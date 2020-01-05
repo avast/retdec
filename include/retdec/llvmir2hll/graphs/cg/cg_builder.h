@@ -25,26 +25,26 @@ class Module;
 */
 class CGBuilder: private OrderedAllVisitor, private retdec::utils::NonCopyable {
 public:
-	static ShPtr<CG> getCG(ShPtr<Module> module);
+	static CG* getCG(Module* module);
 
 private:
-	explicit CGBuilder(ShPtr<Module> module);
+	explicit CGBuilder(Module* module);
 
 	void computeCG();
-	ShPtr<CG::CalledFuncs> computeCGPartForFunction(ShPtr<Function> func);
+	CG::CalledFuncs* computeCGPartForFunction(Function* func);
 
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<CallExpr> expr) override;
+	virtual void visit(CallExpr* expr) override;
 	/// @}
 
 private:
 	/// CG that is currently being built.
-	ShPtr<CG> cg;
+	CG* cg = nullptr;
 
 	/// CalledFuncs that is currently being built.
-	ShPtr<CG::CalledFuncs> calledFuncs;
+	CG::CalledFuncs* calledFuncs = nullptr;
 };
 
 } // namespace llvmir2hll

@@ -15,13 +15,13 @@ namespace llvmir2hll {
 * @brief Does nothing.
 */
 void NoActionPatternFinderRunner::doActionsBeforePatternFinderRuns(
-		ShPtr<PatternFinder> pf) {}
+		PatternFinder* pf) {}
 
 /**
 * @brief Does nothing.
 */
 void NoActionPatternFinderRunner::doActionsAfterPatternFinderHasRun(
-	ShPtr<PatternFinder> pf, const PatternFinder::Patterns &foundPatterns) {}
+	PatternFinder* pf, const PatternFinder::Patterns &foundPatterns) {}
 
 } // namespace llvmir2hll
 } // namespace retdec

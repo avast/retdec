@@ -22,18 +22,18 @@ REGISTER_AT_FACTORY("BreakOutsideLoop", BREAK_OUTSIDE_LOOP_VALIDATOR_ID, Validat
 /**
 * @brief Creates a new validator.
 */
-ShPtr<Validator> BreakOutsideLoopValidator::create() {
-	return ShPtr<BreakOutsideLoopValidator>(new BreakOutsideLoopValidator());
+Validator* BreakOutsideLoopValidator::create() {
+	return new BreakOutsideLoopValidator();
 }
 
 std::string BreakOutsideLoopValidator::getId() const {
 	return BREAK_OUTSIDE_LOOP_VALIDATOR_ID;
 }
 
-void BreakOutsideLoopValidator::visit(ShPtr<BreakStmt> stmt) {
+void BreakOutsideLoopValidator::visit(BreakStmt* stmt) {
 	// A break statement has to be inside of a loop or a switch statement. To
 	// this end, get the innermost loop or switch.
-	ShPtr<Statement> innLoopOrSwitch(getInnermostLoopOrSwitch(stmt));
+	Statement* innLoopOrSwitch(getInnermostLoopOrSwitch(stmt));
 	if (!innLoopOrSwitch) {
 		validationError("In ", func->getName(), "(), found `", stmt,
 			"` outside of a loop or a switch statement.");
@@ -41,10 +41,10 @@ void BreakOutsideLoopValidator::visit(ShPtr<BreakStmt> stmt) {
 	OrderedAllVisitor::visit(stmt);
 }
 
-void BreakOutsideLoopValidator::visit(ShPtr<ContinueStmt> stmt) {
+void BreakOutsideLoopValidator::visit(ContinueStmt* stmt) {
 	// A continue statement has to be inside of a loop. To this end, get the
 	// innermost loop.
-	ShPtr<Statement> innLoop(getInnermostLoop(stmt));
+	Statement* innLoop(getInnermostLoop(stmt));
 	if (!innLoop) {
 		validationError("In ", func->getName(), "(), found `", stmt,
 			"` outside of a loop.");

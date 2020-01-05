@@ -35,7 +35,7 @@ Validator::Validator(): module(), func(), moduleIsCorrect(true) {}
 * @par Preconditions
 *  - @a module is non-null
 */
-bool Validator::validate(ShPtr<Module> module, bool printMessageOnError) {
+bool Validator::validate(Module* module, bool printMessageOnError) {
 	PRECONDITION_NON_NULL(module);
 
 	this->module = module;

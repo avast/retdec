@@ -38,10 +38,10 @@ public:
 	class CompoundOp {
 	public:
 		CompoundOp(std::string op);
-		CompoundOp(std::string op, ShPtr<Expression> operand);
+		CompoundOp(std::string op, Expression* operand);
 
 		const std::string &getOperator() const;
-		ShPtr<Expression> getOperand() const;
+		Expression* getOperand() const;
 		bool isUnaryOperator() const;
 		bool isBinaryOperator() const;
 
@@ -50,7 +50,7 @@ public:
 		std::string op;
 
 		/// The right-hand side operand of a binary operator.
-		ShPtr<Expression> operand;
+		Expression* operand = nullptr;
 	};
 
 public:
@@ -61,69 +61,68 @@ public:
 	*/
 	virtual std::string getId() const = 0;
 
-	CompoundOp tryOptimizeToCompoundOp(ShPtr<AssignStmt> stmt);
-	CompoundOp tryOptimizeToCompoundOp(ShPtr<AssignOpExpr> expr);
-	CompoundOp tryOptimizeToCompoundOp(ShPtr<Expression> lhs,
-		ShPtr<Expression> rhs);
+	CompoundOp tryOptimizeToCompoundOp(AssignStmt* stmt);
+	CompoundOp tryOptimizeToCompoundOp(AssignOpExpr* expr);
+	CompoundOp tryOptimizeToCompoundOp(Expression* lhs,
+		Expression* rhs);
 
 protected:
 	void createResultingUnaryCompoundOp(const std::string &op);
 	void createResultingBinaryCompoundOp(const std::string &op,
-		ShPtr<Expression> operand);
+		Expression* operand);
 
 private:
 	/// @name OrderedAllVisitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<AddOpExpr> expr) override;
-	virtual void visit(ShPtr<SubOpExpr> expr) override;
-	virtual void visit(ShPtr<MulOpExpr> expr) override;
-	virtual void visit(ShPtr<ModOpExpr> expr) override;
-	virtual void visit(ShPtr<DivOpExpr> expr) override;
-	virtual void visit(ShPtr<BitAndOpExpr> expr) override;
-	virtual void visit(ShPtr<BitOrOpExpr> expr) override;
-	virtual void visit(ShPtr<BitXorOpExpr> expr) override;
-	virtual void visit(ShPtr<BitShlOpExpr> expr) override;
-	virtual void visit(ShPtr<BitShrOpExpr> expr) override;
+	virtual void visit(AddOpExpr* expr) override;
+	virtual void visit(SubOpExpr* expr) override;
+	virtual void visit(MulOpExpr* expr) override;
+	virtual void visit(ModOpExpr* expr) override;
+	virtual void visit(DivOpExpr* expr) override;
+	virtual void visit(BitAndOpExpr* expr) override;
+	virtual void visit(BitOrOpExpr* expr) override;
+	virtual void visit(BitXorOpExpr* expr) override;
+	virtual void visit(BitShlOpExpr* expr) override;
+	virtual void visit(BitShrOpExpr* expr) override;
 	/// @}
 
 	/// @name Specializations To What Optimize
 	/// @{
-	virtual void optimizeToCompoundOp(ShPtr<AddOpExpr> expr,
-		ShPtr<Expression> operand);
-	virtual void optimizeToCompoundOp(ShPtr<SubOpExpr> expr,
-		ShPtr<Expression> operand);
-	virtual void optimizeToCompoundOp(ShPtr<MulOpExpr> expr,
-		ShPtr<Expression> operand);
-	virtual void optimizeToCompoundOp(ShPtr<ModOpExpr> expr,
-		ShPtr<Expression> operand);
-	virtual void optimizeToCompoundOp(ShPtr<DivOpExpr> expr,
-		ShPtr<Expression> operand);
-	virtual void optimizeToCompoundOp(ShPtr<BitAndOpExpr> expr,
-		ShPtr<Expression> operand);
-	virtual void optimizeToCompoundOp(ShPtr<BitOrOpExpr> expr,
-		ShPtr<Expression> operand);
-	virtual void optimizeToCompoundOp(ShPtr<BitXorOpExpr> expr,
-		ShPtr<Expression> operand);
-	virtual void optimizeToCompoundOp(ShPtr<BitShlOpExpr> expr,
-		ShPtr<Expression> operand);
-	virtual void optimizeToCompoundOp(ShPtr<BitShrOpExpr> expr,
-		ShPtr<Expression> operand);
+	virtual void optimizeToCompoundOp(AddOpExpr* expr,
+		Expression* operand);
+	virtual void optimizeToCompoundOp(SubOpExpr* expr,
+		Expression* operand);
+	virtual void optimizeToCompoundOp(MulOpExpr* expr,
+		Expression* operand);
+	virtual void optimizeToCompoundOp(ModOpExpr* expr,
+		Expression* operand);
+	virtual void optimizeToCompoundOp(DivOpExpr* expr,
+		Expression* operand);
+	virtual void optimizeToCompoundOp(BitAndOpExpr* expr,
+		Expression* operand);
+	virtual void optimizeToCompoundOp(BitOrOpExpr* expr,
+		Expression* operand);
+	virtual void optimizeToCompoundOp(BitXorOpExpr* expr,
+		Expression* operand);
+	virtual void optimizeToCompoundOp(BitShlOpExpr* expr,
+		Expression* operand);
+	virtual void optimizeToCompoundOp(BitShrOpExpr* expr,
+		Expression* operand);
 	/// @}
 
 	template<typename ToOptimizeExpr>
-	void tryOptimizeWhenOneOfOperandsEqWithLhsOfAssignStmt(ShPtr<ToOptimizeExpr>
+	void tryOptimizeWhenOneOfOperandsEqWithLhsOfAssignStmt(ToOptimizeExpr*
 		expr);
 	template<typename ToOptimizeExpr>
-	void tryOptimizeWhenLeftOperandEqWithLhsOfAssignStmt(ShPtr<ToOptimizeExpr>
+	void tryOptimizeWhenLeftOperandEqWithLhsOfAssignStmt(ToOptimizeExpr*
 		expr);
 
-	ShPtr<Expression> getNextOpIfSecondOneIsEqWithLhsOfAssign(ShPtr<
-		BinaryOpExpr> expr);
+	Expression* getNextOpIfSecondOneIsEqWithLhsOfAssign(BinaryOpExpr* expr);
 
 private:
 	/// Saved left-hand side of an assign statement.
-	ShPtr<Expression> lhsOfAssignStmt;
+	Expression* lhsOfAssignStmt = nullptr;
 
 	/// Resulting operator.
 	CompoundOp compoundOp;

@@ -20,11 +20,11 @@ namespace tests {
 */
 class AliasAnalysisMock: public AliasAnalysis {
 public:
-	MOCK_METHOD1(init, void (ShPtr<Module> module));
+	MOCK_METHOD1(init, void (Module* module));
 	MOCK_CONST_METHOD0(isInitialized, bool ());
-	MOCK_CONST_METHOD1(mayPointTo, const VarSet & (ShPtr<Variable> var));
-	MOCK_CONST_METHOD1(pointsTo, ShPtr<Variable> (ShPtr<Variable> var));
-	MOCK_CONST_METHOD1(mayBePointed, bool (ShPtr<Variable> var));
+	MOCK_CONST_METHOD1(mayPointTo, const VarSet & (Variable* var));
+	MOCK_CONST_METHOD1(pointsTo, Variable* (Variable* var));
+	MOCK_CONST_METHOD1(mayBePointed, bool (Variable* var));
 	MOCK_CONST_METHOD0(getId, std::string ());
 };
 

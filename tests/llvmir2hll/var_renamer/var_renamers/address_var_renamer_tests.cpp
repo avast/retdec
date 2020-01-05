@@ -65,8 +65,8 @@ DoNotRenameFunctionsInCalls) {
 	//     test();
 	// }
 	//
-	ShPtr<CallExpr> testCallExpr(CallExpr::create(testFunc->getAsVar()));
-	ShPtr<CallStmt> testCall(CallStmt::create(testCallExpr));
+	CallExpr* testCallExpr(CallExpr::create(testFunc->getAsVar()));
+	CallStmt* testCall(CallStmt::create(testCallExpr));
 	testFunc->setBody(testCall);
 
 	// Setup the renamer.
@@ -95,11 +95,11 @@ GlobalVariablesGetCorrectlyRenamed) {
 	// void test() {
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a_804839f1", IntType::create(32)));
+	Variable* varA(Variable::create("a_804839f1", IntType::create(32)));
 	module->addGlobalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b_7f375bc2", IntType::create(32)));
+	Variable* varB(Variable::create("b_7f375bc2", IntType::create(32)));
 	module->addGlobalVar(varB);
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(32)));
+	Variable* varC(Variable::create("c", IntType::create(32)));
 	module->addGlobalVar(varC);
 
 	// Setup the renamer.
@@ -122,11 +122,11 @@ GlobalVariablesGetCorrectlyRenamed) {
 	// We have to sort the variables to ease the checking.
 	VarVector globalVarsVector(globalVarsSet.begin(), globalVarsSet.end());
 	sortByName(globalVarsVector);
-	ShPtr<Variable> var1(globalVarsVector[0]);
+	Variable* var1(globalVarsVector[0]);
 	EXPECT_EQ("g1", var1->getName());
-	ShPtr<Variable> var2(globalVarsVector[1]);
+	Variable* var2(globalVarsVector[1]);
 	EXPECT_EQ("g_7f375bc2", var2->getName());
-	ShPtr<Variable> var3(globalVarsVector[2]);
+	Variable* var3(globalVarsVector[2]);
 	EXPECT_EQ("g_804839f1", var3->getName());
 }
 
@@ -137,9 +137,9 @@ ParametersOfFunctionDefinitionGetCorrectlyRenamed) {
 	// void test(int a, int b_5f335bd2) {
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addParam(varA);
-	ShPtr<Variable> varB(Variable::create("b_5f335bd2", IntType::create(32)));
+	Variable* varB(Variable::create("b_5f335bd2", IntType::create(32)));
 	testFunc->addParam(varB);
 
 	// Setup the renamer.
@@ -155,9 +155,9 @@ ParametersOfFunctionDefinitionGetCorrectlyRenamed) {
 	//
 	VarVector params(testFunc->getParams());
 	ASSERT_EQ(2, params.size());
-	ShPtr<Variable> var1(params.front());
+	Variable* var1(params.front());
 	EXPECT_EQ("a1", var1->getName());
-	ShPtr<Variable> var2(params.back());
+	Variable* var2(params.back());
 	EXPECT_EQ("a_5f335bd2", var2->getName());
 }
 
@@ -167,9 +167,9 @@ ParametersOfFunctionDeclarationGetCorrectlyRenamed) {
 	//
 	// void test(int a, int b_5f335bd2);
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addParam(varA);
-	ShPtr<Variable> varB(Variable::create("b_5f335bd2", IntType::create(32)));
+	Variable* varB(Variable::create("b_5f335bd2", IntType::create(32)));
 	testFunc->addParam(varB);
 	// testFunc is by default a definition, so we have to make it a
 	// declaration.
@@ -187,9 +187,9 @@ ParametersOfFunctionDeclarationGetCorrectlyRenamed) {
 	//
 	VarVector params(testFunc->getParams());
 	ASSERT_EQ(2, params.size());
-	ShPtr<Variable> var1(params.front());
+	Variable* var1(params.front());
 	EXPECT_EQ("a1", var1->getName());
-	ShPtr<Variable> var2(params.back());
+	Variable* var2(params.back());
 	EXPECT_EQ("a_5f335bd2", var2->getName());
 }
 
@@ -202,12 +202,12 @@ FunctionLocalVariablesGetCorrectlyRenamed) {
 	//     int b;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("res0_cd53f89", IntType::create(32)));
+	Variable* varA(Variable::create("res0_cd53f89", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	testFunc->addLocalVar(varB);
-	ShPtr<VarDefStmt> varDefB(VarDefStmt::create(varB));
-	ShPtr<VarDefStmt> varDefA(VarDefStmt::create(varA, ShPtr<Expression>(), varDefB));
+	VarDefStmt* varDefB(VarDefStmt::create(varB));
+	VarDefStmt* varDefA(VarDefStmt::create(varA, Expression*(), varDefB));
 	testFunc->setBody(varDefA);
 
 	// Setup the renamer.
@@ -239,23 +239,23 @@ VariablesWithNameFromDebugInfoAreCorrectlyRenamedWhenUsingDebugIsTrue) {
 	//     int b; // from debug info
 	// }
 	//
-	ShPtr<Variable> varG(Variable::create("g", IntType::create(32)));
+	Variable* varG(Variable::create("g", IntType::create(32)));
 	module->addGlobalVar(varG);
 	module->addDebugNameForVar(varG, varG->getName());
-	ShPtr<Variable> varH(Variable::create("h", IntType::create(32)));
+	Variable* varH(Variable::create("h", IntType::create(32)));
 	module->addGlobalVar(varH);
-	ShPtr<Variable> varP(Variable::create("p", IntType::create(32)));
+	Variable* varP(Variable::create("p", IntType::create(32)));
 	testFunc->addParam(varP);
 	module->addDebugNameForVar(varP, varP->getName());
-	ShPtr<Variable> varM(Variable::create("m", IntType::create(32)));
+	Variable* varM(Variable::create("m", IntType::create(32)));
 	testFunc->addParam(varM);
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	testFunc->addLocalVar(varB);
 	module->addDebugNameForVar(varB, varB->getName());
-	ShPtr<VarDefStmt> varDefB(VarDefStmt::create(varB));
-	ShPtr<VarDefStmt> varDefA(VarDefStmt::create(varA, ShPtr<Expression>(), varDefB));
+	VarDefStmt* varDefB(VarDefStmt::create(varB));
+	VarDefStmt* varDefA(VarDefStmt::create(varA, Expression*(), varDefB));
 	testFunc->setBody(varDefA);
 
 	// Setup the renamer.
@@ -280,16 +280,16 @@ VariablesWithNameFromDebugInfoAreCorrectlyRenamedWhenUsingDebugIsTrue) {
 	// We have to sort the variables to ease the checking.
 	VarVector globalVarsVector(globalVarsSet.begin(), globalVarsSet.end());
 	sortByName(globalVarsVector);
-	ShPtr<Variable> var1(globalVarsVector[0]);
+	Variable* var1(globalVarsVector[0]);
 	EXPECT_EQ("g", var1->getName());
-	ShPtr<Variable> var2(globalVarsVector[1]);
+	Variable* var2(globalVarsVector[1]);
 	EXPECT_EQ("g1", var2->getName());
 	// Parameters:
 	VarVector params(testFunc->getParams());
 	ASSERT_EQ(2, params.size());
-	ShPtr<Variable> par1(params.front());
+	Variable* par1(params.front());
 	EXPECT_EQ("p", par1->getName());
-	ShPtr<Variable> par2(params.back());
+	Variable* par2(params.back());
 	EXPECT_EQ("a1", par2->getName());
 	// Locals:
 	EXPECT_EQ("v1", varDefA->getVar()->getName());
@@ -308,23 +308,23 @@ WhenUseDebugNamesIsFalseDoNotUseDebugNames) {
 	//     int b; // from debug info
 	// }
 	//
-	ShPtr<Variable> varG(Variable::create("g", IntType::create(32)));
+	Variable* varG(Variable::create("g", IntType::create(32)));
 	module->addGlobalVar(varG);
 	module->addDebugNameForVar(varG, varG->getName());
-	ShPtr<Variable> varH(Variable::create("h", IntType::create(32)));
+	Variable* varH(Variable::create("h", IntType::create(32)));
 	module->addGlobalVar(varH);
-	ShPtr<Variable> varP(Variable::create("p", IntType::create(32)));
+	Variable* varP(Variable::create("p", IntType::create(32)));
 	testFunc->addParam(varP);
 	module->addDebugNameForVar(varP, varP->getName());
-	ShPtr<Variable> varM(Variable::create("m", IntType::create(32)));
+	Variable* varM(Variable::create("m", IntType::create(32)));
 	testFunc->addParam(varM);
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	testFunc->addLocalVar(varB);
 	module->addDebugNameForVar(varB, varB->getName());
-	ShPtr<VarDefStmt> varDefB(VarDefStmt::create(varB));
-	ShPtr<VarDefStmt> varDefA(VarDefStmt::create(varA, ShPtr<Expression>(), varDefB));
+	VarDefStmt* varDefB(VarDefStmt::create(varB));
+	VarDefStmt* varDefA(VarDefStmt::create(varA, Expression*(), varDefB));
 	testFunc->setBody(varDefA);
 
 	// Setup the renamer (do not use debug names).
@@ -349,16 +349,16 @@ WhenUseDebugNamesIsFalseDoNotUseDebugNames) {
 	// We have to sort the variables to ease the checking.
 	VarVector globalVarsVector(globalVarsSet.begin(), globalVarsSet.end());
 	sortByName(globalVarsVector);
-	ShPtr<Variable> var1(globalVarsVector[0]);
+	Variable* var1(globalVarsVector[0]);
 	EXPECT_EQ("g1", var1->getName());
-	ShPtr<Variable> var2(globalVarsVector[1]);
+	Variable* var2(globalVarsVector[1]);
 	EXPECT_EQ("g2", var2->getName());
 	// Parameters:
 	VarVector params(testFunc->getParams());
 	ASSERT_EQ(2, params.size());
-	ShPtr<Variable> par1(params.front());
+	Variable* par1(params.front());
 	EXPECT_EQ("a1", par1->getName());
-	ShPtr<Variable> par2(params.back());
+	Variable* par2(params.back());
 	EXPECT_EQ("a2", par2->getName());
 	// Locals:
 	EXPECT_EQ("v1", varDefA->getVar()->getName());

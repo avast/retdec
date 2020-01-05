@@ -29,14 +29,14 @@ public:
 	using Type = bool;
 
 public:
-	static ShPtr<ConstBool> create(Type value = Type());
+	static ConstBool* create(Type value = Type());
 
-	virtual ShPtr<Value> clone() override;
+	virtual Value* clone() override;
 
-	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
-	virtual ShPtr<retdec::llvmir2hll::Type> getType() const override;
-	virtual void replace(ShPtr<Expression> oldExpr,
-		ShPtr<Expression> newExpr) override;
+	virtual bool isEqualTo(Value* otherValue) const override;
+	virtual retdec::llvmir2hll::Type* getType() const override;
+	virtual void replace(Expression* oldExpr,
+		Expression* newExpr) override;
 
 	Type getValue() const;
 	bool isTrue() const;
@@ -52,7 +52,7 @@ private:
 	Type value;
 
 	/// Type of the constant.
-	ShPtr<IntType> type;
+	IntType* type = nullptr;
 
 private:
 	// Since instances are created by calling the static function create(), the

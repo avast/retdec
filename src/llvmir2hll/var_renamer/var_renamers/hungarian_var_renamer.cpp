@@ -31,10 +31,10 @@ namespace {
 * @par Preconditions
 *  - @a var is non-null
 */
-std::string getHungarianPrefix(ShPtr<Variable> var) {
+std::string getHungarianPrefix(Variable* var) {
 	PRECONDITION_NON_NULL(var);
 
-	ShPtr<Type> varType(var->getType());
+	Type* varType(var->getType());
 	if (isa<IntType>(varType)) {
 		return "i_";
 	} else if (isa<FloatType>(varType)) {
@@ -53,7 +53,7 @@ std::string getHungarianPrefix(ShPtr<Variable> var) {
 * @par Preconditions
 *  - both @a var and @a varNameGen are non-null
 */
-std::string genVarNameWithHungarianPrefix(ShPtr<Variable> var,
+std::string genVarNameWithHungarianPrefix(Variable* var,
 		VarNameGen *varNameGen) {
 	PRECONDITION_NON_NULL(var);
 	PRECONDITION_NON_NULL(varNameGen);
@@ -68,7 +68,7 @@ std::string genVarNameWithHungarianPrefix(ShPtr<Variable> var,
 *
 * For more details, see create().
 */
-HungarianVarRenamer::HungarianVarRenamer(ShPtr<VarNameGen> varNameGen,
+HungarianVarRenamer::HungarianVarRenamer(VarNameGen* varNameGen,
 	bool useDebugNames): VarRenamer(varNameGen, useDebugNames),
 		globalVarNameGen(NumVarNameGen::create("g")),
 		paramVarNameGen(NumVarNameGen::create("a")),
@@ -85,45 +85,45 @@ HungarianVarRenamer::HungarianVarRenamer(ShPtr<VarNameGen> varNameGen,
 * @par Preconditions
 *  - @a varNameGen is non-null
 */
-ShPtr<VarRenamer> HungarianVarRenamer::create(ShPtr<VarNameGen> varNameGen,
+VarRenamer* HungarianVarRenamer::create(VarNameGen* varNameGen,
 		bool useDebugNames) {
 	PRECONDITION_NON_NULL(varNameGen);
 
-	return ShPtr<VarRenamer>(new HungarianVarRenamer(varNameGen, useDebugNames));
+	return new HungarianVarRenamer(varNameGen, useDebugNames);
 }
 
 std::string HungarianVarRenamer::getId() const {
 	return HUNGARIAN_VAR_RENAMER_ID;
 }
 
-void HungarianVarRenamer::renameGlobalVar(ShPtr<Variable> var) {
+void HungarianVarRenamer::renameGlobalVar(Variable* var) {
 	PRECONDITION_NON_NULL(var);
 
 	assignName(var, genVarNameWithHungarianPrefix(var,
-		globalVarNameGen.get()));
+		globalVarNameGen));
 }
 
-void HungarianVarRenamer::renameVarsInFunc(ShPtr<Function> func) {
+void HungarianVarRenamer::renameVarsInFunc(Function* func) {
 	paramVarNameGen->restart();
 	localVarNameGen->restart();
 
 	VarRenamer::renameVarsInFunc(func);
 }
 
-void HungarianVarRenamer::renameFuncParam(ShPtr<Variable> var,
-		ShPtr<Function> func) {
+void HungarianVarRenamer::renameFuncParam(Variable* var,
+		Function* func) {
 	PRECONDITION_NON_NULL(var);
 
 	assignName(var, genVarNameWithHungarianPrefix(var,
-		paramVarNameGen.get()), func);
+		paramVarNameGen), func);
 }
 
-void HungarianVarRenamer::renameFuncLocalVar(ShPtr<Variable> var,
-		ShPtr<Function> func) {
+void HungarianVarRenamer::renameFuncLocalVar(Variable* var,
+		Function* func) {
 	PRECONDITION_NON_NULL(var);
 
 	assignName(var, genVarNameWithHungarianPrefix(var,
-		localVarNameGen.get()), func);
+		localVarNameGen), func);
 }
 
 } // namespace llvmir2hll

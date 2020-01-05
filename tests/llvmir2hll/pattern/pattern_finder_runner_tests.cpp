@@ -32,7 +32,7 @@ RunWithOnePatternFinderProperlyCallsAllRequiredFunctions) {
 
 	// Mocks.
 	NiceMock<PatternFinderMock> *pfMock(new NiceMock<PatternFinderMock>(va, cio));
-	ShPtr<PatternFinder> pf(pfMock);
+	PatternFinder* pf(pfMock);
 	NiceMock<PatternFinderRunnerMock> pfrMock;
 
 	// Expectations.
@@ -53,9 +53,9 @@ RunWithTwoPatternFindersProperlyCallsAllRequiredFunctions) {
 
 	// Mocks.
 	NiceMock<PatternFinderMock> *pf1Mock(new NiceMock<PatternFinderMock>(va, cio));
-	ShPtr<PatternFinder> pf1(pf1Mock);
+	PatternFinder* pf1(pf1Mock);
 	NiceMock<PatternFinderMock> *pf2Mock(new NiceMock<PatternFinderMock>(va, cio));
-	ShPtr<PatternFinder> pf2(pf2Mock);
+	PatternFinder* pf2(pf2Mock);
 	PatternFinderRunner::PatternFinders pfs;
 	pfs.push_back(pf1);
 	pfs.push_back(pf2);
@@ -84,11 +84,11 @@ RunWithOnePatternFinderAndNullModuleResultsIntoViolatedPrecondition) {
 
 	// Mocks.
 	NiceMock<PatternFinderMock> *pfMock(new NiceMock<PatternFinderMock>(va, cio));
-	ShPtr<PatternFinder> pf(pfMock);
+	PatternFinder* pf(pfMock);
 	NiceMock<PatternFinderRunnerMock> pfrMock;
 
 	// Test.
-	ASSERT_DEATH(pfrMock.run(pf, ShPtr<Module>()), ".*Precondition.*failed.*");
+	ASSERT_DEATH(pfrMock.run(pf, Module*()), ".*Precondition.*failed.*");
 }
 #endif
 
@@ -100,14 +100,14 @@ RunWithTwoPatternFinderAndNullModuleResultsIntoViolatedPrecondition) {
 
 	// Mocks.
 	NiceMock<PatternFinderMock> *pfMock(new NiceMock<PatternFinderMock>(va, cio));
-	ShPtr<PatternFinder> pf(pfMock);
+	PatternFinder* pf(pfMock);
 	PatternFinderRunner::PatternFinders pfs;
 	pfs.push_back(pf);
 	pfs.push_back(pf); // Duplicate the pattern finder so we have two.
 	NiceMock<PatternFinderRunnerMock> pfrMock;
 
 	// Test.
-	ASSERT_DEATH(pfrMock.run(pfs, ShPtr<Module>()), ".*Precondition.*failed.*");
+	ASSERT_DEATH(pfrMock.run(pfs, Module*()), ".*Precondition.*failed.*");
 }
 #endif
 

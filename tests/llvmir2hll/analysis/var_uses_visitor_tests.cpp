@@ -45,7 +45,7 @@
 * @endcode
 */
 #define FOR_EVERY_VAR_USES_VISITOR_VARIANT \
-	using VAVMap = std::map<std::string, ShPtr<VarUsesVisitor>>; \
+	using VAVMap = std::map<std::string, VarUsesVisitor*>; \
 	VAVMap vuvMap; \
 	vuvMap.insert(std::make_pair("-----> VUV: cache OFF, precomputation OFF", \
 		VarUsesVisitor::create(va, false))); \
@@ -54,7 +54,7 @@
 	vuvMap.insert(std::make_pair("-----> VUV: cache ON, precomputation ON", \
 		VarUsesVisitor::create(va, true, module))); \
 	std::string vuvDesc; \
-	ShPtr<VarUsesVisitor> vuv; \
+	VarUsesVisitor* vuv; \
 	for (auto vuvMapI = vuvMap.begin(), vuvMapE = vuvMap.end(); \
 		vuvMapI != vuvMapE && (vuvDesc = vuvMapI->first, true) && (vuv = vuvMapI->second); \
 		++vuvMapI)
@@ -77,8 +77,8 @@ VariableIsNotUsedAtAll) {
 	// def test():
 	//    return
 	//
-	ShPtr<Variable> dummyVar(Variable::create("dummy", IntType::create(32)));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create());
+	Variable* dummyVar(Variable::create("dummy", IntType::create(32)));
+	ReturnStmt* returnStmt(ReturnStmt::create());
 	testFunc->setBody(returnStmt);
 
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
@@ -88,7 +88,7 @@ VariableIsNotUsedAtAll) {
 		EXPECT_FALSE(vuv->isUsed(dummyVar, testFunc, true)) << vuvDesc;
 
 		// getUses()
-		ShPtr<VarUses> dummyVarUses(vuv->getUses(dummyVar, testFunc));
+		VarUses* dummyVarUses(vuv->getUses(dummyVar, testFunc));
 		EXPECT_EQ(dummyVar, dummyVarUses->var) << vuvDesc;
 		EXPECT_EQ(testFunc, dummyVarUses->func) << vuvDesc;
 		EXPECT_TRUE(dummyVarUses->dirUses.empty()) << vuvDesc;
@@ -104,9 +104,9 @@ GlobalVariableIsDirectlyUsedOnce) {
 	// def test():
 	//    return a
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	module->addGlobalVar(varA);
-	ShPtr<ReturnStmt> returnA(ReturnStmt::create(varA));
+	ReturnStmt* returnA(ReturnStmt::create(varA));
 	testFunc->setBody(returnA);
 
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
@@ -116,7 +116,7 @@ GlobalVariableIsDirectlyUsedOnce) {
 		EXPECT_FALSE(vuv->isUsed(varA, testFunc, true)) << vuvDesc;
 
 		// getUses()
-		ShPtr<VarUses> varAUses(vuv->getUses(varA, testFunc));
+		VarUses* varAUses(vuv->getUses(varA, testFunc));
 		EXPECT_EQ(varA, varAUses->var) << vuvDesc;
 		EXPECT_EQ(testFunc, varAUses->func) << vuvDesc;
 		StmtSet refVarAUses;
@@ -135,10 +135,10 @@ GlobalVariableIsDirectlyUsedTwice) {
 	//    a = 1
 	//    return a
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	module->addGlobalVar(varA);
-	ShPtr<ReturnStmt> returnA(ReturnStmt::create(varA));
-	ShPtr<AssignStmt> assignA1(AssignStmt::create(varA,
+	ReturnStmt* returnA(ReturnStmt::create(varA));
+	AssignStmt* assignA1(AssignStmt::create(varA,
 		ConstInt::create(1, 32), returnA));
 	testFunc->setBody(assignA1);
 
@@ -149,7 +149,7 @@ GlobalVariableIsDirectlyUsedTwice) {
 		EXPECT_TRUE(vuv->isUsed(varA, testFunc, true)) << vuvDesc;
 
 		// getUses()
-		ShPtr<VarUses> varAUses(vuv->getUses(varA, testFunc));
+		VarUses* varAUses(vuv->getUses(varA, testFunc));
 		EXPECT_EQ(varA, varAUses->var) << vuvDesc;
 		EXPECT_EQ(testFunc, varAUses->func) << vuvDesc;
 		StmtSet refVarAUses;
@@ -167,10 +167,10 @@ LocalVariableIsDirectlyUsedTwice) {
 	//    a = 1
 	//    return a
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<ReturnStmt> returnA(ReturnStmt::create(varA));
-	ShPtr<VarDefStmt> varADef(VarDefStmt::create(varA,
+	ReturnStmt* returnA(ReturnStmt::create(varA));
+	VarDefStmt* varADef(VarDefStmt::create(varA,
 		ConstInt::create(1, 32), returnA));
 	testFunc->setBody(varADef);
 
@@ -181,7 +181,7 @@ LocalVariableIsDirectlyUsedTwice) {
 		EXPECT_TRUE(vuv->isUsed(varA, testFunc, true)) << vuvDesc;
 
 		// getUses()
-		ShPtr<VarUses> varAUses(vuv->getUses(varA, testFunc));
+		VarUses* varAUses(vuv->getUses(varA, testFunc));
 		EXPECT_EQ(varA, varAUses->var) << vuvDesc;
 		EXPECT_EQ(testFunc, varAUses->func);
 		StmtSet refVarAUses;
@@ -201,12 +201,12 @@ GlobalVariableIsIndirectlyUsedMust) {
 	//    p = &a
 	//    return *p
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	module->addGlobalVar(varA);
-	ShPtr<Variable> varP(Variable::create("p", PointerType::create(
+	Variable* varP(Variable::create("p", PointerType::create(
 		IntType::create(32))));
-	ShPtr<ReturnStmt> returnP(ReturnStmt::create(DerefOpExpr::create(varP)));
-	ShPtr<VarDefStmt> varPDef(VarDefStmt::create(varP,
+	ReturnStmt* returnP(ReturnStmt::create(DerefOpExpr::create(varP)));
+	VarDefStmt* varPDef(VarDefStmt::create(varP,
 		AddressOpExpr::create(varA), returnP));
 	testFunc->setBody(varPDef);
 
@@ -221,7 +221,7 @@ GlobalVariableIsIndirectlyUsedMust) {
 		EXPECT_TRUE(vuv->isUsed(varA, testFunc, true)) << vuvDesc;
 
 		// getUses()
-		ShPtr<VarUses> varAUses(vuv->getUses(varA, testFunc));
+		VarUses* varAUses(vuv->getUses(varA, testFunc));
 		EXPECT_EQ(varA, varAUses->var) << vuvDesc;
 		EXPECT_EQ(testFunc, varAUses->func) << vuvDesc;
 		// - direct
@@ -245,12 +245,12 @@ GlobalVariableIsIndirectlyUsedMay) {
 	//    p = &a
 	//    return *p
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	module->addGlobalVar(varA);
-	ShPtr<Variable> varP(Variable::create("p", PointerType::create(
+	Variable* varP(Variable::create("p", PointerType::create(
 		IntType::create(32))));
-	ShPtr<ReturnStmt> returnP(ReturnStmt::create(DerefOpExpr::create(varP)));
-	ShPtr<VarDefStmt> varPDef(VarDefStmt::create(varP,
+	ReturnStmt* returnP(ReturnStmt::create(DerefOpExpr::create(varP)));
+	VarDefStmt* varPDef(VarDefStmt::create(varP,
 		AddressOpExpr::create(varA), returnP));
 	testFunc->setBody(varPDef);
 
@@ -267,7 +267,7 @@ GlobalVariableIsIndirectlyUsedMay) {
 		EXPECT_TRUE(vuv->isUsed(varA, testFunc, true)) << vuvDesc;
 
 		// getUses()
-		ShPtr<VarUses> varAUses(vuv->getUses(varA, testFunc));
+		VarUses* varAUses(vuv->getUses(varA, testFunc));
 		EXPECT_EQ(varA, varAUses->var) << vuvDesc;
 		EXPECT_EQ(testFunc, varAUses->func) << vuvDesc;
 		// - direct

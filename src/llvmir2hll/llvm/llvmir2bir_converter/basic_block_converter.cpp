@@ -29,15 +29,15 @@ namespace llvmir2hll {
 * @param[in] converter A converter from LLVM values to values in BIR.
 * @param[in] labelsHandler A handler of labels.
 */
-BasicBlockConverter::BasicBlockConverter(ShPtr<LLVMValueConverter> converter,
-	ShPtr<LabelsHandler> labelsHandler):
+BasicBlockConverter::BasicBlockConverter(LLVMValueConverter* converter,
+	LabelsHandler* labelsHandler):
 		converter(converter), labelsHandler(labelsHandler) {}
 
 /**
 * @brief Converts the given LLVM basic block @a bb into a sequence of statements
 *        in BIR.
 */
-ShPtr<Statement> BasicBlockConverter::convert(llvm::BasicBlock &bb) {
+Statement* BasicBlockConverter::convert(llvm::BasicBlock &bb) {
 	auto convertedBody = convertInstructionsOf(bb);
 	if (!convertedBody) {
 		convertedBody = EmptyStmt::create();
@@ -74,8 +74,8 @@ bool BasicBlockConverter::shouldBeConverted(const llvm::Instruction &inst) const
 * @brief Converts instruction of the given LLVM basic block @a bb into
 *        a sequence of statements in BIR.
 */
-ShPtr<Statement> BasicBlockConverter::convertInstructionsOf(llvm::BasicBlock &bb) {
-	ShPtr<Statement> firstStmt;
+Statement* BasicBlockConverter::convertInstructionsOf(llvm::BasicBlock &bb) {
+	Statement* firstStmt = nullptr;
 	for (auto &inst: bb.getInstList()) {
 		if (shouldBeConverted(inst)) {
 			auto stmt = visit(inst);
@@ -91,7 +91,7 @@ ShPtr<Statement> BasicBlockConverter::convertInstructionsOf(llvm::BasicBlock &bb
 * If function result is used somewhere, an assign statement will be created.
 * Otherwise, a call statement will be created.
 */
-ShPtr<Statement> BasicBlockConverter::visitCallInst(llvm::CallInst &inst) {
+Statement* BasicBlockConverter::visitCallInst(llvm::CallInst &inst) {
 	auto callExpr = converter->convertCallInstToCallExpr(inst);
 
 	if (inst.hasNUses(0)) {
@@ -129,7 +129,7 @@ ShPtr<Statement> BasicBlockConverter::visitCallInst(llvm::CallInst &inst) {
 * }
 * @endcode
 */
-ShPtr<Statement> BasicBlockConverter::visitInsertValueInst(llvm::InsertValueInst &inst) {
+Statement* BasicBlockConverter::visitInsertValueInst(llvm::InsertValueInst &inst) {
 	auto type = llvm::cast<llvm::CompositeType>(inst.getAggregateOperand()->getType());
 	auto base = converter->convertValueToExpression(&inst);
 
@@ -146,7 +146,7 @@ ShPtr<Statement> BasicBlockConverter::visitInsertValueInst(llvm::InsertValueInst
 * @brief Converts the given LLVM load instruction @a inst into an assign
 *        statement in BIR.
 */
-ShPtr<Statement> BasicBlockConverter::visitLoadInst(llvm::LoadInst &inst) {
+Statement* BasicBlockConverter::visitLoadInst(llvm::LoadInst &inst) {
 	auto lhs = converter->convertValueToVariable(&inst);
 	if (inst.isVolatile()) {
 		lhs->markAsExternal();
@@ -159,7 +159,7 @@ ShPtr<Statement> BasicBlockConverter::visitLoadInst(llvm::LoadInst &inst) {
 /**
 * @brief Converts the given LLVM return instruction @a inst into a statement in BIR.
 */
-ShPtr<Statement> BasicBlockConverter::visitReturnInst(llvm::ReturnInst &inst) {
+Statement* BasicBlockConverter::visitReturnInst(llvm::ReturnInst &inst) {
 	if (inst.getNumOperands() == 0) {
 		return ReturnStmt::create(nullptr, nullptr, LLVMSupport::getInstAddress(&inst));
 	}
@@ -172,7 +172,7 @@ ShPtr<Statement> BasicBlockConverter::visitReturnInst(llvm::ReturnInst &inst) {
 * @brief Converts the given LLVM store instruction @a inst into an assign
 *        statement in BIR.
 */
-ShPtr<Statement> BasicBlockConverter::visitStoreInst(llvm::StoreInst &inst) {
+Statement* BasicBlockConverter::visitStoreInst(llvm::StoreInst &inst) {
 	auto lhs = converter->convertValueToDerefExpression(inst.getPointerOperand());
 	if (inst.isVolatile()) {
 		if (auto lhsVar = cast<Variable>(lhs)) {
@@ -188,7 +188,7 @@ ShPtr<Statement> BasicBlockConverter::visitStoreInst(llvm::StoreInst &inst) {
 * @brief Converts the given LLVM @c unreachable instruction @a inst into an
 *        unreachable statement in BIR.
 */
-ShPtr<Statement> BasicBlockConverter::visitUnreachableInst(llvm::UnreachableInst &inst) {
+Statement* BasicBlockConverter::visitUnreachableInst(llvm::UnreachableInst &inst) {
 	return UnreachableStmt::create(LLVMSupport::getInstAddress(&inst));
 }
 
@@ -196,7 +196,7 @@ ShPtr<Statement> BasicBlockConverter::visitUnreachableInst(llvm::UnreachableInst
 * @brief Converts the given LLVM instruction @a inst into an assign statement in
 *        BIR. This method converts other instructions.
 */
-ShPtr<Statement> BasicBlockConverter::visitInstruction(llvm::Instruction &inst) {
+Statement* BasicBlockConverter::visitInstruction(llvm::Instruction &inst) {
 	auto lhs = converter->convertValueToVariable(&inst);
 	auto rhs = converter->convertInstructionToExpression(&inst);
 	return AssignStmt::create(lhs, rhs, nullptr, LLVMSupport::getInstAddress(&inst));
@@ -206,7 +206,7 @@ ShPtr<Statement> BasicBlockConverter::visitInstruction(llvm::Instruction &inst) 
 * @brief Generates assignment of previous value to aggregate type expression
 *        for the given LLVM insertvalue instruction @a inst.
 */
-ShPtr<Statement> BasicBlockConverter::generateAssignOfPrevValForInsertValueInst(
+Statement* BasicBlockConverter::generateAssignOfPrevValForInsertValueInst(
 		llvm::InsertValueInst &inst) {
 	auto base = converter->convertValueToExpression(&inst);
 	auto prevVal = converter->convertValueToExpression(inst.getAggregateOperand());

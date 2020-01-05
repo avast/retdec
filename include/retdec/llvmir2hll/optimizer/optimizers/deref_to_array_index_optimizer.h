@@ -51,7 +51,7 @@ namespace llvmir2hll {
 */
 class DerefToArrayIndexOptimizer final: public Optimizer {
 public:
-	DerefToArrayIndexOptimizer(ShPtr<Module> module);
+	DerefToArrayIndexOptimizer(Module* module);
 
 	virtual std::string getId() const override { return "DerefToArrayIndex"; }
 
@@ -59,8 +59,8 @@ private:
 	/// Structure that stores the base and index for creating a new
 	/// ArrayIndexOpExpr.
 	struct BaseAndIndex {
-		ShPtr<Expression> base; ///< Base of ArrayIndexOpExpr
-		ShPtr<Expression> index; ///< Index of ArrayIndexOpExpr
+		Expression* base = nullptr; ///< Base of ArrayIndexOpExpr
+		Expression* index = nullptr; ///< Index of ArrayIndexOpExpr
 	};
 
 private:
@@ -69,11 +69,11 @@ private:
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<DerefOpExpr> expr) override;
+	virtual void visit(DerefOpExpr* expr) override;
 	/// @}
 
-	std::optional<BaseAndIndex> getBaseAndIndexFromExprIfPossible(ShPtr<AddOpExpr> expr);
-	void replaceDerefWithArrayIndex(ShPtr<DerefOpExpr> oldExpr, const
+	std::optional<BaseAndIndex> getBaseAndIndexFromExprIfPossible(AddOpExpr* expr);
+	void replaceDerefWithArrayIndex(DerefOpExpr* oldExpr, const
 		BaseAndIndex &baseAndIndex);
 };
 

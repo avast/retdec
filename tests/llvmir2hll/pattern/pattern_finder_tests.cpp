@@ -28,7 +28,7 @@ class PatternFinderTests: public TestsWithModule {};
 TEST_F(PatternFinderTests,
 ConstructionWithNullValueAnalyzerResultsIntoViolatedPrecondition) {
 	INSTANTIATE_CALL_INFO_OBTAINER_MOCK();
-	ASSERT_DEATH(NiceMock<PatternFinderMock>(ShPtr<ValueAnalysis>(), cio),
+	ASSERT_DEATH(NiceMock<PatternFinderMock>(ValueAnalysis*(), cio),
 		".*Precondition.*failed.*");
 }
 #endif
@@ -37,7 +37,7 @@ ConstructionWithNullValueAnalyzerResultsIntoViolatedPrecondition) {
 TEST_F(PatternFinderTests,
 ConstructionWithNullCallInfoObtainerResultsIntoViolatedPrecondition) {
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
-	ASSERT_DEATH(NiceMock<PatternFinderMock>(va, ShPtr<CallInfoObtainer>()),
+	ASSERT_DEATH(NiceMock<PatternFinderMock>(va, CallInfoObtainer*()),
 		".*Precondition.*failed.*");
 }
 #endif

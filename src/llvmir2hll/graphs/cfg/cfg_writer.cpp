@@ -19,7 +19,7 @@ namespace llvmir2hll {
 * @param[in] cfg CFG to be emitted.
 * @param[in] out Output stream where the CFG is emitted.
 */
-CFGWriter::CFGWriter(ShPtr<CFG> cfg, std::ostream &out):
+CFGWriter::CFGWriter(CFG* cfg, std::ostream &out):
 	cfg(cfg), out(out) {}
 
 } // namespace llvmir2hll

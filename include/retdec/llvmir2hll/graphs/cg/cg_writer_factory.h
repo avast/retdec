@@ -32,7 +32,7 @@ using CGWriterFactory = Singleton<
 		// Type of the object's identifier.
 		std::string,
 		// Type of a function used to create instances.
-		ShPtr<CGWriter> (*)(ShPtr<CG>, std::ostream &)
+		CGWriter* (*)(CG*, std::ostream &)
 	>
 >;
 

@@ -28,20 +28,20 @@ StructTypeVector toVector(const StructTypeSet &types) {
 
 /// Mapping of a structured type @c X into the set of structures that has to be
 /// defined before @c X.
-using Dependencies = std::map<ShPtr<StructType>, StructTypeSet>;
+using Dependencies = std::map<StructType*, StructTypeSet>;
 
 /**
 * @brief Returns structured types that have to be defined before @c type.
 */
-StructTypeSet findDependencies(ShPtr<StructType> type) {
+StructTypeSet findDependencies(StructType* type) {
 	StructTypeSet dependencies;
 	for (const auto &t : type->getElementTypes()) {
 		// Directly contained structure.
-		if (ShPtr<StructType> st = cast<StructType>(t)) {
+		if (StructType* st = cast<StructType>(t)) {
 			dependencies.insert(st);
 		// Array of structures.
-		} else if (ShPtr<ArrayType> at = cast<ArrayType>(t)) {
-			if (ShPtr<StructType> st = cast<StructType>(at->getContainedType())) {
+		} else if (ArrayType* at = cast<ArrayType>(t)) {
+			if (StructType* st = cast<StructType>(at->getContainedType())) {
 				dependencies.insert(st);
 			}
 		}
@@ -68,7 +68,7 @@ public:
 	/**
 	* @brief Returns @c true if <tt>st1 < st2</tt>, @c false otherwise.
 	*/
-	bool operator()(ShPtr<StructType> st1, ShPtr<StructType> st2) const {
+	bool operator()(StructType* st1, StructType* st2) const {
 		return st1->getName() < st2->getName();
 	}
 };
@@ -84,7 +84,7 @@ void sortByName(StructTypeVector &types) {
 * @brief Checks whether the given structure has satisfied all the given
 *        dependencies.
 */
-bool hasAllDependenciesSatisfied(ShPtr<StructType> st,
+bool hasAllDependenciesSatisfied(StructType* st,
 		const StructTypeSet &stDeps,
 		const StructTypeVector &sortedTypes) {
 	for (const auto &stDep : stDeps) {
@@ -99,7 +99,7 @@ bool hasAllDependenciesSatisfied(ShPtr<StructType> st,
 * @brief Returns the next structure to be included into @a sortedTypes based on
 *        @a remainingTypes.
 */
-ShPtr<StructType> getNextStructToInclude(const Dependencies &dependencies,
+StructType* getNextStructToInclude(const Dependencies &dependencies,
 		const StructTypeVector &remainingTypes,
 		const StructTypeVector &sortedTypes) {
 	for (const auto &type: remainingTypes) {
@@ -111,13 +111,13 @@ ShPtr<StructType> getNextStructToInclude(const Dependencies &dependencies,
 
 	FAIL("There is no next structure to be included"
 		" (perhaps a circular dependency?).");
-	return ShPtr<StructType>();
+	return nullptr;
 }
 
 /**
 * @brief Removes @a st from @a types.
 */
-void removeFromVector(ShPtr<StructType> st, StructTypeVector &types) {
+void removeFromVector(StructType* st, StructTypeVector &types) {
 	types.erase(std::remove(types.begin(), types.end(), st), types.end());
 }
 
@@ -129,7 +129,7 @@ void sortByDependencies(StructTypeVector &types, const Dependencies &dependencie
 	StructTypeVector sortedTypes;
 
 	while (!remainingTypes.empty()) {
-		ShPtr<StructType> st(getNextStructToInclude(dependencies,
+		StructType* st(getNextStructToInclude(dependencies,
 			remainingTypes, sortedTypes));
 		sortedTypes.push_back(st);
 		removeFromVector(st, remainingTypes);

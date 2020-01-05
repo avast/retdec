@@ -51,67 +51,67 @@ extern const LineRange NO_LINE_RANGE;
 using StringSet = std::set<std::string>;
 
 /// Set of values.
-using ValueSet = std::set<ShPtr<Value>>;
+using ValueSet = std::set<Value*>;
 
 /// Set of variables.
-using VarSet = std::set<ShPtr<Variable>>;
+using VarSet = std::set<Variable*>;
 
 /// Set of VarDefStmt.
-using VarDefStmtSet = std::set<ShPtr<VarDefStmt>>;
+using VarDefStmtSet = std::set<VarDefStmt*>;
 
 /// Set of types.
-using TypeSet = std::set<ShPtr<Type>>;
+using TypeSet = std::set<Type*>;
 
 /// Set of structured types.
-using StructTypeSet = std::set<ShPtr<StructType>>;
+using StructTypeSet = std::set<StructType*>;
 
 /// Set of statements.
-using StmtSet = std::set<ShPtr<Statement>>;
+using StmtSet = std::set<Statement*>;
 
 /// Set of expressions.
-using ExpressionSet = std::set<ShPtr<Expression>>;
+using ExpressionSet = std::set<Expression*>;
 
 /// Set of function calls.
-using CallSet = std::set<ShPtr<CallExpr>>;
+using CallSet = std::set<CallExpr*>;
 
 /// Set of functions.
-using FuncSet = std::set<ShPtr<Function>>;
+using FuncSet = std::set<Function*>;
 
 /// Unordered set of statements.
-using StmtUSet = std::unordered_set<ShPtr<Statement>>;
+using StmtUSet = std::unordered_set<Statement*>;
 
 /// Unordered set of types.
-using TypeUSet = std::unordered_set<ShPtr<Type>>;
+using TypeUSet = std::unordered_set<Type*>;
 
 /// Vector of strings.
 using StringVector = std::vector<std::string>;
 
 /// Vector of values.
-using ValueVector = std::vector<ShPtr<Value>>;
+using ValueVector = std::vector<Value*>;
 
 /// Vector of variables.
-using VarVector = std::vector<ShPtr<Variable>>;
+using VarVector = std::vector<Variable*>;
 
 /// Vector of statements.
-using StmtVector = std::vector<ShPtr<Statement>>;
+using StmtVector = std::vector<Statement*>;
 
 /// Vector of expressions.
-using ExprVector = std::vector<ShPtr<Expression>>;
+using ExprVector = std::vector<Expression*>;
 
 /// Vector of function calls.
-using CallVector = std::vector<ShPtr<CallExpr>>;
+using CallVector = std::vector<CallExpr*>;
 
 /// Vector of functions.
-using FuncVector = std::vector<ShPtr<Function>>;
+using FuncVector = std::vector<Function*>;
 
 /// Vector of global variable definitions.
-using GlobalVarDefVector = std::vector<ShPtr<GlobalVarDef>>;
+using GlobalVarDefVector = std::vector<GlobalVarDef*>;
 
 /// Vector of structured types.
-using StructTypeVector = std::vector<ShPtr<StructType>>;
+using StructTypeVector = std::vector<StructType*>;
 
 /// Variable with its initializer.
-using VarInitPair = std::pair<ShPtr<Variable>, ShPtr<Expression>>;
+using VarInitPair = std::pair<Variable*, Expression*>;
 
 /// List of variables with their initializers.
 using VarInitPairVector = std::vector<VarInitPair>;
@@ -120,22 +120,22 @@ using VarInitPairVector = std::vector<VarInitPair>;
 using StringStringMap = std::map<std::string, std::string>;
 
 /// Mapping of a string into a type.
-using StringTypeMap = std::map<std::string, ShPtr<Type>>;
+using StringTypeMap = std::map<std::string, Type*>;
 
 /// Mapping of a variable into a string.
-using VarStringMap = std::map<ShPtr<Variable>, std::string>;
+using VarStringMap = std::map<Variable*, std::string>;
 
 /// Mapping of a string into a variable.
-using StringVarMap = std::map<std::string, ShPtr<Variable>>;
+using StringVarMap = std::map<std::string, Variable*>;
 
 /// Mapping of a function into a string.
-using FuncStringMap = std::map<ShPtr<Function>, std::string>;
+using FuncStringMap = std::map<Function*, std::string>;
 
 /// Mapping of a 64b int into a string.
 using IntStringMap = std::map<std::int64_t, std::string>;
 
 /// Mapping of a variable into a set of variables.
-using VarVarSetMap = std::map<ShPtr<Variable>, VarSet>;
+using VarVarSetMap = std::map<Variable*, VarSet>;
 
 /// Unordered mapping of a string into a string.
 using StringStringUMap = std::unordered_map<std::string, std::string>;

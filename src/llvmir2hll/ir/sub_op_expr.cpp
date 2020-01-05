@@ -16,19 +16,19 @@ namespace llvmir2hll {
 *
 * See create() for more information.
 */
-SubOpExpr::SubOpExpr(ShPtr<Expression> op1, ShPtr<Expression> op2):
+SubOpExpr::SubOpExpr(Expression* op1, Expression* op2):
 	BinaryOpExpr(op1, op2) {}
 
-bool SubOpExpr::isEqualTo(ShPtr<Value> otherValue) const {
-	if (ShPtr<SubOpExpr> otherValueSubOpExpr = cast<SubOpExpr>(otherValue)) {
+bool SubOpExpr::isEqualTo(Value* otherValue) const {
+	if (SubOpExpr* otherValueSubOpExpr = cast<SubOpExpr>(otherValue)) {
 		return op1->isEqualTo(otherValueSubOpExpr->getFirstOperand()) &&
 			op2->isEqualTo(otherValueSubOpExpr->getSecondOperand());
 	}
 	return false;
 }
 
-ShPtr<Value> SubOpExpr::clone() {
-	ShPtr<SubOpExpr> subOpExpr(SubOpExpr::create(
+Value* SubOpExpr::clone() {
+	SubOpExpr* subOpExpr(SubOpExpr::create(
 		ucast<Expression>(op1->clone()), ucast<Expression>(op2->clone())));
 	subOpExpr->setMetadata(getMetadata());
 	return subOpExpr;
@@ -43,13 +43,13 @@ ShPtr<Value> SubOpExpr::clone() {
 * @par Preconditions
 *  - both operands are non-null
 */
-ShPtr<SubOpExpr> SubOpExpr::create(ShPtr<Expression> op1, ShPtr<Expression> op2) {
+SubOpExpr* SubOpExpr::create(Expression* op1, Expression* op2) {
 	PRECONDITION_NON_NULL(op1);
 	PRECONDITION_NON_NULL(op2);
 
-	ShPtr<SubOpExpr> expr(new SubOpExpr(op1, op2));
+	SubOpExpr* expr(new SubOpExpr(op1, op2));
 
-	// Initialization (recall that shared_from_this() cannot be called in a
+	// Initialization (recall that this cannot be called in a
 	// constructor).
 	op1->addObserver(expr);
 	op2->addObserver(expr);
@@ -58,7 +58,7 @@ ShPtr<SubOpExpr> SubOpExpr::create(ShPtr<Expression> op1, ShPtr<Expression> op2)
 }
 
 void SubOpExpr::accept(Visitor *v) {
-	v->visit(ucast<SubOpExpr>(shared_from_this()));
+	v->visit(ucast<SubOpExpr>(this));
 }
 
 } // namespace llvmir2hll

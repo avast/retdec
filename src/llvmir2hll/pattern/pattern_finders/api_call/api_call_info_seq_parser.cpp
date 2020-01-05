@@ -187,8 +187,8 @@ std::optional<APICallInfoSeq> APICallInfoSeqParser::parse(const std::string &tex
 /**
 * @brief Creates a new parser.
 */
-ShPtr<APICallInfoSeqParser> APICallInfoSeqParser::create() {
-	return ShPtr<APICallInfoSeqParser>(new APICallInfoSeqParser());
+APICallInfoSeqParser* APICallInfoSeqParser::create() {
+	return new APICallInfoSeqParser();
 }
 
 } // namespace llvmir2hll

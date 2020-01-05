@@ -29,23 +29,23 @@ class CFG;
 */
 class GraphvizCFGWriter: public CFGWriter {
 public:
-	static ShPtr<CFGWriter> create(ShPtr<CFG> cfg, std::ostream &out);
+	static CFGWriter* create(CFG* cfg, std::ostream &out);
 
 	virtual std::string getId() const override;
 	virtual bool emitCFG() override;
 
 private:
 	/// Set of nodes.
-	using NodeSet = std::set<ShPtr<CFG::Node>>;
+	using NodeSet = std::set<CFG::Node*>;
 
 private:
-	GraphvizCFGWriter(ShPtr<CFG> cfg, std::ostream &out);
+	GraphvizCFGWriter(CFG* cfg, std::ostream &out);
 
-	void emitNodesByBreathFirstTraversal(ShPtr<CFG::Node> startNode,
+	void emitNodesByBreathFirstTraversal(CFG::Node* startNode,
 		NodeSet &emittedNodes);
-	void emitNode(ShPtr<CFG::Node> node);
-	void emitEdge(ShPtr<CFG::Edge> edge);
-	void emitStmt(ShPtr<Statement> stmt);
+	void emitNode(CFG::Node* node);
+	void emitEdge(CFG::Edge* edge);
+	void emitStmt(Statement* stmt);
 };
 
 } // namespace llvmir2hll

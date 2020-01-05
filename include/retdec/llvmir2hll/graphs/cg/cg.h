@@ -41,14 +41,14 @@ public:
 	*/
 	class CalledFuncs {
 	public:
-		explicit CalledFuncs(ShPtr<Function> caller,
+		explicit CalledFuncs(Function* caller,
 			bool callsOnlyDefinedFuncs = true,
 			bool callsByPointer = false);
 
 	public:
 		/// Function that calls functions in @c callees. If it is a
 		/// declaration, @c callees are empty.
-		ShPtr<Function> caller;
+		Function* caller = nullptr;
 
 		/// Functions that are called from @c caller (it may or may not contain
 		/// indirectly called functions, see getCalledFuncs()).
@@ -66,14 +66,14 @@ public:
 	};
 
 	/// Mapping of a caller into callees.
-	using CallerCalleeMap = std::map<ShPtr<Function>, ShPtr<CalledFuncs>>;
+	using CallerCalleeMap = std::map<Function*, CalledFuncs*>;
 
 	/// Callers iterator.
 	using caller_iterator = CallerCalleeMap::const_iterator;
 
 public:
-	ShPtr<Module> getCorrespondingModule() const;
-	ShPtr<CalledFuncs> getCalledFuncs(ShPtr<Function> func,
+	Module* getCorrespondingModule() const;
+	CalledFuncs* getCalledFuncs(Function* func,
 		bool includeIndirectCalls = false) const;
 
 	/// @name Callers Accessors
@@ -83,13 +83,13 @@ public:
 	/// @}
 
 private:
-	CG(ShPtr<Module> module);
+	CG(Module* module);
 
-	ShPtr<CalledFuncs> computeIndirectCalls(ShPtr<CalledFuncs> calledFuncs) const;
+	CalledFuncs* computeIndirectCalls(CalledFuncs* calledFuncs) const;
 
 private:
 	/// Module for which this call graph has been created.
-	ShPtr<Module> module;
+	Module* module = nullptr;
 
 	/// Mapping of a caller into callees.
 	CallerCalleeMap callerCalleeMap;

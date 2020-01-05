@@ -22,7 +22,7 @@ namespace tests {
 * @param[in] stmt Statement to optimize.
 * @param[in] expectedResult Expected result.
 */
-void CompoundOpManagerTests::tryToOptimizeAndCheckResult(ShPtr<AssignStmt> stmt,
+void CompoundOpManagerTests::tryToOptimizeAndCheckResult(AssignStmt* stmt,
 		CompoundOpManager::CompoundOp expectedResult) {
 	CompoundOpManager::CompoundOp compoundResult(
 		compoundOpManager->tryOptimizeToCompoundOp(stmt));
@@ -68,7 +68,7 @@ CompoundOpGetOperatorReturnsTheOperator) {
 
 TEST_F(CompoundOpManagerTests,
 CompoundOpGetOperandReturnsTheOperandForBinaryOperator) {
-	ShPtr<Expression> operand(ConstInt::create(1, 32));
+	Expression* operand(ConstInt::create(1, 32));
 	CompoundOpManager::CompoundOp binaryOp("+=", operand);
 	EXPECT_EQ(operand, binaryOp.getOperand());
 }

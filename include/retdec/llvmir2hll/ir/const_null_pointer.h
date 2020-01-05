@@ -25,14 +25,14 @@ class PointerType;
 */
 class ConstNullPointer final: public Constant {
 public:
-	static ShPtr<ConstNullPointer> create(ShPtr<PointerType> type);
+	static ConstNullPointer* create(PointerType* type);
 
-	virtual ShPtr<Value> clone() override;
+	virtual Value* clone() override;
 
-	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
-	virtual ShPtr<Type> getType() const override;
-	virtual void replace(ShPtr<Expression> oldExpr,
-		ShPtr<Expression> newExpr) override;
+	virtual bool isEqualTo(Value* otherValue) const override;
+	virtual Type* getType() const override;
+	virtual void replace(Expression* oldExpr,
+		Expression* newExpr) override;
 
 	/// @name Visitor Interface
 	/// @{
@@ -41,12 +41,12 @@ public:
 
 private:
 	/// Type of the constant.
-	ShPtr<PointerType> type;
+	PointerType* type = nullptr;
 
 private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
-	explicit ConstNullPointer(ShPtr<PointerType> type);
+	explicit ConstNullPointer(PointerType* type);
 };
 
 } // namespace llvmir2hll

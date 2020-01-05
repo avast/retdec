@@ -32,24 +32,24 @@ namespace tests {
 */
 class CArrayArgOptimizerTests: public TestsWithModule {
 protected:
-	ShPtr<AddressOpExpr> createArrayArg(const std::string &varName);
-	ShPtr<Variable> getVarFromArrayArg(ShPtr<AddressOpExpr> arrayArg);
-	void checkThatArrayArgWasOptimized(ShPtr<Expression> arg,
-		ShPtr<AddressOpExpr> arrayArg);
-	void checkThatArrayArgWasNotOptimized(ShPtr<Expression> arg,
-		ShPtr<Expression> arrayArg);
+	AddressOpExpr* createArrayArg(const std::string &varName);
+	Variable* getVarFromArrayArg(AddressOpExpr* arrayArg);
+	void checkThatArrayArgWasOptimized(Expression* arg,
+		AddressOpExpr* arrayArg);
+	void checkThatArrayArgWasNotOptimized(Expression* arg,
+		Expression* arrayArg);
 };
 
 /**
 * @brief Creates an array argument from the given variable name.
 */
-ShPtr<AddressOpExpr> CArrayArgOptimizerTests::createArrayArg(
+AddressOpExpr* CArrayArgOptimizerTests::createArrayArg(
 		const std::string &varName) {
 	ArrayType::Dimensions dimensions;
 	dimensions.push_back(10);
-	ShPtr<Variable> var(Variable::create(varName,
+	Variable* var(Variable::create(varName,
 		ArrayType::create(IntType::create(32), dimensions)));
-	ShPtr<AddressOpExpr> arrayArg(AddressOpExpr::create(
+	AddressOpExpr* arrayArg(AddressOpExpr::create(
 		ArrayIndexOpExpr::create(var, ConstInt::create(0, 32))));
 	return arrayArg;
 }
@@ -57,8 +57,8 @@ ShPtr<AddressOpExpr> CArrayArgOptimizerTests::createArrayArg(
 /**
 * @brief Returns the variable from the given array argument.
 */
-ShPtr<Variable> CArrayArgOptimizerTests::getVarFromArrayArg(
-		ShPtr<AddressOpExpr> arrayArg) {
+Variable* CArrayArgOptimizerTests::getVarFromArrayArg(
+		AddressOpExpr* arrayArg) {
 	return cast<Variable>(cast<ArrayIndexOpExpr>(
 		arrayArg->getOperand())->getBase());
 }
@@ -67,8 +67,8 @@ ShPtr<Variable> CArrayArgOptimizerTests::getVarFromArrayArg(
 * @brief Checks that @a arg is an optimized array argument @a arrayArg.
 */
 void CArrayArgOptimizerTests::checkThatArrayArgWasOptimized(
-		ShPtr<Expression> arg, ShPtr<AddressOpExpr> arrayArg) {
-	ShPtr<Variable> var(getVarFromArrayArg(arrayArg));
+		Expression* arg, AddressOpExpr* arrayArg) {
+	Variable* var(getVarFromArrayArg(arrayArg));
 	ASSERT_EQ(var, arg) <<
 		"expected `" << var << "`, " <<
 		"got `" << arg << "`";
@@ -78,7 +78,7 @@ void CArrayArgOptimizerTests::checkThatArrayArgWasOptimized(
 * @brief Checks that @a arg is not an optimized array argument @a arrayArg.
 */
 void CArrayArgOptimizerTests::checkThatArrayArgWasNotOptimized(
-		ShPtr<Expression> arg, ShPtr<Expression> arrayArg) {
+		Expression* arg, Expression* arrayArg) {
 	ASSERT_EQ(arrayArg, arg) <<
 		"expected `" << arrayArg << "`, " <<
 		"got `" << arg << "`";
@@ -86,7 +86,7 @@ void CArrayArgOptimizerTests::checkThatArrayArgWasNotOptimized(
 
 TEST_F(CArrayArgOptimizerTests,
 OptimizerHasNonEmptyID) {
-	ShPtr<CArrayArgOptimizer> optimizer(
+	CArrayArgOptimizer* optimizer(
 		new CArrayArgOptimizer(module));
 
 	EXPECT_TRUE(!optimizer->getId().empty()) <<
@@ -115,11 +115,11 @@ SingleArrayArgInFunctionCallIsOptimized) {
 	//
 	//    func(x);
 	//
-	ShPtr<AddressOpExpr> arrayArg(createArrayArg("x"));
+	AddressOpExpr* arrayArg(createArrayArg("x"));
 	ExprVector args;
 	args.push_back(arrayArg);
-	ShPtr<CallExpr> callExpr(CallExpr::create(testFunc->getAsVar(), args));
-	ShPtr<CallStmt> callStmt(CallStmt::create(callExpr));
+	CallExpr* callExpr(CallExpr::create(testFunc->getAsVar(), args));
+	CallStmt* callStmt(CallStmt::create(callExpr));
 	testFunc->setBody(callStmt);
 
 	// Optimize the module.
@@ -138,14 +138,14 @@ TwoArrayArgsInFunctionCallAreOptimized) {
 	//
 	//    func(x, 1, y);
 	//
-	ShPtr<AddressOpExpr> arrayArgX(createArrayArg("x"));
-	ShPtr<AddressOpExpr> arrayArgY(createArrayArg("y"));
+	AddressOpExpr* arrayArgX(createArrayArg("x"));
+	AddressOpExpr* arrayArgY(createArrayArg("y"));
 	ExprVector args;
 	args.push_back(arrayArgX);
 	args.push_back(ConstInt::create(1, 32));
 	args.push_back(arrayArgY);
-	ShPtr<CallExpr> callExpr(CallExpr::create(testFunc->getAsVar(), args));
-	ShPtr<CallStmt> callStmt(CallStmt::create(callExpr));
+	CallExpr* callExpr(CallExpr::create(testFunc->getAsVar(), args));
+	CallStmt* callStmt(CallStmt::create(callExpr));
 	testFunc->setBody(callStmt);
 
 	// Optimize the module.
@@ -167,16 +167,16 @@ ArrayArgIsOptimizedInTwoCalls) {
 	//    func(x);
 	//    func(y);
 	//
-	ShPtr<AddressOpExpr> arrayArgY(createArrayArg("y"));
+	AddressOpExpr* arrayArgY(createArrayArg("y"));
 	ExprVector argsY;
 	argsY.push_back(arrayArgY);
-	ShPtr<CallExpr> callExprY(CallExpr::create(testFunc->getAsVar(), argsY));
-	ShPtr<CallStmt> callStmtY(CallStmt::create(callExprY));
-	ShPtr<AddressOpExpr> arrayArgX(createArrayArg("x"));
+	CallExpr* callExprY(CallExpr::create(testFunc->getAsVar(), argsY));
+	CallStmt* callStmtY(CallStmt::create(callExprY));
+	AddressOpExpr* arrayArgX(createArrayArg("x"));
 	ExprVector argsX;
 	argsX.push_back(arrayArgX);
-	ShPtr<CallExpr> callExprX(CallExpr::create(testFunc->getAsVar(), argsX));
-	ShPtr<CallStmt> callStmtX(CallStmt::create(callExprX, callStmtY));
+	CallExpr* callExprX(CallExpr::create(testFunc->getAsVar(), argsX));
+	CallStmt* callStmtX(CallStmt::create(callExprX, callStmtY));
 	testFunc->setBody(callStmtX);
 
 	// Optimize the module.
@@ -194,9 +194,9 @@ ArrayArgOutsideOfFunctionCallIsNotOptimized) {
 	//
 	// is not optimized.
 	//
-	ShPtr<AddressOpExpr> arrayArg(createArrayArg("x"));
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
-	ShPtr<VarDefStmt> varDefStmt(VarDefStmt::create(varA, arrayArg));
+	AddressOpExpr* arrayArg(createArrayArg("x"));
+	Variable* varA(Variable::create("a", IntType::create(32)));
+	VarDefStmt* varDefStmt(VarDefStmt::create(varA, arrayArg));
 	testFunc->setBody(varDefStmt);
 
 	// Optimize the module.
@@ -213,13 +213,13 @@ ArrayArgWithCastInFunctionCallIsNotOptimized) {
 	//
 	// is not optimized.
 	//
-	ShPtr<AddressOpExpr> arrayArg(createArrayArg("x"));
-	ShPtr<BitCastExpr> bitCast(BitCastExpr::create(arrayArg,
+	AddressOpExpr* arrayArg(createArrayArg("x"));
+	BitCastExpr* bitCast(BitCastExpr::create(arrayArg,
 		PointerType::create(IntType::create(32))));
 	ExprVector args;
 	args.push_back(bitCast);
-	ShPtr<CallExpr> callExpr(CallExpr::create(testFunc->getAsVar(), args));
-	ShPtr<CallStmt> callStmt(CallStmt::create(callExpr));
+	CallExpr* callExpr(CallExpr::create(testFunc->getAsVar(), args));
+	CallStmt* callStmt(CallStmt::create(callExpr));
 	testFunc->setBody(callStmt);
 
 	// Optimize the module.

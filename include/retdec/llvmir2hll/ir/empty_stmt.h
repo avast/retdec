@@ -22,14 +22,14 @@ class Visitor;
 */
 class EmptyStmt final: public Statement {
 public:
-	static ShPtr<EmptyStmt> create(ShPtr<Statement> succ = nullptr,
+	static EmptyStmt* create(Statement* succ = nullptr,
 		Address a = Address::Undefined);
 
-	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
-	virtual ShPtr<Value> clone() override;
+	virtual bool isEqualTo(Value* otherValue) const override;
+	virtual Value* clone() override;
 	virtual bool isCompound() override { return false; }
-	virtual void replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) override;
-	virtual ShPtr<Expression> asExpression() const override;
+	virtual void replace(Expression* oldExpr, Expression* newExpr) override;
+	virtual Expression* asExpression() const override;
 
 	/// @name Visitor Interface
 	/// @{

@@ -41,18 +41,18 @@ MulAdd) {
 	//
 	// expected output: return (2 * (0 + a));
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<AddOpExpr> addOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	AddOpExpr* addOpExpr(
 		AddOpExpr::create(
 			ConstInt::create(0, 64),
 			varA
 	));
-	ShPtr<MulOpExpr> mulOpExpr(
+	MulOpExpr* mulOpExpr(
 		MulOpExpr::create(
 			ConstInt::create(2,64),
 			addOpExpr
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(mulOpExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(mulOpExpr));
 	testFunc->setBody(returnStmt);
 	NoBracketManager noBracketManager(module);
 
@@ -68,25 +68,25 @@ MulDivMul) {
 	//
 	// expected output: return (a * ((b / c) * 3));
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(16)));
-	ShPtr<DivOpExpr> divOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	Variable* varC(Variable::create("c", IntType::create(16)));
+	DivOpExpr* divOpExpr(
 		DivOpExpr::create(
 			varB,
 			varC
 	));
-	ShPtr<MulOpExpr> mulOpExpr1(
+	MulOpExpr* mulOpExpr1(
 		MulOpExpr::create(
 			divOpExpr,
 			ConstInt::create(3,64)
 	));
-	ShPtr<MulOpExpr> mulOpExpr2(
+	MulOpExpr* mulOpExpr2(
 		MulOpExpr::create(
 			varA,
 			mulOpExpr1
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(mulOpExpr2));
+	ReturnStmt* returnStmt(ReturnStmt::create(mulOpExpr2));
 	testFunc->setBody(returnStmt);
 	NoBracketManager noBracketManager(module);
 
@@ -104,20 +104,20 @@ MulDiv) {
 	//
 	// expected output: return (a * (b / c));
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(16)));
-	ShPtr<DivOpExpr> divOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	Variable* varC(Variable::create("c", IntType::create(16)));
+	DivOpExpr* divOpExpr(
 		DivOpExpr::create(
 			varB,
 			varC
 	));
-	ShPtr<MulOpExpr> mulOpExpr(
+	MulOpExpr* mulOpExpr(
 		MulOpExpr::create(
 			divOpExpr,
 			varA
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(mulOpExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(mulOpExpr));
 	testFunc->setBody(returnStmt);
 	NoBracketManager noBracketManager(module);
 

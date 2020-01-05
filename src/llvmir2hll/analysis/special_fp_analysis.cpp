@@ -27,19 +27,19 @@ SpecialFPAnalysis::SpecialFPAnalysis():
 * @brief Returns @c true if @a module uses a special floating-point value, like
 *        infinity, @c false otherwise.
 */
-bool SpecialFPAnalysis::hasSpecialFP(ShPtr<Module> module) {
-	ShPtr<SpecialFPAnalysis> visitor(new SpecialFPAnalysis());
+bool SpecialFPAnalysis::hasSpecialFP(Module* module) {
+	SpecialFPAnalysis* visitor(new SpecialFPAnalysis());
 
 	// Browse global variables.
 	for (auto i = module->global_var_begin(), e = module->global_var_end();
 			i != e; ++i) {
-		(*i)->accept(visitor.get());
+		(*i)->accept(visitor);
 	}
 
 	// Browse functions.
 	for (auto i = module->func_definition_begin(),
 			e = module->func_definition_end(); i != e; ++i) {
-		(*i)->accept(visitor.get());
+		(*i)->accept(visitor);
 	}
 
 	return visitor->specialFPFound;
@@ -49,7 +49,7 @@ bool SpecialFPAnalysis::hasSpecialFP(ShPtr<Module> module) {
 // Visits
 //
 
-void SpecialFPAnalysis::visit(ShPtr<ConstFloat> constant) {
+void SpecialFPAnalysis::visit(ConstFloat* constant) {
 	ConstFloat::Type value(constant->getValue());
 	if (value.isInfinity() || value.isNaN()) {
 		specialFPFound = true;

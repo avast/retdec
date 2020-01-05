@@ -45,11 +45,11 @@
 	/* (1) */ \
 	::testing::NiceMock<VarNameGenMock> *varNameGenMock = \
 		new ::testing::NiceMock<VarNameGenMock>(); \
-	ShPtr<VarNameGen> varNameGen(varNameGenMock); \
+	VarNameGen* varNameGen(varNameGenMock); \
 	/* (2) */ \
 	ON_CALL(*varNameGenMock, getId()) \
 		.WillByDefault(::testing::Return(std::string("mock"))); \
 	/* (3) */ \
-	ShPtr<VarRenamer> varRenamer(VarRenamerType::create(varNameGen, useDebugNames))
+	VarRenamer* varRenamer(VarRenamerType::create(varNameGen, useDebugNames))
 
 #endif

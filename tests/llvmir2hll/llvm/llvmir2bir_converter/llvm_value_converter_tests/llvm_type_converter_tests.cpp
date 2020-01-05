@@ -33,7 +33,7 @@ namespace tests {
 */
 class LLVMTypeConverterTests: public LLVMIR2BIRConverterBaseTests {
 protected:
-	ShPtr<Type> convertLLVMIRType2BIRType(const std::string &type,
+	Type* convertLLVMIRType2BIRType(const std::string &type,
 		const std::string &typeName = "");
 
 	template<class T>
@@ -49,7 +49,7 @@ protected:
 * @param[in] type Tested type in LLVM IR.
 * @param[in] typeName Optional name for type.
 */
-ShPtr<Type> LLVMTypeConverterTests::convertLLVMIRType2BIRType(
+Type* LLVMTypeConverterTests::convertLLVMIRType2BIRType(
 		const std::string &type, const std::string &typeName) {
 	std::string llvmIR = "";
 	std::string globType = type;

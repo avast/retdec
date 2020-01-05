@@ -30,7 +30,7 @@ class LLVMIntrinsicsOptimizerTests: public TestsWithModule {};
 
 TEST_F(LLVMIntrinsicsOptimizerTests,
 OptimizerHasNonEmptyID) {
-	ShPtr<LLVMIntrinsicsOptimizer> optimizer(new LLVMIntrinsicsOptimizer(module));
+	LLVMIntrinsicsOptimizer* optimizer(new LLVMIntrinsicsOptimizer(module));
 
 	EXPECT_TRUE(!optimizer->getId().empty()) <<
 		"the optimizer should have a non-empty ID";
@@ -82,10 +82,10 @@ IfThereIsANonStandaloneCallToLlvmCtpopLeftDoNotRemoveTheDeclaration) {
 	// }
 	//
 	addFuncDecl("llvm.ctpop.i8");
-	ShPtr<Variable> varX(Variable::create("x", IntType::create(32)));
-	ShPtr<CallExpr> callExpr(CallExpr::create(module->getFuncByName(
+	Variable* varX(Variable::create("x", IntType::create(32)));
+	CallExpr* callExpr(CallExpr::create(module->getFuncByName(
 		"llvm.ctpop.i8")->getAsVar(), ExprVector()));
-	ShPtr<VarDefStmt> varDefX(VarDefStmt::create(varX, callExpr));
+	VarDefStmt* varDefX(VarDefStmt::create(varX, callExpr));
 	testFunc->setBody(varDefX);
 	addCall("test", "llvm.ctpop.i8");
 

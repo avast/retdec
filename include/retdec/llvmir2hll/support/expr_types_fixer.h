@@ -56,28 +56,28 @@ class Type;
 class ExprTypesFixer final: private OrderedAllVisitor,
 		private retdec::utils::NonCopyable {
 public:
-	static void fixTypes(ShPtr<Module> module);
+	static void fixTypes(Module* module);
 
 private:
 	ExprTypesFixer();
-	void setProbablyTypes(ShPtr<Module> module);
-	ShPtr<Expression> exprCheckAndChange(bool isSigned, ShPtr<Expression> expr);
+	void setProbablyTypes(Module* module);
+	Expression* exprCheckAndChange(bool isSigned, Expression* expr);
 
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<ExtCastExpr> expr) override;
-	virtual void visit(ShPtr<IntToFPCastExpr> expr) override;
-	virtual void visit(ShPtr<DivOpExpr> expr) override;
-	virtual void visit(ShPtr<ModOpExpr> expr) override;
-	virtual void visit(ShPtr<AssignStmt> stmt) override;
-	virtual void visit(ShPtr<VarDefStmt> stmt) override;
-	virtual void visit(ShPtr<LtEqOpExpr> expr) override;
-	virtual void visit(ShPtr<GtEqOpExpr> expr) override;
-	virtual void visit(ShPtr<LtOpExpr> expr) override;
-	virtual void visit(ShPtr<GtOpExpr> expr) override;
-	virtual void visit(ShPtr<BitShlOpExpr> expr) override;
-	virtual void visit(ShPtr<BitShrOpExpr> expr) override;
+	virtual void visit(ExtCastExpr* expr) override;
+	virtual void visit(IntToFPCastExpr* expr) override;
+	virtual void visit(DivOpExpr* expr) override;
+	virtual void visit(ModOpExpr* expr) override;
+	virtual void visit(AssignStmt* stmt) override;
+	virtual void visit(VarDefStmt* stmt) override;
+	virtual void visit(LtEqOpExpr* expr) override;
+	virtual void visit(GtEqOpExpr* expr) override;
+	virtual void visit(LtOpExpr* expr) override;
+	virtual void visit(GtOpExpr* expr) override;
+	virtual void visit(BitShlOpExpr* expr) override;
+	virtual void visit(BitShrOpExpr* expr) override;
 	/// @}
 };
 

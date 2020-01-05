@@ -32,14 +32,14 @@ class NegativeOperandSubOptimizerTests: public TestsWithModule {
 protected:
 	virtual void SetUp() override {
 		TestsWithModule::SetUp();
-		ShPtr<ArithmExprEvaluator> evaluator(StrictArithmExprEvaluator::
+		ArithmExprEvaluator* evaluator(StrictArithmExprEvaluator::
 			create());
-		optimizer = ShPtr<NegativeOperandSubOptimizer>(
+		optimizer = NegativeOperandSubOptimizer*(
 			new NegativeOperandSubOptimizer(evaluator));
 	}
 
 protected:
-	ShPtr<NegativeOperandSubOptimizer> optimizer;
+	NegativeOperandSubOptimizer* optimizer;
 };
 
 TEST_F(NegativeOperandSubOptimizerTests,
@@ -58,32 +58,32 @@ SecOpIsNegativeConstIntAddOptimized) {
 	//
 	// Optimized to return a - 2.
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16, true)));
-	ShPtr<AddOpExpr> returnExpr(
+	Variable* varA(Variable::create("a", IntType::create(16, true)));
+	AddOpExpr* returnExpr(
 		AddOpExpr::create(
 			varA,
 			ConstInt::create(-2, 64)
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(returnExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(returnExpr));
 
 	optimizer->tryOptimize(returnStmt->getRetVal());
 
-	ShPtr<SubOpExpr> outSubOpExpr(cast<SubOpExpr>(returnStmt->getRetVal()));
+	SubOpExpr* outSubOpExpr(cast<SubOpExpr>(returnStmt->getRetVal()));
 	ASSERT_TRUE(outSubOpExpr) <<
 		"expected `SubOpExpr`, "
 		"got `" << returnStmt->getRetVal() << "`";
-	ShPtr<Variable> outOp1(cast<Variable>(outSubOpExpr->getFirstOperand()));
+	Variable* outOp1(cast<Variable>(outSubOpExpr->getFirstOperand()));
 	ASSERT_TRUE(outOp1) <<
 		"expected `Variable`, "
 		"got `" << outSubOpExpr->getFirstOperand() << "`";
 	EXPECT_EQ(varA, outOp1) <<
 		"expected `" << varA << "`, "
 		"got `" << outOp1 << "`";
-	ShPtr<ConstInt> outOp2(cast<ConstInt>(outSubOpExpr->getSecondOperand()));
+	ConstInt* outOp2(cast<ConstInt>(outSubOpExpr->getSecondOperand()));
 	ASSERT_TRUE(outOp2) <<
 		"expected `ConstInt`, "
 		"got `" << outSubOpExpr->getSecondOperand() << "`";
-	ShPtr<ConstInt> result(ConstInt::create(2, 64));
+	ConstInt* result(ConstInt::create(2, 64));
 	EXPECT_EQ(result->getValue(), outOp2->getValue()) <<
 		"expected `" << result << "`, "
 		"got `" << outOp2 << "`";
@@ -95,28 +95,28 @@ SecOpIsNegativeConstFloatAddOptimized) {
 	//
 	// Optimized to return a - 4.0.
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16, true)));
-	ShPtr<AddOpExpr> returnExpr(
+	Variable* varA(Variable::create("a", IntType::create(16, true)));
+	AddOpExpr* returnExpr(
 		AddOpExpr::create(
 			varA,
 			ConstFloat::create(llvm::APFloat(-4.0))
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(returnExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(returnExpr));
 
 	optimizer->tryOptimize(returnStmt->getRetVal());
 
-	ShPtr<SubOpExpr> outSubOpExpr(cast<SubOpExpr>(returnStmt->getRetVal()));
+	SubOpExpr* outSubOpExpr(cast<SubOpExpr>(returnStmt->getRetVal()));
 	ASSERT_TRUE(outSubOpExpr) <<
 		"expected `SubOpExpr`, "
 		"got `" << returnStmt->getRetVal() << "`";
-	ShPtr<Variable> outOp1(cast<Variable>(outSubOpExpr->getFirstOperand()));
+	Variable* outOp1(cast<Variable>(outSubOpExpr->getFirstOperand()));
 	ASSERT_TRUE(outOp1) <<
 		"expected `Variable`, "
 		"got `" << outSubOpExpr->getFirstOperand() << "`";
 	EXPECT_EQ(varA, outOp1) <<
 		"expected `" << varA << "`, "
 		"got `" << outOp1 << "`";
-	ShPtr<ConstFloat> outOp2(cast<ConstFloat>(outSubOpExpr->getSecondOperand()));
+	ConstFloat* outOp2(cast<ConstFloat>(outSubOpExpr->getSecondOperand()));
 	ASSERT_TRUE(outOp2) <<
 		"expected `ConstFloat`, "
 		"got `" << outSubOpExpr->getSecondOperand() << "`";
@@ -130,30 +130,30 @@ SecOpIsNegOpExprAddOptimized) {
 	//
 	// Optimized to return a - b.
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16, true)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16, true)));
-	ShPtr<NegOpExpr> negOpExprVarB(NegOpExpr::create(varB));
-	ShPtr<AddOpExpr> returnExpr(
+	Variable* varA(Variable::create("a", IntType::create(16, true)));
+	Variable* varB(Variable::create("b", IntType::create(16, true)));
+	NegOpExpr* negOpExprVarB(NegOpExpr::create(varB));
+	AddOpExpr* returnExpr(
 		AddOpExpr::create(
 			varA,
 			negOpExprVarB
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(returnExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(returnExpr));
 
 	optimizer->tryOptimize(returnStmt->getRetVal());
 
-	ShPtr<SubOpExpr> outSubOpExpr(cast<SubOpExpr>(returnStmt->getRetVal()));
+	SubOpExpr* outSubOpExpr(cast<SubOpExpr>(returnStmt->getRetVal()));
 	ASSERT_TRUE(outSubOpExpr) <<
 		"expected `SubOpExpr`, "
 		"got `" << returnStmt->getRetVal() << "`";
-	ShPtr<Variable> outOp1(cast<Variable>(outSubOpExpr->getFirstOperand()));
+	Variable* outOp1(cast<Variable>(outSubOpExpr->getFirstOperand()));
 	ASSERT_TRUE(outOp1) <<
 		"expected `Variable`, "
 		"got `" << outSubOpExpr->getFirstOperand() << "`";
 	EXPECT_EQ(varA, outOp1) <<
 		"expected `" << varA << "`, "
 		"got `" << outOp1 << "`";
-	ShPtr<Variable> outOp2(cast<Variable>(outSubOpExpr->getSecondOperand()));
+	Variable* outOp2(cast<Variable>(outSubOpExpr->getSecondOperand()));
 	ASSERT_TRUE(outOp2) <<
 		"expected `Variable`, "
 		"got `" << outSubOpExpr->getSecondOperand() << "`";
@@ -168,32 +168,32 @@ FirstOpIsNegativeConstIntAddOptimized) {
 	//
 	// Optimized to return a - 2.
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16, true)));
-	ShPtr<AddOpExpr> returnExpr(
+	Variable* varA(Variable::create("a", IntType::create(16, true)));
+	AddOpExpr* returnExpr(
 		AddOpExpr::create(
 			ConstInt::create(-2, 64),
 			varA
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(returnExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(returnExpr));
 
 	optimizer->tryOptimize(returnStmt->getRetVal());
 
-	ShPtr<SubOpExpr> outSubOpExpr(cast<SubOpExpr>(returnStmt->getRetVal()));
+	SubOpExpr* outSubOpExpr(cast<SubOpExpr>(returnStmt->getRetVal()));
 	ASSERT_TRUE(outSubOpExpr) <<
 		"expected `SubOpExpr`, "
 		"got `" << returnStmt->getRetVal() << "`";
-	ShPtr<Variable> outOp1(cast<Variable>(outSubOpExpr->getFirstOperand()));
+	Variable* outOp1(cast<Variable>(outSubOpExpr->getFirstOperand()));
 	ASSERT_TRUE(outOp1) <<
 		"expected `Variable`, "
 		"got `" << outSubOpExpr->getFirstOperand() << "`";
 	EXPECT_EQ(varA, outOp1) <<
 		"expected `" << varA << "`, "
 		"got `" << outOp1 << "`";
-	ShPtr<ConstInt> outOp2(cast<ConstInt>(outSubOpExpr->getSecondOperand()));
+	ConstInt* outOp2(cast<ConstInt>(outSubOpExpr->getSecondOperand()));
 	ASSERT_TRUE(outOp2) <<
 		"expected `ConstInt`, "
 		"got `" << outSubOpExpr->getSecondOperand() << "`";
-	ShPtr<ConstInt> result(ConstInt::create(2, 64));
+	ConstInt* result(ConstInt::create(2, 64));
 	EXPECT_EQ(result->getValue(), outOp2->getValue()) <<
 		"expected `" << result << "`, "
 		"got `" << outOp2 << "`";
@@ -205,28 +205,28 @@ FirstOpIsNegativeConstFloatAddOptimized) {
 	//
 	// Optimized to return a - 4.0.
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16, true)));
-	ShPtr<AddOpExpr> returnExpr(
+	Variable* varA(Variable::create("a", IntType::create(16, true)));
+	AddOpExpr* returnExpr(
 		AddOpExpr::create(
 			ConstFloat::create(llvm::APFloat(-4.0)),
 			varA
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(returnExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(returnExpr));
 
 	optimizer->tryOptimize(returnStmt->getRetVal());
 
-	ShPtr<SubOpExpr> outSubOpExpr(cast<SubOpExpr>(returnStmt->getRetVal()));
+	SubOpExpr* outSubOpExpr(cast<SubOpExpr>(returnStmt->getRetVal()));
 	ASSERT_TRUE(outSubOpExpr) <<
 		"expected `SubOpExpr`, "
 		"got `" << returnStmt->getRetVal() << "`";
-	ShPtr<Variable> outOp1(cast<Variable>(outSubOpExpr->getFirstOperand()));
+	Variable* outOp1(cast<Variable>(outSubOpExpr->getFirstOperand()));
 	ASSERT_TRUE(outOp1) <<
 		"expected `Variable`, "
 		"got `" << outSubOpExpr->getFirstOperand() << "`";
 	EXPECT_EQ(varA, outOp1) <<
 		"expected `" << varA << "`, "
 		"got `" << outOp1 << "`";
-	ShPtr<ConstFloat> outOp2(cast<ConstFloat>(outSubOpExpr->getSecondOperand()));
+	ConstFloat* outOp2(cast<ConstFloat>(outSubOpExpr->getSecondOperand()));
 	ASSERT_TRUE(outOp2) <<
 		"expected `ConstFloat`, "
 		"got `" << outSubOpExpr->getSecondOperand() << "`";
@@ -240,30 +240,30 @@ FirstOpIsNegOpExprAddOptimized) {
 	//
 	// Optimized to return a - b.
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16, true)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16, true)));
-	ShPtr<NegOpExpr> negOpExprVarB(NegOpExpr::create(varB));
-	ShPtr<AddOpExpr> returnExpr(
+	Variable* varA(Variable::create("a", IntType::create(16, true)));
+	Variable* varB(Variable::create("b", IntType::create(16, true)));
+	NegOpExpr* negOpExprVarB(NegOpExpr::create(varB));
+	AddOpExpr* returnExpr(
 		AddOpExpr::create(
 			negOpExprVarB,
 			varA
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(returnExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(returnExpr));
 
 	optimizer->tryOptimize(returnStmt->getRetVal());
 
-	ShPtr<SubOpExpr> outSubOpExpr(cast<SubOpExpr>(returnStmt->getRetVal()));
+	SubOpExpr* outSubOpExpr(cast<SubOpExpr>(returnStmt->getRetVal()));
 	ASSERT_TRUE(outSubOpExpr) <<
 		"expected `SubOpExpr`, "
 		"got `" << returnStmt->getRetVal() << "`";
-	ShPtr<Variable> outOp1(cast<Variable>(outSubOpExpr->getFirstOperand()));
+	Variable* outOp1(cast<Variable>(outSubOpExpr->getFirstOperand()));
 	ASSERT_TRUE(outOp1) <<
 		"expected `Variable`, "
 		"got `" << outSubOpExpr->getFirstOperand() << "`";
 	EXPECT_EQ(varA, outOp1) <<
 		"expected `" << varA << "`, "
 		"got `" << outOp1 << "`";
-	ShPtr<Variable> outOp2(cast<Variable>(outSubOpExpr->getSecondOperand()));
+	Variable* outOp2(cast<Variable>(outSubOpExpr->getSecondOperand()));
 	ASSERT_TRUE(outOp2) <<
 		"expected `Variable`, "
 		"got `" << outSubOpExpr->getSecondOperand() << "`";
@@ -282,29 +282,29 @@ SecOpIsNegConstIntSubFewBitsNotOptimized) {
 	//
 	// Not optimized. -128 can't be optimized to 128 on 8 bits.
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(8)));
-	ShPtr<ConstInt> secOpConstInt = ConstInt::create(-128, 8);
-	ShPtr<SubOpExpr> returnExpr(
+	Variable* varA(Variable::create("a", IntType::create(8)));
+	ConstInt* secOpConstInt = ConstInt::create(-128, 8);
+	SubOpExpr* returnExpr(
 		SubOpExpr::create(
 			varA,
 			secOpConstInt
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(returnExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(returnExpr));
 
 	optimizer->tryOptimize(returnStmt->getRetVal());
 
-		ShPtr<SubOpExpr> outSubOpExpr(cast<SubOpExpr>(returnStmt->getRetVal()));
+		SubOpExpr* outSubOpExpr(cast<SubOpExpr>(returnStmt->getRetVal()));
 	ASSERT_TRUE(outSubOpExpr) <<
 		"expected `SubOpExpr`, "
 		"got `" << returnStmt->getRetVal() << "`";
-	ShPtr<Variable> outOp1(cast<Variable>(outSubOpExpr->getFirstOperand()));
+	Variable* outOp1(cast<Variable>(outSubOpExpr->getFirstOperand()));
 	ASSERT_TRUE(outOp1) <<
 		"expected `Variable`, "
 		"got `" << outSubOpExpr->getFirstOperand() << "`";
 	EXPECT_EQ(varA, outOp1) <<
 		"expected `" << varA << "`, "
 		"got `" << outOp1 << "`";
-	ShPtr<ConstInt> outOp2(cast<ConstInt>(outSubOpExpr->getSecondOperand()));
+	ConstInt* outOp2(cast<ConstInt>(outSubOpExpr->getSecondOperand()));
 	ASSERT_TRUE(outOp2) <<
 		"expected `ConstInt`, "
 		"got `" << outSubOpExpr->getSecondOperand() << "`";
@@ -319,32 +319,32 @@ SecOpIsNegConstIntSubOptimized) {
 	//
 	// Optimized to return a + 2.
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<SubOpExpr> returnExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	SubOpExpr* returnExpr(
 		SubOpExpr::create(
 			varA,
 			ConstInt::create(-2, 64)
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(returnExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(returnExpr));
 
 	optimizer->tryOptimize(returnStmt->getRetVal());
 
-	ShPtr<AddOpExpr> outAddOpExpr(cast<AddOpExpr>(returnStmt->getRetVal()));
+	AddOpExpr* outAddOpExpr(cast<AddOpExpr>(returnStmt->getRetVal()));
 	ASSERT_TRUE(outAddOpExpr) <<
 		"expected `AddOpExpr`, "
 		"got `" << returnStmt->getRetVal() << "`";
-	ShPtr<Variable> outOp1(cast<Variable>(outAddOpExpr->getFirstOperand()));
+	Variable* outOp1(cast<Variable>(outAddOpExpr->getFirstOperand()));
 	ASSERT_TRUE(outOp1) <<
 		"expected `Variable`, "
 		"got `" << outAddOpExpr->getFirstOperand() << "`";
 	EXPECT_EQ(varA, outOp1) <<
 		"expected `" << varA << "`, "
 		"got `" << outOp1 << "`";
-	ShPtr<ConstInt> outOp2(cast<ConstInt>(outAddOpExpr->getSecondOperand()));
+	ConstInt* outOp2(cast<ConstInt>(outAddOpExpr->getSecondOperand()));
 	ASSERT_TRUE(outOp2) <<
 		"expected `ConstInt`, "
 		"got `" << outAddOpExpr->getSecondOperand() << "`";
-	ShPtr<ConstInt> result(ConstInt::create(2, 64));
+	ConstInt* result(ConstInt::create(2, 64));
 	EXPECT_EQ(result->getValue(), outOp2->getValue()) <<
 		"expected `" << result << "`, "
 		"got `" << outOp2 << "`";

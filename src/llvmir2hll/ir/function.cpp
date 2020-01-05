@@ -28,8 +28,8 @@ namespace llvmir2hll {
 *
 * See create() for more information.
 */
-Function::Function(ShPtr<Module> module, ShPtr<Type> retType, std::string name,
-		VarVector params, VarSet localVars, ShPtr<Statement> body, bool isVarArg):
+Function::Function(Module* module, Type* retType, std::string name,
+		VarVector params, VarSet localVars, Statement* body, bool isVarArg):
 			module(module), retType(retType), params(params), localVars(localVars),
 			body(body), funcVar(), varArg(isVarArg) {
 	includeParamsIntoLocalVars();
@@ -40,9 +40,9 @@ Function::Function(ShPtr<Module> module, ShPtr<Type> retType, std::string name,
 	funcVar = Variable::create(name, getType());
 }
 
-bool Function::isEqualTo(ShPtr<Value> otherValue) const {
+bool Function::isEqualTo(Value* otherValue) const {
 	// The types of compared instances have to match.
-	ShPtr<Function> otherFunction = cast<Function>(otherValue);
+	Function* otherFunction = cast<Function>(otherValue);
 	if (!otherFunction) {
 		return false;
 	}
@@ -90,7 +90,7 @@ bool Function::isEqualTo(ShPtr<Value> otherValue) const {
 /**
 * @brief Returns function type.
 */
-ShPtr<Type> Function::getRetType() const {
+Type* Function::getRetType() const {
 	return retType;
 }
 
@@ -129,7 +129,7 @@ const VarVector &Function::getParams() const {
 *  - <tt>0 < n <= NUM_OF_PARAMS</tt>, where @c NUM_OF_PARAMS is the number of
 *    parameters that the function has
 */
-ShPtr<Variable> Function::getParam(std::size_t n) const {
+Variable* Function::getParam(std::size_t n) const {
 	PRECONDITION(n > 0, "n `" << n << "` is not > 0");
 	PRECONDITION(n <= getNumOfParams(), "n `" << n << "`" << " is greater "
 		"than the number of parameters (`" << getNumOfParams() << "`)");
@@ -145,7 +145,7 @@ ShPtr<Variable> Function::getParam(std::size_t n) const {
 * @par Preconditions
 *  - @a param is a parameter of the function
 */
-std::size_t Function::getParamPos(ShPtr<Variable> param) const {
+std::size_t Function::getParamPos(Variable* param) const {
 	std::size_t pos = 1;
 	for (auto i = params.begin(), e = params.end(); i != e; ++i, ++pos) {
 		if (*i == param) {
@@ -198,7 +198,7 @@ std::size_t Function::getNumOfLocalVars(bool includeParams) const {
 * @param[in] includeParams If @c true, function parameters will be also
 *                          considered as local variables.
 */
-bool Function::hasLocalVar(ShPtr<Variable> var, bool includeParams) const {
+bool Function::hasLocalVar(Variable* var, bool includeParams) const {
 	if (includeParams) {
 		return hasItem(localVars, var);
 	}
@@ -208,7 +208,7 @@ bool Function::hasLocalVar(ShPtr<Variable> var, bool includeParams) const {
 /**
 * @brief Returns function body.
 */
-ShPtr<Statement> Function::getBody() const {
+Statement* Function::getBody() const {
 	return body;
 }
 
@@ -217,7 +217,7 @@ ShPtr<Statement> Function::getBody() const {
 *
 * This variable may be used when calling this function.
 */
-ShPtr<Variable> Function::getAsVar() const {
+Variable* Function::getAsVar() const {
 	return funcVar;
 }
 
@@ -227,18 +227,18 @@ ShPtr<Variable> Function::getAsVar() const {
 * Currently, it returns the return type of the function, not the complete type
 * of the function. This simplifies the fixing of signed/unsigned types.
 */
-ShPtr<Type> Function::getType() const {
+Type* Function::getType() const {
 	return retType;
 }
 
-ShPtr<Module> Function::getModule() const {
-	return module.lock();
+Module* Function::getModule() const {
+	return module;
 }
 
 AddressRange Function::getAddressRange() const {
 	return getModule()
 		? getModule()->getAddressRangeForFunc(
-			std::dynamic_pointer_cast<const Function>(shared_from_this()))
+			dynamic_cast<const Function*>(this))
 		: NO_ADDRESS_RANGE;
 }
 
@@ -277,7 +277,7 @@ bool Function::isDefinition() const {
 * @brief Returns @c true if @a var is a parameter of the function, @c false
 *        otherwise.
 */
-bool Function::hasParam(ShPtr<Variable> var) const {
+bool Function::hasParam(Variable* var) const {
 	return hasItem(params, var);
 }
 
@@ -297,7 +297,7 @@ bool Function::hasParam(std::size_t n) const {
 /**
 * @brief Sets a new return type;
 */
-void Function::setRetType(ShPtr<Type> newRetType) {
+void Function::setRetType(Type* newRetType) {
 	retType = newRetType;
 
 	updateUnderlyingVarType();
@@ -315,10 +315,10 @@ void Function::setName(const std::string &newName) {
 */
 void Function::setParams(VarVector newParams) {
 	for (auto &param : params) {
-		param->removeObserver(shared_from_this());
+		param->removeObserver(this);
 	}
 	for (auto &param : newParams) {
-		param->addObserver(shared_from_this());
+		param->addObserver(this);
 	}
 	params = newParams;
 
@@ -339,11 +339,11 @@ void Function::setLocalVars(VarSet newLocalVars) {
 * @par Preconditions
 *  - @a var is non-null
 */
-void Function::addParam(ShPtr<Variable> var) {
+void Function::addParam(Variable* var) {
 	PRECONDITION_NON_NULL(var);
 
 	params.push_back(var);
-	var->addObserver(shared_from_this());
+	var->addObserver(this);
 
 	includeParamsIntoLocalVars();
 	updateUnderlyingVarType();
@@ -361,7 +361,7 @@ void Function::addParam(ShPtr<Variable> var) {
 * @par Preconditions
 *  - @a var is non-null
 */
-void Function::addLocalVar(ShPtr<Variable> var) {
+void Function::addLocalVar(Variable* var) {
 	PRECONDITION_NON_NULL(var);
 
 	localVars.insert(var);
@@ -373,13 +373,13 @@ void Function::addLocalVar(ShPtr<Variable> var) {
 * If @a oldParam does not correspond to any parameter, this function does
 * nothing.
 */
-void Function::replaceParam(ShPtr<Variable> oldParam, ShPtr<Variable> newParam) {
+void Function::replaceParam(Variable* oldParam, Variable* newParam) {
 	// Does oldParam correspond to a parameter?
 	auto oldParamIter = std::find(params.begin(), params.end(), oldParam);
 	if (oldParamIter != params.end()) {
 		// It does, so replace it.
-		oldParam->removeObserver(shared_from_this());
-		newParam->addObserver(shared_from_this());
+		oldParam->removeObserver(this);
+		newParam->addObserver(this);
 		*oldParamIter = newParam;
 	}
 
@@ -395,7 +395,7 @@ void Function::replaceParam(ShPtr<Variable> oldParam, ShPtr<Variable> newParam) 
 * @par Preconditions
 *  - @a oldVar and @a newVar are non-null
 */
-void Function::replaceLocalVar(ShPtr<Variable> oldVar, ShPtr<Variable> newVar) {
+void Function::replaceLocalVar(Variable* oldVar, Variable* newVar) {
 	PRECONDITION_NON_NULL(oldVar);
 	PRECONDITION_NON_NULL(newVar);
 
@@ -419,7 +419,7 @@ void Function::replaceLocalVar(ShPtr<Variable> oldVar, ShPtr<Variable> newVar) {
 * @par Preconditions
 *  - @a var is non-null
 */
-void Function::removeLocalVar(ShPtr<Variable> var) {
+void Function::removeLocalVar(Variable* var) {
 	PRECONDITION_NON_NULL(var);
 
 	if (!hasParam(var)) {
@@ -435,7 +435,7 @@ void Function::removeLocalVar(ShPtr<Variable> var) {
 * @par Preconditions
 *  - @a param is non-null
 */
-void Function::removeParam(ShPtr<Variable> param) {
+void Function::removeParam(Variable* param) {
 	PRECONDITION_NON_NULL(param);
 
 	removeItem(params, param);
@@ -449,12 +449,12 @@ void Function::removeParam(ShPtr<Variable> param) {
 * If @a newBody is the null pointer, this function becomes a declaration.
 * Conversely, if @a newBody is non-null, this function becomes a definition.
 */
-void Function::setBody(ShPtr<Statement> newBody) {
+void Function::setBody(Statement* newBody) {
 	if (body) {
-		body->removeObserver(shared_from_this());
+		body->removeObserver(this);
 	}
 	if (newBody) {
-		newBody->addObserver(shared_from_this());
+		newBody->addObserver(this);
 	}
 	body = newBody;
 }
@@ -487,13 +487,13 @@ void Function::convertToDeclaration() {
 		return;
 	}
 
-	setBody(ShPtr<Statement>());
+	setBody(nullptr);
 	notifyObservers();
 }
 
-ShPtr<Value> Function::clone() {
+Value* Function::clone() {
 	// Functions are not cloned (see the description of Value::clone()).
-	return shared_from_this();
+	return this;
 }
 
 /**
@@ -513,13 +513,13 @@ ShPtr<Value> Function::clone() {
 *
 * To build functions in a simpler way, use FunctionBuilder.
 */
-ShPtr<Function> Function::create(ShPtr<Module> module, ShPtr<Type> retType,
+Function* Function::create(Module* module, Type* retType,
 		std::string name, VarVector params, VarSet localVars,
-		ShPtr<Statement> body, bool isVarArg) {
-	ShPtr<Function> func(
+		Statement* body, bool isVarArg) {
+	Function* func(
 		new Function(module, retType, name, params, localVars, body, isVarArg));
 
-	// Initialization (recall that shared_from_this() cannot be called in a
+	// Initialization (recall that this cannot be called in a
 	// constructor).
 	for (auto &param : params) {
 		param->addObserver(func);
@@ -550,14 +550,14 @@ ShPtr<Function> Function::create(ShPtr<Module> module, ShPtr<Type> retType,
 *
 * @see Subject::update()
 */
-void Function::update(ShPtr<Value> subject, ShPtr<Value> arg) {
+void Function::update(Value* subject, Value* arg) {
 	PRECONDITION_NON_NULL(subject);
 
 	//
 	// Check body.
 	//
 	if (subject == body) {
-		if (ShPtr<Statement> newBody = cast<Statement>(arg)) {
+		if (Statement* newBody = cast<Statement>(arg)) {
 			setBody(newBody);
 		} else {
 			ASSERT_MSG(!arg,
@@ -578,8 +578,8 @@ void Function::update(ShPtr<Value> subject, ShPtr<Value> arg) {
 	//
 	// Check arguments and local variables.
 	//
-	ShPtr<Variable> oldVar(cast<Variable>(subject));
-	ShPtr<Variable> newVar(cast<Variable>(arg));
+	Variable* oldVar(cast<Variable>(subject));
+	Variable* newVar(cast<Variable>(arg));
 	if (!oldVar || (!newVar && arg)) {
 		return;
 	}
@@ -606,7 +606,7 @@ void Function::update(ShPtr<Value> subject, ShPtr<Value> arg) {
 }
 
 void Function::accept(Visitor *v) {
-	v->visit(ucast<Function>(shared_from_this()));
+	v->visit(ucast<Function>(this));
 }
 
 /**

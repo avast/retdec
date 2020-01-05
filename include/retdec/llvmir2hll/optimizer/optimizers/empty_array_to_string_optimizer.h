@@ -69,15 +69,15 @@ class Module;
 */
 class EmptyArrayToStringOptimizer final: public Optimizer {
 public:
-	EmptyArrayToStringOptimizer(ShPtr<Module> module);
+	EmptyArrayToStringOptimizer(Module* module);
 
 	virtual std::string getId() const override { return "EmptyArrayToString"; }
 
 private:
 	virtual void doOptimization() override;
 
-	bool isArrayOfStrings(ShPtr<ConstArray> array);
-	bool isEmptyArray(ShPtr<Expression> expr);
+	bool isArrayOfStrings(ConstArray* array);
+	bool isEmptyArray(Expression* expr);
 };
 
 } // namespace llvmir2hll

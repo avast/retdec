@@ -42,8 +42,8 @@ namespace llvmir2hll {
 * @par Preconditions
 *  - @a module, @a va, and @a arithmExprEvaluator are non-null
 */
-WhileTrueToForLoopOptimizer::WhileTrueToForLoopOptimizer(ShPtr<Module> module,
-		ShPtr<ValueAnalysis> va, ShPtr<ArithmExprEvaluator> arithmExprEvaluator):
+WhileTrueToForLoopOptimizer::WhileTrueToForLoopOptimizer(Module* module,
+		ValueAnalysis* va, ArithmExprEvaluator* arithmExprEvaluator):
 	FuncOptimizer(module), va(va), arithmExprEvaluator(arithmExprEvaluator) {
 		PRECONDITION_NON_NULL(module);
 		PRECONDITION_NON_NULL(va);
@@ -64,7 +64,7 @@ void WhileTrueToForLoopOptimizer::doOptimization() {
 	va->invalidateState();
 }
 
-void WhileTrueToForLoopOptimizer::visit(ShPtr<WhileLoopStmt> stmt) {
+void WhileTrueToForLoopOptimizer::visit(WhileLoopStmt* stmt) {
 	// First of all, visit nested and subsequent statements.
 	FuncOptimizer::visit(stmt);
 
@@ -183,8 +183,8 @@ void WhileTrueToForLoopOptimizer::visit(ShPtr<WhileLoopStmt> stmt) {
 *
 * If the start value cannot be computed, the null pointer is returned.
 */
-ShPtr<Expression> WhileTrueToForLoopOptimizer::computeStartValueOfForLoop(
-		ShPtr<IndVarInfo> indVarInfo) const {
+Expression* WhileTrueToForLoopOptimizer::computeStartValueOfForLoop(
+		IndVarInfo* indVarInfo) const {
 	return getRhs(indVarInfo->initStmt);
 }
 
@@ -196,9 +196,9 @@ ShPtr<Expression> WhileTrueToForLoopOptimizer::computeStartValueOfForLoop(
 * @par Preconditions
 *  - both @a startValue and @a step are non-null
 */
-ShPtr<Expression> WhileTrueToForLoopOptimizer::computeEndCondOfForLoop(
-		ShPtr<IndVarInfo> indVarInfo,
-		ShPtr<Expression> startValue, ShPtr<Expression> step) const {
+Expression* WhileTrueToForLoopOptimizer::computeEndCondOfForLoop(
+		IndVarInfo* indVarInfo,
+		Expression* startValue, Expression* step) const {
 	PRECONDITION_NON_NULL(startValue);
 	PRECONDITION_NON_NULL(step);
 
@@ -225,7 +225,7 @@ ShPtr<Expression> WhileTrueToForLoopOptimizer::computeEndCondOfForLoop(
 	auto negatedEndCond = ExpressionNegater::negate(indVarInfo->exitCond);
 
 	// Check whether we support the used operator.
-	ShPtr<BinaryOpExpr> endCondOpExpr;
+	BinaryOpExpr* endCondOpExpr;
 	if (auto ltOpExpr = cast<LtOpExpr>(negatedEndCond)) {
 		// <
 		endCondOpExpr = ltOpExpr;
@@ -430,8 +430,8 @@ ShPtr<Expression> WhileTrueToForLoopOptimizer::computeEndCondOfForLoop(
 *
 * If the step cannot be computed, the null pointer is returned.
 */
-ShPtr<Expression> WhileTrueToForLoopOptimizer::computeStepOfForLoop(
-		ShPtr<IndVarInfo> indVarInfo) const {
+Expression* WhileTrueToForLoopOptimizer::computeStepOfForLoop(
+		IndVarInfo* indVarInfo) const {
 	auto assignStmt = cast<AssignStmt>(indVarInfo->updateStmt);
 	if (!assignStmt) {
 		return {};
@@ -469,7 +469,7 @@ ShPtr<Expression> WhileTrueToForLoopOptimizer::computeStepOfForLoop(
 *
 * If the expression cannot be evaluated, the null pointer is returned.
 */
-ShPtr<ConstInt> WhileTrueToForLoopOptimizer::evaluate(ShPtr<Expression> expr) const {
+ConstInt* WhileTrueToForLoopOptimizer::evaluate(Expression* expr) const {
 	auto evaluated = arithmExprEvaluator->evaluate(expr);
 	return cast<ConstInt>(evaluated);
 }
@@ -484,8 +484,8 @@ ShPtr<ConstInt> WhileTrueToForLoopOptimizer::evaluate(ShPtr<Expression> expr) co
 *
 * If the operation is is not comparison, it returns the null pointer.
 */
-ShPtr<BinaryOpExpr> WhileTrueToForLoopOptimizer::exchangeCompOpAndOperands(
-		ShPtr<BinaryOpExpr> expr) {
+BinaryOpExpr* WhileTrueToForLoopOptimizer::exchangeCompOpAndOperands(
+		BinaryOpExpr* expr) {
 	if (isa<GtOpExpr>(expr)) {
 		// x > y  ->  y < x
 		return LtOpExpr::create(
@@ -523,7 +523,7 @@ ShPtr<BinaryOpExpr> WhileTrueToForLoopOptimizer::exchangeCompOpAndOperands(
 * If the non-negativeness of @a expr cannot be determined, this function
 * returns @c false.
 */
-bool WhileTrueToForLoopOptimizer::isNonNegative(ShPtr<Expression> expr) {
+bool WhileTrueToForLoopOptimizer::isNonNegative(Expression* expr) {
 	// Constant integer.
 	if (auto constInt = cast<ConstInt>(expr)) {
 		return constInt->isZero() || constInt->isPositive();
@@ -542,7 +542,7 @@ bool WhileTrueToForLoopOptimizer::isNonNegative(ShPtr<Expression> expr) {
 * If the positiveness of @a expr cannot be determined, this function
 * returns @c false.
 */
-bool WhileTrueToForLoopOptimizer::isPositive(ShPtr<Expression> expr) {
+bool WhileTrueToForLoopOptimizer::isPositive(Expression* expr) {
 	// Constant integer.
 	if (auto constInt = cast<ConstInt>(expr)) {
 		return constInt->isPositive();

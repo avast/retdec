@@ -37,11 +37,11 @@ CallsObtainer::CallsObtainer():
 * @par Preconditions
 *  - @a value is non-null
 */
-CallVector CallsObtainer::getCalls(ShPtr<Value> value) {
+CallVector CallsObtainer::getCalls(Value* value) {
 	PRECONDITION_NON_NULL(value);
 
-	ShPtr<CallsObtainer> obtainer(new CallsObtainer());
-	value->accept(obtainer.get());
+	CallsObtainer* obtainer(new CallsObtainer());
+	value->accept(obtainer);
 	return obtainer->foundCalls;
 }
 
@@ -51,11 +51,11 @@ CallVector CallsObtainer::getCalls(ShPtr<Value> value) {
 *
 * See the description of getCalls() for more information.
 */
-bool CallsObtainer::hasCalls(ShPtr<Value> value) {
+bool CallsObtainer::hasCalls(Value* value) {
 	return !CallsObtainer::getCalls(value).empty();
 }
 
-void CallsObtainer::visit(ShPtr<CallExpr> expr) {
+void CallsObtainer::visit(CallExpr* expr) {
 	foundCalls.push_back(expr);
 }
 

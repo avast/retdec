@@ -17,7 +17,7 @@ namespace llvmir2hll {
 /**
 * @brief Constructs a new obtainer.
 */
-CallsInModuleObtainer::CallsInModuleObtainer(ShPtr<Module> module):
+CallsInModuleObtainer::CallsInModuleObtainer(Module* module):
 	OrderedAllVisitor(), module(module), currFunc(), foundCalls() {}
 
 /**
@@ -27,10 +27,10 @@ CallsInModuleObtainer::CallsInModuleObtainer(ShPtr<Module> module):
 *  - @a module is non-null
 */
 CallsInModuleObtainer::Calls CallsInModuleObtainer::getCalls(
-		ShPtr<Module> module) {
+		Module* module) {
 	PRECONDITION_NON_NULL(module);
 
-	ShPtr<CallsInModuleObtainer> obtainer(new CallsInModuleObtainer(module));
+	CallsInModuleObtainer* obtainer(new CallsInModuleObtainer(module));
 	return obtainer->getCallsImpl();
 }
 
@@ -67,12 +67,12 @@ void CallsInModuleObtainer::obtainCallsInFuncs() {
 * @brief Obtain calls in all the given function and puts them into @c
 *        foundCalls.
 */
-void CallsInModuleObtainer::obtainCallsInFunc(ShPtr<Function> func) {
+void CallsInModuleObtainer::obtainCallsInFunc(Function* func) {
 	currFunc = func;
 	func->accept(this);
 }
 
-void CallsInModuleObtainer::visit(ShPtr<CallExpr> expr) {
+void CallsInModuleObtainer::visit(CallExpr* expr) {
 	CallInfo ci = {
 		expr,     // call
 		lastStmt, // stmt

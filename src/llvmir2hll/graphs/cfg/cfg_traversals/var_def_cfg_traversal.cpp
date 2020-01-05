@@ -23,8 +23,8 @@ namespace llvmir2hll {
 * @param[in] end Statement at which we should end the traversal.
 * @param[in] va Analysis of values.
 */
-VarDefCFGTraversal::VarDefCFGTraversal(ShPtr<CFG> cfg, const VarSet &vars,
-		ShPtr<Statement> end, ShPtr<ValueAnalysis> va):
+VarDefCFGTraversal::VarDefCFGTraversal(CFG* cfg, const VarSet &vars,
+		Statement* end, ValueAnalysis* va):
 		CFGTraversal(cfg, false), vars(vars), end(end), va(va) {}
 
 /**
@@ -46,18 +46,18 @@ VarDefCFGTraversal::VarDefCFGTraversal(ShPtr<CFG> cfg, const VarSet &vars,
 * This function leaves @a va in a valid state.
 */
 bool VarDefCFGTraversal::isVarDefBetweenStmts(const VarSet &vars,
-		ShPtr<Statement> start, ShPtr<Statement> end, ShPtr<CFG> cfg,
-		ShPtr<ValueAnalysis> va) {
+		Statement* start, Statement* end, CFG* cfg,
+		ValueAnalysis* va) {
 	PRECONDITION_NON_NULL(start);
 	PRECONDITION_NON_NULL(end);
 	PRECONDITION_NON_NULL(va);
 	PRECONDITION(va->isInValidState(), "it is not in a valid state");
 
-	ShPtr<VarDefCFGTraversal> traverser(new VarDefCFGTraversal(cfg, vars, end, va));
+	VarDefCFGTraversal* traverser(new VarDefCFGTraversal(cfg, vars, end, va));
 	return traverser->performTraversalFromSuccessors(start);
 }
 
-bool VarDefCFGTraversal::visitStmt(ShPtr<Statement> stmt) {
+bool VarDefCFGTraversal::visitStmt(Statement* stmt) {
 	// Check whether we're done.
 	if (stmt == end) {
 		currRetVal = false;
@@ -67,7 +67,7 @@ bool VarDefCFGTraversal::visitStmt(ShPtr<Statement> stmt) {
 	// Check whether any variable from vars is defined in this statement. Note
 	// that it doesn't suffice if the variable may be written -- it either has
 	// to be read directly or must be read indirectly.
-	ShPtr<ValueData> stmtData(va->getValueData(stmt));
+	ValueData* stmtData(va->getValueData(stmt));
 	if (shareSomeItem(stmtData->getDirWrittenVars(), vars) ||
 			shareSomeItem(stmtData->getMustBeWrittenVars(), vars)) {
 		currRetVal = true;

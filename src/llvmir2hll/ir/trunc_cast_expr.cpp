@@ -16,12 +16,12 @@ namespace llvmir2hll {
 *
 * See create() for more information.
 */
-TruncCastExpr::TruncCastExpr(ShPtr<Expression> op, ShPtr<Type> dstType):
+TruncCastExpr::TruncCastExpr(Expression* op, Type* dstType):
 	CastExpr(op, dstType) {}
 
-bool TruncCastExpr::isEqualTo(ShPtr<Value> otherValue) const {
+bool TruncCastExpr::isEqualTo(Value* otherValue) const {
 	// Both types and values of all operands have to be equal.
-	if (ShPtr<TruncCastExpr> otherCastExpr = cast<TruncCastExpr>(otherValue)) {
+	if (TruncCastExpr* otherCastExpr = cast<TruncCastExpr>(otherValue)) {
 		return dstType->isEqualTo(otherCastExpr->getType()) &&
 			op->isEqualTo(otherCastExpr->getOperand());
 	}
@@ -31,8 +31,8 @@ bool TruncCastExpr::isEqualTo(ShPtr<Value> otherValue) const {
 /**
 * @brief Clones the cast operator.
 */
-ShPtr<Value> TruncCastExpr::clone() {
-	ShPtr<TruncCastExpr> castExpr(TruncCastExpr::create(
+Value* TruncCastExpr::clone() {
+	TruncCastExpr* castExpr(TruncCastExpr::create(
 		ucast<Expression>(op->clone()), dstType));
 	castExpr->setMetadata(getMetadata());
 	return castExpr;
@@ -47,13 +47,13 @@ ShPtr<Value> TruncCastExpr::clone() {
 * @par Preconditions
 *  - operand is non-null
 */
-ShPtr<TruncCastExpr> TruncCastExpr::create(ShPtr<Expression> op, ShPtr<Type> dstType) {
+TruncCastExpr* TruncCastExpr::create(Expression* op, Type* dstType) {
 	PRECONDITION_NON_NULL(op);
 	PRECONDITION_NON_NULL(dstType);
 
-	ShPtr<TruncCastExpr> expr(new TruncCastExpr(op, dstType));
+	TruncCastExpr* expr(new TruncCastExpr(op, dstType));
 
-	// Initialization (recall that shared_from_this() cannot be called in a
+	// Initialization (recall that this cannot be called in a
 	// constructor).
 	op->addObserver(expr);
 
@@ -61,7 +61,7 @@ ShPtr<TruncCastExpr> TruncCastExpr::create(ShPtr<Expression> op, ShPtr<Type> dst
 }
 
 void TruncCastExpr::accept(Visitor *v) {
-	v->visit(ucast<TruncCastExpr>(shared_from_this()));
+	v->visit(ucast<TruncCastExpr>(this));
 }
 
 } // namespace llvmir2hll

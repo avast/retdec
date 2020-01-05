@@ -22,7 +22,7 @@ class EmptyStmtOptimizerTests: public TestsWithModule {};
 
 TEST_F(EmptyStmtOptimizerTests,
 OptimizerHasNonEmptyID) {
-	ShPtr<EmptyStmtOptimizer> optimizer(
+	EmptyStmtOptimizer* optimizer(
 		new EmptyStmtOptimizer(module));
 
 	EXPECT_TRUE(!optimizer->getId().empty()) <<

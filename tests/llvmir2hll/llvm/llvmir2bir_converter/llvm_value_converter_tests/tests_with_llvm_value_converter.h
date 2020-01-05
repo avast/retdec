@@ -33,18 +33,18 @@ protected:
 
 	/// @name Helper assertions
 	/// @{
-	AssertionResult areBinaryOperandsInCorrectOrder(ShPtr<BinaryOpExpr> expr);
-	AssertionResult areTernaryOperandsInCorrectOrder(ShPtr<TernaryOpExpr> expr);
+	AssertionResult areBinaryOperandsInCorrectOrder(BinaryOpExpr* expr);
+	AssertionResult areTernaryOperandsInCorrectOrder(TernaryOpExpr* expr);
 	/// @}
 
 	/// Context for the LLVM module.
 	llvm::LLVMContext context;
 
 	/// Variables manager.
-	ShPtr<VariablesManager> variablesManager;
+	VariablesManager* variablesManager;
 
 	/// A converter from LLVM values to values in BIR.
-	ShPtr<LLVMValueConverter> converter;
+	LLVMValueConverter* converter;
 };
 
 } // namespace tests

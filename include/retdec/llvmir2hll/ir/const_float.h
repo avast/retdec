@@ -37,14 +37,14 @@ public:
 	using Type = llvm::APFloat;
 
 public:
-	static ShPtr<ConstFloat> create(Type value);
+	static ConstFloat* create(Type value);
 
-	virtual ShPtr<Value> clone() override;
+	virtual Value* clone() override;
 
-	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
-	virtual ShPtr<retdec::llvmir2hll::Type> getType() const override;
-	virtual void replace(ShPtr<Expression> oldExpr,
-		ShPtr<Expression> newExpr) override;
+	virtual bool isEqualTo(Value* otherValue) const override;
+	virtual retdec::llvmir2hll::Type* getType() const override;
+	virtual void replace(Expression* oldExpr,
+		Expression* newExpr) override;
 
 	Type getValue() const;
 	unsigned getSize() const;
@@ -72,7 +72,7 @@ private:
 	Type value;
 
 	/// Type of the constant.
-	ShPtr<FloatType> type;
+	FloatType* type = nullptr;
 
 private:
 	// Since instances are created by calling the static function create(), the

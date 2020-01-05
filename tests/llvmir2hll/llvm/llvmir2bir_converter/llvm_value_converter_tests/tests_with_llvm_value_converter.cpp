@@ -29,7 +29,7 @@ TestsWithLLVMValueConverter::TestsWithLLVMValueConverter():
 *        both are variables and first is named "arg1" and second is named "arg2".
 */
 AssertionResult TestsWithLLVMValueConverter::areBinaryOperandsInCorrectOrder(
-		ShPtr<BinaryOpExpr> expr) {
+		BinaryOpExpr* expr) {
 	auto firstOp = cast<Variable>(expr->getFirstOperand());
 	if (!firstOp || firstOp->getName() != "arg1"s) {
 		return AssertionFailure() << expr
@@ -54,7 +54,7 @@ AssertionResult TestsWithLLVMValueConverter::areBinaryOperandsInCorrectOrder(
 * true value have to be named "true" and false value have to be named "false".
 */
 AssertionResult TestsWithLLVMValueConverter::areTernaryOperandsInCorrectOrder(
-		ShPtr<TernaryOpExpr> expr) {
+		TernaryOpExpr* expr) {
 	auto cond = cast<Variable>(expr->getCondition());
 	if (!cond || cond->getName() != "cond"s) {
 		return AssertionFailure() << expr

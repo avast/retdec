@@ -15,7 +15,7 @@ namespace llvmir2hll {
 *
 * @param[in] module The module to be written.
 */
-NoBracketManager::NoBracketManager(ShPtr<Module> module):BracketManager(module) {
+NoBracketManager::NoBracketManager(Module* module):BracketManager(module) {
 }
 
 std::string NoBracketManager::getId() const {
@@ -30,7 +30,7 @@ std::string NoBracketManager::getId() const {
 *
 * @return always @c true.
 */
-bool NoBracketManager::areBracketsNeeded(ShPtr<Expression> expr) {
+bool NoBracketManager::areBracketsNeeded(Expression* expr) {
 	return true;
 }
 

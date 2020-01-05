@@ -27,8 +27,8 @@ GCCGeneralSemantics::GCCGeneralSemantics() {}
 /**
 * @brief Creates a new semantics.
 */
-ShPtr<Semantics> GCCGeneralSemantics::create() {
-	return ShPtr<Semantics>(new GCCGeneralSemantics());
+Semantics* GCCGeneralSemantics::create() {
+	return new GCCGeneralSemantics();
 }
 
 std::string GCCGeneralSemantics::getId() const {

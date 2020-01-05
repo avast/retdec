@@ -34,14 +34,14 @@ namespace llvmir2hll {
 class APICallPatternFinder: public PatternFinder {
 public:
 	virtual const std::string getId() const override;
-	virtual Patterns findPatterns(ShPtr<Module> module) override;
+	virtual Patterns findPatterns(Module* module) override;
 
-	static ShPtr<PatternFinder> create(ShPtr<ValueAnalysis> va,
-		ShPtr<CallInfoObtainer> cio);
+	static PatternFinder* create(ValueAnalysis* va,
+		CallInfoObtainer* cio);
 
 private:
-	APICallPatternFinder(ShPtr<ValueAnalysis> va,
-		ShPtr<CallInfoObtainer> cio);
+	APICallPatternFinder(ValueAnalysis* va,
+		CallInfoObtainer* cio);
 };
 
 } // namespace llvmir2hll

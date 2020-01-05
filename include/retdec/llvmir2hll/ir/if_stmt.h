@@ -28,7 +28,7 @@ class Visitor;
 class IfStmt final: public Statement {
 public:
 	/// `If` clause (condition and body).
-	using IfClause = std::pair<ShPtr<Expression>, ShPtr<Statement>>;
+	using IfClause = std::pair<Expression*, Statement*>;
 
 	/// A list of `if` clauses.
 	// Note to developers: We have to use std::list as the underlying container
@@ -42,18 +42,18 @@ public:
 	using clause_iterator = IfClauseList::const_iterator;
 
 public:
-	static ShPtr<IfStmt> create(ShPtr<Expression> cond, ShPtr<Statement> body,
-		ShPtr<Statement> succ = nullptr, Address a = Address::Undefined);
+	static IfStmt* create(Expression* cond, Statement* body,
+		Statement* succ = nullptr, Address a = Address::Undefined);
 
-	virtual ShPtr<Value> clone() override;
-	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
+	virtual Value* clone() override;
+	virtual bool isEqualTo(Value* otherValue) const override;
 	virtual bool isCompound() override { return true; }
-	virtual void replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) override;
-	virtual ShPtr<Expression> asExpression() const override;
+	virtual void replace(Expression* oldExpr, Expression* newExpr) override;
+	virtual Expression* asExpression() const override;
 
 	/// @name Observer Interface
 	/// @{
-	virtual void update(ShPtr<Value> subject, ShPtr<Value> arg = nullptr) override;
+	virtual void update(Value* subject, Value* arg = nullptr) override;
 	/// @}
 
 	/// @name Clause Accessors
@@ -61,18 +61,18 @@ public:
 	clause_iterator clause_begin() const;
 	clause_iterator clause_end() const;
 
-	void addClause(ShPtr<Expression> cond, ShPtr<Statement> body);
+	void addClause(Expression* cond, Statement* body);
 	clause_iterator removeClause(clause_iterator clauseIterator);
 	bool hasClauses() const;
 	bool hasIfClause() const;
-	ShPtr<Expression> getFirstIfCond() const;
-	ShPtr<Statement> getFirstIfBody() const;
-	void setFirstIfCond(ShPtr<Expression> newCond);
-	void setFirstIfBody(ShPtr<Statement> newBody);
+	Expression* getFirstIfCond() const;
+	Statement* getFirstIfBody() const;
+	void setFirstIfCond(Expression* newCond);
+	void setFirstIfBody(Statement* newBody);
 	bool hasElseIfClauses() const;
-	ShPtr<Statement> getElseClause() const;
+	Statement* getElseClause() const;
 	bool hasElseClause() const;
-	void setElseClause(ShPtr<Statement> body);
+	void setElseClause(Statement* body);
 	void removeElseClause();
 	/// @}
 
@@ -84,7 +84,7 @@ public:
 private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
-	IfStmt(ShPtr<Expression> cond, ShPtr<Statement> body,
+	IfStmt(Expression* cond, Statement* body,
 		Address a = Address::Undefined);
 
 private:
@@ -92,7 +92,7 @@ private:
 	IfClauseList ifClauseList;
 
 	/// The else clause (if any).
-	ShPtr<Statement> elseClause;
+	Statement* elseClause = nullptr;
 };
 
 } // namespace llvmir2hll

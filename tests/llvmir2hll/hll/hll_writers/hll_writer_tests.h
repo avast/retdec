@@ -40,7 +40,7 @@ protected:
 	llvm::raw_string_ostream codeStream;
 
 	/// Writer under test.
-	ShPtr<HLLWriter> writer;
+	HLLWriter* writer;
 };
 
 } // namespace tests

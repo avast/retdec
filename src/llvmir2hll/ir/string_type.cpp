@@ -19,11 +19,11 @@ namespace llvmir2hll {
 StringType::StringType(std::size_t charSize):
 	Type(), charSize(charSize) {}
 
-ShPtr<Value> StringType::clone() {
+Value* StringType::clone() {
 	return StringType::create(charSize);
 }
 
-bool StringType::isEqualTo(ShPtr<Value> otherValue) const {
+bool StringType::isEqualTo(Value* otherValue) const {
 	// Both types and character sizes have to be equal.
 	if (auto otherStringType = cast<StringType>(otherValue)) {
 		return charSize == otherStringType->charSize;
@@ -46,24 +46,24 @@ std::size_t StringType::getCharSize() const {
 * @par Preconditions
 *  - @a charSize > 0
 */
-ShPtr<StringType> StringType::create(std::size_t charSize) {
+StringType* StringType::create(std::size_t charSize) {
 	PRECONDITION(charSize > 0, "invalid charSize " << charSize);
 
 	auto it = createdTypes.find(charSize);
 	if (it != createdTypes.end()) {
 		return it->second;
 	}
-	ShPtr<StringType> createdType(new StringType(charSize));
+	StringType* createdType(new StringType(charSize));
 	createdTypes[charSize] = createdType;
 	return createdType;
 }
 
 void StringType::accept(Visitor *v) {
-	v->visit(ucast<StringType>(shared_from_this()));
+	v->visit(ucast<StringType>(this));
 }
 
 // Static variables and constants definitions.
-std::map<std::size_t, ShPtr<StringType>> StringType::createdTypes;
+std::map<std::size_t, StringType*> StringType::createdTypes;
 
 } // namespace llvmir2hll
 } // namespace retdec

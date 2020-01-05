@@ -28,14 +28,14 @@ namespace llvmir2hll {
 namespace {
 
 /// List of symbolic constants.
-using ConstSymbolList = std::vector<ShPtr<ConstSymbol>>;
+using ConstSymbolList = std::vector<ConstSymbol*>;
 
 /**
 * @brief Tries to obtain a constant integer from the given argument.
 *
 * If a constant integer cannot be obtained, the null pointer is returned.
 */
-ShPtr<ConstInt> getArgAsConstInt(ShPtr<Expression> arg) {
+ConstInt* getArgAsConstInt(Expression* arg) {
 	// Ignore casts. In this way, we can convert, e.g.,
 	//
 	//     signal(SIGSTOP, (void (*)(int32_t))1);
@@ -45,7 +45,7 @@ ShPtr<ConstInt> getArgAsConstInt(ShPtr<Expression> arg) {
 	//     signal(SIGSTOP, SIG_IGN);
 	//
 	// TODO Is this valid under all circumstances?
-	ShPtr<Expression> argWithoutCasts(skipCasts(arg));
+	Expression* argWithoutCasts(skipCasts(arg));
 
 	// Treat the null pointer as zero (0). In this way, we can convert, e.g.,
 	//
@@ -71,7 +71,7 @@ ShPtr<ConstInt> getArgAsConstInt(ShPtr<Expression> arg) {
 *
 * See convert() for the description of all parameters and preconditions.
 */
-ConstSymbolConverter::ConstSymbolConverter(ShPtr<Module> module):
+ConstSymbolConverter::ConstSymbolConverter(Module* module):
 	module(module) {}
 
 /**
@@ -98,10 +98,10 @@ ConstSymbolConverter::ConstSymbolConverter(ShPtr<Module> module):
 * @par Preconditions
 *  - @a module is non-null
 */
-void ConstSymbolConverter::convert(ShPtr<Module> module) {
+void ConstSymbolConverter::convert(Module* module) {
 	PRECONDITION_NON_NULL(module);
 
-	ShPtr<ConstSymbolConverter> converter(new ConstSymbolConverter(module));
+	ConstSymbolConverter* converter(new ConstSymbolConverter(module));
 	converter->performConversion();
 }
 
@@ -131,7 +131,7 @@ void ConstSymbolConverter::performConversion() {
 *  - @a calledFuncName is the name of a function declaration, not definition
 */
 void ConstSymbolConverter::convertArgsToSymbolicNames(
-		ShPtr<CallExpr> callExpr, const std::string &calledFuncName) {
+		CallExpr* callExpr, const std::string &calledFuncName) {
 	PRECONDITION_NON_NULL(callExpr);
 	PRECONDITION(!calledFuncName.empty(),
 		"the name of the called function cannot be empty");
@@ -140,7 +140,7 @@ void ConstSymbolConverter::convertArgsToSymbolicNames(
 	unsigned currArgPos = 1;
 	const ExprVector &args(callExpr->getArgs());
 	for (auto i = args.begin(), e = args.end(); i != e; ++i, ++currArgPos) {
-		ShPtr<ConstInt> argAsConstInt(getArgAsConstInt(*i));
+		ConstInt* argAsConstInt(getArgAsConstInt(*i));
 		if (!argAsConstInt) {
 			// Skip non-constant-integer arguments.
 			continue;
@@ -155,7 +155,7 @@ void ConstSymbolConverter::convertArgsToSymbolicNames(
 		}
 
 		// Perform the conversion of the argument.
-		ShPtr<Expression> newArg(convertArgToSymbolicNames(
+		Expression* newArg(convertArgToSymbolicNames(
 			argAsConstInt, symbolicNamesMap.value()));
 		callExpr->setArg(currArgPos - 1, newArg); // index starts at 0
 	}
@@ -171,8 +171,8 @@ void ConstSymbolConverter::convertArgsToSymbolicNames(
 * If the argument cannot be decomposed into an expression of symbolic names, it
 * is returned unchanged. Otherwise, the new expression is returned.
 */
-ShPtr<Expression> ConstSymbolConverter::convertArgToSymbolicNames(
-		ShPtr<ConstInt> arg, const IntStringMap &symbolicNamesMap) {
+Expression* ConstSymbolConverter::convertArgToSymbolicNames(
+		ConstInt* arg, const IntStringMap &symbolicNamesMap) {
 	int argValue = arg->getValue().getSExtValue();
 
 	// If there is a direct mapping of the argument into a symbol, we are done,
@@ -216,7 +216,7 @@ ShPtr<Expression> ConstSymbolConverter::convertArgToSymbolicNames(
 	}
 
 	// Create the resulting expression by or-ing the obtained symbols.
-	ShPtr<BitOrOpExpr> newArg;
+	BitOrOpExpr* newArg = nullptr;
 	for (ConstSymbolList::size_type i = 0, e = symbolicNames.size(); i < e; ++i) {
 		if (newArg) {
 			newArg = BitOrOpExpr::create(newArg, symbolicNames[i]);
@@ -230,17 +230,17 @@ ShPtr<Expression> ConstSymbolConverter::convertArgToSymbolicNames(
 	return newArg;
 }
 
-void ConstSymbolConverter::visit(ShPtr<CallExpr> expr) {
+void ConstSymbolConverter::visit(CallExpr* expr) {
 	// Visit nested calls (if any).
 	OrderedAllVisitor::visit(expr);
 
-	ShPtr<Variable> callVar(cast<Variable>(expr->getCalledExpr()));
+	Variable* callVar(cast<Variable>(expr->getCalledExpr()));
 	if (!callVar) {
 		// Indirect call -> nothing to do.
 		return;
 	}
 
-	ShPtr<Function> calledFunc(module->getFuncByName(callVar->getName()));
+	Function* calledFunc(module->getFuncByName(callVar->getName()));
 	if (!calledFunc || !calledFunc->isDeclaration()) {
 		// Not a declared function -> nothing to do.
 		return;

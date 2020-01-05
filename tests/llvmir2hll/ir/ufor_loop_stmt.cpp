@@ -21,13 +21,13 @@ namespace tests {
 */
 class UForLoopStmtTests: public Test {
 protected:
-	ShPtr<UForLoopStmt> createLoop();
+	UForLoopStmt* createLoop();
 };
 
 /**
 * @brief A helper function to make tests more readable.
 */
-ShPtr<UForLoopStmt> UForLoopStmtTests::createLoop() {
+UForLoopStmt* UForLoopStmtTests::createLoop() {
 	return UForLoopStmt::create(
 		ConstInt::create(1, 32),
 		ConstInt::create(2, 32),

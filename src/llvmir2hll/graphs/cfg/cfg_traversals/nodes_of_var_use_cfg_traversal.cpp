@@ -20,7 +20,7 @@ namespace llvmir2hll {
 * See the description of getNodesOfUseVariable for information on the parameters.
 */
 NodesOfVarUseCFGTraversal::NodesOfVarUseCFGTraversal(
-	const VarDefStmtSet &setOfVarDefStmt, ShPtr<CFG> cfg, ShPtr<ValueAnalysis> va):
+	const VarDefStmtSet &setOfVarDefStmt, CFG* cfg, ValueAnalysis* va):
 		CFGTraversal(cfg, true), va(va),
 		mapOfVarDefStmtNodes(new VarDefStmtNodeMap()) {
 	// Initialize map where key is a variable from VarDefStmt and item is a
@@ -46,36 +46,36 @@ NodesOfVarUseCFGTraversal::NodesOfVarUseCFGTraversal(
 *
 * This function leaves @a va in a valid state.
 */
-ShPtr<NodesOfVarUseCFGTraversal::VarDefStmtNodeMap> NodesOfVarUseCFGTraversal::
-		getNodesOfUseVariable(const VarDefStmtSet &setOfVarDefStmt, ShPtr<CFG> cfg,
-		ShPtr<ValueAnalysis> va) {
+NodesOfVarUseCFGTraversal::VarDefStmtNodeMap* NodesOfVarUseCFGTraversal::
+		getNodesOfUseVariable(const VarDefStmtSet &setOfVarDefStmt, CFG* cfg,
+		ValueAnalysis* va) {
 	PRECONDITION_NON_NULL(cfg);
 	PRECONDITION_NON_NULL(va);
 
-	ShPtr<NodesOfVarUseCFGTraversal> traverser(new NodesOfVarUseCFGTraversal(
+	NodesOfVarUseCFGTraversal* traverser(new NodesOfVarUseCFGTraversal(
 		setOfVarDefStmt, cfg, va));
 
 	// Obtain the first statement of the function. We have to skip the entry
 	// node because there are just statements corresponding to the VarDefStmts
 	// for function parameters.
-	ShPtr<CFG::Node> funcBodyNode((*cfg->getEntryNode()->succ_begin())->getDst());
+	CFG::Node* funcBodyNode((*cfg->getEntryNode()->succ_begin())->getDst());
 	if (!funcBodyNode->hasStmts()) {
 		// There are no statements, so there is nothing to compute.
 		return traverser->mapOfVarDefStmtNodes;
 	}
-	ShPtr<Statement> firstStmt(*funcBodyNode->stmt_begin());
+	Statement* firstStmt(*funcBodyNode->stmt_begin());
 
 	traverser->performTraversal(firstStmt);
 
 	return traverser->mapOfVarDefStmtNodes;
 }
 
-bool NodesOfVarUseCFGTraversal::visitStmt(ShPtr<Statement> stmt) {
-	ShPtr<ValueData> stmtData(va->getValueData(stmt));
+bool NodesOfVarUseCFGTraversal::visitStmt(Statement* stmt) {
+	ValueData* stmtData(va->getValueData(stmt));
 
 	// Precompute the node for the statement so we do not have to recompute it
 	// for every variable that is used in the statement.
-	ShPtr<CFG::Node> nodeForStmt(cfg->getNodeForStmt(stmt).first);
+	CFG::Node* nodeForStmt(cfg->getNodeForStmt(stmt).first);
 
 	// Iterate through all variables in stmt and if a variable is in a map,
 	// this means that we need save node for this VarDefStmt, because variable

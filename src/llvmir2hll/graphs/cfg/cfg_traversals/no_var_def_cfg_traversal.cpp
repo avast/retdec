@@ -24,8 +24,8 @@ namespace llvmir2hll {
 * @param[in] vars Variables for whose definition/modification we're looking for.
 * @param[in] va Analysis of values.
 */
-NoVarDefCFGTraversal::NoVarDefCFGTraversal(ShPtr<CFG> cfg, const StmtSet &ends,
-		const VarSet &vars, ShPtr<ValueAnalysis> va):
+NoVarDefCFGTraversal::NoVarDefCFGTraversal(CFG* cfg, const StmtSet &ends,
+		const VarSet &vars, ValueAnalysis* va):
 		CFGTraversal(cfg, true), ends(ends), vars(vars), va(va) {}
 
 /**
@@ -46,18 +46,18 @@ NoVarDefCFGTraversal::NoVarDefCFGTraversal(ShPtr<CFG> cfg, const StmtSet &ends,
 *
 * This function leaves @a va in a valid state.
 */
-bool NoVarDefCFGTraversal::noVarIsDefinedBetweenStmts(ShPtr<Statement> start,
-		const StmtSet &ends, const VarSet &vars, ShPtr<CFG> cfg, ShPtr<ValueAnalysis> va) {
+bool NoVarDefCFGTraversal::noVarIsDefinedBetweenStmts(Statement* start,
+		const StmtSet &ends, const VarSet &vars, CFG* cfg, ValueAnalysis* va) {
 	PRECONDITION_NON_NULL(start);
 	PRECONDITION_NON_NULL(cfg);
 	PRECONDITION_NON_NULL(va);
 	PRECONDITION(va->isInValidState(), "it is not in a valid state");
 
-	ShPtr<NoVarDefCFGTraversal> traverser(new NoVarDefCFGTraversal(cfg, ends, vars, va));
+	NoVarDefCFGTraversal* traverser(new NoVarDefCFGTraversal(cfg, ends, vars, va));
 	return traverser->performReverseTraversal(start);
 }
 
-bool NoVarDefCFGTraversal::visitStmt(ShPtr<Statement> stmt) {
+bool NoVarDefCFGTraversal::visitStmt(Statement* stmt) {
 	// Have we reached some destination?
 	if (hasItem(ends, stmt)) {
 		currRetVal = true;
@@ -65,7 +65,7 @@ bool NoVarDefCFGTraversal::visitStmt(ShPtr<Statement> stmt) {
 	}
 
 	// Check that there are no function calls.
-	ShPtr<ValueData> stmtData(va->getValueData(stmt));
+	ValueData* stmtData(va->getValueData(stmt));
 	if (stmtData->hasCalls()) {
 		currRetVal = false;
 		return false;

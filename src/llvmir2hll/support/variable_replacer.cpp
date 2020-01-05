@@ -19,26 +19,26 @@ namespace llvmir2hll {
 * @param[in] oldVar Old variable.
 * @param[in] newVar New variable.
 */
-VariableReplacer::VariableReplacer(ShPtr<Variable> oldVar, ShPtr<Variable> newVar):
+VariableReplacer::VariableReplacer(Variable* oldVar, Variable* newVar):
 	OrderedAllVisitor(), oldVar(oldVar), newVar(newVar) {}
 
 /**
 * @brief Replaces @a oldVar with @a newVar in @a func.
 */
-void VariableReplacer::replaceVariable(ShPtr<Variable> oldVar,
-		ShPtr<Variable> newVar, ShPtr<Function> func) {
-	ShPtr<VariableReplacer> replacer(new VariableReplacer(oldVar, newVar));
+void VariableReplacer::replaceVariable(Variable* oldVar,
+		Variable* newVar, Function* func) {
+	VariableReplacer* replacer(new VariableReplacer(oldVar, newVar));
 	replacer->performReplace(func);
 }
 
 /**
 * @brief Performs the replace in @a func.
 */
-void VariableReplacer::performReplace(ShPtr<Function> func) {
+void VariableReplacer::performReplace(Function* func) {
 	visitStmt(func->getBody());
 }
 
-void VariableReplacer::visit(ShPtr<Variable> var) {
+void VariableReplacer::visit(Variable* var) {
 	if (var == oldVar) {
 		lastStmt->replace(var, newVar);
 	}

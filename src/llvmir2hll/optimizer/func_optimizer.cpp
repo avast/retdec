@@ -20,7 +20,7 @@ namespace llvmir2hll {
 * @par Preconditions
 *  - @a module is non-null
 */
-FuncOptimizer::FuncOptimizer(ShPtr<Module> module):
+FuncOptimizer::FuncOptimizer(Module* module):
 	Optimizer(module), currFunc() {
 		PRECONDITION_NON_NULL(module);
 	}
@@ -47,7 +47,7 @@ void FuncOptimizer::doOptimization() {
 *
 * By default, this function calls @c func->accept(this).
 */
-void FuncOptimizer::runOnFunction(ShPtr<Function> func) {
+void FuncOptimizer::runOnFunction(Function* func) {
 	restart();
 	currFunc = func;
 	func->accept(this);

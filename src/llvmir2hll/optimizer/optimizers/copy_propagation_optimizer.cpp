@@ -81,7 +81,7 @@ auto textReprs(const StmtSet &stmts) {
 /**
 * @brief Compares the given two statements from in DU chains.
 */
-int compareStmtsInDUChains(const ShPtr<Statement> &s1, const ShPtr<Statement> &s2) {
+int compareStmtsInDUChains(Statement* s1, Statement* s2) {
 	if (!s1 && !s2) {
 		return 0;
 	} else if (s1 && !s2) {
@@ -157,8 +157,8 @@ auto ordered(const DefUseChains::DefUseChain &du) {
 			return cmpResult < 0;
 		}
 		// Predecessors:
-		std::set<ShPtr<Statement>> s1Seen;
-		std::set<ShPtr<Statement>> s2Seen;
+		std::set<Statement*> s1Seen;
+		std::set<Statement*> s2Seen;
 		while (true) {
 			const auto &s1PredSize = s1->getNumberOfPredecessors();
 			const auto &s2PredSize = s2->getNumberOfPredecessors();
@@ -204,8 +204,8 @@ auto ordered(const DefUseChains::DefUseChain &du) {
 * @par Preconditions
 *  - @a module, @a va, and @a cio are non-null
 */
-CopyPropagationOptimizer::CopyPropagationOptimizer(ShPtr<Module> module,
-	ShPtr<ValueAnalysis> va, ShPtr<CallInfoObtainer> cio):
+CopyPropagationOptimizer::CopyPropagationOptimizer(Module* module,
+	ValueAnalysis* va, CallInfoObtainer* cio):
 		FuncOptimizer(module), cfgBuilder(NonRecursiveCFGBuilder::create()),
 		va(va), cio(cio), vuv(), dua(), uda(),
 		ducs(), udcs(), globalVars(module->getGlobalVars()),
@@ -229,7 +229,7 @@ void CopyPropagationOptimizer::doOptimization() {
 	FuncOptimizer::doOptimization();
 }
 
-void CopyPropagationOptimizer::runOnFunction(ShPtr<Function> func) {
+void CopyPropagationOptimizer::runOnFunction(Function* func) {
 	auto currCFG = cfgBuilder->getCFG(func);
 
 	// Keep optimizing until there are no changes.
@@ -339,7 +339,7 @@ void CopyPropagationOptimizer::performOptimization() {
 * @brief Returns @c true if @a stmt or any its uses in @a uses has been
 *        modified, @c false otherwise.
 */
-bool CopyPropagationOptimizer::stmtOrUseHasBeenModified(ShPtr<Statement> stmt,
+bool CopyPropagationOptimizer::stmtOrUseHasBeenModified(Statement* stmt,
 		const StmtSet &uses) const {
 	if (hasItem(modifiedStmts, stmt)) {
 		return true;
@@ -369,8 +369,8 @@ bool CopyPropagationOptimizer::stmtOrUseHasBeenModified(ShPtr<Statement> stmt,
 *  - there are no uses of @a stmtLhsVar after its definition in @a stmt before a
 *    subsequent definition
 */
-void CopyPropagationOptimizer::handleCaseEmptyUses(ShPtr<Statement> stmt,
-		ShPtr<Variable> stmtLhsVar) {
+void CopyPropagationOptimizer::handleCaseEmptyUses(Statement* stmt,
+		Variable* stmtLhsVar) {
 	LOG << "handleCaseEmptyUses() : " << stmt << std::endl;
 	// Do not optimize variables that may be pointed to (to preserve
 	// correctness).
@@ -459,8 +459,8 @@ void CopyPropagationOptimizer::handleCaseEmptyUses(ShPtr<Statement> stmt,
 *  - there is a single use of @a stmtLhsVar after its definition in @a stmt
 *    before a subsequent definition
 */
-void CopyPropagationOptimizer::handleCaseSingleUse(ShPtr<Statement> stmt,
-		ShPtr<Variable> stmtLhsVar, ShPtr<Statement> use) {
+void CopyPropagationOptimizer::handleCaseSingleUse(Statement* stmt,
+		Variable* stmtLhsVar, Statement* use) {
 	LOG << "handleCaseSingleUse() : " << stmt << std::endl;
 	// There has to be a right-hand side.
 	const auto &stmtRhs = getRhs(stmt);
@@ -682,7 +682,7 @@ void CopyPropagationOptimizer::handleCaseSingleUse(ShPtr<Statement> stmt,
 		// several things.
 
 		// (a) All the definitions are identical (equal).
-		ShPtr<Statement> lastDef;
+		Statement* lastDef = nullptr;
 		for (const auto &def : lhsUseDefs) {
 			if (lastDef && !lastDef->isEqualTo(def)) {
 				// They're not identical.
@@ -782,8 +782,8 @@ void CopyPropagationOptimizer::handleCaseSingleUse(ShPtr<Statement> stmt,
 * If this function changes the code, @c codeChanged is set to @c true.
 */
 void CopyPropagationOptimizer::handleCaseInductionVariable(
-	ShPtr<Statement> defStmt,
-	ShPtr<Variable> defVar,
+	Statement* defStmt,
+	Variable* defVar,
 	const StmtSet &uses)
 {
 	LOG << "handleCaseInductionVariable() : " << defStmt << std::endl;
@@ -800,7 +800,7 @@ void CopyPropagationOptimizer::handleCaseInductionVariable(
 	}
 
 	auto orderedUses = ordered(uses);
-	ShPtr<AssignStmt> commonOtherDef;
+	AssignStmt* commonOtherDef = nullptr;
 	for (auto& use : uses) {
 		// Use have 2 definitions.
 		const auto &useDefs = udcs->ud[UseDefChains::VarStmtPair(defVar, use)];
@@ -888,7 +888,7 @@ void CopyPropagationOptimizer::handleCaseInductionVariable(
 
 				// All the uses are after the 2. definition.
 				if (ok) {
-					std::map<ShPtr<Statement>, bool> useColor;
+					std::map<Statement*, bool> useColor;
 					for (auto u : assignDu.second) {
 						useColor[u] = false;
 					}
@@ -969,8 +969,8 @@ void CopyPropagationOptimizer::handleCaseInductionVariable(
  *     y = y + A
  */
 void CopyPropagationOptimizer::handleCaseInductionVariable2(
-	ShPtr<Statement> stmt,
-	ShPtr<Variable> x,
+	Statement* stmt,
+	Variable* x,
 	const StmtSet &xUses)
 {
 	LOG << "handleCaseInductionVariable2() : " << stmt << std::endl;
@@ -1132,8 +1132,8 @@ void CopyPropagationOptimizer::handleCaseInductionVariable2(
 *  - there is more than one use of @a stmtLhsVar after it is defined in @a stmt
 */
 void CopyPropagationOptimizer::handleCaseMoreThanOneUse(
-		ShPtr<Statement> stmt,
-		ShPtr<Variable> stmtLhsVar,
+		Statement* stmt,
+		Variable* stmtLhsVar,
 		const StmtSet &uses) {
 	LOG << "handleCaseMoreThanOneUse() : " << stmt << std::endl;
 	// There has to be a right-hand side.
@@ -1293,7 +1293,7 @@ void CopyPropagationOptimizer::handleCaseMoreThanOneUse(
 * @brief Should the given variable be included in def-use chains?
 */
 bool CopyPropagationOptimizer::shouldBeIncludedInDefUseChains(
-		ShPtr<Variable> var) {
+		Variable* var) {
 	// Do not include variables that may be pointed to (to preserve
 	// correctness).
 	if (va->mayBePointed(var)) {

@@ -22,9 +22,9 @@ namespace llvmir2hll {
 * See the description and implementation of getUses() for information on the
 * parameters.
 */
-LhsRhsUsesCFGTraversal::LhsRhsUsesCFGTraversal(ShPtr<Statement> stmt,
-	ShPtr<Variable> origLhsVar, const VarSet &origRhsVars, ShPtr<CFG> cfg,
-	ShPtr<ValueAnalysis> va, ShPtr<CallInfoObtainer> cio):
+LhsRhsUsesCFGTraversal::LhsRhsUsesCFGTraversal(Statement* stmt,
+	Variable* origLhsVar, const VarSet &origRhsVars, CFG* cfg,
+	ValueAnalysis* va, CallInfoObtainer* cio):
 		CFGTraversal(cfg, true), origStmt(stmt), origLhsVar(origLhsVar),
 		origRhsVars(origRhsVars), va(va), cio(cio), uses() {}
 
@@ -52,8 +52,8 @@ LhsRhsUsesCFGTraversal::LhsRhsUsesCFGTraversal(ShPtr<Statement> stmt,
 *
 * This function leaves @a va in a valid state.
 */
-StmtSet LhsRhsUsesCFGTraversal::getUses(ShPtr<Statement> stmt,
-	ShPtr<CFG> cfg, ShPtr<ValueAnalysis> va, ShPtr<CallInfoObtainer> cio) {
+StmtSet LhsRhsUsesCFGTraversal::getUses(Statement* stmt,
+	CFG* cfg, ValueAnalysis* va, CallInfoObtainer* cio) {
 	PRECONDITION_NON_NULL(stmt);
 	PRECONDITION_NON_NULL(cfg);
 	PRECONDITION_NON_NULL(va);
@@ -65,8 +65,8 @@ StmtSet LhsRhsUsesCFGTraversal::getUses(ShPtr<Statement> stmt,
 		return StmtSet();
 	}
 
-	ShPtr<Variable> lhsVar(cast<Variable>(getLhs(stmt)));
-	ShPtr<Expression> rhs(getRhs(stmt));
+	Variable* lhsVar(cast<Variable>(getLhs(stmt)));
+	Expression* rhs(getRhs(stmt));
 	if (!lhsVar || !rhs) {
 		// It is not of the form `a = x`, where `x` is an expression.
 		return StmtSet();
@@ -78,7 +78,7 @@ StmtSet LhsRhsUsesCFGTraversal::getUses(ShPtr<Statement> stmt,
 		return StmtSet();
 	}
 
-	ShPtr<ValueData> rhsData(va->getValueData(rhs));
+	ValueData* rhsData(va->getValueData(rhs));
 	if (rhsData->hasCalls() || rhsData->hasAddressOps() ||
 			rhsData->hasDerefs() || rhsData->hasArrayAccesses() ||
 			rhsData->hasStructAccesses()) {
@@ -100,7 +100,7 @@ StmtSet LhsRhsUsesCFGTraversal::getUses(ShPtr<Statement> stmt,
 		}
 	}
 
-	ShPtr<LhsRhsUsesCFGTraversal> traverser(new LhsRhsUsesCFGTraversal(
+	LhsRhsUsesCFGTraversal* traverser(new LhsRhsUsesCFGTraversal(
 		stmt, lhsVar, rhsData->getDirReadVars(), cfg, va, cio));
 
 	// The traverser returns true if and only if there are some suitable uses.
@@ -113,8 +113,8 @@ StmtSet LhsRhsUsesCFGTraversal::getUses(ShPtr<Statement> stmt,
 	return StmtSet();
 }
 
-bool LhsRhsUsesCFGTraversal::visitStmt(ShPtr<Statement> stmt) {
-	ShPtr<ValueData> stmtData(va->getValueData(stmt));
+bool LhsRhsUsesCFGTraversal::visitStmt(Statement* stmt) {
+	ValueData* stmtData(va->getValueData(stmt));
 
 	// origLhsVar <-> a
 
@@ -170,7 +170,7 @@ bool LhsRhsUsesCFGTraversal::visitStmt(ShPtr<Statement> stmt) {
 			auto i = stmtNode.second;
 			auto e = stmtNode.first->stmt_end();
 			while (i != e) {
-				ShPtr<ValueData> currStmtData(va->getValueData(*i));
+				ValueData* currStmtData(va->getValueData(*i));
 				if (currStmtData->isDirAccessed(origLhsVar)) {
 					// The origLhsVar is used, so stop the analysis.
 					currRetVal = false;
@@ -198,7 +198,7 @@ bool LhsRhsUsesCFGTraversal::visitStmt(ShPtr<Statement> stmt) {
 		if (!callsInStmt.empty()) {
 			// For each call...
 			for (const auto & call : callsInStmt) {
-				ShPtr<CallInfo> callInfo(cio->getCallInfo(
+				CallInfo* callInfo(cio->getCallInfo(
 					call,
 					cfg->getCorrespondingFunction())
 				);

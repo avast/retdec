@@ -37,8 +37,8 @@ NumVarNameGen::NumVarNameGen(std::string prefix):
 * The getNextVarName() function then returns variable names of the form @c
 * prefixN, where N is a number.
 */
-UPtr<VarNameGen> NumVarNameGen::create(std::string prefix) {
-	return UPtr<VarNameGen>(new NumVarNameGen(prefix));
+VarNameGen* NumVarNameGen::create(std::string prefix) {
+	return new NumVarNameGen(prefix);
 }
 
 std::string NumVarNameGen::getId() const {

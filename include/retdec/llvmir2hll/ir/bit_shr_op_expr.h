@@ -34,11 +34,11 @@ public:
 	};
 
 public:
-	static ShPtr<BitShrOpExpr> create(ShPtr<Expression> op1,
-		ShPtr<Expression> op2, Variant variant = Variant::Arithmetical);
+	static BitShrOpExpr* create(Expression* op1,
+		Expression* op2, Variant variant = Variant::Arithmetical);
 
-	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
-	virtual ShPtr<Value> clone() override;
+	virtual bool isEqualTo(Value* otherValue) const override;
+	virtual Value* clone() override;
 
 	Variant getVariant() const;
 	bool isLogical() const;
@@ -52,7 +52,7 @@ public:
 private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
-	BitShrOpExpr(ShPtr<Expression> op1, ShPtr<Expression> op2,
+	BitShrOpExpr(Expression* op1, Expression* op2,
 		Variant variant = Variant::Arithmetical);
 
 	/// Variant of the operator.

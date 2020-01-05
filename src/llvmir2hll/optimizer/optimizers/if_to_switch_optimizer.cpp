@@ -30,14 +30,14 @@ namespace llvmir2hll {
 * @par Preconditions
 *  - @a module and @a va are non-null
 */
-IfToSwitchOptimizer::IfToSwitchOptimizer(ShPtr<Module> module,
-		ShPtr<ValueAnalysis> va): FuncOptimizer(module), va(va) {
+IfToSwitchOptimizer::IfToSwitchOptimizer(Module* module,
+		ValueAnalysis* va): FuncOptimizer(module), va(va) {
 	PRECONDITION_NON_NULL(module);
 	PRECONDITION_NON_NULL(va);
 }
 
-void IfToSwitchOptimizer::visit(ShPtr<IfStmt> stmt) {
-	ShPtr<Expression> controlExpr(getControlExprIfConvertibleToSwitch(stmt));
+void IfToSwitchOptimizer::visit(IfStmt* stmt) {
+	Expression* controlExpr(getControlExprIfConvertibleToSwitch(stmt));
 	if (!controlExpr) {
 		return;
 	}
@@ -54,11 +54,11 @@ void IfToSwitchOptimizer::visit(ShPtr<IfStmt> stmt) {
 * @return Control expression if @a stmt can be optimized, otherwise the null
 *         pointer
 */
-ShPtr<Expression> IfToSwitchOptimizer::getControlExprIfConvertibleToSwitch(
-		ShPtr<IfStmt> ifStmt) {
+Expression* IfToSwitchOptimizer::getControlExprIfConvertibleToSwitch(
+		IfStmt* ifStmt) {
 	if (!ifStmt->hasElseIfClauses()) {
 		// Don't optimize simple if statements without else if clauses.
-		return ShPtr<Expression>();
+		return nullptr;
 	}
 
 	if (BreakInIfAnalysis::hasBreakStmt(ifStmt)) {
@@ -71,32 +71,32 @@ ShPtr<Expression> IfToSwitchOptimizer::getControlExprIfConvertibleToSwitch(
 		// can't be optimized, because this if statement can be placed in
 		// while loop, and after transformation to switch statement  mentioned
 		// break statement don't break the loop, but switch.
-		return ShPtr<Expression>();
+		return nullptr;
 	}
 
-	ShPtr<Expression> controlExpr;
+	Expression* controlExpr;
 	for (auto i = ifStmt->clause_begin(), e = ifStmt->clause_end(); i != e; ++i) {
-		ShPtr<EqOpExpr> eqOpExpr(cast<EqOpExpr>(i->first));
+		EqOpExpr* eqOpExpr(cast<EqOpExpr>(i->first));
 		if (!eqOpExpr) {
 			// Need to have condition like if (anything == ConstInt (vice versa)).
-			return ShPtr<Expression>();
+			return nullptr;
 		}
 
-		ShPtr<Expression> exprToCompareWithControlExpr(
+		Expression* exprToCompareWithControlExpr(
 			getNextOpIfSecondOneIsConstInt(eqOpExpr));
 		if (!exprToCompareWithControlExpr) {
 			// ConstInt wasn't found in some of operands.
-			return ShPtr<Expression>();
+			return nullptr;
 		}
 
 		if (!controlExpr) {
 			controlExpr = exprToCompareWithControlExpr;
 		} else if (!controlExpr->isEqualTo(exprToCompareWithControlExpr)) {
 			// Need to have same control expressions.
-			return ShPtr<Expression>();
+			return nullptr;
 		}
 
-		ShPtr<ValueData> exprData(va->getValueData(exprToCompareWithControlExpr));
+		ValueData* exprData(va->getValueData(exprToCompareWithControlExpr));
 		if (exprData->hasCalls() || exprData->hasArrayAccesses() ||
 				exprData->hasDerefs()) {
 			// Control expression can't be func() or a[] or *a, because
@@ -108,7 +108,7 @@ ShPtr<Expression> IfToSwitchOptimizer::getControlExprIfConvertibleToSwitch(
 			//          case 6: break;
 			//      }
 			// In the latter case, the function is called only once.
-			return ShPtr<Expression>();
+			return nullptr;
 		}
 	}
 
@@ -121,9 +121,9 @@ ShPtr<Expression> IfToSwitchOptimizer::getControlExprIfConvertibleToSwitch(
 * @param[in] ifStmt IfStmt to optimize.
 * @param[in] controlExpr Control expression of new SwitchStmt.
 */
-void IfToSwitchOptimizer::convertIfStmtToSwitchStmt(ShPtr<IfStmt> ifStmt,
-		ShPtr<Expression> controlExpr) {
-	ShPtr<SwitchStmt> switchStmt(
+void IfToSwitchOptimizer::convertIfStmtToSwitchStmt(IfStmt* ifStmt,
+		Expression* controlExpr) {
+	SwitchStmt* switchStmt(
 		SwitchStmt::create(controlExpr, nullptr, ifStmt->getAddress()));
 	for (auto i = ifStmt->clause_begin(), e = ifStmt->clause_end(); i != e; ++i) {
 		// Append break statement at last statement of statements block. Because
@@ -137,7 +137,7 @@ void IfToSwitchOptimizer::convertIfStmtToSwitchStmt(ShPtr<IfStmt> ifStmt,
 		appendBreakStmtIfNeeded(Statement::getLastStatement(i->second));
 
 		// Create switch clause.
-		ShPtr<EqOpExpr> eqOpExpr(cast<EqOpExpr>(i->first));
+		EqOpExpr* eqOpExpr(cast<EqOpExpr>(i->first));
 		if (eqOpExpr->getFirstOperand()->isEqualTo(controlExpr)) {
 			switchStmt->addClause(eqOpExpr->getSecondOperand(), i->second);
 		} else {
@@ -169,7 +169,7 @@ void IfToSwitchOptimizer::convertIfStmtToSwitchStmt(ShPtr<IfStmt> ifStmt,
 *
 * @param[in] stmt Statement on which is BreakStmt append.
 */
-void IfToSwitchOptimizer::appendBreakStmtIfNeeded(ShPtr<Statement> stmt) {
+void IfToSwitchOptimizer::appendBreakStmtIfNeeded(Statement* stmt) {
 	if (!isa<ContinueStmt>(stmt) && !isa<ReturnStmt>(stmt) &&
 			!isa<GotoStmt>(stmt)) {
 		stmt->setSuccessor(BreakStmt::create(stmt->getAddress()));
@@ -185,14 +185,14 @@ void IfToSwitchOptimizer::appendBreakStmtIfNeeded(ShPtr<Statement> stmt) {
 * @return If one of the operands is a ConstInt, than return the second
 *         operand. Otherwise return the null pointer.
 */
-ShPtr<Expression> IfToSwitchOptimizer::getNextOpIfSecondOneIsConstInt(
-		ShPtr<EqOpExpr> eqOpExpr) {
+Expression* IfToSwitchOptimizer::getNextOpIfSecondOneIsConstInt(
+		EqOpExpr* eqOpExpr) {
 	if (isa<ConstInt>(eqOpExpr->getFirstOperand())) {
 		return eqOpExpr->getSecondOperand();
 	} else if (isa<ConstInt>(eqOpExpr->getSecondOperand())) {
 		return eqOpExpr->getFirstOperand();
 	} else {
-		return ShPtr<Expression>();
+		return nullptr;
 	}
 }
 

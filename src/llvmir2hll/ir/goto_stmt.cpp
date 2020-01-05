@@ -16,28 +16,28 @@ namespace llvmir2hll {
 *
 * See create() for more information.
 */
-GotoStmt::GotoStmt(ShPtr<Statement> target, Address a):
+GotoStmt::GotoStmt(Statement* target, Address a):
 	Statement(a), target(target) {}
 
-ShPtr<Value> GotoStmt::clone() {
-	ShPtr<GotoStmt> gotoStmt(GotoStmt::create(target, getAddress()));
+Value* GotoStmt::clone() {
+	GotoStmt* gotoStmt(GotoStmt::create(target, getAddress()));
 	gotoStmt->setMetadata(getMetadata());
 	return gotoStmt;
 }
 
-bool GotoStmt::isEqualTo(ShPtr<Value> otherValue) const {
+bool GotoStmt::isEqualTo(Value* otherValue) const {
 	// Both types and targets have to be equal.
-	if (ShPtr<GotoStmt> otherGotoStmt = cast<GotoStmt>(otherValue)) {
+	if (GotoStmt* otherGotoStmt = cast<GotoStmt>(otherValue)) {
 		return target->isEqualTo(otherGotoStmt->target);
 	}
 	return false;
 }
 
-void GotoStmt::replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) {
+void GotoStmt::replace(Expression* oldExpr, Expression* newExpr) {
 	// There is nothing to do.
 }
 
-ShPtr<Expression> GotoStmt::asExpression() const {
+Expression* GotoStmt::asExpression() const {
 	// Cannot be converted into an expression.
 	return {};
 }
@@ -45,7 +45,7 @@ ShPtr<Expression> GotoStmt::asExpression() const {
 /**
 * @brief Returns the target of the goto statement.
 */
-ShPtr<Statement> GotoStmt::getTarget() const {
+Statement* GotoStmt::getTarget() const {
 	return target;
 }
 
@@ -55,13 +55,13 @@ ShPtr<Statement> GotoStmt::getTarget() const {
 * @par Preconditions
 *  - @a newTarget is non-null
 */
-void GotoStmt::setTarget(ShPtr<Statement> newTarget) {
+void GotoStmt::setTarget(Statement* newTarget) {
 	PRECONDITION_NON_NULL(newTarget);
 
-	target->removeObserver(shared_from_this());
-	target->removePredecessor(ucast<Statement>(shared_from_this()));
-	newTarget->addObserver(shared_from_this());
-	newTarget->addPredecessor(ucast<Statement>(shared_from_this()));
+	target->removeObserver(this);
+	target->removePredecessor(ucast<Statement>(this));
+	newTarget->addObserver(this);
+	newTarget->addPredecessor(ucast<Statement>(this));
 	target = newTarget;
 }
 
@@ -74,12 +74,12 @@ void GotoStmt::setTarget(ShPtr<Statement> newTarget) {
 * @par Preconditions
 *  - @a target is non-null
 */
-ShPtr<GotoStmt> GotoStmt::create(ShPtr<Statement> target, Address a) {
+GotoStmt* GotoStmt::create(Statement* target, Address a) {
 	PRECONDITION_NON_NULL(target);
 
-	ShPtr<GotoStmt> gotoStmt(new GotoStmt(target, a));
+	GotoStmt* gotoStmt(new GotoStmt(target, a));
 
-	// Initialization (recall that shared_from_this(), which is called in
+	// Initialization (recall that this, which is called in
 	// setTarget(), cannot be called in a constructor).
 	target->addObserver(gotoStmt);
 	target->addPredecessor(gotoStmt);
@@ -105,11 +105,11 @@ ShPtr<GotoStmt> GotoStmt::create(ShPtr<Statement> target, Address a) {
 *
 * @see Subject::update()
 */
-void GotoStmt::update(ShPtr<Value> subject, ShPtr<Value> arg) {
+void GotoStmt::update(Value* subject, Value* arg) {
 	PRECONDITION_NON_NULL(subject);
 	PRECONDITION_NON_NULL(arg);
 
-	ShPtr<Statement> newTarget = cast<Statement>(arg);
+	Statement* newTarget = cast<Statement>(arg);
 	if (arg && !newTarget) {
 		return;
 	}
@@ -120,7 +120,7 @@ void GotoStmt::update(ShPtr<Value> subject, ShPtr<Value> arg) {
 }
 
 void GotoStmt::accept(Visitor *v) {
-	v->visit(ucast<GotoStmt>(shared_from_this()));
+	v->visit(ucast<GotoStmt>(this));
 }
 
 } // namespace llvmir2hll

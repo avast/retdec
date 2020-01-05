@@ -22,15 +22,15 @@ namespace llvmir2hll {
 * @par Preconditions
 *  - both operands are non-null
 */
-BinaryOpExpr::BinaryOpExpr(ShPtr<Expression> op1, ShPtr<Expression> op2):
+BinaryOpExpr::BinaryOpExpr(Expression* op1, Expression* op2):
 		op1(op1), op2(op2) {
 	PRECONDITION_NON_NULL(op1);
 	PRECONDITION_NON_NULL(op2);
 }
 
-ShPtr<Type> BinaryOpExpr::getType() const {
-	ShPtr<Type> op1Type(op1->getType());
-	ShPtr<Type> op2Type(op2->getType());
+Type* BinaryOpExpr::getType() const {
+	Type* op1Type(op1->getType());
+	Type* op2Type(op2->getType());
 
 	// If both operands are of the same type, we can just return that type.
 	if (op1Type == op2Type) {
@@ -39,8 +39,8 @@ ShPtr<Type> BinaryOpExpr::getType() const {
 
 	// If the two operands are of type IntType but differ in signess, return an
 	// unsigned integer.
-	if (ShPtr<IntType> op1IntType = cast<IntType>(op1Type)) {
-		if (ShPtr<IntType> op2IntType = cast<IntType>(op2Type)) {
+	if (IntType* op1IntType = cast<IntType>(op1Type)) {
+		if (IntType* op2IntType = cast<IntType>(op2Type)) {
 			if (op1IntType->getSize() == op2IntType->getSize()) {
 				return IntType::create(op1IntType->getSize(), false);
 			}
@@ -60,7 +60,7 @@ ShPtr<Type> BinaryOpExpr::getType() const {
 	return UnknownType::create();
 }
 
-void BinaryOpExpr::replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) {
+void BinaryOpExpr::replace(Expression* oldExpr, Expression* newExpr) {
 	PRECONDITION_NON_NULL(oldExpr);
 
 	if (op1 == oldExpr) {
@@ -79,14 +79,14 @@ void BinaryOpExpr::replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr)
 /**
 * @brief Returns the first operand.
 */
-ShPtr<Expression> BinaryOpExpr::getFirstOperand() const {
+Expression* BinaryOpExpr::getFirstOperand() const {
 	return op1;
 }
 
 /**
 * @brief Returns the second operand.
 */
-ShPtr<Expression> BinaryOpExpr::getSecondOperand() const {
+Expression* BinaryOpExpr::getSecondOperand() const {
 	return op2;
 }
 
@@ -96,11 +96,11 @@ ShPtr<Expression> BinaryOpExpr::getSecondOperand() const {
 * @par Preconditions
 *  - @a first is non-null
 */
-void BinaryOpExpr::setFirstOperand(ShPtr<Expression> first) {
+void BinaryOpExpr::setFirstOperand(Expression* first) {
 	PRECONDITION_NON_NULL(first);
 
-	op1->removeObserver(shared_from_this());
-	first->addObserver(shared_from_this());
+	op1->removeObserver(this);
+	first->addObserver(this);
 	op1 = first;
 }
 
@@ -110,11 +110,11 @@ void BinaryOpExpr::setFirstOperand(ShPtr<Expression> first) {
 * @par Preconditions
 *  - @a second is non-null
 */
-void BinaryOpExpr::setSecondOperand(ShPtr<Expression> second) {
+void BinaryOpExpr::setSecondOperand(Expression* second) {
 	PRECONDITION_NON_NULL(second);
 
-	op2->removeObserver(shared_from_this());
-	second->addObserver(shared_from_this());
+	op2->removeObserver(this);
+	second->addObserver(this);
 	op2 = second;
 }
 
@@ -136,11 +136,11 @@ void BinaryOpExpr::setSecondOperand(ShPtr<Expression> second) {
 *
 * @see Subject::update()
 */
-void BinaryOpExpr::update(ShPtr<Value> subject, ShPtr<Value> arg) {
+void BinaryOpExpr::update(Value* subject, Value* arg) {
 	PRECONDITION_NON_NULL(subject);
 	PRECONDITION_NON_NULL(arg);
 
-	ShPtr<Expression> newOperand = cast<Expression>(arg);
+	Expression* newOperand = cast<Expression>(arg);
 	if (!newOperand) {
 		return;
 	}

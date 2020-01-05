@@ -45,7 +45,7 @@ using namespace retdec::llvmir2hll;
 * @return @c true if the name of @a f1 comes before the name of @a f2
 *         (case-insensitively), @c false otherwise.
 */
-bool compareFuncs(const ShPtr<Function> &f1, const ShPtr<Function> &f2) {
+bool compareFuncs(const Function* f1, const Function* f2) {
 	return isLowerThanCaseInsensitive(f1->getName(), f2->getName());
 }
 
@@ -55,7 +55,7 @@ bool compareFuncs(const ShPtr<Function> &f1, const ShPtr<Function> &f2) {
 * @return @c true if the name of @a v1 comes before the name of @a v2
 *         (case-insensitively), @c false otherwise.
 */
-bool compareVars(const ShPtr<Variable> &v1, const ShPtr<Variable> &v2) {
+bool compareVars(const Variable* v1, const Variable* v2) {
 	return isLowerThanCaseInsensitive(v1->getName(), v2->getName());
 }
 
@@ -78,7 +78,7 @@ bool compareVarInits(const VarInitPair &v1, const VarInitPair &v2) {
 *           function.
 */
 template<class T>
-ShPtr<Expression> skipUnaryExpr(ShPtr<Expression> expr) {
+Expression* skipUnaryExpr(Expression* expr) {
 	while (auto castedExpr = cast<T>(expr)) {
 		expr = castedExpr->getOperand();
 	}
@@ -126,7 +126,7 @@ void sortByName(VarInitPairVector &vec) {
 *
 * If there is no non-empty statement in @a stmts, the null pointer is returned.
 */
-ShPtr<Statement> skipEmptyStmts(ShPtr<Statement> stmts) {
+Statement* skipEmptyStmts(Statement* stmts) {
 	auto currStmt = stmts;
 	while (isa<EmptyStmt>(currStmt)) {
 		currStmt = currStmt->getSuccessor();
@@ -138,7 +138,7 @@ ShPtr<Statement> skipEmptyStmts(ShPtr<Statement> stmts) {
 * @brief Skips casts in the given expression and returns the first non-cast
 *        expression.
 */
-ShPtr<Expression> skipCasts(ShPtr<Expression> expr) {
+Expression* skipCasts(Expression* expr) {
 	return skipUnaryExpr<CastExpr>(expr);
 }
 
@@ -146,7 +146,7 @@ ShPtr<Expression> skipCasts(ShPtr<Expression> expr) {
 * @brief Skips dereferences in the given expression and returns the first
 *        non-dereference expression.
 */
-ShPtr<Expression> skipDerefs(ShPtr<Expression> expr) {
+Expression* skipDerefs(Expression* expr) {
 	return skipUnaryExpr<DerefOpExpr>(expr);
 }
 
@@ -154,7 +154,7 @@ ShPtr<Expression> skipDerefs(ShPtr<Expression> expr) {
 * @brief Skips addresses in the given expression and returns the first
 *        non-address expression.
 */
-ShPtr<Expression> skipAddresses(ShPtr<Expression> expr) {
+Expression* skipAddresses(Expression* expr) {
 	return skipUnaryExpr<AddressOpExpr>(expr);
 }
 
@@ -164,7 +164,7 @@ ShPtr<Expression> skipAddresses(ShPtr<Expression> expr) {
 *
 * If @a stmts is the null pointer, it returns @c false.
 */
-bool endsWithRetOrUnreach(ShPtr<Statement> stmts) {
+bool endsWithRetOrUnreach(Statement* stmts) {
 	if (!stmts) {
 		return false;
 	}
@@ -180,7 +180,7 @@ bool endsWithRetOrUnreach(ShPtr<Statement> stmts) {
 * Precondition:
 *  - @a stmt is either a variable definition statement or an assign statement
 */
-ShPtr<Expression> getLhs(ShPtr<Statement> stmt) {
+Expression* getLhs(Statement* stmt) {
 	if (auto varDefStmt = cast<VarDefStmt>(stmt)) {
 		return varDefStmt->getVar();
 	} else if (auto assignStmt = cast<AssignStmt>(stmt)) {
@@ -199,7 +199,7 @@ ShPtr<Expression> getLhs(ShPtr<Statement> stmt) {
 * Precondition:
 *  - @a stmt is either a variable definition statement or an assign statement
 */
-ShPtr<Expression> getRhs(ShPtr<Statement> stmt) {
+Expression* getRhs(Statement* stmt) {
 	if (auto varDefStmt = cast<VarDefStmt>(stmt)) {
 		return varDefStmt->getInitializer();
 	} else if (auto assignStmt = cast<AssignStmt>(stmt)) {
@@ -228,8 +228,8 @@ ShPtr<Expression> getRhs(ShPtr<Statement> stmt) {
 * Precondition:
 *  - @a stmt is either a variable definition statement or an assign statement
 */
-StmtVector removeVarDefOrAssignStatement(ShPtr<Statement> stmt,
-		ShPtr<Function> func) {
+StmtVector removeVarDefOrAssignStatement(Statement* stmt,
+		Function* func) {
 	PRECONDITION(isVarDefOrAssignStmt(stmt), "the statement `" << stmt <<
 		"` is not a variable-defining or assign statement");
 
@@ -285,8 +285,8 @@ StmtVector removeVarDefOrAssignStatement(ShPtr<Statement> stmt,
 /**
 * @brief Replaces @a var with @a expr in @a stmt.
 */
-void replaceVarWithExprInStmt(ShPtr<Variable> var,
-		ShPtr<Expression> expr, ShPtr<Statement> stmt) {
+void replaceVarWithExprInStmt(Variable* var,
+		Expression* expr, Statement* stmt) {
 	// If stmt is not a variable-defining/assign statement, we can directly
 	// replace the variable.
 	if (!isVarDefOrAssignStmt(stmt)) {
@@ -339,7 +339,7 @@ void replaceVarWithExprInStmt(ShPtr<Variable> var,
 * @brief Returns @c true if @a stmt is a VarDefStmt or AssignStmt, @c false
 *        otherwise.
 */
-bool isVarDefOrAssignStmt(ShPtr<Statement> stmt) {
+bool isVarDefOrAssignStmt(Statement* stmt) {
 	return isa<VarDefStmt>(stmt) || isa<AssignStmt>(stmt);
 }
 
@@ -348,7 +348,7 @@ bool isVarDefOrAssignStmt(ShPtr<Statement> stmt) {
 *
 * A loop can be either a for loop or a while loop.
 */
-bool isLoop(ShPtr<Statement> stmt) {
+bool isLoop(Statement* stmt) {
 	return isa<WhileLoopStmt>(stmt) || isa<ForLoopStmt>(stmt) ||
 		isa<UForLoopStmt>(stmt);
 }
@@ -364,7 +364,7 @@ bool isLoop(ShPtr<Statement> stmt) {
 * }
 * @endcode
 */
-bool isInfiniteEmptyLoop(ShPtr<WhileLoopStmt> stmt) {
+bool isInfiniteEmptyLoop(WhileLoopStmt* stmt) {
 	// Check that the condition is a literal "true".
 	auto boolCond = cast<ConstBool>(stmt->getCondition());
 	if (!boolCond || !boolCond->getValue()) {
@@ -383,7 +383,7 @@ bool isInfiniteEmptyLoop(ShPtr<WhileLoopStmt> stmt) {
 * @brief Returns @c true if @a stmt is a <tt>while True</tt> loop, @c false
 *        otherwise.
 */
-bool isWhileTrueLoop(ShPtr<WhileLoopStmt> stmt) {
+bool isWhileTrueLoop(WhileLoopStmt* stmt) {
 	auto boolCond = cast<ConstBool>(stmt->getCondition());
 	return boolCond && boolCond->isTrue();
 }
@@ -393,7 +393,7 @@ bool isWhileTrueLoop(ShPtr<WhileLoopStmt> stmt) {
 *
 * If the call is indirect, the null pointer is returned.
 */
-ShPtr<Function> getCalledFunc(ShPtr<CallExpr> callExpr, ShPtr<Module> module) {
+Function* getCalledFunc(CallExpr* callExpr, Module* module) {
 	// If the called expression is not a variable, then it is definitely a call
 	// by pointer.
 	auto calledVar = cast<Variable>(callExpr->getCalledExpr());
@@ -409,7 +409,7 @@ ShPtr<Function> getCalledFunc(ShPtr<CallExpr> callExpr, ShPtr<Module> module) {
 *
 * If the call is indirect, the empty string is returned.
 */
-std::string getNameOfCalledFunc(ShPtr<CallExpr> callExpr, ShPtr<Module> module) {
+std::string getNameOfCalledFunc(CallExpr* callExpr, Module* module) {
 	auto calledFunc = getCalledFunc(callExpr, module);
 	return calledFunc ? calledFunc->getName() : std::string();
 }
@@ -418,7 +418,7 @@ std::string getNameOfCalledFunc(ShPtr<CallExpr> callExpr, ShPtr<Module> module) 
 * @brief Returns @a true if the given call expression @a callExpr in the given
 *        @a module is indirect (by a pointer), @c false otherwise.
 */
-bool isCallByPointer(ShPtr<Expression> callExpr, ShPtr<Module> module) {
+bool isCallByPointer(Expression* callExpr, Module* module) {
 	// If the called expression is not a variable, then it is definitely an indirect call
 	// by pointer.
 	auto calledVar = cast<Variable>(callExpr);
@@ -437,7 +437,7 @@ bool isCallByPointer(ShPtr<Expression> callExpr, ShPtr<Module> module) {
 * @par Preconditions
 *  - @a stmt is non-null
 */
-ShPtr<Statement> getInnermostLoop(ShPtr<Statement> stmt) {
+Statement* getInnermostLoop(Statement* stmt) {
 	PRECONDITION_NON_NULL(stmt);
 
 	auto innLoop = stmt->getParent();
@@ -455,7 +455,7 @@ ShPtr<Statement> getInnermostLoop(ShPtr<Statement> stmt) {
 * @par Preconditions
 *  - @a stmt is non-null
 */
-ShPtr<Statement> getInnermostLoopOrSwitch(ShPtr<Statement> stmt) {
+Statement* getInnermostLoopOrSwitch(Statement* stmt) {
 	PRECONDITION_NON_NULL(stmt);
 
 	auto innLoopOrSwitch = stmt->getParent();
@@ -472,7 +472,7 @@ ShPtr<Statement> getInnermostLoopOrSwitch(ShPtr<Statement> stmt) {
 * @par Preconditions
 *  - @a stmt and @a var are non-null
 */
-bool isDefOfVar(ShPtr<Statement> stmt, ShPtr<Variable> var) {
+bool isDefOfVar(Statement* stmt, Variable* var) {
 	PRECONDITION_NON_NULL(stmt);
 	PRECONDITION_NON_NULL(var);
 
@@ -495,8 +495,8 @@ bool isDefOfVar(ShPtr<Statement> stmt, ShPtr<Variable> var) {
 * @par Preconditions
 *  - @a func is a definition, not a declaration
 */
-void addLocalVarToFunc(ShPtr<Variable> var, ShPtr<Function> func,
-		ShPtr<Expression> init) {
+void addLocalVarToFunc(Variable* var, Function* func,
+		Expression* init) {
 	PRECONDITION(func->isDefinition(), "it has to be a definition");
 
 	if (func->hasLocalVar(var)) {
@@ -531,8 +531,8 @@ void addLocalVarToFunc(ShPtr<Variable> var, ShPtr<Function> func,
 *  - @a var is a global variable
 *  - @a func is a definition, not a declaration
 */
-void convertGlobalVarToLocalVarInFunc(ShPtr<Variable> var, ShPtr<Function> func,
-		ShPtr<Expression> init) {
+void convertGlobalVarToLocalVarInFunc(Variable* var, Function* func,
+		Expression* init) {
 	PRECONDITION(func->isDefinition(), "it has to be a definition");
 
 	// We cannot use clone() because variables are not cloned, so we use

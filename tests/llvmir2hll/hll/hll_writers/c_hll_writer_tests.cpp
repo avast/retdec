@@ -193,9 +193,9 @@ EmitsUForLoopStmtWithoutInitCondStep) {
 	// }
 	//
 	auto loop = UForLoopStmt::create(
-		ShPtr<Expression>(),
-		ShPtr<Expression>(),
-		ShPtr<Expression>(),
+		Expression*(),
+		Expression*(),
+		Expression*(),
 		EmptyStmt::create()
 	);
 	testFunc->setBody(loop);
@@ -217,8 +217,8 @@ EmitsVarDefOfInitOfUForLoopStmtWhenLoopHasItsInitMarked) {
 	testFunc->addLocalVar(varI);
 	auto loop = UForLoopStmt::create(
 		AssignOpExpr::create(varI, ConstInt::create(0, 32)),
-		ShPtr<Expression>(),
-		ShPtr<Expression>(),
+		Expression*(),
+		Expression*(),
 		EmptyStmt::create()
 	);
 	loop->markInitAsDefinition();

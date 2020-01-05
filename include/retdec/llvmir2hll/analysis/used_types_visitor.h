@@ -117,7 +117,7 @@ private:
 class UsedTypesVisitor: private OrderedAllVisitor,
 		private retdec::utils::NonCopyable {
 public:
-	static ShPtr<UsedTypes> getUsedTypes(ShPtr<Module> module);
+	static UsedTypes* getUsedTypes(Module* module);
 
 private:
 	explicit UsedTypesVisitor();
@@ -125,32 +125,32 @@ private:
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<Function> func) override;
-	virtual void visit(ShPtr<Variable> var) override;
-	virtual void visit(ShPtr<ConstBool> constant) override;
+	virtual void visit(Function* func) override;
+	virtual void visit(Variable* var) override;
+	virtual void visit(ConstBool* constant) override;
 	// Casts
-	virtual void visit(ShPtr<BitCastExpr> expr) override;
-	virtual void visit(ShPtr<ExtCastExpr> expr) override;
-	virtual void visit(ShPtr<FPToIntCastExpr> expr) override;
-	virtual void visit(ShPtr<IntToFPCastExpr> expr) override;
-	virtual void visit(ShPtr<IntToPtrCastExpr> expr) override;
-	virtual void visit(ShPtr<PtrToIntCastExpr> expr) override;
-	virtual void visit(ShPtr<TruncCastExpr> expr) override;
+	virtual void visit(BitCastExpr* expr) override;
+	virtual void visit(ExtCastExpr* expr) override;
+	virtual void visit(FPToIntCastExpr* expr) override;
+	virtual void visit(IntToFPCastExpr* expr) override;
+	virtual void visit(IntToPtrCastExpr* expr) override;
+	virtual void visit(PtrToIntCastExpr* expr) override;
+	virtual void visit(TruncCastExpr* expr) override;
 	// Types
-	virtual void visit(ShPtr<FloatType> type) override;
-	virtual void visit(ShPtr<IntType> type) override;
-	virtual void visit(ShPtr<PointerType> type) override;
-	virtual void visit(ShPtr<StringType> type) override;
-	virtual void visit(ShPtr<ArrayType> type) override;
-	virtual void visit(ShPtr<StructType> type) override;
-	virtual void visit(ShPtr<FunctionType> type) override;
-	virtual void visit(ShPtr<VoidType> type) override;
-	virtual void visit(ShPtr<UnknownType> type) override;
+	virtual void visit(FloatType* type) override;
+	virtual void visit(IntType* type) override;
+	virtual void visit(PointerType* type) override;
+	virtual void visit(StringType* type) override;
+	virtual void visit(ArrayType* type) override;
+	virtual void visit(StructType* type) override;
+	virtual void visit(FunctionType* type) override;
+	virtual void visit(VoidType* type) override;
+	virtual void visit(UnknownType* type) override;
 	/// @}
 
 private:
 	/// Set of used types.
-	ShPtr<UsedTypes> usedTypes;
+	UsedTypes* usedTypes = nullptr;
 };
 
 } // namespace llvmir2hll

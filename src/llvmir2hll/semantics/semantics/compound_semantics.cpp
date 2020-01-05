@@ -87,8 +87,8 @@ CompoundSemantics::CompoundSemantics(): providedSemantics() {}
 /**
 * @brief Creates a new semantics.
 */
-ShPtr<CompoundSemantics> CompoundSemantics::create() {
-	return ShPtr<CompoundSemantics>(new CompoundSemantics());
+CompoundSemantics* CompoundSemantics::create() {
+	return new CompoundSemantics();
 }
 
 /**
@@ -98,7 +98,7 @@ ShPtr<CompoundSemantics> CompoundSemantics::create() {
 * When the functions from the Semantics' interface are called, the newly added
 * semantics is asked first.
 */
-void CompoundSemantics::prependSemantics(ShPtr<Semantics> semantics) {
+void CompoundSemantics::prependSemantics(Semantics* semantics) {
 	providedSemantics.push_front(semantics);
 }
 
@@ -109,7 +109,7 @@ void CompoundSemantics::prependSemantics(ShPtr<Semantics> semantics) {
 * When the functions from the Semantics' interface are called, the newly added
 * semantics is asked last.
 */
-void CompoundSemantics::appendSemantics(ShPtr<Semantics> semantics) {
+void CompoundSemantics::appendSemantics(Semantics* semantics) {
 	providedSemantics.push_back(semantics);
 }
 

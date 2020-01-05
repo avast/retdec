@@ -31,14 +31,14 @@ namespace llvmir2hll {
 struct SplittedWhileTrueLoop {
 	/// Statements before the loop's end -- corresponds to (1) in the class
 	/// description.
-	ShPtr<Statement> beforeLoopEndStmts;
+	Statement* beforeLoopEndStmts = nullptr;
 
 	/// The loop's end -- corresponds to (2) in the class description.
-	ShPtr<IfStmt> loopEnd;
+	IfStmt* loopEnd = nullptr;
 
 	/// Statements after the loop's end -- corresponds to (3) in the class
 	/// description.
-	ShPtr<Statement> afterLoopEndStmts;
+	Statement* afterLoopEndStmts = nullptr;
 };
 
 /**
@@ -58,10 +58,10 @@ struct SplittedWhileTrueLoop {
 */
 struct IndVarInfo {
 	IndVarInfo(
-			ShPtr<Statement> initStmt,
-			ShPtr<Variable> indVar,
-			ShPtr<Expression> exitCond,
-			ShPtr<Statement> updateStmt,
+			Statement* initStmt,
+			Variable* indVar,
+			Expression* exitCond,
+			Statement* updateStmt,
 			bool updateBeforeExit)
 			: initStmt(initStmt)
 			, indVar(indVar)
@@ -72,28 +72,28 @@ struct IndVarInfo {
 
 	/// Initialization of the induction variable (either a definition or an
 	/// assignment) -- corresponds to (1) in the class description.
-	ShPtr<Statement> initStmt;
+	Statement* initStmt = nullptr;
 
 	/// Induction variable -- corresponds to (1) in the class description.
-	ShPtr<Variable> indVar;
+	Variable* indVar = nullptr;
 
 	/// Exit condition -- corresponds to (2) in the class description.
-	ShPtr<Expression> exitCond;
+	Expression* exitCond = nullptr;
 
 	/// Update of the induction variable -- corresponds to (3) in the class
 	/// description.
-	ShPtr<Statement> updateStmt;
+	Statement* updateStmt = nullptr;
 
 	/// Is an update statement before exit condition?
 	bool updateBeforeExit;
 };
 
-bool isLoopEnd(ShPtr<Statement> stmt);
-ShPtr<Expression> getExitCondition(ShPtr<Statement> loopEnd);
-ShPtr<SplittedWhileTrueLoop> splitWhileTrueLoop(
-		ShPtr<WhileLoopStmt> stmt,
-		ShPtr<IndVarInfo> indVarInfo = nullptr);
-ShPtr<IndVarInfo> getIndVarInfo(ShPtr<WhileLoopStmt> stmt);
+bool isLoopEnd(Statement* stmt);
+Expression* getExitCondition(Statement* loopEnd);
+SplittedWhileTrueLoop* splitWhileTrueLoop(
+		WhileLoopStmt* stmt,
+		IndVarInfo* indVarInfo = nullptr);
+IndVarInfo* getIndVarInfo(WhileLoopStmt* stmt);
 
 } // namespace llvmir2hll
 } // namespace retdec

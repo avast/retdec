@@ -86,20 +86,20 @@ class VarDefStmt;
 */
 class CCastOptimizer final: public FuncOptimizer {
 public:
-	CCastOptimizer(ShPtr<Module> module);
+	CCastOptimizer(Module* module);
 
-	ShPtr<Expression> checkAndOptimize(ShPtr<Expression> dst,
-		ShPtr<Expression> src);
+	Expression* checkAndOptimize(Expression* dst,
+		Expression* src);
 
 	virtual std::string getId() const override { return "CCast"; }
 
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<CallExpr> expr) override;
-	virtual void visit(ShPtr<AssignStmt> stmt) override;
-	virtual void visit(ShPtr<VarDefStmt> stmt) override;
-	virtual void visit(ShPtr<ReturnStmt> stmt) override;
+	virtual void visit(CallExpr* expr) override;
+	virtual void visit(AssignStmt* stmt) override;
+	virtual void visit(VarDefStmt* stmt) override;
+	virtual void visit(ReturnStmt* stmt) override;
 	/// @}
 
 private:

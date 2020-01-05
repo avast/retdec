@@ -32,8 +32,8 @@ namespace llvmir2hll {
 * @par Preconditions
 *  - @a oldExpr is non-null
 */
-void Expression::replaceExpression(ShPtr<Expression> oldExpr,
-		ShPtr<Expression> newExpr) {
+void Expression::replaceExpression(Expression* oldExpr,
+		Expression* newExpr) {
 	PRECONDITION_NON_NULL(oldExpr);
 
 	// If both expressions are identical, we don't have to do anything.

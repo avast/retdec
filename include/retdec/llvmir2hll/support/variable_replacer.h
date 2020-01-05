@@ -30,26 +30,26 @@ public:
 	// It needs to be public so it can be called in ShPtr's destructor.
 	virtual ~VariableReplacer() override = default;
 
-	static void replaceVariable(ShPtr<Variable> oldVar, ShPtr<Variable> newVar,
-		ShPtr<Function> func);
+	static void replaceVariable(Variable* oldVar, Variable* newVar,
+		Function* func);
 
 private:
-	VariableReplacer(ShPtr<Variable> oldVar, ShPtr<Variable> newVar);
+	VariableReplacer(Variable* oldVar, Variable* newVar);
 
-	void performReplace(ShPtr<Function> func);
+	void performReplace(Function* func);
 
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<Variable> var) override;
+	virtual void visit(Variable* var) override;
 	/// @}
 
 private:
 	/// Old variable.
-	ShPtr<Variable> oldVar;
+	Variable* oldVar = nullptr;
 
 	/// New variable.
-	ShPtr<Variable> newVar;
+	Variable* newVar = nullptr;
 };
 
 } // namespace llvmir2hll

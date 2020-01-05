@@ -43,14 +43,14 @@ namespace llvmir2hll {
 */
 class BasicBlockAPICallSeqFinder: public APICallSeqFinder {
 public:
-	BasicBlockAPICallSeqFinder(ShPtr<ValueAnalysis> va,
-		ShPtr<CallInfoObtainer> cio);
+	BasicBlockAPICallSeqFinder(ValueAnalysis* va,
+		CallInfoObtainer* cio);
 	virtual Patterns findPatterns(const APICallInfoSeq &info,
-		ShPtr<CallExpr> call, ShPtr<Statement> stmt, ShPtr<Function> func,
-		ShPtr<Module> module) override;
+		CallExpr* call, Statement* stmt, Function* func,
+		Module* module) override;
 
-	static ShPtr<BasicBlockAPICallSeqFinder> create(ShPtr<ValueAnalysis> va,
-		ShPtr<CallInfoObtainer> cio);
+	static BasicBlockAPICallSeqFinder* create(ValueAnalysis* va,
+		CallInfoObtainer* cio);
 
 private:
 };

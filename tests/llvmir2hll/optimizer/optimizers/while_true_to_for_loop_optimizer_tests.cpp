@@ -27,7 +27,7 @@ protected:
 
 protected:
 	/// Evaluator of expressions to be used in tests.
-	ShPtr<ArithmExprEvaluator> arithmExprEvaluator;
+	ArithmExprEvaluator* arithmExprEvaluator;
 };
 
 WhileTrueToForLoopOptimizerTests::WhileTrueToForLoopOptimizerTests():
@@ -37,7 +37,7 @@ TEST_F(WhileTrueToForLoopOptimizerTests,
 OptimizerHasNonEmptyID) {
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
 
-	ShPtr<WhileTrueToForLoopOptimizer> optimizer(new WhileTrueToForLoopOptimizer(
+	WhileTrueToForLoopOptimizer* optimizer(new WhileTrueToForLoopOptimizer(
 		module, va, arithmExprEvaluator));
 
 	EXPECT_TRUE(!optimizer->getId().empty()) <<

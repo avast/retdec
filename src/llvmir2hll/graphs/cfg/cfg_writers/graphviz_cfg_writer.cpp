@@ -61,9 +61,9 @@ std::string createLabel(const std::string &str) {
 * @brief Returns a string representation of @a cfgNode to be used as a unique
 *        identifier of the node.
 */
-std::string cfgNodeToGraphvizNode(ShPtr<CFG::Node> cfgNode) {
+std::string cfgNodeToGraphvizNode(CFG::Node* cfgNode) {
 	// To ensure uniqueness, we use the node's address.
-	return "Node" + createLabel(toString(cfgNode.get()));
+	return "Node" + createLabel(toString(cfgNode));
 }
 
 /**
@@ -72,7 +72,7 @@ std::string cfgNodeToGraphvizNode(ShPtr<CFG::Node> cfgNode) {
 *
 * An example of a function's name is <tt>printf(*str, ...)</tt>.
 */
-std::string createFuncName(ShPtr<Function> func) {
+std::string createFuncName(Function* func) {
 	auto funcName = func->getTextRepr();
 
 	// Remove the prefix "def " (if any).
@@ -90,7 +90,7 @@ std::string createFuncName(ShPtr<Function> func) {
 *
 * See create() for the description of parameters.
 */
-GraphvizCFGWriter::GraphvizCFGWriter(ShPtr<CFG> cfg, std::ostream &out):
+GraphvizCFGWriter::GraphvizCFGWriter(CFG* cfg, std::ostream &out):
 	CFGWriter(cfg, out) {}
 
 /**
@@ -99,8 +99,8 @@ GraphvizCFGWriter::GraphvizCFGWriter(ShPtr<CFG> cfg, std::ostream &out):
 * @param[in] cfg CFG to be emitted.
 * @param[in] out Output stream into which the CFG will be emitted.
 */
-ShPtr<CFGWriter> GraphvizCFGWriter::create(ShPtr<CFG> cfg, std::ostream &out) {
-	return ShPtr<CFGWriter>(new GraphvizCFGWriter(cfg, out));
+CFGWriter* GraphvizCFGWriter::create(CFG* cfg, std::ostream &out) {
+	return new GraphvizCFGWriter(cfg, out);
 }
 
 std::string GraphvizCFGWriter::getId() const {
@@ -139,8 +139,8 @@ bool GraphvizCFGWriter::emitCFG() {
 * emittedNodes, it is not emitted.
 */
 void GraphvizCFGWriter::emitNodesByBreathFirstTraversal(
-		ShPtr<CFG::Node> startNode, NodeSet &emittedNodes) {
-	std::queue<ShPtr<CFG::Node>> nodesToEmit;
+		CFG::Node* startNode, NodeSet &emittedNodes) {
+	std::queue<CFG::Node*> nodesToEmit;
 	nodesToEmit.push(startNode);
 	while (!nodesToEmit.empty()) {
 		auto node = nodesToEmit.front();
@@ -164,7 +164,7 @@ void GraphvizCFGWriter::emitNodesByBreathFirstTraversal(
 /**
 * @brief Emits the given node to @c out.
 */
-void GraphvizCFGWriter::emitNode(ShPtr<CFG::Node> node) {
+void GraphvizCFGWriter::emitNode(CFG::Node* node) {
 	out << INDENT << cfgNodeToGraphvizNode(node) << " [label=\"{";
 
 	// Node label (optional).
@@ -184,7 +184,7 @@ void GraphvizCFGWriter::emitNode(ShPtr<CFG::Node> node) {
 /**
 * @brief Emits the given edge to @c out.
 */
-void GraphvizCFGWriter::emitEdge(ShPtr<CFG::Edge> edge) {
+void GraphvizCFGWriter::emitEdge(CFG::Edge* edge) {
 	out << INDENT << cfgNodeToGraphvizNode(edge->getSrc()) << " -> "
 		<< cfgNodeToGraphvizNode(edge->getDst());
 	if (auto label = edge->getLabel()) {
@@ -196,7 +196,7 @@ void GraphvizCFGWriter::emitEdge(ShPtr<CFG::Edge> edge) {
 /**
 * @brief Emits the given statement to @c out.
 */
-void GraphvizCFGWriter::emitStmt(ShPtr<Statement> stmt) {
+void GraphvizCFGWriter::emitStmt(Statement* stmt) {
 	out << INDENT << createLabel(stmt->getTextRepr()) << "\\l";
 }
 

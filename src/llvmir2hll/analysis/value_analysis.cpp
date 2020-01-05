@@ -171,7 +171,7 @@ std::size_t ValueData::getNumOfDirAccessedVars() const {
 * @par Preconditions
 *  - @a var is non-null
 */
-std::size_t ValueData::getDirNumOfUses(ShPtr<Variable> var) const {
+std::size_t ValueData::getDirNumOfUses(Variable* var) const {
 	PRECONDITION_NON_NULL(var);
 
 	auto i = dirNumOfVarUses.find(var);
@@ -227,21 +227,21 @@ ValueData::var_iterator ValueData::dir_all_end() const {
 /**
 * @brief Returns @c true if @a var is directly read, @c false otherwise.
 */
-bool ValueData::isDirRead(ShPtr<Variable> var) const {
+bool ValueData::isDirRead(Variable* var) const {
 	return hasItem(dirReadVars, var);
 }
 
 /**
 * @brief Returns @c true if @a var is directly written, @c false otherwise.
 */
-bool ValueData::isDirWritten(ShPtr<Variable> var) const {
+bool ValueData::isDirWritten(Variable* var) const {
 	return hasItem(dirWrittenVars, var);
 }
 
 /**
 * @brief Returns @c true if @a var is directly accessed, @c false otherwise.
 */
-bool ValueData::isDirAccessed(ShPtr<Variable> var) const {
+bool ValueData::isDirAccessed(Variable* var) const {
 	return hasItem(dirAllVars, var);
 }
 
@@ -278,7 +278,7 @@ const VarSet &ValueData::getMayBeAccessedVars() const {
 /**
 * @brief Returns @c true if @a var may be indirectly read, @c false otherwise.
 */
-bool ValueData::mayBeIndirRead(ShPtr<Variable> var) const {
+bool ValueData::mayBeIndirRead(Variable* var) const {
 	return hasItem(mayBeReadVars, var);
 }
 
@@ -286,7 +286,7 @@ bool ValueData::mayBeIndirRead(ShPtr<Variable> var) const {
 * @brief Returns @c true if @a var may be indirectly written-into, @c false
 *        otherwise.
 */
-bool ValueData::mayBeIndirWritten(ShPtr<Variable> var) const {
+bool ValueData::mayBeIndirWritten(Variable* var) const {
 	return hasItem(mayBeWrittenVars, var);
 }
 
@@ -294,7 +294,7 @@ bool ValueData::mayBeIndirWritten(ShPtr<Variable> var) const {
 * @brief Returns @c true if @a var may be indirectly accessed, @c false
 *        otherwise.
 */
-bool ValueData::mayBeIndirAccessed(ShPtr<Variable> var) const {
+bool ValueData::mayBeIndirAccessed(Variable* var) const {
 	return hasItem(mayBeAccessedVars, var);
 }
 
@@ -387,7 +387,7 @@ const VarSet &ValueData::getMustBeAccessedVars() const {
 /**
 * @brief Returns @c true if @a var must be indirectly read, @c false otherwise.
 */
-bool ValueData::mustBeIndirRead(ShPtr<Variable> var) const {
+bool ValueData::mustBeIndirRead(Variable* var) const {
 	return hasItem(mustBeReadVars, var);
 }
 
@@ -395,7 +395,7 @@ bool ValueData::mustBeIndirRead(ShPtr<Variable> var) const {
 * @brief Returns @c true if @a var must be indirectly written-into, @c false
 *        otherwise.
 */
-bool ValueData::mustBeIndirWritten(ShPtr<Variable> var) const {
+bool ValueData::mustBeIndirWritten(Variable* var) const {
 	return hasItem(mustBeWrittenVars, var);
 }
 
@@ -403,7 +403,7 @@ bool ValueData::mustBeIndirWritten(ShPtr<Variable> var) const {
 * @brief Returns @c true if @a var must be indirectly accessed, @c false
 *        otherwise.
 */
-bool ValueData::mustBeIndirAccessed(ShPtr<Variable> var) const {
+bool ValueData::mustBeIndirAccessed(Variable* var) const {
 	return hasItem(mustBeAccessedVars, var);
 }
 
@@ -503,7 +503,7 @@ bool ValueData::hasAddressOps() const {
 * @par Preconditions
 *  - @a var is non-null
 */
-bool ValueData::hasAddressTaken(ShPtr<Variable> var) const {
+bool ValueData::hasAddressTaken(Variable* var) const {
 	PRECONDITION_NON_NULL(var);
 
 	return hasItem(addressTakenVars, var);
@@ -556,7 +556,7 @@ void ValueData::clear() {
 *
 * See the description of create() for more information.
 */
-ValueAnalysis::ValueAnalysis(ShPtr<AliasAnalysis> aliasAnalysis,
+ValueAnalysis::ValueAnalysis(AliasAnalysis* aliasAnalysis,
 		bool enableCaching):
 	OrderedAllVisitor(false, false), Caching(enableCaching),
 	aliasAnalysis(aliasAnalysis), valueData(), writing(false),
@@ -568,7 +568,7 @@ ValueAnalysis::ValueAnalysis(ShPtr<AliasAnalysis> aliasAnalysis,
 * @par Preconditions
 *  - @a value is non-null
 */
-ShPtr<ValueData> ValueAnalysis::getValueData(ShPtr<Value> value) {
+ValueData* ValueAnalysis::getValueData(Value* value) {
 	PRECONDITION_NON_NULL(value);
 
 	// Caching.
@@ -578,7 +578,7 @@ ShPtr<ValueData> ValueAnalysis::getValueData(ShPtr<Value> value) {
 
 	// Initialization.
 	restart(false, false);
-	valueData = ShPtr<ValueData>(new ValueData());
+	valueData = new ValueData();
 	writing = false;
 
 	// Obtain read and written-into variables.
@@ -614,7 +614,7 @@ void ValueAnalysis::clearCache() {
 * @par Preconditions
 *  - @a value is non-null
 */
-void ValueAnalysis::removeFromCache(ShPtr<Value> value, bool recursive) {
+void ValueAnalysis::removeFromCache(Value* value, bool recursive) {
 	if (!isCachingEnabled()) {
 		return;
 	}
@@ -636,7 +636,7 @@ void ValueAnalysis::removeFromCache(ShPtr<Value> value, bool recursive) {
 * This function is a delegation to AliasAnalysis::init(). See it for more
 * information.
 */
-void ValueAnalysis::initAliasAnalysis(ShPtr<Module> module) {
+void ValueAnalysis::initAliasAnalysis(Module* module) {
 	aliasAnalysis->init(module);
 }
 
@@ -646,7 +646,7 @@ void ValueAnalysis::initAliasAnalysis(ShPtr<Module> module) {
 * This function is a delegation to AliasAnalysis::mayPointTo(). See it for more
 * information.
 */
-const VarSet &ValueAnalysis::mayPointTo(ShPtr<Variable> var) const {
+const VarSet &ValueAnalysis::mayPointTo(Variable* var) const {
 	return aliasAnalysis->mayPointTo(var);
 }
 
@@ -656,7 +656,7 @@ const VarSet &ValueAnalysis::mayPointTo(ShPtr<Variable> var) const {
 * This function is a delegation to AliasAnalysis::pointsTo(). See it for more
 * information.
 */
-ShPtr<Variable> ValueAnalysis::pointsTo(ShPtr<Variable> var) const {
+Variable* ValueAnalysis::pointsTo(Variable* var) const {
 	return aliasAnalysis->pointsTo(var);
 }
 
@@ -667,7 +667,7 @@ ShPtr<Variable> ValueAnalysis::pointsTo(ShPtr<Variable> var) const {
 * This function is a delegation to AliasAnalysis::mayBePointed(). See it for
 * more information.
 */
-bool ValueAnalysis::mayBePointed(ShPtr<Variable> var) const {
+bool ValueAnalysis::mayBePointed(Variable* var) const {
 	return aliasAnalysis->mayBePointed(var);
 }
 
@@ -684,23 +684,23 @@ bool ValueAnalysis::mayBePointed(ShPtr<Variable> var) const {
 * @par Preconditions
 *  - @a aliasAnalysis has been initialized
 */
-ShPtr<ValueAnalysis> ValueAnalysis::create(ShPtr<AliasAnalysis> aliasAnalysis,
+ValueAnalysis* ValueAnalysis::create(AliasAnalysis* aliasAnalysis,
 		bool enableCaching) {
 	PRECONDITION(aliasAnalysis->isInitialized(), "it is not initialized");
 
-	return ShPtr<ValueAnalysis>(new ValueAnalysis(aliasAnalysis, enableCaching));
+	return new ValueAnalysis(aliasAnalysis, enableCaching);
 }
 
 /**
 * @brief Computes indirectly used variables in the given dereferencing
 *        expression and stores them in appropriate sets of @c valueData.
 */
-void ValueAnalysis::computeAndStoreIndirectlyUsedVars(ShPtr<DerefOpExpr> expr) {
+void ValueAnalysis::computeAndStoreIndirectlyUsedVars(DerefOpExpr* expr) {
 	// Traverse through the (possibly nested) dereferences until we find
 	// something different than a dereference. Also, keep the number of
 	// traversed dereferences. This will be useful later.
 	unsigned numOfDerefs = 1;
-	ShPtr<Expression> firstNonDerefExpr(expr->getOperand());
+	Expression* firstNonDerefExpr(expr->getOperand());
 	while (isa<DerefOpExpr>(firstNonDerefExpr)) {
 		firstNonDerefExpr = ucast<DerefOpExpr>(firstNonDerefExpr)->getOperand();
 		numOfDerefs++;
@@ -708,7 +708,7 @@ void ValueAnalysis::computeAndStoreIndirectlyUsedVars(ShPtr<DerefOpExpr> expr) {
 
 	// Currently, we can compute indirectly read/written variables only if the
 	// first non-dereference operand is a variable.
-	ShPtr<Variable> var = cast<Variable>(firstNonDerefExpr);
+	Variable* var = cast<Variable>(firstNonDerefExpr);
 	if (!var) {
 		return;
 	}
@@ -748,7 +748,7 @@ void ValueAnalysis::computeAndStoreIndirectlyUsedVars(ShPtr<DerefOpExpr> expr) {
 
 	// Compute the index [0] (the innermost star).
 	// Does var point to a single, unique variable?
-	if (ShPtr<Variable> pointsToVar = aliasAnalysis->pointsTo(var)) {
+	if (Variable* pointsToVar = aliasAnalysis->pointsTo(var)) {
 		// Yes, it does, so include just it.
 		accessedVarsInDeref[0].insert(pointsToVar);
 		mustInDeref[0] = true;
@@ -764,7 +764,7 @@ void ValueAnalysis::computeAndStoreIndirectlyUsedVars(ShPtr<DerefOpExpr> expr) {
 		// For every variable accessed in the previous dereference...
 		for (const auto &varFromPrevDeref : accessedVarsInDeref[i - 1]) {
 			// Does this variable point to a single, unique variable?
-			if (ShPtr<Variable> pointsToVar = cast<Variable>(
+			if (Variable* pointsToVar = cast<Variable>(
 					aliasAnalysis->pointsTo(varFromPrevDeref))) {
 				// Yes, it does, so include just it.
 				accessedVarsInDeref[i].insert(pointsToVar);
@@ -815,7 +815,7 @@ void ValueAnalysis::computeAndStoreIndirectlyUsedVars(ShPtr<DerefOpExpr> expr) {
 	}
 }
 
-void ValueAnalysis::visit(ShPtr<Function> func) {
+void ValueAnalysis::visit(Function* func) {
 	//
 	// Caching
 	//
@@ -828,7 +828,7 @@ void ValueAnalysis::visit(ShPtr<Function> func) {
 	}
 }
 
-void ValueAnalysis::visit(ShPtr<AssignStmt> stmt) {
+void ValueAnalysis::visit(AssignStmt* stmt) {
 	//
 	// Caching
 	//
@@ -847,7 +847,7 @@ void ValueAnalysis::visit(ShPtr<AssignStmt> stmt) {
 	stmt->getRhs()->accept(this);
 }
 
-void ValueAnalysis::visit(ShPtr<BreakStmt> stmt) {
+void ValueAnalysis::visit(BreakStmt* stmt) {
 	//
 	// Caching
 	//
@@ -858,7 +858,7 @@ void ValueAnalysis::visit(ShPtr<BreakStmt> stmt) {
 	OrderedAllVisitor::visit(stmt);
 }
 
-void ValueAnalysis::visit(ShPtr<CallStmt> stmt) {
+void ValueAnalysis::visit(CallStmt* stmt) {
 	//
 	// Caching
 	//
@@ -869,7 +869,7 @@ void ValueAnalysis::visit(ShPtr<CallStmt> stmt) {
 	OrderedAllVisitor::visit(stmt);
 }
 
-void ValueAnalysis::visit(ShPtr<ContinueStmt> stmt) {
+void ValueAnalysis::visit(ContinueStmt* stmt) {
 	//
 	// Caching
 	//
@@ -880,7 +880,7 @@ void ValueAnalysis::visit(ShPtr<ContinueStmt> stmt) {
 	OrderedAllVisitor::visit(stmt);
 }
 
-void ValueAnalysis::visit(ShPtr<EmptyStmt> stmt) {
+void ValueAnalysis::visit(EmptyStmt* stmt) {
 	//
 	// Caching
 	//
@@ -891,7 +891,7 @@ void ValueAnalysis::visit(ShPtr<EmptyStmt> stmt) {
 	OrderedAllVisitor::visit(stmt);
 }
 
-void ValueAnalysis::visit(ShPtr<ForLoopStmt> stmt) {
+void ValueAnalysis::visit(ForLoopStmt* stmt) {
 	//
 	// Caching
 	//
@@ -912,7 +912,7 @@ void ValueAnalysis::visit(ShPtr<ForLoopStmt> stmt) {
 	stmt->getStep()->accept(this);
 }
 
-void ValueAnalysis::visit(ShPtr<UForLoopStmt> stmt) {
+void ValueAnalysis::visit(UForLoopStmt* stmt) {
 	//
 	// Caching
 	//
@@ -936,7 +936,7 @@ void ValueAnalysis::visit(ShPtr<UForLoopStmt> stmt) {
 	}
 }
 
-void ValueAnalysis::visit(ShPtr<GotoStmt> stmt) {
+void ValueAnalysis::visit(GotoStmt* stmt) {
 	//
 	// Caching
 	//
@@ -947,7 +947,7 @@ void ValueAnalysis::visit(ShPtr<GotoStmt> stmt) {
 	OrderedAllVisitor::visit(stmt);
 }
 
-void ValueAnalysis::visit(ShPtr<IfStmt> stmt) {
+void ValueAnalysis::visit(IfStmt* stmt) {
 	//
 	// Caching
 	//
@@ -958,7 +958,7 @@ void ValueAnalysis::visit(ShPtr<IfStmt> stmt) {
 	OrderedAllVisitor::visit(stmt);
 }
 
-void ValueAnalysis::visit(ShPtr<ReturnStmt> stmt) {
+void ValueAnalysis::visit(ReturnStmt* stmt) {
 	//
 	// Caching
 	//
@@ -969,7 +969,7 @@ void ValueAnalysis::visit(ShPtr<ReturnStmt> stmt) {
 	OrderedAllVisitor::visit(stmt);
 }
 
-void ValueAnalysis::visit(ShPtr<SwitchStmt> stmt) {
+void ValueAnalysis::visit(SwitchStmt* stmt) {
 	//
 	// Caching
 	//
@@ -980,7 +980,7 @@ void ValueAnalysis::visit(ShPtr<SwitchStmt> stmt) {
 	OrderedAllVisitor::visit(stmt);
 }
 
-void ValueAnalysis::visit(ShPtr<UnreachableStmt> stmt) {
+void ValueAnalysis::visit(UnreachableStmt* stmt) {
 	//
 	// Caching
 	//
@@ -991,7 +991,7 @@ void ValueAnalysis::visit(ShPtr<UnreachableStmt> stmt) {
 	OrderedAllVisitor::visit(stmt);
 }
 
-void ValueAnalysis::visit(ShPtr<VarDefStmt> stmt) {
+void ValueAnalysis::visit(VarDefStmt* stmt) {
 	//
 	// Caching
 	//
@@ -1007,12 +1007,12 @@ void ValueAnalysis::visit(ShPtr<VarDefStmt> stmt) {
 	writing = true;
 	stmt->getVar()->accept(this);
 	writing = false;
-	if (ShPtr<Expression> init = stmt->getInitializer()) {
+	if (Expression* init = stmt->getInitializer()) {
 		init->accept(this);
 	}
 }
 
-void ValueAnalysis::visit(ShPtr<WhileLoopStmt> stmt) {
+void ValueAnalysis::visit(WhileLoopStmt* stmt) {
 	//
 	// Caching
 	//
@@ -1023,7 +1023,7 @@ void ValueAnalysis::visit(ShPtr<WhileLoopStmt> stmt) {
 	OrderedAllVisitor::visit(stmt);
 }
 
-void ValueAnalysis::visit(ShPtr<AddOpExpr> expr) {
+void ValueAnalysis::visit(AddOpExpr* expr) {
 	//
 	// Caching
 	//
@@ -1034,7 +1034,7 @@ void ValueAnalysis::visit(ShPtr<AddOpExpr> expr) {
 	OrderedAllVisitor::visit(expr);
 }
 
-void ValueAnalysis::visit(ShPtr<AddressOpExpr> expr) {
+void ValueAnalysis::visit(AddressOpExpr* expr) {
 	//
 	// Caching
 	//
@@ -1047,14 +1047,14 @@ void ValueAnalysis::visit(ShPtr<AddressOpExpr> expr) {
 	//
 	// Address operators
 	//
-	if (ShPtr<Variable> var = cast<Variable>(expr->getOperand())) {
+	if (Variable* var = cast<Variable>(expr->getOperand())) {
 		valueData->addressTakenVars.insert(var);
 	}
 
 	OrderedAllVisitor::visit(expr);
 }
 
-void ValueAnalysis::visit(ShPtr<AndOpExpr> expr) {
+void ValueAnalysis::visit(AndOpExpr* expr) {
 	//
 	// Caching
 	//
@@ -1065,7 +1065,7 @@ void ValueAnalysis::visit(ShPtr<AndOpExpr> expr) {
 	OrderedAllVisitor::visit(expr);
 }
 
-void ValueAnalysis::visit(ShPtr<ArrayIndexOpExpr> expr) {
+void ValueAnalysis::visit(ArrayIndexOpExpr* expr) {
 	//
 	// Caching
 	//
@@ -1091,7 +1091,7 @@ void ValueAnalysis::visit(ShPtr<ArrayIndexOpExpr> expr) {
 	writing = oldWriting;
 }
 
-void ValueAnalysis::visit(ShPtr<AssignOpExpr> expr) {
+void ValueAnalysis::visit(AssignOpExpr* expr) {
 	//
 	// Caching
 	//
@@ -1110,7 +1110,7 @@ void ValueAnalysis::visit(ShPtr<AssignOpExpr> expr) {
 	expr->getSecondOperand()->accept(this);
 }
 
-void ValueAnalysis::visit(ShPtr<StructIndexOpExpr> expr) {
+void ValueAnalysis::visit(StructIndexOpExpr* expr) {
 	//
 	// Caching
 	//
@@ -1136,7 +1136,7 @@ void ValueAnalysis::visit(ShPtr<StructIndexOpExpr> expr) {
 	writing = oldWriting;
 }
 
-void ValueAnalysis::visit(ShPtr<BitAndOpExpr> expr) {
+void ValueAnalysis::visit(BitAndOpExpr* expr) {
 	//
 	// Caching
 	//
@@ -1147,7 +1147,7 @@ void ValueAnalysis::visit(ShPtr<BitAndOpExpr> expr) {
 	OrderedAllVisitor::visit(expr);
 }
 
-void ValueAnalysis::visit(ShPtr<BitOrOpExpr> expr) {
+void ValueAnalysis::visit(BitOrOpExpr* expr) {
 	//
 	// Caching
 	//
@@ -1158,7 +1158,7 @@ void ValueAnalysis::visit(ShPtr<BitOrOpExpr> expr) {
 	OrderedAllVisitor::visit(expr);
 }
 
-void ValueAnalysis::visit(ShPtr<BitShlOpExpr> expr) {
+void ValueAnalysis::visit(BitShlOpExpr* expr) {
 	//
 	// Caching
 	//
@@ -1169,7 +1169,7 @@ void ValueAnalysis::visit(ShPtr<BitShlOpExpr> expr) {
 	OrderedAllVisitor::visit(expr);
 }
 
-void ValueAnalysis::visit(ShPtr<BitShrOpExpr> expr) {
+void ValueAnalysis::visit(BitShrOpExpr* expr) {
 	//
 	// Caching
 	//
@@ -1180,7 +1180,7 @@ void ValueAnalysis::visit(ShPtr<BitShrOpExpr> expr) {
 	OrderedAllVisitor::visit(expr);
 }
 
-void ValueAnalysis::visit(ShPtr<BitXorOpExpr> expr) {
+void ValueAnalysis::visit(BitXorOpExpr* expr) {
 	//
 	// Caching
 	//
@@ -1191,7 +1191,7 @@ void ValueAnalysis::visit(ShPtr<BitXorOpExpr> expr) {
 	OrderedAllVisitor::visit(expr);
 }
 
-void ValueAnalysis::visit(ShPtr<CallExpr> expr) {
+void ValueAnalysis::visit(CallExpr* expr) {
 	//
 	// Caching
 	//
@@ -1209,7 +1209,7 @@ void ValueAnalysis::visit(ShPtr<CallExpr> expr) {
 	OrderedAllVisitor::visit(expr);
 }
 
-void ValueAnalysis::visit(ShPtr<CommaOpExpr> expr) {
+void ValueAnalysis::visit(CommaOpExpr* expr) {
 	//
 	// Caching
 	//
@@ -1220,7 +1220,7 @@ void ValueAnalysis::visit(ShPtr<CommaOpExpr> expr) {
 	OrderedAllVisitor::visit(expr);
 }
 
-void ValueAnalysis::visit(ShPtr<DerefOpExpr> expr) {
+void ValueAnalysis::visit(DerefOpExpr* expr) {
 	//
 	// Caching
 	//
@@ -1249,9 +1249,9 @@ void ValueAnalysis::visit(ShPtr<DerefOpExpr> expr) {
 	// do this instead of just calling expr->getOperand()->accept(this) is that
 	// if we did this, we would also compute indirectly used variables for all
 	// sub-dereferences, which might give us invalid results. Indeed, recall
-	// that in every call to <tt>visit(ShPtr<DerefOpExpr> expr)</tt>, we
+	// that in every call to <tt>visit(DerefOpExpr* expr)</tt>, we
 	// compute indirectly used variables.
-	ShPtr<Expression> firstNonDerefExpr(expr->getOperand());
+	Expression* firstNonDerefExpr(expr->getOperand());
 	while (isa<DerefOpExpr>(firstNonDerefExpr)) {
 		firstNonDerefExpr = ucast<DerefOpExpr>(firstNonDerefExpr)->getOperand();
 	}
@@ -1263,7 +1263,7 @@ void ValueAnalysis::visit(ShPtr<DerefOpExpr> expr) {
 	writing = oldWriting;
 }
 
-void ValueAnalysis::visit(ShPtr<DivOpExpr> expr) {
+void ValueAnalysis::visit(DivOpExpr* expr) {
 	//
 	// Caching
 	//
@@ -1274,7 +1274,7 @@ void ValueAnalysis::visit(ShPtr<DivOpExpr> expr) {
 	OrderedAllVisitor::visit(expr);
 }
 
-void ValueAnalysis::visit(ShPtr<EqOpExpr> expr) {
+void ValueAnalysis::visit(EqOpExpr* expr) {
 	//
 	// Caching
 	//
@@ -1285,7 +1285,7 @@ void ValueAnalysis::visit(ShPtr<EqOpExpr> expr) {
 	OrderedAllVisitor::visit(expr);
 }
 
-void ValueAnalysis::visit(ShPtr<GtEqOpExpr> expr) {
+void ValueAnalysis::visit(GtEqOpExpr* expr) {
 	//
 	// Caching
 	//
@@ -1296,7 +1296,7 @@ void ValueAnalysis::visit(ShPtr<GtEqOpExpr> expr) {
 	OrderedAllVisitor::visit(expr);
 }
 
-void ValueAnalysis::visit(ShPtr<GtOpExpr> expr) {
+void ValueAnalysis::visit(GtOpExpr* expr) {
 	//
 	// Caching
 	//
@@ -1307,7 +1307,7 @@ void ValueAnalysis::visit(ShPtr<GtOpExpr> expr) {
 	OrderedAllVisitor::visit(expr);
 }
 
-void ValueAnalysis::visit(ShPtr<LtEqOpExpr> expr) {
+void ValueAnalysis::visit(LtEqOpExpr* expr) {
 	//
 	// Caching
 	//
@@ -1318,7 +1318,7 @@ void ValueAnalysis::visit(ShPtr<LtEqOpExpr> expr) {
 	OrderedAllVisitor::visit(expr);
 }
 
-void ValueAnalysis::visit(ShPtr<LtOpExpr> expr) {
+void ValueAnalysis::visit(LtOpExpr* expr) {
 	//
 	// Caching
 	//
@@ -1329,7 +1329,7 @@ void ValueAnalysis::visit(ShPtr<LtOpExpr> expr) {
 	OrderedAllVisitor::visit(expr);
 }
 
-void ValueAnalysis::visit(ShPtr<ModOpExpr> expr) {
+void ValueAnalysis::visit(ModOpExpr* expr) {
 	//
 	// Caching
 	//
@@ -1340,7 +1340,7 @@ void ValueAnalysis::visit(ShPtr<ModOpExpr> expr) {
 	OrderedAllVisitor::visit(expr);
 }
 
-void ValueAnalysis::visit(ShPtr<MulOpExpr> expr) {
+void ValueAnalysis::visit(MulOpExpr* expr) {
 	//
 	// Caching
 	//
@@ -1351,7 +1351,7 @@ void ValueAnalysis::visit(ShPtr<MulOpExpr> expr) {
 	OrderedAllVisitor::visit(expr);
 }
 
-void ValueAnalysis::visit(ShPtr<NegOpExpr> expr) {
+void ValueAnalysis::visit(NegOpExpr* expr) {
 	//
 	// Caching
 	//
@@ -1362,7 +1362,7 @@ void ValueAnalysis::visit(ShPtr<NegOpExpr> expr) {
 	OrderedAllVisitor::visit(expr);
 }
 
-void ValueAnalysis::visit(ShPtr<NeqOpExpr> expr) {
+void ValueAnalysis::visit(NeqOpExpr* expr) {
 	//
 	// Caching
 	//
@@ -1373,7 +1373,7 @@ void ValueAnalysis::visit(ShPtr<NeqOpExpr> expr) {
 	OrderedAllVisitor::visit(expr);
 }
 
-void ValueAnalysis::visit(ShPtr<NotOpExpr> expr) {
+void ValueAnalysis::visit(NotOpExpr* expr) {
 	//
 	// Caching
 	//
@@ -1384,7 +1384,7 @@ void ValueAnalysis::visit(ShPtr<NotOpExpr> expr) {
 	OrderedAllVisitor::visit(expr);
 }
 
-void ValueAnalysis::visit(ShPtr<OrOpExpr> expr) {
+void ValueAnalysis::visit(OrOpExpr* expr) {
 	//
 	// Caching
 	//
@@ -1395,7 +1395,7 @@ void ValueAnalysis::visit(ShPtr<OrOpExpr> expr) {
 	OrderedAllVisitor::visit(expr);
 }
 
-void ValueAnalysis::visit(ShPtr<SubOpExpr> expr) {
+void ValueAnalysis::visit(SubOpExpr* expr) {
 	//
 	// Caching
 	//
@@ -1406,7 +1406,7 @@ void ValueAnalysis::visit(ShPtr<SubOpExpr> expr) {
 	OrderedAllVisitor::visit(expr);
 }
 
-void ValueAnalysis::visit(ShPtr<TernaryOpExpr> expr) {
+void ValueAnalysis::visit(TernaryOpExpr* expr) {
 	//
 	// Caching
 	//
@@ -1417,7 +1417,7 @@ void ValueAnalysis::visit(ShPtr<TernaryOpExpr> expr) {
 	OrderedAllVisitor::visit(expr);
 }
 
-void ValueAnalysis::visit(ShPtr<Variable> var) {
+void ValueAnalysis::visit(Variable* var) {
 	//
 	// Caching
 	//
@@ -1439,7 +1439,7 @@ void ValueAnalysis::visit(ShPtr<Variable> var) {
 	valueData->dirNumOfVarUses[var]++;
 }
 
-void ValueAnalysis::visit(ShPtr<BitCastExpr> expr) {
+void ValueAnalysis::visit(BitCastExpr* expr) {
 	//
 	// Caching
 	//
@@ -1450,7 +1450,7 @@ void ValueAnalysis::visit(ShPtr<BitCastExpr> expr) {
 	OrderedAllVisitor::visit(expr);
 }
 
-void ValueAnalysis::visit(ShPtr<ExtCastExpr> expr) {
+void ValueAnalysis::visit(ExtCastExpr* expr) {
 	//
 	// Caching
 	//
@@ -1461,7 +1461,7 @@ void ValueAnalysis::visit(ShPtr<ExtCastExpr> expr) {
 	OrderedAllVisitor::visit(expr);
 }
 
-void ValueAnalysis::visit(ShPtr<FPToIntCastExpr> expr) {
+void ValueAnalysis::visit(FPToIntCastExpr* expr) {
 	//
 	// Caching
 	//
@@ -1472,7 +1472,7 @@ void ValueAnalysis::visit(ShPtr<FPToIntCastExpr> expr) {
 	OrderedAllVisitor::visit(expr);
 }
 
-void ValueAnalysis::visit(ShPtr<IntToFPCastExpr> expr) {
+void ValueAnalysis::visit(IntToFPCastExpr* expr) {
 	//
 	// Caching
 	//
@@ -1483,7 +1483,7 @@ void ValueAnalysis::visit(ShPtr<IntToFPCastExpr> expr) {
 	OrderedAllVisitor::visit(expr);
 }
 
-void ValueAnalysis::visit(ShPtr<IntToPtrCastExpr> expr) {
+void ValueAnalysis::visit(IntToPtrCastExpr* expr) {
 	//
 	// Caching
 	//
@@ -1494,7 +1494,7 @@ void ValueAnalysis::visit(ShPtr<IntToPtrCastExpr> expr) {
 	OrderedAllVisitor::visit(expr);
 }
 
-void ValueAnalysis::visit(ShPtr<PtrToIntCastExpr> expr) {
+void ValueAnalysis::visit(PtrToIntCastExpr* expr) {
 	//
 	// Caching
 	//
@@ -1505,7 +1505,7 @@ void ValueAnalysis::visit(ShPtr<PtrToIntCastExpr> expr) {
 	OrderedAllVisitor::visit(expr);
 }
 
-void ValueAnalysis::visit(ShPtr<TruncCastExpr> expr) {
+void ValueAnalysis::visit(TruncCastExpr* expr) {
 	//
 	// Caching
 	//
@@ -1516,7 +1516,7 @@ void ValueAnalysis::visit(ShPtr<TruncCastExpr> expr) {
 	OrderedAllVisitor::visit(expr);
 }
 
-void ValueAnalysis::visit(ShPtr<ConstArray> constant) {
+void ValueAnalysis::visit(ConstArray* constant) {
 	//
 	// Caching
 	//
@@ -1527,7 +1527,7 @@ void ValueAnalysis::visit(ShPtr<ConstArray> constant) {
 	OrderedAllVisitor::visit(constant);
 }
 
-void ValueAnalysis::visit(ShPtr<ConstBool> constant) {
+void ValueAnalysis::visit(ConstBool* constant) {
 	//
 	// Caching
 	//
@@ -1538,7 +1538,7 @@ void ValueAnalysis::visit(ShPtr<ConstBool> constant) {
 	OrderedAllVisitor::visit(constant);
 }
 
-void ValueAnalysis::visit(ShPtr<ConstFloat> constant) {
+void ValueAnalysis::visit(ConstFloat* constant) {
 	//
 	// Caching
 	//
@@ -1549,7 +1549,7 @@ void ValueAnalysis::visit(ShPtr<ConstFloat> constant) {
 	OrderedAllVisitor::visit(constant);
 }
 
-void ValueAnalysis::visit(ShPtr<ConstInt> constant) {
+void ValueAnalysis::visit(ConstInt* constant) {
 	//
 	// Caching
 	//
@@ -1560,7 +1560,7 @@ void ValueAnalysis::visit(ShPtr<ConstInt> constant) {
 	OrderedAllVisitor::visit(constant);
 }
 
-void ValueAnalysis::visit(ShPtr<ConstNullPointer> constant) {
+void ValueAnalysis::visit(ConstNullPointer* constant) {
 	//
 	// Caching
 	//
@@ -1571,7 +1571,7 @@ void ValueAnalysis::visit(ShPtr<ConstNullPointer> constant) {
 	OrderedAllVisitor::visit(constant);
 }
 
-void ValueAnalysis::visit(ShPtr<ConstString> constant) {
+void ValueAnalysis::visit(ConstString* constant) {
 	//
 	// Caching
 	//
@@ -1582,7 +1582,7 @@ void ValueAnalysis::visit(ShPtr<ConstString> constant) {
 	OrderedAllVisitor::visit(constant);
 }
 
-void ValueAnalysis::visit(ShPtr<ConstStruct> constant) {
+void ValueAnalysis::visit(ConstStruct* constant) {
 	//
 	// Caching
 	//

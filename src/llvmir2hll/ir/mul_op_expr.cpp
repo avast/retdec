@@ -16,19 +16,19 @@ namespace llvmir2hll {
 *
 * See create() for more information.
 */
-MulOpExpr::MulOpExpr(ShPtr<Expression> op1, ShPtr<Expression> op2):
+MulOpExpr::MulOpExpr(Expression* op1, Expression* op2):
 	BinaryOpExpr(op1, op2) {}
 
-bool MulOpExpr::isEqualTo(ShPtr<Value> otherValue) const {
-	if (ShPtr<MulOpExpr> otherValueMulOpExpr = cast<MulOpExpr>(otherValue)) {
+bool MulOpExpr::isEqualTo(Value* otherValue) const {
+	if (MulOpExpr* otherValueMulOpExpr = cast<MulOpExpr>(otherValue)) {
 		return op1->isEqualTo(otherValueMulOpExpr->getFirstOperand()) &&
 			op2->isEqualTo(otherValueMulOpExpr->getSecondOperand());
 	}
 	return false;
 }
 
-ShPtr<Value> MulOpExpr::clone() {
-	ShPtr<MulOpExpr> mulOpExpr(MulOpExpr::create(
+Value* MulOpExpr::clone() {
+	MulOpExpr* mulOpExpr(MulOpExpr::create(
 		ucast<Expression>(op1->clone()), ucast<Expression>(op2->clone())));
 	mulOpExpr->setMetadata(getMetadata());
 	return mulOpExpr;
@@ -43,13 +43,13 @@ ShPtr<Value> MulOpExpr::clone() {
 * @par Preconditions
 *  - both operands are non-null
 */
-ShPtr<MulOpExpr> MulOpExpr::create(ShPtr<Expression> op1, ShPtr<Expression> op2) {
+MulOpExpr* MulOpExpr::create(Expression* op1, Expression* op2) {
 	PRECONDITION_NON_NULL(op1);
 	PRECONDITION_NON_NULL(op2);
 
-	ShPtr<MulOpExpr> expr(new MulOpExpr(op1, op2));
+	MulOpExpr* expr(new MulOpExpr(op1, op2));
 
-	// Initialization (recall that shared_from_this() cannot be called in a
+	// Initialization (recall that this cannot be called in a
 	// constructor).
 	op1->addObserver(expr);
 	op2->addObserver(expr);
@@ -58,7 +58,7 @@ ShPtr<MulOpExpr> MulOpExpr::create(ShPtr<Expression> op1, ShPtr<Expression> op2)
 }
 
 void MulOpExpr::accept(Visitor *v) {
-	v->visit(ucast<MulOpExpr>(shared_from_this()));
+	v->visit(ucast<MulOpExpr>(this));
 }
 
 } // namespace llvmir2hll

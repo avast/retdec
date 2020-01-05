@@ -27,7 +27,7 @@ class JsonOutputManagerTests: public OutputManagerTests
 void JsonOutputManagerTests::SetUp()
 {
 	OutputManagerTests::SetUp();
-	manager = UPtr<OutputManager>(new JsonOutputManager(codeStream));
+	manager = new JsonOutputManager(codeStream);
 	manager->setCommentPrefix("//");
 	manager->setOutputLanguage("C");
 }

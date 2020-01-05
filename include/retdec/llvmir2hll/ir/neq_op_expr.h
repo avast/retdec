@@ -26,12 +26,12 @@ class Visitor;
 */
 class NeqOpExpr final: public BinaryOpExpr {
 public:
-	static ShPtr<NeqOpExpr> create(ShPtr<Expression> op1,
-		ShPtr<Expression> op2);
+	static NeqOpExpr* create(Expression* op1,
+		Expression* op2);
 
-	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
-	virtual ShPtr<Value> clone() override;
-	virtual ShPtr<Type> getType() const override;
+	virtual bool isEqualTo(Value* otherValue) const override;
+	virtual Value* clone() override;
+	virtual Type* getType() const override;
 
 	/// @name Visitor Interface
 	/// @{
@@ -41,7 +41,7 @@ public:
 private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
-	NeqOpExpr(ShPtr<Expression> op1, ShPtr<Expression> op2);
+	NeqOpExpr(Expression* op1, Expression* op2);
 };
 
 } // namespace llvmir2hll

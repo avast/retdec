@@ -90,8 +90,8 @@ FruitVarNameGen::FruitVarNameGen(std::string prefix):
 *
 * @param[in] prefix Prefix of all returned variable names.
 */
-UPtr<VarNameGen> FruitVarNameGen::create(std::string prefix) {
-	return UPtr<VarNameGen>(new FruitVarNameGen(prefix));
+VarNameGen* FruitVarNameGen::create(std::string prefix) {
+	return new FruitVarNameGen(prefix);
 }
 
 std::string FruitVarNameGen::getId() const {

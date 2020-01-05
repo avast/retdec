@@ -16,8 +16,8 @@ namespace {
 * @brief Returns @c true if the given operand is a constant integer with
 *        value @c 1, @c false otherwise.
 */
-bool isConstIntOne(ShPtr<Expression> operand) {
-	ShPtr<ConstInt> constInt(cast<ConstInt>(operand));
+bool isConstIntOne(Expression* operand) {
+	ConstInt* constInt(cast<ConstInt>(operand));
 	return constInt && constInt->isOne();
 }
 
@@ -32,8 +32,8 @@ std::string CCompoundOpManager::getId() const {
 	return "CCompoundOpManager";
 }
 
-void CCompoundOpManager::optimizeToCompoundOp(ShPtr<AddOpExpr> expr,
-		ShPtr<Expression> operand) {
+void CCompoundOpManager::optimizeToCompoundOp(AddOpExpr* expr,
+		Expression* operand) {
 	if (isConstIntOne(operand)) {
 		createResultingUnaryCompoundOp("++");
 	} else {
@@ -41,8 +41,8 @@ void CCompoundOpManager::optimizeToCompoundOp(ShPtr<AddOpExpr> expr,
 	}
 }
 
-void CCompoundOpManager::optimizeToCompoundOp(ShPtr<SubOpExpr> expr,
-		ShPtr<Expression> operand) {
+void CCompoundOpManager::optimizeToCompoundOp(SubOpExpr* expr,
+		Expression* operand) {
 	if (isConstIntOne(operand)) {
 		createResultingUnaryCompoundOp("--");
 	} else {
@@ -50,43 +50,43 @@ void CCompoundOpManager::optimizeToCompoundOp(ShPtr<SubOpExpr> expr,
 	}
 }
 
-void CCompoundOpManager::optimizeToCompoundOp(ShPtr<MulOpExpr> expr,
-		ShPtr<Expression> operand) {
+void CCompoundOpManager::optimizeToCompoundOp(MulOpExpr* expr,
+		Expression* operand) {
 	createResultingBinaryCompoundOp("*=", operand);
 }
 
-void CCompoundOpManager::optimizeToCompoundOp(ShPtr<DivOpExpr> expr,
-		ShPtr<Expression> operand) {
+void CCompoundOpManager::optimizeToCompoundOp(DivOpExpr* expr,
+		Expression* operand) {
 	createResultingBinaryCompoundOp("/=", operand);
 }
 
-void CCompoundOpManager::optimizeToCompoundOp(ShPtr<ModOpExpr> expr,
-		ShPtr<Expression> operand) {
+void CCompoundOpManager::optimizeToCompoundOp(ModOpExpr* expr,
+		Expression* operand) {
 	createResultingBinaryCompoundOp("%=", operand);
 }
 
-void CCompoundOpManager::optimizeToCompoundOp(ShPtr<BitShlOpExpr> expr,
-		ShPtr<Expression> operand) {
+void CCompoundOpManager::optimizeToCompoundOp(BitShlOpExpr* expr,
+		Expression* operand) {
 	createResultingBinaryCompoundOp("<<=", operand);
 }
 
-void CCompoundOpManager::optimizeToCompoundOp(ShPtr<BitShrOpExpr> expr,
-		ShPtr<Expression> operand) {
+void CCompoundOpManager::optimizeToCompoundOp(BitShrOpExpr* expr,
+		Expression* operand) {
 	createResultingBinaryCompoundOp(">>=", operand);
 }
 
-void CCompoundOpManager::optimizeToCompoundOp(ShPtr<BitAndOpExpr> expr,
-		ShPtr<Expression> operand) {
+void CCompoundOpManager::optimizeToCompoundOp(BitAndOpExpr* expr,
+		Expression* operand) {
 	createResultingBinaryCompoundOp("&=", operand);
 }
 
-void CCompoundOpManager::optimizeToCompoundOp(ShPtr<BitOrOpExpr> expr,
-		ShPtr<Expression> operand) {
+void CCompoundOpManager::optimizeToCompoundOp(BitOrOpExpr* expr,
+		Expression* operand) {
 	createResultingBinaryCompoundOp("|=", operand);
 }
 
-void CCompoundOpManager::optimizeToCompoundOp(ShPtr<BitXorOpExpr> expr,
-		ShPtr<Expression> operand) {
+void CCompoundOpManager::optimizeToCompoundOp(BitXorOpExpr* expr,
+		Expression* operand) {
 	createResultingBinaryCompoundOp("^=", operand);
 }
 

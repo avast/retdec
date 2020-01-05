@@ -19,15 +19,15 @@ namespace llvmir2hll {
 * @par Preconditions
 *  - @a module is non-null
 */
-EmptyStmtOptimizer::EmptyStmtOptimizer(ShPtr<Module> module):
+EmptyStmtOptimizer::EmptyStmtOptimizer(Module* module):
 	FuncOptimizer(module) {
 		PRECONDITION_NON_NULL(module);
 	}
 
-void EmptyStmtOptimizer::visit(ShPtr<EmptyStmt> stmt) {
+void EmptyStmtOptimizer::visit(EmptyStmt* stmt) {
 	// We have to store the statement's successor because
 	// Statement::removeStatement() resets it.
-	ShPtr<Statement> stmtSucc(stmt->getSuccessor());
+	Statement* stmtSucc(stmt->getSuccessor());
 	Statement::removeStatement(stmt);
 	visitStmt(stmtSucc);
 }

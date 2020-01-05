@@ -33,17 +33,17 @@ class Variable;
 */
 class OptimFuncInfoCFGTraversal final: public CFGTraversal {
 public:
-	static ShPtr<OptimFuncInfo> getOptimFuncInfo(ShPtr<Module> module,
-		ShPtr<OptimCallInfoObtainer> cio, ShPtr<ValueAnalysis> va,
-		ShPtr<CFG> cfg);
+	static OptimFuncInfo* getOptimFuncInfo(Module* module,
+		OptimCallInfoObtainer* cio, ValueAnalysis* va,
+		CFG* cfg);
 
 private:
 	/// A mapping of a variable into another variable.
-	using VarToVarMap = std::map<ShPtr<Variable>, ShPtr<Variable>>;
+	using VarToVarMap = std::map<Variable*, Variable*>;
 
 private:
 	/// Module which contains the function specified by its CFG.
-	ShPtr<Module> module;
+	Module* module = nullptr;
 
 	/// Global variables in @c module. This is here to speedup the traversal. By
 	/// using this set, we do not have to ask @c module every time we need such
@@ -51,25 +51,25 @@ private:
 	VarSet globalVars;
 
 	/// Call graph of the module.
-	ShPtr<CG> cg;
+	CG* cg = nullptr;
 
 	/// The used call info obtainer.
-	ShPtr<OptimCallInfoObtainer> cio;
+	OptimCallInfoObtainer* cio = nullptr;
 
 	/// Analysis of values.
-	ShPtr<ValueAnalysis> va;
+	ValueAnalysis* va = nullptr;
 
 	/// The CFG that is being traversed.
-	ShPtr<CFG> cfg;
+	CFG* cfg = nullptr;
 
 	/// The function whose CFG is being traversed.
-	ShPtr<Function> traversedFunc;
+	Function* traversedFunc = nullptr;
 
 	/// Called functions from @c traversedFunc.
-	ShPtr<CG::CalledFuncs> calledFuncs;
+	CG::CalledFuncs* calledFuncs = nullptr;
 
 	/// The currently computed FuncInfo.
-	ShPtr<OptimFuncInfo> funcInfo;
+	OptimFuncInfo* funcInfo = nullptr;
 
 	/// Global variables that (1) are read into local variables at the
 	/// beginning of the function's body and (2) the local variables are just
@@ -77,15 +77,15 @@ private:
 	VarToVarMap storedGlobalVars;
 
 private:
-	OptimFuncInfoCFGTraversal(ShPtr<Module> module,
-		ShPtr<OptimCallInfoObtainer> cio, ShPtr<ValueAnalysis> va,
-		ShPtr<CFG> cfg);
+	OptimFuncInfoCFGTraversal(Module* module,
+		OptimCallInfoObtainer* cio, ValueAnalysis* va,
+		CFG* cfg);
 
-	ShPtr<OptimFuncInfo> performComputation();
+	OptimFuncInfo* performComputation();
 	void precomputeAlwaysModifiedVarsBeforeRead();
-	void updateFuncInfo(ShPtr<Statement> stmt);
-	bool checkExitNodesPredecessor(ShPtr<CFG::Node> node);
-	virtual bool visitStmt(ShPtr<Statement> stmt) override;
+	void updateFuncInfo(Statement* stmt);
+	bool checkExitNodesPredecessor(CFG::Node* node);
+	virtual bool visitStmt(Statement* stmt) override;
 	virtual bool getEndRetVal() const override;
 	virtual bool combineRetVals(bool origRetVal, bool newRetVal) const override;
 };

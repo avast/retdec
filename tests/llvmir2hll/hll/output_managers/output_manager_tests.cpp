@@ -26,7 +26,7 @@ void OutputManagerTests::SetUp()
 {
 	// By default, use PlainOutputManager to test functionality that is shared
 	// between output managers.
-	manager = UPtr<OutputManager>(new PlainOutputManager(codeStream));
+	manager = new PlainOutputManager(codeStream);
 }
 
 std::string OutputManagerTests::emitCode()

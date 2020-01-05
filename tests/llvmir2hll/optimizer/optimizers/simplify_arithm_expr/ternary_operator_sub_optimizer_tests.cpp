@@ -30,14 +30,14 @@ class TernaryOperatorSubOptimizerTests: public TestsWithModule {
 protected:
 	virtual void SetUp() override {
 		TestsWithModule::SetUp();
-		ShPtr<ArithmExprEvaluator> evaluator(StrictArithmExprEvaluator::
+		ArithmExprEvaluator* evaluator(StrictArithmExprEvaluator::
 			create());
-		optimizer = ShPtr<TernaryOperatorSubOptimizer>(
+		optimizer = TernaryOperatorSubOptimizer*(
 			new TernaryOperatorSubOptimizer(evaluator));
 	}
 
 protected:
-	ShPtr<TernaryOperatorSubOptimizer> optimizer;
+	TernaryOperatorSubOptimizer* optimizer;
 };
 
 TEST_F(TernaryOperatorSubOptimizerTests,
@@ -56,20 +56,20 @@ TernaryOperatorTrueValueOptimized) {
 	//
 	// Optimized to return 1.
 	//
-	ShPtr<ConstInt> firstConstInt(ConstInt::create(1, 64));
-	ShPtr<ConstInt> secConstInt(ConstInt::create(2, 64));
-	ShPtr<ConstBool> boolConstant(ConstBool::create(1));
-	ShPtr<TernaryOpExpr> returnExpr(
+	ConstInt* firstConstInt(ConstInt::create(1, 64));
+	ConstInt* secConstInt(ConstInt::create(2, 64));
+	ConstBool* boolConstant(ConstBool::create(1));
+	TernaryOpExpr* returnExpr(
 		TernaryOpExpr::create(
 			boolConstant,
 			firstConstInt,
 			secConstInt
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(returnExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(returnExpr));
 
 	optimizer->tryOptimize(returnStmt->getRetVal());
 
-	ShPtr<ConstInt> outConstInt(cast<ConstInt>(returnStmt->getRetVal()));
+	ConstInt* outConstInt(cast<ConstInt>(returnStmt->getRetVal()));
 	ASSERT_TRUE(outConstInt) <<
 		"expected `ConstInt`, "
 		"got `" << returnStmt->getRetVal() << "`";
@@ -84,20 +84,20 @@ TernaryOperatorFalseOptimized) {
 	//
 	// Optimized to return 2.
 	//
-	ShPtr<ConstInt> firstConstInt(ConstInt::create(1, 64));
-	ShPtr<ConstInt> secConstInt(ConstInt::create(2, 64));
-	ShPtr<ConstBool> boolConstant(ConstBool::create(0));
-	ShPtr<TernaryOpExpr> returnExpr(
+	ConstInt* firstConstInt(ConstInt::create(1, 64));
+	ConstInt* secConstInt(ConstInt::create(2, 64));
+	ConstBool* boolConstant(ConstBool::create(0));
+	TernaryOpExpr* returnExpr(
 		TernaryOpExpr::create(
 			boolConstant,
 			firstConstInt,
 			secConstInt
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(returnExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(returnExpr));
 
 	optimizer->tryOptimize(returnStmt->getRetVal());
 
-	ShPtr<ConstInt> outConstInt(cast<ConstInt>(returnStmt->getRetVal()));
+	ConstInt* outConstInt(cast<ConstInt>(returnStmt->getRetVal()));
 	ASSERT_TRUE(outConstInt) <<
 		"expected `ConstInt`, "
 		"got `" << returnStmt->getRetVal() << "`";
@@ -112,20 +112,20 @@ TernaryOperatorVariableNotOptimized) {
 	//
 	// Not optimized.
 	//
-	ShPtr<ConstInt> firstConstInt(ConstInt::create(1, 64));
-	ShPtr<ConstInt> secConstInt(ConstInt::create(2, 64));
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<TernaryOpExpr> returnExpr(
+	ConstInt* firstConstInt(ConstInt::create(1, 64));
+	ConstInt* secConstInt(ConstInt::create(2, 64));
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	TernaryOpExpr* returnExpr(
 		TernaryOpExpr::create(
 			varA,
 			firstConstInt,
 			secConstInt
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(returnExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(returnExpr));
 
 	optimizer->tryOptimize(returnStmt->getRetVal());
 
-	ShPtr<TernaryOpExpr> outTernaryOp(cast<TernaryOpExpr>(returnStmt->getRetVal()));
+	TernaryOpExpr* outTernaryOp(cast<TernaryOpExpr>(returnStmt->getRetVal()));
 	ASSERT_TRUE(outTernaryOp) <<
 		"expected `TernaryOpExpr`, "
 		"got `" << returnStmt->getRetVal() << "`";

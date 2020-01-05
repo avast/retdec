@@ -64,76 +64,76 @@ class LLVMValueConverter;
 *  - @c LLVMValueConverter must be set
 */
 class LLVMInstructionConverter final: private retdec::utils::NonCopyable,
-	private llvm::InstVisitor<LLVMInstructionConverter, ShPtr<Expression>> {
+	private llvm::InstVisitor<LLVMInstructionConverter, Expression*> {
 public:
 	/// @name Constant expression conversion
 	/// @{
-	ShPtr<Expression> convertConstExprToExpression(llvm::ConstantExpr *cExpr);
+	Expression* convertConstExprToExpression(llvm::ConstantExpr *cExpr);
 	/// @}
 
 	/// @name Instruction conversion
 	/// @{
-	ShPtr<Expression> convertInstructionToExpression(llvm::Instruction *inst);
-	ShPtr<CallExpr> convertCallInstToCallExpr(llvm::CallInst &inst);
-	ShPtr<Expression> generateAccessToAggregateType(llvm::CompositeType *type,
-		const ShPtr<Expression> &base, const llvm::ArrayRef<unsigned> &indices);
+	Expression* convertInstructionToExpression(llvm::Instruction *inst);
+	CallExpr* convertCallInstToCallExpr(llvm::CallInst &inst);
+	Expression* generateAccessToAggregateType(llvm::CompositeType *type,
+		Expression* base, const llvm::ArrayRef<unsigned> &indices);
 	/// @}
 
 	/// @name Options
 	/// @{
-	void setLLVMValueConverter(ShPtr<LLVMValueConverter> conv);
+	void setLLVMValueConverter(LLVMValueConverter* conv);
 	void setOptionStrictFPUSemantics(bool strict = true);
 	/// @}
 
 private:
 	/// @name Instruction conversion using InstVisitor
 	/// @{
-	friend class llvm::InstVisitor<LLVMInstructionConverter, ShPtr<Expression>>;
-	ShPtr<Expression> visitAddrSpaceCastInst(llvm::AddrSpaceCastInst &inst);
-	ShPtr<Expression> visitBinaryOperator(llvm::BinaryOperator &inst);
-	ShPtr<Expression> visitBitCastInst(llvm::BitCastInst &inst);
-	ShPtr<Expression> visitFPExtInst(llvm::FPExtInst &inst);
-	ShPtr<Expression> visitSExtInst(llvm::SExtInst &inst);
-	ShPtr<Expression> visitZExtInst(llvm::ZExtInst &inst);
-	ShPtr<Expression> visitFPToSIInst(llvm::FPToSIInst &inst);
-	ShPtr<Expression> visitFPToUIInst(llvm::FPToUIInst &inst);
-	ShPtr<Expression> visitTruncInst(llvm::TruncInst &inst);
-	ShPtr<Expression> visitFPTruncInst(llvm::FPTruncInst &inst);
-	ShPtr<Expression> visitIntToPtrInst(llvm::IntToPtrInst &inst);
-	ShPtr<Expression> visitPtrToIntInst(llvm::PtrToIntInst &inst);
-	ShPtr<Expression> visitSIToFPInst(llvm::SIToFPInst &inst);
-	ShPtr<Expression> visitUIToFPInst(llvm::UIToFPInst &inst);
-	ShPtr<Expression> visitICmpInst(llvm::ICmpInst &inst);
-	ShPtr<Expression> visitFCmpInst(llvm::FCmpInst &inst);
-	ShPtr<Expression> visitSelectInst(llvm::SelectInst &inst);
-	ShPtr<Expression> visitGetElementPtrInst(llvm::GetElementPtrInst &inst);
-	ShPtr<Expression> visitExtractValueInst(llvm::ExtractValueInst &inst);
-	ShPtr<Expression> visitInstruction(llvm::Instruction &inst);
+	friend class llvm::InstVisitor<LLVMInstructionConverter, Expression*>;
+	Expression* visitAddrSpaceCastInst(llvm::AddrSpaceCastInst &inst);
+	Expression* visitBinaryOperator(llvm::BinaryOperator &inst);
+	Expression* visitBitCastInst(llvm::BitCastInst &inst);
+	Expression* visitFPExtInst(llvm::FPExtInst &inst);
+	Expression* visitSExtInst(llvm::SExtInst &inst);
+	Expression* visitZExtInst(llvm::ZExtInst &inst);
+	Expression* visitFPToSIInst(llvm::FPToSIInst &inst);
+	Expression* visitFPToUIInst(llvm::FPToUIInst &inst);
+	Expression* visitTruncInst(llvm::TruncInst &inst);
+	Expression* visitFPTruncInst(llvm::FPTruncInst &inst);
+	Expression* visitIntToPtrInst(llvm::IntToPtrInst &inst);
+	Expression* visitPtrToIntInst(llvm::PtrToIntInst &inst);
+	Expression* visitSIToFPInst(llvm::SIToFPInst &inst);
+	Expression* visitUIToFPInst(llvm::UIToFPInst &inst);
+	Expression* visitICmpInst(llvm::ICmpInst &inst);
+	Expression* visitFCmpInst(llvm::FCmpInst &inst);
+	Expression* visitSelectInst(llvm::SelectInst &inst);
+	Expression* visitGetElementPtrInst(llvm::GetElementPtrInst &inst);
+	Expression* visitExtractValueInst(llvm::ExtractValueInst &inst);
+	Expression* visitInstruction(llvm::Instruction &inst);
 	/// @}
 
-	ShPtr<Expression> convertBinaryOpToExpression(llvm::User &inst,
+	Expression* convertBinaryOpToExpression(llvm::User &inst,
 		unsigned opcode);
-	ShPtr<Expression> convertICmpInstToExpression(llvm::User &inst,
+	Expression* convertICmpInstToExpression(llvm::User &inst,
 		unsigned predicate);
-	ShPtr<Expression> convertFCmpInstToExpression(llvm::User &inst,
+	Expression* convertFCmpInstToExpression(llvm::User &inst,
 		unsigned predicate);
-	ShPtr<Expression> convertSelectInstToExpression(llvm::User &inst);
-	ShPtr<Expression> convertExtCastInstToExpression(llvm::User &inst,
+	Expression* convertSelectInstToExpression(llvm::User &inst);
+	Expression* convertExtCastInstToExpression(llvm::User &inst,
 		ExtCastExpr::Variant variant);
-	ShPtr<Expression> convertIntToFPInstToExpression(llvm::User &inst,
+	Expression* convertIntToFPInstToExpression(llvm::User &inst,
 		IntToFPCastExpr::Variant variant);
-	ShPtr<Expression> convertFPToIntInstToExpression(llvm::User &inst);
-	ShPtr<Expression> convertTruncInstToExpression(llvm::User &inst);
+	Expression* convertFPToIntInstToExpression(llvm::User &inst);
+	Expression* convertTruncInstToExpression(llvm::User &inst);
 	template<class T>
-	ShPtr<Expression> convertCastInstToExpression(llvm::User &inst);
-	ShPtr<Expression> convertGetElementPtrToExpression(llvm::User &inst);
-	ShPtr<Expression> convertGEPIndices(ShPtr<Expression> base,
+	Expression* convertCastInstToExpression(llvm::User &inst);
+	Expression* convertGetElementPtrToExpression(llvm::User &inst);
+	Expression* convertGEPIndices(Expression* base,
 		llvm::gep_type_iterator start, llvm::gep_type_iterator end);
 
-	ShPtr<LLVMValueConverter> getConverter();
+	LLVMValueConverter* getConverter();
 
 	/// A converter from LLVM values to values in BIR.
-	WkPtr<LLVMValueConverter> converter;
+	LLVMValueConverter* converter = nullptr;
 
 	/// A converter from LLVM fcmp instruction to expression in BIR.
 	LLVMFCmpConverter fcmpConverter;

@@ -84,14 +84,14 @@ public:
 	* @par Preconditions
 	*  - all functions in @a module have available line information
 	*/
-	explicit LineInfoFuncComparator(ShPtr<Module> module):
+	explicit LineInfoFuncComparator(Module* module):
 		module(module) {}
 
 	/**
 	* @brief Returns @c true if @a f1 starts on a smaller line number than @a
 	*        f2, @c false otherwise.
 	*/
-	bool operator()(ShPtr<Function> f1, ShPtr<Function> f2) {
+	bool operator()(Function* f1, Function* f2) {
 		auto f1LineRange = module->getLineRangeForFunc(f1);
 		auto f2LineRange = module->getLineRangeForFunc(f2);
 		return f1LineRange.first < f2LineRange.first;
@@ -99,7 +99,7 @@ public:
 
 private:
 	/// The current module.
-	ShPtr<Module> module;
+	Module* module;
 };
 
 /**
@@ -115,14 +115,14 @@ public:
 	* @par Preconditionsout
 	*  - all functions in @a module have available address ranges
 	*/
-	explicit AddressRangeFuncComparator(ShPtr<Module> module):
+	explicit AddressRangeFuncComparator(Module* module):
 		module(module) {}
 
 	/**
 	* @brief Returns @c true if @a f1 starts on a smaller address than @a f2,
 	* @c false otherwise.
 	*/
-	bool operator()(ShPtr<Function> f1, ShPtr<Function> f2) {
+	bool operator()(Function* f1, Function* f2) {
 		auto f1AddressRange = module->getAddressRangeForFunc(f1);
 		auto f2AddressRange = module->getAddressRangeForFunc(f2);
 		return f1AddressRange < f2AddressRange;
@@ -130,7 +130,7 @@ public:
 
 private:
 	/// The current module.
-	ShPtr<Module> module;
+	Module* module;
 };
 
 } // anonymous namespace
@@ -151,11 +151,11 @@ HLLWriter::HLLWriter(llvm::raw_ostream &o, const std::string& outputFormat):
 	currentIndent(DEFAULT_LEVEL_INDENT)
 {
 	if (outputFormat == "json") {
-		out = UPtr<OutputManager>(new JsonOutputManager(o));
+		out = new JsonOutputManager(o);
 	} else if (outputFormat == "json-human") {
-		out = UPtr<OutputManager>(new JsonOutputManager(o, true));
+		out = new JsonOutputManager(o, true);
 	} else {
-		out = UPtr<OutputManager>(new PlainOutputManager(o));
+		out = new PlainOutputManager(o);
 	}
 }
 
@@ -221,7 +221,7 @@ void HLLWriter::setOptionUseCompoundOperators(bool use) {
 * override the appropriate emit*() functions. To change the order of blocks,
 * override this function.
 */
-bool HLLWriter::emitTargetCode(ShPtr<Module> module) {
+bool HLLWriter::emitTargetCode(Module* module) {
 	this->module = module;
 	bool codeEmitted = false;
 
@@ -464,7 +464,7 @@ bool HLLWriter::emitGlobalVariables() {
 * By default (if it is not overridden), it calls @c varDef->accept(this) and
 * returns @c true.
 */
-bool HLLWriter::emitGlobalVariable(ShPtr<GlobalVarDef> varDef) {
+bool HLLWriter::emitGlobalVariable(GlobalVarDef* varDef) {
 	out->addressPush(varDef->getAddress());
 	emitDetectedCryptoPatternForGlobalVarIfAvailable(varDef->getVar());
 	varDef->accept(this);
@@ -540,7 +540,7 @@ bool HLLWriter::emitFunctions() {
 * @par Preconditions
 *  - @a func is non-null
 */
-bool HLLWriter::emitFunction(ShPtr<Function> func) {
+bool HLLWriter::emitFunction(Function* func) {
 	PRECONDITION_NON_NULL(func);
 
 	currFunc = func;
@@ -562,7 +562,7 @@ bool HLLWriter::emitFunction(ShPtr<Function> func) {
 
 	func->accept(this);
 
-	currFunc.reset();
+	currFunc = nullptr;
 	out->addressPop();
 
 	return true;
@@ -697,7 +697,7 @@ bool HLLWriter::emitExternalFunctions(const FuncSet &funcs) {
 *
 * By default (if it is not overridden), it emits nothing.
 */
-bool HLLWriter::emitExternalFunction(ShPtr<Function> func) {
+bool HLLWriter::emitExternalFunction(Function* func) {
 	return false;
 }
 
@@ -736,7 +736,7 @@ bool HLLWriter::emitMetaInfo() {
 /**
 * @brief Emits the given expression with brackets around it (if needed).
 */
-void HLLWriter::emitExprWithBracketsIfNeeded(ShPtr<Expression> expr) {
+void HLLWriter::emitExprWithBracketsIfNeeded(Expression* expr) {
 	bool bracketsAreNeeded = bracketsManager->areBracketsNeeded(expr);
 	if (bracketsAreNeeded) {
 		out->punctuation('(');
@@ -757,7 +757,7 @@ void HLLWriter::emitExprWithBracketsIfNeeded(ShPtr<Expression> expr) {
 * emit the operator without any specialties.
 */
 void HLLWriter::emitUnaryOpExpr(const std::string &opRepr,
-		ShPtr<UnaryOpExpr> expr) {
+		UnaryOpExpr* expr) {
 	out->operatorX(opRepr);
 	emitExprWithBracketsIfNeeded(expr->getOperand());
 }
@@ -774,7 +774,7 @@ void HLLWriter::emitUnaryOpExpr(const std::string &opRepr,
 * emit the operator without any specialties.
 */
 void HLLWriter::emitBinaryOpExpr(const std::string &opRepr,
-		ShPtr<BinaryOpExpr> expr, bool spaceBefore, bool spaceAfter) {
+		BinaryOpExpr* expr, bool spaceBefore, bool spaceAfter) {
 	bool bracketsAreNeeded = bracketsManager->areBracketsNeeded(expr);
 	if (bracketsAreNeeded) {
 		out->punctuation('(');
@@ -795,7 +795,7 @@ void HLLWriter::emitBinaryOpExpr(const std::string &opRepr,
 *
 * @return @c true if some code was emitted, @c false otherwise.
 */
-bool HLLWriter::emitDetectedCryptoPatternForGlobalVarIfAvailable(ShPtr<Variable> var) {
+bool HLLWriter::emitDetectedCryptoPatternForGlobalVarIfAvailable(Variable* var) {
 	auto pattern = module->getDetectedCryptoPatternForGlobalVar(var);
 	if (pattern.empty()) {
 		return false;
@@ -813,7 +813,7 @@ bool HLLWriter::emitDetectedCryptoPatternForGlobalVarIfAvailable(ShPtr<Variable>
 *
 * @return @c true if some code was emitted, @c false otherwise.
 */
-bool HLLWriter::emitModuleNameForFuncIfAvailable(ShPtr<Function> func) {
+bool HLLWriter::emitModuleNameForFuncIfAvailable(Function* func) {
 	auto moduleName = module->getDebugModuleNameForFunc(func);
 	if (moduleName.empty()) {
 		return false;
@@ -832,7 +832,7 @@ bool HLLWriter::emitModuleNameForFuncIfAvailable(ShPtr<Function> func) {
 *
 * @return @c true if some code was emitted, @c false otherwise.
 */
-bool HLLWriter::emitAddressRangeForFuncIfAvailable(ShPtr<Function> func) {
+bool HLLWriter::emitAddressRangeForFuncIfAvailable(Function* func) {
 	auto addressRange = module->getAddressRangeForFunc(func);
 	if (addressRange == NO_ADDRESS_RANGE) {
 		return false;
@@ -852,7 +852,7 @@ bool HLLWriter::emitAddressRangeForFuncIfAvailable(ShPtr<Function> func) {
 *
 * @return @c true if some code was emitted, @c false otherwise.
 */
-bool HLLWriter::emitLineRangeForFuncIfAvailable(ShPtr<Function> func) {
+bool HLLWriter::emitLineRangeForFuncIfAvailable(Function* func) {
 	auto lineRange = module->getLineRangeForFunc(func);
 	if (lineRange == NO_LINE_RANGE) {
 		return false;
@@ -873,7 +873,7 @@ bool HLLWriter::emitLineRangeForFuncIfAvailable(ShPtr<Function> func) {
 *
 * @return @c true if some code was emitted, @c false otherwise.
 */
-bool HLLWriter::emitWrapperInfoForFuncIfAvailable(ShPtr<Function> func) {
+bool HLLWriter::emitWrapperInfoForFuncIfAvailable(Function* func) {
 	auto wrappedFunc = module->getWrappedFuncName(func);
 	if (wrappedFunc.empty()) {
 		return false;
@@ -888,7 +888,7 @@ bool HLLWriter::emitWrapperInfoForFuncIfAvailable(ShPtr<Function> func) {
 *
 * @return @c true if some code was emitted, @c false otherwise.
 */
-bool HLLWriter::emitClassInfoIfAvailable(ShPtr<Function> func) {
+bool HLLWriter::emitClassInfoIfAvailable(Function* func) {
 	auto className = module->getClassForFunc(func);
 	if (className.empty()) {
 		return false;
@@ -907,7 +907,7 @@ bool HLLWriter::emitClassInfoIfAvailable(ShPtr<Function> func) {
 *
 * @return @c true if some code was emitted, @c false otherwise.
 */
-bool HLLWriter::emitDemangledNameIfAvailable(ShPtr<Function> func) {
+bool HLLWriter::emitDemangledNameIfAvailable(Function* func) {
 	auto demangledName = module->getDemangledNameOfFunc(func);
 	if (demangledName.empty()) {
 		return false;
@@ -922,7 +922,7 @@ bool HLLWriter::emitDemangledNameIfAvailable(ShPtr<Function> func) {
 *
 * @return @c true if some code was emitted, @c false otherwise.
 */
-bool HLLWriter::emitCommentIfAvailable(ShPtr<Function> func) {
+bool HLLWriter::emitCommentIfAvailable(Function* func) {
 	auto funcComment = module->getCommentForFunc(func);
 	if (funcComment.empty()) {
 		return false;
@@ -967,7 +967,7 @@ bool HLLWriter::emitCommentIfAvailable(ShPtr<Function> func) {
 *
 * @return @c true if some code was emitted, @c false otherwise.
 */
-bool HLLWriter::emitDetectedCryptoPatternsForFuncIfAvailable(ShPtr<Function> func) {
+bool HLLWriter::emitDetectedCryptoPatternsForFuncIfAvailable(Function* func) {
 	auto patterns = module->getDetectedCryptoPatternsForFunc(func);
 	if (patterns.empty()) {
 		return false;
@@ -1036,7 +1036,7 @@ void HLLWriter::sortFuncsForEmission(FuncVector &funcs) {
 * If the emission of debug comments is disabled, this function does nothing and
 * returns @c false;
 */
-bool HLLWriter::tryEmitVarInfoInComment(ShPtr<Variable> var, ShPtr<Statement> stmt) {
+bool HLLWriter::tryEmitVarInfoInComment(Variable* var, Statement* stmt) {
 	if (!optionEmitDebugComments) {
 		return false;
 	}
@@ -1093,7 +1093,7 @@ bool HLLWriter::tryEmitVarInfoInComment(ShPtr<Variable> var, ShPtr<Statement> st
 *
 * @return @c true if some code has been emitted, @c false otherwise.
 */
-bool HLLWriter::tryEmitVarAddressInComment(ShPtr<Variable> var) {
+bool HLLWriter::tryEmitVarAddressInComment(Variable* var) {
 	if (var->getAddress().isDefined()) {
 		out->comment(var->getAddress().toHexPrefixString(), " ");
 		return true;
@@ -1109,7 +1109,7 @@ bool HLLWriter::tryEmitVarAddressInComment(ShPtr<Variable> var) {
 * @par Preconditions
 *  - @a constant is non-null
 */
-bool HLLWriter::shouldBeEmittedInHexa(ShPtr<ConstInt> constant) const {
+bool HLLWriter::shouldBeEmittedInHexa(ConstInt* constant) const {
 	PRECONDITION_NON_NULL(constant);
 
 	// Originally, we used
@@ -1127,7 +1127,7 @@ bool HLLWriter::shouldBeEmittedInHexa(ShPtr<ConstInt> constant) const {
 * @brief Checks whether the given @a array should be emitted in a structured
 *        way.
 */
-bool HLLWriter::shouldBeEmittedInStructuredWay(ShPtr<ConstArray> array) const {
+bool HLLWriter::shouldBeEmittedInStructuredWay(ConstArray* array) const {
 	if (!emitConstantsInStructuredWay) {
 		return false;
 	}
@@ -1135,7 +1135,7 @@ bool HLLWriter::shouldBeEmittedInStructuredWay(ShPtr<ConstArray> array) const {
 	// Only arrays of more complex types should be emitted in a structured way.
 	// That is, do not emit arrays of integers or floats in a structured way
 	// because they look better when emitted inline.
-	ShPtr<Type> containedType(array->getContainedType());
+	Type* containedType(array->getContainedType());
 	if (isa<IntType>(containedType) || isa<FloatType>(containedType)) {
 		return false;
 	}
@@ -1147,7 +1147,7 @@ bool HLLWriter::shouldBeEmittedInStructuredWay(ShPtr<ConstArray> array) const {
 * @brief Checks whether the given @a structure should be emitted in a
 *        structured way.
 */
-bool HLLWriter::shouldBeEmittedInStructuredWay(ShPtr<ConstStruct> structure) const {
+bool HLLWriter::shouldBeEmittedInStructuredWay(ConstStruct* structure) const {
 	return emitConstantsInStructuredWay;
 }
 
@@ -1163,7 +1163,7 @@ std::string HLLWriter::getConstNullPointerTextRepr() const {
 /**
 * @brief Returns the goto label for the given statement.
 */
-std::string HLLWriter::getGotoLabel(ShPtr<Statement> stmt) {
+std::string HLLWriter::getGotoLabel(Statement* stmt) {
 	// By prefixing the raw label, we ensure that it is valid in C (labels
 	// in C are required to start with either a letter on an underscore).
 	auto rawLabel = getRawGotoLabel(stmt);
@@ -1245,7 +1245,7 @@ bool HLLWriter::emitMetaInfoDecompilationDate() {
 *
 * "raw" means without any prefix.
 */
-std::string HLLWriter::getRawGotoLabel(ShPtr<Statement> stmt) {
+std::string HLLWriter::getRawGotoLabel(Statement* stmt) {
 	if (stmt->hasLabel()) {
 		return stmt->getLabel();
 	}

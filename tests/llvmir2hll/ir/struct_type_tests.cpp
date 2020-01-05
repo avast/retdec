@@ -26,14 +26,14 @@ class StructTypeTests: public Test {};
 
 TEST_F(StructTypeTests,
 hasNameAfterCreateWithNameReturnsTrue) {
-	ShPtr<StructType> st(StructType::create(StructType::ElementTypes(), "MyStruct"));
+	StructType* st(StructType::create(StructType::ElementTypes(), "MyStruct"));
 
 	EXPECT_TRUE(st->hasName());
 }
 
 TEST_F(StructTypeTests,
 hasNameAfterCreateWithNoNameReturnsFalse) {
-	ShPtr<StructType> st(StructType::create(StructType::ElementTypes()));
+	StructType* st(StructType::create(StructType::ElementTypes()));
 
 	EXPECT_FALSE(st->hasName());
 }
@@ -44,7 +44,7 @@ hasNameAfterCreateWithNoNameReturnsFalse) {
 
 TEST_F(StructTypeTests,
 getNameAfterCreateWithNoElementsAndNoNameReturnsEmptyName) {
-	ShPtr<StructType> st(StructType::create(StructType::ElementTypes()));
+	StructType* st(StructType::create(StructType::ElementTypes()));
 
 	EXPECT_TRUE(st->getName().empty());
 }
@@ -52,7 +52,7 @@ getNameAfterCreateWithNoElementsAndNoNameReturnsEmptyName) {
 TEST_F(StructTypeTests,
 getNameAfterCreateWithNoElementsReturnsCorrectName) {
 	const std::string refName("MyStruct");
-	ShPtr<StructType> st(StructType::create(StructType::ElementTypes(), refName));
+	StructType* st(StructType::create(StructType::ElementTypes(), refName));
 
 	EXPECT_EQ(refName, st->getName());
 }
@@ -63,7 +63,7 @@ getNameAfterCreateWithElementsReturnsCorrectName) {
 	elementTypes.push_back(IntType::create(32));
 	elementTypes.push_back(IntType::create(64));
 	const std::string refName("MyStruct");
-	ShPtr<StructType> st(StructType::create(elementTypes, refName));
+	StructType* st(StructType::create(elementTypes, refName));
 
 	EXPECT_EQ(refName, st->getName());
 }

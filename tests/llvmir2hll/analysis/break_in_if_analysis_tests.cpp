@@ -45,17 +45,17 @@ BreakInNestedStatement) {
 	//   b = 1;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	testFunc->addLocalVar(varA);
 	testFunc->addLocalVar(varB);
-	ShPtr<VarDefStmt> varDefA(VarDefStmt::create(varA));
-	ShPtr<VarDefStmt> varDefB(VarDefStmt::create(varB));
-	ShPtr<AssignStmt> assignA1(AssignStmt::create(varA, ConstInt::create(1, 32)));
-	ShPtr<BreakStmt> breakStmt(BreakStmt::create());
-	ShPtr<IfStmt> ifStmt(IfStmt::create(ConstInt::create(5, 64), assignA1));
+	VarDefStmt* varDefA(VarDefStmt::create(varA));
+	VarDefStmt* varDefB(VarDefStmt::create(varB));
+	AssignStmt* assignA1(AssignStmt::create(varA, ConstInt::create(1, 32)));
+	BreakStmt* breakStmt(BreakStmt::create());
+	IfStmt* ifStmt(IfStmt::create(ConstInt::create(5, 64), assignA1));
 	ifStmt->setElseClause(breakStmt);
-	ShPtr<AssignStmt> assignB(AssignStmt::create(varB, ConstInt::create(1, 32)));
+	AssignStmt* assignB(AssignStmt::create(varB, ConstInt::create(1, 32)));
 	varDefA->setSuccessor(varDefB);
 	varDefB->setSuccessor(ifStmt);
 	ifStmt->setSuccessor(assignB);
@@ -82,18 +82,18 @@ BreakInNestedInNestedStatement) {
 	//   b = 1;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	testFunc->addLocalVar(varA);
 	testFunc->addLocalVar(varB);
-	ShPtr<VarDefStmt> varDefA(VarDefStmt::create(varA));
-	ShPtr<VarDefStmt> varDefB(VarDefStmt::create(varB));
-	ShPtr<AssignStmt> assignA1(AssignStmt::create(varA, ConstInt::create(1, 32)));
-	ShPtr<BreakStmt> breakStmt(BreakStmt::create());
-	ShPtr<IfStmt> ifStmt(IfStmt::create(ConstInt::create(5, 64), assignA1));
-	ShPtr<WhileLoopStmt> whileLoopStmt(WhileLoopStmt::create(ConstInt::create(
+	VarDefStmt* varDefA(VarDefStmt::create(varA));
+	VarDefStmt* varDefB(VarDefStmt::create(varB));
+	AssignStmt* assignA1(AssignStmt::create(varA, ConstInt::create(1, 32)));
+	BreakStmt* breakStmt(BreakStmt::create());
+	IfStmt* ifStmt(IfStmt::create(ConstInt::create(5, 64), assignA1));
+	WhileLoopStmt* whileLoopStmt(WhileLoopStmt::create(ConstInt::create(
 		2, 64), breakStmt));
-	ShPtr<AssignStmt> assignB(AssignStmt::create(varB, ConstInt::create(1, 32)));
+	AssignStmt* assignB(AssignStmt::create(varB, ConstInt::create(1, 32)));
 	varDefA->setSuccessor(varDefB);
 	varDefB->setSuccessor(ifStmt);
 	assignA1->setSuccessor(whileLoopStmt);
@@ -117,12 +117,12 @@ BreakOutOfNestedStatements) {
 	//   break;
 	// }
 	//
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	testFunc->addLocalVar(varB);
-	ShPtr<VarDefStmt> varDefB(VarDefStmt::create(varB));
-	ShPtr<AssignStmt> assignB1(AssignStmt::create(varB, ConstInt::create(1, 32)));
-	ShPtr<IfStmt> ifStmt(IfStmt::create(ConstInt::create(5, 64), assignB1));
-	ShPtr<BreakStmt> breakStmt(BreakStmt::create());
+	VarDefStmt* varDefB(VarDefStmt::create(varB));
+	AssignStmt* assignB1(AssignStmt::create(varB, ConstInt::create(1, 32)));
+	IfStmt* ifStmt(IfStmt::create(ConstInt::create(5, 64), assignB1));
+	BreakStmt* breakStmt(BreakStmt::create());
 	varDefB->setSuccessor(ifStmt);
 	ifStmt->setSuccessor(breakStmt);
 
@@ -146,14 +146,14 @@ BreakOutOfNestedStatementsAndWithGotoThatReferenceOutOfIfStatementBody) {
 	//   break;
 	// }
 	//
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	testFunc->addLocalVar(varB);
-	ShPtr<VarDefStmt> varDefB(VarDefStmt::create(varB));
-	ShPtr<AssignStmt> assignB1(AssignStmt::create(varB, ConstInt::create(1, 32)));
-	ShPtr<AssignStmt> assignB2(AssignStmt::create(varB, ConstInt::create(2, 32)));
-	ShPtr<IfStmt> ifStmt(IfStmt::create(ConstInt::create(5, 64), assignB1));
-	ShPtr<GotoStmt> gotoStmt(GotoStmt::create(assignB2));
-	ShPtr<BreakStmt> breakStmt(BreakStmt::create());
+	VarDefStmt* varDefB(VarDefStmt::create(varB));
+	AssignStmt* assignB1(AssignStmt::create(varB, ConstInt::create(1, 32)));
+	AssignStmt* assignB2(AssignStmt::create(varB, ConstInt::create(2, 32)));
+	IfStmt* ifStmt(IfStmt::create(ConstInt::create(5, 64), assignB1));
+	GotoStmt* gotoStmt(GotoStmt::create(assignB2));
+	BreakStmt* breakStmt(BreakStmt::create());
 	varDefB->setSuccessor(ifStmt);
 	assignB1->setSuccessor(gotoStmt);
 	ifStmt->setSuccessor(breakStmt);

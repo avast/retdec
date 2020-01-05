@@ -16,12 +16,12 @@ namespace llvmir2hll {
 *
 * See create() for more information.
 */
-FPToIntCastExpr::FPToIntCastExpr(ShPtr<Expression> op, ShPtr<Type> dstType):
+FPToIntCastExpr::FPToIntCastExpr(Expression* op, Type* dstType):
 	CastExpr(op, dstType) {}
 
-bool FPToIntCastExpr::isEqualTo(ShPtr<Value> otherValue) const {
+bool FPToIntCastExpr::isEqualTo(Value* otherValue) const {
 	// Both types and values of all operands have to be equal.
-	if (ShPtr<FPToIntCastExpr> otherCastExpr = cast<FPToIntCastExpr>(otherValue)) {
+	if (FPToIntCastExpr* otherCastExpr = cast<FPToIntCastExpr>(otherValue)) {
 		return dstType->isEqualTo(otherCastExpr->getType()) &&
 			op->isEqualTo(otherCastExpr->getOperand());
 	}
@@ -31,8 +31,8 @@ bool FPToIntCastExpr::isEqualTo(ShPtr<Value> otherValue) const {
 /**
 * @brief Clones the cast operator.
 */
-ShPtr<Value> FPToIntCastExpr::clone() {
-	ShPtr<FPToIntCastExpr> castExpr(FPToIntCastExpr::create(
+Value* FPToIntCastExpr::clone() {
+	FPToIntCastExpr* castExpr(FPToIntCastExpr::create(
 		ucast<Expression>(op->clone()), dstType));
 	castExpr->setMetadata(getMetadata());
 	return castExpr;
@@ -47,14 +47,14 @@ ShPtr<Value> FPToIntCastExpr::clone() {
 * @par Preconditions
 *  - operand is non-null
 */
-ShPtr<FPToIntCastExpr> FPToIntCastExpr::create(ShPtr<Expression> op,
-		ShPtr<Type> dstType) {
+FPToIntCastExpr* FPToIntCastExpr::create(Expression* op,
+		Type* dstType) {
 	PRECONDITION_NON_NULL(op);
 	PRECONDITION_NON_NULL(dstType);
 
-	ShPtr<FPToIntCastExpr> expr(new FPToIntCastExpr(op, dstType));
+	FPToIntCastExpr* expr(new FPToIntCastExpr(op, dstType));
 
-	// Initialization (recall that shared_from_this() cannot be called in a
+	// Initialization (recall that this cannot be called in a
 	// constructor).
 	op->addObserver(expr);
 
@@ -62,7 +62,7 @@ ShPtr<FPToIntCastExpr> FPToIntCastExpr::create(ShPtr<Expression> op,
 }
 
 void FPToIntCastExpr::accept(Visitor *v) {
-	v->visit(ucast<FPToIntCastExpr>(shared_from_this()));
+	v->visit(ucast<FPToIntCastExpr>(this));
 }
 
 } // namespace llvmir2hll

@@ -18,15 +18,15 @@ namespace llvmir2hll {
 * See create() for more information.
 */
 UForLoopStmt::UForLoopStmt(
-		ShPtr<Expression> init,
-		ShPtr<Expression> cond,
-		ShPtr<Expression> step,
-		ShPtr<Statement> body,
+		Expression* init,
+		Expression* cond,
+		Expression* step,
+		Statement* body,
 		Address a):
 	Statement(a), init(init), initIsDefinition(false), cond(cond), step(step),
 	body(body) {}
 
-ShPtr<Value> UForLoopStmt::clone() {
+Value* UForLoopStmt::clone() {
 	auto loop = UForLoopStmt::create(
 		ucast<Expression>(init->clone()),
 		ucast<Expression>(cond->clone()),
@@ -39,7 +39,7 @@ ShPtr<Value> UForLoopStmt::clone() {
 	return loop;
 }
 
-bool UForLoopStmt::isEqualTo(ShPtr<Value> otherValue) const {
+bool UForLoopStmt::isEqualTo(Value* otherValue) const {
 	// Types, parts, and bodies have to be equal.
 	if (auto otherLoop = cast<UForLoopStmt>(otherValue)) {
 		return init->isEqualTo(otherLoop->init) &&
@@ -50,7 +50,7 @@ bool UForLoopStmt::isEqualTo(ShPtr<Value> otherValue) const {
 	return false;
 }
 
-void UForLoopStmt::replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) {
+void UForLoopStmt::replace(Expression* oldExpr, Expression* newExpr) {
 	if (oldExpr == init) {
 		setInit(newExpr);
 	} else if (init) {
@@ -70,7 +70,7 @@ void UForLoopStmt::replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr)
 	}
 }
 
-ShPtr<Expression> UForLoopStmt::asExpression() const {
+Expression* UForLoopStmt::asExpression() const {
 	// Cannot be converted into an expression.
 	return {};
 }
@@ -78,28 +78,28 @@ ShPtr<Expression> UForLoopStmt::asExpression() const {
 /**
 * @brief Returns the initialization part.
 */
-ShPtr<Expression> UForLoopStmt::getInit() const {
+Expression* UForLoopStmt::getInit() const {
 	return init;
 }
 
 /**
 * @brief Returns the conditional part.
 */
-ShPtr<Expression> UForLoopStmt::getCond() const {
+Expression* UForLoopStmt::getCond() const {
 	return cond;
 }
 
 /**
 * @brief Returns the step part.
 */
-ShPtr<Expression> UForLoopStmt::getStep() const {
+Expression* UForLoopStmt::getStep() const {
 	return step;
 }
 
 /**
 * @brief Returns the body.
 */
-ShPtr<Statement> UForLoopStmt::getBody() const {
+Statement* UForLoopStmt::getBody() const {
 	return body;
 }
 
@@ -109,11 +109,11 @@ ShPtr<Statement> UForLoopStmt::getBody() const {
 * @par Preconditions
 *  - @a newInit is non-null
 */
-void UForLoopStmt::setInit(ShPtr<Expression> newInit) {
+void UForLoopStmt::setInit(Expression* newInit) {
 	PRECONDITION_NON_NULL(newInit);
 
-	init->removeObserver(shared_from_this());
-	newInit->addObserver(shared_from_this());
+	init->removeObserver(this);
+	newInit->addObserver(this);
 	init = newInit;
 }
 
@@ -123,11 +123,11 @@ void UForLoopStmt::setInit(ShPtr<Expression> newInit) {
 * @par Preconditions
 *  - @a newCond is non-null
 */
-void UForLoopStmt::setCond(ShPtr<Expression> newCond) {
+void UForLoopStmt::setCond(Expression* newCond) {
 	PRECONDITION_NON_NULL(newCond);
 
-	cond->removeObserver(shared_from_this());
-	newCond->addObserver(shared_from_this());
+	cond->removeObserver(this);
+	newCond->addObserver(this);
 	cond = newCond;
 }
 
@@ -137,11 +137,11 @@ void UForLoopStmt::setCond(ShPtr<Expression> newCond) {
 * @par Preconditions
 *  - @a newStep is non-null
 */
-void UForLoopStmt::setStep(ShPtr<Expression> newStep) {
+void UForLoopStmt::setStep(Expression* newStep) {
 	PRECONDITION_NON_NULL(newStep);
 
-	step->removeObserver(shared_from_this());
-	newStep->addObserver(shared_from_this());
+	step->removeObserver(this);
+	newStep->addObserver(this);
 	step = newStep;
 }
 
@@ -151,11 +151,11 @@ void UForLoopStmt::setStep(ShPtr<Expression> newStep) {
 * @par Preconditions
 *  - @a newBody is non-null
 */
-void UForLoopStmt::setBody(ShPtr<Statement> newBody) {
+void UForLoopStmt::setBody(Statement* newBody) {
 	PRECONDITION_NON_NULL(newBody);
 
-	body->removeObserver(shared_from_this());
-	newBody->addObserver(shared_from_this());
+	body->removeObserver(this);
+	newBody->addObserver(this);
 	body = newBody;
 }
 
@@ -187,19 +187,19 @@ void UForLoopStmt::markInitAsDefinition() {
 * @par Preconditions
 *  - body is non-null
 */
-ShPtr<UForLoopStmt> UForLoopStmt::create(
-		ShPtr<Expression> init,
-		ShPtr<Expression> cond,
-		ShPtr<Expression> step,
-		ShPtr<Statement> body,
-		ShPtr<Statement> succ,
+UForLoopStmt* UForLoopStmt::create(
+		Expression* init,
+		Expression* cond,
+		Expression* step,
+		Statement* body,
+		Statement* succ,
 		Address a) {
 	PRECONDITION_NON_NULL(body);
 
-	ShPtr<UForLoopStmt> stmt(new UForLoopStmt(init, cond, step, body, a));
+	UForLoopStmt* stmt(new UForLoopStmt(init, cond, step, body, a));
 	stmt->setSuccessor(succ);
 
-	// Initialization (recall that shared_from_this() cannot be called in a
+	// Initialization (recall that this cannot be called in a
 	// constructor).
 	if (init) {
 		init->addObserver(stmt);
@@ -233,7 +233,7 @@ ShPtr<UForLoopStmt> UForLoopStmt::create(
 *
 * @see Subject::update()
 */
-void UForLoopStmt::update(ShPtr<Value> subject, ShPtr<Value> arg) {
+void UForLoopStmt::update(Value* subject, Value* arg) {
 	PRECONDITION_NON_NULL(subject);
 
 	auto newBody = cast<Statement>(arg);
@@ -257,7 +257,7 @@ void UForLoopStmt::update(ShPtr<Value> subject, ShPtr<Value> arg) {
 }
 
 void UForLoopStmt::accept(Visitor *v) {
-	v->visit(ucast<UForLoopStmt>(shared_from_this()));
+	v->visit(ucast<UForLoopStmt>(this));
 }
 
 } // namespace llvmir2hll

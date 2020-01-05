@@ -27,17 +27,17 @@ namespace llvmir2hll {
 */
 class CFGTraversal: private retdec::utils::NonCopyable {
 protected:
-	CFGTraversal(ShPtr<CFG> cfg, bool defaultCurrRetVal);
+	CFGTraversal(CFG* cfg, bool defaultCurrRetVal);
 	// The destructor is protected and non-virtual on a purpose. Indeed,
 	// concrete CFG traversers are not meant to be used by a pointer to the
 	// base class.
 	~CFGTraversal() = default;
 
 	bool getCurrRetVal() const;
-	bool performTraversal(ShPtr<Statement> startStmt);
-	bool performTraversalFromSuccessors(ShPtr<Statement> stmt);
-	bool performReverseTraversal(ShPtr<Statement> startStmt);
-	bool performReverseTraversalFromPredecessors(ShPtr<Statement> stmt);
+	bool performTraversal(Statement* startStmt);
+	bool performTraversalFromSuccessors(Statement* stmt);
+	bool performReverseTraversal(Statement* startStmt);
+	bool performReverseTraversalFromPredecessors(Statement* stmt);
 
 	/**
 	* @brief Visits the given statement @a stmt.
@@ -52,7 +52,7 @@ protected:
 	* variable to @c true. Otherwise, if you just return @c false, the
 	* traversal may still continue from other branches because of recursion.
 	*/
-	virtual bool visitStmt(ShPtr<Statement> stmt) = 0;
+	virtual bool visitStmt(Statement* stmt) = 0;
 
 	/**
 	* @brief Returns the value that should be returned when an end of the
@@ -71,7 +71,7 @@ protected:
 
 protected:
 	/// CFG that is being traversed.
-	ShPtr<CFG> cfg;
+	CFG* cfg = nullptr;
 
 	/// Statements that have been checked (to prevent looping).
 	StmtUSet checkedStmts;
@@ -83,13 +83,13 @@ protected:
 	bool stopTraversal;
 
 private:
-	bool performTraversalImpl(ShPtr<CFG::Node> startNode,
+	bool performTraversalImpl(CFG::Node* startNode,
 		CFG::stmt_iterator startStmtIter);
 	std::pair<bool, bool> visitSingleNode(CFG::stmt_iterator startStmtIter,
 		CFG::stmt_iterator endStmtIter);
-	bool performReverseTraversalImpl(ShPtr<CFG::Node> startNode,
+	bool performReverseTraversalImpl(CFG::Node* startNode,
 		CFG::stmt_reverse_iterator startStmtRIter);
-	bool traverseNodePredecessors(ShPtr<CFG::Node> node);
+	bool traverseNodePredecessors(CFG::Node* node);
 };
 
 } // namespace llvmir2hll

@@ -134,9 +134,9 @@ namespace llvmir2hll {
 */
 class ZeroSubOptimizer final: public SubOptimizer {
 public:
-	ZeroSubOptimizer(ShPtr<ArithmExprEvaluator> arithmExprEvaluator);
+	ZeroSubOptimizer(ArithmExprEvaluator* arithmExprEvaluator);
 
-	static ShPtr<SubOptimizer> create(ShPtr<ArithmExprEvaluator>
+	static SubOptimizer* create(ArithmExprEvaluator*
 		arithmExprEvaluator);
 	virtual std::string getId() const override;
 
@@ -144,19 +144,19 @@ private:
 	/// @name Visitor Interface
 	/// @{
 	using SubOptimizer::visit;
-	virtual void visit(ShPtr<AddOpExpr> expr) override;
-	virtual void visit(ShPtr<SubOpExpr> expr) override;
-	virtual void visit(ShPtr<MulOpExpr> expr) override;
-	virtual void visit(ShPtr<DivOpExpr> expr) override;
-	virtual void visit(ShPtr<ModOpExpr> expr) override;
-	virtual void visit(ShPtr<BitAndOpExpr> expr) override;
-	virtual void visit(ShPtr<BitOrOpExpr> expr) override;
-	virtual void visit(ShPtr<BitXorOpExpr> expr) override;
+	virtual void visit(AddOpExpr* expr) override;
+	virtual void visit(SubOpExpr* expr) override;
+	virtual void visit(MulOpExpr* expr) override;
+	virtual void visit(DivOpExpr* expr) override;
+	virtual void visit(ModOpExpr* expr) override;
+	virtual void visit(BitAndOpExpr* expr) override;
+	virtual void visit(BitOrOpExpr* expr) override;
+	virtual void visit(BitXorOpExpr* expr) override;
 	/// @}
 
-	bool isConstFloatZero(ShPtr<Expression> expr) const;
-	bool isConstIntZero(ShPtr<Expression> expr) const;
-	bool isOpZero(ShPtr<Expression> expr) const;
+	bool isConstFloatZero(Expression* expr) const;
+	bool isConstIntZero(Expression* expr) const;
+	bool isOpZero(Expression* expr) const;
 };
 
 } // namespace llvmir2hll

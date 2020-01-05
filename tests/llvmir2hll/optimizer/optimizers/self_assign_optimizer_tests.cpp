@@ -31,7 +31,7 @@ class SelfAssignOptimizerTests: public TestsWithModule {};
 
 TEST_F(SelfAssignOptimizerTests,
 OptimizerHasNonEmptyID) {
-	ShPtr<SelfAssignOptimizer> optimizer(new SelfAssignOptimizer(module));
+	SelfAssignOptimizer* optimizer(new SelfAssignOptimizer(module));
 
 	EXPECT_TRUE(!optimizer->getId().empty()) <<
 		"the optimizer should have a non-empty ID";
@@ -56,12 +56,12 @@ NonAssignStmtsAreNotOptimized) {
 	//
 	// return 5 + 10
 	//
-	ShPtr<AddOpExpr> returnExpr(
+	AddOpExpr* returnExpr(
 		AddOpExpr::create(
 			ConstInt::create(llvm::APInt(64, 5)),
 			ConstInt::create(llvm::APInt(64, 10))
 		));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(returnExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(returnExpr));
 	testFunc->setBody(returnStmt);
 
 	// Optimize the module.
@@ -71,20 +71,20 @@ NonAssignStmtsAreNotOptimized) {
 	ASSERT_TRUE(testFunc->getBody()) <<
 		"expected a non-empty body";
 	// return
-	ShPtr<ReturnStmt> outFuncBody(cast<ReturnStmt>(testFunc->getBody()));
+	ReturnStmt* outFuncBody(cast<ReturnStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outFuncBody) <<
 		"expected ReturnStmt, got " << testFunc->getBody();
 	// +
-	ShPtr<AddOpExpr> outReturnExpr(cast<AddOpExpr>(outFuncBody->getRetVal()));
+	AddOpExpr* outReturnExpr(cast<AddOpExpr>(outFuncBody->getRetVal()));
 	ASSERT_TRUE(outReturnExpr) <<
 		"expected AddOpExpr, got " << outFuncBody->getRetVal();
 	// 5
-	ShPtr<ConstInt> outOp1(cast<ConstInt>(outReturnExpr->getFirstOperand()));
+	ConstInt* outOp1(cast<ConstInt>(outReturnExpr->getFirstOperand()));
 	ASSERT_TRUE(outOp1) <<
 		"expected ConstInt, got " << outReturnExpr->getFirstOperand();
 	EXPECT_EQ(llvm::APInt(64, 5), outOp1->getValue());
 	// 10
-	ShPtr<ConstInt> outOp2(cast<ConstInt>(outReturnExpr->getSecondOperand()));
+	ConstInt* outOp2(cast<ConstInt>(outReturnExpr->getSecondOperand()));
 	ASSERT_TRUE(outOp2) <<
 		"expected ConstInt, got " << outReturnExpr->getSecondOperand();
 	EXPECT_EQ(llvm::APInt(64, 10), outOp2->getValue());
@@ -96,9 +96,9 @@ AssignOfDifferentVariablesIsNotRemoved) {
 	//
 	//   a = b
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<AssignStmt> assignStmt(AssignStmt::create(varA, varB));
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	AssignStmt* assignStmt(AssignStmt::create(varA, varB));
 	testFunc->setBody(assignStmt);
 
 	// Optimize the module.
@@ -108,16 +108,16 @@ AssignOfDifferentVariablesIsNotRemoved) {
 	ASSERT_TRUE(testFunc->getBody()) <<
 		"expected a non-empty body";
 	// =
-	ShPtr<AssignStmt> outFuncBody(cast<AssignStmt>(testFunc->getBody()));
+	AssignStmt* outFuncBody(cast<AssignStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outFuncBody) <<
 		"expected AssignStmt, got " << testFunc->getBody();
 	EXPECT_TRUE(!outFuncBody->hasSuccessor()) <<
 		"expected no successor, got " << outFuncBody->getSuccessor();
 	// a
-	ShPtr<Variable> outLhs(cast<Variable>(outFuncBody->getLhs()));
+	Variable* outLhs(cast<Variable>(outFuncBody->getLhs()));
 	EXPECT_EQ(varA, outLhs);
 	// b
-	ShPtr<Variable> outRhs(cast<Variable>(outFuncBody->getRhs()));
+	Variable* outRhs(cast<Variable>(outFuncBody->getRhs()));
 	EXPECT_EQ(varB, outRhs);
 }
 
@@ -128,8 +128,8 @@ SelfAssignIsRemovedWhenItHasSuccessor) {
 	//   a = a
 	//   return
 	//
-	ShPtr<Variable> var(Variable::create("a", IntType::create(16)));
-	ShPtr<AssignStmt> assignStmt(
+	Variable* var(Variable::create("a", IntType::create(16)));
+	AssignStmt* assignStmt(
 		AssignStmt::create(var, var,
 		ReturnStmt::create())); // successor
 	testFunc->setBody(assignStmt);
@@ -141,7 +141,7 @@ SelfAssignIsRemovedWhenItHasSuccessor) {
 	ASSERT_TRUE(testFunc->getBody()) <<
 		"expected a non-empty body";
 	// return
-	ShPtr<ReturnStmt> outFuncBody(cast<ReturnStmt>(testFunc->getBody()));
+	ReturnStmt* outFuncBody(cast<ReturnStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outFuncBody) <<
 		"expected ReturnStmt, got " << testFunc->getBody();
 	EXPECT_TRUE(!outFuncBody->getRetVal()) <<
@@ -157,9 +157,9 @@ SelfAssignIsRemovedWhenItHasPredecessor) {
 	//   return
 	//   a = a
 	//
-	ShPtr<Variable> var(Variable::create("a", IntType::create(16)));
-	ShPtr<AssignStmt> assignStmt(AssignStmt::create(var, var));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(ShPtr<Expression>(),
+	Variable* var(Variable::create("a", IntType::create(16)));
+	AssignStmt* assignStmt(AssignStmt::create(var, var));
+	ReturnStmt* returnStmt(ReturnStmt::create(Expression*(),
 		assignStmt));
 	testFunc->setBody(returnStmt);
 
@@ -170,7 +170,7 @@ SelfAssignIsRemovedWhenItHasPredecessor) {
 	ASSERT_TRUE(testFunc->getBody()) <<
 		"expected a non-empty body";
 	// return
-	ShPtr<ReturnStmt> outFuncBody(cast<ReturnStmt>(testFunc->getBody()));
+	ReturnStmt* outFuncBody(cast<ReturnStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outFuncBody) <<
 		"expected ReturnStmt, got " << testFunc->getBody();
 	EXPECT_TRUE(!outFuncBody->getRetVal()) <<
@@ -185,8 +185,8 @@ FuncWithJustSelfAssignIsOptimizedToEmptyBody) {
 	//
 	//   a = a
 	//
-	ShPtr<Variable> var(Variable::create("a", IntType::create(16)));
-	ShPtr<AssignStmt> assignStmt(
+	Variable* var(Variable::create("a", IntType::create(16)));
+	AssignStmt* assignStmt(
 		AssignStmt::create(var, var));
 	testFunc->setBody(assignStmt);
 

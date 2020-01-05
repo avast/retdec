@@ -29,7 +29,7 @@ using VarNameGenFactory = Singleton<
 		// Type of the object's identifier.
 		std::string,
 		// Type of a function used to create instances.
-		UPtr<VarNameGen> (*)(std::string)
+		VarNameGen* (*)(std::string)
 	>
 >;
 

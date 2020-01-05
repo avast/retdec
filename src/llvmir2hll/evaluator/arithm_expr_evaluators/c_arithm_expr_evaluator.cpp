@@ -75,7 +75,7 @@ void convertOperandsToSameSemantics(ArithmExprEvaluator::APFloatPair
 *
 * When the constant integer cannot be converted, it returns the null pointer.
 */
-ShPtr<ConstFloat> constIntToConstFloat(ShPtr<ConstInt> constInt) {
+ConstFloat* constIntToConstFloat(ConstInt* constInt) {
 	llvm::APFloat apFloat(
 		constInt->getValue().roundToDouble(constInt->isSigned())
 	);
@@ -141,14 +141,14 @@ void tryConvertBoolBoolToInt(ArithmExprEvaluator::ConstPair &constPair) {
 */
 void tryConvertFloatIntToFloat(ArithmExprEvaluator::ConstPair &constPair) {
 	if (isa<ConstFloat>(constPair.first)) {
-		if (ShPtr<ConstInt> constInt = cast<ConstInt>(constPair.second)) {
-			if (ShPtr<ConstFloat> constFloat = constIntToConstFloat(constInt)) {
+		if (ConstInt* constInt = cast<ConstInt>(constPair.second)) {
+			if (ConstFloat* constFloat = constIntToConstFloat(constInt)) {
 				constPair.second = constFloat;
 			}
 		}
 	} else if (isa<ConstFloat>(constPair.second)) {
-		if (ShPtr<ConstInt> constInt = cast<ConstInt>(constPair.first)) {
-			if (ShPtr<ConstFloat> constFloat = constIntToConstFloat(constInt)) {
+		if (ConstInt* constInt = cast<ConstInt>(constPair.first)) {
+			if (ConstFloat* constFloat = constIntToConstFloat(constInt)) {
 				constPair.first = constFloat;
 			}
 		}
@@ -164,12 +164,12 @@ void tryConvertFloatIntToFloat(ArithmExprEvaluator::ConstPair &constPair) {
 * @param[in, out] constPair Pair of constants.
 */
 void tryConvertBoolIntToInt(ArithmExprEvaluator::ConstPair &constPair) {
-	if (ShPtr<ConstBool> constBool = cast<ConstBool>(constPair.first)) {
+	if (ConstBool* constBool = cast<ConstBool>(constPair.first)) {
 		if (isa<ConstInt>(constPair.second)) {
 			constPair.first = ConstInt::create(constBool->getValue(),
 				DEFAULT_INT_BIT_WIDTH);
 		}
-	} else if (ShPtr<ConstBool> constBool = cast<ConstBool>(constPair.second)) {
+	} else if (ConstBool* constBool = cast<ConstBool>(constPair.second)) {
 		if (isa<ConstInt>(constPair.first)) {
 			constPair.second = ConstInt::create(constBool->getValue(),
 				DEFAULT_INT_BIT_WIDTH);
@@ -185,8 +185,8 @@ REGISTER_AT_FACTORY("c", C_ARITHM_EXPR_EVALUATOR_ID,
 /**
 * @brief Creates a new CArithmExprEvaluator.
 */
-ShPtr<ArithmExprEvaluator> CArithmExprEvaluator::create() {
-	return ShPtr<ArithmExprEvaluator>(new CArithmExprEvaluator());
+ArithmExprEvaluator* CArithmExprEvaluator::create() {
+	return new CArithmExprEvaluator();
 }
 
 std::string CArithmExprEvaluator::getId() const {
@@ -198,8 +198,8 @@ std::string CArithmExprEvaluator::getId() const {
 *
 * @param[in, out] operand Operand on which is resolved types correction.
 */
-void CArithmExprEvaluator::resolveTypesUnaryOp(ShPtr<Constant> &operand) {
-	if (ShPtr<ConstBool> constBool = cast<ConstBool>(operand)) {
+void CArithmExprEvaluator::resolveTypesUnaryOp(Constant* &operand) {
+	if (ConstBool* constBool = cast<ConstBool>(operand)) {
 		operand = ConstInt::create(constBool->getValue(), DEFAULT_INT_BIT_WIDTH,
 			true);
 	}
@@ -270,7 +270,7 @@ void CArithmExprEvaluator::resolveTypesBinaryOp(ConstPair &constPair) {
 	}
 }
 
-void CArithmExprEvaluator::resolveOpSpecifications(ShPtr<DivOpExpr> expr,
+void CArithmExprEvaluator::resolveOpSpecifications(DivOpExpr* expr,
 		ConstPair &constPair) {
 	if (isa<ConstInt>(constPair.second) && isConstantZero(constPair.second)) {
 		// Integer division with zero is not defined in C language.
@@ -279,21 +279,21 @@ void CArithmExprEvaluator::resolveOpSpecifications(ShPtr<DivOpExpr> expr,
 	}
 }
 
-void CArithmExprEvaluator::resolveOpSpecifications(ShPtr<ModOpExpr> expr,
+void CArithmExprEvaluator::resolveOpSpecifications(ModOpExpr* expr,
 		ConstPair &constPair) {
 	// Remaindering with zero is not defined in C language.
 	canBeEvaluated &= !isConstantZero(constPair.second);
 }
 
-void CArithmExprEvaluator::resolveCast(ShPtr<BitCastExpr> expr,
-		ShPtr<Constant> &constant) {
+void CArithmExprEvaluator::resolveCast(BitCastExpr* expr,
+		Constant* &constant) {
 	if (isa<IntType>(expr->getType())) {
-		if (ShPtr<ConstFloat> constFloat = cast<ConstFloat>(expr->getOperand())) {
+		if (ConstFloat* constFloat = cast<ConstFloat>(expr->getOperand())) {
 			constant = ConstInt::create(constFloat->getValue().bitcastToAPInt());
 		} else {
 			canBeEvaluated = false;
 		}
-	} else if (ShPtr<FloatType> floatType = cast<FloatType>(expr->getType())) {
+	} else if (isa<FloatType>(expr->getType())) {
 		// TODO - implement bitCast from ConstInt or ConstBool to ConstFloat.
 		// Now is not implemented because wasn't find function to do this
 		// operation.
@@ -303,10 +303,10 @@ void CArithmExprEvaluator::resolveCast(ShPtr<BitCastExpr> expr,
 	}
 }
 
-void CArithmExprEvaluator::resolveCast(ShPtr<ExtCastExpr> expr,
-		ShPtr<Constant> &constant) {
-	if (ShPtr<IntType> intType = cast<IntType>(expr->getType())) {
-		if (ShPtr<ConstInt> constInt = cast<ConstInt>(constant)) {
+void CArithmExprEvaluator::resolveCast(ExtCastExpr* expr,
+		Constant* &constant) {
+	if (IntType* intType = cast<IntType>(expr->getType())) {
+		if (ConstInt* constInt = cast<ConstInt>(constant)) {
 			if (intType->getSize() <= constInt->getValue().getBitWidth()) {
 				// Extension can be only from lower bitWidth to higher.
 				canBeEvaluated = false;
@@ -321,7 +321,7 @@ void CArithmExprEvaluator::resolveCast(ShPtr<ExtCastExpr> expr,
 			} else {
 				canBeEvaluated = false;
 			}
-		} else if (ShPtr<ConstBool> constBool = cast<ConstBool>(constant)) {
+		} else if (ConstBool* constBool = cast<ConstBool>(constant)) {
 			if (intType->getSize() <= 1) {
 				// Extension can be only when bitWidth is more then 1 because we
 				// want extend boolean constant.
@@ -339,7 +339,7 @@ void CArithmExprEvaluator::resolveCast(ShPtr<ExtCastExpr> expr,
 		} else {
 			canBeEvaluated = false;
 		}
-	} else if (ShPtr<FloatType> floatType = cast<FloatType>(expr->getType())) {
+	} else if (isa<FloatType>(expr->getType())) {
 		// TODO: Add support for FloatType. Can't find llvm function to
 		// extend float. Probably need to save semantics in FloatType.
 		canBeEvaluated = false;
@@ -348,10 +348,10 @@ void CArithmExprEvaluator::resolveCast(ShPtr<ExtCastExpr> expr,
 	}
 }
 
-void CArithmExprEvaluator::resolveCast(ShPtr<FPToIntCastExpr> expr,
-		ShPtr<Constant> &constant) {
-	if (ShPtr<ConstFloat> constFloat = cast<ConstFloat>(constant)) {
-		if (ShPtr<IntType> intType = cast<IntType>(expr->getType())) {
+void CArithmExprEvaluator::resolveCast(FPToIntCastExpr* expr,
+		Constant* &constant) {
+	if (ConstFloat* constFloat = cast<ConstFloat>(constant)) {
+		if (IntType* intType = cast<IntType>(expr->getType())) {
 			// NAN and INFINITY not supported conversion to Int in IEEE-754.
 			if (constFloat->getValue().isInfinity() || constFloat->getValue().
 				isNaN()) {
@@ -371,11 +371,11 @@ void CArithmExprEvaluator::resolveCast(ShPtr<FPToIntCastExpr> expr,
 	}
 }
 
-void CArithmExprEvaluator::resolveCast(ShPtr<IntToFPCastExpr> expr,
-		ShPtr<Constant> &constant) {
+void CArithmExprEvaluator::resolveCast(IntToFPCastExpr* expr,
+		Constant* &constant) {
 	if (isa<FloatType>(expr->getType())) {
-		ShPtr<ConstInt> constInt = cast<ConstInt>(constant);
-		ShPtr<ConstBool> constBool = cast<ConstBool>(constant);
+		ConstInt* constInt = cast<ConstInt>(constant);
+		ConstBool* constBool = cast<ConstBool>(constant);
 		if ((!constInt && !constBool)) {
 			canBeEvaluated = false;
 			return;
@@ -394,10 +394,10 @@ void CArithmExprEvaluator::resolveCast(ShPtr<IntToFPCastExpr> expr,
 	}
 }
 
-void CArithmExprEvaluator::resolveCast(ShPtr<TruncCastExpr> expr,
-		ShPtr<Constant> &constant) {
-	if (ShPtr<IntType> intType = cast<IntType>(expr->getType())) {
-		if (ShPtr<ConstInt> constInt = cast<ConstInt>(constant)) {
+void CArithmExprEvaluator::resolveCast(TruncCastExpr* expr,
+		Constant* &constant) {
+	if (IntType* intType = cast<IntType>(expr->getType())) {
+		if (ConstInt* constInt = cast<ConstInt>(constant)) {
 			if (intType->getSize() >= constInt->getValue().getBitWidth()) {
 				// Truncate can be only from higher bitWidth to lower.
 				canBeEvaluated = false;
@@ -410,7 +410,7 @@ void CArithmExprEvaluator::resolveCast(ShPtr<TruncCastExpr> expr,
 			// we want truncate to IntType.
 			canBeEvaluated = false;
 		}
-	} else if (ShPtr<FloatType> floatType = cast<FloatType>(expr->getType())) {
+	} else if (isa<FloatType>(expr->getType())) {
 		// TODO: Add support for FloatType. Can't find llvm function to
 		// extend float. Probably need to save semantics in FloatType.
 		canBeEvaluated = false;

@@ -23,7 +23,7 @@ class RemoveAllCastsOptimizerTests: public TestsWithModule {};
 
 TEST_F(RemoveAllCastsOptimizerTests,
 OptimizerHasNonEmptyID) {
-	ShPtr<RemoveAllCastsOptimizer> optimizer(
+	RemoveAllCastsOptimizer* optimizer(
 		new RemoveAllCastsOptimizer(module));
 
 	EXPECT_TRUE(!optimizer->getId().empty()) <<

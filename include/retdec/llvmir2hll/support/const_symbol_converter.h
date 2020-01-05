@@ -30,26 +30,26 @@ class Module;
 class ConstSymbolConverter: private OrderedAllVisitor,
 		private retdec::utils::NonCopyable {
 public:
-	static void convert(ShPtr<Module> module);
+	static void convert(Module* module);
 
 private:
-	ConstSymbolConverter(ShPtr<Module> module);
+	ConstSymbolConverter(Module* module);
 
 	void performConversion();
-	void convertArgsToSymbolicNames(ShPtr<CallExpr> callExpr,
+	void convertArgsToSymbolicNames(CallExpr* callExpr,
 		const std::string &calledFuncName);
-	ShPtr<Expression> convertArgToSymbolicNames(ShPtr<ConstInt> arg,
+	Expression* convertArgToSymbolicNames(ConstInt* arg,
 		const IntStringMap &symbolicNamesMap);
 
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<CallExpr> expr) override;
+	virtual void visit(CallExpr* expr) override;
 	/// @}
 
 private:
 	/// Module in which the constants are converted.
-	ShPtr<Module> module;
+	Module* module = nullptr;
 };
 
 } // namespace llvmir2hll

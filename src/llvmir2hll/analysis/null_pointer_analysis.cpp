@@ -19,7 +19,7 @@ namespace llvmir2hll {
 *
 * For the description of parameters and preconditions, see create().
 */
-NullPointerAnalysis::NullPointerAnalysis(ShPtr<Module> module):
+NullPointerAnalysis::NullPointerAnalysis(Module* module):
 	OrderedAllVisitor(), module(module), foundNullPointer(false) {}
 
 /**
@@ -30,10 +30,10 @@ NullPointerAnalysis::NullPointerAnalysis(ShPtr<Module> module):
 * @par Preconditions
 *  - @a module is non-null
 */
-bool NullPointerAnalysis::useNullPointers(ShPtr<Module> module) {
+bool NullPointerAnalysis::useNullPointers(Module* module) {
 	PRECONDITION_NON_NULL(module);
 
-	ShPtr<NullPointerAnalysis> analysis(new NullPointerAnalysis(module));
+	NullPointerAnalysis* analysis(new NullPointerAnalysis(module));
 	analysis->analyzeNullPointersUsage();
 	return analysis->foundNullPointer;
 }
@@ -77,7 +77,7 @@ void NullPointerAnalysis::analyzeAllFunctions() {
 	}
 }
 
-void NullPointerAnalysis::visit(ShPtr<ConstNullPointer> constant) {
+void NullPointerAnalysis::visit(ConstNullPointer* constant) {
 	foundNullPointer = true;
 }
 

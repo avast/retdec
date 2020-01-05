@@ -27,12 +27,12 @@ namespace llvmir2hll {
 * @par Preconditions
 *  - @a module is non-null
 */
-VoidReturnOptimizer::VoidReturnOptimizer(ShPtr<Module> module):
+VoidReturnOptimizer::VoidReturnOptimizer(Module* module):
 	FuncOptimizer(module), nestingLevel(0) {
 		PRECONDITION_NON_NULL(module);
 	}
 
-void VoidReturnOptimizer::visit(ShPtr<ReturnStmt> stmt) {
+void VoidReturnOptimizer::visit(ReturnStmt* stmt) {
 	// The return statement can be eliminated only if
 	//  (1) it doesn't return a value, i.e. it is a void return;
 	//  (2) it is not the only statement in the function;
@@ -72,19 +72,19 @@ void VoidReturnOptimizer::visit(ShPtr<ReturnStmt> stmt) {
 //
 // TODO: Do this also with other optimizations?
 //
-void VoidReturnOptimizer::visit(ShPtr<AssignStmt> stmt) {
+void VoidReturnOptimizer::visit(AssignStmt* stmt) {
 	visitStmt(stmt->getSuccessor());
 }
 
-void VoidReturnOptimizer::visit(ShPtr<VarDefStmt> stmt) {
+void VoidReturnOptimizer::visit(VarDefStmt* stmt) {
 	visitStmt(stmt->getSuccessor());
 }
 
-void VoidReturnOptimizer::visit(ShPtr<CallStmt> stmt) {
+void VoidReturnOptimizer::visit(CallStmt* stmt) {
 	visitStmt(stmt->getSuccessor());
 }
 
-void VoidReturnOptimizer::visit(ShPtr<IfStmt> stmt) {
+void VoidReturnOptimizer::visit(IfStmt* stmt) {
 	// For each clause...
 	++nestingLevel;
 	for (auto i = stmt->clause_begin(), e = stmt->clause_end(); i != e; ++i) {
@@ -96,7 +96,7 @@ void VoidReturnOptimizer::visit(ShPtr<IfStmt> stmt) {
 	visitStmt(stmt->getSuccessor());
 }
 
-void VoidReturnOptimizer::visit(ShPtr<SwitchStmt> stmt) {
+void VoidReturnOptimizer::visit(SwitchStmt* stmt) {
 	// For each clause...
 	++nestingLevel;
 	for (auto i = stmt->clause_begin(), e = stmt->clause_end(); i != e; ++i) {
@@ -107,7 +107,7 @@ void VoidReturnOptimizer::visit(ShPtr<SwitchStmt> stmt) {
 	visitStmt(stmt->getSuccessor());
 }
 
-void VoidReturnOptimizer::visit(ShPtr<WhileLoopStmt> stmt) {
+void VoidReturnOptimizer::visit(WhileLoopStmt* stmt) {
 	++nestingLevel;
 	visitStmt(stmt->getBody());
 	--nestingLevel;
@@ -115,7 +115,7 @@ void VoidReturnOptimizer::visit(ShPtr<WhileLoopStmt> stmt) {
 	visitStmt(stmt->getSuccessor());
 }
 
-void VoidReturnOptimizer::visit(ShPtr<ForLoopStmt> stmt) {
+void VoidReturnOptimizer::visit(ForLoopStmt* stmt) {
 	++nestingLevel;
 	visitStmt(stmt->getBody());
 	--nestingLevel;
@@ -123,7 +123,7 @@ void VoidReturnOptimizer::visit(ShPtr<ForLoopStmt> stmt) {
 	visitStmt(stmt->getSuccessor());
 }
 
-void VoidReturnOptimizer::visit(ShPtr<UForLoopStmt> stmt) {
+void VoidReturnOptimizer::visit(UForLoopStmt* stmt) {
 	++nestingLevel;
 	visitStmt(stmt->getBody());
 	--nestingLevel;

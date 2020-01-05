@@ -28,9 +28,9 @@ class ArrayIndexOpExprTests: public Test {};
 
 TEST_F(ArrayIndexOpExprTests,
 GetBaseReturnsBase) {
-	ShPtr<Variable> base(Variable::create("base", IntType::create(32)));
-	ShPtr<ConstInt> index(ConstInt::create(1, 32));
-	ShPtr<ArrayIndexOpExpr> expr(ArrayIndexOpExpr::create(base, index));
+	Variable* base(Variable::create("base", IntType::create(32)));
+	ConstInt* index(ConstInt::create(1, 32));
+	ArrayIndexOpExpr* expr(ArrayIndexOpExpr::create(base, index));
 
 	EXPECT_EQ(base, expr->getBase());
 }
@@ -41,9 +41,9 @@ GetBaseReturnsBase) {
 
 TEST_F(ArrayIndexOpExprTests,
 GetIndexReturnsIndex) {
-	ShPtr<Variable> base(Variable::create("base", IntType::create(32)));
-	ShPtr<ConstInt> index(ConstInt::create(1, 32));
-	ShPtr<ArrayIndexOpExpr> expr(ArrayIndexOpExpr::create(base, index));
+	Variable* base(Variable::create("base", IntType::create(32)));
+	ConstInt* index(ConstInt::create(1, 32));
+	ArrayIndexOpExpr* expr(ArrayIndexOpExpr::create(base, index));
 
 	EXPECT_EQ(index, expr->getIndex());
 }

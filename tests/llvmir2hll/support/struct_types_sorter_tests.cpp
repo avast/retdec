@@ -38,7 +38,7 @@ SingleStructTypeIsConvertedToSingletonVector) {
 	// struct A {};
 	//
 	StructTypeSet structTypes;
-	ShPtr<StructType> structA(StructType::create(StructType::ElementTypes(), "A"));
+	StructType* structA(StructType::create(StructType::ElementTypes(), "A"));
 	structTypes.insert(structA);
 
 	// Expected output:
@@ -60,11 +60,11 @@ ThreeStructTypesWithoutDependenciesAreSortedByName) {
 	// struct C {};
 	//
 	StructTypeSet structTypes;
-	ShPtr<StructType> structA(StructType::create(StructType::ElementTypes(), "A"));
+	StructType* structA(StructType::create(StructType::ElementTypes(), "A"));
 	structTypes.insert(structA);
-	ShPtr<StructType> structB(StructType::create(StructType::ElementTypes(), "B"));
+	StructType* structB(StructType::create(StructType::ElementTypes(), "B"));
 	structTypes.insert(structB);
-	ShPtr<StructType> structC(StructType::create(StructType::ElementTypes(), "C"));
+	StructType* structC(StructType::create(StructType::ElementTypes(), "C"));
 	structTypes.insert(structC);
 
 	// Expected output:
@@ -90,15 +90,15 @@ ThreeStructTypesWithDependenciesAreProperlySorted) {
 	// struct A { struct B b; };
 	//
 	StructTypeSet structTypes;
-	ShPtr<StructType> structC(StructType::create(StructType::ElementTypes(), "C"));
+	StructType* structC(StructType::create(StructType::ElementTypes(), "C"));
 	structTypes.insert(structC);
 	StructType::ElementTypes structBElements;
 	structBElements.push_back(structC);
-	ShPtr<StructType> structB(StructType::create(structBElements, "B"));
+	StructType* structB(StructType::create(structBElements, "B"));
 	structTypes.insert(structB);
 	StructType::ElementTypes structAElements;
 	structAElements.push_back(structB);
-	ShPtr<StructType> structA(StructType::create(structAElements, "A"));
+	StructType* structA(StructType::create(structAElements, "A"));
 	structTypes.insert(structA);
 
 	// Expected output:
@@ -124,15 +124,15 @@ ThreeStructTypesWithDependenciesInArraysAreProperlySorted) {
 	// struct A { struct B b[]; };
 	//
 	StructTypeSet structTypes;
-	ShPtr<StructType> structC(StructType::create(StructType::ElementTypes(), "C"));
+	StructType* structC(StructType::create(StructType::ElementTypes(), "C"));
 	structTypes.insert(structC);
 	StructType::ElementTypes structBElements;
 	structBElements.push_back(ArrayType::create(structC, ArrayType::Dimensions()));
-	ShPtr<StructType> structB(StructType::create(structBElements, "B"));
+	StructType* structB(StructType::create(structBElements, "B"));
 	structTypes.insert(structB);
 	StructType::ElementTypes structAElements;
 	structAElements.push_back(ArrayType::create(structB, ArrayType::Dimensions()));
-	ShPtr<StructType> structA(StructType::create(structAElements, "A"));
+	StructType* structA(StructType::create(structAElements, "A"));
 	structTypes.insert(structA);
 
 	// Expected output:
@@ -160,19 +160,19 @@ FiveStructTypesWithSomeDependenciesAreProperlySortedByNameAndByDependencies) {
 	// struct E {};
 	//
 	StructTypeSet structTypes;
-	ShPtr<StructType> structC(StructType::create(StructType::ElementTypes(), "C"));
+	StructType* structC(StructType::create(StructType::ElementTypes(), "C"));
 	structTypes.insert(structC);
 	StructType::ElementTypes structBElements;
 	structBElements.push_back(structC);
-	ShPtr<StructType> structB(StructType::create(structBElements, "B"));
+	StructType* structB(StructType::create(structBElements, "B"));
 	structTypes.insert(structB);
 	StructType::ElementTypes structAElements;
 	structAElements.push_back(structB);
-	ShPtr<StructType> structA(StructType::create(structAElements, "A"));
+	StructType* structA(StructType::create(structAElements, "A"));
 	structTypes.insert(structA);
-	ShPtr<StructType> structD(StructType::create(StructType::ElementTypes(), "D"));
+	StructType* structD(StructType::create(StructType::ElementTypes(), "D"));
 	structTypes.insert(structD);
-	ShPtr<StructType> structE(StructType::create(StructType::ElementTypes(), "E"));
+	StructType* structE(StructType::create(StructType::ElementTypes(), "E"));
 	structTypes.insert(structE);
 
 	// Expected output:

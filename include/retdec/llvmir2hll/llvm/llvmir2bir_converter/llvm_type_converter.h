@@ -41,15 +41,15 @@ public:
 
 	bool isBool(const llvm::IntegerType *type) const;
 
-	ShPtr<Type> convert(const llvm::Type *type);
-	ShPtr<PointerType> convert(const llvm::PointerType *type);
-	ShPtr<ArrayType> convert(const llvm::ArrayType *type);
-	ShPtr<StructType> convert(const llvm::StructType *type);
-	ShPtr<FunctionType> convert(const llvm::FunctionType *type);
+	Type* convert(const llvm::Type *type);
+	PointerType* convert(const llvm::PointerType *type);
+	ArrayType* convert(const llvm::ArrayType *type);
+	StructType* convert(const llvm::StructType *type);
+	FunctionType* convert(const llvm::FunctionType *type);
 
 private:
 	/// Mapping of an LLVM type into an already converted type in BIR.
-	std::unordered_map<const llvm::Type *, ShPtr<Type>> mapLLVMTypeToType;
+	std::unordered_map<const llvm::Type *, Type*> mapLLVMTypeToType;
 };
 
 } // namespace llvmir2hll

@@ -25,32 +25,32 @@ class Visitor;
 */
 class ForLoopStmt final: public Statement {
 public:
-	static ShPtr<ForLoopStmt> create(ShPtr<Variable> indVar, ShPtr<Expression> startValue,
-		ShPtr<Expression> endCond, ShPtr<Expression> step,
-		ShPtr<Statement> body, ShPtr<Statement> succ = nullptr,
+	static ForLoopStmt* create(Variable* indVar, Expression* startValue,
+		Expression* endCond, Expression* step,
+		Statement* body, Statement* succ = nullptr,
 		Address a = Address::Undefined);
 
-	virtual ShPtr<Value> clone() override;
-	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
+	virtual Value* clone() override;
+	virtual bool isEqualTo(Value* otherValue) const override;
 	virtual bool isCompound() override { return true; }
-	virtual void replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) override;
-	virtual ShPtr<Expression> asExpression() const override;
+	virtual void replace(Expression* oldExpr, Expression* newExpr) override;
+	virtual Expression* asExpression() const override;
 
-	ShPtr<Variable> getIndVar() const;
-	ShPtr<Expression> getStartValue() const;
-	ShPtr<Expression> getEndCond() const;
-	ShPtr<Expression> getStep() const;
-	ShPtr<Statement> getBody() const;
+	Variable* getIndVar() const;
+	Expression* getStartValue() const;
+	Expression* getEndCond() const;
+	Expression* getStep() const;
+	Statement* getBody() const;
 
-	void setIndVar(ShPtr<Variable> newIndVar);
-	void setStartValue(ShPtr<Expression> newStartValue);
-	void setEndCond(ShPtr<Expression> newEndCond);
-	void setStep(ShPtr<Expression> newStep);
-	void setBody(ShPtr<Statement> newBody);
+	void setIndVar(Variable* newIndVar);
+	void setStartValue(Expression* newStartValue);
+	void setEndCond(Expression* newEndCond);
+	void setStep(Expression* newStep);
+	void setBody(Statement* newBody);
 
 	/// @name Observer Interface
 	/// @{
-	virtual void update(ShPtr<Value> subject, ShPtr<Value> arg = nullptr) override;
+	virtual void update(Value* subject, Value* arg = nullptr) override;
 	/// @}
 
 	/// @name Visitor Interface
@@ -61,25 +61,25 @@ public:
 private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
-	ForLoopStmt(ShPtr<Variable> indVar, ShPtr<Expression> startValue,
-		ShPtr<Expression> endCond, ShPtr<Expression> step,
-		ShPtr<Statement> body, Address a);
+	ForLoopStmt(Variable* indVar, Expression* startValue,
+		Expression* endCond, Expression* step,
+		Statement* body, Address a);
 
 private:
 	/// Induction variable.
-	ShPtr<Variable> indVar;
+	Variable* indVar = nullptr;
 
 	/// Starting value.
-	ShPtr<Expression> startValue;
+	Expression* startValue = nullptr;
 
 	/// End condition.
-	ShPtr<Expression> endCond;
+	Expression* endCond = nullptr;
 
 	/// Step.
-	ShPtr<Expression> step;
+	Expression* step = nullptr;
 
 	/// Body.
-	ShPtr<Statement> body;
+	Statement* body = nullptr;
 };
 
 } // namespace llvmir2hll

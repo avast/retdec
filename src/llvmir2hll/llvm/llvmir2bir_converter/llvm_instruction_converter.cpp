@@ -71,7 +71,7 @@ const unsigned COMPOSITE_TYPE_INDEX_SIZE_BITS = 32;
 * @par Preconditions
 *  - @a cExpr is non-null
 */
-ShPtr<Expression> LLVMInstructionConverter::convertConstExprToExpression(
+Expression* LLVMInstructionConverter::convertConstExprToExpression(
 		llvm::ConstantExpr *cExpr) {
 	PRECONDITION_NON_NULL(cExpr);
 
@@ -150,7 +150,7 @@ ShPtr<Expression> LLVMInstructionConverter::convertConstExprToExpression(
 * @par Preconditions
 *  - @a inst is non-null
 */
-ShPtr<Expression> LLVMInstructionConverter::convertInstructionToExpression(
+Expression* LLVMInstructionConverter::convertInstructionToExpression(
 		llvm::Instruction *inst) {
 	PRECONDITION_NON_NULL(inst);
 
@@ -160,7 +160,7 @@ ShPtr<Expression> LLVMInstructionConverter::convertInstructionToExpression(
 /**
 * @brief Converts the given LLVM call instruction @a inst into an expression in BIR.
 */
-ShPtr<CallExpr> LLVMInstructionConverter::convertCallInstToCallExpr(llvm::CallInst &inst) {
+CallExpr* LLVMInstructionConverter::convertCallInstToCallExpr(llvm::CallInst &inst) {
 	ExprVector args;
 	for (auto &arg: inst.arg_operands()) {
 		args.push_back(getConverter()->convertValueToExpression(arg));
@@ -178,8 +178,8 @@ ShPtr<CallExpr> LLVMInstructionConverter::convertCallInstToCallExpr(llvm::CallIn
 * @param[in] base Base expression.
 * @param[in] indices Array of indices.
 */
-ShPtr<Expression> LLVMInstructionConverter::generateAccessToAggregateType(
-		llvm::CompositeType *type, const ShPtr<Expression> &base,
+Expression* LLVMInstructionConverter::generateAccessToAggregateType(
+		llvm::CompositeType *type, Expression* base,
 		const llvm::ArrayRef<unsigned> &indices) {
 	auto typeIt = type;
 	auto access = base;
@@ -204,7 +204,7 @@ ShPtr<Expression> LLVMInstructionConverter::generateAccessToAggregateType(
 * @par Preconditions
 *  - @a conv is non-null
 */
-void LLVMInstructionConverter::setLLVMValueConverter(ShPtr<LLVMValueConverter> conv) {
+void LLVMInstructionConverter::setLLVMValueConverter(LLVMValueConverter* conv) {
 	PRECONDITION_NON_NULL(conv);
 
 	converter = conv;
@@ -224,7 +224,7 @@ void LLVMInstructionConverter::setOptionStrictFPUSemantics(bool strict) {
 * @brief Converts the given LLVM address space cast instruction @a inst into an
 *        expression in BIR.
 */
-ShPtr<Expression> LLVMInstructionConverter::visitAddrSpaceCastInst(llvm::AddrSpaceCastInst &inst) {
+Expression* LLVMInstructionConverter::visitAddrSpaceCastInst(llvm::AddrSpaceCastInst &inst) {
 	// TODO: Address space casts are treated like bit casts, there might
 	// be a better way to deal with them.
 	return convertCastInstToExpression<BitCastExpr>(inst);
@@ -234,7 +234,7 @@ ShPtr<Expression> LLVMInstructionConverter::visitAddrSpaceCastInst(llvm::AddrSpa
 * @brief Converts the given LLVM binary operation @a inst into an expression in
 *        BIR.
 */
-ShPtr<Expression> LLVMInstructionConverter::visitBinaryOperator(
+Expression* LLVMInstructionConverter::visitBinaryOperator(
 		llvm::BinaryOperator &inst) {
 	return convertBinaryOpToExpression(inst, inst.getOpcode());
 }
@@ -243,7 +243,7 @@ ShPtr<Expression> LLVMInstructionConverter::visitBinaryOperator(
 * @brief Converts the given LLVM bitcast instruction @a inst into an expression
 *        in BIR.
 */
-ShPtr<Expression> LLVMInstructionConverter::visitBitCastInst(llvm::BitCastInst &inst) {
+Expression* LLVMInstructionConverter::visitBitCastInst(llvm::BitCastInst &inst) {
 	return convertCastInstToExpression<BitCastExpr>(inst);
 }
 
@@ -251,7 +251,7 @@ ShPtr<Expression> LLVMInstructionConverter::visitBitCastInst(llvm::BitCastInst &
 * @brief Converts the given LLVM fpext instruction @a inst into an expression
 *        in BIR.
 */
-ShPtr<Expression> LLVMInstructionConverter::visitFPExtInst(llvm::FPExtInst &inst) {
+Expression* LLVMInstructionConverter::visitFPExtInst(llvm::FPExtInst &inst) {
 	return convertExtCastInstToExpression(inst, ExtCastExpr::Variant::FPExt);
 }
 
@@ -259,7 +259,7 @@ ShPtr<Expression> LLVMInstructionConverter::visitFPExtInst(llvm::FPExtInst &inst
 * @brief Converts the given LLVM sext instruction @a inst into an expression
 *        in BIR.
 */
-ShPtr<Expression> LLVMInstructionConverter::visitSExtInst(llvm::SExtInst &inst) {
+Expression* LLVMInstructionConverter::visitSExtInst(llvm::SExtInst &inst) {
 	return convertExtCastInstToExpression(inst, ExtCastExpr::Variant::SExt);
 }
 
@@ -267,7 +267,7 @@ ShPtr<Expression> LLVMInstructionConverter::visitSExtInst(llvm::SExtInst &inst) 
 * @brief Converts the given LLVM zext instruction @a inst into an expression
 *        in BIR.
 */
-ShPtr<Expression> LLVMInstructionConverter::visitZExtInst(llvm::ZExtInst &inst) {
+Expression* LLVMInstructionConverter::visitZExtInst(llvm::ZExtInst &inst) {
 	return convertExtCastInstToExpression(inst, ExtCastExpr::Variant::ZExt);
 }
 
@@ -275,7 +275,7 @@ ShPtr<Expression> LLVMInstructionConverter::visitZExtInst(llvm::ZExtInst &inst) 
 * @brief Converts the given LLVM fptosi instruction @a inst into an expression
 *        in BIR.
 */
-ShPtr<Expression> LLVMInstructionConverter::visitFPToSIInst(llvm::FPToSIInst &inst) {
+Expression* LLVMInstructionConverter::visitFPToSIInst(llvm::FPToSIInst &inst) {
 	return convertFPToIntInstToExpression(inst);
 }
 
@@ -283,7 +283,7 @@ ShPtr<Expression> LLVMInstructionConverter::visitFPToSIInst(llvm::FPToSIInst &in
 * @brief Converts the given LLVM fptoui instruction @a inst into an expression
 *        in BIR.
 */
-ShPtr<Expression> LLVMInstructionConverter::visitFPToUIInst(llvm::FPToUIInst &inst) {
+Expression* LLVMInstructionConverter::visitFPToUIInst(llvm::FPToUIInst &inst) {
 	return convertFPToIntInstToExpression(inst);
 }
 
@@ -291,7 +291,7 @@ ShPtr<Expression> LLVMInstructionConverter::visitFPToUIInst(llvm::FPToUIInst &in
 * @brief Converts the given LLVM trunc instruction @a inst into an expression
 *        in BIR.
 */
-ShPtr<Expression> LLVMInstructionConverter::visitTruncInst(llvm::TruncInst &inst) {
+Expression* LLVMInstructionConverter::visitTruncInst(llvm::TruncInst &inst) {
 	return convertTruncInstToExpression(inst);
 }
 
@@ -299,7 +299,7 @@ ShPtr<Expression> LLVMInstructionConverter::visitTruncInst(llvm::TruncInst &inst
 * @brief Converts the given LLVM fptrunc instruction @a inst into an expression
 *        in BIR.
 */
-ShPtr<Expression> LLVMInstructionConverter::visitFPTruncInst(llvm::FPTruncInst &inst) {
+Expression* LLVMInstructionConverter::visitFPTruncInst(llvm::FPTruncInst &inst) {
 	return convertTruncInstToExpression(inst);
 }
 
@@ -307,7 +307,7 @@ ShPtr<Expression> LLVMInstructionConverter::visitFPTruncInst(llvm::FPTruncInst &
 * @brief Converts the given LLVM inttoptr instruction @a inst into an expression
 *        in BIR.
 */
-ShPtr<Expression> LLVMInstructionConverter::visitIntToPtrInst(llvm::IntToPtrInst &inst) {
+Expression* LLVMInstructionConverter::visitIntToPtrInst(llvm::IntToPtrInst &inst) {
 	return convertCastInstToExpression<IntToPtrCastExpr>(inst);
 }
 
@@ -315,7 +315,7 @@ ShPtr<Expression> LLVMInstructionConverter::visitIntToPtrInst(llvm::IntToPtrInst
 * @brief Converts the given LLVM ptrtoint instruction @a inst into an expression
 *        in BIR.
 */
-ShPtr<Expression> LLVMInstructionConverter::visitPtrToIntInst(llvm::PtrToIntInst &inst) {
+Expression* LLVMInstructionConverter::visitPtrToIntInst(llvm::PtrToIntInst &inst) {
 	return convertCastInstToExpression<PtrToIntCastExpr>(inst);
 }
 
@@ -323,7 +323,7 @@ ShPtr<Expression> LLVMInstructionConverter::visitPtrToIntInst(llvm::PtrToIntInst
 * @brief Converts the given LLVM sitofp instruction @a inst into an expression
 *        in BIR.
 */
-ShPtr<Expression> LLVMInstructionConverter::visitSIToFPInst(llvm::SIToFPInst &inst) {
+Expression* LLVMInstructionConverter::visitSIToFPInst(llvm::SIToFPInst &inst) {
 	return convertIntToFPInstToExpression(inst, IntToFPCastExpr::Variant::SIToFP);
 }
 
@@ -331,7 +331,7 @@ ShPtr<Expression> LLVMInstructionConverter::visitSIToFPInst(llvm::SIToFPInst &in
 * @brief Converts the given LLVM uitofp instruction @a inst into an expression
 *        in BIR.
 */
-ShPtr<Expression> LLVMInstructionConverter::visitUIToFPInst(llvm::UIToFPInst &inst) {
+Expression* LLVMInstructionConverter::visitUIToFPInst(llvm::UIToFPInst &inst) {
 	return convertIntToFPInstToExpression(inst, IntToFPCastExpr::Variant::UIToFP);
 }
 
@@ -339,7 +339,7 @@ ShPtr<Expression> LLVMInstructionConverter::visitUIToFPInst(llvm::UIToFPInst &in
 * @brief Converts the given LLVM icmp instruction @a inst into an expression
 *        in BIR.
 */
-ShPtr<Expression> LLVMInstructionConverter::visitICmpInst(llvm::ICmpInst &inst) {
+Expression* LLVMInstructionConverter::visitICmpInst(llvm::ICmpInst &inst) {
 	return convertICmpInstToExpression(inst, inst.getPredicate());
 }
 
@@ -347,7 +347,7 @@ ShPtr<Expression> LLVMInstructionConverter::visitICmpInst(llvm::ICmpInst &inst) 
 * @brief Converts the given LLVM fcmp instruction @a inst into an expression
 *        in BIR.
 */
-ShPtr<Expression> LLVMInstructionConverter::visitFCmpInst(llvm::FCmpInst &inst) {
+Expression* LLVMInstructionConverter::visitFCmpInst(llvm::FCmpInst &inst) {
 	return convertFCmpInstToExpression(inst, inst.getPredicate());
 }
 
@@ -355,7 +355,7 @@ ShPtr<Expression> LLVMInstructionConverter::visitFCmpInst(llvm::FCmpInst &inst) 
 * @brief Converts the given LLVM select instruction @a inst into an expression
 *        in BIR.
 */
-ShPtr<Expression> LLVMInstructionConverter::visitSelectInst(llvm::SelectInst &inst) {
+Expression* LLVMInstructionConverter::visitSelectInst(llvm::SelectInst &inst) {
 	return convertSelectInstToExpression(inst);
 }
 
@@ -363,7 +363,7 @@ ShPtr<Expression> LLVMInstructionConverter::visitSelectInst(llvm::SelectInst &in
 * @brief Converts the given LLVM getElementPtr instruction @a inst into
 *        an expression in BIR.
 */
-ShPtr<Expression> LLVMInstructionConverter::visitGetElementPtrInst(
+Expression* LLVMInstructionConverter::visitGetElementPtrInst(
 		llvm::GetElementPtrInst &inst) {
 	return convertGetElementPtrToExpression(inst);
 }
@@ -372,7 +372,7 @@ ShPtr<Expression> LLVMInstructionConverter::visitGetElementPtrInst(
 * @brief Converts the given LLVM extractvalue instruction @a inst into
 *        an expression in BIR.
 */
-ShPtr<Expression> LLVMInstructionConverter::visitExtractValueInst(
+Expression* LLVMInstructionConverter::visitExtractValueInst(
 		llvm::ExtractValueInst &inst) {
 	auto type = llvm::cast<llvm::CompositeType>(inst.getAggregateOperand()->getType());
 	auto base = getConverter()->convertValueToExpression(inst.getAggregateOperand());
@@ -382,7 +382,7 @@ ShPtr<Expression> LLVMInstructionConverter::visitExtractValueInst(
 /**
 * @brief Converts the given LLVM instruction @a inst into an expression in BIR.
 */
-ShPtr<Expression> LLVMInstructionConverter::visitInstruction(llvm::Instruction &inst) {
+Expression* LLVMInstructionConverter::visitInstruction(llvm::Instruction &inst) {
 	FAIL("unsupported instruction: " << inst);
 	return nullptr;
 }
@@ -394,7 +394,7 @@ ShPtr<Expression> LLVMInstructionConverter::visitInstruction(llvm::Instruction &
 * Note that @a inst type is @c llvm::User instead of @c llvm::BinaryOperator
 * because this method can handle also constant binary expressions.
 */
-ShPtr<Expression> LLVMInstructionConverter::convertBinaryOpToExpression(
+Expression* LLVMInstructionConverter::convertBinaryOpToExpression(
 		llvm::User &inst, unsigned opcode) {
 	auto op1 = getConverter()->convertValueToExpression(inst.getOperand(0));
 	auto op2 = getConverter()->convertValueToExpression(inst.getOperand(1));
@@ -471,7 +471,7 @@ ShPtr<Expression> LLVMInstructionConverter::convertBinaryOpToExpression(
 * Note that @a inst type is @c llvm::User instead of @c llvm::ICmpInst because
 * this method can handle also constant integral compare expressions.
 */
-ShPtr<Expression> LLVMInstructionConverter::convertICmpInstToExpression(
+Expression* LLVMInstructionConverter::convertICmpInstToExpression(
 		llvm::User &inst, unsigned predicate) {
 	auto op1 = getConverter()->convertValueToExpression(inst.getOperand(0));
 	auto op2 = getConverter()->convertValueToExpression(inst.getOperand(1));
@@ -530,7 +530,7 @@ ShPtr<Expression> LLVMInstructionConverter::convertICmpInstToExpression(
 * Note that @a inst type is @c llvm::User instead of @c llvm::FCmpInst because
 * this method can handle also constant floating-point compare expressions.
 */
-ShPtr<Expression> LLVMInstructionConverter::convertFCmpInstToExpression(
+Expression* LLVMInstructionConverter::convertFCmpInstToExpression(
 		llvm::User &inst, unsigned predicate) {
 	auto op1 = getConverter()->convertValueToExpression(inst.getOperand(0));
 	auto op2 = getConverter()->convertValueToExpression(inst.getOperand(1));
@@ -549,7 +549,7 @@ ShPtr<Expression> LLVMInstructionConverter::convertFCmpInstToExpression(
 * Note that @a inst type is @c llvm::User instead of @c llvm::SelectInst
 * because this method can handle also constant select expressions.
 */
-ShPtr<Expression> LLVMInstructionConverter::convertSelectInstToExpression(
+Expression* LLVMInstructionConverter::convertSelectInstToExpression(
 		llvm::User &inst) {
 	auto cond = getConverter()->convertValueToExpression(inst.getOperand(0));
 	auto trueValue = getConverter()->convertValueToExpression(inst.getOperand(1));
@@ -567,7 +567,7 @@ ShPtr<Expression> LLVMInstructionConverter::convertSelectInstToExpression(
 * @param[in] inst Given LLVM extension cast instruction.
 * @param[in] variant Variant of extension cast expression in BIR.
 */
-ShPtr<Expression> LLVMInstructionConverter::convertExtCastInstToExpression(
+Expression* LLVMInstructionConverter::convertExtCastInstToExpression(
 		llvm::User &inst, ExtCastExpr::Variant variant) {
 	auto op = getConverter()->convertValueToExpression(inst.getOperand(0));
 	auto dstType = getConverter()->convertType(inst.getType());
@@ -584,7 +584,7 @@ ShPtr<Expression> LLVMInstructionConverter::convertExtCastInstToExpression(
 * @param[in] inst Given LLVM int to FP cast instruction.
 * @param[in] variant Variant of int to FP cast expression in BIR.
 */
-ShPtr<Expression> LLVMInstructionConverter::convertIntToFPInstToExpression(
+Expression* LLVMInstructionConverter::convertIntToFPInstToExpression(
 		llvm::User &inst, IntToFPCastExpr::Variant variant) {
 	auto op = getConverter()->convertValueToExpression(inst.getOperand(0));
 	auto dstType = getConverter()->convertType(inst.getType());
@@ -598,7 +598,7 @@ ShPtr<Expression> LLVMInstructionConverter::convertIntToFPInstToExpression(
 * Note that @a inst type is @c llvm::User instead of @c llvm::CastInst
 * because this method can handle also constant cast expressions.
 */
-ShPtr<Expression> LLVMInstructionConverter::convertFPToIntInstToExpression(
+Expression* LLVMInstructionConverter::convertFPToIntInstToExpression(
 		llvm::User &inst) {
 	return convertCastInstToExpression<FPToIntCastExpr>(inst);
 }
@@ -610,7 +610,7 @@ ShPtr<Expression> LLVMInstructionConverter::convertFPToIntInstToExpression(
 * Note that @a inst type is @c llvm::User instead of @c llvm::CastInst
 * because this method can handle also constant cast expressions.
 */
-ShPtr<Expression> LLVMInstructionConverter::convertTruncInstToExpression(
+Expression* LLVMInstructionConverter::convertTruncInstToExpression(
 		llvm::User &inst) {
 	return convertCastInstToExpression<TruncCastExpr>(inst);
 }
@@ -625,7 +625,7 @@ ShPtr<Expression> LLVMInstructionConverter::convertTruncInstToExpression(
 * @tparam T Class that represents a cast expression in BIR.
 */
 template<class T>
-ShPtr<Expression> LLVMInstructionConverter::convertCastInstToExpression(llvm::User &inst) {
+Expression* LLVMInstructionConverter::convertCastInstToExpression(llvm::User &inst) {
 	auto op = getConverter()->convertValueToExpression(inst.getOperand(0));
 	auto dstType = getConverter()->convertType(inst.getType());
 	return T::create(op, dstType);
@@ -638,7 +638,7 @@ ShPtr<Expression> LLVMInstructionConverter::convertCastInstToExpression(llvm::Us
 * Note that @a inst type is @c llvm::User instead of @c llvm::GetElementPtrInst
 * because this method can handle also constant getelementptr expression.
 */
-ShPtr<Expression> LLVMInstructionConverter::convertGetElementPtrToExpression(
+Expression* LLVMInstructionConverter::convertGetElementPtrToExpression(
 		llvm::User &inst) {
 	auto pointedValue = inst.getOperand(0);
 
@@ -651,7 +651,7 @@ ShPtr<Expression> LLVMInstructionConverter::convertGetElementPtrToExpression(
 	auto it = llvm::gep_type_begin(inst);
 	auto e = llvm::gep_type_end(inst);
 	if (it != e) {
-		ShPtr<Expression> base;
+		Expression* base;
 		auto index = getConverter()->convertValueToExpression(it.getOperand());
 		auto cInt = cast<ConstInt>(index);
 		if (cInt && cInt->isZero()) {
@@ -675,7 +675,7 @@ ShPtr<Expression> LLVMInstructionConverter::convertGetElementPtrToExpression(
 * @param[in] start First index of LLVM getelementptr instruction to be converted.
 * @param[in] end End of iterator through LLVM getelementptr instruction indices.
 */
-ShPtr<Expression> LLVMInstructionConverter::convertGEPIndices(ShPtr<Expression> base,
+Expression* LLVMInstructionConverter::convertGEPIndices(Expression* base,
 		llvm::gep_type_iterator start, llvm::gep_type_iterator end) {
 	auto indexOp = base;
 	for (auto i = start; i != end; ++i) {
@@ -694,8 +694,8 @@ ShPtr<Expression> LLVMInstructionConverter::convertGEPIndices(ShPtr<Expression> 
 /**
 * @brief Returns the @c LLVMValueConverter.
 */
-ShPtr<LLVMValueConverter> LLVMInstructionConverter::getConverter() {
-	auto conv = converter.lock();
+LLVMValueConverter* LLVMInstructionConverter::getConverter() {
+	auto conv = converter;
 	ASSERT_MSG(conv, "LLVMValueConverter has not been set or no longer exists");
 	return conv;
 }

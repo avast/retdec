@@ -44,8 +44,8 @@ const unsigned STRUCT_INDEX_SIZE_BITS = 32;
 /**
 * @brief Constructs a new converter.
 */
-LLVMConstantConverter::LLVMConstantConverter(ShPtr<LLVMInstructionConverter> instConverter,
-	ShPtr<LLVMTypeConverter> typeConverter):
+LLVMConstantConverter::LLVMConstantConverter(LLVMInstructionConverter* instConverter,
+	LLVMTypeConverter* typeConverter):
 	instConverter(instConverter), typeConverter(typeConverter) {}
 
 /**
@@ -54,7 +54,7 @@ LLVMConstantConverter::LLVMConstantConverter(ShPtr<LLVMInstructionConverter> ins
 * @par Preconditions
 *  - @a constant is non-null
 */
-ShPtr<Expression> LLVMConstantConverter::convertToExpression(llvm::Constant *constant) {
+Expression* LLVMConstantConverter::convertToExpression(llvm::Constant *constant) {
 	PRECONDITION_NON_NULL(constant);
 
 	if (auto cInt = llvm::dyn_cast<llvm::ConstantInt>(constant)) {
@@ -91,7 +91,7 @@ ShPtr<Expression> LLVMConstantConverter::convertToExpression(llvm::Constant *con
 * @par Preconditions
 *  - @a conv is non-null
 */
-void LLVMConstantConverter::setLLVMValueConverter(ShPtr<LLVMValueConverter> conv) {
+void LLVMConstantConverter::setLLVMValueConverter(LLVMValueConverter* conv) {
 	PRECONDITION_NON_NULL(conv);
 
 	converter = conv;
@@ -104,7 +104,7 @@ void LLVMConstantConverter::setLLVMValueConverter(ShPtr<LLVMValueConverter> conv
 * @par Preconditions
 *  - @a cInt is non-null
 */
-ShPtr<Expression> LLVMConstantConverter::convertToExpression(
+Expression* LLVMConstantConverter::convertToExpression(
 		const llvm::ConstantInt *cInt) {
 	PRECONDITION_NON_NULL(cInt);
 
@@ -122,7 +122,7 @@ ShPtr<Expression> LLVMConstantConverter::convertToExpression(
 * @par Preconditions
 *  - @a cFloat is non-null
 */
-ShPtr<Expression> LLVMConstantConverter::convertToExpression(
+Expression* LLVMConstantConverter::convertToExpression(
 		const llvm::ConstantFP *cFloat) {
 	PRECONDITION_NON_NULL(cFloat);
 
@@ -142,7 +142,7 @@ ShPtr<Expression> LLVMConstantConverter::convertToExpression(
 * @par Preconditions
 *  - @a cArray is non-null
 */
-ShPtr<Expression> LLVMConstantConverter::convertToExpression(
+Expression* LLVMConstantConverter::convertToExpression(
 		llvm::ConstantArray *cArray) {
 	PRECONDITION_NON_NULL(cArray);
 
@@ -169,7 +169,7 @@ ShPtr<Expression> LLVMConstantConverter::convertToExpression(
 * @par Preconditions
 *  - @a cArray is non-null
 */
-ShPtr<Expression> LLVMConstantConverter::convertToExpression(
+Expression* LLVMConstantConverter::convertToExpression(
 		llvm::ConstantDataArray *cArray) {
 	PRECONDITION_NON_NULL(cArray);
 
@@ -193,7 +193,7 @@ ShPtr<Expression> LLVMConstantConverter::convertToExpression(
 * @par Preconditions
 *  - @a cStruct is non-null
 */
-ShPtr<Expression> LLVMConstantConverter::convertToExpression(
+Expression* LLVMConstantConverter::convertToExpression(
 		const llvm::ConstantStruct *cStruct) {
 	PRECONDITION_NON_NULL(cStruct);
 
@@ -215,7 +215,7 @@ ShPtr<Expression> LLVMConstantConverter::convertToExpression(
 * @par Preconditions
 *  - @a cNullPtr is non-null
 */
-ShPtr<Expression> LLVMConstantConverter::convertToExpression(
+Expression* LLVMConstantConverter::convertToExpression(
 		const llvm::ConstantPointerNull *cNullPtr) {
 	PRECONDITION_NON_NULL(cNullPtr);
 
@@ -229,7 +229,7 @@ ShPtr<Expression> LLVMConstantConverter::convertToExpression(
 * @par Preconditions
 *  - @a globVar is non-null
 */
-ShPtr<Expression> LLVMConstantConverter::convertToExpression(
+Expression* LLVMConstantConverter::convertToExpression(
 		llvm::GlobalVariable *globVar) {
 	PRECONDITION_NON_NULL(globVar);
 
@@ -250,7 +250,7 @@ ShPtr<Expression> LLVMConstantConverter::convertToExpression(
 * @par Preconditions
 *  - @a type is non-null
 */
-ShPtr<Expression> LLVMConstantConverter::convertZeroInitializer(
+Expression* LLVMConstantConverter::convertZeroInitializer(
 		const llvm::Type *type) {
 	PRECONDITION_NON_NULL(type);
 
@@ -282,7 +282,7 @@ ShPtr<Expression> LLVMConstantConverter::convertZeroInitializer(
 * @par Preconditions
 *  - @a type is non-null
 */
-ShPtr<Expression> LLVMConstantConverter::convertZeroInitializer(
+Expression* LLVMConstantConverter::convertZeroInitializer(
 		const llvm::IntegerType *type) {
 	PRECONDITION_NON_NULL(type);
 
@@ -302,7 +302,7 @@ ShPtr<Expression> LLVMConstantConverter::convertZeroInitializer(
 * @par Preconditions
 *  - @a type is non-null
 */
-ShPtr<Expression> LLVMConstantConverter::convertZeroInitializer(
+Expression* LLVMConstantConverter::convertZeroInitializer(
 		const llvm::ArrayType *type) {
 	PRECONDITION_NON_NULL(type);
 
@@ -319,7 +319,7 @@ ShPtr<Expression> LLVMConstantConverter::convertZeroInitializer(
 * @par Preconditions
 *  - @a type is non-null
 */
-ShPtr<Expression> LLVMConstantConverter::convertZeroInitializer(
+Expression* LLVMConstantConverter::convertZeroInitializer(
 		const llvm::StructType *type) {
 	PRECONDITION_NON_NULL(type);
 
@@ -342,7 +342,7 @@ ShPtr<Expression> LLVMConstantConverter::convertZeroInitializer(
 * @par Preconditions
 *  - @a type is non-null
 */
-ShPtr<Expression> LLVMConstantConverter::convertZeroInitializer(
+Expression* LLVMConstantConverter::convertZeroInitializer(
 		const llvm::PointerType *type) {
 	PRECONDITION_NON_NULL(type);
 
@@ -364,15 +364,15 @@ bool LLVMConstantConverter::isBool(const llvm::ConstantInt *cInt) const {
 /**
 * @brief Creates name of structure element with given index @a index.
 */
-ShPtr<ConstInt> LLVMConstantConverter::getNameOfStructElement(unsigned index) const {
+ConstInt* LLVMConstantConverter::getNameOfStructElement(unsigned index) const {
 	return ConstInt::create(index, STRUCT_INDEX_SIZE_BITS);
 }
 
 /**
 * @brief Returns the @c LLVMValueConverter.
 */
-ShPtr<LLVMValueConverter> LLVMConstantConverter::getConverter() {
-	auto conv = converter.lock();
+LLVMValueConverter* LLVMConstantConverter::getConverter() {
+	auto conv = converter;
 	ASSERT_MSG(conv, "LLVMValueConverter has not been set or no longer exists");
 	return conv;
 }

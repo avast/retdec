@@ -35,7 +35,7 @@ FinderHasNonEmptyId) {
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
 	INSTANTIATE_CALL_INFO_OBTAINER_MOCK();
 
-	ShPtr<PatternFinder> pf(APICallPatternFinder::create(va, cio));
+	PatternFinder* pf(APICallPatternFinder::create(va, cio));
 
 	EXPECT_FALSE(pf->getId().empty());
 }
@@ -45,7 +45,7 @@ FinderIsRegisteredAtFactory) {
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
 	INSTANTIATE_CALL_INFO_OBTAINER_MOCK();
 
-	ShPtr<PatternFinder> pf(APICallPatternFinder::create(va, cio));
+	PatternFinder* pf(APICallPatternFinder::create(va, cio));
 
 	EXPECT_TRUE(PatternFinderFactory::getInstance().isRegistered(pf->getId()));
 }
@@ -55,7 +55,7 @@ WhenNoAPICallsArePresentNoPatternsAreReturned) {
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
 	INSTANTIATE_CALL_INFO_OBTAINER_MOCK();
 
-	ShPtr<PatternFinder> pf(APICallPatternFinder::create(va, cio));
+	PatternFinder* pf(APICallPatternFinder::create(va, cio));
 	PatternFinder::Patterns foundPatterns(pf->findPatterns(module));
 
 	EXPECT_TRUE(foundPatterns.empty());
@@ -71,19 +71,19 @@ WhenThereIsAPICallAsStatementPatternContainingThisStatementIsReturned) {
 	//    ShellExecute();
 	// }
 	//
-	ShPtr<Function> shellExecuteFunc(addFuncDecl("ShellExecute"));
-	ShPtr<CallExpr> callExpr(CallExpr::create(shellExecuteFunc->getAsVar()));
-	ShPtr<CallStmt> callStmt(CallStmt::create(callExpr));
+	Function* shellExecuteFunc(addFuncDecl("ShellExecute"));
+	CallExpr* callExpr(CallExpr::create(shellExecuteFunc->getAsVar()));
+	CallStmt* callStmt(CallStmt::create(callExpr));
 	testFunc->setBody(callStmt);
 
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
 	INSTANTIATE_CALL_INFO_OBTAINER_MOCK();
 
-	ShPtr<PatternFinder> pf(APICallPatternFinder::create(va, cio));
+	PatternFinder* pf(APICallPatternFinder::create(va, cio));
 	PatternFinder::Patterns foundPatterns(pf->findPatterns(module));
 
 	ASSERT_EQ(1, foundPatterns.size());
-	ShPtr<StmtsPattern> p(cast<StmtsPattern>(foundPatterns[0]));
+	StmtsPattern* p(cast<StmtsPattern>(foundPatterns[0]));
 	ASSERT_TRUE(p) << "the pattern is not of type StmtsPattern";
 	ASSERT_FALSE(p->isEmpty());
 	EXPECT_EQ(callStmt, *p->stmt_begin());
@@ -99,15 +99,15 @@ UninterestingCallsAreSkipped) {
 	//    foo();
 	// }
 	//
-	ShPtr<Function> fooFunc(addFuncDecl("foo"));
-	ShPtr<CallExpr> callExpr(CallExpr::create(fooFunc->getAsVar()));
-	ShPtr<CallStmt> callStmt(CallStmt::create(callExpr));
+	Function* fooFunc(addFuncDecl("foo"));
+	CallExpr* callExpr(CallExpr::create(fooFunc->getAsVar()));
+	CallStmt* callStmt(CallStmt::create(callExpr));
 	testFunc->setBody(callStmt);
 
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
 	INSTANTIATE_CALL_INFO_OBTAINER_MOCK();
 
-	ShPtr<PatternFinder> pf(APICallPatternFinder::create(va, cio));
+	PatternFinder* pf(APICallPatternFinder::create(va, cio));
 	PatternFinder::Patterns foundPatterns(pf->findPatterns(module));
 
 	EXPECT_EQ(0, foundPatterns.size());
@@ -124,25 +124,25 @@ WhenThereAreMoreAPICallsAsStatementsPatternsContainingTheseStatementsAreReturned
 	//    ShellExecute();
 	// }
 	//
-	ShPtr<Function> shellExecuteFunc(addFuncDecl("ShellExecute"));
-	ShPtr<CallExpr> callExpr2(CallExpr::create(shellExecuteFunc->getAsVar()));
-	ShPtr<CallStmt> callStmt2(CallStmt::create(callExpr2));
-	ShPtr<CallExpr> callExpr1(CallExpr::create(shellExecuteFunc->getAsVar()));
-	ShPtr<CallStmt> callStmt1(CallStmt::create(callExpr1, callStmt2));
+	Function* shellExecuteFunc(addFuncDecl("ShellExecute"));
+	CallExpr* callExpr2(CallExpr::create(shellExecuteFunc->getAsVar()));
+	CallStmt* callStmt2(CallStmt::create(callExpr2));
+	CallExpr* callExpr1(CallExpr::create(shellExecuteFunc->getAsVar()));
+	CallStmt* callStmt1(CallStmt::create(callExpr1, callStmt2));
 	testFunc->setBody(callStmt1);
 
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
 	INSTANTIATE_CALL_INFO_OBTAINER_MOCK();
 
-	ShPtr<PatternFinder> pf(APICallPatternFinder::create(va, cio));
+	PatternFinder* pf(APICallPatternFinder::create(va, cio));
 	PatternFinder::Patterns foundPatterns(pf->findPatterns(module));
 
 	ASSERT_EQ(2, foundPatterns.size());
-	ShPtr<StmtsPattern> p1(cast<StmtsPattern>(foundPatterns[0]));
+	StmtsPattern* p1(cast<StmtsPattern>(foundPatterns[0]));
 	ASSERT_TRUE(p1) << "the pattern is not of type StmtsPattern";
 	ASSERT_FALSE(p1->isEmpty());
 	EXPECT_EQ(callStmt1, *p1->stmt_begin());
-	ShPtr<StmtsPattern> p2(cast<StmtsPattern>(foundPatterns[1]));
+	StmtsPattern* p2(cast<StmtsPattern>(foundPatterns[1]));
 	ASSERT_FALSE(p2->isEmpty());
 	EXPECT_EQ(callStmt2, *p2->stmt_begin());
 }

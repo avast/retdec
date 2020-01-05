@@ -26,7 +26,7 @@ namespace {
 template <class Graph>
 class df_iterator {
 private:
-	using Node = ShPtr<typename Graph::Node>;
+	using Node = typename Graph::Node*;
 
 	// Standard typedefs.
 	using value_type = Node;
@@ -142,7 +142,7 @@ public:
 * @par Preconditions
 *  - @c cfg is non-null
 */
-CFGTraversal::CFGTraversal(ShPtr<CFG> cfg, bool defaultCurrRetVal):
+CFGTraversal::CFGTraversal(CFG* cfg, bool defaultCurrRetVal):
 		cfg(cfg), currRetVal(defaultCurrRetVal), stopTraversal(false) {
 	PRECONDITION_NON_NULL(cfg);
 }
@@ -157,7 +157,7 @@ CFGTraversal::CFGTraversal(ShPtr<CFG> cfg, bool defaultCurrRetVal):
 *   - @a startStmt is non-null and it is not an empty statement (recall that a
 *     CFG doesn't contain empty statements)
 */
-bool CFGTraversal::performTraversal(ShPtr<Statement> startStmt) {
+bool CFGTraversal::performTraversal(Statement* startStmt) {
 	PRECONDITION_NON_NULL(startStmt);
 	PRECONDITION(!isa<EmptyStmt>(startStmt),
 		"a CFG traversal cannot start from an empty statement");
@@ -182,7 +182,7 @@ bool CFGTraversal::performTraversal(ShPtr<Statement> startStmt) {
 *   - @a startStmt is non-null and it is not an empty statement (recall that a
 *     CFG doesn't contain empty statements)
 */
-bool CFGTraversal::performTraversalFromSuccessors(ShPtr<Statement> stmt) {
+bool CFGTraversal::performTraversalFromSuccessors(Statement* stmt) {
 	PRECONDITION_NON_NULL(stmt);
 	PRECONDITION(!isa<EmptyStmt>(stmt),
 		"a CFG traversal cannot start from an empty statement");
@@ -203,7 +203,7 @@ bool CFGTraversal::performTraversalFromSuccessors(ShPtr<Statement> stmt) {
 		// It is the last statement in the node, so traverse all node successors.
 		// For each outgoing edge...
 		for (auto i = node->succ_begin(), e = node->succ_end(); i != e; ++i) {
-			ShPtr<CFG::Node> dstNode((*i)->getDst());
+			(*i)->getDst(); // Maybe useless, maybe it has side effects?
 			retVal = combineRetVals(retVal, performTraversalImpl(node, node->stmt_end()));
 			if (stopTraversal) {
 				break;
@@ -223,7 +223,7 @@ bool CFGTraversal::performTraversalFromSuccessors(ShPtr<Statement> stmt) {
 *   - @a startStmt is non-null and it is not an empty statement (recall that a
 *     CFG doesn't contain empty statements)
 */
-bool CFGTraversal::performReverseTraversal(ShPtr<Statement> startStmt) {
+bool CFGTraversal::performReverseTraversal(Statement* startStmt) {
 	PRECONDITION_NON_NULL(startStmt);
 	PRECONDITION(!isa<EmptyStmt>(startStmt),
 		"a CFG traversal cannot start from an empty statement");
@@ -249,7 +249,7 @@ bool CFGTraversal::performReverseTraversal(ShPtr<Statement> startStmt) {
 *   - @a startStmt is non-null and it is not an empty statement (recall that a
 *     CFG doesn't contain empty statements)
 */
-bool CFGTraversal::performReverseTraversalFromPredecessors(ShPtr<Statement> stmt) {
+bool CFGTraversal::performReverseTraversalFromPredecessors(Statement* stmt) {
 	PRECONDITION_NON_NULL(stmt);
 	PRECONDITION(!isa<EmptyStmt>(stmt),
 		"a CFG traversal cannot start from an empty statement");
@@ -290,7 +290,7 @@ bool CFGTraversal::getCurrRetVal() const {
 * This function traverses the entire CFG rooted at @a node, starting with the statement
 * in @a stmtIter.
 */
-bool CFGTraversal::performTraversalImpl(ShPtr<CFG::Node> node,
+bool CFGTraversal::performTraversalImpl(CFG::Node* node,
 		CFG::stmt_iterator stmtIter) {
 	// Walk the CFG rooted at node in depth first order.
 	auto retVal = getEndRetVal();
@@ -356,7 +356,7 @@ std::pair<bool, bool> CFGTraversal::visitSingleNode(CFG::stmt_iterator stmtIter,
 * If @a stmtIter equals @c node->stmt_rend(), the function traverses all
 * predecessors of @a node.
 */
-bool CFGTraversal::performReverseTraversalImpl(ShPtr<CFG::Node> node,
+bool CFGTraversal::performReverseTraversalImpl(CFG::Node* node,
 		CFG::stmt_reverse_iterator stmtRIter) {
 	while (stmtRIter != node->stmt_rend()) {
 		// We're not at the start of the node, so check the statement under
@@ -387,11 +387,11 @@ bool CFGTraversal::performReverseTraversalImpl(ShPtr<CFG::Node> node,
 * This function is meant to be called within functions traversing a CFG in
 * reverse.
 */
-bool CFGTraversal::traverseNodePredecessors(ShPtr<CFG::Node> node) {
+bool CFGTraversal::traverseNodePredecessors(CFG::Node* node) {
 	bool retVal = getEndRetVal();
 	// For each ingoing edge...
 	for (auto i = node->pred_begin(), e = node->pred_end(); i != e; ++i) {
-		ShPtr<CFG::Node> srcNode((*i)->getSrc());
+		CFG::Node* srcNode((*i)->getSrc());
 		retVal = combineRetVals(retVal, performReverseTraversalImpl(srcNode,
 			srcNode->stmt_rbegin()));
 		if (stopTraversal) {

@@ -26,26 +26,26 @@ class Visitor;
 */
 class GlobalVarDef final: public Value {
 public:
-	static ShPtr<GlobalVarDef> create(ShPtr<Variable> var,
-		ShPtr<Expression> init = nullptr);
+	static GlobalVarDef* create(Variable* var,
+		Expression* init = nullptr);
 
-	virtual ShPtr<Value> clone() override;
-	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
-	void replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr);
+	virtual Value* clone() override;
+	virtual bool isEqualTo(Value* otherValue) const override;
+	void replace(Expression* oldExpr, Expression* newExpr);
 
-	ShPtr<Variable> getVar() const;
-	ShPtr<Expression> getInitializer() const;
+	Variable* getVar() const;
+	Expression* getInitializer() const;
 	bool hasInitializer() const;
 	bool definesExternalVar() const;
 	Address getAddress() const;
 
-	void setVar(ShPtr<Variable> newVar);
-	void setInitializer(ShPtr<Expression> newInit);
+	void setVar(Variable* newVar);
+	void setInitializer(Expression* newInit);
 	void removeInitializer();
 
 	/// @name Observer Interface
 	/// @{
-	virtual void update(ShPtr<Value> subject, ShPtr<Value> arg = nullptr) override;
+	virtual void update(Value* subject, Value* arg = nullptr) override;
 	/// @}
 
 	/// @name Visitor Interface
@@ -56,15 +56,15 @@ public:
 private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
-	explicit GlobalVarDef(ShPtr<Variable> var,
-		ShPtr<Expression> init = nullptr);
+	explicit GlobalVarDef(Variable* var,
+		Expression* init = nullptr);
 
 private:
 	/// Global variable.
-	ShPtr<Variable> var;
+	Variable* var = nullptr;
 
 	/// Initializer of the variable. May be empty.
-	ShPtr<Expression> init;
+	Expression* init = nullptr;
 };
 
 } // namespace llvmir2hll

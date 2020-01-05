@@ -34,30 +34,30 @@ class Variable;
 */
 class VariablesManager final: private retdec::utils::NonCopyable {
 public:
-	VariablesManager(ShPtr<Module> resModule);
+	VariablesManager(Module* resModule);
 
 	void reset();
 
-	void addGlobalValVarPair(llvm::Value *val, ShPtr<Variable> var);
-	ShPtr<Variable> getVarByValue(llvm::Value *val);
+	void addGlobalValVarPair(llvm::Value *val, Variable* var);
+	Variable* getVarByValue(llvm::Value *val);
 	VarSet getLocalVars() const;
 
 private:
 	void assignNameToValue(llvm::Value *val) const;
-	ShPtr<Variable> getGlobalVar(llvm::Value *val);
-	ShPtr<Variable> getOrCreateLocalVar(llvm::Value *val);
+	Variable* getGlobalVar(llvm::Value *val);
+	Variable* getOrCreateLocalVar(llvm::Value *val);
 
 	/// Mapping of a LLVM value to an existing variable.
-	std::unordered_map<llvm::Value*, ShPtr<Variable>> localVarsMap;
+	std::unordered_map<llvm::Value*, Variable*> localVarsMap;
 
 	/// Mapping of LLVM functions and globals to existing variables.
-	std::unordered_map<llvm::Value*, ShPtr<Variable>> globalVarsMap;
+	std::unordered_map<llvm::Value*, Variable*> globalVarsMap;
 
 	/// Variable names generator.
-	UPtr<VarNameGen> varNameGen;
+	VarNameGen* varNameGen = nullptr;
 
 	/// The resulting module in BIR.
-	ShPtr<Module> resModule;
+	Module* resModule = nullptr;
 };
 
 } // namespace llvmir2hll

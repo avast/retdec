@@ -26,11 +26,11 @@ class Visitor;
 */
 class VoidType final: public Type {
 public:
-	static ShPtr<VoidType> create();
+	static VoidType* create();
 
-	virtual ShPtr<Value> clone() override;
+	virtual Value* clone() override;
 
-	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
+	virtual bool isEqualTo(Value* otherValue) const override;
 
 	std::size_t getSize() const;
 

@@ -16,12 +16,12 @@ namespace llvmir2hll {
 *
 * See create() for more information.
 */
-BitShrOpExpr::BitShrOpExpr(ShPtr<Expression> op1, ShPtr<Expression> op2,
+BitShrOpExpr::BitShrOpExpr(Expression* op1, Expression* op2,
 		Variant variant):
 	BinaryOpExpr(op1, op2), variant(variant) {}
 
-bool BitShrOpExpr::isEqualTo(ShPtr<Value> otherValue) const {
-	if (ShPtr<BitShrOpExpr> otherValueBitShrOpExpr = cast<BitShrOpExpr>(otherValue)) {
+bool BitShrOpExpr::isEqualTo(Value* otherValue) const {
+	if (BitShrOpExpr* otherValueBitShrOpExpr = cast<BitShrOpExpr>(otherValue)) {
 		return variant == otherValueBitShrOpExpr->variant &&
 			op1->isEqualTo(otherValueBitShrOpExpr->getFirstOperand()) &&
 			op2->isEqualTo(otherValueBitShrOpExpr->getSecondOperand());
@@ -29,8 +29,8 @@ bool BitShrOpExpr::isEqualTo(ShPtr<Value> otherValue) const {
 	return false;
 }
 
-ShPtr<Value> BitShrOpExpr::clone() {
-	ShPtr<BitShrOpExpr> bitShrOpExpr(BitShrOpExpr::create(
+Value* BitShrOpExpr::clone() {
+	BitShrOpExpr* bitShrOpExpr(BitShrOpExpr::create(
 		ucast<Expression>(op1->clone()), ucast<Expression>(op2->clone()), variant));
 	bitShrOpExpr->setMetadata(getMetadata());
 	return bitShrOpExpr;
@@ -67,14 +67,14 @@ bool BitShrOpExpr::isArithmetical() const {
 * @par Preconditions
 *  - @a op1 and @a op2 are non-null
 */
-ShPtr<BitShrOpExpr> BitShrOpExpr::create(ShPtr<Expression> op1, ShPtr<Expression> op2,
+BitShrOpExpr* BitShrOpExpr::create(Expression* op1, Expression* op2,
 		Variant variant) {
 	PRECONDITION_NON_NULL(op1);
 	PRECONDITION_NON_NULL(op2);
 
-	ShPtr<BitShrOpExpr> expr(new BitShrOpExpr(op1, op2, variant));
+	BitShrOpExpr* expr(new BitShrOpExpr(op1, op2, variant));
 
-	// Initialization (recall that shared_from_this() cannot be called in a
+	// Initialization (recall that this cannot be called in a
 	// constructor).
 	op1->addObserver(expr);
 	op2->addObserver(expr);
@@ -83,7 +83,7 @@ ShPtr<BitShrOpExpr> BitShrOpExpr::create(ShPtr<Expression> op1, ShPtr<Expression
 }
 
 void BitShrOpExpr::accept(Visitor *v) {
-	v->visit(ucast<BitShrOpExpr>(shared_from_this()));
+	v->visit(ucast<BitShrOpExpr>(this));
 }
 
 } // namespace llvmir2hll

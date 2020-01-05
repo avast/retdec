@@ -53,21 +53,21 @@ public:
 	*/
 	virtual std::string getId() const = 0;
 
-	void renameVars(ShPtr<Module> module);
+	void renameVars(Module* module);
 
 protected:
-	VarRenamer(ShPtr<VarNameGen> varNameGen, bool useDebugNames = true);
+	VarRenamer(VarNameGen* varNameGen, bool useDebugNames = true);
 
-	void assignName(ShPtr<Variable> var, const std::string &name,
-		ShPtr<Function> func = nullptr);
-	void assignNameFromDebugInfoIfAvail(ShPtr<Variable> var,
-		ShPtr<Function> func = nullptr);
-	bool isGlobalVar(ShPtr<Variable> var) const;
-	bool isFunc(ShPtr<Variable> var) const;
-	bool hasBeenRenamed(ShPtr<Variable> var) const;
+	void assignName(Variable* var, const std::string &name,
+		Function* func = nullptr);
+	void assignNameFromDebugInfoIfAvail(Variable* var,
+		Function* func = nullptr);
+	bool isGlobalVar(Variable* var) const;
+	bool isFunc(Variable* var) const;
+	bool hasBeenRenamed(Variable* var) const;
 	bool nameExists(const std::string &name,
-		ShPtr<Function> func = nullptr) const;
-	ShPtr<Function> getFuncByName(const std::string &name) const;
+		Function* func = nullptr) const;
+	Function* getFuncByName(const std::string &name) const;
 
 	virtual void doVarsRenaming();
 
@@ -79,41 +79,41 @@ protected:
 	/// @name Renaming of Global Variables
 	/// @{
 	virtual void renameGlobalVars();
-	virtual void renameGlobalVar(ShPtr<Variable> var);
+	virtual void renameGlobalVar(Variable* var);
 	/// @}
 
 	/// @name Renaming of Variables in Functions
 	/// @{
 	virtual void renameVarsInFuncs();
-	virtual void renameVarsInFunc(ShPtr<Function> func);
-	virtual void renameFuncParam(ShPtr<Variable> var,
-		ShPtr<Function> func);
-	virtual void renameFuncLocalVar(ShPtr<Variable> var,
-		ShPtr<Function> func);
+	virtual void renameVarsInFunc(Function* func);
+	virtual void renameFuncParam(Variable* var,
+		Function* func);
+	virtual void renameFuncLocalVar(Variable* var,
+		Function* func);
 	/// @}
 
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<Variable> var) override;
+	virtual void visit(Variable* var) override;
 	/// @}
 
 protected:
 	/// Mapping of a function into a set of strings.
-	using FuncStringSetMap = std::map<ShPtr<Function>, StringSet>;
+	using FuncStringSetMap = std::map<Function*, StringSet>;
 
 	/// Mapping of a function's name into the function.
-	using FuncByNameMap = std::map<std::string, ShPtr<Function>>;
+	using FuncByNameMap = std::map<std::string, Function*>;
 
 protected:
 	/// Used generator of variable names.
-	ShPtr<VarNameGen> varNameGen;
+	VarNameGen* varNameGen = nullptr;
 
 	/// Should we use variable names from debugging information?
 	bool useDebugNames;
 
 	/// Module in which the variables are being renamed.
-	ShPtr<Module> module;
+	Module* module = nullptr;
 
 	/// Global variables in @c module. This is here to speedup the renaming. By
 	/// using this set, we do not have to ask @c module every time we need such
@@ -139,16 +139,16 @@ protected:
 	FuncStringSetMap localVarsNames;
 
 	/// The currently visited function.
-	ShPtr<Function> currFunc;
+	Function* currFunc = nullptr;
 
 private:
 	void storeFuncsByName();
-	std::string ensureNameUniqueness(ShPtr<Variable> var,
-		const std::string &name, ShPtr<Function> func = nullptr);
-	std::string generateUniqueName(ShPtr<Variable> var,
-		const std::string &name, ShPtr<Function> func = nullptr);
+	std::string ensureNameUniqueness(Variable* var,
+		const std::string &name, Function* func = nullptr);
+	std::string generateUniqueName(Variable* var,
+		const std::string &name, Function* func = nullptr);
 	void assignRealNamesToFuncs();
-	void assignNameToFunc(ShPtr<Function> func, const std::string &newName);
+	void assignNameToFunc(Function* func, const std::string &newName);
 };
 
 } // namespace llvmir2hll

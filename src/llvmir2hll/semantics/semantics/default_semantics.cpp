@@ -22,8 +22,8 @@ DefaultSemantics::DefaultSemantics() {}
 /**
 * @brief Creates a new semantics.
 */
-ShPtr<Semantics> DefaultSemantics::create() {
-	return ShPtr<Semantics>(new DefaultSemantics());
+Semantics* DefaultSemantics::create() {
+	return new DefaultSemantics();
 }
 
 std::string DefaultSemantics::getId() const {

@@ -27,18 +27,18 @@ public:
 	* @brief Returns the ID of the optimizer.
 	*/
 	virtual std::string getId() const = 0;
-	virtual bool tryOptimize(ShPtr<Expression> expr);
+	virtual bool tryOptimize(Expression* expr);
 
 protected:
-	SubOptimizer(ShPtr<ArithmExprEvaluator> arithmExprEvaluator);
+	SubOptimizer(ArithmExprEvaluator* arithmExprEvaluator);
 
-	bool isConstFloatOrConstInt(ShPtr<Expression> expr) const;
-	void optimizeExpr(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr);
-	bool tryOptimizeAndReturnIfCodeChanged(ShPtr<Expression> expr);
+	bool isConstFloatOrConstInt(Expression* expr) const;
+	void optimizeExpr(Expression* oldExpr, Expression* newExpr);
+	bool tryOptimizeAndReturnIfCodeChanged(Expression* expr);
 
 protected:
 	/// The used evaluator of arithmetical expressions.
-	ShPtr<ArithmExprEvaluator> arithmExprEvaluator;
+	ArithmExprEvaluator* arithmExprEvaluator = nullptr;
 
 private:
 	bool codeChanged;

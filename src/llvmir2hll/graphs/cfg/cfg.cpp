@@ -24,7 +24,7 @@ namespace llvmir2hll {
 namespace {
 
 /// Set of nodes.
-using NodeSet = std::set<ShPtr<CFG::Node>>;
+using NodeSet = std::set<CFG::Node*>;
 
 } // anonymous namespace
 
@@ -88,7 +88,7 @@ std::size_t CFG::Node::getNumberOfStmts() const {
 * @par Preconditions
 *   - @a stmt is non-null
 */
-void CFG::Node::addStmt(ShPtr<Statement> stmt) {
+void CFG::Node::addStmt(Statement* stmt) {
 	PRECONDITION_NON_NULL(stmt);
 
 	stmts.push_back(stmt);
@@ -102,7 +102,7 @@ void CFG::Node::addStmt(ShPtr<Statement> stmt) {
 * @par Preconditions
 *   - both @a stmt and @a stmts are non-null
 */
-void CFG::Node::replaceStmt(ShPtr<Statement> stmt, const StmtVector &stmts) {
+void CFG::Node::replaceStmt(Statement* stmt, const StmtVector &stmts) {
 	this->stmts.insert(
 		std::find(this->stmts.begin(), this->stmts.end(), stmt),
 		stmts.begin(),
@@ -119,7 +119,7 @@ void CFG::Node::replaceStmt(ShPtr<Statement> stmt, const StmtVector &stmts) {
 * @par Preconditions
 *   - @a stmt is non-null
 */
-void CFG::Node::removeStmt(ShPtr<Statement> stmt) {
+void CFG::Node::removeStmt(Statement* stmt) {
 	PRECONDITION_NON_NULL(stmt);
 
 	removeItem(stmts, stmt);
@@ -169,7 +169,7 @@ bool CFG::Node::hasSuccs() const {
 * @par Preconditions
 *   - @a edge is non-null
 */
-bool CFG::Node::hasSucc(ShPtr<Edge> edge) const {
+bool CFG::Node::hasSucc(Edge* edge) const {
 	PRECONDITION_NON_NULL(edge);
 
 	return hasItem(succs, edge);
@@ -188,7 +188,7 @@ std::size_t CFG::Node::getNumberOfSuccs() const {
 * @par Preconditions
 *   - @a succ is non-null
 */
-void CFG::Node::addSucc(ShPtr<Edge> succ) {
+void CFG::Node::addSucc(Edge* succ) {
 	PRECONDITION_NON_NULL(succ);
 
 	succs.push_back(succ);
@@ -199,8 +199,8 @@ void CFG::Node::addSucc(ShPtr<Edge> succ) {
 *
 * If there are no successors, the null pointer is returned.
 */
-ShPtr<CFG::Edge> CFG::Node::getFirstSucc() const {
-	return !succs.empty() ? succs.front() : ShPtr<CFG::Edge>();
+CFG::Edge* CFG::Node::getFirstSucc() const {
+	return !succs.empty() ? succs.front() : nullptr;
 }
 
 /**
@@ -211,7 +211,7 @@ ShPtr<CFG::Edge> CFG::Node::getFirstSucc() const {
 * @par Preconditions
 *   - @a succ is non-null
 */
-void CFG::Node::removeSucc(ShPtr<Edge> succ) {
+void CFG::Node::removeSucc(Edge* succ) {
 	PRECONDITION_NON_NULL(succ);
 
 	removeItem(succs, succ);
@@ -245,7 +245,7 @@ bool CFG::Node::hasPreds() const {
 * @par Preconditions
 *   - @a edge is non-null
 */
-bool CFG::Node::hasPred(ShPtr<Edge> edge) const {
+bool CFG::Node::hasPred(Edge* edge) const {
 	PRECONDITION_NON_NULL(edge);
 
 	return hasItem(preds, edge);
@@ -264,7 +264,7 @@ std::size_t CFG::Node::getNumberOfPreds() const {
 * @par Preconditions
 *   - @a pred is non-null
 */
-void CFG::Node::addPred(ShPtr<Edge> pred) {
+void CFG::Node::addPred(Edge* pred) {
 	PRECONDITION_NON_NULL(pred);
 
 	preds.push_back(pred);
@@ -278,7 +278,7 @@ void CFG::Node::addPred(ShPtr<Edge> pred) {
 * @par Preconditions
 *   - @a pred is non-null
 */
-void CFG::Node::removePred(ShPtr<Edge> pred) {
+void CFG::Node::removePred(Edge* pred) {
 	PRECONDITION_NON_NULL(pred);
 
 	removeItem(preds, pred);
@@ -306,13 +306,13 @@ CFG::pred_iterator CFG::Node::pred_end() const {
 * @param[in] dst Destination node.
 * @param[in] label Optional edge label.
 */
-CFG::Edge::Edge(ShPtr<Node> src, ShPtr<Node> dst, ShPtr<Expression> label):
+CFG::Edge::Edge(Node* src, Node* dst, Expression* label):
 	src(src), label(label), dst(dst) {}
 
 /**
 * @brief Returns the source node of the edge.
 */
-ShPtr<CFG::Node> CFG::Edge::getSrc() const {
+CFG::Node* CFG::Edge::getSrc() const {
 	return src;
 }
 
@@ -321,14 +321,14 @@ ShPtr<CFG::Node> CFG::Edge::getSrc() const {
 *
 * The returned label may be null.
 */
-ShPtr<Expression> CFG::Edge::getLabel() const {
+Expression* CFG::Edge::getLabel() const {
 	return label;
 }
 
 /**
 * @brief Returns the destination node of the edge.
 */
-ShPtr<CFG::Node> CFG::Edge::getDst() const {
+CFG::Node* CFG::Edge::getDst() const {
 	return dst;
 }
 
@@ -337,14 +337,14 @@ ShPtr<CFG::Node> CFG::Edge::getDst() const {
 *
 * @param[in] func The CFG will correspond to this function.
 */
-CFG::CFG(ShPtr<Function> func): correspondingFunction(func) {}
+CFG::CFG(Function* func): correspondingFunction(func) {}
 
 /**
 * @brief Returns the function which corresponds to the CFG.
 *
 * In other words, it returns the function from which this CFG was created.
 */
-ShPtr<Function> CFG::getCorrespondingFunction() const {
+Function* CFG::getCorrespondingFunction() const {
 	return correspondingFunction;
 }
 
@@ -354,7 +354,7 @@ ShPtr<Function> CFG::getCorrespondingFunction() const {
 * @par Preconditions
 *   - @a node is non-null
 */
-void CFG::addEntryNode(ShPtr<Node> node) {
+void CFG::addEntryNode(Node* node) {
 	PRECONDITION_NON_NULL(node);
 
 	addNode(node);
@@ -367,7 +367,7 @@ void CFG::addEntryNode(ShPtr<Node> node) {
 * @par Preconditions
 *   - @a node is non-null
 */
-void CFG::addExitNode(ShPtr<Node> node) {
+void CFG::addExitNode(Node* node) {
 	PRECONDITION_NON_NULL(node);
 
 	addNode(node);
@@ -377,14 +377,14 @@ void CFG::addExitNode(ShPtr<Node> node) {
 /**
 * @brief Returns the entry node of the CFG.
 */
-ShPtr<CFG::Node> CFG::getEntryNode() const {
+CFG::Node* CFG::getEntryNode() const {
 	return entryNode;
 }
 
 /**
 * @brief Returns the exit node of the CFG.
 */
-ShPtr<CFG::Node> CFG::getExitNode() const {
+CFG::Node* CFG::getExitNode() const {
 	return exitNode;
 }
 
@@ -395,7 +395,7 @@ ShPtr<CFG::Node> CFG::getExitNode() const {
 * @par Preconditions
 *   - @a stmt is non-null
 */
-bool CFG::stmtExistsInCFG(ShPtr<Statement> stmt) const {
+bool CFG::stmtExistsInCFG(Statement* stmt) const {
 	PRECONDITION_NON_NULL(stmt);
 
 	return stmtNodeMapping.find(stmt) != stmtNodeMapping.end();
@@ -410,16 +410,16 @@ bool CFG::stmtExistsInCFG(ShPtr<Statement> stmt) const {
 * @par Preconditions
 *   - @a stmt is non-null
 */
-CFG::StmtInNode CFG::getNodeForStmt(ShPtr<Statement> stmt) const {
+CFG::StmtInNode CFG::getNodeForStmt(Statement* stmt) const {
 	PRECONDITION_NON_NULL(stmt);
 
 	// Get the node.
 	auto nodeForStmtIter = stmtNodeMapping.find(stmt);
 	if (nodeForStmtIter == stmtNodeMapping.end()) {
 		// The statement doesn't exist in the CFG.
-		return StmtInNode(ShPtr<Node>(), exitNode->stmt_end());
+		return StmtInNode(nullptr, exitNode->stmt_end());
 	}
-	ShPtr<Node> nodeForStmt(nodeForStmtIter->second);
+	Node* nodeForStmt(nodeForStmtIter->second);
 
 	// Get the position of the statement within the found node.
 	auto stmtPos = std::find(nodeForStmt->stmt_begin(),
@@ -437,7 +437,7 @@ CFG::StmtInNode CFG::getNodeForStmt(ShPtr<Statement> stmt) const {
 * @par Preconditions
 *   - @a stmt is non-null
 */
-bool CFG::hasNodeForStmt(ShPtr<Statement> stmt) const {
+bool CFG::hasNodeForStmt(Statement* stmt) const {
 	PRECONDITION_NON_NULL(stmt);
 
 	return getNodeForStmt(stmt).first != nullptr;
@@ -493,7 +493,7 @@ void CFG::splitNodes() {
 * @par Preconditions
 *  - both @a stmt and @a node are non-null
 */
-void CFG::removeStmtFromNode(ShPtr<Statement> stmt, ShPtr<CFG::Node> node) {
+void CFG::removeStmtFromNode(Statement* stmt, CFG::Node* node) {
 	PRECONDITION_NON_NULL(stmt);
 	PRECONDITION_NON_NULL(node);
 
@@ -516,7 +516,7 @@ void CFG::removeStmtFromNode(ShPtr<Statement> stmt, ShPtr<CFG::Node> node) {
 * @par Preconditions
 *  - @a stmt is non-null
 */
-void CFG::removeStmt(ShPtr<Statement> stmt) {
+void CFG::removeStmt(Statement* stmt) {
 	PRECONDITION_NON_NULL(stmt);
 
 	// If stmt doesn't exist in the CFG, do nothing.
@@ -568,7 +568,7 @@ void CFG::removeStmt(ShPtr<Statement> stmt) {
 * @par Preconditions
 *  - @a stmt are non-null
 */
-void CFG::replaceStmt(ShPtr<Statement> stmt, const StmtVector &stmts) {
+void CFG::replaceStmt(Statement* stmt, const StmtVector &stmts) {
 	PRECONDITION_NON_NULL(stmt);
 
 	// If stmt doesn't exist in the CFG, do nothing.
@@ -654,7 +654,7 @@ CFG::NodeVector CFG::getUnreachableNodes() const {
 /**
 * @brief Returns the last statement in the given @a node.
 */
-ShPtr<Statement> CFG::getLastStmtInNode(ShPtr<Node> node) {
+Statement* CFG::getLastStmtInNode(Node* node) {
 	stmt_iterator lastStmtIter;
 	for (auto i = node->stmt_begin(), e = node->stmt_end(); i != e; ++i) {
 		lastStmtIter = i;
@@ -697,8 +697,8 @@ CFG::edge_iterator CFG::edge_end() const {
 *
 * @return The added node.
 */
-ShPtr<CFG::Node> CFG::addNode(const std::string &label) {
-	auto node = std::make_shared<Node>(label);
+CFG::Node* CFG::addNode(const std::string &label) {
+	auto node = new Node(label);
 	addNode(node);
 	return node;
 }
@@ -706,7 +706,7 @@ ShPtr<CFG::Node> CFG::addNode(const std::string &label) {
 /**
 * @brief Adds the given node to the CFG.
 */
-void CFG::addNode(ShPtr<Node> node) {
+void CFG::addNode(Node* node) {
 	nodes.push_back(node);
 }
 
@@ -724,12 +724,12 @@ void CFG::addNode(ShPtr<Node> node) {
 * @par Preconditions
 *  - @a src and @a dst are non-null
 */
-ShPtr<CFG::Edge> CFG::addEdge(ShPtr<Node> src, ShPtr<Node> dst,
-		ShPtr<Expression> label) {
+CFG::Edge* CFG::addEdge(Node* src, Node* dst,
+		Expression* label) {
 	PRECONDITION_NON_NULL(src);
 	PRECONDITION_NON_NULL(dst);
 
-	auto edge = std::make_shared<CFG::Edge>(src, dst, label);
+	auto edge = new CFG::Edge(src, dst, label);
 	edges.push_back(edge);
 	src->addSucc(edge);
 	dst->addPred(edge);
@@ -753,7 +753,7 @@ ShPtr<CFG::Edge> CFG::addEdge(ShPtr<Node> src, ShPtr<Node> dst,
 *  - @a node is non-null
 *  - @a node is not the entry or the exit node
 */
-void CFG::removeNode(ShPtr<Node> node) {
+void CFG::removeNode(Node* node) {
 	PRECONDITION_NON_NULL(node);
 	PRECONDITION(node != entryNode,
 		"Trying to remove the entry node.");
@@ -818,7 +818,7 @@ void CFG::removeNode(ShPtr<Node> node) {
 * @par Preconditions
 *  - @a edge is non-null
 */
-void CFG::removeEdge(ShPtr<Edge> edge) {
+void CFG::removeEdge(Edge* edge) {
 	PRECONDITION_NON_NULL(edge);
 
 	removeItem(edges, edge);
@@ -832,7 +832,7 @@ void CFG::removeEdge(ShPtr<Edge> edge) {
 *
 * Nodes for the empty statement are not created.
 */
-void CFG::splitNode(ShPtr<Node> node) {
+void CFG::splitNode(Node* node) {
 	// If there is only a single statement in node, we're done.
 	if (node->getNumberOfStmts() == 1) {
 		return;
@@ -845,7 +845,7 @@ void CFG::splitNode(ShPtr<Node> node) {
 	// For each statement in the node (except the first one which we can skip
 	// since it already has an associated node)...
 	auto lastNode = node;
-	ShPtr<Edge> edgeFromNodeToSecondNode;
+	Edge* edgeFromNodeToSecondNode = nullptr;
 	auto secondStmtIter = ++node->stmt_begin();
 	for (auto i = secondStmtIter, e = node->stmt_end(); i != e; ++i) {
 		// Skip empty statements.

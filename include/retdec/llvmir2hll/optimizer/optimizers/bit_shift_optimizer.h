@@ -58,7 +58,7 @@ class BinaryOpExpr;
 */
 class BitShiftOptimizer final: public Optimizer {
 public:
-	BitShiftOptimizer(ShPtr<Module> module);
+	BitShiftOptimizer(Module* module);
 
 	virtual std::string getId() const override { return "BitShift"; }
 
@@ -68,8 +68,8 @@ private:
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<BitShlOpExpr> expr) override;
-	virtual void visit(ShPtr<BitShrOpExpr> expr) override;
+	virtual void visit(BitShlOpExpr* expr) override;
+	virtual void visit(BitShrOpExpr* expr) override;
 	/// @}
 };
 

@@ -31,20 +31,20 @@ class ValueAnalysis;
 class OptimizerManager final: private retdec::utils::NonCopyable {
 public:
 	OptimizerManager(const StringSet &enabledOpts, const StringSet &disabledOpts,
-		ShPtr<HLLWriter> hllWriter, ShPtr<ValueAnalysis> va,
-		ShPtr<CallInfoObtainer> cio, ShPtr<ArithmExprEvaluator> arithmExprEvaluator,
+		HLLWriter* hllWriter, ValueAnalysis* va,
+		CallInfoObtainer* cio, ArithmExprEvaluator* arithmExprEvaluator,
 		bool enableAggressiveOpts, bool enableDebug = false);
 
-	void optimize(ShPtr<Module> m);
+	void optimize(Module* m);
 
 private:
 	void printOptimization(const std::string &optName) const;
 	bool optShouldBeRun(const std::string &optName) const;
-	void runOptimizerProvidedItShouldBeRun(ShPtr<Optimizer> optimizer);
+	void runOptimizerProvidedItShouldBeRun(Optimizer* optimizer);
 	bool shouldSecondCopyPropagationBeRun() const;
 
 	template<typename Optimization, typename... Args>
-	void run(ShPtr<Module> m, Args &&... args);
+	void run(Module* m, Args &&... args);
 
 private:
 	/// No other optimization than these will be run.
@@ -54,16 +54,16 @@ private:
 	const StringSet disabledOpts;
 
 	/// Used HLL writer.
-	ShPtr<HLLWriter> hllWriter;
+	HLLWriter* hllWriter = nullptr;
 
 	/// Used value analysis.
-	ShPtr<ValueAnalysis> va;
+	ValueAnalysis* va = nullptr;
 
 	/// Used call info obtainer.
-	ShPtr<CallInfoObtainer> cio;
+	CallInfoObtainer* cio = nullptr;
 
 	/// Used evaluator of arithmetical expressions.
-	ShPtr<ArithmExprEvaluator> arithmExprEvaluator;
+	ArithmExprEvaluator* arithmExprEvaluator = nullptr;
 
 	/// Enable aggressive optimizations?
 	bool enableAggressiveOpts;

@@ -45,8 +45,8 @@ class ValueAnalysis;
 */
 class WhileTrueToForLoopOptimizer final: public FuncOptimizer {
 public:
-	WhileTrueToForLoopOptimizer(ShPtr<Module> module, ShPtr<ValueAnalysis> va,
-		ShPtr<ArithmExprEvaluator> arithmExprEvaluator);
+	WhileTrueToForLoopOptimizer(Module* module, ValueAnalysis* va,
+		ArithmExprEvaluator* arithmExprEvaluator);
 
 	virtual std::string getId() const override { return "WhileTrueToForLoop"; }
 
@@ -56,29 +56,29 @@ private:
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<WhileLoopStmt> stmt) override;
+	virtual void visit(WhileLoopStmt* stmt) override;
 	/// @}
 
-	ShPtr<Expression> computeStartValueOfForLoop(
-		ShPtr<IndVarInfo> indVarInfo) const;
-	ShPtr<Expression> computeStepOfForLoop(
-		ShPtr<IndVarInfo> indVarInfo) const;
-	ShPtr<Expression> computeEndCondOfForLoop(
-		ShPtr<IndVarInfo> indVarInfo,
-		ShPtr<Expression> startValue, ShPtr<Expression> step) const;
-	ShPtr<ConstInt> evaluate(ShPtr<Expression> expr) const;
+	Expression* computeStartValueOfForLoop(
+		IndVarInfo* indVarInfo) const;
+	Expression* computeStepOfForLoop(
+		IndVarInfo* indVarInfo) const;
+	Expression* computeEndCondOfForLoop(
+		IndVarInfo* indVarInfo,
+		Expression* startValue, Expression* step) const;
+	ConstInt* evaluate(Expression* expr) const;
 
-	static ShPtr<BinaryOpExpr> exchangeCompOpAndOperands(
-		ShPtr<BinaryOpExpr> expr);
-	static bool isNonNegative(ShPtr<Expression> expr);
-	static bool isPositive(ShPtr<Expression> expr);
+	static BinaryOpExpr* exchangeCompOpAndOperands(
+		BinaryOpExpr* expr);
+	static bool isNonNegative(Expression* expr);
+	static bool isPositive(Expression* expr);
 
 private:
 	/// Analysis of values.
-	ShPtr<ValueAnalysis> va;
+	ValueAnalysis* va = nullptr;
 
 	/// Evaluator of expressions.
-	ShPtr<ArithmExprEvaluator> arithmExprEvaluator;
+	ArithmExprEvaluator* arithmExprEvaluator = nullptr;
 };
 
 } // namespace llvmir2hll

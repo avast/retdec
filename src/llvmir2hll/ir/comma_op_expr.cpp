@@ -16,10 +16,10 @@ namespace llvmir2hll {
 *
 * See create() for more information.
 */
-CommaOpExpr::CommaOpExpr(ShPtr<Expression> op1, ShPtr<Expression> op2):
+CommaOpExpr::CommaOpExpr(Expression* op1, Expression* op2):
 	BinaryOpExpr(op1, op2) {}
 
-bool CommaOpExpr::isEqualTo(ShPtr<Value> otherValue) const {
+bool CommaOpExpr::isEqualTo(Value* otherValue) const {
 	if (auto otherExpr = cast<CommaOpExpr>(otherValue)) {
 		return op1->isEqualTo(otherExpr->getFirstOperand()) &&
 			op2->isEqualTo(otherExpr->getSecondOperand());
@@ -27,7 +27,7 @@ bool CommaOpExpr::isEqualTo(ShPtr<Value> otherValue) const {
 	return false;
 }
 
-ShPtr<Value> CommaOpExpr::clone() {
+Value* CommaOpExpr::clone() {
 	auto expr = CommaOpExpr::create(
 		ucast<Expression>(op1->clone()),
 		ucast<Expression>(op2->clone())
@@ -45,13 +45,13 @@ ShPtr<Value> CommaOpExpr::clone() {
 * @par Preconditions
 *  - both operands are non-null
 */
-ShPtr<CommaOpExpr> CommaOpExpr::create(ShPtr<Expression> op1, ShPtr<Expression> op2) {
+CommaOpExpr* CommaOpExpr::create(Expression* op1, Expression* op2) {
 	PRECONDITION_NON_NULL(op1);
 	PRECONDITION_NON_NULL(op2);
 
-	ShPtr<CommaOpExpr> expr(new CommaOpExpr(op1, op2));
+	CommaOpExpr* expr(new CommaOpExpr(op1, op2));
 
-	// Initialization (recall that shared_from_this() cannot be called in a
+	// Initialization (recall that this cannot be called in a
 	// constructor).
 	op1->addObserver(expr);
 	op2->addObserver(expr);
@@ -60,7 +60,7 @@ ShPtr<CommaOpExpr> CommaOpExpr::create(ShPtr<Expression> op1, ShPtr<Expression> 
 }
 
 void CommaOpExpr::accept(Visitor *v) {
-	v->visit(ucast<CommaOpExpr>(shared_from_this()));
+	v->visit(ucast<CommaOpExpr>(this));
 }
 
 } // namespace llvmir2hll

@@ -20,7 +20,7 @@ REGISTER_AT_FACTORY("unified", UNIFIED_VAR_RENAMER_ID, VarRenamerFactory,
 *
 * For more details, see create().
 */
-UnifiedVarRenamer::UnifiedVarRenamer(ShPtr<VarNameGen> varNameGen,
+UnifiedVarRenamer::UnifiedVarRenamer(VarNameGen* varNameGen,
 	bool useDebugNames): VarRenamer(varNameGen, useDebugNames),
 		globalVarNameGen(NumVarNameGen::create("g")),
 		paramVarNameGen(NumVarNameGen::create("a")),
@@ -37,39 +37,39 @@ UnifiedVarRenamer::UnifiedVarRenamer(ShPtr<VarNameGen> varNameGen,
 * @par Preconditions
 *  - @a varNameGen is non-null
 */
-ShPtr<VarRenamer> UnifiedVarRenamer::create(ShPtr<VarNameGen> varNameGen,
+VarRenamer* UnifiedVarRenamer::create(VarNameGen* varNameGen,
 		bool useDebugNames) {
 	PRECONDITION_NON_NULL(varNameGen);
 
-	return ShPtr<VarRenamer>(new UnifiedVarRenamer(varNameGen, useDebugNames));
+	return new UnifiedVarRenamer(varNameGen, useDebugNames);
 }
 
 std::string UnifiedVarRenamer::getId() const {
 	return UNIFIED_VAR_RENAMER_ID;
 }
 
-void UnifiedVarRenamer::renameGlobalVar(ShPtr<Variable> var) {
+void UnifiedVarRenamer::renameGlobalVar(Variable* var) {
 	PRECONDITION_NON_NULL(var);
 
 	assignName(var, globalVarNameGen->getNextVarName());
 }
 
-void UnifiedVarRenamer::renameVarsInFunc(ShPtr<Function> func) {
+void UnifiedVarRenamer::renameVarsInFunc(Function* func) {
 	paramVarNameGen->restart();
 	localVarNameGen->restart();
 
 	VarRenamer::renameVarsInFunc(func);
 }
 
-void UnifiedVarRenamer::renameFuncParam(ShPtr<Variable> var,
-		ShPtr<Function> func) {
+void UnifiedVarRenamer::renameFuncParam(Variable* var,
+		Function* func) {
 	PRECONDITION_NON_NULL(var);
 
 	assignName(var, paramVarNameGen->getNextVarName(), func);
 }
 
-void UnifiedVarRenamer::renameFuncLocalVar(ShPtr<Variable> var,
-		ShPtr<Function> func) {
+void UnifiedVarRenamer::renameFuncLocalVar(Variable* var,
+		Function* func) {
 	PRECONDITION_NON_NULL(var);
 
 	assignName(var, localVarNameGen->getNextVarName(), func);

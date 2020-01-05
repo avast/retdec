@@ -17,25 +17,25 @@ namespace llvmir2hll {
 *
 * See create() for more information.
 */
-CallStmt::CallStmt(ShPtr<CallExpr> call, Address a):
+CallStmt::CallStmt(CallExpr* call, Address a):
 	Statement(a), call(call) {}
 
-bool CallStmt::isEqualTo(ShPtr<Value> otherValue) const {
+bool CallStmt::isEqualTo(Value* otherValue) const {
 	// Both types and values have to be equal.
-	if (ShPtr<CallStmt> otherCallStmt = cast<CallStmt>(otherValue)) {
+	if (CallStmt* otherCallStmt = cast<CallStmt>(otherValue)) {
 		return call->isEqualTo(otherCallStmt->call);
 	}
 	return false;
 }
 
-ShPtr<Value> CallStmt::clone() {
-	ShPtr<CallStmt> callStmt(
+Value* CallStmt::clone() {
+	CallStmt* callStmt(
 		CallStmt::create(ucast<CallExpr>(call->clone()), nullptr, getAddress()));
 	callStmt->setMetadata(getMetadata());
 	return callStmt;
 }
 
-void CallStmt::replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) {
+void CallStmt::replace(Expression* oldExpr, Expression* newExpr) {
 	if (oldExpr == call && isa<CallExpr>(newExpr)) {
 		setCall(cast<CallExpr>(newExpr));
 	} else {
@@ -43,14 +43,14 @@ void CallStmt::replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) {
 	}
 }
 
-ShPtr<Expression> CallStmt::asExpression() const {
+Expression* CallStmt::asExpression() const {
 	return call;
 }
 
 /**
 * @brief Returns the contained call.
 */
-ShPtr<CallExpr> CallStmt::getCall() const {
+CallExpr* CallStmt::getCall() const {
 	return call;
 }
 
@@ -60,11 +60,11 @@ ShPtr<CallExpr> CallStmt::getCall() const {
 * @par Preconditions
 *  - @a newCall is non-null
 */
-void CallStmt::setCall(ShPtr<CallExpr> newCall) {
+void CallStmt::setCall(CallExpr* newCall) {
 	PRECONDITION_NON_NULL(newCall);
 
-	call->removeObserver(shared_from_this());
-	newCall->addObserver(shared_from_this());
+	call->removeObserver(this);
+	newCall->addObserver(this);
 	call = newCall;
 }
 
@@ -78,14 +78,14 @@ void CallStmt::setCall(ShPtr<CallExpr> newCall) {
 * @par Preconditions
 *  - @a call is non-null
 */
-ShPtr<CallStmt> CallStmt::create(ShPtr<CallExpr> call, ShPtr<Statement> succ,
+CallStmt* CallStmt::create(CallExpr* call, Statement* succ,
 		Address a) {
 	PRECONDITION_NON_NULL(call);
 
-	ShPtr<CallStmt> callStmt(new CallStmt(call, a));
+	CallStmt* callStmt(new CallStmt(call, a));
 	callStmt->setSuccessor(succ);
 
-	// Initialization (recall that shared_from_this() cannot be called in a
+	// Initialization (recall that this cannot be called in a
 	// constructor).
 	call->addObserver(callStmt);
 
@@ -109,18 +109,18 @@ ShPtr<CallStmt> CallStmt::create(ShPtr<CallExpr> call, ShPtr<Statement> succ,
 *
 * @see Subject::update()
 */
-void CallStmt::update(ShPtr<Value> subject, ShPtr<Value> arg) {
+void CallStmt::update(Value* subject, Value* arg) {
 	PRECONDITION_NON_NULL(subject);
 	PRECONDITION_NON_NULL(arg);
 
-	ShPtr<CallExpr> newCall = cast<CallExpr>(arg);
+	CallExpr* newCall = cast<CallExpr>(arg);
 	if (subject == call && newCall) {
 		setCall(newCall);
 	}
 }
 
 void CallStmt::accept(Visitor *v) {
-	v->visit(ucast<CallStmt>(shared_from_this()));
+	v->visit(ucast<CallStmt>(this));
 }
 
 } // namespace llvmir2hll

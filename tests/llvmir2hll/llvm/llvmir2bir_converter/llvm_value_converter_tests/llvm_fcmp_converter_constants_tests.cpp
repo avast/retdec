@@ -39,7 +39,7 @@ namespace tests {
 */
 class LLVMFCmpConverterConstantsTests: public LLVMIR2BIRConverterBaseTests {
 protected:
-	AssertionResult isDetectionIfEitherOperandIsQNAN(ShPtr<Expression> expr);
+	AssertionResult isDetectionIfEitherOperandIsQNAN(Expression* expr);
 
 	template<class T>
 	void fcmpIsConvertedAsSimpleExpression(const std::string &pred);
@@ -59,7 +59,7 @@ protected:
 *        the operands is QNAN.
 */
 AssertionResult LLVMFCmpConverterConstantsTests::isDetectionIfEitherOperandIsQNAN(
-		ShPtr<Expression> expr) {
+		Expression* expr) {
 	auto birOrOpExpr = cast<OrOpExpr>(expr);
 	if (!birOrOpExpr) {
 		return AssertionFailure() << expr

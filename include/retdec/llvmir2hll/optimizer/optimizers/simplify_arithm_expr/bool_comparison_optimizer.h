@@ -41,25 +41,25 @@ class ArithmExprEvaluator;
 */
 class BoolComparisonSubOptimizer final: public SubOptimizer {
 public:
-	BoolComparisonSubOptimizer(ShPtr<ArithmExprEvaluator> arithmExprEvaluator);
+	BoolComparisonSubOptimizer(ArithmExprEvaluator* arithmExprEvaluator);
 
-	static ShPtr<SubOptimizer> create(
-		ShPtr<ArithmExprEvaluator> arithmExprEvaluator);
+	static SubOptimizer* create(
+		ArithmExprEvaluator* arithmExprEvaluator);
 	virtual std::string getId() const override;
 
 private:
 	/// @name Visitor Interface
 	/// @{
 	using SubOptimizer::visit;
-	virtual void visit(ShPtr<EqOpExpr> expr) override;
-	virtual void visit(ShPtr<NeqOpExpr> expr) override;
+	virtual void visit(EqOpExpr* expr) override;
+	virtual void visit(NeqOpExpr* expr) override;
 	/// @}
 
 	template<typename ExprType>
 	void optimizeNestedComparisons(ExprType expr);
 
-	void replaceWithFirstOperand(ShPtr<BinaryOpExpr> expr);
-	void replaceWithNegationOfFirstOperand(ShPtr<BinaryOpExpr> expr);
+	void replaceWithFirstOperand(BinaryOpExpr* expr);
+	void replaceWithNegationOfFirstOperand(BinaryOpExpr* expr);
 };
 
 } // namespace llvmir2hll

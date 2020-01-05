@@ -119,7 +119,7 @@ class VarUsesVisitor;
 */
 class PreWhileTrueLoopConvOptimizer final: public FuncOptimizer {
 public:
-	PreWhileTrueLoopConvOptimizer(ShPtr<Module> module, ShPtr<ValueAnalysis> va);
+	PreWhileTrueLoopConvOptimizer(Module* module, ValueAnalysis* va);
 
 	virtual std::string getId() const override { return "PreWhileTrueLoopConv"; }
 
@@ -129,21 +129,21 @@ private:
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<WhileLoopStmt> stmt) override;
+	virtual void visit(WhileLoopStmt* stmt) override;
 	/// @}
 
-	bool tryOptimizationCase1(ShPtr<WhileLoopStmt> stmt);
-	bool tryOptimizationCase2(ShPtr<WhileLoopStmt> stmt);
-	bool tryOptimizationCase3(ShPtr<WhileLoopStmt> stmt);
-	bool tryOptimizationCase4(ShPtr<WhileLoopStmt> stmt);
-	bool tryOptimizationCase5(ShPtr<WhileLoopStmt> stmt);
+	bool tryOptimizationCase1(WhileLoopStmt* stmt);
+	bool tryOptimizationCase2(WhileLoopStmt* stmt);
+	bool tryOptimizationCase3(WhileLoopStmt* stmt);
+	bool tryOptimizationCase4(WhileLoopStmt* stmt);
+	bool tryOptimizationCase5(WhileLoopStmt* stmt);
 
 private:
 	/// Analysis of values.
-	ShPtr<ValueAnalysis> va;
+	ValueAnalysis* va = nullptr;
 
 	/// Visitor for obtaining uses of variables.
-	ShPtr<VarUsesVisitor> vuv;
+	VarUsesVisitor* vuv = nullptr;
 };
 
 } // namespace llvmir2hll

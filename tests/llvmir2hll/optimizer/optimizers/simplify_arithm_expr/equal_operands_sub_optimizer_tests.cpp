@@ -37,14 +37,14 @@ class EqualOperandsSubOptimizerTests: public TestsWithModule {
 protected:
 	virtual void SetUp() override {
 		TestsWithModule::SetUp();
-		ShPtr<ArithmExprEvaluator> evaluator(StrictArithmExprEvaluator::
+		ArithmExprEvaluator* evaluator(StrictArithmExprEvaluator::
 			create());
-		optimizer = ShPtr<EqualOperandsSubOptimizer>(
+		optimizer = EqualOperandsSubOptimizer*(
 			new EqualOperandsSubOptimizer(evaluator));
 	}
 
 protected:
-	ShPtr<EqualOperandsSubOptimizer> optimizer;
+	EqualOperandsSubOptimizer* optimizer;
 };
 
 TEST_F(EqualOperandsSubOptimizerTests,
@@ -63,29 +63,29 @@ TwoSameOperandsAddOptimized) {
 	//
 	// Optimized to return 2 * a.
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16, true)));
-	ShPtr<AddOpExpr> returnExpr(
+	Variable* varA(Variable::create("a", IntType::create(16, true)));
+	AddOpExpr* returnExpr(
 		AddOpExpr::create(
 			varA,
 			varA
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(returnExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(returnExpr));
 
 	optimizer->tryOptimize(returnStmt->getRetVal());
 
-	ShPtr<MulOpExpr> outMulOpExpr(cast<MulOpExpr>(returnStmt->getRetVal()));
+	MulOpExpr* outMulOpExpr(cast<MulOpExpr>(returnStmt->getRetVal()));
 	ASSERT_TRUE(outMulOpExpr) <<
 		"expected `MulOpExpr`, "
 		"got `" << returnStmt->getRetVal() << "`";
-	ShPtr<ConstInt> outOp1(cast<ConstInt>(outMulOpExpr->getFirstOperand()));
+	ConstInt* outOp1(cast<ConstInt>(outMulOpExpr->getFirstOperand()));
 	ASSERT_TRUE(outOp1) <<
 		"expected `ConstInt`, "
 		"got `" << outMulOpExpr->getFirstOperand() << "`";
-	ShPtr<ConstInt> result(ConstInt::create(2, 64));
+	ConstInt* result(ConstInt::create(2, 64));
 	EXPECT_EQ(result->getValue(), outOp1->getValue()) <<
 		"expected `" << result << "`, "
 		"got `" << outOp1 << "`";
-	ShPtr<Variable> outOp2(cast<Variable>(outMulOpExpr->getSecondOperand()));
+	Variable* outOp2(cast<Variable>(outMulOpExpr->getSecondOperand()));
 	ASSERT_TRUE(outOp2) <<
 		"expected `Variable`, "
 		"got `" << outMulOpExpr->getSecondOperand() << "`";
@@ -104,21 +104,21 @@ TwoSameOperandsSubIntTypeOptimized) {
 	//
 	// Optimized to return 0.
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16, true)));
-	ShPtr<SubOpExpr> returnExpr(
+	Variable* varA(Variable::create("a", IntType::create(16, true)));
+	SubOpExpr* returnExpr(
 		SubOpExpr::create(
 			varA,
 			varA
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(returnExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(returnExpr));
 
 	optimizer->tryOptimize(returnStmt->getRetVal());
 
-	ShPtr<ConstInt> outConstInt(cast<ConstInt>(returnStmt->getRetVal()));
+	ConstInt* outConstInt(cast<ConstInt>(returnStmt->getRetVal()));
 	ASSERT_TRUE(outConstInt) <<
 		"expected `ConstInt`, "
 		"got `" << returnStmt->getRetVal() << "`";
-	ShPtr<ConstInt> result(ConstInt::create(0, 64));
+	ConstInt* result(ConstInt::create(0, 64));
 	EXPECT_EQ(result->getValue(), outConstInt->getValue()) <<
 		"expected `" << result << "`, "
 		"got `" << outConstInt << "`";
@@ -130,17 +130,17 @@ TwoSameOperandsSubFloatTypeOptimized) {
 	//
 	// Optimized to return 0.0.
 	//
-	ShPtr<Variable> varA(Variable::create("a", FloatType::create(16)));
-	ShPtr<SubOpExpr> returnExpr(
+	Variable* varA(Variable::create("a", FloatType::create(16)));
+	SubOpExpr* returnExpr(
 		SubOpExpr::create(
 			varA,
 			varA
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(returnExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(returnExpr));
 
 	optimizer->tryOptimize(returnStmt->getRetVal());
 
-	ShPtr<ConstFloat> outConstFloat(cast<ConstFloat>(returnStmt->getRetVal()));
+	ConstFloat* outConstFloat(cast<ConstFloat>(returnStmt->getRetVal()));
 	ASSERT_TRUE(outConstFloat) <<
 		"expected `ConstFloat`, "
 		"got `" << returnStmt->getRetVal() << "`";
@@ -158,21 +158,21 @@ TwoSameOperandsDivIntTypeOptimized) {
 	//
 	// Optimized to return 1.
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16, true)));
-	ShPtr<DivOpExpr> returnExpr(
+	Variable* varA(Variable::create("a", IntType::create(16, true)));
+	DivOpExpr* returnExpr(
 		DivOpExpr::create(
 			varA,
 			varA
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(returnExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(returnExpr));
 
 	optimizer->tryOptimize(returnStmt->getRetVal());
 
-	ShPtr<ConstInt> outConstInt(cast<ConstInt>(returnStmt->getRetVal()));
+	ConstInt* outConstInt(cast<ConstInt>(returnStmt->getRetVal()));
 	ASSERT_TRUE(outConstInt) <<
 		"expected `ConstInt`, "
 		"got `" << returnStmt->getRetVal() << "`";
-	ShPtr<ConstInt> result(ConstInt::create(1, 64));
+	ConstInt* result(ConstInt::create(1, 64));
 	EXPECT_EQ(result->getValue(), outConstInt->getValue()) <<
 		"expected `" << result << "`, "
 		"got `" << outConstInt << "`";
@@ -184,17 +184,17 @@ TwoSameOperandsDivFloatTypeOptimized) {
 	//
 	// Optimized to return 1.0.
 	//
-	ShPtr<Variable> varA(Variable::create("a", FloatType::create(16)));
-	ShPtr<DivOpExpr> returnExpr(
+	Variable* varA(Variable::create("a", FloatType::create(16)));
+	DivOpExpr* returnExpr(
 		DivOpExpr::create(
 			varA,
 			varA
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(returnExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(returnExpr));
 
 	optimizer->tryOptimize(returnStmt->getRetVal());
 
-	ShPtr<ConstFloat> outConstFloat(cast<ConstFloat>(returnStmt->getRetVal()));
+	ConstFloat* outConstFloat(cast<ConstFloat>(returnStmt->getRetVal()));
 	ASSERT_TRUE(outConstFloat) <<
 		"expected `ConstFloat`, "
 		"got `" << returnStmt->getRetVal() << "`";
@@ -212,21 +212,21 @@ TwoSameOperandsEqOpOptimized) {
 	//
 	// Optimized to return 1(ConstBool).
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16, true)));
-	ShPtr<EqOpExpr> returnExpr(
+	Variable* varA(Variable::create("a", IntType::create(16, true)));
+	EqOpExpr* returnExpr(
 		EqOpExpr::create(
 			varA,
 			varA
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(returnExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(returnExpr));
 
 	optimizer->tryOptimize(returnStmt->getRetVal());
 
-	ShPtr<ConstBool> outConstBool(cast<ConstBool>(returnStmt->getRetVal()));
+	ConstBool* outConstBool(cast<ConstBool>(returnStmt->getRetVal()));
 	ASSERT_TRUE(outConstBool) <<
 		"expected `ConstBool`, "
 		"got `" << returnStmt->getRetVal() << "`";
-	ShPtr<ConstBool> result(ConstBool::create(1));
+	ConstBool* result(ConstBool::create(1));
 	EXPECT_EQ(result->getValue(), outConstBool->getValue()) <<
 		"expected `" << result << "`, "
 		"got `" << outConstBool << "`";
@@ -238,20 +238,20 @@ TwoSameOperandsConstIntEqOpOptimized) {
 	//
 	// Optimized to return 1(ConstBool).
 	//
-	ShPtr<EqOpExpr> returnExpr(
+	EqOpExpr* returnExpr(
 		EqOpExpr::create(
 			ConstInt::create(2, 64),
 			ConstInt::create(2, 64)
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(returnExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(returnExpr));
 
 	optimizer->tryOptimize(returnStmt->getRetVal());
 
-	ShPtr<ConstBool> outConstBool(cast<ConstBool>(returnStmt->getRetVal()));
+	ConstBool* outConstBool(cast<ConstBool>(returnStmt->getRetVal()));
 	ASSERT_TRUE(outConstBool) <<
 		"expected `ConstBool`, "
 		"got `" << returnStmt->getRetVal() << "`";
-	ShPtr<ConstBool> result(ConstBool::create(1));
+	ConstBool* result(ConstBool::create(1));
 	EXPECT_EQ(result->getValue(), outConstBool->getValue()) <<
 		"expected `" << result << "`, "
 		"got `" << outConstBool << "`";
@@ -263,28 +263,28 @@ TwoSameOperandsEqOpFloatTypeNotOptimized) {
 	//
 	// Not optimized.
 	//
-	ShPtr<Variable> varA(Variable::create("a", FloatType::create(16)));
-	ShPtr<EqOpExpr> returnExpr(
+	Variable* varA(Variable::create("a", FloatType::create(16)));
+	EqOpExpr* returnExpr(
 		EqOpExpr::create(
 			varA,
 			varA
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(returnExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(returnExpr));
 
 	optimizer->tryOptimize(returnStmt->getRetVal());
 
-	ShPtr<EqOpExpr> outEqOpExpr(cast<EqOpExpr>(returnStmt->getRetVal()));
+	EqOpExpr* outEqOpExpr(cast<EqOpExpr>(returnStmt->getRetVal()));
 	ASSERT_TRUE(outEqOpExpr) <<
 		"expected `EqOpExpr`, "
 		"got `" << returnStmt->getRetVal() << "`";
-	ShPtr<Variable> outOp1(cast<Variable>(outEqOpExpr->getFirstOperand()));
+	Variable* outOp1(cast<Variable>(outEqOpExpr->getFirstOperand()));
 	ASSERT_TRUE(outOp1) <<
 		"expected `Variable`, "
 		"got `" << outEqOpExpr->getFirstOperand() << "`";
 	EXPECT_EQ(varA, outOp1) <<
 		"expected `" << varA << "`, "
 		"got `" << outOp1 << "`";
-	ShPtr<Variable> outOp2(cast<Variable>(outEqOpExpr->getSecondOperand()));
+	Variable* outOp2(cast<Variable>(outEqOpExpr->getSecondOperand()));
 	ASSERT_TRUE(outOp2) <<
 		"expected `Variable`, "
 		"got `" << outEqOpExpr->getSecondOperand() << "`";
@@ -303,21 +303,21 @@ TwoSameOperandsNeqOpOptimized) {
 	//
 	// Optimized to return 0(ConstBool).
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16, true)));
-	ShPtr<NeqOpExpr> returnExpr(
+	Variable* varA(Variable::create("a", IntType::create(16, true)));
+	NeqOpExpr* returnExpr(
 		NeqOpExpr::create(
 			varA,
 			varA
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(returnExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(returnExpr));
 
 	optimizer->tryOptimize(returnStmt->getRetVal());
 
-	ShPtr<ConstBool> outConstBool(cast<ConstBool>(returnStmt->getRetVal()));
+	ConstBool* outConstBool(cast<ConstBool>(returnStmt->getRetVal()));
 	ASSERT_TRUE(outConstBool) <<
 		"expected `ConstBool`, "
 		"got `" << returnStmt->getRetVal() << "`";
-	ShPtr<ConstBool> result(ConstBool::create(0));
+	ConstBool* result(ConstBool::create(0));
 	EXPECT_EQ(result->getValue(), outConstBool->getValue()) <<
 		"expected `" << result << "`, "
 		"got `" << outConstBool << "`";
@@ -329,20 +329,20 @@ TwoSameOperandsConstIntNeqOpOptimized) {
 	//
 	// Optimized to return 0(ConstBool).
 	//
-	ShPtr<NeqOpExpr> returnExpr(
+	NeqOpExpr* returnExpr(
 		NeqOpExpr::create(
 			ConstInt::create(2, 64),
 			ConstInt::create(2, 64)
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(returnExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(returnExpr));
 
 	optimizer->tryOptimize(returnStmt->getRetVal());
 
-	ShPtr<ConstBool> outConstBool(cast<ConstBool>(returnStmt->getRetVal()));
+	ConstBool* outConstBool(cast<ConstBool>(returnStmt->getRetVal()));
 	ASSERT_TRUE(outConstBool) <<
 		"expected `ConstBool`, "
 		"got `" << returnStmt->getRetVal() << "`";
-	ShPtr<ConstBool> result(ConstBool::create(0));
+	ConstBool* result(ConstBool::create(0));
 	EXPECT_EQ(result->getValue(), outConstBool->getValue()) <<
 		"expected `" << result << "`, "
 		"got `" << outConstBool << "`";
@@ -354,28 +354,28 @@ TwoSameOperandsNeqOpFloatTypeNotOptimized) {
 	//
 	// Not optimized.
 	//
-	ShPtr<Variable> varA(Variable::create("a", FloatType::create(16)));
-	ShPtr<NeqOpExpr> returnExpr(
+	Variable* varA(Variable::create("a", FloatType::create(16)));
+	NeqOpExpr* returnExpr(
 		NeqOpExpr::create(
 			varA,
 			varA
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(returnExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(returnExpr));
 
 	optimizer->tryOptimize(returnStmt->getRetVal());
 
-	ShPtr<NeqOpExpr> outNeqOpExpr(cast<NeqOpExpr>(returnStmt->getRetVal()));
+	NeqOpExpr* outNeqOpExpr(cast<NeqOpExpr>(returnStmt->getRetVal()));
 	ASSERT_TRUE(outNeqOpExpr) <<
 		"expected `NeqOpExpr`, "
 		"got `" << returnStmt->getRetVal() << "`";
-	ShPtr<Variable> outOp1(cast<Variable>(outNeqOpExpr->getFirstOperand()));
+	Variable* outOp1(cast<Variable>(outNeqOpExpr->getFirstOperand()));
 	ASSERT_TRUE(outOp1) <<
 		"expected `Variable`, "
 		"got `" << outNeqOpExpr->getFirstOperand() << "`";
 	EXPECT_EQ(varA, outOp1) <<
 		"expected `" << varA << "`, "
 		"got `" << outOp1 << "`";
-	ShPtr<Variable> outOp2(cast<Variable>(outNeqOpExpr->getSecondOperand()));
+	Variable* outOp2(cast<Variable>(outNeqOpExpr->getSecondOperand()));
 	ASSERT_TRUE(outOp2) <<
 		"expected `Variable`, "
 		"got `" << outNeqOpExpr->getSecondOperand() << "`";

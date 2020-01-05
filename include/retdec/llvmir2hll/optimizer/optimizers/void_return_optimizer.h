@@ -34,7 +34,7 @@ namespace llvmir2hll {
 */
 class VoidReturnOptimizer final: public FuncOptimizer {
 public:
-	VoidReturnOptimizer(ShPtr<Module> module);
+	VoidReturnOptimizer(Module* module);
 
 	virtual std::string getId() const override { return "VoidReturn"; }
 
@@ -42,15 +42,15 @@ private:
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<AssignStmt> stmt) override;
-	virtual void visit(ShPtr<VarDefStmt> stmt) override;
-	virtual void visit(ShPtr<CallStmt> stmt) override;
-	virtual void visit(ShPtr<ReturnStmt> stmt) override;
-	virtual void visit(ShPtr<IfStmt> stmt) override;
-	virtual void visit(ShPtr<SwitchStmt> stmt) override;
-	virtual void visit(ShPtr<WhileLoopStmt> stmt) override;
-	virtual void visit(ShPtr<ForLoopStmt> stmt) override;
-	virtual void visit(ShPtr<UForLoopStmt> stmt) override;
+	virtual void visit(AssignStmt* stmt) override;
+	virtual void visit(VarDefStmt* stmt) override;
+	virtual void visit(CallStmt* stmt) override;
+	virtual void visit(ReturnStmt* stmt) override;
+	virtual void visit(IfStmt* stmt) override;
+	virtual void visit(SwitchStmt* stmt) override;
+	virtual void visit(WhileLoopStmt* stmt) override;
+	virtual void visit(ForLoopStmt* stmt) override;
+	virtual void visit(UForLoopStmt* stmt) override;
 	/// @}
 
 private:

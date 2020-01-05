@@ -78,7 +78,7 @@ protected:
 
 	/// @name Testing conversion of compare instructions
 	/// @{
-	ShPtr<Expression> createICmpInstAndConvertToBir(llvm::ICmpInst::Predicate pred);
+	Expression* createICmpInstAndConvertToBir(llvm::ICmpInst::Predicate pred);
 	template<class T>
 	void iCmpIsConvertedCorrectly(llvm::ICmpInst::Predicate pred);
 	template<class T>
@@ -187,7 +187,7 @@ void LLVMInstructionsConverterTests::castInstIsConvertedCorrectly(llvm::Type *sr
 *
 * @param[in] pred Predicate which is used for creating LLVM icmp instruction.
 */
-ShPtr<Expression> LLVMInstructionsConverterTests::createICmpInstAndConvertToBir(
+Expression* LLVMInstructionsConverterTests::createICmpInstAndConvertToBir(
 		llvm::ICmpInst::Predicate pred) {
 	auto type = llvm::Type::getInt32Ty(context);
 	auto op1 = std::make_unique<llvm::Argument>(type, "arg1");

@@ -25,7 +25,7 @@ namespace llvmir2hll {
 * @par Preconditions
 *  - @a module is non-null
 */
-StringSet HeadersForDeclaredFuncs::getHeaders(ShPtr<Module> module) {
+StringSet HeadersForDeclaredFuncs::getHeaders(Module* module) {
 	PRECONDITION_NON_NULL(module);
 
 	StringSet headers;
@@ -44,8 +44,8 @@ StringSet HeadersForDeclaredFuncs::getHeaders(ShPtr<Module> module) {
 * @brief Returns @c true if the given function has associated a header file, @c
 *        false otherwise.
 */
-bool HeadersForDeclaredFuncs::hasAssocHeader(ShPtr<Module> module,
-		ShPtr<Function> func) {
+bool HeadersForDeclaredFuncs::hasAssocHeader(Module* module,
+		Function* func) {
 	return static_cast<bool>(module->getSemantics()->getCHeaderFileForFunc(
 		func->getName()));
 }

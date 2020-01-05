@@ -29,14 +29,14 @@ namespace {
 /**
 * @brief Returns a new function declaration.
 */
-ShPtr<Function> getFuncDeclaration(const std::string &name = "func") {
+Function* getFuncDeclaration(const std::string &name = "func") {
 	return Function::create(nullptr, VoidType::create(), name, VarVector());
 }
 
 /**
 * @brief Returns a new function definition.
 */
-ShPtr<Function> getFuncDefinition(const std::string &name = "func") {
+Function* getFuncDefinition(const std::string &name = "func") {
 	return Function::create(nullptr, VoidType::create(), name,
 		VarVector(), VarSet(), EmptyStmt::create());
 }
@@ -207,7 +207,7 @@ ConvertToDeclarationNotifiesObserversWhenItWasDefinition) {
 	INSTANTIATE_OBSERVER_MOCK(observer, StrictMock, Value);
 	func->addObserver(observer);
 
-	EXPECT_CALL(*observerMock, update(cast<Value>(func), ShPtr<Value>()));
+	EXPECT_CALL(*observerMock, update(cast<Value>(func), Value*()));
 	func->convertToDeclaration();
 
 	// The update() call is checked when the mock is destroyed.

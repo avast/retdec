@@ -32,28 +32,28 @@ class Visitor;
 */
 class Function final: public Value {
 public:
-	static ShPtr<Function> create(ShPtr<Module> module, ShPtr<Type> retType,
+	static Function* create(Module* module, Type* retType,
 		std::string name, VarVector params, VarSet localVars = VarSet(),
-		ShPtr<Statement> body = nullptr, bool isVarArg = false);
+		Statement* body = nullptr, bool isVarArg = false);
 
-	virtual ShPtr<Value> clone() override;
+	virtual Value* clone() override;
 
-	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
+	virtual bool isEqualTo(Value* otherValue) const override;
 
-	ShPtr<Type> getRetType() const;
+	Type* getRetType() const;
 	const std::string &getInitialName() const;
 	const std::string &getName() const;
 	const VarVector &getParams() const;
-	ShPtr<Variable> getParam(std::size_t n) const;
-	std::size_t getParamPos(ShPtr<Variable> param) const;
+	Variable* getParam(std::size_t n) const;
+	std::size_t getParamPos(Variable* param) const;
 	std::size_t getNumOfParams() const;
 	VarSet getLocalVars(bool includeParams = false) const;
 	std::size_t getNumOfLocalVars(bool includeParams = false) const;
-	bool hasLocalVar(ShPtr<Variable> var, bool includeParams = false) const;
-	ShPtr<Statement> getBody() const;
-	ShPtr<Variable> getAsVar() const;
-	ShPtr<Type> getType() const;
-	ShPtr<Module> getModule() const;
+	bool hasLocalVar(Variable* var, bool includeParams = false) const;
+	Statement* getBody() const;
+	Variable* getAsVar() const;
+	Type* getType() const;
+	Module* getModule() const;
 	AddressRange getAddressRange() const;
 	Address getStartAddress() const;
 	Address getEndAddress() const;
@@ -61,26 +61,26 @@ public:
 	bool isVarArg() const;
 	bool isDeclaration() const;
 	bool isDefinition() const;
-	bool hasParam(ShPtr<Variable> var) const;
+	bool hasParam(Variable* var) const;
 	bool hasParam(std::size_t n) const;
 
-	void setRetType(ShPtr<Type> newRetType);
+	void setRetType(Type* newRetType);
 	void setName(const std::string &newName);
 	void setParams(VarVector newParams);
 	void setLocalVars(VarSet newLocalVars);
-	void addParam(ShPtr<Variable> var);
-	void addLocalVar(ShPtr<Variable> var);
-	void replaceParam(ShPtr<Variable> oldParam, ShPtr<Variable> newParam);
-	void replaceLocalVar(ShPtr<Variable> oldVar, ShPtr<Variable> newVar);
-	void removeLocalVar(ShPtr<Variable> var);
-	void removeParam(ShPtr<Variable> param);
-	void setBody(ShPtr<Statement> newBody);
+	void addParam(Variable* var);
+	void addLocalVar(Variable* var);
+	void replaceParam(Variable* oldParam, Variable* newParam);
+	void replaceLocalVar(Variable* oldVar, Variable* newVar);
+	void removeLocalVar(Variable* var);
+	void removeParam(Variable* param);
+	void setBody(Statement* newBody);
 	void setVarArg(bool isVarArg = true);
 	void convertToDeclaration();
 
 	/// @name Observer Interface
 	/// @{
-	virtual void update(ShPtr<Value> subject, ShPtr<Value> arg = nullptr) override;
+	virtual void update(Value* subject, Value* arg = nullptr) override;
 	/// @}
 
 	/// @name Visitor Interface
@@ -90,10 +90,10 @@ public:
 
 private:
 	/// The module to which the function belongs.
-	WkPtr<Module> module;
+	Module* module = nullptr;
 
 	/// Return type.
-	ShPtr<Type> retType;
+	Type* retType = nullptr;
 
 	/// Parameters.
 	VarVector params;
@@ -102,11 +102,11 @@ private:
 	VarSet localVars;
 
 	/// Function body.
-	ShPtr<Statement> body;
+	Statement* body = nullptr;
 
 	/// Variable corresponding to the function. This variable may be used when
 	/// calling this function.
-	ShPtr<Variable> funcVar;
+	Variable* funcVar = nullptr;
 
 	// Takes the function a variable number of arguments?
 	bool varArg;
@@ -114,9 +114,9 @@ private:
 private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
-	Function(ShPtr<Module> module, ShPtr<Type>, std::string name,
+	Function(Module* module, Type*, std::string name,
 		VarVector params, VarSet localVars = VarSet(),
-		ShPtr<Statement> body = nullptr, bool isVarArg = false);
+		Statement* body = nullptr, bool isVarArg = false);
 
 	void updateUnderlyingVarType();
 	void includeParamsIntoLocalVars();

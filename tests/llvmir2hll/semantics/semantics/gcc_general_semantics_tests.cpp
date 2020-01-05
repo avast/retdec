@@ -19,7 +19,7 @@ namespace tests {
 */
 class GCCGeneralSemanticsTests: public Test {
 protected:
-	ShPtr<Semantics> semantics;
+	Semantics* semantics;
 
 protected:
 	virtual void SetUp() override {

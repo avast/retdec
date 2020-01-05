@@ -47,31 +47,31 @@ class Module;
 class IndirectFuncRefAnalysis: private OrderedAllVisitor,
 		private retdec::utils::NonCopyable {
 public:
-	static FuncSet getIndirectlyReferencedFuncs(ShPtr<Module> module);
-	static bool isIndirectlyReferenced(ShPtr<Module> module,
-		ShPtr<Function> func);
+	static FuncSet getIndirectlyReferencedFuncs(Module* module);
+	static bool isIndirectlyReferenced(Module* module,
+		Function* func);
 
 private:
-	IndirectFuncRefAnalysis(ShPtr<Module> module);
+	IndirectFuncRefAnalysis(Module* module);
 
 	void performAnalysis();
 	void visitAllFuncs();
-	bool shouldCalledExprBeVisited(ShPtr<Expression> expr);
+	bool shouldCalledExprBeVisited(Expression* expr);
 	void visitArgs(const ExprVector &args);
 
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<CallExpr> expr) override;
-	virtual void visit(ShPtr<Variable> var) override;
+	virtual void visit(CallExpr* expr) override;
+	virtual void visit(Variable* var) override;
 	/// @}
 
 private:
 	/// The analyzed module.
-	ShPtr<Module> module;
+	Module* module = nullptr;
 
 	/// The currently visited function.
-	ShPtr<Function> currFunc;
+	Function* currFunc = nullptr;
 
 	/// Indirectly referenced functions.
 	FuncSet indirRefdFuncs;

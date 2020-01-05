@@ -33,15 +33,15 @@ public:
 	~LabelsHandler() = default;
 
 	std::string getLabel(const llvm::BasicBlock *bb) const;
-	std::string getLabel(ShPtr<Statement> stmt) const;
+	std::string getLabel(Statement* stmt) const;
 	void removeLabel(const std::string &label);
-	void setGotoTargetLabel(ShPtr<Statement> target,
+	void setGotoTargetLabel(Statement* target,
 		const llvm::BasicBlock *targetBB);
 
 private:
 	std::string createLabelFor(
 			const llvm::BasicBlock *bb,
-			ShPtr<Statement> stmt) const;
+			Statement* stmt) const;
 	std::string ensureLabelIsValid(const std::string &label) const;
 	std::string ensureLabelIsUnique(const std::string &label) const;
 	bool labelIsUsed(const std::string &label) const;

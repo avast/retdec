@@ -42,14 +42,14 @@ namespace llvmir2hll {
 */
 class Optimizer: public OrderedAllVisitor, private retdec::utils::NonCopyable {
 public:
-	Optimizer(ShPtr<Module> module);
+	Optimizer(Module* module);
 
 	/**
 	* @brief Returns the ID of the optimizer.
 	*/
 	virtual std::string getId() const = 0;
 
-	ShPtr<Module> optimize();
+	Module* optimize();
 
 	/**
 	* @brief Creates an instance of OptimizerType with the given arguments and
@@ -63,8 +63,8 @@ public:
 	* @return Optimized module.
 	*/
 	template<class OptimizerType, typename... Args>
-	static ShPtr<Module> optimize(ShPtr<Module> module, Args &&... args) {
-		auto optimizer = std::make_shared<OptimizerType>(module,
+	static Module* optimize(Module* module, Args &&... args) {
+		auto optimizer = new OptimizerType(module,
 			std::forward<Args>(args)...);
 		return optimizer->optimize();
 	}
@@ -76,7 +76,7 @@ protected:
 
 protected:
 	/// The module that is being optimized.
-	ShPtr<Module> module;
+	Module* module = nullptr;
 };
 
 } // namespace llvmir2hll

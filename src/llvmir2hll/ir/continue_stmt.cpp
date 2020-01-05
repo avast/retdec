@@ -16,21 +16,21 @@ namespace llvmir2hll {
 */
 ContinueStmt::ContinueStmt(Address a): Statement(a) {}
 
-ShPtr<Value> ContinueStmt::clone() {
-	ShPtr<ContinueStmt> continueStmt(ContinueStmt::create(getAddress()));
+Value* ContinueStmt::clone() {
+	ContinueStmt* continueStmt(ContinueStmt::create(getAddress()));
 	continueStmt->setMetadata(getMetadata());
 	return continueStmt;
 }
 
-bool ContinueStmt::isEqualTo(ShPtr<Value> otherValue) const {
+bool ContinueStmt::isEqualTo(Value* otherValue) const {
 	return isa<ContinueStmt>(otherValue);
 }
 
-void ContinueStmt::replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) {
+void ContinueStmt::replace(Expression* oldExpr, Expression* newExpr) {
 	// There is nothing to do.
 }
 
-ShPtr<Expression> ContinueStmt::asExpression() const {
+Expression* ContinueStmt::asExpression() const {
 	// Cannot be converted into an expression.
 	return {};
 }
@@ -39,12 +39,12 @@ ShPtr<Expression> ContinueStmt::asExpression() const {
 * @brief Creates a new continue statement.
 * @param[in] a Address.
 */
-ShPtr<ContinueStmt> ContinueStmt::create(Address a) {
-	return ShPtr<ContinueStmt>(new ContinueStmt(a));
+ContinueStmt* ContinueStmt::create(Address a) {
+	return new ContinueStmt(a);
 }
 
 void ContinueStmt::accept(Visitor *v) {
-	v->visit(ucast<ContinueStmt>(shared_from_this()));
+	v->visit(ucast<ContinueStmt>(this));
 }
 
 } // namespace llvmir2hll

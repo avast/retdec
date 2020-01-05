@@ -40,7 +40,7 @@ namespace llvmir2hll {
 * @endcode
 * Furhermore, none of the statements is a goto target.
 */
-bool isLoopEnd(ShPtr<Statement> stmt) {
+bool isLoopEnd(Statement* stmt) {
 	// It has to be an if statement.
 	auto ifStmt = cast<IfStmt>(stmt);
 	if (!ifStmt) {
@@ -65,7 +65,7 @@ bool isLoopEnd(ShPtr<Statement> stmt) {
 	if (isa<BreakStmt>(ifBodyStmt) || isa<ReturnStmt>(ifBodyStmt)) {
 		return !ifBodyStmt->isGotoTarget();
 	} else if (auto assignStmt = cast<AssignStmt>(ifBodyStmt)) {
-		ShPtr<Statement> endStmt(skipEmptyStmts(assignStmt->getSuccessor()));
+		Statement* endStmt(skipEmptyStmts(assignStmt->getSuccessor()));
 		if (!isa<BreakStmt>(endStmt) && !isa<ReturnStmt>(endStmt)) {
 			// There are some other statements.
 			return false;
@@ -92,7 +92,7 @@ bool isLoopEnd(ShPtr<Statement> stmt) {
 * @par Preconditions
 *  - @a loopEnd is a loop's end
 */
-ShPtr<Expression> getExitCondition(ShPtr<Statement> loopEnd) {
+Expression* getExitCondition(Statement* loopEnd) {
 	auto ifStmt = cast<IfStmt>(loopEnd);
 	ASSERT(ifStmt);
 	return ifStmt->getFirstIfCond();
@@ -111,17 +111,17 @@ ShPtr<Expression> getExitCondition(ShPtr<Statement> loopEnd) {
 * If the loop either isn't a "while True" loop or it cannot be splitted into
 * the three parts, the null pointer is returned.
 */
-ShPtr<SplittedWhileTrueLoop> splitWhileTrueLoop(
-		ShPtr<WhileLoopStmt> stmt,
-		ShPtr<IndVarInfo> indVarInfo) {
+SplittedWhileTrueLoop* splitWhileTrueLoop(
+		WhileLoopStmt* stmt,
+		IndVarInfo* indVarInfo) {
 	// It has to be a "while True" loop.
 	if (!isWhileTrueLoop(stmt)) {
 		return {};
 	}
 
 	// Split the loop.
-	auto splittedLoop = std::make_shared<SplittedWhileTrueLoop>();
-	ShPtr<Expression> exitCond;
+	auto splittedLoop = new SplittedWhileTrueLoop();
+	Expression* exitCond = nullptr;
 	auto currStmt = stmt->getBody();
 	while (currStmt) {
 		// When a statement in the loop is a goto target, we cannot split the
@@ -171,7 +171,7 @@ ShPtr<SplittedWhileTrueLoop> splitWhileTrueLoop(
 * If the loop either isn't a "while True" loop or complete information cannot
 * be obtained, the null pointer is returned.
 */
-ShPtr<IndVarInfo> getIndVarInfo(ShPtr<WhileLoopStmt> stmt) {
+IndVarInfo* getIndVarInfo(WhileLoopStmt* stmt) {
 	// It has to be a "while True" loop.
 	if (!isWhileTrueLoop(stmt)) {
 		return {};
@@ -185,8 +185,8 @@ ShPtr<IndVarInfo> getIndVarInfo(ShPtr<WhileLoopStmt> stmt) {
 	// Obtain the update statement of the induction variable. During this,
 	// get also the exit condition.
 	bool updateBeforeExit = false;
-	ShPtr<Statement> updateStmt;
-	ShPtr<Expression> exitCond;
+	Statement* updateStmt = nullptr;
+	Expression* exitCond = nullptr;
 	auto currStmt = stmt->getBody();
 	while (currStmt) {
 		if (isLoopEnd(currStmt)) {
@@ -221,7 +221,7 @@ ShPtr<IndVarInfo> getIndVarInfo(ShPtr<WhileLoopStmt> stmt) {
 	auto indVar = *indVarIter;
 
 	// Obtain the initializer of the induction variable.
-	ShPtr<Statement> initStmt;
+	Statement* initStmt = nullptr;
 	auto pred = ucast<Statement>(stmt);
 	while (pred) {
 		pred = pred->getUniquePredecessor();
@@ -249,7 +249,7 @@ ShPtr<IndVarInfo> getIndVarInfo(ShPtr<WhileLoopStmt> stmt) {
 
 	// TODO Check that indVar is used only on "safe" places, meaning that the
 	//      loop can be optimized into a for loop.
-	return std::make_shared<IndVarInfo>(
+	return new IndVarInfo(
 			initStmt,
 			indVar,
 			exitCond,

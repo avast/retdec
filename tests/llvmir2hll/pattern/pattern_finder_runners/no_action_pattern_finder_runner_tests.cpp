@@ -32,14 +32,14 @@ RunWithOnePatternFinderOnlyCallsFindPatternOnThatFinder) {
 
 	// Mocks.
 	StrictMock<PatternFinderMock> *pfMock(new StrictMock<PatternFinderMock>(va, cio));
-	ShPtr<PatternFinder> pf(pfMock);
+	PatternFinder* pf(pfMock);
 
 	// Expectations.
 	PatternFinder::Patterns patterns;
 	EXPECT_CALL(*pfMock, findPatterns(module))
 		.WillOnce(Return(patterns));
 
-	ShPtr<NoActionPatternFinderRunner> pfr(new NoActionPatternFinderRunner());
+	NoActionPatternFinderRunner* pfr(new NoActionPatternFinderRunner());
 
 	// Test.
 	pfr->run(pf, module);
@@ -52,9 +52,9 @@ RunWithTwoPatternFindersOnlyCallsFindPatternOnTheseFinders) {
 
 	// Mocks.
 	StrictMock<PatternFinderMock> *pf1Mock(new StrictMock<PatternFinderMock>(va, cio));
-	ShPtr<PatternFinder> pf1(pf1Mock);
+	PatternFinder* pf1(pf1Mock);
 	StrictMock<PatternFinderMock> *pf2Mock(new StrictMock<PatternFinderMock>(va, cio));
-	ShPtr<PatternFinder> pf2(pf2Mock);
+	PatternFinder* pf2(pf2Mock);
 	PatternFinderRunner::PatternFinders pfs;
 	pfs.push_back(pf1);
 	pfs.push_back(pf2);
@@ -66,7 +66,7 @@ RunWithTwoPatternFindersOnlyCallsFindPatternOnTheseFinders) {
 	EXPECT_CALL(*pf2Mock, findPatterns(module))
 		.WillOnce(Return(patterns));
 
-	ShPtr<NoActionPatternFinderRunner> pfr(new NoActionPatternFinderRunner());
+	NoActionPatternFinderRunner* pfr(new NoActionPatternFinderRunner());
 
 	// Test.
 	pfr->run(pfs, module);

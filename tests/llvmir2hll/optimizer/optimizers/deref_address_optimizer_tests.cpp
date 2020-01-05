@@ -23,7 +23,7 @@ class DerefAddressOptimizerTests: public TestsWithModule {};
 
 TEST_F(DerefAddressOptimizerTests,
 OptimizerHasNonEmptyID) {
-	ShPtr<DerefAddressOptimizer> optimizer(
+	DerefAddressOptimizer* optimizer(
 		new DerefAddressOptimizer(module));
 
 	EXPECT_TRUE(!optimizer->getId().empty()) <<

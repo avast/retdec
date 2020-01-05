@@ -57,10 +57,10 @@ SingleGotoTargetAsTheFirstStatementInFunction) {
 	//     goto lab;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<VarDefStmt> varDefA(VarDefStmt::create(varA));
-	ShPtr<GotoStmt> gotoStmt(GotoStmt::create(varDefA));
+	VarDefStmt* varDefA(VarDefStmt::create(varA));
+	GotoStmt* gotoStmt(GotoStmt::create(varDefA));
 	varDefA->setSuccessor(gotoStmt);
 	testFunc->setBody(varDefA);
 
@@ -89,15 +89,15 @@ MoreStatementsBeforeAndAfterGotoTarget) {
 	//     goto lab;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<VarDefStmt> varDefA(VarDefStmt::create(varA));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	VarDefStmt* varDefA(VarDefStmt::create(varA));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	testFunc->addLocalVar(varB);
-	ShPtr<VarDefStmt> varDefB(VarDefStmt::create(varB));
-	ShPtr<AssignStmt> assignA1(AssignStmt::create(varA, ConstInt::create(1, 32)));
-	ShPtr<AssignStmt> assignB1(AssignStmt::create(varB, ConstInt::create(1, 32)));
-	ShPtr<GotoStmt> gotoStmt(GotoStmt::create(varDefB));
+	VarDefStmt* varDefB(VarDefStmt::create(varB));
+	AssignStmt* assignA1(AssignStmt::create(varA, ConstInt::create(1, 32)));
+	AssignStmt* assignB1(AssignStmt::create(varB, ConstInt::create(1, 32)));
+	GotoStmt* gotoStmt(GotoStmt::create(varDefB));
 	assignB1->setSuccessor(gotoStmt);
 	varDefB->setSuccessor(assignB1);
 	assignA1->setSuccessor(varDefB);
@@ -132,16 +132,16 @@ TwoGotoTargetsAndIfStmt) {
 	//     }
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<VarDefStmt> varDefA(VarDefStmt::create(varA));
-	ShPtr<IfStmt> ifStmt(IfStmt::create(ConstInt::create(1, 32), varDefA));
-	ShPtr<GotoStmt> gotoIfStmt(GotoStmt::create(ifStmt));
+	VarDefStmt* varDefA(VarDefStmt::create(varA));
+	IfStmt* ifStmt(IfStmt::create(ConstInt::create(1, 32), varDefA));
+	GotoStmt* gotoIfStmt(GotoStmt::create(ifStmt));
 	varDefA->setSuccessor(gotoIfStmt);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	testFunc->addLocalVar(varB);
-	ShPtr<VarDefStmt> varDefB(VarDefStmt::create(varB));
-	ShPtr<GotoStmt> gotoVarDefB(GotoStmt::create(varDefB));
+	VarDefStmt* varDefB(VarDefStmt::create(varB));
+	GotoStmt* gotoVarDefB(GotoStmt::create(varDefB));
 	varDefB->setSuccessor(gotoVarDefB);
 	ifStmt->setElseClause(varDefB);
 	testFunc->setBody(ifStmt);
@@ -171,17 +171,17 @@ GotoLabelAfterIfStmt) {
 	//   }
 	//   label: a = a + 1;
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	testFunc->addLocalVar(varA);
 	testFunc->addLocalVar(varB);
-	ShPtr<VarDefStmt> varDefA(VarDefStmt::create(varA));
-	ShPtr<VarDefStmt> varDefB(VarDefStmt::create(varB));
-	ShPtr<AddOpExpr> addOpExpr(AddOpExpr::create(varA, ConstInt::create(1, 64)));
-	ShPtr<AssignStmt> assignStmtB(AssignStmt::create(varB, addOpExpr));
-	ShPtr<IfStmt> ifStmt(IfStmt::create(ConstInt::create(1, 32), assignStmtB));
-	ShPtr<AssignStmt> assignStmtA(AssignStmt::create(varA, addOpExpr));
-	ShPtr<GotoStmt> gotoAssign(GotoStmt::create(assignStmtA));
+	VarDefStmt* varDefA(VarDefStmt::create(varA));
+	VarDefStmt* varDefB(VarDefStmt::create(varB));
+	AddOpExpr* addOpExpr(AddOpExpr::create(varA, ConstInt::create(1, 64)));
+	AssignStmt* assignStmtB(AssignStmt::create(varB, addOpExpr));
+	IfStmt* ifStmt(IfStmt::create(ConstInt::create(1, 32), assignStmtB));
+	AssignStmt* assignStmtA(AssignStmt::create(varA, addOpExpr));
+	GotoStmt* gotoAssign(GotoStmt::create(assignStmtA));
 	varDefA->setSuccessor(varDefB);
 	varDefB->setSuccessor(ifStmt);
 	ifStmt->setSuccessor(assignStmtA);

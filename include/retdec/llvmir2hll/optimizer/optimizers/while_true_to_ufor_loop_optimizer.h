@@ -25,37 +25,37 @@ class ValueAnalysis;
 */
 class WhileTrueToUForLoopOptimizer final: public FuncOptimizer {
 public:
-	WhileTrueToUForLoopOptimizer(ShPtr<Module> module, ShPtr<ValueAnalysis> va);
+	WhileTrueToUForLoopOptimizer(Module* module, ValueAnalysis* va);
 
 	virtual std::string getId() const override { return "WhileTrueToUForLoop"; }
 
 private:
 	virtual void doOptimization() override;
 
-	void tryReplacementWithUForLoop(ShPtr<WhileLoopStmt> whileLoop);
-	void initializeReplacement(ShPtr<WhileLoopStmt> stmt);
+	void tryReplacementWithUForLoop(WhileLoopStmt* whileLoop);
+	void initializeReplacement(WhileLoopStmt* stmt);
 	bool gatherInfoAboutOptimizedWhileLoop();
-	ShPtr<UForLoopStmt> tryConversionToUForLoop();
-	ShPtr<EmptyStmt> getLastEmptyStatement(ShPtr<Statement> stmts) const;
-	void removeUselessSucessors(ShPtr<UForLoopStmt> forLoop);
-	void performReplacement(ShPtr<UForLoopStmt> forLoop);
+	UForLoopStmt* tryConversionToUForLoop();
+	EmptyStmt* getLastEmptyStatement(Statement* stmts) const;
+	void removeUselessSucessors(UForLoopStmt* forLoop);
+	void performReplacement(UForLoopStmt* forLoop);
 	void removeStatementsToBeRemoved();
 
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<WhileLoopStmt> stmt) override;
+	virtual void visit(WhileLoopStmt* stmt) override;
 	/// @}
 
 private:
 	/// Analysis of values.
-	ShPtr<ValueAnalysis> va;
+	ValueAnalysis* va = nullptr;
 
 	/// While loop that is being optimized.
-	ShPtr<WhileLoopStmt> whileLoop;
+	WhileLoopStmt* whileLoop = nullptr;
 
 	/// Splitted loop that is being optimized.
-	ShPtr<SplittedWhileTrueLoop> splittedLoop;
+	SplittedWhileTrueLoop* splittedLoop = nullptr;
 
 	/// Can the loop be optimized?
 	bool canBeOptimized;

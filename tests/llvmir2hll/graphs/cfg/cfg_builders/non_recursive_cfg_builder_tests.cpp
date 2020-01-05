@@ -55,9 +55,9 @@ namespace {
 * @param[in] CFGToEmit CFG to emit.
 * @param[in] canEmit Emit the CFG?
 */
-void emitCFG(ShPtr<CFG> CFGToEmit) {
+void emitCFG(CFG* CFGToEmit) {
 	std::ofstream out("cfgTest.dot");
-	ShPtr<retdec::llvmir2hll::CFGWriter> writer(GraphvizCFGWriter::create(CFGToEmit, out,
+	retdec::llvmir2hll::CFGWriter* writer(GraphvizCFGWriter::create(CFGToEmit, out,
 		false));
 	writer->emitCFG();
 }
@@ -67,7 +67,7 @@ void emitCFG(ShPtr<CFG> CFGToEmit) {
 * @brief Support function that emits the statements in @a node into @c
 *        std::errs().
 */
-void printNode(ShPtr<CFG::Node> node) {
+void printNode(CFG::Node* node) {
 	if (node->getLabel() == "entry") {
 		llvm::errs() << "Entry node";
 	} else if (node->getLabel() == "exit") {
@@ -85,7 +85,7 @@ void printNode(ShPtr<CFG::Node> node) {
 * @param[in] compNode First printed node.
 * @param[in] refNode Second printed node.
 */
-void printNodes(ShPtr<CFG::Node> compNode, ShPtr<CFG::Node> refNode) {
+void printNodes(CFG::Node* compNode, CFG::Node* refNode) {
 	if (compNode->getLabel() == "entry") {
 		llvm::errs() << "Entry node in compared CFG";
 	} else if (compNode->getLabel() == "exit") {
@@ -115,9 +115,9 @@ void printNodes(ShPtr<CFG::Node> compNode, ShPtr<CFG::Node> refNode) {
 */
 class NonRecursiveCFGBuilderTests: public TestsWithModule {
 protected:
-	void checkEquivalenceOfCFGs(const ShPtr<CFG> &toCompCFG, const ShPtr<CFG>
+	void checkEquivalenceOfCFGs(const CFG* &toCompCFG, const CFG*
 		&refCFG);
-	void checkNodes(ShPtr<CFG::Node> nodeOfCompCFG, ShPtr<CFG::Node>
+	void checkNodes(CFG::Node* nodeOfCompCFG, CFG::Node*
 		nodeOfRefCFG);
 
 protected:
@@ -131,8 +131,8 @@ protected:
 * @param[in] toCompCFG CFG to compare.
 * @param[in] refCFG Reference CFG.
 */
-void NonRecursiveCFGBuilderTests::checkEquivalenceOfCFGs(const ShPtr<CFG>
-		&toCompCFG, const ShPtr<CFG> &refCFG) {
+void NonRecursiveCFGBuilderTests::checkEquivalenceOfCFGs(const CFG*
+		&toCompCFG, const CFG* &refCFG) {
 	ASSERT_EQ(toCompCFG->getNumberOfNodes(), refCFG->getNumberOfNodes()) <<
 		"expected same number of nodes but in the compared CFG are `" <<
 			toCompCFG->getNumberOfNodes() << "` nodes, "
@@ -149,8 +149,8 @@ void NonRecursiveCFGBuilderTests::checkEquivalenceOfCFGs(const ShPtr<CFG>
 * @param[in] nodeOfCompCFG Node to compare.
 * @param[in] nodeOfRefCFG Reference node.
 */
-void NonRecursiveCFGBuilderTests::checkNodes(ShPtr<CFG::Node> nodeOfCompCFG,
-		ShPtr<CFG::Node> nodeOfRefCFG) {
+void NonRecursiveCFGBuilderTests::checkNodes(CFG::Node* nodeOfCompCFG,
+		CFG::Node* nodeOfRefCFG) {
 	if (hasItem(visitedNodes, nodeOfCompCFG)) {
 		return;
 	}
@@ -226,36 +226,36 @@ OneNodeWithSimpleConnectionWithEntryAndExitNode) {
 	//
 
 	// Creating body of function to create CFG.
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
 	testFunc->addLocalVar(varB);
-	ShPtr<VarDefStmt> varDefStmtA(VarDefStmt::create(varA, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtB(VarDefStmt::create(varB, ShPtr<Expression>()));
-	ShPtr<AssignStmt> assignStmtA(AssignStmt::create(varA, varB));
+	VarDefStmt* varDefStmtA(VarDefStmt::create(varA, Expression*()));
+	VarDefStmt* varDefStmtB(VarDefStmt::create(varB, Expression*()));
+	AssignStmt* assignStmtA(AssignStmt::create(varA, varB));
 	varDefStmtA->setSuccessor(varDefStmtB);
 	varDefStmtB->setSuccessor(assignStmtA);
 	testFunc->setBody(varDefStmtA);
 
 	// Creating a reference CFG.
-	ShPtr<CFG> refCFG(ShPtr<CFG>(new CFG(testFunc)));
+	CFG* refCFG(CFG*(new CFG(testFunc)));
 
-	refCFG->addEntryNode(ShPtr<CFG::Node>(new CFG::Node("entry")));
+	refCFG->addEntryNode(CFG::Node*(new CFG::Node("entry")));
 
-	ShPtr<CFG::Node> nodeA(new CFG::Node());
+	CFG::Node* nodeA(new CFG::Node());
 	nodeA->addStmt(varDefStmtA);
 	nodeA->addStmt(varDefStmtB);
 	nodeA->addStmt(assignStmtA);
 	refCFG->addNode(nodeA);
 
-	refCFG->addExitNode(ShPtr<CFG::Node>(new CFG::Node("exit")));
+	refCFG->addExitNode(CFG::Node*(new CFG::Node("exit")));
 
 	refCFG->addEdge(refCFG->getEntryNode(), nodeA);
 	refCFG->addEdge(nodeA, refCFG->getExitNode());
 
 	// Check difference.
-	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
-	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
+	retdec::llvmir2hll::CFGBuilder* cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
+	CFG* compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
 	// If want to emit CFG, set to 1
@@ -279,38 +279,38 @@ OneNodeWithSimpleConnectionWithEntryAndExitNodeButContainsEmptyStmt) {
 	//
 
 	// Creating body of function to create CFG.
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
 	testFunc->addLocalVar(varB);
-	ShPtr<VarDefStmt> varDefStmtA(VarDefStmt::create(varA, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtB(VarDefStmt::create(varB, ShPtr<Expression>()));
-	ShPtr<AssignStmt> assignStmtA(AssignStmt::create(varA, varB));
-	ShPtr<EmptyStmt> emptyStmt(EmptyStmt::create());
+	VarDefStmt* varDefStmtA(VarDefStmt::create(varA, Expression*()));
+	VarDefStmt* varDefStmtB(VarDefStmt::create(varB, Expression*()));
+	AssignStmt* assignStmtA(AssignStmt::create(varA, varB));
+	EmptyStmt* emptyStmt(EmptyStmt::create());
 	varDefStmtA->setSuccessor(varDefStmtB);
 	varDefStmtB->setSuccessor(assignStmtA);
 	assignStmtA->setSuccessor(emptyStmt);
 	testFunc->setBody(varDefStmtA);
 
 	// Creating a reference CFG.
-	ShPtr<CFG> refCFG(ShPtr<CFG>(new CFG(testFunc)));
+	CFG* refCFG(CFG*(new CFG(testFunc)));
 
-	refCFG->addEntryNode(ShPtr<CFG::Node>(new CFG::Node("entry")));
+	refCFG->addEntryNode(CFG::Node*(new CFG::Node("entry")));
 
-	ShPtr<CFG::Node> nodeA(new CFG::Node());
+	CFG::Node* nodeA(new CFG::Node());
 	nodeA->addStmt(varDefStmtA);
 	nodeA->addStmt(varDefStmtB);
 	nodeA->addStmt(assignStmtA);
 	refCFG->addNode(nodeA);
 
-	refCFG->addExitNode(ShPtr<CFG::Node>(new CFG::Node("exit")));
+	refCFG->addExitNode(CFG::Node*(new CFG::Node("exit")));
 
 	refCFG->addEdge(refCFG->getEntryNode(), nodeA);
 	refCFG->addEdge(nodeA, refCFG->getExitNode());
 
 	// Check difference.
-	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
-	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
+	retdec::llvmir2hll::CFGBuilder* cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
+	CFG* compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
 	// If want to emit CFG, set to 1
@@ -334,38 +334,38 @@ OneNodeWithSimpleConnectionWithEntryAndExitNodeButContainsReturnInTheMiddleNode)
 	//
 
 	// Creating body of function to create CFG.
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
 	testFunc->addLocalVar(varB);
-	ShPtr<VarDefStmt> varDefStmtA(VarDefStmt::create(varA, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtB(VarDefStmt::create(varB, ShPtr<Expression>()));
-	ShPtr<AssignStmt> assignStmtA(AssignStmt::create(varA, varB));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create());
+	VarDefStmt* varDefStmtA(VarDefStmt::create(varA, Expression*()));
+	VarDefStmt* varDefStmtB(VarDefStmt::create(varB, Expression*()));
+	AssignStmt* assignStmtA(AssignStmt::create(varA, varB));
+	ReturnStmt* returnStmt(ReturnStmt::create());
 	varDefStmtA->setSuccessor(varDefStmtB);
 	varDefStmtB->setSuccessor(returnStmt);
 	returnStmt->setSuccessor(assignStmtA);
 	testFunc->setBody(varDefStmtA);
 
 	// Creating a reference CFG.
-	ShPtr<CFG> refCFG(ShPtr<CFG>(new CFG(testFunc)));
+	CFG* refCFG(CFG*(new CFG(testFunc)));
 
-	refCFG->addEntryNode(ShPtr<CFG::Node>(new CFG::Node("entry")));
+	refCFG->addEntryNode(CFG::Node*(new CFG::Node("entry")));
 
-	ShPtr<CFG::Node> nodeA(new CFG::Node());
+	CFG::Node* nodeA(new CFG::Node());
 	nodeA->addStmt(varDefStmtA);
 	nodeA->addStmt(varDefStmtB);
 	nodeA->addStmt(returnStmt);
 	refCFG->addNode(nodeA);
 
-	refCFG->addExitNode(ShPtr<CFG::Node>(new CFG::Node("exit")));
+	refCFG->addExitNode(CFG::Node*(new CFG::Node("exit")));
 
 	refCFG->addEdge(refCFG->getEntryNode(), nodeA);
 	refCFG->addEdge(nodeA, refCFG->getExitNode());
 
 	// Check difference.
-	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
-	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
+	retdec::llvmir2hll::CFGBuilder* cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
+	CFG* compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
 	// If want to emit CFG, set to 1
@@ -388,38 +388,38 @@ OneNodeWithSimpleConnectionWithEntryAndExitNodeContainsUnreachableStmt) {
 	//
 
 	// Creating body of function to create CFG.
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
 	testFunc->addLocalVar(varB);
-	ShPtr<VarDefStmt> varDefStmtA(VarDefStmt::create(varA, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtB(VarDefStmt::create(varB, ShPtr<Expression>()));
-	ShPtr<AssignStmt> assignStmtA(AssignStmt::create(varA, varB));
-	ShPtr<UnreachableStmt> unreachableStmt(UnreachableStmt::create());
+	VarDefStmt* varDefStmtA(VarDefStmt::create(varA, Expression*()));
+	VarDefStmt* varDefStmtB(VarDefStmt::create(varB, Expression*()));
+	AssignStmt* assignStmtA(AssignStmt::create(varA, varB));
+	UnreachableStmt* unreachableStmt(UnreachableStmt::create());
 	varDefStmtA->setSuccessor(varDefStmtB);
 	varDefStmtB->setSuccessor(unreachableStmt);
 	unreachableStmt->setSuccessor(assignStmtA);
 	testFunc->setBody(varDefStmtA);
 
 	// Creating a reference CFG.
-	ShPtr<CFG> refCFG(ShPtr<CFG>(new CFG(testFunc)));
+	CFG* refCFG(CFG*(new CFG(testFunc)));
 
-	refCFG->addEntryNode(ShPtr<CFG::Node>(new CFG::Node("entry")));
+	refCFG->addEntryNode(CFG::Node*(new CFG::Node("entry")));
 
-	ShPtr<CFG::Node> nodeA(new CFG::Node());
+	CFG::Node* nodeA(new CFG::Node());
 	nodeA->addStmt(varDefStmtA);
 	nodeA->addStmt(varDefStmtB);
 	nodeA->addStmt(unreachableStmt);
 	refCFG->addNode(nodeA);
 
-	refCFG->addExitNode(ShPtr<CFG::Node>(new CFG::Node("exit")));
+	refCFG->addExitNode(CFG::Node*(new CFG::Node("exit")));
 
 	refCFG->addEdge(refCFG->getEntryNode(), nodeA);
 	refCFG->addEdge(nodeA, refCFG->getExitNode());
 
 	// Check difference.
-	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
-	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
+	retdec::llvmir2hll::CFGBuilder* cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
+	CFG* compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
 	// If want to emit CFG, set to 1
@@ -448,20 +448,20 @@ CFGCreatedForSimpleIfStmtWithoutElseClause) {
 	//
 
 	// Creating body of function to create CFG.
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
 	testFunc->addLocalVar(varB);
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(16)));
+	Variable* varC(Variable::create("c", IntType::create(16)));
 	testFunc->addLocalVar(varC);
-	ShPtr<VarDefStmt> varDefStmtA(VarDefStmt::create(varA, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtB(VarDefStmt::create(varB, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtC(VarDefStmt::create(varC, ShPtr<Expression>()));
-	ShPtr<AssignStmt> assignStmtA(AssignStmt::create(varA, varB));
-	ShPtr<AssignStmt> assignStmtC(AssignStmt::create(varC, ConstInt::create(1, 64)));
-	ShPtr<GtOpExpr> gtOpExpr(GtOpExpr::create(varA, varB));
-	ShPtr<LtEqOpExpr> ltEqOpExpr(LtEqOpExpr::create(varA, varB));
-	ShPtr<IfStmt> ifStmt(IfStmt::create(gtOpExpr, assignStmtA));
+	VarDefStmt* varDefStmtA(VarDefStmt::create(varA, Expression*()));
+	VarDefStmt* varDefStmtB(VarDefStmt::create(varB, Expression*()));
+	VarDefStmt* varDefStmtC(VarDefStmt::create(varC, Expression*()));
+	AssignStmt* assignStmtA(AssignStmt::create(varA, varB));
+	AssignStmt* assignStmtC(AssignStmt::create(varC, ConstInt::create(1, 64)));
+	GtOpExpr* gtOpExpr(GtOpExpr::create(varA, varB));
+	LtEqOpExpr* ltEqOpExpr(LtEqOpExpr::create(varA, varB));
+	IfStmt* ifStmt(IfStmt::create(gtOpExpr, assignStmtA));
 	varDefStmtA->setSuccessor(varDefStmtB);
 	varDefStmtB->setSuccessor(varDefStmtC);
 	varDefStmtC->setSuccessor(ifStmt);
@@ -469,29 +469,29 @@ CFGCreatedForSimpleIfStmtWithoutElseClause) {
 	testFunc->setBody(varDefStmtA);
 
 	// Creating a reference CFG.
-	ShPtr<CFG> refCFG(ShPtr<CFG>(new CFG(testFunc)));
+	CFG* refCFG(CFG*(new CFG(testFunc)));
 
-	refCFG->addEntryNode(ShPtr<CFG::Node>(new CFG::Node("entry")));
+	refCFG->addEntryNode(CFG::Node*(new CFG::Node("entry")));
 
-	ShPtr<CFG::Node> nodeBeforeIf(new CFG::Node());
+	CFG::Node* nodeBeforeIf(new CFG::Node());
 	nodeBeforeIf->addStmt(varDefStmtA);
 	nodeBeforeIf->addStmt(varDefStmtB);
 	nodeBeforeIf->addStmt(varDefStmtC);
 	refCFG->addNode(nodeBeforeIf);
 
-	ShPtr<CFG::Node> nodeIf(new CFG::Node());
+	CFG::Node* nodeIf(new CFG::Node());
 	nodeIf->addStmt(ifStmt);
 	refCFG->addNode(nodeIf);
 
-	ShPtr<CFG::Node> nodeTrueCondBody(new CFG::Node());
+	CFG::Node* nodeTrueCondBody(new CFG::Node());
 	nodeTrueCondBody->addStmt(assignStmtA);
 	refCFG->addNode(nodeTrueCondBody);
 
-	ShPtr<CFG::Node> nodeAfterIf(new CFG::Node());
+	CFG::Node* nodeAfterIf(new CFG::Node());
 	nodeAfterIf->addStmt(assignStmtC);
 	refCFG->addNode(nodeAfterIf);
 
-	refCFG->addExitNode(ShPtr<CFG::Node>(new CFG::Node("exit")));
+	refCFG->addExitNode(CFG::Node*(new CFG::Node("exit")));
 
 	refCFG->addEdge(refCFG->getEntryNode(), nodeBeforeIf);
 	refCFG->addEdge(nodeBeforeIf, nodeIf);
@@ -501,8 +501,8 @@ CFGCreatedForSimpleIfStmtWithoutElseClause) {
 	refCFG->addEdge(nodeAfterIf, refCFG->getExitNode());
 
 	// Check difference.
-	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
-	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
+	retdec::llvmir2hll::CFGBuilder* cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
+	CFG* compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
 	// If want to emit CFG, set to 1
@@ -530,25 +530,25 @@ CFGCreatedForIfStmtWithNestedIfStmtWithElseClause) {
 	//
 
 	// Creating body of function to create CFG.
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
 	testFunc->addLocalVar(varB);
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(16)));
+	Variable* varC(Variable::create("c", IntType::create(16)));
 	testFunc->addLocalVar(varC);
-	ShPtr<VarDefStmt> varDefStmtA(VarDefStmt::create(varA, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtB(VarDefStmt::create(varB, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtC(VarDefStmt::create(varC, ShPtr<Expression>()));
-	ShPtr<AssignStmt> assignStmtA(AssignStmt::create(varA, varB));
-	ShPtr<AssignStmt> assignStmtB(AssignStmt::create(varB, ConstInt::create(2, 64)));
-	ShPtr<AssignStmt> assignStmtC(AssignStmt::create(varC, ConstInt::create(1, 64)));
-	ShPtr<GtOpExpr> gtOpExprA(GtOpExpr::create(varA, varB));
-	ShPtr<GtOpExpr> gtOpExprC(GtOpExpr::create(varC, ConstInt::create(2, 64)));
-	ShPtr<LtEqOpExpr> ltEqOpExprA(LtEqOpExpr::create(varA, varB));
-	ShPtr<LtEqOpExpr> ltEqOpExprC(LtEqOpExpr::create(varC, ConstInt::create(2, 64)));
-	ShPtr<IfStmt> ifStmtC(IfStmt::create(gtOpExprC, assignStmtA));
+	VarDefStmt* varDefStmtA(VarDefStmt::create(varA, Expression*()));
+	VarDefStmt* varDefStmtB(VarDefStmt::create(varB, Expression*()));
+	VarDefStmt* varDefStmtC(VarDefStmt::create(varC, Expression*()));
+	AssignStmt* assignStmtA(AssignStmt::create(varA, varB));
+	AssignStmt* assignStmtB(AssignStmt::create(varB, ConstInt::create(2, 64)));
+	AssignStmt* assignStmtC(AssignStmt::create(varC, ConstInt::create(1, 64)));
+	GtOpExpr* gtOpExprA(GtOpExpr::create(varA, varB));
+	GtOpExpr* gtOpExprC(GtOpExpr::create(varC, ConstInt::create(2, 64)));
+	LtEqOpExpr* ltEqOpExprA(LtEqOpExpr::create(varA, varB));
+	LtEqOpExpr* ltEqOpExprC(LtEqOpExpr::create(varC, ConstInt::create(2, 64)));
+	IfStmt* ifStmtC(IfStmt::create(gtOpExprC, assignStmtA));
 	ifStmtC->setElseClause(assignStmtB);
-	ShPtr<IfStmt> ifStmtA(IfStmt::create(gtOpExprA, ifStmtC));
+	IfStmt* ifStmtA(IfStmt::create(gtOpExprA, ifStmtC));
 	varDefStmtA->setSuccessor(varDefStmtB);
 	varDefStmtB->setSuccessor(varDefStmtC);
 	varDefStmtC->setSuccessor(ifStmtA);
@@ -556,37 +556,37 @@ CFGCreatedForIfStmtWithNestedIfStmtWithElseClause) {
 	testFunc->setBody(varDefStmtA);
 
 	// Creating a reference CFG.
-	ShPtr<CFG> refCFG(ShPtr<CFG>(new CFG(testFunc)));
+	CFG* refCFG(CFG*(new CFG(testFunc)));
 
-	refCFG->addEntryNode(ShPtr<CFG::Node>(new CFG::Node("entry")));
+	refCFG->addEntryNode(CFG::Node*(new CFG::Node("entry")));
 
-	ShPtr<CFG::Node> nodeBeforeIf(new CFG::Node());
+	CFG::Node* nodeBeforeIf(new CFG::Node());
 	nodeBeforeIf->addStmt(varDefStmtA);
 	nodeBeforeIf->addStmt(varDefStmtB);
 	nodeBeforeIf->addStmt(varDefStmtC);
 	refCFG->addNode(nodeBeforeIf);
 
-	ShPtr<CFG::Node> nodeIfA(new CFG::Node());
+	CFG::Node* nodeIfA(new CFG::Node());
 	nodeIfA->addStmt(ifStmtA);
 	refCFG->addNode(nodeIfA);
 
-	ShPtr<CFG::Node> nodeIfC(new CFG::Node());
+	CFG::Node* nodeIfC(new CFG::Node());
 	nodeIfC->addStmt(ifStmtC);
 	refCFG->addNode(nodeIfC);
 
-	ShPtr<CFG::Node> nodeTrueCondBodyIfC(new CFG::Node());
+	CFG::Node* nodeTrueCondBodyIfC(new CFG::Node());
 	nodeTrueCondBodyIfC->addStmt(assignStmtA);
 	refCFG->addNode(nodeTrueCondBodyIfC);
 
-	ShPtr<CFG::Node> nodeElseBodyIfC(new CFG::Node());
+	CFG::Node* nodeElseBodyIfC(new CFG::Node());
 	nodeElseBodyIfC->addStmt(assignStmtB);
 	refCFG->addNode(nodeElseBodyIfC);
 
-	ShPtr<CFG::Node> nodeAfterIfA(new CFG::Node());
+	CFG::Node* nodeAfterIfA(new CFG::Node());
 	nodeAfterIfA->addStmt(assignStmtC);
 	refCFG->addNode(nodeAfterIfA);
 
-	refCFG->addExitNode(ShPtr<CFG::Node>(new CFG::Node("exit")));
+	refCFG->addExitNode(CFG::Node*(new CFG::Node("exit")));
 
 	refCFG->addEdge(refCFG->getEntryNode(), nodeBeforeIf);
 	refCFG->addEdge(nodeBeforeIf, nodeIfA);
@@ -599,8 +599,8 @@ CFGCreatedForIfStmtWithNestedIfStmtWithElseClause) {
 	refCFG->addEdge(nodeAfterIfA, refCFG->getExitNode());
 
 	// Check difference.
-	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
-	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
+	retdec::llvmir2hll::CFGBuilder* cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
+	CFG* compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
 	// If want to emit CFG, set to 1
@@ -634,36 +634,36 @@ CFGCreatedForIfStmtWithNestedIfStmtWithElseClauseAndElseIfClause) {
 	//
 
 	// Creating body of function to create CFG.
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
 	testFunc->addLocalVar(varB);
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(16)));
+	Variable* varC(Variable::create("c", IntType::create(16)));
 	testFunc->addLocalVar(varC);
-	ShPtr<Variable> varD(Variable::create("d", IntType::create(16)));
+	Variable* varD(Variable::create("d", IntType::create(16)));
 	testFunc->addLocalVar(varD);
-	ShPtr<Variable> varE(Variable::create("e", IntType::create(16)));
+	Variable* varE(Variable::create("e", IntType::create(16)));
 	testFunc->addLocalVar(varE);
-	ShPtr<VarDefStmt> varDefStmtA(VarDefStmt::create(varA, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtB(VarDefStmt::create(varB, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtC(VarDefStmt::create(varC, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtD(VarDefStmt::create(varD, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtE(VarDefStmt::create(varE, ShPtr<Expression>()));
-	ShPtr<AssignStmt> assignStmtA(AssignStmt::create(varA, varB));
-	ShPtr<AssignStmt> assignStmtB(AssignStmt::create(varB, ConstInt::create(2, 64)));
-	ShPtr<AssignStmt> assignStmtC(AssignStmt::create(varC, ConstInt::create(1, 64)));
-	ShPtr<AssignStmt> assignStmtD(AssignStmt::create(varD, varA));
-	ShPtr<AssignStmt> assignStmtE(AssignStmt::create(varE, ConstInt::create(1, 64)));
-	ShPtr<GtOpExpr> gtOpExprA(GtOpExpr::create(varA, varB));
-	ShPtr<GtOpExpr> gtOpExprC1(GtOpExpr::create(varC, ConstInt::create(2, 64)));
-	ShPtr<GtOpExpr> gtOpExprC2(GtOpExpr::create(varC, ConstInt::create(3, 64)));
-	ShPtr<LtEqOpExpr> ltEqOpExprA(LtEqOpExpr::create(varA, varB));
-	ShPtr<LtEqOpExpr> ltEqOpExprC1(LtEqOpExpr::create(varC, ConstInt::create(2, 64)));
-	ShPtr<AndOpExpr> andOpExprC1(AndOpExpr::create(ltEqOpExprC1, gtOpExprC2));
-	ShPtr<LtEqOpExpr> ltEqOpExprC2(LtEqOpExpr::create(varC, ConstInt::create(3, 64)));
-	ShPtr<AndOpExpr> andOpExprC2(AndOpExpr::create(ltEqOpExprC1, ltEqOpExprC2));
-	ShPtr<IfStmt> ifStmtA(IfStmt::create(gtOpExprA, assignStmtD));
-	ShPtr<IfStmt> ifStmtC(IfStmt::create(gtOpExprC1, assignStmtA));
+	VarDefStmt* varDefStmtA(VarDefStmt::create(varA, Expression*()));
+	VarDefStmt* varDefStmtB(VarDefStmt::create(varB, Expression*()));
+	VarDefStmt* varDefStmtC(VarDefStmt::create(varC, Expression*()));
+	VarDefStmt* varDefStmtD(VarDefStmt::create(varD, Expression*()));
+	VarDefStmt* varDefStmtE(VarDefStmt::create(varE, Expression*()));
+	AssignStmt* assignStmtA(AssignStmt::create(varA, varB));
+	AssignStmt* assignStmtB(AssignStmt::create(varB, ConstInt::create(2, 64)));
+	AssignStmt* assignStmtC(AssignStmt::create(varC, ConstInt::create(1, 64)));
+	AssignStmt* assignStmtD(AssignStmt::create(varD, varA));
+	AssignStmt* assignStmtE(AssignStmt::create(varE, ConstInt::create(1, 64)));
+	GtOpExpr* gtOpExprA(GtOpExpr::create(varA, varB));
+	GtOpExpr* gtOpExprC1(GtOpExpr::create(varC, ConstInt::create(2, 64)));
+	GtOpExpr* gtOpExprC2(GtOpExpr::create(varC, ConstInt::create(3, 64)));
+	LtEqOpExpr* ltEqOpExprA(LtEqOpExpr::create(varA, varB));
+	LtEqOpExpr* ltEqOpExprC1(LtEqOpExpr::create(varC, ConstInt::create(2, 64)));
+	AndOpExpr* andOpExprC1(AndOpExpr::create(ltEqOpExprC1, gtOpExprC2));
+	LtEqOpExpr* ltEqOpExprC2(LtEqOpExpr::create(varC, ConstInt::create(3, 64)));
+	AndOpExpr* andOpExprC2(AndOpExpr::create(ltEqOpExprC1, ltEqOpExprC2));
+	IfStmt* ifStmtA(IfStmt::create(gtOpExprA, assignStmtD));
+	IfStmt* ifStmtC(IfStmt::create(gtOpExprC1, assignStmtA));
 	ifStmtC->addClause(gtOpExprC2, assignStmtC);
 	ifStmtC->setElseClause(assignStmtB);
 
@@ -677,11 +677,11 @@ CFGCreatedForIfStmtWithNestedIfStmtWithElseClauseAndElseIfClause) {
 	testFunc->setBody(varDefStmtA);
 
 	// Creating a reference CFG.
-	ShPtr<CFG> refCFG(ShPtr<CFG>(new CFG(testFunc)));
+	CFG* refCFG(CFG*(new CFG(testFunc)));
 
-	refCFG->addEntryNode(ShPtr<CFG::Node>(new CFG::Node("entry")));
+	refCFG->addEntryNode(CFG::Node*(new CFG::Node("entry")));
 
-	ShPtr<CFG::Node> nodeBeforeIf(new CFG::Node());
+	CFG::Node* nodeBeforeIf(new CFG::Node());
 	nodeBeforeIf->addStmt(varDefStmtA);
 	nodeBeforeIf->addStmt(varDefStmtB);
 	nodeBeforeIf->addStmt(varDefStmtC);
@@ -689,35 +689,35 @@ CFGCreatedForIfStmtWithNestedIfStmtWithElseClauseAndElseIfClause) {
 	nodeBeforeIf->addStmt(varDefStmtE);
 	refCFG->addNode(nodeBeforeIf);
 
-	ShPtr<CFG::Node> nodeIfA(new CFG::Node());
+	CFG::Node* nodeIfA(new CFG::Node());
 	nodeIfA->addStmt(ifStmtA);
 	refCFG->addNode(nodeIfA);
 
-	ShPtr<CFG::Node> nodeD(new CFG::Node());
+	CFG::Node* nodeD(new CFG::Node());
 	nodeD->addStmt(assignStmtD);
 	refCFG->addNode(nodeD);
 
-	ShPtr<CFG::Node> nodeIfC(new CFG::Node());
+	CFG::Node* nodeIfC(new CFG::Node());
 	nodeIfC->addStmt(ifStmtC);
 	refCFG->addNode(nodeIfC);
 
-	ShPtr<CFG::Node> nodeTrueCondBodyIfC(new CFG::Node());
+	CFG::Node* nodeTrueCondBodyIfC(new CFG::Node());
 	nodeTrueCondBodyIfC->addStmt(assignStmtA);
 	refCFG->addNode(nodeTrueCondBodyIfC);
 
-	ShPtr<CFG::Node> nodeTrueCondBodyElseIfC(new CFG::Node());
+	CFG::Node* nodeTrueCondBodyElseIfC(new CFG::Node());
 	nodeTrueCondBodyElseIfC->addStmt(assignStmtC);
 	refCFG->addNode(nodeTrueCondBodyElseIfC);
 
-	ShPtr<CFG::Node> nodeElseBodyIfC(new CFG::Node());
+	CFG::Node* nodeElseBodyIfC(new CFG::Node());
 	nodeElseBodyIfC->addStmt(assignStmtB);
 	refCFG->addNode(nodeElseBodyIfC);
 
-	ShPtr<CFG::Node> nodeE(new CFG::Node());
+	CFG::Node* nodeE(new CFG::Node());
 	nodeE->addStmt(assignStmtE);
 	refCFG->addNode(nodeE);
 
-	refCFG->addExitNode(ShPtr<CFG::Node>(new CFG::Node("exit")));
+	refCFG->addExitNode(CFG::Node*(new CFG::Node("exit")));
 
 	refCFG->addEdge(refCFG->getEntryNode(), nodeBeforeIf);
 	refCFG->addEdge(nodeBeforeIf, nodeIfA);
@@ -733,8 +733,8 @@ CFGCreatedForIfStmtWithNestedIfStmtWithElseClauseAndElseIfClause) {
 	refCFG->addEdge(nodeIfA, refCFG->getExitNode(), ltEqOpExprA);
 
 	// Check difference.
-	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
-	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
+	retdec::llvmir2hll::CFGBuilder* cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
+	CFG* compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
 	// If want to emit CFG, set to 1
@@ -763,20 +763,20 @@ CFGCreatedForSimpleWhileLoop) {
 	//
 
 	// Creating body of function to create CFG.
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
 	testFunc->addLocalVar(varB);
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(16)));
+	Variable* varC(Variable::create("c", IntType::create(16)));
 	testFunc->addLocalVar(varC);
-	ShPtr<VarDefStmt> varDefStmtA(VarDefStmt::create(varA, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtB(VarDefStmt::create(varB, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtC(VarDefStmt::create(varC, ShPtr<Expression>()));
-	ShPtr<AssignStmt> assignStmtA(AssignStmt::create(varA, varB));
-	ShPtr<AssignStmt> assignStmtC(AssignStmt::create(varC, ConstInt::create(1, 64)));
-	ShPtr<GtOpExpr> gtOpExpr(GtOpExpr::create(varA, varB));
-	ShPtr<LtEqOpExpr> ltEqOpExpr(LtEqOpExpr::create(varA, varB));
-	ShPtr<WhileLoopStmt> whileLoopStmt(WhileLoopStmt::create(gtOpExpr, assignStmtA));
+	VarDefStmt* varDefStmtA(VarDefStmt::create(varA, Expression*()));
+	VarDefStmt* varDefStmtB(VarDefStmt::create(varB, Expression*()));
+	VarDefStmt* varDefStmtC(VarDefStmt::create(varC, Expression*()));
+	AssignStmt* assignStmtA(AssignStmt::create(varA, varB));
+	AssignStmt* assignStmtC(AssignStmt::create(varC, ConstInt::create(1, 64)));
+	GtOpExpr* gtOpExpr(GtOpExpr::create(varA, varB));
+	LtEqOpExpr* ltEqOpExpr(LtEqOpExpr::create(varA, varB));
+	WhileLoopStmt* whileLoopStmt(WhileLoopStmt::create(gtOpExpr, assignStmtA));
 	varDefStmtA->setSuccessor(varDefStmtB);
 	varDefStmtB->setSuccessor(varDefStmtC);
 	varDefStmtC->setSuccessor(whileLoopStmt);
@@ -784,29 +784,29 @@ CFGCreatedForSimpleWhileLoop) {
 	testFunc->setBody(varDefStmtA);
 
 	// Creating a reference CFG.
-	ShPtr<CFG> refCFG(ShPtr<CFG>(new CFG(testFunc)));
+	CFG* refCFG(CFG*(new CFG(testFunc)));
 
-	refCFG->addEntryNode(ShPtr<CFG::Node>(new CFG::Node("entry")));
+	refCFG->addEntryNode(CFG::Node*(new CFG::Node("entry")));
 
-	ShPtr<CFG::Node> nodeBeforeWhile(new CFG::Node());
+	CFG::Node* nodeBeforeWhile(new CFG::Node());
 	nodeBeforeWhile->addStmt(varDefStmtA);
 	nodeBeforeWhile->addStmt(varDefStmtB);
 	nodeBeforeWhile->addStmt(varDefStmtC);
 	refCFG->addNode(nodeBeforeWhile);
 
-	ShPtr<CFG::Node> nodeWhile(new CFG::Node());
+	CFG::Node* nodeWhile(new CFG::Node());
 	nodeWhile->addStmt(whileLoopStmt);
 	refCFG->addNode(nodeWhile);
 
-	ShPtr<CFG::Node> nodeWhileBody(new CFG::Node());
+	CFG::Node* nodeWhileBody(new CFG::Node());
 	nodeWhileBody->addStmt(assignStmtA);
 	refCFG->addNode(nodeWhileBody);
 
-	ShPtr<CFG::Node> nodeAfterWhile(new CFG::Node());
+	CFG::Node* nodeAfterWhile(new CFG::Node());
 	nodeAfterWhile->addStmt(assignStmtC);
 	refCFG->addNode(nodeAfterWhile);
 
-	refCFG->addExitNode(ShPtr<CFG::Node>(new CFG::Node("exit")));
+	refCFG->addExitNode(CFG::Node*(new CFG::Node("exit")));
 
 	refCFG->addEdge(refCFG->getEntryNode(), nodeBeforeWhile);
 	refCFG->addEdge(nodeBeforeWhile, nodeWhile);
@@ -816,8 +816,8 @@ CFGCreatedForSimpleWhileLoop) {
 	refCFG->addEdge(nodeAfterWhile, refCFG->getExitNode());
 
 	// Check difference.
-	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
-	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
+	retdec::llvmir2hll::CFGBuilder* cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
+	CFG* compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
 	// If want to emit CFG, set to 1
@@ -845,24 +845,24 @@ CFGCreatedForWhileInWhileLoop) {
 	//
 
 	// Creating body of function to create CFG.
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
 	testFunc->addLocalVar(varB);
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(16)));
+	Variable* varC(Variable::create("c", IntType::create(16)));
 	testFunc->addLocalVar(varC);
-	ShPtr<VarDefStmt> varDefStmtA(VarDefStmt::create(varA, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtB(VarDefStmt::create(varB, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtC(VarDefStmt::create(varC, ShPtr<Expression>()));
-	ShPtr<AssignStmt> assignStmtA(AssignStmt::create(varA, varB));
-	ShPtr<AssignStmt> assignStmtB(AssignStmt::create(varB, ConstInt::create(2, 64)));
-	ShPtr<AssignStmt> assignStmtC(AssignStmt::create(varC, ConstInt::create(1, 64)));
-	ShPtr<GtOpExpr> gtOpExprA(GtOpExpr::create(varA, varB));
-	ShPtr<GtOpExpr> gtOpExprC(GtOpExpr::create(varC, ConstInt::create(2, 64)));
-	ShPtr<LtEqOpExpr> ltEqOpExprA(LtEqOpExpr::create(varA, varB));
-	ShPtr<LtEqOpExpr> ltEqOpExprC(LtEqOpExpr::create(varC, ConstInt::create(2, 64)));
-	ShPtr<WhileLoopStmt> whileLoopStmtC(WhileLoopStmt::create(gtOpExprC, assignStmtA));
-	ShPtr<WhileLoopStmt> whileLoopStmtA(WhileLoopStmt::create(gtOpExprA, assignStmtB));
+	VarDefStmt* varDefStmtA(VarDefStmt::create(varA, Expression*()));
+	VarDefStmt* varDefStmtB(VarDefStmt::create(varB, Expression*()));
+	VarDefStmt* varDefStmtC(VarDefStmt::create(varC, Expression*()));
+	AssignStmt* assignStmtA(AssignStmt::create(varA, varB));
+	AssignStmt* assignStmtB(AssignStmt::create(varB, ConstInt::create(2, 64)));
+	AssignStmt* assignStmtC(AssignStmt::create(varC, ConstInt::create(1, 64)));
+	GtOpExpr* gtOpExprA(GtOpExpr::create(varA, varB));
+	GtOpExpr* gtOpExprC(GtOpExpr::create(varC, ConstInt::create(2, 64)));
+	LtEqOpExpr* ltEqOpExprA(LtEqOpExpr::create(varA, varB));
+	LtEqOpExpr* ltEqOpExprC(LtEqOpExpr::create(varC, ConstInt::create(2, 64)));
+	WhileLoopStmt* whileLoopStmtC(WhileLoopStmt::create(gtOpExprC, assignStmtA));
+	WhileLoopStmt* whileLoopStmtA(WhileLoopStmt::create(gtOpExprA, assignStmtB));
 	varDefStmtA->setSuccessor(varDefStmtB);
 	varDefStmtB->setSuccessor(varDefStmtC);
 	varDefStmtC->setSuccessor(whileLoopStmtA);
@@ -871,37 +871,37 @@ CFGCreatedForWhileInWhileLoop) {
 	testFunc->setBody(varDefStmtA);
 
 	// Creating a reference CFG.
-	ShPtr<CFG> refCFG(ShPtr<CFG>(new CFG(testFunc)));
+	CFG* refCFG(CFG*(new CFG(testFunc)));
 
-	refCFG->addEntryNode(ShPtr<CFG::Node>(new CFG::Node("entry")));
+	refCFG->addEntryNode(CFG::Node*(new CFG::Node("entry")));
 
-	ShPtr<CFG::Node> nodeBeforeWhile(new CFG::Node());
+	CFG::Node* nodeBeforeWhile(new CFG::Node());
 	nodeBeforeWhile->addStmt(varDefStmtA);
 	nodeBeforeWhile->addStmt(varDefStmtB);
 	nodeBeforeWhile->addStmt(varDefStmtC);
 	refCFG->addNode(nodeBeforeWhile);
 
-	ShPtr<CFG::Node> nodeWhileA(new CFG::Node());
+	CFG::Node* nodeWhileA(new CFG::Node());
 	nodeWhileA->addStmt(whileLoopStmtA);
 	refCFG->addNode(nodeWhileA);
 
-	ShPtr<CFG::Node> nodeB(new CFG::Node());
+	CFG::Node* nodeB(new CFG::Node());
 	nodeB->addStmt(assignStmtB);
 	refCFG->addNode(nodeB);
 
-	ShPtr<CFG::Node> nodeWhileC(new CFG::Node());
+	CFG::Node* nodeWhileC(new CFG::Node());
 	nodeWhileC->addStmt(whileLoopStmtC);
 	refCFG->addNode(nodeWhileC);
 
-	ShPtr<CFG::Node> nodeWhileBodyC(new CFG::Node());
+	CFG::Node* nodeWhileBodyC(new CFG::Node());
 	nodeWhileBodyC->addStmt(assignStmtA);
 	refCFG->addNode(nodeWhileBodyC);
 
-	ShPtr<CFG::Node> nodeAfterWhile(new CFG::Node());
+	CFG::Node* nodeAfterWhile(new CFG::Node());
 	nodeAfterWhile->addStmt(assignStmtC);
 	refCFG->addNode(nodeAfterWhile);
 
-	refCFG->addExitNode(ShPtr<CFG::Node>(new CFG::Node("exit")));
+	refCFG->addExitNode(CFG::Node*(new CFG::Node("exit")));
 
 	refCFG->addEdge(refCFG->getEntryNode(), nodeBeforeWhile);
 	refCFG->addEdge(nodeBeforeWhile, nodeWhileA);
@@ -914,8 +914,8 @@ CFGCreatedForWhileInWhileLoop) {
 	refCFG->addEdge(nodeAfterWhile, refCFG->getExitNode());
 
 	// Check difference.
-	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
-	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
+	retdec::llvmir2hll::CFGBuilder* cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
+	CFG* compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
 	// If want to emit CFG, set to 1
@@ -946,25 +946,25 @@ CFGCreatedForWhileLoopWithIfStmtAndBreakInside) {
 	//
 
 	// Creating body of function to create CFG.
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
 	testFunc->addLocalVar(varB);
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(16)));
+	Variable* varC(Variable::create("c", IntType::create(16)));
 	testFunc->addLocalVar(varC);
-	ShPtr<VarDefStmt> varDefStmtA(VarDefStmt::create(varA, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtB(VarDefStmt::create(varB, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtC(VarDefStmt::create(varC, ShPtr<Expression>()));
-	ShPtr<AssignStmt> assignStmtA(AssignStmt::create(varA, varB));
-	ShPtr<AssignStmt> assignStmtB(AssignStmt::create(varB, ConstInt::create(1, 64)));
-	ShPtr<AssignStmt> assignStmtC(AssignStmt::create(varC, ConstInt::create(1, 64)));
-	ShPtr<BreakStmt> breakStmt(BreakStmt::create());
-	ShPtr<GtOpExpr> gtOpExprA(GtOpExpr::create(varA, varB));
-	ShPtr<GtOpExpr> gtOpExprC(GtOpExpr::create(varC, ConstInt::create(2, 64)));
-	ShPtr<LtEqOpExpr> ltEqOpExprA(LtEqOpExpr::create(varA, varB));
-	ShPtr<LtEqOpExpr> ltEqOpExprC(LtEqOpExpr::create(varC, ConstInt::create(2, 64)));
-	ShPtr<IfStmt> ifStmt(IfStmt::create(gtOpExprC, breakStmt));
-	ShPtr<WhileLoopStmt> whileLoopStmt(WhileLoopStmt::create(gtOpExprA, ifStmt));
+	VarDefStmt* varDefStmtA(VarDefStmt::create(varA, Expression*()));
+	VarDefStmt* varDefStmtB(VarDefStmt::create(varB, Expression*()));
+	VarDefStmt* varDefStmtC(VarDefStmt::create(varC, Expression*()));
+	AssignStmt* assignStmtA(AssignStmt::create(varA, varB));
+	AssignStmt* assignStmtB(AssignStmt::create(varB, ConstInt::create(1, 64)));
+	AssignStmt* assignStmtC(AssignStmt::create(varC, ConstInt::create(1, 64)));
+	BreakStmt* breakStmt(BreakStmt::create());
+	GtOpExpr* gtOpExprA(GtOpExpr::create(varA, varB));
+	GtOpExpr* gtOpExprC(GtOpExpr::create(varC, ConstInt::create(2, 64)));
+	LtEqOpExpr* ltEqOpExprA(LtEqOpExpr::create(varA, varB));
+	LtEqOpExpr* ltEqOpExprC(LtEqOpExpr::create(varC, ConstInt::create(2, 64)));
+	IfStmt* ifStmt(IfStmt::create(gtOpExprC, breakStmt));
+	WhileLoopStmt* whileLoopStmt(WhileLoopStmt::create(gtOpExprA, ifStmt));
 	varDefStmtA->setSuccessor(varDefStmtB);
 	varDefStmtB->setSuccessor(varDefStmtC);
 	varDefStmtC->setSuccessor(whileLoopStmt);
@@ -974,37 +974,37 @@ CFGCreatedForWhileLoopWithIfStmtAndBreakInside) {
 	testFunc->setBody(varDefStmtA);
 
 	// Creating a reference CFG.
-	ShPtr<CFG> refCFG(ShPtr<CFG>(new CFG(testFunc)));
+	CFG* refCFG(CFG*(new CFG(testFunc)));
 
-	refCFG->addEntryNode(ShPtr<CFG::Node>(new CFG::Node("entry")));
+	refCFG->addEntryNode(CFG::Node*(new CFG::Node("entry")));
 
-	ShPtr<CFG::Node> nodeBeforeWhile(new CFG::Node());
+	CFG::Node* nodeBeforeWhile(new CFG::Node());
 	nodeBeforeWhile->addStmt(varDefStmtA);
 	nodeBeforeWhile->addStmt(varDefStmtB);
 	nodeBeforeWhile->addStmt(varDefStmtC);
 	refCFG->addNode(nodeBeforeWhile);
 
-	ShPtr<CFG::Node> nodeWhile(new CFG::Node());
+	CFG::Node* nodeWhile(new CFG::Node());
 	nodeWhile->addStmt(whileLoopStmt);
 	refCFG->addNode(nodeWhile);
 
-	ShPtr<CFG::Node> nodeWhileBodyIf(new CFG::Node());
+	CFG::Node* nodeWhileBodyIf(new CFG::Node());
 	nodeWhileBodyIf->addStmt(ifStmt);
 	refCFG->addNode(nodeWhileBodyIf);
 
-	ShPtr<CFG::Node> nodeIfBody(new CFG::Node());
+	CFG::Node* nodeIfBody(new CFG::Node());
 	nodeIfBody->addStmt(breakStmt);
 	refCFG->addNode(nodeIfBody);
 
-	ShPtr<CFG::Node> nodeWhileBodyAssignA(new CFG::Node());
+	CFG::Node* nodeWhileBodyAssignA(new CFG::Node());
 	nodeWhileBodyAssignA->addStmt(assignStmtA);
 	refCFG->addNode(nodeWhileBodyAssignA);
 
-	ShPtr<CFG::Node> nodeAfterWhile(new CFG::Node());
+	CFG::Node* nodeAfterWhile(new CFG::Node());
 	nodeAfterWhile->addStmt(assignStmtC);
 	refCFG->addNode(nodeAfterWhile);
 
-	refCFG->addExitNode(ShPtr<CFG::Node>(new CFG::Node("exit")));
+	refCFG->addExitNode(CFG::Node*(new CFG::Node("exit")));
 
 	refCFG->addEdge(refCFG->getEntryNode(), nodeBeforeWhile);
 	refCFG->addEdge(nodeBeforeWhile, nodeWhile);
@@ -1017,8 +1017,8 @@ CFGCreatedForWhileLoopWithIfStmtAndBreakInside) {
 	refCFG->addEdge(nodeAfterWhile, refCFG->getExitNode());
 
 	// Check difference.
-	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
-	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
+	retdec::llvmir2hll::CFGBuilder* cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
+	CFG* compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
 	// If want to emit CFG, set to 1
@@ -1047,23 +1047,23 @@ CFGCreatedForWhileLoopWithNestedWhileTrueLoop) {
 	//
 
 	// Creating body of function to create CFG.
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
 	testFunc->addLocalVar(varB);
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(16)));
+	Variable* varC(Variable::create("c", IntType::create(16)));
 	testFunc->addLocalVar(varC);
-	ShPtr<VarDefStmt> varDefStmtA(VarDefStmt::create(varA, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtB(VarDefStmt::create(varB, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtC(VarDefStmt::create(varC, ShPtr<Expression>()));
-	ShPtr<AssignStmt> assignStmtA(AssignStmt::create(varA, varB));
-	ShPtr<AssignStmt> assignStmtB(AssignStmt::create(varB, ConstInt::create(1, 64)));
-	ShPtr<AssignStmt> assignStmtC(AssignStmt::create(varC, ConstInt::create(1, 64)));
-	ShPtr<GtOpExpr> gtOpExpr(GtOpExpr::create(varA, varB));
-	ShPtr<LtEqOpExpr> ltEqOpExpr(LtEqOpExpr::create(varA, varB));
-	ShPtr<WhileLoopStmt> whileLoopStmtTrue(WhileLoopStmt::create(
+	VarDefStmt* varDefStmtA(VarDefStmt::create(varA, Expression*()));
+	VarDefStmt* varDefStmtB(VarDefStmt::create(varB, Expression*()));
+	VarDefStmt* varDefStmtC(VarDefStmt::create(varC, Expression*()));
+	AssignStmt* assignStmtA(AssignStmt::create(varA, varB));
+	AssignStmt* assignStmtB(AssignStmt::create(varB, ConstInt::create(1, 64)));
+	AssignStmt* assignStmtC(AssignStmt::create(varC, ConstInt::create(1, 64)));
+	GtOpExpr* gtOpExpr(GtOpExpr::create(varA, varB));
+	LtEqOpExpr* ltEqOpExpr(LtEqOpExpr::create(varA, varB));
+	WhileLoopStmt* whileLoopStmtTrue(WhileLoopStmt::create(
 		ConstBool::create(true), assignStmtA));
-	ShPtr<WhileLoopStmt> whileLoopStmtA(WhileLoopStmt::create(
+	WhileLoopStmt* whileLoopStmtA(WhileLoopStmt::create(
 		gtOpExpr, whileLoopStmtTrue));
 	varDefStmtA->setSuccessor(varDefStmtB);
 	varDefStmtB->setSuccessor(varDefStmtC);
@@ -1073,33 +1073,33 @@ CFGCreatedForWhileLoopWithNestedWhileTrueLoop) {
 	testFunc->setBody(varDefStmtA);
 
 	// Creating a reference CFG.
-	ShPtr<CFG> refCFG(ShPtr<CFG>(new CFG(testFunc)));
+	CFG* refCFG(CFG*(new CFG(testFunc)));
 
-	refCFG->addEntryNode(ShPtr<CFG::Node>(new CFG::Node("entry")));
+	refCFG->addEntryNode(CFG::Node*(new CFG::Node("entry")));
 
-	ShPtr<CFG::Node> nodeBeforeWhile(new CFG::Node());
+	CFG::Node* nodeBeforeWhile(new CFG::Node());
 	nodeBeforeWhile->addStmt(varDefStmtA);
 	nodeBeforeWhile->addStmt(varDefStmtB);
 	nodeBeforeWhile->addStmt(varDefStmtC);
 	refCFG->addNode(nodeBeforeWhile);
 
-	ShPtr<CFG::Node> nodeWhileA(new CFG::Node());
+	CFG::Node* nodeWhileA(new CFG::Node());
 	nodeWhileA->addStmt(whileLoopStmtA);
 	refCFG->addNode(nodeWhileA);
 
-	ShPtr<CFG::Node> nodeWhileTrue(new CFG::Node());
+	CFG::Node* nodeWhileTrue(new CFG::Node());
 	nodeWhileTrue->addStmt(whileLoopStmtTrue);
 	refCFG->addNode(nodeWhileTrue);
 
-	ShPtr<CFG::Node> nodeWhileTrueBody(new CFG::Node());
+	CFG::Node* nodeWhileTrueBody(new CFG::Node());
 	nodeWhileTrueBody->addStmt(assignStmtA);
 	refCFG->addNode(nodeWhileTrueBody);
 
-	ShPtr<CFG::Node> nodeAfterWhileA(new CFG::Node());
+	CFG::Node* nodeAfterWhileA(new CFG::Node());
 	nodeAfterWhileA->addStmt(assignStmtC);
 	refCFG->addNode(nodeAfterWhileA);
 
-	refCFG->addExitNode(ShPtr<CFG::Node>(new CFG::Node("exit")));
+	refCFG->addExitNode(CFG::Node*(new CFG::Node("exit")));
 
 	refCFG->addEdge(refCFG->getEntryNode(), nodeBeforeWhile);
 	refCFG->addEdge(nodeBeforeWhile, nodeWhileA);
@@ -1110,8 +1110,8 @@ CFGCreatedForWhileLoopWithNestedWhileTrueLoop) {
 	refCFG->addEdge(nodeAfterWhileA, refCFG->getExitNode());
 
 	// Check difference.
-	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
-	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
+	retdec::llvmir2hll::CFGBuilder* cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
+	CFG* compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
 	// If want to emit CFG, set to 1
@@ -1136,18 +1136,18 @@ CFGCreatedForSimpleWhileTrueLoop) {
 	//
 
 	// Creating body of function to create CFG.
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
 	testFunc->addLocalVar(varB);
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(16)));
+	Variable* varC(Variable::create("c", IntType::create(16)));
 	testFunc->addLocalVar(varC);
-	ShPtr<VarDefStmt> varDefStmtA(VarDefStmt::create(varA, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtB(VarDefStmt::create(varB, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtC(VarDefStmt::create(varC, ShPtr<Expression>()));
-	ShPtr<AssignStmt> assignStmtA(AssignStmt::create(varA, varB));
-	ShPtr<AssignStmt> assignStmtC(AssignStmt::create(varC, ConstInt::create(1, 64)));
-	ShPtr<WhileLoopStmt> whileLoopStmtTrue(WhileLoopStmt::create(
+	VarDefStmt* varDefStmtA(VarDefStmt::create(varA, Expression*()));
+	VarDefStmt* varDefStmtB(VarDefStmt::create(varB, Expression*()));
+	VarDefStmt* varDefStmtC(VarDefStmt::create(varC, Expression*()));
+	AssignStmt* assignStmtA(AssignStmt::create(varA, varB));
+	AssignStmt* assignStmtC(AssignStmt::create(varC, ConstInt::create(1, 64)));
+	WhileLoopStmt* whileLoopStmtTrue(WhileLoopStmt::create(
 		ConstBool::create(true), assignStmtA));
 	varDefStmtA->setSuccessor(varDefStmtB);
 	varDefStmtB->setSuccessor(varDefStmtC);
@@ -1156,25 +1156,25 @@ CFGCreatedForSimpleWhileTrueLoop) {
 	testFunc->setBody(varDefStmtA);
 
 	// Creating a reference CFG.
-	ShPtr<CFG> refCFG(ShPtr<CFG>(new CFG(testFunc)));
+	CFG* refCFG(CFG*(new CFG(testFunc)));
 
-	refCFG->addEntryNode(ShPtr<CFG::Node>(new CFG::Node("entry")));
+	refCFG->addEntryNode(CFG::Node*(new CFG::Node("entry")));
 
-	ShPtr<CFG::Node> nodeBeforeWhile(new CFG::Node());
+	CFG::Node* nodeBeforeWhile(new CFG::Node());
 	nodeBeforeWhile->addStmt(varDefStmtA);
 	nodeBeforeWhile->addStmt(varDefStmtB);
 	nodeBeforeWhile->addStmt(varDefStmtC);
 	refCFG->addNode(nodeBeforeWhile);
 
-	ShPtr<CFG::Node> nodeWhileTrue(new CFG::Node());
+	CFG::Node* nodeWhileTrue(new CFG::Node());
 	nodeWhileTrue->addStmt(whileLoopStmtTrue);
 	refCFG->addNode(nodeWhileTrue);
 
-	ShPtr<CFG::Node> nodeWhileBody(new CFG::Node());
+	CFG::Node* nodeWhileBody(new CFG::Node());
 	nodeWhileBody->addStmt(assignStmtA);
 	refCFG->addNode(nodeWhileBody);
 
-	refCFG->addExitNode(ShPtr<CFG::Node>(new CFG::Node("exit")));
+	refCFG->addExitNode(CFG::Node*(new CFG::Node("exit")));
 
 	refCFG->addEdge(refCFG->getEntryNode(), nodeBeforeWhile);
 	refCFG->addEdge(nodeBeforeWhile, nodeWhileTrue);
@@ -1182,8 +1182,8 @@ CFGCreatedForSimpleWhileTrueLoop) {
 	refCFG->addEdge(nodeWhileBody, nodeWhileTrue);
 
 	// Check difference.
-	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
-	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
+	retdec::llvmir2hll::CFGBuilder* cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
+	CFG* compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
 	// If want to emit CFG, set to 1
@@ -1212,19 +1212,19 @@ CFGCreatedForSimpleForLoop) {
 	//
 
 	// Creating body of function to create CFG.
-	ShPtr<ConstInt> oneConstInt(ConstInt::create(1, 64));
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	ConstInt* oneConstInt(ConstInt::create(1, 64));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
 	testFunc->addLocalVar(varB);
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(16)));
+	Variable* varC(Variable::create("c", IntType::create(16)));
 	testFunc->addLocalVar(varC);
-	ShPtr<VarDefStmt> varDefStmtA(VarDefStmt::create(varA, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtB(VarDefStmt::create(varB, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtC(VarDefStmt::create(varC, ShPtr<Expression>()));
-	ShPtr<AssignStmt> assignStmtA(AssignStmt::create(varA, varB));
-	ShPtr<AssignStmt> assignStmtC(AssignStmt::create(varC, ConstInt::create(1, 64)));
-	ShPtr<ForLoopStmt> forLoopStmt(ForLoopStmt::create(varA, oneConstInt,
+	VarDefStmt* varDefStmtA(VarDefStmt::create(varA, Expression*()));
+	VarDefStmt* varDefStmtB(VarDefStmt::create(varB, Expression*()));
+	VarDefStmt* varDefStmtC(VarDefStmt::create(varC, Expression*()));
+	AssignStmt* assignStmtA(AssignStmt::create(varA, varB));
+	AssignStmt* assignStmtC(AssignStmt::create(varC, ConstInt::create(1, 64)));
+	ForLoopStmt* forLoopStmt(ForLoopStmt::create(varA, oneConstInt,
 		oneConstInt, oneConstInt, assignStmtA));
 	varDefStmtA->setSuccessor(varDefStmtB);
 	varDefStmtB->setSuccessor(varDefStmtC);
@@ -1233,29 +1233,29 @@ CFGCreatedForSimpleForLoop) {
 	testFunc->setBody(varDefStmtA);
 
 	// Creating a reference CFG.
-	ShPtr<CFG> refCFG(ShPtr<CFG>(new CFG(testFunc)));
+	CFG* refCFG(CFG*(new CFG(testFunc)));
 
-	refCFG->addEntryNode(ShPtr<CFG::Node>(new CFG::Node("entry")));
+	refCFG->addEntryNode(CFG::Node*(new CFG::Node("entry")));
 
-	ShPtr<CFG::Node> nodeBeforeFor(new CFG::Node());
+	CFG::Node* nodeBeforeFor(new CFG::Node());
 	nodeBeforeFor->addStmt(varDefStmtA);
 	nodeBeforeFor->addStmt(varDefStmtB);
 	nodeBeforeFor->addStmt(varDefStmtC);
 	refCFG->addNode(nodeBeforeFor);
 
-	ShPtr<CFG::Node> nodeFor(new CFG::Node());
+	CFG::Node* nodeFor(new CFG::Node());
 	nodeFor->addStmt(forLoopStmt);
 	refCFG->addNode(nodeFor);
 
-	ShPtr<CFG::Node> nodeForBody(new CFG::Node());
+	CFG::Node* nodeForBody(new CFG::Node());
 	nodeForBody->addStmt(assignStmtA);
 	refCFG->addNode(nodeForBody);
 
-	ShPtr<CFG::Node> nodeAfterFor(new CFG::Node());
+	CFG::Node* nodeAfterFor(new CFG::Node());
 	nodeAfterFor->addStmt(assignStmtC);
 	refCFG->addNode(nodeAfterFor);
 
-	refCFG->addExitNode(ShPtr<CFG::Node>(new CFG::Node("exit")));
+	refCFG->addExitNode(CFG::Node*(new CFG::Node("exit")));
 
 	refCFG->addEdge(refCFG->getEntryNode(), nodeBeforeFor);
 	refCFG->addEdge(nodeBeforeFor, nodeFor);
@@ -1265,8 +1265,8 @@ CFGCreatedForSimpleForLoop) {
 	refCFG->addEdge(nodeAfterFor, refCFG->getExitNode());
 
 	// Check difference.
-	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
-	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
+	retdec::llvmir2hll::CFGBuilder* cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
+	CFG* compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
 	// If want to emit CFG, set to 1
@@ -1294,23 +1294,23 @@ CFGCreatedForForInForLoop) {
 	//
 
 	// Creating body of function to create CFG.
-	ShPtr<ConstInt> oneConstInt(ConstInt::create(1, 64));
-	ShPtr<ConstInt> twoConstInt(ConstInt::create(2, 64));
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	ConstInt* oneConstInt(ConstInt::create(1, 64));
+	ConstInt* twoConstInt(ConstInt::create(2, 64));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
 	testFunc->addLocalVar(varB);
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(16)));
+	Variable* varC(Variable::create("c", IntType::create(16)));
 	testFunc->addLocalVar(varC);
-	ShPtr<VarDefStmt> varDefStmtA(VarDefStmt::create(varA, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtB(VarDefStmt::create(varB, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtC(VarDefStmt::create(varC, ShPtr<Expression>()));
-	ShPtr<AssignStmt> assignStmtA(AssignStmt::create(varA, varB));
-	ShPtr<AssignStmt> assignStmtB(AssignStmt::create(varB, ConstInt::create(2, 64)));
-	ShPtr<AssignStmt> assignStmtC(AssignStmt::create(varC, ConstInt::create(1, 64)));
-	ShPtr<ForLoopStmt> forLoopStmtFirst(ForLoopStmt::create(varA, oneConstInt,
+	VarDefStmt* varDefStmtA(VarDefStmt::create(varA, Expression*()));
+	VarDefStmt* varDefStmtB(VarDefStmt::create(varB, Expression*()));
+	VarDefStmt* varDefStmtC(VarDefStmt::create(varC, Expression*()));
+	AssignStmt* assignStmtA(AssignStmt::create(varA, varB));
+	AssignStmt* assignStmtB(AssignStmt::create(varB, ConstInt::create(2, 64)));
+	AssignStmt* assignStmtC(AssignStmt::create(varC, ConstInt::create(1, 64)));
+	ForLoopStmt* forLoopStmtFirst(ForLoopStmt::create(varA, oneConstInt,
 		oneConstInt, oneConstInt, assignStmtB));
-	ShPtr<ForLoopStmt> forLoopStmtSec(ForLoopStmt::create(varA, twoConstInt,
+	ForLoopStmt* forLoopStmtSec(ForLoopStmt::create(varA, twoConstInt,
 		twoConstInt, twoConstInt, assignStmtA));
 	varDefStmtA->setSuccessor(varDefStmtB);
 	varDefStmtB->setSuccessor(varDefStmtC);
@@ -1320,37 +1320,37 @@ CFGCreatedForForInForLoop) {
 	testFunc->setBody(varDefStmtA);
 
 	// Creating a reference CFG.
-	ShPtr<CFG> refCFG(ShPtr<CFG>(new CFG(testFunc)));
+	CFG* refCFG(CFG*(new CFG(testFunc)));
 
-	refCFG->addEntryNode(ShPtr<CFG::Node>(new CFG::Node("entry")));
+	refCFG->addEntryNode(CFG::Node*(new CFG::Node("entry")));
 
-	ShPtr<CFG::Node> nodeBeforeFor(new CFG::Node());
+	CFG::Node* nodeBeforeFor(new CFG::Node());
 	nodeBeforeFor->addStmt(varDefStmtA);
 	nodeBeforeFor->addStmt(varDefStmtB);
 	nodeBeforeFor->addStmt(varDefStmtC);
 	refCFG->addNode(nodeBeforeFor);
 
-	ShPtr<CFG::Node> nodeForFirst(new CFG::Node());
+	CFG::Node* nodeForFirst(new CFG::Node());
 	nodeForFirst->addStmt(forLoopStmtFirst);
 	refCFG->addNode(nodeForFirst);
 
-	ShPtr<CFG::Node> nodeB(new CFG::Node());
+	CFG::Node* nodeB(new CFG::Node());
 	nodeB->addStmt(assignStmtB);
 	refCFG->addNode(nodeB);
 
-	ShPtr<CFG::Node> nodeForSec(new CFG::Node());
+	CFG::Node* nodeForSec(new CFG::Node());
 	nodeForSec->addStmt(forLoopStmtSec);
 	refCFG->addNode(nodeForSec);
 
-	ShPtr<CFG::Node> nodeForBodySec(new CFG::Node());
+	CFG::Node* nodeForBodySec(new CFG::Node());
 	nodeForBodySec->addStmt(assignStmtA);
 	refCFG->addNode(nodeForBodySec);
 
-	ShPtr<CFG::Node> nodeAfterFor(new CFG::Node());
+	CFG::Node* nodeAfterFor(new CFG::Node());
 	nodeAfterFor->addStmt(assignStmtC);
 	refCFG->addNode(nodeAfterFor);
 
-	refCFG->addExitNode(ShPtr<CFG::Node>(new CFG::Node("exit")));
+	refCFG->addExitNode(CFG::Node*(new CFG::Node("exit")));
 
 	refCFG->addEdge(refCFG->getEntryNode(), nodeBeforeFor);
 	refCFG->addEdge(nodeBeforeFor, nodeForFirst);
@@ -1363,8 +1363,8 @@ CFGCreatedForForInForLoop) {
 	refCFG->addEdge(nodeAfterFor, refCFG->getExitNode());
 
 	// Check difference.
-	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
-	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
+	retdec::llvmir2hll::CFGBuilder* cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
+	CFG* compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
 	// If want to emit CFG, set to 1
@@ -1395,24 +1395,24 @@ CFGCreatedForForLoopWithIfStmtAndContinueInside) {
 	//
 
 	// Creating body of function to create CFG.
-	ShPtr<ConstInt> oneConstInt(ConstInt::create(1, 64));
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	ConstInt* oneConstInt(ConstInt::create(1, 64));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
 	testFunc->addLocalVar(varB);
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(16)));
+	Variable* varC(Variable::create("c", IntType::create(16)));
 	testFunc->addLocalVar(varC);
-	ShPtr<VarDefStmt> varDefStmtA(VarDefStmt::create(varA, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtB(VarDefStmt::create(varB, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtC(VarDefStmt::create(varC, ShPtr<Expression>()));
-	ShPtr<AssignStmt> assignStmtA(AssignStmt::create(varA, varB));
-	ShPtr<AssignStmt> assignStmtB(AssignStmt::create(varB, ConstInt::create(1, 64)));
-	ShPtr<AssignStmt> assignStmtC(AssignStmt::create(varC, ConstInt::create(1, 64)));
-	ShPtr<ContinueStmt> continueStmt(ContinueStmt::create());
-	ShPtr<GtOpExpr> gtOpExpr(GtOpExpr::create(varC, ConstInt::create(2, 64)));
-	ShPtr<LtEqOpExpr> ltEqOpExpr(LtEqOpExpr::create(varC, ConstInt::create(2, 64)));
-	ShPtr<IfStmt> ifStmt(IfStmt::create(gtOpExpr, continueStmt));
-	ShPtr<ForLoopStmt> forLoopStmt(ForLoopStmt::create(varA, oneConstInt,
+	VarDefStmt* varDefStmtA(VarDefStmt::create(varA, Expression*()));
+	VarDefStmt* varDefStmtB(VarDefStmt::create(varB, Expression*()));
+	VarDefStmt* varDefStmtC(VarDefStmt::create(varC, Expression*()));
+	AssignStmt* assignStmtA(AssignStmt::create(varA, varB));
+	AssignStmt* assignStmtB(AssignStmt::create(varB, ConstInt::create(1, 64)));
+	AssignStmt* assignStmtC(AssignStmt::create(varC, ConstInt::create(1, 64)));
+	ContinueStmt* continueStmt(ContinueStmt::create());
+	GtOpExpr* gtOpExpr(GtOpExpr::create(varC, ConstInt::create(2, 64)));
+	LtEqOpExpr* ltEqOpExpr(LtEqOpExpr::create(varC, ConstInt::create(2, 64)));
+	IfStmt* ifStmt(IfStmt::create(gtOpExpr, continueStmt));
+	ForLoopStmt* forLoopStmt(ForLoopStmt::create(varA, oneConstInt,
 		oneConstInt, oneConstInt, ifStmt));
 	varDefStmtA->setSuccessor(varDefStmtB);
 	varDefStmtB->setSuccessor(varDefStmtC);
@@ -1423,37 +1423,37 @@ CFGCreatedForForLoopWithIfStmtAndContinueInside) {
 	testFunc->setBody(varDefStmtA);
 
 	// Creating a reference CFG.
-	ShPtr<CFG> refCFG(ShPtr<CFG>(new CFG(testFunc)));
+	CFG* refCFG(CFG*(new CFG(testFunc)));
 
-	refCFG->addEntryNode(ShPtr<CFG::Node>(new CFG::Node("entry")));
+	refCFG->addEntryNode(CFG::Node*(new CFG::Node("entry")));
 
-	ShPtr<CFG::Node> nodeBeforeFor(new CFG::Node());
+	CFG::Node* nodeBeforeFor(new CFG::Node());
 	nodeBeforeFor->addStmt(varDefStmtA);
 	nodeBeforeFor->addStmt(varDefStmtB);
 	nodeBeforeFor->addStmt(varDefStmtC);
 	refCFG->addNode(nodeBeforeFor);
 
-	ShPtr<CFG::Node> nodeFor(new CFG::Node());
+	CFG::Node* nodeFor(new CFG::Node());
 	nodeFor->addStmt(forLoopStmt);
 	refCFG->addNode(nodeFor);
 
-	ShPtr<CFG::Node> nodeForBodyIf(new CFG::Node());
+	CFG::Node* nodeForBodyIf(new CFG::Node());
 	nodeForBodyIf->addStmt(ifStmt);
 	refCFG->addNode(nodeForBodyIf);
 
-	ShPtr<CFG::Node> nodeIfBody(new CFG::Node());
+	CFG::Node* nodeIfBody(new CFG::Node());
 	nodeIfBody->addStmt(continueStmt);
 	refCFG->addNode(nodeIfBody);
 
-	ShPtr<CFG::Node> nodeForBodyAssignA(new CFG::Node());
+	CFG::Node* nodeForBodyAssignA(new CFG::Node());
 	nodeForBodyAssignA->addStmt(assignStmtA);
 	refCFG->addNode(nodeForBodyAssignA);
 
-	ShPtr<CFG::Node> nodeAfterFor(new CFG::Node());
+	CFG::Node* nodeAfterFor(new CFG::Node());
 	nodeAfterFor->addStmt(assignStmtC);
 	refCFG->addNode(nodeAfterFor);
 
-	refCFG->addExitNode(ShPtr<CFG::Node>(new CFG::Node("exit")));
+	refCFG->addExitNode(CFG::Node*(new CFG::Node("exit")));
 
 	refCFG->addEdge(refCFG->getEntryNode(), nodeBeforeFor);
 	refCFG->addEdge(nodeBeforeFor, nodeFor);
@@ -1466,8 +1466,8 @@ CFGCreatedForForLoopWithIfStmtAndContinueInside) {
 	refCFG->addEdge(nodeAfterFor, refCFG->getExitNode());
 
 	// Check difference.
-	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
-	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
+	retdec::llvmir2hll::CFGBuilder* cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
+	CFG* compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
 	// If want to emit CFG, set to 1
@@ -1498,24 +1498,24 @@ CFGCreatedForForLoopWithIfStmtAndReturnInside) {
 	//
 
 	// Creating body of function to create CFG.
-	ShPtr<ConstInt> oneConstInt(ConstInt::create(1, 64));
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	ConstInt* oneConstInt(ConstInt::create(1, 64));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
 	testFunc->addLocalVar(varB);
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(16)));
+	Variable* varC(Variable::create("c", IntType::create(16)));
 	testFunc->addLocalVar(varC);
-	ShPtr<VarDefStmt> varDefStmtA(VarDefStmt::create(varA, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtB(VarDefStmt::create(varB, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtC(VarDefStmt::create(varC, ShPtr<Expression>()));
-	ShPtr<AssignStmt> assignStmtA(AssignStmt::create(varA, varB));
-	ShPtr<AssignStmt> assignStmtB(AssignStmt::create(varB, ConstInt::create(1, 64)));
-	ShPtr<AssignStmt> assignStmtC(AssignStmt::create(varC, ConstInt::create(1, 64)));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create());
-	ShPtr<GtOpExpr> gtOpExpr(GtOpExpr::create(varC, ConstInt::create(2, 64)));
-	ShPtr<LtEqOpExpr> ltEqOpExpr(LtEqOpExpr::create(varC, ConstInt::create(2, 64)));
-	ShPtr<IfStmt> ifStmt(IfStmt::create(gtOpExpr, returnStmt));
-	ShPtr<ForLoopStmt> forLoopStmt(ForLoopStmt::create(varA, oneConstInt,
+	VarDefStmt* varDefStmtA(VarDefStmt::create(varA, Expression*()));
+	VarDefStmt* varDefStmtB(VarDefStmt::create(varB, Expression*()));
+	VarDefStmt* varDefStmtC(VarDefStmt::create(varC, Expression*()));
+	AssignStmt* assignStmtA(AssignStmt::create(varA, varB));
+	AssignStmt* assignStmtB(AssignStmt::create(varB, ConstInt::create(1, 64)));
+	AssignStmt* assignStmtC(AssignStmt::create(varC, ConstInt::create(1, 64)));
+	ReturnStmt* returnStmt(ReturnStmt::create());
+	GtOpExpr* gtOpExpr(GtOpExpr::create(varC, ConstInt::create(2, 64)));
+	LtEqOpExpr* ltEqOpExpr(LtEqOpExpr::create(varC, ConstInt::create(2, 64)));
+	IfStmt* ifStmt(IfStmt::create(gtOpExpr, returnStmt));
+	ForLoopStmt* forLoopStmt(ForLoopStmt::create(varA, oneConstInt,
 		oneConstInt, oneConstInt, ifStmt));
 	varDefStmtA->setSuccessor(varDefStmtB);
 	varDefStmtB->setSuccessor(varDefStmtC);
@@ -1526,37 +1526,37 @@ CFGCreatedForForLoopWithIfStmtAndReturnInside) {
 	testFunc->setBody(varDefStmtA);
 
 	// Creating a reference CFG.
-	ShPtr<CFG> refCFG(ShPtr<CFG>(new CFG(testFunc)));
+	CFG* refCFG(CFG*(new CFG(testFunc)));
 
-	refCFG->addEntryNode(ShPtr<CFG::Node>(new CFG::Node("entry")));
+	refCFG->addEntryNode(CFG::Node*(new CFG::Node("entry")));
 
-	ShPtr<CFG::Node> nodeBeforeFor(new CFG::Node());
+	CFG::Node* nodeBeforeFor(new CFG::Node());
 	nodeBeforeFor->addStmt(varDefStmtA);
 	nodeBeforeFor->addStmt(varDefStmtB);
 	nodeBeforeFor->addStmt(varDefStmtC);
 	refCFG->addNode(nodeBeforeFor);
 
-	ShPtr<CFG::Node> nodeFor(new CFG::Node());
+	CFG::Node* nodeFor(new CFG::Node());
 	nodeFor->addStmt(forLoopStmt);
 	refCFG->addNode(nodeFor);
 
-	ShPtr<CFG::Node> nodeForBodyIf(new CFG::Node());
+	CFG::Node* nodeForBodyIf(new CFG::Node());
 	nodeForBodyIf->addStmt(ifStmt);
 	refCFG->addNode(nodeForBodyIf);
 
-	ShPtr<CFG::Node> nodeIfBody(new CFG::Node());
+	CFG::Node* nodeIfBody(new CFG::Node());
 	nodeIfBody->addStmt(returnStmt);
 	refCFG->addNode(nodeIfBody);
 
-	ShPtr<CFG::Node> nodeForBodyAssignA(new CFG::Node());
+	CFG::Node* nodeForBodyAssignA(new CFG::Node());
 	nodeForBodyAssignA->addStmt(assignStmtA);
 	refCFG->addNode(nodeForBodyAssignA);
 
-	ShPtr<CFG::Node> nodeAfterFor(new CFG::Node());
+	CFG::Node* nodeAfterFor(new CFG::Node());
 	nodeAfterFor->addStmt(assignStmtC);
 	refCFG->addNode(nodeAfterFor);
 
-	refCFG->addExitNode(ShPtr<CFG::Node>(new CFG::Node("exit")));
+	refCFG->addExitNode(CFG::Node*(new CFG::Node("exit")));
 
 	refCFG->addEdge(refCFG->getEntryNode(), nodeBeforeFor);
 	refCFG->addEdge(nodeBeforeFor, nodeFor);
@@ -1569,8 +1569,8 @@ CFGCreatedForForLoopWithIfStmtAndReturnInside) {
 	refCFG->addEdge(nodeAfterFor, refCFG->getExitNode());
 
 	// Check difference.
-	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
-	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
+	retdec::llvmir2hll::CFGBuilder* cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
+	CFG* compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
 	// If want to emit CFG, set to 1
@@ -1607,27 +1607,27 @@ CFGCreatedForSimpleSwitchStatementWithDefaultClause) {
 	//
 
 	// Creating body of function to create CFG.
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
 	testFunc->addLocalVar(varB);
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(16)));
+	Variable* varC(Variable::create("c", IntType::create(16)));
 	testFunc->addLocalVar(varC);
-	ShPtr<VarDefStmt> varDefStmtA(VarDefStmt::create(varA, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtB(VarDefStmt::create(varB, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtC(VarDefStmt::create(varC, ShPtr<Expression>()));
-	ShPtr<AssignStmt> assignStmtA(AssignStmt::create(varA, varB));
-	ShPtr<AssignStmt> assignStmtB(AssignStmt::create(varB, ConstInt::create(1, 64)));
-	ShPtr<AssignStmt> assignStmtC(AssignStmt::create(varC, ConstInt::create(1, 64)));
-	ShPtr<EqOpExpr> eqOpExprA(EqOpExpr::create(varA, varA));
-	ShPtr<EqOpExpr> eqOpExprB(EqOpExpr::create(varA, varB));
-	ShPtr<NeqOpExpr> neqOpExprA(NeqOpExpr::create(varA, varA));
-	ShPtr<NeqOpExpr> neqOpExprB(NeqOpExpr::create(varA, varB));
-	ShPtr<AndOpExpr> andOpExpr(AndOpExpr::create(neqOpExprA, neqOpExprB));
-	ShPtr<BreakStmt> breakStmtA(BreakStmt::create());
-	ShPtr<BreakStmt> breakStmtB(BreakStmt::create());
-	ShPtr<BreakStmt> breakStmtDef(BreakStmt::create());
-	ShPtr<SwitchStmt> switchStmt(SwitchStmt::create(varA));
+	VarDefStmt* varDefStmtA(VarDefStmt::create(varA, Expression*()));
+	VarDefStmt* varDefStmtB(VarDefStmt::create(varB, Expression*()));
+	VarDefStmt* varDefStmtC(VarDefStmt::create(varC, Expression*()));
+	AssignStmt* assignStmtA(AssignStmt::create(varA, varB));
+	AssignStmt* assignStmtB(AssignStmt::create(varB, ConstInt::create(1, 64)));
+	AssignStmt* assignStmtC(AssignStmt::create(varC, ConstInt::create(1, 64)));
+	EqOpExpr* eqOpExprA(EqOpExpr::create(varA, varA));
+	EqOpExpr* eqOpExprB(EqOpExpr::create(varA, varB));
+	NeqOpExpr* neqOpExprA(NeqOpExpr::create(varA, varA));
+	NeqOpExpr* neqOpExprB(NeqOpExpr::create(varA, varB));
+	AndOpExpr* andOpExpr(AndOpExpr::create(neqOpExprA, neqOpExprB));
+	BreakStmt* breakStmtA(BreakStmt::create());
+	BreakStmt* breakStmtB(BreakStmt::create());
+	BreakStmt* breakStmtDef(BreakStmt::create());
+	SwitchStmt* switchStmt(SwitchStmt::create(varA));
 	switchStmt->addClause(varA, assignStmtA);
 	switchStmt->addClause(varB, assignStmtB);
 	switchStmt->addDefaultClause(breakStmtDef);
@@ -1640,39 +1640,39 @@ CFGCreatedForSimpleSwitchStatementWithDefaultClause) {
 	testFunc->setBody(varDefStmtA);
 
 	// Creating a reference CFG.
-	ShPtr<CFG> refCFG(ShPtr<CFG>(new CFG(testFunc)));
+	CFG* refCFG(CFG*(new CFG(testFunc)));
 
-	refCFG->addEntryNode(ShPtr<CFG::Node>(new CFG::Node("entry")));
+	refCFG->addEntryNode(CFG::Node*(new CFG::Node("entry")));
 
-	ShPtr<CFG::Node> nodeBeforeSwitch(new CFG::Node());
+	CFG::Node* nodeBeforeSwitch(new CFG::Node());
 	nodeBeforeSwitch->addStmt(varDefStmtA);
 	nodeBeforeSwitch->addStmt(varDefStmtB);
 	nodeBeforeSwitch->addStmt(varDefStmtC);
 	refCFG->addNode(nodeBeforeSwitch);
 
-	ShPtr<CFG::Node> nodeSwitch(new CFG::Node());
+	CFG::Node* nodeSwitch(new CFG::Node());
 	nodeSwitch->addStmt(switchStmt);
 	refCFG->addNode(nodeSwitch);
 
-	ShPtr<CFG::Node> nodeClauseA(new CFG::Node());
+	CFG::Node* nodeClauseA(new CFG::Node());
 	nodeClauseA->addStmt(assignStmtA);
 	nodeClauseA->addStmt(breakStmtA);
 	refCFG->addNode(nodeClauseA);
 
-	ShPtr<CFG::Node> nodeClauseB(new CFG::Node());
+	CFG::Node* nodeClauseB(new CFG::Node());
 	nodeClauseB->addStmt(assignStmtB);
 	nodeClauseB->addStmt(breakStmtB);
 	refCFG->addNode(nodeClauseB);
 
-	ShPtr<CFG::Node> nodeClauseDef(new CFG::Node());
+	CFG::Node* nodeClauseDef(new CFG::Node());
 	nodeClauseDef->addStmt(breakStmtDef);
 	refCFG->addNode(nodeClauseDef);
 
-	ShPtr<CFG::Node> nodeAfterSwitch(new CFG::Node());
+	CFG::Node* nodeAfterSwitch(new CFG::Node());
 	nodeAfterSwitch->addStmt(assignStmtC);
 	refCFG->addNode(nodeAfterSwitch);
 
-	refCFG->addExitNode(ShPtr<CFG::Node>(new CFG::Node("exit")));
+	refCFG->addExitNode(CFG::Node*(new CFG::Node("exit")));
 
 	refCFG->addEdge(refCFG->getEntryNode(), nodeBeforeSwitch);
 	refCFG->addEdge(nodeBeforeSwitch, nodeSwitch);
@@ -1685,8 +1685,8 @@ CFGCreatedForSimpleSwitchStatementWithDefaultClause) {
 	refCFG->addEdge(nodeAfterSwitch, refCFG->getExitNode());
 
 	// Check difference.
-	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
-	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
+	retdec::llvmir2hll::CFGBuilder* cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
+	CFG* compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
 	// If want to emit CFG, set to 1
@@ -1717,26 +1717,26 @@ CFGCreatedForSimpleSwitchStatementWithoutDefaultClause) {
 	//
 
 	// Creating body of function to create CFG.
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
 	testFunc->addLocalVar(varB);
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(16)));
+	Variable* varC(Variable::create("c", IntType::create(16)));
 	testFunc->addLocalVar(varC);
-	ShPtr<VarDefStmt> varDefStmtA(VarDefStmt::create(varA, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtB(VarDefStmt::create(varB, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtC(VarDefStmt::create(varC, ShPtr<Expression>()));
-	ShPtr<AssignStmt> assignStmtA(AssignStmt::create(varA, varB));
-	ShPtr<AssignStmt> assignStmtB(AssignStmt::create(varB, ConstInt::create(1, 64)));
-	ShPtr<AssignStmt> assignStmtC(AssignStmt::create(varC, ConstInt::create(1, 64)));
-	ShPtr<EqOpExpr> eqOpExprA(EqOpExpr::create(varA, varA));
-	ShPtr<EqOpExpr> eqOpExprB(EqOpExpr::create(varA, varB));
-	ShPtr<NeqOpExpr> neqOpExprA(NeqOpExpr::create(varA, varA));
-	ShPtr<NeqOpExpr> neqOpExprB(NeqOpExpr::create(varA, varB));
-	ShPtr<AndOpExpr> andOpExpr(AndOpExpr::create(neqOpExprA, neqOpExprB));
-	ShPtr<BreakStmt> breakStmtA(BreakStmt::create());
-	ShPtr<BreakStmt> breakStmtB(BreakStmt::create());
-	ShPtr<SwitchStmt> switchStmt(SwitchStmt::create(varA));
+	VarDefStmt* varDefStmtA(VarDefStmt::create(varA, Expression*()));
+	VarDefStmt* varDefStmtB(VarDefStmt::create(varB, Expression*()));
+	VarDefStmt* varDefStmtC(VarDefStmt::create(varC, Expression*()));
+	AssignStmt* assignStmtA(AssignStmt::create(varA, varB));
+	AssignStmt* assignStmtB(AssignStmt::create(varB, ConstInt::create(1, 64)));
+	AssignStmt* assignStmtC(AssignStmt::create(varC, ConstInt::create(1, 64)));
+	EqOpExpr* eqOpExprA(EqOpExpr::create(varA, varA));
+	EqOpExpr* eqOpExprB(EqOpExpr::create(varA, varB));
+	NeqOpExpr* neqOpExprA(NeqOpExpr::create(varA, varA));
+	NeqOpExpr* neqOpExprB(NeqOpExpr::create(varA, varB));
+	AndOpExpr* andOpExpr(AndOpExpr::create(neqOpExprA, neqOpExprB));
+	BreakStmt* breakStmtA(BreakStmt::create());
+	BreakStmt* breakStmtB(BreakStmt::create());
+	SwitchStmt* switchStmt(SwitchStmt::create(varA));
 	switchStmt->addClause(varA, assignStmtA);
 	switchStmt->addClause(varB, assignStmtB);
 	varDefStmtA->setSuccessor(varDefStmtB);
@@ -1748,35 +1748,35 @@ CFGCreatedForSimpleSwitchStatementWithoutDefaultClause) {
 	testFunc->setBody(varDefStmtA);
 
 	// Creating a reference CFG.
-	ShPtr<CFG> refCFG(ShPtr<CFG>(new CFG(testFunc)));
+	CFG* refCFG(CFG*(new CFG(testFunc)));
 
-	refCFG->addEntryNode(ShPtr<CFG::Node>(new CFG::Node("entry")));
+	refCFG->addEntryNode(CFG::Node*(new CFG::Node("entry")));
 
-	ShPtr<CFG::Node> nodeBeforeSwitch(new CFG::Node());
+	CFG::Node* nodeBeforeSwitch(new CFG::Node());
 	nodeBeforeSwitch->addStmt(varDefStmtA);
 	nodeBeforeSwitch->addStmt(varDefStmtB);
 	nodeBeforeSwitch->addStmt(varDefStmtC);
 	refCFG->addNode(nodeBeforeSwitch);
 
-	ShPtr<CFG::Node> nodeSwitch(new CFG::Node());
+	CFG::Node* nodeSwitch(new CFG::Node());
 	nodeSwitch->addStmt(switchStmt);
 	refCFG->addNode(nodeSwitch);
 
-	ShPtr<CFG::Node> nodeClauseA(new CFG::Node());
+	CFG::Node* nodeClauseA(new CFG::Node());
 	nodeClauseA->addStmt(assignStmtA);
 	nodeClauseA->addStmt(breakStmtA);
 	refCFG->addNode(nodeClauseA);
 
-	ShPtr<CFG::Node> nodeClauseB(new CFG::Node());
+	CFG::Node* nodeClauseB(new CFG::Node());
 	nodeClauseB->addStmt(assignStmtB);
 	nodeClauseB->addStmt(breakStmtB);
 	refCFG->addNode(nodeClauseB);
 
-	ShPtr<CFG::Node> nodeAfterSwitch(new CFG::Node());
+	CFG::Node* nodeAfterSwitch(new CFG::Node());
 	nodeAfterSwitch->addStmt(assignStmtC);
 	refCFG->addNode(nodeAfterSwitch);
 
-	refCFG->addExitNode(ShPtr<CFG::Node>(new CFG::Node("exit")));
+	refCFG->addExitNode(CFG::Node*(new CFG::Node("exit")));
 
 	refCFG->addEdge(refCFG->getEntryNode(), nodeBeforeSwitch);
 	refCFG->addEdge(nodeBeforeSwitch, nodeSwitch);
@@ -1788,8 +1788,8 @@ CFGCreatedForSimpleSwitchStatementWithoutDefaultClause) {
 	refCFG->addEdge(nodeAfterSwitch, refCFG->getExitNode());
 
 	// Check difference.
-	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
-	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
+	retdec::llvmir2hll::CFGBuilder* cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
+	CFG* compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
 	// If want to emit CFG, set to 1
@@ -1822,28 +1822,28 @@ CFGCreatedForSimpleSwitchStatementWithDefaultClauseWithoutBreakStmts) {
 	//
 
 	// Creating body of function to create CFG.
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
 	testFunc->addLocalVar(varB);
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(16)));
+	Variable* varC(Variable::create("c", IntType::create(16)));
 	testFunc->addLocalVar(varC);
-	ShPtr<Variable> varD(Variable::create("d", IntType::create(16)));
+	Variable* varD(Variable::create("d", IntType::create(16)));
 	testFunc->addLocalVar(varD);
-	ShPtr<VarDefStmt> varDefStmtA(VarDefStmt::create(varA, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtB(VarDefStmt::create(varB, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtC(VarDefStmt::create(varC, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtD(VarDefStmt::create(varD, ShPtr<Expression>()));
-	ShPtr<AssignStmt> assignStmtA(AssignStmt::create(varA, varB));
-	ShPtr<AssignStmt> assignStmtB(AssignStmt::create(varB, ConstInt::create(1, 64)));
-	ShPtr<AssignStmt> assignStmtC(AssignStmt::create(varC, ConstInt::create(1, 64)));
-	ShPtr<AssignStmt> assignStmtD(AssignStmt::create(varD, ConstInt::create(1, 64)));
-	ShPtr<EqOpExpr> eqOpExprA(EqOpExpr::create(varA, varA));
-	ShPtr<EqOpExpr> eqOpExprB(EqOpExpr::create(varA, varB));
-	ShPtr<NeqOpExpr> neqOpExprA(NeqOpExpr::create(varA, varA));
-	ShPtr<NeqOpExpr> neqOpExprB(NeqOpExpr::create(varA, varB));
-	ShPtr<AndOpExpr> andOpExpr(AndOpExpr::create(neqOpExprA, neqOpExprB));
-	ShPtr<SwitchStmt> switchStmt(SwitchStmt::create(varA));
+	VarDefStmt* varDefStmtA(VarDefStmt::create(varA, Expression*()));
+	VarDefStmt* varDefStmtB(VarDefStmt::create(varB, Expression*()));
+	VarDefStmt* varDefStmtC(VarDefStmt::create(varC, Expression*()));
+	VarDefStmt* varDefStmtD(VarDefStmt::create(varD, Expression*()));
+	AssignStmt* assignStmtA(AssignStmt::create(varA, varB));
+	AssignStmt* assignStmtB(AssignStmt::create(varB, ConstInt::create(1, 64)));
+	AssignStmt* assignStmtC(AssignStmt::create(varC, ConstInt::create(1, 64)));
+	AssignStmt* assignStmtD(AssignStmt::create(varD, ConstInt::create(1, 64)));
+	EqOpExpr* eqOpExprA(EqOpExpr::create(varA, varA));
+	EqOpExpr* eqOpExprB(EqOpExpr::create(varA, varB));
+	NeqOpExpr* neqOpExprA(NeqOpExpr::create(varA, varA));
+	NeqOpExpr* neqOpExprB(NeqOpExpr::create(varA, varB));
+	AndOpExpr* andOpExpr(AndOpExpr::create(neqOpExprA, neqOpExprB));
+	SwitchStmt* switchStmt(SwitchStmt::create(varA));
 	switchStmt->addClause(varA, assignStmtA);
 	switchStmt->addClause(varB, assignStmtB);
 	switchStmt->addDefaultClause(assignStmtD);
@@ -1855,38 +1855,38 @@ CFGCreatedForSimpleSwitchStatementWithDefaultClauseWithoutBreakStmts) {
 	testFunc->setBody(varDefStmtA);
 
 	// Creating a reference CFG.
-	ShPtr<CFG> refCFG(ShPtr<CFG>(new CFG(testFunc)));
+	CFG* refCFG(CFG*(new CFG(testFunc)));
 
-	refCFG->addEntryNode(ShPtr<CFG::Node>(new CFG::Node("entry")));
+	refCFG->addEntryNode(CFG::Node*(new CFG::Node("entry")));
 
-	ShPtr<CFG::Node> nodeBeforeSwitch(new CFG::Node());
+	CFG::Node* nodeBeforeSwitch(new CFG::Node());
 	nodeBeforeSwitch->addStmt(varDefStmtA);
 	nodeBeforeSwitch->addStmt(varDefStmtB);
 	nodeBeforeSwitch->addStmt(varDefStmtC);
 	nodeBeforeSwitch->addStmt(varDefStmtD);
 	refCFG->addNode(nodeBeforeSwitch);
 
-	ShPtr<CFG::Node> nodeSwitch(new CFG::Node());
+	CFG::Node* nodeSwitch(new CFG::Node());
 	nodeSwitch->addStmt(switchStmt);
 	refCFG->addNode(nodeSwitch);
 
-	ShPtr<CFG::Node> nodeClauseA(new CFG::Node());
+	CFG::Node* nodeClauseA(new CFG::Node());
 	nodeClauseA->addStmt(assignStmtA);
 	refCFG->addNode(nodeClauseA);
 
-	ShPtr<CFG::Node> nodeClauseB(new CFG::Node());
+	CFG::Node* nodeClauseB(new CFG::Node());
 	nodeClauseB->addStmt(assignStmtB);
 	refCFG->addNode(nodeClauseB);
 
-	ShPtr<CFG::Node> nodeClauseDef(new CFG::Node());
+	CFG::Node* nodeClauseDef(new CFG::Node());
 	nodeClauseDef->addStmt(assignStmtD);
 	refCFG->addNode(nodeClauseDef);
 
-	ShPtr<CFG::Node> nodeAfterSwitch(new CFG::Node());
+	CFG::Node* nodeAfterSwitch(new CFG::Node());
 	nodeAfterSwitch->addStmt(assignStmtC);
 	refCFG->addNode(nodeAfterSwitch);
 
-	refCFG->addExitNode(ShPtr<CFG::Node>(new CFG::Node("exit")));
+	refCFG->addExitNode(CFG::Node*(new CFG::Node("exit")));
 
 	refCFG->addEdge(refCFG->getEntryNode(), nodeBeforeSwitch);
 	refCFG->addEdge(nodeBeforeSwitch, nodeSwitch);
@@ -1899,8 +1899,8 @@ CFGCreatedForSimpleSwitchStatementWithDefaultClauseWithoutBreakStmts) {
 	refCFG->addEdge(nodeAfterSwitch, refCFG->getExitNode());
 
 	// Check difference.
-	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
-	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
+	retdec::llvmir2hll::CFGBuilder* cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
+	CFG* compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
 	// If want to emit CFG, set to 1
@@ -1936,29 +1936,29 @@ CFGCreatedForSwitchStatementWithNestedSwitchStmtWithDefaultClause) {
 	//
 
 	// Creating body of function to create CFG.
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
 	testFunc->addLocalVar(varB);
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(16)));
+	Variable* varC(Variable::create("c", IntType::create(16)));
 	testFunc->addLocalVar(varC);
-	ShPtr<Variable> varD(Variable::create("d", IntType::create(16)));
+	Variable* varD(Variable::create("d", IntType::create(16)));
 	testFunc->addLocalVar(varD);
-	ShPtr<VarDefStmt> varDefStmtA(VarDefStmt::create(varA, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtB(VarDefStmt::create(varB, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtC(VarDefStmt::create(varC, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtD(VarDefStmt::create(varD, ShPtr<Expression>()));
-	ShPtr<AssignStmt> assignStmtA(AssignStmt::create(varA, varB));
-	ShPtr<AssignStmt> assignStmtB(AssignStmt::create(varB, ConstInt::create(1, 64)));
-	ShPtr<AssignStmt> assignStmtC(AssignStmt::create(varC, ConstInt::create(1, 64)));
-	ShPtr<AssignStmt> assignStmtD(AssignStmt::create(varD, ConstInt::create(1, 64)));
-	ShPtr<BreakStmt> breakStmtB(BreakStmt::create());
-	ShPtr<BreakStmt> breakStmtDef(BreakStmt::create());
-	ShPtr<EqOpExpr> eqOpExprA(EqOpExpr::create(varA, varA));
-	ShPtr<EqOpExpr> eqOpExprB(EqOpExpr::create(varB, varB));
-	ShPtr<NeqOpExpr> neqOpExprB(NeqOpExpr::create(varB, varB));
-	ShPtr<SwitchStmt> switchStmtB(SwitchStmt::create(varB));
-	ShPtr<SwitchStmt> switchStmtA(SwitchStmt::create(varA));
+	VarDefStmt* varDefStmtA(VarDefStmt::create(varA, Expression*()));
+	VarDefStmt* varDefStmtB(VarDefStmt::create(varB, Expression*()));
+	VarDefStmt* varDefStmtC(VarDefStmt::create(varC, Expression*()));
+	VarDefStmt* varDefStmtD(VarDefStmt::create(varD, Expression*()));
+	AssignStmt* assignStmtA(AssignStmt::create(varA, varB));
+	AssignStmt* assignStmtB(AssignStmt::create(varB, ConstInt::create(1, 64)));
+	AssignStmt* assignStmtC(AssignStmt::create(varC, ConstInt::create(1, 64)));
+	AssignStmt* assignStmtD(AssignStmt::create(varD, ConstInt::create(1, 64)));
+	BreakStmt* breakStmtB(BreakStmt::create());
+	BreakStmt* breakStmtDef(BreakStmt::create());
+	EqOpExpr* eqOpExprA(EqOpExpr::create(varA, varA));
+	EqOpExpr* eqOpExprB(EqOpExpr::create(varB, varB));
+	NeqOpExpr* neqOpExprB(NeqOpExpr::create(varB, varB));
+	SwitchStmt* switchStmtB(SwitchStmt::create(varB));
+	SwitchStmt* switchStmtA(SwitchStmt::create(varA));
 	switchStmtA->addClause(varA, switchStmtB);
 	switchStmtB->addClause(varB, assignStmtB);
 	switchStmtB->addDefaultClause(assignStmtC);
@@ -1973,44 +1973,44 @@ CFGCreatedForSwitchStatementWithNestedSwitchStmtWithDefaultClause) {
 	testFunc->setBody(varDefStmtA);
 
 	// Creating a reference CFG.
-	ShPtr<CFG> refCFG(ShPtr<CFG>(new CFG(testFunc)));
+	CFG* refCFG(CFG*(new CFG(testFunc)));
 
-	refCFG->addEntryNode(ShPtr<CFG::Node>(new CFG::Node("entry")));
+	refCFG->addEntryNode(CFG::Node*(new CFG::Node("entry")));
 
-	ShPtr<CFG::Node> nodeBeforeSwitch(new CFG::Node());
+	CFG::Node* nodeBeforeSwitch(new CFG::Node());
 	nodeBeforeSwitch->addStmt(varDefStmtA);
 	nodeBeforeSwitch->addStmt(varDefStmtB);
 	nodeBeforeSwitch->addStmt(varDefStmtC);
 	nodeBeforeSwitch->addStmt(varDefStmtD);
 	refCFG->addNode(nodeBeforeSwitch);
 
-	ShPtr<CFG::Node> nodeSwitchA(new CFG::Node());
+	CFG::Node* nodeSwitchA(new CFG::Node());
 	nodeSwitchA->addStmt(switchStmtA);
 	refCFG->addNode(nodeSwitchA);
 
-	ShPtr<CFG::Node> nodeSwitchB(new CFG::Node());
+	CFG::Node* nodeSwitchB(new CFG::Node());
 	nodeSwitchB->addStmt(switchStmtB);
 	refCFG->addNode(nodeSwitchB);
 
-	ShPtr<CFG::Node> nodeClauseB(new CFG::Node());
+	CFG::Node* nodeClauseB(new CFG::Node());
 	nodeClauseB->addStmt(assignStmtB);
 	nodeClauseB->addStmt(breakStmtB);
 	refCFG->addNode(nodeClauseB);
 
-	ShPtr<CFG::Node> nodeClauseDef(new CFG::Node());
+	CFG::Node* nodeClauseDef(new CFG::Node());
 	nodeClauseDef->addStmt(assignStmtC);
 	nodeClauseDef->addStmt(breakStmtDef);
 	refCFG->addNode(nodeClauseDef);
 
-	ShPtr<CFG::Node> nodeAfterSwitchB(new CFG::Node());
+	CFG::Node* nodeAfterSwitchB(new CFG::Node());
 	nodeAfterSwitchB->addStmt(assignStmtD);
 	refCFG->addNode(nodeAfterSwitchB);
 
-	ShPtr<CFG::Node> nodeAfterSwitchA(new CFG::Node());
+	CFG::Node* nodeAfterSwitchA(new CFG::Node());
 	nodeAfterSwitchA->addStmt(assignStmtA);
 	refCFG->addNode(nodeAfterSwitchA);
 
-	refCFG->addExitNode(ShPtr<CFG::Node>(new CFG::Node("exit")));
+	refCFG->addExitNode(CFG::Node*(new CFG::Node("exit")));
 
 	refCFG->addEdge(refCFG->getEntryNode(), nodeBeforeSwitch);
 	refCFG->addEdge(nodeBeforeSwitch, nodeSwitchA);
@@ -2024,8 +2024,8 @@ CFGCreatedForSwitchStatementWithNestedSwitchStmtWithDefaultClause) {
 	refCFG->addEdge(nodeAfterSwitchA, refCFG->getExitNode());
 
 	// Check difference.
-	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
-	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
+	retdec::llvmir2hll::CFGBuilder* cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
+	CFG* compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
 	// If want to emit CFG, set to 1
@@ -2055,19 +2055,19 @@ CFGCreatedForSimpleGotoJumpBackward) {
 	//
 
 	// Creating body of function to create CFG.
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
 	testFunc->addLocalVar(varB);
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(16)));
+	Variable* varC(Variable::create("c", IntType::create(16)));
 	testFunc->addLocalVar(varC);
-	ShPtr<VarDefStmt> varDefStmtA(VarDefStmt::create(varA, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtB(VarDefStmt::create(varB, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtC(VarDefStmt::create(varC, ShPtr<Expression>()));
-	ShPtr<AssignStmt> assignStmtA(AssignStmt::create(varA, varB));
-	ShPtr<AssignStmt> assignStmtB(AssignStmt::create(varB, ConstInt::create(1, 64)));
-	ShPtr<AssignStmt> assignStmtC(AssignStmt::create(varC, ConstInt::create(1, 64)));
-	ShPtr<GotoStmt> gotoStmt(GotoStmt::create(assignStmtC));
+	VarDefStmt* varDefStmtA(VarDefStmt::create(varA, Expression*()));
+	VarDefStmt* varDefStmtB(VarDefStmt::create(varB, Expression*()));
+	VarDefStmt* varDefStmtC(VarDefStmt::create(varC, Expression*()));
+	AssignStmt* assignStmtA(AssignStmt::create(varA, varB));
+	AssignStmt* assignStmtB(AssignStmt::create(varB, ConstInt::create(1, 64)));
+	AssignStmt* assignStmtC(AssignStmt::create(varC, ConstInt::create(1, 64)));
+	GotoStmt* gotoStmt(GotoStmt::create(assignStmtC));
 	varDefStmtA->setSuccessor(varDefStmtB);
 	varDefStmtB->setSuccessor(varDefStmtC);
 	varDefStmtC->setSuccessor(assignStmtB);
@@ -2077,31 +2077,31 @@ CFGCreatedForSimpleGotoJumpBackward) {
 	testFunc->setBody(varDefStmtA);
 
 	// Creating a reference CFG.
-	ShPtr<CFG> refCFG(ShPtr<CFG>(new CFG(testFunc)));
+	CFG* refCFG(CFG*(new CFG(testFunc)));
 
-	refCFG->addEntryNode(ShPtr<CFG::Node>(new CFG::Node("entry")));
+	refCFG->addEntryNode(CFG::Node*(new CFG::Node("entry")));
 
-	ShPtr<CFG::Node> nodeBeforeGotoTarg(new CFG::Node());
+	CFG::Node* nodeBeforeGotoTarg(new CFG::Node());
 	nodeBeforeGotoTarg->addStmt(varDefStmtA);
 	nodeBeforeGotoTarg->addStmt(varDefStmtB);
 	nodeBeforeGotoTarg->addStmt(varDefStmtC);
 	nodeBeforeGotoTarg->addStmt(assignStmtB);
 	refCFG->addNode(nodeBeforeGotoTarg);
 
-	ShPtr<CFG::Node> targetGotoNode(new CFG::Node());
+	CFG::Node* targetGotoNode(new CFG::Node());
 	targetGotoNode->addStmt(assignStmtC);
 	targetGotoNode->addStmt(gotoStmt);
 	refCFG->addNode(targetGotoNode);
 
-	refCFG->addExitNode(ShPtr<CFG::Node>(new CFG::Node("exit")));
+	refCFG->addExitNode(CFG::Node*(new CFG::Node("exit")));
 
 	refCFG->addEdge(refCFG->getEntryNode(), nodeBeforeGotoTarg);
 	refCFG->addEdge(nodeBeforeGotoTarg, targetGotoNode);
 	refCFG->addEdge(targetGotoNode, targetGotoNode);
 
 	// Check difference.
-	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
-	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
+	retdec::llvmir2hll::CFGBuilder* cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
+	CFG* compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
 	// If want to emit CFG, set to 1
@@ -2127,19 +2127,19 @@ CFGCreatedForSimpleGotoJumpForward) {
 	//
 
 	// Creating body of function to create CFG.
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
 	testFunc->addLocalVar(varB);
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(16)));
+	Variable* varC(Variable::create("c", IntType::create(16)));
 	testFunc->addLocalVar(varC);
-	ShPtr<VarDefStmt> varDefStmtA(VarDefStmt::create(varA, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtB(VarDefStmt::create(varB, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtC(VarDefStmt::create(varC, ShPtr<Expression>()));
-	ShPtr<AssignStmt> assignStmtA(AssignStmt::create(varA, varB));
-	ShPtr<AssignStmt> assignStmtB(AssignStmt::create(varB, ConstInt::create(1, 64)));
-	ShPtr<AssignStmt> assignStmtC(AssignStmt::create(varC, ConstInt::create(1, 64)));
-	ShPtr<GotoStmt> gotoStmt(GotoStmt::create(assignStmtC));
+	VarDefStmt* varDefStmtA(VarDefStmt::create(varA, Expression*()));
+	VarDefStmt* varDefStmtB(VarDefStmt::create(varB, Expression*()));
+	VarDefStmt* varDefStmtC(VarDefStmt::create(varC, Expression*()));
+	AssignStmt* assignStmtA(AssignStmt::create(varA, varB));
+	AssignStmt* assignStmtB(AssignStmt::create(varB, ConstInt::create(1, 64)));
+	AssignStmt* assignStmtC(AssignStmt::create(varC, ConstInt::create(1, 64)));
+	GotoStmt* gotoStmt(GotoStmt::create(assignStmtC));
 	varDefStmtA->setSuccessor(varDefStmtB);
 	varDefStmtB->setSuccessor(varDefStmtC);
 	varDefStmtC->setSuccessor(assignStmtB);
@@ -2150,11 +2150,11 @@ CFGCreatedForSimpleGotoJumpForward) {
 	testFunc->setBody(varDefStmtA);
 
 	// Creating a reference CFG.
-	ShPtr<CFG> refCFG(ShPtr<CFG>(new CFG(testFunc)));
+	CFG* refCFG(CFG*(new CFG(testFunc)));
 
-	refCFG->addEntryNode(ShPtr<CFG::Node>(new CFG::Node("entry")));
+	refCFG->addEntryNode(CFG::Node*(new CFG::Node("entry")));
 
-	ShPtr<CFG::Node> nodeWithGoto(new CFG::Node());
+	CFG::Node* nodeWithGoto(new CFG::Node());
 	nodeWithGoto->addStmt(varDefStmtA);
 	nodeWithGoto->addStmt(varDefStmtB);
 	nodeWithGoto->addStmt(varDefStmtC);
@@ -2162,19 +2162,19 @@ CFGCreatedForSimpleGotoJumpForward) {
 	nodeWithGoto->addStmt(gotoStmt);
 	refCFG->addNode(nodeWithGoto);
 
-	ShPtr<CFG::Node> targetGotoNode(new CFG::Node());
+	CFG::Node* targetGotoNode(new CFG::Node());
 	targetGotoNode->addStmt(assignStmtC);
 	refCFG->addNode(targetGotoNode);
 
-	refCFG->addExitNode(ShPtr<CFG::Node>(new CFG::Node("exit")));
+	refCFG->addExitNode(CFG::Node*(new CFG::Node("exit")));
 
 	refCFG->addEdge(refCFG->getEntryNode(), nodeWithGoto);
 	refCFG->addEdge(nodeWithGoto, targetGotoNode);
 	refCFG->addEdge(targetGotoNode, refCFG->getExitNode());
 
 	// Check difference.
-	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
-	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
+	retdec::llvmir2hll::CFGBuilder* cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
+	CFG* compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
 	// If want to emit CFG, set to 1
@@ -2203,23 +2203,23 @@ CFGCreatedForTwoGotoJumpBackwardFromIfStmt) {
 	//
 
 	// Creating body of function to create CFG.
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
 	testFunc->addLocalVar(varB);
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(16)));
+	Variable* varC(Variable::create("c", IntType::create(16)));
 	testFunc->addLocalVar(varC);
-	ShPtr<VarDefStmt> varDefStmtA(VarDefStmt::create(varA, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtB(VarDefStmt::create(varB, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtC(VarDefStmt::create(varC, ShPtr<Expression>()));
-	ShPtr<AssignStmt> assignStmtA(AssignStmt::create(varA, varB));
-	ShPtr<AssignStmt> assignStmtB(AssignStmt::create(varB, ConstInt::create(1, 64)));
-	ShPtr<AssignStmt> assignStmtC(AssignStmt::create(varC, ConstInt::create(1, 64)));
-	ShPtr<GtOpExpr> gtOpExpr(GtOpExpr::create(varA, varB));
-	ShPtr<LtEqOpExpr> ltEqOpExpr(LtEqOpExpr::create(varA, varB));
-	ShPtr<GotoStmt> gotoStmtFirst(GotoStmt::create(assignStmtC));
-	ShPtr<GotoStmt> gotoStmtSec(GotoStmt::create(assignStmtC));
-	ShPtr<IfStmt> ifStmt(IfStmt::create(gtOpExpr, gotoStmtFirst));
+	VarDefStmt* varDefStmtA(VarDefStmt::create(varA, Expression*()));
+	VarDefStmt* varDefStmtB(VarDefStmt::create(varB, Expression*()));
+	VarDefStmt* varDefStmtC(VarDefStmt::create(varC, Expression*()));
+	AssignStmt* assignStmtA(AssignStmt::create(varA, varB));
+	AssignStmt* assignStmtB(AssignStmt::create(varB, ConstInt::create(1, 64)));
+	AssignStmt* assignStmtC(AssignStmt::create(varC, ConstInt::create(1, 64)));
+	GtOpExpr* gtOpExpr(GtOpExpr::create(varA, varB));
+	LtEqOpExpr* ltEqOpExpr(LtEqOpExpr::create(varA, varB));
+	GotoStmt* gotoStmtFirst(GotoStmt::create(assignStmtC));
+	GotoStmt* gotoStmtSec(GotoStmt::create(assignStmtC));
+	IfStmt* ifStmt(IfStmt::create(gtOpExpr, gotoStmtFirst));
 	ifStmt->setElseClause(gotoStmtSec);
 	varDefStmtA->setSuccessor(varDefStmtB);
 	varDefStmtB->setSuccessor(varDefStmtC);
@@ -2230,34 +2230,34 @@ CFGCreatedForTwoGotoJumpBackwardFromIfStmt) {
 	testFunc->setBody(varDefStmtA);
 
 	// Creating a reference CFG.
-	ShPtr<CFG> refCFG(ShPtr<CFG>(new CFG(testFunc)));
+	CFG* refCFG(CFG*(new CFG(testFunc)));
 
-	refCFG->addEntryNode(ShPtr<CFG::Node>(new CFG::Node("entry")));
+	refCFG->addEntryNode(CFG::Node*(new CFG::Node("entry")));
 
-	ShPtr<CFG::Node> nodeBeforeGotoTarg(new CFG::Node());
+	CFG::Node* nodeBeforeGotoTarg(new CFG::Node());
 	nodeBeforeGotoTarg->addStmt(varDefStmtA);
 	nodeBeforeGotoTarg->addStmt(varDefStmtB);
 	nodeBeforeGotoTarg->addStmt(varDefStmtC);
 	nodeBeforeGotoTarg->addStmt(assignStmtB);
 	refCFG->addNode(nodeBeforeGotoTarg);
 
-	ShPtr<CFG::Node> targetGotoNode(new CFG::Node());
+	CFG::Node* targetGotoNode(new CFG::Node());
 	targetGotoNode->addStmt(assignStmtC);
 	refCFG->addNode(targetGotoNode);
 
-	ShPtr<CFG::Node> nodeIf(new CFG::Node());
+	CFG::Node* nodeIf(new CFG::Node());
 	nodeIf->addStmt(ifStmt);
 	refCFG->addNode(nodeIf);
 
-	ShPtr<CFG::Node> nodeIfBody(new CFG::Node());
+	CFG::Node* nodeIfBody(new CFG::Node());
 	nodeIfBody->addStmt(gotoStmtFirst);
 	refCFG->addNode(nodeIfBody);
 
-	ShPtr<CFG::Node> nodeElseBody(new CFG::Node());
+	CFG::Node* nodeElseBody(new CFG::Node());
 	nodeElseBody->addStmt(gotoStmtSec);
 	refCFG->addNode(nodeElseBody);
 
-	refCFG->addExitNode(ShPtr<CFG::Node>(new CFG::Node("exit")));
+	refCFG->addExitNode(CFG::Node*(new CFG::Node("exit")));
 
 	refCFG->addEdge(refCFG->getEntryNode(), nodeBeforeGotoTarg);
 	refCFG->addEdge(nodeBeforeGotoTarg, targetGotoNode);
@@ -2268,8 +2268,8 @@ CFGCreatedForTwoGotoJumpBackwardFromIfStmt) {
 	refCFG->addEdge(nodeElseBody, targetGotoNode);
 
 	// Check difference.
-	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
-	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
+	retdec::llvmir2hll::CFGBuilder* cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
+	CFG* compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
 	// If want to emit CFG, set to 1
@@ -2298,23 +2298,23 @@ CFGCreatedForTwoGotoJumpForwardFromIfStmt) {
 	//
 
 	// Creating body of function to create CFG.
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
 	testFunc->addLocalVar(varB);
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(16)));
+	Variable* varC(Variable::create("c", IntType::create(16)));
 	testFunc->addLocalVar(varC);
-	ShPtr<VarDefStmt> varDefStmtA(VarDefStmt::create(varA, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtB(VarDefStmt::create(varB, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtC(VarDefStmt::create(varC, ShPtr<Expression>()));
-	ShPtr<AssignStmt> assignStmtA(AssignStmt::create(varA, varB));
-	ShPtr<AssignStmt> assignStmtB(AssignStmt::create(varB, ConstInt::create(1, 64)));
-	ShPtr<AssignStmt> assignStmtC(AssignStmt::create(varC, ConstInt::create(1, 64)));
-	ShPtr<GtOpExpr> gtOpExpr(GtOpExpr::create(varA, varB));
-	ShPtr<LtEqOpExpr> ltEqOpExpr(LtEqOpExpr::create(varA, varB));
-	ShPtr<GotoStmt> gotoStmtFirst(GotoStmt::create(assignStmtC));
-	ShPtr<GotoStmt> gotoStmtSec(GotoStmt::create(assignStmtC));
-	ShPtr<IfStmt> ifStmt(IfStmt::create(gtOpExpr, gotoStmtFirst));
+	VarDefStmt* varDefStmtA(VarDefStmt::create(varA, Expression*()));
+	VarDefStmt* varDefStmtB(VarDefStmt::create(varB, Expression*()));
+	VarDefStmt* varDefStmtC(VarDefStmt::create(varC, Expression*()));
+	AssignStmt* assignStmtA(AssignStmt::create(varA, varB));
+	AssignStmt* assignStmtB(AssignStmt::create(varB, ConstInt::create(1, 64)));
+	AssignStmt* assignStmtC(AssignStmt::create(varC, ConstInt::create(1, 64)));
+	GtOpExpr* gtOpExpr(GtOpExpr::create(varA, varB));
+	LtEqOpExpr* ltEqOpExpr(LtEqOpExpr::create(varA, varB));
+	GotoStmt* gotoStmtFirst(GotoStmt::create(assignStmtC));
+	GotoStmt* gotoStmtSec(GotoStmt::create(assignStmtC));
+	IfStmt* ifStmt(IfStmt::create(gtOpExpr, gotoStmtFirst));
 	ifStmt->setElseClause(gotoStmtSec);
 	varDefStmtA->setSuccessor(varDefStmtB);
 	varDefStmtB->setSuccessor(varDefStmtC);
@@ -2325,34 +2325,34 @@ CFGCreatedForTwoGotoJumpForwardFromIfStmt) {
 	testFunc->setBody(varDefStmtA);
 
 	// Creating a reference CFG.
-	ShPtr<CFG> refCFG(ShPtr<CFG>(new CFG(testFunc)));
+	CFG* refCFG(CFG*(new CFG(testFunc)));
 
-	refCFG->addEntryNode(ShPtr<CFG::Node>(new CFG::Node("entry")));
+	refCFG->addEntryNode(CFG::Node*(new CFG::Node("entry")));
 
-	ShPtr<CFG::Node> nodeBeforeIf(new CFG::Node());
+	CFG::Node* nodeBeforeIf(new CFG::Node());
 	nodeBeforeIf->addStmt(varDefStmtA);
 	nodeBeforeIf->addStmt(varDefStmtB);
 	nodeBeforeIf->addStmt(varDefStmtC);
 	nodeBeforeIf->addStmt(assignStmtB);
 	refCFG->addNode(nodeBeforeIf);
 
-	ShPtr<CFG::Node> nodeIf(new CFG::Node());
+	CFG::Node* nodeIf(new CFG::Node());
 	nodeIf->addStmt(ifStmt);
 	refCFG->addNode(nodeIf);
 
-	ShPtr<CFG::Node> nodeIfBody(new CFG::Node());
+	CFG::Node* nodeIfBody(new CFG::Node());
 	nodeIfBody->addStmt(gotoStmtFirst);
 	refCFG->addNode(nodeIfBody);
 
-	ShPtr<CFG::Node> nodeElseBody(new CFG::Node());
+	CFG::Node* nodeElseBody(new CFG::Node());
 	nodeElseBody->addStmt(gotoStmtSec);
 	refCFG->addNode(nodeElseBody);
 
-	ShPtr<CFG::Node> targetGotoNode(new CFG::Node());
+	CFG::Node* targetGotoNode(new CFG::Node());
 	targetGotoNode->addStmt(assignStmtC);
 	refCFG->addNode(targetGotoNode);
 
-	refCFG->addExitNode(ShPtr<CFG::Node>(new CFG::Node("exit")));
+	refCFG->addExitNode(CFG::Node*(new CFG::Node("exit")));
 
 	refCFG->addEdge(refCFG->getEntryNode(), nodeBeforeIf);
 	refCFG->addEdge(nodeBeforeIf, nodeIf);
@@ -2363,8 +2363,8 @@ CFGCreatedForTwoGotoJumpForwardFromIfStmt) {
 	refCFG->addEdge(targetGotoNode, refCFG->getExitNode());
 
 	// Check difference.
-	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
-	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
+	retdec::llvmir2hll::CFGBuilder* cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
+	CFG* compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
 	// If want to emit CFG, set to 1
@@ -2392,22 +2392,22 @@ CFGCreatedForTwoGotoOneJumpForwardSecondOneBackwardFromIfStmt) {
 	//
 
 	// Creating body of function to create CFG.
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
 	testFunc->addLocalVar(varB);
-	ShPtr<Variable> varD(Variable::create("d", IntType::create(16)));
+	Variable* varD(Variable::create("d", IntType::create(16)));
 	testFunc->addLocalVar(varD);
-	ShPtr<VarDefStmt> varDefStmtA(VarDefStmt::create(varA, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtB(VarDefStmt::create(varB, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtD(VarDefStmt::create(varD, ShPtr<Expression>()));
-	ShPtr<AssignStmt> assignStmtA(AssignStmt::create(varA, varB));
-	ShPtr<AssignStmt> assignStmtD(AssignStmt::create(varD, ConstInt::create(3, 64)));
-	ShPtr<GtOpExpr> gtOpExpr(GtOpExpr::create(varA, varB));
-	ShPtr<LtEqOpExpr> ltEqOpExpr(LtEqOpExpr::create(varA, varB));
-	ShPtr<IfStmt> ifStmt(IfStmt::create(gtOpExpr, assignStmtA));
-	ShPtr<GotoStmt> gotoStmt(GotoStmt::create(assignStmtD));
-	ShPtr<GotoStmt> gotoStmt1(GotoStmt::create(ifStmt));
+	VarDefStmt* varDefStmtA(VarDefStmt::create(varA, Expression*()));
+	VarDefStmt* varDefStmtB(VarDefStmt::create(varB, Expression*()));
+	VarDefStmt* varDefStmtD(VarDefStmt::create(varD, Expression*()));
+	AssignStmt* assignStmtA(AssignStmt::create(varA, varB));
+	AssignStmt* assignStmtD(AssignStmt::create(varD, ConstInt::create(3, 64)));
+	GtOpExpr* gtOpExpr(GtOpExpr::create(varA, varB));
+	LtEqOpExpr* ltEqOpExpr(LtEqOpExpr::create(varA, varB));
+	IfStmt* ifStmt(IfStmt::create(gtOpExpr, assignStmtA));
+	GotoStmt* gotoStmt(GotoStmt::create(assignStmtD));
+	GotoStmt* gotoStmt1(GotoStmt::create(ifStmt));
 	varDefStmtA->setSuccessor(varDefStmtB);
 	varDefStmtB->setSuccessor(varDefStmtD);
 	varDefStmtD->setSuccessor(gotoStmt);
@@ -2417,31 +2417,31 @@ CFGCreatedForTwoGotoOneJumpForwardSecondOneBackwardFromIfStmt) {
 	testFunc->setBody(varDefStmtA);
 
 	// Creating a reference CFG.
-	ShPtr<CFG> refCFG(ShPtr<CFG>(new CFG(testFunc)));
+	CFG* refCFG(CFG*(new CFG(testFunc)));
 
-	refCFG->addEntryNode(ShPtr<CFG::Node>(new CFG::Node("entry")));
+	refCFG->addEntryNode(CFG::Node*(new CFG::Node("entry")));
 
-	ShPtr<CFG::Node> varDefNodeWithFirstGoto(new CFG::Node());
+	CFG::Node* varDefNodeWithFirstGoto(new CFG::Node());
 	varDefNodeWithFirstGoto->addStmt(varDefStmtA);
 	varDefNodeWithFirstGoto->addStmt(varDefStmtB);
 	varDefNodeWithFirstGoto->addStmt(varDefStmtD);
 	varDefNodeWithFirstGoto->addStmt(gotoStmt);
 	refCFG->addNode(varDefNodeWithFirstGoto);
 
-	ShPtr<CFG::Node> firstGotoTargetNode(new CFG::Node());
+	CFG::Node* firstGotoTargetNode(new CFG::Node());
 	firstGotoTargetNode->addStmt(assignStmtD);
 	firstGotoTargetNode->addStmt(gotoStmt1);
 	refCFG->addNode(firstGotoTargetNode);
 
-	ShPtr<CFG::Node> nodeIfAlsoSecondGotoTarget(new CFG::Node());
+	CFG::Node* nodeIfAlsoSecondGotoTarget(new CFG::Node());
 	nodeIfAlsoSecondGotoTarget->addStmt(ifStmt);
 	refCFG->addNode(nodeIfAlsoSecondGotoTarget);
 
-	ShPtr<CFG::Node> nodeIfBody(new CFG::Node());
+	CFG::Node* nodeIfBody(new CFG::Node());
 	nodeIfBody->addStmt(assignStmtA);
 	refCFG->addNode(nodeIfBody);
 
-	refCFG->addExitNode(ShPtr<CFG::Node>(new CFG::Node("exit")));
+	refCFG->addExitNode(CFG::Node*(new CFG::Node("exit")));
 
 	refCFG->addEdge(refCFG->getEntryNode(), varDefNodeWithFirstGoto);
 	refCFG->addEdge(varDefNodeWithFirstGoto, firstGotoTargetNode);
@@ -2451,8 +2451,8 @@ CFGCreatedForTwoGotoOneJumpForwardSecondOneBackwardFromIfStmt) {
 	refCFG->addEdge(nodeIfAlsoSecondGotoTarget, refCFG->getExitNode(), ltEqOpExpr);
 
 	// Check difference.
-	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
-	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
+	retdec::llvmir2hll::CFGBuilder* cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
+	CFG* compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
 	// If want to emit CFG, set to 1
@@ -2481,24 +2481,24 @@ CFGCreatedForGotoToGotoForwardJumps) {
 	//
 
 	// Creating body of function to create CFG.
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
 	testFunc->addLocalVar(varB);
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(16)));
+	Variable* varC(Variable::create("c", IntType::create(16)));
 	testFunc->addLocalVar(varC);
-	ShPtr<Variable> varD(Variable::create("d", IntType::create(16)));
+	Variable* varD(Variable::create("d", IntType::create(16)));
 	testFunc->addLocalVar(varD);
-	ShPtr<VarDefStmt> varDefStmtA(VarDefStmt::create(varA, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtB(VarDefStmt::create(varB, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtC(VarDefStmt::create(varC, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtD(VarDefStmt::create(varD, ShPtr<Expression>()));
-	ShPtr<AssignStmt> assignStmtA(AssignStmt::create(varA, varB));
-	ShPtr<AssignStmt> assignStmtB(AssignStmt::create(varB, ConstInt::create(1, 64)));
-	ShPtr<AssignStmt> assignStmtC(AssignStmt::create(varC, ConstInt::create(1, 64)));
-	ShPtr<AssignStmt> assignStmtD(AssignStmt::create(varD, ConstInt::create(2, 64)));
-	ShPtr<GotoStmt> gotoStmtSec(GotoStmt::create(assignStmtC));
-	ShPtr<GotoStmt> gotoStmtFirst(GotoStmt::create(gotoStmtSec));
+	VarDefStmt* varDefStmtA(VarDefStmt::create(varA, Expression*()));
+	VarDefStmt* varDefStmtB(VarDefStmt::create(varB, Expression*()));
+	VarDefStmt* varDefStmtC(VarDefStmt::create(varC, Expression*()));
+	VarDefStmt* varDefStmtD(VarDefStmt::create(varD, Expression*()));
+	AssignStmt* assignStmtA(AssignStmt::create(varA, varB));
+	AssignStmt* assignStmtB(AssignStmt::create(varB, ConstInt::create(1, 64)));
+	AssignStmt* assignStmtC(AssignStmt::create(varC, ConstInt::create(1, 64)));
+	AssignStmt* assignStmtD(AssignStmt::create(varD, ConstInt::create(2, 64)));
+	GotoStmt* gotoStmtSec(GotoStmt::create(assignStmtC));
+	GotoStmt* gotoStmtFirst(GotoStmt::create(gotoStmtSec));
 	varDefStmtA->setSuccessor(varDefStmtB);
 	varDefStmtB->setSuccessor(varDefStmtC);
 	varDefStmtC->setSuccessor(varDefStmtD);
@@ -2512,11 +2512,11 @@ CFGCreatedForGotoToGotoForwardJumps) {
 	testFunc->setBody(varDefStmtA);
 
 	// Creating a reference CFG.
-	ShPtr<CFG> refCFG(ShPtr<CFG>(new CFG(testFunc)));
+	CFG* refCFG(CFG*(new CFG(testFunc)));
 
-	refCFG->addEntryNode(ShPtr<CFG::Node>(new CFG::Node("entry")));
+	refCFG->addEntryNode(CFG::Node*(new CFG::Node("entry")));
 
-	ShPtr<CFG::Node> nodeWithFirstGoto(new CFG::Node());
+	CFG::Node* nodeWithFirstGoto(new CFG::Node());
 	nodeWithFirstGoto->addStmt(varDefStmtA);
 	nodeWithFirstGoto->addStmt(varDefStmtB);
 	nodeWithFirstGoto->addStmt(varDefStmtC);
@@ -2525,15 +2525,15 @@ CFGCreatedForGotoToGotoForwardJumps) {
 	nodeWithFirstGoto->addStmt(gotoStmtFirst);
 	refCFG->addNode(nodeWithFirstGoto);
 
-	ShPtr<CFG::Node> nodeWithSecGoto(new CFG::Node());
+	CFG::Node* nodeWithSecGoto(new CFG::Node());
 	nodeWithSecGoto->addStmt(gotoStmtSec);
 	refCFG->addNode(nodeWithSecGoto);
 
-	ShPtr<CFG::Node> targetGotoNode(new CFG::Node());
+	CFG::Node* targetGotoNode(new CFG::Node());
 	targetGotoNode->addStmt(assignStmtC);
 	refCFG->addNode(targetGotoNode);
 
-	refCFG->addExitNode(ShPtr<CFG::Node>(new CFG::Node("exit")));
+	refCFG->addExitNode(CFG::Node*(new CFG::Node("exit")));
 
 	refCFG->addEdge(refCFG->getEntryNode(), nodeWithFirstGoto);
 	refCFG->addEdge(nodeWithFirstGoto, nodeWithSecGoto);
@@ -2541,8 +2541,8 @@ CFGCreatedForGotoToGotoForwardJumps) {
 	refCFG->addEdge(targetGotoNode, refCFG->getExitNode());
 
 	// Check difference.
-	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
-	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
+	retdec::llvmir2hll::CFGBuilder* cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
+	CFG* compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
 	// If want to emit CFG, set to 1
@@ -2569,22 +2569,22 @@ CFGCreatedForWhileWithGotoJumpForward) {
 	//
 
 	// Creating body of function to create CFG.
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
 	testFunc->addLocalVar(varB);
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(16)));
+	Variable* varC(Variable::create("c", IntType::create(16)));
 	testFunc->addLocalVar(varC);
-	ShPtr<VarDefStmt> varDefStmtA(VarDefStmt::create(varA, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtB(VarDefStmt::create(varB, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtC(VarDefStmt::create(varC, ShPtr<Expression>()));
-	ShPtr<AssignStmt> assignStmtA(AssignStmt::create(varA, varB));
-	ShPtr<AssignStmt> assignStmtB(AssignStmt::create(varB, ConstInt::create(1, 64)));
-	ShPtr<AssignStmt> assignStmtC(AssignStmt::create(varC, ConstInt::create(1, 64)));
-	ShPtr<GtOpExpr> gtOpExpr(GtOpExpr::create(varA, varB));
-	ShPtr<LtEqOpExpr> ltEqOpExpr(LtEqOpExpr::create(varA, varB));
-	ShPtr<GotoStmt> gotoStmt(GotoStmt::create(assignStmtC));
-	ShPtr<WhileLoopStmt> whileLoopStmt(WhileLoopStmt::create(gtOpExpr, gotoStmt));
+	VarDefStmt* varDefStmtA(VarDefStmt::create(varA, Expression*()));
+	VarDefStmt* varDefStmtB(VarDefStmt::create(varB, Expression*()));
+	VarDefStmt* varDefStmtC(VarDefStmt::create(varC, Expression*()));
+	AssignStmt* assignStmtA(AssignStmt::create(varA, varB));
+	AssignStmt* assignStmtB(AssignStmt::create(varB, ConstInt::create(1, 64)));
+	AssignStmt* assignStmtC(AssignStmt::create(varC, ConstInt::create(1, 64)));
+	GtOpExpr* gtOpExpr(GtOpExpr::create(varA, varB));
+	LtEqOpExpr* ltEqOpExpr(LtEqOpExpr::create(varA, varB));
+	GotoStmt* gotoStmt(GotoStmt::create(assignStmtC));
+	WhileLoopStmt* whileLoopStmt(WhileLoopStmt::create(gtOpExpr, gotoStmt));
 	varDefStmtA->setSuccessor(varDefStmtB);
 	varDefStmtB->setSuccessor(varDefStmtC);
 	varDefStmtC->setSuccessor(assignStmtB);
@@ -2594,34 +2594,34 @@ CFGCreatedForWhileWithGotoJumpForward) {
 	testFunc->setBody(varDefStmtA);
 
 	// Creating a reference CFG.
-	ShPtr<CFG> refCFG(ShPtr<CFG>(new CFG(testFunc)));
+	CFG* refCFG(CFG*(new CFG(testFunc)));
 
-	refCFG->addEntryNode(ShPtr<CFG::Node>(new CFG::Node("entry")));
+	refCFG->addEntryNode(CFG::Node*(new CFG::Node("entry")));
 
-	ShPtr<CFG::Node> nodeBeforeWhile(new CFG::Node());
+	CFG::Node* nodeBeforeWhile(new CFG::Node());
 	nodeBeforeWhile->addStmt(varDefStmtA);
 	nodeBeforeWhile->addStmt(varDefStmtB);
 	nodeBeforeWhile->addStmt(varDefStmtC);
 	nodeBeforeWhile->addStmt(assignStmtB);
 	refCFG->addNode(nodeBeforeWhile);
 
-	ShPtr<CFG::Node> nodeWhile(new CFG::Node());
+	CFG::Node* nodeWhile(new CFG::Node());
 	nodeWhile->addStmt(whileLoopStmt);
 	refCFG->addNode(nodeWhile);
 
-	ShPtr<CFG::Node> nodeWhileBody(new CFG::Node());
+	CFG::Node* nodeWhileBody(new CFG::Node());
 	nodeWhileBody->addStmt(gotoStmt);
 	refCFG->addNode(nodeWhileBody);
 
-	ShPtr<CFG::Node> nodeA(new CFG::Node());
+	CFG::Node* nodeA(new CFG::Node());
 	nodeA->addStmt(assignStmtA);
 	refCFG->addNode(nodeA);
 
-	ShPtr<CFG::Node> targetGotoNode(new CFG::Node());
+	CFG::Node* targetGotoNode(new CFG::Node());
 	targetGotoNode->addStmt(assignStmtC);
 	refCFG->addNode(targetGotoNode);
 
-	refCFG->addExitNode(ShPtr<CFG::Node>(new CFG::Node("exit")));
+	refCFG->addExitNode(CFG::Node*(new CFG::Node("exit")));
 
 	refCFG->addEdge(refCFG->getEntryNode(), nodeBeforeWhile);
 	refCFG->addEdge(nodeBeforeWhile, nodeWhile);
@@ -2632,8 +2632,8 @@ CFGCreatedForWhileWithGotoJumpForward) {
 	refCFG->addEdge(targetGotoNode, refCFG->getExitNode());
 
 	// Check difference.
-	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
-	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
+	retdec::llvmir2hll::CFGBuilder* cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
+	CFG* compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
 	// If want to emit CFG, set to 1
@@ -2660,22 +2660,22 @@ CFGCreatedForGotoJumpToBodyOfWhile) {
 	//
 
 	// Creating body of function to create CFG.
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
 	testFunc->addLocalVar(varB);
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(16)));
+	Variable* varC(Variable::create("c", IntType::create(16)));
 	testFunc->addLocalVar(varC);
-	ShPtr<VarDefStmt> varDefStmtA(VarDefStmt::create(varA, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtB(VarDefStmt::create(varB, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtC(VarDefStmt::create(varC, ShPtr<Expression>()));
-	ShPtr<AssignStmt> assignStmtA(AssignStmt::create(varA, varB));
-	ShPtr<AssignStmt> assignStmtB(AssignStmt::create(varB, ConstInt::create(1, 64)));
-	ShPtr<AssignStmt> assignStmtC(AssignStmt::create(varC, ConstInt::create(1, 64)));
-	ShPtr<GtOpExpr> gtOpExpr(GtOpExpr::create(varA, varB));
-	ShPtr<LtEqOpExpr> ltEqOpExpr(LtEqOpExpr::create(varA, varB));
-	ShPtr<GotoStmt> gotoStmt(GotoStmt::create(assignStmtC));
-	ShPtr<WhileLoopStmt> whileLoopStmt(WhileLoopStmt::create(gtOpExpr, assignStmtC));
+	VarDefStmt* varDefStmtA(VarDefStmt::create(varA, Expression*()));
+	VarDefStmt* varDefStmtB(VarDefStmt::create(varB, Expression*()));
+	VarDefStmt* varDefStmtC(VarDefStmt::create(varC, Expression*()));
+	AssignStmt* assignStmtA(AssignStmt::create(varA, varB));
+	AssignStmt* assignStmtB(AssignStmt::create(varB, ConstInt::create(1, 64)));
+	AssignStmt* assignStmtC(AssignStmt::create(varC, ConstInt::create(1, 64)));
+	GtOpExpr* gtOpExpr(GtOpExpr::create(varA, varB));
+	LtEqOpExpr* ltEqOpExpr(LtEqOpExpr::create(varA, varB));
+	GotoStmt* gotoStmt(GotoStmt::create(assignStmtC));
+	WhileLoopStmt* whileLoopStmt(WhileLoopStmt::create(gtOpExpr, assignStmtC));
 	varDefStmtA->setSuccessor(varDefStmtB);
 	varDefStmtB->setSuccessor(varDefStmtC);
 	varDefStmtC->setSuccessor(assignStmtB);
@@ -2685,11 +2685,11 @@ CFGCreatedForGotoJumpToBodyOfWhile) {
 	testFunc->setBody(varDefStmtA);
 
 	// Creating a reference CFG.
-	ShPtr<CFG> refCFG(ShPtr<CFG>(new CFG(testFunc)));
+	CFG* refCFG(CFG*(new CFG(testFunc)));
 
-	refCFG->addEntryNode(ShPtr<CFG::Node>(new CFG::Node("entry")));
+	refCFG->addEntryNode(CFG::Node*(new CFG::Node("entry")));
 
-	ShPtr<CFG::Node> nodeWithGoto(new CFG::Node());
+	CFG::Node* nodeWithGoto(new CFG::Node());
 	nodeWithGoto->addStmt(varDefStmtA);
 	nodeWithGoto->addStmt(varDefStmtB);
 	nodeWithGoto->addStmt(varDefStmtC);
@@ -2697,15 +2697,15 @@ CFGCreatedForGotoJumpToBodyOfWhile) {
 	nodeWithGoto->addStmt(gotoStmt);
 	refCFG->addNode(nodeWithGoto);
 
-	ShPtr<CFG::Node> nodeWhile(new CFG::Node());
+	CFG::Node* nodeWhile(new CFG::Node());
 	nodeWhile->addStmt(whileLoopStmt);
 	refCFG->addNode(nodeWhile);
 
-	ShPtr<CFG::Node> nodeWhileBody(new CFG::Node());
+	CFG::Node* nodeWhileBody(new CFG::Node());
 	nodeWhileBody->addStmt(assignStmtC);
 	refCFG->addNode(nodeWhileBody);
 
-	refCFG->addExitNode(ShPtr<CFG::Node>(new CFG::Node("exit")));
+	refCFG->addExitNode(CFG::Node*(new CFG::Node("exit")));
 
 	refCFG->addEdge(refCFG->getEntryNode(), nodeWithGoto);
 	refCFG->addEdge(nodeWithGoto, nodeWhileBody);
@@ -2714,8 +2714,8 @@ CFGCreatedForGotoJumpToBodyOfWhile) {
 	refCFG->addEdge(nodeWhileBody, nodeWhile);
 
 	// Check difference.
-	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
-	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
+	retdec::llvmir2hll::CFGBuilder* cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
+	CFG* compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
 	// If want to emit CFG, set to 1
@@ -2742,22 +2742,22 @@ CFGCreatedForGotoJumpToWhile) {
 	//
 
 	// Creating body of function to create CFG.
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
 	testFunc->addLocalVar(varB);
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(16)));
+	Variable* varC(Variable::create("c", IntType::create(16)));
 	testFunc->addLocalVar(varC);
-	ShPtr<VarDefStmt> varDefStmtA(VarDefStmt::create(varA, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtB(VarDefStmt::create(varB, ShPtr<Expression>()));
-	ShPtr<VarDefStmt> varDefStmtC(VarDefStmt::create(varC, ShPtr<Expression>()));
-	ShPtr<AssignStmt> assignStmtA(AssignStmt::create(varA, varB));
-	ShPtr<AssignStmt> assignStmtB(AssignStmt::create(varB, ConstInt::create(1, 64)));
-	ShPtr<AssignStmt> assignStmtC(AssignStmt::create(varC, ConstInt::create(1, 64)));
-	ShPtr<GtOpExpr> gtOpExpr(GtOpExpr::create(varA, varB));
-	ShPtr<LtEqOpExpr> ltEqOpExpr(LtEqOpExpr::create(varA, varB));
-	ShPtr<WhileLoopStmt> whileLoopStmt(WhileLoopStmt::create(gtOpExpr, assignStmtC));
-	ShPtr<GotoStmt> gotoStmt(GotoStmt::create(whileLoopStmt));
+	VarDefStmt* varDefStmtA(VarDefStmt::create(varA, Expression*()));
+	VarDefStmt* varDefStmtB(VarDefStmt::create(varB, Expression*()));
+	VarDefStmt* varDefStmtC(VarDefStmt::create(varC, Expression*()));
+	AssignStmt* assignStmtA(AssignStmt::create(varA, varB));
+	AssignStmt* assignStmtB(AssignStmt::create(varB, ConstInt::create(1, 64)));
+	AssignStmt* assignStmtC(AssignStmt::create(varC, ConstInt::create(1, 64)));
+	GtOpExpr* gtOpExpr(GtOpExpr::create(varA, varB));
+	LtEqOpExpr* ltEqOpExpr(LtEqOpExpr::create(varA, varB));
+	WhileLoopStmt* whileLoopStmt(WhileLoopStmt::create(gtOpExpr, assignStmtC));
+	GotoStmt* gotoStmt(GotoStmt::create(whileLoopStmt));
 	varDefStmtA->setSuccessor(varDefStmtB);
 	varDefStmtB->setSuccessor(varDefStmtC);
 	varDefStmtC->setSuccessor(assignStmtB);
@@ -2767,11 +2767,11 @@ CFGCreatedForGotoJumpToWhile) {
 	testFunc->setBody(varDefStmtA);
 
 	// Creating a reference CFG.
-	ShPtr<CFG> refCFG(ShPtr<CFG>(new CFG(testFunc)));
+	CFG* refCFG(CFG*(new CFG(testFunc)));
 
-	refCFG->addEntryNode(ShPtr<CFG::Node>(new CFG::Node("entry")));
+	refCFG->addEntryNode(CFG::Node*(new CFG::Node("entry")));
 
-	ShPtr<CFG::Node> nodeWithGoto(new CFG::Node());
+	CFG::Node* nodeWithGoto(new CFG::Node());
 	nodeWithGoto->addStmt(varDefStmtA);
 	nodeWithGoto->addStmt(varDefStmtB);
 	nodeWithGoto->addStmt(varDefStmtC);
@@ -2779,15 +2779,15 @@ CFGCreatedForGotoJumpToWhile) {
 	nodeWithGoto->addStmt(gotoStmt);
 	refCFG->addNode(nodeWithGoto);
 
-	ShPtr<CFG::Node> nodeWhile(new CFG::Node());
+	CFG::Node* nodeWhile(new CFG::Node());
 	nodeWhile->addStmt(whileLoopStmt);
 	refCFG->addNode(nodeWhile);
 
-	ShPtr<CFG::Node> nodeWhileBody(new CFG::Node());
+	CFG::Node* nodeWhileBody(new CFG::Node());
 	nodeWhileBody->addStmt(assignStmtC);
 	refCFG->addNode(nodeWhileBody);
 
-	refCFG->addExitNode(ShPtr<CFG::Node>(new CFG::Node("exit")));
+	refCFG->addExitNode(CFG::Node*(new CFG::Node("exit")));
 
 	refCFG->addEdge(refCFG->getEntryNode(), nodeWithGoto);
 	refCFG->addEdge(nodeWithGoto, nodeWhile);
@@ -2796,8 +2796,8 @@ CFGCreatedForGotoJumpToWhile) {
 	refCFG->addEdge(nodeWhileBody, nodeWhile);
 
 	// Check difference.
-	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
-	ShPtr<CFG> compCFG(cfgBuilder->getCFG(testFunc));
+	retdec::llvmir2hll::CFGBuilder* cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
+	CFG* compCFG(cfgBuilder->getCFG(testFunc));
 	checkEquivalenceOfCFGs(compCFG, refCFG);
 
 	// If want to emit CFG, set to 1

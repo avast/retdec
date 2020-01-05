@@ -29,7 +29,7 @@ namespace llvmir2hll {
 * A concrete evaluator should
 *  - implement the virtual functions where you wan't to change behaviour of
 *    sub-evaluator. Default implementation of this virtual function do nothing.
-*  - define a static <tt>ShPtr<ArithmExprEvaluator> create()</tt> function
+*  - define a static <tt>ArithmExprEvaluator* create()</tt> function
 *  - register itself at ArithmExprEvaluatorFactory by passing the static @c
 *    create function and the concrete evaluator's ID
 */
@@ -43,38 +43,47 @@ public:
 	using APFloatPair = std::pair<llvm::APFloat, llvm::APFloat>;
 
 	/// Pair of integer constants.
-	using ConstIntPair = std::pair<ShPtr<ConstInt>, ShPtr<ConstInt>>;
+	using ConstIntPair = std::pair<ConstInt*, ConstInt*>;
 
 	/// Pair of float constants.
-	using ConstFloatPair = std::pair<ShPtr<ConstFloat>, ShPtr<ConstFloat>>;
+	using ConstFloatPair = std::pair<ConstFloat*, ConstFloat*>;
 
 	/// Pair of bool constants.
-	using ConstBoolPair = std::pair<ShPtr<ConstBool>, ShPtr<ConstBool>>;
+	using ConstBoolPair = std::pair<ConstBool*, ConstBool*>;
 
 	/// Pair of constants.
-	using ConstPair = std::pair<ShPtr<Constant>, ShPtr<Constant>>;
+	using ConstPair = std::pair<Constant*, Constant*>;
 
 	/// Stack of constats.
-	using ConstStack = std::stack<ShPtr<Constant>>;
+	using ConstStack = std::stack<Constant*>;
 
 	/// Mapping of variables to constants.
-	using VarConstMap = std::map<ShPtr<Variable>, ShPtr<Constant>>;
+	using VarConstMap = std::map<Variable*, Constant*>;
 
 public:
 	/**
 	* @brief Returns the ID of the optimizer.
 	*/
 	virtual std::string getId() const = 0;
-	virtual std::optional<bool> toBool(ShPtr<Expression> expr, VarConstMap
+	virtual std::optional<bool> toBool(Expression* expr, VarConstMap
 		varValues = VarConstMap());
 
-	ShPtr<Constant> evaluate(ShPtr<Expression> expr);
-	ShPtr<Constant> evaluate(ShPtr<Expression> expr, const VarConstMap
+	Constant* evaluate(Expression* expr);
+	Constant* evaluate(Expression* expr, const VarConstMap
 		&varValues);
 
 	template<typename ConstType>
-	static std::optional<std::pair<ShPtr<ConstType>, ShPtr<ConstType>>> castConstPair(
-		const ConstPair &constPair);
+	static std::optional<std::pair<ConstType*, ConstType*>> castConstPair(
+		const ConstPair &constPair)
+{
+	ConstType* firstConst(cast<ConstType>(constPair.first));
+	ConstType* secConst(cast<ConstType>(constPair.second));
+	if (!firstConst || !secConst) {
+		return std::nullopt;
+	} else {
+		return std::make_pair(firstConst, secConst);
+	}
+}
 
 protected:
 	ArithmExprEvaluator() = default;
@@ -83,7 +92,7 @@ protected:
 		&constIntPair);
 	static APFloatPair getAPFloatsFromConstants(const std::optional<ConstFloatPair>
 		&ConstFloatPair);
-	static bool isConstantZero(ShPtr<Constant> constant);
+	static bool isConstantZero(Constant* constant);
 
 protected:
 	/// Signalizes if evaluation can go on.
@@ -109,134 +118,134 @@ private:
 	/// @name Visitor Interface
 	/// @{
 	// Expressions
-	virtual void visit(ShPtr<AddOpExpr> expr) override;
-	virtual void visit(ShPtr<AddressOpExpr> expr) override;
-	virtual void visit(ShPtr<AndOpExpr> expr) override;
-	virtual void visit(ShPtr<ArrayIndexOpExpr> expr) override;
-	virtual void visit(ShPtr<BitAndOpExpr> expr) override;
-	virtual void visit(ShPtr<BitOrOpExpr> expr) override;
-	virtual void visit(ShPtr<BitShlOpExpr> expr) override;
-	virtual void visit(ShPtr<BitShrOpExpr> expr) override;
-	virtual void visit(ShPtr<BitXorOpExpr> expr) override;
-	virtual void visit(ShPtr<CallExpr> expr) override;
-	virtual void visit(ShPtr<DerefOpExpr> expr) override;
-	virtual void visit(ShPtr<DivOpExpr> expr) override;
-	virtual void visit(ShPtr<EqOpExpr> expr) override;
-	virtual void visit(ShPtr<GtEqOpExpr> expr) override;
-	virtual void visit(ShPtr<GtOpExpr> expr) override;
-	virtual void visit(ShPtr<LtEqOpExpr> expr) override;
-	virtual void visit(ShPtr<LtOpExpr> expr) override;
-	virtual void visit(ShPtr<ModOpExpr> expr) override;
-	virtual void visit(ShPtr<MulOpExpr> expr) override;
-	virtual void visit(ShPtr<NegOpExpr> expr) override;
-	virtual void visit(ShPtr<NeqOpExpr> expr) override;
-	virtual void visit(ShPtr<NotOpExpr> expr) override;
-	virtual void visit(ShPtr<OrOpExpr> expr) override;
-	virtual void visit(ShPtr<StructIndexOpExpr> expr) override;
-	virtual void visit(ShPtr<SubOpExpr> expr) override;
-	virtual void visit(ShPtr<TernaryOpExpr> expr) override;
-	virtual void visit(ShPtr<Variable> var) override;
+	virtual void visit(AddOpExpr* expr) override;
+	virtual void visit(AddressOpExpr* expr) override;
+	virtual void visit(AndOpExpr* expr) override;
+	virtual void visit(ArrayIndexOpExpr* expr) override;
+	virtual void visit(BitAndOpExpr* expr) override;
+	virtual void visit(BitOrOpExpr* expr) override;
+	virtual void visit(BitShlOpExpr* expr) override;
+	virtual void visit(BitShrOpExpr* expr) override;
+	virtual void visit(BitXorOpExpr* expr) override;
+	virtual void visit(CallExpr* expr) override;
+	virtual void visit(DerefOpExpr* expr) override;
+	virtual void visit(DivOpExpr* expr) override;
+	virtual void visit(EqOpExpr* expr) override;
+	virtual void visit(GtEqOpExpr* expr) override;
+	virtual void visit(GtOpExpr* expr) override;
+	virtual void visit(LtEqOpExpr* expr) override;
+	virtual void visit(LtOpExpr* expr) override;
+	virtual void visit(ModOpExpr* expr) override;
+	virtual void visit(MulOpExpr* expr) override;
+	virtual void visit(NegOpExpr* expr) override;
+	virtual void visit(NeqOpExpr* expr) override;
+	virtual void visit(NotOpExpr* expr) override;
+	virtual void visit(OrOpExpr* expr) override;
+	virtual void visit(StructIndexOpExpr* expr) override;
+	virtual void visit(SubOpExpr* expr) override;
+	virtual void visit(TernaryOpExpr* expr) override;
+	virtual void visit(Variable* var) override;
 	// Casts
-	virtual void visit(ShPtr<BitCastExpr> expr) override;
-	virtual void visit(ShPtr<ExtCastExpr> expr) override;
-	virtual void visit(ShPtr<FPToIntCastExpr> expr) override;
-	virtual void visit(ShPtr<IntToFPCastExpr> expr) override;
-	virtual void visit(ShPtr<IntToPtrCastExpr> expr) override;
-	virtual void visit(ShPtr<PtrToIntCastExpr> expr) override;
-	virtual void visit(ShPtr<TruncCastExpr> expr) override;
+	virtual void visit(BitCastExpr* expr) override;
+	virtual void visit(ExtCastExpr* expr) override;
+	virtual void visit(FPToIntCastExpr* expr) override;
+	virtual void visit(IntToFPCastExpr* expr) override;
+	virtual void visit(IntToPtrCastExpr* expr) override;
+	virtual void visit(PtrToIntCastExpr* expr) override;
+	virtual void visit(TruncCastExpr* expr) override;
 	// Constants
-	virtual void visit(ShPtr<ConstArray> constant) override;
-	virtual void visit(ShPtr<ConstBool> constant) override;
-	virtual void visit(ShPtr<ConstFloat> constant) override;
-	virtual void visit(ShPtr<ConstInt> constant) override;
-	virtual void visit(ShPtr<ConstNullPointer> constant) override;
-	virtual void visit(ShPtr<ConstString> constant) override;
-	virtual void visit(ShPtr<ConstStruct> constant) override;
-	virtual void visit(ShPtr<ConstSymbol> constant) override;
+	virtual void visit(ConstArray* constant) override;
+	virtual void visit(ConstBool* constant) override;
+	virtual void visit(ConstFloat* constant) override;
+	virtual void visit(ConstInt* constant) override;
+	virtual void visit(ConstNullPointer* constant) override;
+	virtual void visit(ConstString* constant) override;
+	virtual void visit(ConstStruct* constant) override;
+	virtual void visit(ConstSymbol* constant) override;
 	/// @}
 
 	// Resolve types.
-	virtual void resolveTypesUnaryOp(ShPtr<Constant> &operand);
+	virtual void resolveTypesUnaryOp(Constant* &operand);
 	virtual void resolveTypesBinaryOp(ConstPair &constPair);
 
 	// Resolve operators specifications.
-	virtual void resolveOpSpecifications(ShPtr<AddOpExpr> expr,
+	virtual void resolveOpSpecifications(AddOpExpr* expr,
 		ConstPair &constPair);
-	virtual void resolveOpSpecifications(ShPtr<AndOpExpr> expr,
+	virtual void resolveOpSpecifications(AndOpExpr* expr,
 		ConstPair &constPair);
-	virtual void resolveOpSpecifications(ShPtr<BitAndOpExpr> expr,
+	virtual void resolveOpSpecifications(BitAndOpExpr* expr,
 		ConstPair &constPair);
-	virtual void resolveOpSpecifications(ShPtr<BitOrOpExpr> expr,
+	virtual void resolveOpSpecifications(BitOrOpExpr* expr,
 		ConstPair &constPair);
-	virtual void resolveOpSpecifications(ShPtr<BitShlOpExpr> expr,
+	virtual void resolveOpSpecifications(BitShlOpExpr* expr,
 		ConstPair &constPair);
-	virtual void resolveOpSpecifications(ShPtr<BitShrOpExpr> expr,
+	virtual void resolveOpSpecifications(BitShrOpExpr* expr,
 		ConstPair &constPair);
-	virtual void resolveOpSpecifications(ShPtr<BitXorOpExpr> expr,
+	virtual void resolveOpSpecifications(BitXorOpExpr* expr,
 		ConstPair &constPair);
-	virtual void resolveOpSpecifications(ShPtr<DivOpExpr> expr,
+	virtual void resolveOpSpecifications(DivOpExpr* expr,
 		ConstPair &constPair);
-	virtual void resolveOpSpecifications(ShPtr<EqOpExpr> expr,
+	virtual void resolveOpSpecifications(EqOpExpr* expr,
 		ConstPair &constPair);
-	virtual void resolveOpSpecifications(ShPtr<GtEqOpExpr> expr,
+	virtual void resolveOpSpecifications(GtEqOpExpr* expr,
 		ConstPair &constPair);
-	virtual void resolveOpSpecifications(ShPtr<GtOpExpr> expr,
+	virtual void resolveOpSpecifications(GtOpExpr* expr,
 		ConstPair &constPair);
-	virtual void resolveOpSpecifications(ShPtr<LtEqOpExpr> expr,
+	virtual void resolveOpSpecifications(LtEqOpExpr* expr,
 		ConstPair &constPair);
-	virtual void resolveOpSpecifications(ShPtr<LtOpExpr> expr,
+	virtual void resolveOpSpecifications(LtOpExpr* expr,
 		ConstPair &constPair);
-	virtual void resolveOpSpecifications(ShPtr<ModOpExpr> expr,
+	virtual void resolveOpSpecifications(ModOpExpr* expr,
 		ConstPair &constPair);
-	virtual void resolveOpSpecifications(ShPtr<MulOpExpr> expr,
+	virtual void resolveOpSpecifications(MulOpExpr* expr,
 		ConstPair &constPair);
-	virtual void resolveOpSpecifications(ShPtr<NegOpExpr> expr,
-		ShPtr<Constant> &constant);
-	virtual void resolveOpSpecifications(ShPtr<NeqOpExpr> expr,
+	virtual void resolveOpSpecifications(NegOpExpr* expr,
+		Constant* &constant);
+	virtual void resolveOpSpecifications(NeqOpExpr* expr,
 		ConstPair &constPair);
-	virtual void resolveOpSpecifications(ShPtr<NotOpExpr> expr,
-		ShPtr<Constant> &constant);
-	virtual void resolveOpSpecifications(ShPtr<OrOpExpr> expr,
+	virtual void resolveOpSpecifications(NotOpExpr* expr,
+		Constant* &constant);
+	virtual void resolveOpSpecifications(OrOpExpr* expr,
 		ConstPair &constPair);
-	virtual void resolveOpSpecifications(ShPtr<SubOpExpr> expr,
+	virtual void resolveOpSpecifications(SubOpExpr* expr,
 		ConstPair &constPair);
 
 	// Resolve casts.
-	virtual void resolveCast(ShPtr<BitCastExpr> expr, ShPtr<Constant> &constant);
-	virtual void resolveCast(ShPtr<ExtCastExpr> expr, ShPtr<Constant> &constant);
-	virtual void resolveCast(ShPtr<FPToIntCastExpr> expr,
-		ShPtr<Constant> &constant);
-	virtual void resolveCast(ShPtr<IntToFPCastExpr> expr,
-		ShPtr<Constant> &constant);
-	virtual void resolveCast(ShPtr<TruncCastExpr> expr,
-		ShPtr<Constant> &constant);
+	virtual void resolveCast(BitCastExpr* expr, Constant* &constant);
+	virtual void resolveCast(ExtCastExpr* expr, Constant* &constant);
+	virtual void resolveCast(FPToIntCastExpr* expr,
+		Constant* &constant);
+	virtual void resolveCast(IntToFPCastExpr* expr,
+		Constant* &constant);
+	virtual void resolveCast(TruncCastExpr* expr,
+		Constant* &constant);
 
 	// Resolve overflow.
 	virtual void resolveOverflowForAPInt(bool overflow);
 	virtual void resolveOverflowForAPFloat(llvm::APFloat::opStatus opStatus);
 
 	// Perform functions.
-	ShPtr<ConstFloat> performOperationOverApFloat(const std::optional<ConstFloatPair>
+	ConstFloat* performOperationOverApFloat(const std::optional<ConstFloatPair>
 		&constFloatPair, LLVMAPFloatOp op, llvm::APFloat::opStatus &status);
-	ShPtr<ConstFloat> performOperationOverApFloat(const std::optional<ConstFloatPair>
+	ConstFloat* performOperationOverApFloat(const std::optional<ConstFloatPair>
 		&constFloatPair, LLVMAPFloatOpNoRounding op, llvm::APFloat::opStatus &status);
 	llvm::APFloat::cmpResult performOperationOverApFloat(const std::optional<
 		ConstFloatPair> &constFloatPair);
-	ShPtr<ConstInt> performOperationOverApInt(const std::optional<ConstIntPair>
+	ConstInt* performOperationOverApInt(const std::optional<ConstIntPair>
 		&constIntPair, LLVMAPIntAPIntBoolOp op, bool &overflow);
-	ShPtr<ConstInt> performOperationOverApInt(const std::optional<ConstIntPair>
+	ConstInt* performOperationOverApInt(const std::optional<ConstIntPair>
 		&constIntPair, LLVMAPIntAPIntOp op);
-	ShPtr<ConstBool> performOperationOverApInt(const std::optional<ConstIntPair>
+	ConstBool* performOperationOverApInt(const std::optional<ConstIntPair>
 		&constIntPair, LLVMBoolAPIntOp op);
 
 	// Other functions.
 	ConstPair getOperandsForBinaryOpAndResolveTypes();
-	ShPtr<Constant> getOperandForUnaryOpAndResolveTypes();
+	Constant* getOperandForUnaryOpAndResolveTypes();
 	void resolveOverflows(bool overflow, llvm::APFloat::opStatus opStatus);
 
 private:
 	/// Map of constants that substitute variables in evaluation.
-	const VarConstMap *varValues;
+	const VarConstMap *varValues = nullptr;
 
 	/// Stack of results during the evaluation.
 	ConstStack stackOfResults;

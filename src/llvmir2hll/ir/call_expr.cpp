@@ -20,29 +20,29 @@ namespace llvmir2hll {
 *
 * See create() for more information.
 */
-CallExpr::CallExpr(ShPtr<Expression> calledExpr, ExprVector args):
+CallExpr::CallExpr(Expression* calledExpr, ExprVector args):
 	calledExpr(calledExpr), args(args) {}
 
-ShPtr<Value> CallExpr::clone() {
+Value* CallExpr::clone() {
 	// Clone all arguments.
 	ExprVector newArgs;
 	for (const auto &arg : args) {
 		newArgs.push_back(ucast<Expression>(arg->clone()));
 	}
 
-	ShPtr<CallExpr> callExpr(CallExpr::create(
+	CallExpr* callExpr(CallExpr::create(
 		ucast<Expression>(calledExpr->clone()), newArgs));
 	callExpr->setMetadata(getMetadata());
 	return callExpr;
 }
 
-bool CallExpr::isEqualTo(ShPtr<Value> otherValue) const {
+bool CallExpr::isEqualTo(Value* otherValue) const {
 	if (!otherValue) {
 		return false;
 	}
 
 	// The types of compared instances have to match.
-	ShPtr<CallExpr> otherCallExpr = cast<CallExpr>(otherValue);
+	CallExpr* otherCallExpr = cast<CallExpr>(otherValue);
 	if (!otherCallExpr) {
 		return false;
 	}
@@ -68,11 +68,11 @@ bool CallExpr::isEqualTo(ShPtr<Value> otherValue) const {
 	return true;
 }
 
-ShPtr<Type> CallExpr::getType() const {
+Type* CallExpr::getType() const {
 	return calledExpr->getType();
 }
 
-void CallExpr::replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) {
+void CallExpr::replace(Expression* oldExpr, Expression* newExpr) {
 	PRECONDITION_NON_NULL(oldExpr);
 
 	// Called expression.
@@ -85,8 +85,8 @@ void CallExpr::replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) {
 	// Arguments.
 	for (auto &arg : args) {
 		if (arg == oldExpr) {
-			arg->removeObserver(shared_from_this());
-			newExpr->addObserver(shared_from_this());
+			arg->removeObserver(this);
+			newExpr->addObserver(this);
 			arg = newExpr;
 		} else {
 			arg->replace(oldExpr, newExpr);
@@ -97,7 +97,7 @@ void CallExpr::replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) {
 /**
 * @brief Returns the expression called by this call.
 */
-ShPtr<Expression> CallExpr::getCalledExpr() const {
+Expression* CallExpr::getCalledExpr() const {
 	return calledExpr;
 }
 
@@ -139,7 +139,7 @@ bool CallExpr::hasArg(std::size_t n) const {
 *  - <tt>0 < n <= NUM_OF_ARGS</tt>, where @c NUM_OF_ARGS is the number of
 *    arguments that the call has
 */
-ShPtr<Expression> CallExpr::getArg(std::size_t n) const {
+Expression* CallExpr::getArg(std::size_t n) const {
 	PRECONDITION(n > 0, "n `" << n << "` is not > 0");
 	PRECONDITION(n <= args.size(), "n `" << n << "`" <<
 		" is greater than the number of arguments (`" << args.size() << "`)");
@@ -153,11 +153,11 @@ ShPtr<Expression> CallExpr::getArg(std::size_t n) const {
 * @par Preconditions
 *  - @a newCalledExpr is non-null
 */
-void CallExpr::setCalledExpr(ShPtr<Expression> newCalledExpr) {
+void CallExpr::setCalledExpr(Expression* newCalledExpr) {
 	PRECONDITION_NON_NULL(newCalledExpr);
 
-	calledExpr->removeObserver(shared_from_this());
-	newCalledExpr->addObserver(shared_from_this());
+	calledExpr->removeObserver(this);
+	newCalledExpr->addObserver(this);
 	calledExpr = newCalledExpr;
 }
 
@@ -166,10 +166,10 @@ void CallExpr::setCalledExpr(ShPtr<Expression> newCalledExpr) {
 */
 void CallExpr::setArgs(ExprVector newArgs) {
 	for (auto &arg : args) {
-		arg->removeObserver(shared_from_this());
+		arg->removeObserver(this);
 	}
 	for (auto &arg : newArgs) {
-		arg->addObserver(shared_from_this());
+		arg->addObserver(this);
 	}
 	args = newArgs;
 }
@@ -184,7 +184,7 @@ void CallExpr::setArgs(ExprVector newArgs) {
 *  - @a position is not out of range
 *  - @a newArg is non-null
 */
-void CallExpr::setArg(std::size_t position, ShPtr<Expression> newArg) {
+void CallExpr::setArg(std::size_t position, Expression* newArg) {
 	PRECONDITION(position < args.size(),
 		"position, which is " << position << ", is out of range");
 	PRECONDITION_NON_NULL(newArg);
@@ -196,8 +196,8 @@ void CallExpr::setArg(std::size_t position, ShPtr<Expression> newArg) {
 	}
 
 	// Replace the argument.
-	(*iter)->removeObserver(shared_from_this());
-	newArg->addObserver(shared_from_this());
+	(*iter)->removeObserver(this);
+	newArg->addObserver(this);
 	*iter = newArg;
 }
 
@@ -209,13 +209,13 @@ void CallExpr::setArg(std::size_t position, ShPtr<Expression> newArg) {
 * @par Preconditions
 *  - both arguments are non-null
 */
-void CallExpr::replaceArg(ShPtr<Expression> oldArg, ShPtr<Expression> newArg) {
+void CallExpr::replaceArg(Expression* oldArg, Expression* newArg) {
 	// Does oldArg correspond to an argument?
 	auto oldArgIter = std::find(args.begin(), args.end(), oldArg);
 	if (oldArgIter != args.end()) {
 		// It does, so replace it.
-		oldArg->removeObserver(shared_from_this());
-		newArg->addObserver(shared_from_this());
+		oldArg->removeObserver(this);
+		newArg->addObserver(this);
 		*oldArgIter = newArg;
 	}
 }
@@ -229,12 +229,12 @@ void CallExpr::replaceArg(ShPtr<Expression> oldArg, ShPtr<Expression> newArg) {
 * @par Preconditions
 *  - @a calledExpr is non-null
 */
-ShPtr<CallExpr> CallExpr::create(ShPtr<Expression> calledExpr, ExprVector args) {
+CallExpr* CallExpr::create(Expression* calledExpr, ExprVector args) {
 	PRECONDITION_NON_NULL(calledExpr);
 
-	ShPtr<CallExpr> expr(new CallExpr(calledExpr, args));
+	CallExpr* expr(new CallExpr(calledExpr, args));
 
-	// Initialization (recall that shared_from_this() cannot be called in a
+	// Initialization (recall that this cannot be called in a
 	// constructor).
 	calledExpr->addObserver(expr);
 	for (auto &arg : args) {
@@ -262,18 +262,18 @@ ShPtr<CallExpr> CallExpr::create(ShPtr<Expression> calledExpr, ExprVector args) 
 *
 * @see Subject::update()
 */
-void CallExpr::update(ShPtr<Value> subject, ShPtr<Value> arg) {
+void CallExpr::update(Value* subject, Value* arg) {
 	PRECONDITION_NON_NULL(subject);
 	PRECONDITION_NON_NULL(arg);
 
-	ShPtr<Expression> newCalledExpr = cast<Expression>(arg);
+	Expression* newCalledExpr = cast<Expression>(arg);
 	if (subject == calledExpr && newCalledExpr) {
 		setCalledExpr(newCalledExpr);
 		return;
 	}
 
-	if (ShPtr<Expression> oldArg = cast<Expression>(subject)) {
-		if (ShPtr<Expression> newArg = cast<Expression>(arg)) {
+	if (Expression* oldArg = cast<Expression>(subject)) {
+		if (Expression* newArg = cast<Expression>(arg)) {
 			// If oldArg does not correspond to any argument, replaceArg() does
 			// nothing, so the following call is safe.
 			replaceArg(oldArg, newArg);
@@ -282,7 +282,7 @@ void CallExpr::update(ShPtr<Value> subject, ShPtr<Value> arg) {
 }
 
 void CallExpr::accept(Visitor *v) {
-	v->visit(ucast<CallExpr>(shared_from_this()));
+	v->visit(ucast<CallExpr>(this));
 }
 
 } // namespace llvmir2hll

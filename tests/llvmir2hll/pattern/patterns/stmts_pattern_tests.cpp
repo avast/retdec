@@ -38,7 +38,7 @@ protected:
 		// and stmt2.
 		stmt1 = EmptyStmt::create();
 		stmts12.push_back(stmt1);
-		stmt2 = ReturnStmt::create(ShPtr<Expression>(), stmt1);
+		stmt2 = ReturnStmt::create(Expression*(), stmt1);
 		stmts12.push_back(stmt2);
 		testFunc = FunctionBuilder("test")
 			.definitionWithBody(stmt1)
@@ -47,13 +47,13 @@ protected:
 
 protected:
 	/// A testing function.
-	ShPtr<Function> testFunc;
+	Function* testFunc;
 
 	/// The first statement in the function.
-	ShPtr<Statement> stmt1;
+	Statement* stmt1;
 
 	/// The second statement in the function.
-	ShPtr<Statement> stmt2;
+	Statement* stmt2;
 
 	/// A vector containing @c stmt1 and @c stmt2.
 	StmtVector stmts12;
@@ -65,19 +65,19 @@ protected:
 
 TEST_F(StmtsPatternTests,
 IsEmptyPatternIsEmptyAfterCreationWithNoArguments) {
-	ShPtr<StmtsPattern> p(StmtsPattern::create());
+	StmtsPattern* p(StmtsPattern::create());
 	EXPECT_TRUE(p->isEmpty());
 }
 
 TEST_F(StmtsPatternTests,
 IsEmptyPatternIsNotEmptyWhenPassedStatementIntoCreate) {
-	ShPtr<StmtsPattern> p(StmtsPattern::create(stmt1));
+	StmtsPattern* p(StmtsPattern::create(stmt1));
 	EXPECT_FALSE(p->isEmpty());
 }
 
 TEST_F(StmtsPatternTests,
 IsEmptyPatternIsNotEmptyAfterAddingStatement) {
-	ShPtr<StmtsPattern> p(StmtsPattern::create());
+	StmtsPattern* p(StmtsPattern::create());
 	p->addStmt(stmt1);
 	EXPECT_FALSE(p->isEmpty());
 }
@@ -88,19 +88,19 @@ IsEmptyPatternIsNotEmptyAfterAddingStatement) {
 
 TEST_F(StmtsPatternTests,
 GetNumOfStmtsReturnsZeroOnEmptyPattern) {
-	ShPtr<StmtsPattern> p(StmtsPattern::create());
+	StmtsPattern* p(StmtsPattern::create());
 	EXPECT_EQ(0, p->getNumOfStmts());
 }
 
 TEST_F(StmtsPatternTests,
 GetNumOfStmtsReturnsCorrectNumberOfStatmentsWhenStatementIsPassedToCreate) {
-	ShPtr<StmtsPattern> p(StmtsPattern::create(stmt1));
+	StmtsPattern* p(StmtsPattern::create(stmt1));
 	EXPECT_EQ(1, p->getNumOfStmts());
 }
 
 TEST_F(StmtsPatternTests,
 GetNumOfStmtsReturnsCorrectNumberOfStatmentsWhenNonEmpty) {
-	ShPtr<StmtsPattern> p(StmtsPattern::create());
+	StmtsPattern* p(StmtsPattern::create());
 	p->addStmt(stmt1);
 	EXPECT_EQ(1, p->getNumOfStmts());
 	p->addStmt(stmt2);
@@ -113,13 +113,13 @@ GetNumOfStmtsReturnsCorrectNumberOfStatmentsWhenNonEmpty) {
 
 TEST_F(StmtsPatternTests,
 IterationOverEmptyPatternDoesNotIterate) {
-	ShPtr<StmtsPattern> p(StmtsPattern::create());
+	StmtsPattern* p(StmtsPattern::create());
 	EXPECT_EQ(p->stmt_begin(), p->stmt_end());
 }
 
 TEST_F(StmtsPatternTests,
 IterationOverNonEmptyPatternIteratesOverEveryElementInCorrectOrder) {
-	ShPtr<StmtsPattern> p(StmtsPattern::create());
+	StmtsPattern* p(StmtsPattern::create());
 	p->addStmt(stmt1);
 	p->addStmt(stmt2);
 	StmtVector stmtsInPattern(p->stmt_begin(), p->stmt_end());
@@ -135,7 +135,7 @@ namespace {
 /**
 * @brief Converts the given pattern into a string by utilizing print().
 */
-std::string patternToString(ShPtr<StmtsPattern> p,
+std::string patternToString(StmtsPattern* p,
 		const std::string &indentation = "") {
 	std::string pStrRepr;
 	llvm::raw_string_ostream os(pStrRepr);
@@ -147,14 +147,14 @@ std::string patternToString(ShPtr<StmtsPattern> p,
 
 TEST_F(StmtsPatternTests,
 PrintPrintsNothingForEmptyPattern) {
-	ShPtr<StmtsPattern> p(StmtsPattern::create());
+	StmtsPattern* p(StmtsPattern::create());
 	std::string pStrRepr(patternToString(p));
 	EXPECT_TRUE(pStrRepr.empty());
 }
 
 TEST_F(StmtsPatternTests,
 PrintPrintsSomethingForNonEmptyPatternAndEndsWithNewLine) {
-	ShPtr<StmtsPattern> p(StmtsPattern::create(stmt2));
+	StmtsPattern* p(StmtsPattern::create(stmt2));
 	std::string pStrRepr(patternToString(p));
 	EXPECT_FALSE(pStrRepr.empty());
 	EXPECT_EQ('\n', *pStrRepr.rbegin());
@@ -162,7 +162,7 @@ PrintPrintsSomethingForNonEmptyPatternAndEndsWithNewLine) {
 
 TEST_F(StmtsPatternTests,
 PrintTheResultForNonEmptyPatternStartsWithSpecifiedIndentationAndEndsWithNewLine) {
-	ShPtr<StmtsPattern> p(StmtsPattern::create(stmt2));
+	StmtsPattern* p(StmtsPattern::create(stmt2));
 	const std::string indentation("XXX");
 	std::string pStrRepr(patternToString(p, indentation));
 	EXPECT_TRUE(startsWith(pStrRepr, indentation));

@@ -32,11 +32,11 @@ public:
 		FPExt /// Floating-point extension.
 	};
 
-	static ShPtr<ExtCastExpr> create(ShPtr<Expression> op, ShPtr<Type> dstType,
+	static ExtCastExpr* create(Expression* op, Type* dstType,
 		Variant variant = Variant::ZExt);
 
-	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
-	virtual ShPtr<Value> clone() override;
+	virtual bool isEqualTo(Value* otherValue) const override;
+	virtual Value* clone() override;
 
 	Variant getVariant() const;
 
@@ -52,7 +52,7 @@ private:
 private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
-	ExtCastExpr(ShPtr<Expression> op, ShPtr<Type> dstType,
+	ExtCastExpr(Expression* op, Type* dstType,
 		Variant variant = Variant::ZExt);
 };
 

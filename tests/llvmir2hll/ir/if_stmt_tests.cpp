@@ -29,9 +29,9 @@ class IfStmtTests: public Test {};
 
 TEST_F(IfStmtTests,
 RemoveClauseWorksCorrectlyWhenRemovingTheFirstClauseOfTwoClauses) {
-	ShPtr<ConstInt> clause1Cond(ConstInt::create(1, 32));
-	ShPtr<IfStmt> ifStmt(IfStmt::create(clause1Cond, BreakStmt::create()));
-	ShPtr<ConstInt> clause2Cond(ConstInt::create(2, 32));
+	ConstInt* clause1Cond(ConstInt::create(1, 32));
+	IfStmt* ifStmt(IfStmt::create(clause1Cond, BreakStmt::create()));
+	ConstInt* clause2Cond(ConstInt::create(2, 32));
 	ifStmt->addClause(clause2Cond, BreakStmt::create());
 
 	ifStmt->removeClause(ifStmt->clause_begin());
@@ -42,9 +42,9 @@ RemoveClauseWorksCorrectlyWhenRemovingTheFirstClauseOfTwoClauses) {
 
 TEST_F(IfStmtTests,
 RemoveClauseWorksCorrectlyWhenRemovingTheLastClauseOfTwoClauses) {
-	ShPtr<ConstInt> clause1Cond(ConstInt::create(1, 32));
-	ShPtr<IfStmt> ifStmt(IfStmt::create(clause1Cond, BreakStmt::create()));
-	ShPtr<ConstInt> clause2Cond(ConstInt::create(2, 32));
+	ConstInt* clause1Cond(ConstInt::create(1, 32));
+	IfStmt* ifStmt(IfStmt::create(clause1Cond, BreakStmt::create()));
+	ConstInt* clause2Cond(ConstInt::create(2, 32));
 	ifStmt->addClause(clause2Cond, BreakStmt::create());
 
 	ifStmt->removeClause(++ifStmt->clause_begin());
@@ -55,8 +55,8 @@ RemoveClauseWorksCorrectlyWhenRemovingTheLastClauseOfTwoClauses) {
 
 TEST_F(IfStmtTests,
 RemoveClauseWorksCorrectlyWhenRemovingTheOnlyClause) {
-	ShPtr<ConstInt> clause1Cond(ConstInt::create(1, 32));
-	ShPtr<IfStmt> ifStmt(IfStmt::create(clause1Cond, BreakStmt::create()));
+	ConstInt* clause1Cond(ConstInt::create(1, 32));
+	IfStmt* ifStmt(IfStmt::create(clause1Cond, BreakStmt::create()));
 
 	ifStmt->removeClause(ifStmt->clause_begin());
 
@@ -69,14 +69,14 @@ RemoveClauseWorksCorrectlyWhenRemovingTheOnlyClause) {
 
 TEST_F(IfStmtTests,
 IfStmtWithJustTheIfClauseHasClauses) {
-	ShPtr<IfStmt> ifStmt(IfStmt::create(ConstInt::create(1, 32), BreakStmt::create()));
+	IfStmt* ifStmt(IfStmt::create(ConstInt::create(1, 32), BreakStmt::create()));
 
 	EXPECT_TRUE(ifStmt->hasClauses());
 }
 
 TEST_F(IfStmtTests,
 IfStmtWithJustTheElseClauseHasClauses) {
-	ShPtr<IfStmt> ifStmt(IfStmt::create(ConstInt::create(1, 32), BreakStmt::create()));
+	IfStmt* ifStmt(IfStmt::create(ConstInt::create(1, 32), BreakStmt::create()));
 	ifStmt->removeClause(ifStmt->clause_begin());
 	ifStmt->setElseClause(BreakStmt::create());
 
@@ -85,7 +85,7 @@ IfStmtWithJustTheElseClauseHasClauses) {
 
 TEST_F(IfStmtTests,
 IfStmtWithoutAnyClausesHasNoClauses) {
-	ShPtr<IfStmt> ifStmt(IfStmt::create(ConstInt::create(1, 32), BreakStmt::create()));
+	IfStmt* ifStmt(IfStmt::create(ConstInt::create(1, 32), BreakStmt::create()));
 	ifStmt->removeClause(ifStmt->clause_begin());
 
 	EXPECT_FALSE(ifStmt->hasClauses());
@@ -97,14 +97,14 @@ IfStmtWithoutAnyClausesHasNoClauses) {
 
 TEST_F(IfStmtTests,
 IfStmtWithIfClauseHasIfClause) {
-	ShPtr<IfStmt> ifStmt(IfStmt::create(ConstInt::create(1, 32), BreakStmt::create()));
+	IfStmt* ifStmt(IfStmt::create(ConstInt::create(1, 32), BreakStmt::create()));
 
 	EXPECT_TRUE(ifStmt->hasIfClause());
 }
 
 TEST_F(IfStmtTests,
 IfStmtWithNoClausesHasNoIfClause) {
-	ShPtr<IfStmt> ifStmt(IfStmt::create(ConstInt::create(1, 32), BreakStmt::create()));
+	IfStmt* ifStmt(IfStmt::create(ConstInt::create(1, 32), BreakStmt::create()));
 	ifStmt->removeClause(ifStmt->clause_begin());
 
 	EXPECT_FALSE(ifStmt->hasIfClause());

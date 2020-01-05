@@ -62,7 +62,7 @@ namespace llvmir2hll {
 */
 class APICallInfoSeqParser: private retdec::utils::NonCopyable {
 public:
-	static ShPtr<APICallInfoSeqParser> create();
+	static APICallInfoSeqParser* create();
 
 	std::optional<APICallInfoSeq> parse(const std::string &text) const;
 

@@ -67,10 +67,10 @@ ExpressionNegater::ExpressionNegater(): Visitor() {}
 * @par Preconditions
 *  - @a expr is non-null
 */
-ShPtr<Expression> ExpressionNegater::negate(ShPtr<Expression> expr) {
+Expression* ExpressionNegater::negate(Expression* expr) {
 	PRECONDITION_NON_NULL(expr);
 
-	ShPtr<ExpressionNegater> negater(new ExpressionNegater());
+	ExpressionNegater* negater(new ExpressionNegater());
 	return negater->negateInternal(expr);
 }
 
@@ -84,309 +84,309 @@ ShPtr<Expression> ExpressionNegater::negate(ShPtr<Expression> expr) {
 * @par Preconditions
 *  - @a expr is non-null
 */
-ShPtr<Expression> ExpressionNegater::negateInternal(ShPtr<Expression> expr) {
+Expression* ExpressionNegater::negateInternal(Expression* expr) {
 	PRECONDITION_NON_NULL(expr);
 
 	expr->accept(this);
 	return exprStack.top();
 }
 
-void ExpressionNegater::visit(ShPtr<Variable> var) {
+void ExpressionNegater::visit(Variable* var) {
 	exprStack.push(NotOpExpr::create(var));
 }
 
-void ExpressionNegater::visit(ShPtr<AddressOpExpr> expr) {
+void ExpressionNegater::visit(AddressOpExpr* expr) {
 	exprStack.push(NotOpExpr::create(expr));
 }
 
-void ExpressionNegater::visit(ShPtr<AssignOpExpr> expr) {
+void ExpressionNegater::visit(AssignOpExpr* expr) {
 	exprStack.push(NotOpExpr::create(expr));
 }
 
-void ExpressionNegater::visit(ShPtr<ArrayIndexOpExpr> expr) {
+void ExpressionNegater::visit(ArrayIndexOpExpr* expr) {
 	exprStack.push(NotOpExpr::create(expr));
 }
 
-void ExpressionNegater::visit(ShPtr<StructIndexOpExpr> expr) {
+void ExpressionNegater::visit(StructIndexOpExpr* expr) {
 	exprStack.push(NotOpExpr::create(expr));
 }
 
-void ExpressionNegater::visit(ShPtr<DerefOpExpr> expr) {
+void ExpressionNegater::visit(DerefOpExpr* expr) {
 	exprStack.push(NotOpExpr::create(expr));
 }
 
-void ExpressionNegater::visit(ShPtr<NotOpExpr> expr) {
+void ExpressionNegater::visit(NotOpExpr* expr) {
 	// not not expr -> expr
 	// We have to clone the operand to prevent errors later.
 	exprStack.push(ucast<Expression>(expr->getOperand()->clone()));
 }
 
-void ExpressionNegater::visit(ShPtr<NegOpExpr> expr) {
+void ExpressionNegater::visit(NegOpExpr* expr) {
 	exprStack.push(NotOpExpr::create(expr));
 }
 
-void ExpressionNegater::visit(ShPtr<EqOpExpr> expr) {
+void ExpressionNegater::visit(EqOpExpr* expr) {
 	exprStack.push(NeqOpExpr::create(expr->getFirstOperand(), expr->getSecondOperand()));
 }
 
-void ExpressionNegater::visit(ShPtr<NeqOpExpr> expr) {
+void ExpressionNegater::visit(NeqOpExpr* expr) {
 	exprStack.push(EqOpExpr::create(expr->getFirstOperand(), expr->getSecondOperand()));
 }
 
-void ExpressionNegater::visit(ShPtr<LtEqOpExpr> expr) {
+void ExpressionNegater::visit(LtEqOpExpr* expr) {
 	exprStack.push(GtOpExpr::create(expr->getFirstOperand(), expr->getSecondOperand()));
 }
 
-void ExpressionNegater::visit(ShPtr<GtEqOpExpr> expr) {
+void ExpressionNegater::visit(GtEqOpExpr* expr) {
 	exprStack.push(LtOpExpr::create(expr->getFirstOperand(), expr->getSecondOperand()));
 }
 
-void ExpressionNegater::visit(ShPtr<LtOpExpr> expr) {
+void ExpressionNegater::visit(LtOpExpr* expr) {
 	exprStack.push(GtEqOpExpr::create(expr->getFirstOperand(), expr->getSecondOperand()));
 }
 
-void ExpressionNegater::visit(ShPtr<GtOpExpr> expr) {
+void ExpressionNegater::visit(GtOpExpr* expr) {
 	exprStack.push(LtEqOpExpr::create(expr->getFirstOperand(), expr->getSecondOperand()));
 }
 
-void ExpressionNegater::visit(ShPtr<AddOpExpr> expr) {
+void ExpressionNegater::visit(AddOpExpr* expr) {
 	exprStack.push(NotOpExpr::create(expr));
 }
 
-void ExpressionNegater::visit(ShPtr<SubOpExpr> expr) {
+void ExpressionNegater::visit(SubOpExpr* expr) {
 	exprStack.push(NotOpExpr::create(expr));
 }
 
-void ExpressionNegater::visit(ShPtr<MulOpExpr> expr) {
+void ExpressionNegater::visit(MulOpExpr* expr) {
 	exprStack.push(NotOpExpr::create(expr));
 }
 
-void ExpressionNegater::visit(ShPtr<ModOpExpr> expr) {
+void ExpressionNegater::visit(ModOpExpr* expr) {
 	exprStack.push(NotOpExpr::create(expr));
 }
 
-void ExpressionNegater::visit(ShPtr<DivOpExpr> expr) {
+void ExpressionNegater::visit(DivOpExpr* expr) {
 	exprStack.push(NotOpExpr::create(expr));
 }
 
-void ExpressionNegater::visit(ShPtr<AndOpExpr> expr) {
+void ExpressionNegater::visit(AndOpExpr* expr) {
 	// Use De-Morgan laws.
 	expr->getFirstOperand()->accept(this);
-	ShPtr<Expression> firstOperandNegated(exprStack.top());
+	Expression* firstOperandNegated(exprStack.top());
 	exprStack.pop();
 
 	expr->getSecondOperand()->accept(this);
-	ShPtr<Expression> secondOperandNegated(exprStack.top());
+	Expression* secondOperandNegated(exprStack.top());
 	exprStack.pop();
 
 	exprStack.push(OrOpExpr::create(firstOperandNegated, secondOperandNegated));
 }
 
-void ExpressionNegater::visit(ShPtr<OrOpExpr> expr) {
+void ExpressionNegater::visit(OrOpExpr* expr) {
 	// Use De-Morgan laws.
 	expr->getFirstOperand()->accept(this);
-	ShPtr<Expression> firstOperandNegated(exprStack.top());
+	Expression* firstOperandNegated(exprStack.top());
 	exprStack.pop();
 
 	expr->getSecondOperand()->accept(this);
-	ShPtr<Expression> secondOperandNegated(exprStack.top());
+	Expression* secondOperandNegated(exprStack.top());
 	exprStack.pop();
 
 	exprStack.push(AndOpExpr::create(firstOperandNegated, secondOperandNegated));
 }
 
-void ExpressionNegater::visit(ShPtr<BitAndOpExpr> expr) {
+void ExpressionNegater::visit(BitAndOpExpr* expr) {
 	exprStack.push(NotOpExpr::create(expr));
 }
 
-void ExpressionNegater::visit(ShPtr<BitOrOpExpr> expr) {
+void ExpressionNegater::visit(BitOrOpExpr* expr) {
 	exprStack.push(NotOpExpr::create(expr));
 }
 
-void ExpressionNegater::visit(ShPtr<BitXorOpExpr> expr) {
+void ExpressionNegater::visit(BitXorOpExpr* expr) {
 	exprStack.push(NotOpExpr::create(expr));
 }
 
-void ExpressionNegater::visit(ShPtr<BitShlOpExpr> expr) {
+void ExpressionNegater::visit(BitShlOpExpr* expr) {
 	exprStack.push(NotOpExpr::create(expr));
 }
 
-void ExpressionNegater::visit(ShPtr<BitShrOpExpr> expr) {
+void ExpressionNegater::visit(BitShrOpExpr* expr) {
 	exprStack.push(NotOpExpr::create(expr));
 }
 
-void ExpressionNegater::visit(ShPtr<TernaryOpExpr> expr) {
+void ExpressionNegater::visit(TernaryOpExpr* expr) {
 	exprStack.push(NotOpExpr::create(expr));
 }
 
-void ExpressionNegater::visit(ShPtr<CallExpr> expr) {
+void ExpressionNegater::visit(CallExpr* expr) {
 	exprStack.push(NotOpExpr::create(expr));
 }
 
-void ExpressionNegater::visit(ShPtr<CommaOpExpr> expr) {
+void ExpressionNegater::visit(CommaOpExpr* expr) {
 	exprStack.push(NotOpExpr::create(expr));
 }
 
 // Casts.
-void ExpressionNegater::visit(ShPtr<BitCastExpr> expr) {
+void ExpressionNegater::visit(BitCastExpr* expr) {
 	exprStack.push(NotOpExpr::create(expr));
 }
 
-void ExpressionNegater::visit(ShPtr<ExtCastExpr> expr) {
+void ExpressionNegater::visit(ExtCastExpr* expr) {
 	exprStack.push(NotOpExpr::create(expr));
 }
 
-void ExpressionNegater::visit(ShPtr<TruncCastExpr> expr) {
+void ExpressionNegater::visit(TruncCastExpr* expr) {
 	exprStack.push(NotOpExpr::create(expr));
 }
 
-void ExpressionNegater::visit(ShPtr<FPToIntCastExpr> expr) {
+void ExpressionNegater::visit(FPToIntCastExpr* expr) {
 	exprStack.push(NotOpExpr::create(expr));
 }
 
-void ExpressionNegater::visit(ShPtr<IntToFPCastExpr> expr) {
+void ExpressionNegater::visit(IntToFPCastExpr* expr) {
 	exprStack.push(NotOpExpr::create(expr));
 }
 
-void ExpressionNegater::visit(ShPtr<IntToPtrCastExpr> expr) {
+void ExpressionNegater::visit(IntToPtrCastExpr* expr) {
 	exprStack.push(NotOpExpr::create(expr));
 }
 
-void ExpressionNegater::visit(ShPtr<PtrToIntCastExpr> expr) {
+void ExpressionNegater::visit(PtrToIntCastExpr* expr) {
 	exprStack.push(NotOpExpr::create(expr));
 }
 // End of casts.
 
-void ExpressionNegater::visit(ShPtr<ConstBool> constant) {
+void ExpressionNegater::visit(ConstBool* constant) {
 	// true -> false, false -> true
 	exprStack.push(ConstBool::create(!constant->getValue()));
 }
 
-void ExpressionNegater::visit(ShPtr<ConstFloat> constant) {
+void ExpressionNegater::visit(ConstFloat* constant) {
 	exprStack.push(NotOpExpr::create(constant));
 }
 
-void ExpressionNegater::visit(ShPtr<ConstInt> constant) {
+void ExpressionNegater::visit(ConstInt* constant) {
 	exprStack.push(NotOpExpr::create(constant));
 }
 
-void ExpressionNegater::visit(ShPtr<ConstNullPointer> constant) {
+void ExpressionNegater::visit(ConstNullPointer* constant) {
 	exprStack.push(NotOpExpr::create(constant));
 }
 
-void ExpressionNegater::visit(ShPtr<ConstString> constant) {
+void ExpressionNegater::visit(ConstString* constant) {
 	exprStack.push(NotOpExpr::create(constant));
 }
 
-void ExpressionNegater::visit(ShPtr<ConstArray> constant) {
+void ExpressionNegater::visit(ConstArray* constant) {
 	exprStack.push(NotOpExpr::create(constant));
 }
 
-void ExpressionNegater::visit(ShPtr<ConstStruct> constant) {
+void ExpressionNegater::visit(ConstStruct* constant) {
 	exprStack.push(NotOpExpr::create(constant));
 }
 
-void ExpressionNegater::visit(ShPtr<ConstSymbol> constant) {
+void ExpressionNegater::visit(ConstSymbol* constant) {
 	exprStack.push(NotOpExpr::create(constant));
 }
 
-void ExpressionNegater::visit(ShPtr<GlobalVarDef> varDef) {
+void ExpressionNegater::visit(GlobalVarDef* varDef) {
 	FAIL("you cannot negate a global variable definition");
 }
 
-void ExpressionNegater::visit(ShPtr<Function> func) {
+void ExpressionNegater::visit(Function* func) {
 	FAIL("you cannot negate a function");
 }
 
-void ExpressionNegater::visit(ShPtr<AssignStmt> stmt) {
+void ExpressionNegater::visit(AssignStmt* stmt) {
 	FAIL("you cannot negate a statement");
 }
 
-void ExpressionNegater::visit(ShPtr<VarDefStmt> stmt) {
+void ExpressionNegater::visit(VarDefStmt* stmt) {
 	FAIL("you cannot negate a statement");
 }
 
-void ExpressionNegater::visit(ShPtr<CallStmt> stmt) {
+void ExpressionNegater::visit(CallStmt* stmt) {
 	FAIL("you cannot negate a statement");
 }
 
-void ExpressionNegater::visit(ShPtr<ReturnStmt> stmt) {
+void ExpressionNegater::visit(ReturnStmt* stmt) {
 	FAIL("you cannot negate a statement");
 }
 
-void ExpressionNegater::visit(ShPtr<EmptyStmt> stmt) {
+void ExpressionNegater::visit(EmptyStmt* stmt) {
 	FAIL("you cannot negate a statement");
 }
 
-void ExpressionNegater::visit(ShPtr<IfStmt> stmt) {
+void ExpressionNegater::visit(IfStmt* stmt) {
 	FAIL("you cannot negate a statement");
 }
 
-void ExpressionNegater::visit(ShPtr<SwitchStmt> stmt) {
+void ExpressionNegater::visit(SwitchStmt* stmt) {
 	FAIL("you cannot negate a statement");
 }
 
-void ExpressionNegater::visit(ShPtr<WhileLoopStmt> stmt) {
+void ExpressionNegater::visit(WhileLoopStmt* stmt) {
 	FAIL("you cannot negate a statement");
 }
 
-void ExpressionNegater::visit(ShPtr<ForLoopStmt> stmt) {
+void ExpressionNegater::visit(ForLoopStmt* stmt) {
 	FAIL("you cannot negate a statement");
 }
 
-void ExpressionNegater::visit(ShPtr<UForLoopStmt> stmt) {
+void ExpressionNegater::visit(UForLoopStmt* stmt) {
 	FAIL("you cannot negate a statement");
 }
 
-void ExpressionNegater::visit(ShPtr<BreakStmt> stmt) {
+void ExpressionNegater::visit(BreakStmt* stmt) {
 	FAIL("you cannot negate a statement");
 }
 
-void ExpressionNegater::visit(ShPtr<ContinueStmt> stmt) {
+void ExpressionNegater::visit(ContinueStmt* stmt) {
 	FAIL("you cannot negate a statement");
 }
 
-void ExpressionNegater::visit(ShPtr<GotoStmt> stmt) {
+void ExpressionNegater::visit(GotoStmt* stmt) {
 	FAIL("you cannot negate a statement");
 }
 
-void ExpressionNegater::visit(ShPtr<UnreachableStmt> stmt) {
+void ExpressionNegater::visit(UnreachableStmt* stmt) {
 	FAIL("you cannot negate a statement");
 }
 
-void ExpressionNegater::visit(ShPtr<FloatType> type) {
+void ExpressionNegater::visit(FloatType* type) {
 	FAIL("you cannot negate a type");
 }
 
-void ExpressionNegater::visit(ShPtr<IntType> type) {
+void ExpressionNegater::visit(IntType* type) {
 	FAIL("you cannot negate a type");
 }
 
-void ExpressionNegater::visit(ShPtr<PointerType> type) {
+void ExpressionNegater::visit(PointerType* type) {
 	FAIL("you cannot negate a type");
 }
 
-void ExpressionNegater::visit(ShPtr<StringType> type) {
+void ExpressionNegater::visit(StringType* type) {
 	FAIL("you cannot negate a type");
 }
 
-void ExpressionNegater::visit(ShPtr<ArrayType> type) {
+void ExpressionNegater::visit(ArrayType* type) {
 	FAIL("you cannot negate a type");
 }
 
-void ExpressionNegater::visit(ShPtr<StructType> type) {
+void ExpressionNegater::visit(StructType* type) {
 	FAIL("you cannot negate a type");
 }
 
-void ExpressionNegater::visit(ShPtr<FunctionType> type) {
+void ExpressionNegater::visit(FunctionType* type) {
 	FAIL("you cannot negate a type");
 }
 
-void ExpressionNegater::visit(ShPtr<VoidType> type) {
+void ExpressionNegater::visit(VoidType* type) {
 	FAIL("you cannot negate a type");
 }
 
-void ExpressionNegater::visit(ShPtr<UnknownType> type) {
+void ExpressionNegater::visit(UnknownType* type) {
 	FAIL("you cannot negate a type");
 }
 

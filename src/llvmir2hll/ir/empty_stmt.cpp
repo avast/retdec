@@ -13,21 +13,21 @@ namespace llvmir2hll {
 
 EmptyStmt::EmptyStmt(Address a) : Statement(a) {}
 
-ShPtr<Value> EmptyStmt::clone() {
-	ShPtr<EmptyStmt> emptyStmt(EmptyStmt::create(nullptr, getAddress()));
+Value* EmptyStmt::clone() {
+	EmptyStmt* emptyStmt(EmptyStmt::create(nullptr, getAddress()));
 	emptyStmt->setMetadata(getMetadata());
 	return emptyStmt;
 }
 
-bool EmptyStmt::isEqualTo(ShPtr<Value> otherValue) const {
+bool EmptyStmt::isEqualTo(Value* otherValue) const {
 	return isa<EmptyStmt>(otherValue);
 }
 
-void EmptyStmt::replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) {
+void EmptyStmt::replace(Expression* oldExpr, Expression* newExpr) {
 	// There is nothing to do.
 }
 
-ShPtr<Expression> EmptyStmt::asExpression() const {
+Expression* EmptyStmt::asExpression() const {
 	// Cannot be converted into an expression.
 	return {};
 }
@@ -38,14 +38,14 @@ ShPtr<Expression> EmptyStmt::asExpression() const {
 * @param[in] succ Follower of the statement in the program flow.
 * @param[in] a Address.
 */
-ShPtr<EmptyStmt> EmptyStmt::create(ShPtr<Statement> succ, Address a) {
-	ShPtr<EmptyStmt> stmt(new EmptyStmt(a));
+EmptyStmt* EmptyStmt::create(Statement* succ, Address a) {
+	EmptyStmt* stmt(new EmptyStmt(a));
 	stmt->setSuccessor(succ);
 	return stmt;
 }
 
 void EmptyStmt::accept(Visitor *v) {
-	v->visit(ucast<EmptyStmt>(shared_from_this()));
+	v->visit(ucast<EmptyStmt>(this));
 }
 
 } // namespace llvmir2hll

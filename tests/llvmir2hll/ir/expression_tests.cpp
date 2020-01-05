@@ -34,11 +34,11 @@ ExpressionInAnotherExpressionIsCorrectlyReplaced) {
 	//
 	// a = a + b
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(32)));
-	ShPtr<AddOpExpr> addAB(AddOpExpr::create(varA, varB));
-	ShPtr<VarDefStmt> varDefA(VarDefStmt::create(varA, addAB));
+	Variable* varA(Variable::create("a", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
+	Variable* varC(Variable::create("c", IntType::create(32)));
+	AddOpExpr* addAB(AddOpExpr::create(varA, varB));
+	VarDefStmt* varDefA(VarDefStmt::create(varA, addAB));
 
 	// Perform the replacement.
 	Expression::replaceExpression(varB, varC);
@@ -61,10 +61,10 @@ ExpressionOnTheRightHandSideOfVarDefStmtIsCorrectlyReplaced) {
 	//
 	// a = b
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(32)));
-	ShPtr<VarDefStmt> varDefA(VarDefStmt::create(varA, varB));
+	Variable* varA(Variable::create("a", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
+	Variable* varC(Variable::create("c", IntType::create(32)));
+	VarDefStmt* varDefA(VarDefStmt::create(varA, varB));
 
 	// Perform the replacement.
 	Expression::replaceExpression(varB, varC);
@@ -87,9 +87,9 @@ ExpressionOnTheRightHandSideOfGlobalVariableDefinitionIsCorrectlyReplaced) {
 	//
 	// a = b (global variable definition)
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
+	Variable* varC(Variable::create("c", IntType::create(32)));
 	module->addGlobalVar(varA, varB);
 
 	// Perform the replacement.

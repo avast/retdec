@@ -17,12 +17,12 @@ namespace llvmir2hll {
 *
 * See create() for more information.
 */
-TernaryOpExpr::TernaryOpExpr(ShPtr<Expression> cond, ShPtr<Expression> trueValue,
-	ShPtr<Expression> falseValue):
+TernaryOpExpr::TernaryOpExpr(Expression* cond, Expression* trueValue,
+	Expression* falseValue):
 		Expression(), cond(cond), trueValue(trueValue), falseValue(falseValue) {}
 
-ShPtr<Value> TernaryOpExpr::clone() {
-	ShPtr<TernaryOpExpr> ternaryOpExpr(TernaryOpExpr::create(
+Value* TernaryOpExpr::clone() {
+	TernaryOpExpr* ternaryOpExpr(TernaryOpExpr::create(
 		ucast<Expression>(cond->clone()),
 		ucast<Expression>(trueValue->clone()),
 		ucast<Expression>(falseValue->clone())));
@@ -30,9 +30,9 @@ ShPtr<Value> TernaryOpExpr::clone() {
 	return ternaryOpExpr;
 }
 
-bool TernaryOpExpr::isEqualTo(ShPtr<Value> otherValue) const {
+bool TernaryOpExpr::isEqualTo(Value* otherValue) const {
 	// Both types, conditions, true and false values have to be equal.
-	if (ShPtr<TernaryOpExpr> otherTernaryOpExpr = cast<TernaryOpExpr>(otherValue)) {
+	if (TernaryOpExpr* otherTernaryOpExpr = cast<TernaryOpExpr>(otherValue)) {
 		return cond->isEqualTo(otherTernaryOpExpr->cond) &&
 			trueValue->isEqualTo(otherTernaryOpExpr->trueValue) &&
 			falseValue->isEqualTo(otherTernaryOpExpr->falseValue);
@@ -40,7 +40,7 @@ bool TernaryOpExpr::isEqualTo(ShPtr<Value> otherValue) const {
 	return false;
 }
 
-ShPtr<Type> TernaryOpExpr::getType() const {
+Type* TernaryOpExpr::getType() const {
 	// Both true and false value must have the same types.
 	if (trueValue->getType() == falseValue->getType()) {
 		return trueValue->getType();
@@ -48,7 +48,7 @@ ShPtr<Type> TernaryOpExpr::getType() const {
 	return UnknownType::create();
 }
 
-void TernaryOpExpr::replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) {
+void TernaryOpExpr::replace(Expression* oldExpr, Expression* newExpr) {
 	PRECONDITION_NON_NULL(oldExpr);
 
 	if (cond == oldExpr) {
@@ -73,21 +73,21 @@ void TernaryOpExpr::replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr
 /**
 * @brief Returns the operator condition.
 */
-ShPtr<Expression> TernaryOpExpr::getCondition() const {
+Expression* TernaryOpExpr::getCondition() const {
 	return cond;
 }
 
 /**
 * @brief Returns the true value.
 */
-ShPtr<Expression> TernaryOpExpr::getTrueValue() const {
+Expression* TernaryOpExpr::getTrueValue() const {
 	return trueValue;
 }
 
 /**
 * @brief Returns the false value.
 */
-ShPtr<Expression> TernaryOpExpr::getFalseValue() const {
+Expression* TernaryOpExpr::getFalseValue() const {
 	return falseValue;
 }
 
@@ -97,11 +97,11 @@ ShPtr<Expression> TernaryOpExpr::getFalseValue() const {
 * @par Preconditions
 *  - @a newCond is non-null
 */
-void TernaryOpExpr::setCondition(ShPtr<Expression> newCond) {
+void TernaryOpExpr::setCondition(Expression* newCond) {
 	PRECONDITION_NON_NULL(newCond);
 
-	cond->removeObserver(shared_from_this());
-	newCond->addObserver(shared_from_this());
+	cond->removeObserver(this);
+	newCond->addObserver(this);
 	cond = newCond;
 }
 
@@ -111,11 +111,11 @@ void TernaryOpExpr::setCondition(ShPtr<Expression> newCond) {
 * @par Preconditions
 *  - @a newTrueValue is non-null
 */
-void TernaryOpExpr::setTrueValue(ShPtr<Expression> newTrueValue) {
+void TernaryOpExpr::setTrueValue(Expression* newTrueValue) {
 	PRECONDITION_NON_NULL(newTrueValue);
 
-	trueValue->removeObserver(shared_from_this());
-	newTrueValue->addObserver(shared_from_this());
+	trueValue->removeObserver(this);
+	newTrueValue->addObserver(this);
 	trueValue = newTrueValue;
 }
 
@@ -125,11 +125,11 @@ void TernaryOpExpr::setTrueValue(ShPtr<Expression> newTrueValue) {
 * @par Preconditions
 *  - @a newFalseValue is non-null
 */
-void TernaryOpExpr::setFalseValue(ShPtr<Expression> newFalseValue) {
+void TernaryOpExpr::setFalseValue(Expression* newFalseValue) {
 	PRECONDITION_NON_NULL(newFalseValue);
 
-	falseValue->removeObserver(shared_from_this());
-	newFalseValue->addObserver(shared_from_this());
+	falseValue->removeObserver(this);
+	newFalseValue->addObserver(this);
 	falseValue = newFalseValue;
 }
 
@@ -145,15 +145,15 @@ void TernaryOpExpr::setFalseValue(ShPtr<Expression> newFalseValue) {
 * @par Preconditions
 *  - all arguments are non-null
 */
-ShPtr<TernaryOpExpr> TernaryOpExpr::create(ShPtr<Expression> cond,
-		ShPtr<Expression> trueValue, ShPtr<Expression> falseValue) {
+TernaryOpExpr* TernaryOpExpr::create(Expression* cond,
+		Expression* trueValue, Expression* falseValue) {
 	PRECONDITION_NON_NULL(cond);
 	PRECONDITION_NON_NULL(trueValue);
 	PRECONDITION_NON_NULL(falseValue);
 
-	ShPtr<TernaryOpExpr> expr(new TernaryOpExpr(cond, trueValue, falseValue));
+	TernaryOpExpr* expr(new TernaryOpExpr(cond, trueValue, falseValue));
 
-	// Initialization (recall that shared_from_this() cannot be called in a
+	// Initialization (recall that this cannot be called in a
 	// constructor).
 	cond->addObserver(expr);
 	trueValue->addObserver(expr);
@@ -180,11 +180,11 @@ ShPtr<TernaryOpExpr> TernaryOpExpr::create(ShPtr<Expression> cond,
 *
 * @see Subject::update()
 */
-void TernaryOpExpr::update(ShPtr<Value> subject, ShPtr<Value> arg) {
+void TernaryOpExpr::update(Value* subject, Value* arg) {
 	PRECONDITION_NON_NULL(subject);
 	PRECONDITION_NON_NULL(arg);
 
-	ShPtr<Expression> newOperand = cast<Expression>(arg);
+	Expression* newOperand = cast<Expression>(arg);
 	if (!newOperand) {
 		return;
 	}
@@ -199,7 +199,7 @@ void TernaryOpExpr::update(ShPtr<Value> subject, ShPtr<Value> arg) {
 }
 
 void TernaryOpExpr::accept(Visitor *v) {
-	v->visit(ucast<TernaryOpExpr>(shared_from_this()));
+	v->visit(ucast<TernaryOpExpr>(this));
 }
 
 } // namespace llvmir2hll

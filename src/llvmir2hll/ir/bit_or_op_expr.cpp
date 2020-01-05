@@ -16,19 +16,19 @@ namespace llvmir2hll {
 *
 * See create() for more information.
 */
-BitOrOpExpr::BitOrOpExpr(ShPtr<Expression> op1, ShPtr<Expression> op2):
+BitOrOpExpr::BitOrOpExpr(Expression* op1, Expression* op2):
 	BinaryOpExpr(op1, op2) {}
 
-bool BitOrOpExpr::isEqualTo(ShPtr<Value> otherValue) const {
-	if (ShPtr<BitOrOpExpr> otherValueBitOrOpExpr = cast<BitOrOpExpr>(otherValue)) {
+bool BitOrOpExpr::isEqualTo(Value* otherValue) const {
+	if (BitOrOpExpr* otherValueBitOrOpExpr = cast<BitOrOpExpr>(otherValue)) {
 		return op1->isEqualTo(otherValueBitOrOpExpr->getFirstOperand()) &&
 			op2->isEqualTo(otherValueBitOrOpExpr->getSecondOperand());
 	}
 	return false;
 }
 
-ShPtr<Value> BitOrOpExpr::clone() {
-	ShPtr<BitOrOpExpr> bitOrOpExpr(BitOrOpExpr::create(
+Value* BitOrOpExpr::clone() {
+	BitOrOpExpr* bitOrOpExpr(BitOrOpExpr::create(
 		ucast<Expression>(op1->clone()), ucast<Expression>(op2->clone())));
 	bitOrOpExpr->setMetadata(getMetadata());
 	return bitOrOpExpr;
@@ -43,13 +43,13 @@ ShPtr<Value> BitOrOpExpr::clone() {
 * @par Preconditions
 *  - both operands are non-null
 */
-ShPtr<BitOrOpExpr> BitOrOpExpr::create(ShPtr<Expression> op1, ShPtr<Expression> op2) {
+BitOrOpExpr* BitOrOpExpr::create(Expression* op1, Expression* op2) {
 	PRECONDITION_NON_NULL(op1);
 	PRECONDITION_NON_NULL(op2);
 
-	ShPtr<BitOrOpExpr> expr(new BitOrOpExpr(op1, op2));
+	BitOrOpExpr* expr(new BitOrOpExpr(op1, op2));
 
-	// Initialization (recall that shared_from_this() cannot be called in a
+	// Initialization (recall that this cannot be called in a
 	// constructor).
 	op1->addObserver(expr);
 	op2->addObserver(expr);
@@ -58,7 +58,7 @@ ShPtr<BitOrOpExpr> BitOrOpExpr::create(ShPtr<Expression> op1, ShPtr<Expression> 
 }
 
 void BitOrOpExpr::accept(Visitor *v) {
-	v->visit(ucast<BitOrOpExpr>(shared_from_this()));
+	v->visit(ucast<BitOrOpExpr>(this));
 }
 
 } // namespace llvmir2hll

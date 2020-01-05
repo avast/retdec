@@ -17,23 +17,23 @@ namespace llvmir2hll {
 *
 * See create() for more information.
 */
-NotOpExpr::NotOpExpr(ShPtr<Expression> op):
+NotOpExpr::NotOpExpr(Expression* op):
 	UnaryOpExpr(op) {}
 
-bool NotOpExpr::isEqualTo(ShPtr<Value> otherValue) const {
-	if (ShPtr<NotOpExpr> otherValueNotOpExpr = cast<NotOpExpr>(otherValue)) {
+bool NotOpExpr::isEqualTo(Value* otherValue) const {
+	if (NotOpExpr* otherValueNotOpExpr = cast<NotOpExpr>(otherValue)) {
 		return op->isEqualTo(otherValueNotOpExpr->getOperand());
 	}
 	return false;
 }
 
-ShPtr<Value> NotOpExpr::clone() {
-	ShPtr<NotOpExpr> notOpExpr(NotOpExpr::create(ucast<Expression>(op->clone())));
+Value* NotOpExpr::clone() {
+	NotOpExpr* notOpExpr(NotOpExpr::create(ucast<Expression>(op->clone())));
 	notOpExpr->setMetadata(getMetadata());
 	return notOpExpr;
 }
 
-ShPtr<Type> NotOpExpr::getType() const {
+Type* NotOpExpr::getType() const {
 	// The type of `!x` should be bool.
 	return IntType::create(1);
 }
@@ -46,12 +46,12 @@ ShPtr<Type> NotOpExpr::getType() const {
 * @par Preconditions
 *  - @a op is non-null
 */
-ShPtr<NotOpExpr> NotOpExpr::create(ShPtr<Expression> op) {
+NotOpExpr* NotOpExpr::create(Expression* op) {
 	PRECONDITION_NON_NULL(op);
 
-	ShPtr<NotOpExpr> expr(new NotOpExpr(op));
+	NotOpExpr* expr(new NotOpExpr(op));
 
-	// Initialization (recall that shared_from_this() cannot be called in a
+	// Initialization (recall that this cannot be called in a
 	// constructor).
 	op->addObserver(expr);
 
@@ -59,7 +59,7 @@ ShPtr<NotOpExpr> NotOpExpr::create(ShPtr<Expression> op) {
 }
 
 void NotOpExpr::accept(Visitor *v) {
-	v->visit(ucast<NotOpExpr>(shared_from_this()));
+	v->visit(ucast<NotOpExpr>(this));
 }
 
 } // namespace llvmir2hll

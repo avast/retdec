@@ -20,31 +20,31 @@ namespace llvmir2hll {
 */
 class BinaryOpExpr: public Expression {
 public:
-	virtual ShPtr<Type> getType() const override;
-	virtual void replace(ShPtr<Expression> oldExpr,
-		ShPtr<Expression> newExpr) override;
+	virtual Type* getType() const override;
+	virtual void replace(Expression* oldExpr,
+		Expression* newExpr) override;
 
-	ShPtr<Expression> getFirstOperand() const;
-	ShPtr<Expression> getSecondOperand() const;
+	Expression* getFirstOperand() const;
+	Expression* getSecondOperand() const;
 
-	void setFirstOperand(ShPtr<Expression> first);
-	void setSecondOperand(ShPtr<Expression> second);
+	void setFirstOperand(Expression* first);
+	void setSecondOperand(Expression* second);
 
 	/// @name Observer Interface
 	/// @{
-	virtual void update(ShPtr<Value> subject,
-		ShPtr<Value> arg = nullptr) override;
+	virtual void update(Value* subject,
+		Value* arg = nullptr) override;
 	/// @}
 
 protected:
-	BinaryOpExpr(ShPtr<Expression> op1, ShPtr<Expression> op2);
+	BinaryOpExpr(Expression* op1, Expression* op2);
 
 protected:
 	/// First operand.
-	ShPtr<Expression> op1;
+	Expression* op1 = nullptr;
 
 	/// Second operand.
-	ShPtr<Expression> op2;
+	Expression* op2 = nullptr;
 };
 
 } // namespace llvmir2hll

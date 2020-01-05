@@ -30,25 +30,25 @@ class Visitor;
 class ConstArray final: public Constant {
 public:
 	/// Underlying type of the array's value.
-	using ArrayValue = std::vector<ShPtr<Expression>>;
+	using ArrayValue = std::vector<Expression*>;
 
 	/// Initialized array iterator.
 	using init_iterator = ArrayValue::const_iterator;
 
 public:
-	static ShPtr<ConstArray> create(ArrayValue value, ShPtr<ArrayType> type);
-	static ShPtr<ConstArray> createUninitialized(ShPtr<ArrayType> type);
+	static ConstArray* create(ArrayValue value, ArrayType* type);
+	static ConstArray* createUninitialized(ArrayType* type);
 
-	virtual ShPtr<Value> clone() override;
+	virtual Value* clone() override;
 
-	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
-	virtual ShPtr<Type> getType() const override;
-	virtual void replace(ShPtr<Expression> oldExpr,
-		ShPtr<Expression> newExpr) override;
+	virtual bool isEqualTo(Value* otherValue) const override;
+	virtual Type* getType() const override;
+	virtual void replace(Expression* oldExpr,
+		Expression* newExpr) override;
 
 	bool isInitialized() const;
 	bool isEmpty() const;
-	ShPtr<Type> getContainedType() const;
+	Type* getContainedType() const;
 	ArrayType::Dimensions getDimensions() const;
 
 	/// @name Initialized Array Accessors
@@ -61,8 +61,8 @@ public:
 
 	/// @name Observer Interface
 	/// @{
-	virtual void update(ShPtr<Value> subject,
-		ShPtr<Value> arg = nullptr) override;
+	virtual void update(Value* subject,
+		Value* arg = nullptr) override;
 	/// @}
 
 	/// @name Visitor Interface
@@ -78,12 +78,12 @@ private:
 	bool initialized;
 
 	/// The type of the array.
-	ShPtr<ArrayType> type;
+	ArrayType* type = nullptr;
 
 private:
 	// Since instances are created by calling the static function create(),
 	// constructors can be private.
-	ConstArray(ArrayValue value, ShPtr<ArrayType> type);
+	ConstArray(ArrayValue value, ArrayType* type);
 };
 
 } // namespace llvmir2hll

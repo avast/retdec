@@ -28,7 +28,7 @@ namespace llvmir2hll {
 * @par Preconditions
 *  - @a module is non-null
 */
-LLVMIntrinsicsOptimizer::LLVMIntrinsicsOptimizer(ShPtr<Module> module):
+LLVMIntrinsicsOptimizer::LLVMIntrinsicsOptimizer(Module* module):
 	FuncOptimizer(module), doNotRemoveFuncs(), removedCalls() {
 		PRECONDITION_NON_NULL(module);
 	}
@@ -50,27 +50,27 @@ void LLVMIntrinsicsOptimizer::doOptimization() {
 * If the called expression is something more complex, like an indirect call, it
 * returns the null pointer.
 */
-ShPtr<Function> LLVMIntrinsicsOptimizer::getCalledFunc(ShPtr<CallExpr> expr) const {
-	ShPtr<Variable> callAsVar(cast<Variable>(expr->getCalledExpr()));
+Function* LLVMIntrinsicsOptimizer::getCalledFunc(CallExpr* expr) const {
+	Variable* callAsVar(cast<Variable>(expr->getCalledExpr()));
 	if (!callAsVar) {
 		// The called expression is something complex.
-		return ShPtr<Function>();
+		return nullptr;
 	}
 
-	ShPtr<Function> calledFunc(module->getFuncByName(callAsVar->getName()));
+	Function* calledFunc(module->getFuncByName(callAsVar->getName()));
 	if (!calledFunc) {
 		// Indirect call.
-		return ShPtr<Function>();
+		return nullptr;
 	}
 
 	return calledFunc;
 }
 
-void LLVMIntrinsicsOptimizer::visit(ShPtr<CallExpr> expr) {
+void LLVMIntrinsicsOptimizer::visit(CallExpr* expr) {
 	// When we got here, we know that such a call should not be removed. Hence,
 	// we just check that the call is a function call (not some indirect call)
 	// and insert the call into doNotRemoveFuncs.
-	ShPtr<Function> calledFunc(getCalledFunc(expr));
+	Function* calledFunc(getCalledFunc(expr));
 	if (calledFunc) {
 		doNotRemoveFuncs.insert(calledFunc);
 	}
@@ -78,8 +78,8 @@ void LLVMIntrinsicsOptimizer::visit(ShPtr<CallExpr> expr) {
 	FuncOptimizer::visit(expr);
 }
 
-void LLVMIntrinsicsOptimizer::visit(ShPtr<CallStmt> stmt) {
-	ShPtr<Function> calledFunc(getCalledFunc(stmt->getCall()));
+void LLVMIntrinsicsOptimizer::visit(CallStmt* stmt) {
+	Function* calledFunc(getCalledFunc(stmt->getCall()));
 	if (!calledFunc || calledFunc->isDefinition() ||
 			!startsWith(calledFunc->getInitialName(), "llvm.ctpop.")) {
 		FuncOptimizer::visit(stmt);
@@ -87,7 +87,7 @@ void LLVMIntrinsicsOptimizer::visit(ShPtr<CallStmt> stmt) {
 	}
 
 	// It is a call to llvm.ctpop.*. Remove it.
-	ShPtr<Statement> stmtSucc(stmt->getSuccessor());
+	Statement* stmtSucc(stmt->getSuccessor());
 	removedCalls.insert(calledFunc);
 	Statement::removeStatementButKeepDebugComment(stmt);
 	if (stmtSucc) {

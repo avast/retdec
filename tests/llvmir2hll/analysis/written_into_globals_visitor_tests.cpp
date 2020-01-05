@@ -61,9 +61,9 @@ TwoGlobalsNoReadNoWrittenInto) {
 	// def test():
 	//    pass
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	module->addGlobalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
 	module->addGlobalVar(varB);
 
 	VarSet ref;
@@ -80,11 +80,11 @@ TwoGlobalsBothJustRead) {
 	// def test():
 	//    return a + b
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	module->addGlobalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
 	module->addGlobalVar(varB);
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(
+	ReturnStmt* returnStmt(ReturnStmt::create(
 		AddOpExpr::create(varA, varB)));
 	testFunc->setBody(returnStmt);
 
@@ -103,12 +103,12 @@ TwoGlobalsOneJustReadOneJustWrittenInto) {
 	//    a = 1     (AssignStmt)
 	//    return b
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	module->addGlobalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
 	module->addGlobalVar(varB);
-	ShPtr<ReturnStmt> returnB(ReturnStmt::create(varB));
-	ShPtr<AssignStmt> assignA1(AssignStmt::create(
+	ReturnStmt* returnB(ReturnStmt::create(varB));
+	AssignStmt* assignA1(AssignStmt::create(
 		varA, ConstInt::create(1, 16), returnB));
 	testFunc->setBody(assignA1);
 
@@ -128,13 +128,13 @@ TwoGlobalsBothJustWrittenInto) {
 	//    a = 1     (AssignStmt)
 	//    b = 1     (AssignStmt)
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	module->addGlobalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
 	module->addGlobalVar(varB);
-	ShPtr<AssignStmt> assignB1(AssignStmt::create(
+	AssignStmt* assignB1(AssignStmt::create(
 		varB, ConstInt::create(1, 16)));
-	ShPtr<AssignStmt> assignA1(AssignStmt::create(
+	AssignStmt* assignA1(AssignStmt::create(
 		varA, ConstInt::create(1, 16), assignB1));
 	testFunc->setBody(assignA1);
 
@@ -156,15 +156,15 @@ ThreeGlobalsTwoJustWrittenIntoOneUnused) {
 	//    a = 1     (AssignStmt)
 	//    b = 1     (AssignStmt)
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	module->addGlobalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
 	module->addGlobalVar(varB);
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(16)));
+	Variable* varC(Variable::create("c", IntType::create(16)));
 	module->addGlobalVar(varC);
-	ShPtr<AssignStmt> assignB1(AssignStmt::create(
+	AssignStmt* assignB1(AssignStmt::create(
 		varB, ConstInt::create(1, 16)));
-	ShPtr<AssignStmt> assignA1(AssignStmt::create(
+	AssignStmt* assignA1(AssignStmt::create(
 		varA, ConstInt::create(1, 16), assignB1));
 	testFunc->setBody(assignA1);
 
@@ -184,9 +184,9 @@ OneGlobalUsedAsLoopInductionVariable) {
 	//    for a in range(0, 10):
 	//        pass
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	module->addGlobalVar(varA);
-	ShPtr<ForLoopStmt> forLoopStmt(ForLoopStmt::create(
+	ForLoopStmt* forLoopStmt(ForLoopStmt::create(
 		varA, ConstInt::create(0, 16), LtOpExpr::create(varA, ConstInt::create(10, 16)),
 		ConstInt::create(1, 16), EmptyStmt::create()));
 	testFunc->setBody(forLoopStmt);
@@ -205,10 +205,10 @@ ArrayGlobalWhenSubscriptedDoesNotCountAsAWrittenIntoVariable) {
 	// def test():
 	//    a[0] = 1
 	//
-	ShPtr<Variable> varA(Variable::create("a", ArrayType::create(
+	Variable* varA(Variable::create("a", ArrayType::create(
 		IntType::create(16), ArrayType::Dimensions())));
 	module->addGlobalVar(varA);
-	ShPtr<AssignStmt> assignA01(AssignStmt::create(
+	AssignStmt* assignA01(AssignStmt::create(
 		ArrayIndexOpExpr::create(varA, ConstInt::create(0, 16)),
 		ConstInt::create(1, 16)));
 	testFunc->setBody(assignA01);
@@ -226,10 +226,10 @@ StructGlobalWhenSubscriptedDoesNotCountAsAWrittenIntoVariable) {
 	// def test():
 	//    a[0] = 1
 	//
-	ShPtr<Variable> varA(Variable::create("a", StructType::create(
+	Variable* varA(Variable::create("a", StructType::create(
 		StructType::ElementTypes())));
 	module->addGlobalVar(varA);
-	ShPtr<AssignStmt> assignA01(AssignStmt::create(
+	AssignStmt* assignA01(AssignStmt::create(
 		StructIndexOpExpr::create(varA, ConstInt::create(0, 16)),
 		ConstInt::create(1, 16)));
 	testFunc->setBody(assignA01);
@@ -247,10 +247,10 @@ DereferencingGlobalDoesNotCountAsAWrittenIntoVariable) {
 	// def test():
 	//    *a = 1
 	//
-	ShPtr<Variable> varA(Variable::create("a", PointerType::create(
+	Variable* varA(Variable::create("a", PointerType::create(
 		IntType::create(16))));
 	module->addGlobalVar(varA);
-	ShPtr<AssignStmt> assignA1(AssignStmt::create(
+	AssignStmt* assignA1(AssignStmt::create(
 		DerefOpExpr::create(varA),
 		ConstInt::create(1, 16)));
 	testFunc->setBody(assignA1);

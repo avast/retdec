@@ -33,18 +33,18 @@ public:
 	/// @name Statement Accessors
 	/// @{
 	bool isEmpty() const;
-	void addStmt(ShPtr<Statement> stmt);
+	void addStmt(Statement* stmt);
 	StmtVector::size_type getNumOfStmts() const;
 	stmt_iterator stmt_begin() const;
 	stmt_iterator stmt_end() const;
 	/// @}
 
-	static ShPtr<StmtsPattern> create();
-	static ShPtr<StmtsPattern> create(ShPtr<Statement> stmt);
+	static StmtsPattern* create();
+	static StmtsPattern* create(Statement* stmt);
 
 protected:
 	StmtsPattern();
-	explicit StmtsPattern(ShPtr<Statement> stmt);
+	explicit StmtsPattern(Statement* stmt);
 
 protected:
 	/// Statements that form the pattern.

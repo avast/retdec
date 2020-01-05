@@ -44,8 +44,8 @@ LLVMIR2BIRConverter::LLVMIR2BIRConverter(llvm::Pass *basePass):
 * @par Preconditions
 *  - @a basePass is non-null
 */
-ShPtr<LLVMIR2BIRConverter> LLVMIR2BIRConverter::create(llvm::Pass *basePass) {
-	return ShPtr<LLVMIR2BIRConverter>(new LLVMIR2BIRConverter(basePass));
+LLVMIR2BIRConverter* LLVMIR2BIRConverter::create(llvm::Pass *basePass) {
+	return new LLVMIR2BIRConverter(basePass);
 }
 
 /**
@@ -70,19 +70,19 @@ void LLVMIR2BIRConverter::setOptionStrictFPUSemantics(bool strict) {
 * @par Preconditions
 *  - both @a llvmModule and @a semantics are non-null
 */
-ShPtr<Module> LLVMIR2BIRConverter::convert(llvm::Module *llvmModule,
-		const std::string &moduleName, ShPtr<Semantics> semantics,
-		ShPtr<Config> config, bool enableDebug) {
+Module* LLVMIR2BIRConverter::convert(llvm::Module *llvmModule,
+		const std::string &moduleName, Semantics* semantics,
+		Config* config, bool enableDebug) {
 	PRECONDITION_NON_NULL(llvmModule);
 	PRECONDITION_NON_NULL(semantics);
 
 	this->llvmModule = llvmModule;
 	this->enableDebug = enableDebug;
-	resModule = std::make_shared<Module>(llvmModule, moduleName, semantics,
+	resModule = new Module(llvmModule, moduleName, semantics,
 		config);
-	variablesManager = std::make_shared<VariablesManager>(resModule);
+	variablesManager = new VariablesManager(resModule);
 	converter = LLVMValueConverter::create(resModule, variablesManager);
-	structConverter = std::make_unique<StructureConverter>(basePass, converter, resModule);
+	structConverter = new StructureConverter(basePass, converter, resModule);
 
 	converter->setOptionStrictFPUSemantics(optionStrictFPUSemantics);
 
@@ -115,7 +115,7 @@ bool LLVMIR2BIRConverter::shouldBeConvertedAndAdded(
 /**
 * @brief Converts the given LLVM global variable @a globVar into a variable in BIR.
 */
-ShPtr<Variable> LLVMIR2BIRConverter::convertGlobalVariable(
+Variable* LLVMIR2BIRConverter::convertGlobalVariable(
 		llvm::GlobalVariable &globVar) const {
 	auto var = converter->convertValueToVariable(&globVar);
 	if (isExternal(globVar)) {
@@ -132,7 +132,7 @@ ShPtr<Variable> LLVMIR2BIRConverter::convertGlobalVariable(
 * @brief Converts initializer of the given LLVM global variable @a globVar into
 *        an expression in BIR.
 */
-ShPtr<Expression> LLVMIR2BIRConverter::convertGlobalVariableInitializer(
+Expression* LLVMIR2BIRConverter::convertGlobalVariableInitializer(
 		llvm::GlobalVariable &globVar) const {
 	if (globVar.hasInitializer()) {
 		return converter->convertConstantToExpression(
@@ -178,7 +178,7 @@ VarVector LLVMIR2BIRConverter::convertFuncParams(llvm::Function &func) {
 * @brief Converts a declaration of the given LLVM function @a func into
 *        a function declaration in BIR.
 */
-ShPtr<Function> LLVMIR2BIRConverter::convertFuncDeclaration(
+Function* LLVMIR2BIRConverter::convertFuncDeclaration(
 		llvm::Function &func) {
 	// Clear local variables before conversion.
 	variablesManager->reset();
@@ -226,7 +226,7 @@ VarVector LLVMIR2BIRConverter::sortLocalVars(const VarSet &vars) const {
 /**
 * @brief Generates variable definition statements at the beginning of @a func.
 */
-void LLVMIR2BIRConverter::generateVarDefinitions(ShPtr<Function> func) const {
+void LLVMIR2BIRConverter::generateVarDefinitions(Function* func) const {
 	auto vars = sortLocalVars(func->getLocalVars());
 	for (auto i = vars.crbegin(), e = vars.crend(); i != e; ++i) {
 		Address a = (*i)->getAddress();
@@ -303,7 +303,7 @@ void LLVMIR2BIRConverter::makeFuncsIdentifiersValid() {
 * @brief Makes all identifiers of the given function @a func valid (function
 *        name, parameters and local variables).
 */
-void LLVMIR2BIRConverter::makeFuncIdentifiersValid(ShPtr<Function> func) const {
+void LLVMIR2BIRConverter::makeFuncIdentifiersValid(Function* func) const {
 	func->setName(makeIdentifierValid(func->getName()));
 	makeFuncVariablesValid(func);
 }
@@ -312,7 +312,7 @@ void LLVMIR2BIRConverter::makeFuncIdentifiersValid(ShPtr<Function> func) const {
 * @brief Makes all identifiers of the local variables and parameters in the
 *        given function @a func valid.
 */
-void LLVMIR2BIRConverter::makeFuncVariablesValid(ShPtr<Function> func) const {
+void LLVMIR2BIRConverter::makeFuncVariablesValid(Function* func) const {
 	for (auto &var: func->getLocalVars(true)) {
 		var->setName(makeIdentifierValid(var->getName()));
 	}

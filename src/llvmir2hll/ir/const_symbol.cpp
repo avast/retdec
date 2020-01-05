@@ -16,37 +16,37 @@ namespace llvmir2hll {
 *
 * See create() for more information.
 */
-ConstSymbol::ConstSymbol(const std::string &name, ShPtr<Constant> value):
+ConstSymbol::ConstSymbol(const std::string &name, Constant* value):
 	Constant(), name(name), value(value) {}
 
-ShPtr<Value> ConstSymbol::clone() {
-	ShPtr<ConstSymbol> constSymbol(ConstSymbol::create(name, value));
+Value* ConstSymbol::clone() {
+	ConstSymbol* constSymbol(ConstSymbol::create(name, value));
 	constSymbol->setMetadata(getMetadata());
 	return constSymbol;
 }
 
-bool ConstSymbol::isEqualTo(ShPtr<Value> otherValue) const {
+bool ConstSymbol::isEqualTo(Value* otherValue) const {
 	// Both names and values have to be equal.
-	if (ShPtr<ConstSymbol> otherConstSymbol = cast<ConstSymbol>(otherValue)) {
+	if (ConstSymbol* otherConstSymbol = cast<ConstSymbol>(otherValue)) {
 		return name == otherConstSymbol->getName() &&
 			value->isEqualTo(otherConstSymbol->getValue());
 	}
 	return false;
 }
 
-ShPtr<Type> ConstSymbol::getType() const {
+Type* ConstSymbol::getType() const {
 	return value->getType();
 }
 
-void ConstSymbol::replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) {
+void ConstSymbol::replace(Expression* oldExpr, Expression* newExpr) {
 	PRECONDITION_NON_NULL(oldExpr);
 
-	ShPtr<Constant> constOldExpr(cast<Constant>(oldExpr));
+	Constant* constOldExpr(cast<Constant>(oldExpr));
 	if (!constOldExpr || value != constOldExpr) {
 		return;
 	}
 
-	ShPtr<Constant> constNewExpr(cast<Constant>(newExpr));
+	Constant* constNewExpr(cast<Constant>(newExpr));
 	if (!constNewExpr) {
 		return;
 	}
@@ -63,13 +63,13 @@ void ConstSymbol::replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) 
 * @par Preconditions
 *  - @a value is non-null
 */
-ShPtr<ConstSymbol> ConstSymbol::create(const std::string &name,
-		ShPtr<Constant> value) {
+ConstSymbol* ConstSymbol::create(const std::string &name,
+		Constant* value) {
 	PRECONDITION_NON_NULL(value);
 
-	ShPtr<ConstSymbol> constSymbol(new ConstSymbol(name, value));
+	ConstSymbol* constSymbol(new ConstSymbol(name, value));
 
-	// Initialization (recall that shared_from_this() cannot be called in a
+	// Initialization (recall that this cannot be called in a
 	// constructor).
 	value->addObserver(constSymbol);
 
@@ -86,7 +86,7 @@ const std::string &ConstSymbol::getName() const {
 /**
 * @brief Returns the value of the symbolic constant.
 */
-ShPtr<Constant> ConstSymbol::getValue() const {
+Constant* ConstSymbol::getValue() const {
 	return value;
 }
 
@@ -96,16 +96,16 @@ ShPtr<Constant> ConstSymbol::getValue() const {
 * @par Preconditions
 *  - @a newValue is non-null
 */
-void ConstSymbol::setValue(ShPtr<Constant> newValue) {
+void ConstSymbol::setValue(Constant* newValue) {
 	PRECONDITION_NON_NULL(newValue);
 
-	value->removeObserver(shared_from_this());
+	value->removeObserver(this);
 	value = newValue;
-	value->addObserver(shared_from_this());
+	value->addObserver(this);
 }
 
 void ConstSymbol::accept(Visitor *v) {
-	v->visit(ucast<ConstSymbol>(shared_from_this()));
+	v->visit(ucast<ConstSymbol>(this));
 }
 
 } // namespace llvmir2hll

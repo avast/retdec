@@ -24,7 +24,7 @@ namespace {
 /**
 * @brief Computes the type of the given llvm::APFloat.
 */
-ShPtr<FloatType> getTypeOfValue(const ConstFloat::Type &value) {
+FloatType* getTypeOfValue(const ConstFloat::Type &value) {
 	// FloatType::create() needs the size of the type in bits. The size has to
 	// be obtained from the semantics. However, I haven't found a better way of
 	// doing this because you cannot simply obtain the size from the semantics
@@ -60,15 +60,15 @@ ShPtr<FloatType> getTypeOfValue(const ConstFloat::Type &value) {
 ConstFloat::ConstFloat(Type value):
 	Constant(), value(value), type(getTypeOfValue(value)) {}
 
-ShPtr<Value> ConstFloat::clone() {
-	ShPtr<ConstFloat> constFloat(ConstFloat::create(value));
+Value* ConstFloat::clone() {
+	ConstFloat* constFloat(ConstFloat::create(value));
 	constFloat->setMetadata(getMetadata());
 	return constFloat;
 }
 
-bool ConstFloat::isEqualTo(ShPtr<Value> otherValue) const {
+bool ConstFloat::isEqualTo(Value* otherValue) const {
 	// Both types and values have to be equal.
-	if (ShPtr<ConstFloat> otherConstFloat = cast<ConstFloat>(otherValue)) {
+	if (ConstFloat* otherConstFloat = cast<ConstFloat>(otherValue)) {
 		if (getType() != otherConstFloat->getType()) {
 			return false;
 		}
@@ -77,11 +77,11 @@ bool ConstFloat::isEqualTo(ShPtr<Value> otherValue) const {
 	return false;
 }
 
-ShPtr<Type> ConstFloat::getType() const {
+Type* ConstFloat::getType() const {
 	return type;
 }
 
-void ConstFloat::replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) {
+void ConstFloat::replace(Expression* oldExpr, Expression* newExpr) {
 	PRECONDITION_NON_NULL(oldExpr);
 
 	// There is nothing to be replaced.
@@ -246,12 +246,12 @@ bool ConstFloat::isZero() const {
 *
 * @param[in] value Value of the constant.
 */
-ShPtr<ConstFloat> ConstFloat::create(Type value) {
-	return ShPtr<ConstFloat>(new ConstFloat(value));
+ConstFloat* ConstFloat::create(Type value) {
+	return new ConstFloat(value);
 }
 
 void ConstFloat::accept(Visitor *v) {
-	v->visit(ucast<ConstFloat>(shared_from_this()));
+	v->visit(ucast<ConstFloat>(this));
 }
 
 } // namespace llvmir2hll

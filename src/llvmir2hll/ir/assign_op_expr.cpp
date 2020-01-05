@@ -16,10 +16,10 @@ namespace llvmir2hll {
 *
 * See create() for more information.
 */
-AssignOpExpr::AssignOpExpr(ShPtr<Expression> op1, ShPtr<Expression> op2):
+AssignOpExpr::AssignOpExpr(Expression* op1, Expression* op2):
 	BinaryOpExpr(op1, op2) {}
 
-bool AssignOpExpr::isEqualTo(ShPtr<Value> otherValue) const {
+bool AssignOpExpr::isEqualTo(Value* otherValue) const {
 	if (auto otherExpr = cast<AssignOpExpr>(otherValue)) {
 		return op1->isEqualTo(otherExpr->getFirstOperand()) &&
 			op2->isEqualTo(otherExpr->getSecondOperand());
@@ -27,7 +27,7 @@ bool AssignOpExpr::isEqualTo(ShPtr<Value> otherValue) const {
 	return false;
 }
 
-ShPtr<Value> AssignOpExpr::clone() {
+Value* AssignOpExpr::clone() {
 	auto expr = AssignOpExpr::create(
 		ucast<Expression>(op1->clone()),
 		ucast<Expression>(op2->clone())
@@ -45,13 +45,13 @@ ShPtr<Value> AssignOpExpr::clone() {
 * @par Preconditions
 *  - both operands are non-null
 */
-ShPtr<AssignOpExpr> AssignOpExpr::create(ShPtr<Expression> op1, ShPtr<Expression> op2) {
+AssignOpExpr* AssignOpExpr::create(Expression* op1, Expression* op2) {
 	PRECONDITION_NON_NULL(op1);
 	PRECONDITION_NON_NULL(op2);
 
-	ShPtr<AssignOpExpr> expr(new AssignOpExpr(op1, op2));
+	AssignOpExpr* expr(new AssignOpExpr(op1, op2));
 
-	// Initialization (recall that shared_from_this() cannot be called in a
+	// Initialization (recall that this cannot be called in a
 	// constructor).
 	op1->addObserver(expr);
 	op2->addObserver(expr);
@@ -60,7 +60,7 @@ ShPtr<AssignOpExpr> AssignOpExpr::create(ShPtr<Expression> op1, ShPtr<Expression
 }
 
 void AssignOpExpr::accept(Visitor *v) {
-	v->visit(ucast<AssignOpExpr>(shared_from_this()));
+	v->visit(ucast<AssignOpExpr>(this));
 }
 
 } // namespace llvmir2hll

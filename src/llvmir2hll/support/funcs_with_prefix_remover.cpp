@@ -26,7 +26,7 @@ namespace llvmir2hll {
 *
 * See removeFuncs() for the description of all parameters and preconditions.
 */
-FuncsWithPrefixRemover::FuncsWithPrefixRemover(ShPtr<Module> module,
+FuncsWithPrefixRemover::FuncsWithPrefixRemover(Module* module,
 	const StringSet &prefixes):
 		OrderedAllVisitor(), module(module), prefixes(prefixes) {}
 
@@ -48,11 +48,11 @@ FuncsWithPrefixRemover::FuncsWithPrefixRemover(ShPtr<Module> module,
 * @par Preconditions
 *  - @a module is non-null
 */
-void FuncsWithPrefixRemover::removeFuncs(ShPtr<Module> module,
+void FuncsWithPrefixRemover::removeFuncs(Module* module,
 		const StringSet &prefixes) {
 	PRECONDITION_NON_NULL(module);
 
-	ShPtr<FuncsWithPrefixRemover> remover(new FuncsWithPrefixRemover(module,
+	FuncsWithPrefixRemover* remover(new FuncsWithPrefixRemover(module,
 		prefixes));
 	remover->performRemoval();
 }
@@ -60,7 +60,7 @@ void FuncsWithPrefixRemover::removeFuncs(ShPtr<Module> module,
 /**
 * @brief Overload of removeFuncs() for a single prefix.
 */
-void FuncsWithPrefixRemover::removeFuncs(ShPtr<Module> module,
+void FuncsWithPrefixRemover::removeFuncs(Module* module,
 		const std::string &prefix) {
 	StringSet prefixes{prefix};
 	removeFuncs(module, prefixes);
@@ -109,18 +109,18 @@ void FuncsWithPrefixRemover::removeDeclarationsOfFuncsWithPrefixes() {
 * @brief Returns @c true if @a expr is a call to a function that should be
 *        removed, @c false otherwise.
 */
-bool FuncsWithPrefixRemover::isCallOfFuncToBeRemoved(ShPtr<Expression> expr) const {
-	ShPtr<CallExpr> callExpr(cast<CallExpr>(expr));
+bool FuncsWithPrefixRemover::isCallOfFuncToBeRemoved(Expression* expr) const {
+	CallExpr* callExpr(cast<CallExpr>(expr));
 	if (!callExpr) {
 		return false;
 	}
 
-	ShPtr<Variable> callVar(cast<Variable>(callExpr->getCalledExpr()));
+	Variable* callVar(cast<Variable>(callExpr->getCalledExpr()));
 	if (!callVar) {
 		return false;
 	}
 
-	ShPtr<Function> callFunc(module->getFuncByName(callVar->getName()));
+	Function* callFunc(module->getFuncByName(callVar->getName()));
 	if (!callFunc) {
 		return false;
 	}
@@ -132,7 +132,7 @@ bool FuncsWithPrefixRemover::isCallOfFuncToBeRemoved(ShPtr<Expression> expr) con
 * @brief Returns @c true if @a func is a function that should be removed, @c
 *        false otherwise.
 */
-bool FuncsWithPrefixRemover::shouldBeRemoved(ShPtr<Function> func) const {
+bool FuncsWithPrefixRemover::shouldBeRemoved(Function* func) const {
 	for (const auto &prefix : prefixes) {
 		if (startsWith(func->getName(), prefix)) {
 			return true;
@@ -141,10 +141,10 @@ bool FuncsWithPrefixRemover::shouldBeRemoved(ShPtr<Function> func) const {
 	return false;
 }
 
-void FuncsWithPrefixRemover::visit(ShPtr<CallStmt> stmt) {
+void FuncsWithPrefixRemover::visit(CallStmt* stmt) {
 	// We have to backup the statement's successor because
 	// removeStatementButKeepDebugComment() resets the successor.
-	ShPtr<Statement> stmtSucc(stmt->getSuccessor());
+	Statement* stmtSucc(stmt->getSuccessor());
 
 	if (isCallOfFuncToBeRemoved(stmt->getCall())) {
 		Statement::removeStatementButKeepDebugComment(stmt);
@@ -156,10 +156,10 @@ void FuncsWithPrefixRemover::visit(ShPtr<CallStmt> stmt) {
 	}
 }
 
-void FuncsWithPrefixRemover::visit(ShPtr<AssignStmt> stmt) {
+void FuncsWithPrefixRemover::visit(AssignStmt* stmt) {
 	// We have to backup the statement's successor because
 	// removeStatementButKeepDebugComment() resets the successor.
-	ShPtr<Statement> stmtSucc(stmt->getSuccessor());
+	Statement* stmtSucc(stmt->getSuccessor());
 
 	if (isCallOfFuncToBeRemoved(stmt->getRhs())) {
 		Statement::removeStatementButKeepDebugComment(stmt);
@@ -171,13 +171,13 @@ void FuncsWithPrefixRemover::visit(ShPtr<AssignStmt> stmt) {
 	}
 }
 
-void FuncsWithPrefixRemover::visit(ShPtr<VarDefStmt> stmt) {
+void FuncsWithPrefixRemover::visit(VarDefStmt* stmt) {
 	if (isCallOfFuncToBeRemoved(stmt->getInitializer())) {
 		stmt->removeInitializer();
 	}
 
 	// Visit the successor (if any).
-	if (ShPtr<Statement> stmtSucc = stmt->getSuccessor()) {
+	if (Statement* stmtSucc = stmt->getSuccessor()) {
 		visitStmt(stmtSucc);
 	}
 }

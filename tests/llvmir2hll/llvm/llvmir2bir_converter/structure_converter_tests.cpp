@@ -48,11 +48,11 @@ namespace tests {
 class StructureConverterTests: public LLVMIR2BIRConverterBaseTests {
 protected:
 	template<class T>
-	AssertionResult isComparison(ShPtr<Expression> expr, ShPtr<Variable> var,
+	AssertionResult isComparison(Expression* expr, Variable* var,
 		int num);
 	template<class T>
-	AssertionResult isComparison(ShPtr<Expression> expr, ShPtr<Variable> var1,
-		ShPtr<Variable> var2);
+	AssertionResult isComparison(Expression* expr, Variable* var1,
+		Variable* var2);
 
 	template<class T = BreakStmt>
 	AssertionResult isTerminatingSwitchClause(const SwitchStmt::SwitchClause &clause,
@@ -60,9 +60,9 @@ protected:
 	AssertionResult isNonTerminatingSwitchClause(const SwitchStmt::SwitchClause &clause,
 		int cond, int funcParam);
 
-	void testPredefinedDoWhileLoop(ShPtr<Statement> statement,
-		ShPtr<Variable> varX, ShPtr<Variable> varY,
-		ShPtr<Variable> varLoopCond);
+	void testPredefinedDoWhileLoop(Statement* statement,
+		Variable* varX, Variable* varY,
+		Variable* varLoopCond);
 };
 
 /**
@@ -72,8 +72,8 @@ protected:
 * @tparam T Class that represents a comparison operator in BIR.
 */
 template<class T>
-AssertionResult StructureConverterTests::isComparison(ShPtr<Expression> expr,
-		ShPtr<Variable> var, int num) {
+AssertionResult StructureConverterTests::isComparison(Expression* expr,
+		Variable* var, int num) {
 	auto compExpr = cast<T>(expr);
 	if (!compExpr) {
 		return AssertionFailure() << expr
@@ -101,8 +101,8 @@ AssertionResult StructureConverterTests::isComparison(ShPtr<Expression> expr,
 * @tparam T Class that represents a comparison operator in BIR.
 */
 template<class T>
-AssertionResult StructureConverterTests::isComparison(ShPtr<Expression> expr,
-		ShPtr<Variable> var1, ShPtr<Variable> var2) {
+AssertionResult StructureConverterTests::isComparison(Expression* expr,
+		Variable* var1, Variable* var2) {
 	auto compExpr = cast<T>(expr);
 	if (!compExpr) {
 		return AssertionFailure() << expr
@@ -209,8 +209,8 @@ AssertionResult StructureConverterTests::isNonTerminatingSwitchClause(
 * @param[in] varVal Integer variable "val".
 */
 void StructureConverterTests::testPredefinedDoWhileLoop(
-		ShPtr<Statement> statement, ShPtr<Variable> varX,
-		ShPtr<Variable> varY, ShPtr<Variable> varVal) {
+		Statement* statement, Variable* varX,
+		Variable* varY, Variable* varVal) {
 	auto whileStmt = cast<WhileLoopStmt>(statement);
 	ASSERT_TRUE(whileStmt);
 	auto whileCond = cast<ConstBool>(whileStmt->getCondition());

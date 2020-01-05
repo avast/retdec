@@ -20,26 +20,26 @@ namespace llvmir2hll {
 */
 class UnaryOpExpr: public Expression {
 public:
-	virtual ShPtr<Type> getType() const override;
-	virtual void replace(ShPtr<Expression> oldExpr,
-		ShPtr<Expression> newExpr) override;
+	virtual Type* getType() const override;
+	virtual void replace(Expression* oldExpr,
+		Expression* newExpr) override;
 
-	ShPtr<Expression> getOperand() const;
+	Expression* getOperand() const;
 
-	void setOperand(ShPtr<Expression> newOp);
+	void setOperand(Expression* newOp);
 
 	/// @name Observer Interface
 	/// @{
-	virtual void update(ShPtr<Value> subject,
-		ShPtr<Value> arg = nullptr) override;
+	virtual void update(Value* subject,
+		Value* arg = nullptr) override;
 	/// @}
 
 protected:
-	explicit UnaryOpExpr(ShPtr<Expression> op);
+	explicit UnaryOpExpr(Expression* op);
 
 protected:
 	/// Operand.
-	ShPtr<Expression> op;
+	Expression* op = nullptr;
 };
 
 } // namespace llvmir2hll

@@ -28,13 +28,13 @@ namespace llvmir2hll {
 * an instance of the requested semantics. If there is no semantics with a given
 * ID, a warning message is emitted and the semantics is not added.
 */
-ShPtr<CompoundSemantics> CompoundSemanticsBuilder::build(
+CompoundSemantics* CompoundSemanticsBuilder::build(
 		const StringVector &semanticsIds) {
-	ShPtr<CompoundSemantics> compoundSemantics(CompoundSemantics::create());
+	CompoundSemantics* compoundSemantics(CompoundSemantics::create());
 
 	// Try to instantiate and add all semantics from semanticsIds.
 	for (const auto &id : semanticsIds) {
-		ShPtr<Semantics> semantics(SemanticsFactory::getInstance().createObject(id));
+		Semantics* semantics(SemanticsFactory::getInstance().createObject(id));
 		if (semantics) {
 			compoundSemantics->appendSemantics(semantics);
 		} else {

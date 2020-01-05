@@ -24,22 +24,22 @@ class Visitor;
 */
 class ReturnStmt final: public Statement {
 public:
-	static ShPtr<ReturnStmt> create(ShPtr<Expression> retVal = nullptr,
-		ShPtr<Statement> succ = nullptr, Address a = Address::Undefined);
+	static ReturnStmt* create(Expression* retVal = nullptr,
+		Statement* succ = nullptr, Address a = Address::Undefined);
 
-	virtual ShPtr<Value> clone() override;
-	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
+	virtual Value* clone() override;
+	virtual bool isEqualTo(Value* otherValue) const override;
 	virtual bool isCompound() override { return false; }
-	virtual void replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) override;
-	virtual ShPtr<Expression> asExpression() const override;
+	virtual void replace(Expression* oldExpr, Expression* newExpr) override;
+	virtual Expression* asExpression() const override;
 
-	ShPtr<Expression> getRetVal() const;
-	void setRetVal(ShPtr<Expression> newRetVal);
+	Expression* getRetVal() const;
+	void setRetVal(Expression* newRetVal);
 	bool hasRetVal() const;
 
 	/// @name Observer Interface
 	/// @{
-	virtual void update(ShPtr<Value> subject, ShPtr<Value> arg = nullptr) override;
+	virtual void update(Value* subject, Value* arg = nullptr) override;
 	/// @}
 
 	/// @name Visitor Interface
@@ -50,12 +50,12 @@ public:
 private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
-	explicit ReturnStmt(ShPtr<Expression> retVal = nullptr,
+	explicit ReturnStmt(Expression* retVal = nullptr,
 		Address a = Address::Undefined);
 
 private:
 	/// Return value.
-	ShPtr<Expression> retVal;
+	Expression* retVal = nullptr;
 };
 
 } // namespace llvmir2hll

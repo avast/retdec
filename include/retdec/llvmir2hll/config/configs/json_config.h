@@ -43,9 +43,9 @@ public:
 
 	/// @name Loading and Saving
 	/// @{
-	static UPtr<JSONConfig> fromFile(const std::string &path);
-	static UPtr<JSONConfig> fromString(const std::string &str);
-	static UPtr<JSONConfig> empty();
+	static JSONConfig* fromFile(const std::string &path);
+	static JSONConfig* fromString(const std::string &str);
+	static JSONConfig* empty();
 
 	virtual void saveTo(const std::string &path) override;
 	/// @}

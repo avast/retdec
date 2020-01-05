@@ -25,7 +25,7 @@ REGISTER_AT_FACTORY("NegativeOperand", NEGATIVE_OPERAND_SUB_OPTIMIZER_ID,
 *            expressions.
 */
 NegativeOperandSubOptimizer::NegativeOperandSubOptimizer(
-		ShPtr<ArithmExprEvaluator> arithmExprEvaluator):
+		ArithmExprEvaluator* arithmExprEvaluator):
 			SubOptimizer(arithmExprEvaluator) {}
 
 /**
@@ -34,27 +34,27 @@ NegativeOperandSubOptimizer::NegativeOperandSubOptimizer(
 * @param[in] arithmExprEvaluator @a The used evaluator of arithmetical
 *            expressions.
 */
-ShPtr<SubOptimizer> NegativeOperandSubOptimizer::create(
-		ShPtr<ArithmExprEvaluator> arithmExprEvaluator) {
-	return ShPtr<SubOptimizer>(new NegativeOperandSubOptimizer(
-		arithmExprEvaluator));
+SubOptimizer* NegativeOperandSubOptimizer::create(
+		ArithmExprEvaluator* arithmExprEvaluator) {
+	return new NegativeOperandSubOptimizer(
+		arithmExprEvaluator);
 }
 
 std::string NegativeOperandSubOptimizer::getId() const {
 	return NEGATIVE_OPERAND_SUB_OPTIMIZER_ID;
 }
 
-void NegativeOperandSubOptimizer::visit(ShPtr<AddOpExpr> expr) {
+void NegativeOperandSubOptimizer::visit(AddOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	// -------
 	// First negative operand optimization.
 	//
-	ShPtr<ConstInt> firstOpNegConstInt(
+	ConstInt* firstOpNegConstInt(
 		ifNegativeConstIntReturnIt(expr->getFirstOperand()));
-	ShPtr<ConstFloat> firstOpNegConstFloat(
+	ConstFloat* firstOpNegConstFloat(
 		ifNegativeConstFloatReturnIt(expr->getFirstOperand()));
-	ShPtr<NegOpExpr> firstOpNegOpExpr(cast<NegOpExpr>(expr->getFirstOperand()));
+	NegOpExpr* firstOpNegOpExpr(cast<NegOpExpr>(expr->getFirstOperand()));
 
 	// Optimization like "-3 + a" -> optimized to "a - 3".
 	if (firstOpNegConstInt && !firstOpNegConstInt->isMinSigned()) {
@@ -62,7 +62,7 @@ void NegativeOperandSubOptimizer::visit(ShPtr<AddOpExpr> expr) {
 		// on 8 bits because in this case, .abs() does not invert this
 		// number to positive.
 		firstOpNegConstInt->flipSign();
-		ShPtr<SubOpExpr> sub(SubOpExpr::create(expr->getSecondOperand(),
+		SubOpExpr* sub(SubOpExpr::create(expr->getSecondOperand(),
 			firstOpNegConstInt));
 		optimizeExpr(expr, sub);
 		return;
@@ -71,7 +71,7 @@ void NegativeOperandSubOptimizer::visit(ShPtr<AddOpExpr> expr) {
 	// Optimization like "-3.0 + a" -> optimized to "a - 3.0".
 	if (firstOpNegConstFloat) {
 		firstOpNegConstFloat->flipSign();
-		ShPtr<SubOpExpr> sub(SubOpExpr::create(expr->getSecondOperand(),
+		SubOpExpr* sub(SubOpExpr::create(expr->getSecondOperand(),
 			firstOpNegConstFloat));
 		optimizeExpr(expr, sub);
 		return;
@@ -79,7 +79,7 @@ void NegativeOperandSubOptimizer::visit(ShPtr<AddOpExpr> expr) {
 
 	// Optimization like "(NegOpExpr)a + 3" -> optimized to "3 - a".
 	if (firstOpNegOpExpr) {
-		ShPtr<SubOpExpr> sub(SubOpExpr::create(expr->getSecondOperand(),
+		SubOpExpr* sub(SubOpExpr::create(expr->getSecondOperand(),
 			firstOpNegOpExpr->getOperand()));
 		optimizeExpr(expr, sub);
 		return;
@@ -90,11 +90,11 @@ void NegativeOperandSubOptimizer::visit(ShPtr<AddOpExpr> expr) {
 	// -------
 	// Second negative operand optimization.
 	//
-	ShPtr<ConstInt> secOpNegConstInt(
+	ConstInt* secOpNegConstInt(
 		ifNegativeConstIntReturnIt(expr->getSecondOperand()));
-	ShPtr<ConstFloat> secOpNegConstFloat(
+	ConstFloat* secOpNegConstFloat(
 		ifNegativeConstFloatReturnIt(expr->getSecondOperand()));
-	ShPtr<NegOpExpr> secOpNegOpExpr(cast<NegOpExpr>(expr->getSecondOperand()));
+	NegOpExpr* secOpNegOpExpr(cast<NegOpExpr>(expr->getSecondOperand()));
 
 	// Optimization like "a + -2" -> optimized to "a - 2".
 	if (secOpNegConstInt && !secOpNegConstInt->isMinSigned()) {
@@ -102,7 +102,7 @@ void NegativeOperandSubOptimizer::visit(ShPtr<AddOpExpr> expr) {
 		// We can't optimize expressions like a + -128 when -128 is only
 		// on 8 bits because in this case, .abs() does not invert this
 		// number to positive.
-		ShPtr<SubOpExpr> sub(SubOpExpr::create(expr->getFirstOperand(),
+		SubOpExpr* sub(SubOpExpr::create(expr->getFirstOperand(),
 			secOpNegConstInt));
 		optimizeExpr(expr, sub);
 		return;
@@ -111,7 +111,7 @@ void NegativeOperandSubOptimizer::visit(ShPtr<AddOpExpr> expr) {
 	// Optimization like "a + -2.0" -> optimized to "a - 2.0".
 	if (secOpNegConstFloat) {
 		secOpNegConstFloat->flipSign();
-		ShPtr<SubOpExpr> sub(SubOpExpr::create(expr->getFirstOperand(),
+		SubOpExpr* sub(SubOpExpr::create(expr->getFirstOperand(),
 			secOpNegConstFloat));
 		optimizeExpr(expr, sub);
 		return;
@@ -119,7 +119,7 @@ void NegativeOperandSubOptimizer::visit(ShPtr<AddOpExpr> expr) {
 
 	// Optimization like "2 + (NegOpExpr)a" -> optimized to "2 - a".
 	if (secOpNegOpExpr) {
-		ShPtr<SubOpExpr> sub(SubOpExpr::create(expr->getFirstOperand(),
+		SubOpExpr* sub(SubOpExpr::create(expr->getFirstOperand(),
 			secOpNegOpExpr->getOperand()));
 		optimizeExpr(expr, sub);
 		return;
@@ -128,17 +128,17 @@ void NegativeOperandSubOptimizer::visit(ShPtr<AddOpExpr> expr) {
 	// -------
 }
 
-void NegativeOperandSubOptimizer::visit(ShPtr<SubOpExpr> expr) {
+void NegativeOperandSubOptimizer::visit(SubOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	// -------
 	// Second negative operand optimization.
 	//
-	ShPtr<ConstInt> secOpNegConstInt(
+	ConstInt* secOpNegConstInt(
 		ifNegativeConstIntReturnIt(expr->getSecondOperand()));
-	ShPtr<ConstFloat> secOpNegConstFloat(
+	ConstFloat* secOpNegConstFloat(
 		ifNegativeConstFloatReturnIt(expr->getSecondOperand()));
-	ShPtr<NegOpExpr> secOpNegOpExpr(cast<NegOpExpr>(expr->getSecondOperand()));
+	NegOpExpr* secOpNegOpExpr(cast<NegOpExpr>(expr->getSecondOperand()));
 
 	// Optimization like "a - -2" -> optimized to "a + 2".
 	if (secOpNegConstInt && !secOpNegConstInt->isMinSigned()) {
@@ -146,7 +146,7 @@ void NegativeOperandSubOptimizer::visit(ShPtr<SubOpExpr> expr) {
 		// on 8 bits because in this case, .abs() does not invert this
 		// number to positive.
 		secOpNegConstInt->flipSign();
-		ShPtr<AddOpExpr> add(AddOpExpr::create(expr->getFirstOperand(),
+		AddOpExpr* add(AddOpExpr::create(expr->getFirstOperand(),
 			secOpNegConstInt));
 		optimizeExpr(expr, add);
 		return;
@@ -155,7 +155,7 @@ void NegativeOperandSubOptimizer::visit(ShPtr<SubOpExpr> expr) {
 	// Optimization like "a - -2.0" -> optimized to "a + 2.0".
 	if (secOpNegConstFloat) {
 		secOpNegConstFloat->flipSign();
-		ShPtr<AddOpExpr> add(AddOpExpr::create(expr->getFirstOperand(),
+		AddOpExpr* add(AddOpExpr::create(expr->getFirstOperand(),
 			secOpNegConstFloat));
 		optimizeExpr(expr, add);
 		return;
@@ -163,7 +163,7 @@ void NegativeOperandSubOptimizer::visit(ShPtr<SubOpExpr> expr) {
 
 	// Optimization like "2 - (NegOpExpr)a" -> optimized to "2 + a".
 	if (secOpNegOpExpr) {
-		ShPtr<AddOpExpr> add(AddOpExpr::create(expr->getFirstOperand(),
+		AddOpExpr* add(AddOpExpr::create(expr->getFirstOperand(),
 			secOpNegOpExpr->getOperand()));
 		optimizeExpr(expr, add);
 		return;
@@ -180,13 +180,13 @@ void NegativeOperandSubOptimizer::visit(ShPtr<SubOpExpr> expr) {
 * @return @c ConstInt if @a expr is negative @c ConstInt, otherwise the null
 *         pointer.
 */
-ShPtr<ConstInt> NegativeOperandSubOptimizer::ifNegativeConstIntReturnIt(
-		ShPtr<Expression> expr) const {
-	ShPtr<ConstInt> constInt(cast<ConstInt>(expr));
+ConstInt* NegativeOperandSubOptimizer::ifNegativeConstIntReturnIt(
+		Expression* expr) const {
+	ConstInt* constInt(cast<ConstInt>(expr));
 	if (constInt && constInt->isNegative()) {
 		return constInt;
 	} else {
-		return ShPtr<ConstInt>();
+		return nullptr;
 	}
 }
 
@@ -198,13 +198,13 @@ ShPtr<ConstInt> NegativeOperandSubOptimizer::ifNegativeConstIntReturnIt(
 * @return @c ConstFloat if @a expr is negative @c ConstFloat, otherwise the
 *         null pointer.
 */
-ShPtr<ConstFloat> NegativeOperandSubOptimizer::ifNegativeConstFloatReturnIt(
-		ShPtr<Expression> expr) const {
-	ShPtr<ConstFloat> constFloat(cast<ConstFloat>(expr));
+ConstFloat* NegativeOperandSubOptimizer::ifNegativeConstFloatReturnIt(
+		Expression* expr) const {
+	ConstFloat* constFloat(cast<ConstFloat>(expr));
 	if (constFloat && constFloat->isNegative()) {
 		return constFloat;
 	} else {
-		return ShPtr<ConstFloat>();
+		return nullptr;
 	}
 }
 

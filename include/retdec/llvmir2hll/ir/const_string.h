@@ -38,15 +38,15 @@ public:
 	using UnderlyingStringType = retdec::utils::WideStringType;
 
 public:
-	static ShPtr<ConstString> create(const UnderlyingStringType &value, std::size_t charSize);
-	static ShPtr<ConstString> create(const std::string &str);
+	static ConstString* create(const UnderlyingStringType &value, std::size_t charSize);
+	static ConstString* create(const std::string &str);
 
-	virtual ShPtr<Value> clone() override;
+	virtual Value* clone() override;
 
-	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
-	virtual ShPtr<Type> getType() const override;
-	virtual void replace(ShPtr<Expression> oldExpr,
-		ShPtr<Expression> newExpr) override;
+	virtual bool isEqualTo(Value* otherValue) const override;
+	virtual Type* getType() const override;
+	virtual void replace(Expression* oldExpr,
+		Expression* newExpr) override;
 
 	UnderlyingStringType getValue() const;
 	std::string getValueAsEscapedCString() const;
@@ -67,7 +67,7 @@ private:
 	std::size_t charSize;
 
 	/// Type.
-	ShPtr<StringType> type;
+	StringType* type = nullptr;
 
 private:
 	// Since instances are created by calling the static function create(), the

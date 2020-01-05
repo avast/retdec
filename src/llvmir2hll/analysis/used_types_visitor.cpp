@@ -265,23 +265,23 @@ UsedTypesVisitor::UsedTypesVisitor():
 *
 * @param[in] module Searched module.
 */
-ShPtr<UsedTypes> UsedTypesVisitor::getUsedTypes(ShPtr<Module> module) {
-	ShPtr<UsedTypesVisitor> visitor(new UsedTypesVisitor());
+UsedTypes* UsedTypesVisitor::getUsedTypes(Module* module) {
+	UsedTypesVisitor* visitor(new UsedTypesVisitor());
 
 	// Obtain types from module.
 	// Global vars.
 	for (auto i = module->global_var_begin(), e = module->global_var_end();
 			i != e; ++i) {
-		(*i)->accept(visitor.get());
+		(*i)->accept(visitor);
 	}
 
 	// Functions.
 	for (auto i = module->func_definition_begin(),
 			e = module->func_definition_end(); i != e; ++i) {
-		(*i)->accept(visitor.get());
+		(*i)->accept(visitor);
 	}
 
-	ShPtr<UsedTypes> usedTypes(visitor->usedTypes);
+	UsedTypes* usedTypes(visitor->usedTypes);
 	// Merge signed and unsigned integer sets into the set of integer types.
 	addToSet(usedTypes->signedIntTypes, usedTypes->intTypes);
 	addToSet(usedTypes->unsignedIntTypes, usedTypes->intTypes);
@@ -300,7 +300,7 @@ ShPtr<UsedTypes> UsedTypesVisitor::getUsedTypes(ShPtr<Module> module) {
 // Visits
 //
 
-void UsedTypesVisitor::visit(ShPtr<Function> func) {
+void UsedTypesVisitor::visit(Function* func) {
 	// Return type.
 	func->getRetType()->accept(this);
 
@@ -308,11 +308,11 @@ void UsedTypesVisitor::visit(ShPtr<Function> func) {
 	OrderedAllVisitor::visit(func);
 }
 
-void UsedTypesVisitor::visit(ShPtr<Variable> var) {
+void UsedTypesVisitor::visit(Variable* var) {
 	var->getType()->accept(this);
 }
 
-void UsedTypesVisitor::visit(ShPtr<ConstBool> constant) {
+void UsedTypesVisitor::visit(ConstBool* constant) {
 	usedTypes->usedBool = true;
 }
 
@@ -320,37 +320,37 @@ void UsedTypesVisitor::visit(ShPtr<ConstBool> constant) {
 // Casts
 //
 
-void UsedTypesVisitor::visit(ShPtr<BitCastExpr> expr) {
+void UsedTypesVisitor::visit(BitCastExpr* expr) {
 	expr->getType()->accept(this);
 	OrderedAllVisitor::visit(expr);
 }
 
-void UsedTypesVisitor::visit(ShPtr<ExtCastExpr> expr) {
+void UsedTypesVisitor::visit(ExtCastExpr* expr) {
 	expr->getType()->accept(this);
 	OrderedAllVisitor::visit(expr);
 }
 
-void UsedTypesVisitor::visit(ShPtr<TruncCastExpr> expr) {
+void UsedTypesVisitor::visit(TruncCastExpr* expr) {
 	expr->getType()->accept(this);
 	OrderedAllVisitor::visit(expr);
 }
 
-void UsedTypesVisitor::visit(ShPtr<FPToIntCastExpr> expr) {
+void UsedTypesVisitor::visit(FPToIntCastExpr* expr) {
 	expr->getType()->accept(this);
 	OrderedAllVisitor::visit(expr);
 }
 
-void UsedTypesVisitor::visit(ShPtr<IntToFPCastExpr> expr) {
+void UsedTypesVisitor::visit(IntToFPCastExpr* expr) {
 	expr->getType()->accept(this);
 	OrderedAllVisitor::visit(expr);
 }
 
-void UsedTypesVisitor::visit(ShPtr<IntToPtrCastExpr> expr) {
+void UsedTypesVisitor::visit(IntToPtrCastExpr* expr) {
 	expr->getType()->accept(this);
 	OrderedAllVisitor::visit(expr);
 }
 
-void UsedTypesVisitor::visit(ShPtr<PtrToIntCastExpr> expr) {
+void UsedTypesVisitor::visit(PtrToIntCastExpr* expr) {
 	expr->getType()->accept(this);
 	OrderedAllVisitor::visit(expr);
 }
@@ -359,11 +359,11 @@ void UsedTypesVisitor::visit(ShPtr<PtrToIntCastExpr> expr) {
 // Types
 //
 
-void UsedTypesVisitor::visit(ShPtr<FloatType> type) {
+void UsedTypesVisitor::visit(FloatType* type) {
 	usedTypes->floatTypes.insert(type);
 }
 
-void UsedTypesVisitor::visit(ShPtr<IntType> type) {
+void UsedTypesVisitor::visit(IntType* type) {
 	// If int type is has size 1, it is bool.
 	if (type->isBool()) {
 		usedTypes->usedBool = true;
@@ -375,35 +375,35 @@ void UsedTypesVisitor::visit(ShPtr<IntType> type) {
 	}
 }
 
-void UsedTypesVisitor::visit(ShPtr<PointerType> type) {
+void UsedTypesVisitor::visit(PointerType* type) {
 	usedTypes->otherTypes.insert(type);
 	OrderedAllVisitor::visit(type);
 }
 
-void UsedTypesVisitor::visit(ShPtr<StringType> type) {
+void UsedTypesVisitor::visit(StringType* type) {
 	usedTypes->otherTypes.insert(type);
 }
 
-void UsedTypesVisitor::visit(ShPtr<ArrayType> type) {
+void UsedTypesVisitor::visit(ArrayType* type) {
 	usedTypes->otherTypes.insert(type);
 	OrderedAllVisitor::visit(type);
 }
 
-void UsedTypesVisitor::visit(ShPtr<StructType> type) {
+void UsedTypesVisitor::visit(StructType* type) {
 	usedTypes->structTypes.insert(type);
 	OrderedAllVisitor::visit(type);
 }
 
-void UsedTypesVisitor::visit(ShPtr<FunctionType> type) {
+void UsedTypesVisitor::visit(FunctionType* type) {
 	usedTypes->otherTypes.insert(type);
 	OrderedAllVisitor::visit(type);
 }
 
-void UsedTypesVisitor::visit(ShPtr<VoidType> type) {
+void UsedTypesVisitor::visit(VoidType* type) {
 	usedTypes->otherTypes.insert(type);
 }
 
-void UsedTypesVisitor::visit(ShPtr<UnknownType> type) {
+void UsedTypesVisitor::visit(UnknownType* type) {
 	usedTypes->otherTypes.insert(type);
 }
 

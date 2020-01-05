@@ -63,14 +63,14 @@ class VarUsesVisitor;
 */
 class CopyPropagationOptimizer final: public FuncOptimizer {
 public:
-	CopyPropagationOptimizer(ShPtr<Module> module, ShPtr<ValueAnalysis> va,
-		ShPtr<CallInfoObtainer> cio);
+	CopyPropagationOptimizer(Module* module, ValueAnalysis* va,
+		CallInfoObtainer* cio);
 
 	virtual std::string getId() const override { return "CopyPropagation"; }
 
 private:
 	virtual void doOptimization() override;
-	virtual void runOnFunction(ShPtr<Function> func) override;
+	virtual void runOnFunction(Function* func) override;
 
 	/// @name Visitor Interface
 	/// @{
@@ -78,52 +78,52 @@ private:
 	/// @}
 
 	void performOptimization();
-	bool stmtOrUseHasBeenModified(ShPtr<Statement> stmt, const StmtSet &uses) const;
-	void handleCaseEmptyUses(ShPtr<Statement> stmt, ShPtr<Variable> stmtLhsVar);
-	void handleCaseSingleUse(ShPtr<Statement> stmt, ShPtr<Variable> stmtLhsVar,
-		ShPtr<Statement> use);
+	bool stmtOrUseHasBeenModified(Statement* stmt, const StmtSet &uses) const;
+	void handleCaseEmptyUses(Statement* stmt, Variable* stmtLhsVar);
+	void handleCaseSingleUse(Statement* stmt, Variable* stmtLhsVar,
+		Statement* use);
 	void handleCaseInductionVariable(
-		ShPtr<Statement> stmt,
-		ShPtr<Variable> stmtLhsVar,
+		Statement* stmt,
+		Variable* stmtLhsVar,
 		const StmtSet &uses);
 	void handleCaseInductionVariable2(
-		ShPtr<Statement> stmt,
-		ShPtr<Variable> stmtLhsVar,
+		Statement* stmt,
+		Variable* stmtLhsVar,
 		const StmtSet &uses);
 	void handleCaseMoreThanOneUse(
-		ShPtr<Statement> stmt,
-		ShPtr<Variable> stmtLhsVar,
+		Statement* stmt,
+		Variable* stmtLhsVar,
 		const StmtSet &uses);
-	bool shouldBeIncludedInDefUseChains(ShPtr<Variable> var);
+	bool shouldBeIncludedInDefUseChains(Variable* var);
 
 private:
 	/// The used builder of CFGs.
-	ShPtr<CFGBuilder> cfgBuilder;
+	CFGBuilder* cfgBuilder = nullptr;
 
 	/// Analysis of values.
-	ShPtr<ValueAnalysis> va;
+	ValueAnalysis* va = nullptr;
 
 	/// Obtainer of information about function calls.
-	ShPtr<CallInfoObtainer> cio;
+	CallInfoObtainer* cio = nullptr;
 
 	/// Visitor for obtaining uses of variables.
-	ShPtr<VarUsesVisitor> vuv;
+	VarUsesVisitor* vuv = nullptr;
 
 	/// Def-use analysis.
-	ShPtr<DefUseAnalysis> dua;
+	DefUseAnalysis* dua = nullptr;
 
 	/// Use-def analysis.
-	ShPtr<UseDefAnalysis> uda;
+	UseDefAnalysis* uda = nullptr;
 
 	/// Def-use chains.
-	ShPtr<DefUseChains> ducs;
+	DefUseChains* ducs = nullptr;
 
 	/// Use-def chains.
-	ShPtr<UseDefChains> udcs;
+	UseDefChains* udcs = nullptr;
 
 	/// Associative def-use chains.
 	std::map<DefUseChains::StmtVarPair, std::size_t> def2uses;
-	std::map<ShPtr<Variable>, std::set<std::size_t>> var2dus;
+	std::map<Variable*, std::set<std::size_t>> var2dus;
 
 	/// Global variables in @c module. This is here to speedup the traversal. By
 	/// using this set, we do not have to ask @c module every time we need such

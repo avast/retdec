@@ -43,7 +43,7 @@ void UseDefChains::debugPrint() {
 *
 * See create() for the description of the parameters.
 */
-UseDefAnalysis::UseDefAnalysis(ShPtr<Module> module):
+UseDefAnalysis::UseDefAnalysis(Module* module):
 	module(module) {}
 
 /**
@@ -55,9 +55,9 @@ UseDefAnalysis::UseDefAnalysis(ShPtr<Module> module):
 * @par Preconditions
 *  - @a ducs is non-null
 */
-ShPtr<UseDefChains> UseDefAnalysis::getUseDefChains(
-		ShPtr<Function> func, ShPtr<DefUseChains> ducs) {
-	ShPtr<UseDefChains> udcs(new UseDefChains());
+UseDefChains* UseDefAnalysis::getUseDefChains(
+		Function* func, DefUseChains* ducs) {
+	UseDefChains* udcs(new UseDefChains());
 	udcs->func = func;
 	udcs->cfg = ducs->cfg;
 
@@ -71,8 +71,8 @@ ShPtr<UseDefChains> UseDefAnalysis::getUseDefChains(
 *
 * @param[in] module Module for which the analysis is created.
 */
-ShPtr<UseDefAnalysis> UseDefAnalysis::create(ShPtr<Module> module) {
-	return ShPtr<UseDefAnalysis>(new UseDefAnalysis(module));
+UseDefAnalysis* UseDefAnalysis::create(Module* module) {
+	return new UseDefAnalysis(module);
 }
 
 /**
@@ -81,8 +81,8 @@ ShPtr<UseDefAnalysis> UseDefAnalysis::create(ShPtr<Module> module) {
 *
 * This function modifies @a udcs.
 */
-void UseDefAnalysis::computeUseDefChains(ShPtr<UseDefChains> udcs,
-		ShPtr<DefUseChains> ducs) {
+void UseDefAnalysis::computeUseDefChains(UseDefChains* udcs,
+		DefUseChains* ducs) {
 	// For each def-use chain...
 	for (auto i = ducs->du.begin(), e = ducs->du.end(); i != e; ++i) {
 		// For each statement in the chain...

@@ -25,8 +25,8 @@ namespace llvmir2hll {
 * @par Preconditions
 *  - @a module and @a va are non-null
 */
-WhileTrueToUForLoopOptimizer::WhileTrueToUForLoopOptimizer(ShPtr<Module> module,
-		ShPtr<ValueAnalysis> va):
+WhileTrueToUForLoopOptimizer::WhileTrueToUForLoopOptimizer(Module* module,
+		ValueAnalysis* va):
 	FuncOptimizer(module), va(va), canBeOptimized(false) {
 		PRECONDITION_NON_NULL(module);
 		PRECONDITION_NON_NULL(va);
@@ -48,7 +48,7 @@ void WhileTrueToUForLoopOptimizer::doOptimization() {
 * @brief Tries to replace the given while loop with a universal for loop.
 */
 void WhileTrueToUForLoopOptimizer::tryReplacementWithUForLoop(
-		ShPtr<WhileLoopStmt> whileLoop) {
+		WhileLoopStmt* whileLoop) {
 	initializeReplacement(whileLoop);
 	bool infoGathered = gatherInfoAboutOptimizedWhileLoop();
 	if (!infoGathered) {
@@ -79,9 +79,9 @@ void WhileTrueToUForLoopOptimizer::tryReplacementWithUForLoop(
 /**
 * @brief Initialize a new replacement.
 */
-void WhileTrueToUForLoopOptimizer::initializeReplacement(ShPtr<WhileLoopStmt> stmt) {
+void WhileTrueToUForLoopOptimizer::initializeReplacement(WhileLoopStmt* stmt) {
 	whileLoop = stmt;
-	splittedLoop.reset();
+	splittedLoop = nullptr;
 	canBeOptimized = true;
 	toRemoveStmts.clear();
 }
@@ -109,7 +109,7 @@ bool WhileTrueToUForLoopOptimizer::gatherInfoAboutOptimizedWhileLoop() {
 /**
 * @brief Tries to convert the "while true" loop into a universal for loop.
 */
-ShPtr<UForLoopStmt> WhileTrueToUForLoopOptimizer::tryConversionToUForLoop() {
+UForLoopStmt* WhileTrueToUForLoopOptimizer::tryConversionToUForLoop() {
 	// TODO How to implement this optimization?
 	return {};
 }
@@ -117,8 +117,8 @@ ShPtr<UForLoopStmt> WhileTrueToUForLoopOptimizer::tryConversionToUForLoop() {
 /**
 * @brief Returns the last empty statement in the given statements.
 */
-ShPtr<EmptyStmt> WhileTrueToUForLoopOptimizer::getLastEmptyStatement(
-		ShPtr<Statement> stmts) const {
+EmptyStmt* WhileTrueToUForLoopOptimizer::getLastEmptyStatement(
+		Statement* stmts) const {
 	return cast<EmptyStmt>(Statement::getLastStatement(stmts));
 }
 
@@ -126,7 +126,7 @@ ShPtr<EmptyStmt> WhileTrueToUForLoopOptimizer::getLastEmptyStatement(
 * @brief Removes useless successors (if any) of the given universal for loop.
 */
 void WhileTrueToUForLoopOptimizer::removeUselessSucessors(
-		ShPtr<UForLoopStmt> forLoop) {
+		UForLoopStmt* forLoop) {
 	// If the successors of the resulting for loop are two empty statements
 	// with metadata, remove the first one because it usually contains just an
 	// end label of the original while loop.
@@ -144,7 +144,7 @@ void WhileTrueToUForLoopOptimizer::removeUselessSucessors(
 /**
 * @brief Performs the replacement.
 */
-void WhileTrueToUForLoopOptimizer::performReplacement(ShPtr<UForLoopStmt> forLoop) {
+void WhileTrueToUForLoopOptimizer::performReplacement(UForLoopStmt* forLoop) {
 	Statement::replaceStatement(whileLoop, forLoop);
 	removeStatementsToBeRemoved();
 }
@@ -159,7 +159,7 @@ void WhileTrueToUForLoopOptimizer::removeStatementsToBeRemoved() {
 	}
 }
 
-void WhileTrueToUForLoopOptimizer::visit(ShPtr<WhileLoopStmt> stmt) {
+void WhileTrueToUForLoopOptimizer::visit(WhileLoopStmt* stmt) {
 	visitNestedAndSuccessorStatements(stmt);
 	tryReplacementWithUForLoop(stmt);
 }

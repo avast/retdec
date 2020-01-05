@@ -29,20 +29,20 @@ namespace llvmir2hll {
 *  - @a va is in a valid state
 *  - @a cio has been initialized
 */
-BasicBlockAPICallSeqFinder::BasicBlockAPICallSeqFinder(ShPtr<ValueAnalysis> va,
-	ShPtr<CallInfoObtainer> cio): APICallSeqFinder(va, cio) {}
+BasicBlockAPICallSeqFinder::BasicBlockAPICallSeqFinder(ValueAnalysis* va,
+	CallInfoObtainer* cio): APICallSeqFinder(va, cio) {}
 
 BasicBlockAPICallSeqFinder::Patterns BasicBlockAPICallSeqFinder::findPatterns(
-		const APICallInfoSeq &info, ShPtr<CallExpr> call, ShPtr<Statement> stmt,
-		ShPtr<Function> func, ShPtr<Module> module) {
+		const APICallInfoSeq &info, CallExpr* call, Statement* stmt,
+		Function* func, Module* module) {
 	PRECONDITION_NON_NULL(call);
 	PRECONDITION_NON_NULL(stmt);
 	PRECONDITION_NON_NULL(func);
 
 	// Use a CFG to find the block in which the statement appears.
-	ShPtr<CFG> cfg(cio->getCFGForFunc(func));
+	CFG* cfg(cio->getCFGForFunc(func));
 	CFG::StmtInNode stmtInNode(cfg->getNodeForStmt(stmt));
-	ShPtr<CFG::Node> nodeForStmt(stmtInNode.first);
+	CFG::Node* nodeForStmt(stmtInNode.first);
 	ASSERT_MSG(nodeForStmt, "statement `" << stmt << "` does not exist in the CFG");
 	auto stmtIter = stmtInNode.second;
 
@@ -50,7 +50,7 @@ BasicBlockAPICallSeqFinder::Patterns BasicBlockAPICallSeqFinder::findPatterns(
 	APICallSeqData data(info);
 	data.apply(*stmtIter, call);
 	while (++stmtIter != nodeForStmt->stmt_end() && !data.atEnd()) {
-		ShPtr<ValueData> stmtData(va->getValueData(*stmtIter));
+		ValueData* stmtData(va->getValueData(*stmtIter));
 		for (auto i = stmtData->call_begin(), e = stmtData->call_end();
 				i != e; ++i) {
 			if (data.matches(*i)) {

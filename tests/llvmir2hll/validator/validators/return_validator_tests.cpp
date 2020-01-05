@@ -34,7 +34,7 @@ protected:
 	}
 
 protected:
-	ShPtr<Validator> validator;
+	Validator* validator;
 };
 
 TEST_F(ReturnValidatorTests,
@@ -56,7 +56,7 @@ NoErrorOnVoidWithReturnNothing) {
 	//    return;
 	// }
 	//
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create());
+	ReturnStmt* returnStmt(ReturnStmt::create());
 	testFunc->setBody(returnStmt);
 
 	EXPECT_TRUE(validator->validate(module));
@@ -70,7 +70,7 @@ NoErrorOnNonVoidWithReturnValue) {
 	//    return 1;
 	// }
 	//
-	ShPtr<Function> testFunc2 = FunctionBuilder("test2")
+	Function* testFunc2 = FunctionBuilder("test2")
 		.definitionWithBody(ReturnStmt::create(ConstInt::create(1, 16)))
 		.withRetType(IntType::create(32))
 		.build();
@@ -87,7 +87,7 @@ ErrorOnVoidWithReturnValue) {
 	//    return 1;
 	// }
 	//
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(ConstInt::create(1, 16)));
+	ReturnStmt* returnStmt(ReturnStmt::create(ConstInt::create(1, 16)));
 	testFunc->setBody(returnStmt);
 
 	EXPECT_FALSE(validator->validate(module));
@@ -101,7 +101,7 @@ ErrorOnNonVoidWithoutReturnValue) {
 	//    return;
 	// }
 	//
-	ShPtr<Function> testFunc2 = FunctionBuilder("test2")
+	Function* testFunc2 = FunctionBuilder("test2")
 		.definitionWithBody(ReturnStmt::create())
 		.withRetType(IntType::create(32))
 		.build();

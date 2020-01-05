@@ -26,15 +26,15 @@ ReturnValidator::ReturnValidator(): Validator() {}
 /**
 * @brief Creates a new validator.
 */
-ShPtr<Validator> ReturnValidator::create() {
-	return ShPtr<ReturnValidator>(new ReturnValidator());
+Validator* ReturnValidator::create() {
+	return new ReturnValidator();
 }
 
 std::string ReturnValidator::getId() const {
 	return RETURN_VALIDATOR_ID;
 }
 
-void ReturnValidator::visit(ShPtr<ReturnStmt> stmt) {
+void ReturnValidator::visit(ReturnStmt* stmt) {
 	// If the function is non-void, there has to be a return value.
 	if (!isa<VoidType>(func->getRetType()) && !stmt->getRetVal()) {
 		validationError("In ", func->getName(), "(), which is non-void, ",

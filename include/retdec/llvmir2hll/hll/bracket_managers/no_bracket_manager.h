@@ -18,18 +18,18 @@ namespace llvmir2hll {
 * For this purpose need to change @a emitTargetCode(...) in chosen HLL writer.
 * Need to change there
 * @code
-* bracketsManager = ShPtr<BracketManager>(new ..BracketManager(module));
+* bracketsManager = BracketManager*(new ..BracketManager(module));
 * to
-* bracketsManager = ShPtr<BracketManager>(new NoBracketManager(module));
+* bracketsManager = BracketManager*(new NoBracketManager(module));
 * @endcode
 */
 class NoBracketManager: public BracketManager {
 public:
-	NoBracketManager(ShPtr<Module> module);
+	NoBracketManager(Module* module);
 
 	virtual std::string getId() const override;
 
-	bool areBracketsNeeded(ShPtr<Expression> expr);
+	bool areBracketsNeeded(Expression* expr);
 
 private:
 	virtual ItemOfPrecTable checkPrecTable(Operators currentOperator,

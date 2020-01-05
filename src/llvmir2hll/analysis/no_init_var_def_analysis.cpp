@@ -19,14 +19,14 @@ namespace llvmir2hll {
 *
 * @param[in] func A function to analyze.
 */
-VarDefStmtSet NoInitVarDefAnalysis::getNoInitVarDefStmts(ShPtr<Function> func) {
+VarDefStmtSet NoInitVarDefAnalysis::getNoInitVarDefStmts(Function* func) {
 	noInitVarDefs.clear();
 	func->accept(this);
 
 	return noInitVarDefs;
 }
 
-void NoInitVarDefAnalysis::visit(ShPtr<VarDefStmt> varDefStmt) {
+void NoInitVarDefAnalysis::visit(VarDefStmt* varDefStmt) {
 	if (!varDefStmt->hasInitializer()) {
 		noInitVarDefs.insert(varDefStmt);
 	}

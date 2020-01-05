@@ -57,7 +57,7 @@ DoNotRemoveAnythingIfThereIsJustTheMainFunction) {
 
 	// Check that the output is correct.
 	EXPECT_TRUE(removedFuncs.empty());
-	ShPtr<Function> mainFunc(module->getFuncByName("main"));
+	Function* mainFunc(module->getFuncByName("main"));
 	ASSERT_TRUE(mainFunc);
 	EXPECT_TRUE(mainFunc->isDefinition());
 }
@@ -80,10 +80,10 @@ DoNotRemoveAnythingIfThereAreNoFunctionDeclarations) {
 
 	// Check that the output is correct.
 	EXPECT_TRUE(removedFuncs.empty());
-	ShPtr<Function> testFunc(module->getFuncByName("test"));
+	Function* testFunc(module->getFuncByName("test"));
 	ASSERT_TRUE(testFunc);
 	EXPECT_TRUE(testFunc->isDefinition());
-	ShPtr<Function> test2Func(module->getFuncByName("test2"));
+	Function* test2Func(module->getFuncByName("test2"));
 	ASSERT_TRUE(test2Func);
 	EXPECT_TRUE(test2Func->isDefinition());
 }
@@ -108,13 +108,13 @@ DoNotRemoveAnythingIfThereAreFunctionDeclarationsButNoHeadersAreToBeIncluded) {
 
 	// Check that the output is correct.
 	EXPECT_TRUE(removedFuncs.empty());
-	ShPtr<Function> testFunc(module->getFuncByName("test"));
+	Function* testFunc(module->getFuncByName("test"));
 	ASSERT_TRUE(testFunc);
 	EXPECT_TRUE(testFunc->isDefinition());
-	ShPtr<Function> decl1Func(module->getFuncByName("decl1"));
+	Function* decl1Func(module->getFuncByName("decl1"));
 	ASSERT_TRUE(decl1Func);
 	EXPECT_TRUE(decl1Func->isDeclaration());
-	ShPtr<Function> decl2Func(module->getFuncByName("decl2"));
+	Function* decl2Func(module->getFuncByName("decl2"));
 	ASSERT_TRUE(decl2Func);
 	EXPECT_TRUE(decl2Func->isDeclaration());
 }
@@ -147,7 +147,7 @@ DoNotRemoveFuncMarkedAsExportedEvenIfThereIsHeaderForIt) {
 
 	// Check that the output is correct.
 	EXPECT_TRUE(removedFuncs.empty());
-	ShPtr<Function> fprintfFunc(module->getFuncByName("fprintf"));
+	Function* fprintfFunc(module->getFuncByName("fprintf"));
 	ASSERT_TRUE(fprintfFunc);
 	EXPECT_TRUE(fprintfFunc->isDefinition());
 }
@@ -182,16 +182,16 @@ DefinedFunctionsFromIncludedHeadersAreTurnedIntoDeclarations) {
 	FuncVector refRemovedFuncs;
 	refRemovedFuncs.push_back(module->getFuncByName("printf"));
 	EXPECT_EQ(refRemovedFuncs, removedFuncs);
-	ShPtr<Function> testFunc(module->getFuncByName("test"));
+	Function* testFunc(module->getFuncByName("test"));
 	ASSERT_TRUE(testFunc);
 	EXPECT_TRUE(testFunc->isDefinition());
-	ShPtr<Function> fprintfFunc(module->getFuncByName("fprintf"));
+	Function* fprintfFunc(module->getFuncByName("fprintf"));
 	ASSERT_TRUE(fprintfFunc);
 	EXPECT_TRUE(fprintfFunc->isDeclaration());
-	ShPtr<Function> printfFunc(module->getFuncByName("printf"));
+	Function* printfFunc(module->getFuncByName("printf"));
 	ASSERT_TRUE(printfFunc);
 	EXPECT_TRUE(printfFunc->isDeclaration());
-	ShPtr<Function> signalFunc(module->getFuncByName("signal"));
+	Function* signalFunc(module->getFuncByName("signal"));
 	ASSERT_TRUE(signalFunc);
 	EXPECT_TRUE(signalFunc->isDefinition());
 }

@@ -21,8 +21,8 @@ namespace tests {
 */
 class PatternFinderRunnerMock: public PatternFinderRunner {
 public:
-	MOCK_METHOD1(doActionsBeforePatternFinderRuns, void (ShPtr<PatternFinder>));
-	MOCK_METHOD2(doActionsAfterPatternFinderHasRun, void (ShPtr<PatternFinder>,
+	MOCK_METHOD1(doActionsBeforePatternFinderRuns, void (PatternFinder*));
+	MOCK_METHOD2(doActionsAfterPatternFinderHasRun, void (PatternFinder*,
 		const PatternFinder::Patterns &));
 };
 

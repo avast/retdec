@@ -25,10 +25,10 @@ class Module;
 class NullPointerAnalysis: private OrderedAllVisitor,
 		private retdec::utils::NonCopyable {
 public:
-	static bool useNullPointers(ShPtr<Module> module);
+	static bool useNullPointers(Module* module);
 
 private:
-	NullPointerAnalysis(ShPtr<Module> module);
+	NullPointerAnalysis(Module* module);
 
 	void analyzeNullPointersUsage();
 	void analyzeAllGlobalVariables();
@@ -37,12 +37,12 @@ private:
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<ConstNullPointer> constant) override;
+	virtual void visit(ConstNullPointer* constant) override;
 	/// @}
 
 private:
 	/// The module to be checked.
-	ShPtr<Module> module;
+	Module* module = nullptr;
 
 	/// Has the null pointer been found?
 	bool foundNullPointer;

@@ -52,7 +52,7 @@ using APICallInfoSeqMap = std::multimap<std::string, APICallInfoSeq>;
 */
 void parseAndAddAPICallInfoSeqToMap(APICallInfoSeqMap &map,
 		const std::string &funcName, const std::string &seqTextRepr) {
-	static ShPtr<APICallInfoSeqParser> parser(APICallInfoSeqParser::create());
+	static APICallInfoSeqParser* parser(APICallInfoSeqParser::create());
 	std::optional<APICallInfoSeq> seq(parser->parse(seqTextRepr));
 	if (seq) {
 		map.insert(std::make_pair(funcName, seq.value()));
@@ -1100,7 +1100,7 @@ const APICallInfoSeqMap &API_CALL_INFO_SEQ_MAP(initAPICallInfoSeqMap());
 * See PatternFinder::PatternFinder() for more information.
 */
 APICallSeqPatternFinder::APICallSeqPatternFinder(
-	ShPtr<ValueAnalysis> va, ShPtr<CallInfoObtainer> cio):
+	ValueAnalysis* va, CallInfoObtainer* cio):
 		PatternFinder(va, cio), foundPatterns() {}
 
 /**
@@ -1109,9 +1109,9 @@ APICallSeqPatternFinder::APICallSeqPatternFinder(
 * See PatternFinder::PatternFinder() for more information on the parameters and
 * preconditions.
 */
-ShPtr<PatternFinder> APICallSeqPatternFinder::create(
-		ShPtr<ValueAnalysis> va, ShPtr<CallInfoObtainer> cio) {
-	return ShPtr<PatternFinder>(new APICallSeqPatternFinder(va, cio));
+PatternFinder* APICallSeqPatternFinder::create(
+		ValueAnalysis* va, CallInfoObtainer* cio) {
+	return new APICallSeqPatternFinder(va, cio);
 }
 
 const std::string APICallSeqPatternFinder::getId() const {
@@ -1124,10 +1124,10 @@ const std::string APICallSeqPatternFinder::getId() const {
 * The returned patterns are instances of StmtsPattern.
 */
 PatternFinder::Patterns APICallSeqPatternFinder::findPatterns(
-		ShPtr<Module> module) {
+		Module* module) {
 	// TODO Add a possibility of setting APICallSeqFinder outside of this
 	//      function.
-	ShPtr<APICallSeqFinder> acf(new BasicBlockAPICallSeqFinder(va, cio));
+	APICallSeqFinder* acf(new BasicBlockAPICallSeqFinder(va, cio));
 
 	// For every call in the module...
 	for (const auto &call : CallsInModuleObtainer::getCalls(module)) {

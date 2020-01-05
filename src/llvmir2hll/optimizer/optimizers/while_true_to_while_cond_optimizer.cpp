@@ -31,12 +31,12 @@ namespace llvmir2hll {
 * @par Preconditions
 *  - @a module is non-null
 */
-WhileTrueToWhileCondOptimizer::WhileTrueToWhileCondOptimizer(ShPtr<Module> module):
+WhileTrueToWhileCondOptimizer::WhileTrueToWhileCondOptimizer(Module* module):
 	FuncOptimizer(module) {
 		PRECONDITION_NON_NULL(module);
 	}
 
-void WhileTrueToWhileCondOptimizer::visit(ShPtr<WhileLoopStmt> stmt) {
+void WhileTrueToWhileCondOptimizer::visit(WhileLoopStmt* stmt) {
 	// First of all, visit nested and subsequent statements.
 	FuncOptimizer::visit(stmt);
 
@@ -54,7 +54,7 @@ void WhileTrueToWhileCondOptimizer::visit(ShPtr<WhileLoopStmt> stmt) {
 	}
 
 	// Gather all information needed to transform the loop.
-	ShPtr<SplittedWhileTrueLoop> splittedLoop(splitWhileTrueLoop(stmt));
+	SplittedWhileTrueLoop* splittedLoop(splitWhileTrueLoop(stmt));
 	if (!splittedLoop) {
 		// The loop cannot be optimized.
 		return;
@@ -85,7 +85,7 @@ void WhileTrueToWhileCondOptimizer::visit(ShPtr<WhileLoopStmt> stmt) {
 	//     # bb
 	//     ...
 	//
-	ShPtr<EmptyStmt> loopPred(cast<EmptyStmt>(stmt->getUniquePredecessor()));
+	EmptyStmt* loopPred(cast<EmptyStmt>(stmt->getUniquePredecessor()));
 	if (loopPred) {
 		Statement::removeStatement(loopPred);
 	}
@@ -106,7 +106,7 @@ void WhileTrueToWhileCondOptimizer::visit(ShPtr<WhileLoopStmt> stmt) {
 	}
 
 	// If there is an assignment in the loop's end, we also prepend it.
-	ShPtr<AssignStmt> assignStmtInLoopEnd(cast<AssignStmt>(
+	AssignStmt* assignStmtInLoopEnd(cast<AssignStmt>(
 		skipEmptyStmts(splittedLoop->loopEnd->getFirstIfBody())));
 	if (assignStmtInLoopEnd) {
 		stmt->prependStatement(ucast<Statement>(assignStmtInLoopEnd->clone()));
@@ -125,14 +125,14 @@ void WhileTrueToWhileCondOptimizer::visit(ShPtr<WhileLoopStmt> stmt) {
 	// Since in the next step, we swap the statements before the original
 	// loop's exit condition with the statements after the exit condition,
 	// keeping this piece of information would result into improper code.
-	ShPtr<Statement> lastLoopStmt = splittedLoop->afterLoopEndStmts;
+	Statement* lastLoopStmt = splittedLoop->afterLoopEndStmts;
 	if (lastLoopStmt) {
 		// When lastLoopStmt has no predecessors and successors, we have to
 		// null splittedLoop->afterLoopEndStmts manually (recall that in this
 		// case, Statement::removeStatement() cannot help us since it does
 		// nothing). If we didn't do this, we might get into troubles.
 		if (!lastLoopStmt->hasPredecessors() && !lastLoopStmt->hasSuccessor()) {
-			splittedLoop->afterLoopEndStmts = ShPtr<Statement>();
+			splittedLoop->afterLoopEndStmts = nullptr;
 		} else {
 			// Go to the last statement in splittedLoop->afterLoopEndStmts, and
 			// if the last statement is an empty statement, remove it.
@@ -153,7 +153,7 @@ void WhileTrueToWhileCondOptimizer::visit(ShPtr<WhileLoopStmt> stmt) {
 
 	// We swap the statements before the original loop's exit condition
 	// with the statements after the exit condition.
-	ShPtr<Statement> newLoopBody(Statement::mergeStatements(
+	Statement* newLoopBody(Statement::mergeStatements(
 		splittedLoop->afterLoopEndStmts, splittedLoop->beforeLoopEndStmts));
 	if (!newLoopBody) {
 		// Make sure that there are some statements so the body is non-null.
@@ -174,7 +174,7 @@ void WhileTrueToWhileCondOptimizer::visit(ShPtr<WhileLoopStmt> stmt) {
 	// to the first statement of the new loop.
 	if (stmt->getBody()->getMetadata() != "") {
 		// An empty statement need to be used.
-		ShPtr<EmptyStmt> emptyStmt(EmptyStmt::create(nullptr, stmt->getAddress()));
+		EmptyStmt* emptyStmt(EmptyStmt::create(nullptr, stmt->getAddress()));
 		emptyStmt->setMetadata(firstStmtMetadata);
 		stmt->getBody()->prependStatement(emptyStmt);
 	} else {
@@ -188,7 +188,7 @@ void WhileTrueToWhileCondOptimizer::visit(ShPtr<WhileLoopStmt> stmt) {
 
 	// If the exit statement of the original loop was a return statement, we
 	// have to add it after the loop.
-	if (ShPtr<ReturnStmt> retStmt = cast<ReturnStmt>(Statement::getLastStatement(
+	if (ReturnStmt* retStmt = cast<ReturnStmt>(Statement::getLastStatement(
 			splittedLoop->loopEnd->getFirstIfBody()))) {
 		stmt->appendStatement(retStmt);
 	}

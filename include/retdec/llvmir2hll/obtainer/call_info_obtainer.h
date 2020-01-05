@@ -38,19 +38,19 @@ public:
 	// It needs to be public so it can be called in ShPtr's destructor.
 	virtual ~CallInfo() = default;
 
-	ShPtr<CallExpr> getCall() const;
+	CallExpr* getCall() const;
 
 	/**
 	* @brief Returns @c true if @a var is never read in the call, @c false
 	*        otherwise.
 	*/
-	virtual bool isNeverRead(ShPtr<Variable> var) const = 0;
+	virtual bool isNeverRead(Variable* var) const = 0;
 
 	/**
 	* @brief Returns @c true if @a var may be read in the call, @c false
 	*        otherwise.
 	*/
-	virtual bool mayBeRead(ShPtr<Variable> var) const = 0;
+	virtual bool mayBeRead(Variable* var) const = 0;
 
 	/**
 	* @brief Returns @c true if @a var is always read in the call, @c false
@@ -59,19 +59,19 @@ public:
 	* "Always read" means that every time the function is called, @a var
 	* is read.
 	*/
-	virtual bool isAlwaysRead(ShPtr<Variable> var) const = 0;
+	virtual bool isAlwaysRead(Variable* var) const = 0;
 
 	/**
 	* @brief Returns @c true if there is no assign into @a var in the call, @c
 	*        false otherwise.
 	*/
-	virtual bool isNeverModified(ShPtr<Variable> var) const = 0;
+	virtual bool isNeverModified(Variable* var) const = 0;
 
 	/**
 	* @brief Returns @c true if the value of @a var may be changed in the call,
 	*        @c false otherwise.
 	*/
-	virtual bool mayBeModified(ShPtr<Variable> var) const = 0;
+	virtual bool mayBeModified(Variable* var) const = 0;
 
 	/**
 	* @brief Returns @c true if the value of @a var is always changed in
@@ -81,7 +81,7 @@ public:
 	* has a new assigned value. The new value may, however, be the same as the
 	* old value.
 	*/
-	virtual bool isAlwaysModified(ShPtr<Variable> var) const = 0;
+	virtual bool isAlwaysModified(Variable* var) const = 0;
 
 	/**
 	* @brief Returns @c true if the value of @a var is never changed in the
@@ -91,7 +91,7 @@ public:
 	* call, but when the called function returns, the value of @a var is always
 	* its original value.
 	*/
-	virtual bool valueIsNeverChanged(ShPtr<Variable> var) const = 0;
+	virtual bool valueIsNeverChanged(Variable* var) const = 0;
 
 	/**
 	* @brief Returns @c true if the given variable is modified prior to being
@@ -101,14 +101,14 @@ public:
 	* actually read or modified in the call. It only means that if the variable
 	* is read in the call, then it has been assigned a value before this read.
 	*/
-	virtual bool isAlwaysModifiedBeforeRead(ShPtr<Variable> var) const = 0;
+	virtual bool isAlwaysModifiedBeforeRead(Variable* var) const = 0;
 
 protected:
-	explicit CallInfo(ShPtr<CallExpr> call);
+	explicit CallInfo(CallExpr* call);
 
 protected:
 	/// Function call for which this piece of information is computed.
-	ShPtr<CallExpr> call;
+	CallExpr* call = nullptr;
 };
 
 /**
@@ -123,19 +123,19 @@ public:
 	// It needs to be public so it can be called in ShPtr's destructor.
 	virtual ~FuncInfo() = default;
 
-	ShPtr<Function> getFunc() const;
+	Function* getFunc() const;
 
 	/**
 	* @brief Returns @c true if @a var is never read in the function, @c false
 	*        otherwise.
 	*/
-	virtual bool isNeverRead(ShPtr<Variable> var) const = 0;
+	virtual bool isNeverRead(Variable* var) const = 0;
 
 	/**
 	* @brief Returns @c true if @a var may be read in the function, @c false
 	*        otherwise.
 	*/
-	virtual bool mayBeRead(ShPtr<Variable> var) const = 0;
+	virtual bool mayBeRead(Variable* var) const = 0;
 
 	/**
 	* @brief Returns @c true if @a var is always read in the function, @c false
@@ -144,19 +144,19 @@ public:
 	* "Always read" means that every time the function is called, @a var is
 	* read.
 	*/
-	virtual bool isAlwaysRead(ShPtr<Variable> var) const = 0;
+	virtual bool isAlwaysRead(Variable* var) const = 0;
 
 	/**
 	* @brief Returns @c true if there is no assign into @a var in the function,
 	*        @c false otherwise.
 	*/
-	virtual bool isNeverModified(ShPtr<Variable> var) const = 0;
+	virtual bool isNeverModified(Variable* var) const = 0;
 
 	/**
 	* @brief Returns @c true if the value of @a var may be changed in the
 	*        function, @c false otherwise.
 	*/
-	virtual bool mayBeModified(ShPtr<Variable> var) const = 0;
+	virtual bool mayBeModified(Variable* var) const = 0;
 
 	/**
 	* @brief Returns @c true if the value of @a var is always changed in
@@ -166,7 +166,7 @@ public:
 	* a new assigned value. The new value may, however, be the same as the old
 	* value.
 	*/
-	virtual bool isAlwaysModified(ShPtr<Variable> var) const = 0;
+	virtual bool isAlwaysModified(Variable* var) const = 0;
 
 	/**
 	* @brief Returns @c true if the value of @a var is never changed in the
@@ -176,7 +176,7 @@ public:
 	* call, but when the called function returns, the value of @a var is always
 	* its original value.
 	*/
-	virtual bool valueIsNeverChanged(ShPtr<Variable> var) const = 0;
+	virtual bool valueIsNeverChanged(Variable* var) const = 0;
 
 	/**
 	* @brief Returns @c true if the given variable is modified prior to being
@@ -187,14 +187,14 @@ public:
 	* variable is read in the function, then it has been assigned a value
 	* before this read.
 	*/
-	virtual bool isAlwaysModifiedBeforeRead(ShPtr<Variable> var) const = 0;
+	virtual bool isAlwaysModifiedBeforeRead(Variable* var) const = 0;
 
 protected:
-	explicit FuncInfo(ShPtr<Function> func);
+	explicit FuncInfo(Function* func);
 
 protected:
 	/// Function for which this piece of information is computed.
-	ShPtr<Function> func;
+	Function* func = nullptr;
 };
 
 /**
@@ -219,10 +219,10 @@ class CallInfoObtainer: public SharableFromThis<CallInfoObtainer>,
 public:
 	virtual ~CallInfoObtainer() = default;
 
-	ShPtr<CG> getCG() const;
-	ShPtr<CFG> getCFGForFunc(ShPtr<Function> func) const;
+	CG* getCG() const;
+	CFG* getCFGForFunc(Function* func) const;
 
-	virtual void init(ShPtr<CG> cg, ShPtr<ValueAnalysis> va);
+	virtual void init(CG* cg, ValueAnalysis* va);
 	virtual bool isInitialized() const;
 
 	/**
@@ -238,8 +238,8 @@ public:
 	*  - the call obtainer has been initialized using init()
 	*  - the given call and caller exist in the module
 	*/
-	virtual ShPtr<CallInfo> getCallInfo(ShPtr<CallExpr> call,
-		ShPtr<Function> caller) = 0;
+	virtual CallInfo* getCallInfo(CallExpr* call,
+		Function* caller) = 0;
 
 	/**
 	* @brief Computes and returns information about the given function.
@@ -248,7 +248,7 @@ public:
 	*  - the call obtainer has been initialized using init()
 	*  - the given function exists in the module
 	*/
-	virtual ShPtr<FuncInfo> getFuncInfo(ShPtr<Function> func) = 0;
+	virtual FuncInfo* getFuncInfo(Function* func) = 0;
 
 protected:
 	/// Vector of sets of functions.
@@ -301,28 +301,28 @@ protected:
 	};
 
 	/// Mapping of a function into its CFG.
-	using FuncCFGMap = std::map<ShPtr<Function>, ShPtr<CFG>>;
+	using FuncCFGMap = std::map<Function*, CFG*>;
 
 protected:
 	CallInfoObtainer();
 
-	ShPtr<FuncInfoCompOrder> getFuncInfoCompOrder(ShPtr<CG> cg);
+	FuncInfoCompOrder* getFuncInfoCompOrder(CG* cg);
 
 protected:
 	/// The current module.
-	ShPtr<Module> module;
+	Module* module = nullptr;
 
 	/// Call graph of the current module.
-	ShPtr<CG> cg;
+	CG* cg = nullptr;
 
 	/// Analysis of values.
-	ShPtr<ValueAnalysis> va;
+	ValueAnalysis* va = nullptr;
 
 	/// Mapping of a function into its CFG.
 	FuncCFGMap funcCFGMap;
 
 	/// The used builder of CFGs.
-	ShPtr<CFGBuilder> cfgBuilder;
+	CFGBuilder* cfgBuilder = nullptr;
 
 private:
 	/**
@@ -356,11 +356,11 @@ private:
 		// requires Log N comparisons each possibly taking O(N) time due
 		// to how operator < is defined on std::set (lexicographic
 		// compare).
-		static FuncVectorSet computeSCCs(ShPtr<CG> cg);
+		static FuncVectorSet computeSCCs(CG* cg);
 
 	private:
 		/// Stack of CalledFuncs.
-		using CalledFuncStack = std::stack<ShPtr<CG::CalledFuncs>>;
+		using CalledFuncStack = std::stack<CG::CalledFuncs*>;
 
 		/**
 		* @brief Information about a CalledFunc from the SCC algorithm.
@@ -374,17 +374,17 @@ private:
 		};
 
 		/// Mapping of a CalledFunc into its information.
-		using CalledFuncInfoMap = std::map<ShPtr<CG::CalledFuncs>, CalledFuncInfo>;
+		using CalledFuncInfoMap = std::map<CG::CalledFuncs*, CalledFuncInfo>;
 
 	private:
-		SCCComputer(ShPtr<CG> cg);
-		void visit(ShPtr<CG::CalledFuncs> calledFunc,
+		SCCComputer(CG* cg);
+		void visit(CG::CalledFuncs* calledFunc,
 			CalledFuncInfo &calledFuncInfo);
 		FuncVectorSet findSCCs();
 
 	private:
 		/// Call graph of the current module.
-		ShPtr<CG> cg;
+		CG* cg = nullptr;
 
 		/// The 'index' variable from the SCC algorithm.
 		int index;
@@ -406,16 +406,16 @@ private:
 	* @brief An SCC with a represent.
 	*/
 	struct SCCWithRepresent {
-		SCCWithRepresent(FuncSet scc, ShPtr<Function> represent):
+		SCCWithRepresent(FuncSet scc, Function* represent):
 			scc(scc), represent(represent) {}
 
 		FuncSet scc;
-		ShPtr<Function> represent;
+		Function* represent = nullptr;
 	};
 
 private:
 	FuncVectorSet computeSCCs();
-	bool callsJustComputedFuncs(ShPtr<Function> func,
+	bool callsJustComputedFuncs(Function* func,
 		const FuncSet &computedFuncs) const;
 	SCCWithRepresent findNextSCC(const FuncVectorSet &sccs,
 		const FuncSet &computedFuncs, const FuncSet &remainingFuncs) const;

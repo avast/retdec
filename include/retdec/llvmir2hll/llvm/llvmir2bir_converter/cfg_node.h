@@ -38,28 +38,28 @@ private:
 	*/
 	class CFGEdge: private retdec::utils::NonCopyable {
 	public:
-		CFGEdge(ShPtr<CFGNode> target);
+		CFGEdge(CFGNode* target);
 
-		ShPtr<CFGNode> getTarget() const;
+		CFGNode* getTarget() const;
 		bool isBackEdge() const;
 
 		void setBackEdge(bool isBackEdge = true);
 
 	private:
 		/// A target of this edge.
-		ShPtr<CFGNode> target;
+		CFGNode* target = nullptr;
 
 		/// Is this edge a back-edge?
 		bool backEdge;
 	};
 
 public:
-	using CFGEdgeVector = std::vector<ShPtr<CFGEdge>>;
-	using CFGNodeSet = std::unordered_set<ShPtr<CFGNode>>;
-	using CFGNodeVector = std::vector<ShPtr<CFGNode>>;
+	using CFGEdgeVector = std::vector<CFGEdge*>;
+	using CFGNodeSet = std::unordered_set<CFGNode*>;
+	using CFGNodeVector = std::vector<CFGNode*>;
 
 public:
-	CFGNode(llvm::BasicBlock *bb, ShPtr<Statement> body);
+	CFGNode(llvm::BasicBlock *bb, Statement* body);
 
 	/// @name Operations with stored basic blocks
 	/// @{
@@ -76,15 +76,15 @@ public:
 
 	/// @name Operations with node's body
 	/// @{
-	ShPtr<Statement> getBody() const;
-	void setBody(ShPtr<Statement> body);
-	void appendToBody(ShPtr<Statement> statement);
+	Statement* getBody() const;
+	void setBody(Statement* body);
+	void appendToBody(Statement* statement);
 	/// @}
 
 	/// @name Addition and deletion of the node's successors
 	/// @{
-	void addSuccessor(ShPtr<CFGNode> succ);
-	void moveSuccessorsFrom(const ShPtr<CFGNode> &node);
+	void addSuccessor(CFGNode* succ);
+	void moveSuccessorsFrom(CFGNode* node);
 	void removeSucc(std::size_t i);
 	void deleteSucc(std::size_t i);
 	void deleteSuccessors();
@@ -98,24 +98,24 @@ public:
 
 	/// @name Node's successors getters and querying
 	/// @{
-	CFGNodeSet getPredecessors();
-	CFGNodeVector getSuccessors();
-	ShPtr<CFGNode> getSucc(std::size_t i) const;
-	ShPtr<CFGNode> getSuccOrNull(std::size_t i) const;
-	bool hasSuccessor(const ShPtr<CFGNode> &node) const;
+	CFGNodeSet getPredecessors() const;
+	CFGNodeVector getSuccessors() const;
+	CFGNode* getSucc(std::size_t i) const;
+	CFGNode* getSuccOrNull(std::size_t i) const;
+	bool hasSuccessor(CFGNode* node) const;
 	/// @}
 
 	/// @name Operations with back-edges
 	/// @{
-	void markAsBackEdge(const ShPtr<CFGNode> &node);
-	bool isBackEdge(const ShPtr<CFGNode> &node) const;
+	void markAsBackEdge(CFGNode* node);
+	bool isBackEdge(CFGNode* node) const;
 	/// @}
 
 	/// @name Operations with statement successor
 	/// @{
 	bool hasStatementSuccessor() const;
-	ShPtr<CFGNode> getStatementSuccessor() const;
-	void setStatementSuccessor(ShPtr<CFGNode> succ);
+	CFGNode* getStatementSuccessor() const;
+	void setStatementSuccessor(CFGNode* succ);
 	void removeStatementSuccessor();
 	/// @}
 
@@ -127,13 +127,13 @@ public:
 
 private:
 	/// A first LLVM basic block in sequence which is represented by this node.
-	llvm::BasicBlock *firstBasicBlock;
+	llvm::BasicBlock *firstBasicBlock = nullptr;
 
 	/// A last LLVM basic block in sequence which is represented by this node.
-	llvm::BasicBlock *lastBasicBlock;
+	llvm::BasicBlock *lastBasicBlock = nullptr;
 
 	/// A body of this tree node.
-	ShPtr<Statement> body;
+	Statement* body = nullptr;
 
 	/// A set of node predecessors.
 	CFGNodeSet predecessors;
@@ -142,7 +142,7 @@ private:
 	CFGEdgeVector successors;
 
 	/// A successor of the high-level statement represented by this node.
-	ShPtr<CFGNode> statementSuccessor;
+	CFGNode* statementSuccessor = nullptr;
 };
 
 } // namespace llvmir2hll

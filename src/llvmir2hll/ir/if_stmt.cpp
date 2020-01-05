@@ -18,11 +18,11 @@ namespace llvmir2hll {
 *
 * See create() for more information.
 */
-IfStmt::IfStmt(ShPtr<Expression> cond, ShPtr<Statement> body, Address a):
+IfStmt::IfStmt(Expression* cond, Statement* body, Address a):
 		Statement(a), ifClauseList{IfClause(cond, body)}, elseClause() {}
 
-ShPtr<Value> IfStmt::clone() {
-	ShPtr<IfStmt> ifStmt(IfStmt::create(
+Value* IfStmt::clone() {
+	IfStmt* ifStmt(IfStmt::create(
 		ucast<Expression>(ifClauseList.front().first->clone()),
 		ucast<Statement>(Statement::cloneStatements(ifClauseList.front().second)),
 		nullptr,
@@ -47,9 +47,9 @@ ShPtr<Value> IfStmt::clone() {
 	return ifStmt;
 }
 
-bool IfStmt::isEqualTo(ShPtr<Value> otherValue) const {
+bool IfStmt::isEqualTo(Value* otherValue) const {
 	// The types of compared instances have to match.
-	ShPtr<IfStmt> otherIfStmt = cast<IfStmt>(otherValue);
+	IfStmt* otherIfStmt = cast<IfStmt>(otherValue);
 	if (!otherIfStmt) {
 		return false;
 	}
@@ -78,12 +78,12 @@ bool IfStmt::isEqualTo(ShPtr<Value> otherValue) const {
 	return !otherIfStmt->hasElseClause();
 }
 
-void IfStmt::replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) {
+void IfStmt::replace(Expression* oldExpr, Expression* newExpr) {
 	// For each clause...
 	for (auto &clause : ifClauseList) {
 		if (clause.first == oldExpr) {
-			clause.first->removeObserver(shared_from_this());
-			newExpr->addObserver(shared_from_this());
+			clause.first->removeObserver(this);
+			newExpr->addObserver(this);
 			clause.first = newExpr;
 		} else {
 			clause.first->replace(oldExpr, newExpr);
@@ -91,7 +91,7 @@ void IfStmt::replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) {
 	}
 }
 
-ShPtr<Expression> IfStmt::asExpression() const {
+Expression* IfStmt::asExpression() const {
 	// Cannot be converted into an expression.
 	return {};
 }
@@ -110,13 +110,13 @@ ShPtr<Expression> IfStmt::asExpression() const {
 * @par Preconditions
 *  - both arguments are non-null
 */
-void IfStmt::addClause(ShPtr<Expression> cond, ShPtr<Statement> body) {
+void IfStmt::addClause(Expression* cond, Statement* body) {
 	PRECONDITION_NON_NULL(cond);
 	PRECONDITION_NON_NULL(body);
 
 	body->removePredecessors(true);
-	cond->addObserver(shared_from_this());
-	body->addObserver(shared_from_this());
+	cond->addObserver(this);
+	body->addObserver(this);
 	ifClauseList.push_back(IfClause(cond, body));
 }
 
@@ -162,8 +162,8 @@ bool IfStmt::hasElseIfClauses() const {
 */
 IfStmt::clause_iterator IfStmt::removeClause(clause_iterator clauseIterator) {
 	// We assume that the used container is std::list.
-	clauseIterator->first->removeObserver(shared_from_this());
-	clauseIterator->second->removeObserver(shared_from_this());
+	clauseIterator->first->removeObserver(this);
+	clauseIterator->second->removeObserver(this);
 	return ifClauseList.erase(clauseIterator);
 }
 
@@ -194,13 +194,13 @@ bool IfStmt::hasIfClause() const {
 *
 * If @a body is the null pointer, then there is no else clause.
 */
-void IfStmt::setElseClause(ShPtr<Statement> body) {
+void IfStmt::setElseClause(Statement* body) {
 	if (hasElseClause()) {
-		elseClause->removeObserver(shared_from_this());
+		elseClause->removeObserver(this);
 	}
 	if (body) {
 		body->removePredecessors(true);
-		body->addObserver(shared_from_this());
+		body->addObserver(this);
 	}
 	elseClause = body;
 }
@@ -209,10 +209,10 @@ void IfStmt::setElseClause(ShPtr<Statement> body) {
 * @brief Removes the else clause (if any).
 *
 * Calling this function is the same as calling @c
-* setElseClause(ShPtr<Statement>()).
+* setElseClause(nullptr).
 */
 void IfStmt::removeElseClause() {
-	setElseClause(ShPtr<Statement>());
+	setElseClause(nullptr);
 }
 
 /**
@@ -246,7 +246,7 @@ IfStmt::clause_iterator IfStmt::clause_end() const {
 /**
 * @brief Returns the else clause (if any), the null pointer otherwise.
 */
-ShPtr<Statement> IfStmt::getElseClause() const {
+Statement* IfStmt::getElseClause() const {
 	return elseClause;
 }
 
@@ -261,15 +261,15 @@ ShPtr<Statement> IfStmt::getElseClause() const {
 * @par Preconditions
 *  - @a cond and @a body are non-null
 */
-ShPtr<IfStmt> IfStmt::create(ShPtr<Expression> cond, ShPtr<Statement> body,
-			ShPtr<Statement> succ, Address a) {
+IfStmt* IfStmt::create(Expression* cond, Statement* body,
+			Statement* succ, Address a) {
 	PRECONDITION_NON_NULL(cond);
 	PRECONDITION_NON_NULL(body);
 
-	ShPtr<IfStmt> stmt(new IfStmt(cond, body, a));
+	IfStmt* stmt(new IfStmt(cond, body, a));
 	stmt->setSuccessor(succ);
 
-	// Initialization (recall that shared_from_this() cannot be called in a
+	// Initialization (recall that this cannot be called in a
 	// constructor).
 	cond->addObserver(stmt);
 	body->addObserver(stmt);
@@ -298,22 +298,22 @@ ShPtr<IfStmt> IfStmt::create(ShPtr<Expression> cond, ShPtr<Statement> body,
 *
 * @see Subject::update()
 */
-void IfStmt::update(ShPtr<Value> subject, ShPtr<Value> arg) {
+void IfStmt::update(Value* subject, Value* arg) {
 	PRECONDITION_NON_NULL(subject);
 
 	// Check all if/else-if clauses.
-	ShPtr<Expression> newCond = cast<Expression>(arg);
-	ShPtr<Statement> newBody = cast<Statement>(arg);
+	Expression* newCond = cast<Expression>(arg);
+	Statement* newBody = cast<Statement>(arg);
 	for (auto &clause : ifClauseList) {
 		// TODO Refactor the handling of observers into a separate function
 		// after methods for updating if-else clauses are implemented.
 		if (subject == clause.first && newCond) {
-			clause.first->removeObserver(shared_from_this());
-			newCond->addObserver(shared_from_this());
+			clause.first->removeObserver(this);
+			newCond->addObserver(this);
 			clause.first = newCond;
 		} else if (subject == clause.second && newBody) {
-			clause.second->removeObserver(shared_from_this());
-			newBody->addObserver(shared_from_this());
+			clause.second->removeObserver(this);
+			newBody->addObserver(this);
 			clause.second = newBody;
 		}
 	}
@@ -326,7 +326,7 @@ void IfStmt::update(ShPtr<Value> subject, ShPtr<Value> arg) {
 }
 
 void IfStmt::accept(Visitor *v) {
-	v->visit(ucast<IfStmt>(shared_from_this()));
+	v->visit(ucast<IfStmt>(this));
 }
 
 /**
@@ -334,9 +334,9 @@ void IfStmt::accept(Visitor *v) {
 *
 * If there are no if clauses, the null pointer is returned.
 */
-ShPtr<Expression> IfStmt::getFirstIfCond() const {
+Expression* IfStmt::getFirstIfCond() const {
 	if (ifClauseList.empty()) {
-		return ShPtr<Expression>();
+		return nullptr;
 	}
 	return clause_begin()->first;
 }
@@ -346,9 +346,9 @@ ShPtr<Expression> IfStmt::getFirstIfCond() const {
 *
 * If there are no if clauses, the null pointer is returned.
 */
-ShPtr<Statement> IfStmt::getFirstIfBody() const {
+Statement* IfStmt::getFirstIfBody() const {
 	if (ifClauseList.empty()) {
-		return ShPtr<Statement>();
+		return nullptr;
 	}
 	return clause_begin()->second;
 }
@@ -359,11 +359,11 @@ ShPtr<Statement> IfStmt::getFirstIfBody() const {
 * @par Preconditions
 *  - @a newCond is non-null
 */
-void IfStmt::setFirstIfCond(ShPtr<Expression> newCond) {
+void IfStmt::setFirstIfCond(Expression* newCond) {
 	PRECONDITION_NON_NULL(newCond);
 
-	ifClauseList.begin()->first->removeObserver(shared_from_this());
-	newCond->addObserver(shared_from_this());
+	ifClauseList.begin()->first->removeObserver(this);
+	newCond->addObserver(this);
 	*ifClauseList.begin() = IfClause(newCond, ifClauseList.begin()->second);
 }
 
@@ -373,11 +373,11 @@ void IfStmt::setFirstIfCond(ShPtr<Expression> newCond) {
 * @par Preconditions
 *  - @a newBody is non-null
 */
-void IfStmt::setFirstIfBody(ShPtr<Statement> newBody) {
+void IfStmt::setFirstIfBody(Statement* newBody) {
 	PRECONDITION_NON_NULL(newBody);
 
-	ifClauseList.begin()->second->removeObserver(shared_from_this());
-	newBody->addObserver(shared_from_this());
+	ifClauseList.begin()->second->removeObserver(this);
+	newBody->addObserver(this);
 	newBody->removePredecessors(true);
 	*ifClauseList.begin() = IfClause(ifClauseList.begin()->first, newBody);
 }

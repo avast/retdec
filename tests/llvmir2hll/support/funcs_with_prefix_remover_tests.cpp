@@ -38,9 +38,9 @@ DoNotRemoveAnythingIfThereIsNothingToRemove) {
 	//     int a;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<VarDefStmt> varDefA(VarDefStmt::create(varA));
+	VarDefStmt* varDefA(VarDefStmt::create(varA));
 	testFunc->setBody(varDefA);
 
 	// Perform the removal.
@@ -48,7 +48,7 @@ DoNotRemoveAnythingIfThereIsNothingToRemove) {
 
 	// Check that the output is correct.
 	EXPECT_TRUE(module->getFuncByName("test"));
-	EXPECT_EQ(ShPtr<Expression>(), varDefA->getInitializer());
+	EXPECT_EQ(Expression*(), varDefA->getInitializer());
 }
 
 TEST_F(FuncsWithPrefixRemoverTests,
@@ -62,17 +62,17 @@ RemoveCallToFuncInAssignStmtAndItsDeclaration) {
 	//     a = to_remove_i();
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Function> toRemoveFunc(
+	Function* toRemoveFunc(
 		FunctionBuilder("to_remove_i")
 			.withRetType(IntType::create(32))
 			.build()
 	);
 	module->addFunc(toRemoveFunc);
-	ShPtr<CallExpr> toRemoveCallExpr(CallExpr::create(toRemoveFunc->getAsVar()));
-	ShPtr<AssignStmt> assignAToRemoveCallExpr(AssignStmt::create(varA, toRemoveCallExpr));
-	ShPtr<VarDefStmt> varDefA(VarDefStmt::create(varA, ShPtr<Expression>(), assignAToRemoveCallExpr));
+	CallExpr* toRemoveCallExpr(CallExpr::create(toRemoveFunc->getAsVar()));
+	AssignStmt* assignAToRemoveCallExpr(AssignStmt::create(varA, toRemoveCallExpr));
+	VarDefStmt* varDefA(VarDefStmt::create(varA, Expression*(), assignAToRemoveCallExpr));
 	testFunc->setBody(varDefA);
 
 	// Perform the removal.
@@ -93,16 +93,16 @@ RemoveCallToFuncInVarDefStmtAndItsDeclaration) {
 	//     int a = to_remove_i();
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Function> toRemoveFunc(
+	Function* toRemoveFunc(
 		FunctionBuilder("to_remove_i")
 			.withRetType(IntType::create(32))
 			.build()
 	);
 	module->addFunc(toRemoveFunc);
-	ShPtr<CallExpr> toRemoveCallExpr(CallExpr::create(toRemoveFunc->getAsVar()));
-	ShPtr<VarDefStmt> varDefA(VarDefStmt::create(varA, toRemoveCallExpr));
+	CallExpr* toRemoveCallExpr(CallExpr::create(toRemoveFunc->getAsVar()));
+	VarDefStmt* varDefA(VarDefStmt::create(varA, toRemoveCallExpr));
 	testFunc->setBody(varDefA);
 
 	// Perform the removal.
@@ -123,13 +123,13 @@ RemoveCallToFuncAsSingleCallStatement) {
 	//     to_remove_i();
 	// }
 	//
-	ShPtr<Function> toRemoveFunc(
+	Function* toRemoveFunc(
 		FunctionBuilder("to_remove_i")
 			.build()
 	);
 	module->addFunc(toRemoveFunc);
-	ShPtr<CallExpr> toRemoveCallExpr(CallExpr::create(toRemoveFunc->getAsVar()));
-	ShPtr<CallStmt> toRemoveCallStmt(CallStmt::create(toRemoveCallExpr));
+	CallExpr* toRemoveCallExpr(CallExpr::create(toRemoveFunc->getAsVar()));
+	CallStmt* toRemoveCallStmt(CallStmt::create(toRemoveCallExpr));
 	testFunc->setBody(toRemoveCallStmt);
 
 	// Perform the removal.
@@ -151,16 +151,16 @@ DoNotRemoveFuncIfItsNameDoesNotContainPrefix) {
 	//     int a = not_to_remove();
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Function> notToRemoveFunc(
+	Function* notToRemoveFunc(
 		FunctionBuilder("not_to_remove")
 			.withRetType(IntType::create(32))
 			.build()
 	);
 	module->addFunc(notToRemoveFunc);
-	ShPtr<CallExpr> notToRemoveCallExpr(CallExpr::create(notToRemoveFunc->getAsVar()));
-	ShPtr<VarDefStmt> varDefA(VarDefStmt::create(varA, notToRemoveCallExpr));
+	CallExpr* notToRemoveCallExpr(CallExpr::create(notToRemoveFunc->getAsVar()));
+	VarDefStmt* varDefA(VarDefStmt::create(varA, notToRemoveCallExpr));
 	testFunc->setBody(varDefA);
 
 	// Perform the removal.
@@ -185,31 +185,31 @@ WhenMultiplePrefixesAreGivenFuncsWithNamesStartingWithSuchPrefixesAreRemoved) {
 	//     do_not_remove();
 	// }
 	//
-	ShPtr<Function> toRemoveFunc(
+	Function* toRemoveFunc(
 		FunctionBuilder("to_remove_i")
 			.build()
 	);
 	module->addFunc(toRemoveFunc);
-	ShPtr<CallExpr> toRemoveCallExpr(CallExpr::create(toRemoveFunc->getAsVar()));
-	ShPtr<CallStmt> toRemoveCallStmt(CallStmt::create(toRemoveCallExpr));
+	CallExpr* toRemoveCallExpr(CallExpr::create(toRemoveFunc->getAsVar()));
+	CallStmt* toRemoveCallStmt(CallStmt::create(toRemoveCallExpr));
 	testFunc->setBody(toRemoveCallStmt);
 
-	ShPtr<Function> anotherToRemoveFunc(
+	Function* anotherToRemoveFunc(
 		FunctionBuilder("another_to_remove_j")
 			.build()
 	);
 	module->addFunc(anotherToRemoveFunc);
-	ShPtr<CallExpr> anotherToRemoveCallExpr(CallExpr::create(anotherToRemoveFunc->getAsVar()));
-	ShPtr<CallStmt> anotherToRemoveCallStmt(CallStmt::create(anotherToRemoveCallExpr));
+	CallExpr* anotherToRemoveCallExpr(CallExpr::create(anotherToRemoveFunc->getAsVar()));
+	CallStmt* anotherToRemoveCallStmt(CallStmt::create(anotherToRemoveCallExpr));
 	Statement::mergeStatements(testFunc->getBody(), anotherToRemoveCallStmt);
 
-	ShPtr<Function> doNotRemoveFunc(
+	Function* doNotRemoveFunc(
 		FunctionBuilder("do_not_remove")
 			.build()
 	);
 	module->addFunc(doNotRemoveFunc);
-	ShPtr<CallExpr> doNotRemoveCallExpr(CallExpr::create(doNotRemoveFunc->getAsVar()));
-	ShPtr<CallStmt> doNotRemoveCallStmt(CallStmt::create(doNotRemoveCallExpr));
+	CallExpr* doNotRemoveCallExpr(CallExpr::create(doNotRemoveFunc->getAsVar()));
+	CallStmt* doNotRemoveCallStmt(CallStmt::create(doNotRemoveCallExpr));
 	Statement::mergeStatements(testFunc->getBody(), doNotRemoveCallStmt);
 
 	// Perform the removal.
@@ -230,7 +230,7 @@ WhenMultiplePrefixesAreGivenFuncsWithNamesStartingWithSuchPrefixesAreRemoved) {
 #if DEATH_TESTS_ENABLED
 TEST_F(FuncsWithPrefixRemoverTests,
 ViolatedPreconditionNullModule) {
-	EXPECT_DEATH(FuncsWithPrefixRemover::removeFuncs(ShPtr<Module>(), "to_remove_"),
+	EXPECT_DEATH(FuncsWithPrefixRemover::removeFuncs(Module*(), "to_remove_"),
 		".*removeFuncs.*Precondition.*failed.*");
 }
 #endif

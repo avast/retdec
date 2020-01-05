@@ -30,8 +30,8 @@ public:
 	LLVMFCmpConverter() = default;
 	~LLVMFCmpConverter() = default;
 
-	ShPtr<Expression> convertToExpression(ShPtr<Expression> op1,
-		ShPtr<Expression> op2, unsigned predicate);
+	Expression* convertToExpression(Expression* op1,
+		Expression* op2, unsigned predicate);
 
 	/// @name Options
 	/// @{
@@ -39,15 +39,15 @@ public:
 	/// @}
 
 private:
-	ShPtr<Expression> getExprIsNotQNAN(ShPtr<Expression> op) const;
-	ShPtr<Expression> getExprIsQNAN(ShPtr<Expression> op) const;
+	Expression* getExprIsNotQNAN(Expression* op) const;
+	Expression* getExprIsQNAN(Expression* op) const;
 
 	template<class T>
-	ShPtr<Expression> getOrdFCmpExpr(ShPtr<Expression> op1,
-		ShPtr<Expression> op2) const;
+	Expression* getOrdFCmpExpr(Expression* op1,
+		Expression* op2) const;
 	template<class T>
-	ShPtr<Expression> getUnordFCmpExpr(ShPtr<Expression> op1,
-		ShPtr<Expression> op2) const;
+	Expression* getUnordFCmpExpr(Expression* op1,
+		Expression* op2) const;
 
 	/// Use strict FPU semantics?
 	bool optionStrictFPUSemantics = false;

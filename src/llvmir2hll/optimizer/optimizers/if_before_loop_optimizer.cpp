@@ -29,8 +29,8 @@ namespace llvmir2hll {
 * @par Preconditions
 *  - @a module and @a va are non-null
 */
-IfBeforeLoopOptimizer::IfBeforeLoopOptimizer(ShPtr<Module> module,
-		ShPtr<ValueAnalysis> va):
+IfBeforeLoopOptimizer::IfBeforeLoopOptimizer(Module* module,
+		ValueAnalysis* va):
 	FuncOptimizer(module), va(va) {
 		PRECONDITION_NON_NULL(module);
 		PRECONDITION_NON_NULL(va);
@@ -49,7 +49,7 @@ void IfBeforeLoopOptimizer::doOptimization() {
 	va->invalidateState();
 }
 
-void IfBeforeLoopOptimizer::visit(ShPtr<IfStmt> stmt) {
+void IfBeforeLoopOptimizer::visit(IfStmt* stmt) {
 	// First of all, visit nested and subsequent statements.
 	FuncOptimizer::visit(stmt);
 
@@ -71,7 +71,7 @@ void IfBeforeLoopOptimizer::visit(ShPtr<IfStmt> stmt) {
 *
 * @return @c true if the optimization was done, @c false otherwise.
 */
-bool IfBeforeLoopOptimizer::tryOptimizationCase1(ShPtr<IfStmt> stmt) {
+bool IfBeforeLoopOptimizer::tryOptimizationCase1(IfStmt* stmt) {
 	// Check that the code surrounding the if statement is of the following
 	// form:
 	//
@@ -81,13 +81,13 @@ bool IfBeforeLoopOptimizer::tryOptimizationCase1(ShPtr<IfStmt> stmt) {
 	//     ... // some statements
 	//
 	// TODO What about "while cond" loops instead of for loops?
-	ShPtr<Expression> ifCond(stmt->getFirstIfCond());
-	ShPtr<ValueData> ifCondData(va->getValueData(ifCond));
+	Expression* ifCond(stmt->getFirstIfCond());
+	ValueData* ifCondData(va->getValueData(ifCond));
 
 	// Check that the if's condition is of the form x op y,
 	// where y is a constant and x is a variable (or vice versa, but in what
 	// follows, x denotes a variable).
-	ShPtr<BinaryOpExpr> ifCondOp(cast<BinaryOpExpr>(ifCond));
+	BinaryOpExpr* ifCondOp(cast<BinaryOpExpr>(ifCond));
 	if (!ifCondOp) {
 		// This if statement cannot be optimized.
 		return false;
@@ -97,7 +97,7 @@ bool IfBeforeLoopOptimizer::tryOptimizationCase1(ShPtr<IfStmt> stmt) {
 		return false;
 	}
 	const VarSet &allVarsUsedInIfCond(ifCondData->getDirAccessedVars());
-	ShPtr<Variable> x(*allVarsUsedInIfCond.begin());
+	Variable* x(*allVarsUsedInIfCond.begin());
 	if (cast<Variable>(ifCondOp->getFirstOperand()) != x &&
 		cast<Variable>(ifCondOp->getSecondOperand()) != x) {
 		// One operand of ifCondOp has to be x.
@@ -112,7 +112,7 @@ bool IfBeforeLoopOptimizer::tryOptimizationCase1(ShPtr<IfStmt> stmt) {
 	}
 
 	// Check that the if's body starts with a for loop.
-	ShPtr<ForLoopStmt> forLoop(cast<ForLoopStmt>(skipEmptyStmts(
+	ForLoopStmt* forLoop(cast<ForLoopStmt>(skipEmptyStmts(
 		stmt->getFirstIfBody())));
 	if (!forLoop) {
 		// This if statement cannot be optimized.
@@ -120,7 +120,7 @@ bool IfBeforeLoopOptimizer::tryOptimizationCase1(ShPtr<IfStmt> stmt) {
 	}
 
 	// Check that the end value of forLoop depends on x.
-	ShPtr<ValueData> loopEndData(va->getValueData(forLoop->getEndCond()));
+	ValueData* loopEndData(va->getValueData(forLoop->getEndCond()));
 	if (!loopEndData->isDirAccessed(x)) {
 		// This if statement cannot be optimized.
 		return false;
@@ -142,7 +142,7 @@ bool IfBeforeLoopOptimizer::tryOptimizationCase1(ShPtr<IfStmt> stmt) {
 	// a debug comment of the form "branch -> bb"). Notice that now, the
 	// successor of forLoop can be either an empty statement or the null
 	// pointer.
-	if (ShPtr<Statement> forLoopSucc = forLoop->getSuccessor()) {
+	if (Statement* forLoopSucc = forLoop->getSuccessor()) {
 		Statement::removeStatement(forLoopSucc);
 	}
 
@@ -150,13 +150,13 @@ bool IfBeforeLoopOptimizer::tryOptimizationCase1(ShPtr<IfStmt> stmt) {
 	std::string ifStmtMetadata(stmt->getMetadata());
 
 	// Remove the surrounding if statement.
-	ShPtr<Statement> ifStmtReplacement(stmt->getFirstIfBody());
+	Statement* ifStmtReplacement(stmt->getFirstIfBody());
 	Statement::replaceStatement(stmt, ifStmtReplacement);
 
 	// Attach the if's metadata to forLoop (if any). However, put them in an
 	// empty statement because there could already be some existing metadata.
 	if (!ifStmtMetadata.empty()) {
-		ShPtr<EmptyStmt> emptyStmt(
+		EmptyStmt* emptyStmt(
 			EmptyStmt::create(nullptr, ifStmtReplacement->getAddress()));
 		emptyStmt->setMetadata(ifStmtMetadata);
 		ifStmtReplacement->prependStatement(emptyStmt);
@@ -171,7 +171,7 @@ bool IfBeforeLoopOptimizer::tryOptimizationCase1(ShPtr<IfStmt> stmt) {
 *
 * @return @c true if the optimization was done, @c false otherwise.
 */
-bool IfBeforeLoopOptimizer::tryOptimizationCase2(ShPtr<IfStmt> stmt) {
+bool IfBeforeLoopOptimizer::tryOptimizationCase2(IfStmt* stmt) {
 	// Check that the code surrounding the if statement is of the following
 	// form:
 	//
@@ -183,28 +183,28 @@ bool IfBeforeLoopOptimizer::tryOptimizationCase2(ShPtr<IfStmt> stmt) {
 	// TODO What about "while cond" loops instead of for loops?
 
 	// Get the variable x.
-	ShPtr<Expression> ifCond(stmt->getFirstIfCond());
-	ShPtr<ValueData> ifCondData(va->getValueData(ifCond));
+	Expression* ifCond(stmt->getFirstIfCond());
+	ValueData* ifCondData(va->getValueData(ifCond));
 	if (ifCondData->getNumOfDirAccessedVars() != 1) {
 		// There should be only a single variable in the if's condition.
 		return false;
 	}
 	const VarSet &allVarsUsedInIfCond(ifCondData->getDirAccessedVars());
-	ShPtr<Variable> x(*allVarsUsedInIfCond.begin());
+	Variable* x(*allVarsUsedInIfCond.begin());
 	if (!x) {
 		// The variable x was not found.
 		return false;
 	}
 
 	// Check that the if's successor is a for loop.
-	ShPtr<ForLoopStmt> forLoop(cast<ForLoopStmt>(skipEmptyStmts(
+	ForLoopStmt* forLoop(cast<ForLoopStmt>(skipEmptyStmts(
 		stmt->getSuccessor())));
 	if (!forLoop) {
 		return false;
 	}
 
 	// Check that the end value of forLoop depends on x.
-	ShPtr<ValueData> loopEndData(va->getValueData(forLoop->getEndCond()));
+	ValueData* loopEndData(va->getValueData(forLoop->getEndCond()));
 	if (!loopEndData->isDirAccessed(x)) {
 		return false;
 	}

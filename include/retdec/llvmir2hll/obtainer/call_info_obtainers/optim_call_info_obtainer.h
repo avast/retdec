@@ -29,20 +29,20 @@ class OptimCallInfo: public CallInfo {
 	friend class OptimFuncInfoCFGTraversal;
 
 public:
-	explicit OptimCallInfo(ShPtr<CallExpr> call);
+	explicit OptimCallInfo(CallExpr* call);
 
 	void debugPrint();
 
-	virtual bool isNeverRead(ShPtr<Variable> var) const override;
-	virtual bool mayBeRead(ShPtr<Variable> var) const override;
-	virtual bool isAlwaysRead(ShPtr<Variable> var) const override;
+	virtual bool isNeverRead(Variable* var) const override;
+	virtual bool mayBeRead(Variable* var) const override;
+	virtual bool isAlwaysRead(Variable* var) const override;
 
-	virtual bool isNeverModified(ShPtr<Variable> var) const override;
-	virtual bool mayBeModified(ShPtr<Variable> var) const override;
-	virtual bool isAlwaysModified(ShPtr<Variable> var) const override;
+	virtual bool isNeverModified(Variable* var) const override;
+	virtual bool mayBeModified(Variable* var) const override;
+	virtual bool isAlwaysModified(Variable* var) const override;
 
-	virtual bool valueIsNeverChanged(ShPtr<Variable> var) const override;
-	virtual bool isAlwaysModifiedBeforeRead(ShPtr<Variable> var) const override;
+	virtual bool valueIsNeverChanged(Variable* var) const override;
+	virtual bool isAlwaysModifiedBeforeRead(Variable* var) const override;
 
 private:
 	/// Variables that are never read in this function call.
@@ -82,20 +82,20 @@ class OptimFuncInfo: public FuncInfo {
 	friend class OptimFuncInfoCFGTraversal;
 
 public:
-	explicit OptimFuncInfo(ShPtr<Function> func);
+	explicit OptimFuncInfo(Function* func);
 
 	void debugPrint();
 
-	virtual bool isNeverRead(ShPtr<Variable> var) const override;
-	virtual bool mayBeRead(ShPtr<Variable> var) const override;
-	virtual bool isAlwaysRead(ShPtr<Variable> var) const override;
+	virtual bool isNeverRead(Variable* var) const override;
+	virtual bool mayBeRead(Variable* var) const override;
+	virtual bool isAlwaysRead(Variable* var) const override;
 
-	virtual bool isNeverModified(ShPtr<Variable> var) const override;
-	virtual bool mayBeModified(ShPtr<Variable> var) const override;
-	virtual bool isAlwaysModified(ShPtr<Variable> var) const override;
+	virtual bool isNeverModified(Variable* var) const override;
+	virtual bool mayBeModified(Variable* var) const override;
+	virtual bool isAlwaysModified(Variable* var) const override;
 
-	virtual bool valueIsNeverChanged(ShPtr<Variable> var) const override;
-	virtual bool isAlwaysModifiedBeforeRead(ShPtr<Variable> var) const override;
+	virtual bool valueIsNeverChanged(Variable* var) const override;
+	virtual bool isAlwaysModifiedBeforeRead(Variable* var) const override;
 
 private:
 	/// Variables that are never read in this function.
@@ -142,35 +142,35 @@ class OptimCallInfoObtainer: public CallInfoObtainer {
 	friend class OptimFuncInfoCFGTraversal;
 
 public:
-	static ShPtr<CallInfoObtainer> create();
+	static CallInfoObtainer* create();
 
-	virtual void init(ShPtr<CG> cg, ShPtr<ValueAnalysis> va) override;
+	virtual void init(CG* cg, ValueAnalysis* va) override;
 	virtual std::string getId() const override;
-	virtual ShPtr<CallInfo> getCallInfo(ShPtr<CallExpr> call,
-		ShPtr<Function> caller) override;
-	virtual ShPtr<FuncInfo> getFuncInfo(ShPtr<Function> func) override;
+	virtual CallInfo* getCallInfo(CallExpr* call,
+		Function* caller) override;
+	virtual FuncInfo* getFuncInfo(Function* func) override;
 
 private:
 	/// Mapping of a function into its info.
-	using FuncInfoMap = std::map<ShPtr<Function>, ShPtr<OptimFuncInfo>>;
+	using FuncInfoMap = std::map<Function*, OptimFuncInfo*>;
 
 	/// Mapping of a function call into its info.
-	using CallInfoMap = std::map<ShPtr<CallExpr>, ShPtr<OptimCallInfo>>;
+	using CallInfoMap = std::map<CallExpr*, OptimCallInfo*>;
 
 private:
 	OptimCallInfoObtainer();
 
 	void computeAllFuncInfos();
-	void computeFuncInfo(ShPtr<Function> func);
+	void computeFuncInfo(Function* func);
 	void computeFuncInfos(const FuncSet &funcs);
 	VarSet skipLocalVars(const VarSet &vars);
-	ShPtr<OptimFuncInfo> computeFuncInfoDeclaration(ShPtr<Function> func);
-	ShPtr<OptimFuncInfo> computeFuncInfoDefinition(ShPtr<Function> func);
-	ShPtr<OptimCallInfo> computeCallInfo(ShPtr<CallExpr> call,
-		ShPtr<Function> caller);
+	OptimFuncInfo* computeFuncInfoDeclaration(Function* func);
+	OptimFuncInfo* computeFuncInfoDefinition(Function* func);
+	OptimCallInfo* computeCallInfo(CallExpr* call,
+		Function* caller);
 
-	static bool areDifferent(ShPtr<OptimFuncInfo> fi1,
-		ShPtr<OptimFuncInfo> fi2);
+	static bool areDifferent(OptimFuncInfo* fi1,
+		OptimFuncInfo* fi2);
 	static bool hasChanged(const FuncInfoMap &oldInfo,
 		const FuncInfoMap &newInfo);
 

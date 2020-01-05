@@ -27,15 +27,15 @@ class Visitor;
 */
 class Variable final: public Expression {
 public:
-	static ShPtr<Variable> create(const std::string &name, ShPtr<Type> type,
+	static Variable* create(const std::string &name, Type* type,
 		Address a = Address::Undefined);
 
-	virtual ShPtr<Value> clone() override;
+	virtual Value* clone() override;
 
-	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
-	virtual ShPtr<Type> getType() const override;
-	virtual void replace(ShPtr<Expression> oldExpr,
-		ShPtr<Expression> newExpr) override;
+	virtual bool isEqualTo(Value* otherValue) const override;
+	virtual Type* getType() const override;
+	virtual void replace(Expression* oldExpr,
+		Expression* newExpr) override;
 
 	const std::string &getInitialName() const;
 	const std::string &getName() const;
@@ -43,10 +43,10 @@ public:
 	bool hasName() const;
 	bool isInternal() const;
 	bool isExternal() const;
-	ShPtr<Variable> copy() const;
+	Variable* copy() const;
 
 	void setName(const std::string &newName);
-	void setType(ShPtr<Type> newType);
+	void setType(Type* newType);
 	void setAddress(Address a);
 	void markAsInternal();
 	void markAsExternal();
@@ -59,7 +59,7 @@ public:
 private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
-	Variable(const std::string &name, ShPtr<Type> type,
+	Variable(const std::string &name, Type* type,
 		Address a = Address::Undefined);
 
 private:
@@ -70,7 +70,7 @@ private:
 	std::string name;
 
 	/// Type of the variable.
-	ShPtr<Type> type;
+	Type* type = nullptr;
 
 	/// Is the variable internal?
 	bool internal;

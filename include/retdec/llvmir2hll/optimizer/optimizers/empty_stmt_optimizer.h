@@ -24,7 +24,7 @@ namespace llvmir2hll {
 */
 class EmptyStmtOptimizer final: public FuncOptimizer {
 public:
-	EmptyStmtOptimizer(ShPtr<Module> module);
+	EmptyStmtOptimizer(Module* module);
 
 	virtual std::string getId() const override { return "EmptyStmt"; }
 
@@ -32,7 +32,7 @@ private:
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<EmptyStmt> stmt) override;
+	virtual void visit(EmptyStmt* stmt) override;
 	/// @}
 };
 

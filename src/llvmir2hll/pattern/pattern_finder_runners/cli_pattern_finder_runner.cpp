@@ -37,7 +37,7 @@ CLIPatternFinderRunner::CLIPatternFinderRunner(llvm::raw_ostream &os):
 * The ID of the finder is included in the output.
 */
 void CLIPatternFinderRunner::doActionsBeforePatternFinderRuns(
-		ShPtr<PatternFinder> pf) {
+		PatternFinder* pf) {
 	printSubPhase("running " + pf->getId() + "PatternFinder", os);
 }
 
@@ -45,7 +45,7 @@ void CLIPatternFinderRunner::doActionsBeforePatternFinderRuns(
 * @brief Prints the found patterns of the given finder.
 */
 void CLIPatternFinderRunner::doActionsAfterPatternFinderHasRun(
-		ShPtr<PatternFinder> pf, const PatternFinder::Patterns &foundPatterns) {
+		PatternFinder* pf, const PatternFinder::Patterns &foundPatterns) {
 	for (const auto &pattern : foundPatterns) {
 		printPatternInfo(pattern);
 	}
@@ -54,7 +54,7 @@ void CLIPatternFinderRunner::doActionsAfterPatternFinderHasRun(
 /**
 * @brief Prints information about the given pattern.
 */
-void CLIPatternFinderRunner::printPatternInfo(const ShPtr<Pattern> &p) {
+void CLIPatternFinderRunner::printPatternInfo(const Pattern* p) {
 	os << PATTERN_INFO_INDENT << "Found pattern:" << "\n";
 	p->print(os, PATTERN_INFO_INDENT + "  ");
 }

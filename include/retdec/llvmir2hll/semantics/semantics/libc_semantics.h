@@ -25,7 +25,7 @@ namespace llvmir2hll {
 */
 class LibcSemantics: public DefaultSemantics {
 public:
-	static ShPtr<Semantics> create();
+	static Semantics* create();
 
 	/// @name Semantics Interface
 	/// @{

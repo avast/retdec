@@ -31,11 +31,11 @@ public:
 		UIToFP  /// Unsigned integer to floating-point.
 	};
 
-	static ShPtr<IntToFPCastExpr> create(ShPtr<Expression> op, ShPtr<Type> dstType,
+	static IntToFPCastExpr* create(Expression* op, Type* dstType,
 		Variant variant = Variant::UIToFP);
 
-	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
-	virtual ShPtr<Value> clone() override;
+	virtual bool isEqualTo(Value* otherValue) const override;
+	virtual Value* clone() override;
 
 	Variant getVariant() const;
 
@@ -50,7 +50,7 @@ private:
 private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
-	IntToFPCastExpr(ShPtr<Expression> op, ShPtr<Type> dstType,
+	IntToFPCastExpr(Expression* op, Type* dstType,
 		Variant variant = Variant::UIToFP);
 };
 

@@ -43,11 +43,11 @@ public:
 	virtual bool emitCG() = 0;
 
 protected:
-	CGWriter(ShPtr<CG> cg, std::ostream &out);
+	CGWriter(CG* cg, std::ostream &out);
 
 protected:
 	/// CG to be emitted.
-	ShPtr<CG> cg;
+	CG* cg = nullptr;
 
 	/// Stream, where the resulting CG will be emitted.
 	std::ostream &out;

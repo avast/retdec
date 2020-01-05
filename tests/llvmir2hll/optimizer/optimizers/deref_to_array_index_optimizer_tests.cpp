@@ -34,7 +34,7 @@ class DerefToArrayIndexOptimizerTests: public TestsWithModule {};
 
 TEST_F(DerefToArrayIndexOptimizerTests,
 OptimizerHasNonEmptyID) {
-	ShPtr<DerefToArrayIndexOptimizer> optimizer(new DerefToArrayIndexOptimizer(
+	DerefToArrayIndexOptimizer* optimizer(new DerefToArrayIndexOptimizer(
 		module));
 
 	EXPECT_TRUE(!optimizer->getId().empty()) <<
@@ -47,14 +47,14 @@ VarPlusConstantOptimized) {
 	//
 	// Optimized to return a[4].
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<AddOpExpr> addOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	AddOpExpr* addOpExpr(
 		AddOpExpr::create(
 			varA,
 			ConstInt::create(4, 64)
 	));
-	ShPtr<DerefOpExpr> derefOpExpr(DerefOpExpr::create(addOpExpr));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(derefOpExpr));
+	DerefOpExpr* derefOpExpr(DerefOpExpr::create(addOpExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(derefOpExpr));
 
 	testFunc->setBody(returnStmt);
 
@@ -62,11 +62,11 @@ VarPlusConstantOptimized) {
 
 	ASSERT_TRUE(testFunc->getBody()) <<
 		"expected a non-empty body";
-	ShPtr<ReturnStmt> outReturnBody(cast<ReturnStmt>(testFunc->getBody()));
+	ReturnStmt* outReturnBody(cast<ReturnStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outReturnBody) <<
 		"expected `ReturnStmt`, "
 		"got `" << testFunc->getBody() << "`";
-	ShPtr<ArrayIndexOpExpr> outArray(cast<ArrayIndexOpExpr>(
+	ArrayIndexOpExpr* outArray(cast<ArrayIndexOpExpr>(
 		outReturnBody->getRetVal()));
 	ASSERT_TRUE(outArray) <<
 		"expected `ArrayIndexOpExpr`, "
@@ -83,19 +83,19 @@ GlobalVarPlusConstantOptimized) {
 	// int b = a[4];
 	// void test() {}
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<AddOpExpr> addOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	AddOpExpr* addOpExpr(
 		AddOpExpr::create(
 			varA,
 			ConstInt::create(4, 64)
 	));
-	ShPtr<DerefOpExpr> derefOpExpr(DerefOpExpr::create(addOpExpr));
+	DerefOpExpr* derefOpExpr(DerefOpExpr::create(addOpExpr));
 	module->addGlobalVar(varB, derefOpExpr);
 
 	Optimizer::optimize<DerefToArrayIndexOptimizer>(module);
 
-	ShPtr<ArrayIndexOpExpr> outArray(cast<ArrayIndexOpExpr>(
+	ArrayIndexOpExpr* outArray(cast<ArrayIndexOpExpr>(
 		module->getInitForGlobalVar(varB)));
 	ASSERT_TRUE(outArray) <<
 		"expected `ArrayIndexOpExpr`, "
@@ -108,15 +108,15 @@ ConstantPlusVarOptimized) {
 	//
 	// Optimized to return a[4].
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<ConstInt> constInt(ConstInt::create(4, 64));
-	ShPtr<AddOpExpr> addOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	ConstInt* constInt(ConstInt::create(4, 64));
+	AddOpExpr* addOpExpr(
 		AddOpExpr::create(
 			constInt,
 			varA
 	));
-	ShPtr<DerefOpExpr> derefOpExpr(DerefOpExpr::create(addOpExpr));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(derefOpExpr));
+	DerefOpExpr* derefOpExpr(DerefOpExpr::create(addOpExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(derefOpExpr));
 
 	testFunc->setBody(returnStmt);
 
@@ -124,23 +124,23 @@ ConstantPlusVarOptimized) {
 
 	ASSERT_TRUE(testFunc->getBody()) <<
 		"expected a non-empty body";
-	ShPtr<ReturnStmt> outReturnBody(cast<ReturnStmt>(testFunc->getBody()));
+	ReturnStmt* outReturnBody(cast<ReturnStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outReturnBody) <<
 		"expected `ReturnStmt`, "
 		"got `" << testFunc->getBody() << "`";
-	ShPtr<ArrayIndexOpExpr> outArray(cast<ArrayIndexOpExpr>(
+	ArrayIndexOpExpr* outArray(cast<ArrayIndexOpExpr>(
 		outReturnBody->getRetVal()));
 	ASSERT_TRUE(outArray) <<
 		"expected `ArrayIndexOpExpr`, "
 		"got `" << outReturnBody->getRetVal() << "`";
-	ShPtr<Variable> outBase(cast<Variable>(outArray->getBase()));
+	Variable* outBase(cast<Variable>(outArray->getBase()));
 	ASSERT_TRUE(outBase) <<
 		"expected `Variable`, "
 		"got `" << outArray->getBase() << "`";
 	EXPECT_EQ(outBase, varA) <<
 		"expected `" << varA << "`, "
 		"got `" << outBase << "`";
-	ShPtr<ConstInt> outIndex(cast<ConstInt>(outArray->getIndex()));
+	ConstInt* outIndex(cast<ConstInt>(outArray->getIndex()));
 	ASSERT_TRUE(outIndex) <<
 		"expected `ConstInt`, "
 		"got `" << outArray->getIndex() << "`";
@@ -155,20 +155,20 @@ ConstantPlusArrayIndexOpExprOptimized) {
 	//
 	// Optimized to return a[2][4].
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<ConstInt> constInt4(ConstInt::create(4, 64));
-	ShPtr<ConstInt> constInt2(ConstInt::create(2, 64));
-	ShPtr<ArrayIndexOpExpr> arrayIndexOpExpr(ArrayIndexOpExpr::create(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	ConstInt* constInt4(ConstInt::create(4, 64));
+	ConstInt* constInt2(ConstInt::create(2, 64));
+	ArrayIndexOpExpr* arrayIndexOpExpr(ArrayIndexOpExpr::create(
 		varA,
 		constInt2
 	));
-	ShPtr<AddOpExpr> addOpExpr(
+	AddOpExpr* addOpExpr(
 		AddOpExpr::create(
 			constInt4,
 			arrayIndexOpExpr
 	));
-	ShPtr<DerefOpExpr> derefOpExpr(DerefOpExpr::create(addOpExpr));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(derefOpExpr));
+	DerefOpExpr* derefOpExpr(DerefOpExpr::create(addOpExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(derefOpExpr));
 
 	testFunc->setBody(returnStmt);
 
@@ -176,35 +176,35 @@ ConstantPlusArrayIndexOpExprOptimized) {
 
 	ASSERT_TRUE(testFunc->getBody()) <<
 		"expected a non-empty body";
-	ShPtr<ReturnStmt> outReturnBody(cast<ReturnStmt>(testFunc->getBody()));
+	ReturnStmt* outReturnBody(cast<ReturnStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outReturnBody) <<
 		"expected `ReturnStmt`, "
 		"got `" << testFunc->getBody() << "`";
-	ShPtr<ArrayIndexOpExpr> outArray(cast<ArrayIndexOpExpr>(
+	ArrayIndexOpExpr* outArray(cast<ArrayIndexOpExpr>(
 		outReturnBody->getRetVal()));
 	ASSERT_TRUE(outArray) <<
 		"expected `ArrayIndexOpExpr`, "
 		"got `" << outReturnBody->getRetVal() << "`";
-	ShPtr<ArrayIndexOpExpr> outBaseArray(cast<ArrayIndexOpExpr>(
+	ArrayIndexOpExpr* outBaseArray(cast<ArrayIndexOpExpr>(
 		outArray->getBase()));
 	ASSERT_TRUE(outBaseArray) <<
 		"expected `ArrayIndexOpExpr`, "
 		"got `" << outArray->getBase() << "`";
-	ShPtr<ConstInt> outIndex(cast<ConstInt>(outArray->getIndex()));
+	ConstInt* outIndex(cast<ConstInt>(outArray->getIndex()));
 	ASSERT_TRUE(outIndex) <<
 		"expected `ConstInt`, "
 		"got `" << outArray->getIndex() << "`";
 	EXPECT_EQ(outIndex->getValue(), constInt4->getValue()) <<
 		"expected `" << constInt4 << "`, "
 		"got `" << outIndex << "`";
-	ShPtr<Variable> outBaseVar(cast<Variable>(outBaseArray->getBase()));
+	Variable* outBaseVar(cast<Variable>(outBaseArray->getBase()));
 	ASSERT_TRUE(outBaseVar) <<
 		"expected `Variable`, "
 		"got `" << outBaseArray->getBase() << "`";
 	EXPECT_EQ(outBaseVar, varA) <<
 		"expected `" << varA << "`, "
 		"got `" << outBaseVar << "`";
-	ShPtr<ConstInt> outBaseIndex(cast<ConstInt>(outBaseArray->getIndex()));
+	ConstInt* outBaseIndex(cast<ConstInt>(outBaseArray->getIndex()));
 	ASSERT_TRUE(outBaseIndex) <<
 		"expected `ConstInt`, "
 		"got `" << outBaseArray->getIndex() << "`";
@@ -219,20 +219,20 @@ ConstantPlusAccessToStructIndexOpOptimized) {
 	//
 	// Optimized to return a.e0[0][4].
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<StructIndexOpExpr> structIndexOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	StructIndexOpExpr* structIndexOpExpr(
 		StructIndexOpExpr::create(
 			varA,
 			ConstInt::create(0, 64)
 	));
-	ShPtr<ConstInt> constInt(ConstInt::create(4, 64));
-	ShPtr<AddOpExpr> addOpExpr(
+	ConstInt* constInt(ConstInt::create(4, 64));
+	AddOpExpr* addOpExpr(
 		AddOpExpr::create(
 			constInt,
 			structIndexOpExpr
 	));
-	ShPtr<DerefOpExpr> derefOpExpr(DerefOpExpr::create(addOpExpr));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(derefOpExpr));
+	DerefOpExpr* derefOpExpr(DerefOpExpr::create(addOpExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(derefOpExpr));
 
 	testFunc->setBody(returnStmt);
 
@@ -240,23 +240,23 @@ ConstantPlusAccessToStructIndexOpOptimized) {
 
 	ASSERT_TRUE(testFunc->getBody()) <<
 		"expected a non-empty body";
-	ShPtr<ReturnStmt> outReturnBody(cast<ReturnStmt>(testFunc->getBody()));
+	ReturnStmt* outReturnBody(cast<ReturnStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outReturnBody) <<
 		"expected `ReturnStmt`, "
 		"got `" << testFunc->getBody() << "`";
-	ShPtr<ArrayIndexOpExpr> outArray(cast<ArrayIndexOpExpr>(
+	ArrayIndexOpExpr* outArray(cast<ArrayIndexOpExpr>(
 		outReturnBody->getRetVal()));
 	ASSERT_TRUE(outArray) <<
 		"expected `ArrayIndexOpExpr`, "
 		"got `" << outReturnBody->getRetVal() << "`";
-	ShPtr<StructIndexOpExpr> outBase(cast<StructIndexOpExpr>(outArray->getBase()));
+	StructIndexOpExpr* outBase(cast<StructIndexOpExpr>(outArray->getBase()));
 	ASSERT_TRUE(outBase) <<
 		"expected `StructIndexOpExpr`, "
 		"got `" << outArray->getBase() << "`";
 	EXPECT_EQ(outBase, structIndexOpExpr) <<
 		"expected `" << structIndexOpExpr << "`, "
 		"got `" << outBase << "`";
-	ShPtr<ConstInt> outIndex(cast<ConstInt>(outArray->getIndex()));
+	ConstInt* outIndex(cast<ConstInt>(outArray->getIndex()));
 	ASSERT_TRUE(outIndex) <<
 		"expected `ConstInt`, "
 		"got `" << outArray->getIndex() << "`";
@@ -271,14 +271,14 @@ VarPlusNotConstantNotOptimized) {
 	//
 	// Not optimized.
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<AddOpExpr> addOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	AddOpExpr* addOpExpr(
 		AddOpExpr::create(
 			varA,
 			varA
 	));
-	ShPtr<DerefOpExpr> derefOpExpr(DerefOpExpr::create(addOpExpr));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(derefOpExpr));
+	DerefOpExpr* derefOpExpr(DerefOpExpr::create(addOpExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(derefOpExpr));
 
 	testFunc->setBody(returnStmt);
 
@@ -286,11 +286,11 @@ VarPlusNotConstantNotOptimized) {
 
 	ASSERT_TRUE(testFunc->getBody()) <<
 		"expected a non-empty body";
-	ShPtr<ReturnStmt> outReturnBody(cast<ReturnStmt>(testFunc->getBody()));
+	ReturnStmt* outReturnBody(cast<ReturnStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outReturnBody) <<
 		"expected `ReturnStmt`, "
 		"got `" << testFunc->getBody() << "`";
-	ShPtr<DerefOpExpr> outDerefOpExpr(cast<DerefOpExpr>(
+	DerefOpExpr* outDerefOpExpr(cast<DerefOpExpr>(
 		outReturnBody->getRetVal()));
 	ASSERT_TRUE(outDerefOpExpr) <<
 		"expected `DerefOpExpr`, "

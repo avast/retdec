@@ -15,7 +15,7 @@ namespace llvmir2hll {
 *
 * @param[in] module The module to be analyzed.
 */
-CBracketManager::CBracketManager(ShPtr<Module> module): BracketManager(module) {
+CBracketManager::CBracketManager(Module* module): BracketManager(module) {
 	// Starts running of brackets elimination analyse.
 	init();
 }

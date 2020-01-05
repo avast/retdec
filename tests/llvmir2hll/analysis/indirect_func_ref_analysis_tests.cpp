@@ -29,7 +29,7 @@ namespace tests {
 */
 class IndirectFuncRefAnalysisTests: public TestsWithModule {
 protected:
-	ShPtr<Function> addFooFuncToModule();
+	Function* addFooFuncToModule();
 
 	void scenarioGivenIndirectlyReferencedFuncsAreFound(const FuncSet &expectedFuncs);
 	void scenarioNoIndirectlyReferencedFuncsAreFound();
@@ -39,8 +39,8 @@ protected:
 * @brief Inserts a <tt>int foo()</tt> function declaration into the module and
 *        returns it.
 */
-ShPtr<Function> IndirectFuncRefAnalysisTests::addFooFuncToModule() {
-	ShPtr<Function> fooFunc(
+Function* IndirectFuncRefAnalysisTests::addFooFuncToModule() {
+	Function* fooFunc(
 		FunctionBuilder("foo")
 			.withRetType(IntType::create(32))
 			.build()
@@ -98,11 +98,11 @@ ThereAreNoIndirectlyReferencedFuncsWhenOnlyDirectCallsAreMade) {
 	//     foo();
 	// }
 	//
-	ShPtr<Function> fooFunc(addFooFuncToModule());
-	ShPtr<CallExpr> fooCall(CallExpr::create(fooFunc->getAsVar()));
-	ShPtr<CallStmt> fooCallStmt(CallStmt::create(fooCall));
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
-	ShPtr<VarDefStmt> varDefA(VarDefStmt::create(varA,
+	Function* fooFunc(addFooFuncToModule());
+	CallExpr* fooCall(CallExpr::create(fooFunc->getAsVar()));
+	CallStmt* fooCallStmt(CallStmt::create(fooCall));
+	Variable* varA(Variable::create("a", IntType::create(32)));
+	VarDefStmt* varDefA(VarDefStmt::create(varA,
 		ucast<CallExpr>(fooCall->clone()), fooCallStmt));
 	testFunc->addLocalVar(varA);
 	testFunc->setBody(varDefA);
@@ -121,10 +121,10 @@ FunctionStoredIntoVariableIsConsideredAsIndirectlyReferenced) {
 	//     int a = foo; // The type mismatch does not matter.
 	// }
 	//
-	ShPtr<Function> fooFunc(addFooFuncToModule());
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Function* fooFunc(addFooFuncToModule());
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<VarDefStmt> varDefA(VarDefStmt::create(varA, fooFunc->getAsVar()));
+	VarDefStmt* varDefA(VarDefStmt::create(varA, fooFunc->getAsVar()));
 	testFunc->setBody(varDefA);
 
 	FuncSet expectedFuncs;
@@ -144,14 +144,14 @@ LocalVariableWithSameNameAsFunctionIsNotMistakenForFunction) {
 	//     int a = foo;
 	// }
 	//
-	ShPtr<Function> fooFunc(addFooFuncToModule());
-	ShPtr<Variable> varFoo(Variable::create("foo", IntType::create(32)));
+	Function* fooFunc(addFooFuncToModule());
+	Variable* varFoo(Variable::create("foo", IntType::create(32)));
 	testFunc->addLocalVar(varFoo);
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
-	ShPtr<VarDefStmt> varDefA(VarDefStmt::create(varA, varFoo));
+	Variable* varA(Variable::create("a", IntType::create(32)));
+	VarDefStmt* varDefA(VarDefStmt::create(varA, varFoo));
 	testFunc->addLocalVar(varA);
-	ShPtr<VarDefStmt> varDefFoo(VarDefStmt::create(varFoo,
-		ShPtr<Expression>(), varDefA));
+	VarDefStmt* varDefFoo(VarDefStmt::create(varFoo,
+		Expression*(), varDefA));
 	testFunc->setBody(varDefFoo);
 
 	SCOPED_TRACE("");
@@ -168,11 +168,11 @@ ParameterWithSameNameAsFunctionIsNotMistakenForFunction) {
 	//     int a = foo;
 	// }
 	//
-	ShPtr<Function> fooFunc(addFooFuncToModule());
-	ShPtr<Variable> varFoo(Variable::create("foo", IntType::create(32)));
+	Function* fooFunc(addFooFuncToModule());
+	Variable* varFoo(Variable::create("foo", IntType::create(32)));
 	testFunc->addParam(varFoo);
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
-	ShPtr<VarDefStmt> varDefA(VarDefStmt::create(varA, varFoo));
+	Variable* varA(Variable::create("a", IntType::create(32)));
+	VarDefStmt* varDefA(VarDefStmt::create(varA, varFoo));
 	testFunc->addLocalVar(varA);
 	testFunc->setBody(varDefA);
 
@@ -190,13 +190,13 @@ FunctionCalledAfterCastIsConsideredAsIndirectlyCalled) {
 	//     int a = ((int)foo)(); // The type mismatch does not matter.
 	// }
 	//
-	ShPtr<Function> fooFunc(addFooFuncToModule());
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Function* fooFunc(addFooFuncToModule());
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<BitCastExpr> castedFoo(BitCastExpr::create(fooFunc->getAsVar(),
+	BitCastExpr* castedFoo(BitCastExpr::create(fooFunc->getAsVar(),
 		IntType::create(32)));
-	ShPtr<CallExpr> fooCall(CallExpr::create(castedFoo));
-	ShPtr<VarDefStmt> varDefA(VarDefStmt::create(varA, fooCall));
+	CallExpr* fooCall(CallExpr::create(castedFoo));
+	VarDefStmt* varDefA(VarDefStmt::create(varA, fooCall));
 	testFunc->setBody(varDefA);
 
 	FuncSet expectedFuncs;
@@ -209,7 +209,7 @@ FunctionCalledAfterCastIsConsideredAsIndirectlyCalled) {
 TEST_F(IndirectFuncRefAnalysisTests,
 PreconditionFailsWhenModuleIsNull) {
 	EXPECT_DEATH(IndirectFuncRefAnalysis::getIndirectlyReferencedFuncs(
-		ShPtr<Module>()), ".*getIndirectlyReferencedFuncs.*Precondition.*failed.*");
+		Module*()), ".*getIndirectlyReferencedFuncs.*Precondition.*failed.*");
 }
 #endif
 

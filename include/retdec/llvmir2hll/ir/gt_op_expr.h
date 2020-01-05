@@ -32,12 +32,12 @@ public:
 		SCmp  /// Signed compare.
 	};
 
-	static ShPtr<GtOpExpr> create(ShPtr<Expression> op1,
-		ShPtr<Expression> op2, Variant variant = Variant::UCmp);
+	static GtOpExpr* create(Expression* op1,
+		Expression* op2, Variant variant = Variant::UCmp);
 
-	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
-	virtual ShPtr<Value> clone() override;
-	virtual ShPtr<Type> getType() const override;
+	virtual bool isEqualTo(Value* otherValue) const override;
+	virtual Value* clone() override;
+	virtual Type* getType() const override;
 
 	Variant getVariant() const;
 
@@ -53,7 +53,7 @@ private:
 private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
-	GtOpExpr(ShPtr<Expression> op1, ShPtr<Expression> op2,
+	GtOpExpr(Expression* op1, Expression* op2,
 		Variant variant = Variant::UCmp);
 };
 

@@ -30,7 +30,7 @@ using AliasAnalysisFactory = Singleton<
 		// Type of the object's identifier.
 		std::string,
 		// Type of a function used to create instances.
-		ShPtr<AliasAnalysis> (*)()
+		AliasAnalysis* (*)()
 	>
 >;
 

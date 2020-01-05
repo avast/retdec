@@ -60,8 +60,8 @@ protected:
 * @c cast<X>(ptr) is more concise than @c std::dynamic_pointer_cast<X>(ptr).
 */
 template<typename To, typename From>
-ShPtr<To> cast(const ShPtr<From> &ptr) noexcept {
-	return std::dynamic_pointer_cast<To>(ptr);
+To* cast(From* ptr) noexcept {
+	return dynamic_cast<To*>(ptr);
 }
 
 /**
@@ -79,8 +79,8 @@ ShPtr<To> cast(const ShPtr<From> &ptr) noexcept {
 * <tt>u</tt>nchecked <tt>cast</tt>, hence @c ucast.
 */
 template<typename To, typename From>
-ShPtr<To> ucast(const ShPtr<From> &ptr) noexcept {
-	return std::static_pointer_cast<To>(ptr);
+To* ucast(From* ptr) noexcept {
+	return static_cast<To*>(ptr);
 }
 
 /**
@@ -105,25 +105,9 @@ ShPtr<To> ucast(const ShPtr<From> &ptr) noexcept {
 * @endcode
 */
 template<typename To, typename From>
-bool isa(const ShPtr<From> &ptr) noexcept {
+bool isa(From* ptr) noexcept {
 	return cast<To>(ptr) != nullptr;
 }
-
-/**
-* @brief A predicate for checking the equality of two weak pointers.
-*/
-template<typename T>
-class WkPtrEqPredicate {
-public:
-	WkPtrEqPredicate(const WkPtr<T> &ptr): ptr(ptr) {}
-
-	bool operator()(const WkPtr<T> &otherPtr) const {
-		return ptr.lock() == otherPtr.lock();
-	}
-
-private:
-	const WkPtr<T> &ptr;
-};
 
 } // namespace llvmir2hll
 } // namespace retdec

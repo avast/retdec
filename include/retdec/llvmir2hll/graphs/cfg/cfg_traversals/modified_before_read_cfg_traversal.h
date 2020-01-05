@@ -27,27 +27,27 @@ class Variable;
 */
 class ModifiedBeforeReadCFGTraversal final: public CFGTraversal {
 public:
-	static bool isModifiedBeforeEveryRead(ShPtr<Variable> var,
-		ShPtr<Statement> startStmt, ShPtr<CFG> cfg, ShPtr<ValueAnalysis> va,
-		ShPtr<CallInfoObtainer> cio);
+	static bool isModifiedBeforeEveryRead(Variable* var,
+		Statement* startStmt, CFG* cfg, ValueAnalysis* va,
+		CallInfoObtainer* cio);
 
 private:
-	ModifiedBeforeReadCFGTraversal(ShPtr<Variable> var,
-		ShPtr<CFG> cfg, ShPtr<ValueAnalysis> va, ShPtr<CallInfoObtainer> cio);
+	ModifiedBeforeReadCFGTraversal(Variable* var,
+		CFG* cfg, ValueAnalysis* va, CallInfoObtainer* cio);
 
-	virtual bool visitStmt(ShPtr<Statement> stmt) override;
+	virtual bool visitStmt(Statement* stmt) override;
 	virtual bool getEndRetVal() const override;
 	virtual bool combineRetVals(bool origRetVal, bool newRetVal) const override;
 
 private:
 	/// Variable whose modification is looked for.
-	ShPtr<Variable> var;
+	Variable* var = nullptr;
 
 	/// Analysis of values.
-	ShPtr<ValueAnalysis> va;
+	ValueAnalysis* va = nullptr;
 
 	/// Obtainer of information about function calls.
-	ShPtr<CallInfoObtainer> cio;
+	CallInfoObtainer* cio = nullptr;
 
 	/// Was the variable modified before every read?
 	bool wasModifiedBeforeEveryRead;

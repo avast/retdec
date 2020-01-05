@@ -38,9 +38,9 @@ namespace llvmir2hll {
 */
 class TernaryOperatorSubOptimizer final: public SubOptimizer {
 public:
-	TernaryOperatorSubOptimizer(ShPtr<ArithmExprEvaluator> arithmExprEvaluator);
+	TernaryOperatorSubOptimizer(ArithmExprEvaluator* arithmExprEvaluator);
 
-	static ShPtr<SubOptimizer> create(ShPtr<ArithmExprEvaluator>
+	static SubOptimizer* create(ArithmExprEvaluator*
 		arithmExprEvaluator);
 	virtual std::string getId() const override;
 
@@ -48,7 +48,7 @@ private:
 	/// @name Visitor Interface
 	/// @{
 	using SubOptimizer::visit;
-	virtual void visit(ShPtr<TernaryOpExpr> expr) override;
+	virtual void visit(TernaryOpExpr* expr) override;
 	/// @}
 };
 

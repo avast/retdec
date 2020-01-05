@@ -39,28 +39,28 @@ SimpleAliasAnalysis::SimpleAliasAnalysis(): AliasAnalysis(),
 /**
 * @brief Creates a new alias analysis.
 */
-ShPtr<AliasAnalysis> SimpleAliasAnalysis::create() {
-	return ShPtr<SimpleAliasAnalysis>(new SimpleAliasAnalysis());
+AliasAnalysis* SimpleAliasAnalysis::create() {
+	return new SimpleAliasAnalysis();
 }
 
 std::string SimpleAliasAnalysis::getId() const {
 	return SIMPLE_ALIAS_ANALYSIS_ID;
 }
 
-void SimpleAliasAnalysis::init(ShPtr<Module> module) {
+void SimpleAliasAnalysis::init(Module* module) {
 	AliasAnalysis::init(module);
 
 	allAddressedVars.clear();
 	funcAddressedVarsMap.clear();
 	varFuncMap.clear();
-	func.reset();
+	func = nullptr;
 	restart();
 
 	// Check the initializers of global variables whether they contain a taking
 	// of an address of a variable.
 	for (auto i = module->global_var_begin(), e = module->global_var_end();
 			i != e; ++i) {
-		if (ShPtr<Expression> init = (*i)->getInitializer()) {
+		if (Expression* init = (*i)->getInitializer()) {
 			init->accept(this);
 		}
 	}
@@ -85,7 +85,7 @@ void SimpleAliasAnalysis::init(ShPtr<Module> module) {
 	}
 }
 
-const VarSet &SimpleAliasAnalysis::mayPointTo(ShPtr<Variable> var) const {
+const VarSet &SimpleAliasAnalysis::mayPointTo(Variable* var) const {
 	if (!isa<PointerType>(var->getType())) {
 		// Assumption: a non-pointer variable never points to any variable.
 		return EMPTY_VAR_SET;
@@ -111,21 +111,21 @@ const VarSet &SimpleAliasAnalysis::mayPointTo(ShPtr<Variable> var) const {
 	return mayPointToVarsIter->second;
 }
 
-ShPtr<Variable> SimpleAliasAnalysis::pointsTo(ShPtr<Variable> var) const {
+Variable* SimpleAliasAnalysis::pointsTo(Variable* var) const {
 	// Currently, we always return the null pointer because the analysis is not
 	// robust enough to find whether a pointer always points to a single
 	// variable.
-	return ShPtr<Variable>();
+	return nullptr;
 }
 
-bool SimpleAliasAnalysis::mayBePointed(ShPtr<Variable> var) const {
+bool SimpleAliasAnalysis::mayBePointed(Variable* var) const {
 	// Assumption: a variable may be pointed if and only if its address is
 	// taken.
 	return hasItem(allAddressedVars, var);
 }
 
-void SimpleAliasAnalysis::visit(ShPtr<AddressOpExpr> expr) {
-	if (ShPtr<Variable> var = cast<Variable>(expr->getOperand())) {
+void SimpleAliasAnalysis::visit(AddressOpExpr* expr) {
+	if (Variable* var = cast<Variable>(expr->getOperand())) {
 		allAddressedVars.insert(var);
 		// Initializers of global variables may contain the `&` operator.
 		// However, there is no function associated with them. Hence the

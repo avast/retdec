@@ -24,7 +24,7 @@ namespace llvmir2hll {
 * @par Preconditions
 *  - @a arithmExprEvaluator is non-null
 */
-SubOptimizer::SubOptimizer(ShPtr<ArithmExprEvaluator> arithmExprEvaluator):
+SubOptimizer::SubOptimizer(ArithmExprEvaluator* arithmExprEvaluator):
 		arithmExprEvaluator(arithmExprEvaluator) {
 	PRECONDITION_NON_NULL(arithmExprEvaluator);
 }
@@ -36,7 +36,7 @@ SubOptimizer::SubOptimizer(ShPtr<ArithmExprEvaluator> arithmExprEvaluator):
 *
 * @return @c true if something was optimized, otherwise @c false.
 */
-bool SubOptimizer::tryOptimize(ShPtr<Expression> expr) {
+bool SubOptimizer::tryOptimize(Expression* expr) {
 	return tryOptimizeAndReturnIfCodeChanged(expr);
 }
 
@@ -46,8 +46,8 @@ bool SubOptimizer::tryOptimize(ShPtr<Expression> expr) {
 * @param[in] oldExpr Old expression that will be replaced.
 * @param[in] newExpr New expression that is used to replace @a oldExpr.
 */
-void SubOptimizer::optimizeExpr(ShPtr<Expression> oldExpr,
-		ShPtr<Expression> newExpr) {
+void SubOptimizer::optimizeExpr(Expression* oldExpr,
+		Expression* newExpr) {
 	if (oldExpr->isEqualTo(newExpr)) {
 		// Nothing to optimize because expressions are same.
 		return;
@@ -64,7 +64,7 @@ void SubOptimizer::optimizeExpr(ShPtr<Expression> oldExpr,
 *
 * @return @c true if something was optimized, otherwise @c false.
 */
-bool SubOptimizer::tryOptimizeAndReturnIfCodeChanged(ShPtr<Expression> expr) {
+bool SubOptimizer::tryOptimizeAndReturnIfCodeChanged(Expression* expr) {
 	codeChanged = false;
 	expr->accept(this);
 	return codeChanged;
@@ -78,7 +78,7 @@ bool SubOptimizer::tryOptimizeAndReturnIfCodeChanged(ShPtr<Expression> expr) {
 * @return @c true if @a expr is a @c ConstInt or @c ConstFloat, otherwise
 *         @c false.
 */
-bool SubOptimizer::isConstFloatOrConstInt (ShPtr<Expression> expr) const {
+bool SubOptimizer::isConstFloatOrConstInt (Expression* expr) const {
 	return isa<ConstInt>(expr) || isa<ConstFloat>(expr);
 }
 

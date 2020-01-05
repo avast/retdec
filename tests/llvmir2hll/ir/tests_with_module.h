@@ -49,9 +49,9 @@ class TestsWithModule: public ::testing::Test {
 protected:
 	TestsWithModule();
 
-	ShPtr<Function> addFuncDecl(const std::string &funcName);
-	ShPtr<Function> addFuncDef(const std::string &funcName);
-	ShPtr<CallStmt> addCall(const std::string &callerName,
+	Function* addFuncDecl(const std::string &funcName);
+	Function* addFuncDef(const std::string &funcName);
+	CallStmt* addCall(const std::string &callerName,
 		const std::string &calleeName);
 
 protected:
@@ -65,16 +65,16 @@ protected:
 	llvm::Module llvmModule;
 
 	/// A mock for the used semantics.
-	ShPtr<::testing::NiceMock<SemanticsMock>> semanticsMock;
+	::testing::NiceMock<SemanticsMock>* semanticsMock;
 
 	/// A mock for the used config.
-	ShPtr<::testing::NiceMock<ConfigMock>> configMock;
+	::testing::NiceMock<ConfigMock>* configMock;
 
 	/// Module in our IR.
-	ShPtr<Module> module;
+	Module* module;
 
 	/// Testing function <tt>void test()</tt>.
-	ShPtr<Function> testFunc;
+	Function* testFunc;
 };
 
 } // namespace tests

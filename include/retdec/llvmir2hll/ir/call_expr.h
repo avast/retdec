@@ -26,30 +26,30 @@ class Visitor;
 */
 class CallExpr final: public Expression {
 public:
-	static ShPtr<CallExpr> create(ShPtr<Expression> calledExpr,
+	static CallExpr* create(Expression* calledExpr,
 		ExprVector args = ExprVector());
 
-	virtual ShPtr<Value> clone() override;
-	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
-	virtual ShPtr<Type> getType() const override;
-	virtual void replace(ShPtr<Expression> oldExpr,
-		ShPtr<Expression> newExpr) override;
+	virtual Value* clone() override;
+	virtual bool isEqualTo(Value* otherValue) const override;
+	virtual Type* getType() const override;
+	virtual void replace(Expression* oldExpr,
+		Expression* newExpr) override;
 
-	ShPtr<Expression> getCalledExpr() const;
+	Expression* getCalledExpr() const;
 	bool hasArg(std::size_t n) const;
-	ShPtr<Expression> getArg(std::size_t n) const;
+	Expression* getArg(std::size_t n) const;
 	const ExprVector &getArgs() const;
 	std::size_t getNumOfArgs() const;
 
-	void setCalledExpr(ShPtr<Expression> newCalledExpr);
+	void setCalledExpr(Expression* newCalledExpr);
 	void setArgs(ExprVector newArgs);
-	void setArg(std::size_t position, ShPtr<Expression> newArg);
-	void replaceArg(ShPtr<Expression> oldArg, ShPtr<Expression> newArg);
+	void setArg(std::size_t position, Expression* newArg);
+	void replaceArg(Expression* oldArg, Expression* newArg);
 
 	/// @name Observer Interface
 	/// @{
-	virtual void update(ShPtr<Value> subject,
-		ShPtr<Value> arg = nullptr) override;
+	virtual void update(Value* subject,
+		Value* arg = nullptr) override;
 	/// @}
 
 	/// @name Visitor Interface
@@ -60,11 +60,11 @@ public:
 private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
-	CallExpr(ShPtr<Expression> calledExpr, ExprVector args);
+	CallExpr(Expression* calledExpr, ExprVector args);
 
 private:
 	/// Expression that is called by this call.
-	ShPtr<Expression> calledExpr;
+	Expression* calledExpr = nullptr;
 
 	/// Arguments.
 	ExprVector args;

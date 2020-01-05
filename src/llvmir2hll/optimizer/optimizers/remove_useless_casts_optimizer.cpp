@@ -24,12 +24,12 @@ namespace llvmir2hll {
 * @par Preconditions
 *  - @a module is non-null
 */
-RemoveUselessCastsOptimizer::RemoveUselessCastsOptimizer(ShPtr<Module> module):
+RemoveUselessCastsOptimizer::RemoveUselessCastsOptimizer(Module* module):
 	FuncOptimizer(module) {
 		PRECONDITION_NON_NULL(module);
 	}
 
-void RemoveUselessCastsOptimizer::visit(ShPtr<AssignStmt> stmt) {
+void RemoveUselessCastsOptimizer::visit(AssignStmt* stmt) {
 	if (tryOptimizationCase1(stmt)) {
 		return;
 	}
@@ -45,14 +45,14 @@ void RemoveUselessCastsOptimizer::visit(ShPtr<AssignStmt> stmt) {
 *
 * @return @c true if the optimization was performed, @c false otherwise.
 */
-bool RemoveUselessCastsOptimizer::tryOptimizationCase1(ShPtr<AssignStmt> stmt) {
-	ShPtr<Variable> lhsVar(cast<Variable>(stmt->getLhs()));
+bool RemoveUselessCastsOptimizer::tryOptimizationCase1(AssignStmt* stmt) {
+	Variable* lhsVar(cast<Variable>(stmt->getLhs()));
 	if (!lhsVar) {
 		// The statement is not of the form `a = ...`.
 		return false;
 	}
 
-	ShPtr<CastExpr> rhsCast(cast<CastExpr>(stmt->getRhs()));
+	CastExpr* rhsCast(cast<CastExpr>(stmt->getRhs()));
 	if (!rhsCast) {
 		// The statement is not of the form `a = cast<>(...)`.
 		return false;
@@ -63,7 +63,7 @@ bool RemoveUselessCastsOptimizer::tryOptimizationCase1(ShPtr<AssignStmt> stmt) {
 		return false;
 	}
 
-	ShPtr<Variable> rhsCastVar(cast<Variable>(rhsCast->getOperand()));
+	Variable* rhsCastVar(cast<Variable>(rhsCast->getOperand()));
 	if (!rhsCastVar) {
 		// The statement is not of the form `a = cast<>(b)`.
 		return false;

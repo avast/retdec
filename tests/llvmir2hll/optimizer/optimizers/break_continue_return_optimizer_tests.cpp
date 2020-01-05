@@ -23,7 +23,7 @@ class BreakContinueReturnOptimizerTests: public TestsWithModule {};
 
 TEST_F(BreakContinueReturnOptimizerTests,
 OptimizerHasNonEmptyID) {
-	ShPtr<BreakContinueReturnOptimizer> optimizer(
+	BreakContinueReturnOptimizer* optimizer(
 		new BreakContinueReturnOptimizer(module));
 
 	EXPECT_TRUE(!optimizer->getId().empty()) <<

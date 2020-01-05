@@ -31,7 +31,7 @@ class RemoveUselessCastsOptimizerTests: public TestsWithModule {};
 
 TEST_F(RemoveUselessCastsOptimizerTests,
 OptimizerHasNonEmptyID) {
-	ShPtr<RemoveUselessCastsOptimizer> optimizer(
+	RemoveUselessCastsOptimizer* optimizer(
 		new RemoveUselessCastsOptimizer(module));
 
 	EXPECT_TRUE(!optimizer->getId().empty()) <<
@@ -69,14 +69,14 @@ Case1OptimizeBitCastExpr) {
 	//     a = b;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	testFunc->addLocalVar(varB);
-	ShPtr<BitCastExpr> castB(BitCastExpr::create(varB, IntType::create(32)));
-	ShPtr<AssignStmt> assignACastB(AssignStmt::create(varA, castB));
-	ShPtr<VarDefStmt> varDefB(VarDefStmt::create(varB, ShPtr<Expression>(), assignACastB));
-	ShPtr<VarDefStmt> varDefA(VarDefStmt::create(varA, ShPtr<Expression>(), varDefB));
+	BitCastExpr* castB(BitCastExpr::create(varB, IntType::create(32)));
+	AssignStmt* assignACastB(AssignStmt::create(varA, castB));
+	VarDefStmt* varDefB(VarDefStmt::create(varB, Expression*(), assignACastB));
+	VarDefStmt* varDefA(VarDefStmt::create(varA, Expression*(), varDefB));
 	testFunc->setBody(varDefA);
 
 	// Optimize the module.
@@ -106,14 +106,14 @@ Case1OptimizeExtCastExpr) {
 	//     a = b;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	testFunc->addLocalVar(varB);
-	ShPtr<ExtCastExpr> castB(ExtCastExpr::create(varB, IntType::create(32)));
-	ShPtr<AssignStmt> assignACastB(AssignStmt::create(varA, castB));
-	ShPtr<VarDefStmt> varDefB(VarDefStmt::create(varB, ShPtr<Expression>(), assignACastB));
-	ShPtr<VarDefStmt> varDefA(VarDefStmt::create(varA, ShPtr<Expression>(), varDefB));
+	ExtCastExpr* castB(ExtCastExpr::create(varB, IntType::create(32)));
+	AssignStmt* assignACastB(AssignStmt::create(varA, castB));
+	VarDefStmt* varDefB(VarDefStmt::create(varB, Expression*(), assignACastB));
+	VarDefStmt* varDefA(VarDefStmt::create(varA, Expression*(), varDefB));
 	testFunc->setBody(varDefA);
 
 	// Optimize the module.
@@ -137,14 +137,14 @@ Case1DotNotOptimizeIfCastTypeMismatch) {
 	//
 	// It should not be optimized.
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	testFunc->addLocalVar(varB);
-	ShPtr<ExtCastExpr> castB(ExtCastExpr::create(varB, IntType::create(8)));
-	ShPtr<AssignStmt> assignACastB(AssignStmt::create(varA, castB));
-	ShPtr<VarDefStmt> varDefB(VarDefStmt::create(varB, ShPtr<Expression>(), assignACastB));
-	ShPtr<VarDefStmt> varDefA(VarDefStmt::create(varA, ShPtr<Expression>(), varDefB));
+	ExtCastExpr* castB(ExtCastExpr::create(varB, IntType::create(8)));
+	AssignStmt* assignACastB(AssignStmt::create(varA, castB));
+	VarDefStmt* varDefB(VarDefStmt::create(varB, Expression*(), assignACastB));
+	VarDefStmt* varDefA(VarDefStmt::create(varA, Expression*(), varDefB));
 	testFunc->setBody(varDefA);
 
 	// Optimize the module.
@@ -168,14 +168,14 @@ Case1DotNotOptimizeIfRhsVarTypeMismatch) {
 	//
 	// It should not be optimized.
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(8)));
+	Variable* varB(Variable::create("b", IntType::create(8)));
 	testFunc->addLocalVar(varB);
-	ShPtr<ExtCastExpr> castB(ExtCastExpr::create(varB, IntType::create(32)));
-	ShPtr<AssignStmt> assignACastB(AssignStmt::create(varA, castB));
-	ShPtr<VarDefStmt> varDefB(VarDefStmt::create(varB, ShPtr<Expression>(), assignACastB));
-	ShPtr<VarDefStmt> varDefA(VarDefStmt::create(varA, ShPtr<Expression>(), varDefB));
+	ExtCastExpr* castB(ExtCastExpr::create(varB, IntType::create(32)));
+	AssignStmt* assignACastB(AssignStmt::create(varA, castB));
+	VarDefStmt* varDefB(VarDefStmt::create(varB, Expression*(), assignACastB));
+	VarDefStmt* varDefA(VarDefStmt::create(varA, Expression*(), varDefB));
 	testFunc->setBody(varDefA);
 
 	// Optimize the module.

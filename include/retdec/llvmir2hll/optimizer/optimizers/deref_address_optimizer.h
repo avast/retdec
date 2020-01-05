@@ -31,7 +31,7 @@ namespace llvmir2hll {
 */
 class DerefAddressOptimizer final: public FuncOptimizer {
 public:
-	DerefAddressOptimizer(ShPtr<Module> module);
+	DerefAddressOptimizer(Module* module);
 
 	virtual std::string getId() const override { return "DerefAddress"; }
 
@@ -39,7 +39,7 @@ private:
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<DerefOpExpr> expr) override;
+	virtual void visit(DerefOpExpr* expr) override;
 	/// @}
 };
 

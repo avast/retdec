@@ -22,11 +22,11 @@ namespace tests {
 */
 class PatternFinderMock: public PatternFinder {
 public:
-	PatternFinderMock(ShPtr<ValueAnalysis> va, ShPtr<CallInfoObtainer> cio):
+	PatternFinderMock(ValueAnalysis* va, CallInfoObtainer* cio):
 		PatternFinder(va, cio) {}
 
 	MOCK_CONST_METHOD0(getId, const std::string ());
-	MOCK_METHOD1(findPatterns, PatternFinder::Patterns (ShPtr<Module>));
+	MOCK_METHOD1(findPatterns, PatternFinder::Patterns (Module*));
 };
 
 } // namespace tests

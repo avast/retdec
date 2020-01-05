@@ -28,12 +28,12 @@ class Visitor;
 */
 class StructIndexOpExpr final: public BinaryOpExpr {
 public:
-	static ShPtr<StructIndexOpExpr> create(ShPtr<Expression> base,
-		ShPtr<ConstInt> fieldNumber);
+	static StructIndexOpExpr* create(Expression* base,
+		ConstInt* fieldNumber);
 
-	virtual ShPtr<Type> getType() const override;
-	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
-	virtual ShPtr<Value> clone() override;
+	virtual Type* getType() const override;
+	virtual bool isEqualTo(Value* otherValue) const override;
+	virtual Value* clone() override;
 
 	/// @name Visitor Interface
 	/// @{
@@ -43,7 +43,7 @@ public:
 private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
-	StructIndexOpExpr(ShPtr<Expression> base, ShPtr<ConstInt> fieldNumber);
+	StructIndexOpExpr(Expression* base, ConstInt* fieldNumber);
 };
 
 } // namespace llvmir2hll

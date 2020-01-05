@@ -101,33 +101,33 @@ class ValueAnalysis;
 */
 class BitOpToLogOpOptimizer final: public FuncOptimizer {
 public:
-	BitOpToLogOpOptimizer(ShPtr<Module> module, ShPtr<ValueAnalysis> va);
+	BitOpToLogOpOptimizer(Module* module, ValueAnalysis* va);
 
 	virtual std::string getId() const override { return "BitOpToLogOp"; }
 
 private:
-	bool canBeBitOrBitAndOptimized(ShPtr<Expression> expr);
-	bool isPotentionalDivProblem(ShPtr<DivOpExpr> divOpExpr);
-	bool isPotentionalModProblem(ShPtr<Expression> expr);
-	bool isPotentionalMulProblem(ShPtr<MulOpExpr> mulOpExpr);
-	void tryOptimizeCond(ShPtr<Expression> expr);
+	bool canBeBitOrBitAndOptimized(Expression* expr);
+	bool isPotentionalDivProblem(DivOpExpr* divOpExpr);
+	bool isPotentionalModProblem(Expression* expr);
+	bool isPotentionalMulProblem(MulOpExpr* mulOpExpr);
+	void tryOptimizeCond(Expression* expr);
 
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<IfStmt> stmt) override;
-	virtual void visit(ShPtr<SwitchStmt> stmt) override;
-	virtual void visit(ShPtr<WhileLoopStmt> stmt) override;
-	virtual void visit(ShPtr<BitAndOpExpr> expr) override;
-	virtual void visit(ShPtr<BitOrOpExpr> expr) override;
-	virtual void visit(ShPtr<DivOpExpr> expr) override;
-	virtual void visit(ShPtr<ModOpExpr> expr) override;
-	virtual void visit(ShPtr<MulOpExpr> expr) override;
+	virtual void visit(IfStmt* stmt) override;
+	virtual void visit(SwitchStmt* stmt) override;
+	virtual void visit(WhileLoopStmt* stmt) override;
+	virtual void visit(BitAndOpExpr* expr) override;
+	virtual void visit(BitOrOpExpr* expr) override;
+	virtual void visit(DivOpExpr* expr) override;
+	virtual void visit(ModOpExpr* expr) override;
+	virtual void visit(MulOpExpr* expr) override;
 	/// @}
 
 private:
 	/// Analysis of values.
-	ShPtr<ValueAnalysis> va;
+	ValueAnalysis* va = nullptr;
 
 	/// A variable for check if we are in some condition.
 	bool isCondition;

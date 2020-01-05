@@ -29,37 +29,37 @@ class Value;
 */
 class UForLoopStmt final: public Statement {
 public:
-	static ShPtr<UForLoopStmt> create(
-		ShPtr<Expression> init,
-		ShPtr<Expression> cond,
-		ShPtr<Expression> step,
-		ShPtr<Statement> body,
-		ShPtr<Statement> succ = nullptr,
+	static UForLoopStmt* create(
+		Expression* init,
+		Expression* cond,
+		Expression* step,
+		Statement* body,
+		Statement* succ = nullptr,
 		Address a = Address::Undefined
 	);
 
-	virtual ShPtr<Value> clone() override;
-	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
+	virtual Value* clone() override;
+	virtual bool isEqualTo(Value* otherValue) const override;
 	virtual bool isCompound() override { return true; }
-	virtual void replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) override;
-	virtual ShPtr<Expression> asExpression() const override;
+	virtual void replace(Expression* oldExpr, Expression* newExpr) override;
+	virtual Expression* asExpression() const override;
 
-	ShPtr<Expression> getInit() const;
-	ShPtr<Expression> getCond() const;
-	ShPtr<Expression> getStep() const;
-	ShPtr<Statement> getBody() const;
+	Expression* getInit() const;
+	Expression* getCond() const;
+	Expression* getStep() const;
+	Statement* getBody() const;
 
-	void setInit(ShPtr<Expression> newInit);
-	void setCond(ShPtr<Expression> newCond);
-	void setStep(ShPtr<Expression> newStep);
-	void setBody(ShPtr<Statement> newBody);
+	void setInit(Expression* newInit);
+	void setCond(Expression* newCond);
+	void setStep(Expression* newStep);
+	void setBody(Statement* newBody);
 
 	bool isInitDefinition() const;
 	void markInitAsDefinition();
 
 	/// @name Observer Interface
 	/// @{
-	virtual void update(ShPtr<Value> subject, ShPtr<Value> arg = nullptr) override;
+	virtual void update(Value* subject, Value* arg = nullptr) override;
 	/// @}
 
 	/// @name Visitor Interface
@@ -71,27 +71,27 @@ private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
 	UForLoopStmt(
-		ShPtr<Expression> init,
-		ShPtr<Expression> cond,
-		ShPtr<Expression> step,
-		ShPtr<Statement> body,
+		Expression* init,
+		Expression* cond,
+		Expression* step,
+		Statement* body,
 		Address a = Address::Undefined
 	);
 
 	/// Initialization part.
-	ShPtr<Expression> init;
+	Expression* init = nullptr;
 
 	/// Is the initialization part a definition?
 	bool initIsDefinition;
 
 	/// Conditional part.
-	ShPtr<Expression> cond;
+	Expression* cond = nullptr;
 
 	/// Step part.
-	ShPtr<Expression> step;
+	Expression* step = nullptr;
 
 	/// Body.
-	ShPtr<Statement> body;
+	Statement* body = nullptr;
 };
 
 } // namespace llvmir2hll

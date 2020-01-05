@@ -32,9 +32,9 @@ bool stores8BitStringLiteral(const llvm::GlobalVariable *v);
 
 /// @name Conversions
 /// @{
-ShPtr<ConstString> toConstString(llvm::ConstantArray *ca);
-ShPtr<ConstString> toConstString(llvm::ConstantDataArray *cda);
-ShPtr<ConstString> getInitializerAsConstString(llvm::GlobalVariable *v);
+ConstString* toConstString(llvm::ConstantArray *ca);
+ConstString* toConstString(llvm::ConstantDataArray *cda);
+ConstString* getInitializerAsConstString(llvm::GlobalVariable *v);
 /// @}
 
 } // namespace llvmir2hll

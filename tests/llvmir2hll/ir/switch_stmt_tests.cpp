@@ -29,9 +29,9 @@ class SwitchStmtTests: public Test {};
 
 TEST_F(SwitchStmtTests,
 AddCaseClauseWorksCorrectlyWhenAddingNonDefaultClause) {
-	ShPtr<SwitchStmt> switchStmt(SwitchStmt::create(ConstInt::create(1, 32)));
-	ShPtr<ConstInt> caseExpr(ConstInt::create(1, 32));
-	ShPtr<BreakStmt> caseBody(BreakStmt::create());
+	SwitchStmt* switchStmt(SwitchStmt::create(ConstInt::create(1, 32)));
+	ConstInt* caseExpr(ConstInt::create(1, 32));
+	BreakStmt* caseBody(BreakStmt::create());
 	switchStmt->addClause(caseExpr, caseBody);
 
 	EXPECT_EQ(caseExpr, switchStmt->clause_begin()->first);
@@ -40,9 +40,9 @@ AddCaseClauseWorksCorrectlyWhenAddingNonDefaultClause) {
 
 TEST_F(SwitchStmtTests,
 AddCaseClauseWorksCorrectlyWhenAddingDefaultClause) {
-	ShPtr<SwitchStmt> switchStmt(SwitchStmt::create(ConstInt::create(1, 32)));
-	ShPtr<BreakStmt> caseBody(BreakStmt::create());
-	switchStmt->addClause(ShPtr<Expression>(), caseBody);
+	SwitchStmt* switchStmt(SwitchStmt::create(ConstInt::create(1, 32)));
+	BreakStmt* caseBody(BreakStmt::create());
+	switchStmt->addClause(Expression*(), caseBody);
 
 	EXPECT_EQ(caseBody, switchStmt->clause_begin()->second);
 }
@@ -50,9 +50,9 @@ AddCaseClauseWorksCorrectlyWhenAddingDefaultClause) {
 #if DEATH_TESTS_ENABLED
 TEST_F(SwitchStmtTests,
 AddCaseClauseViolatedPreconditionNoBody) {
-	ShPtr<SwitchStmt> switchStmt(SwitchStmt::create(ConstInt::create(1, 32)));
+	SwitchStmt* switchStmt(SwitchStmt::create(ConstInt::create(1, 32)));
 
-	EXPECT_DEATH(switchStmt->addClause(ShPtr<Expression>(), ShPtr<Statement>()),
+	EXPECT_DEATH(switchStmt->addClause(Expression*(), Statement*()),
 		".*addClause.*Precondition.*failed.*");
 }
 #endif
@@ -60,10 +60,10 @@ AddCaseClauseViolatedPreconditionNoBody) {
 #if DEATH_TESTS_ENABLED
 TEST_F(SwitchStmtTests,
 AddCaseClauseViolatedPreconditionThereAlreadyIsDefaultClause) {
-	ShPtr<SwitchStmt> switchStmt(SwitchStmt::create(ConstInt::create(1, 32)));
+	SwitchStmt* switchStmt(SwitchStmt::create(ConstInt::create(1, 32)));
 	switchStmt->addDefaultClause(ContinueStmt::create());
 
-	EXPECT_DEATH(switchStmt->addClause(ShPtr<Expression>(), BreakStmt::create()),
+	EXPECT_DEATH(switchStmt->addClause(Expression*(), BreakStmt::create()),
 		".*addClause.*Precondition.*failed.*");
 }
 #endif
@@ -74,13 +74,13 @@ AddCaseClauseViolatedPreconditionThereAlreadyIsDefaultClause) {
 
 TEST_F(SwitchStmtTests,
 RemoveClauseWorksCorrectlyWhenRemovingTheFirstClauseOfTwoClauses) {
-	ShPtr<ConstInt> controlExpr(ConstInt::create(0, 32));
-	ShPtr<SwitchStmt> switchStmt(SwitchStmt::create(controlExpr));
-	ShPtr<ConstInt> clause1Expr(ConstInt::create(1, 32));
-	ShPtr<BreakStmt> clause1Body(BreakStmt::create());
+	ConstInt* controlExpr(ConstInt::create(0, 32));
+	SwitchStmt* switchStmt(SwitchStmt::create(controlExpr));
+	ConstInt* clause1Expr(ConstInt::create(1, 32));
+	BreakStmt* clause1Body(BreakStmt::create());
 	switchStmt->addClause(clause1Expr, clause1Body);
-	ShPtr<ConstInt> clause2Expr(ConstInt::create(1, 32));
-	ShPtr<BreakStmt> clause2Body(BreakStmt::create());
+	ConstInt* clause2Expr(ConstInt::create(1, 32));
+	BreakStmt* clause2Body(BreakStmt::create());
 	switchStmt->addClause(clause2Expr, clause2Body);
 
 	switchStmt->removeClause(switchStmt->clause_begin());
@@ -91,13 +91,13 @@ RemoveClauseWorksCorrectlyWhenRemovingTheFirstClauseOfTwoClauses) {
 
 TEST_F(SwitchStmtTests,
 RemoveClauseWorksCorrectlyWhenRemovingTheLastClauseOfTwoClauses) {
-	ShPtr<ConstInt> controlExpr(ConstInt::create(0, 32));
-	ShPtr<SwitchStmt> switchStmt(SwitchStmt::create(controlExpr));
-	ShPtr<ConstInt> clause1Expr(ConstInt::create(1, 32));
-	ShPtr<BreakStmt> clause1Body(BreakStmt::create());
+	ConstInt* controlExpr(ConstInt::create(0, 32));
+	SwitchStmt* switchStmt(SwitchStmt::create(controlExpr));
+	ConstInt* clause1Expr(ConstInt::create(1, 32));
+	BreakStmt* clause1Body(BreakStmt::create());
 	switchStmt->addClause(clause1Expr, clause1Body);
-	ShPtr<ConstInt> clause2Expr(ConstInt::create(1, 32));
-	ShPtr<BreakStmt> clause2Body(BreakStmt::create());
+	ConstInt* clause2Expr(ConstInt::create(1, 32));
+	BreakStmt* clause2Body(BreakStmt::create());
 	switchStmt->addClause(clause2Expr, clause2Body);
 
 	switchStmt->removeClause(++switchStmt->clause_begin());
@@ -108,10 +108,10 @@ RemoveClauseWorksCorrectlyWhenRemovingTheLastClauseOfTwoClauses) {
 
 TEST_F(SwitchStmtTests,
 RemoveClauseWorksCorrectlyWhenRemovingTheOnlyClause) {
-	ShPtr<ConstInt> controlExpr(ConstInt::create(0, 32));
-	ShPtr<SwitchStmt> switchStmt(SwitchStmt::create(controlExpr));
-	ShPtr<ConstInt> clauseExpr(ConstInt::create(1, 32));
-	ShPtr<BreakStmt> clauseBody(BreakStmt::create());
+	ConstInt* controlExpr(ConstInt::create(0, 32));
+	SwitchStmt* switchStmt(SwitchStmt::create(controlExpr));
+	ConstInt* clauseExpr(ConstInt::create(1, 32));
+	BreakStmt* clauseBody(BreakStmt::create());
 	switchStmt->addClause(clauseExpr, clauseBody);
 
 	switchStmt->removeClause(switchStmt->clause_begin());
@@ -122,8 +122,8 @@ RemoveClauseWorksCorrectlyWhenRemovingTheOnlyClause) {
 
 TEST_F(SwitchStmtTests,
 RemoveClauseWorksCorrectlyWhenRemovingTheDefaultClause) {
-	ShPtr<ConstInt> controlExpr(ConstInt::create(0, 32));
-	ShPtr<SwitchStmt> switchStmt(SwitchStmt::create(controlExpr));
+	ConstInt* controlExpr(ConstInt::create(0, 32));
+	SwitchStmt* switchStmt(SwitchStmt::create(controlExpr));
 	switchStmt->addDefaultClause(BreakStmt::create());
 
 	switchStmt->removeClause(switchStmt->clause_begin());
@@ -137,18 +137,18 @@ RemoveClauseWorksCorrectlyWhenRemovingTheDefaultClause) {
 
 TEST_F(SwitchStmtTests,
 GetDefaultCaluseBodyReturnsClauseBodyIfThereIsDefaultClause) {
-	ShPtr<SwitchStmt> switchStmt(SwitchStmt::create(ConstInt::create(1, 32)));
-	ShPtr<BreakStmt> breakStmt(BreakStmt::create());
-	switchStmt->addClause(ShPtr<Expression>(), breakStmt);
+	SwitchStmt* switchStmt(SwitchStmt::create(ConstInt::create(1, 32)));
+	BreakStmt* breakStmt(BreakStmt::create());
+	switchStmt->addClause(Expression*(), breakStmt);
 
 	EXPECT_EQ(breakStmt, switchStmt->getDefaultClauseBody());
 }
 
 TEST_F(SwitchStmtTests,
 GetDefaultCaluseBodyReturnsNullPointerWhenThereIsNoDefaultCaluse) {
-	ShPtr<SwitchStmt> switchStmt(SwitchStmt::create(ConstInt::create(1, 32)));
+	SwitchStmt* switchStmt(SwitchStmt::create(ConstInt::create(1, 32)));
 
-	EXPECT_EQ(ShPtr<Statement>(), switchStmt->getDefaultClauseBody());
+	EXPECT_EQ(Statement*(), switchStmt->getDefaultClauseBody());
 }
 
 //
@@ -157,8 +157,8 @@ GetDefaultCaluseBodyReturnsNullPointerWhenThereIsNoDefaultCaluse) {
 
 TEST_F(SwitchStmtTests,
 AddDefaultClauseWorksCorrectlyWhenThereIsNoDefaultClause) {
-	ShPtr<SwitchStmt> switchStmt(SwitchStmt::create(ConstInt::create(1, 32)));
-	ShPtr<BreakStmt> breakStmt(BreakStmt::create());
+	SwitchStmt* switchStmt(SwitchStmt::create(ConstInt::create(1, 32)));
+	BreakStmt* breakStmt(BreakStmt::create());
 	switchStmt->addDefaultClause(breakStmt);
 
 	EXPECT_EQ(breakStmt, switchStmt->getDefaultClauseBody());
@@ -167,9 +167,9 @@ AddDefaultClauseWorksCorrectlyWhenThereIsNoDefaultClause) {
 #if DEATH_TESTS_ENABLED
 TEST_F(SwitchStmtTests,
 AddDefaultClauseViolatedPreconditionNoBody) {
-	ShPtr<SwitchStmt> switchStmt(SwitchStmt::create(ConstInt::create(1, 32)));
+	SwitchStmt* switchStmt(SwitchStmt::create(ConstInt::create(1, 32)));
 
-	EXPECT_DEATH(switchStmt->addDefaultClause(ShPtr<Statement>()),
+	EXPECT_DEATH(switchStmt->addDefaultClause(Statement*()),
 		".*addDefaultClause.*Precondition.*failed.*");
 }
 #endif
@@ -177,7 +177,7 @@ AddDefaultClauseViolatedPreconditionNoBody) {
 #if DEATH_TESTS_ENABLED
 TEST_F(SwitchStmtTests,
 SetDefaultClauseBodyViolatedPreconditionThereAlreadyIsDefaultClause) {
-	ShPtr<SwitchStmt> switchStmt(SwitchStmt::create(ConstInt::create(1, 32)));
+	SwitchStmt* switchStmt(SwitchStmt::create(ConstInt::create(1, 32)));
 	switchStmt->addDefaultClause(ContinueStmt::create());
 
 	EXPECT_DEATH(switchStmt->addDefaultClause(BreakStmt::create()),
@@ -191,9 +191,9 @@ SetDefaultClauseBodyViolatedPreconditionThereAlreadyIsDefaultClause) {
 
 TEST_F(SwitchStmtTests,
 SetDefaultClauseBodyWorksCorrectlyWhenThereIsDefaultClause) {
-	ShPtr<SwitchStmt> switchStmt(SwitchStmt::create(ConstInt::create(1, 32)));
-	switchStmt->addClause(ShPtr<Expression>(), ContinueStmt::create());
-	ShPtr<BreakStmt> breakStmt(BreakStmt::create());
+	SwitchStmt* switchStmt(SwitchStmt::create(ConstInt::create(1, 32)));
+	switchStmt->addClause(Expression*(), ContinueStmt::create());
+	BreakStmt* breakStmt(BreakStmt::create());
 	switchStmt->setDefaultClauseBody(breakStmt);
 
 	EXPECT_EQ(breakStmt, switchStmt->getDefaultClauseBody());
@@ -202,9 +202,9 @@ SetDefaultClauseBodyWorksCorrectlyWhenThereIsDefaultClause) {
 #if DEATH_TESTS_ENABLED
 TEST_F(SwitchStmtTests,
 SetDefaultClauseBodyViolatedPreconditionNoBody) {
-	ShPtr<SwitchStmt> switchStmt(SwitchStmt::create(ConstInt::create(1, 32)));
+	SwitchStmt* switchStmt(SwitchStmt::create(ConstInt::create(1, 32)));
 
-	EXPECT_DEATH(switchStmt->setDefaultClauseBody(ShPtr<Statement>()),
+	EXPECT_DEATH(switchStmt->setDefaultClauseBody(Statement*()),
 		".*setDefaultClauseBody.*Precondition.*failed.*");
 }
 #endif
@@ -212,7 +212,7 @@ SetDefaultClauseBodyViolatedPreconditionNoBody) {
 #if DEATH_TESTS_ENABLED
 TEST_F(SwitchStmtTests,
 SetDefaultClauseBodyViolatedPreconditionNoDefaultClause) {
-	ShPtr<SwitchStmt> switchStmt(SwitchStmt::create(ConstInt::create(1, 32)));
+	SwitchStmt* switchStmt(SwitchStmt::create(ConstInt::create(1, 32)));
 
 	EXPECT_DEATH(switchStmt->setDefaultClauseBody(BreakStmt::create()),
 		".*setDefaultClauseBody.*Precondition.*failed.*");
@@ -225,7 +225,7 @@ SetDefaultClauseBodyViolatedPreconditionNoDefaultClause) {
 
 TEST_F(SwitchStmtTests,
 RemoveDefaultClauseWorksCorrectlyWhenThereAreNoClauses) {
-	ShPtr<SwitchStmt> switchStmt(SwitchStmt::create(ConstInt::create(1, 32)));
+	SwitchStmt* switchStmt(SwitchStmt::create(ConstInt::create(1, 32)));
 	switchStmt->removeDefaultClause();
 
 	EXPECT_FALSE(switchStmt->hasDefaultClause());
@@ -233,7 +233,7 @@ RemoveDefaultClauseWorksCorrectlyWhenThereAreNoClauses) {
 
 TEST_F(SwitchStmtTests,
 RemoveDefaultClauseWorksCorrectlyWhenThereIsDefaultClause) {
-	ShPtr<SwitchStmt> switchStmt(SwitchStmt::create(ConstInt::create(1, 32)));
+	SwitchStmt* switchStmt(SwitchStmt::create(ConstInt::create(1, 32)));
 	switchStmt->removeDefaultClause();
 
 	EXPECT_FALSE(switchStmt->hasDefaultClause());

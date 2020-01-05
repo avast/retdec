@@ -19,13 +19,13 @@ namespace llvmir2hll {
 IntType::IntType(unsigned size, bool isSigned):
 	Type(), size(size), signedInt(isSigned) {}
 
-ShPtr<Value> IntType::clone() {
+Value* IntType::clone() {
 	return IntType::create(size);
 }
 
-bool IntType::isEqualTo(ShPtr<Value> otherValue) const {
+bool IntType::isEqualTo(Value* otherValue) const {
 	// Both types and numbers of bits have to be equal.
-	if (ShPtr<IntType> otherIntType = cast<IntType>(otherValue)) {
+	if (IntType* otherIntType = cast<IntType>(otherValue)) {
 		return size == otherIntType->size;
 	}
 	return false;
@@ -75,7 +75,7 @@ bool IntType::isBool() const {
 * @par Preconditions
 *  - @a size > 0
 */
-ShPtr<IntType> IntType::create(unsigned size, bool isSigned) {
+IntType* IntType::create(unsigned size, bool isSigned) {
 	PRECONDITION(size > 0, "invalid size " << size);
 
 	// There are two maps, one for signed integers and one for unsigned integers.
@@ -89,25 +89,25 @@ ShPtr<IntType> IntType::create(unsigned size, bool isSigned) {
 		}
 		// Create the type and store it for later use. There is no special
 		// initialization.
-		createdSignedTypes[size] = ShPtr<IntType>(new IntType(size, isSigned));
+		createdSignedTypes[size] = new IntType(size, isSigned);
 		return createdSignedTypes[size];
 	} else {
 		auto it = createdUnsignedTypes.find(size);
 		if (it != createdUnsignedTypes.end()) {
 			return it->second;
 		}
-		createdUnsignedTypes[size] = ShPtr<IntType>(new IntType(size, isSigned));
+		createdUnsignedTypes[size] = new IntType(size, isSigned);
 		return createdUnsignedTypes[size];
 	}
 }
 
 void IntType::accept(Visitor *v) {
-	v->visit(ucast<IntType>(shared_from_this()));
+	v->visit(ucast<IntType>(this));
 }
 
 // Static variables and constants definitions.
-std::map<unsigned, ShPtr<IntType>> IntType::createdSignedTypes;
-std::map<unsigned, ShPtr<IntType>> IntType::createdUnsignedTypes;
+std::map<unsigned, IntType*> IntType::createdSignedTypes;
+std::map<unsigned, IntType*> IntType::createdUnsignedTypes;
 
 } // namespace llvmir2hll
 } // namespace retdec

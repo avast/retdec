@@ -18,23 +18,23 @@ namespace llvmir2hll {
 *
 * See create() or createUninitialized() for more information.
 */
-ConstArray::ConstArray(ArrayValue value, ShPtr<ArrayType> type):
+ConstArray::ConstArray(ArrayValue value, ArrayType* type):
 	Constant(), value(value), initialized(!value.empty()), type(type) {}
 
-ShPtr<Value> ConstArray::clone() {
+Value* ConstArray::clone() {
 	if (isInitialized()) {
-		ShPtr<ConstArray> constArray(ConstArray::create(value, type));
+		ConstArray* constArray(ConstArray::create(value, type));
 		constArray->setMetadata(getMetadata());
 		return constArray;
 	}
-	ShPtr<ConstArray> constArray(ConstArray::createUninitialized(type));
+	ConstArray* constArray(ConstArray::createUninitialized(type));
 	constArray->setMetadata(getMetadata());
 	return constArray;
 }
 
-bool ConstArray::isEqualTo(ShPtr<Value> otherValue) const {
+bool ConstArray::isEqualTo(Value* otherValue) const {
 	// The types of compared instances have to match.
-	ShPtr<ConstArray> otherConstArray = cast<ConstArray>(otherValue);
+	ConstArray* otherConstArray = cast<ConstArray>(otherValue);
 	if (!otherConstArray) {
 		return false;
 	}
@@ -70,11 +70,11 @@ bool ConstArray::isEqualTo(ShPtr<Value> otherValue) const {
 	return true;
 }
 
-ShPtr<Type> ConstArray::getType() const {
+Type* ConstArray::getType() const {
 	return type;
 }
 
-void ConstArray::replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) {
+void ConstArray::replace(Expression* oldExpr, Expression* newExpr) {
 	PRECONDITION_NON_NULL(oldExpr);
 
 	if (!isInitialized()) {
@@ -158,7 +158,7 @@ bool ConstArray::isEmpty() const {
 /**
 * @brief Returns the type of items in the array.
 */
-ShPtr<Type> ConstArray::getContainedType() const {
+Type* ConstArray::getContainedType() const {
 	return type->getContainedType();
 }
 
@@ -179,13 +179,13 @@ ArrayType::Dimensions ConstArray::getDimensions() const {
 *  - @a value is non-empty
 *  - @a type is non-null
 */
-ShPtr<ConstArray> ConstArray::create(ArrayValue value, ShPtr<ArrayType> type) {
+ConstArray* ConstArray::create(ArrayValue value, ArrayType* type) {
 	PRECONDITION(!value.empty(), "missing value for an initialized array");
 	PRECONDITION_NON_NULL(type);
 
-	ShPtr<ConstArray> array(new ConstArray(value, type));
+	ConstArray* array(new ConstArray(value, type));
 
-	// Initialization (recall that shared_from_this() cannot be called in a
+	// Initialization (recall that this cannot be called in a
 	// constructor).
 	for (auto &item : value) {
 		item->addObserver(array);
@@ -202,10 +202,10 @@ ShPtr<ConstArray> ConstArray::create(ArrayValue value, ShPtr<ArrayType> type) {
 * @par Preconditions
 *  - @a type is non-null
 */
-ShPtr<ConstArray> ConstArray::createUninitialized(ShPtr<ArrayType> type) {
+ConstArray* ConstArray::createUninitialized(ArrayType* type) {
 	PRECONDITION_NON_NULL(type);
 
-	return ShPtr<ConstArray>(new ConstArray({}, type));
+	return new ConstArray({}, type);
 }
 
 /**
@@ -226,11 +226,11 @@ ShPtr<ConstArray> ConstArray::createUninitialized(ShPtr<ArrayType> type) {
 *
 * @see Subject::update()
 */
-void ConstArray::update(ShPtr<Value> subject, ShPtr<Value> arg) {
+void ConstArray::update(Value* subject, Value* arg) {
 	PRECONDITION_NON_NULL(subject);
 	PRECONDITION_NON_NULL(arg);
 
-	ShPtr<Expression> newExpr = cast<Expression>(arg);
+	Expression* newExpr = cast<Expression>(arg);
 	if (!newExpr) {
 		return;
 	}
@@ -245,7 +245,7 @@ void ConstArray::update(ShPtr<Value> subject, ShPtr<Value> arg) {
 }
 
 void ConstArray::accept(Visitor *v) {
-	v->visit(ucast<ConstArray>(shared_from_this()));
+	v->visit(ucast<ConstArray>(this));
 }
 
 } // namespace llvmir2hll

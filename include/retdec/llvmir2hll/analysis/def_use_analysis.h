@@ -35,13 +35,13 @@ class Variable;
 class DefUseChains {
 public:
 	/// (statement, variable) pair
-	using StmtVarPair = std::pair<ShPtr<Statement>, ShPtr<Variable>>;
+	using StmtVarPair = std::pair<Statement*, Variable*>;
 
 	/// Set of (statement, variable) pairs.
 	using StmtVarPairSet = std::set<StmtVarPair>;
 
 	/// Mapping of a CFG node into a set of (statement, variable) pairs.
-	using NodePairMap = std::map<ShPtr<CFG::Node>, StmtVarPairSet>;
+	using NodePairMap = std::map<CFG::Node*, StmtVarPairSet>;
 
 	/// A def-use chain (see [ItC]).
 	// Implementation note: we have to use std::vector instead of std::map to
@@ -53,14 +53,14 @@ public:
 
 public:
 	/// Function for which the chains have been computed.
-	ShPtr<Function> func;
+	Function* func = nullptr;
 
 	/// CFG of @c func.
-	ShPtr<CFG> cfg;
+	CFG* cfg = nullptr;
 
 	/// A function that returns whether the given variable should be included
 	/// in def-use chains.
-	std::function<bool (ShPtr<Variable>)> shouldBeIncluded;
+	std::function<bool (Variable*)> shouldBeIncluded;
 
 	/// Def-use chain for each statement @c s that defines a variable @c x (the
 	/// <tt>DU(s, x)</tt> set in [ItC]).
@@ -111,46 +111,46 @@ public:
 */
 class DefUseAnalysis: private retdec::utils::NonCopyable {
 public:
-	ShPtr<DefUseChains> getDefUseChains(
-		ShPtr<Function> func,
-		ShPtr<CFG> cfg = nullptr,
-		std::function<bool (ShPtr<Variable>)> shouldBeIncluded =
+	DefUseChains* getDefUseChains(
+		Function* func,
+		CFG* cfg = nullptr,
+		std::function<bool (Variable*)> shouldBeIncluded =
 			[](auto) { return true; }
 	);
 
-	static ShPtr<DefUseAnalysis> create(ShPtr<Module> module,
-		ShPtr<ValueAnalysis> va, ShPtr<VarUsesVisitor> vuv = nullptr);
+	static DefUseAnalysis* create(Module* module,
+		ValueAnalysis* va, VarUsesVisitor* vuv = nullptr);
 
 private:
-	DefUseAnalysis(ShPtr<Module> module,
-		ShPtr<ValueAnalysis> va, ShPtr<VarUsesVisitor> vuv = nullptr);
+	DefUseAnalysis(Module* module,
+		ValueAnalysis* va, VarUsesVisitor* vuv = nullptr);
 
-	void computeGenAndKill(ShPtr<DefUseChains> ducs);
-	void computeGenAndKillForNode(ShPtr<DefUseChains> ducs,
-		ShPtr<CFG::Node> node);
-	void computeInAndOut(ShPtr<DefUseChains> ducs);
-	bool computeInAndOutForNode(ShPtr<DefUseChains> ducs,
-		ShPtr<CFG::Node> node);
-	void computeDefUseChains(ShPtr<DefUseChains> ducs);
-	void computeDefUseChainForNode(ShPtr<DefUseChains> ducs,
-		ShPtr<CFG::Node> node);
-	void computeDefUseChainForStmt(ShPtr<DefUseChains> ducs,
-		ShPtr<CFG::Node> node, CFG::stmt_iterator varDefStmtIter,
-		ShPtr<Variable> defVar);
-	ShPtr<Variable> getDefVarInStmt(ShPtr<Statement> stmt);
+	void computeGenAndKill(DefUseChains* ducs);
+	void computeGenAndKillForNode(DefUseChains* ducs,
+		CFG::Node* node);
+	void computeInAndOut(DefUseChains* ducs);
+	bool computeInAndOutForNode(DefUseChains* ducs,
+		CFG::Node* node);
+	void computeDefUseChains(DefUseChains* ducs);
+	void computeDefUseChainForNode(DefUseChains* ducs,
+		CFG::Node* node);
+	void computeDefUseChainForStmt(DefUseChains* ducs,
+		CFG::Node* node, CFG::stmt_iterator varDefStmtIter,
+		Variable* defVar);
+	Variable* getDefVarInStmt(Statement* stmt);
 
 private:
 	/// Module that is being analyzed.
-	ShPtr<Module> module;
+	Module* module = nullptr;
 
 	/// Analysis of used values.
-	ShPtr<ValueAnalysis> va;
+	ValueAnalysis* va = nullptr;
 
 	/// Visitor for obtaining uses of variables.
-	ShPtr<VarUsesVisitor> vuv;
+	VarUsesVisitor* vuv = nullptr;
 
 	/// The used builder of CFGs.
-	ShPtr<CFGBuilder> cfgBuilder;
+	CFGBuilder* cfgBuilder = nullptr;
 };
 
 } // namespace llvmir2hll

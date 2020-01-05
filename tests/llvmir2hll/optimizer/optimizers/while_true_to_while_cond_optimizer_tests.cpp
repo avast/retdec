@@ -23,7 +23,7 @@ class WhileTrueToWhileCondOptimizerTests: public TestsWithModule {};
 
 TEST_F(WhileTrueToWhileCondOptimizerTests,
 OptimizerHasNonEmptyID) {
-	ShPtr<WhileTrueToWhileCondOptimizer> optimizer(
+	WhileTrueToWhileCondOptimizer* optimizer(
 		new WhileTrueToWhileCondOptimizer(module));
 
 	EXPECT_TRUE(!optimizer->getId().empty()) <<

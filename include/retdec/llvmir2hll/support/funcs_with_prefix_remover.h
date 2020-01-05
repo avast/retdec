@@ -30,32 +30,32 @@ class Module;
 class FuncsWithPrefixRemover: private OrderedAllVisitor,
 		private retdec::utils::NonCopyable {
 public:
-	static void removeFuncs(ShPtr<Module> module,
+	static void removeFuncs(Module* module,
 		const StringSet &prefixes);
-	static void removeFuncs(ShPtr<Module> module,
+	static void removeFuncs(Module* module,
 		const std::string &prefix);
 
 private:
-	FuncsWithPrefixRemover(ShPtr<Module> module,
+	FuncsWithPrefixRemover(Module* module,
 		const StringSet &prefixes);
 
 	void performRemoval();
 	void removeCallsOfFuncsWithPrefixes();
 	void removeDeclarationsOfFuncsWithPrefixes();
-	bool isCallOfFuncToBeRemoved(ShPtr<Expression> expr) const;
-	bool shouldBeRemoved(ShPtr<Function> func) const;
+	bool isCallOfFuncToBeRemoved(Expression* expr) const;
+	bool shouldBeRemoved(Function* func) const;
 
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<CallStmt> stmt) override;
-	virtual void visit(ShPtr<AssignStmt> stmt) override;
-	virtual void visit(ShPtr<VarDefStmt> stmt) override;
+	virtual void visit(CallStmt* stmt) override;
+	virtual void visit(AssignStmt* stmt) override;
+	virtual void visit(VarDefStmt* stmt) override;
 	/// @}
 
 private:
 	/// Module in which the functions are removed.
-	ShPtr<Module> module;
+	Module* module = nullptr;
 
 	/// Prefixes of functions that should be removed.
 	StringSet prefixes;

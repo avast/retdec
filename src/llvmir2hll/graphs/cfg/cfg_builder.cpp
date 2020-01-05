@@ -17,7 +17,7 @@ namespace llvmir2hll {
 * @par Preconditions
 *  - @a func is non-null
 */
-ShPtr<CFG> CFGBuilder::getCFG(ShPtr<Function> func) {
+CFG* CFGBuilder::getCFG(Function* func) {
 	PRECONDITION_NON_NULL(func);
 
 	initializeNewCFG(func);
@@ -28,9 +28,9 @@ ShPtr<CFG> CFGBuilder::getCFG(ShPtr<Function> func) {
 /**
 * @brief Creates a new CFG and initializes it.
 */
-void CFGBuilder::initializeNewCFG(ShPtr<Function> func) {
+void CFGBuilder::initializeNewCFG(Function* func) {
 	this->func = func;
-	cfg = ShPtr<CFG>(new CFG(func));
+	cfg = new CFG(func);
 }
 
 } // namespace llvmir2hll

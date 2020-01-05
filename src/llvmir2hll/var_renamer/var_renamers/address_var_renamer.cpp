@@ -29,7 +29,7 @@ namespace {
 * @par Preconditions
 *  - both @a var and @a varNameGen are non-null
 */
-std::string genVarNameWithAddressIfAvailable(ShPtr<Variable> var,
+std::string genVarNameWithAddressIfAvailable(Variable* var,
 		VarNameGen *varNameGen) {
 	PRECONDITION_NON_NULL(var);
 	PRECONDITION_NON_NULL(varNameGen);
@@ -48,7 +48,7 @@ std::string genVarNameWithAddressIfAvailable(ShPtr<Variable> var,
 *
 * For more details, see create().
 */
-AddressVarRenamer::AddressVarRenamer(ShPtr<VarNameGen> varNameGen,
+AddressVarRenamer::AddressVarRenamer(VarNameGen* varNameGen,
 	bool useDebugNames): VarRenamer(varNameGen, useDebugNames),
 		globalVarNameGen(NumVarNameGen::create("g")),
 		paramVarNameGen(NumVarNameGen::create("a")),
@@ -64,45 +64,45 @@ AddressVarRenamer::AddressVarRenamer(ShPtr<VarNameGen> varNameGen,
 * @par Preconditions
 *  - @a varNameGen is non-null
 */
-ShPtr<VarRenamer> AddressVarRenamer::create(ShPtr<VarNameGen> varNameGen,
+VarRenamer* AddressVarRenamer::create(VarNameGen* varNameGen,
 		bool useDebugNames) {
 	PRECONDITION_NON_NULL(varNameGen);
 
-	return ShPtr<VarRenamer>(new AddressVarRenamer(varNameGen, useDebugNames));
+	return new AddressVarRenamer(varNameGen, useDebugNames);
 }
 
 std::string AddressVarRenamer::getId() const {
 	return ADDRESS_VAR_RENAMER_ID;
 }
 
-void AddressVarRenamer::renameGlobalVar(ShPtr<Variable> var) {
+void AddressVarRenamer::renameGlobalVar(Variable* var) {
 	PRECONDITION_NON_NULL(var);
 
 	assignName(var, genVarNameWithAddressIfAvailable(var,
-		globalVarNameGen.get()));
+		globalVarNameGen));
 }
 
-void AddressVarRenamer::renameVarsInFunc(ShPtr<Function> func) {
+void AddressVarRenamer::renameVarsInFunc(Function* func) {
 	paramVarNameGen->restart();
 	localVarNameGen->restart();
 
 	VarRenamer::renameVarsInFunc(func);
 }
 
-void AddressVarRenamer::renameFuncParam(ShPtr<Variable> var,
-		ShPtr<Function> func) {
+void AddressVarRenamer::renameFuncParam(Variable* var,
+		Function* func) {
 	PRECONDITION_NON_NULL(var);
 
 	assignName(var, genVarNameWithAddressIfAvailable(var,
-		paramVarNameGen.get()), func);
+		paramVarNameGen), func);
 }
 
-void AddressVarRenamer::renameFuncLocalVar(ShPtr<Variable> var,
-		ShPtr<Function> func) {
+void AddressVarRenamer::renameFuncLocalVar(Variable* var,
+		Function* func) {
 	PRECONDITION_NON_NULL(var);
 
 	assignName(var, genVarNameWithAddressIfAvailable(var,
-		localVarNameGen.get()), func);
+		localVarNameGen), func);
 }
 
 } // namespace llvmir2hll

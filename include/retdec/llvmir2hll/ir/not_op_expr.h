@@ -26,11 +26,11 @@ class Visitor;
 */
 class NotOpExpr final: public UnaryOpExpr {
 public:
-	static ShPtr<NotOpExpr> create(ShPtr<Expression> op);
+	static NotOpExpr* create(Expression* op);
 
-	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
-	virtual ShPtr<Value> clone() override;
-	virtual ShPtr<Type> getType() const override;
+	virtual bool isEqualTo(Value* otherValue) const override;
+	virtual Value* clone() override;
+	virtual Type* getType() const override;
 
 	/// @name Visitor Interface
 	/// @{
@@ -40,7 +40,7 @@ public:
 private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
-	explicit NotOpExpr(ShPtr<Expression> op);
+	explicit NotOpExpr(Expression* op);
 };
 
 } // namespace llvmir2hll

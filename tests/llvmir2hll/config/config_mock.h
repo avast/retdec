@@ -75,13 +75,13 @@ public:
 *      @endcode
 *  (2) @c configName, which is of type
 *      @code
-*      ShPtr<Config>
+*      Config*
 *      @endcode
 *      and delegates to the mock from (1).
 */
 #define INSTANTIATE_CONFIG_MOCK(configName) \
 	::testing::NiceMock<ConfigMock> *configName##Mock = \
 		new ::testing::NiceMock<ConfigMock>(); \
-	ShPtr<Config> configName(configName##Mock);
+	Config* configName(configName##Mock);
 
 #endif

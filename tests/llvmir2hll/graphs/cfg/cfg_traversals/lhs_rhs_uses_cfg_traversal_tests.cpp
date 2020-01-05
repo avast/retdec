@@ -46,7 +46,7 @@ protected:
 	}
 
 protected:
-	ShPtr<CFGBuilder> cfgBuilder;
+	CFGBuilder* cfgBuilder;
 };
 
 TEST_F(LhsRhsUsesCFGTraversalTests,
@@ -57,14 +57,14 @@ NoUsesForVarDefStmtWithNoInitializer) {
 	//     int a;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<VarDefStmt> varDefA(VarDefStmt::create(varA));
+	VarDefStmt* varDefA(VarDefStmt::create(varA));
 	testFunc->setBody(varDefA);
 
 	// Instantiate the needed analyses.
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
-	ShPtr<CallInfoObtainer> cio(OptimCallInfoObtainer::create());
+	CallInfoObtainer* cio(OptimCallInfoObtainer::create());
 	cio->init(CGBuilder::getCG(module), va);
 
 	// Perform the traversal.
@@ -83,12 +83,12 @@ NoUsesWhenStmtIsNotInCFG) {
 	// void test() {
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
-	ShPtr<VarDefStmt> varDefA(VarDefStmt::create(varA));
+	Variable* varA(Variable::create("a", IntType::create(32)));
+	VarDefStmt* varDefA(VarDefStmt::create(varA));
 
 	// Instantiate the needed analyses.
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
-	ShPtr<CallInfoObtainer> cio(OptimCallInfoObtainer::create());
+	CallInfoObtainer* cio(OptimCallInfoObtainer::create());
 	cio->init(CGBuilder::getCG(module), va);
 
 	// Perform the traversal.
@@ -108,14 +108,14 @@ NoUsesForNonAssignOrVarDefStmt) {
 	//     return a;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<ReturnStmt> returnA(ReturnStmt::create(varA));
+	ReturnStmt* returnA(ReturnStmt::create(varA));
 	testFunc->setBody(returnA);
 
 	// Instantiate the needed analyses.
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
-	ShPtr<CallInfoObtainer> cio(OptimCallInfoObtainer::create());
+	CallInfoObtainer* cio(OptimCallInfoObtainer::create());
 	cio->init(CGBuilder::getCG(module), va);
 
 	// Perform the traversal.
@@ -136,18 +136,18 @@ NoUsesForAssignStmtWhereLhsIsNotVariable) {
 	//    return a;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32))); // the type does not matter
+	Variable* varA(Variable::create("a", IntType::create(32))); // the type does not matter
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	testFunc->addLocalVar(varB);
-	ShPtr<ReturnStmt> returnA(ReturnStmt::create(varA));
-	ShPtr<AssignStmt> assignA1B(AssignStmt::create(
+	ReturnStmt* returnA(ReturnStmt::create(varA));
+	AssignStmt* assignA1B(AssignStmt::create(
 		ArrayIndexOpExpr::create(varA, ConstInt::create(1, 32)), varB, returnA));
 	testFunc->setBody(assignA1B);
 
 	// Instantiate the needed analyses.
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
-	ShPtr<CallInfoObtainer> cio(OptimCallInfoObtainer::create());
+	CallInfoObtainer* cio(OptimCallInfoObtainer::create());
 	cio->init(CGBuilder::getCG(module), va);
 
 	// Perform the traversal.
@@ -168,17 +168,17 @@ NoUsesForAssignStmtWhereRhsContainsDereference) {
 	//    return a;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32))); // the type does not matter
+	Variable* varA(Variable::create("a", IntType::create(32))); // the type does not matter
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", PointerType::create(IntType::create(32))));
+	Variable* varB(Variable::create("b", PointerType::create(IntType::create(32))));
 	testFunc->addLocalVar(varB);
-	ShPtr<ReturnStmt> returnA(ReturnStmt::create(varA));
-	ShPtr<AssignStmt> assignAB(AssignStmt::create(varA, DerefOpExpr::create(varB), returnA));
+	ReturnStmt* returnA(ReturnStmt::create(varA));
+	AssignStmt* assignAB(AssignStmt::create(varA, DerefOpExpr::create(varB), returnA));
 	testFunc->setBody(assignAB);
 
 	// Instantiate the needed analyses.
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
-	ShPtr<CallInfoObtainer> cio(OptimCallInfoObtainer::create());
+	CallInfoObtainer* cio(OptimCallInfoObtainer::create());
 	cio->init(CGBuilder::getCG(module), va);
 
 	// Perform the traversal.
@@ -200,12 +200,12 @@ NoUsesWhenLhsMayBeUsedIndirectly) {
 	//     return a;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	testFunc->addLocalVar(varB);
-	ShPtr<ReturnStmt> returnA(ReturnStmt::create(varA));
-	ShPtr<AssignStmt> assignAB(AssignStmt::create(varA, varB, returnA));
+	ReturnStmt* returnA(ReturnStmt::create(varA));
+	AssignStmt* assignAB(AssignStmt::create(varA, varB, returnA));
 	testFunc->setBody(assignAB);
 
 	// Instantiate the needed analyses.
@@ -214,7 +214,7 @@ NoUsesWhenLhsMayBeUsedIndirectly) {
 		.WillByDefault(Return(true));
 	ON_CALL(*aliasAnalysisMock, mayBePointed(varB))
 		.WillByDefault(Return(false));
-	ShPtr<CallInfoObtainer> cio(OptimCallInfoObtainer::create());
+	CallInfoObtainer* cio(OptimCallInfoObtainer::create());
 	cio->init(CGBuilder::getCG(module), va);
 
 	// Perform the traversal.
@@ -236,12 +236,12 @@ NoUsesWhenRhsMayBeUsedIndirectly) {
 	//     return a;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	testFunc->addLocalVar(varB);
-	ShPtr<ReturnStmt> returnA(ReturnStmt::create(varA));
-	ShPtr<AssignStmt> assignAB(AssignStmt::create(varA, varB, returnA));
+	ReturnStmt* returnA(ReturnStmt::create(varA));
+	AssignStmt* assignAB(AssignStmt::create(varA, varB, returnA));
 	testFunc->setBody(assignAB);
 
 	// Instantiate the needed analyses.
@@ -250,7 +250,7 @@ NoUsesWhenRhsMayBeUsedIndirectly) {
 		.WillByDefault(Return(false));
 	ON_CALL(*aliasAnalysisMock, mayBePointed(varB))
 		.WillByDefault(Return(true));
-	ShPtr<CallInfoObtainer> cio(OptimCallInfoObtainer::create());
+	CallInfoObtainer* cio(OptimCallInfoObtainer::create());
 	cio->init(CGBuilder::getCG(module), va);
 
 	// Perform the traversal.
@@ -271,17 +271,17 @@ SingleUseRightAfterOriginalStatement) {
 	//     return a;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	testFunc->addLocalVar(varB);
-	ShPtr<ReturnStmt> returnA(ReturnStmt::create(varA));
-	ShPtr<AssignStmt> assignAB(AssignStmt::create(varA, varB, returnA));
+	ReturnStmt* returnA(ReturnStmt::create(varA));
+	AssignStmt* assignAB(AssignStmt::create(varA, varB, returnA));
 	testFunc->setBody(assignAB);
 
 	// Instantiate the needed analyses.
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
-	ShPtr<CallInfoObtainer> cio(OptimCallInfoObtainer::create());
+	CallInfoObtainer* cio(OptimCallInfoObtainer::create());
 	cio->init(CGBuilder::getCG(module), va);
 
 	// Perform the traversal.
@@ -303,17 +303,17 @@ SingleUseRightAfterOriginalStatementRhsHasNoVariables) {
 	//     return a;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	testFunc->addLocalVar(varB);
-	ShPtr<ReturnStmt> returnA(ReturnStmt::create(varA));
-	ShPtr<AssignStmt> assignA1(AssignStmt::create(varA, ConstInt::create(1, 32), returnA));
+	ReturnStmt* returnA(ReturnStmt::create(varA));
+	AssignStmt* assignA1(AssignStmt::create(varA, ConstInt::create(1, 32), returnA));
 	testFunc->setBody(assignA1);
 
 	// Instantiate the needed analyses.
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
-	ShPtr<CallInfoObtainer> cio(OptimCallInfoObtainer::create());
+	CallInfoObtainer* cio(OptimCallInfoObtainer::create());
 	cio->init(CGBuilder::getCG(module), va);
 
 	// Perform the traversal.
@@ -336,18 +336,18 @@ NoUsesWhenRhsModifiedBeforeLhsUse) {
 	//     return a;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	testFunc->addLocalVar(varB);
-	ShPtr<ReturnStmt> returnA(ReturnStmt::create(varA));
-	ShPtr<AssignStmt> assignB1(AssignStmt::create(varB, ConstInt::create(1, 32), returnA));
-	ShPtr<AssignStmt> assignAB(AssignStmt::create(varA, varB, assignB1));
+	ReturnStmt* returnA(ReturnStmt::create(varA));
+	AssignStmt* assignB1(AssignStmt::create(varB, ConstInt::create(1, 32), returnA));
+	AssignStmt* assignAB(AssignStmt::create(varA, varB, assignB1));
 	testFunc->setBody(assignAB);
 
 	// Instantiate the needed analyses.
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
-	ShPtr<CallInfoObtainer> cio(OptimCallInfoObtainer::create());
+	CallInfoObtainer* cio(OptimCallInfoObtainer::create());
 	cio->init(CGBuilder::getCG(module), va);
 
 	// Perform the traversal.
@@ -369,18 +369,18 @@ NoUsesWhenLhsModifiedBeforeItIsUsed) {
 	//     return a;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	testFunc->addLocalVar(varB);
-	ShPtr<ReturnStmt> returnA(ReturnStmt::create(varA));
-	ShPtr<AssignStmt> assignA1(AssignStmt::create(varA, ConstInt::create(1, 32), returnA));
-	ShPtr<AssignStmt> assignAB(AssignStmt::create(varA, varB, assignA1));
+	ReturnStmt* returnA(ReturnStmt::create(varA));
+	AssignStmt* assignA1(AssignStmt::create(varA, ConstInt::create(1, 32), returnA));
+	AssignStmt* assignAB(AssignStmt::create(varA, varB, assignA1));
 	testFunc->setBody(assignAB);
 
 	// Instantiate the needed analyses.
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
-	ShPtr<CallInfoObtainer> cio(OptimCallInfoObtainer::create());
+	CallInfoObtainer* cio(OptimCallInfoObtainer::create());
 	cio->init(CGBuilder::getCG(module), va);
 
 	// Perform the traversal.
@@ -403,21 +403,21 @@ NoUsesWhenLhsIsModifiedAfterItIsUsed) {
 	//     return a;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	testFunc->addLocalVar(varB);
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(32)));
+	Variable* varC(Variable::create("c", IntType::create(32)));
 	testFunc->addLocalVar(varC);
-	ShPtr<ReturnStmt> returnA(ReturnStmt::create(varA));
-	ShPtr<AssignStmt> assignA1(AssignStmt::create(varA, ConstInt::create(1, 32), returnA));
-	ShPtr<AssignStmt> assignCA(AssignStmt::create(varC, varA, assignA1));
-	ShPtr<AssignStmt> assignAB(AssignStmt::create(varA, varB, assignCA));
+	ReturnStmt* returnA(ReturnStmt::create(varA));
+	AssignStmt* assignA1(AssignStmt::create(varA, ConstInt::create(1, 32), returnA));
+	AssignStmt* assignCA(AssignStmt::create(varC, varA, assignA1));
+	AssignStmt* assignAB(AssignStmt::create(varA, varB, assignCA));
 	testFunc->setBody(assignAB);
 
 	// Instantiate the needed analyses.
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
-	ShPtr<CallInfoObtainer> cio(OptimCallInfoObtainer::create());
+	CallInfoObtainer* cio(OptimCallInfoObtainer::create());
 	cio->init(CGBuilder::getCG(module), va);
 
 	// Perform the traversal.
@@ -439,20 +439,20 @@ TwoUsesRightAfterOriginalStatement) {
 	//     return a;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	testFunc->addLocalVar(varB);
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(32)));
+	Variable* varC(Variable::create("c", IntType::create(32)));
 	testFunc->addLocalVar(varC);
-	ShPtr<ReturnStmt> returnA(ReturnStmt::create(varA));
-	ShPtr<AssignStmt> assignCA(AssignStmt::create(varC, varA, returnA));
-	ShPtr<AssignStmt> assignAB(AssignStmt::create(varA, varB, assignCA));
+	ReturnStmt* returnA(ReturnStmt::create(varA));
+	AssignStmt* assignCA(AssignStmt::create(varC, varA, returnA));
+	AssignStmt* assignAB(AssignStmt::create(varA, varB, assignCA));
 	testFunc->setBody(assignAB);
 
 	// Instantiate the needed analyses.
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
-	ShPtr<CallInfoObtainer> cio(OptimCallInfoObtainer::create());
+	CallInfoObtainer* cio(OptimCallInfoObtainer::create());
 	cio->init(CGBuilder::getCG(module), va);
 
 	// Perform the traversal.
@@ -476,20 +476,20 @@ RhsModifiedAfterTheOnlyUseOfLhsAndFuncReturnsRightAfterThat) {
 	//     b = 1;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	testFunc->addLocalVar(varB);
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(32)));
+	Variable* varC(Variable::create("c", IntType::create(32)));
 	testFunc->addLocalVar(varC);
-	ShPtr<AssignStmt> assignB1(AssignStmt::create(varB, ConstInt::create(1, 32)));
-	ShPtr<AssignStmt> assignCA(AssignStmt::create(varC, varA, assignB1));
-	ShPtr<AssignStmt> assignAB(AssignStmt::create(varA, varB, assignCA));
+	AssignStmt* assignB1(AssignStmt::create(varB, ConstInt::create(1, 32)));
+	AssignStmt* assignCA(AssignStmt::create(varC, varA, assignB1));
+	AssignStmt* assignAB(AssignStmt::create(varA, varB, assignCA));
 	testFunc->setBody(assignAB);
 
 	// Instantiate the needed analyses.
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
-	ShPtr<CallInfoObtainer> cio(OptimCallInfoObtainer::create());
+	CallInfoObtainer* cio(OptimCallInfoObtainer::create());
 	cio->init(CGBuilder::getCG(module), va);
 
 	// Perform the traversal.
@@ -514,22 +514,22 @@ RhsModifiedAfterTheOnlyUseOfLhsAndFuncReturnsAfterMoreStmtsNoLhsUses) {
 	//     c = 2; // auxiliary statement
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	testFunc->addLocalVar(varB);
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(32)));
+	Variable* varC(Variable::create("c", IntType::create(32)));
 	testFunc->addLocalVar(varC);
-	ShPtr<AssignStmt> assignC2(AssignStmt::create(varC, ConstInt::create(2, 32)));
-	ShPtr<AssignStmt> assignC1(AssignStmt::create(varC, ConstInt::create(1, 32), assignC2));
-	ShPtr<AssignStmt> assignB1(AssignStmt::create(varB, ConstInt::create(1, 32), assignC1));
-	ShPtr<AssignStmt> assignCA(AssignStmt::create(varC, varA, assignB1));
-	ShPtr<AssignStmt> assignAB(AssignStmt::create(varA, varB, assignCA));
+	AssignStmt* assignC2(AssignStmt::create(varC, ConstInt::create(2, 32)));
+	AssignStmt* assignC1(AssignStmt::create(varC, ConstInt::create(1, 32), assignC2));
+	AssignStmt* assignB1(AssignStmt::create(varB, ConstInt::create(1, 32), assignC1));
+	AssignStmt* assignCA(AssignStmt::create(varC, varA, assignB1));
+	AssignStmt* assignAB(AssignStmt::create(varA, varB, assignCA));
 	testFunc->setBody(assignAB);
 
 	// Instantiate the needed analyses.
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
-	ShPtr<CallInfoObtainer> cio(OptimCallInfoObtainer::create());
+	CallInfoObtainer* cio(OptimCallInfoObtainer::create());
 	cio->init(CGBuilder::getCG(module), va);
 
 	// Perform the traversal.
@@ -553,21 +553,21 @@ NoUsesRhsModifiedAfterTheOnlyUseOfLhsAndFuncReturnsAfterMoreStmtsButLhsIsUsed) {
 	//     c = a; // use of `a` after `b` has been written to
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	testFunc->addLocalVar(varB);
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(32)));
+	Variable* varC(Variable::create("c", IntType::create(32)));
 	testFunc->addLocalVar(varC);
-	ShPtr<AssignStmt> assignCA1(AssignStmt::create(varC, varA));
-	ShPtr<AssignStmt> assignB1(AssignStmt::create(varB, ConstInt::create(1, 32), assignCA1));
-	ShPtr<AssignStmt> assignCA2(AssignStmt::create(varC, varA, assignB1));
-	ShPtr<AssignStmt> assignAB(AssignStmt::create(varA, varB, assignCA2));
+	AssignStmt* assignCA1(AssignStmt::create(varC, varA));
+	AssignStmt* assignB1(AssignStmt::create(varB, ConstInt::create(1, 32), assignCA1));
+	AssignStmt* assignCA2(AssignStmt::create(varC, varA, assignB1));
+	AssignStmt* assignAB(AssignStmt::create(varA, varB, assignCA2));
 	testFunc->setBody(assignAB);
 
 	// Instantiate the needed analyses.
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
-	ShPtr<CallInfoObtainer> cio(OptimCallInfoObtainer::create());
+	CallInfoObtainer* cio(OptimCallInfoObtainer::create());
 	cio->init(CGBuilder::getCG(module), va);
 
 	// Perform the traversal.
@@ -592,22 +592,22 @@ NoUsesWhenRhsModifiedAfterTheOnlyUseOfLhsAndFuncNoReturnAtEndOfNode) {
 	//     c = a;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	testFunc->addLocalVar(varB);
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(32)));
+	Variable* varC(Variable::create("c", IntType::create(32)));
 	testFunc->addLocalVar(varC);
-	ShPtr<AssignStmt> assignCA2(AssignStmt::create(varC, varA));
-	ShPtr<AssignStmt> assignB1(AssignStmt::create(varB, ConstInt::create(1, 32)));
-	ShPtr<AssignStmt> assignCA1(AssignStmt::create(varC, varA, assignB1));
-	ShPtr<AssignStmt> assignAB(AssignStmt::create(varA, varB, assignCA1));
-	ShPtr<IfStmt> ifStmt(IfStmt::create(ConstInt::create(1, 32), assignAB, assignCA2));
+	AssignStmt* assignCA2(AssignStmt::create(varC, varA));
+	AssignStmt* assignB1(AssignStmt::create(varB, ConstInt::create(1, 32)));
+	AssignStmt* assignCA1(AssignStmt::create(varC, varA, assignB1));
+	AssignStmt* assignAB(AssignStmt::create(varA, varB, assignCA1));
+	IfStmt* ifStmt(IfStmt::create(ConstInt::create(1, 32), assignAB, assignCA2));
 	testFunc->setBody(ifStmt);
 
 	// Instantiate the needed analyses.
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
-	ShPtr<CallInfoObtainer> cio(OptimCallInfoObtainer::create());
+	CallInfoObtainer* cio(OptimCallInfoObtainer::create());
 	cio->init(CGBuilder::getCG(module), va);
 
 	// Perform the traversal.
@@ -631,21 +631,21 @@ NoUsesWhenLhsIsAssignedValueInIfStmt) {
 	//     c = a;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	testFunc->addLocalVar(varB);
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(32)));
+	Variable* varC(Variable::create("c", IntType::create(32)));
 	testFunc->addLocalVar(varC);
-	ShPtr<AssignStmt> assignCA(AssignStmt::create(varC, varA));
-	ShPtr<AssignStmt> assignAB(AssignStmt::create(varA, varB));
-	ShPtr<IfStmt> ifStmt(IfStmt::create(ConstInt::create(1, 32), assignAB, assignCA));
-	ShPtr<AssignStmt> assignA1(AssignStmt::create(varA, ConstInt::create(1, 32), ifStmt));
+	AssignStmt* assignCA(AssignStmt::create(varC, varA));
+	AssignStmt* assignAB(AssignStmt::create(varA, varB));
+	IfStmt* ifStmt(IfStmt::create(ConstInt::create(1, 32), assignAB, assignCA));
+	AssignStmt* assignA1(AssignStmt::create(varA, ConstInt::create(1, 32), ifStmt));
 	testFunc->setBody(assignA1);
 
 	// Instantiate the needed analyses.
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
-	ShPtr<CallInfoObtainer> cio(OptimCallInfoObtainer::create());
+	CallInfoObtainer* cio(OptimCallInfoObtainer::create());
 	cio->init(CGBuilder::getCG(module), va);
 
 	// Perform the traversal.
@@ -671,21 +671,21 @@ LhsIsAssignedValueOutsideIfStmt) {
 	//                // about `a = 1`
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	testFunc->addLocalVar(varB);
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(32)));
+	Variable* varC(Variable::create("c", IntType::create(32)));
 	testFunc->addLocalVar(varC);
-	ShPtr<AssignStmt> assignCA(AssignStmt::create(varC, varA));
-	ShPtr<AssignStmt> assignAB(AssignStmt::create(varA, varB));
-	ShPtr<IfStmt> ifStmt(IfStmt::create(ConstInt::create(1, 32), assignAB, assignCA));
-	ShPtr<AssignStmt> assignA1(AssignStmt::create(varA, ConstInt::create(1, 32), ifStmt));
+	AssignStmt* assignCA(AssignStmt::create(varC, varA));
+	AssignStmt* assignAB(AssignStmt::create(varA, varB));
+	IfStmt* ifStmt(IfStmt::create(ConstInt::create(1, 32), assignAB, assignCA));
+	AssignStmt* assignA1(AssignStmt::create(varA, ConstInt::create(1, 32), ifStmt));
 	testFunc->setBody(assignA1);
 
 	// Instantiate the needed analyses.
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
-	ShPtr<CallInfoObtainer> cio(OptimCallInfoObtainer::create());
+	CallInfoObtainer* cio(OptimCallInfoObtainer::create());
 	cio->init(CGBuilder::getCG(module), va);
 
 	// Perform the traversal.
@@ -708,19 +708,19 @@ FunctionCallAfterOrigStmtThatDoesNotModifyLhsOrRhs) {
 	//     return a;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	testFunc->addLocalVar(varB);
-	ShPtr<ReturnStmt> returnA(ReturnStmt::create(varA));
-	ShPtr<Variable> varRand(Variable::create("a", IntType::create(16)));
-	ShPtr<CallStmt> randCall(CallStmt::create(CallExpr::create(varRand), returnA));
-	ShPtr<AssignStmt> assignAB(AssignStmt::create(varA, varB, randCall));
+	ReturnStmt* returnA(ReturnStmt::create(varA));
+	Variable* varRand(Variable::create("a", IntType::create(16)));
+	CallStmt* randCall(CallStmt::create(CallExpr::create(varRand), returnA));
+	AssignStmt* assignAB(AssignStmt::create(varA, varB, randCall));
 	testFunc->setBody(assignAB);
 
 	// Instantiate the needed analyses.
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
-	ShPtr<CallInfoObtainer> cio(OptimCallInfoObtainer::create());
+	CallInfoObtainer* cio(OptimCallInfoObtainer::create());
 	cio->init(CGBuilder::getCG(module), va);
 
 	// Perform the traversal.
@@ -749,10 +749,10 @@ NoUsesWhenThereIsFunctionCallAfterOrigStmtThatModifiesRhs) {
 	//     return a;
 	// }
 	//
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	module->addGlobalVar(varB);
 	// setB:
-	ShPtr<Function> setB(
+	Function* setB(
 		FunctionBuilder("setB")
 			.definitionWithBody(AssignStmt::create(varB, ConstInt::create(1, 32)))
 			.withRetType(IntType::create(32))
@@ -760,16 +760,16 @@ NoUsesWhenThereIsFunctionCallAfterOrigStmtThatModifiesRhs) {
 	);
 	module->addFunc(setB);
 	// test:
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<ReturnStmt> returnA(ReturnStmt::create(varA));
-	ShPtr<CallStmt> setBCall(CallStmt::create(CallExpr::create(setB->getAsVar()), returnA));
-	ShPtr<AssignStmt> assignAB(AssignStmt::create(varA, varB, setBCall));
+	ReturnStmt* returnA(ReturnStmt::create(varA));
+	CallStmt* setBCall(CallStmt::create(CallExpr::create(setB->getAsVar()), returnA));
+	AssignStmt* assignAB(AssignStmt::create(varA, varB, setBCall));
 	testFunc->setBody(assignAB);
 
 	// Instantiate the needed analyses.
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
-	ShPtr<CallInfoObtainer> cio(OptimCallInfoObtainer::create());
+	CallInfoObtainer* cio(OptimCallInfoObtainer::create());
 	cio->init(CGBuilder::getCG(module), va);
 
 	// Perform the traversal.

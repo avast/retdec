@@ -21,8 +21,8 @@ namespace llvmir2hll {
 */
 class NoActionPatternFinderRunner: public PatternFinderRunner {
 private:
-	virtual void doActionsBeforePatternFinderRuns(ShPtr<PatternFinder> pf) override;
-	virtual void doActionsAfterPatternFinderHasRun(ShPtr<PatternFinder> pf,
+	virtual void doActionsBeforePatternFinderRuns(PatternFinder* pf) override;
+	virtual void doActionsAfterPatternFinderHasRun(PatternFinder* pf,
 		const PatternFinder::Patterns &foundPatterns) override;
 };
 

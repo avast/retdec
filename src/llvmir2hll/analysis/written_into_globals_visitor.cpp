@@ -30,7 +30,7 @@ namespace llvmir2hll {
 * @par Preconditions
 *  - @a module is non-null
 */
-WrittenIntoGlobalsVisitor::WrittenIntoGlobalsVisitor(ShPtr<Module> module):
+WrittenIntoGlobalsVisitor::WrittenIntoGlobalsVisitor(Module* module):
 	OrderedAllVisitor(), module(module), globalVars(module->getGlobalVars()),
 			writtenIntoGlobals(), writing(false) {}
 
@@ -43,42 +43,42 @@ WrittenIntoGlobalsVisitor::WrittenIntoGlobalsVisitor(ShPtr<Module> module):
 * @par Preconditions
 *  - both @a func and @a module are non-null
 */
-VarSet WrittenIntoGlobalsVisitor::getWrittenIntoGlobals(ShPtr<Function> func,
-		ShPtr<Module> module) {
+VarSet WrittenIntoGlobalsVisitor::getWrittenIntoGlobals(Function* func,
+		Module* module) {
 	PRECONDITION_NON_NULL(func);
 	PRECONDITION_NON_NULL(module);
 
-	ShPtr<WrittenIntoGlobalsVisitor> visitor(new WrittenIntoGlobalsVisitor(
+	WrittenIntoGlobalsVisitor* visitor(new WrittenIntoGlobalsVisitor(
 		module));
-	func->accept(visitor.get());
+	func->accept(visitor);
 	return visitor->writtenIntoGlobals;
 }
 
-void WrittenIntoGlobalsVisitor::visit(ShPtr<Variable> var) {
+void WrittenIntoGlobalsVisitor::visit(Variable* var) {
 	if (writing && hasItem(globalVars, var)) {
 		writtenIntoGlobals.insert(var);
 	}
 }
 
-void WrittenIntoGlobalsVisitor::visit(ShPtr<ArrayIndexOpExpr> expr) {
+void WrittenIntoGlobalsVisitor::visit(ArrayIndexOpExpr* expr) {
 	// We consider a in a[1] = 5 to be just read (not written). To this end, we
 	// now can stop the computation since inside the indexed expression, there
 	// can be only read variables.
 }
 
-void WrittenIntoGlobalsVisitor::visit(ShPtr<StructIndexOpExpr> expr) {
+void WrittenIntoGlobalsVisitor::visit(StructIndexOpExpr* expr) {
 	// We consider a in a['1'] = 5 to be just read (not written). To this end,
 	// we now can stop the computation since inside the indexed expression,
 	// there can be only read variables.
 }
 
-void WrittenIntoGlobalsVisitor::visit(ShPtr<DerefOpExpr> expr) {
+void WrittenIntoGlobalsVisitor::visit(DerefOpExpr* expr) {
 	// We consider a in *a = 5 to be just read (not written). To this end, we
 	// now can stop the computation since inside the dereferenced expression,
 	// there can be only read variables.
 }
 
-void WrittenIntoGlobalsVisitor::visit(ShPtr<AssignStmt> stmt) {
+void WrittenIntoGlobalsVisitor::visit(AssignStmt* stmt) {
 	writing = true;
 	stmt->getLhs()->accept(this);
 	writing = false;
@@ -87,7 +87,7 @@ void WrittenIntoGlobalsVisitor::visit(ShPtr<AssignStmt> stmt) {
 	visitStmt(stmt->getSuccessor());
 }
 
-void WrittenIntoGlobalsVisitor::visit(ShPtr<VarDefStmt> stmt) {
+void WrittenIntoGlobalsVisitor::visit(VarDefStmt* stmt) {
 	writing = true;
 	stmt->getVar()->accept(this);
 	writing = false;
@@ -96,7 +96,7 @@ void WrittenIntoGlobalsVisitor::visit(ShPtr<VarDefStmt> stmt) {
 	visitStmt(stmt->getSuccessor());
 }
 
-void WrittenIntoGlobalsVisitor::visit(ShPtr<ForLoopStmt> stmt) {
+void WrittenIntoGlobalsVisitor::visit(ForLoopStmt* stmt) {
 	writing = true;
 	stmt->getIndVar()->accept(this);
 	writing = false;

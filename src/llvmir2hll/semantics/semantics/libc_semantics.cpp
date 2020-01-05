@@ -28,8 +28,8 @@ LibcSemantics::LibcSemantics() {}
 /**
 * @brief Creates a new semantics.
 */
-ShPtr<Semantics> LibcSemantics::create() {
-	return ShPtr<Semantics>(new LibcSemantics());
+Semantics* LibcSemantics::create() {
+	return new LibcSemantics();
 }
 
 std::string LibcSemantics::getId() const {

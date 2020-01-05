@@ -36,7 +36,7 @@ namespace {
 *
 * @param[in] expr Expression to be checked.
 */
-bool isRelationalOperator(ShPtr<Expression> expr) {
+bool isRelationalOperator(Expression* expr) {
 	return isa<LtOpExpr>(expr) || isa<LtEqOpExpr>(expr) ||
 		isa<GtOpExpr>(expr) || isa<GtEqOpExpr>(expr) ||
 		isa<EqOpExpr>(expr) || isa<NeqOpExpr>(expr);
@@ -53,7 +53,7 @@ REGISTER_AT_FACTORY("ThreeOperands", OP_OPER_OP_OPER_OP_SUB_OPTIMIZER_ID,
 * @param[in] arithmExprEvaluator @a The used evaluator of arithmetical
 *            expressions.
 */
-ThreeOperandsSubOptimizer::ThreeOperandsSubOptimizer(ShPtr<ArithmExprEvaluator>
+ThreeOperandsSubOptimizer::ThreeOperandsSubOptimizer(ArithmExprEvaluator*
 		arithmExprEvaluator): SubOptimizer(arithmExprEvaluator) {}
 
 /**
@@ -62,34 +62,33 @@ ThreeOperandsSubOptimizer::ThreeOperandsSubOptimizer(ShPtr<ArithmExprEvaluator>
 * @param[in] arithmExprEvaluator @a The used evaluator of arithmetical
 *            expressions.
 */
-ShPtr<SubOptimizer> ThreeOperandsSubOptimizer::create(ShPtr<ArithmExprEvaluator>
+SubOptimizer* ThreeOperandsSubOptimizer::create(ArithmExprEvaluator*
 		arithmExprEvaluator) {
-	return ShPtr<SubOptimizer>(new ThreeOperandsSubOptimizer(
-		arithmExprEvaluator));
+	return new ThreeOperandsSubOptimizer(arithmExprEvaluator);
 }
 
 std::string ThreeOperandsSubOptimizer::getId() const {
 	return OP_OPER_OP_OPER_OP_SUB_OPTIMIZER_ID;
 }
 
-void ThreeOperandsSubOptimizer::visit(ShPtr<AddOpExpr> expr) {
+void ThreeOperandsSubOptimizer::visit(AddOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	// Optimizations dependent on the first Constant operand or on the second
 	// Constant operand.
-	ShPtr<Expression> firstConstant;
-	ShPtr<Expression> opOperopExpr;
+	Expression* firstConstant;
+	Expression* opOperopExpr;
 	if (analyzeOpOperOp(firstConstant, opOperopExpr, expr)) {
 		// Something like ConstInt/ConstFloat +
 		// (ConstInt/ConstFloat + or - anything)*vice versa*. or
 		// (ConstInt/ConstFloat + or - anything)*vice versa* + ConstInt/ConstFloat.
-		ShPtr<AddOpExpr> addOpExpr(cast<AddOpExpr>(opOperopExpr));
+		AddOpExpr* addOpExpr(cast<AddOpExpr>(opOperopExpr));
 		if (addOpExpr) {
 			// Something like ConstInt/ConstFloat +
 			// (ConstInt/ConstFloat + anything)*vice versa*. or
 			// (ConstInt/ConstFloat + anything)*vice versa* + ConstInt/ConstFloat.
-			ShPtr<Expression> secondConstant;
-			ShPtr<Expression> exprInAddOpExpr;
+			Expression* secondConstant;
+			Expression* exprInAddOpExpr;
 			if (!analyzeOpOperOp(secondConstant, exprInAddOpExpr, addOpExpr)) {
 				// Something like ConstInt/ConstFloat +
 				// (anything + anything) anything in both operands are not
@@ -97,11 +96,11 @@ void ThreeOperandsSubOptimizer::visit(ShPtr<AddOpExpr> expr) {
 				return;
 			};
 			// Get summation of two constants.
-			ShPtr<Expression> result(getResult(AddOpExpr::create(firstConstant,
+			Expression* result(getResult(AddOpExpr::create(firstConstant,
 				secondConstant)));
 			if (result) {
 				// Result is Constant + anything.
-				ShPtr<AddOpExpr> add(AddOpExpr::create(result, exprInAddOpExpr));
+				AddOpExpr* add(AddOpExpr::create(result, exprInAddOpExpr));
 				optimizeExpr(expr, add);
 				return;
 			}
@@ -114,12 +113,12 @@ void ThreeOperandsSubOptimizer::visit(ShPtr<AddOpExpr> expr) {
 	if (isConstFloatOrConstInt(expr->getFirstOperand())) {
 		// Optimization like ConstInt/ConstFloat +
 		// (ConstInt/ConstFloat/anything + - ConstInt/ConstFloat/anything).
-		ShPtr<SubOpExpr> subOpExpr(cast<SubOpExpr>(expr->getSecondOperand()));
+		SubOpExpr* subOpExpr(cast<SubOpExpr>(expr->getSecondOperand()));
 		if (subOpExpr) {
 			// Optimization like ConstInt/ConstFloat +
 			// (ConstInt/ConstFloat/anything - ConstInt/ConstFloat/anything).
-			ShPtr<Expression> constSecOp;
-			ShPtr<Expression> exprSecOp;
+			Expression* constSecOp;
+			Expression* exprSecOp;
 			if (!analyzeOpOperOp(constSecOp, exprSecOp, subOpExpr)) {
 				// Something like ConstInt/ConstFloat +
 				// (anything - anything) anything in both operands are not
@@ -129,21 +128,21 @@ void ThreeOperandsSubOptimizer::visit(ShPtr<AddOpExpr> expr) {
 			if (constSecOp->isEqualTo(subOpExpr->getFirstOperand())) {
 				// Optimization like ConstInt/ConstFloat +
 				// (ConstInt/ConstFloat/anything - anything).
-				ShPtr<Expression> result(getResult(AddOpExpr::create(
+				Expression* result(getResult(AddOpExpr::create(
 					expr->getFirstOperand(), constSecOp)));
 				if (result) {
-					ShPtr<SubOpExpr> sub(SubOpExpr::create(result, exprSecOp));
+					SubOpExpr* sub(SubOpExpr::create(result, exprSecOp));
 					optimizeExpr(expr, sub);
 					return;
 				}
 			} else if (constSecOp->isEqualTo(subOpExpr->getSecondOperand())) {
 				// Optimization like ConstInt/ConstFloat +
 				// (anything - ConstInt/ConstFloat/anything).
-				ShPtr<Expression> result(getResult(SubOpExpr::create(
+				Expression* result(getResult(SubOpExpr::create(
 					expr->getFirstOperand(), constSecOp)));
 				if (result) {
 					// Result is Constant + anything.
-					ShPtr<AddOpExpr> add(AddOpExpr::create(result, exprSecOp));
+					AddOpExpr* add(AddOpExpr::create(result, exprSecOp));
 					optimizeExpr(expr, add);
 					return;
 				}
@@ -156,13 +155,13 @@ void ThreeOperandsSubOptimizer::visit(ShPtr<AddOpExpr> expr) {
 		// Optimization like
 		// (ConstInt/ConstFloat/anything + - ConstInt/ConstFloat/anything)
 		// + ConstInt/ConstFloat.
-		ShPtr<SubOpExpr> subOpExpr(cast<SubOpExpr>(expr->getFirstOperand()));
+		SubOpExpr* subOpExpr(cast<SubOpExpr>(expr->getFirstOperand()));
 		if (subOpExpr) {
 			// Optimization like
 			// (ConstInt/ConstFloat/anything - ConstInt/ConstFloat/anything)
 			// + ConstInt/ConstFloat.
-			ShPtr<Expression> constSecOp;
-			ShPtr<Expression> exprSecOp;
+			Expression* constSecOp;
+			Expression* exprSecOp;
 			if (!analyzeOpOperOp(constSecOp, exprSecOp, subOpExpr)) {
 				// Something like (anything - anything) + ConstInt/ConstFloat.
 				// "anything" in both operands are not ConstInt/ConstFloat.
@@ -171,22 +170,22 @@ void ThreeOperandsSubOptimizer::visit(ShPtr<AddOpExpr> expr) {
 			if (constSecOp->isEqualTo(subOpExpr->getFirstOperand())) {
 				// Optimization like
 				// (ConstInt/ConstFloat - anything) + ConstInt/ConstFloat.
-				ShPtr<Expression> result(getResult(AddOpExpr::create(
+				Expression* result(getResult(AddOpExpr::create(
 					expr->getSecondOperand(), constSecOp)));
 				if (result) {
 					// Result is Constant - anything.
-					ShPtr<SubOpExpr> sub(SubOpExpr::create(result, exprSecOp));
+					SubOpExpr* sub(SubOpExpr::create(result, exprSecOp));
 					optimizeExpr(expr, sub);
 					return;
 				}
 			} else if (constSecOp->isEqualTo(subOpExpr->getSecondOperand())) {
 				// Optimization like
 				// (anything - ConstInt/ConstFloat) + ConstInt/ConstFloat.
-				ShPtr<Expression> result(getResult(SubOpExpr::create(constSecOp,
+				Expression* result(getResult(SubOpExpr::create(constSecOp,
 					expr->getSecondOperand())));
 				if (result) {
 					// Result is Anything - constant.
-					ShPtr<SubOpExpr> sub(SubOpExpr::create(exprSecOp, result));
+					SubOpExpr* sub(SubOpExpr::create(exprSecOp, result));
 					optimizeExpr(expr, sub);
 					return;
 				}
@@ -195,20 +194,20 @@ void ThreeOperandsSubOptimizer::visit(ShPtr<AddOpExpr> expr) {
 	}
 }
 
-void ThreeOperandsSubOptimizer::visit(ShPtr<SubOpExpr> expr) {
+void ThreeOperandsSubOptimizer::visit(SubOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	// Optimizations dependent on the first Constant operand.
 	if (isConstFloatOrConstInt(expr->getFirstOperand())) {
 		// Optimization like ConstInt/ConstFloat -
 		// (ConstInt/ConstFloat/anything + - ConstInt/ConstFloat/anything).
-		ShPtr<AddOpExpr> addOpExpr(cast<AddOpExpr>(expr->getSecondOperand()));
-		ShPtr<SubOpExpr> subOpExpr(cast<SubOpExpr>(expr->getSecondOperand()));
-		ShPtr<BinaryOpExpr> binOpExpr(cast<BinaryOpExpr>(expr->getSecondOperand()));
+		AddOpExpr* addOpExpr(cast<AddOpExpr>(expr->getSecondOperand()));
+		SubOpExpr* subOpExpr(cast<SubOpExpr>(expr->getSecondOperand()));
+		BinaryOpExpr* binOpExpr(cast<BinaryOpExpr>(expr->getSecondOperand()));
 
 		// Find constant and not constant in AddOpExpr or SubOpExpr.
-		ShPtr<Expression> constSecOp;
-		ShPtr<Expression> exprSecOp;
+		Expression* constSecOp;
+		Expression* exprSecOp;
 		if (addOpExpr || subOpExpr) {
 			if (!analyzeOpOperOp(constSecOp, exprSecOp, binOpExpr)) {
 				// Something like ConstInt/ConstFloat -
@@ -220,11 +219,11 @@ void ThreeOperandsSubOptimizer::visit(ShPtr<SubOpExpr> expr) {
 		if (addOpExpr) {
 			// Optimization like ConstInt/ConstFloat -
 			// (ConstInt/ConstFloat/anything + ConstInt/ConstFloat/anything).
-			ShPtr<Expression> result(getResult(SubOpExpr::create(
+			Expression* result(getResult(SubOpExpr::create(
 				expr->getFirstOperand(), constSecOp)));
 			if (result) {
 				// Result is Constant + anything.
-				ShPtr<SubOpExpr> sub(SubOpExpr::create(result, exprSecOp));
+				SubOpExpr* sub(SubOpExpr::create(result, exprSecOp));
 				optimizeExpr(expr, sub);
 				return;
 			}
@@ -236,22 +235,22 @@ void ThreeOperandsSubOptimizer::visit(ShPtr<SubOpExpr> expr) {
 			if (constSecOp->isEqualTo(subOpExpr->getFirstOperand())) {
 				// Optimization like ConstInt/ConstFloat -
 				// (ConstInt/ConstFloat - anything).
-				ShPtr<Expression> result(getResult(SubOpExpr::create(
+				Expression* result(getResult(SubOpExpr::create(
 					expr->getFirstOperand(), constSecOp)));
 				if (result) {
 					// Result is Constant + anything.
-					ShPtr<AddOpExpr> add(AddOpExpr::create(result, exprSecOp));
+					AddOpExpr* add(AddOpExpr::create(result, exprSecOp));
 					optimizeExpr(expr, add);
 					return;
 				}
 			} else if (constSecOp->isEqualTo(subOpExpr->getSecondOperand())) {
 				// Optimization like ConstInt/ConstFloat -
 				// (anything - ConstInt/ConstFloat/anything).
-				ShPtr<Expression> result(getResult(AddOpExpr::create(
+				Expression* result(getResult(AddOpExpr::create(
 					expr->getFirstOperand(), constSecOp)));
 				if (result) {
 					// Result is Constant - anything.
-					ShPtr<SubOpExpr> sub(SubOpExpr::create(result, exprSecOp));
+					SubOpExpr* sub(SubOpExpr::create(result, exprSecOp));
 					optimizeExpr(expr, sub);
 					return;
 				}
@@ -264,13 +263,13 @@ void ThreeOperandsSubOptimizer::visit(ShPtr<SubOpExpr> expr) {
 		// Optimization like
 		// (ConstInt/ConstFloat/anything + - ConstInt/ConstFloat/anything)
 		// - ConstInt/ConstFloat.
-		ShPtr<AddOpExpr> addOpExpr(cast<AddOpExpr>(expr->getFirstOperand()));
-		ShPtr<SubOpExpr> subOpExpr(cast<SubOpExpr>(expr->getFirstOperand()));
-		ShPtr<BinaryOpExpr> binOpExpr(cast<BinaryOpExpr>(expr->getFirstOperand()));
+		AddOpExpr* addOpExpr(cast<AddOpExpr>(expr->getFirstOperand()));
+		SubOpExpr* subOpExpr(cast<SubOpExpr>(expr->getFirstOperand()));
+		BinaryOpExpr* binOpExpr(cast<BinaryOpExpr>(expr->getFirstOperand()));
 
 		// Find constant and not constant in AddOpExpr or SubOpExpr.
-		ShPtr<Expression> constSecOp;
-		ShPtr<Expression> exprSecOp;
+		Expression* constSecOp;
+		Expression* exprSecOp;
 		if (addOpExpr || subOpExpr) {
 			if (!analyzeOpOperOp(constSecOp, exprSecOp, binOpExpr)) {
 				// Something like (anything + - anything) - ConstInt/ConstFloat.
@@ -286,11 +285,11 @@ void ThreeOperandsSubOptimizer::visit(ShPtr<SubOpExpr> expr) {
 				// Optimization like
 				// (ConstInt/ConstFloat + ConstInt/ConstFloat/anything)
 				// - ConstInt/ConstFloat.
-				ShPtr<Expression> result(getResult(SubOpExpr::create(constSecOp,
+				Expression* result(getResult(SubOpExpr::create(constSecOp,
 					expr->getFirstOperand())));
 				if (result) {
 					// Result is Constant + anything.
-					ShPtr<AddOpExpr> add(AddOpExpr::create(result, exprSecOp));
+					AddOpExpr* add(AddOpExpr::create(result, exprSecOp));
 					optimizeExpr(expr, add);
 					return;
 				}
@@ -298,11 +297,11 @@ void ThreeOperandsSubOptimizer::visit(ShPtr<SubOpExpr> expr) {
 				// Optimization like
 				// (anything + ConstInt/ConstFloat/anything)
 				// - ConstInt/ConstFloat.
-				ShPtr<Expression> result(getResult(SubOpExpr::create(
+				Expression* result(getResult(SubOpExpr::create(
 					expr->getSecondOperand(), constSecOp)));
 				if (result) {
 					// Result is Anything - constant.
-					ShPtr<SubOpExpr> sub(SubOpExpr::create(exprSecOp, result));
+					SubOpExpr* sub(SubOpExpr::create(exprSecOp, result));
 					optimizeExpr(expr, sub);
 					return;
 				}
@@ -315,11 +314,11 @@ void ThreeOperandsSubOptimizer::visit(ShPtr<SubOpExpr> expr) {
 				// Optimization like
 				// (ConstInt/ConstFloat - anything)
 				// - ConstInt/ConstFloat.
-				ShPtr<Expression> result(getResult(SubOpExpr::create(constSecOp,
+				Expression* result(getResult(SubOpExpr::create(constSecOp,
 					expr->getSecondOperand())));
 				if (result) {
 					// Result is Constant - anything.
-					ShPtr<SubOpExpr> sub(SubOpExpr::create(result, exprSecOp));
+					SubOpExpr* sub(SubOpExpr::create(result, exprSecOp));
 					optimizeExpr(expr, sub);
 					return;
 				}
@@ -327,11 +326,11 @@ void ThreeOperandsSubOptimizer::visit(ShPtr<SubOpExpr> expr) {
 				// Optimization like
 				// (anything - ConstInt/ConstFloat)
 				// - ConstInt/ConstFloat.
-				ShPtr<Expression> result(getResult(AddOpExpr::create(constSecOp,
+				Expression* result(getResult(AddOpExpr::create(constSecOp,
 					expr->getSecondOperand())));
 				if (result) {
 					// Result is anything - Constant.
-					ShPtr<SubOpExpr> sub(SubOpExpr::create(exprSecOp, result));
+					SubOpExpr* sub(SubOpExpr::create(exprSecOp, result));
 					optimizeExpr(expr, sub);
 					return;
 				}
@@ -351,8 +350,8 @@ void ThreeOperandsSubOptimizer::visit(ShPtr<SubOpExpr> expr) {
 * @return If @a exprToAnalyze is the null pointer or @c Constant was not fined
 *         return @c false, otherwise return @c true.
 */
-bool ThreeOperandsSubOptimizer::analyzeOpOperOp(ShPtr<Expression> &constant,
-		ShPtr<Expression> &expr, ShPtr<BinaryOpExpr> exprToAnalyze) const {
+bool ThreeOperandsSubOptimizer::analyzeOpOperOp(Expression* &constant,
+		Expression* &expr, BinaryOpExpr* exprToAnalyze) const {
 
 	// Is exprToAnalyze a BinaryOpExpr?
 	if (!exprToAnalyze) {
@@ -376,7 +375,7 @@ bool ThreeOperandsSubOptimizer::analyzeOpOperOp(ShPtr<Expression> &constant,
 	return true;
 }
 
-void ThreeOperandsSubOptimizer::visit(ShPtr<LtOpExpr> expr) {
+void ThreeOperandsSubOptimizer::visit(LtOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	std::optional<ExprPair> exprPair(tryOptimizeExpressionWithRelationalOperator(expr));
@@ -385,7 +384,7 @@ void ThreeOperandsSubOptimizer::visit(ShPtr<LtOpExpr> expr) {
 	}
 }
 
-void ThreeOperandsSubOptimizer::visit(ShPtr<LtEqOpExpr> expr) {
+void ThreeOperandsSubOptimizer::visit(LtEqOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	std::optional<ExprPair> exprPair(tryOptimizeExpressionWithRelationalOperator(expr));
@@ -394,7 +393,7 @@ void ThreeOperandsSubOptimizer::visit(ShPtr<LtEqOpExpr> expr) {
 	}
 }
 
-void ThreeOperandsSubOptimizer::visit(ShPtr<GtOpExpr> expr) {
+void ThreeOperandsSubOptimizer::visit(GtOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	std::optional<ExprPair> exprPair(tryOptimizeExpressionWithRelationalOperator(expr));
@@ -403,7 +402,7 @@ void ThreeOperandsSubOptimizer::visit(ShPtr<GtOpExpr> expr) {
 	}
 }
 
-void ThreeOperandsSubOptimizer::visit(ShPtr<GtEqOpExpr> expr) {
+void ThreeOperandsSubOptimizer::visit(GtEqOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	std::optional<ExprPair> exprPair(tryOptimizeExpressionWithRelationalOperator(expr));
@@ -412,7 +411,7 @@ void ThreeOperandsSubOptimizer::visit(ShPtr<GtEqOpExpr> expr) {
 	}
 }
 
-void ThreeOperandsSubOptimizer::visit(ShPtr<EqOpExpr> expr) {
+void ThreeOperandsSubOptimizer::visit(EqOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	std::optional<ExprPair> exprPair(tryOptimizeExpressionWithRelationalOperator(expr));
@@ -421,7 +420,7 @@ void ThreeOperandsSubOptimizer::visit(ShPtr<EqOpExpr> expr) {
 	}
 }
 
-void ThreeOperandsSubOptimizer::visit(ShPtr<NeqOpExpr> expr) {
+void ThreeOperandsSubOptimizer::visit(NeqOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	std::optional<ExprPair> exprPair(tryOptimizeExpressionWithRelationalOperator(expr));
@@ -430,13 +429,13 @@ void ThreeOperandsSubOptimizer::visit(ShPtr<NeqOpExpr> expr) {
 	}
 }
 
-void ThreeOperandsSubOptimizer::visit(ShPtr<BitXorOpExpr> expr) {
+void ThreeOperandsSubOptimizer::visit(BitXorOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	tryOptimizeBitXorOpWithRelationalOperator(expr);
 }
 
-void ThreeOperandsSubOptimizer::visit(ShPtr<OrOpExpr> expr) {
+void ThreeOperandsSubOptimizer::visit(OrOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	tryOptimizeOrOpExprWithRelOperators(expr);
@@ -448,10 +447,10 @@ void ThreeOperandsSubOptimizer::visit(ShPtr<OrOpExpr> expr) {
 *
 * @param[in] expr Expression to optimize.
 */
-void ThreeOperandsSubOptimizer::tryOptimizeOrOpExprWithRelOperators(ShPtr<
-		OrOpExpr> expr) {
-	ShPtr<EqOpExpr> firstOpEqOp(cast<EqOpExpr>(expr->getFirstOperand()));
-	ShPtr<LtEqOpExpr> secOpLtEqOp(cast<LtEqOpExpr>(expr->getSecondOperand()));
+void ThreeOperandsSubOptimizer::tryOptimizeOrOpExprWithRelOperators(
+		OrOpExpr* expr) {
+	EqOpExpr* firstOpEqOp(cast<EqOpExpr>(expr->getFirstOperand()));
+	LtEqOpExpr* secOpLtEqOp(cast<LtEqOpExpr>(expr->getSecondOperand()));
 	if (!firstOpEqOp || !secOpLtEqOp) {
 		// Not (var == ConstInt) || (var <= ConstInt).
 		return;
@@ -468,9 +467,9 @@ void ThreeOperandsSubOptimizer::tryOptimizeOrOpExprWithRelOperators(ShPtr<
 		return;
 	}
 
-	ShPtr<ConstInt> firstOpConstInt(
+	ConstInt* firstOpConstInt(
 		cast<ConstInt>(firstOpEqOp->getSecondOperand()));
-	ShPtr<ConstInt> secOpConstInt(
+	ConstInt* secOpConstInt(
 		cast<ConstInt>(secOpLtEqOp->getSecondOperand()));
 
 	if (!firstOpConstInt || !secOpConstInt) {
@@ -479,9 +478,9 @@ void ThreeOperandsSubOptimizer::tryOptimizeOrOpExprWithRelOperators(ShPtr<
 	}
 
 	// Evaluate two ConstInt's and thank to result optimize or not.
-	ShPtr<LtEqOpExpr> ltEqOpExpr(
+	LtEqOpExpr* ltEqOpExpr(
 		LtEqOpExpr::create(firstOpConstInt, secOpConstInt));
-	ShPtr<ConstBool> constBool(
+	ConstBool* constBool(
 		cast<ConstBool>(arithmExprEvaluator->evaluate(ltEqOpExpr)));
 	if (constBool && constBool->getValue()) {
 		// If firstConstInt is lower than secConstInt, can be optimized.
@@ -495,21 +494,21 @@ void ThreeOperandsSubOptimizer::tryOptimizeOrOpExprWithRelOperators(ShPtr<
 *
 * @param[in] expr BitXorOpExpr to optimize.
 */
-void ThreeOperandsSubOptimizer::tryOptimizeBitXorOpWithRelationalOperator(ShPtr<
-		BitXorOpExpr> expr) {
-	ShPtr<Expression> firstOp(expr->getFirstOperand());
-	ShPtr<Expression> secOp(expr->getSecondOperand());
+void ThreeOperandsSubOptimizer::tryOptimizeBitXorOpWithRelationalOperator(
+		BitXorOpExpr* expr) {
+	Expression* firstOp(expr->getFirstOperand());
+	Expression* secOp(expr->getSecondOperand());
 
 	// Expression like (a < 2) ^ True can be optimized to !(a < 2).
-	ShPtr<NotOpExpr> notOpExpr;
+	NotOpExpr* notOpExpr = nullptr;
 	if (isRelationalOperator(firstOp)) {
-		ShPtr<ConstBool> constBoolSecOp(cast<ConstBool>(secOp));
+		ConstBool* constBoolSecOp(cast<ConstBool>(secOp));
 		if (constBoolSecOp && constBoolSecOp->getValue()) {
 			// ConstBool must be True.
 			notOpExpr = NotOpExpr::create(firstOp);
 		}
 	} else if (isRelationalOperator(secOp) && isa<ConstBool>(firstOp)) {
-		ShPtr<ConstBool> constBoolFirstOp(cast<ConstBool>(firstOp));
+		ConstBool* constBoolFirstOp(cast<ConstBool>(firstOp));
 		if (constBoolFirstOp && constBoolFirstOp->getValue()) {
 			// ConstBool must be True.
 			notOpExpr = NotOpExpr::create(secOp);
@@ -533,18 +532,18 @@ void ThreeOperandsSubOptimizer::tryOptimizeBitXorOpWithRelationalOperator(ShPtr<
 *  - @a expr is BinaryOpExpr with relational operator.
 */
 std::optional<ThreeOperandsSubOptimizer::ExprPair> ThreeOperandsSubOptimizer::
-		tryOptimizeExpressionWithRelationalOperator(ShPtr<BinaryOpExpr> expr) {
+		tryOptimizeExpressionWithRelationalOperator(BinaryOpExpr* expr) {
 	if (isConstFloatOrConstInt(expr->getSecondOperand())) {
 		// Optimization like
 		// (ConstInt/ConstFloat/anything + - ConstInt/ConstFloat/anything)
 		// < ConstInt/ConstFloat.
-		ShPtr<AddOpExpr> addOpExpr(cast<AddOpExpr>(expr->getFirstOperand()));
-		ShPtr<SubOpExpr> subOpExpr(cast<SubOpExpr>(expr->getFirstOperand()));
-		ShPtr<BinaryOpExpr> binOpExpr(cast<BinaryOpExpr>(expr->getFirstOperand()));
+		AddOpExpr* addOpExpr(cast<AddOpExpr>(expr->getFirstOperand()));
+		SubOpExpr* subOpExpr(cast<SubOpExpr>(expr->getFirstOperand()));
+		BinaryOpExpr* binOpExpr(cast<BinaryOpExpr>(expr->getFirstOperand()));
 
 		// Find constant and not constant in AddOpExpr or SubOpExpr.
-		ShPtr<Expression> constSecOp;
-		ShPtr<Expression> exprSecOp;
+		Expression* constSecOp;
+		Expression* exprSecOp;
 		if (addOpExpr || subOpExpr) {
 			if (!analyzeOpOperOp(constSecOp, exprSecOp, binOpExpr)) {
 				// Something like (anything + - anything) < ConstInt/ConstFloat.
@@ -556,7 +555,7 @@ std::optional<ThreeOperandsSubOptimizer::ExprPair> ThreeOperandsSubOptimizer::
 			// Optimization like
 			// (ConstInt/ConstFloat + ConstInt/ConstFloat/anything)
 			// < ConstInt/ConstFloat.
-			ShPtr<Expression> result(getResult(SubOpExpr::create(
+			Expression* result(getResult(SubOpExpr::create(
 				expr->getSecondOperand(), constSecOp)));
 			if (result) {
 				// Result is anything relational operator Constant.
@@ -574,7 +573,7 @@ std::optional<ThreeOperandsSubOptimizer::ExprPair> ThreeOperandsSubOptimizer::
 				// Optimization like
 				// (anything - ConstInt/ConstFloat)
 				// < ConstInt/ConstFloat.
-				ShPtr<Expression> result(getResult(AddOpExpr::create(
+				Expression* result(getResult(AddOpExpr::create(
 					expr->getSecondOperand(), constSecOp)));
 				if (result) {
 					// Result is anything relational operator Constant.
@@ -584,9 +583,9 @@ std::optional<ThreeOperandsSubOptimizer::ExprPair> ThreeOperandsSubOptimizer::
 				// Optimization like
 				// (ConstInt/ConstFloat - anything)
 				// < ConstInt/ConstFloat.
-				ShPtr<Expression> result(getResult(SubOpExpr::create(
+				Expression* result(getResult(SubOpExpr::create(
 					expr->getSecondOperand(), constSecOp)));
-				ShPtr<NegOpExpr> negOpExpr(NegOpExpr::create(exprSecOp));
+				NegOpExpr* negOpExpr(NegOpExpr::create(exprSecOp));
 				if (result) {
 					// Result is anything(negOpExpr) relational operator Constant.
 					return ExprPair(negOpExpr, result);
@@ -604,7 +603,7 @@ std::optional<ThreeOperandsSubOptimizer::ExprPair> ThreeOperandsSubOptimizer::
 *
 * @return The result. If counting was not successful return the null pointer.
 */
-ShPtr<Expression> ThreeOperandsSubOptimizer::getResult(ShPtr<Expression> expr) const {
+Expression* ThreeOperandsSubOptimizer::getResult(Expression* expr) const {
 	return arithmExprEvaluator->evaluate(expr);
 }
 

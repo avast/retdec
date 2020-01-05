@@ -29,7 +29,7 @@ namespace {
 *
 * This function assumes that @a func is a floating-point function.
 */
-std::string getTypeAwareNameFor(ShPtr<Function> func, const std::string &baseName) {
+std::string getTypeAwareNameFor(Function* func, const std::string &baseName) {
 	const auto &funcName = func->getInitialName();
 	if (endsWith(funcName, ".f32")) {
 		// e.g. float fabsf(float x);
@@ -53,7 +53,7 @@ std::string getTypeAwareNameFor(ShPtr<Function> func, const std::string &baseNam
 *
 * See convert() for the description of all parameters and preconditions.
 */
-LLVMIntrinsicConverter::LLVMIntrinsicConverter(ShPtr<Module> module):
+LLVMIntrinsicConverter::LLVMIntrinsicConverter(Module* module):
 	OrderedAllVisitor(), module(module), renamedFuncNames() {}
 
 /**
@@ -65,10 +65,10 @@ LLVMIntrinsicConverter::LLVMIntrinsicConverter(ShPtr<Module> module):
 * @par Preconditions
 *  - @a module is non-null
 */
-void LLVMIntrinsicConverter::convert(ShPtr<Module> module) {
+void LLVMIntrinsicConverter::convert(Module* module) {
 	PRECONDITION_NON_NULL(module);
 
-	ShPtr<LLVMIntrinsicConverter> converter(new LLVMIntrinsicConverter(module));
+	LLVMIntrinsicConverter* converter(new LLVMIntrinsicConverter(module));
 	converter->performConversion();
 }
 
@@ -100,7 +100,7 @@ void LLVMIntrinsicConverter::performConversion() {
 * @brief Returns @c true if the given function is an LLVM intrinsic function,
 *        @c false otherwise.
 */
-bool LLVMIntrinsicConverter::isIntrinsicFunc(ShPtr<Function> func) const {
+bool LLVMIntrinsicConverter::isIntrinsicFunc(Function* func) const {
 	// See the class description for the format of LLVM intrinsic function
 	// names.
 	return startsWith(func->getInitialName(), "llvm.");
@@ -113,7 +113,7 @@ bool LLVMIntrinsicConverter::isIntrinsicFunc(ShPtr<Function> func) const {
 * @par Preconditions
 *  - @a func is an LLVM intrinsic function
 */
-void LLVMIntrinsicConverter::convertIntrinsicFuncName(ShPtr<Function> func) {
+void LLVMIntrinsicConverter::convertIntrinsicFuncName(Function* func) {
 	// Check whether we support such an intrinsic. If so, rename it.
 	const std::string &funcName(func->getInitialName());
 
@@ -181,7 +181,7 @@ void LLVMIntrinsicConverter::convertIntrinsicFuncName(ShPtr<Function> func) {
 * If there are some metadata for the changed function, it attaches them to the
 * renamed function. Also updates renamedFuncNames.
 */
-void LLVMIntrinsicConverter::renameIntrinsicFunc(ShPtr<Function> func,
+void LLVMIntrinsicConverter::renameIntrinsicFunc(Function* func,
 		const std::string &newName) {
 	func->setName(newName);
 	renamedFuncNames.insert(newName);
@@ -194,7 +194,7 @@ void LLVMIntrinsicConverter::renameIntrinsicFunc(ShPtr<Function> func,
 * e.g. for @c llvm.fabs.32, it renames the function to @c fabsf, because @c
 * fabsf is @c fabs for @c float (@c fabs is for @c double).
 */
-void LLVMIntrinsicConverter::renameFloatIntrinsicFunc(ShPtr<Function> func,
+void LLVMIntrinsicConverter::renameFloatIntrinsicFunc(Function* func,
 		const std::string &baseName) {
 	renameIntrinsicFunc(func, getTypeAwareNameFor(func, baseName));
 }
@@ -206,8 +206,8 @@ void LLVMIntrinsicConverter::renameFloatIntrinsicFunc(ShPtr<Function> func,
 * Arguments/parameters are only removed if the original number of
 * arguments/parameters is @a m.
 */
-void LLVMIntrinsicConverter::trimLastNArgsAndParams(ShPtr<CallExpr> expr,
-		ShPtr<Function> func, unsigned m, unsigned n) {
+void LLVMIntrinsicConverter::trimLastNArgsAndParams(CallExpr* expr,
+		Function* func, unsigned m, unsigned n) {
 	// Alter the called expression.
 	ExprVector args(expr->getArgs());
 	if (args.size() == m) {
@@ -227,11 +227,11 @@ void LLVMIntrinsicConverter::trimLastNArgsAndParams(ShPtr<CallExpr> expr,
 	}
 }
 
-void LLVMIntrinsicConverter::visit(ShPtr<CallExpr> expr) {
+void LLVMIntrinsicConverter::visit(CallExpr* expr) {
 	// Check whether we have to change the call. If so, then we change it.
 
 	// The called expression has to be a variable.
-	ShPtr<Variable> funcVar(cast<Variable>(expr->getCalledExpr()));
+	Variable* funcVar(cast<Variable>(expr->getCalledExpr()));
 	if (!funcVar) {
 		OrderedAllVisitor::visit(expr);
 		return;

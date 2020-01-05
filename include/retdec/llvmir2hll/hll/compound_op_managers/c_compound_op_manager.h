@@ -24,26 +24,26 @@ public:
 	virtual std::string getId() const override;
 
 private:
-	virtual void optimizeToCompoundOp(ShPtr<AddOpExpr> expr,
-		ShPtr<Expression> operand) override;
-	virtual void optimizeToCompoundOp(ShPtr<SubOpExpr> expr,
-		ShPtr<Expression> operand) override;
-	virtual void optimizeToCompoundOp(ShPtr<MulOpExpr> expr,
-		ShPtr<Expression> operand) override;
-	virtual void optimizeToCompoundOp(ShPtr<ModOpExpr> expr,
-		ShPtr<Expression> operand) override;
-	virtual void optimizeToCompoundOp(ShPtr<DivOpExpr> expr,
-		ShPtr<Expression> operand) override;
-	virtual void optimizeToCompoundOp(ShPtr<BitAndOpExpr> expr,
-		ShPtr<Expression> operand) override;
-	virtual void optimizeToCompoundOp(ShPtr<BitOrOpExpr> expr,
-		ShPtr<Expression> operand) override;
-	virtual void optimizeToCompoundOp(ShPtr<BitXorOpExpr> expr,
-		ShPtr<Expression> operand) override;
-	virtual void optimizeToCompoundOp(ShPtr<BitShlOpExpr> expr,
-		ShPtr<Expression> operand) override;
-	virtual void optimizeToCompoundOp(ShPtr<BitShrOpExpr> expr,
-		ShPtr<Expression> operand) override;
+	virtual void optimizeToCompoundOp(AddOpExpr* expr,
+		Expression* operand) override;
+	virtual void optimizeToCompoundOp(SubOpExpr* expr,
+		Expression* operand) override;
+	virtual void optimizeToCompoundOp(MulOpExpr* expr,
+		Expression* operand) override;
+	virtual void optimizeToCompoundOp(ModOpExpr* expr,
+		Expression* operand) override;
+	virtual void optimizeToCompoundOp(DivOpExpr* expr,
+		Expression* operand) override;
+	virtual void optimizeToCompoundOp(BitAndOpExpr* expr,
+		Expression* operand) override;
+	virtual void optimizeToCompoundOp(BitOrOpExpr* expr,
+		Expression* operand) override;
+	virtual void optimizeToCompoundOp(BitXorOpExpr* expr,
+		Expression* operand) override;
+	virtual void optimizeToCompoundOp(BitShlOpExpr* expr,
+		Expression* operand) override;
+	virtual void optimizeToCompoundOp(BitShrOpExpr* expr,
+		Expression* operand) override;
 };
 
 } // namespace llvmir2hll

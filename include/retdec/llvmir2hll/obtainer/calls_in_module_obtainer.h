@@ -30,44 +30,44 @@ public:
 	/// Information about a single call.
 	struct CallInfo {
 		/// The call itself.
-		ShPtr<CallExpr> call;
+		CallExpr* call = nullptr;
 
 		/// The statement in which the call appears.
-		ShPtr<Statement> stmt;
+		Statement* stmt = nullptr;
 
 		/// The function in which the call appears.
-		ShPtr<Function> func;
+		Function* func = nullptr;
 
 		/// The module in which the function appears.
-		ShPtr<Module> module;
+		Module* module = nullptr;
 	};
 
 	/// A list of calls.
 	using Calls = std::vector<CallInfo>;
 
 public:
-	static Calls getCalls(ShPtr<Module> module);
+	static Calls getCalls(Module* module);
 
 private:
-	CallsInModuleObtainer(ShPtr<Module> module);
+	CallsInModuleObtainer(Module* module);
 
 	Calls getCallsImpl();
 	void obtainCallsInGlobalVars();
 	void obtainCallsInFuncs();
-	void obtainCallsInFunc(ShPtr<Function> func);
+	void obtainCallsInFunc(Function* func);
 
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<CallExpr> expr) override;
+	virtual void visit(CallExpr* expr) override;
 	/// @}
 
 private:
 	/// Module in which the calls are searched.
-	ShPtr<Module> module;
+	Module* module = nullptr;
 
 	/// The currently traversed function.
-	ShPtr<Function> currFunc;
+	Function* currFunc = nullptr;
 
 	/// Found function calls.
 	Calls foundCalls;

@@ -28,8 +28,8 @@ class ArithmExprEvaluator;
 */
 class SimplifyArithmExprOptimizer final: public Optimizer {
 public:
-	SimplifyArithmExprOptimizer(ShPtr<Module> module,
-		ShPtr<ArithmExprEvaluator> arithmExprEvaluator);
+	SimplifyArithmExprOptimizer(Module* module,
+		ArithmExprEvaluator* arithmExprEvaluator);
 
 	virtual std::string getId() const override { return "SimplifyArithmExpr"; }
 
@@ -39,31 +39,31 @@ private:
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-		virtual void visit(ShPtr<AddOpExpr> expr) override;
-		virtual void visit(ShPtr<SubOpExpr> expr) override;
-		virtual void visit(ShPtr<MulOpExpr> expr) override;
-		virtual void visit(ShPtr<DivOpExpr> expr) override;
-		virtual void visit(ShPtr<ModOpExpr> expr) override;
-		virtual void visit(ShPtr<BitAndOpExpr> expr) override;
-		virtual void visit(ShPtr<BitOrOpExpr> expr) override;
-		virtual void visit(ShPtr<BitXorOpExpr> expr) override;
-		virtual void visit(ShPtr<LtOpExpr> expr) override;
-		virtual void visit(ShPtr<LtEqOpExpr> expr) override;
-		virtual void visit(ShPtr<GtOpExpr> expr) override;
-		virtual void visit(ShPtr<GtEqOpExpr> expr) override;
-		virtual void visit(ShPtr<EqOpExpr> expr) override;
-		virtual void visit(ShPtr<NeqOpExpr> expr) override;
-		virtual void visit(ShPtr<NotOpExpr> expr) override;
-		virtual void visit(ShPtr<OrOpExpr> expr) override;
-		virtual void visit(ShPtr<TernaryOpExpr> expr) override;
+		virtual void visit(AddOpExpr* expr) override;
+		virtual void visit(SubOpExpr* expr) override;
+		virtual void visit(MulOpExpr* expr) override;
+		virtual void visit(DivOpExpr* expr) override;
+		virtual void visit(ModOpExpr* expr) override;
+		virtual void visit(BitAndOpExpr* expr) override;
+		virtual void visit(BitOrOpExpr* expr) override;
+		virtual void visit(BitXorOpExpr* expr) override;
+		virtual void visit(LtOpExpr* expr) override;
+		virtual void visit(LtEqOpExpr* expr) override;
+		virtual void visit(GtOpExpr* expr) override;
+		virtual void visit(GtEqOpExpr* expr) override;
+		virtual void visit(EqOpExpr* expr) override;
+		virtual void visit(NeqOpExpr* expr) override;
+		virtual void visit(NotOpExpr* expr) override;
+		virtual void visit(OrOpExpr* expr) override;
+		virtual void visit(TernaryOpExpr* expr) override;
 		/// @}
 
-	void createSubOptimizers(ShPtr<ArithmExprEvaluator> arithmExprEvaluator);
-	void tryOptimizeInSubOptimizations(ShPtr<Expression> expr);
+	void createSubOptimizers(ArithmExprEvaluator* arithmExprEvaluator);
+	void tryOptimizeInSubOptimizations(Expression* expr);
 
 private:
 	/// Vector of sub-optimizations.
-	using SubOptimVec = std::vector<ShPtr<SubOptimizer>>;
+	using SubOptimVec = std::vector<SubOptimizer*>;
 
 private:
 	/// Vector of sub-optimizations.

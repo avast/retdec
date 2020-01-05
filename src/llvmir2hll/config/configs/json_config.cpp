@@ -112,9 +112,9 @@ JSONConfig::~JSONConfig() = default;
 * @throw JSONConfigFileNotFoundError when the file does not exist.
 * @throw JSONConfigParsingError when there is a parsing error.
 */
-UPtr<JSONConfig> JSONConfig::fromFile(const std::string &path) {
+JSONConfig* JSONConfig::fromFile(const std::string &path) {
 	// We cannot use std::make_unique() because JSONConfig() is private.
-	auto config = UPtr<JSONConfig>(new JSONConfig());
+	auto config = new JSONConfig();
 	config->impl->path = path;
 	try {
 		config->impl->config.readJsonFile(path);
@@ -131,9 +131,9 @@ UPtr<JSONConfig> JSONConfig::fromFile(const std::string &path) {
 *
 * @throw JSONConfigParsingError when there is a parsing error.
 */
-UPtr<JSONConfig> JSONConfig::fromString(const std::string &str) {
+JSONConfig* JSONConfig::fromString(const std::string &str) {
 	// We cannot use std::make_unique() because JSONConfig() is private.
-	auto config = UPtr<JSONConfig>(new JSONConfig());
+	auto config = new JSONConfig();
 	try {
 		config->impl->config.readJsonString(str);
 	} catch (const retdec::config::Exception &ex) {
@@ -145,9 +145,9 @@ UPtr<JSONConfig> JSONConfig::fromString(const std::string &str) {
 /**
 * @brief Returns an empty config.
 */
-UPtr<JSONConfig> JSONConfig::empty() {
+JSONConfig* JSONConfig::empty() {
 	// We cannot use std::make_unique() because JSONConfig() is private.
-	return UPtr<JSONConfig>(new JSONConfig());
+	return new JSONConfig();
 }
 
 void JSONConfig::saveTo(const std::string &path) {

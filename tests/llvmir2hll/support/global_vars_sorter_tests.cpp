@@ -41,8 +41,8 @@ TEST_F(GlobalVarsSorterTests,
 SingleGlobalVarReturnsSingletonVector) {
 	GlobalVarDefVector globalVars;
 
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
-	ShPtr<Expression> varAInit;
+	Variable* varA(Variable::create("a", IntType::create(32)));
+	Expression* varAInit;
 	globalVars.push_back(GlobalVarDef::create(varA, varAInit));
 
 	GlobalVarDefVector refSortedGlobalVars(globalVars);
@@ -61,28 +61,28 @@ WhenThereAreNoInterdependenciesTheVariablesAreSortedByOriginalName) {
 
 	GlobalVarDefVector globalVars;
 
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	// Change the name so that we can test that the variables are sorted by
 	// their original name.
 	varA->setName("z");
-	ShPtr<Expression> varAInit;
-	ShPtr<GlobalVarDef> varADef(GlobalVarDef::create(varA, varAInit));
+	Expression* varAInit;
+	GlobalVarDef* varADef(GlobalVarDef::create(varA, varAInit));
 	globalVars.push_back(varADef);
 
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	// Change the name so that we can test that the variables are sorted by
 	// their original name.
 	varB->setName("y");
-	ShPtr<Expression> varBInit;
-	ShPtr<GlobalVarDef> varBDef(GlobalVarDef::create(varB, varBInit));
+	Expression* varBInit;
+	GlobalVarDef* varBDef(GlobalVarDef::create(varB, varBInit));
 	globalVars.push_back(varBDef);
 
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(32)));
+	Variable* varC(Variable::create("c", IntType::create(32)));
 	// Change the name so that we can test that the variables are sorted by
 	// their original name.
 	varC->setName("x");
-	ShPtr<Expression> varCInit;
-	ShPtr<GlobalVarDef> varCDef(GlobalVarDef::create(varC, varCInit));
+	Expression* varCInit;
+	GlobalVarDef* varCDef(GlobalVarDef::create(varC, varCInit));
 	globalVars.push_back(varCDef);
 
 	GlobalVarDefVector refSortedGlobalVars;
@@ -103,14 +103,14 @@ TwoGlobalVarsWithInterdependenciesTharAreAlreadyOrderedUntouched) {
 
 	GlobalVarDefVector globalVars;
 
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
-	ShPtr<Expression> varAInit;
-	ShPtr<GlobalVarDef> varADef(GlobalVarDef::create(varA, varAInit));
+	Variable* varA(Variable::create("a", IntType::create(32)));
+	Expression* varAInit;
+	GlobalVarDef* varADef(GlobalVarDef::create(varA, varAInit));
 	globalVars.push_back(varADef);
 
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
-	ShPtr<Expression> varBInit(varA);
-	ShPtr<GlobalVarDef> varBDef(GlobalVarDef::create(varB, varBInit));
+	Variable* varB(Variable::create("b", IntType::create(32)));
+	Expression* varBInit(varA);
+	GlobalVarDef* varBDef(GlobalVarDef::create(varB, varBInit));
 	globalVars.push_back(varBDef);
 
 	GlobalVarDefVector refSortedGlobalVars(globalVars);
@@ -128,14 +128,14 @@ TwoGlobalVarsWithInterdependenciesInReverseOrderGetsCorrectlyOrdered) {
 
 	GlobalVarDefVector globalVars;
 
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
-	ShPtr<Expression> varBInit(varA);
-	ShPtr<GlobalVarDef> varBDef(GlobalVarDef::create(varB, varBInit));
+	Variable* varA(Variable::create("a", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
+	Expression* varBInit(varA);
+	GlobalVarDef* varBDef(GlobalVarDef::create(varB, varBInit));
 	globalVars.push_back(varBDef);
 
-	ShPtr<Expression> varAInit;
-	ShPtr<GlobalVarDef> varADef(GlobalVarDef::create(varA, varAInit));
+	Expression* varAInit;
+	GlobalVarDef* varADef(GlobalVarDef::create(varA, varAInit));
 	globalVars.push_back(varADef);
 
 	GlobalVarDefVector refSortedGlobalVars;
@@ -156,19 +156,19 @@ ThreeGlobalVarsWithInterdependenciesGetsCorrectlyOrdered) {
 
 	GlobalVarDefVector globalVars;
 
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
-	ShPtr<Expression> varBInit(varA);
-	ShPtr<GlobalVarDef> varBDef(GlobalVarDef::create(varB, varBInit));
+	Variable* varA(Variable::create("a", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
+	Expression* varBInit(varA);
+	GlobalVarDef* varBDef(GlobalVarDef::create(varB, varBInit));
 	globalVars.push_back(varBDef);
 
-	ShPtr<Expression> varAInit;
-	ShPtr<GlobalVarDef> varADef(GlobalVarDef::create(varA, varAInit));
+	Expression* varAInit;
+	GlobalVarDef* varADef(GlobalVarDef::create(varA, varAInit));
 	globalVars.push_back(varADef);
 
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(32)));
-	ShPtr<Expression> varCInit(varB);
-	ShPtr<GlobalVarDef> varCDef(GlobalVarDef::create(varC, varCInit));
+	Variable* varC(Variable::create("c", IntType::create(32)));
+	Expression* varCInit(varB);
+	GlobalVarDef* varCDef(GlobalVarDef::create(varC, varCInit));
 	globalVars.push_back(varCDef);
 
 	GlobalVarDefVector refSortedGlobalVars;
@@ -189,15 +189,15 @@ SortingWorksCorrectlyEvenIfVariableIsNested) {
 
 	GlobalVarDefVector globalVars;
 
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
-	ShPtr<Variable> varB(Variable::create("b", PointerType::create(
+	Variable* varA(Variable::create("a", IntType::create(32)));
+	Variable* varB(Variable::create("b", PointerType::create(
 		IntType::create(32))));
-	ShPtr<Expression> varBInit(AddressOpExpr::create(varA));
-	ShPtr<GlobalVarDef> varBDef(GlobalVarDef::create(varB, varBInit));
+	Expression* varBInit(AddressOpExpr::create(varA));
+	GlobalVarDef* varBDef(GlobalVarDef::create(varB, varBInit));
 	globalVars.push_back(varBDef);
 
-	ShPtr<Expression> varAInit;
-	ShPtr<GlobalVarDef> varADef(GlobalVarDef::create(varA, varAInit));
+	Expression* varAInit;
+	GlobalVarDef* varADef(GlobalVarDef::create(varA, varAInit));
 	globalVars.push_back(varADef);
 
 	GlobalVarDefVector refSortedGlobalVars;

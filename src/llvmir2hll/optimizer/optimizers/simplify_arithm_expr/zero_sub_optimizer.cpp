@@ -32,7 +32,7 @@ REGISTER_AT_FACTORY("Zero", ZERO_SUB_OPTIMIZER_ID, SubOptimizerFactory,
 * @param[in] arithmExprEvaluator @a The used evaluator of arithmetical
 *            expressions.
 */
-ZeroSubOptimizer::ZeroSubOptimizer(ShPtr<ArithmExprEvaluator>
+ZeroSubOptimizer::ZeroSubOptimizer(ArithmExprEvaluator*
 		arithmExprEvaluator): SubOptimizer(arithmExprEvaluator) {}
 
 /**
@@ -41,16 +41,16 @@ ZeroSubOptimizer::ZeroSubOptimizer(ShPtr<ArithmExprEvaluator>
 * @param[in] arithmExprEvaluator @a The used evaluator of arithmetical
 *            expressions.
 */
-ShPtr<SubOptimizer> ZeroSubOptimizer::create(ShPtr<ArithmExprEvaluator>
+SubOptimizer* ZeroSubOptimizer::create(ArithmExprEvaluator*
 		arithmExprEvaluator) {
-	return ShPtr<SubOptimizer>(new ZeroSubOptimizer(arithmExprEvaluator));
+	return new ZeroSubOptimizer(arithmExprEvaluator);
 }
 
 std::string ZeroSubOptimizer::getId() const {
 	return ZERO_SUB_OPTIMIZER_ID;
 }
 
-void ZeroSubOptimizer::visit(ShPtr<AddOpExpr> expr) {
+void ZeroSubOptimizer::visit(AddOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	if (isOpZero(expr->getFirstOperand())) {
@@ -62,12 +62,12 @@ void ZeroSubOptimizer::visit(ShPtr<AddOpExpr> expr) {
 	}
 }
 
-void ZeroSubOptimizer::visit(ShPtr<SubOpExpr> expr) {
+void ZeroSubOptimizer::visit(SubOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
-	ShPtr<ConstInt> secOpConstInt(cast<ConstInt>(expr->getSecondOperand()));
-	ShPtr<ConstFloat> secOpConstFloat(cast<ConstFloat>(expr->getSecondOperand()));
-	ShPtr<NegOpExpr> secOpNegOpExpr(cast<NegOpExpr>(expr->getSecondOperand()));
+	ConstInt* secOpConstInt(cast<ConstInt>(expr->getSecondOperand()));
+	ConstFloat* secOpConstFloat(cast<ConstFloat>(expr->getSecondOperand()));
+	NegOpExpr* secOpNegOpExpr(cast<NegOpExpr>(expr->getSecondOperand()));
 
 	// Optimization like "0(ConstInt/ConstFloat) - anything -> optimized to
 	// "-anything"
@@ -85,7 +85,7 @@ void ZeroSubOptimizer::visit(ShPtr<SubOpExpr> expr) {
 			optimizeExpr(expr, secOpNegOpExpr->getOperand());
 		} else {
 			// Optimization like "0 - a" -> optimized to "-a"
-			ShPtr<NegOpExpr> newNegOpExpr(NegOpExpr::create(
+			NegOpExpr* newNegOpExpr(NegOpExpr::create(
 				expr->getSecondOperand()));
 			optimizeExpr(expr, newNegOpExpr);
 		}
@@ -99,7 +99,7 @@ void ZeroSubOptimizer::visit(ShPtr<SubOpExpr> expr) {
 	}
 }
 
-void ZeroSubOptimizer::visit(ShPtr<MulOpExpr> expr) {
+void ZeroSubOptimizer::visit(MulOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	if (isOpZero(expr->getFirstOperand())) {
@@ -111,7 +111,7 @@ void ZeroSubOptimizer::visit(ShPtr<MulOpExpr> expr) {
 	}
 }
 
-void ZeroSubOptimizer::visit(ShPtr<DivOpExpr> expr) {
+void ZeroSubOptimizer::visit(DivOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	if (isOpZero(expr->getFirstOperand())) {
@@ -120,7 +120,7 @@ void ZeroSubOptimizer::visit(ShPtr<DivOpExpr> expr) {
 	}
 }
 
-void ZeroSubOptimizer::visit(ShPtr<ModOpExpr> expr) {
+void ZeroSubOptimizer::visit(ModOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	if (isOpZero(expr->getFirstOperand())) {
@@ -129,7 +129,7 @@ void ZeroSubOptimizer::visit(ShPtr<ModOpExpr> expr) {
 	}
 }
 
-void ZeroSubOptimizer::visit(ShPtr<BitAndOpExpr> expr) {
+void ZeroSubOptimizer::visit(BitAndOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	if (isConstIntZero(expr->getFirstOperand())) {
@@ -141,7 +141,7 @@ void ZeroSubOptimizer::visit(ShPtr<BitAndOpExpr> expr) {
 	}
 }
 
-void ZeroSubOptimizer::visit(ShPtr<BitOrOpExpr> expr) {
+void ZeroSubOptimizer::visit(BitOrOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	if (isConstIntZero(expr->getFirstOperand())) {
@@ -154,7 +154,7 @@ void ZeroSubOptimizer::visit(ShPtr<BitOrOpExpr> expr) {
 
 }
 
-void ZeroSubOptimizer::visit(ShPtr<BitXorOpExpr> expr) {
+void ZeroSubOptimizer::visit(BitXorOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	if (isConstIntZero(expr->getFirstOperand())) {
@@ -172,8 +172,8 @@ void ZeroSubOptimizer::visit(ShPtr<BitXorOpExpr> expr) {
 * @param[in] expr Expression to check.
 * @return @c true if @a expr is a @c ConstInt zero, otherwise @c false.
 */
-bool ZeroSubOptimizer::isConstIntZero(ShPtr<Expression> expr) const {
-	ShPtr<ConstInt> opConstInt(cast<ConstInt>(expr));
+bool ZeroSubOptimizer::isConstIntZero(Expression* expr) const {
+	ConstInt* opConstInt(cast<ConstInt>(expr));
 	return opConstInt && opConstInt->isZero();
 }
 
@@ -183,8 +183,8 @@ bool ZeroSubOptimizer::isConstIntZero(ShPtr<Expression> expr) const {
 * @param[in] expr Expression to check.
 * @return @c true if @a expr is a @c ConstFloat zero, otherwise @c false.
 */
-bool ZeroSubOptimizer::isConstFloatZero(ShPtr<Expression> expr) const {
-	ShPtr<ConstFloat> opConstFloat(cast<ConstFloat>(expr));
+bool ZeroSubOptimizer::isConstFloatZero(Expression* expr) const {
+	ConstFloat* opConstFloat(cast<ConstFloat>(expr));
 	return opConstFloat && opConstFloat->isZero();
 }
 
@@ -195,7 +195,7 @@ bool ZeroSubOptimizer::isConstFloatZero(ShPtr<Expression> expr) const {
 * @return @c true if @a expr is a @c ConstInt or @c ConstFloat zero,
 *         otherwise @c false.
 */
-bool ZeroSubOptimizer::isOpZero(ShPtr<Expression> expr) const {
+bool ZeroSubOptimizer::isOpZero(Expression* expr) const {
 	return isConstIntZero(expr) || isConstFloatZero(expr);
 }
 

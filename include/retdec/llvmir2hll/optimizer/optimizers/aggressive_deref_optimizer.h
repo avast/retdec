@@ -31,20 +31,20 @@ namespace llvmir2hll {
 */
 class AggressiveDerefOptimizer final: public FuncOptimizer {
 public:
-	AggressiveDerefOptimizer(ShPtr<Module> module);
+	AggressiveDerefOptimizer(Module* module);
 
 	virtual std::string getId() const override { return "AggressiveDeref"; }
 
 private:
-	void tryToOptimizeStmt(ShPtr<Statement> stmt, ShPtr<Expression> lhs,
-		ShPtr<Expression> rhs);
+	void tryToOptimizeStmt(Statement* stmt, Expression* lhs,
+		Expression* rhs);
 
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<DerefOpExpr> expr) override;
-	virtual void visit(ShPtr<AssignStmt> stmt) override;
-	virtual void visit(ShPtr<VarDefStmt> stmt) override;
+	virtual void visit(DerefOpExpr* expr) override;
+	virtual void visit(AssignStmt* stmt) override;
+	virtual void visit(VarDefStmt* stmt) override;
 	/// @}
 
 private:

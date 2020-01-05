@@ -150,7 +150,7 @@ using Patterns = PatternFinder::Patterns;
 Calls getAPICalls(const Calls &calls) {
 	Calls apiCalls;
 	for (const auto &call : calls) {
-		ShPtr<Variable> funcVar(cast<Variable>(call.call->getCalledExpr()));
+		Variable* funcVar(cast<Variable>(call.call->getCalledExpr()));
 		if (funcVar && hasItem(API_CALL_FUNC_NAMES, funcVar->getName())) {
 			apiCalls.push_back(call);
 		}
@@ -177,7 +177,7 @@ Patterns makePatterns(const Calls &apiCalls) {
 * See PatternFinder::PatternFinder() for more information.
 */
 APICallPatternFinder::APICallPatternFinder(
-	ShPtr<ValueAnalysis> va, ShPtr<CallInfoObtainer> cio):
+	ValueAnalysis* va, CallInfoObtainer* cio):
 		PatternFinder(va, cio) {}
 
 /**
@@ -186,9 +186,9 @@ APICallPatternFinder::APICallPatternFinder(
 * See PatternFinder::PatternFinder() for more information on the parameters and
 * preconditions.
 */
-ShPtr<PatternFinder> APICallPatternFinder::create(
-		ShPtr<ValueAnalysis> va, ShPtr<CallInfoObtainer> cio) {
-	return ShPtr<PatternFinder>(new APICallPatternFinder(va, cio));
+PatternFinder* APICallPatternFinder::create(
+		ValueAnalysis* va, CallInfoObtainer* cio) {
+	return new APICallPatternFinder(va, cio);
 }
 
 const std::string APICallPatternFinder::getId() const {
@@ -201,7 +201,7 @@ const std::string APICallPatternFinder::getId() const {
 * The returned patterns are instances of StmtsPattern.
 */
 PatternFinder::Patterns APICallPatternFinder::findPatterns(
-		ShPtr<Module> module) {
+		Module* module) {
 	Calls allCalls(CallsInModuleObtainer::getCalls(module));
 	Calls apiCalls(getAPICalls(allCalls));
 	return makePatterns(apiCalls);

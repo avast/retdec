@@ -29,28 +29,28 @@ namespace llvmir2hll {
 /**
 * @brief Constructs a new piece of information about the given function call.
 */
-CallInfo::CallInfo(ShPtr<CallExpr> call):
+CallInfo::CallInfo(CallExpr* call):
 	call(call) {}
 
 /**
 * @brief Returns the function call for which the piece of information has been
 *        computed.
 */
-ShPtr<CallExpr> CallInfo::getCall() const {
+CallExpr* CallInfo::getCall() const {
 	return call;
 }
 
 /**
 * @brief Constructs a new piece of information about the given function.
 */
-FuncInfo::FuncInfo(ShPtr<Function> func):
+FuncInfo::FuncInfo(Function* func):
 	func(func) {}
 
 /**
 * @brief Returns the function for which the piece of information has been
 *        computed.
 */
-ShPtr<Function> FuncInfo::getFunc() const {
+Function* FuncInfo::getFunc() const {
 	return func;
 }
 
@@ -67,7 +67,7 @@ CallInfoObtainer::CallInfoObtainer():
 * If the obtainer hasn't been initialized, this function returns the null
 * pointer.
 */
-ShPtr<CG> CallInfoObtainer::getCG() const {
+CG* CallInfoObtainer::getCG() const {
 	return cg;
 }
 
@@ -77,9 +77,9 @@ ShPtr<CG> CallInfoObtainer::getCG() const {
 * If the obtainer hasn't been initialized or there is no CFG for @a func, it
 * returns the null pointer.
 */
-ShPtr<CFG> CallInfoObtainer::getCFGForFunc(ShPtr<Function> func) const {
+CFG* CallInfoObtainer::getCFGForFunc(Function* func) const {
 	auto i = funcCFGMap.find(func);
-	return i != funcCFGMap.end() ? i->second : ShPtr<CFG>();
+	return i != funcCFGMap.end() ? i->second : nullptr;
 }
 
 /**
@@ -99,7 +99,7 @@ ShPtr<CFG> CallInfoObtainer::getCFGForFunc(ShPtr<Function> func) const {
 *
 * This function leaves @a va in a valid state.
 */
-void CallInfoObtainer::init(ShPtr<CG> cg, ShPtr<ValueAnalysis> va) {
+void CallInfoObtainer::init(CG* cg, ValueAnalysis* va) {
 	PRECONDITION_NON_NULL(cg);
 	PRECONDITION(va->isInValidState(), "it is not in a valid state");
 
@@ -128,9 +128,9 @@ bool CallInfoObtainer::isInitialized() const {
 *
 * See the description of FuncInfoCompOrder for some more information.
 */
-ShPtr<CallInfoObtainer::FuncInfoCompOrder> CallInfoObtainer::getFuncInfoCompOrder(
-		ShPtr<CG> cg) {
-	ShPtr<FuncInfoCompOrder> fico(new FuncInfoCompOrder());
+CallInfoObtainer::FuncInfoCompOrder* CallInfoObtainer::getFuncInfoCompOrder(
+		CG* cg) {
+	FuncInfoCompOrder* fico(new FuncInfoCompOrder());
 
 	// Below, remainingFuncs contains functions which haven't been added into
 	// the computation order. In computedFuncs, we store functions which have
@@ -196,9 +196,9 @@ ShPtr<CallInfoObtainer::FuncInfoCompOrder> CallInfoObtainer::getFuncInfoCompOrde
 * @brief Returns @c true if @a func calls just functions from @a computedFuncs,
 *        @c false otherwise.
 */
-bool CallInfoObtainer::callsJustComputedFuncs(ShPtr<Function> func,
+bool CallInfoObtainer::callsJustComputedFuncs(Function* func,
 		const FuncSet &computedFuncs) const {
-	ShPtr<CG::CalledFuncs> calledFuncs(cg->getCalledFuncs(func));
+	CG::CalledFuncs* calledFuncs(cg->getCalledFuncs(func));
 	for (const auto &callee : calledFuncs->callees) {
 		if (!hasItem(computedFuncs, callee)) {
 			return false;
@@ -234,12 +234,12 @@ CallInfoObtainer::SCCWithRepresent CallInfoObtainer::findNextSCC(
 	// For every SCC...
 	for (const auto &scc : sccs) {
 		bool sccFound = true;
-		ShPtr<Function> funcFromRemainingFuncs;
+		Function* funcFromRemainingFuncs = nullptr;
 		// For every function in the SCC...
 		for (const auto &func : scc) {
 			// Check whether the function calls just the functions in the SCC
 			// or in computedFuncs.
-			ShPtr<CG::CalledFuncs> calledFuncs(cg->getCalledFuncs(func));
+			CG::CalledFuncs* calledFuncs(cg->getCalledFuncs(func));
 			FuncSet mayCall(setUnion(scc, computedFuncs));
 			if (!setDifference(calledFuncs->callees, mayCall).empty()) {
 				sccFound = false;
@@ -258,7 +258,7 @@ CallInfoObtainer::SCCWithRepresent CallInfoObtainer::findNextSCC(
 	// TODO Can this happen?
 	printWarningMessage("[SCCComputer] No viable SCC has been found.");
 	FuncSet scc;
-	ShPtr<Function> func(*(remainingFuncs.begin()));
+	Function* func(*(remainingFuncs.begin()));
 	scc.insert(func);
 	return SCCWithRepresent(scc, func);
 }
@@ -283,7 +283,7 @@ void CallInfoObtainer::FuncInfoCompOrder::debugPrint() const {
 
 	// order
 	llvm::errs() << "order: <";
-	dump(order, dumpFuncGetName<ShPtr<Function>>, ", ", ">\n");
+	dump(order, dumpFuncGetName<Function*>, ", ", ">\n");
 
 	// SCCs
 	bool setPrinted = false;
@@ -293,7 +293,7 @@ void CallInfoObtainer::FuncInfoCompOrder::debugPrint() const {
 			llvm::errs() << ", ";
 		}
 		llvm::errs() << "{";
-		dump(scc, dumpFuncGetName<ShPtr<Function>>, ", ", "}");
+		dump(scc, dumpFuncGetName<Function*>, ", ", "}");
 		setPrinted = true;
 	}
 	llvm::errs() << "}\n\n";
@@ -307,7 +307,7 @@ void CallInfoObtainer::FuncInfoCompOrder::debugPrint() const {
 * @par Preconditions
 *  - @a cg is non-null
 */
-CallInfoObtainer::SCCComputer::SCCComputer(ShPtr<CG> cg): cg(cg), index(0) {
+CallInfoObtainer::SCCComputer::SCCComputer(CG* cg): cg(cg), index(0) {
 	PRECONDITION_NON_NULL(cg);
 
 	for (auto i = cg->caller_begin(), e = cg->caller_end(); i != e; ++i) {
@@ -326,10 +326,10 @@ CallInfoObtainer::SCCComputer::SCCComputer(ShPtr<CG> cg): cg(cg), index(0) {
 * itself (see the description of FuncInfoCompOrder).
 */
 CallInfoObtainer::FuncVectorSet CallInfoObtainer::SCCComputer::computeSCCs(
-		ShPtr<CG> cg) {
+		CG* cg) {
 	PRECONDITION_NON_NULL(cg);
 
-	ShPtr<SCCComputer> sccComputer(new SCCComputer(cg));
+	SCCComputer* sccComputer(new SCCComputer(cg));
 	return sccComputer->findSCCs();
 }
 
@@ -369,7 +369,7 @@ CallInfoObtainer::FuncVectorSet CallInfoObtainer::SCCComputer::findSCCs() {
 * Corresponds to the strongconnect(v) function from
 * http://en.wikipedia.org/wiki/Tarjan%27s_strongly_connected_components_algorithm
 */
-void CallInfoObtainer::SCCComputer::visit(ShPtr<CG::CalledFuncs> calledFunc,
+void CallInfoObtainer::SCCComputer::visit(CG::CalledFuncs* calledFunc,
 		CalledFuncInfo &calledFuncInfo) {
 	// Set the depth index for calledFunc to the smallest unused index.
 	calledFuncInfo.index = calledFuncInfo.lowlink = index;
@@ -381,7 +381,7 @@ void CallInfoObtainer::SCCComputer::visit(ShPtr<CG::CalledFuncs> calledFunc,
 
 	// Consider the successors of calledFunc.
 	for (const auto &callee : calledFunc->callees) {
-		ShPtr<CG::CalledFuncs> succ(cg->getCalledFuncs(callee));
+		CG::CalledFuncs* succ(cg->getCalledFuncs(callee));
 		CalledFuncInfo &succInfo(calledFuncInfoMap[succ]);
 		if (succInfo.index < 0) { // '< 0' means 'undefined'
 			// The successor has not yet been visited; recurse on it.
@@ -399,7 +399,7 @@ void CallInfoObtainer::SCCComputer::visit(ShPtr<CG::CalledFuncs> calledFunc,
 	if (calledFuncInfo.lowlink == calledFuncInfo.index) {
 		// Generate a new SCC.
 		FuncSet scc;
-		ShPtr<CG::CalledFuncs> poppedCalledFunc;
+		CG::CalledFuncs* poppedCalledFunc;
 		do {
 			poppedCalledFunc = stack.top();
 			stack.pop();

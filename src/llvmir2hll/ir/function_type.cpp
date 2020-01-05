@@ -20,20 +20,20 @@ namespace llvmir2hll {
 *
 * See create() for more information.
 */
-FunctionType::FunctionType(ShPtr<Type> retType):
+FunctionType::FunctionType(Type* retType):
 	Type(), retType(retType), varArg(false) {}
 
-ShPtr<Value> FunctionType::clone() {
-	ShPtr<FunctionType> cloned(FunctionType::create());
+Value* FunctionType::clone() {
+	FunctionType* cloned(FunctionType::create());
 	cloned->retType = retType;
 	cloned->varArg = varArg;
 	cloned->params = params;
 	return cloned;
 }
 
-bool FunctionType::isEqualTo(ShPtr<Value> otherValue) const {
+bool FunctionType::isEqualTo(Value* otherValue) const {
 	// The types of compared instances have to match.
-	ShPtr<FunctionType> otherType = cast<FunctionType>(otherValue);
+	FunctionType* otherType = cast<FunctionType>(otherValue);
 	if (!otherType) {
 		return false;
 	}
@@ -67,14 +67,14 @@ bool FunctionType::isEqualTo(ShPtr<Value> otherValue) const {
 /**
 * @brief Sets a new return type.
 */
-void FunctionType::setRetType(ShPtr<Type> retType) {
+void FunctionType::setRetType(Type* retType) {
 	this->retType = retType;
 }
 
 /**
 * @brief Returns the return type.
 */
-ShPtr<Type> FunctionType::getRetType() const {
+Type* FunctionType::getRetType() const {
 	return retType;
 }
 
@@ -111,7 +111,7 @@ std::size_t FunctionType::getNumOfParams() const {
 /**
 * @brief Adds a new parameter.
 */
-void FunctionType::addParam(ShPtr<Type> paramType) {
+void FunctionType::addParam(Type* paramType) {
 	params.push_back(paramType);
 }
 
@@ -124,7 +124,7 @@ void FunctionType::addParam(ShPtr<Type> paramType) {
 *  - <tt>0 < n <= NUM_OF_PARAMS</tt>, where @c NUM_OF_PARAMS is the number of
 *    parameters that the function has
 */
-ShPtr<Type> FunctionType::getParam(std::size_t n) const {
+Type* FunctionType::getParam(std::size_t n) const {
 	PRECONDITION(n > 0, "n `" << n << "` is not > 0");
 	PRECONDITION(n <= getNumOfParams(), "n `" << n << "`" << " is greater "
 		"than the number of parameters (`" << getNumOfParams() << "`)");
@@ -165,12 +165,12 @@ bool FunctionType::isVarArg() const {
 /**
 * @brief Creates a new function type.
 */
-ShPtr<FunctionType> FunctionType::create(ShPtr<Type> retType) {
-	return ShPtr<FunctionType>(new FunctionType(retType));
+FunctionType* FunctionType::create(Type* retType) {
+	return new FunctionType(retType);
 }
 
 void FunctionType::accept(Visitor *v) {
-	v->visit(ucast<FunctionType>(shared_from_this()));
+	v->visit(ucast<FunctionType>(this));
 }
 
 } // namespace llvmir2hll

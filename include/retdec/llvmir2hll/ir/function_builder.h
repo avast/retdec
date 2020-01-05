@@ -32,7 +32,7 @@ class Variable;
 * The following code constructs a definition of a function named @c "myFunc"
 * with an empty body and the single given parameter:
 * @code
-* ShPtr<Function> myFunc(
+* Function* myFunc(
 *     FunctionBuilder("myFunc")
 *         .definitionWithEmptyBody()
 *         .withParam(param)
@@ -49,21 +49,21 @@ public:
 	/// @name Specifiers
 	/// @{
 	FunctionBuilder &definitionWithEmptyBody();
-	FunctionBuilder &definitionWithBody(ShPtr<Statement> body);
-	FunctionBuilder &withRetType(ShPtr<Type> retType);
-	FunctionBuilder &withParam(ShPtr<Variable> param);
-	FunctionBuilder &withLocalVar(ShPtr<Variable> var);
+	FunctionBuilder &definitionWithBody(Statement* body);
+	FunctionBuilder &withRetType(Type* retType);
+	FunctionBuilder &withParam(Variable* param);
+	FunctionBuilder &withLocalVar(Variable* var);
 	FunctionBuilder &withVarArg();
 	/// @}
 
-	ShPtr<Function> build();
+	Function* build();
 
 private:
-	ShPtr<Function> releaseFuncAndInvalidateBuilder();
+	Function* releaseFuncAndInvalidateBuilder();
 
 private:
 	/// A function that is being built.
-	ShPtr<Function> func;
+	Function* func = nullptr;
 };
 
 } // namespace llvmir2hll

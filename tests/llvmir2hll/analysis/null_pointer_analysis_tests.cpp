@@ -47,8 +47,8 @@ NonEmptyFunctionWithoutNullPointersDoesNotUseThem) {
 	//    int *a = 1;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", PointerType::create(IntType::create(32))));
-	ShPtr<VarDefStmt> varDefA(VarDefStmt::create(varA, ConstInt::create(32, 1)));
+	Variable* varA(Variable::create("a", PointerType::create(IntType::create(32))));
+	VarDefStmt* varDefA(VarDefStmt::create(varA, ConstInt::create(32, 1)));
 	testFunc->setBody(varDefA);
 
 	// Run the analysis and verify the result.
@@ -63,8 +63,8 @@ FunctionWithNullPointersUseThem) {
 	//    int *a = 0;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", PointerType::create(IntType::create(32))));
-	ShPtr<VarDefStmt> varDefA(VarDefStmt::create(varA, ConstNullPointer::create(
+	Variable* varA(Variable::create("a", PointerType::create(IntType::create(32))));
+	VarDefStmt* varDefA(VarDefStmt::create(varA, ConstNullPointer::create(
 		PointerType::create(IntType::create(32)))));
 	testFunc->setBody(varDefA);
 

@@ -29,7 +29,7 @@ namespace llvmir2hll {
 * @par Preconditions
 *  - @a module and @a va are non-null
 */
-DerefToArrayIndexOptimizer::DerefToArrayIndexOptimizer(ShPtr<Module> module):
+DerefToArrayIndexOptimizer::DerefToArrayIndexOptimizer(Module* module):
 		Optimizer(module) {
 	PRECONDITION_NON_NULL(module);
 }
@@ -48,11 +48,11 @@ void DerefToArrayIndexOptimizer::doOptimization() {
 	}
 }
 
-void DerefToArrayIndexOptimizer::visit(ShPtr<DerefOpExpr> expr) {
+void DerefToArrayIndexOptimizer::visit(DerefOpExpr* expr) {
 	// First, visit (and possibly optimize) nested expressions.
 	Optimizer::visit(expr);
 
-	ShPtr<AddOpExpr> addOpExpr(cast<AddOpExpr>(expr->getOperand()));
+	AddOpExpr* addOpExpr(cast<AddOpExpr>(expr->getOperand()));
 	if (!addOpExpr) {
 		return;
 	}
@@ -77,10 +77,10 @@ void DerefToArrayIndexOptimizer::visit(ShPtr<DerefOpExpr> expr) {
 *         index. Otherwise std::nullopt.
 */
 std::optional<DerefToArrayIndexOptimizer::BaseAndIndex> DerefToArrayIndexOptimizer::
-		getBaseAndIndexFromExprIfPossible(ShPtr<AddOpExpr> expr) {
+		getBaseAndIndexFromExprIfPossible(AddOpExpr* expr) {
 	BaseAndIndex baseAndIndex;
-	ShPtr<Expression> firstOp(expr->getFirstOperand());
-	ShPtr<Expression> secOp(expr->getSecondOperand());
+	Expression* firstOp(expr->getFirstOperand());
+	Expression* secOp(expr->getSecondOperand());
 
 	// One of the operand must be ConstInt.
 	if (isa<ConstInt>(firstOp)) {
@@ -113,9 +113,9 @@ std::optional<DerefToArrayIndexOptimizer::BaseAndIndex> DerefToArrayIndexOptimiz
 * @param[in] oldExpr DerefOpExpr that will be replaced.
 * @param[in] baseAndIndex Base and index to new ArrayIndexOpExpr.
 */
-void DerefToArrayIndexOptimizer::replaceDerefWithArrayIndex(ShPtr<DerefOpExpr>
+void DerefToArrayIndexOptimizer::replaceDerefWithArrayIndex(DerefOpExpr*
 		oldExpr, const BaseAndIndex &baseAndIndex) {
-	ShPtr<ArrayIndexOpExpr> arrayIndexOp(ArrayIndexOpExpr::create(
+	ArrayIndexOpExpr* arrayIndexOp(ArrayIndexOpExpr::create(
 		baseAndIndex.base, baseAndIndex.index));
 	Expression::replaceExpression(oldExpr, arrayIndexOp);
 }

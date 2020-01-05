@@ -33,7 +33,7 @@ class ValueAnalysis;
 class APICallSeqFinder: private retdec::utils::NonCopyable {
 public:
 	/// List of patterns.
-	using Patterns = std::vector<ShPtr<Pattern>>;
+	using Patterns = std::vector<Pattern*>;
 
 public:
 	virtual ~APICallSeqFinder() = default;
@@ -54,18 +54,18 @@ public:
 	*  - @a call, @a stmt, @a func, and @a module are non-null
 	*/
 	virtual Patterns findPatterns(const APICallInfoSeq &info,
-		ShPtr<CallExpr> call, ShPtr<Statement> stmt, ShPtr<Function> func,
-		ShPtr<Module> module) = 0;
+		CallExpr* call, Statement* stmt, Function* func,
+		Module* module) = 0;
 
 protected:
-	APICallSeqFinder(ShPtr<ValueAnalysis> va, ShPtr<CallInfoObtainer> cio);
+	APICallSeqFinder(ValueAnalysis* va, CallInfoObtainer* cio);
 
 protected:
 	/// Analysis of values.
-	ShPtr<ValueAnalysis> va;
+	ValueAnalysis* va = nullptr;
 
 	/// The used call info obtainer.
-	ShPtr<CallInfoObtainer> cio;
+	CallInfoObtainer* cio = nullptr;
 };
 
 } // namespace llvmir2hll

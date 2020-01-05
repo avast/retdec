@@ -25,9 +25,9 @@ namespace {
 * A part of an expression is @e irrelevant if its presence should have no
 * impact when two values are matched.
 */
-ShPtr<Expression> skipIrrelevantParts(ShPtr<Expression> expr) {
-	ShPtr<Expression> oldResult;
-	ShPtr<Expression> newResult(expr);
+Expression* skipIrrelevantParts(Expression* expr) {
+	Expression* oldResult = nullptr;
+	Expression* newResult(expr);
 	while (oldResult != newResult) {
 		oldResult = newResult;
 		newResult = skipCasts(newResult);
@@ -95,7 +95,7 @@ bool APICallSeqData::operator!=(const APICallSeqData &other) const {
 * @brief Returns @a true if @a call matches the currently set API call
 *        information, @c false otherwise.
 */
-bool APICallSeqData::matches(ShPtr<CallExpr> call) const {
+bool APICallSeqData::matches(CallExpr* call) const {
 	return funcNameMatches(call->getCalledExpr()) && argsMatch(call);
 }
 
@@ -108,7 +108,7 @@ bool APICallSeqData::matches(ShPtr<CallExpr> call) const {
 *
 * Note: This function should be called only after matches() returned @c true.
 */
-void APICallSeqData::apply(ShPtr<Statement> stmt, ShPtr<CallExpr> call) {
+void APICallSeqData::apply(Statement* stmt, CallExpr* call) {
 	addToPattern(stmt, call);
 	bindValues(stmt, call);
 	advanceToNextInfo();
@@ -129,7 +129,7 @@ bool APICallSeqData::patternIsComplete() const {
 * This functions returns a complete pattern only if patternIsComplete() returns
 * @c true. Otherwise, it returns a partially build pattern.
 */
-ShPtr<Pattern> APICallSeqData::getPattern() const {
+Pattern* APICallSeqData::getPattern() const {
 	return pattern;
 }
 
@@ -144,8 +144,8 @@ bool APICallSeqData::atEnd() const {
 /**
 * @brief Checks that the function called in @a calledExpr is the one we expect.
 */
-bool APICallSeqData::funcNameMatches(ShPtr<Expression> calledExpr) const {
-	ShPtr<Variable> calledVar(cast<Variable>(calledExpr));
+bool APICallSeqData::funcNameMatches(Expression* calledExpr) const {
+	Variable* calledVar(cast<Variable>(calledExpr));
 	return calledVar && calledVar->getName() == currInfo->getFuncName();
 }
 
@@ -153,7 +153,7 @@ bool APICallSeqData::funcNameMatches(ShPtr<Expression> calledExpr) const {
 * @brief Checks that all the bound parameters from the API call info match the
 *        values in @a call.
 */
-bool APICallSeqData::argsMatch(ShPtr<CallExpr> call) const {
+bool APICallSeqData::argsMatch(CallExpr* call) const {
 	for (auto i = currInfo->param_bind_begin(), e = currInfo->param_bind_end();
 			i != e; ++i) {
 		if (!call->hasArg(i->first)) {
@@ -187,14 +187,14 @@ bool APICallSeqData::argsMatch(ShPtr<CallExpr> call) const {
 * Structurally equal means that they may have different addresses, but they
 * hold the same data.
 */
-bool APICallSeqData::valuesMatch(ShPtr<Value> value1, ShPtr<Value> value2) const {
+bool APICallSeqData::valuesMatch(Value* value1, Value* value2) const {
 	return value1->isEqualTo(value2);
 }
 
 /**
 * @brief Adds a new piece of information into the currently built pattern.
 */
-void APICallSeqData::addToPattern(ShPtr<Statement> stmt, ShPtr<CallExpr> call) {
+void APICallSeqData::addToPattern(Statement* stmt, CallExpr* call) {
 	pattern->addStmt(stmt);
 }
 
@@ -212,7 +212,7 @@ void APICallSeqData::advanceToNextInfo() {
 /**
 * @brief Binds values from @a call that appear in @a stmt.
 */
-void APICallSeqData::bindValues(ShPtr<Statement> stmt, ShPtr<CallExpr> call) {
+void APICallSeqData::bindValues(Statement* stmt, CallExpr* call) {
 	if (currInfo->hasBoundReturnValue()) {
 		bindValueFromReturnValue(stmt, call);
 	}
@@ -222,20 +222,20 @@ void APICallSeqData::bindValues(ShPtr<Statement> stmt, ShPtr<CallExpr> call) {
 /**
 * @brief Binds the value returned from @a call (if any).
 */
-void APICallSeqData::bindValueFromReturnValue(ShPtr<Statement> stmt,
-		ShPtr<CallExpr> call) {
+void APICallSeqData::bindValueFromReturnValue(Statement* stmt,
+		CallExpr* call) {
 	const std::string &bindId(currInfo->getReturnValueBind());
 
 	if (!isVarDefOrAssignStmt(stmt)) {
 		// TODO Replace with the NullExpr concept?
-		addToMap(bindId, ShPtr<Expression>(), boundValues);
+		addToMap(bindId, nullptr, boundValues);
 		return;
 	}
 
-	ShPtr<Expression> rhs(getRhs(stmt));
+	Expression* rhs(getRhs(stmt));
 	if (skipIrrelevantParts(rhs) != call) {
 		// TODO Replace with the NullExpr concept?
-		addToMap(bindId, ShPtr<Expression>(), boundValues);
+		addToMap(bindId, nullptr, boundValues);
 		return;
 	}
 
@@ -245,7 +245,7 @@ void APICallSeqData::bindValueFromReturnValue(ShPtr<Statement> stmt,
 /**
 * @brief Binds the values from the arguments of @a call.
 */
-void APICallSeqData::bindValuesFromArgs(ShPtr<CallExpr> call) {
+void APICallSeqData::bindValuesFromArgs(CallExpr* call) {
 	for (auto i = currInfo->param_bind_begin(), e = currInfo->param_bind_end();
 			i != e; ++i) {
 		addToMap(i->second, skipIrrelevantParts(call->getArg(i->first)),

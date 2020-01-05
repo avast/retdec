@@ -22,17 +22,17 @@ namespace llvmir2hll {
 *
 * Usage example (see Analysis/UsedVarsVisitor):
 * @code
-* class UsedVarsVisitor: public Caching<ShPtr<Value>, ShPtr<UsedVars>,
-*         HashFuncShPtr<Value>> {
+* class UsedVarsVisitor: public Caching<Value*, UsedVars*,
+*         HashFuncValue*> {
 *     UsedVarsVisitor::UsedVarsVisitor(bool enableCaching):
 *         Caching(enableCaching) {}
 *
 *    // ...
 * };
 *
-* ShPtr<UsedVars> UsedVarsVisitor::getUsedVars(ShPtr<Value> value) {
+* UsedVars* UsedVarsVisitor::getUsedVars(Value* value) {
 *    // Caching.
-*    ShPtr<UsedVars> usedVars;
+*    UsedVars* usedVars = nullptr;
 *    if (getCachedResult(value, usedVars)) {
 *        return usedVars;
 *    }

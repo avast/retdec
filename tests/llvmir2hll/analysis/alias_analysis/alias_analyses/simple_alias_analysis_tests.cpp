@@ -37,7 +37,7 @@ protected:
 	}
 
 protected:
-	ShPtr<AliasAnalysis> analysis;
+	AliasAnalysis* analysis;
 };
 
 TEST_F(SimpleAliasAnalysisTests,
@@ -63,7 +63,7 @@ GlobalNonPointerVariableDoesNotPointToAnything) {
 	// void test() {
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	module->addGlobalVar(varA);
 
 	analysis->init(module);
@@ -71,7 +71,7 @@ GlobalNonPointerVariableDoesNotPointToAnything) {
 	// `a` does not point to anything.
 	VarSet refAMayPointTo;
 	EXPECT_EQ(refAMayPointTo, analysis->mayPointTo(varA));
-	EXPECT_EQ(ShPtr<Variable>(), analysis->pointsTo(varA));
+	EXPECT_EQ(Variable*(), analysis->pointsTo(varA));
 }
 
 TEST_F(SimpleAliasAnalysisTests,
@@ -82,9 +82,9 @@ LocalNonPointerVariableDoesNotPointToAnything) {
 	//     int a;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	testFunc->addLocalVar(varA);
-	ShPtr<VarDefStmt> varDefA(VarDefStmt::create(varA));
+	VarDefStmt* varDefA(VarDefStmt::create(varA));
 	testFunc->setBody(varDefA);
 
 	analysis->init(module);
@@ -92,7 +92,7 @@ LocalNonPointerVariableDoesNotPointToAnything) {
 	// `a` does not point to anything.
 	VarSet refAMayPointTo;
 	EXPECT_EQ(refAMayPointTo, analysis->mayPointTo(varA));
-	EXPECT_EQ(ShPtr<Variable>(), analysis->pointsTo(varA));
+	EXPECT_EQ(Variable*(), analysis->pointsTo(varA));
 }
 
 TEST_F(SimpleAliasAnalysisTests,
@@ -107,15 +107,15 @@ GlobalPointerVariableMayPointToAnythingWithAddressTaken) {
 	//     g = &a;
 	// }
 	//
-	ShPtr<Variable> varG(Variable::create("g", PointerType::create(IntType::create(16))));
+	Variable* varG(Variable::create("g", PointerType::create(IntType::create(16))));
 	module->addGlobalVar(varG);
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
 	testFunc->addLocalVar(varB);
-	ShPtr<AssignStmt> assignGA(AssignStmt::create(varG, AddressOpExpr::create(varA)));
-	ShPtr<VarDefStmt> varDefB(VarDefStmt::create(varB, ShPtr<Expression>(), assignGA));
-	ShPtr<VarDefStmt> varDefA(VarDefStmt::create(varA, ShPtr<Expression>(), varDefB));
+	AssignStmt* assignGA(AssignStmt::create(varG, AddressOpExpr::create(varA)));
+	VarDefStmt* varDefB(VarDefStmt::create(varB, Expression*(), assignGA));
+	VarDefStmt* varDefA(VarDefStmt::create(varA, Expression*(), varDefB));
 	testFunc->setBody(varDefA);
 
 	analysis->init(module);
@@ -124,7 +124,7 @@ GlobalPointerVariableMayPointToAnythingWithAddressTaken) {
 	VarSet refGMayPointTo;
 	refGMayPointTo.insert(varA);
 	EXPECT_EQ(refGMayPointTo, analysis->mayPointTo(varG));
-	EXPECT_EQ(ShPtr<Variable>(), analysis->pointsTo(varG));
+	EXPECT_EQ(Variable*(), analysis->pointsTo(varG));
 }
 
 TEST_F(SimpleAliasAnalysisTests,
@@ -142,17 +142,17 @@ LocalPointerVariableMayPointToAnythingInFuncWithAddressTaken) {
 	//     int *p2 = &g2;
 	// }
 	//
-	ShPtr<Variable> varG1(Variable::create("g1", IntType::create(16)));
+	Variable* varG1(Variable::create("g1", IntType::create(16)));
 	module->addGlobalVar(varG1);
-	ShPtr<Variable> varG2(Variable::create("g2", IntType::create(16)));
+	Variable* varG2(Variable::create("g2", IntType::create(16)));
 	module->addGlobalVar(varG2);
-	ShPtr<Variable> varP1(Variable::create("p1", PointerType::create(IntType::create(16))));
+	Variable* varP1(Variable::create("p1", PointerType::create(IntType::create(16))));
 	testFunc->addLocalVar(varP1);
-	ShPtr<VarDefStmt> varDefP1(VarDefStmt::create(varP1, AddressOpExpr::create(varG1)));
+	VarDefStmt* varDefP1(VarDefStmt::create(varP1, AddressOpExpr::create(varG1)));
 	testFunc->setBody(varDefP1);
 
-	ShPtr<Variable> varP2(Variable::create("p2", PointerType::create(IntType::create(16))));
-	ShPtr<Function> testFunc2(
+	Variable* varP2(Variable::create("p2", PointerType::create(IntType::create(16))));
+	Function* testFunc2(
 		FunctionBuilder("test2")
 			.definitionWithBody(VarDefStmt::create(varP2, AddressOpExpr::create(varG2)))
 			.withLocalVar(varP2)
@@ -166,7 +166,7 @@ LocalPointerVariableMayPointToAnythingInFuncWithAddressTaken) {
 	VarSet refP1MayPointTo;
 	refP1MayPointTo.insert(varG1);
 	EXPECT_EQ(refP1MayPointTo, analysis->mayPointTo(varP1));
-	EXPECT_EQ(ShPtr<Variable>(), analysis->pointsTo(varP1));
+	EXPECT_EQ(Variable*(), analysis->pointsTo(varP1));
 }
 
 TEST_F(SimpleAliasAnalysisTests,
@@ -179,9 +179,9 @@ GlobalPointerVariableMayBeInitializedToAnAddress) {
 	// void test() {
 	// }
 	//
-	ShPtr<Variable> varG1(Variable::create("g1", IntType::create(16)));
+	Variable* varG1(Variable::create("g1", IntType::create(16)));
 	module->addGlobalVar(varG1);
-	ShPtr<Variable> varG2(Variable::create("g2", PointerType::create(IntType::create(16))));
+	Variable* varG2(Variable::create("g2", PointerType::create(IntType::create(16))));
 	module->addGlobalVar(varG2, AddressOpExpr::create(varG1));
 
 	analysis->init(module);
@@ -190,7 +190,7 @@ GlobalPointerVariableMayBeInitializedToAnAddress) {
 	VarSet refG2MayPointTo;
 	refG2MayPointTo.insert(varG1);
 	EXPECT_EQ(refG2MayPointTo, analysis->mayPointTo(varG2));
-	EXPECT_EQ(ShPtr<Variable>(), analysis->pointsTo(varG2));
+	EXPECT_EQ(Variable*(), analysis->pointsTo(varG2));
 }
 
 TEST_F(SimpleAliasAnalysisTests,
@@ -204,12 +204,12 @@ VariableWithAddressTakenMayBePointed) {
 	//     return *p;
 	// }
 	//
-	ShPtr<Variable> varG(Variable::create("g", IntType::create(32)));
+	Variable* varG(Variable::create("g", IntType::create(32)));
 	module->addGlobalVar(varG);
-	ShPtr<Variable> varP(Variable::create("p", PointerType::create(
+	Variable* varP(Variable::create("p", PointerType::create(
 		IntType::create(32))));
-	ShPtr<ReturnStmt> returnP(ReturnStmt::create(DerefOpExpr::create(varP)));
-	ShPtr<VarDefStmt> varPDef(VarDefStmt::create(varP,
+	ReturnStmt* returnP(ReturnStmt::create(DerefOpExpr::create(varP)));
+	VarDefStmt* varPDef(VarDefStmt::create(varP,
 		AddressOpExpr::create(varG), returnP));
 	testFunc->setBody(varPDef);
 
@@ -227,9 +227,9 @@ VariableWhoseAddressIsNotTakenMayNotBePointed) {
 	//     int a;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<VarDefStmt> varADef(VarDefStmt::create(varA));
+	VarDefStmt* varADef(VarDefStmt::create(varA));
 	testFunc->setBody(varADef);
 
 	analysis->init(module);

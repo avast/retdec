@@ -19,7 +19,7 @@ namespace tests {
 */
 class LibcSemanticsTests: public Test {
 protected:
-	ShPtr<Semantics> semantics;
+	Semantics* semantics;
 
 protected:
 	virtual void SetUp() override {

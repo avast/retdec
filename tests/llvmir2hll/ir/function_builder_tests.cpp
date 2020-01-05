@@ -28,7 +28,7 @@ class FunctionBuilderTests: public Test {};
 TEST_F(FunctionBuilderTests,
 BuilderWithoutAdditionalSpecifiersBuildsDefaultFunctionDeclaration) {
 	const std::string FUNC_NAME("test");
-	ShPtr<Function> func(
+	Function* func(
 		FunctionBuilder(FUNC_NAME)
 			.build()
 	);
@@ -47,7 +47,7 @@ BuilderWithoutAdditionalSpecifiersBuildsDefaultFunctionDeclaration) {
 
 TEST_F(FunctionBuilderTests,
 BuilderWithoutFunctionNameBuildsFunctionWithEmptyName) {
-	ShPtr<Function> func(
+	Function* func(
 		FunctionBuilder()
 			.build()
 	);
@@ -60,7 +60,7 @@ BuilderWithoutFunctionNameBuildsFunctionWithEmptyName) {
 TEST_F(FunctionBuilderTests,
 BuilderWithNonEmptyFuncNameCreatesFunctionWithThatName) {
 	const std::string FUNC_NAME("test");
-	ShPtr<Function> func(
+	Function* func(
 		FunctionBuilder(FUNC_NAME)
 			.build()
 	);
@@ -70,7 +70,7 @@ BuilderWithNonEmptyFuncNameCreatesFunctionWithThatName) {
 
 TEST_F(FunctionBuilderTests,
 DefinitionWithEmptyBodySpecifierMakesFunctionDefinitionWithEmptyBody) {
-	ShPtr<Function> func(
+	Function* func(
 		FunctionBuilder()
 			.definitionWithEmptyBody()
 			.build()
@@ -96,8 +96,8 @@ DefinitionWithEmptyBodySpecifierChecksThatBuildHasNotBeenAlreadyCalled) {
 
 TEST_F(FunctionBuilderTests,
 DefinitionWithBodySpecifierMakesFunctionDefinitionWithGivenBody) {
-	ShPtr<ReturnStmt> FUNC_BODY(ReturnStmt::create());
-	ShPtr<Function> func(
+	ReturnStmt* FUNC_BODY(ReturnStmt::create());
+	Function* func(
 		FunctionBuilder()
 			.definitionWithBody(FUNC_BODY)
 			.build()
@@ -124,15 +124,15 @@ TEST_F(FunctionBuilderTests,
 DefinitionWithBodySpecifierWithNullBodyResultsIntoViolatedPrecondition) {
 	FunctionBuilder builder;
 
-	ASSERT_DEATH(builder.definitionWithBody(ShPtr<Statement>()),
+	ASSERT_DEATH(builder.definitionWithBody(Statement*()),
 		".*Precondition.*body.*");
 }
 #endif
 
 TEST_F(FunctionBuilderTests,
 WithRetTypeSpecifierMakesFunctionWithGivenReturnType) {
-	ShPtr<IntType> FUNC_RET_TYPE(IntType::create(32));
-	ShPtr<Function> func(
+	IntType* FUNC_RET_TYPE(IntType::create(32));
+	Function* func(
 		FunctionBuilder()
 			.withRetType(FUNC_RET_TYPE)
 			.build()
@@ -159,15 +159,15 @@ TEST_F(FunctionBuilderTests,
 WithRetTypeSpecifierWithNullRetTypeResultsIntoViolatedPrecondition) {
 	FunctionBuilder builder;
 
-	ASSERT_DEATH(builder.withRetType(ShPtr<Type>()),
+	ASSERT_DEATH(builder.withRetType(Type*()),
 		".*Precondition.*retType.*");
 }
 #endif
 
 TEST_F(FunctionBuilderTests,
 WithParamSpecifierMakesFunctionWithoutParametersToHaveGivenParameter) {
-	ShPtr<Variable> FUNC_PARAM(Variable::create("p", IntType::create(32)));
-	ShPtr<Function> func(
+	Variable* FUNC_PARAM(Variable::create("p", IntType::create(32)));
+	Function* func(
 		FunctionBuilder()
 			.withParam(FUNC_PARAM)
 			.build()
@@ -181,9 +181,9 @@ WithParamSpecifierMakesFunctionWithoutParametersToHaveGivenParameter) {
 
 TEST_F(FunctionBuilderTests,
 WithParamSpecifierCalledForSecondTimeAppendsSecondParameter) {
-	ShPtr<Variable> FUNC_PARAM1(Variable::create("p1", IntType::create(32)));
-	ShPtr<Variable> FUNC_PARAM2(Variable::create("p2", IntType::create(32)));
-	ShPtr<Function> func(
+	Variable* FUNC_PARAM1(Variable::create("p1", IntType::create(32)));
+	Variable* FUNC_PARAM2(Variable::create("p2", IntType::create(32)));
+	Function* func(
 		FunctionBuilder()
 			.withParam(FUNC_PARAM1)
 			.withParam(FUNC_PARAM2)
@@ -215,15 +215,15 @@ TEST_F(FunctionBuilderTests,
 WithParamSpecifierWithNullParamResultsIntoViolatedPrecondition) {
 	FunctionBuilder builder;
 
-	ASSERT_DEATH(builder.withParam(ShPtr<Variable>()),
+	ASSERT_DEATH(builder.withParam(Variable*()),
 		".*Precondition.*param.*");
 }
 #endif
 
 TEST_F(FunctionBuilderTests,
 WithLocalVarSpecifierMakesFunctionWithoutLocalVariablesHavingSingleLocalVariable) {
-	ShPtr<Variable> FUNC_LOCAL_VAR(Variable::create("v", IntType::create(32)));
-	ShPtr<Function> func(
+	Variable* FUNC_LOCAL_VAR(Variable::create("v", IntType::create(32)));
+	Function* func(
 		FunctionBuilder()
 			.withLocalVar(FUNC_LOCAL_VAR)
 			.build()
@@ -237,9 +237,9 @@ WithLocalVarSpecifierMakesFunctionWithoutLocalVariablesHavingSingleLocalVariable
 
 TEST_F(FunctionBuilderTests,
 WithLocalVarSpecifierWhenCalledMultipleTimesAddsLocalVars) {
-	ShPtr<Variable> FUNC_LOCAL_VAR1(Variable::create("v1", IntType::create(32)));
-	ShPtr<Variable> FUNC_LOCAL_VAR2(Variable::create("v2", IntType::create(32)));
-	ShPtr<Function> func(
+	Variable* FUNC_LOCAL_VAR1(Variable::create("v1", IntType::create(32)));
+	Variable* FUNC_LOCAL_VAR2(Variable::create("v2", IntType::create(32)));
+	Function* func(
 		FunctionBuilder()
 			.withLocalVar(FUNC_LOCAL_VAR1)
 			.withLocalVar(FUNC_LOCAL_VAR2)
@@ -269,14 +269,14 @@ TEST_F(FunctionBuilderTests,
 WithLocalVarSpecifierWithNullLocalVarResultsIntoViolatedPrecondition) {
 	FunctionBuilder builder;
 
-	ASSERT_DEATH(builder.withLocalVar(ShPtr<Variable>()),
+	ASSERT_DEATH(builder.withLocalVar(Variable*()),
 		".*Precondition.*var.*");
 }
 #endif
 
 TEST_F(FunctionBuilderTests,
 WithVarArgSpecifierMakesFunctionWithVariableNumberOfArguments) {
-	ShPtr<Function> func(
+	Function* func(
 		FunctionBuilder()
 			.withVarArg()
 			.build()
@@ -299,7 +299,7 @@ WithVarArgSpecifierChecksThatBuildHasNotBeenAlreadyCalled) {
 TEST_F(FunctionBuilderTests,
 FuncReturnedFromBuildIsUnique) {
 	FunctionBuilder builder;
-	ShPtr<Function> func(builder.build());
+	Function* func(builder.build());
 
 	EXPECT_EQ(1, func.use_count());
 }

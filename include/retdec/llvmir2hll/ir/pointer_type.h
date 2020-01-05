@@ -23,14 +23,14 @@ class Visitor;
 */
 class PointerType final: public Type {
 public:
-	static ShPtr<PointerType> create(ShPtr<Type> containedType);
+	static PointerType* create(Type* containedType);
 
-	virtual ShPtr<Value> clone() override;
+	virtual Value* clone() override;
 
-	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
+	virtual bool isEqualTo(Value* otherValue) const override;
 
-	void setContainedType(ShPtr<Type> newContainedType);
-	ShPtr<Type> getContainedType() const;
+	void setContainedType(Type* newContainedType);
+	Type* getContainedType() const;
 
 	/// @name Visitor Interface
 	/// @{
@@ -39,12 +39,12 @@ public:
 
 private:
 	/// Contained type.
-	ShPtr<Type> containedType;
+	Type* containedType = nullptr;
 
 private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
-	PointerType(ShPtr<Type> containedType);
+	PointerType(Type* containedType);
 };
 
 } // namespace llvmir2hll

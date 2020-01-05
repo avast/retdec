@@ -33,9 +33,9 @@ RunWithOnePatternFinderCallsFindPatternAndPrintOnThatFinder) {
 
 	// Mocks.
 	NiceMock<PatternMock> *pMock(new NiceMock<PatternMock>());
-	ShPtr<Pattern> p(pMock);
+	Pattern* p(pMock);
 	NiceMock<PatternFinderMock> *pfMock(new NiceMock<PatternFinderMock>(va, cio));
-	ShPtr<PatternFinder> pf(pfMock);
+	PatternFinder* pf(pfMock);
 
 	std::string outputStr;
 	llvm::raw_string_ostream os(outputStr);
@@ -50,7 +50,7 @@ RunWithOnePatternFinderCallsFindPatternAndPrintOnThatFinder) {
 		.WillOnce(Return(std::string(PF_MOCK_ID)));
 	EXPECT_CALL(*pMock, print(_, _));
 
-	ShPtr<CLIPatternFinderRunner> pfr(new CLIPatternFinderRunner(os));
+	CLIPatternFinderRunner* pfr(new CLIPatternFinderRunner(os));
 
 	// Test.
 	pfr->run(pf, module);
@@ -69,13 +69,13 @@ RunWithTwoPatternFindersCallsFindPatternAndPrintOnTheseFinders) {
 
 	// Mocks.
 	NiceMock<PatternMock> *p1Mock(new NiceMock<PatternMock>());
-	ShPtr<Pattern> p1(p1Mock);
+	Pattern* p1(p1Mock);
 	NiceMock<PatternMock> *p2Mock(new NiceMock<PatternMock>());
-	ShPtr<Pattern> p2(p2Mock);
+	Pattern* p2(p2Mock);
 	NiceMock<PatternFinderMock> *pf1Mock(new NiceMock<PatternFinderMock>(va, cio));
-	ShPtr<PatternFinder> pf1(pf1Mock);
+	PatternFinder* pf1(pf1Mock);
 	NiceMock<PatternFinderMock> *pf2Mock(new NiceMock<PatternFinderMock>(va, cio));
-	ShPtr<PatternFinder> pf2(pf2Mock);
+	PatternFinder* pf2(pf2Mock);
 	PatternFinderRunner::PatternFinders pfs;
 	pfs.push_back(pf1);
 	pfs.push_back(pf2);
@@ -98,7 +98,7 @@ RunWithTwoPatternFindersCallsFindPatternAndPrintOnTheseFinders) {
 		.WillOnce(Return(std::string(PF2_MOCK_ID)));
 	EXPECT_CALL(*p2Mock, print(_, _));
 
-	ShPtr<CLIPatternFinderRunner> pfr(new CLIPatternFinderRunner(os));
+	CLIPatternFinderRunner* pfr(new CLIPatternFinderRunner(os));
 
 	// Test.
 	pfr->run(pfs, module);

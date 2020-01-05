@@ -48,7 +48,7 @@ public:
 	/// A pointer to an observer.
 	// We have to use a weak pointer instead of a shared one because of
 	// possible circular references.
-	using ObserverPtr = WkPtr<ConcreteObserver>;
+	using ObserverPtr = ConcreteObserver*;
 
 public:
 	/**
@@ -77,11 +77,11 @@ public:
 	*
 	* This function is used in notifyObservers() to get the pointer of self.
 	* Since shared pointers are used, the situation is a bit more difficult;
-	* indeed, one cannot return just @c ShPtr<SubjectType>(this).
+	* indeed, one cannot return just @c SubjectType*(this).
 	*
 	* @see notifyObservers(), removeObserver()
 	*/
-	virtual ShPtr<SubjectType> getSelf() = 0;
+	virtual SubjectType* getSelf() = 0;
 
 	/**
 	* @brief Adds a new observer to the list of observers.
@@ -122,7 +122,7 @@ public:
 	*
 	* @see addObserver(), Observer::update(), getSelf()
 	*/
-	void notifyObservers(ShPtr<ArgType> arg = nullptr) {
+	void notifyObservers(ArgType* arg = nullptr) {
 		// We have to iterate over a copy of the container because it can be
 		// modified during the iteration (either by us or in an update() call).
 		for (const auto &observer : ObserverContainer(observers)) {
@@ -161,7 +161,7 @@ private:
 	*        does not exist).
 	*/
 	void notifyObserverOrRemoveItIfNotExists(ObserverPtr observer,
-			ShPtr<ArgType> arg) {
+			ArgType* arg) {
 		if (observerExists(observer)) {
 			notifyObserver(observer, arg);
 		} else {
@@ -173,14 +173,14 @@ private:
 	* @brief Checks if the given observer still exists.
 	*/
 	bool observerExists(ObserverPtr observer) {
-		return !observer.expired();
+		return observer != nullptr;
 	}
 
 	/**
 	* @brief Notifies the given observer, provided it still exists.
 	*/
-	void notifyObserver(ObserverPtr observer, ShPtr<ArgType> arg) {
-		if (ShPtr<ConcreteObserver> existingObserver = observer.lock()) {
+	void notifyObserver(ObserverPtr observer, ArgType* arg) {
+		if (ConcreteObserver* existingObserver = observer) {
 			existingObserver->update(getSelf(), arg);
 		}
 	}
@@ -191,7 +191,7 @@ private:
 	void removeObserverAndNonExistingObservers(ObserverPtr observer) {
 		observers.erase(std::remove_if(observers.begin(), observers.end(),
 			[&observer](const auto &other) {
-				return other.expired() || observer.lock() == other.lock();
+				return other == nullptr || observer == other;
 			}
 		));
 	}

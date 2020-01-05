@@ -32,7 +32,7 @@ REGISTER_AT_FACTORY("EqualOperands", EQUAL_OPERANDS_SUB_OPTIMIZER_ID,
 * @param[in] arithmExprEvaluator @a The used evaluator of arithmetical
 *            expressions.
 */
-EqualOperandsSubOptimizer::EqualOperandsSubOptimizer(ShPtr<ArithmExprEvaluator>
+EqualOperandsSubOptimizer::EqualOperandsSubOptimizer(ArithmExprEvaluator*
 		arithmExprEvaluator): SubOptimizer(arithmExprEvaluator) {}
 
 /**
@@ -41,22 +41,21 @@ EqualOperandsSubOptimizer::EqualOperandsSubOptimizer(ShPtr<ArithmExprEvaluator>
 * @param[in] arithmExprEvaluator @a The used evaluator of arithmetical
 *            expressions.
 */
-ShPtr<SubOptimizer> EqualOperandsSubOptimizer::create(ShPtr<ArithmExprEvaluator>
+SubOptimizer* EqualOperandsSubOptimizer::create(ArithmExprEvaluator*
 		arithmExprEvaluator) {
-	return ShPtr<SubOptimizer>(new EqualOperandsSubOptimizer(
-		arithmExprEvaluator));
+	return new EqualOperandsSubOptimizer(arithmExprEvaluator);
 }
 
 std::string EqualOperandsSubOptimizer::getId() const {
 	return EQUAL_OPERANDS_SUB_OPTIMIZER_ID;
 }
 
-void EqualOperandsSubOptimizer::visit(ShPtr<AddOpExpr> expr) {
+void EqualOperandsSubOptimizer::visit(AddOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	// Optimization like "a + a" -> optimized to "2 * a".
 	if ((expr->getFirstOperand())->isEqualTo(expr->getSecondOperand())) {
-		ShPtr<MulOpExpr> mulOpExpr(MulOpExpr::create(
+		MulOpExpr* mulOpExpr(MulOpExpr::create(
 			ConstInt::create(2, 64),
 			expr->getSecondOperand()
 		));
@@ -64,7 +63,7 @@ void EqualOperandsSubOptimizer::visit(ShPtr<AddOpExpr> expr) {
 	}
 }
 
-void EqualOperandsSubOptimizer::visit(ShPtr<SubOpExpr> expr) {
+void EqualOperandsSubOptimizer::visit(SubOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	// Optimization like "a - a" -> optimized to "0".
@@ -72,14 +71,14 @@ void EqualOperandsSubOptimizer::visit(ShPtr<SubOpExpr> expr) {
 		// Due to create correct zero(ConstInt or ConstFloat).
 		if (cast<FloatType>(expr->getFirstOperand()->getType())) {
 			optimizeExpr(expr, ConstFloat::create(llvm::APFloat(0.0)));
-		} else if (ShPtr<IntType> firstOpIntType = cast<IntType>(
+		} else if (IntType* firstOpIntType = cast<IntType>(
 				expr->getFirstOperand()->getType())) {
 			optimizeExpr(expr, ConstInt::create(0, 64, firstOpIntType->isSigned()));
 		}
 	}
 }
 
-void EqualOperandsSubOptimizer::visit(ShPtr<DivOpExpr> expr) {
+void EqualOperandsSubOptimizer::visit(DivOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	// Optimization like "a / a" -> optimized to "1".
@@ -87,14 +86,14 @@ void EqualOperandsSubOptimizer::visit(ShPtr<DivOpExpr> expr) {
 		// Due to create correct zero(ConstInt or ConstFloat).
 		if (cast<FloatType>(expr->getFirstOperand()->getType())) {
 			optimizeExpr(expr, ConstFloat::create(llvm::APFloat(1.0)));
-		} else if (ShPtr<IntType> firstOpIntType = cast<IntType>(
+		} else if (IntType* firstOpIntType = cast<IntType>(
 				expr->getFirstOperand()->getType())) {
 			optimizeExpr(expr, ConstInt::create(1, 64, firstOpIntType->isSigned()));
 		}
 	}
 }
 
-void EqualOperandsSubOptimizer::visit(ShPtr<EqOpExpr> expr) {
+void EqualOperandsSubOptimizer::visit(EqOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	// We don't want to optimize func() == func() or 2.74 == 2.74.
@@ -104,12 +103,12 @@ void EqualOperandsSubOptimizer::visit(ShPtr<EqOpExpr> expr) {
 
 	// Optimization like "anything == anything" -> optimized to "1(ConstBool)".
 	if ((expr->getFirstOperand())->isEqualTo(expr->getSecondOperand())) {
-		ShPtr<ConstBool> constBool(ConstBool::create(1));
+		ConstBool* constBool(ConstBool::create(1));
 		optimizeExpr(expr, constBool);
 	}
 }
 
-void EqualOperandsSubOptimizer::visit(ShPtr<NeqOpExpr> expr) {
+void EqualOperandsSubOptimizer::visit(NeqOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	// We don't want to optimize func() != func() or 2.74 != 2.74.
@@ -119,7 +118,7 @@ void EqualOperandsSubOptimizer::visit(ShPtr<NeqOpExpr> expr) {
 
 	// Optimization like "anything != anything" -> optimized to "0(ConstBool)".
 	if ((expr->getFirstOperand())->isEqualTo(expr->getSecondOperand())) {
-		ShPtr<ConstBool> constBool(ConstBool::create(0));
+		ConstBool* constBool(ConstBool::create(0));
 		optimizeExpr(expr, constBool);
 	}
 }
@@ -133,7 +132,7 @@ void EqualOperandsSubOptimizer::visit(ShPtr<NeqOpExpr> expr) {
 *         otherwise @c false.
 */
 bool EqualOperandsSubOptimizer::isaConstIntOrIntTypeVariable(
-		ShPtr<Expression> expr) {
+		Expression* expr) {
 	if (!isa<IntType>(expr->getType())) {
 		return false;
 	}

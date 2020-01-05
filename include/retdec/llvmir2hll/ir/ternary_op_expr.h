@@ -23,28 +23,28 @@ namespace llvmir2hll {
 */
 class TernaryOpExpr final: public Expression {
 public:
-	static ShPtr<TernaryOpExpr> create(ShPtr<Expression> cond,
-		ShPtr<Expression> trueValue, ShPtr<Expression> falseValue);
+	static TernaryOpExpr* create(Expression* cond,
+		Expression* trueValue, Expression* falseValue);
 
-	virtual ShPtr<Value> clone() override;
+	virtual Value* clone() override;
 
-	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
-	virtual ShPtr<Type> getType() const override;
-	virtual void replace(ShPtr<Expression> oldExpr,
-		ShPtr<Expression> newExpr) override;
+	virtual bool isEqualTo(Value* otherValue) const override;
+	virtual Type* getType() const override;
+	virtual void replace(Expression* oldExpr,
+		Expression* newExpr) override;
 
-	ShPtr<Expression> getCondition() const;
-	ShPtr<Expression> getTrueValue() const;
-	ShPtr<Expression> getFalseValue() const;
+	Expression* getCondition() const;
+	Expression* getTrueValue() const;
+	Expression* getFalseValue() const;
 
-	void setCondition(ShPtr<Expression> newCond);
-	void setTrueValue(ShPtr<Expression> newTrueValue);
-	void setFalseValue(ShPtr<Expression> newFalseValue);
+	void setCondition(Expression* newCond);
+	void setTrueValue(Expression* newTrueValue);
+	void setFalseValue(Expression* newFalseValue);
 
 	/// @name Observer Interface
 	/// @{
-	virtual void update(ShPtr<Value> subject,
-		ShPtr<Value> arg = nullptr) override;
+	virtual void update(Value* subject,
+		Value* arg = nullptr) override;
 	/// @}
 
 	/// @name Visitor Interface
@@ -55,17 +55,17 @@ public:
 private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
-	TernaryOpExpr(ShPtr<Expression> cond, ShPtr<Expression> trueValue,
-			ShPtr<Expression> falseValue);
+	TernaryOpExpr(Expression* cond, Expression* trueValue,
+			Expression* falseValue);
 private:
 	/// Condition.
-	ShPtr<Expression> cond;
+	Expression* cond = nullptr;
 
 	/// True value.
-	ShPtr<Expression> trueValue;
+	Expression* trueValue = nullptr;
 
 	/// False value.
-	ShPtr<Expression> falseValue;
+	Expression* falseValue = nullptr;
 };
 
 } // namespace llvmir2hll

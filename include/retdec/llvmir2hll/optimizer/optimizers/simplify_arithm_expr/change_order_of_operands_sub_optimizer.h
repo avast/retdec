@@ -39,9 +39,9 @@ namespace llvmir2hll {
 class ChangeOrderOfOperandsSubOptimizer final: public SubOptimizer {
 public:
 	ChangeOrderOfOperandsSubOptimizer(
-		ShPtr<ArithmExprEvaluator> arithmExprEvaluator);
+		ArithmExprEvaluator* arithmExprEvaluator);
 
-	static ShPtr<SubOptimizer> create(ShPtr<ArithmExprEvaluator>
+	static SubOptimizer* create(ArithmExprEvaluator*
 		arithmExprEvaluator);
 	virtual std::string getId() const override;
 
@@ -49,7 +49,7 @@ private:
 	/// @name Visitor Interface
 	/// @{
 	using SubOptimizer::visit;
-	virtual void visit(ShPtr<MulOpExpr> expr) override;
+	virtual void visit(MulOpExpr* expr) override;
 	/// @}
 };
 

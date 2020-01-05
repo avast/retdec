@@ -18,11 +18,11 @@ namespace llvmir2hll {
 *
 * See create() for more information.
 */
-ReturnStmt::ReturnStmt(ShPtr<Expression> retVal, Address a):
+ReturnStmt::ReturnStmt(Expression* retVal, Address a):
 	Statement(a), retVal(retVal) {}
 
-ShPtr<Value> ReturnStmt::clone() {
-	ShPtr<ReturnStmt> returnStmt(
+Value* ReturnStmt::clone() {
+	ReturnStmt* returnStmt(
 		ReturnStmt::create(nullptr, nullptr, getAddress()));
 	returnStmt->setMetadata(getMetadata());
 	if (retVal) {
@@ -31,9 +31,9 @@ ShPtr<Value> ReturnStmt::clone() {
 	return returnStmt;
 }
 
-bool ReturnStmt::isEqualTo(ShPtr<Value> otherValue) const {
+bool ReturnStmt::isEqualTo(Value* otherValue) const {
 	// Both types and return values have to be equal.
-	if (ShPtr<ReturnStmt> otherReturnStmt = cast<ReturnStmt>(otherValue)) {
+	if (ReturnStmt* otherReturnStmt = cast<ReturnStmt>(otherValue)) {
 		if (!retVal && !otherReturnStmt->retVal) {
 			// There are no return values.
 			return true;
@@ -44,7 +44,7 @@ bool ReturnStmt::isEqualTo(ShPtr<Value> otherValue) const {
 	return false;
 }
 
-void ReturnStmt::replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) {
+void ReturnStmt::replace(Expression* oldExpr, Expression* newExpr) {
 	if (oldExpr == retVal) {
 		setRetVal(newExpr);
 	} else if (retVal) {
@@ -52,7 +52,7 @@ void ReturnStmt::replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) {
 	}
 }
 
-ShPtr<Expression> ReturnStmt::asExpression() const {
+Expression* ReturnStmt::asExpression() const {
 	// Cannot be converted into an expression.
 	return {};
 }
@@ -60,7 +60,7 @@ ShPtr<Expression> ReturnStmt::asExpression() const {
 /**
 * @brief Returns the return value.
 */
-ShPtr<Expression> ReturnStmt::getRetVal() const {
+Expression* ReturnStmt::getRetVal() const {
 	return retVal;
 }
 
@@ -72,13 +72,13 @@ ShPtr<Expression> ReturnStmt::getRetVal() const {
 * If @a newRetVal is the null pointer, the return value of the statement is
 * discarded.
 */
-void ReturnStmt::setRetVal(ShPtr<Expression> newRetVal) {
+void ReturnStmt::setRetVal(Expression* newRetVal) {
 	if (retVal) {
-		retVal->removeObserver(shared_from_this());
+		retVal->removeObserver(this);
 	}
 	retVal = newRetVal;
 	if (retVal) {
-		retVal->addObserver(shared_from_this());
+		retVal->addObserver(this);
 	}
 }
 
@@ -97,12 +97,12 @@ bool ReturnStmt::hasRetVal() const {
 * @param[in] succ Follower of the statement in the program flow.
 * @param[in] a Address.
 */
-ShPtr<ReturnStmt> ReturnStmt::create(ShPtr<Expression> retVal,
-	ShPtr<Statement> succ, Address a) {
-	ShPtr<ReturnStmt> stmt(new ReturnStmt(retVal, a));
+ReturnStmt* ReturnStmt::create(Expression* retVal,
+	Statement* succ, Address a) {
+	ReturnStmt* stmt(new ReturnStmt(retVal, a));
 	stmt->setSuccessor(succ);
 
-	// Initialization (recall that shared_from_this() cannot be called in a
+	// Initialization (recall that this cannot be called in a
 	// constructor).
 	if (retVal) {
 		retVal->addObserver(stmt);
@@ -128,17 +128,17 @@ ShPtr<ReturnStmt> ReturnStmt::create(ShPtr<Expression> retVal,
 *
 * @see Subject::update()
 */
-void ReturnStmt::update(ShPtr<Value> subject, ShPtr<Value> arg) {
+void ReturnStmt::update(Value* subject, Value* arg) {
 	PRECONDITION_NON_NULL(subject);
 
-	ShPtr<Expression> newRetVal = cast<Expression>(arg);
+	Expression* newRetVal = cast<Expression>(arg);
 	if (subject == retVal && (!arg || newRetVal)) {
 		setRetVal(newRetVal);
 	}
 }
 
 void ReturnStmt::accept(Visitor *v) {
-	v->visit(ucast<ReturnStmt>(shared_from_this()));
+	v->visit(ucast<ReturnStmt>(this));
 }
 
 } // namespace llvmir2hll

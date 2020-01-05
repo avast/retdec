@@ -50,13 +50,13 @@ public:
 *      @endcode
 *  (2) @c semanticsName, which is of type
 *      @code
-*      ShPtr<Semantics>
+*      Semantics*
 *      @endcode
 *      and delegates to the mock from (1).
 */
 #define INSTANTIATE_SEMANTICS_MOCK(semanticsName) \
 	::testing::NiceMock<SemanticsMock> *semanticsName##Mock = \
 		new ::testing::NiceMock<SemanticsMock>(); \
-	ShPtr<Semantics> semanticsName(semanticsName##Mock);
+	Semantics* semanticsName(semanticsName##Mock);
 
 #endif

@@ -44,14 +44,14 @@ namespace llvmir2hll {
 */
 class CArrayArgOptimizer final: public FuncOptimizer {
 public:
-	CArrayArgOptimizer(ShPtr<Module> module);
+	CArrayArgOptimizer(Module* module);
 
 	virtual std::string getId() const override { return "CArrayArg"; }
 
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	void visit(ShPtr<CallExpr> expr) override;
+	void visit(CallExpr* expr) override;
 	/// @}
 };
 

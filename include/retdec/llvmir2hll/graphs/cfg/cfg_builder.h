@@ -30,20 +30,20 @@ class Function;
 */
 class CFGBuilder: private retdec::utils::NonCopyable {
 public:
-	ShPtr<CFG> getCFG(ShPtr<Function> func);
+	CFG* getCFG(Function* func);
 
 protected:
 	CFGBuilder() = default;
 
 protected:
 	/// A CFG that is currently being built.
-	ShPtr<CFG> cfg;
+	CFG* cfg = nullptr;
 
 	/// A function from which the CFG is being built.
-	ShPtr<Function> func;
+	Function* func = nullptr;
 
 private:
-	void initializeNewCFG(ShPtr<Function> func);
+	void initializeNewCFG(Function* func);
 
 	/**
 	* @brief Builds @c cfg.

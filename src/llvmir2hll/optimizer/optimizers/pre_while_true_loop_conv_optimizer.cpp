@@ -34,8 +34,8 @@ namespace llvmir2hll {
 * @par Preconditions
 *  - @a module and @a va are non-null
 */
-PreWhileTrueLoopConvOptimizer::PreWhileTrueLoopConvOptimizer(ShPtr<Module> module,
-		ShPtr<ValueAnalysis> va):
+PreWhileTrueLoopConvOptimizer::PreWhileTrueLoopConvOptimizer(Module* module,
+		ValueAnalysis* va):
 	FuncOptimizer(module), va(va), vuv() {
 		PRECONDITION_NON_NULL(module);
 		PRECONDITION_NON_NULL(va);
@@ -59,7 +59,7 @@ void PreWhileTrueLoopConvOptimizer::doOptimization() {
 	va->invalidateState();
 }
 
-void PreWhileTrueLoopConvOptimizer::visit(ShPtr<WhileLoopStmt> stmt) {
+void PreWhileTrueLoopConvOptimizer::visit(WhileLoopStmt* stmt) {
 	// First of all, visit nested and subsequent statements.
 	FuncOptimizer::visit(stmt);
 
@@ -85,7 +85,7 @@ void PreWhileTrueLoopConvOptimizer::visit(ShPtr<WhileLoopStmt> stmt) {
 *  - @a stmt is a `while True` loop
 */
 bool PreWhileTrueLoopConvOptimizer::tryOptimizationCase1(
-		ShPtr<WhileLoopStmt> stmt) {
+		WhileLoopStmt* stmt) {
 
 	// Check whether the loop is of the following form:
 	//
@@ -99,7 +99,7 @@ bool PreWhileTrueLoopConvOptimizer::tryOptimizationCase1(
 	// (Of course, the constants an conditions may be different.)
 
 	// Try to split the loop.
-	ShPtr<SplittedWhileTrueLoop> splittedLoop(splitWhileTrueLoop(stmt));
+	SplittedWhileTrueLoop* splittedLoop(splitWhileTrueLoop(stmt));
 	if (!splittedLoop) {
 		return false;
 	}
@@ -119,26 +119,26 @@ bool PreWhileTrueLoopConvOptimizer::tryOptimizationCase1(
 	// then skip the calls.
 	// TODO Use CallInfoObtainer to make sure the calls do not modify the
 	//      variables tmp and i.
-	ShPtr<Statement> stmtBeforeIf(splittedLoop->loopEnd->getUniquePredecessor());
+	Statement* stmtBeforeIf(splittedLoop->loopEnd->getUniquePredecessor());
 	while (stmtBeforeIf && isa<CallStmt>(stmtBeforeIf) &&
 			stmtBeforeIf->getNumberOfPredecessors() == 1) {
 		stmtBeforeIf = stmtBeforeIf->getUniquePredecessor();
 	}
-	ShPtr<AssignStmt> assignBeforeIf(cast<AssignStmt>(stmtBeforeIf));
+	AssignStmt* assignBeforeIf(cast<AssignStmt>(stmtBeforeIf));
 	if (!assignBeforeIf) {
 		return false;
 	}
 
 	// Check that the variable used in the break condition is assigned before
 	// the if statement.
-	ShPtr<Variable> tmpVar(cast<Variable>(assignBeforeIf->getLhs()));
+	Variable* tmpVar(cast<Variable>(assignBeforeIf->getLhs()));
 	if (!tmpVar) {
 		return false;
 	}
 
 	// There cannot be any function calls or dereferences in the assign
 	// statement before the if statement.
-	ShPtr<ValueData> assignBeforeIfData(va->getValueData(assignBeforeIf));
+	ValueData* assignBeforeIfData(va->getValueData(assignBeforeIf));
 	if (assignBeforeIfData->hasCalls() || assignBeforeIfData->hasDerefs()) {
 		return false;
 	}
@@ -155,7 +155,7 @@ bool PreWhileTrueLoopConvOptimizer::tryOptimizationCase1(
 
 	// Check that the variable used in the break condition is assigned to
 	// another variable after the if statement.
-	ShPtr<AssignStmt> assignAfterIf(cast<AssignStmt>(
+	AssignStmt* assignAfterIf(cast<AssignStmt>(
 		splittedLoop->loopEnd->getSuccessor()));
 	if (!assignAfterIf) {
 		return false;
@@ -166,8 +166,8 @@ bool PreWhileTrueLoopConvOptimizer::tryOptimizationCase1(
 
 	// The temporary variable has to be used only at the three places (apart
 	// from its definition).
-	ShPtr<VarDefStmt> tmpVarDef;
-	ShPtr<VarUses> tmpVarUses(vuv->getUses(tmpVar, currFunc));
+	VarDefStmt* tmpVarDef = nullptr;
+	VarUses* tmpVarUses(vuv->getUses(tmpVar, currFunc));
 	for (const auto &dirUse : tmpVarUses->dirUses) {
 		if (dirUse == assignBeforeIf || dirUse == splittedLoop->loopEnd ||
 				dirUse == assignAfterIf) {
@@ -215,7 +215,7 @@ bool PreWhileTrueLoopConvOptimizer::tryOptimizationCase1(
 *  - @a stmt is a `while True` loop
 */
 bool PreWhileTrueLoopConvOptimizer::tryOptimizationCase2(
-		ShPtr<WhileLoopStmt> stmt) {
+		WhileLoopStmt* stmt) {
 
 	// Check whether the loop is of the following form:
 	//
@@ -229,7 +229,7 @@ bool PreWhileTrueLoopConvOptimizer::tryOptimizationCase2(
 	// (Of course, the constants an conditions may be different.)
 
 	// Try to split the loop.
-	ShPtr<SplittedWhileTrueLoop> splittedLoop(splitWhileTrueLoop(stmt));
+	SplittedWhileTrueLoop* splittedLoop(splitWhileTrueLoop(stmt));
 	if (!splittedLoop) {
 		return false;
 	}
@@ -244,12 +244,12 @@ bool PreWhileTrueLoopConvOptimizer::tryOptimizationCase2(
 	//
 	//     i = expr
 	//
-	ShPtr<AssignStmt> assign1BeforeIf(cast<AssignStmt>(
+	AssignStmt* assign1BeforeIf(cast<AssignStmt>(
 		splittedLoop->loopEnd->getUniquePredecessor()));
 	if (!assign1BeforeIf) {
 		return false;
 	}
-	ShPtr<Variable> iVar(cast<Variable>(assign1BeforeIf->getLhs()));
+	Variable* iVar(cast<Variable>(assign1BeforeIf->getLhs()));
 	if (!iVar) {
 		return false;
 	}
@@ -264,28 +264,28 @@ bool PreWhileTrueLoopConvOptimizer::tryOptimizationCase2(
 	//
 	//     tmp = i
 	//
-	ShPtr<AssignStmt> assign2BeforeIf(cast<AssignStmt>(
+	AssignStmt* assign2BeforeIf(cast<AssignStmt>(
 		assign1BeforeIf->getUniquePredecessor()));
 	if (!assign2BeforeIf) {
 		return false;
 	}
-	ShPtr<Variable> tmpVar(cast<Variable>(assign2BeforeIf->getLhs()));
+	Variable* tmpVar(cast<Variable>(assign2BeforeIf->getLhs()));
 	if (!tmpVar || assign2BeforeIf->getRhs() != iVar) {
 		return false;
 	}
 
 	// There cannot be any function calls or dereferences in the statements
 	// before the if statement or in its condition.
-	ShPtr<ValueData> assign1BeforeIfData(va->getValueData(assign1BeforeIf));
+	ValueData* assign1BeforeIfData(va->getValueData(assign1BeforeIf));
 	if (assign1BeforeIfData->hasCalls() || assign1BeforeIfData->hasDerefs()) {
 		return false;
 	}
-	ShPtr<ValueData> assign2BeforeIfData(va->getValueData(assign2BeforeIf));
+	ValueData* assign2BeforeIfData(va->getValueData(assign2BeforeIf));
 	if (assign2BeforeIfData->hasCalls() || assign2BeforeIfData->hasDerefs()) {
 		return false;
 	}
-	ShPtr<Expression> ifCond(splittedLoop->loopEnd->getFirstIfCond());
-	ShPtr<ValueData> ifCondData(va->getValueData(assign2BeforeIf));
+	splittedLoop->loopEnd->getFirstIfCond();
+	ValueData* ifCondData(va->getValueData(assign2BeforeIf));
 	if (ifCondData->hasCalls() || ifCondData->hasDerefs()) {
 		return false;
 	}
@@ -310,7 +310,7 @@ bool PreWhileTrueLoopConvOptimizer::tryOptimizationCase2(
 
 	// The temporary variable has to be used only at the three places (apart
 	// from its definition).
-	ShPtr<VarDefStmt> tmpVarDef;
+	VarDefStmt* tmpVarDef = nullptr;
 	// We have to store a copy of tmpVar's dirUses because in the second loop,
 	// the original dirUses might be changed, thus invalidating the iterator.
 	StmtSet tmpVarDirUses(vuv->getUses(tmpVar, currFunc)->dirUses);
@@ -359,7 +359,7 @@ bool PreWhileTrueLoopConvOptimizer::tryOptimizationCase2(
 *  - @a stmt is a `while True` loop
 */
 bool PreWhileTrueLoopConvOptimizer::tryOptimizationCase3(
-		ShPtr<WhileLoopStmt> stmt) {
+		WhileLoopStmt* stmt) {
 
 	// Check whether the code is of the following form:
 	//
@@ -376,13 +376,13 @@ bool PreWhileTrueLoopConvOptimizer::tryOptimizationCase3(
 	if (stmt->getNumberOfPredecessors() != 1) {
 		return false;
 	}
-	ShPtr<IfStmt> ifBeforeLoop(cast<IfStmt>(stmt->getUniquePredecessor()));
+	IfStmt* ifBeforeLoop(cast<IfStmt>(stmt->getUniquePredecessor()));
 	if (!ifBeforeLoop) {
 		return false;
 	}
 
 	// The if body has to be a return statement.
-	ShPtr<ReturnStmt> returnStmt(cast<ReturnStmt>(skipEmptyStmts(
+	ReturnStmt* returnStmt(cast<ReturnStmt>(skipEmptyStmts(
 		ifBeforeLoop->getFirstIfBody())));
 	if (!returnStmt) {
 		return false;
@@ -393,7 +393,7 @@ bool PreWhileTrueLoopConvOptimizer::tryOptimizationCase3(
 	if (ifBeforeLoop->getNumberOfPredecessors() != 1) {
 		return false;
 	}
-	ShPtr<AssignStmt> assignBeforeIf(cast<AssignStmt>(
+	AssignStmt* assignBeforeIf(cast<AssignStmt>(
 		ifBeforeLoop->getUniquePredecessor()));
 	if (!assignBeforeIf) {
 		return false;
@@ -401,18 +401,18 @@ bool PreWhileTrueLoopConvOptimizer::tryOptimizationCase3(
 
 	// The assign statment has to be of the form `i = expr`, where expr does
 	// not contain i, function calls, or dereferences
-	ShPtr<Variable> iVar(cast<Variable>(assignBeforeIf->getLhs()));
+	Variable* iVar(cast<Variable>(assignBeforeIf->getLhs()));
 	if (!iVar) {
 		return false;
 	}
-	ShPtr<ValueData> assignBeforeIfData(va->getValueData(assignBeforeIf));
+	ValueData* assignBeforeIfData(va->getValueData(assignBeforeIf));
 	if (assignBeforeIfData->hasCalls() || assignBeforeIfData->hasDerefs() ||
 			assignBeforeIfData->getDirNumOfUses(iVar) != 1) {
 		return false;
 	}
 
 	// The variable i cannot be used in the return statement.
-	ShPtr<ValueData> returnStmtData(va->getValueData(returnStmt));
+	ValueData* returnStmtData(va->getValueData(returnStmt));
 	if (returnStmtData->isDirAccessed(iVar)) {
 		return false;
 	}
@@ -448,7 +448,7 @@ bool PreWhileTrueLoopConvOptimizer::tryOptimizationCase3(
 *  - @a stmt is a `while True` loop
 */
 bool PreWhileTrueLoopConvOptimizer::tryOptimizationCase4(
-		ShPtr<WhileLoopStmt> stmt) {
+		WhileLoopStmt* stmt) {
 
 	// Check whether the loop is of the following form:
 	//
@@ -461,7 +461,7 @@ bool PreWhileTrueLoopConvOptimizer::tryOptimizationCase4(
 	// (Of course, the condition may be different.)
 
 	// Try to split the loop.
-	ShPtr<SplittedWhileTrueLoop> splittedLoop(splitWhileTrueLoop(stmt));
+	SplittedWhileTrueLoop* splittedLoop(splitWhileTrueLoop(stmt));
 	if (!splittedLoop) {
 		return false;
 	}
@@ -473,22 +473,22 @@ bool PreWhileTrueLoopConvOptimizer::tryOptimizationCase4(
 	}
 
 	// There has to be `tmp = rand()` before the if statement.
-	ShPtr<AssignStmt> assignBeforeIf(cast<AssignStmt>(
+	AssignStmt* assignBeforeIf(cast<AssignStmt>(
 		splittedLoop->loopEnd->getUniquePredecessor()));
 	if (!assignBeforeIf) {
 		return false;
 	}
-	ShPtr<Variable> tmpVar(cast<Variable>(assignBeforeIf->getLhs()));
+	Variable* tmpVar(cast<Variable>(assignBeforeIf->getLhs()));
 	if (!tmpVar) {
 		return false;
 	}
-	ShPtr<CallExpr> callExpr(cast<CallExpr>(assignBeforeIf->getRhs()));
+	CallExpr* callExpr(cast<CallExpr>(assignBeforeIf->getRhs()));
 	if (!callExpr) {
 		return false;
 	}
 
 	// The temporary variable has to be used precisely once the if condition.
-	ShPtr<ValueData> ifStmtData(va->getValueData(splittedLoop->loopEnd));
+	ValueData* ifStmtData(va->getValueData(splittedLoop->loopEnd));
 	if (ifStmtData->getDirNumOfUses(tmpVar) != 1) {
 		return false;
 	}
@@ -513,15 +513,15 @@ bool PreWhileTrueLoopConvOptimizer::tryOptimizationCase4(
 	//       if (i >= 1 && i <= tmp):
 	//           break;
 	//
-	ShPtr<Expression> ifCond(splittedLoop->loopEnd->getFirstIfCond());
+	Expression* ifCond(splittedLoop->loopEnd->getFirstIfCond());
 	if (isa<AndOpExpr>(ifCond) || isa<OrOpExpr>(ifCond)) {
 		return false;
 	}
 
 	// The temporary variable has to be used only at the two places (apart
 	// from its definition).
-	ShPtr<VarDefStmt> tmpVarDef;
-	ShPtr<VarUses> tmpVarUses(vuv->getUses(tmpVar, currFunc));
+	VarDefStmt* tmpVarDef = nullptr;
+	VarUses* tmpVarUses(vuv->getUses(tmpVar, currFunc));
 	for (const auto &dirUse : tmpVarUses->dirUses) {
 		if (dirUse == assignBeforeIf || dirUse == splittedLoop->loopEnd) {
 			continue;
@@ -558,7 +558,7 @@ bool PreWhileTrueLoopConvOptimizer::tryOptimizationCase4(
 *  - @a stmt is a `while True` loop
 */
 bool PreWhileTrueLoopConvOptimizer::tryOptimizationCase5(
-		ShPtr<WhileLoopStmt> stmt) {
+		WhileLoopStmt* stmt) {
 	// Check whether the loop is of the following form:
 	//
 	//   while True:
@@ -570,7 +570,7 @@ bool PreWhileTrueLoopConvOptimizer::tryOptimizationCase5(
 	// (Of course, the condition and constants may be different.)
 
 	// Try to split the loop.
-	ShPtr<SplittedWhileTrueLoop> splittedLoop(splitWhileTrueLoop(stmt));
+	SplittedWhileTrueLoop* splittedLoop(splitWhileTrueLoop(stmt));
 	if (!splittedLoop) {
 		return false;
 	}
@@ -583,19 +583,19 @@ bool PreWhileTrueLoopConvOptimizer::tryOptimizationCase5(
 
 	// Check that the variable used in the break condition is assigned before
 	// the if statement.
-	ShPtr<AssignStmt> assignBeforeIf(cast<AssignStmt>(
+	AssignStmt* assignBeforeIf(cast<AssignStmt>(
 		splittedLoop->loopEnd->getUniquePredecessor()));
 	if (!assignBeforeIf) {
 		return false;
 	}
-	ShPtr<Variable> iVar(cast<Variable>(assignBeforeIf->getLhs()));
+	Variable* iVar(cast<Variable>(assignBeforeIf->getLhs()));
 	if (!iVar) {
 		return false;
 	}
 
 	// There cannot be any function calls or dereferences in the assign
 	// statement before the if statement.
-	ShPtr<ValueData> assignBeforeIfData(va->getValueData(assignBeforeIf));
+	ValueData* assignBeforeIfData(va->getValueData(assignBeforeIf));
 	if (assignBeforeIfData->hasCalls() || assignBeforeIfData->hasDerefs()) {
 		return false;
 	}
@@ -616,14 +616,14 @@ bool PreWhileTrueLoopConvOptimizer::tryOptimizationCase5(
 	//       if (i > 5):    <-- 4
 	//           break
 	//
-	ShPtr<VarUses> iVarUses(vuv->getUses(iVar, currFunc));
+	VarUses* iVarUses(vuv->getUses(iVar, currFunc));
 	for (const auto &dirUse : iVarUses->dirUses) {
 		if (dirUse == assignBeforeIf || dirUse == splittedLoop->loopEnd ||
 				dirUse == stmt->getUniquePredecessor()) {
 			continue;
 		}
 
-		ShPtr<VarDefStmt> iVarDef(cast<VarDefStmt>(dirUse));
+		VarDefStmt* iVarDef(cast<VarDefStmt>(dirUse));
 		if (!iVarDef || iVarDef->getVar() != iVar ||
 				iVarDef->getInitializer()) {
 			// There is some other use of i.

@@ -18,11 +18,11 @@ namespace llvmir2hll {
 *
 * See create() for more information.
 */
-GlobalVarDef::GlobalVarDef(ShPtr<Variable> var, ShPtr<Expression> init):
+GlobalVarDef::GlobalVarDef(Variable* var, Expression* init):
 	var(var), init(init) {}
 
-ShPtr<Value> GlobalVarDef::clone() {
-	ShPtr<GlobalVarDef> varDefStmt(GlobalVarDef::create(ucast<Variable>(var->clone())));
+Value* GlobalVarDef::clone() {
+	GlobalVarDef* varDefStmt(GlobalVarDef::create(ucast<Variable>(var->clone())));
 	varDefStmt->setMetadata(getMetadata());
 	if (init) {
 		varDefStmt->setInitializer(ucast<Expression>(init->clone()));
@@ -30,18 +30,18 @@ ShPtr<Value> GlobalVarDef::clone() {
 	return varDefStmt;
 }
 
-bool GlobalVarDef::isEqualTo(ShPtr<Value> otherValue) const {
+bool GlobalVarDef::isEqualTo(Value* otherValue) const {
 	// Both types, variables and variable initializers have to be equal.
-	if (ShPtr<GlobalVarDef> otherGlobalVarDef = cast<GlobalVarDef>(otherValue)) {
+	if (GlobalVarDef* otherGlobalVarDef = cast<GlobalVarDef>(otherValue)) {
 		return var->isEqualTo(otherGlobalVarDef->var) &&
 			init->isEqualTo(otherGlobalVarDef->init);
 	}
 	return false;
 }
 
-void GlobalVarDef::replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) {
+void GlobalVarDef::replace(Expression* oldExpr, Expression* newExpr) {
 	if (oldExpr == var) {
-		ShPtr<Variable> newVar(cast<Variable>(newExpr));
+		Variable* newVar(cast<Variable>(newExpr));
 		ASSERT_MSG(newVar, "defined variable can be replaced only with a variable");
 		setVar(newVar);
 	} else {
@@ -58,7 +58,7 @@ void GlobalVarDef::replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr)
 /**
 * @brief Return the variable.
 */
-ShPtr<Variable> GlobalVarDef::getVar() const {
+Variable* GlobalVarDef::getVar() const {
 	return var;
 }
 
@@ -67,7 +67,7 @@ ShPtr<Variable> GlobalVarDef::getVar() const {
 *
 * If there is no initializer, it returns the null pointer.
 */
-ShPtr<Expression> GlobalVarDef::getInitializer() const {
+Expression* GlobalVarDef::getInitializer() const {
 	return init;
 }
 
@@ -76,7 +76,7 @@ ShPtr<Expression> GlobalVarDef::getInitializer() const {
 *        otherwise.
 */
 bool GlobalVarDef::hasInitializer() const {
-	return init != ShPtr<Expression>();
+	return init != nullptr;
 }
 
 /**
@@ -98,23 +98,23 @@ Address GlobalVarDef::getAddress() const {
 * @par Preconditions
 *  - @a newVar is non-null
 */
-void GlobalVarDef::setVar(ShPtr<Variable> newVar) {
+void GlobalVarDef::setVar(Variable* newVar) {
 	PRECONDITION_NON_NULL(newVar);
 
-	var->removeObserver(shared_from_this());
-	newVar->addObserver(shared_from_this());
+	var->removeObserver(this);
+	newVar->addObserver(this);
 	var = newVar;
 }
 
 /**
 * @brief Sets a new initializer.
 */
-void GlobalVarDef::setInitializer(ShPtr<Expression> newInit) {
+void GlobalVarDef::setInitializer(Expression* newInit) {
 	if (init) {
-		init->removeObserver(shared_from_this());
+		init->removeObserver(this);
 	}
 	if (newInit) {
-		newInit->addObserver(shared_from_this());
+		newInit->addObserver(this);
 	}
 	init = newInit;
 }
@@ -123,7 +123,7 @@ void GlobalVarDef::setInitializer(ShPtr<Expression> newInit) {
 * @brief Removes the initializer.
 */
 void GlobalVarDef::removeInitializer() {
-	setInitializer(ShPtr<Expression>());
+	setInitializer(nullptr);
 }
 
 /**
@@ -135,12 +135,12 @@ void GlobalVarDef::removeInitializer() {
 * @par Preconditions
 *  - @a var is non-null
 */
-ShPtr<GlobalVarDef> GlobalVarDef::create(ShPtr<Variable> var, ShPtr<Expression> init) {
+GlobalVarDef* GlobalVarDef::create(Variable* var, Expression* init) {
 	PRECONDITION_NON_NULL(var);
 
-	ShPtr<GlobalVarDef> varDef(new GlobalVarDef(var, init));
+	GlobalVarDef* varDef(new GlobalVarDef(var, init));
 
-	// Initialization (recall that shared_from_this() cannot be called in a
+	// Initialization (recall that this cannot be called in a
 	// constructor).
 	var->addObserver(varDef);
 	if (init) {
@@ -169,23 +169,23 @@ ShPtr<GlobalVarDef> GlobalVarDef::create(ShPtr<Variable> var, ShPtr<Expression> 
 *
 * @see Subject::update()
 */
-void GlobalVarDef::update(ShPtr<Value> subject, ShPtr<Value> arg) {
+void GlobalVarDef::update(Value* subject, Value* arg) {
 	PRECONDITION_NON_NULL(subject);
 
-	ShPtr<Variable> newVar = cast<Variable>(arg);
+	Variable* newVar = cast<Variable>(arg);
 	if (subject == var && newVar) {
 		setVar(newVar);
 		return;
 	}
 
-	ShPtr<Expression> newInit = cast<Expression>(arg);
+	Expression* newInit = cast<Expression>(arg);
 	if (subject == init && (!arg || newInit)) {
 		setInitializer(newInit);
 	}
 }
 
 void GlobalVarDef::accept(Visitor *v) {
-	v->visit(ucast<GlobalVarDef>(shared_from_this()));
+	v->visit(ucast<GlobalVarDef>(this));
 }
 
 } // namespace llvmir2hll

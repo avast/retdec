@@ -59,9 +59,9 @@ namespace {
 *
 * @return Topped constant operand.
 */
-ShPtr<Constant> topAndPopStack(ArithmExprEvaluator::ConstStack &stack) {
+Constant* topAndPopStack(ArithmExprEvaluator::ConstStack &stack) {
 	ASSERT_MSG(!stack.empty(), "Signalizes not correctly evaluating.");
-	ShPtr<Constant> constant(stack.top());
+	Constant* constant(stack.top());
 	stack.pop();
 	return constant;
 }
@@ -77,8 +77,8 @@ ShPtr<Constant> topAndPopStack(ArithmExprEvaluator::ConstStack &stack) {
 ArithmExprEvaluator::ConstPair getFirstAndSecondOpFromStack(
 		ArithmExprEvaluator::ConstStack &stack) {
 	// The second operand is on the top of the stack, so pop it first.
-	ShPtr<Constant> second(topAndPopStack(stack));
-	ShPtr<Constant> first(topAndPopStack(stack));
+	Constant* second(topAndPopStack(stack));
+	Constant* first(topAndPopStack(stack));
 	return ArithmExprEvaluator::ConstPair(first, second);
 }
 
@@ -102,7 +102,7 @@ void clearStack(ArithmExprEvaluator::ConstStack &stack) {
 * @return If @a exr can be evaluated, returns evaluated @c Constant, otherwise
 *         the null pointer.
 */
-ShPtr<Constant> ArithmExprEvaluator::evaluate(ShPtr<Expression> expr) {
+Constant* ArithmExprEvaluator::evaluate(Expression* expr) {
 	return evaluate(expr, VarConstMap());
 }
 
@@ -115,7 +115,7 @@ ShPtr<Constant> ArithmExprEvaluator::evaluate(ShPtr<Expression> expr) {
 * @return If @a exr can be evaluated, returns evaluated @c Constant, otherwise
 *         the null pointer.
 */
-ShPtr<Constant> ArithmExprEvaluator::evaluate(ShPtr<Expression> expr,
+Constant* ArithmExprEvaluator::evaluate(Expression* expr,
 		const VarConstMap &varValues) {
 	// Need to set stack and canBeEvaluated to initial state.
 	clearStack(stackOfResults);
@@ -124,7 +124,7 @@ ShPtr<Constant> ArithmExprEvaluator::evaluate(ShPtr<Expression> expr,
 	this->varValues = &varValues;
 	expr->accept(this);
 	return canBeEvaluated && !stackOfResults.empty() ? stackOfResults.top() :
-		ShPtr<Constant>();
+		nullptr;
 }
 
 /**
@@ -136,57 +136,57 @@ ShPtr<Constant> ArithmExprEvaluator::evaluate(ShPtr<Expression> expr,
 * @return Bool value if the @a expr after evaluation is @c bool,
 *         <tt>std::nullopt<bool>()</tt> otherwise.
 */
-std::optional<bool> ArithmExprEvaluator::toBool(ShPtr<Expression> expr, VarConstMap
+std::optional<bool> ArithmExprEvaluator::toBool(Expression* expr, VarConstMap
 		varValues) {
-	ShPtr<Constant> result(evaluate(expr, varValues));
+	Constant* result(evaluate(expr, varValues));
 	if (!result) {
 		return std::nullopt;
 	}
 
-	if (ShPtr<ConstInt> constInt = cast<ConstInt>(result)) {
+	if (ConstInt* constInt = cast<ConstInt>(result)) {
 			return !constInt->isZero();
-	} else if (ShPtr<ConstFloat> constFloat = cast<ConstFloat>(result)) {
+	} else if (ConstFloat* constFloat = cast<ConstFloat>(result)) {
 		return !constFloat->isZero();
-	} else if (ShPtr<ConstBool> constBool = cast<ConstBool>(result)) {
+	} else if (ConstBool* constBool = cast<ConstBool>(result)) {
 		return constBool->getValue();
 	} else {
 		return std::nullopt;
 	}
 }
 
-void ArithmExprEvaluator::visit(ShPtr<AddressOpExpr> expr) {
+void ArithmExprEvaluator::visit(AddressOpExpr* expr) {
 	canBeEvaluated = false;
 }
 
-void ArithmExprEvaluator::visit(ShPtr<ArrayIndexOpExpr> expr) {
+void ArithmExprEvaluator::visit(ArrayIndexOpExpr* expr) {
 	canBeEvaluated = false;
 }
 
-void ArithmExprEvaluator::visit(ShPtr<StructIndexOpExpr> expr) {
+void ArithmExprEvaluator::visit(StructIndexOpExpr* expr) {
 	canBeEvaluated = false;
 }
 
-void ArithmExprEvaluator::visit(ShPtr<DerefOpExpr> expr) {
+void ArithmExprEvaluator::visit(DerefOpExpr* expr) {
 	canBeEvaluated = false;
 }
 
-void ArithmExprEvaluator::visit(ShPtr<NotOpExpr> expr) {
+void ArithmExprEvaluator::visit(NotOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	if (canBeEvaluated) {
-		ShPtr<Constant> operand(getOperandForUnaryOpAndResolveTypes());
+		Constant* operand(getOperandForUnaryOpAndResolveTypes());
 		resolveOpSpecifications(expr, operand);
 		if (!canBeEvaluated) {
 			return;
 		}
 
-		ShPtr<Constant> result;
-		if (ShPtr<ConstInt> operandConstInt = cast<ConstInt>(operand)) {
+		Constant* result;
+		if (ConstInt* operandConstInt = cast<ConstInt>(operand)) {
 			result = ConstBool::create(!operandConstInt->getValue());
-		} else if (ShPtr<ConstFloat> operandConstFloat = cast<ConstFloat>(
+		} else if (ConstFloat* operandConstFloat = cast<ConstFloat>(
 				operand)) {
 			result = ConstBool::create(operandConstFloat->isZero());
-		} else if (ShPtr<ConstBool> operandConstBool = cast<ConstBool>(
+		} else if (ConstBool* operandConstBool = cast<ConstBool>(
 				operand)) {
 			result = ConstBool::create(!operandConstBool->getValue());
 		} else {
@@ -197,20 +197,20 @@ void ArithmExprEvaluator::visit(ShPtr<NotOpExpr> expr) {
 	}
 }
 
-void ArithmExprEvaluator::visit(ShPtr<NegOpExpr> expr) {
+void ArithmExprEvaluator::visit(NegOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	if (canBeEvaluated) {
-		ShPtr<Constant> operand(getOperandForUnaryOpAndResolveTypes());
+		Constant* operand(getOperandForUnaryOpAndResolveTypes());
 		resolveOpSpecifications(expr, operand);
 		if (!canBeEvaluated) {
 			return;
 		}
 
-		ShPtr<Constant> result;
-		if (ShPtr<ConstInt> operandConstInt = cast<ConstInt>(operand)) {
+		Constant* result;
+		if (ConstInt* operandConstInt = cast<ConstInt>(operand)) {
 			result = ConstInt::create(-operandConstInt->getValue());
-		} else if (ShPtr<ConstFloat> operandConstFloat = cast<ConstFloat>(
+		} else if (ConstFloat* operandConstFloat = cast<ConstFloat>(
 				operand)) {
 			llvm::APFloat apFloat = operandConstFloat->getValue();
 			apFloat.changeSign();
@@ -223,7 +223,7 @@ void ArithmExprEvaluator::visit(ShPtr<NegOpExpr> expr) {
 	}
 }
 
-void ArithmExprEvaluator::visit(ShPtr<EqOpExpr> expr) {
+void ArithmExprEvaluator::visit(EqOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	if (canBeEvaluated) {
@@ -233,7 +233,7 @@ void ArithmExprEvaluator::visit(ShPtr<EqOpExpr> expr) {
 			return;
 		}
 
-		ShPtr<Constant> result;
+		Constant* result;
 		if (std::optional<ConstIntPair> constIntPair = castConstPair<ConstInt>(
 				constPair)) {
 			result = performOperationOverApInt(constIntPair, &llvm::APInt::eq);
@@ -254,7 +254,7 @@ void ArithmExprEvaluator::visit(ShPtr<EqOpExpr> expr) {
 	}
 }
 
-void ArithmExprEvaluator::visit(ShPtr<NeqOpExpr> expr) {
+void ArithmExprEvaluator::visit(NeqOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	if (canBeEvaluated) {
@@ -264,7 +264,7 @@ void ArithmExprEvaluator::visit(ShPtr<NeqOpExpr> expr) {
 			return;
 		}
 
-		ShPtr<Constant> result;
+		Constant* result;
 		if (std::optional<ConstIntPair> constIntPair = castConstPair<ConstInt>(
 				constPair)) {
 			result = performOperationOverApInt(constIntPair, &llvm::APInt::ne);
@@ -285,7 +285,7 @@ void ArithmExprEvaluator::visit(ShPtr<NeqOpExpr> expr) {
 	}
 }
 
-void ArithmExprEvaluator::visit(ShPtr<LtEqOpExpr> expr) {
+void ArithmExprEvaluator::visit(LtEqOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	if (canBeEvaluated) {
@@ -295,7 +295,7 @@ void ArithmExprEvaluator::visit(ShPtr<LtEqOpExpr> expr) {
 			return;
 		}
 
-		ShPtr<Constant> result;
+		Constant* result;
 		if (std::optional<ConstIntPair> constIntPair = castConstPair<ConstInt>(
 				constPair)) {
 			result = performOperationOverApInt(constIntPair, &llvm::APInt::sle);
@@ -313,7 +313,7 @@ void ArithmExprEvaluator::visit(ShPtr<LtEqOpExpr> expr) {
 	}
 }
 
-void ArithmExprEvaluator::visit(ShPtr<GtEqOpExpr> expr) {
+void ArithmExprEvaluator::visit(GtEqOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	if (canBeEvaluated) {
@@ -323,7 +323,7 @@ void ArithmExprEvaluator::visit(ShPtr<GtEqOpExpr> expr) {
 			return;
 		}
 
-		ShPtr<Constant> result;
+		Constant* result;
 		if (std::optional<ConstIntPair> constIntPair = castConstPair<ConstInt>(
 				constPair)) {
 			result = performOperationOverApInt(constIntPair, &llvm::APInt::sge);
@@ -341,7 +341,7 @@ void ArithmExprEvaluator::visit(ShPtr<GtEqOpExpr> expr) {
 	}
 }
 
-void ArithmExprEvaluator::visit(ShPtr<LtOpExpr> expr) {
+void ArithmExprEvaluator::visit(LtOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	if (canBeEvaluated) {
@@ -351,7 +351,7 @@ void ArithmExprEvaluator::visit(ShPtr<LtOpExpr> expr) {
 			return;
 		}
 
-		ShPtr<Constant> result;
+		Constant* result;
 		if (std::optional<ConstIntPair> constIntPair = castConstPair<ConstInt>(
 				constPair)) {
 			result = performOperationOverApInt(constIntPair, &llvm::APInt::slt);
@@ -368,7 +368,7 @@ void ArithmExprEvaluator::visit(ShPtr<LtOpExpr> expr) {
 	}
 }
 
-void ArithmExprEvaluator::visit(ShPtr<GtOpExpr> expr) {
+void ArithmExprEvaluator::visit(GtOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	if (canBeEvaluated) {
@@ -378,7 +378,7 @@ void ArithmExprEvaluator::visit(ShPtr<GtOpExpr> expr) {
 			return;
 		}
 
-		ShPtr<Constant> result;
+		Constant* result;
 		if (std::optional<ConstIntPair> constIntPair = castConstPair<ConstInt>(
 				constPair)) {
 			result = performOperationOverApInt(constIntPair, &llvm::APInt::sgt);
@@ -395,7 +395,7 @@ void ArithmExprEvaluator::visit(ShPtr<GtOpExpr> expr) {
 	}
 }
 
-void ArithmExprEvaluator::visit(ShPtr<AddOpExpr> expr) {
+void ArithmExprEvaluator::visit(AddOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	if (canBeEvaluated) {
@@ -405,7 +405,7 @@ void ArithmExprEvaluator::visit(ShPtr<AddOpExpr> expr) {
 			return;
 		}
 
-		ShPtr<Constant> result;
+		Constant* result;
 		bool overflow = false;
 		llvm::APFloat::opStatus opStatus = llvm::APFloat::opOK;
 		if (std::optional<ConstIntPair> constIntPair = castConstPair<ConstInt>(
@@ -425,7 +425,7 @@ void ArithmExprEvaluator::visit(ShPtr<AddOpExpr> expr) {
 	}
 }
 
-void ArithmExprEvaluator::visit(ShPtr<SubOpExpr> expr) {
+void ArithmExprEvaluator::visit(SubOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	if (canBeEvaluated) {
@@ -435,7 +435,7 @@ void ArithmExprEvaluator::visit(ShPtr<SubOpExpr> expr) {
 			return;
 		}
 
-		ShPtr<Constant> result;
+		Constant* result;
 		bool overflow = false;
 		llvm::APFloat::opStatus opStatus = llvm::APFloat::opOK;
 		if (std::optional<ConstIntPair> constIntPair = castConstPair<ConstInt>(
@@ -455,7 +455,7 @@ void ArithmExprEvaluator::visit(ShPtr<SubOpExpr> expr) {
 	}
 }
 
-void ArithmExprEvaluator::visit(ShPtr<MulOpExpr> expr) {
+void ArithmExprEvaluator::visit(MulOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	if (canBeEvaluated) {
@@ -465,7 +465,7 @@ void ArithmExprEvaluator::visit(ShPtr<MulOpExpr> expr) {
 			return;
 		}
 
-		ShPtr<Constant> result;
+		Constant* result;
 		bool overflow = false;
 		llvm::APFloat::opStatus opStatus = llvm::APFloat::opOK;
 		if (std::optional<ConstIntPair> constIntPair = castConstPair<ConstInt>(
@@ -485,7 +485,7 @@ void ArithmExprEvaluator::visit(ShPtr<MulOpExpr> expr) {
 	}
 }
 
-void ArithmExprEvaluator::visit(ShPtr<ModOpExpr> expr) {
+void ArithmExprEvaluator::visit(ModOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	if (canBeEvaluated) {
@@ -495,7 +495,7 @@ void ArithmExprEvaluator::visit(ShPtr<ModOpExpr> expr) {
 			return;
 		}
 
-		ShPtr<Constant> result;
+		Constant* result;
 		llvm::APFloat::opStatus opStatus = llvm::APFloat::opOK;
 		if (std::optional<ConstIntPair> constIntPair = castConstPair<ConstInt>(
 				constPair)) {
@@ -513,7 +513,7 @@ void ArithmExprEvaluator::visit(ShPtr<ModOpExpr> expr) {
 	}
 }
 
-void ArithmExprEvaluator::visit(ShPtr<DivOpExpr> expr) {
+void ArithmExprEvaluator::visit(DivOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	if (canBeEvaluated) {
@@ -523,7 +523,7 @@ void ArithmExprEvaluator::visit(ShPtr<DivOpExpr> expr) {
 			return;
 		}
 
-		ShPtr<Constant> result;
+		Constant* result;
 		bool overflow = false;
 		llvm::APFloat::opStatus opStatus = llvm::APFloat::opOK;
 		if (std::optional<ConstIntPair> constIntPair = castConstPair<ConstInt>(
@@ -543,7 +543,7 @@ void ArithmExprEvaluator::visit(ShPtr<DivOpExpr> expr) {
 	}
 }
 
-void ArithmExprEvaluator::visit(ShPtr<AndOpExpr> expr) {
+void ArithmExprEvaluator::visit(AndOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	if (canBeEvaluated) {
@@ -553,7 +553,7 @@ void ArithmExprEvaluator::visit(ShPtr<AndOpExpr> expr) {
 			return;
 		}
 
-		ShPtr<Constant> result;
+		Constant* result;
 		if (std::optional<ConstIntPair> constIntPair = castConstPair<ConstInt>(
 				constPair)) {
 			result = ConstBool::create(!constIntPair->first->isZero() &&
@@ -574,7 +574,7 @@ void ArithmExprEvaluator::visit(ShPtr<AndOpExpr> expr) {
 	}
 }
 
-void ArithmExprEvaluator::visit(ShPtr<OrOpExpr> expr) {
+void ArithmExprEvaluator::visit(OrOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	if (canBeEvaluated) {
@@ -584,7 +584,7 @@ void ArithmExprEvaluator::visit(ShPtr<OrOpExpr> expr) {
 			return;
 		}
 
-		ShPtr<Constant> result;
+		Constant* result;
 		if (std::optional<ConstIntPair> constIntPair = castConstPair<ConstInt>(
 				constPair)) {
 			result = ConstBool::create(!constIntPair->first->isZero() ||
@@ -605,7 +605,7 @@ void ArithmExprEvaluator::visit(ShPtr<OrOpExpr> expr) {
 	}
 }
 
-void ArithmExprEvaluator::visit(ShPtr<BitAndOpExpr> expr) {
+void ArithmExprEvaluator::visit(BitAndOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	if (canBeEvaluated) {
@@ -615,7 +615,7 @@ void ArithmExprEvaluator::visit(ShPtr<BitAndOpExpr> expr) {
 			return;
 		}
 
-		ShPtr<Constant> result;
+		Constant* result;
 		if (std::optional<ConstIntPair> constIntPair = castConstPair<ConstInt>(
 				constPair)) {
 			APSIntPair apsIntPair(getAPSIntsFromConstants(constIntPair));
@@ -628,7 +628,7 @@ void ArithmExprEvaluator::visit(ShPtr<BitAndOpExpr> expr) {
 	}
 }
 
-void ArithmExprEvaluator::visit(ShPtr<BitOrOpExpr> expr) {
+void ArithmExprEvaluator::visit(BitOrOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	if (canBeEvaluated) {
@@ -638,7 +638,7 @@ void ArithmExprEvaluator::visit(ShPtr<BitOrOpExpr> expr) {
 			return;
 		}
 
-		ShPtr<Constant> result;
+		Constant* result;
 		if (std::optional<ConstIntPair> constIntPair = castConstPair<ConstInt>(
 				constPair)) {
 			APSIntPair apsIntPair(getAPSIntsFromConstants(constIntPair));
@@ -651,7 +651,7 @@ void ArithmExprEvaluator::visit(ShPtr<BitOrOpExpr> expr) {
 	}
 }
 
-void ArithmExprEvaluator::visit(ShPtr<BitXorOpExpr> expr) {
+void ArithmExprEvaluator::visit(BitXorOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	if (canBeEvaluated) {
@@ -661,7 +661,7 @@ void ArithmExprEvaluator::visit(ShPtr<BitXorOpExpr> expr) {
 			return;
 		}
 
-		ShPtr<Constant> result;
+		Constant* result;
 		if (std::optional<ConstIntPair> constIntPair = castConstPair<ConstInt>(
 				constPair)) {
 			APSIntPair apsIntPair(getAPSIntsFromConstants(constIntPair));
@@ -674,7 +674,7 @@ void ArithmExprEvaluator::visit(ShPtr<BitXorOpExpr> expr) {
 	}
 }
 
-void ArithmExprEvaluator::visit(ShPtr<BitShlOpExpr> expr) {
+void ArithmExprEvaluator::visit(BitShlOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	if (canBeEvaluated) {
@@ -684,7 +684,7 @@ void ArithmExprEvaluator::visit(ShPtr<BitShlOpExpr> expr) {
 			return;
 		}
 
-		ShPtr<Constant> result;
+		Constant* result;
 		bool overflow = false;
 		if (std::optional<ConstIntPair> constIntPair = castConstPair<ConstInt>(
 				constPair)) {
@@ -700,7 +700,7 @@ void ArithmExprEvaluator::visit(ShPtr<BitShlOpExpr> expr) {
 	}
 }
 
-void ArithmExprEvaluator::visit(ShPtr<BitShrOpExpr> expr) {
+void ArithmExprEvaluator::visit(BitShrOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	if (canBeEvaluated) {
@@ -711,7 +711,7 @@ void ArithmExprEvaluator::visit(ShPtr<BitShrOpExpr> expr) {
 		}
 
 		if (expr->isArithmetical()) {
-			ShPtr<Constant> result;
+			Constant* result;
 			if (std::optional<ConstIntPair> constIntPair = castConstPair<ConstInt>(
 					constPair)) {
 				result = performOperationOverApInt(constIntPair,
@@ -722,7 +722,7 @@ void ArithmExprEvaluator::visit(ShPtr<BitShrOpExpr> expr) {
 
 			stackOfResults.push(result);
 		} else if (expr->isLogical()) {
-			ShPtr<Constant> result;
+			Constant* result;
 			if (std::optional<ConstIntPair> constIntPair = castConstPair<ConstInt>(
 					constPair)) {
 				result = performOperationOverApInt(constIntPair,
@@ -736,21 +736,21 @@ void ArithmExprEvaluator::visit(ShPtr<BitShrOpExpr> expr) {
 	}
 }
 
-void ArithmExprEvaluator::visit(ShPtr<TernaryOpExpr> expr) {
+void ArithmExprEvaluator::visit(TernaryOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	if (canBeEvaluated) {
-		ShPtr<Constant> falseValue(topAndPopStack(stackOfResults));
-		ShPtr<Constant> trueValue(topAndPopStack(stackOfResults));
-		ShPtr<Constant> condition(topAndPopStack(stackOfResults));
+		Constant* falseValue(topAndPopStack(stackOfResults));
+		Constant* trueValue(topAndPopStack(stackOfResults));
+		Constant* condition(topAndPopStack(stackOfResults));
 
 		bool condResult(true);
-		if (ShPtr<ConstInt> condConstInt = cast<ConstInt>(condition)) {
+		if (ConstInt* condConstInt = cast<ConstInt>(condition)) {
 			condResult = !condConstInt->isZero();
-		} else if (ShPtr<ConstFloat> condConstFloat = cast<ConstFloat>(
+		} else if (ConstFloat* condConstFloat = cast<ConstFloat>(
 				condition)) {
 			condResult = !condConstFloat->isZero();
-		} else if (ShPtr<ConstBool> condConstBool = cast<ConstBool>(condition)) {
+		} else if (ConstBool* condConstBool = cast<ConstBool>(condition)) {
 			condResult = condConstBool->getValue();
 		} else {
 			canBeEvaluated = false;
@@ -760,101 +760,101 @@ void ArithmExprEvaluator::visit(ShPtr<TernaryOpExpr> expr) {
 	}
 }
 
-void ArithmExprEvaluator::visit(ShPtr<CallExpr> expr) {
+void ArithmExprEvaluator::visit(CallExpr* expr) {
 	canBeEvaluated = false;
 }
 
-void ArithmExprEvaluator::visit(ShPtr<BitCastExpr> expr) {
+void ArithmExprEvaluator::visit(BitCastExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	if (canBeEvaluated) {
-		ShPtr<Constant> constant(topAndPopStack(stackOfResults));
+		Constant* constant(topAndPopStack(stackOfResults));
 		resolveCast(expr, constant);
 		stackOfResults.push(constant);
 	}
 }
 
-void ArithmExprEvaluator::visit(ShPtr<ExtCastExpr> expr) {
+void ArithmExprEvaluator::visit(ExtCastExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	if (canBeEvaluated) {
-		ShPtr<Constant> constant(topAndPopStack(stackOfResults));
+		Constant* constant(topAndPopStack(stackOfResults));
 		resolveCast(expr, constant);
 		stackOfResults.push(constant);
 	}
 }
 
-void ArithmExprEvaluator::visit(ShPtr<TruncCastExpr> expr) {
+void ArithmExprEvaluator::visit(TruncCastExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	if (canBeEvaluated) {
-		ShPtr<Constant> constant(topAndPopStack(stackOfResults));
+		Constant* constant(topAndPopStack(stackOfResults));
 		resolveCast(expr, constant);
 		stackOfResults.push(constant);
 	}
 }
 
-void ArithmExprEvaluator::visit(ShPtr<FPToIntCastExpr> expr) {
+void ArithmExprEvaluator::visit(FPToIntCastExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	if (canBeEvaluated) {
-		ShPtr<Constant> constant(topAndPopStack(stackOfResults));
+		Constant* constant(topAndPopStack(stackOfResults));
 		resolveCast(expr, constant);
 		stackOfResults.push(constant);
 	}
 }
 
-void ArithmExprEvaluator::visit(ShPtr<IntToFPCastExpr> expr) {
+void ArithmExprEvaluator::visit(IntToFPCastExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	if (canBeEvaluated) {
-		ShPtr<Constant> constant(topAndPopStack(stackOfResults));
+		Constant* constant(topAndPopStack(stackOfResults));
 		resolveCast(expr, constant);
 		stackOfResults.push(constant);
 	}
 }
 
-void ArithmExprEvaluator::visit(ShPtr<IntToPtrCastExpr> expr) {
+void ArithmExprEvaluator::visit(IntToPtrCastExpr* expr) {
 	canBeEvaluated = false;
 }
 
-void ArithmExprEvaluator::visit(ShPtr<PtrToIntCastExpr> expr) {
+void ArithmExprEvaluator::visit(PtrToIntCastExpr* expr) {
 	canBeEvaluated = false;
 }
 
-void ArithmExprEvaluator::visit(ShPtr<ConstBool> constant) {
+void ArithmExprEvaluator::visit(ConstBool* constant) {
 	stackOfResults.push(constant);
 }
 
-void ArithmExprEvaluator::visit(ShPtr<ConstFloat> constant) {
+void ArithmExprEvaluator::visit(ConstFloat* constant) {
 	stackOfResults.push(constant);
 }
 
-void ArithmExprEvaluator::visit(ShPtr<ConstInt> constant) {
+void ArithmExprEvaluator::visit(ConstInt* constant) {
 	stackOfResults.push(constant);
 }
 
-void ArithmExprEvaluator::visit(ShPtr<ConstSymbol> constant) {
+void ArithmExprEvaluator::visit(ConstSymbol* constant) {
 	stackOfResults.push(constant->getValue());
 }
 
-void ArithmExprEvaluator::visit(ShPtr<ConstNullPointer> constant) {
+void ArithmExprEvaluator::visit(ConstNullPointer* constant) {
 	canBeEvaluated = false;
 }
 
-void ArithmExprEvaluator::visit(ShPtr<ConstString> constant) {
+void ArithmExprEvaluator::visit(ConstString* constant) {
 	canBeEvaluated = false;
 }
 
-void ArithmExprEvaluator::visit(ShPtr<ConstArray> constant) {
+void ArithmExprEvaluator::visit(ConstArray* constant) {
 	canBeEvaluated = false;
 }
 
-void ArithmExprEvaluator::visit(ShPtr<ConstStruct> constant) {
+void ArithmExprEvaluator::visit(ConstStruct* constant) {
 	canBeEvaluated = false;
 }
 
-void ArithmExprEvaluator::visit(ShPtr<Variable> var) {
+void ArithmExprEvaluator::visit(Variable* var) {
 	auto it = varValues->find(var);
 	if (it != varValues->end()) {
 		stackOfResults.push(it->second);
@@ -863,84 +863,84 @@ void ArithmExprEvaluator::visit(ShPtr<Variable> var) {
 	}
 }
 
-void ArithmExprEvaluator::resolveTypesUnaryOp(ShPtr<Constant> &operand) {}
+void ArithmExprEvaluator::resolveTypesUnaryOp(Constant* &operand) {}
 
 void ArithmExprEvaluator::resolveTypesBinaryOp(ConstPair &constPair) {}
 
-void ArithmExprEvaluator::resolveOpSpecifications(ShPtr<AddOpExpr> expr,
+void ArithmExprEvaluator::resolveOpSpecifications(AddOpExpr* expr,
 	ConstPair &constPair) {}
 
-void ArithmExprEvaluator::resolveOpSpecifications(ShPtr<AndOpExpr> expr,
+void ArithmExprEvaluator::resolveOpSpecifications(AndOpExpr* expr,
 	ConstPair &constPair) {}
 
-void ArithmExprEvaluator::resolveOpSpecifications(ShPtr<BitAndOpExpr> expr,
+void ArithmExprEvaluator::resolveOpSpecifications(BitAndOpExpr* expr,
 	ConstPair &constPair) {}
 
-void ArithmExprEvaluator::resolveOpSpecifications(ShPtr<BitOrOpExpr> expr,
+void ArithmExprEvaluator::resolveOpSpecifications(BitOrOpExpr* expr,
 	ConstPair &constPair) {}
 
-void ArithmExprEvaluator::resolveOpSpecifications(ShPtr<BitShlOpExpr> expr,
+void ArithmExprEvaluator::resolveOpSpecifications(BitShlOpExpr* expr,
 	ConstPair &constPair) {}
 
-void ArithmExprEvaluator::resolveOpSpecifications(ShPtr<BitShrOpExpr> expr,
+void ArithmExprEvaluator::resolveOpSpecifications(BitShrOpExpr* expr,
 	ConstPair &constPair) {}
 
-void ArithmExprEvaluator::resolveOpSpecifications(ShPtr<BitXorOpExpr> expr,
+void ArithmExprEvaluator::resolveOpSpecifications(BitXorOpExpr* expr,
 	ConstPair &constPair) {}
 
-void ArithmExprEvaluator::resolveOpSpecifications(ShPtr<DivOpExpr> expr,
+void ArithmExprEvaluator::resolveOpSpecifications(DivOpExpr* expr,
 	ConstPair &constPair) {}
 
-void ArithmExprEvaluator::resolveOpSpecifications(ShPtr<EqOpExpr> expr,
+void ArithmExprEvaluator::resolveOpSpecifications(EqOpExpr* expr,
 	ConstPair &constPair) {}
 
-void ArithmExprEvaluator::resolveOpSpecifications(ShPtr<GtOpExpr> expr,
+void ArithmExprEvaluator::resolveOpSpecifications(GtOpExpr* expr,
 	ConstPair &constPair) {}
 
-void ArithmExprEvaluator::resolveOpSpecifications(ShPtr<GtEqOpExpr> expr,
+void ArithmExprEvaluator::resolveOpSpecifications(GtEqOpExpr* expr,
 	ConstPair &constPair) {}
 
-void ArithmExprEvaluator::resolveOpSpecifications(ShPtr<LtEqOpExpr> expr,
+void ArithmExprEvaluator::resolveOpSpecifications(LtEqOpExpr* expr,
 	ConstPair &constPair) {}
 
-void ArithmExprEvaluator::resolveOpSpecifications(ShPtr<LtOpExpr> expr,
+void ArithmExprEvaluator::resolveOpSpecifications(LtOpExpr* expr,
 	ConstPair &constPair) {}
 
-void ArithmExprEvaluator::resolveOpSpecifications(ShPtr<ModOpExpr> expr,
+void ArithmExprEvaluator::resolveOpSpecifications(ModOpExpr* expr,
 	ConstPair &constPair) {}
 
-void ArithmExprEvaluator::resolveOpSpecifications(ShPtr<MulOpExpr> expr,
+void ArithmExprEvaluator::resolveOpSpecifications(MulOpExpr* expr,
 	ConstPair &constPair) {}
 
-void ArithmExprEvaluator::resolveOpSpecifications(ShPtr<NegOpExpr> expr,
-	ShPtr<Constant> &constant) {}
+void ArithmExprEvaluator::resolveOpSpecifications(NegOpExpr* expr,
+	Constant* &constant) {}
 
-void ArithmExprEvaluator::resolveOpSpecifications(ShPtr<NeqOpExpr> expr,
+void ArithmExprEvaluator::resolveOpSpecifications(NeqOpExpr* expr,
 	ConstPair &constPair) {}
 
-void ArithmExprEvaluator::resolveOpSpecifications(ShPtr<NotOpExpr> expr,
-	ShPtr<Constant> &constant) {}
+void ArithmExprEvaluator::resolveOpSpecifications(NotOpExpr* expr,
+	Constant* &constant) {}
 
-void ArithmExprEvaluator::resolveOpSpecifications(ShPtr<OrOpExpr> expr,
+void ArithmExprEvaluator::resolveOpSpecifications(OrOpExpr* expr,
 	ConstPair &constPair) {}
 
-void ArithmExprEvaluator::resolveOpSpecifications(ShPtr<SubOpExpr> expr,
+void ArithmExprEvaluator::resolveOpSpecifications(SubOpExpr* expr,
 	ConstPair &constPair) {}
 
-void ArithmExprEvaluator::resolveCast(ShPtr<BitCastExpr> expr,
-	ShPtr<Constant> &constant) {}
+void ArithmExprEvaluator::resolveCast(BitCastExpr* expr,
+	Constant* &constant) {}
 
-void ArithmExprEvaluator::resolveCast(ShPtr<ExtCastExpr> expr,
-	ShPtr<Constant> &constant) {}
+void ArithmExprEvaluator::resolveCast(ExtCastExpr* expr,
+	Constant* &constant) {}
 
-void ArithmExprEvaluator::resolveCast(ShPtr<FPToIntCastExpr> expr,
-	ShPtr<Constant> &constant) {}
+void ArithmExprEvaluator::resolveCast(FPToIntCastExpr* expr,
+	Constant* &constant) {}
 
-void ArithmExprEvaluator::resolveCast(ShPtr<IntToFPCastExpr> expr,
-	ShPtr<Constant> &constant) {}
+void ArithmExprEvaluator::resolveCast(IntToFPCastExpr* expr,
+	Constant* &constant) {}
 
-void ArithmExprEvaluator::resolveCast(ShPtr<TruncCastExpr> expr,
-	ShPtr<Constant> &constant) {}
+void ArithmExprEvaluator::resolveCast(TruncCastExpr* expr,
+	Constant* &constant) {}
 
 void ArithmExprEvaluator::resolveOverflowForAPInt(bool overflow) {}
 
@@ -953,8 +953,8 @@ void ArithmExprEvaluator::resolveOverflowForAPFloat(llvm::APFloat::opStatus
 *
 * @return Constant operand after types corrections.
 */
-ShPtr<Constant> ArithmExprEvaluator::getOperandForUnaryOpAndResolveTypes() {
-	ShPtr<Constant> operand(topAndPopStack(stackOfResults));
+Constant* ArithmExprEvaluator::getOperandForUnaryOpAndResolveTypes() {
+	Constant* operand(topAndPopStack(stackOfResults));
 	resolveTypesUnaryOp(operand);
 	return operand;
 }
@@ -980,17 +980,17 @@ ArithmExprEvaluator::ConstPair ArithmExprEvaluator::
 * @return A pair of casted constants if the cast was correct, @c std::nullopt
 *         otherwise.
 */
-template<typename ConstType>
-std::optional<std::pair<ShPtr<ConstType>, ShPtr<ConstType>>> ArithmExprEvaluator::
-		castConstPair(const ConstPair &constPair) {
-	ShPtr<ConstType> firstConst(cast<ConstType>(constPair.first));
-	ShPtr<ConstType> secConst(cast<ConstType>(constPair.second));
-	if (!firstConst || !secConst) {
-		return std::nullopt;
-	} else {
-		return std::make_pair(firstConst, secConst);
-	}
-}
+// template<typename ConstType>
+// std::optional<std::pair<ConstType*, ConstType*>> ArithmExprEvaluator::
+// 		castConstPair(const ConstPair &constPair) {
+// 	ConstType* firstConst(cast<ConstType>(constPair.first));
+// 	ConstType* secConst(cast<ConstType>(constPair.second));
+// 	if (!firstConst || !secConst) {
+// 		return std::nullopt;
+// 	} else {
+// 		return std::make_pair(firstConst, secConst);
+// 	}
+// }
 
 /**
 * @brief Perform the operation specified by @a op on the first and the
@@ -1008,7 +1008,7 @@ std::optional<std::pair<ShPtr<ConstType>, ShPtr<ConstType>>> ArithmExprEvaluator
 *
 * @return Result of operation.
 */
-ShPtr<ConstInt> ArithmExprEvaluator::performOperationOverApInt(
+ConstInt* ArithmExprEvaluator::performOperationOverApInt(
 		const std::optional<ConstIntPair> &constIntPair, LLVMAPIntAPIntBoolOp op,
 		bool &overflow) {
 	APSIntPair apsIntPair(getAPSIntsFromConstants(constIntPair));
@@ -1030,7 +1030,7 @@ ShPtr<ConstInt> ArithmExprEvaluator::performOperationOverApInt(
 *
 * @return Result of operation.
 */
-ShPtr<ConstInt> ArithmExprEvaluator::performOperationOverApInt(
+ConstInt* ArithmExprEvaluator::performOperationOverApInt(
 		const std::optional<ConstIntPair> &constIntPair, LLVMAPIntAPIntOp op) {
 	APSIntPair apsIntPair(getAPSIntsFromConstants(constIntPair));
 	return ConstInt::create((apsIntPair.first.*op)(apsIntPair.second),
@@ -1051,7 +1051,7 @@ ShPtr<ConstInt> ArithmExprEvaluator::performOperationOverApInt(
 *
 * @return Result of operation.
 */
-ShPtr<ConstBool> ArithmExprEvaluator::performOperationOverApInt(
+ConstBool* ArithmExprEvaluator::performOperationOverApInt(
 		const std::optional<ConstIntPair> &constIntPair, LLVMBoolAPIntOp op) {
 	APSIntPair apsIntPair(getAPSIntsFromConstants(constIntPair));
 	return ConstBool::create((apsIntPair.first.*op)(apsIntPair.second));
@@ -1086,7 +1086,7 @@ llvm::APFloat::cmpResult ArithmExprEvaluator::performOperationOverApFloat(
 *
 * @return Result of operation.
 */
-ShPtr<ConstFloat> ArithmExprEvaluator::performOperationOverApFloat(
+ConstFloat* ArithmExprEvaluator::performOperationOverApFloat(
 		const std::optional<ConstFloatPair> &constFloatPair, LLVMAPFloatOp op, llvm::
 		APFloat::opStatus &status) {
 	APFloatPair apFloatPair(getAPFloatsFromConstants(constFloatPair));
@@ -1099,7 +1099,7 @@ ShPtr<ConstFloat> ArithmExprEvaluator::performOperationOverApFloat(
 * @brief An overload of @c performOperationOverApFloat() when the operation has
 *        no rounding mode.
 */
-ShPtr<ConstFloat> ArithmExprEvaluator::performOperationOverApFloat(
+ConstFloat* ArithmExprEvaluator::performOperationOverApFloat(
 		const std::optional<ConstFloatPair> &constFloatPair, LLVMAPFloatOpNoRounding op,
 		llvm::APFloat::opStatus &status) {
 	APFloatPair apFloatPair(getAPFloatsFromConstants(constFloatPair));
@@ -1152,9 +1152,9 @@ void ArithmExprEvaluator::resolveOverflows(bool overflow,
 *
 * @return If @a constant is @c ConstInt or @c ConstFloat zero.
 */
-bool ArithmExprEvaluator::isConstantZero(ShPtr<Constant> constant) {
-	ShPtr<ConstInt> secConstInt(cast<ConstInt>(constant));
-	ShPtr<ConstFloat> secConstFloat(cast<ConstFloat>(constant));
+bool ArithmExprEvaluator::isConstantZero(Constant* constant) {
+	ConstInt* secConstInt(cast<ConstInt>(constant));
+	ConstFloat* secConstFloat(cast<ConstFloat>(constant));
 	return (secConstInt && secConstInt->isZero()) ||
 			(secConstFloat && secConstFloat->isZero());
 }

@@ -20,11 +20,11 @@ namespace tests {
 */
 class APICallSeqFinderMock: public APICallSeqFinder {
 public:
-	APICallSeqFinderMock(ShPtr<ValueAnalysis> va, ShPtr<CallInfoObtainer> cio):
+	APICallSeqFinderMock(ValueAnalysis* va, CallInfoObtainer* cio):
 		PatternFinder(va, cio) {}
 
 	MOCK_METHOD3(findPatterns, Patterns (const APICallInfoSeq &,
-		ShPtr<CallExpr>, ShPtr<Statement>, ShPtr<Function>, ShPtr<Module>);
+		CallExpr*, Statement*, Function*, Module*);
 );
 
 };

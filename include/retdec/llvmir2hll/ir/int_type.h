@@ -25,10 +25,10 @@ class Visitor;
 */
 class IntType final: public Type {
 public:
-	static ShPtr<IntType> create(unsigned size, bool isSigned = true);
+	static IntType* create(unsigned size, bool isSigned = true);
 
-	virtual ShPtr<Value> clone() override;
-	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
+	virtual Value* clone() override;
+	virtual bool isEqualTo(Value* otherValue) const override;
 
 	unsigned getSize() const;
 	bool isSigned() const;
@@ -42,7 +42,7 @@ public:
 
 private:
 	/// Mapping of integer sizes into IntType instances.
-	using SizeToIntTypeMap = std::map<unsigned, ShPtr<IntType>>;
+	using SizeToIntTypeMap = std::map<unsigned, IntType*>;
 
 private:
 	/// Number of bits (size of the integer).

@@ -37,14 +37,14 @@ class VarRenamerWithCreate: public VarRenamer {
 public:
 	virtual std::string getId() const override { return "renamer_with_create"; }
 
-	static ShPtr<VarRenamer> create(ShPtr<VarNameGen> varNameGen,
+	static VarRenamer* create(VarNameGen* varNameGen,
 			bool useDebugNames = true) {
-		return ShPtr<VarRenamer>(new VarRenamerWithCreate(
+		return VarRenamer*(new VarRenamerWithCreate(
 			varNameGen, useDebugNames));
 	}
 
 private:
-	VarRenamerWithCreate(ShPtr<VarNameGen> varNameGen, bool useDebugNames):
+	VarRenamerWithCreate(VarNameGen* varNameGen, bool useDebugNames):
 		VarRenamer(varNameGen, useDebugNames) {}
 };
 
@@ -59,11 +59,11 @@ ClashingNamesEndingWithNumberAreSuffixedWithUnderscores) {
 	// void test() {
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	module->addGlobalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	module->addGlobalVar(varB);
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(32)));
+	Variable* varC(Variable::create("c", IntType::create(32)));
 	module->addGlobalVar(varC);
 
 	// Setup the name generator so it always returns "g1".
@@ -91,11 +91,11 @@ ClashingNamesEndingWithNumberAreSuffixedWithUnderscores) {
 	// We have to sort the variables to ease the checking.
 	VarVector globalVarsVector(globalVarsSet.begin(), globalVarsSet.end());
 	sortByName(globalVarsVector);
-	ShPtr<Variable> var1(globalVarsVector[0]);
+	Variable* var1(globalVarsVector[0]);
 	EXPECT_EQ("g1", var1->getName());
-	ShPtr<Variable> var2(globalVarsVector[1]);
+	Variable* var2(globalVarsVector[1]);
 	EXPECT_EQ("g1_", var2->getName());
-	ShPtr<Variable> var3(globalVarsVector[2]);
+	Variable* var3(globalVarsVector[2]);
 	EXPECT_EQ("g1__", var3->getName());
 }
 
@@ -110,11 +110,11 @@ ClashingNamesNotEndingWithNumberAreSuffixedWithNumbers) {
 	// void test() {
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	module->addGlobalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	module->addGlobalVar(varB);
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(32)));
+	Variable* varC(Variable::create("c", IntType::create(32)));
 	module->addGlobalVar(varC);
 
 	// Setup the name generator so it always returns "g".
@@ -142,11 +142,11 @@ ClashingNamesNotEndingWithNumberAreSuffixedWithNumbers) {
 	// We have to sort the variables to ease the checking.
 	VarVector globalVarsVector(globalVarsSet.begin(), globalVarsSet.end());
 	sortByName(globalVarsVector);
-	ShPtr<Variable> var1(globalVarsVector[0]);
+	Variable* var1(globalVarsVector[0]);
 	EXPECT_EQ("g", var1->getName());
-	ShPtr<Variable> var2(globalVarsVector[1]);
+	Variable* var2(globalVarsVector[1]);
 	EXPECT_EQ("g2", var2->getName());
-	ShPtr<Variable> var3(globalVarsVector[2]);
+	Variable* var3(globalVarsVector[2]);
 	EXPECT_EQ("g3", var3->getName());
 }
 
@@ -187,7 +187,7 @@ NameUniquenessIsEnsuredEvenIfMultipleFunctionsHaveSameRealName) {
 	// void test2() {
 	// }
 	//
-	ShPtr<Function> test2Func(
+	Function* test2Func(
 		FunctionBuilder("test2")
 			.withRetType(VoidType::create())
 			.build()
@@ -228,7 +228,7 @@ NameUniquenessIsEnsuredEvenIfFunctionHasRealNameSameAsOtherFunctionInitialName) 
 	// void test_other() {
 	// }
 	//
-	ShPtr<Function> testOtherFunc(
+	Function* testOtherFunc(
 		FunctionBuilder("test_other")
 			.withRetType(VoidType::create())
 			.build()

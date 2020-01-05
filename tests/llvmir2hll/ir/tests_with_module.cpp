@@ -42,9 +42,9 @@ TestsWithModule::TestsWithModule():
 *
 * @return The constructed function declaration.
 */
-ShPtr<Function> TestsWithModule::addFuncDecl(const std::string &funcName) {
-	ShPtr<Function> func(Function::create(nullptr, VoidType::create(), funcName,
-		VarVector(), VarSet(), ShPtr<Statement>(), false));
+Function* TestsWithModule::addFuncDecl(const std::string &funcName) {
+	Function* func(Function::create(nullptr, VoidType::create(), funcName,
+		VarVector(), VarSet(), Statement*(), false));
 	module->addFunc(func);
 	return func;
 }
@@ -54,8 +54,8 @@ ShPtr<Function> TestsWithModule::addFuncDecl(const std::string &funcName) {
 *
 * @return The constructed function definition.
 */
-ShPtr<Function> TestsWithModule::addFuncDef(const std::string &funcName) {
-	ShPtr<Function> func(Function::create(nullptr, VoidType::create(), funcName,
+Function* TestsWithModule::addFuncDef(const std::string &funcName) {
+	Function* func(Function::create(nullptr, VoidType::create(), funcName,
 		VarVector(), VarSet(), EmptyStmt::create(), false));
 	module->addFunc(func);
 	return func;
@@ -71,17 +71,17 @@ ShPtr<Function> TestsWithModule::addFuncDef(const std::string &funcName) {
 *  - the two functions have to exist; moreover, the function named @a
 *    callerName has to be a definition
 */
-ShPtr<CallStmt> TestsWithModule::addCall(const std::string &callerName,
+CallStmt* TestsWithModule::addCall(const std::string &callerName,
 		const std::string &calleeName) {
-	ShPtr<Function> caller(module->getFuncByName(callerName));
+	Function* caller(module->getFuncByName(callerName));
 	ASSERT_MSG(caller && caller->isDefinition(),
 		"the function `" << callerName << "` is not defined");
 
-	ShPtr<Function> callee(module->getFuncByName(calleeName));
+	Function* callee(module->getFuncByName(calleeName));
 	ASSERT_MSG(callee, "the function `" << calleeName << "` does not exist");
 
-	ShPtr<CallExpr> calleeCallExpr(CallExpr::create(callee->getAsVar()));
-	ShPtr<CallStmt> calleeCall(CallStmt::create(calleeCallExpr));
+	CallExpr* calleeCallExpr(CallExpr::create(callee->getAsVar()));
+	CallStmt* calleeCall(CallStmt::create(calleeCallExpr));
 	if (isa<EmptyStmt>(caller->getBody())) {
 		caller->setBody(calleeCall);
 	} else {

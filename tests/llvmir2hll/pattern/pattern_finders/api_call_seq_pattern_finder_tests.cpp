@@ -34,7 +34,7 @@ FinderHasNonEmptyId) {
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
 	INSTANTIATE_CALL_INFO_OBTAINER_MOCK();
 
-	ShPtr<PatternFinder> pf(APICallSeqPatternFinder::create(va, cio));
+	PatternFinder* pf(APICallSeqPatternFinder::create(va, cio));
 
 	EXPECT_FALSE(pf->getId().empty());
 }
@@ -44,7 +44,7 @@ FinderIsRegisteredAtFactory) {
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
 	INSTANTIATE_CALL_INFO_OBTAINER_MOCK();
 
-	ShPtr<PatternFinder> pf(APICallSeqPatternFinder::create(va, cio));
+	PatternFinder* pf(APICallSeqPatternFinder::create(va, cio));
 
 	EXPECT_TRUE(PatternFinderFactory::getInstance().isRegistered(pf->getId()));
 }
@@ -54,7 +54,7 @@ WhenNoAPICallsArePresentNoPatternsAreReturned) {
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
 	INSTANTIATE_CALL_INFO_OBTAINER_MOCK();
 
-	ShPtr<PatternFinder> pf(APICallSeqPatternFinder::create(va, cio));
+	PatternFinder* pf(APICallSeqPatternFinder::create(va, cio));
 	PatternFinder::Patterns foundPatterns(pf->findPatterns(module));
 
 	EXPECT_TRUE(foundPatterns.empty());

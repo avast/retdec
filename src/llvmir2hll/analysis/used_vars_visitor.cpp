@@ -91,7 +91,7 @@ std::size_t UsedVars::getCount(bool read, bool written) const {
 * @par Preconditions
 *  - @a var is non-null
 */
-std::size_t UsedVars::getNumOfUses(ShPtr<Variable> var) const {
+std::size_t UsedVars::getNumOfUses(Variable* var) const {
 	PRECONDITION_NON_NULL(var);
 
 	auto i = numOfVarUses.find(var);
@@ -151,7 +151,7 @@ UsedVars::var_iterator UsedVars::all_end() const {
 * @param[in] read Consider variables that are read.
 * @param[in] written Consider written-into variables.
 */
-bool UsedVars::isUsed(ShPtr<Variable> var, bool read,
+bool UsedVars::isUsed(Variable* var, bool read,
 		bool written) const {
 	if (read && readVars.find(var) != readVars.end()) {
 		return true;
@@ -191,7 +191,7 @@ UsedVarsVisitor::UsedVarsVisitor(bool visitSuccessors, bool visitNestedStmts,
 * @par Preconditions
 *  - @a value is non-null
 */
-ShPtr<UsedVars> UsedVarsVisitor::getUsedVars_(ShPtr<Value> value) {
+UsedVars* UsedVarsVisitor::getUsedVars_(Value* value) {
 	PRECONDITION_NON_NULL(value);
 
 	// Caching.
@@ -201,11 +201,11 @@ ShPtr<UsedVars> UsedVarsVisitor::getUsedVars_(ShPtr<Value> value) {
 
 	// Initialization.
 	accessedStmts.clear();
-	usedVars = ShPtr<UsedVars>(new UsedVars());
+	usedVars = new UsedVars();
 	writing = false;
 
 	// Obtain read and written-into variables.
-	if (ShPtr<Statement> block = cast<Statement>(value)) {
+	if (Statement* block = cast<Statement>(value)) {
 		visitStmt(block, visitSuccessors, visitNestedStmts);
 	} else {
 		value->accept(this);
@@ -234,10 +234,10 @@ ShPtr<UsedVars> UsedVarsVisitor::getUsedVars_(ShPtr<Value> value) {
 *                          This may speed up subsequent calls to getUsedVars_()
 *                          if the same values are passed to getUsedVars_().
 */
-ShPtr<UsedVarsVisitor> UsedVarsVisitor::create(bool visitSuccessors,
+UsedVarsVisitor* UsedVarsVisitor::create(bool visitSuccessors,
 		bool visitNestedStmts, bool enableCaching) {
-	return ShPtr<UsedVarsVisitor>(new UsedVarsVisitor(visitSuccessors,
-		visitNestedStmts, enableCaching));
+	return new UsedVarsVisitor(visitSuccessors,
+		visitNestedStmts, enableCaching);
 }
 
 /**
@@ -256,22 +256,22 @@ ShPtr<UsedVarsVisitor> UsedVarsVisitor::create(bool visitSuccessors,
 * @par Preconditions
 *  - @a value is non-null
 */
-ShPtr<UsedVars> UsedVarsVisitor::getUsedVars(ShPtr<Value> value,
+UsedVars* UsedVarsVisitor::getUsedVars(Value* value,
 		bool visitSuccessors, bool visitNestedStmts) {
 	PRECONDITION_NON_NULL(value);
 
-	ShPtr<UsedVarsVisitor> visitor(new UsedVarsVisitor(visitSuccessors,
+	UsedVarsVisitor* visitor(new UsedVarsVisitor(visitSuccessors,
 		visitNestedStmts));
 	return visitor->getUsedVars_(value);
 }
 
-void UsedVarsVisitor::visit(ShPtr<Function> func) {
+void UsedVarsVisitor::visit(Function* func) {
 	if (func->isDefinition()) {
 		visitStmt(func->getBody());
 	}
 }
 
-void UsedVarsVisitor::visit(ShPtr<Variable> var) {
+void UsedVarsVisitor::visit(Variable* var) {
 	if (writing) {
 		usedVars->writtenVars.insert(var);
 	} else {
@@ -281,7 +281,7 @@ void UsedVarsVisitor::visit(ShPtr<Variable> var) {
 	usedVars->numOfVarUses[var]++;
 }
 
-void UsedVarsVisitor::visit(ShPtr<ArrayIndexOpExpr> expr) {
+void UsedVarsVisitor::visit(ArrayIndexOpExpr* expr) {
 	// We consider a in a[1] = 5 to be just read (not written). This allows a
 	// much simpler implementation of various optimizations.
 	bool oldWriting = writing;
@@ -291,7 +291,7 @@ void UsedVarsVisitor::visit(ShPtr<ArrayIndexOpExpr> expr) {
 	writing = oldWriting;
 }
 
-void UsedVarsVisitor::visit(ShPtr<StructIndexOpExpr> expr) {
+void UsedVarsVisitor::visit(StructIndexOpExpr* expr) {
 	// We consider a in a['1'] = 5 to be just read (not written). This allows a
 	// much simpler implementation of various optimizations.
 	bool oldWriting = writing;
@@ -301,7 +301,7 @@ void UsedVarsVisitor::visit(ShPtr<StructIndexOpExpr> expr) {
 	writing = oldWriting;
 }
 
-void UsedVarsVisitor::visit(ShPtr<DerefOpExpr> expr) {
+void UsedVarsVisitor::visit(DerefOpExpr* expr) {
 	// We consider a in *a = 5 to be just read (not written). This allows a
 	// much simpler implementation of various optimizations.
 	bool oldWriting = writing;
@@ -310,7 +310,7 @@ void UsedVarsVisitor::visit(ShPtr<DerefOpExpr> expr) {
 	writing = oldWriting;
 }
 
-void UsedVarsVisitor::visit(ShPtr<AssignStmt> stmt) {
+void UsedVarsVisitor::visit(AssignStmt* stmt) {
 	writing = true;
 	stmt->getLhs()->accept(this);
 	writing = false;
@@ -321,11 +321,11 @@ void UsedVarsVisitor::visit(ShPtr<AssignStmt> stmt) {
 	}
 }
 
-void UsedVarsVisitor::visit(ShPtr<VarDefStmt> stmt) {
+void UsedVarsVisitor::visit(VarDefStmt* stmt) {
 	writing = true;
 	stmt->getVar()->accept(this);
 	writing = false;
-	if (ShPtr<Expression> init = stmt->getInitializer()) {
+	if (Expression* init = stmt->getInitializer()) {
 		init->accept(this);
 	}
 
@@ -334,7 +334,7 @@ void UsedVarsVisitor::visit(ShPtr<VarDefStmt> stmt) {
 	}
 }
 
-void UsedVarsVisitor::visit(ShPtr<ForLoopStmt> stmt) {
+void UsedVarsVisitor::visit(ForLoopStmt* stmt) {
 	writing = true;
 	stmt->getIndVar()->accept(this);
 	writing = false;

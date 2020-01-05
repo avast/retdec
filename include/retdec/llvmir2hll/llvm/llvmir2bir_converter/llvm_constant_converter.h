@@ -47,44 +47,44 @@ class LLVMValueConverter;
 */
 class LLVMConstantConverter final: private retdec::utils::NonCopyable {
 public:
-	LLVMConstantConverter(ShPtr<LLVMInstructionConverter> instConverter,
-		ShPtr<LLVMTypeConverter> typeConverter);
+	LLVMConstantConverter(LLVMInstructionConverter* instConverter,
+		LLVMTypeConverter* typeConverter);
 
-	ShPtr<Expression> convertToExpression(llvm::Constant *constant);
+	Expression* convertToExpression(llvm::Constant *constant);
 
 	/// @name Options
 	/// @{
-	void setLLVMValueConverter(ShPtr<LLVMValueConverter> conv);
+	void setLLVMValueConverter(LLVMValueConverter* conv);
 	/// @}
 
 private:
-	ShPtr<Expression> convertToExpression(const llvm::ConstantInt *cInt);
-	ShPtr<Expression> convertToExpression(const llvm::ConstantFP *cFloat);
-	ShPtr<Expression> convertToExpression(llvm::ConstantArray *cArray);
-	ShPtr<Expression> convertToExpression(llvm::ConstantDataArray *cArray);
-	ShPtr<Expression> convertToExpression(const llvm::ConstantStruct *cStruct);
-	ShPtr<Expression> convertToExpression(const llvm::ConstantPointerNull *cNullPtr);
-	ShPtr<Expression> convertToExpression(llvm::GlobalVariable *globVar);
+	Expression* convertToExpression(const llvm::ConstantInt *cInt);
+	Expression* convertToExpression(const llvm::ConstantFP *cFloat);
+	Expression* convertToExpression(llvm::ConstantArray *cArray);
+	Expression* convertToExpression(llvm::ConstantDataArray *cArray);
+	Expression* convertToExpression(const llvm::ConstantStruct *cStruct);
+	Expression* convertToExpression(const llvm::ConstantPointerNull *cNullPtr);
+	Expression* convertToExpression(llvm::GlobalVariable *globVar);
 
-	ShPtr<Expression> convertZeroInitializer(const llvm::Type *type);
-	ShPtr<Expression> convertZeroInitializer(const llvm::IntegerType *type);
-	ShPtr<Expression> convertZeroInitializer(const llvm::ArrayType *type);
-	ShPtr<Expression> convertZeroInitializer(const llvm::StructType *type);
-	ShPtr<Expression> convertZeroInitializer(const llvm::PointerType *type);
+	Expression* convertZeroInitializer(const llvm::Type *type);
+	Expression* convertZeroInitializer(const llvm::IntegerType *type);
+	Expression* convertZeroInitializer(const llvm::ArrayType *type);
+	Expression* convertZeroInitializer(const llvm::StructType *type);
+	Expression* convertZeroInitializer(const llvm::PointerType *type);
 
 	bool isBool(const llvm::ConstantInt *cInt) const;
-	ShPtr<ConstInt> getNameOfStructElement(unsigned index) const;
+	ConstInt* getNameOfStructElement(unsigned index) const;
 
-	ShPtr<LLVMValueConverter> getConverter();
+	LLVMValueConverter* getConverter();
 
 	/// A converter from LLVM values to values in BIR.
-	WkPtr<LLVMValueConverter> converter;
+	LLVMValueConverter* converter = nullptr;
 
 	/// A converter from LLVM instruction to expression in BIR.
-	ShPtr<LLVMInstructionConverter> instConverter;
+	LLVMInstructionConverter* instConverter = nullptr;
 
 	/// A converter from LLVM type to type in BIR.
-	ShPtr<LLVMTypeConverter> typeConverter;
+	LLVMTypeConverter* typeConverter = nullptr;
 };
 
 } // namespace llvmir2hll

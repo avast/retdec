@@ -62,25 +62,25 @@ class ValueAnalysis;
 */
 class IfBeforeLoopOptimizer final: public FuncOptimizer {
 public:
-	IfBeforeLoopOptimizer(ShPtr<Module> module, ShPtr<ValueAnalysis> va);
+	IfBeforeLoopOptimizer(Module* module, ValueAnalysis* va);
 
 	virtual std::string getId() const override { return "IfBeforeLoop"; }
 
 private:
 	virtual void doOptimization() override;
 
-	bool tryOptimizationCase1(ShPtr<IfStmt> stmt);
-	bool tryOptimizationCase2(ShPtr<IfStmt> stmt);
+	bool tryOptimizationCase1(IfStmt* stmt);
+	bool tryOptimizationCase2(IfStmt* stmt);
 
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<IfStmt> stmt) override;
+	virtual void visit(IfStmt* stmt) override;
 	/// @}
 
 private:
 	/// Analysis of values.
-	ShPtr<ValueAnalysis> va;
+	ValueAnalysis* va = nullptr;
 };
 
 } // namespace llvmir2hll

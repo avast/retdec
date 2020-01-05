@@ -96,7 +96,7 @@ ToStringCorrectConversionToStringHexaWithPrefix) {
 #if DEATH_TESTS_ENABLED
 TEST_F(ConstIntTests,
 ToStringViolatedPreconditionInvalidRadix) {
-	ShPtr<ConstInt> i(ConstInt::create(1024, 16, false));
+	ConstInt* i(ConstInt::create(1024, 16, false));
 
 	EXPECT_DEATH(i->toString(0), ".*toString.*Precondition.*failed.*");
 	EXPECT_DEATH(i->toString(1), ".*toString.*Precondition.*failed.*");
@@ -117,7 +117,7 @@ ToStringViolatedPreconditionInvalidRadix) {
 
 TEST_F(ConstIntTests,
 ToHexStringWorksLikeToString) {
-	ShPtr<ConstInt> i(ConstInt::create(1024, 32, false));
+	ConstInt* i(ConstInt::create(1024, 32, false));
 
 	EXPECT_EQ(i->toString(16, "0x"), i->toHexString());
 	EXPECT_EQ(i->toString(16, ""), i->toHexString(""));
@@ -129,8 +129,8 @@ ToHexStringWorksLikeToString) {
 
 TEST_F(ConstIntTests,
 flipSign) {
-	ShPtr<ConstInt> posInt(ConstInt::create(5, 32, true));
-	ShPtr<ConstInt> negInt(ConstInt::create(-2, 64, true));
+	ConstInt* posInt(ConstInt::create(5, 32, true));
+	ConstInt* negInt(ConstInt::create(-2, 64, true));
 
 	// Flip sign.
 	posInt->flipSign();
@@ -229,38 +229,38 @@ IsUnsignedReturnsFalseWhenConstantIsSigned) {
 
 TEST_F(ConstIntTests,
 GetTwoToPositivePowerTwoToZeroIsOne) {
-	ShPtr<ConstInt> x(ConstInt::create(0, 64, false));
+	ConstInt* x(ConstInt::create(0, 64, false));
 	EXPECT_EQ(llvm::APInt(64, 1), ConstInt::getTwoToPositivePower(x)->getValue());
 }
 
 TEST_F(ConstIntTests,
 GetTwoToPositivePowerTwoToOneIsTwo) {
-	ShPtr<ConstInt> x(ConstInt::create(1, 64, false));
+	ConstInt* x(ConstInt::create(1, 64, false));
 	EXPECT_EQ(llvm::APInt(64, 2), ConstInt::getTwoToPositivePower(x)->getValue());
 }
 
 TEST_F(ConstIntTests,
 GetTwoToPositivePowerTwoToTwoIsFour) {
-	ShPtr<ConstInt> x(ConstInt::create(2, 64, false));
+	ConstInt* x(ConstInt::create(2, 64, false));
 	EXPECT_EQ(llvm::APInt(64, 4), ConstInt::getTwoToPositivePower(x)->getValue());
 }
 
 TEST_F(ConstIntTests,
 GetTwoToPositivePowerTwoToThreeIsEight) {
-	ShPtr<ConstInt> x(ConstInt::create(3, 64, false));
+	ConstInt* x(ConstInt::create(3, 64, false));
 	EXPECT_EQ(llvm::APInt(64, 8), ConstInt::getTwoToPositivePower(x)->getValue());
 }
 
 TEST_F(ConstIntTests,
 GetTwoToPositivePowerTwoTo16Is65536) {
-	ShPtr<ConstInt> x(ConstInt::create(16, 64, false));
+	ConstInt* x(ConstInt::create(16, 64, false));
 	EXPECT_EQ(llvm::APInt(64, 65536), ConstInt::getTwoToPositivePower(x)->getValue());
 }
 
 #if DEATH_TESTS_ENABLED
 TEST_F(ConstIntTests,
 GetTwoToPositivePowerPreconditionXNonNull) {
-	ASSERT_DEATH(ConstInt::getTwoToPositivePower(ShPtr<ConstInt>()),
+	ASSERT_DEATH(ConstInt::getTwoToPositivePower(ConstInt*()),
 		".*getTwoToPositivePower.*Precondition.*failed.*");
 }
 #endif
@@ -268,7 +268,7 @@ GetTwoToPositivePowerPreconditionXNonNull) {
 #if DEATH_TESTS_ENABLED
 TEST_F(ConstIntTests,
 GetTwoToPositivePowerPreconditionXGreaterOrEqualZero) {
-	ShPtr<ConstInt> x(ConstInt::create(-1, 64, true));
+	ConstInt* x(ConstInt::create(-1, 64, true));
 	ASSERT_DEATH(ConstInt::getTwoToPositivePower(x),
 		".*getTwoToPositivePower.*Precondition.*failed.*");
 }

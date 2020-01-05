@@ -33,7 +33,7 @@ TEST_F(DeadLocalAssignOptimizerTests,
 OptimizerHasNonEmptyID) {
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
 
-	ShPtr<DeadLocalAssignOptimizer> optimizer(new DeadLocalAssignOptimizer(module, va));
+	DeadLocalAssignOptimizer* optimizer(new DeadLocalAssignOptimizer(module, va));
 
 	EXPECT_TRUE(!optimizer->getId().empty()) <<
 		"the optimizer should have a non-empty ID";
@@ -61,9 +61,9 @@ OptimizeOneUseVarDefStmtNoInitializer) {
 	// def test():
 	//     a  (VarDefStmt)
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	testFunc->addLocalVar(varA);
-	ShPtr<VarDefStmt> varDefA(VarDefStmt::create(varA));
+	VarDefStmt* varDefA(VarDefStmt::create(varA));
 	testFunc->setBody(varDefA);
 
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
@@ -83,10 +83,10 @@ OptimizeOneUseVarDefStmtWithConstantInitializer) {
 	// def test():
 	//     a = 1  (VarDefStmt)
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	testFunc->addLocalVar(varA);
-	ShPtr<ConstInt> constInt1(ConstInt::create(llvm::APInt(16, 1)));
-	ShPtr<VarDefStmt> varDefA(VarDefStmt::create(varA, constInt1));
+	ConstInt* constInt1(ConstInt::create(llvm::APInt(16, 1)));
+	VarDefStmt* varDefA(VarDefStmt::create(varA, constInt1));
 	testFunc->setBody(varDefA);
 
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
@@ -106,10 +106,10 @@ OptimizeOneUseAssignStmt) {
 	// def test():
 	//     a = 1  (AssignStmt)
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	testFunc->addLocalVar(varA);
-	ShPtr<ConstInt> constInt1(ConstInt::create(llvm::APInt(16, 1)));
-	ShPtr<AssignStmt> assignA1(AssignStmt::create(varA, constInt1));
+	ConstInt* constInt1(ConstInt::create(llvm::APInt(16, 1)));
+	AssignStmt* assignA1(AssignStmt::create(varA, constInt1));
 	testFunc->setBody(assignA1);
 
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
@@ -130,11 +130,11 @@ OptimizeTwoUsesConstantOnRhs) {
 	//     a      (VarDefStmt)
 	//     a = 1  (AssignStmt)
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	testFunc->addLocalVar(varA);
-	ShPtr<ConstInt> constInt1(ConstInt::create(llvm::APInt(16, 1)));
-	ShPtr<AssignStmt> assignA1(AssignStmt::create(varA, constInt1));
-	ShPtr<VarDefStmt> varDefA(VarDefStmt::create(varA, ShPtr<Expression>(), assignA1));
+	ConstInt* constInt1(ConstInt::create(llvm::APInt(16, 1)));
+	AssignStmt* assignA1(AssignStmt::create(varA, constInt1));
+	VarDefStmt* varDefA(VarDefStmt::create(varA, Expression*(), assignA1));
 	testFunc->setBody(varDefA);
 
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
@@ -158,14 +158,14 @@ OptimizeThreeUses) {
 	//     a = 1  (AssignStmt)
 	//     a = g  (AssignStmt)
 	//
-	ShPtr<Variable> varG(Variable::create("g", IntType::create(16)));
+	Variable* varG(Variable::create("g", IntType::create(16)));
 	module->addGlobalVar(varG);
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	testFunc->addLocalVar(varA);
-	ShPtr<AssignStmt> assignAG(AssignStmt::create(varA, varG));
-	ShPtr<ConstInt> constInt1(ConstInt::create(llvm::APInt(16, 1)));
-	ShPtr<AssignStmt> assignA1(AssignStmt::create(varA, constInt1, assignAG));
-	ShPtr<VarDefStmt> varDefA(VarDefStmt::create(varA, ShPtr<Expression>(), assignA1));
+	AssignStmt* assignAG(AssignStmt::create(varA, varG));
+	ConstInt* constInt1(ConstInt::create(llvm::APInt(16, 1)));
+	AssignStmt* assignA1(AssignStmt::create(varA, constInt1, assignAG));
+	VarDefStmt* varDefA(VarDefStmt::create(varA, Expression*(), assignA1));
 	testFunc->setBody(varDefA);
 
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
@@ -186,12 +186,12 @@ OptimizeTwoUsesVariableOnRhs) {
 	//     a      (VarDefStmt)
 	//     a = b  (AssignStmt)
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
 	testFunc->addParam(varB);
-	ShPtr<AssignStmt> assignAB(AssignStmt::create(varA, varB));
-	ShPtr<VarDefStmt> varDefA(VarDefStmt::create(varA, ShPtr<Expression>(), assignAB));
+	AssignStmt* assignAB(AssignStmt::create(varA, varB));
+	VarDefStmt* varDefA(VarDefStmt::create(varA, Expression*(), assignAB));
 	testFunc->setBody(varDefA);
 
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
@@ -213,12 +213,12 @@ DoNotOptimizeWhenVariablesIsRead) {
 	//     a = 1  (AssignStmt)
 	//     return a
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	testFunc->addLocalVar(varA);
-	ShPtr<ReturnStmt> returnA(ReturnStmt::create(varA));
-	ShPtr<ConstInt> constInt1(ConstInt::create(llvm::APInt(16, 1)));
-	ShPtr<AssignStmt> assignA1(AssignStmt::create(varA, constInt1, returnA));
-	ShPtr<VarDefStmt> varDefA(VarDefStmt::create(varA, ShPtr<Expression>(), assignA1));
+	ReturnStmt* returnA(ReturnStmt::create(varA));
+	ConstInt* constInt1(ConstInt::create(llvm::APInt(16, 1)));
+	AssignStmt* assignA1(AssignStmt::create(varA, constInt1, returnA));
+	VarDefStmt* varDefA(VarDefStmt::create(varA, Expression*(), assignA1));
 	testFunc->setBody(varDefA);
 
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
@@ -228,15 +228,15 @@ DoNotOptimizeWhenVariablesIsRead) {
 
 	// Check that the output is correct.
 	// a
-	ShPtr<Statement> stmt1(testFunc->getBody());
+	Statement* stmt1(testFunc->getBody());
 	ASSERT_EQ(varDefA, stmt1) <<
 		"expected `" << varDefA << "`, got `" << stmt1 << "`";
 	// a = 1
-	ShPtr<Statement> stmt2(stmt1->getSuccessor());
+	Statement* stmt2(stmt1->getSuccessor());
 	ASSERT_EQ(assignA1, stmt2) <<
 		"expected `" << assignA1 << "`, got `" << stmt2 << "`";
 	// return a
-	ShPtr<Statement> stmt3(stmt2->getSuccessor());
+	Statement* stmt3(stmt2->getSuccessor());
 	ASSERT_EQ(returnA, stmt3) <<
 		"expected `" << returnA << "`, got `" << stmt3 << "`";
 }
@@ -249,12 +249,12 @@ DoNotOptimizeWhenRhsHasSideEffects) {
 	//     a           (VarDefStmt)
 	//     a = rand()  (AssignStmt)
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varRand(Variable::create("a", IntType::create(16)));
-	ShPtr<CallExpr> randCall(CallExpr::create(varRand));
-	ShPtr<AssignStmt> assignRand(AssignStmt::create(varA, randCall));
-	ShPtr<VarDefStmt> varDefA(VarDefStmt::create(varA, ShPtr<Expression>(), assignRand));
+	Variable* varRand(Variable::create("a", IntType::create(16)));
+	CallExpr* randCall(CallExpr::create(varRand));
+	AssignStmt* assignRand(AssignStmt::create(varA, randCall));
+	VarDefStmt* varDefA(VarDefStmt::create(varA, Expression*(), assignRand));
 	testFunc->setBody(varDefA);
 
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
@@ -264,11 +264,11 @@ DoNotOptimizeWhenRhsHasSideEffects) {
 
 	// Check that the output is correct.
 	// a
-	ShPtr<Statement> stmt1(testFunc->getBody());
+	Statement* stmt1(testFunc->getBody());
 	ASSERT_EQ(varDefA, stmt1) <<
 		"expected `" << varDefA << "`, got `" << stmt1 << "`";
 	// a = rand()
-	ShPtr<Statement> stmt2(stmt1->getSuccessor());
+	Statement* stmt2(stmt1->getSuccessor());
 	ASSERT_EQ(assignRand, stmt2) <<
 		"expected `" << assignRand << "`, got `" << stmt2 << "`";
 }
@@ -282,10 +282,10 @@ DoNotOptimizeAssignmentOfConstantIntoGlobalVariable) {
 	// def test():
 	//     a = 1  (AssignStmt)
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	module->addGlobalVar(varA);
-	ShPtr<ConstInt> constInt1(ConstInt::create(llvm::APInt(16, 1)));
-	ShPtr<AssignStmt> assignA1(AssignStmt::create(varA, constInt1));
+	ConstInt* constInt1(ConstInt::create(llvm::APInt(16, 1)));
+	AssignStmt* assignA1(AssignStmt::create(varA, constInt1));
 	testFunc->setBody(assignA1);
 
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
@@ -295,7 +295,7 @@ DoNotOptimizeAssignmentOfConstantIntoGlobalVariable) {
 
 	// Check that the output is correct.
 	// a = 1
-	ShPtr<Statement> stmt(testFunc->getBody());
+	Statement* stmt(testFunc->getBody());
 	ASSERT_EQ(assignA1, stmt) <<
 		"expected `" << assignA1 << "`, got `" << stmt << "`";
 }
@@ -308,11 +308,11 @@ DoNotOptimizeAssignmentIntoExternalVariable) {
 	//     a = 1  (VarDefStmt, where 'a' is external and comes from a volatile
 	//             store)
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	varA->markAsExternal();
 	testFunc->addLocalVar(varA);
-	ShPtr<ConstInt> constInt1(ConstInt::create(llvm::APInt(16, 1)));
-	ShPtr<VarDefStmt> varDefA(VarDefStmt::create(varA, constInt1));
+	ConstInt* constInt1(ConstInt::create(llvm::APInt(16, 1)));
+	VarDefStmt* varDefA(VarDefStmt::create(varA, constInt1));
 	testFunc->setBody(varDefA);
 
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
@@ -322,7 +322,7 @@ DoNotOptimizeAssignmentIntoExternalVariable) {
 
 	// Check that the output is correct.
 	// a = 1
-	ShPtr<Statement> stmt(testFunc->getBody());
+	Statement* stmt(testFunc->getBody());
 	ASSERT_EQ(varDefA, stmt) <<
 		"expected `" << varDefA << "`, got `" << stmt << "`";
 }

@@ -23,7 +23,7 @@ REGISTER_AT_FACTORY("BoolComparison", BOOL_COMPARISON_OPTIMIZER_ID,
 * @param[in] arithmExprEvaluator @a The used evaluator of arithmetical
 *            expressions.
 */
-BoolComparisonSubOptimizer::BoolComparisonSubOptimizer(ShPtr<ArithmExprEvaluator>
+BoolComparisonSubOptimizer::BoolComparisonSubOptimizer(ArithmExprEvaluator*
 		arithmExprEvaluator): SubOptimizer(arithmExprEvaluator) {}
 
 /**
@@ -32,16 +32,16 @@ BoolComparisonSubOptimizer::BoolComparisonSubOptimizer(ShPtr<ArithmExprEvaluator
 * @param[in] arithmExprEvaluator @a The used evaluator of arithmetical
 *            expressions.
 */
-ShPtr<SubOptimizer> BoolComparisonSubOptimizer::create(
-		ShPtr<ArithmExprEvaluator> arithmExprEvaluator) {
-	return std::make_shared<BoolComparisonSubOptimizer>(arithmExprEvaluator);
+SubOptimizer* BoolComparisonSubOptimizer::create(
+		ArithmExprEvaluator* arithmExprEvaluator) {
+	return new BoolComparisonSubOptimizer(arithmExprEvaluator);
 }
 
 std::string BoolComparisonSubOptimizer::getId() const {
 	return BOOL_COMPARISON_OPTIMIZER_ID;
 }
 
-void BoolComparisonSubOptimizer::visit(ShPtr<EqOpExpr> expr) {
+void BoolComparisonSubOptimizer::visit(EqOpExpr* expr) {
 	optimizeNestedComparisons(expr);
 
 	auto secOpBool = cast<ConstBool>(expr->getSecondOperand());
@@ -74,7 +74,7 @@ void BoolComparisonSubOptimizer::visit(ShPtr<EqOpExpr> expr) {
 	}
 }
 
-void BoolComparisonSubOptimizer::visit(ShPtr<NeqOpExpr> expr) {
+void BoolComparisonSubOptimizer::visit(NeqOpExpr* expr) {
 	optimizeNestedComparisons(expr);
 
 	auto secOpBool = cast<ConstBool>(expr->getSecondOperand());
@@ -112,12 +112,12 @@ void BoolComparisonSubOptimizer::optimizeNestedComparisons(ExprType expr) {
 	SubOptimizer::visit(expr);
 }
 
-void BoolComparisonSubOptimizer::replaceWithFirstOperand(ShPtr<BinaryOpExpr> expr) {
+void BoolComparisonSubOptimizer::replaceWithFirstOperand(BinaryOpExpr* expr) {
 	Expression::replaceExpression(expr, expr->getFirstOperand());
 }
 
 void BoolComparisonSubOptimizer::replaceWithNegationOfFirstOperand(
-		ShPtr<BinaryOpExpr> expr) {
+		BinaryOpExpr* expr) {
 	Expression::replaceExpression(
 		expr,
 		ExpressionNegater::negate(expr->getFirstOperand())

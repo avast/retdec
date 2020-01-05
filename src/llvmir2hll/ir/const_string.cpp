@@ -26,13 +26,13 @@ ConstString::ConstString(const UnderlyingStringType &value, std::size_t charSize
 	Constant(), value(value), charSize(charSize),
 	type(StringType::create(charSize)) {}
 
-ShPtr<Value> ConstString::clone() {
+Value* ConstString::clone() {
 	auto constString = ConstString::create(value, charSize);
 	constString->setMetadata(getMetadata());
 	return constString;
 }
 
-bool ConstString::isEqualTo(ShPtr<Value> otherValue) const {
+bool ConstString::isEqualTo(Value* otherValue) const {
 	// Types, values, and character sizes have to be equal.
 	if (auto otherConstString = cast<ConstString>(otherValue)) {
 		return value == otherConstString->value &&
@@ -41,11 +41,11 @@ bool ConstString::isEqualTo(ShPtr<Value> otherValue) const {
 	return false;
 }
 
-ShPtr<Type> ConstString::getType() const {
+Type* ConstString::getType() const {
 	return type;
 }
 
-void ConstString::replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) {
+void ConstString::replace(Expression* oldExpr, Expression* newExpr) {
 	PRECONDITION_NON_NULL(oldExpr);
 
 	// There is nothing to be replaced.
@@ -95,23 +95,23 @@ bool ConstString::isWideString() const {
 * @par Preconditions
 *  - @a charSize is 8, 16, or 32
 */
-ShPtr<ConstString> ConstString::create(const UnderlyingStringType &value,
+ConstString* ConstString::create(const UnderlyingStringType &value,
 		std::size_t charSize) {
 	PRECONDITION(charSize == 8 || charSize == 16 || charSize == 32,
 		"invalid charSize " << charSize);
 
-	return ShPtr<ConstString>(new ConstString(value, charSize));
+	return new ConstString(value, charSize);
 }
 
 /**
 * @brief Constructs a string constant initialized from the given 8-bit string.
 */
-ShPtr<ConstString> ConstString::create(const std::string &str) {
+ConstString* ConstString::create(const std::string &str) {
 	return create({str.begin(), str.end()}, 8);
 }
 
 void ConstString::accept(Visitor *v) {
-	v->visit(ucast<ConstString>(shared_from_this()));
+	v->visit(ucast<ConstString>(this));
 }
 
 } // namespace llvmir2hll

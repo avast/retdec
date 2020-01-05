@@ -15,7 +15,7 @@ namespace llvmir2hll {
 
 class GotoStmtOptimizer final: public FuncOptimizer {
 public:
-	GotoStmtOptimizer(ShPtr<Module> module);
+	GotoStmtOptimizer(Module* module);
 
 	virtual std::string getId() const override { return "GotoStmt"; }
 
@@ -23,7 +23,7 @@ private:
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<GotoStmt> stmt) override;
+	virtual void visit(GotoStmt* stmt) override;
 	/// @}
 };
 

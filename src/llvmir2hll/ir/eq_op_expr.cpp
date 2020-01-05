@@ -17,25 +17,25 @@ namespace llvmir2hll {
 *
 * See create() for more information.
 */
-EqOpExpr::EqOpExpr(ShPtr<Expression> op1, ShPtr<Expression> op2):
+EqOpExpr::EqOpExpr(Expression* op1, Expression* op2):
 	BinaryOpExpr(op1, op2) {}
 
-bool EqOpExpr::isEqualTo(ShPtr<Value> otherValue) const {
-	if (ShPtr<EqOpExpr> otherValueEqOpExpr = cast<EqOpExpr>(otherValue)) {
+bool EqOpExpr::isEqualTo(Value* otherValue) const {
+	if (EqOpExpr* otherValueEqOpExpr = cast<EqOpExpr>(otherValue)) {
 		return op1->isEqualTo(otherValueEqOpExpr->getFirstOperand()) &&
 			op2->isEqualTo(otherValueEqOpExpr->getSecondOperand());
 	}
 	return false;
 }
 
-ShPtr<Value> EqOpExpr::clone() {
-	ShPtr<EqOpExpr> eqOpExpr(EqOpExpr::create(
+Value* EqOpExpr::clone() {
+	EqOpExpr* eqOpExpr(EqOpExpr::create(
 		ucast<Expression>(op1->clone()), ucast<Expression>(op2->clone())));
 	eqOpExpr->setMetadata(getMetadata());
 	return eqOpExpr;
 }
 
-ShPtr<Type> EqOpExpr::getType() const {
+Type* EqOpExpr::getType() const {
 	// The type of `x == y` should be bool.
 	return IntType::create(1);
 }
@@ -49,13 +49,13 @@ ShPtr<Type> EqOpExpr::getType() const {
 * @par Preconditions
 *  - both operands are non-null
 */
-ShPtr<EqOpExpr> EqOpExpr::create(ShPtr<Expression> op1, ShPtr<Expression> op2) {
+EqOpExpr* EqOpExpr::create(Expression* op1, Expression* op2) {
 	PRECONDITION_NON_NULL(op1);
 	PRECONDITION_NON_NULL(op2);
 
-	ShPtr<EqOpExpr> expr(new EqOpExpr(op1, op2));
+	EqOpExpr* expr(new EqOpExpr(op1, op2));
 
-	// Initialization (recall that shared_from_this() cannot be called in a
+	// Initialization (recall that this cannot be called in a
 	// constructor).
 	op1->addObserver(expr);
 	op2->addObserver(expr);
@@ -64,7 +64,7 @@ ShPtr<EqOpExpr> EqOpExpr::create(ShPtr<Expression> op1, ShPtr<Expression> op2) {
 }
 
 void EqOpExpr::accept(Visitor *v) {
-	v->visit(ucast<EqOpExpr>(shared_from_this()));
+	v->visit(ucast<EqOpExpr>(this));
 }
 
 } // namespace llvmir2hll

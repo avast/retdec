@@ -36,7 +36,7 @@ namespace tests {
 */
 class IfToSwitchOptimizerTests: public TestsWithModule {
 protected:
-	void checkCorrectConvertIfToSwitch(ShPtr<IfStmt> ifStmt, ShPtr<Statement>
+	void checkCorrectConvertIfToSwitch(IfStmt* ifStmt, Statement*
 		stmt, bool isBreakNeeded);
 };
 
@@ -47,16 +47,16 @@ protected:
 * @param[in] stmt Optimized statement to compare.
 * @param[in] isBreakNeeded Set control to if break is in case clauses needed.
 */
-void IfToSwitchOptimizerTests::checkCorrectConvertIfToSwitch(ShPtr<IfStmt> ifStmt,
-		ShPtr<Statement> stmt, bool isBreakNeeded) {
-	ShPtr<SwitchStmt> outSwitchStmt(cast<SwitchStmt>(stmt));
+void IfToSwitchOptimizerTests::checkCorrectConvertIfToSwitch(IfStmt* ifStmt,
+		Statement* stmt, bool isBreakNeeded) {
+	SwitchStmt* outSwitchStmt(cast<SwitchStmt>(stmt));
 	ASSERT_TRUE(outSwitchStmt) <<
 		"expected `SwitchStmt`, "
 		"got `" << ifStmt << "`";
 
 	// Check control expression.
-	ShPtr<EqOpExpr> eqOpExpr(cast<EqOpExpr>(ifStmt->getFirstIfCond()));
-	ShPtr<Expression> controlExpr;
+	EqOpExpr* eqOpExpr(cast<EqOpExpr>(ifStmt->getFirstIfCond()));
+	Expression* controlExpr;
 	if (isa<ConstInt>(eqOpExpr->getFirstOperand())) {
 		controlExpr = eqOpExpr->getSecondOperand();
 	} else {
@@ -69,8 +69,8 @@ void IfToSwitchOptimizerTests::checkCorrectConvertIfToSwitch(ShPtr<IfStmt> ifStm
 	// Check correctness transform if clauses to switch clauses.
 	auto switchIt = outSwitchStmt->clause_begin();
 	for (auto i = ifStmt->clause_begin(), e = ifStmt->clause_end(); i != e; ++i) {
-		ShPtr<EqOpExpr> eqOpExpr(cast<EqOpExpr>(i->first));
-		ShPtr<ConstInt> constant(cast<ConstInt>(eqOpExpr->getFirstOperand()));
+		EqOpExpr* eqOpExpr(cast<EqOpExpr>(i->first));
+		ConstInt* constant(cast<ConstInt>(eqOpExpr->getFirstOperand()));
 		if (!constant) {
 			constant = cast<ConstInt>(eqOpExpr->getSecondOperand());
 		}
@@ -78,7 +78,7 @@ void IfToSwitchOptimizerTests::checkCorrectConvertIfToSwitch(ShPtr<IfStmt> ifStm
 			"expected `" << constant << "`, "
 			"got `" << switchIt->first << "`";
 
-		ShPtr<BreakStmt> outBreakStmt(cast<BreakStmt>(Statement::
+		BreakStmt* outBreakStmt(cast<BreakStmt>(Statement::
 			getLastStatement(i->second)));
 		if (isBreakNeeded) {
 			ASSERT_TRUE(outBreakStmt) <<
@@ -95,7 +95,7 @@ void IfToSwitchOptimizerTests::checkCorrectConvertIfToSwitch(ShPtr<IfStmt> ifStm
 		ASSERT_TRUE(outSwitchStmt->hasDefaultClause()) <<
 			"expected that `" << outSwitchStmt <<
 			"` has default clause";
-		ShPtr<BreakStmt> outBreakStmt(cast<BreakStmt>(Statement::getLastStatement(
+		BreakStmt* outBreakStmt(cast<BreakStmt>(Statement::getLastStatement(
 			outSwitchStmt->getDefaultClauseBody())));
 		ASSERT_TRUE(outBreakStmt) <<
 			"expected `BreakStmt`";
@@ -106,7 +106,7 @@ TEST_F(IfToSwitchOptimizerTests,
 OptimizerHasNonEmptyID) {
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
 
-	ShPtr<IfToSwitchOptimizer> optimizer(new IfToSwitchOptimizer(module, va));
+	IfToSwitchOptimizer* optimizer(new IfToSwitchOptimizer(module, va));
 
 	EXPECT_TRUE(!optimizer->getId().empty()) <<
 		"the optimizer should have a non-empty ID";
@@ -122,29 +122,29 @@ NotSameControlExprInElseIfClausesNotOptimize) {
 	//
 	// Not optimized
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<AddOpExpr> addOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	AddOpExpr* addOpExpr(
 		AddOpExpr::create(
 			varB,
 			ConstInt::create(3, 64)
 	));
-	ShPtr<EqOpExpr> eqOpExprIf(
+	EqOpExpr* eqOpExprIf(
 		EqOpExpr::create(
 			varA,
 			ConstInt::create(5, 64)
 	));
-	ShPtr<EqOpExpr> eqOpExprElseIf(
+	EqOpExpr* eqOpExprElseIf(
 		EqOpExpr::create(
 			addOpExpr,
 			ConstInt::create(6, 64)
 	));
-	ShPtr<AssignStmt> assignStmt(
+	AssignStmt* assignStmt(
 		AssignStmt::create(
 			varB,
 			addOpExpr
 	));
-	ShPtr<IfStmt> ifStmt(IfStmt::create(eqOpExprIf, assignStmt));
+	IfStmt* ifStmt(IfStmt::create(eqOpExprIf, assignStmt));
 	ifStmt->addClause(eqOpExprElseIf, assignStmt);
 	testFunc->setBody(ifStmt);
 
@@ -153,7 +153,7 @@ NotSameControlExprInElseIfClausesNotOptimize) {
 	Optimizer::optimize<IfToSwitchOptimizer>(module, va);
 
 	ASSERT_TRUE(testFunc->getBody()) << "expected a non-empty body";
-	ShPtr<IfStmt> outIfStmt(cast<IfStmt>(testFunc->getBody()));
+	IfStmt* outIfStmt(cast<IfStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outIfStmt) <<
 		"expected `IfStmt`, "
 		"got `" << testFunc->getBody() << "`";
@@ -167,24 +167,24 @@ OnlyIfConditionNotOptimize) {
 	//
 	// Not optimized
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<AddOpExpr> addOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	AddOpExpr* addOpExpr(
 		AddOpExpr::create(
 			varB,
 			ConstInt::create(3, 64)
 	));
-	ShPtr<EqOpExpr> eqOpExprIf(
+	EqOpExpr* eqOpExprIf(
 		EqOpExpr::create(
 			varA,
 			ConstInt::create(5, 64)
 	));
-	ShPtr<AssignStmt> assignStmt(
+	AssignStmt* assignStmt(
 		AssignStmt::create(
 			varB,
 			addOpExpr
 	));
-	ShPtr<IfStmt> ifStmt(IfStmt::create(eqOpExprIf, assignStmt));
+	IfStmt* ifStmt(IfStmt::create(eqOpExprIf, assignStmt));
 	testFunc->setBody(ifStmt);
 
 	// Optimize the module.
@@ -192,7 +192,7 @@ OnlyIfConditionNotOptimize) {
 	Optimizer::optimize<IfToSwitchOptimizer>(module, va);
 
 	ASSERT_TRUE(testFunc->getBody()) << "expected a non-empty body";
-	ShPtr<IfStmt> outIfStmt(cast<IfStmt>(testFunc->getBody()));
+	IfStmt* outIfStmt(cast<IfStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outIfStmt) <<
 		"expected `IfStmt`, "
 		"got `" << testFunc->getBody() << "`";
@@ -208,18 +208,18 @@ SameControlExprButNoEqOpExprNotOptimize) {
 	//
 	// Not optimized
 	//
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<AddOpExpr> addOpExpr(
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	AddOpExpr* addOpExpr(
 		AddOpExpr::create(
 			varB,
 			ConstInt::create(3, 64)
 	));
-	ShPtr<AssignStmt> assignStmt(
+	AssignStmt* assignStmt(
 		AssignStmt::create(
 			varB,
 			addOpExpr
 	));
-	ShPtr<IfStmt> ifStmt(IfStmt::create(addOpExpr, assignStmt));
+	IfStmt* ifStmt(IfStmt::create(addOpExpr, assignStmt));
 	ifStmt->addClause(addOpExpr, assignStmt);
 	testFunc->setBody(ifStmt);
 
@@ -228,7 +228,7 @@ SameControlExprButNoEqOpExprNotOptimize) {
 	Optimizer::optimize<IfToSwitchOptimizer>(module, va);
 
 	ASSERT_TRUE(testFunc->getBody()) << "expected a non-empty body";
-	ShPtr<IfStmt> outIfStmt(cast<IfStmt>(testFunc->getBody()));
+	IfStmt* outIfStmt(cast<IfStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outIfStmt) <<
 		"expected `IfStmt`, "
 		"got `" << testFunc->getBody() << "`";
@@ -244,29 +244,29 @@ SameControlExprButNotConstIntOperandNotOptimize) {
 	//
 	// Not optimized
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<AddOpExpr> addOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	AddOpExpr* addOpExpr(
 		AddOpExpr::create(
 			varB,
 			ConstInt::create(3, 64)
 	));
-	ShPtr<EqOpExpr> eqOpExprIf(
+	EqOpExpr* eqOpExprIf(
 		EqOpExpr::create(
 			varA,
 			varA
 	));
-	ShPtr<EqOpExpr> eqOpExprElseIf(
+	EqOpExpr* eqOpExprElseIf(
 		EqOpExpr::create(
 			addOpExpr,
 			varB
 	));
-	ShPtr<AssignStmt> assignStmt(
+	AssignStmt* assignStmt(
 		AssignStmt::create(
 			varB,
 			addOpExpr
 	));
-	ShPtr<IfStmt> ifStmt(IfStmt::create(eqOpExprIf, assignStmt));
+	IfStmt* ifStmt(IfStmt::create(eqOpExprIf, assignStmt));
 	ifStmt->addClause(eqOpExprElseIf, assignStmt);
 	testFunc->setBody(ifStmt);
 
@@ -275,7 +275,7 @@ SameControlExprButNotConstIntOperandNotOptimize) {
 	Optimizer::optimize<IfToSwitchOptimizer>(module, va);
 
 	ASSERT_TRUE(testFunc->getBody()) << "expected a non-empty body";
-	ShPtr<IfStmt> outIfStmt(cast<IfStmt>(testFunc->getBody()));
+	IfStmt* outIfStmt(cast<IfStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outIfStmt) <<
 		"expected `IfStmt`, "
 		"got `" << testFunc->getBody() << "`";
@@ -291,29 +291,29 @@ SameControlExprButBreakInIfStmtNotOptimize) {
 	//
 	// Not optimized
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<AddOpExpr> addOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	AddOpExpr* addOpExpr(
 		AddOpExpr::create(
 			varB,
 			ConstInt::create(3, 64)
 	));
-	ShPtr<EqOpExpr> eqOpExprIf(
+	EqOpExpr* eqOpExprIf(
 		EqOpExpr::create(
 			addOpExpr,
 			ConstInt::create(2, 64)
 	));
-	ShPtr<EqOpExpr> eqOpExprElseIf(
+	EqOpExpr* eqOpExprElseIf(
 		EqOpExpr::create(
 			addOpExpr,
 			ConstInt::create(3, 64)
 	));
-	ShPtr<AssignStmt> assignStmt(
+	AssignStmt* assignStmt(
 		AssignStmt::create(
 			varB,
 			addOpExpr
 	));
-	ShPtr<IfStmt> ifStmt(IfStmt::create(eqOpExprIf, BreakStmt::create()));
+	IfStmt* ifStmt(IfStmt::create(eqOpExprIf, BreakStmt::create()));
 	ifStmt->addClause(eqOpExprElseIf, assignStmt);
 	testFunc->setBody(ifStmt);
 
@@ -322,7 +322,7 @@ SameControlExprButBreakInIfStmtNotOptimize) {
 	Optimizer::optimize<IfToSwitchOptimizer>(module, va);
 
 	ASSERT_TRUE(testFunc->getBody()) << "expected a non-empty body";
-	ShPtr<IfStmt> outIfStmt(cast<IfStmt>(testFunc->getBody()));
+	IfStmt* outIfStmt(cast<IfStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outIfStmt) <<
 		"expected `IfStmt`, "
 		"got `" << testFunc->getBody() << "`";
@@ -338,24 +338,24 @@ SameControlExprInElseIfClausesButDerefOpExprInControlExprNotOptimize) {
 	//
 	// Not optimized
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<DerefOpExpr> derefOpExpr(DerefOpExpr::create(varA));
-	ShPtr<EqOpExpr> eqOpExprIf(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	DerefOpExpr* derefOpExpr(DerefOpExpr::create(varA));
+	EqOpExpr* eqOpExprIf(
 		EqOpExpr::create(
 			derefOpExpr,
 			ConstInt::create(5, 64)
 	));
-	ShPtr<EqOpExpr> eqOpExprElseIf(
+	EqOpExpr* eqOpExprElseIf(
 		EqOpExpr::create(
 			derefOpExpr,
 			ConstInt::create(6, 64)
 	));
-	ShPtr<AssignStmt> assignStmt(
+	AssignStmt* assignStmt(
 		AssignStmt::create(
 			varA,
 			ConstInt::create(3, 64)
 	));
-	ShPtr<IfStmt> ifStmt(IfStmt::create(eqOpExprIf, assignStmt));
+	IfStmt* ifStmt(IfStmt::create(eqOpExprIf, assignStmt));
 	ifStmt->addClause(eqOpExprElseIf, assignStmt);
 	testFunc->setBody(ifStmt);
 
@@ -364,7 +364,7 @@ SameControlExprInElseIfClausesButDerefOpExprInControlExprNotOptimize) {
 	Optimizer::optimize<IfToSwitchOptimizer>(module, va);
 
 	ASSERT_TRUE(testFunc->getBody()) << "expected a non-empty body";
-	ShPtr<IfStmt> outIfStmt(cast<IfStmt>(testFunc->getBody()));
+	IfStmt* outIfStmt(cast<IfStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outIfStmt) <<
 		"expected `IfStmt`, "
 		"got `" << testFunc->getBody() << "`";
@@ -380,25 +380,25 @@ SameControlExprInElseIfClausesButArrayIndexOpExprInControlExprNotOptimize) {
 	//
 	// Not optimized
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<ArrayIndexOpExpr> arrayIndexOpExpr(ArrayIndexOpExpr::create(varA,
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	ArrayIndexOpExpr* arrayIndexOpExpr(ArrayIndexOpExpr::create(varA,
 		ConstInt::create(3, 64)));
-	ShPtr<EqOpExpr> eqOpExprIf(
+	EqOpExpr* eqOpExprIf(
 		EqOpExpr::create(
 			arrayIndexOpExpr,
 			ConstInt::create(5, 64)
 	));
-	ShPtr<EqOpExpr> eqOpExprElseIf(
+	EqOpExpr* eqOpExprElseIf(
 		EqOpExpr::create(
 			arrayIndexOpExpr,
 			ConstInt::create(6, 64)
 	));
-	ShPtr<AssignStmt> assignStmt(
+	AssignStmt* assignStmt(
 		AssignStmt::create(
 			varA,
 			ConstInt::create(3, 64)
 	));
-	ShPtr<IfStmt> ifStmt(IfStmt::create(eqOpExprIf, assignStmt));
+	IfStmt* ifStmt(IfStmt::create(eqOpExprIf, assignStmt));
 	ifStmt->addClause(eqOpExprElseIf, assignStmt);
 	testFunc->setBody(ifStmt);
 
@@ -407,7 +407,7 @@ SameControlExprInElseIfClausesButArrayIndexOpExprInControlExprNotOptimize) {
 	Optimizer::optimize<IfToSwitchOptimizer>(module, va);
 
 	ASSERT_TRUE(testFunc->getBody()) << "expected a non-empty body";
-	ShPtr<IfStmt> outIfStmt(cast<IfStmt>(testFunc->getBody()));
+	IfStmt* outIfStmt(cast<IfStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outIfStmt) <<
 		"expected `IfStmt`, "
 		"got `" << testFunc->getBody() << "`";
@@ -423,28 +423,28 @@ SameControlExprInElseIfClausesButFunctionCallInControlExprNotOptimize) {
 	//
 	// Not optimized
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	ExprVector args;
 	args.push_back(varA);
-	ShPtr<CallExpr> callExpr(CallExpr::create(varA, args));
-	ShPtr<ArrayIndexOpExpr> arrayIndexOpExpr(ArrayIndexOpExpr::create(varA,
+	CallExpr* callExpr(CallExpr::create(varA, args));
+	ArrayIndexOpExpr* arrayIndexOpExpr(ArrayIndexOpExpr::create(varA,
 		ConstInt::create(3, 64)));
-	ShPtr<EqOpExpr> eqOpExprIf(
+	EqOpExpr* eqOpExprIf(
 		EqOpExpr::create(
 			callExpr,
 			ConstInt::create(5, 64)
 	));
-	ShPtr<EqOpExpr> eqOpExprElseIf(
+	EqOpExpr* eqOpExprElseIf(
 		EqOpExpr::create(
 			callExpr,
 			ConstInt::create(6, 64)
 	));
-	ShPtr<AssignStmt> assignStmt(
+	AssignStmt* assignStmt(
 		AssignStmt::create(
 			varA,
 			ConstInt::create(3, 64)
 	));
-	ShPtr<IfStmt> ifStmt(IfStmt::create(eqOpExprIf, assignStmt));
+	IfStmt* ifStmt(IfStmt::create(eqOpExprIf, assignStmt));
 	ifStmt->addClause(eqOpExprElseIf, assignStmt);
 	testFunc->setBody(ifStmt);
 
@@ -453,7 +453,7 @@ SameControlExprInElseIfClausesButFunctionCallInControlExprNotOptimize) {
 	Optimizer::optimize<IfToSwitchOptimizer>(module, va);
 
 	ASSERT_TRUE(testFunc->getBody()) << "expected a non-empty body";
-	ShPtr<IfStmt> outIfStmt(cast<IfStmt>(testFunc->getBody()));
+	IfStmt* outIfStmt(cast<IfStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outIfStmt) <<
 		"expected `IfStmt`, "
 		"got `" << testFunc->getBody() << "`";
@@ -473,38 +473,38 @@ SimpleSubstituteIfToSwitchOptimize) {
 	//     case 6: b = b + 3; break;
 	// }
 	//
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<AddOpExpr> addOpExpr(
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	AddOpExpr* addOpExpr(
 		AddOpExpr::create(
 			varB,
 			ConstInt::create(3, 64)
 	));
-	ShPtr<AddOpExpr> addOpExpr2(
+	AddOpExpr* addOpExpr2(
 		AddOpExpr::create(
 			varB,
 			ConstInt::create(4, 64)
 	));
-	ShPtr<EqOpExpr> eqOpExprIf(
+	EqOpExpr* eqOpExprIf(
 		EqOpExpr::create(
 			addOpExpr,
 			ConstInt::create(5, 64)
 	));
-	ShPtr<EqOpExpr> eqOpExprElseIf(
+	EqOpExpr* eqOpExprElseIf(
 		EqOpExpr::create(
 			addOpExpr,
 			ConstInt::create(6, 64)
 	));
-	ShPtr<AssignStmt> assignStmt(
+	AssignStmt* assignStmt(
 		AssignStmt::create(
 			varB,
 			addOpExpr
 	));
-	ShPtr<AssignStmt> assignStmt2(
+	AssignStmt* assignStmt2(
 		AssignStmt::create(
 			varB,
 			addOpExpr2
 	));
-	ShPtr<IfStmt> ifStmt(IfStmt::create(eqOpExprIf, assignStmt));
+	IfStmt* ifStmt(IfStmt::create(eqOpExprIf, assignStmt));
 	ifStmt->addClause(eqOpExprElseIf, assignStmt2);
 	testFunc->setBody(ifStmt);
 
@@ -534,38 +534,38 @@ MoreComplicatedSubstituteIfToSwitchOptimize) {
 	//     case 12: b = b + 3; break;
 	// }
 	//
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<AddOpExpr> addOpExpr(
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	AddOpExpr* addOpExpr(
 		AddOpExpr::create(
 			varB,
 			ConstInt::create(3, 64)
 	));
-	ShPtr<EqOpExpr> eqOpExprIf(
+	EqOpExpr* eqOpExprIf(
 		EqOpExpr::create(
 			addOpExpr,
 			ConstInt::create(5, 64)
 	));
-	ShPtr<EqOpExpr> eqOpExprElseIf1(
+	EqOpExpr* eqOpExprElseIf1(
 		EqOpExpr::create(
 			addOpExpr,
 			ConstInt::create(6, 64)
 	));
-	ShPtr<EqOpExpr> eqOpExprElseIf2(
+	EqOpExpr* eqOpExprElseIf2(
 		EqOpExpr::create(
 			addOpExpr,
 			ConstInt::create(8, 64)
 	));
-	ShPtr<EqOpExpr> eqOpExprElseIf3(
+	EqOpExpr* eqOpExprElseIf3(
 		EqOpExpr::create(
 			addOpExpr,
 			ConstInt::create(12, 64)
 	));
-	ShPtr<AssignStmt> assignStmt(
+	AssignStmt* assignStmt(
 		AssignStmt::create(
 			varB,
 			addOpExpr
 	));
-	ShPtr<IfStmt> ifStmt(IfStmt::create(eqOpExprIf, assignStmt));
+	IfStmt* ifStmt(IfStmt::create(eqOpExprIf, assignStmt));
 	ifStmt->addClause(eqOpExprElseIf1, assignStmt);
 	ifStmt->addClause(eqOpExprElseIf2, assignStmt);
 	ifStmt->addClause(eqOpExprElseIf3, assignStmt);
@@ -595,28 +595,28 @@ SimpleSubstituteIfToSwitchWithElseClauseOptimize) {
 	//     default: b = b + 3; break;
 	// }
 	//
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<AddOpExpr> addOpExpr(
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	AddOpExpr* addOpExpr(
 		AddOpExpr::create(
 			varB,
 			ConstInt::create(3, 64)
 	));
-	ShPtr<EqOpExpr> eqOpExprIf(
+	EqOpExpr* eqOpExprIf(
 		EqOpExpr::create(
 			addOpExpr,
 			ConstInt::create(5, 64)
 	));
-	ShPtr<EqOpExpr> eqOpExprElseIf(
+	EqOpExpr* eqOpExprElseIf(
 		EqOpExpr::create(
 			addOpExpr,
 			ConstInt::create(6, 64)
 	));
-	ShPtr<AssignStmt> assignStmt(
+	AssignStmt* assignStmt(
 		AssignStmt::create(
 			varB,
 			addOpExpr
 	));
-	ShPtr<IfStmt> ifStmt(IfStmt::create(eqOpExprIf, assignStmt));
+	IfStmt* ifStmt(IfStmt::create(eqOpExprIf, assignStmt));
 	ifStmt->addClause(eqOpExprElseIf, assignStmt);
 	ifStmt->setElseClause(assignStmt);
 	testFunc->setBody(ifStmt);
@@ -642,28 +642,28 @@ SimpleSubstituteIfToSwitchControlExprIsOnNotSameSidesOptimize) {
 	//     case 6: b = b + 3; break;
 	// }
 	//
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<AddOpExpr> addOpExpr(
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	AddOpExpr* addOpExpr(
 		AddOpExpr::create(
 			varB,
 			ConstInt::create(3, 64)
 	));
-	ShPtr<EqOpExpr> eqOpExprIf(
+	EqOpExpr* eqOpExprIf(
 		EqOpExpr::create(
 			addOpExpr,
 			ConstInt::create(5, 64)
 	));
-	ShPtr<EqOpExpr> eqOpExprElseIf(
+	EqOpExpr* eqOpExprElseIf(
 		EqOpExpr::create(
 			ConstInt::create(6, 64),
 			addOpExpr
 	));
-	ShPtr<AssignStmt> assignStmt(
+	AssignStmt* assignStmt(
 		AssignStmt::create(
 			varB,
 			addOpExpr
 	));
-	ShPtr<IfStmt> ifStmt(IfStmt::create(eqOpExprIf, assignStmt));
+	IfStmt* ifStmt(IfStmt::create(eqOpExprIf, assignStmt));
 	ifStmt->addClause(eqOpExprElseIf, assignStmt);
 	testFunc->setBody(ifStmt);
 
@@ -688,24 +688,24 @@ SimpleSubstituteIfToSwitchLastStmtIsReturnStmtOptimize) {
 	//     case 6: return 2;
 	// }
 	//
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<AddOpExpr> addOpExpr(
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	AddOpExpr* addOpExpr(
 		AddOpExpr::create(
 			varB,
 			ConstInt::create(3, 64)
 	));
-	ShPtr<EqOpExpr> eqOpExprIf(
+	EqOpExpr* eqOpExprIf(
 		EqOpExpr::create(
 			addOpExpr,
 			ConstInt::create(5, 64)
 	));
-	ShPtr<EqOpExpr> eqOpExprElseIf(
+	EqOpExpr* eqOpExprElseIf(
 		EqOpExpr::create(
 			addOpExpr,
 			ConstInt::create(6, 64)
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(ConstInt::create(2, 64)));
-	ShPtr<IfStmt> ifStmt(IfStmt::create(eqOpExprIf, returnStmt));
+	ReturnStmt* returnStmt(ReturnStmt::create(ConstInt::create(2, 64)));
+	IfStmt* ifStmt(IfStmt::create(eqOpExprIf, returnStmt));
 	ifStmt->addClause(eqOpExprElseIf, returnStmt);
 	testFunc->setBody(ifStmt);
 
@@ -730,23 +730,23 @@ SimpleSubstituteIfToSwitchLastStmtIsContinueStmtOptimize) {
 	//     case 6: continue;
 	// }
 	//
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<AddOpExpr> addOpExpr(
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	AddOpExpr* addOpExpr(
 		AddOpExpr::create(
 			varB,
 			ConstInt::create(3, 64)
 	));
-	ShPtr<EqOpExpr> eqOpExprIf(
+	EqOpExpr* eqOpExprIf(
 		EqOpExpr::create(
 			addOpExpr,
 			ConstInt::create(5, 64)
 	));
-	ShPtr<EqOpExpr> eqOpExprElseIf(
+	EqOpExpr* eqOpExprElseIf(
 		EqOpExpr::create(
 			addOpExpr,
 			ConstInt::create(6, 64)
 	));
-	ShPtr<IfStmt> ifStmt(IfStmt::create(eqOpExprIf, ContinueStmt::create()));
+	IfStmt* ifStmt(IfStmt::create(eqOpExprIf, ContinueStmt::create()));
 	ifStmt->addClause(eqOpExprElseIf, ContinueStmt::create());
 	testFunc->setBody(ifStmt);
 

@@ -34,14 +34,14 @@ namespace llvmir2hll {
 *  - @a module is non-null
 *  - @a arithmExprEvaluator is non-null
 */
-DeadCodeOptimizer::DeadCodeOptimizer(ShPtr<Module> module,
-		ShPtr<ArithmExprEvaluator> arithmExprEvaluator): FuncOptimizer(module),
+DeadCodeOptimizer::DeadCodeOptimizer(Module* module,
+		ArithmExprEvaluator* arithmExprEvaluator): FuncOptimizer(module),
 			arithmExprEvaluator(arithmExprEvaluator) {
 	PRECONDITION_NON_NULL(module);
 	PRECONDITION_NON_NULL(arithmExprEvaluator);
 }
 
-void DeadCodeOptimizer::visit(ShPtr<IfStmt> stmt) {
+void DeadCodeOptimizer::visit(IfStmt* stmt) {
 	FuncOptimizer::visit(stmt);
 
 	tryToOptimizeIfStmt(stmt);
@@ -52,7 +52,7 @@ void DeadCodeOptimizer::visit(ShPtr<IfStmt> stmt) {
 *
 * @param[in] stmt Statement to optimize.
 */
-void DeadCodeOptimizer::tryToOptimizeIfStmt(ShPtr<IfStmt> stmt) {
+void DeadCodeOptimizer::tryToOptimizeIfStmt(IfStmt* stmt) {
 	removeFalseClausesWithoutGotoLabel(stmt);
 	auto trueClauseIter = findTrueClause(stmt);
 	if (trueClauseIter == stmt->clause_end()) {
@@ -80,7 +80,7 @@ void DeadCodeOptimizer::tryToOptimizeIfStmt(ShPtr<IfStmt> stmt) {
 * @return if clause found return iterator to this clause, otherwise
 *         @c clause_end().
 */
-IfStmt::clause_iterator DeadCodeOptimizer::findTrueClause(ShPtr<IfStmt> stmt) {
+IfStmt::clause_iterator DeadCodeOptimizer::findTrueClause(IfStmt* stmt) {
 	for (auto i = stmt->clause_begin(), e = stmt->clause_end(); i != e; ++i) {
 		std::optional<bool> boolResult(arithmExprEvaluator->toBool(i->first));
 		if (boolResult && boolResult.value()) {
@@ -97,7 +97,7 @@ IfStmt::clause_iterator DeadCodeOptimizer::findTrueClause(ShPtr<IfStmt> stmt) {
 *
 * @param[in] stmt Statement from which are removed false clause.
 */
-void DeadCodeOptimizer::removeFalseClausesWithoutGotoLabel(ShPtr<IfStmt> stmt) {
+void DeadCodeOptimizer::removeFalseClausesWithoutGotoLabel(IfStmt* stmt) {
 	auto i = stmt->clause_begin();
 	while (i != stmt->clause_end()) {
 		std::optional<bool> boolResult(arithmExprEvaluator->toBool(i->first));
@@ -126,7 +126,7 @@ void DeadCodeOptimizer::removeFalseClausesWithoutGotoLabel(ShPtr<IfStmt> stmt) {
 * @param[in] stmt Statement to optimize.
 * @param[in] trueClause First true clause.
 */
-void DeadCodeOptimizer::optimizeBecauseTrueClauseIsPresent(ShPtr<IfStmt> stmt,
+void DeadCodeOptimizer::optimizeBecauseTrueClauseIsPresent(IfStmt* stmt,
 		IfStmt::clause_iterator trueClause) {
 	bool atLeastOneClauseHasGotoLabel(false);
 	auto i = stmt->clause_begin();
@@ -197,7 +197,7 @@ void DeadCodeOptimizer::optimizeBecauseTrueClauseIsPresent(ShPtr<IfStmt> stmt,
 * @param[in] stmt Statement on which are made correctness.
 */
 void DeadCodeOptimizer::correctIfStmtDueToPresenceOfFalseClauses(
-		ShPtr<IfStmt> stmt) {
+		IfStmt* stmt) {
 	if (!stmt->hasClauses()) {
 		// Due to removing false clauses we can get if statement without first
 		// if condition and body. We need to make correctness.
@@ -222,7 +222,7 @@ void DeadCodeOptimizer::correctIfStmtDueToPresenceOfFalseClauses(
 	}
 }
 
-void DeadCodeOptimizer::visit(ShPtr<SwitchStmt> stmt) {
+void DeadCodeOptimizer::visit(SwitchStmt* stmt) {
 	FuncOptimizer::visit(stmt);
 
 	tryToOptimizeSwitchStmt(stmt);
@@ -237,7 +237,7 @@ void DeadCodeOptimizer::visit(ShPtr<SwitchStmt> stmt) {
 *
 * @param[in] stmt @c SwitchStmt to optimize.
 */
-void DeadCodeOptimizer::tryToOptimizeSwitchStmt(ShPtr<SwitchStmt> stmt) {
+void DeadCodeOptimizer::tryToOptimizeSwitchStmt(SwitchStmt* stmt) {
 	// Try to evaluate control expression of switch statement.
 	auto controlExpr = arithmExprEvaluator->evaluate(stmt->getControlExpr());
 	if (!controlExpr) {
@@ -273,7 +273,7 @@ void DeadCodeOptimizer::tryToOptimizeSwitchStmt(ShPtr<SwitchStmt> stmt) {
 *         statement at last statement, otherwise @c false.
 */
 bool DeadCodeOptimizer::hasBreakContinueReturnInAllClausesAsLastStmt(
-		ShPtr<SwitchStmt> stmt) {
+		SwitchStmt* stmt) {
 	bool hasBreakContinueReturnInAllClauses(true);
 	for (auto i = stmt->clause_begin(), e = stmt->clause_end(); i != e; ++i) {
 		auto lastStmt = Statement::getLastStatement(i->second);
@@ -294,8 +294,8 @@ bool DeadCodeOptimizer::hasBreakContinueReturnInAllClausesAsLastStmt(
 *         @c clause_end().
 */
 SwitchStmt::clause_iterator DeadCodeOptimizer::
-		findClauseWithCondEqualToControlExpr(ShPtr<SwitchStmt> stmt,
-			ShPtr<Constant> controlExpr) {
+		findClauseWithCondEqualToControlExpr(SwitchStmt* stmt,
+			Constant* controlExpr) {
 	auto controlExprConstInt = cast<ConstInt>(controlExpr);
 	auto controlExprConstFloat = cast<ConstInt>(controlExpr);
 	if (!controlExprConstInt && !controlExprConstFloat) {
@@ -334,7 +334,7 @@ SwitchStmt::clause_iterator DeadCodeOptimizer::
 * @param[in] resultClause Clause that has equal evaluated condition as control
 *            expression.
 */
-void DeadCodeOptimizer::optimizeSwitchStmt(ShPtr<SwitchStmt> stmt,
+void DeadCodeOptimizer::optimizeSwitchStmt(SwitchStmt* stmt,
 		SwitchStmt::clause_iterator resultClause) {
 	bool atLeastOneClauseHasGotoLabel(false);
 	auto i = stmt->clause_begin();
@@ -383,7 +383,7 @@ void DeadCodeOptimizer::optimizeSwitchStmt(ShPtr<SwitchStmt> stmt,
 	}
 }
 
-void DeadCodeOptimizer::visit(ShPtr<WhileLoopStmt> stmt) {
+void DeadCodeOptimizer::visit(WhileLoopStmt* stmt) {
 	FuncOptimizer::visit(stmt);
 
 	tryToOptimizeWhileLoopStmt(stmt);
@@ -397,7 +397,7 @@ void DeadCodeOptimizer::visit(ShPtr<WhileLoopStmt> stmt) {
 *
 * @param[in] stmt @c WhileLoopStmt to optimize.
 */
-void DeadCodeOptimizer::tryToOptimizeWhileLoopStmt(ShPtr<WhileLoopStmt> stmt) {
+void DeadCodeOptimizer::tryToOptimizeWhileLoopStmt(WhileLoopStmt* stmt) {
 	std::optional<bool> boolResult(arithmExprEvaluator->toBool(stmt->getCondition()));
 	if (boolResult && !boolResult.value()) {
 		// while (false) {
@@ -413,7 +413,7 @@ void DeadCodeOptimizer::tryToOptimizeWhileLoopStmt(ShPtr<WhileLoopStmt> stmt) {
 	}
 }
 
-void DeadCodeOptimizer::visit(ShPtr<ForLoopStmt> stmt) {
+void DeadCodeOptimizer::visit(ForLoopStmt* stmt) {
 	FuncOptimizer::visit(stmt);
 
 	tryToOptimizeForLoopStmt(stmt);
@@ -427,7 +427,7 @@ void DeadCodeOptimizer::visit(ShPtr<ForLoopStmt> stmt) {
 *
 * @param[in] stmt @c ForLoopStmt to optimize.
 */
-void DeadCodeOptimizer::tryToOptimizeForLoopStmt(ShPtr<ForLoopStmt> stmt) {
+void DeadCodeOptimizer::tryToOptimizeForLoopStmt(ForLoopStmt* stmt) {
 	// For loop can have variables in end condition which can be substituted
 	// with initial variable that start value is a constant.
 	ArithmExprEvaluator::VarConstMap varValues;

@@ -26,7 +26,7 @@ namespace llvmir2hll {
 /**
 * @brief Constructs a new variables manager.
 */
-VariablesManager::VariablesManager(ShPtr<Module> resModule): localVarsMap(),
+VariablesManager::VariablesManager(Module* resModule): localVarsMap(),
 	varNameGen(NumVarNameGen::create()), resModule(resModule) {}
 
 /**
@@ -39,7 +39,7 @@ void VariablesManager::reset() {
 	varNameGen->restart();
 }
 
-void VariablesManager::addGlobalValVarPair(llvm::Value *val, ShPtr<Variable> var) {
+void VariablesManager::addGlobalValVarPair(llvm::Value *val, Variable* var) {
 	globalVarsMap.emplace(val, var);
 }
 
@@ -49,7 +49,7 @@ void VariablesManager::addGlobalValVarPair(llvm::Value *val, ShPtr<Variable> var
 * If variable doesn't have it's own name, a new one is generated and assigned
 * to it. The reason is, that all variables in BIR have to be named.
 */
-ShPtr<Variable> VariablesManager::getVarByValue(llvm::Value *val) {
+Variable* VariablesManager::getVarByValue(llvm::Value *val) {
 	if (!val->hasName()) {
 		assignNameToValue(val);
 	}
@@ -70,7 +70,7 @@ void VariablesManager::assignNameToValue(llvm::Value *val) const {
 	val->setName(varNameGen->getNextVarName());
 }
 
-ShPtr<Variable> VariablesManager::getGlobalVar(llvm::Value *val) {
+Variable* VariablesManager::getGlobalVar(llvm::Value *val) {
 	auto fit = globalVarsMap.find(val);
 	return fit != globalVarsMap.end() ? fit->second : nullptr;
 }
@@ -81,7 +81,7 @@ ShPtr<Variable> VariablesManager::getGlobalVar(llvm::Value *val) {
 * If local variable doesn't exist, new one will be created. Type of new created
 * variable is unknown.
 */
-ShPtr<Variable> VariablesManager::getOrCreateLocalVar(llvm::Value *val) {
+Variable* VariablesManager::getOrCreateLocalVar(llvm::Value *val) {
 	auto existingVarIt = localVarsMap.find(val);
 	if (existingVarIt != localVarsMap.end()) {
 		return existingVarIt->second;

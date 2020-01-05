@@ -45,7 +45,7 @@ public:
 	*/
 	virtual std::string getId() const = 0;
 
-	virtual bool emitTargetCode(ShPtr<Module> module);
+	virtual bool emitTargetCode(Module* module);
 
 	/// @name Options
 	/// @{
@@ -83,7 +83,7 @@ protected:
 
 	virtual bool emitGlobalVariablesHeader();
 	virtual bool emitGlobalVariables();
-	virtual bool emitGlobalVariable(ShPtr<GlobalVarDef> varDef);
+	virtual bool emitGlobalVariable(GlobalVarDef* varDef);
 
 	virtual bool emitClassesHeader();
 	virtual bool emitClasses();
@@ -94,7 +94,7 @@ protected:
 
 	virtual bool emitFunctionsHeader();
 	virtual bool emitFunctions();
-	virtual bool emitFunction(ShPtr<Function> func);
+	virtual bool emitFunction(Function* func);
 
 	virtual bool emitStaticallyLinkedFunctionsHeader();
 	virtual bool emitStaticallyLinkedFunctions();
@@ -109,25 +109,25 @@ protected:
 	virtual bool emitInstructionIdiomFunctions();
 
 	virtual bool emitExternalFunctions(const FuncSet &funcs);
-	virtual bool emitExternalFunction(ShPtr<Function> func);
+	virtual bool emitExternalFunction(Function* func);
 
 	virtual bool emitMetaInfoHeader();
 	virtual bool emitMetaInfo();
 
-	virtual void emitExprWithBracketsIfNeeded(ShPtr<Expression> expr);
-	void emitUnaryOpExpr(const std::string &opRepr, ShPtr<UnaryOpExpr> expr);
-	void emitBinaryOpExpr(const std::string &opRepr, ShPtr<BinaryOpExpr> expr,
+	virtual void emitExprWithBracketsIfNeeded(Expression* expr);
+	void emitUnaryOpExpr(const std::string &opRepr, UnaryOpExpr* expr);
+	void emitBinaryOpExpr(const std::string &opRepr, BinaryOpExpr* expr,
 			bool spaceBefore = true, bool spaceAfter = true);
 
-	bool emitDetectedCryptoPatternForGlobalVarIfAvailable(ShPtr<Variable> var);
-	bool emitModuleNameForFuncIfAvailable(ShPtr<Function> func);
-	bool emitAddressRangeForFuncIfAvailable(ShPtr<Function> func);
-	bool emitLineRangeForFuncIfAvailable(ShPtr<Function> func);
-	bool emitWrapperInfoForFuncIfAvailable(ShPtr<Function> func);
-	bool emitClassInfoIfAvailable(ShPtr<Function> func);
-	bool emitDemangledNameIfAvailable(ShPtr<Function> func);
-	bool emitCommentIfAvailable(ShPtr<Function> func);
-	bool emitDetectedCryptoPatternsForFuncIfAvailable(ShPtr<Function> func);
+	bool emitDetectedCryptoPatternForGlobalVarIfAvailable(Variable* var);
+	bool emitModuleNameForFuncIfAvailable(Function* func);
+	bool emitAddressRangeForFuncIfAvailable(Function* func);
+	bool emitLineRangeForFuncIfAvailable(Function* func);
+	bool emitWrapperInfoForFuncIfAvailable(Function* func);
+	bool emitClassInfoIfAvailable(Function* func);
+	bool emitDemangledNameIfAvailable(Function* func);
+	bool emitCommentIfAvailable(Function* func);
+	bool emitDetectedCryptoPatternsForFuncIfAvailable(Function* func);
 
 	void emitSectionHeader(const std::string &sectionName);
 
@@ -164,23 +164,23 @@ protected:
 	/// @}
 
 	void sortFuncsForEmission(FuncVector &funcs);
-	bool tryEmitVarInfoInComment(ShPtr<Variable> var, ShPtr<Statement> stmt = nullptr);
-	bool tryEmitVarAddressInComment(ShPtr<Variable> var);
-	bool shouldBeEmittedInHexa(ShPtr<ConstInt> constant) const;
-	bool shouldBeEmittedInStructuredWay(ShPtr<ConstArray> array) const;
-	bool shouldBeEmittedInStructuredWay(ShPtr<ConstStruct> structure) const;
+	bool tryEmitVarInfoInComment(Variable* var, Statement* stmt = nullptr);
+	bool tryEmitVarAddressInComment(Variable* var);
+	bool shouldBeEmittedInHexa(ConstInt* constant) const;
+	bool shouldBeEmittedInStructuredWay(ConstArray* array) const;
+	bool shouldBeEmittedInStructuredWay(ConstStruct* structure) const;
 
-	std::string getGotoLabel(ShPtr<Statement> stmt);
+	std::string getGotoLabel(Statement* stmt);
 
 protected:
 	/// The module to be written.
-	ShPtr<Module> module;
+	Module* module = nullptr;
 
 	/// Output where the resulting code will be generated.
-	UPtr<OutputManager> out;
+	OutputManager* out = nullptr;
 
 	/// Recognizes which brackets around expressions are needed.
-	ShPtr<BracketManager> bracketsManager;
+	BracketManager* bracketsManager = nullptr;
 
 	/// Should we emit constants in a structured way?
 	/// This variable is used to structure large initializations so that they
@@ -200,7 +200,7 @@ protected:
 	bool optionUseCompoundOperators;
 
 	/// The currently emitted function definition (if any).
-	ShPtr<Function> currFunc;
+	Function* currFunc = nullptr;
 
 	/// Counter for goto labels for the current function.
 	std::size_t currFuncGotoLabelCounter;
@@ -215,7 +215,7 @@ private:
 	bool emitMetaInfoDecompilationDate();
 	/// @}
 
-	std::string getRawGotoLabel(ShPtr<Statement> stmt);
+	std::string getRawGotoLabel(Statement* stmt);
 	std::string getReadableClassName(const std::string &cl) const;
 	StringVector getReadableClassNames(const StringVector &classes) const;
 

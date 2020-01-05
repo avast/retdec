@@ -18,16 +18,16 @@ namespace llvmir2hll {
 * @par Preconditions
 *  - @a op is non-null
 */
-UnaryOpExpr::UnaryOpExpr(ShPtr<Expression> op):
+UnaryOpExpr::UnaryOpExpr(Expression* op):
 		op(op) {
 	PRECONDITION_NON_NULL(op);
 }
 
-ShPtr<Type> UnaryOpExpr::getType() const {
+Type* UnaryOpExpr::getType() const {
 	return op->getType();
 }
 
-void UnaryOpExpr::replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) {
+void UnaryOpExpr::replace(Expression* oldExpr, Expression* newExpr) {
 	PRECONDITION_NON_NULL(oldExpr);
 
 	if (op == oldExpr) {
@@ -40,7 +40,7 @@ void UnaryOpExpr::replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) 
 /**
 * @brief Returns the operand.
 */
-ShPtr<Expression> UnaryOpExpr::getOperand() const {
+Expression* UnaryOpExpr::getOperand() const {
 	return op;
 }
 
@@ -50,11 +50,11 @@ ShPtr<Expression> UnaryOpExpr::getOperand() const {
 * @par Preconditions
 *  - @a operand is non-null
 */
-void UnaryOpExpr::setOperand(ShPtr<Expression> newOp) {
+void UnaryOpExpr::setOperand(Expression* newOp) {
 	PRECONDITION_NON_NULL(newOp);
 
-	op->removeObserver(shared_from_this());
-	newOp->addObserver(shared_from_this());
+	op->removeObserver(this);
+	newOp->addObserver(this);
 	op = newOp;
 }
 
@@ -76,11 +76,11 @@ void UnaryOpExpr::setOperand(ShPtr<Expression> newOp) {
 *
 * @see Subject::update()
 */
-void UnaryOpExpr::update(ShPtr<Value> subject, ShPtr<Value> arg) {
+void UnaryOpExpr::update(Value* subject, Value* arg) {
 	PRECONDITION_NON_NULL(subject);
 	PRECONDITION_NON_NULL(arg);
 
-	ShPtr<Expression> newOperand = cast<Expression>(arg);
+	Expression* newOperand = cast<Expression>(arg);
 	if (subject == op && newOperand) {
 		setOperand(newOperand);
 	}

@@ -32,16 +32,16 @@ class InterdependencySorter: private OrderedAllVisitor,
 
 private:
 	/**
-	* @brief Key to be used to sort sequences of ShPtr<GlobalVarDefVector>.
+	* @brief Key to be used to sort sequences of GlobalVarDefVector*.
 	*/
 	struct LessThanKey {
-		explicit LessThanKey(ShPtr<InterdependencySorter> sorter): sorter(sorter) {}
+		explicit LessThanKey(InterdependencySorter* sorter): sorter(sorter) {}
 
 		/**
 		* @brief Returns @c true iff <tt>p1 < p2</tt>.
 		*/
-		bool operator() (const ShPtr<GlobalVarDef> &p1,
-				const ShPtr<GlobalVarDef> &p2) {
+		bool operator() (const GlobalVarDef* p1,
+				const GlobalVarDef* p2) {
 			// p1: int a;
 			// p2: int b = /* a appears here */;
 			//
@@ -108,7 +108,7 @@ private:
 			return p1->getVar()->getInitialName() < p2->getVar()->getInitialName();
 		}
 
-		ShPtr<InterdependencySorter> sorter;
+		InterdependencySorter* sorter;
 	};
 
 public:
@@ -116,7 +116,7 @@ public:
 	* @brief Implementation of GlobalVarsSorter::sortByInterdependencies().
 	*/
 	static GlobalVarDefVector sort(const GlobalVarDefVector &globalVars) {
-		ShPtr<InterdependencySorter> sorter(new InterdependencySorter(globalVars));
+		InterdependencySorter* sorter(new InterdependencySorter(globalVars));
 
 		GlobalVarDefVector sorted(globalVars);
 		std::sort(sorted.begin(), sorted.end(), LessThanKey(sorter));
@@ -128,7 +128,7 @@ private:
 		// Compute used variables in the initializers of all global variables.
 		for (const auto &varInitPair : globalVars) {
 			usedVarsInLastInit.clear();
-			if (ShPtr<Expression> init = varInitPair->getInitializer()) {
+			if (Expression* init = varInitPair->getInitializer()) {
 				init->accept(this);
 			}
 			varToUsedVarsMap[varInitPair->getVar()] = usedVarsInLastInit;
@@ -138,7 +138,7 @@ private:
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<Variable> var) override {
+	virtual void visit(Variable* var) override {
 		usedVarsInLastInit.insert(var);
 	}
 	/// @}
@@ -149,7 +149,7 @@ private:
 
 	/// Mapping of a variable into the set of variables used in in its
 	/// initializer.
-	std::map<ShPtr<Variable>, VarSet> varToUsedVarsMap;
+	std::map<Variable*, VarSet> varToUsedVarsMap;
 };
 
 } // anonymous namespace

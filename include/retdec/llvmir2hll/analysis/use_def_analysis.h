@@ -30,7 +30,7 @@ class DefUseChains;
 class UseDefChains {
 public:
 	/// (variable, statement) pair
-	using VarStmtPair = std::pair<ShPtr<Variable>, ShPtr<Statement>>;
+	using VarStmtPair = std::pair<Variable*, Statement*>;
 
 	/// Set of (variable, statement) pairs.
 	using StmtVarPairSet = std::set<VarStmtPair>;
@@ -44,10 +44,10 @@ public:
 
 public:
 	/// Function for which the chains have been computed.
-	ShPtr<Function> func;
+	Function* func = nullptr;
 
 	/// CFG of @c func.
-	ShPtr<CFG> cfg;
+	CFG* cfg = nullptr;
 
 	/// Use-def chain for each variable @c x that is used in a statement @c s:
 	/// @code
@@ -69,20 +69,20 @@ public:
 */
 class UseDefAnalysis: private retdec::utils::NonCopyable {
 public:
-	ShPtr<UseDefChains> getUseDefChains(ShPtr<Function> func,
-		ShPtr<DefUseChains> ducs);
+	UseDefChains* getUseDefChains(Function* func,
+		DefUseChains* ducs);
 
-	static ShPtr<UseDefAnalysis> create(ShPtr<Module> module);
+	static UseDefAnalysis* create(Module* module);
 
 private:
-	explicit UseDefAnalysis(ShPtr<Module> module);
+	explicit UseDefAnalysis(Module* module);
 
-	static void computeUseDefChains(ShPtr<UseDefChains> udcs,
-		ShPtr<DefUseChains> ducs);
+	static void computeUseDefChains(UseDefChains* udcs,
+		DefUseChains* ducs);
 
 private:
 	/// Module that is being analyzed.
-	ShPtr<Module> module;
+	Module* module = nullptr;
 };
 
 } // namespace llvmir2hll

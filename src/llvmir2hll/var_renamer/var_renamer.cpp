@@ -36,7 +36,7 @@ namespace llvmir2hll {
 * @par Preconditions
 *  - @a varNameGen is non-null
 */
-VarRenamer::VarRenamer(ShPtr<VarNameGen> varNameGen, bool useDebugNames):
+VarRenamer::VarRenamer(VarNameGen* varNameGen, bool useDebugNames):
 	varNameGen(varNameGen), useDebugNames(useDebugNames), module(),
 	globalVars(), renamedVars(), globalVarsNames(), localVarsNames(),
 	currFunc() {
@@ -54,7 +54,7 @@ VarRenamer::VarRenamer(ShPtr<VarNameGen> varNameGen, bool useDebugNames):
 *
 * Function names are not renamed.
 */
-void VarRenamer::renameVars(ShPtr<Module> module) {
+void VarRenamer::renameVars(Module* module) {
 	this->module = module;
 	globalVars = module->getGlobalVars();
 	storeFuncsByName();
@@ -83,8 +83,8 @@ void VarRenamer::renameVars(ShPtr<Module> module) {
 *  - if @a var is a local variable or a function parameter, @a func has to be
 *    non-null
 */
-void VarRenamer::assignName(ShPtr<Variable> var, const std::string &name,
-		ShPtr<Function> func) {
+void VarRenamer::assignName(Variable* var, const std::string &name,
+		Function* func) {
 	PRECONDITION_NON_NULL(var);
 	PRECONDITION(!name.empty(), "the name cannot be empty");
 
@@ -119,8 +119,8 @@ void VarRenamer::assignName(ShPtr<Variable> var, const std::string &name,
 *  - if @a var is a local variable or a function parameter, @a func has to be
 *    non-null
 */
-void VarRenamer::assignNameFromDebugInfoIfAvail(ShPtr<Variable> var,
-		ShPtr<Function> func) {
+void VarRenamer::assignNameFromDebugInfoIfAvail(Variable* var,
+		Function* func) {
 	PRECONDITION_NON_NULL(var);
 
 	std::string varDebugName(module->getDebugNameForVar(var));
@@ -140,7 +140,7 @@ void VarRenamer::assignNameFromDebugInfoIfAvail(ShPtr<Variable> var,
 * @par Preconditions
 *  - @a var is non-null
 */
-bool VarRenamer::isGlobalVar(ShPtr<Variable> var) const {
+bool VarRenamer::isGlobalVar(Variable* var) const {
 	PRECONDITION_NON_NULL(var);
 
 	return hasItem(globalVars, var);
@@ -153,7 +153,7 @@ bool VarRenamer::isGlobalVar(ShPtr<Variable> var) const {
 * @par Preconditions
 *  - @a var is non-null
 */
-bool VarRenamer::isFunc(ShPtr<Variable> var) const {
+bool VarRenamer::isFunc(Variable* var) const {
 	PRECONDITION_NON_NULL(var);
 
 	return module->correspondsToFunc(var);
@@ -166,7 +166,7 @@ bool VarRenamer::isFunc(ShPtr<Variable> var) const {
 * @par Preconditions
 *  - @a var is non-null
 */
-bool VarRenamer::hasBeenRenamed(ShPtr<Variable> var) const {
+bool VarRenamer::hasBeenRenamed(Variable* var) const {
 	PRECONDITION_NON_NULL(var);
 
 	return hasItem(renamedVars, var);
@@ -182,7 +182,7 @@ bool VarRenamer::hasBeenRenamed(ShPtr<Variable> var) const {
 * More precisely, it returns @c true if naming a variable by @a name would
 * introduce a name clash.
 */
-bool VarRenamer::nameExists(const std::string &name, ShPtr<Function> func) const {
+bool VarRenamer::nameExists(const std::string &name, Function* func) const {
 	// Global names.
 	if (hasItem(globalVarsNames, name) || getFuncByName(name)) {
 		return true;
@@ -204,7 +204,7 @@ bool VarRenamer::nameExists(const std::string &name, ShPtr<Function> func) const
 *
 * If there is no function with the given name, the null pointer is returned.
 */
-ShPtr<Function> VarRenamer::getFuncByName(const std::string &name) const {
+Function* VarRenamer::getFuncByName(const std::string &name) const {
 	// This is a "wrapper" around module->getFuncByName() to speedup the
 	// renaming (it is a bottleneck, I have measured it).
 	return mapGetValueOrDefault(funcsByName, name);
@@ -241,8 +241,8 @@ void VarRenamer::storeFuncsByName() {
 *  - if @a var is a local variable or a function parameter, @a func has to be
 *    non-null
 */
-std::string VarRenamer::ensureNameUniqueness(ShPtr<Variable> var,
-		const std::string &name, ShPtr<Function> func) {
+std::string VarRenamer::ensureNameUniqueness(Variable* var,
+		const std::string &name, Function* func) {
 	if (!nameExists(name, func)) {
 		return name;
 	}
@@ -267,8 +267,8 @@ std::string VarRenamer::ensureNameUniqueness(ShPtr<Variable> var,
 *
 * If renaming a global variable, pass the null pointer as the third argument.
 */
-std::string VarRenamer::generateUniqueName(ShPtr<Variable> var,
-		const std::string &name, ShPtr<Function> func) {
+std::string VarRenamer::generateUniqueName(Variable* var,
+		const std::string &name, Function* func) {
 	std::string newName(name);
 	if (std::isdigit(name.back())) {
 		// The name ends with a number -> append underscores.
@@ -307,7 +307,7 @@ void VarRenamer::assignRealNamesToFuncs() {
 *
 * Behaves as @c assignName().
 */
-void VarRenamer::assignNameToFunc(ShPtr<Function> func, const std::string &name) {
+void VarRenamer::assignNameToFunc(Function* func, const std::string &name) {
 	PRECONDITION_NON_NULL(func);
 	PRECONDITION(!name.empty(), "the name cannot be empty");
 
@@ -396,7 +396,7 @@ void VarRenamer::renameGlobalVars() {
 * @par Preconditions
 *  - @a var is non-null
 */
-void VarRenamer::renameGlobalVar(ShPtr<Variable> var) {
+void VarRenamer::renameGlobalVar(Variable* var) {
 	PRECONDITION_NON_NULL(var);
 
 	assignName(var, varNameGen->getNextVarName());
@@ -425,7 +425,7 @@ void VarRenamer::renameVarsInFuncs() {
 * @par Preconditions
 *  - @a func is non-null
 */
-void VarRenamer::renameVarsInFunc(ShPtr<Function> func) {
+void VarRenamer::renameVarsInFunc(Function* func) {
 	PRECONDITION_NON_NULL(func);
 
 	currFunc = func;
@@ -452,7 +452,7 @@ void VarRenamer::renameVarsInFunc(ShPtr<Function> func) {
 * @par Preconditions
 *  - @a var and @a func are non-null
 */
-void VarRenamer::renameFuncParam(ShPtr<Variable> var, ShPtr<Function> func) {
+void VarRenamer::renameFuncParam(Variable* var, Function* func) {
 	PRECONDITION_NON_NULL(var);
 	PRECONDITION_NON_NULL(func);
 
@@ -467,14 +467,14 @@ void VarRenamer::renameFuncParam(ShPtr<Variable> var, ShPtr<Function> func) {
 * @par Preconditions
 *  - @a var and @a func are non-null
 */
-void VarRenamer::renameFuncLocalVar(ShPtr<Variable> var, ShPtr<Function> func) {
+void VarRenamer::renameFuncLocalVar(Variable* var, Function* func) {
 	PRECONDITION_NON_NULL(var);
 	PRECONDITION_NON_NULL(func);
 
 	assignName(var, varNameGen->getNextVarName(), func);
 }
 
-void VarRenamer::visit(ShPtr<Variable> var) {
+void VarRenamer::visit(Variable* var) {
 	// Do not rename already renamed variables.
 	if (hasBeenRenamed(var)) {
 		return;

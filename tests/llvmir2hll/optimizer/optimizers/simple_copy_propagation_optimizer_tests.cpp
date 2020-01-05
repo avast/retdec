@@ -47,7 +47,7 @@ TEST_F(SimpleCopyPropagationOptimizerTests,
 OptimizerHasNonEmptyID) {
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
 
-	ShPtr<SimpleCopyPropagationOptimizer> optimizer(new SimpleCopyPropagationOptimizer(
+	SimpleCopyPropagationOptimizer* optimizer(new SimpleCopyPropagationOptimizer(
 		module, va, OptimCallInfoObtainer::create()));
 
 	EXPECT_TRUE(!optimizer->getId().empty()) <<
@@ -78,9 +78,9 @@ JustAssignStmtDoesNotGetRemoved) {
 	//     a = 1;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<AssignStmt> assignA1(AssignStmt::create(varA, ConstInt::create(1, 32)));
+	AssignStmt* assignA1(AssignStmt::create(varA, ConstInt::create(1, 32)));
 	testFunc->setBody(assignA1);
 
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
@@ -107,12 +107,12 @@ DoNotOptimizeIfLhsMayBeUsedIndirectly) {
 	//     return a;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	testFunc->addLocalVar(varB);
-	ShPtr<ReturnStmt> returnA(ReturnStmt::create(varA));
-	ShPtr<AssignStmt> assignAB(AssignStmt::create(varA, varB, returnA));
+	ReturnStmt* returnA(ReturnStmt::create(varA));
+	AssignStmt* assignAB(AssignStmt::create(varA, varB, returnA));
 	testFunc->setBody(assignAB);
 
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
@@ -126,14 +126,14 @@ DoNotOptimizeIfLhsMayBeUsedIndirectly) {
 		OptimCallInfoObtainer::create());
 
 	// Check that the output is correct.
-	ShPtr<Statement> stmt1(testFunc->getBody());
+	Statement* stmt1(testFunc->getBody());
 	ASSERT_TRUE(stmt1) <<
 		"expected `" << assignAB << "`, "
 		"got the null pointer";
 	EXPECT_EQ(assignAB, stmt1) <<
 		"expected `" << assignAB << "`, "
 		"got `" << stmt1 << "`";
-	ShPtr<Statement> stmt2(stmt1->getSuccessor());
+	Statement* stmt2(stmt1->getSuccessor());
 	ASSERT_TRUE(stmt2) <<
 		"expected `" << returnA << "`, "
 		"got the null pointer";
@@ -152,12 +152,12 @@ DoNotOptimizeIfRhsMayBeUsedIndirectly) {
 	//     return a;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	testFunc->addLocalVar(varB);
-	ShPtr<ReturnStmt> returnA(ReturnStmt::create(varA));
-	ShPtr<AssignStmt> assignAB(AssignStmt::create(varA, varB, returnA));
+	ReturnStmt* returnA(ReturnStmt::create(varA));
+	AssignStmt* assignAB(AssignStmt::create(varA, varB, returnA));
 	testFunc->setBody(assignAB);
 
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
@@ -171,14 +171,14 @@ DoNotOptimizeIfRhsMayBeUsedIndirectly) {
 		OptimCallInfoObtainer::create());
 
 	// Check that the output is correct.
-	ShPtr<Statement> stmt1(testFunc->getBody());
+	Statement* stmt1(testFunc->getBody());
 	ASSERT_TRUE(stmt1) <<
 		"expected `" << assignAB << "`, "
 		"got the null pointer";
 	EXPECT_EQ(assignAB, stmt1) <<
 		"expected `" << assignAB << "`, "
 		"got `" << stmt1 << "`";
-	ShPtr<Statement> stmt2(stmt1->getSuccessor());
+	Statement* stmt2(stmt1->getSuccessor());
 	ASSERT_TRUE(stmt2) <<
 		"expected `" << returnA << "`, "
 		"got the null pointer";
@@ -198,12 +198,12 @@ DoNotOptimizeIfLhsIsGlobalVariable) {
 	//     return a;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	module->addGlobalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	testFunc->addLocalVar(varB);
-	ShPtr<ReturnStmt> returnA(ReturnStmt::create(varA));
-	ShPtr<AssignStmt> assignAB(AssignStmt::create(varA, varB, returnA));
+	ReturnStmt* returnA(ReturnStmt::create(varA));
+	AssignStmt* assignAB(AssignStmt::create(varA, varB, returnA));
 	testFunc->setBody(assignAB);
 
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
@@ -213,14 +213,14 @@ DoNotOptimizeIfLhsIsGlobalVariable) {
 		OptimCallInfoObtainer::create());
 
 	// Check that the output is correct.
-	ShPtr<Statement> stmt1(testFunc->getBody());
+	Statement* stmt1(testFunc->getBody());
 	ASSERT_TRUE(stmt1) <<
 		"expected `" << assignAB << "`, "
 		"got the null pointer";
 	EXPECT_EQ(assignAB, stmt1) <<
 		"expected `" << assignAB << "`, "
 		"got `" << stmt1 << "`";
-	ShPtr<Statement> stmt2(stmt1->getSuccessor());
+	Statement* stmt2(stmt1->getSuccessor());
 	ASSERT_TRUE(stmt2) <<
 		"expected `" << returnA << "`, "
 		"got the null pointer";
@@ -239,14 +239,14 @@ DoNotOptimizeIfRhsIsModifiedBeforeLhsUse) {
 	//     return a;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	testFunc->addLocalVar(varB);
-	ShPtr<ReturnStmt> returnA(ReturnStmt::create(varA));
-	ShPtr<AssignStmt> assignB1(AssignStmt::create(varB, ConstInt::create(1, 32),
+	ReturnStmt* returnA(ReturnStmt::create(varA));
+	AssignStmt* assignB1(AssignStmt::create(varB, ConstInt::create(1, 32),
 		returnA));
-	ShPtr<AssignStmt> assignAB(AssignStmt::create(varA, varB, assignB1));
+	AssignStmt* assignAB(AssignStmt::create(varA, varB, assignB1));
 	testFunc->setBody(assignAB);
 
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
@@ -256,21 +256,21 @@ DoNotOptimizeIfRhsIsModifiedBeforeLhsUse) {
 		OptimCallInfoObtainer::create());
 
 	// Check that the output is correct.
-	ShPtr<Statement> stmt1(testFunc->getBody());
+	Statement* stmt1(testFunc->getBody());
 	ASSERT_TRUE(stmt1) <<
 		"expected `" << assignAB << "`, "
 		"got the null pointer";
 	EXPECT_EQ(assignAB, stmt1) <<
 		"expected `" << assignAB << "`, "
 		"got `" << stmt1 << "`";
-	ShPtr<Statement> stmt2(stmt1->getSuccessor());
+	Statement* stmt2(stmt1->getSuccessor());
 	ASSERT_TRUE(stmt2) <<
 		"expected `" << assignB1 << "`, "
 		"got the null pointer";
 	EXPECT_EQ(assignB1, stmt2) <<
 		"expected `" << assignB1 << "`, "
 		"got `" << stmt2 << "`";
-	ShPtr<Statement> stmt3(stmt2->getSuccessor());
+	Statement* stmt3(stmt2->getSuccessor());
 	ASSERT_TRUE(stmt3) <<
 		"expected `" << returnA << "`, "
 		"got the null pointer";
@@ -288,13 +288,13 @@ DoNotOptimizeIfLhsHasAssignedNameFromDebugInformation) {
 	//     return a;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
 	module->addDebugNameForVar(varA, varA->getName());
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	testFunc->addLocalVar(varB);
-	ShPtr<ReturnStmt> returnA(ReturnStmt::create(varA));
-	ShPtr<AssignStmt> assignAB(AssignStmt::create(varA, varB, returnA));
+	ReturnStmt* returnA(ReturnStmt::create(varA));
+	AssignStmt* assignAB(AssignStmt::create(varA, varB, returnA));
 	testFunc->setBody(assignAB);
 
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
@@ -304,14 +304,14 @@ DoNotOptimizeIfLhsHasAssignedNameFromDebugInformation) {
 		OptimCallInfoObtainer::create());
 
 	// Check that the output is correct.
-	ShPtr<Statement> stmt1(testFunc->getBody());
+	Statement* stmt1(testFunc->getBody());
 	ASSERT_TRUE(stmt1) <<
 		"expected `" << assignAB << "`, "
 		"got the null pointer";
 	EXPECT_EQ(assignAB, stmt1) <<
 		"expected `" << assignAB << "`, "
 		"got `" << stmt1 << "`";
-	ShPtr<Statement> stmt2(stmt1->getSuccessor());
+	Statement* stmt2(stmt1->getSuccessor());
 	ASSERT_TRUE(stmt2) <<
 		"expected `" << returnA << "`, "
 		"got the null pointer";
@@ -329,13 +329,13 @@ DoNotOptimizeIfLhsIsExternalVariable) {
 	//     return a;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	varA->markAsExternal();
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	testFunc->addLocalVar(varB);
-	ShPtr<ReturnStmt> returnA(ReturnStmt::create(varA));
-	ShPtr<AssignStmt> assignAB(AssignStmt::create(varA, varB, returnA));
+	ReturnStmt* returnA(ReturnStmt::create(varA));
+	AssignStmt* assignAB(AssignStmt::create(varA, varB, returnA));
 	testFunc->setBody(assignAB);
 
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
@@ -345,14 +345,14 @@ DoNotOptimizeIfLhsIsExternalVariable) {
 		OptimCallInfoObtainer::create());
 
 	// Check that the output is correct.
-	ShPtr<Statement> stmt1(testFunc->getBody());
+	Statement* stmt1(testFunc->getBody());
 	ASSERT_TRUE(stmt1) <<
 		"expected `" << assignAB << "`, "
 		"got the null pointer";
 	EXPECT_EQ(assignAB, stmt1) <<
 		"expected `" << assignAB << "`, "
 		"got `" << stmt1 << "`";
-	ShPtr<Statement> stmt2(stmt1->getSuccessor());
+	Statement* stmt2(stmt1->getSuccessor());
 	ASSERT_TRUE(stmt2) <<
 		"expected `" << returnA << "`, "
 		"got the null pointer";
@@ -370,10 +370,10 @@ DoNotOptimizeIfRhsEqualsLhs) {
 	//     return a;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<ReturnStmt> returnA(ReturnStmt::create(varA));
-	ShPtr<AssignStmt> assignAA(AssignStmt::create(varA, varA, returnA));
+	ReturnStmt* returnA(ReturnStmt::create(varA));
+	AssignStmt* assignAA(AssignStmt::create(varA, varA, returnA));
 	testFunc->setBody(assignAA);
 
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
@@ -383,14 +383,14 @@ DoNotOptimizeIfRhsEqualsLhs) {
 		OptimCallInfoObtainer::create());
 
 	// Check that the output is correct.
-	ShPtr<Statement> stmt1(testFunc->getBody());
+	Statement* stmt1(testFunc->getBody());
 	ASSERT_TRUE(stmt1) <<
 		"expected `" << assignAA << "`, "
 		"got the null pointer";
 	EXPECT_EQ(assignAA, stmt1) <<
 		"expected `" << assignAA << "`, "
 		"got `" << stmt1 << "`";
-	ShPtr<Statement> stmt2(stmt1->getSuccessor());
+	Statement* stmt2(stmt1->getSuccessor());
 	ASSERT_TRUE(stmt2) <<
 		"expected `" << returnA << "`, "
 		"got the null pointer";
@@ -408,12 +408,12 @@ DoNotOptimizeIfRhsContainsArrayAccess) {
 	//     return a;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	testFunc->addLocalVar(varB);
-	ShPtr<ReturnStmt> returnA(ReturnStmt::create(varA));
-	ShPtr<AssignStmt> assignAB(AssignStmt::create(varA,
+	ReturnStmt* returnA(ReturnStmt::create(varA));
+	AssignStmt* assignAB(AssignStmt::create(varA,
 		ArrayIndexOpExpr::create(varB, ConstInt::create(0, 32)), returnA));
 	testFunc->setBody(assignAB);
 
@@ -424,14 +424,14 @@ DoNotOptimizeIfRhsContainsArrayAccess) {
 		OptimCallInfoObtainer::create());
 
 	// Check that the output is correct.
-	ShPtr<Statement> stmt1(testFunc->getBody());
+	Statement* stmt1(testFunc->getBody());
 	ASSERT_TRUE(stmt1) <<
 		"expected `" << assignAB << "`, "
 		"got the null pointer";
 	EXPECT_EQ(assignAB, stmt1) <<
 		"expected `" << assignAB << "`, "
 		"got `" << stmt1 << "`";
-	ShPtr<Statement> stmt2(stmt1->getSuccessor());
+	Statement* stmt2(stmt1->getSuccessor());
 	ASSERT_TRUE(stmt2) <<
 		"expected `" << returnA << "`, "
 		"got the null pointer";
@@ -449,10 +449,10 @@ DoNotOptimizeIfRhsIsAConstString) {
 	//     return a;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<ReturnStmt> returnA(ReturnStmt::create(varA));
-	ShPtr<AssignStmt> assignAString(AssignStmt::create(varA,
+	ReturnStmt* returnA(ReturnStmt::create(varA));
+	AssignStmt* assignAString(AssignStmt::create(varA,
 		ConstString::create("abcd"), returnA));
 	testFunc->setBody(assignAString);
 
@@ -463,14 +463,14 @@ DoNotOptimizeIfRhsIsAConstString) {
 		OptimCallInfoObtainer::create());
 
 	// Check that the output is correct.
-	ShPtr<Statement> stmt1(testFunc->getBody());
+	Statement* stmt1(testFunc->getBody());
 	ASSERT_TRUE(stmt1) <<
 		"expected `" << assignAString << "`, "
 		"got the null pointer";
 	EXPECT_EQ(assignAString, stmt1) <<
 		"expected `" << assignAString << "`, "
 		"got `" << stmt1 << "`";
-	ShPtr<Statement> stmt2(stmt1->getSuccessor());
+	Statement* stmt2(stmt1->getSuccessor());
 	ASSERT_TRUE(stmt2) <<
 		"expected `" << returnA << "`, "
 		"got the null pointer";
@@ -488,13 +488,13 @@ DoNotOptimizeIfRhsIsAConstArray) {
 	//     return a;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<ReturnStmt> returnA(ReturnStmt::create(varA));
-	ShPtr<ConstArray> constArray(ConstArray::createUninitialized(
+	ReturnStmt* returnA(ReturnStmt::create(varA));
+	ConstArray* constArray(ConstArray::createUninitialized(
 		ArrayType::create(IntType::create(32), ArrayType::Dimensions())
 	));
-	ShPtr<AssignStmt> assignAArray(AssignStmt::create(varA,
+	AssignStmt* assignAArray(AssignStmt::create(varA,
 		constArray, returnA));
 	testFunc->setBody(assignAArray);
 
@@ -505,14 +505,14 @@ DoNotOptimizeIfRhsIsAConstArray) {
 		OptimCallInfoObtainer::create());
 
 	// Check that the output is correct.
-	ShPtr<Statement> stmt1(testFunc->getBody());
+	Statement* stmt1(testFunc->getBody());
 	ASSERT_TRUE(stmt1) <<
 		"expected `" << assignAArray << "`, "
 		"got the null pointer";
 	EXPECT_EQ(assignAArray, stmt1) <<
 		"expected `" << assignAArray << "`, "
 		"got `" << stmt1 << "`";
-	ShPtr<Statement> stmt2(stmt1->getSuccessor());
+	Statement* stmt2(stmt1->getSuccessor());
 	ASSERT_TRUE(stmt2) <<
 		"expected `" << returnA << "`, "
 		"got the null pointer";
@@ -530,10 +530,10 @@ DoNotOptimizeIfRhsIsAConstStruct) {
 	//     return a;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<ReturnStmt> returnA(ReturnStmt::create(varA));
-	ShPtr<AssignStmt> assignAStruct(AssignStmt::create(varA,
+	ReturnStmt* returnA(ReturnStmt::create(varA));
+	AssignStmt* assignAStruct(AssignStmt::create(varA,
 		ConstStruct::create(ConstStruct::Type(),
 			StructType::create(StructType::ElementTypes())), returnA));
 	testFunc->setBody(assignAStruct);
@@ -545,14 +545,14 @@ DoNotOptimizeIfRhsIsAConstStruct) {
 		OptimCallInfoObtainer::create());
 
 	// Check that the output is correct.
-	ShPtr<Statement> stmt1(testFunc->getBody());
+	Statement* stmt1(testFunc->getBody());
 	ASSERT_TRUE(stmt1) <<
 		"expected `" << assignAStruct << "`, "
 		"got the null pointer";
 	EXPECT_EQ(assignAStruct, stmt1) <<
 		"expected `" << assignAStruct << "`, "
 		"got `" << stmt1 << "`";
-	ShPtr<Statement> stmt2(stmt1->getSuccessor());
+	Statement* stmt2(stmt1->getSuccessor());
 	ASSERT_TRUE(stmt2) <<
 		"expected `" << returnA << "`, "
 		"got the null pointer";
@@ -570,12 +570,12 @@ DoNotOptimizeIfRhsContainsStructAccess) {
 	//     return a;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	testFunc->addLocalVar(varB);
-	ShPtr<ReturnStmt> returnA(ReturnStmt::create(varA));
-	ShPtr<AssignStmt> assignAB(AssignStmt::create(varA,
+	ReturnStmt* returnA(ReturnStmt::create(varA));
+	AssignStmt* assignAB(AssignStmt::create(varA,
 		StructIndexOpExpr::create(varB, ConstInt::create(0, 32)), returnA));
 	testFunc->setBody(assignAB);
 
@@ -586,14 +586,14 @@ DoNotOptimizeIfRhsContainsStructAccess) {
 		OptimCallInfoObtainer::create());
 
 	// Check that the output is correct.
-	ShPtr<Statement> stmt1(testFunc->getBody());
+	Statement* stmt1(testFunc->getBody());
 	ASSERT_TRUE(stmt1) <<
 		"expected `" << assignAB << "`, "
 		"got the null pointer";
 	EXPECT_EQ(assignAB, stmt1) <<
 		"expected `" << assignAB << "`, "
 		"got `" << stmt1 << "`";
-	ShPtr<Statement> stmt2(stmt1->getSuccessor());
+	Statement* stmt2(stmt1->getSuccessor());
 	ASSERT_TRUE(stmt2) <<
 		"expected `" << returnA << "`, "
 		"got the null pointer";
@@ -612,14 +612,14 @@ DoNotOptimizeIfLhsIsModifiedBeforeItIsUsed) {
 	//     return a;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	testFunc->addLocalVar(varB);
-	ShPtr<ReturnStmt> returnA(ReturnStmt::create(varA));
-	ShPtr<AssignStmt> assignA1(AssignStmt::create(varA, ConstInt::create(1, 32),
+	ReturnStmt* returnA(ReturnStmt::create(varA));
+	AssignStmt* assignA1(AssignStmt::create(varA, ConstInt::create(1, 32),
 		returnA));
-	ShPtr<AssignStmt> assignAB(AssignStmt::create(varA, varB, assignA1));
+	AssignStmt* assignAB(AssignStmt::create(varA, varB, assignA1));
 	testFunc->setBody(assignAB);
 
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
@@ -629,21 +629,21 @@ DoNotOptimizeIfLhsIsModifiedBeforeItIsUsed) {
 		OptimCallInfoObtainer::create());
 
 	// Check that the output is correct.
-	ShPtr<Statement> stmt1(testFunc->getBody());
+	Statement* stmt1(testFunc->getBody());
 	ASSERT_TRUE(stmt1) <<
 		"expected `" << assignAB << "`, "
 		"got the null pointer";
 	EXPECT_EQ(assignAB, stmt1) <<
 		"expected `" << assignAB << "`, "
 		"got `" << stmt1 << "`";
-	ShPtr<Statement> stmt2(stmt1->getSuccessor());
+	Statement* stmt2(stmt1->getSuccessor());
 	ASSERT_TRUE(stmt2) <<
 		"expected `" << assignA1 << "`, "
 		"got the null pointer";
 	EXPECT_EQ(assignA1, stmt2) <<
 		"expected `" << assignA1 << "`, "
 		"got `" << stmt2 << "`";
-	ShPtr<Statement> stmt3(stmt2->getSuccessor());
+	Statement* stmt3(stmt2->getSuccessor());
 	ASSERT_TRUE(stmt3) <<
 		"expected `" << returnA << "`, "
 		"got the null pointer";
@@ -664,17 +664,17 @@ DoNotOptimizeIfLhsIsAssignedValueInIf) {
 	//     c = a;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	testFunc->addLocalVar(varB);
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(32)));
+	Variable* varC(Variable::create("c", IntType::create(32)));
 	testFunc->addLocalVar(varC);
-	ShPtr<AssignStmt> assignAC(AssignStmt::create(varA, varC));
-	ShPtr<AssignStmt> assignCA(AssignStmt::create(varC, varA));
-	ShPtr<IfStmt> ifStmt(IfStmt::create(ConstInt::create(1, 32), assignAC,
+	AssignStmt* assignAC(AssignStmt::create(varA, varC));
+	AssignStmt* assignCA(AssignStmt::create(varC, varA));
+	IfStmt* ifStmt(IfStmt::create(ConstInt::create(1, 32), assignAC,
 		assignCA));
-	ShPtr<AssignStmt> assignAB(AssignStmt::create(varA, varB, ifStmt));
+	AssignStmt* assignAB(AssignStmt::create(varA, varB, ifStmt));
 	testFunc->setBody(assignAB);
 
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
@@ -684,28 +684,28 @@ DoNotOptimizeIfLhsIsAssignedValueInIf) {
 		OptimCallInfoObtainer::create());
 
 	// Check that the output is correct.
-	ShPtr<Statement> stmt1(testFunc->getBody());
+	Statement* stmt1(testFunc->getBody());
 	ASSERT_TRUE(stmt1) <<
 		"expected `" << assignAB << "`, "
 		"got the null pointer";
 	EXPECT_EQ(assignAB, stmt1) <<
 		"expected `" << assignAB << "`, "
 		"got `" << stmt1 << "`";
-	ShPtr<Statement> stmt2(stmt1->getSuccessor());
+	Statement* stmt2(stmt1->getSuccessor());
 	ASSERT_TRUE(stmt2) <<
 		"expected `" << ifStmt << "`, "
 		"got the null pointer";
 	EXPECT_EQ(ifStmt, stmt2) <<
 		"expected `" << ifStmt << "`, "
 		"got `" << stmt2 << "`";
-	ShPtr<Statement> stmt3(ifStmt->getFirstIfBody());
+	Statement* stmt3(ifStmt->getFirstIfBody());
 	ASSERT_TRUE(stmt3) <<
 		"expected `" << assignAC << "`, "
 		"got the null pointer";
 	EXPECT_EQ(assignAC, stmt3) <<
 		"expected `" << assignAC << "`, "
 		"got `" << stmt3 << "`";
-	ShPtr<Statement> stmt4(ifStmt->getSuccessor());
+	Statement* stmt4(ifStmt->getSuccessor());
 	ASSERT_TRUE(stmt4) <<
 		"expected `" << assignCA << "`, "
 		"got the null pointer";
@@ -730,10 +730,10 @@ DoNotOptimizeIfThereIsFunctionCallAfterOrigStmtThatModifiesRhs) {
 	//     return a;
 	// }
 	//
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	module->addGlobalVar(varB);
 	// setB:
-	ShPtr<Function> setB(
+	Function* setB(
 		FunctionBuilder("setB")
 			.definitionWithBody(AssignStmt::create(varB, ConstInt::create(1, 32)))
 			.withRetType(IntType::create(32))
@@ -741,12 +741,12 @@ DoNotOptimizeIfThereIsFunctionCallAfterOrigStmtThatModifiesRhs) {
 	);
 	module->addFunc(setB);
 	// test:
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<ReturnStmt> returnA(ReturnStmt::create(varA));
-	ShPtr<CallStmt> setBCall(CallStmt::create(CallExpr::create(setB->getAsVar()),
+	ReturnStmt* returnA(ReturnStmt::create(varA));
+	CallStmt* setBCall(CallStmt::create(CallExpr::create(setB->getAsVar()),
 		returnA));
-	ShPtr<AssignStmt> assignAB(AssignStmt::create(varA, varB, setBCall));
+	AssignStmt* assignAB(AssignStmt::create(varA, varB, setBCall));
 	testFunc->setBody(assignAB);
 
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
@@ -756,21 +756,21 @@ DoNotOptimizeIfThereIsFunctionCallAfterOrigStmtThatModifiesRhs) {
 		OptimCallInfoObtainer::create());
 
 	// Check that the output is correct.
-	ShPtr<Statement> stmt1(testFunc->getBody());
+	Statement* stmt1(testFunc->getBody());
 	ASSERT_TRUE(stmt1) <<
 		"expected `" << assignAB << "`, "
 		"got the null pointer";
 	EXPECT_EQ(assignAB, stmt1) <<
 		"expected `" << assignAB << "`, "
 		"got `" << stmt1 << "`";
-	ShPtr<Statement> stmt2(stmt1->getSuccessor());
+	Statement* stmt2(stmt1->getSuccessor());
 	ASSERT_TRUE(stmt2) <<
 		"expected `" << setBCall << "`, "
 		"got the null pointer";
 	EXPECT_EQ(setBCall, stmt2) <<
 		"expected `" << setBCall << "`, "
 		"got `" << stmt2 << "`";
-	ShPtr<Statement> stmt3(setBCall->getSuccessor());
+	Statement* stmt3(setBCall->getSuccessor());
 	ASSERT_TRUE(stmt3) <<
 		"expected `" << returnA << "`, "
 		"got the null pointer";
@@ -788,13 +788,13 @@ OptimizeIfOrigStatementHasFunctionCallOnItsRightHandSide) {
 	//     b = a;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	testFunc->addLocalVar(varB);
-	ShPtr<AssignStmt> assignBA(AssignStmt::create(varB, varA));
-	ShPtr<CallExpr> testCall(CallExpr::create(testFunc->getAsVar()));
-	ShPtr<AssignStmt> assignATest(AssignStmt::create(varA, testCall, assignBA));
+	AssignStmt* assignBA(AssignStmt::create(varB, varA));
+	CallExpr* testCall(CallExpr::create(testFunc->getAsVar()));
+	AssignStmt* assignATest(AssignStmt::create(varA, testCall, assignBA));
 	testFunc->setBody(assignATest);
 
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
@@ -804,7 +804,7 @@ OptimizeIfOrigStatementHasFunctionCallOnItsRightHandSide) {
 		OptimCallInfoObtainer::create());
 
 	// Check that the output is correct.
-	ShPtr<AssignStmt> assignBTest(cast<AssignStmt>(testFunc->getBody()));
+	AssignStmt* assignBTest(cast<AssignStmt>(testFunc->getBody()));
 	ASSERT_TRUE(assignBTest) <<
 		"expected an assign statement, got `" << testFunc->getBody() << "`";
 	EXPECT_EQ(testCall, assignBTest->getRhs()) <<
@@ -824,15 +824,15 @@ OptimizeIfOrigStatementHasFunctionCallOnItsRightHandSideAndNextIsCallStatement) 
 	// }
 	//
 	addFuncDecl("foo");
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<CallExpr> testCallExpr(CallExpr::create(testFunc->getAsVar()));
+	CallExpr* testCallExpr(CallExpr::create(testFunc->getAsVar()));
 	ExprVector fooCallArgs;
 	fooCallArgs.push_back(varA);
-	ShPtr<CallExpr> fooCallExpr(CallExpr::create(
+	CallExpr* fooCallExpr(CallExpr::create(
 		module->getFuncByName("foo")->getAsVar(), fooCallArgs));
-	ShPtr<CallStmt> fooCallStmt(CallStmt::create(fooCallExpr));
-	ShPtr<AssignStmt> assignATest(AssignStmt::create(varA, testCallExpr, fooCallStmt));
+	CallStmt* fooCallStmt(CallStmt::create(fooCallExpr));
+	AssignStmt* assignATest(AssignStmt::create(varA, testCallExpr, fooCallStmt));
 	testFunc->setBody(assignATest);
 
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
@@ -842,10 +842,10 @@ OptimizeIfOrigStatementHasFunctionCallOnItsRightHandSideAndNextIsCallStatement) 
 		OptimCallInfoObtainer::create());
 
 	// Check that the output is correct.
-	ShPtr<CallStmt> fooCallStmtNew(cast<CallStmt>(testFunc->getBody()));
+	CallStmt* fooCallStmtNew(cast<CallStmt>(testFunc->getBody()));
 	ASSERT_TRUE(fooCallStmtNew) <<
 		"expected a call statement, got `" << testFunc->getBody() << "`";
-	ShPtr<CallExpr> fooCallArgNew(cast<CallExpr>(fooCallStmtNew->getCall()));
+	CallExpr* fooCallArgNew(cast<CallExpr>(fooCallStmtNew->getCall()));
 	ASSERT_TRUE(fooCallArgNew) <<
 		"expected a call expression, got `" << fooCallArgNew << "`";
 	EXPECT_EQ(testCallExpr, fooCallArgNew->getArgs().front()) <<
@@ -865,15 +865,15 @@ OptimizeIfOrigStatementHasFunctionCallOnItsRightHandSideAndNextIsReturnStatement
 	// }
 	//
 	addFuncDecl("foo");
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<CallExpr> testCallExpr(CallExpr::create(testFunc->getAsVar()));
+	CallExpr* testCallExpr(CallExpr::create(testFunc->getAsVar()));
 	ExprVector fooCallArgs;
 	fooCallArgs.push_back(varA);
-	ShPtr<CallExpr> fooCallExpr(CallExpr::create(
+	CallExpr* fooCallExpr(CallExpr::create(
 		module->getFuncByName("foo")->getAsVar(), fooCallArgs));
-	ShPtr<ReturnStmt> returnFoo(ReturnStmt::create(fooCallExpr));
-	ShPtr<AssignStmt> assignATest(AssignStmt::create(varA, testCallExpr, returnFoo));
+	ReturnStmt* returnFoo(ReturnStmt::create(fooCallExpr));
+	AssignStmt* assignATest(AssignStmt::create(varA, testCallExpr, returnFoo));
 	testFunc->setBody(assignATest);
 
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
@@ -883,10 +883,10 @@ OptimizeIfOrigStatementHasFunctionCallOnItsRightHandSideAndNextIsReturnStatement
 		OptimCallInfoObtainer::create());
 
 	// Check that the output is correct.
-	ShPtr<ReturnStmt> returnFooNew(cast<ReturnStmt>(testFunc->getBody()));
+	ReturnStmt* returnFooNew(cast<ReturnStmt>(testFunc->getBody()));
 	ASSERT_TRUE(returnFooNew) <<
 		"expected a return statement, got `" << testFunc->getBody() << "`";
-	ShPtr<CallExpr> fooCallArgNew(cast<CallExpr>(returnFooNew->getRetVal()));
+	CallExpr* fooCallArgNew(cast<CallExpr>(returnFooNew->getRetVal()));
 	ASSERT_TRUE(fooCallArgNew) <<
 		"expected a call expression, got `" << fooCallArgNew << "`";
 	EXPECT_EQ(testCallExpr, fooCallArgNew->getArgs().front()) <<
@@ -906,17 +906,17 @@ OptimizeIfOrigStatementHasFunctionCallOnItsRightHandSideAndNextIsAssignStatement
 	// }
 	//
 	addFuncDecl("foo");
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<CallExpr> testCallExpr(CallExpr::create(testFunc->getAsVar()));
+	CallExpr* testCallExpr(CallExpr::create(testFunc->getAsVar()));
 	ExprVector fooCallArgs;
 	fooCallArgs.push_back(varA);
-	ShPtr<CallExpr> fooCallExpr(CallExpr::create(
+	CallExpr* fooCallExpr(CallExpr::create(
 		module->getFuncByName("foo")->getAsVar(), fooCallArgs));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	testFunc->addLocalVar(varB);
-	ShPtr<AssignStmt> assignBFoo(AssignStmt::create(varB, fooCallExpr));
-	ShPtr<AssignStmt> assignATest(AssignStmt::create(varA, testCallExpr, assignBFoo));
+	AssignStmt* assignBFoo(AssignStmt::create(varB, fooCallExpr));
+	AssignStmt* assignATest(AssignStmt::create(varA, testCallExpr, assignBFoo));
 	testFunc->setBody(assignATest);
 
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
@@ -926,10 +926,10 @@ OptimizeIfOrigStatementHasFunctionCallOnItsRightHandSideAndNextIsAssignStatement
 		OptimCallInfoObtainer::create());
 
 	// Check that the output is correct.
-	ShPtr<AssignStmt> assignBFooNew(cast<AssignStmt>(testFunc->getBody()));
+	AssignStmt* assignBFooNew(cast<AssignStmt>(testFunc->getBody()));
 	ASSERT_TRUE(assignBFooNew) <<
 		"expected an assign statement, got `" << testFunc->getBody() << "`";
-	ShPtr<CallExpr> fooCallArgNew(cast<CallExpr>(assignBFoo->getRhs()));
+	CallExpr* fooCallArgNew(cast<CallExpr>(assignBFoo->getRhs()));
 	ASSERT_TRUE(fooCallArgNew) <<
 		"expected a call expression, got `" << fooCallArgNew << "`";
 	EXPECT_EQ(testCallExpr, fooCallArgNew->getArgs().front()) <<
@@ -947,15 +947,15 @@ OptimizeIfOrigStatementHasFunctionCallOnItsRightHandSideAndTheUseIsNotNextStatem
 	//     return a;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	testFunc->addLocalVar(varB);
-	ShPtr<ReturnStmt> returnA(ReturnStmt::create(varA));
-	ShPtr<AssignStmt> assignB1(AssignStmt::create(varB, ConstInt::create(1, 32),
+	ReturnStmt* returnA(ReturnStmt::create(varA));
+	AssignStmt* assignB1(AssignStmt::create(varB, ConstInt::create(1, 32),
 		returnA));
-	ShPtr<CallExpr> testCall(CallExpr::create(testFunc->getAsVar()));
-	ShPtr<AssignStmt> assignATest(AssignStmt::create(varA, testCall, assignB1));
+	CallExpr* testCall(CallExpr::create(testFunc->getAsVar()));
+	AssignStmt* assignATest(AssignStmt::create(varA, testCall, assignB1));
 	testFunc->setBody(assignATest);
 
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
@@ -965,7 +965,7 @@ OptimizeIfOrigStatementHasFunctionCallOnItsRightHandSideAndTheUseIsNotNextStatem
 		OptimCallInfoObtainer::create());
 
 	// Check that the output is correct.
-	ShPtr<AssignStmt> assignBTest(cast<AssignStmt>(testFunc->getBody()));
+	AssignStmt* assignBTest(cast<AssignStmt>(testFunc->getBody()));
 	ASSERT_TRUE(assignBTest) <<
 		"expected an assign statement, got `" << testFunc->getBody() << "`";
 	EXPECT_EQ(varB, assignBTest->getLhs()) <<
@@ -987,13 +987,13 @@ OptimizeIfOrigStatementHasFunctionCallOnItsRightHandSideAndUseIsIfStmt) {
 	//     }
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create());
-	ShPtr<EqOpExpr> ifCond(EqOpExpr::create(varA, ConstInt::create(1, 32)));
-	ShPtr<IfStmt> ifStmt(IfStmt::create(ifCond, returnStmt));
-	ShPtr<CallExpr> testCall(CallExpr::create(testFunc->getAsVar()));
-	ShPtr<AssignStmt> assignATest(AssignStmt::create(varA, testCall, ifStmt));
+	ReturnStmt* returnStmt(ReturnStmt::create());
+	EqOpExpr* ifCond(EqOpExpr::create(varA, ConstInt::create(1, 32)));
+	IfStmt* ifStmt(IfStmt::create(ifCond, returnStmt));
+	CallExpr* testCall(CallExpr::create(testFunc->getAsVar()));
+	AssignStmt* assignATest(AssignStmt::create(varA, testCall, ifStmt));
 	testFunc->setBody(assignATest);
 
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
@@ -1020,19 +1020,19 @@ DoNotOptimizeIfThereIsAStatementBetweenCallAndUseThatUsesAVariableFromTheCall) {
 	//     b = a;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	testFunc->addLocalVar(varB);
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(32)));
+	Variable* varC(Variable::create("c", IntType::create(32)));
 	testFunc->addLocalVar(varC);
-	ShPtr<AssignStmt> assignBA(AssignStmt::create(varB, varA));
-	ShPtr<AssignStmt> assignC1(AssignStmt::create(varC, ConstInt::create(1, 32),
+	AssignStmt* assignBA(AssignStmt::create(varB, varA));
+	AssignStmt* assignC1(AssignStmt::create(varC, ConstInt::create(1, 32),
 		assignBA));
 	ExprVector testCallArgs;
 	testCallArgs.push_back(varC);
-	ShPtr<CallExpr> testCall(CallExpr::create(testFunc->getAsVar(), testCallArgs));
-	ShPtr<AssignStmt> assignATest(AssignStmt::create(varA, testCall, assignC1));
+	CallExpr* testCall(CallExpr::create(testFunc->getAsVar(), testCallArgs));
+	AssignStmt* assignATest(AssignStmt::create(varA, testCall, assignC1));
 	testFunc->setBody(assignATest);
 
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
@@ -1042,21 +1042,21 @@ DoNotOptimizeIfThereIsAStatementBetweenCallAndUseThatUsesAVariableFromTheCall) {
 		OptimCallInfoObtainer::create());
 
 	// Check that the output is correct.
-	ShPtr<Statement> stmt1(testFunc->getBody());
+	Statement* stmt1(testFunc->getBody());
 	ASSERT_TRUE(stmt1) <<
 		"expected `" << assignATest << "`, "
 		"got the null pointer";
 	EXPECT_EQ(assignATest, stmt1) <<
 		"expected `" << assignATest << "`, "
 		"got `" << stmt1 << "`";
-	ShPtr<Statement> stmt2(stmt1->getSuccessor());
+	Statement* stmt2(stmt1->getSuccessor());
 	ASSERT_TRUE(stmt2) <<
 		"expected `" << assignC1 << "`, "
 		"got the null pointer";
 	EXPECT_EQ(assignC1, stmt2) <<
 		"expected `" << assignC1 << "`, "
 		"got `" << stmt2 << "`";
-	ShPtr<Statement> stmt3(stmt2->getSuccessor());
+	Statement* stmt3(stmt2->getSuccessor());
 	ASSERT_TRUE(stmt3) <<
 		"expected `" << assignBA << "`, "
 		"got the null pointer";

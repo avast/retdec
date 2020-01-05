@@ -44,7 +44,7 @@ namespace tests {
 class ReadableVarRenamerTests: public TestsWithModule {
 protected:
 	void scenarioVarStoringTheResultOfKnownFuncIsRenamedCorrectly(
-		ShPtr<Function> func, const ExprVector &args, const std::string &refVarName);
+		Function* func, const ExprVector &args, const std::string &refVarName);
 };
 
 TEST_F(ReadableVarRenamerTests,
@@ -85,8 +85,8 @@ DoNotRenameFunctionsInCalls) {
 	//     test();
 	// }
 	//
-	ShPtr<CallExpr> testCallExpr(CallExpr::create(testFunc->getAsVar()));
-	ShPtr<CallStmt> testCall(CallStmt::create(testCallExpr));
+	CallExpr* testCallExpr(CallExpr::create(testFunc->getAsVar()));
+	CallStmt* testCall(CallStmt::create(testCallExpr));
 	testFunc->setBody(testCall);
 
 	// Setup the renamer.
@@ -115,11 +115,11 @@ GlobalVariablesGetCorrectlyRenamed) {
 	// void test() {
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	module->addGlobalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	module->addGlobalVar(varB);
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(32)));
+	Variable* varC(Variable::create("c", IntType::create(32)));
 	module->addGlobalVar(varC);
 
 	// Setup the renamer.
@@ -142,11 +142,11 @@ GlobalVariablesGetCorrectlyRenamed) {
 	// We have to sort the variables to ease the checking.
 	VarVector globalVarsVector(globalVarsSet.begin(), globalVarsSet.end());
 	sortByName(globalVarsVector);
-	ShPtr<Variable> var1(globalVarsVector[0]);
+	Variable* var1(globalVarsVector[0]);
 	EXPECT_EQ("g1", var1->getName());
-	ShPtr<Variable> var2(globalVarsVector[1]);
+	Variable* var2(globalVarsVector[1]);
 	EXPECT_EQ("g2", var2->getName());
-	ShPtr<Variable> var3(globalVarsVector[2]);
+	Variable* var3(globalVarsVector[2]);
 	EXPECT_EQ("g3", var3->getName());
 }
 
@@ -157,9 +157,9 @@ ParametersOfFunctionDefinitionGetCorrectlyRenamed) {
 	// void test(int a, int b) {
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addParam(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	testFunc->addParam(varB);
 
 	// Setup the renamer.
@@ -175,9 +175,9 @@ ParametersOfFunctionDefinitionGetCorrectlyRenamed) {
 	//
 	VarVector params(testFunc->getParams());
 	ASSERT_EQ(2, params.size());
-	ShPtr<Variable> var1(params.front());
+	Variable* var1(params.front());
 	EXPECT_EQ("a1", var1->getName());
-	ShPtr<Variable> var2(params.back());
+	Variable* var2(params.back());
 	EXPECT_EQ("a2", var2->getName());
 }
 
@@ -187,9 +187,9 @@ ParametersOfFunctionDeclarationGetCorrectlyRenamed) {
 	//
 	// void test(int a, int b);
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addParam(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	testFunc->addParam(varB);
 	// testFunc is by default a definition, so we have to make it a
 	// declaration.
@@ -207,9 +207,9 @@ ParametersOfFunctionDeclarationGetCorrectlyRenamed) {
 	//
 	VarVector params(testFunc->getParams());
 	ASSERT_EQ(2, params.size());
-	ShPtr<Variable> var1(params.front());
+	Variable* var1(params.front());
 	EXPECT_EQ("a1", var1->getName());
-	ShPtr<Variable> var2(params.back());
+	Variable* var2(params.back());
 	EXPECT_EQ("a2", var2->getName());
 }
 
@@ -222,12 +222,12 @@ FunctionLocalVariablesGetCorrectlyRenamed) {
 	//     int b;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	testFunc->addLocalVar(varB);
-	ShPtr<VarDefStmt> varDefB(VarDefStmt::create(varB));
-	ShPtr<VarDefStmt> varDefA(VarDefStmt::create(varA, ShPtr<Expression>(), varDefB));
+	VarDefStmt* varDefB(VarDefStmt::create(varB));
+	VarDefStmt* varDefA(VarDefStmt::create(varA, Expression*(), varDefB));
 	testFunc->setBody(varDefA);
 
 	// Setup the renamer.
@@ -259,23 +259,23 @@ VariablesWithNameFromDebugInfoAreCorrectlyRenamedWhenUsingDebugIsTrue) {
 	//     int b; // from debug info
 	// }
 	//
-	ShPtr<Variable> varG(Variable::create("g", IntType::create(32)));
+	Variable* varG(Variable::create("g", IntType::create(32)));
 	module->addGlobalVar(varG);
 	module->addDebugNameForVar(varG, varG->getName());
-	ShPtr<Variable> varH(Variable::create("h", IntType::create(32)));
+	Variable* varH(Variable::create("h", IntType::create(32)));
 	module->addGlobalVar(varH);
-	ShPtr<Variable> varP(Variable::create("p", IntType::create(32)));
+	Variable* varP(Variable::create("p", IntType::create(32)));
 	testFunc->addParam(varP);
 	module->addDebugNameForVar(varP, varP->getName());
-	ShPtr<Variable> varM(Variable::create("m", IntType::create(32)));
+	Variable* varM(Variable::create("m", IntType::create(32)));
 	testFunc->addParam(varM);
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	testFunc->addLocalVar(varB);
 	module->addDebugNameForVar(varB, varB->getName());
-	ShPtr<VarDefStmt> varDefB(VarDefStmt::create(varB));
-	ShPtr<VarDefStmt> varDefA(VarDefStmt::create(varA, ShPtr<Expression>(), varDefB));
+	VarDefStmt* varDefB(VarDefStmt::create(varB));
+	VarDefStmt* varDefA(VarDefStmt::create(varA, Expression*(), varDefB));
 	testFunc->setBody(varDefA);
 
 	// Setup the renamer.
@@ -300,16 +300,16 @@ VariablesWithNameFromDebugInfoAreCorrectlyRenamedWhenUsingDebugIsTrue) {
 	// We have to sort the variables to ease the checking.
 	VarVector globalVarsVector(globalVarsSet.begin(), globalVarsSet.end());
 	sortByName(globalVarsVector);
-	ShPtr<Variable> var1(globalVarsVector[0]);
+	Variable* var1(globalVarsVector[0]);
 	EXPECT_EQ("g", var1->getName());
-	ShPtr<Variable> var2(globalVarsVector[1]);
+	Variable* var2(globalVarsVector[1]);
 	EXPECT_EQ("g1", var2->getName());
 	// Parameters:
 	VarVector params(testFunc->getParams());
 	ASSERT_EQ(2, params.size());
-	ShPtr<Variable> par1(params.front());
+	Variable* par1(params.front());
 	EXPECT_EQ("p", par1->getName());
-	ShPtr<Variable> par2(params.back());
+	Variable* par2(params.back());
 	EXPECT_EQ("a2", par2->getName());
 	// Locals:
 	EXPECT_EQ("v1", varDefA->getVar()->getName());
@@ -328,23 +328,23 @@ WhenUseDebugNamesIsFalseDoNotUseDebugNames) {
 	//     int b; // from debug info
 	// }
 	//
-	ShPtr<Variable> varG(Variable::create("g", IntType::create(32)));
+	Variable* varG(Variable::create("g", IntType::create(32)));
 	module->addGlobalVar(varG);
 	module->addDebugNameForVar(varG, varG->getName());
-	ShPtr<Variable> varH(Variable::create("h", IntType::create(32)));
+	Variable* varH(Variable::create("h", IntType::create(32)));
 	module->addGlobalVar(varH);
-	ShPtr<Variable> varP(Variable::create("p", IntType::create(32)));
+	Variable* varP(Variable::create("p", IntType::create(32)));
 	testFunc->addParam(varP);
 	module->addDebugNameForVar(varP, varP->getName());
-	ShPtr<Variable> varM(Variable::create("m", IntType::create(32)));
+	Variable* varM(Variable::create("m", IntType::create(32)));
 	testFunc->addParam(varM);
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	testFunc->addLocalVar(varB);
 	module->addDebugNameForVar(varB, varB->getName());
-	ShPtr<VarDefStmt> varDefB(VarDefStmt::create(varB));
-	ShPtr<VarDefStmt> varDefA(VarDefStmt::create(varA, ShPtr<Expression>(), varDefB));
+	VarDefStmt* varDefB(VarDefStmt::create(varB));
+	VarDefStmt* varDefA(VarDefStmt::create(varA, Expression*(), varDefB));
 	testFunc->setBody(varDefA);
 
 	// Setup the renamer (do not use debug names).
@@ -369,16 +369,16 @@ WhenUseDebugNamesIsFalseDoNotUseDebugNames) {
 	// We have to sort the variables to ease the checking.
 	VarVector globalVarsVector(globalVarsSet.begin(), globalVarsSet.end());
 	sortByName(globalVarsVector);
-	ShPtr<Variable> var1(globalVarsVector[0]);
+	Variable* var1(globalVarsVector[0]);
 	EXPECT_EQ("g1", var1->getName());
-	ShPtr<Variable> var2(globalVarsVector[1]);
+	Variable* var2(globalVarsVector[1]);
 	EXPECT_EQ("g2", var2->getName());
 	// Parameters:
 	VarVector params(testFunc->getParams());
 	ASSERT_EQ(2, params.size());
-	ShPtr<Variable> par1(params.front());
+	Variable* par1(params.front());
 	EXPECT_EQ("a1", par1->getName());
-	ShPtr<Variable> par2(params.back());
+	Variable* par2(params.back());
 	EXPECT_EQ("a2", par2->getName());
 	// Locals:
 	EXPECT_EQ("v1", varDefA->getVar()->getName());
@@ -395,7 +395,7 @@ ParametersOfMainAreProperlyRenamed) {
 	// int main(int a, char **b) {
 	// }
 	//
-	ShPtr<Function> mainFunc(
+	Function* mainFunc(
 		FunctionBuilder("main")
 			.definitionWithEmptyBody()
 			.withRetType(IntType::create(32))
@@ -422,9 +422,9 @@ ParametersOfMainAreProperlyRenamed) {
 	//
 	VarVector params(mainFunc->getParams());
 	ASSERT_EQ(2, params.size());
-	ShPtr<Variable> par1(params.front());
+	Variable* par1(params.front());
 	EXPECT_EQ("argc", par1->getName());
-	ShPtr<Variable> par2(params.back());
+	Variable* par2(params.back());
 	EXPECT_EQ("argv", par2->getName());
 }
 
@@ -443,21 +443,21 @@ InductionVariablesOfForLoopsAreProperlyRenamed) {
 	// }
 	//
 	// c
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(32)));
+	Variable* varC(Variable::create("c", IntType::create(32)));
 	testFunc->addLocalVar(varC);
-	ShPtr<ForLoopStmt> forLoopC(ForLoopStmt::create(
+	ForLoopStmt* forLoopC(ForLoopStmt::create(
 		varC, ConstInt::create(0, 32), LtOpExpr::create(varC, ConstInt::create(10, 32)),
 		ConstInt::create(1, 32), EmptyStmt::create()));
 	// b
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	testFunc->addLocalVar(varB);
-	ShPtr<ForLoopStmt> forLoopB(ForLoopStmt::create(
+	ForLoopStmt* forLoopB(ForLoopStmt::create(
 		varB, ConstInt::create(0, 32), LtOpExpr::create(varC, ConstInt::create(10, 32)),
 		ConstInt::create(1, 32), EmptyStmt::create()));
 	// a
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<ForLoopStmt> forLoopA(ForLoopStmt::create(
+	ForLoopStmt* forLoopA(ForLoopStmt::create(
 		varA, ConstInt::create(0, 32), LtOpExpr::create(varA, ConstInt::create(10, 32)),
 		ConstInt::create(1, 32), forLoopB, forLoopC));
 	testFunc->setBody(forLoopA);
@@ -493,9 +493,9 @@ ReturnVariablesFromFunctionAreProperlyRenamed) {
 	//     return a;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<ReturnStmt> returnA(ReturnStmt::create(varA));
+	ReturnStmt* returnA(ReturnStmt::create(varA));
 	testFunc->setBody(returnA);
 
 	// Setup the renamer.
@@ -546,8 +546,8 @@ ReturnVariableFromFunctionIsNotRenamedWhenItRepresentsFunction) {
 *  - @a func does not have a body
 */
 void ReadableVarRenamerTests::scenarioVarStoringTheResultOfKnownFuncIsRenamedCorrectly(
-		ShPtr<Function> func, const ExprVector &args, const std::string &refVarName) {
-	ShPtr<Function> testFunc(module->getFuncByName("test"));
+		Function* func, const ExprVector &args, const std::string &refVarName) {
+	Function* testFunc(module->getFuncByName("test"));
 	PRECONDITION(testFunc, "the module does not contain the `test` function");
 	PRECONDITION(!func->getBody(), "the passed func `" << func->getName() <<
 		"` has a body");
@@ -559,10 +559,10 @@ void ReadableVarRenamerTests::scenarioVarStoringTheResultOfKnownFuncIsRenamedCor
 	// }
 	//
 	module->addFunc(func);
-	ShPtr<Variable> varX(Variable::create("x", func->getRetType()));
+	Variable* varX(Variable::create("x", func->getRetType()));
 	testFunc->addLocalVar(varX);
-	ShPtr<CallExpr> funcCallExpr(CallExpr::create(func->getAsVar(), args));
-	ShPtr<AssignStmt> assignXFunc(AssignStmt::create(varX, funcCallExpr));
+	CallExpr* funcCallExpr(CallExpr::create(func->getAsVar(), args));
+	AssignStmt* assignXFunc(AssignStmt::create(varX, funcCallExpr));
 	testFunc->setBody(assignXFunc);
 
 	// Setup the renamer.
@@ -584,7 +584,7 @@ void ReadableVarRenamerTests::scenarioVarStoringTheResultOfKnownFuncIsRenamedCor
 
 TEST_F(ReadableVarRenamerTests,
 VarStoringTheResultOfFopenIsNamedFile) {
-	ShPtr<Function> fopenFunc(
+	Function* fopenFunc(
 		FunctionBuilder("fopen")
 			.withRetType(IntType::create(32))
 			.build()
@@ -597,7 +597,7 @@ VarStoringTheResultOfFopenIsNamedFile) {
 
 TEST_F(ReadableVarRenamerTests,
 VarStoringTheResultOfGetcIsNamedC) {
-	ShPtr<Function> getcFunc(
+	Function* getcFunc(
 		FunctionBuilder("getc")
 			.withRetType(IntType::create(32))
 			.build()
@@ -610,7 +610,7 @@ VarStoringTheResultOfGetcIsNamedC) {
 
 TEST_F(ReadableVarRenamerTests,
 VarStoringTheResultOfFgetcIsNamedC) {
-	ShPtr<Function> fgetcFunc(
+	Function* fgetcFunc(
 		FunctionBuilder("fgetc")
 			.withRetType(IntType::create(32))
 			.build()
@@ -623,7 +623,7 @@ VarStoringTheResultOfFgetcIsNamedC) {
 
 TEST_F(ReadableVarRenamerTests,
 VarStoringTheResultOfGetcharIsNamedC) {
-	ShPtr<Function> getcharFunc(
+	Function* getcharFunc(
 		FunctionBuilder("getchar")
 			.withRetType(IntType::create(32))
 			.build()
@@ -636,7 +636,7 @@ VarStoringTheResultOfGetcharIsNamedC) {
 
 TEST_F(ReadableVarRenamerTests,
 VarStoringTheResultOfSocketIsNamedSockId) {
-	ShPtr<Function> socketFunc(
+	Function* socketFunc(
 		FunctionBuilder("socket")
 			.withRetType(IntType::create(32))
 			.build()
@@ -657,17 +657,17 @@ VarStoringTheResultOfFunctionDefinitionIsNotGivenSpecialName) {
 	//     int x = getchar();
 	// }
 	//
-	ShPtr<Function> getcharFunc(
+	Function* getcharFunc(
 		FunctionBuilder("getchar")
 			.definitionWithEmptyBody()
 			.withRetType(IntType::create(32))
 			.build()
 	);
 	module->addFunc(getcharFunc);
-	ShPtr<Variable> varX(Variable::create("x", IntType::create(32)));
+	Variable* varX(Variable::create("x", IntType::create(32)));
 	testFunc->addLocalVar(varX);
-	ShPtr<CallExpr> funcCallExpr(CallExpr::create(getcharFunc->getAsVar()));
-	ShPtr<AssignStmt> assignXFunc(AssignStmt::create(varX, funcCallExpr));
+	CallExpr* funcCallExpr(CallExpr::create(getcharFunc->getAsVar()));
+	AssignStmt* assignXFunc(AssignStmt::create(varX, funcCallExpr));
 	testFunc->setBody(assignXFunc);
 
 	// Setup the renamer.
@@ -690,17 +690,17 @@ VarStoringTheResultOfNotWellKnownFunctionIsNotGivenSpecialName) {
 	//     int x = unusual_func();
 	// }
 	//
-	ShPtr<Function> unusualFunc(
+	Function* unusualFunc(
 		FunctionBuilder("unusual")
 			.definitionWithEmptyBody()
 			.withRetType(IntType::create(32))
 			.build()
 	);
 	module->addFunc(unusualFunc);
-	ShPtr<Variable> varX(Variable::create("x", IntType::create(32)));
+	Variable* varX(Variable::create("x", IntType::create(32)));
 	testFunc->addLocalVar(varX);
-	ShPtr<CallExpr> funcCallExpr(CallExpr::create(unusualFunc->getAsVar()));
-	ShPtr<AssignStmt> assignXFunc(AssignStmt::create(varX, funcCallExpr));
+	CallExpr* funcCallExpr(CallExpr::create(unusualFunc->getAsVar()));
+	AssignStmt* assignXFunc(AssignStmt::create(varX, funcCallExpr));
 	testFunc->setBody(assignXFunc);
 
 	// Setup the renamer.
@@ -723,7 +723,7 @@ VariablesPassedAsArgumentsToWellKnownFunctionAreGivenSpecialNames) {
 	//     fopen(v1, v2);
 	// }
 	//
-	ShPtr<Function> fopenFunc(
+	Function* fopenFunc(
 		FunctionBuilder("fopen")
 			.withRetType(IntType::create(32))
 			.withParam(Variable::create("p1", IntType::create(32)))
@@ -731,16 +731,16 @@ VariablesPassedAsArgumentsToWellKnownFunctionAreGivenSpecialNames) {
 			.build()
 	);
 	module->addFunc(fopenFunc);
-	ShPtr<Variable> var1(Variable::create("v1", IntType::create(32)));
+	Variable* var1(Variable::create("v1", IntType::create(32)));
 	testFunc->addLocalVar(var1);
-	ShPtr<Variable> var2(Variable::create("v2", IntType::create(32)));
+	Variable* var2(Variable::create("v2", IntType::create(32)));
 	testFunc->addLocalVar(var2);
 	ExprVector fopenCallArgs;
 	fopenCallArgs.push_back(var1);
 	fopenCallArgs.push_back(var2);
-	ShPtr<CallExpr> fopenCallExpr(CallExpr::create(fopenFunc->getAsVar(),
+	CallExpr* fopenCallExpr(CallExpr::create(fopenFunc->getAsVar(),
 		fopenCallArgs));
-	ShPtr<CallStmt> fopenCallStmt(CallStmt::create(fopenCallExpr));
+	CallStmt* fopenCallStmt(CallStmt::create(fopenCallExpr));
 	testFunc->setBody(fopenCallStmt);
 
 	// Setup the renamer.
@@ -812,7 +812,7 @@ VariablePassedAsArgumentToWellKnownFunctionIsNotRenamedWhenItIsFunction) {
 	//     fopen(v1, test); // test is the testing function
 	// }
 	//
-	ShPtr<Function> fopenFunc(
+	Function* fopenFunc(
 		FunctionBuilder("fopen")
 			.withRetType(IntType::create(32))
 			.withParam(Variable::create("p1", IntType::create(32)))
@@ -820,14 +820,14 @@ VariablePassedAsArgumentToWellKnownFunctionIsNotRenamedWhenItIsFunction) {
 			.build()
 	);
 	module->addFunc(fopenFunc);
-	ShPtr<Variable> var1(Variable::create("v1", IntType::create(32)));
+	Variable* var1(Variable::create("v1", IntType::create(32)));
 	testFunc->addLocalVar(var1);
 	ExprVector fopenCallArgs;
 	fopenCallArgs.push_back(var1);
 	fopenCallArgs.push_back(testFunc->getAsVar());
-	ShPtr<CallExpr> fopenCallExpr(CallExpr::create(fopenFunc->getAsVar(),
+	CallExpr* fopenCallExpr(CallExpr::create(fopenFunc->getAsVar(),
 		fopenCallArgs));
-	ShPtr<CallStmt> fopenCallStmt(CallStmt::create(fopenCallExpr));
+	CallStmt* fopenCallStmt(CallStmt::create(fopenCallExpr));
 	testFunc->setBody(fopenCallStmt);
 
 	// Setup the renamer.
@@ -856,10 +856,10 @@ GlobalVarPassedAsArgOfWellKnownFunctionIsNotGivenSpecialName) {
 	//     putchar(x);
 	// }
 	//
-	ShPtr<Variable> varX(Variable::create("x", IntType::create(32)));
+	Variable* varX(Variable::create("x", IntType::create(32)));
 	module->addGlobalVar(varX);
 	// putchar:
-	ShPtr<Function> putcharFunc(
+	Function* putcharFunc(
 		FunctionBuilder("putchar")
 			.withParam(Variable::create("p1", IntType::create(32)))
 			.build()
@@ -868,9 +868,9 @@ GlobalVarPassedAsArgOfWellKnownFunctionIsNotGivenSpecialName) {
 	// test:
 	ExprVector putcharArgs;
 	putcharArgs.push_back(varX);
-	ShPtr<CallExpr> putcharCallExpr(CallExpr::create(
+	CallExpr* putcharCallExpr(CallExpr::create(
 		putcharFunc->getAsVar(), putcharArgs));
-	ShPtr<CallStmt> putcharCall(CallStmt::create(putcharCallExpr));
+	CallStmt* putcharCall(CallStmt::create(putcharCallExpr));
 	testFunc->setBody(putcharCall);
 
 	// Setup the renamer.
@@ -895,20 +895,20 @@ VarPassedAsArgOfNotWellKnownFunctionIsNotGivenSpecialName) {
 	//     unusual_func(v1);
 	// }
 	//
-	ShPtr<Function> unusualFunc(
+	Function* unusualFunc(
 		FunctionBuilder("unusual")
 			.withRetType(IntType::create(32))
 			.withParam(Variable::create("p1", IntType::create(32)))
 			.build()
 	);
 	module->addFunc(unusualFunc);
-	ShPtr<Variable> var1(Variable::create("v1", IntType::create(32)));
+	Variable* var1(Variable::create("v1", IntType::create(32)));
 	testFunc->addLocalVar(var1);
 	ExprVector unusualCallArgs;
 	unusualCallArgs.push_back(var1);
-	ShPtr<CallExpr> unusualCallExpr(CallExpr::create(unusualFunc->getAsVar(),
+	CallExpr* unusualCallExpr(CallExpr::create(unusualFunc->getAsVar(),
 		unusualCallArgs));
-	ShPtr<CallStmt> unusualCallStmt(CallStmt::create(unusualCallExpr));
+	CallStmt* unusualCallStmt(CallStmt::create(unusualCallExpr));
 	testFunc->setBody(unusualCallStmt);
 
 	// Setup the renamer.
@@ -933,7 +933,7 @@ VarPassedAsArgOfFunctionDefinitionIsNotGivenSpecialName) {
 	//     fopen(v1, v2);
 	// }
 	//
-	ShPtr<Function> fopenFunc(
+	Function* fopenFunc(
 		FunctionBuilder("putchar")
 			.definitionWithEmptyBody()
 			.withParam(Variable::create("p1", IntType::create(32)))
@@ -941,16 +941,16 @@ VarPassedAsArgOfFunctionDefinitionIsNotGivenSpecialName) {
 			.build()
 	);
 	module->addFunc(fopenFunc);
-	ShPtr<Variable> var1(Variable::create("v1", IntType::create(32)));
+	Variable* var1(Variable::create("v1", IntType::create(32)));
 	testFunc->addLocalVar(var1);
-	ShPtr<Variable> var2(Variable::create("v2", IntType::create(32)));
+	Variable* var2(Variable::create("v2", IntType::create(32)));
 	testFunc->addLocalVar(var2);
 	ExprVector fopenCallArgs;
 	fopenCallArgs.push_back(var1);
 	fopenCallArgs.push_back(var2);
-	ShPtr<CallExpr> fopenCallExpr(CallExpr::create(fopenFunc->getAsVar(),
+	CallExpr* fopenCallExpr(CallExpr::create(fopenFunc->getAsVar(),
 		fopenCallArgs));
-	ShPtr<CallStmt> fopenCallStmt(CallStmt::create(fopenCallExpr));
+	CallStmt* fopenCallStmt(CallStmt::create(fopenCallExpr));
 	testFunc->setBody(fopenCallStmt);
 
 	// Setup the renamer.
@@ -977,30 +977,30 @@ VarStoringTheResultOfKnownFuncIsRenamedBeforeVarPassedAsArgument) {
 	// }
 	//
 	// getchar:
-	ShPtr<Function> getcharFunc(
+	Function* getcharFunc(
 		FunctionBuilder("getchar")
 			.withRetType(IntType::create(32))
 			.build()
 	);
 	module->addFunc(getcharFunc);
 	// putchar:
-	ShPtr<Function> putcharFunc(
+	Function* putcharFunc(
 		FunctionBuilder("putchar")
 			.withParam(Variable::create("p1", IntType::create(32)))
 			.build()
 	);
 	module->addFunc(putcharFunc);
 	// test:
-	ShPtr<Variable> varX(Variable::create("x", IntType::create(32)));
+	Variable* varX(Variable::create("x", IntType::create(32)));
 	testFunc->addLocalVar(varX);
 	ExprVector putcharArgs;
 	putcharArgs.push_back(varX);
-	ShPtr<CallExpr> putcharCallExpr(CallExpr::create(
+	CallExpr* putcharCallExpr(CallExpr::create(
 		putcharFunc->getAsVar(), putcharArgs));
-	ShPtr<CallStmt> putcharCall(CallStmt::create(putcharCallExpr));
-	ShPtr<CallExpr> getcharCallExpr(CallExpr::create(
+	CallStmt* putcharCall(CallStmt::create(putcharCallExpr));
+	CallExpr* getcharCallExpr(CallExpr::create(
 		getcharFunc->getAsVar()));
-	ShPtr<AssignStmt> assignXGetcharCall(AssignStmt::create(
+	AssignStmt* assignXGetcharCall(AssignStmt::create(
 		varX, getcharCallExpr, putcharCall));
 	testFunc->setBody(assignXGetcharCall);
 

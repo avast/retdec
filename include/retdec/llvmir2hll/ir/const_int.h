@@ -32,18 +32,18 @@ class Visitor;
 */
 class ConstInt final: public Constant {
 public:
-	static ShPtr<ConstInt> create(std::int64_t value, unsigned bitWidth,
+	static ConstInt* create(std::int64_t value, unsigned bitWidth,
 		bool isSigned = true);
-	static ShPtr<ConstInt> create(const llvm::APInt &value,
+	static ConstInt* create(const llvm::APInt &value,
 		bool isSigned = true);
-	static ShPtr<ConstInt> create(const llvm::APSInt &value);
-	static ShPtr<ConstInt> getTwoToPositivePower(ShPtr<ConstInt> x);
+	static ConstInt* create(const llvm::APSInt &value);
+	static ConstInt* getTwoToPositivePower(ConstInt* x);
 
-	virtual ShPtr<Value> clone() override;
-	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
-	virtual ShPtr<retdec::llvmir2hll::Type> getType() const override;
-	virtual void replace(ShPtr<Expression> oldExpr,
-		ShPtr<Expression> newExpr) override;
+	virtual Value* clone() override;
+	virtual bool isEqualTo(Value* otherValue) const override;
+	virtual retdec::llvmir2hll::Type* getType() const override;
+	virtual void replace(Expression* oldExpr,
+		Expression* newExpr) override;
 
 	void flipSign();
 
@@ -71,7 +71,7 @@ private:
 	llvm::APSInt value;
 
 	/// Type of the constant.
-	ShPtr<IntType> type;
+	IntType* type = nullptr;
 
 private:
 	// Since instances are created by calling the static function create(), the

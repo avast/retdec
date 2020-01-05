@@ -34,9 +34,9 @@ class ModuleTests: public Test {
 protected:
 	ModuleTests();
 
-	ShPtr<Function> addFuncDecl(const std::string &name);
-	ShPtr<Function> addFuncDef(const std::string &name);
-	ShPtr<Variable> addGlobalVar(const std::string &name);
+	Function* addFuncDecl(const std::string &name);
+	Function* addFuncDef(const std::string &name);
+	Variable* addGlobalVar(const std::string &name);
 
 protected:
 	/// Context for the LLVM module.
@@ -49,13 +49,13 @@ protected:
 	llvm::Module llvmModule;
 
 	/// A mock for the used semantics.
-	ShPtr<::testing::NiceMock<SemanticsMock>> semanticsMock;
+	::testing::NiceMock<SemanticsMock>* semanticsMock;
 
 	/// A mock for the used config.
-	ShPtr<::testing::NiceMock<ConfigMock>> configMock;
+	::testing::NiceMock<ConfigMock>* configMock;
 
 	/// Module in our IR.
-	ShPtr<Module> module;
+	Module* module;
 };
 
 /**
@@ -71,7 +71,7 @@ ModuleTests::ModuleTests():
 /**
 * @brief Adds a declaration of a function with the given name to the module.
 */
-ShPtr<Function> ModuleTests::addFuncDecl(const std::string &name) {
+Function* ModuleTests::addFuncDecl(const std::string &name) {
 	auto func = FunctionBuilder(name).build();
 	module->addFunc(func);
 	return func;
@@ -80,7 +80,7 @@ ShPtr<Function> ModuleTests::addFuncDecl(const std::string &name) {
 /**
 * @brief Adds an empty definition of a function with the given name to the module.
 */
-ShPtr<Function> ModuleTests::addFuncDef(const std::string &name) {
+Function* ModuleTests::addFuncDef(const std::string &name) {
 	auto func = FunctionBuilder(name)
 		.definitionWithEmptyBody()
 		.build();
@@ -91,7 +91,7 @@ ShPtr<Function> ModuleTests::addFuncDef(const std::string &name) {
 /**
 * @brief Adds a global variable with the given name to the module.
 */
-ShPtr<Variable> ModuleTests::addGlobalVar(const std::string &name) {
+Variable* ModuleTests::addGlobalVar(const std::string &name) {
 	auto var = Variable::create(name, IntType::create(32));
 	module->addGlobalVar(var);
 	return var;
@@ -107,7 +107,7 @@ IterationOverFunctionsIteratesOverBothDeclarationsAndDefinitions) {
 	addFuncDef("def");
 	addFuncDecl("decl2");
 
-	std::vector<ShPtr<Function>> funcs(
+	std::vector<Function*> funcs(
 		module->func_begin(),
 		module->func_end()
 	);
@@ -125,7 +125,7 @@ IterationOverFunctionDefinitionsIteratesOnlyOverDefinitions) {
 	addFuncDef("def");
 	addFuncDecl("decl2");
 
-	std::vector<ShPtr<Function>> funcs(
+	std::vector<Function*> funcs(
 		module->func_definition_begin(),
 		module->func_definition_end()
 	);
@@ -143,7 +143,7 @@ IterationOverFunctionDeclarationsIteratesOnlyOverDeclarations) {
 	addFuncDef("def");
 	addFuncDecl("decl2");
 
-	std::vector<ShPtr<Function>> funcs(
+	std::vector<Function*> funcs(
 		module->func_declaration_begin(),
 		module->func_declaration_end()
 	);

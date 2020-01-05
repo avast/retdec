@@ -16,13 +16,13 @@ namespace llvmir2hll {
 *
 * See create() for more information.
 */
-IntToFPCastExpr::IntToFPCastExpr(ShPtr<Expression> op, ShPtr<Type> dstType,
+IntToFPCastExpr::IntToFPCastExpr(Expression* op, Type* dstType,
 		Variant variant):
 	CastExpr(op, dstType), variant(variant) {}
 
-bool IntToFPCastExpr::isEqualTo(ShPtr<Value> otherValue) const {
+bool IntToFPCastExpr::isEqualTo(Value* otherValue) const {
 	// Both types and values of all operands have to be equal.
-	if (ShPtr<IntToFPCastExpr> otherCastExpr = cast<IntToFPCastExpr>(otherValue)) {
+	if (IntToFPCastExpr* otherCastExpr = cast<IntToFPCastExpr>(otherValue)) {
 		return dstType->isEqualTo(otherCastExpr->getType()) &&
 			op->isEqualTo(otherCastExpr->getOperand());
 	}
@@ -32,8 +32,8 @@ bool IntToFPCastExpr::isEqualTo(ShPtr<Value> otherValue) const {
 /**
 * @brief Clones the cast operator.
 */
-ShPtr<Value> IntToFPCastExpr::clone() {
-	ShPtr<IntToFPCastExpr> castExpr(IntToFPCastExpr::create(
+Value* IntToFPCastExpr::clone() {
+	IntToFPCastExpr* castExpr(IntToFPCastExpr::create(
 		ucast<Expression>(op->clone()), dstType));
 	castExpr->setMetadata(getMetadata());
 	return castExpr;
@@ -56,14 +56,14 @@ IntToFPCastExpr::Variant IntToFPCastExpr::getVariant() const {
 * @par Preconditions
 *  - @a op is non-null
 */
-ShPtr<IntToFPCastExpr> IntToFPCastExpr::create(ShPtr<Expression> op,
-		ShPtr<Type> dstType, Variant variant) {
+IntToFPCastExpr* IntToFPCastExpr::create(Expression* op,
+		Type* dstType, Variant variant) {
 	PRECONDITION_NON_NULL(op);
 	PRECONDITION_NON_NULL(dstType);
 
-	ShPtr<IntToFPCastExpr> expr(new IntToFPCastExpr(op, dstType, variant));
+	IntToFPCastExpr* expr(new IntToFPCastExpr(op, dstType, variant));
 
-	// Initialization (recall that shared_from_this() cannot be called in a
+	// Initialization (recall that this cannot be called in a
 	// constructor).
 	op->addObserver(expr);
 
@@ -71,7 +71,7 @@ ShPtr<IntToFPCastExpr> IntToFPCastExpr::create(ShPtr<Expression> op,
 }
 
 void IntToFPCastExpr::accept(Visitor *v) {
-	v->visit(ucast<IntToFPCastExpr>(shared_from_this()));
+	v->visit(ucast<IntToFPCastExpr>(this));
 }
 
 } // namespace llvmir2hll

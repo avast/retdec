@@ -26,11 +26,11 @@ class Visitor;
 */
 class StringType final: public Type {
 public:
-	static ShPtr<StringType> create(std::size_t charSize);
+	static StringType* create(std::size_t charSize);
 
-	virtual ShPtr<Value> clone() override;
+	virtual Value* clone() override;
 
-	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
+	virtual bool isEqualTo(Value* otherValue) const override;
 
 	std::size_t getCharSize() const;
 
@@ -41,7 +41,7 @@ public:
 
 private:
 	/// Mapping of sizes into StringType instances.
-	using SizeToStringTypeMap = std::map<std::size_t, ShPtr<StringType>>;
+	using SizeToStringTypeMap = std::map<std::size_t, StringType*>;
 
 private:
 	/// How large are characters in the string (in bits)?

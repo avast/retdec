@@ -31,13 +31,13 @@ namespace tests {
 */
 class LLVMConstantConverterTestsByLLVMIR: public LLVMIR2BIRConverterBaseTests {
 protected:
-	ShPtr<Constant> convertLLVMIRConstant2BIR(const std::string &c);
+	Constant* convertLLVMIRConstant2BIR(const std::string &c);
 };
 
 /**
 * @brief Converts the given LLVM IR constant @a type into a BIR constant.
 */
-ShPtr<Constant> LLVMConstantConverterTestsByLLVMIR::convertLLVMIRConstant2BIR(
+Constant* LLVMConstantConverterTestsByLLVMIR::convertLLVMIRConstant2BIR(
 		const std::string &c) {
 	auto module = convertLLVMIR2BIR("@g = constant " + c);
 	auto g = module->getGlobalVarByName("g");

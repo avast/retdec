@@ -16,20 +16,20 @@ namespace llvmir2hll {
 *
 * See create() for more information.
 */
-DivOpExpr::DivOpExpr(ShPtr<Expression> op1, ShPtr<Expression> op2,
+DivOpExpr::DivOpExpr(Expression* op1, Expression* op2,
 		Variant variant):
 	BinaryOpExpr(op1, op2), variant(variant) {}
 
-bool DivOpExpr::isEqualTo(ShPtr<Value> otherValue) const {
-	if (ShPtr<DivOpExpr> otherValueDivOpExpr = cast<DivOpExpr>(otherValue)) {
+bool DivOpExpr::isEqualTo(Value* otherValue) const {
+	if (DivOpExpr* otherValueDivOpExpr = cast<DivOpExpr>(otherValue)) {
 		return op1->isEqualTo(otherValueDivOpExpr->getFirstOperand()) &&
 			op2->isEqualTo(otherValueDivOpExpr->getSecondOperand());
 	}
 	return false;
 }
 
-ShPtr<Value> DivOpExpr::clone() {
-	ShPtr<DivOpExpr> divOpExpr(DivOpExpr::create(
+Value* DivOpExpr::clone() {
+	DivOpExpr* divOpExpr(DivOpExpr::create(
 		ucast<Expression>(op1->clone()), ucast<Expression>(op2->clone())));
 	divOpExpr->setMetadata(getMetadata());
 	return divOpExpr;
@@ -52,14 +52,14 @@ DivOpExpr::Variant DivOpExpr::getVariant() const {
 * @par Preconditions
 *  - both operands are non-null
 */
-ShPtr<DivOpExpr> DivOpExpr::create(ShPtr<Expression> op1, ShPtr<Expression> op2,
+DivOpExpr* DivOpExpr::create(Expression* op1, Expression* op2,
 		Variant variant) {
 	PRECONDITION_NON_NULL(op1);
 	PRECONDITION_NON_NULL(op2);
 
-	ShPtr<DivOpExpr> expr(new DivOpExpr(op1, op2, variant));
+	DivOpExpr* expr(new DivOpExpr(op1, op2, variant));
 
-	// Initialization (recall that shared_from_this() cannot be called in a
+	// Initialization (recall that this cannot be called in a
 	// constructor).
 	op1->addObserver(expr);
 	op2->addObserver(expr);
@@ -68,7 +68,7 @@ ShPtr<DivOpExpr> DivOpExpr::create(ShPtr<Expression> op1, ShPtr<Expression> op2,
 }
 
 void DivOpExpr::accept(Visitor *v) {
-	v->visit(ucast<DivOpExpr>(shared_from_this()));
+	v->visit(ucast<DivOpExpr>(this));
 }
 
 } // namespace llvmir2hll

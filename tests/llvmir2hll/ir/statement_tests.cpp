@@ -176,9 +176,9 @@ RemoveLastStatementWorksCorrectlyWhenStmtsIsJustSingleStatement) {
 
 TEST_F(StatementTests,
 RemoveLastStatementWorksCorrectlyWhenStmtsHasMoreThanOneStatement) {
-	ShPtr<Statement> stmt1(BreakStmt::create());
-	ShPtr<Statement> stmt2(EmptyStmt::create(stmt1));
-	ShPtr<Statement> stmt3(EmptyStmt::create(stmt2));
+	Statement* stmt1(BreakStmt::create());
+	Statement* stmt2(EmptyStmt::create(stmt1));
+	Statement* stmt3(EmptyStmt::create(stmt2));
 
 	Statement::removeLastStatement(stmt1);
 
@@ -188,7 +188,7 @@ RemoveLastStatementWorksCorrectlyWhenStmtsHasMoreThanOneStatement) {
 #if DEATH_TESTS_ENABLED
 TEST_F(StatementTests,
 RemoveLastStatementViolatedPreconditionNullStmts) {
-	EXPECT_DEATH(Statement::removeLastStatement(ShPtr<Statement>()),
+	EXPECT_DEATH(Statement::removeLastStatement(Statement*()),
 		".*removeLastStatement.*Precondition.*failed.*");
 }
 #endif
@@ -199,9 +199,9 @@ RemoveLastStatementViolatedPreconditionNullStmts) {
 
 TEST_F(StatementTests,
 IsStatementInStatementsReturnsTrueWhenStatementIsInBlockOfStatements) {
-	ShPtr<BreakStmt> breakStmt(BreakStmt::create());
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create());
-	ShPtr<EmptyStmt> emptyStmt(EmptyStmt::create());
+	BreakStmt* breakStmt(BreakStmt::create());
+	ReturnStmt* returnStmt(ReturnStmt::create());
+	EmptyStmt* emptyStmt(EmptyStmt::create());
 	breakStmt->setSuccessor(returnStmt);
 	returnStmt->setSuccessor(emptyStmt);
 
@@ -210,10 +210,10 @@ IsStatementInStatementsReturnsTrueWhenStatementIsInBlockOfStatements) {
 
 TEST_F(StatementTests,
 IsStatementInStatementsReturnsFalseWhenStatementIsNotInBlockOfStatements) {
-	ShPtr<BreakStmt> breakStmt(BreakStmt::create());
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create());
-	ShPtr<EmptyStmt> emptyStmt(EmptyStmt::create());
-	ShPtr<ContinueStmt> continueStmt(ContinueStmt::create());
+	BreakStmt* breakStmt(BreakStmt::create());
+	ReturnStmt* returnStmt(ReturnStmt::create());
+	EmptyStmt* emptyStmt(EmptyStmt::create());
+	ContinueStmt* continueStmt(ContinueStmt::create());
 	breakStmt->setSuccessor(returnStmt);
 	returnStmt->setSuccessor(emptyStmt);
 
@@ -222,10 +222,10 @@ IsStatementInStatementsReturnsFalseWhenStatementIsNotInBlockOfStatements) {
 
 TEST_F(StatementTests,
 IsStatementInStatementsReturnsFalseWhenStatementIsInNestedBlock) {
-	ShPtr<BreakStmt> breakStmt(BreakStmt::create());
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create());
-	ShPtr<EmptyStmt> emptyStmt(EmptyStmt::create());
-	ShPtr<IfStmt> ifStmt(IfStmt::create(ConstBool::create(true), emptyStmt));
+	BreakStmt* breakStmt(BreakStmt::create());
+	ReturnStmt* returnStmt(ReturnStmt::create());
+	EmptyStmt* emptyStmt(EmptyStmt::create());
+	IfStmt* ifStmt(IfStmt::create(ConstBool::create(true), emptyStmt));
 	breakStmt->setSuccessor(returnStmt);
 	returnStmt->setSuccessor(ifStmt);
 

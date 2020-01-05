@@ -55,13 +55,13 @@ namespace {
 * not cond1 and not cond2 and currCond
 * @endcode
 */
-ShPtr<Expression> generateIfCondEdgeLabel(const ExprVector &conds,
-		ShPtr<Expression> currCond = nullptr) {
+Expression* generateIfCondEdgeLabel(const ExprVector &conds,
+		Expression* currCond = nullptr) {
 	if (conds.empty()) {
 		return ucast<Expression>(currCond->clone());
 	}
 
-	ShPtr<Expression> label;
+	Expression* label = nullptr;
 	for (const auto &cond : conds) {
 		if (label) {
 			label = AndOpExpr::create(ucast<Expression>(label->clone()),
@@ -82,8 +82,8 @@ ShPtr<Expression> generateIfCondEdgeLabel(const ExprVector &conds,
 *
 * If there are no non-default clauses in @a stmt, it returns the null pointer.
 */
-ShPtr<Expression> generateSwitchDefaultCondLabel(ShPtr<SwitchStmt> stmt) {
-	ShPtr<Expression> label;
+Expression* generateSwitchDefaultCondLabel(SwitchStmt* stmt) {
+	Expression* label = nullptr;
 
 	// For example, for the following switch statement:
 	//
@@ -99,7 +99,7 @@ ShPtr<Expression> generateSwitchDefaultCondLabel(ShPtr<SwitchStmt> stmt) {
 	//
 
 	// For each clause...
-	ShPtr<Expression> switchCond(stmt->getControlExpr());
+	Expression* switchCond(stmt->getControlExpr());
 	for (auto i = stmt->clause_begin(), e = stmt->clause_end(); i != e; ++i) {
 		if (!i->first) {
 			// The default clause.
@@ -129,10 +129,10 @@ ShPtr<Expression> generateSwitchDefaultCondLabel(ShPtr<SwitchStmt> stmt) {
 * Precondition:
 *  - @a stmt is non-null
 */
-bool isStatementInStatements(ShPtr<Statement> stmt, ShPtr<Statement> stmts) {
+bool isStatementInStatements(Statement* stmt, Statement* stmts) {
 	PRECONDITION_NON_NULL(stmt);
 
-	ShPtr<Statement> currStmt(stmts);
+	Statement* currStmt(stmts);
 	while (currStmt && currStmt != stmt) {
 		currStmt = currStmt->getSuccessor();
 	}
@@ -149,7 +149,7 @@ RecursiveCFGBuilder::RecursiveCFGBuilder():
 
 void RecursiveCFGBuilder::buildCFG() {
 	// Initialization.
-	currNode.reset();
+	currNode = nullptr;
 	firstStmtNodeMapping.clear();
 	OrderedAllVisitor::restart();
 
@@ -176,22 +176,22 @@ void RecursiveCFGBuilder::buildCFG() {
 /**
 * @brief Creates and returns a new RecursiveCFGBuilder.
 */
-ShPtr<RecursiveCFGBuilder> RecursiveCFGBuilder::create() {
-	return ShPtr<RecursiveCFGBuilder>(new RecursiveCFGBuilder());
+RecursiveCFGBuilder* RecursiveCFGBuilder::create() {
+	return new RecursiveCFGBuilder();
 }
 
-void RecursiveCFGBuilder::visit(ShPtr<Function> func) {
+void RecursiveCFGBuilder::visit(Function* func) {
 	//
 	// Create the entry node.
 	//
-	cfg->addEntryNode(ShPtr<CFG::Node>(new CFG::Node("entry")));
+	cfg->addEntryNode(new CFG::Node("entry"));
 
 	// We introduce a VarDefStmt for each parameter into the entry block. This
 	// way, we can store the function's parameters into the CFG in a uniform
 	// way.
 	// For each parameter...
 	for (const auto &param : func->getParams()) {
-		ShPtr<Statement> varDefStmt(
+		Statement* varDefStmt(
 			VarDefStmt::create(param, nullptr, nullptr, func->getStartAddress()));
 		cfg->stmtNodeMapping[varDefStmt] = cfg->entryNode;
 		cfg->entryNode->stmts.push_back(varDefStmt);
@@ -200,42 +200,42 @@ void RecursiveCFGBuilder::visit(ShPtr<Function> func) {
 	//
 	// Create the exit node.
 	//
-	cfg->addExitNode(ShPtr<CFG::Node>(new CFG::Node("exit")));
+	cfg->addExitNode(new CFG::Node("exit"));
 
 	//
 	// Create the rest of the CFG.
 	//
-	ShPtr<CFG::Node> afterEntryNode(addNode(func->getBody()));
+	CFG::Node* afterEntryNode(addNode(func->getBody()));
 	cfg->addEdge(cfg->getEntryNode(), afterEntryNode);
 }
 
-void RecursiveCFGBuilder::visit(ShPtr<AssignStmt> stmt) {
+void RecursiveCFGBuilder::visit(AssignStmt* stmt) {
 	addStatement(stmt);
 }
 
-void RecursiveCFGBuilder::visit(ShPtr<VarDefStmt> stmt) {
+void RecursiveCFGBuilder::visit(VarDefStmt* stmt) {
 	addStatement(stmt);
 }
 
-void RecursiveCFGBuilder::visit(ShPtr<CallStmt> stmt) {
+void RecursiveCFGBuilder::visit(CallStmt* stmt) {
 	addStatement(stmt);
 }
 
-void RecursiveCFGBuilder::visit(ShPtr<ReturnStmt> stmt) {
+void RecursiveCFGBuilder::visit(ReturnStmt* stmt) {
 	cfg->stmtNodeMapping[stmt] = currNode;
 	currNode->stmts.push_back(stmt);
 	cfg->addEdge(currNode, cfg->exitNode);
 }
 
-void RecursiveCFGBuilder::visit(ShPtr<EmptyStmt> stmt) {
+void RecursiveCFGBuilder::visit(EmptyStmt* stmt) {
 	addStatement(stmt);
 }
 
-void RecursiveCFGBuilder::visit(ShPtr<IfStmt> stmt) {
-	ShPtr<CFG::Node> beforeIfNode(currNode);
+void RecursiveCFGBuilder::visit(IfStmt* stmt) {
+	CFG::Node* beforeIfNode(currNode);
 
 	// Create a node for the if statement.
-	ShPtr<CFG::Node> ifNode(new CFG::Node());
+	CFG::Node* ifNode(new CFG::Node());
 	firstStmtNodeMapping[stmt] = ifNode;
 	cfg->stmtNodeMapping[stmt] = ifNode;
 	ifNode->stmts.push_back(stmt);
@@ -245,7 +245,7 @@ void RecursiveCFGBuilder::visit(ShPtr<IfStmt> stmt) {
 	// Create a node for the bodies of the if statement.
 	ExprVector conds;
 	for (auto i = stmt->clause_begin(), e = stmt->clause_end(); i != e; ++i) {
-		ShPtr<CFG::Node> clauseBody(addNode(i->second));
+		CFG::Node* clauseBody(addNode(i->second));
 		cfg->addEdge(ifNode, clauseBody, generateIfCondEdgeLabel(conds, i->first));
 		conds.push_back(i->first);
 	}
@@ -257,13 +257,13 @@ void RecursiveCFGBuilder::visit(ShPtr<IfStmt> stmt) {
 	// clause doesn't always ends with a return, the statement's successor will
 	// be traversed when adding a node for the else clause.
 	if (stmt->hasElseClause()) {
-		ShPtr<CFG::Node> clauseBody(addNode(stmt->getElseClause()));
+		CFG::Node* clauseBody(addNode(stmt->getElseClause()));
 		cfg->addEdge(ifNode, clauseBody, generateIfCondEdgeLabel(conds));
 		return;
 	}
-	ShPtr<Expression> edgeCond(generateIfCondEdgeLabel(conds));
-	if (ShPtr<Statement> stmtSucc = stmt->getSuccessor()) {
-		ShPtr<CFG::Node> afterIfNode(addNode(stmtSucc));
+	Expression* edgeCond(generateIfCondEdgeLabel(conds));
+	if (Statement* stmtSucc = stmt->getSuccessor()) {
+		CFG::Node* afterIfNode(addNode(stmtSucc));
 		cfg->addEdge(ifNode, afterIfNode, edgeCond);
 		return;
 	}
@@ -271,11 +271,11 @@ void RecursiveCFGBuilder::visit(ShPtr<IfStmt> stmt) {
 	addForwardOrBackwardEdge(stmt, edgeCond);
 }
 
-void RecursiveCFGBuilder::visit(ShPtr<SwitchStmt> stmt) {
-	ShPtr<CFG::Node> beforeSwitchNode(currNode);
+void RecursiveCFGBuilder::visit(SwitchStmt* stmt) {
+	CFG::Node* beforeSwitchNode(currNode);
 
 	// Create a node for the switch statement.
-	ShPtr<CFG::Node> switchNode(new CFG::Node());
+	CFG::Node* switchNode(new CFG::Node());
 	firstStmtNodeMapping[stmt] = switchNode;
 	cfg->stmtNodeMapping[stmt] = switchNode;
 	switchNode->stmts.push_back(stmt);
@@ -285,8 +285,8 @@ void RecursiveCFGBuilder::visit(ShPtr<SwitchStmt> stmt) {
 	// Create a node for each clause.
 	for (auto i = stmt->clause_begin(),
 			e = stmt->clause_end(); i != e; ++i) {
-		ShPtr<CFG::Node> clauseBody(addNode(i->second));
-		ShPtr<Expression> cond;
+		CFG::Node* clauseBody(addNode(i->second));
+		Expression* cond;
 		if (i->first) {
 			// Generate a label of the form `switchCond == clauseCond`.
 			cond = EqOpExpr::create(stmt->getControlExpr(), i->first);
@@ -305,8 +305,8 @@ void RecursiveCFGBuilder::visit(ShPtr<SwitchStmt> stmt) {
 	if (stmt->hasDefaultClause()) {
 		return;
 	}
-	if (ShPtr<Statement> stmtSucc = stmt->getSuccessor()) {
-		ShPtr<CFG::Node> afterSwitchNode(addNode(stmtSucc));
+	if (Statement* stmtSucc = stmt->getSuccessor()) {
+		CFG::Node* afterSwitchNode(addNode(stmtSucc));
 		cfg->addEdge(switchNode, afterSwitchNode);
 		return;
 	}
@@ -315,11 +315,11 @@ void RecursiveCFGBuilder::visit(ShPtr<SwitchStmt> stmt) {
 	addForwardOrBackwardEdge(stmt);
 }
 
-void RecursiveCFGBuilder::visit(ShPtr<WhileLoopStmt> stmt) {
-	ShPtr<CFG::Node> beforeLoopNode(currNode);
+void RecursiveCFGBuilder::visit(WhileLoopStmt* stmt) {
+	CFG::Node* beforeLoopNode(currNode);
 
 	// Create a node for the loop.
-	ShPtr<CFG::Node> loopNode(new CFG::Node());
+	CFG::Node* loopNode(new CFG::Node());
 	firstStmtNodeMapping[stmt] = loopNode;
 	cfg->stmtNodeMapping[stmt] = loopNode;
 	loopNode->stmts.push_back(stmt);
@@ -327,16 +327,16 @@ void RecursiveCFGBuilder::visit(ShPtr<WhileLoopStmt> stmt) {
 	cfg->addEdge(beforeLoopNode, loopNode);
 
 	// Create a node for the loop's body.
-	ShPtr<CFG::Node> loopBody(addNode(stmt->getBody()));
+	CFG::Node* loopBody(addNode(stmt->getBody()));
 	cfg->addEdge(loopNode, loopBody, stmt->getCondition());
 
 	// Create a node (an edge) for the loop's successor. However, do this only
 	// if it is not a "while True" loop (the "False" edge is never taken).
 	if (!isWhileTrueLoop(stmt)) {
-		ShPtr<Expression> edgeCond(ExpressionNegater::negate(ucast<Expression>(
+		Expression* edgeCond(ExpressionNegater::negate(ucast<Expression>(
 			stmt->getCondition()->clone())));
-		if (ShPtr<Statement> stmtSucc = stmt->getSuccessor()) {
-			ShPtr<CFG::Node> afterLoopNode(addNode(stmtSucc));
+		if (Statement* stmtSucc = stmt->getSuccessor()) {
+			CFG::Node* afterLoopNode(addNode(stmtSucc));
 			cfg->addEdge(loopNode, afterLoopNode, edgeCond);
 		} else {
 			currNode = loopNode;
@@ -345,50 +345,50 @@ void RecursiveCFGBuilder::visit(ShPtr<WhileLoopStmt> stmt) {
 	}
 }
 
-void RecursiveCFGBuilder::visit(ShPtr<ForLoopStmt> stmt) {
+void RecursiveCFGBuilder::visit(ForLoopStmt* stmt) {
 	visitForOrUForLoop(stmt, stmt->getBody());
 }
 
-void RecursiveCFGBuilder::visit(ShPtr<UForLoopStmt> stmt) {
+void RecursiveCFGBuilder::visit(UForLoopStmt* stmt) {
 	visitForOrUForLoop(stmt, stmt->getBody());
 }
 
-void RecursiveCFGBuilder::visit(ShPtr<BreakStmt> stmt) {
+void RecursiveCFGBuilder::visit(BreakStmt* stmt) {
 	cfg->stmtNodeMapping[stmt] = currNode;
 	currNode->stmts.push_back(stmt);
 
 	// Create an edge to the successor.
-	ShPtr<CFG::Node> currNodeBackup(currNode);
+	CFG::Node* currNodeBackup(currNode);
 	cfg->addEdge(currNodeBackup, getIndirectSuccessor(stmt));
 }
 
-void RecursiveCFGBuilder::visit(ShPtr<ContinueStmt> stmt) {
+void RecursiveCFGBuilder::visit(ContinueStmt* stmt) {
 	cfg->stmtNodeMapping[stmt] = currNode;
 	currNode->stmts.push_back(stmt);
 
 	// Create an edge to the successor.
-	ShPtr<CFG::Node> currNodeBackup(currNode);
+	CFG::Node* currNodeBackup(currNode);
 	cfg->addEdge(currNodeBackup, getIndirectSuccessor(stmt));
 }
 
-void RecursiveCFGBuilder::visit(ShPtr<GotoStmt> stmt) {
+void RecursiveCFGBuilder::visit(GotoStmt* stmt) {
 	cfg->stmtNodeMapping[stmt] = currNode;
 	currNode->stmts.push_back(stmt);
 
-	if (ShPtr<Statement> gotoTarget = stmt->getTarget()) {
-		ShPtr<CFG::Node> currNodeBackup(currNode);
-		ShPtr<CFG::Node> targetNode(addNode(gotoTarget));
+	if (Statement* gotoTarget = stmt->getTarget()) {
+		CFG::Node* currNodeBackup(currNode);
+		CFG::Node* targetNode(addNode(gotoTarget));
 		cfg->addEdge(currNodeBackup, targetNode);
 	}
 }
 
-void RecursiveCFGBuilder::visit(ShPtr<UnreachableStmt> stmt) {
+void RecursiveCFGBuilder::visit(UnreachableStmt* stmt) {
 	cfg->stmtNodeMapping[stmt] = currNode;
 	currNode->stmts.push_back(stmt);
 	cfg->addEdge(currNode, cfg->exitNode);
 }
 
-void RecursiveCFGBuilder::visitStmt(ShPtr<Statement> stmt, bool visitSuccessors,
+void RecursiveCFGBuilder::visitStmt(Statement* stmt, bool visitSuccessors,
 		bool visitNestedStmts) {
 	if (!stmt) {
 		return;
@@ -396,7 +396,7 @@ void RecursiveCFGBuilder::visitStmt(ShPtr<Statement> stmt, bool visitSuccessors,
 
 	if (hasItem(accessedStmts, stmt)) {
 		// The statement has been accessed.
-		ShPtr<CFG::Node> stmtNode(firstStmtNodeMapping[stmt]);
+		CFG::Node* stmtNode(firstStmtNodeMapping[stmt]);
 		cfg->addEdge(currNode, stmtNode);
 		return;
 	}
@@ -404,8 +404,8 @@ void RecursiveCFGBuilder::visitStmt(ShPtr<Statement> stmt, bool visitSuccessors,
 	// When the statement is a goto target and there are some statements in the
 	// current node, we have to emit the statement into a new node.
 	if (stmt->isGotoTarget() && !currNode->stmts.empty()) {
-		ShPtr<CFG::Node> prevNode(currNode);
-		ShPtr<CFG::Node> stmtNode(addNode(stmt));
+		CFG::Node* prevNode(currNode);
+		CFG::Node* stmtNode(addNode(stmt));
 		cfg->addEdge(prevNode, stmtNode);
 		return;
 	}
@@ -423,7 +423,7 @@ void RecursiveCFGBuilder::visitStmt(ShPtr<Statement> stmt, bool visitSuccessors,
 * @par Preconditions
 *  - @a stmt is non-null
 */
-ShPtr<CFG::Node> RecursiveCFGBuilder::addNode(ShPtr<Statement> stmt) {
+CFG::Node* RecursiveCFGBuilder::addNode(Statement* stmt) {
 	PRECONDITION_NON_NULL(stmt);
 
 	// Does a node corresponding to stmt already exist?
@@ -433,7 +433,7 @@ ShPtr<CFG::Node> RecursiveCFGBuilder::addNode(ShPtr<Statement> stmt) {
 	}
 
 	// Add a new node.
-	ShPtr<CFG::Node> nodeToAdd = currNode = ShPtr<CFG::Node>(new CFG::Node());
+	CFG::Node* nodeToAdd = currNode = new CFG::Node();
 	firstStmtNodeMapping[stmt] = currNode;
 	visitStmt(stmt);
 	cfg->addNode(nodeToAdd);
@@ -448,12 +448,12 @@ ShPtr<CFG::Node> RecursiveCFGBuilder::addNode(ShPtr<Statement> stmt) {
 * Empty statements are skipped (i.e. not added to <tt>cfg->stmtNodeMapping</tt>
 * and <tt>currNode->stmts</tt>).
 */
-void RecursiveCFGBuilder::addStatement(ShPtr<Statement> stmt) {
+void RecursiveCFGBuilder::addStatement(Statement* stmt) {
 	if (!isa<EmptyStmt>(stmt)) {
 		cfg->stmtNodeMapping[stmt] = currNode;
 		currNode->stmts.push_back(stmt);
 	}
-	if (ShPtr<Statement> stmtSucc = stmt->getSuccessor()) {
+	if (Statement* stmtSucc = stmt->getSuccessor()) {
 		visitStmt(stmtSucc);
 		return;
 	}
@@ -478,12 +478,12 @@ void RecursiveCFGBuilder::addStatement(ShPtr<Statement> stmt) {
 *
 * This function may add new nodes.
 */
-void RecursiveCFGBuilder::addForwardOrBackwardEdge(ShPtr<Statement> stmt,
-		ShPtr<Expression> edgeCond) {
+void RecursiveCFGBuilder::addForwardOrBackwardEdge(Statement* stmt,
+		Expression* edgeCond) {
 	PRECONDITION(!stmt->getSuccessor(), stmt << "should not have a successor;"
 		"the successor is `" << stmt->getSuccessor() << "`");
 
-	ShPtr<CFG::Node> stmtNode(currNode);
+	CFG::Node* stmtNode(currNode);
 	cfg->addEdge(stmtNode, getIndirectSuccessor(stmt), edgeCond);
 }
 
@@ -492,10 +492,10 @@ void RecursiveCFGBuilder::addForwardOrBackwardEdge(ShPtr<Statement> stmt,
 *
 * This function may add new nodes.
 */
-ShPtr<CFG::Node> RecursiveCFGBuilder::getIndirectSuccessor(ShPtr<Statement> stmt) {
+CFG::Node* RecursiveCFGBuilder::getIndirectSuccessor(Statement* stmt) {
 	if (isa<ContinueStmt>(stmt)) {
 		// A continue statement has to be inside of a loop.
-		ShPtr<Statement> innLoop(getInnermostLoop(stmt));
+		Statement* innLoop(getInnermostLoop(stmt));
 		if (!innLoop) {
 			return cfg->getExitNode();
 		}
@@ -505,18 +505,18 @@ ShPtr<CFG::Node> RecursiveCFGBuilder::getIndirectSuccessor(ShPtr<Statement> stmt
 
 	if (isa<BreakStmt>(stmt)) {
 		// A break statement has to be inside a loop or switch.
-		ShPtr<Statement> innLoopOrSwitch(getInnermostLoopOrSwitch(stmt));
+		Statement* innLoopOrSwitch(getInnermostLoopOrSwitch(stmt));
 		if (!innLoopOrSwitch) {
 			return cfg->getExitNode();
 		}
 
-		if (ShPtr<Statement> succ = innLoopOrSwitch->getSuccessor()) {
+		if (Statement* succ = innLoopOrSwitch->getSuccessor()) {
 			return addNode(succ);
 		}
 		return getIndirectSuccessor(innLoopOrSwitch);
 	}
 
-	ShPtr<Statement> stmtParent(stmt->getParent());
+	Statement* stmtParent(stmt->getParent());
 	if (!stmtParent) {
 		// There is an implicit return from the function.
 		return cfg->exitNode;
@@ -530,7 +530,7 @@ ShPtr<CFG::Node> RecursiveCFGBuilder::getIndirectSuccessor(ShPtr<Statement> stmt
 		return addNode(stmtParent->getSuccessor());
 	}
 
-	if (ShPtr<SwitchStmt> stmtParentSwitch = cast<SwitchStmt>(stmtParent)) {
+	if (SwitchStmt* stmtParentSwitch = cast<SwitchStmt>(stmtParent)) {
 		// There should be a fall-through to the next switch clause (or to the
 		// switch's successor, if there is no next clause).
 
@@ -556,7 +556,7 @@ ShPtr<CFG::Node> RecursiveCFGBuilder::getIndirectSuccessor(ShPtr<Statement> stmt
 	// found. If there is no such parent, then there is an implicit return from
 	// the current function.
 	do {
-		if (ShPtr<Statement> stmtParentSucc = stmtParent->getSuccessor()) {
+		if (Statement* stmtParentSucc = stmtParent->getSuccessor()) {
 			return addNode(stmtParentSucc);
 		}
 	} while ((stmtParent = stmtParent->getParent()));
@@ -567,12 +567,12 @@ ShPtr<CFG::Node> RecursiveCFGBuilder::getIndirectSuccessor(ShPtr<Statement> stmt
 /**
 * @brief Implementation of visit() for for loops.
 */
-void RecursiveCFGBuilder::visitForOrUForLoop(ShPtr<Statement> loop,
-		ShPtr<Statement> body) {
-	ShPtr<CFG::Node> beforeLoopNode(currNode);
+void RecursiveCFGBuilder::visitForOrUForLoop(Statement* loop,
+		Statement* body) {
+	CFG::Node* beforeLoopNode(currNode);
 
 	// Create a node for the loop.
-	ShPtr<CFG::Node> loopNode(new CFG::Node());
+	CFG::Node* loopNode(new CFG::Node());
 	firstStmtNodeMapping[loop] = loopNode;
 	cfg->stmtNodeMapping[loop] = loopNode;
 	loopNode->stmts.push_back(loop);
@@ -581,15 +581,15 @@ void RecursiveCFGBuilder::visitForOrUForLoop(ShPtr<Statement> loop,
 
 	// Generate the loop's condition.
 	// TODO
-	// ShPtr<Expression> loopCond;
+	// Expression* loopCond;
 
 	// Create a node for the loop's body.
-	ShPtr<CFG::Node> loopBody(addNode(body));
+	CFG::Node* loopBody(addNode(body));
 	cfg->addEdge(loopNode, loopBody);
 
 	// Create a node (an edge) for the loop's successor.
-	if (ShPtr<Statement> loopSucc = loop->getSuccessor()) {
-		ShPtr<CFG::Node> afterLoopNode(addNode(loopSucc));
+	if (Statement* loopSucc = loop->getSuccessor()) {
+		CFG::Node* afterLoopNode(addNode(loopSucc));
 		cfg->addEdge(loopNode, afterLoopNode);
 	} else {
 		currNode = loopNode;

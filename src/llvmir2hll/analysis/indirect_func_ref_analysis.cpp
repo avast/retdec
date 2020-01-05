@@ -20,7 +20,7 @@ namespace llvmir2hll {
 /**
 * @brief Constructs a new analysis.
 */
-IndirectFuncRefAnalysis::IndirectFuncRefAnalysis(ShPtr<Module> module):
+IndirectFuncRefAnalysis::IndirectFuncRefAnalysis(Module* module):
 	OrderedAllVisitor(), module(module) {}
 
 /**
@@ -30,10 +30,10 @@ IndirectFuncRefAnalysis::IndirectFuncRefAnalysis(ShPtr<Module> module):
 * @par Preconditions
 *  - @a module is non-null
 */
-FuncSet IndirectFuncRefAnalysis::getIndirectlyReferencedFuncs(ShPtr<Module> module) {
+FuncSet IndirectFuncRefAnalysis::getIndirectlyReferencedFuncs(Module* module) {
 	PRECONDITION_NON_NULL(module);
 
-	ShPtr<IndirectFuncRefAnalysis> analysis(new IndirectFuncRefAnalysis(module));
+	IndirectFuncRefAnalysis* analysis(new IndirectFuncRefAnalysis(module));
 	analysis->performAnalysis();
 	return analysis->indirRefdFuncs;
 }
@@ -45,8 +45,8 @@ FuncSet IndirectFuncRefAnalysis::getIndirectlyReferencedFuncs(ShPtr<Module> modu
 * @par Preconditions
 *  - @a module is non-null
 */
-bool IndirectFuncRefAnalysis::isIndirectlyReferenced(ShPtr<Module> module,
-		ShPtr<Function> func) {
+bool IndirectFuncRefAnalysis::isIndirectlyReferenced(Module* module,
+		Function* func) {
 	return hasItem(getIndirectlyReferencedFuncs(module), func);
 }
 
@@ -72,7 +72,7 @@ void IndirectFuncRefAnalysis::visitAllFuncs() {
 /**
 * @brief Checks whether the given called expression should be visited.
 */
-bool IndirectFuncRefAnalysis::shouldCalledExprBeVisited(ShPtr<Expression> expr) {
+bool IndirectFuncRefAnalysis::shouldCalledExprBeVisited(Expression* expr) {
 	// The called expression should be visited only in the case of indirect
 	// function calls. Indeed, if a variable is called in a direct function
 	// call, such a variable cannot represent a function that is called
@@ -89,8 +89,8 @@ void IndirectFuncRefAnalysis::visitArgs(const ExprVector &args) {
 	}
 }
 
-void IndirectFuncRefAnalysis::visit(ShPtr<CallExpr> expr) {
-	ShPtr<Expression> calledExpr(expr->getCalledExpr());
+void IndirectFuncRefAnalysis::visit(CallExpr* expr) {
+	Expression* calledExpr(expr->getCalledExpr());
 	if (shouldCalledExprBeVisited(calledExpr)) {
 		calledExpr->accept(this);
 	}
@@ -98,14 +98,14 @@ void IndirectFuncRefAnalysis::visit(ShPtr<CallExpr> expr) {
 	visitArgs(expr->getArgs());
 }
 
-void IndirectFuncRefAnalysis::visit(ShPtr<Variable> var) {
+void IndirectFuncRefAnalysis::visit(Variable* var) {
 	// Ignore functions that are named as one of the parameters of local
 	// variables.
 	if (currFunc->hasLocalVar(var, true)) {
 		return;
 	}
 
-	if (ShPtr<Function> func = module->getFuncByName(var->getName())) {
+	if (Function* func = module->getFuncByName(var->getName())) {
 		indirRefdFuncs.insert(func);
 	}
 }

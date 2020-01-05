@@ -47,9 +47,9 @@ ExprTypesFixer::ExprTypesFixer():
 *
 * @param[in] module Searched module.
 */
-void ExprTypesFixer::setProbablyTypes(ShPtr<Module> module) {
+void ExprTypesFixer::setProbablyTypes(Module* module) {
 	// Create Analysis of integer types.
-	ShPtr<ExprTypesAnalysis> exprTypesAnalysis(ExprTypesAnalysis::create());
+	ExprTypesAnalysis* exprTypesAnalysis(ExprTypesAnalysis::create());
 	bool changed = true;
 	while (changed) {
 		changed = false;
@@ -59,7 +59,7 @@ void ExprTypesFixer::setProbablyTypes(ShPtr<Module> module) {
 		// Check statistics about all variables and fix their types to correct
 		// signed if expected.
 		for (const auto &p : exprTagsMap) {
-			ShPtr<Expression> expr = p.first;
+			Expression* expr = p.first;
 			// Get statistics about expression - how many times it is used as
 			// signed.
 			std::size_t isSigned = exprTypesAnalysis->getCountOfTag(
@@ -69,8 +69,8 @@ void ExprTypesFixer::setProbablyTypes(ShPtr<Module> module) {
 			std::size_t isUnsigned = exprTypesAnalysis->getCountOfTag(
 				expr, ExprTypesAnalysis::ExprTag::Unsigned);
 			// We can change the type of a variable.
-			if (ShPtr<Variable> var = cast<Variable>(expr)) {
-				if (ShPtr<IntType> type = cast<IntType>(var->getType())) {
+			if (Variable* var = cast<Variable>(expr)) {
+				if (IntType* type = cast<IntType>(var->getType())) {
 					// Evaluation of statistics and fixing of type.
 					if ((isSigned > isUnsigned) && type->isUnsigned()) {
 						changed = true;
@@ -81,8 +81,8 @@ void ExprTypesFixer::setProbablyTypes(ShPtr<Module> module) {
 					}
 				}
 			// We can change the type of a constant.
-			} else if (ShPtr<ConstInt> constant = cast<ConstInt>(expr)) {
-				if (ShPtr<IntType> type = cast<IntType>(constant->getType())) {
+			} else if (ConstInt* constant = cast<ConstInt>(expr)) {
+				if (isa<IntType>(constant->getType())) {
 					// Evaluation of statistics and fixing of type.
 					if ((isSigned > isUnsigned) && constant->isUnsigned()) {
 						changed = true;
@@ -99,16 +99,16 @@ void ExprTypesFixer::setProbablyTypes(ShPtr<Module> module) {
 					}
 				}
 			// We can change the type of a CalledExpr of CallExpr.
-			} else if (ShPtr<CallExpr> callExpr = cast<CallExpr>(expr)) {
-				if (ShPtr<Variable> var = cast<Variable>(callExpr->getCalledExpr())) {
+			} else if (CallExpr* callExpr = cast<CallExpr>(expr)) {
+				if (Variable* var = cast<Variable>(callExpr->getCalledExpr())) {
 					// We are finding a local function.
 					bool found = false;
 					// Searched function.
-					ShPtr<Function> func = module->getFuncByName(var->getName());
+					Function* func = module->getFuncByName(var->getName());
 					if (func) {
 						found = true;
 					}
-					if (ShPtr<IntType> type = cast<IntType>(var->getType())) {
+					if (IntType* type = cast<IntType>(var->getType())) {
 						// Evaluation of statistics and fixing of the type.
 						if ((isSigned > isUnsigned) && type->isUnsigned()) {
 							changed = true;
@@ -144,9 +144,9 @@ void ExprTypesFixer::setProbablyTypes(ShPtr<Module> module) {
 * * @par Preconditions
 *  - @a expr has integer type
 */
-ShPtr<Expression> ExprTypesFixer::exprCheckAndChange(bool isSigned,
-		ShPtr<Expression> expr) {
-	if (ShPtr<IntType> type = cast<IntType>(expr->getType())) {
+Expression* ExprTypesFixer::exprCheckAndChange(bool isSigned,
+		Expression* expr) {
+	if (IntType* type = cast<IntType>(expr->getType())) {
 		// If it is an integer-type variable.
 		if (!isSigned && type->isSigned()) {
 			// Add cast to unsigned.
@@ -166,8 +166,8 @@ ShPtr<Expression> ExprTypesFixer::exprCheckAndChange(bool isSigned,
 *
 * @param[in] module Searched module.
 */
-void ExprTypesFixer::fixTypes(ShPtr<Module> module) {
-	ShPtr<ExprTypesFixer> visitor(new ExprTypesFixer());
+void ExprTypesFixer::fixTypes(Module* module) {
+	ExprTypesFixer* visitor(new ExprTypesFixer());
 
 	// Sets the probably types (from statistics of Analyser called inside).
 	visitor->setProbablyTypes(module);
@@ -176,13 +176,13 @@ void ExprTypesFixer::fixTypes(ShPtr<Module> module) {
 	// Global variables.
 	for (auto i = module->global_var_begin(), e = module->global_var_begin();
 			i != e; ++i) {
-		(*i)->accept(visitor.get());
+		(*i)->accept(visitor);
 	}
 
 	// Functions.
 	for (auto i = module->func_definition_begin(),
 			e = module->func_definition_end(); i != e; ++i) {
-		(*i)->accept(visitor.get());
+		(*i)->accept(visitor);
 	}
 }
 
@@ -191,7 +191,7 @@ void ExprTypesFixer::fixTypes(ShPtr<Module> module) {
 //
 
 // Casts.
-void ExprTypesFixer::visit(ShPtr<ExtCastExpr> expr) {
+void ExprTypesFixer::visit(ExtCastExpr* expr) {
 	// If it is a variable with the int type.
 	if (expr->getVariant() == ExtCastExpr::Variant::SExt) {
 		expr->setOperand(exprCheckAndChange(true, expr->getOperand()));
@@ -202,7 +202,7 @@ void ExprTypesFixer::visit(ShPtr<ExtCastExpr> expr) {
 	OrderedAllVisitor::visit(expr);
 }
 
-void ExprTypesFixer::visit(ShPtr<IntToFPCastExpr> expr) {
+void ExprTypesFixer::visit(IntToFPCastExpr* expr) {
 	// If it is a signed variant of an expression.
 	if (expr->getVariant() == IntToFPCastExpr::Variant::SIToFP) {
 		expr->setOperand(exprCheckAndChange(true, expr->getOperand()));
@@ -213,7 +213,7 @@ void ExprTypesFixer::visit(ShPtr<IntToFPCastExpr> expr) {
 	OrderedAllVisitor::visit(expr);
 }
 
-void ExprTypesFixer::visit(ShPtr<DivOpExpr> expr) {
+void ExprTypesFixer::visit(DivOpExpr* expr) {
 	// If it is a signed variant of an expression.
 	if (expr->getVariant() == DivOpExpr::Variant::SDiv) {
 		// Checking and changing of operands.
@@ -227,7 +227,7 @@ void ExprTypesFixer::visit(ShPtr<DivOpExpr> expr) {
 	OrderedAllVisitor::visit(expr);
 }
 
-void ExprTypesFixer::visit(ShPtr<ModOpExpr> expr) {
+void ExprTypesFixer::visit(ModOpExpr* expr) {
 	// If it is a signed variant of an expression.
 	if (expr->getVariant() == ModOpExpr::Variant::SMod) {
 		// Checking and changing of operands.
@@ -241,22 +241,22 @@ void ExprTypesFixer::visit(ShPtr<ModOpExpr> expr) {
 	OrderedAllVisitor::visit(expr);
 }
 
-void ExprTypesFixer::visit(ShPtr<AssignStmt> stmt) {
+void ExprTypesFixer::visit(AssignStmt* stmt) {
 	stmt->getLhs()->accept(this);
 	stmt->getRhs()->accept(this);
 
-	ShPtr<Variable> var = cast<Variable>(stmt->getLhs());
+	Variable* var = cast<Variable>(stmt->getLhs());
 	if (!var) {
 		return;
 	}
 
-	ShPtr<IntType> type = cast<IntType>(var->getType());
+	IntType* type = cast<IntType>(var->getType());
 	if (!type) {
 		return;
 	}
 
 	// If right value is expression - division.
-	if (ShPtr<DivOpExpr> expr = cast<DivOpExpr>(stmt->getRhs())) {
+	if (DivOpExpr* expr = cast<DivOpExpr>(stmt->getRhs())) {
 		// If it is a signed variant of an expression.
 		if (expr->getVariant() == DivOpExpr::Variant::SDiv) {
 			if (cast<BitCastExpr>(exprCheckAndChange(true, stmt->getLhs()))) {
@@ -271,7 +271,7 @@ void ExprTypesFixer::visit(ShPtr<AssignStmt> stmt) {
 			}
 		}
 	// If right value is expression - modulation.
-	} else if (ShPtr<ModOpExpr> expr = cast<ModOpExpr>(stmt->getRhs())) {
+	} else if (ModOpExpr* expr = cast<ModOpExpr>(stmt->getRhs())) {
 		// If it is a signed variant of an expression.
 		if (expr->getVariant() == ModOpExpr::Variant::SMod) {
 			if (cast<BitCastExpr>(exprCheckAndChange(true, stmt->getLhs()))) {
@@ -297,51 +297,51 @@ void ExprTypesFixer::visit(ShPtr<AssignStmt> stmt) {
 	}
 }
 
-void ExprTypesFixer::visit(ShPtr<VarDefStmt> stmt) {
-	if (ShPtr<Expression> init = stmt->getInitializer()) {
+void ExprTypesFixer::visit(VarDefStmt* stmt) {
+	if (Expression* init = stmt->getInitializer()) {
 		// If right value is expression - division.
-		if (ShPtr<DivOpExpr> expr = cast<DivOpExpr>(init)) {
+		if (DivOpExpr* expr = cast<DivOpExpr>(init)) {
 			// If it is a signed variant of an expression.
 			if (expr->getVariant() == DivOpExpr::Variant::SDiv) {
 				if (cast<BitCastExpr>(exprCheckAndChange(true, stmt->getVar()))) {
-					ShPtr<Variable> var = cast<Variable>(stmt->getVar());
-					ShPtr<IntType> type = cast<IntType>(var->getType());
+					Variable* var = cast<Variable>(stmt->getVar());
+					IntType* type = cast<IntType>(var->getType());
 					stmt->setInitializer(BitCastExpr::create(init, IntType::create(
 						type->getSize(), true)));
 				}
 			// If it is a unsigned variant of an expression.
 			} else if (expr->getVariant() == DivOpExpr::Variant::UDiv) {
 				if (cast<BitCastExpr>(exprCheckAndChange(false, stmt->getVar()))) {
-					ShPtr<Variable> var = cast<Variable>(stmt->getVar());
-					ShPtr<IntType> type = cast<IntType>(var->getType());
+					Variable* var = cast<Variable>(stmt->getVar());
+					IntType* type = cast<IntType>(var->getType());
 					stmt->setInitializer(BitCastExpr::create(init, IntType::create(
 						type->getSize(), false)));
 				}
 			}
 		// If right value is expression - modulation.
-		} else if (ShPtr<ModOpExpr> expr = cast<ModOpExpr>(init)) {
+		} else if (ModOpExpr* expr = cast<ModOpExpr>(init)) {
 			// If it is a signed variant of an expression.
 			if (expr->getVariant() == ModOpExpr::Variant::SMod) {
 				if (cast<BitCastExpr>(exprCheckAndChange(true, stmt->getVar()))) {
-					ShPtr<Variable> var = cast<Variable>(stmt->getVar());
-					ShPtr<IntType> type = cast<IntType>(var->getType());
+					Variable* var = cast<Variable>(stmt->getVar());
+					IntType* type = cast<IntType>(var->getType());
 					stmt->setInitializer(BitCastExpr::create(init, IntType::create(
 						type->getSize(), true)));
 				}
 			// If it is a unsigned variant of an expression.
 			} else if (expr->getVariant() == ModOpExpr::Variant::UMod) {
 				if (cast<BitCastExpr>(exprCheckAndChange(false, stmt->getVar()))) {
-					ShPtr<Variable> var = cast<Variable>(stmt->getVar());
-					ShPtr<IntType> type = cast<IntType>(var->getType());
+					Variable* var = cast<Variable>(stmt->getVar());
+					IntType* type = cast<IntType>(var->getType());
 					stmt->setInitializer(BitCastExpr::create(init, IntType::create(
 						type->getSize(), false)));
 				}
 			}
 		// If right value is variable.
-		} else if (ShPtr<Variable> var = cast<Variable>(stmt->getVar())) {
+		} else if (Variable* var = cast<Variable>(stmt->getVar())) {
 			// We must check & change init value, because we can't cast var
 			// value. Instead "(signed) a = b;" we need a = (unsigned) b;
-			if (ShPtr<IntType> type = cast<IntType>(var->getType())) {
+			if (IntType* type = cast<IntType>(var->getType())) {
 				if (type->isSigned()) {
 					stmt->setInitializer(exprCheckAndChange(true, init));
 				} else if (type->isUnsigned()) {
@@ -354,7 +354,7 @@ void ExprTypesFixer::visit(ShPtr<VarDefStmt> stmt) {
 	OrderedAllVisitor::visit(stmt);
 }
 
-void ExprTypesFixer::visit(ShPtr<LtEqOpExpr> expr) {
+void ExprTypesFixer::visit(LtEqOpExpr* expr) {
 	// If it is the signed compare operator
 	if (expr->getVariant() == LtEqOpExpr::Variant::SCmp) {
 		expr->setFirstOperand(exprCheckAndChange(true, expr->getFirstOperand()));
@@ -368,7 +368,7 @@ void ExprTypesFixer::visit(ShPtr<LtEqOpExpr> expr) {
 	OrderedAllVisitor::visit(expr);
 }
 
-void ExprTypesFixer::visit(ShPtr<GtEqOpExpr> expr) {
+void ExprTypesFixer::visit(GtEqOpExpr* expr) {
 	if (expr->getVariant() == GtEqOpExpr::Variant::SCmp) {
 		expr->setFirstOperand(exprCheckAndChange(true, expr->getFirstOperand()));
 		expr->setSecondOperand(exprCheckAndChange(true, expr->getSecondOperand()));
@@ -380,7 +380,7 @@ void ExprTypesFixer::visit(ShPtr<GtEqOpExpr> expr) {
 	OrderedAllVisitor::visit(expr);
 }
 
-void ExprTypesFixer::visit(ShPtr<LtOpExpr> expr) {
+void ExprTypesFixer::visit(LtOpExpr* expr) {
 	if (expr->getVariant() == LtOpExpr::Variant::SCmp) {
 		expr->setFirstOperand(exprCheckAndChange(true, expr->getFirstOperand()));
 		expr->setSecondOperand(exprCheckAndChange(true, expr->getSecondOperand()));
@@ -392,7 +392,7 @@ void ExprTypesFixer::visit(ShPtr<LtOpExpr> expr) {
 	OrderedAllVisitor::visit(expr);
 }
 
-void ExprTypesFixer::visit(ShPtr<GtOpExpr> expr) {
+void ExprTypesFixer::visit(GtOpExpr* expr) {
 	if (expr->getVariant() == GtOpExpr::Variant::SCmp) {
 		expr->setFirstOperand(exprCheckAndChange(true, expr->getFirstOperand()));
 		expr->setSecondOperand(exprCheckAndChange(true, expr->getSecondOperand()));
@@ -404,13 +404,13 @@ void ExprTypesFixer::visit(ShPtr<GtOpExpr> expr) {
 	OrderedAllVisitor::visit(expr);
 }
 
-void ExprTypesFixer::visit(ShPtr<BitShlOpExpr> expr) {
+void ExprTypesFixer::visit(BitShlOpExpr* expr) {
 	expr->setSecondOperand(exprCheckAndChange(false, expr->getSecondOperand()));
 
 	OrderedAllVisitor::visit(expr);
 }
 
-void ExprTypesFixer::visit(ShPtr<BitShrOpExpr> expr) {
+void ExprTypesFixer::visit(BitShrOpExpr* expr) {
 	if (expr->isArithmetical()) {
 		expr->setFirstOperand(exprCheckAndChange(true, expr->getFirstOperand()));
 	} else {

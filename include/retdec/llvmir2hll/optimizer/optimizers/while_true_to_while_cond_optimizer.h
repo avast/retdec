@@ -64,7 +64,7 @@ namespace llvmir2hll {
 */
 class WhileTrueToWhileCondOptimizer final: public FuncOptimizer {
 public:
-	WhileTrueToWhileCondOptimizer(ShPtr<Module> module);
+	WhileTrueToWhileCondOptimizer(Module* module);
 
 	virtual std::string getId() const override { return "WhileTrueToWhileCond"; }
 
@@ -72,7 +72,7 @@ private:
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<WhileLoopStmt> stmt) override;
+	virtual void visit(WhileLoopStmt* stmt) override;
 	/// @}
 };
 

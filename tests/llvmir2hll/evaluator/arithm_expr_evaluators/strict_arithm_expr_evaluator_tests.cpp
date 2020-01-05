@@ -70,10 +70,10 @@ using VarConstMap = ArithmExprEvaluator::VarConstMap;
 */
 class StrictArithmExprEvaluatorTests: public TestsWithModule {
 protected:
-	void evaluateAndCheckResult(ShPtr<Expression> inputExpr,
-		ShPtr<Expression> refResult);
-	void evaluateAndCheckResult(ShPtr<Expression> inputExpr,
-		ShPtr<Expression> refResult, VarConstMap varConstMap);
+	void evaluateAndCheckResult(Expression* inputExpr,
+		Expression* refResult);
+	void evaluateAndCheckResult(Expression* inputExpr,
+		Expression* refResult, VarConstMap varConstMap);
 };
 
 /**
@@ -83,7 +83,7 @@ protected:
 * @param[in] refResult An expression to compare with the @a inputExpr.
 */
 void StrictArithmExprEvaluatorTests::evaluateAndCheckResult(
-		ShPtr<Expression> inputExpr, ShPtr<Expression> refResult) {
+		Expression* inputExpr, Expression* refResult) {
 	evaluateAndCheckResult(inputExpr, refResult, VarConstMap());
 }
 
@@ -96,10 +96,10 @@ void StrictArithmExprEvaluatorTests::evaluateAndCheckResult(
 * @param[in] varConstMap map of constants to substitute the variables in @a inputExpr.
 */
 void StrictArithmExprEvaluatorTests::evaluateAndCheckResult(
-		ShPtr<Expression> inputExpr, ShPtr<Expression> refResult,
+		Expression* inputExpr, Expression* refResult,
 		VarConstMap varConstMap) {
-	ShPtr<ArithmExprEvaluator> evaluator(StrictArithmExprEvaluator::create());
-	ShPtr<Constant> result(evaluator->evaluate(inputExpr, varConstMap));
+	ArithmExprEvaluator* evaluator(StrictArithmExprEvaluator::create());
+	Constant* result(evaluator->evaluate(inputExpr, varConstMap));
 	if (refResult && !result) {
 		FAIL() << "expected `" << refResult << "`, " <<
 			"but the expression was not evaluated";
@@ -117,7 +117,7 @@ void StrictArithmExprEvaluatorTests::evaluateAndCheckResult(
 
 TEST_F(StrictArithmExprEvaluatorTests,
 EvaluatorHasNonEmptyID) {
-	ShPtr<ArithmExprEvaluator> evaluator(StrictArithmExprEvaluator::create());
+	ArithmExprEvaluator* evaluator(StrictArithmExprEvaluator::create());
 	EXPECT_TRUE(!evaluator->getId().empty()) <<
 		"the optimizer should have a non-empty ID";
 }
@@ -129,237 +129,237 @@ EvaluatorHasNonEmptyID) {
 TEST_F(StrictArithmExprEvaluatorTests,
 AddNumConstIntAddressTest) {
 	SCOPED_TRACE("2 + &a   ->   Not evaluated");
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16, true)));
-	ShPtr<AddOpExpr> inputExpr(AddOpExpr::create(
+	Variable* varA(Variable::create("a", IntType::create(16, true)));
+	AddOpExpr* inputExpr(AddOpExpr::create(
 		ConstInt::create(2, 64),
 		AddressOpExpr::create(varA)
 	));
 
-	evaluateAndCheckResult(inputExpr, ShPtr<Constant>());
+	evaluateAndCheckResult(inputExpr, Constant*());
 }
 
 TEST_F(StrictArithmExprEvaluatorTests,
 AddNumConstIntArrayIndexOpExprTest) {
 	SCOPED_TRACE("2 + a[2]   ->   Not evaluated");
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16, true)));
-	ShPtr<AddOpExpr> inputExpr(AddOpExpr::create(
+	Variable* varA(Variable::create("a", IntType::create(16, true)));
+	AddOpExpr* inputExpr(AddOpExpr::create(
 		ConstInt::create(2, 64),
 		ArrayIndexOpExpr::create(varA, ConstInt::create(2, 64))
 	));
 
-	evaluateAndCheckResult(inputExpr, ShPtr<Constant>());
+	evaluateAndCheckResult(inputExpr, Constant*());
 }
 
 TEST_F(StrictArithmExprEvaluatorTests,
 AddNumConstIntStructIndexOpExprTest) {
 	SCOPED_TRACE("2 + StructIndexOpExpr   ->   Not evaluated");
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16, true)));
-	ShPtr<AddOpExpr> inputExpr(AddOpExpr::create(
+	Variable* varA(Variable::create("a", IntType::create(16, true)));
+	AddOpExpr* inputExpr(AddOpExpr::create(
 		ConstInt::create(2, 64),
 		StructIndexOpExpr::create(varA, ConstInt::create(2, 64))
 	));
 
-	evaluateAndCheckResult(inputExpr, ShPtr<Constant>());
+	evaluateAndCheckResult(inputExpr, Constant*());
 }
 
 TEST_F(StrictArithmExprEvaluatorTests,
 AddNumConstIntDerefOpExprTest) {
 	SCOPED_TRACE("2 + *2  ->   Not evaluated");
-	ShPtr<AddOpExpr> inputExpr(AddOpExpr::create(
+	AddOpExpr* inputExpr(AddOpExpr::create(
 		ConstInt::create(2, 64),
 		DerefOpExpr::create(ConstInt::create(2, 64))
 	));
 
-	evaluateAndCheckResult(inputExpr, ShPtr<Constant>());
+	evaluateAndCheckResult(inputExpr, Constant*());
 }
 
 TEST_F(StrictArithmExprEvaluatorTests,
 MulNumConstIntCallOpExprTest) {
 	ExprVector args;
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	SCOPED_TRACE("2 * callExpr  ->   Not evaluated");
-	ShPtr<MulOpExpr> inputExpr(MulOpExpr::create(
+	MulOpExpr* inputExpr(MulOpExpr::create(
 		ConstInt::create(2, 64),
 		CallExpr::create(varA, args)
 	));
 
-	evaluateAndCheckResult(inputExpr, ShPtr<Constant>());
+	evaluateAndCheckResult(inputExpr, Constant*());
 }
 
 TEST_F(StrictArithmExprEvaluatorTests,
 MulNumConstIntBitCastExprTest) {
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	SCOPED_TRACE("2 * BitCastExpr(a, IntType)  ->   Not evaluated");
-	ShPtr<BitCastExpr> cast(BitCastExpr::create(
+	BitCastExpr* cast(BitCastExpr::create(
 		varA,
 		IntType::create(32)
 	));
-	ShPtr<MulOpExpr> inputExpr(MulOpExpr::create(
+	MulOpExpr* inputExpr(MulOpExpr::create(
 		ConstInt::create(2, 64),
 		cast
 	));
 
-	evaluateAndCheckResult(inputExpr, ShPtr<Constant>());
+	evaluateAndCheckResult(inputExpr, Constant*());
 }
 
 TEST_F(StrictArithmExprEvaluatorTests,
 MulNumConstIntExtCastExprTest) {
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	SCOPED_TRACE("2 * ExtCastExpr(a, IntType)  ->   Not evaluated");
-	ShPtr<ExtCastExpr> cast(ExtCastExpr::create(
+	ExtCastExpr* cast(ExtCastExpr::create(
 		varA,
 		IntType::create(32)
 	));
-	ShPtr<MulOpExpr> inputExpr(MulOpExpr::create(
+	MulOpExpr* inputExpr(MulOpExpr::create(
 		ConstInt::create(2, 64),
 		cast
 	));
 
-	evaluateAndCheckResult(inputExpr, ShPtr<Constant>());
+	evaluateAndCheckResult(inputExpr, Constant*());
 }
 
 TEST_F(StrictArithmExprEvaluatorTests,
 MulNumConstIntTruncCastExprTest) {
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	SCOPED_TRACE("2 * TruncCastExpr(a, IntType)  ->   Not evaluated");
-	ShPtr<TruncCastExpr> cast(TruncCastExpr::create(
+	TruncCastExpr* cast(TruncCastExpr::create(
 		varA,
 		IntType::create(32)
 	));
-	ShPtr<MulOpExpr> inputExpr(MulOpExpr::create(
+	MulOpExpr* inputExpr(MulOpExpr::create(
 		ConstInt::create(2, 64),
 		cast
 	));
 
-	evaluateAndCheckResult(inputExpr, ShPtr<Constant>());
+	evaluateAndCheckResult(inputExpr, Constant*());
 }
 
 TEST_F(StrictArithmExprEvaluatorTests,
 MulNumConstIntFPToIntCastExprTest) {
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	SCOPED_TRACE("2 * FPToIntCastExpr(a, IntType)  ->   Not evaluated");
-	ShPtr<FPToIntCastExpr> cast(FPToIntCastExpr::create(
+	FPToIntCastExpr* cast(FPToIntCastExpr::create(
 		varA,
 		IntType::create(32)
 	));
-	ShPtr<MulOpExpr> inputExpr(MulOpExpr::create(
+	MulOpExpr* inputExpr(MulOpExpr::create(
 		ConstInt::create(2, 64),
 		cast
 	));
 
-	evaluateAndCheckResult(inputExpr, ShPtr<Constant>());
+	evaluateAndCheckResult(inputExpr, Constant*());
 }
 
 TEST_F(StrictArithmExprEvaluatorTests,
 MulNumConstIntIntToFPCastExprTest) {
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	SCOPED_TRACE("2 * IntToFPCastExpr(a, IntType)  ->   Not evaluated");
-	ShPtr<IntToFPCastExpr> cast(IntToFPCastExpr::create(
+	IntToFPCastExpr* cast(IntToFPCastExpr::create(
 		varA,
 		FloatType::create(20)
 	));
-	ShPtr<MulOpExpr> inputExpr(MulOpExpr::create(
+	MulOpExpr* inputExpr(MulOpExpr::create(
 		ConstInt::create(2, 64),
 		cast
 	));
 
-	evaluateAndCheckResult(inputExpr, ShPtr<Constant>());
+	evaluateAndCheckResult(inputExpr, Constant*());
 }
 
 TEST_F(StrictArithmExprEvaluatorTests,
 MulNumConstIntIntToPtrCastExprTest) {
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	SCOPED_TRACE("2 * IntToPtrCastExpr(a, IntType)  ->   Not evaluated");
-	ShPtr<IntToPtrCastExpr> cast(IntToPtrCastExpr::create(
+	IntToPtrCastExpr* cast(IntToPtrCastExpr::create(
 		varA,
 		IntType::create(32)
 	));
-	ShPtr<MulOpExpr> inputExpr(MulOpExpr::create(
+	MulOpExpr* inputExpr(MulOpExpr::create(
 		ConstInt::create(2, 64),
 		cast
 	));
 
-	evaluateAndCheckResult(inputExpr, ShPtr<Constant>());
+	evaluateAndCheckResult(inputExpr, Constant*());
 }
 
 TEST_F(StrictArithmExprEvaluatorTests,
 MulNumConstIntPtrToIntCastExprTest) {
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	SCOPED_TRACE("2 * PtrToIntCastExpr(a, IntType)  ->   Not evaluated");
-	ShPtr<PtrToIntCastExpr> cast(PtrToIntCastExpr::create(
+	PtrToIntCastExpr* cast(PtrToIntCastExpr::create(
 		varA,
 		IntType::create(32)
 	));
-	ShPtr<MulOpExpr> inputExpr(MulOpExpr::create(
+	MulOpExpr* inputExpr(MulOpExpr::create(
 		ConstInt::create(2, 64),
 		cast
 	));
 
-	evaluateAndCheckResult(inputExpr, ShPtr<Constant>());
+	evaluateAndCheckResult(inputExpr, Constant*());
 }
 
 TEST_F(StrictArithmExprEvaluatorTests,
 MulNumConstIntConstNullPointerTest) {
 	SCOPED_TRACE("2 * ConstNullPointer(IntType)  ->   Not evaluated");
-	ShPtr<ConstNullPointer> pointer(ConstNullPointer::create(
+	ConstNullPointer* pointer(ConstNullPointer::create(
 		PointerType::create(IntType::create(32))));
-	ShPtr<MulOpExpr> inputExpr(MulOpExpr::create(
+	MulOpExpr* inputExpr(MulOpExpr::create(
 		ConstInt::create(2, 64),
 		pointer
 	));
 
-	evaluateAndCheckResult(inputExpr, ShPtr<Constant>());
+	evaluateAndCheckResult(inputExpr, Constant*());
 }
 
 TEST_F(StrictArithmExprEvaluatorTests,
 MulNumConstIntConstStringTest) {
 	SCOPED_TRACE("2 * ConstString()  ->   Not evaluated");
-	ShPtr<ConstString> constString(ConstString::create(""));
-	ShPtr<MulOpExpr> inputExpr(MulOpExpr::create(
+	ConstString* constString(ConstString::create(""));
+	MulOpExpr* inputExpr(MulOpExpr::create(
 		ConstInt::create(2, 64),
 		constString
 	));
 
-	evaluateAndCheckResult(inputExpr, ShPtr<Constant>());
+	evaluateAndCheckResult(inputExpr, Constant*());
 }
 
 TEST_F(StrictArithmExprEvaluatorTests,
 MulNumConstIntConstArrayTest) {
 	SCOPED_TRACE("2 * ConstArray()  ->   Not evaluated");
-	ShPtr<ConstArray> constArray(ConstArray::createUninitialized(
+	ConstArray* constArray(ConstArray::createUninitialized(
 		ArrayType::create(IntType::create(32), ArrayType::Dimensions())
 	));
-	ShPtr<MulOpExpr> inputExpr(MulOpExpr::create(
+	MulOpExpr* inputExpr(MulOpExpr::create(
 		ConstInt::create(2, 64),
 		constArray
 	));
 
-	evaluateAndCheckResult(inputExpr, ShPtr<Constant>());
+	evaluateAndCheckResult(inputExpr, Constant*());
 }
 
 TEST_F(StrictArithmExprEvaluatorTests,
 MulNumConstIntConstStructTest) {
 	SCOPED_TRACE("2 * ConstStruct()  ->   Not evaluated");
-	ShPtr<ConstStruct> constStruct(ConstStruct::create(
+	ConstStruct* constStruct(ConstStruct::create(
 		ConstStruct::Type(), StructType::create(StructType::ElementTypes())));
-	ShPtr<MulOpExpr> inputExpr(MulOpExpr::create(
+	MulOpExpr* inputExpr(MulOpExpr::create(
 		ConstInt::create(2, 64),
 		constStruct
 	));
 
-	evaluateAndCheckResult(inputExpr, ShPtr<Constant>());
+	evaluateAndCheckResult(inputExpr, Constant*());
 }
 
 TEST_F(StrictArithmExprEvaluatorTests,
 MulNumConstIntVariableTest) {
 	SCOPED_TRACE("2 * varA  ->   Not evaluated");
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
-	ShPtr<MulOpExpr> inputExpr(MulOpExpr::create(
+	Variable* varA(Variable::create("a", IntType::create(32)));
+	MulOpExpr* inputExpr(MulOpExpr::create(
 		ConstInt::create(2, 64),
 		varA
 	));
 
-	evaluateAndCheckResult(inputExpr, ShPtr<Constant>());
+	evaluateAndCheckResult(inputExpr, Constant*());
 }
 
 //
@@ -370,118 +370,118 @@ MulNumConstIntVariableTest) {
 TEST_F(StrictArithmExprEvaluatorTests,
 NegOpExprTrueTest) {
 	SCOPED_TRACE("-True(negOpExpr)   ->   Not evaluated");
-	ShPtr<NegOpExpr> inputExpr(NegOpExpr::create(ConstBool::create(true)));
+	NegOpExpr* inputExpr(NegOpExpr::create(ConstBool::create(true)));
 
-	evaluateAndCheckResult(inputExpr, ShPtr<Constant>());
+	evaluateAndCheckResult(inputExpr, Constant*());
 }
 
 TEST_F(StrictArithmExprEvaluatorTests,
 SubNumConstIntNumConstIntNotSameBitWidthTest) {
 	SCOPED_TRACE("2(2 bitWidth) -4(4 bitWidth)  ->   Not evaluated");
-	ShPtr<SubOpExpr> inputExpr(SubOpExpr::create(
+	SubOpExpr* inputExpr(SubOpExpr::create(
 		ConstInt::create(2, 2),
 		ConstInt::create(4, 4)
 	));
 
-	evaluateAndCheckResult(inputExpr, ShPtr<Constant>());
+	evaluateAndCheckResult(inputExpr, Constant*());
 }
 
 TEST_F(StrictArithmExprEvaluatorTests,
 SubNumConstIntNumConstFloatNotSameTypesTest) {
 	SCOPED_TRACE("2(ConstInt) -1.5(ConstFloat)  ->   Not evaluated");
-	ShPtr<SubOpExpr> inputExpr(SubOpExpr::create(
+	SubOpExpr* inputExpr(SubOpExpr::create(
 		ConstInt::create(2, 64),
 		ConstFloat::create(llvm::APFloat(1.5))
 	));
 
-	evaluateAndCheckResult(inputExpr, ShPtr<Constant>());
+	evaluateAndCheckResult(inputExpr, Constant*());
 }
 
 TEST_F(StrictArithmExprEvaluatorTests,
 SubNumConstIntConstBoolNotSameTypesTest) {
 	SCOPED_TRACE("2(ConstInt) - true  ->   Not evaluated");
-	ShPtr<SubOpExpr> inputExpr(SubOpExpr::create(
+	SubOpExpr* inputExpr(SubOpExpr::create(
 		ConstInt::create(2, 64),
 		ConstBool::create(1)
 	));
 
-	evaluateAndCheckResult(inputExpr, ShPtr<Constant>());
+	evaluateAndCheckResult(inputExpr, Constant*());
 }
 
 TEST_F(StrictArithmExprEvaluatorTests,
 DivNumConstIntNumConstIntRemainderTest) {
 	SCOPED_TRACE("3 / 2 ->   Not evaluated");
-	ShPtr<DivOpExpr> inputExpr(DivOpExpr::create(
+	DivOpExpr* inputExpr(DivOpExpr::create(
 		ConstInt::create(3, 64),
 		ConstInt::create(2, 64)
 	));
 
-	evaluateAndCheckResult(inputExpr, ShPtr<Constant>());
+	evaluateAndCheckResult(inputExpr, Constant*());
 }
 
 TEST_F(StrictArithmExprEvaluatorTests,
 NegOpExprMinSignedValueTest) {
 	SCOPED_TRACE("-128(8 bits) ->   Not evaluated");
-	ShPtr<NegOpExpr> inputExpr(NegOpExpr::create(
+	NegOpExpr* inputExpr(NegOpExpr::create(
 		ConstInt::create(-128, 8, true)
 	));
 
-	evaluateAndCheckResult(inputExpr, ShPtr<Constant>());
+	evaluateAndCheckResult(inputExpr, Constant*());
 }
 
 TEST_F(StrictArithmExprEvaluatorTests,
 DivNumConstIntNumConstIntZeroDivTest) {
 	SCOPED_TRACE("3 / 0 ->   Not evaluated");
-	ShPtr<DivOpExpr> inputExpr(DivOpExpr::create(
+	DivOpExpr* inputExpr(DivOpExpr::create(
 		ConstInt::create(3, 64),
 		ConstInt::create(0, 64)
 	));
 
-	evaluateAndCheckResult(inputExpr, ShPtr<Constant>());
+	evaluateAndCheckResult(inputExpr, Constant*());
 }
 
 TEST_F(StrictArithmExprEvaluatorTests,
 ModNumConstIntNumConstIntZeroModTest) {
 	SCOPED_TRACE("3 % 0 ->   Not evaluated");
-	ShPtr<ModOpExpr> inputExpr(ModOpExpr::create(
+	ModOpExpr* inputExpr(ModOpExpr::create(
 		ConstInt::create(3, 64),
 		ConstInt::create(0, 64)
 	));
 
-	evaluateAndCheckResult(inputExpr, ShPtr<Constant>());
+	evaluateAndCheckResult(inputExpr, Constant*());
 }
 
 TEST_F(StrictArithmExprEvaluatorTests,
 AddNumConstIntNumConstIntOverflowTest) {
 	SCOPED_TRACE("7(4 bits) + 7(4 bits) ->   Not evaluated");
-	ShPtr<AddOpExpr> inputExpr(AddOpExpr::create(
+	AddOpExpr* inputExpr(AddOpExpr::create(
 		ConstInt::create(7, 4),
 		ConstInt::create(7, 4)
 	));
 
-	evaluateAndCheckResult(inputExpr, ShPtr<Constant>());
+	evaluateAndCheckResult(inputExpr, Constant*());
 }
 
 TEST_F(StrictArithmExprEvaluatorTests,
 GtOpExprBoolComparisonTest) {
 	SCOPED_TRACE("true > false   ->   Not evaluated");
-	ShPtr<GtOpExpr> inputExpr(GtOpExpr::create(
+	GtOpExpr* inputExpr(GtOpExpr::create(
 		ConstBool::create(true),
 		ConstBool::create(false)
 	));
 
-	evaluateAndCheckResult(inputExpr, ShPtr<Constant>());
+	evaluateAndCheckResult(inputExpr, Constant*());
 }
 
 TEST_F(StrictArithmExprEvaluatorTests,
 BitXorOnConstFloatTest) {
 	SCOPED_TRACE("1.0 ^ 2.0   ->   Not evaluated");
-	ShPtr<BitXorOpExpr> inputExpr(BitXorOpExpr::create(
+	BitXorOpExpr* inputExpr(BitXorOpExpr::create(
 		ConstFloat::create(llvm::APFloat(1.0)),
 		ConstFloat::create(llvm::APFloat(2.0))
 	));
 
-	evaluateAndCheckResult(inputExpr, ShPtr<Constant>());
+	evaluateAndCheckResult(inputExpr, Constant*());
 }
 
 //
@@ -491,8 +491,8 @@ BitXorOnConstFloatTest) {
 TEST_F(StrictArithmExprEvaluatorTests,
 OnlyConstIntTest) {
 	SCOPED_TRACE("2   ->   2");
-	ShPtr<ConstInt> inputExpr(ConstInt::create(2, 64));
-	ShPtr<ConstInt> refResult(ConstInt::create(2, 64));
+	ConstInt* inputExpr(ConstInt::create(2, 64));
+	ConstInt* refResult(ConstInt::create(2, 64));
 
 	evaluateAndCheckResult(inputExpr, refResult);
 }
@@ -500,9 +500,9 @@ OnlyConstIntTest) {
 TEST_F(StrictArithmExprEvaluatorTests,
 NotOpExprConstIntFalseTest) {
 	SCOPED_TRACE("!2   ->   false");
-	ShPtr<NotOpExpr> inputExpr(NotOpExpr::create(
+	NotOpExpr* inputExpr(NotOpExpr::create(
 		ConstInt::create(2, 64)));
-	ShPtr<ConstBool> refResult(ConstBool::create(false));
+	ConstBool* refResult(ConstBool::create(false));
 
 	evaluateAndCheckResult(inputExpr, refResult);
 }
@@ -510,9 +510,9 @@ NotOpExprConstIntFalseTest) {
 TEST_F(StrictArithmExprEvaluatorTests,
 NotOpExprConstIntTrueTest) {
 	SCOPED_TRACE("!0   ->   true");
-	ShPtr<NotOpExpr> inputExpr(NotOpExpr::create(
+	NotOpExpr* inputExpr(NotOpExpr::create(
 		ConstInt::create(0, 64)));
-	ShPtr<ConstBool> refResult(ConstBool::create(true));
+	ConstBool* refResult(ConstBool::create(true));
 
 	evaluateAndCheckResult(inputExpr, refResult);
 }
@@ -520,9 +520,9 @@ NotOpExprConstIntTrueTest) {
 TEST_F(StrictArithmExprEvaluatorTests,
 NotOpExprConstFloatTrueTest) {
 	SCOPED_TRACE("!0.0   ->   true");
-	ShPtr<NotOpExpr> inputExpr(NotOpExpr::create(
+	NotOpExpr* inputExpr(NotOpExpr::create(
 		ConstFloat::create(llvm::APFloat(0.0))));
-	ShPtr<ConstBool> refResult(ConstBool::create(true));
+	ConstBool* refResult(ConstBool::create(true));
 
 	evaluateAndCheckResult(inputExpr, refResult);
 }
@@ -530,9 +530,9 @@ NotOpExprConstFloatTrueTest) {
 TEST_F(StrictArithmExprEvaluatorTests,
 NotOpExprConstFloatFalseTest) {
 	SCOPED_TRACE("!0.1   ->   false");
-	ShPtr<NotOpExpr> inputExpr(NotOpExpr::create(
+	NotOpExpr* inputExpr(NotOpExpr::create(
 		ConstFloat::create(llvm::APFloat(0.1))));
-	ShPtr<ConstBool> refResult(ConstBool::create(false));
+	ConstBool* refResult(ConstBool::create(false));
 
 	evaluateAndCheckResult(inputExpr, refResult);
 }
@@ -540,9 +540,9 @@ NotOpExprConstFloatFalseTest) {
 TEST_F(StrictArithmExprEvaluatorTests,
 NegOpExprTest) {
 	SCOPED_TRACE("-2(negOpExpr)   ->   2");
-	ShPtr<NegOpExpr> inputExpr(NegOpExpr::create(
+	NegOpExpr* inputExpr(NegOpExpr::create(
 		ConstInt::create(-2, 64, true)));
-	ShPtr<ConstInt> refResult(ConstInt::create(2, 64, true));
+	ConstInt* refResult(ConstInt::create(2, 64, true));
 
 	evaluateAndCheckResult(inputExpr, refResult);
 }
@@ -550,11 +550,11 @@ NegOpExprTest) {
 TEST_F(StrictArithmExprEvaluatorTests,
 EqOpExprConstIntTest) {
 	SCOPED_TRACE("2 == 3   ->   false");
-	ShPtr<EqOpExpr> inputExpr(EqOpExpr::create(
+	EqOpExpr* inputExpr(EqOpExpr::create(
 		ConstInt::create(2, 64),
 		ConstInt::create(3, 64)
 	));
-	ShPtr<ConstBool> refResult(ConstBool::create(false));
+	ConstBool* refResult(ConstBool::create(false));
 
 	evaluateAndCheckResult(inputExpr, refResult);
 }
@@ -562,11 +562,11 @@ EqOpExprConstIntTest) {
 TEST_F(StrictArithmExprEvaluatorTests,
 EqOpExprConstBoolTest) {
 	SCOPED_TRACE("true == true   ->   true");
-	ShPtr<EqOpExpr> inputExpr(EqOpExpr::create(
+	EqOpExpr* inputExpr(EqOpExpr::create(
 		ConstBool::create(true),
 		ConstBool::create(true)
 	));
-	ShPtr<ConstBool> refResult(ConstBool::create(true));
+	ConstBool* refResult(ConstBool::create(true));
 
 	evaluateAndCheckResult(inputExpr, refResult);
 }
@@ -574,11 +574,11 @@ EqOpExprConstBoolTest) {
 TEST_F(StrictArithmExprEvaluatorTests,
 NeqOpExprConstBoolTest) {
 	SCOPED_TRACE("false != true   ->   true");
-	ShPtr<NeqOpExpr> inputExpr(NeqOpExpr::create(
+	NeqOpExpr* inputExpr(NeqOpExpr::create(
 		ConstBool::create(false),
 		ConstBool::create(true)
 	));
-	ShPtr<ConstBool> refResult(ConstBool::create(true));
+	ConstBool* refResult(ConstBool::create(true));
 
 	evaluateAndCheckResult(inputExpr, refResult);
 }
@@ -586,11 +586,11 @@ NeqOpExprConstBoolTest) {
 TEST_F(StrictArithmExprEvaluatorTests,
 GtOpExprConstIntTrueTest) {
 	SCOPED_TRACE("3 > 2   ->   true");
-	ShPtr<GtOpExpr> inputExpr(GtOpExpr::create(
+	GtOpExpr* inputExpr(GtOpExpr::create(
 		ConstInt::create(3, 64),
 		ConstInt::create(2, 64)
 	));
-	ShPtr<ConstBool> refResult(ConstBool::create(true));
+	ConstBool* refResult(ConstBool::create(true));
 
 	evaluateAndCheckResult(inputExpr, refResult);
 }
@@ -598,11 +598,11 @@ GtOpExprConstIntTrueTest) {
 TEST_F(StrictArithmExprEvaluatorTests,
 GtOpExprConstIntFalseTest) {
 	SCOPED_TRACE("2 > 3   ->   false");
-	ShPtr<GtOpExpr> inputExpr(GtOpExpr::create(
+	GtOpExpr* inputExpr(GtOpExpr::create(
 		ConstInt::create(2, 64),
 		ConstInt::create(3, 64)
 	));
-	ShPtr<ConstBool> refResult(ConstBool::create(false));
+	ConstBool* refResult(ConstBool::create(false));
 
 	evaluateAndCheckResult(inputExpr, refResult);
 }
@@ -610,11 +610,11 @@ GtOpExprConstIntFalseTest) {
 TEST_F(StrictArithmExprEvaluatorTests,
 LtOpExprConstIntTrueTest) {
 	SCOPED_TRACE("2 < 3   ->   true");
-	ShPtr<LtOpExpr> inputExpr(LtOpExpr::create(
+	LtOpExpr* inputExpr(LtOpExpr::create(
 		ConstInt::create(2, 64),
 		ConstInt::create(3, 64)
 	));
-	ShPtr<ConstBool> refResult(ConstBool::create(true));
+	ConstBool* refResult(ConstBool::create(true));
 
 	evaluateAndCheckResult(inputExpr, refResult);
 }
@@ -622,11 +622,11 @@ LtOpExprConstIntTrueTest) {
 TEST_F(StrictArithmExprEvaluatorTests,
 LtOpExprConstIntFalseTest) {
 	SCOPED_TRACE("3 < 2   ->   true");
-	ShPtr<LtOpExpr> inputExpr(LtOpExpr::create(
+	LtOpExpr* inputExpr(LtOpExpr::create(
 		ConstInt::create(3, 64),
 		ConstInt::create(2, 64)
 	));
-	ShPtr<ConstBool> refResult(ConstBool::create(false));
+	ConstBool* refResult(ConstBool::create(false));
 
 	evaluateAndCheckResult(inputExpr, refResult);
 }
@@ -634,11 +634,11 @@ LtOpExprConstIntFalseTest) {
 TEST_F(StrictArithmExprEvaluatorTests,
 LtEqOpExprConstIntNotEqualTrue) {
 	SCOPED_TRACE("2 <= 3   ->   true");
-	ShPtr<LtEqOpExpr> inputExpr(LtEqOpExpr::create(
+	LtEqOpExpr* inputExpr(LtEqOpExpr::create(
 		ConstInt::create(2, 64),
 		ConstInt::create(3, 64)
 	));
-	ShPtr<ConstBool> refResult(ConstBool::create(true));
+	ConstBool* refResult(ConstBool::create(true));
 
 	evaluateAndCheckResult(inputExpr, refResult);
 }
@@ -646,11 +646,11 @@ LtEqOpExprConstIntNotEqualTrue) {
 TEST_F(StrictArithmExprEvaluatorTests,
 LtEqOpExprConstIntEqualTrueTest) {
 	SCOPED_TRACE("3 <= 3   ->   true");
-	ShPtr<LtEqOpExpr> inputExpr(LtEqOpExpr::create(
+	LtEqOpExpr* inputExpr(LtEqOpExpr::create(
 		ConstInt::create(3, 64),
 		ConstInt::create(3, 64)
 	));
-	ShPtr<ConstBool> refResult(ConstBool::create(true));
+	ConstBool* refResult(ConstBool::create(true));
 
 	evaluateAndCheckResult(inputExpr, refResult);
 }
@@ -658,11 +658,11 @@ LtEqOpExprConstIntEqualTrueTest) {
 TEST_F(StrictArithmExprEvaluatorTests,
 GtEqOpExprConstIntNotEqualTrue) {
 	SCOPED_TRACE("3 >= 2   ->   true");
-	ShPtr<GtEqOpExpr> inputExpr(GtEqOpExpr::create(
+	GtEqOpExpr* inputExpr(GtEqOpExpr::create(
 		ConstInt::create(3, 64),
 		ConstInt::create(2, 64)
 	));
-	ShPtr<ConstBool> refResult(ConstBool::create(true));
+	ConstBool* refResult(ConstBool::create(true));
 
 	evaluateAndCheckResult(inputExpr, refResult);
 }
@@ -670,11 +670,11 @@ GtEqOpExprConstIntNotEqualTrue) {
 TEST_F(StrictArithmExprEvaluatorTests,
 GtEqOpExprConstIntEqualTrueTest) {
 	SCOPED_TRACE("3 >= 3   ->   true");
-	ShPtr<GtEqOpExpr> inputExpr(GtEqOpExpr::create(
+	GtEqOpExpr* inputExpr(GtEqOpExpr::create(
 		ConstInt::create(3, 64),
 		ConstInt::create(3, 64)
 	));
-	ShPtr<ConstBool> refResult(ConstBool::create(true));
+	ConstBool* refResult(ConstBool::create(true));
 
 	evaluateAndCheckResult(inputExpr, refResult);
 }
@@ -682,11 +682,11 @@ GtEqOpExprConstIntEqualTrueTest) {
 TEST_F(StrictArithmExprEvaluatorTests,
 SimpleAddTest) {
 	SCOPED_TRACE("2 + 2   ->   4");
-	ShPtr<AddOpExpr> inputExpr(AddOpExpr::create(
+	AddOpExpr* inputExpr(AddOpExpr::create(
 		ConstInt::create(2, 64),
 		ConstInt::create(2, 64)
 	));
-	ShPtr<ConstInt> refResult(ConstInt::create(4, 64));
+	ConstInt* refResult(ConstInt::create(4, 64));
 
 	evaluateAndCheckResult(inputExpr, refResult);
 }
@@ -694,22 +694,22 @@ SimpleAddTest) {
 TEST_F(StrictArithmExprEvaluatorTests,
 MoreAddTest) {
 	SCOPED_TRACE("(3 + 5) + (2 + 1) -> 11");
-	ShPtr<AddOpExpr> leftAdd(
+	AddOpExpr* leftAdd(
 	AddOpExpr::create(
 		ConstInt::create(3, 64),
 		ConstInt::create(5, 64)
 	));
-	ShPtr<AddOpExpr> rightAdd(
+	AddOpExpr* rightAdd(
 		AddOpExpr::create(
 			ConstInt::create(2, 64),
 			ConstInt::create(1, 64)
 	));
-	ShPtr<AddOpExpr> centralAdd(
+	AddOpExpr* centralAdd(
 		AddOpExpr::create(
 			leftAdd,
 			rightAdd
 	));
-	ShPtr<ConstInt> refResult(ConstInt::create(11, 64));
+	ConstInt* refResult(ConstInt::create(11, 64));
 
 	evaluateAndCheckResult(centralAdd, refResult);
 }
@@ -717,22 +717,22 @@ MoreAddTest) {
 TEST_F(StrictArithmExprEvaluatorTests,
 MoreSubTest) {
 	SCOPED_TRACE("(3 - 5) - (2 - 1) -> -3");
-	ShPtr<SubOpExpr> leftAdd(
+	SubOpExpr* leftAdd(
 	SubOpExpr::create(
 		ConstInt::create(3, 64),
 		ConstInt::create(5, 64)
 	));
-	ShPtr<SubOpExpr> rightAdd(
+	SubOpExpr* rightAdd(
 		SubOpExpr::create(
 			ConstInt::create(2, 64),
 			ConstInt::create(1, 64)
 	));
-	ShPtr<SubOpExpr> centralAdd(
+	SubOpExpr* centralAdd(
 		SubOpExpr::create(
 			leftAdd,
 			rightAdd
 	));
-	ShPtr<ConstInt> refResult(ConstInt::create(-3, 64, true));
+	ConstInt* refResult(ConstInt::create(-3, 64, true));
 
 	evaluateAndCheckResult(centralAdd, refResult);
 }
@@ -740,11 +740,11 @@ MoreSubTest) {
 TEST_F(StrictArithmExprEvaluatorTests,
 SimpleMulTest) {
 	SCOPED_TRACE("3 * 2   ->   6");
-	ShPtr<MulOpExpr> inputExpr(MulOpExpr::create(
+	MulOpExpr* inputExpr(MulOpExpr::create(
 		ConstInt::create(3, 64),
 		ConstInt::create(2, 64)
 	));
-	ShPtr<ConstInt> refResult(ConstInt::create(6, 64));
+	ConstInt* refResult(ConstInt::create(6, 64));
 
 	evaluateAndCheckResult(inputExpr, refResult);
 }
@@ -752,11 +752,11 @@ SimpleMulTest) {
 TEST_F(StrictArithmExprEvaluatorTests,
 SimpleModTest) {
 	SCOPED_TRACE("6 % 2   ->   0");
-	ShPtr<ModOpExpr> inputExpr(ModOpExpr::create(
+	ModOpExpr* inputExpr(ModOpExpr::create(
 		ConstInt::create(6, 64),
 		ConstInt::create(2, 64)
 	));
-	ShPtr<ConstInt> refResult(ConstInt::create(0, 64));
+	ConstInt* refResult(ConstInt::create(0, 64));
 
 	evaluateAndCheckResult(inputExpr, refResult);
 }
@@ -764,11 +764,11 @@ SimpleModTest) {
 TEST_F(StrictArithmExprEvaluatorTests,
 SimpleDivTest) {
 	SCOPED_TRACE("6 / 3   ->   2");
-	ShPtr<DivOpExpr> inputExpr(DivOpExpr::create(
+	DivOpExpr* inputExpr(DivOpExpr::create(
 		ConstInt::create(6, 64),
 		ConstInt::create(2, 64)
 	));
-	ShPtr<ConstInt> refResult(ConstInt::create(3, 64));
+	ConstInt* refResult(ConstInt::create(3, 64));
 
 	evaluateAndCheckResult(inputExpr, refResult);
 }
@@ -776,11 +776,11 @@ SimpleDivTest) {
 TEST_F(StrictArithmExprEvaluatorTests,
 SimpleAndTrueTest) {
 	SCOPED_TRACE("true && true   ->   true");
-	ShPtr<AndOpExpr> inputExpr(AndOpExpr::create(
+	AndOpExpr* inputExpr(AndOpExpr::create(
 		ConstBool::create(true),
 		ConstBool::create(true)
 	));
-	ShPtr<ConstBool> refResult(ConstBool::create(true));
+	ConstBool* refResult(ConstBool::create(true));
 
 	evaluateAndCheckResult(inputExpr, refResult);
 }
@@ -788,11 +788,11 @@ SimpleAndTrueTest) {
 TEST_F(StrictArithmExprEvaluatorTests,
 SimpleAndFalseTest) {
 	SCOPED_TRACE("1 && 0   ->   false");
-	ShPtr<AndOpExpr> inputExpr(AndOpExpr::create(
+	AndOpExpr* inputExpr(AndOpExpr::create(
 		ConstInt::create(1, 64),
 		ConstInt::create(0, 64)
 	));
-	ShPtr<ConstBool> refResult(ConstBool::create(false));
+	ConstBool* refResult(ConstBool::create(false));
 
 	evaluateAndCheckResult(inputExpr, refResult);
 }
@@ -800,11 +800,11 @@ SimpleAndFalseTest) {
 TEST_F(StrictArithmExprEvaluatorTests,
 SimpleOrTrueTest) {
 	SCOPED_TRACE("true || false   ->   true");
-	ShPtr<OrOpExpr> inputExpr(OrOpExpr::create(
+	OrOpExpr* inputExpr(OrOpExpr::create(
 		ConstBool::create(true),
 		ConstBool::create(false)
 	));
-	ShPtr<ConstBool> refResult(ConstBool::create(true));
+	ConstBool* refResult(ConstBool::create(true));
 
 	evaluateAndCheckResult(inputExpr, refResult);
 }
@@ -812,11 +812,11 @@ SimpleOrTrueTest) {
 TEST_F(StrictArithmExprEvaluatorTests,
 SimpleOrFalseTest) {
 	SCOPED_TRACE("0 && 0   ->   false");
-	ShPtr<AndOpExpr> inputExpr(AndOpExpr::create(
+	AndOpExpr* inputExpr(AndOpExpr::create(
 		ConstFloat::create(llvm::APFloat(0.0)),
 		ConstFloat::create(llvm::APFloat(0.0))
 	));
-	ShPtr<ConstBool> refResult(ConstBool::create(false));
+	ConstBool* refResult(ConstBool::create(false));
 
 	evaluateAndCheckResult(inputExpr, refResult);
 }
@@ -824,11 +824,11 @@ SimpleOrFalseTest) {
 TEST_F(StrictArithmExprEvaluatorTests,
 SimpleBitAndTest) {
 	SCOPED_TRACE("2 & 3   ->   2");
-	ShPtr<BitAndOpExpr> inputExpr(BitAndOpExpr::create(
+	BitAndOpExpr* inputExpr(BitAndOpExpr::create(
 		ConstInt::create(2, 64),
 		ConstInt::create(3, 64)
 	));
-	ShPtr<ConstInt> refResult(ConstInt::create(2, 64));
+	ConstInt* refResult(ConstInt::create(2, 64));
 
 	evaluateAndCheckResult(inputExpr, refResult);
 }
@@ -836,11 +836,11 @@ SimpleBitAndTest) {
 TEST_F(StrictArithmExprEvaluatorTests,
 SimpleBitOrTest) {
 	SCOPED_TRACE("2 | 3   ->   3");
-	ShPtr<BitOrOpExpr> inputExpr(BitOrOpExpr::create(
+	BitOrOpExpr* inputExpr(BitOrOpExpr::create(
 		ConstInt::create(2, 64),
 		ConstInt::create(3, 64)
 	));
-	ShPtr<ConstInt> refResult(ConstInt::create(3, 64));
+	ConstInt* refResult(ConstInt::create(3, 64));
 
 	evaluateAndCheckResult(inputExpr, refResult);
 }
@@ -848,11 +848,11 @@ SimpleBitOrTest) {
 TEST_F(StrictArithmExprEvaluatorTests,
 SimpleBitXorTest) {
 	SCOPED_TRACE("2 ^ 3   ->   1");
-	ShPtr<BitXorOpExpr> inputExpr(BitXorOpExpr::create(
+	BitXorOpExpr* inputExpr(BitXorOpExpr::create(
 		ConstInt::create(2, 64),
 		ConstInt::create(3, 64)
 	));
-	ShPtr<ConstInt> refResult(ConstInt::create(1, 64));
+	ConstInt* refResult(ConstInt::create(1, 64));
 
 	evaluateAndCheckResult(inputExpr, refResult);
 }
@@ -860,11 +860,11 @@ SimpleBitXorTest) {
 TEST_F(StrictArithmExprEvaluatorTests,
 SimpleBitShlTest) {
 	SCOPED_TRACE("4 << 2   ->   16");
-	ShPtr<BitShlOpExpr> inputExpr(BitShlOpExpr::create(
+	BitShlOpExpr* inputExpr(BitShlOpExpr::create(
 		ConstInt::create(4, 64),
 		ConstInt::create(2, 64)
 	));
-	ShPtr<ConstInt> refResult(ConstInt::create(16, 64));
+	ConstInt* refResult(ConstInt::create(16, 64));
 
 	evaluateAndCheckResult(inputExpr, refResult);
 }
@@ -872,12 +872,12 @@ SimpleBitShlTest) {
 TEST_F(StrictArithmExprEvaluatorTests,
 SimpleBitShrArithmeticalTest) {
 	SCOPED_TRACE("4 >> 2   ->   1");
-	ShPtr<BitShrOpExpr> inputExpr(BitShrOpExpr::create(
+	BitShrOpExpr* inputExpr(BitShrOpExpr::create(
 		ConstInt::create(4, 64),
 		ConstInt::create(2, 64),
 		BitShrOpExpr::Variant::Arithmetical
 	));
-	ShPtr<ConstInt> refResult(ConstInt::create(1, 64));
+	ConstInt* refResult(ConstInt::create(1, 64));
 
 	evaluateAndCheckResult(inputExpr, refResult);
 }
@@ -885,12 +885,12 @@ SimpleBitShrArithmeticalTest) {
 TEST_F(StrictArithmExprEvaluatorTests,
 SimpleBitShrLogicalTest) {
 	SCOPED_TRACE("4 >> 2   ->   1");
-	ShPtr<BitShrOpExpr> inputExpr(BitShrOpExpr::create(
+	BitShrOpExpr* inputExpr(BitShrOpExpr::create(
 		ConstInt::create(4, 64),
 		ConstInt::create(2, 64),
 		BitShrOpExpr::Variant::Logical
 	));
-	ShPtr<ConstInt> refResult(ConstInt::create(1, 64));
+	ConstInt* refResult(ConstInt::create(1, 64));
 
 	evaluateAndCheckResult(inputExpr, refResult);
 }
@@ -898,12 +898,12 @@ SimpleBitShrLogicalTest) {
 TEST_F(StrictArithmExprEvaluatorTests,
 SimpleTernaryOpExprTrueTest) {
 	SCOPED_TRACE("4 ? 2 : 3   ->   2");
-	ShPtr<TernaryOpExpr> inputExpr(TernaryOpExpr::create(
+	TernaryOpExpr* inputExpr(TernaryOpExpr::create(
 		ConstInt::create(4, 64),
 		ConstInt::create(2, 64),
 		ConstInt::create(3, 64)
 	));
-	ShPtr<ConstInt> refResult(ConstInt::create(2, 64));
+	ConstInt* refResult(ConstInt::create(2, 64));
 
 	evaluateAndCheckResult(inputExpr, refResult);
 }
@@ -911,12 +911,12 @@ SimpleTernaryOpExprTrueTest) {
 TEST_F(StrictArithmExprEvaluatorTests,
 SimpleTernaryOpExprFalseTest) {
 	SCOPED_TRACE("false ? 2 : 3   ->   3");
-	ShPtr<TernaryOpExpr> inputExpr(TernaryOpExpr::create(
+	TernaryOpExpr* inputExpr(TernaryOpExpr::create(
 		ConstBool::create(false),
 		ConstInt::create(2, 64),
 		ConstInt::create(3, 64)
 	));
-	ShPtr<ConstInt> refResult(ConstInt::create(3, 64));
+	ConstInt* refResult(ConstInt::create(3, 64));
 
 	evaluateAndCheckResult(inputExpr, refResult);
 }
@@ -924,27 +924,27 @@ SimpleTernaryOpExprFalseTest) {
 TEST_F(StrictArithmExprEvaluatorTests,
 MoreComplicatedTest1) {
 	SCOPED_TRACE("(((((3 + 4) - 5) * 2) / 2) ^ 4)    ->   6");
-	ShPtr<AddOpExpr> addOpExpr(AddOpExpr::create(
+	AddOpExpr* addOpExpr(AddOpExpr::create(
 		ConstInt::create(3, 64),
 		ConstInt::create(4, 64)
 	));
-	ShPtr<SubOpExpr> subOpExpr(SubOpExpr::create(
+	SubOpExpr* subOpExpr(SubOpExpr::create(
 		addOpExpr,
 		ConstInt::create(5, 64)
 	));
-	ShPtr<MulOpExpr> mulOpExpr(MulOpExpr::create(
+	MulOpExpr* mulOpExpr(MulOpExpr::create(
 		subOpExpr,
 		ConstInt::create(2, 64)
 	));
-	ShPtr<DivOpExpr> divOpExpr(DivOpExpr::create(
+	DivOpExpr* divOpExpr(DivOpExpr::create(
 		mulOpExpr,
 		ConstInt::create(2, 64)
 	));
-	ShPtr<BitXorOpExpr> inputExpr(BitXorOpExpr::create(
+	BitXorOpExpr* inputExpr(BitXorOpExpr::create(
 		divOpExpr,
 		ConstInt::create(4, 64)
 	));
-	ShPtr<ConstInt> refResult(ConstInt::create(6, 64));
+	ConstInt* refResult(ConstInt::create(6, 64));
 
 	evaluateAndCheckResult(inputExpr, refResult);
 }
@@ -952,23 +952,23 @@ MoreComplicatedTest1) {
 TEST_F(StrictArithmExprEvaluatorTests,
 MoreComplicatedTest2) {
 	SCOPED_TRACE("((((2.5 + 2.5) - 3.5) * 2.0) / 2.0)    ->   1.5");
-	ShPtr<AddOpExpr> addOpExpr(AddOpExpr::create(
+	AddOpExpr* addOpExpr(AddOpExpr::create(
 		ConstFloat::create(llvm::APFloat(2.5)),
 		ConstFloat::create(llvm::APFloat(2.5))
 	));
-	ShPtr<SubOpExpr> subOpExpr(SubOpExpr::create(
+	SubOpExpr* subOpExpr(SubOpExpr::create(
 		addOpExpr,
 		ConstFloat::create(llvm::APFloat(3.5))
 	));
-	ShPtr<MulOpExpr> mulOpExpr(MulOpExpr::create(
+	MulOpExpr* mulOpExpr(MulOpExpr::create(
 		subOpExpr,
 		ConstFloat::create(llvm::APFloat(2.0))
 	));
-	ShPtr<DivOpExpr> inputExpr(DivOpExpr::create(
+	DivOpExpr* inputExpr(DivOpExpr::create(
 		mulOpExpr,
 		ConstFloat::create(llvm::APFloat(2.0))
 	));
-	ShPtr<ConstFloat> refResult(ConstFloat::create(llvm::APFloat(1.5)));
+	ConstFloat* refResult(ConstFloat::create(llvm::APFloat(1.5)));
 
 	evaluateAndCheckResult(inputExpr, refResult);
 }
@@ -976,23 +976,23 @@ MoreComplicatedTest2) {
 TEST_F(StrictArithmExprEvaluatorTests,
 MoreComplicatedTest3) {
 	SCOPED_TRACE("(2 << (2 ^ (5 | (3 & 4))))    ->   256");
-	ShPtr<BitAndOpExpr> bitAndOpExpr(BitAndOpExpr::create(
+	BitAndOpExpr* bitAndOpExpr(BitAndOpExpr::create(
 		ConstInt::create(3, 64),
 		ConstInt::create(4, 64)
 	));
-	ShPtr<BitOrOpExpr> bitOrOpExpr(BitOrOpExpr::create(
+	BitOrOpExpr* bitOrOpExpr(BitOrOpExpr::create(
 		ConstInt::create(5, 64),
 		bitAndOpExpr
 	));
-	ShPtr<BitXorOpExpr> bitXorOpExpr(BitXorOpExpr::create(
+	BitXorOpExpr* bitXorOpExpr(BitXorOpExpr::create(
 		ConstInt::create(2, 64),
 		bitOrOpExpr
 	));
-	ShPtr<BitShlOpExpr> inputExpr(BitShlOpExpr::create(
+	BitShlOpExpr* inputExpr(BitShlOpExpr::create(
 		ConstInt::create(2, 64),
 		bitXorOpExpr
 	));
-	ShPtr<ConstInt> refResult(ConstInt::create(256, 64));
+	ConstInt* refResult(ConstInt::create(256, 64));
 
 	evaluateAndCheckResult(inputExpr, refResult);
 }
@@ -1004,30 +1004,30 @@ MoreComplicatedTest3) {
 TEST_F(StrictArithmExprEvaluatorTests,
 SimpleAddWithVarsNotSubstituteTest) {
 	SCOPED_TRACE("a(2) + b   ->   Not evaluated");
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16, true)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16, true)));
+	Variable* varA(Variable::create("a", IntType::create(16, true)));
+	Variable* varB(Variable::create("b", IntType::create(16, true)));
 	VarConstMap varConstMap;
 	varConstMap[varA] = ConstInt::create(2, 64);
-	ShPtr<AddOpExpr> inputExpr(AddOpExpr::create(
+	AddOpExpr* inputExpr(AddOpExpr::create(
 		varA,
 		varB
 	));
 
-	evaluateAndCheckResult(inputExpr, ShPtr<Constant>(), varConstMap);
+	evaluateAndCheckResult(inputExpr, Constant*(), varConstMap);
 }
 
 TEST_F(StrictArithmExprEvaluatorTests,
 DivZeroWithVarTest) {
 	SCOPED_TRACE("7 / b(0)   ->   Not evaluated");
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16, true)));
+	Variable* varB(Variable::create("b", IntType::create(16, true)));
 	VarConstMap varConstMap;
 	varConstMap[varB] = ConstInt::create(0, 64);
-	ShPtr<DivOpExpr> inputExpr(DivOpExpr::create(
+	DivOpExpr* inputExpr(DivOpExpr::create(
 		ConstInt::create(7, 64),
 		varB
 	));
 
-	evaluateAndCheckResult(inputExpr, ShPtr<Constant>(), varConstMap);
+	evaluateAndCheckResult(inputExpr, Constant*(), varConstMap);
 }
 
 //
@@ -1037,16 +1037,16 @@ DivZeroWithVarTest) {
 TEST_F(StrictArithmExprEvaluatorTests,
 SimpleAddWithVarsTest) {
 	SCOPED_TRACE("a(2) + b(4)   ->   6");
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16, true)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16, true)));
+	Variable* varA(Variable::create("a", IntType::create(16, true)));
+	Variable* varB(Variable::create("b", IntType::create(16, true)));
 	VarConstMap varConstMap;
 	varConstMap[varA] = ConstInt::create(2, 64);
 	varConstMap[varB] = ConstInt::create(4, 64);
-	ShPtr<AddOpExpr> inputExpr(AddOpExpr::create(
+	AddOpExpr* inputExpr(AddOpExpr::create(
 		varA,
 		varB
 	));
-	ShPtr<ConstInt> refResult(ConstInt::create(6, 64));
+	ConstInt* refResult(ConstInt::create(6, 64));
 
 	evaluateAndCheckResult(inputExpr, refResult, varConstMap);
 }
@@ -1054,11 +1054,11 @@ SimpleAddWithVarsTest) {
 TEST_F(StrictArithmExprEvaluatorTests,
 NegOpExprWithVarTest) {
 	SCOPED_TRACE("a(negOpExpr)(2)   ->   -2");
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16, true)));
+	Variable* varA(Variable::create("a", IntType::create(16, true)));
 	VarConstMap varConstMap;
 	varConstMap[varA] = ConstInt::create(2, 64);
-	ShPtr<NegOpExpr> inputExpr(NegOpExpr::create(varA));
-	ShPtr<ConstInt> refResult(ConstInt::create(-2, 64, true));
+	NegOpExpr* inputExpr(NegOpExpr::create(varA));
+	ConstInt* refResult(ConstInt::create(-2, 64, true));
 
 	evaluateAndCheckResult(inputExpr, refResult, varConstMap);
 }
@@ -1066,34 +1066,34 @@ NegOpExprWithVarTest) {
 TEST_F(StrictArithmExprEvaluatorTests,
 MoreComplicatedWithVarsTest) {
 	SCOPED_TRACE("(((((3 + a(4)) - 5) * 2) / b(2)) ^ c(4))    ->   6");
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16, true)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16, true)));
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(16, true)));
+	Variable* varA(Variable::create("a", IntType::create(16, true)));
+	Variable* varB(Variable::create("b", IntType::create(16, true)));
+	Variable* varC(Variable::create("c", IntType::create(16, true)));
 	VarConstMap varConstMap;
 	varConstMap[varA] = ConstInt::create(4, 64);
 	varConstMap[varB] = ConstInt::create(2, 64);
 	varConstMap[varC] = ConstInt::create(4, 64);
-	ShPtr<AddOpExpr> addOpExpr(AddOpExpr::create(
+	AddOpExpr* addOpExpr(AddOpExpr::create(
 		ConstInt::create(3, 64),
 		varA
 	));
-	ShPtr<SubOpExpr> subOpExpr(SubOpExpr::create(
+	SubOpExpr* subOpExpr(SubOpExpr::create(
 		addOpExpr,
 		ConstInt::create(5, 64)
 	));
-	ShPtr<MulOpExpr> mulOpExpr(MulOpExpr::create(
+	MulOpExpr* mulOpExpr(MulOpExpr::create(
 		subOpExpr,
 		ConstInt::create(2, 64)
 	));
-	ShPtr<DivOpExpr> divOpExpr(DivOpExpr::create(
+	DivOpExpr* divOpExpr(DivOpExpr::create(
 		mulOpExpr,
 		varB
 	));
-	ShPtr<BitXorOpExpr> inputExpr(BitXorOpExpr::create(
+	BitXorOpExpr* inputExpr(BitXorOpExpr::create(
 		divOpExpr,
 		varC
 	));
-	ShPtr<ConstInt> refResult(ConstInt::create(6, 64));
+	ConstInt* refResult(ConstInt::create(6, 64));
 
 	evaluateAndCheckResult(inputExpr, refResult, varConstMap);
 }

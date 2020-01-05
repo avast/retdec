@@ -26,10 +26,10 @@ class Visitor;
 */
 class DerefOpExpr final: public UnaryOpExpr {
 public:
-	static ShPtr<DerefOpExpr> create(ShPtr<Expression> op);
+	static DerefOpExpr* create(Expression* op);
 
-	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
-	virtual ShPtr<Value> clone() override;
+	virtual bool isEqualTo(Value* otherValue) const override;
+	virtual Value* clone() override;
 
 	/// @name Visitor Interface
 	/// @{
@@ -39,7 +39,7 @@ public:
 private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
-	explicit DerefOpExpr(ShPtr<Expression> op);
+	explicit DerefOpExpr(Expression* op);
 };
 
 } // namespace llvmir2hll

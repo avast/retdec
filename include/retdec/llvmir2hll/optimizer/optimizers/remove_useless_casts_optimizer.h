@@ -41,7 +41,7 @@ namespace llvmir2hll {
 */
 class RemoveUselessCastsOptimizer final: public FuncOptimizer {
 public:
-	RemoveUselessCastsOptimizer(ShPtr<Module> module);
+	RemoveUselessCastsOptimizer(Module* module);
 
 	virtual std::string getId() const override { return "RemoveUselessCasts"; }
 
@@ -49,10 +49,10 @@ private:
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<AssignStmt> stmt) override;
+	virtual void visit(AssignStmt* stmt) override;
 	/// @}
 
-	bool tryOptimizationCase1(ShPtr<AssignStmt> stmt);
+	bool tryOptimizationCase1(AssignStmt* stmt);
 };
 
 } // namespace llvmir2hll

@@ -22,7 +22,7 @@ class EmptyArrayToStringOptimizerTests: public TestsWithModule {};
 
 TEST_F(EmptyArrayToStringOptimizerTests,
 OptimizerHasNonEmptyID) {
-	ShPtr<EmptyArrayToStringOptimizer> optimizer(
+	EmptyArrayToStringOptimizer* optimizer(
 		new EmptyArrayToStringOptimizer(module));
 
 	EXPECT_TRUE(!optimizer->getId().empty()) <<

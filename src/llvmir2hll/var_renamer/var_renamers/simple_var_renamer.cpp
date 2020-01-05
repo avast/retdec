@@ -19,7 +19,7 @@ REGISTER_AT_FACTORY("simple", SIMPLE_VAR_RENAMER_ID, VarRenamerFactory,
 *
 * For more details, see create().
 */
-SimpleVarRenamer::SimpleVarRenamer(ShPtr<VarNameGen> varNameGen,
+SimpleVarRenamer::SimpleVarRenamer(VarNameGen* varNameGen,
 	bool useDebugNames): VarRenamer(varNameGen, useDebugNames) {}
 
 /**
@@ -32,11 +32,11 @@ SimpleVarRenamer::SimpleVarRenamer(ShPtr<VarNameGen> varNameGen,
 * @par Preconditions
 *  - @a varNameGen is non-null
 */
-ShPtr<VarRenamer> SimpleVarRenamer::create(ShPtr<VarNameGen> varNameGen,
+VarRenamer* SimpleVarRenamer::create(VarNameGen* varNameGen,
 		bool useDebugNames) {
 	PRECONDITION_NON_NULL(varNameGen);
 
-	return ShPtr<VarRenamer>(new SimpleVarRenamer(varNameGen, useDebugNames));
+	return new SimpleVarRenamer(varNameGen, useDebugNames);
 }
 
 std::string SimpleVarRenamer::getId() const {

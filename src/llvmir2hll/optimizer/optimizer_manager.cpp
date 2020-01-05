@@ -120,9 +120,9 @@ StringSet trimOptimizerSuffix(const StringSet &opts) {
 *  - @a hllWriter, @a va, @a cio, and @a arithmExprEvaluator are non-null
 */
 OptimizerManager::OptimizerManager(const StringSet &enabledOpts,
-	const StringSet &disabledOpts, ShPtr<HLLWriter> hllWriter,
-	ShPtr<ValueAnalysis> va, ShPtr<CallInfoObtainer> cio,
-	ShPtr<ArithmExprEvaluator> arithmExprEvaluator,
+	const StringSet &disabledOpts, HLLWriter* hllWriter,
+	ValueAnalysis* va, CallInfoObtainer* cio,
+	ArithmExprEvaluator* arithmExprEvaluator,
 	bool enableAggressiveOpts, bool enableDebug):
 		enabledOpts(trimOptimizerSuffix(enabledOpts)),
 		disabledOpts(trimOptimizerSuffix(disabledOpts)),
@@ -139,7 +139,7 @@ OptimizerManager::OptimizerManager(const StringSet &enabledOpts,
 /**
 * @brief Runs the optimizations over @a m.
 */
-void OptimizerManager::optimize(ShPtr<Module> m) {
+void OptimizerManager::optimize(Module* m) {
 	// All optimizations should be run in order from the one that eliminates
 	// most statements/expressions to the one that eliminates least number of
 	// statements/expressions.
@@ -303,7 +303,7 @@ bool OptimizerManager::optShouldBeRun(const std::string &optId) const {
 /**
 * @brief Runs the given optimizer provided that it should be run.
 */
-void OptimizerManager::runOptimizerProvidedItShouldBeRun(ShPtr<Optimizer> optimizer) {
+void OptimizerManager::runOptimizerProvidedItShouldBeRun(Optimizer* optimizer) {
 	const std::string OPT_ID = optimizer->getId();
 	if (!optShouldBeRun(OPT_ID)) {
 		return;
@@ -382,8 +382,8 @@ bool OptimizerManager::shouldSecondCopyPropagationBeRun() const {
 * If @c enableDebug is @c true, debug messages are emitted.
 */
 template<typename Optimization, typename... Args>
-void OptimizerManager::run(ShPtr<Module> m, Args &&... args) {
-	auto optimizer = std::make_shared<Optimization>(m,
+void OptimizerManager::run(Module* m, Args &&... args) {
+	auto optimizer = new Optimization(m,
 		std::forward<Args>(args)...);
 	runOptimizerProvidedItShouldBeRun(optimizer);
 }

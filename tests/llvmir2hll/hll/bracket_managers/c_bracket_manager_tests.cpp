@@ -69,18 +69,18 @@ MulAdd) {
 	//
 	// expected output: return 2 * (0 + a);
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<AddOpExpr> addOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	AddOpExpr* addOpExpr(
 		AddOpExpr::create(
 			ConstInt::create(0, 64),
 			varA
 	));
-	ShPtr<MulOpExpr> mulOpExpr(
+	MulOpExpr* mulOpExpr(
 		MulOpExpr::create(
 			ConstInt::create(2, 64),
 			addOpExpr
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(mulOpExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(mulOpExpr));
 	testFunc->setBody(returnStmt);
 	CBracketManager cBrackets(module);
 
@@ -96,25 +96,25 @@ MulDivMul) {
 	//
 	// expected output: return a * b / c * 3;
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(16)));
-	ShPtr<DivOpExpr> divOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	Variable* varC(Variable::create("c", IntType::create(16)));
+	DivOpExpr* divOpExpr(
 		DivOpExpr::create(
 			varB,
 			varC
 	));
-	ShPtr<MulOpExpr> mulOpExpr1(
+	MulOpExpr* mulOpExpr1(
 		MulOpExpr::create(
 			divOpExpr,
 			ConstInt::create(3, 64)
 	));
-	ShPtr<MulOpExpr> mulOpExpr2(
+	MulOpExpr* mulOpExpr2(
 		MulOpExpr::create(
 			varA,
 			mulOpExpr1
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(mulOpExpr2));
+	ReturnStmt* returnStmt(ReturnStmt::create(mulOpExpr2));
 	testFunc->setBody(returnStmt);
 	CBracketManager cBrackets(module);
 
@@ -132,20 +132,20 @@ MulDiv) {
 	//
 	// expected output: return a * b / c;
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(16)));
-	ShPtr<DivOpExpr> divOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	Variable* varC(Variable::create("c", IntType::create(16)));
+	DivOpExpr* divOpExpr(
 		DivOpExpr::create(
 			varB,
 			varC
 	));
-	ShPtr<MulOpExpr> mulOpExpr(
+	MulOpExpr* mulOpExpr(
 		MulOpExpr::create(
 			divOpExpr,
 			varA
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(mulOpExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(mulOpExpr));
 	testFunc->setBody(returnStmt);
 	CBracketManager cBrackets(module);
 
@@ -161,20 +161,20 @@ DivMul) {
 	//
 	// expected output: return a / (b * c);
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(16)));
-	ShPtr<MulOpExpr> mulOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	Variable* varC(Variable::create("c", IntType::create(16)));
+	MulOpExpr* mulOpExpr(
 		MulOpExpr::create(
 			varB,
 			varC
 	));
-	ShPtr<DivOpExpr> divOpExpr(
+	DivOpExpr* divOpExpr(
 		DivOpExpr::create(
 			varA,
 			mulOpExpr
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(divOpExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(divOpExpr));
 	testFunc->setBody(returnStmt);
 	CBracketManager cBrackets(module);
 
@@ -190,20 +190,20 @@ DivDivBracketsNeeded) {
 	//
 	// expected output: return a / (b / c);
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(16)));
-	ShPtr<DivOpExpr> divOpExprBC(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	Variable* varC(Variable::create("c", IntType::create(16)));
+	DivOpExpr* divOpExprBC(
 		DivOpExpr::create(
 			varB,
 			varC
 	));
-	ShPtr<DivOpExpr> divOpExprABC(
+	DivOpExpr* divOpExprABC(
 		DivOpExpr::create(
 			varA,
 			divOpExprBC
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(divOpExprABC));
+	ReturnStmt* returnStmt(ReturnStmt::create(divOpExprABC));
 	testFunc->setBody(returnStmt);
 	CBracketManager cBrackets(module);
 
@@ -219,20 +219,20 @@ DivDivBracketsNotNeeded) {
 	//
 	// expected output: return a / b / c;
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(16)));
-	ShPtr<DivOpExpr> divOpExprAB(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	Variable* varC(Variable::create("c", IntType::create(16)));
+	DivOpExpr* divOpExprAB(
 		DivOpExpr::create(
 			varA,
 			varB
 	));
-	ShPtr<DivOpExpr> divOpExprABC(
+	DivOpExpr* divOpExprABC(
 		DivOpExpr::create(
 			divOpExprAB,
 			varC
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(divOpExprABC));
+	ReturnStmt* returnStmt(ReturnStmt::create(divOpExprABC));
 	testFunc->setBody(returnStmt);
 	CBracketManager cBrackets(module);
 
@@ -248,18 +248,18 @@ NotEqBracketsNotNeeded) {
 	//
 	// expected output: return !a == b;
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<NotOpExpr> notOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	NotOpExpr* notOpExpr(
 		NotOpExpr::create(
 			varA
 	));
-	ShPtr<EqOpExpr> eqOpExpr(
+	EqOpExpr* eqOpExpr(
 		EqOpExpr::create(
 			notOpExpr,
 			varB
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(eqOpExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(eqOpExpr));
 	testFunc->setBody(returnStmt);
 	CBracketManager cBrackets(module);
 
@@ -275,18 +275,18 @@ EqNotBracketsNeeded) {
 	//
 	// expected output: return a == !b;
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<NotOpExpr> notOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	NotOpExpr* notOpExpr(
 		NotOpExpr::create(
 			varB
 	));
-	ShPtr<EqOpExpr> eqOpExpr(
+	EqOpExpr* eqOpExpr(
 		EqOpExpr::create(
 			varA,
 			notOpExpr
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(eqOpExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(eqOpExpr));
 	testFunc->setBody(returnStmt);
 	CBracketManager cBrackets(module);
 
@@ -302,48 +302,48 @@ NotEqGtEqGtLtEqLtNeqFirst) {
 	//
 	// expected output: return (!a == b) >= c > d <= f < g != h;
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(16)));
-	ShPtr<Variable> varD(Variable::create("d", IntType::create(16)));
-	ShPtr<Variable> varE(Variable::create("e", IntType::create(16)));
-	ShPtr<Variable> varF(Variable::create("f", IntType::create(16)));
-	ShPtr<Variable> varG(Variable::create("g", IntType::create(16)));
-	ShPtr<NotOpExpr> notOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	Variable* varC(Variable::create("c", IntType::create(16)));
+	Variable* varD(Variable::create("d", IntType::create(16)));
+	Variable* varE(Variable::create("e", IntType::create(16)));
+	Variable* varF(Variable::create("f", IntType::create(16)));
+	Variable* varG(Variable::create("g", IntType::create(16)));
+	NotOpExpr* notOpExpr(
 		NotOpExpr::create(
 			varA
 	));
-	ShPtr<EqOpExpr> eqOpExpr(
+	EqOpExpr* eqOpExpr(
 		EqOpExpr::create(
 			notOpExpr,
 			varB
 	));
-	ShPtr<GtEqOpExpr> gtEqOpExpr(
+	GtEqOpExpr* gtEqOpExpr(
 		GtEqOpExpr::create(
 			eqOpExpr,
 			varC
 	));
-	ShPtr<GtOpExpr> gtOpExpr(
+	GtOpExpr* gtOpExpr(
 		GtOpExpr::create(
 			gtEqOpExpr,
 			varD
 	));
-	ShPtr<LtEqOpExpr> ltEqOpExpr(
+	LtEqOpExpr* ltEqOpExpr(
 		LtEqOpExpr::create(
 			gtOpExpr,
 			varE
 	));
-	ShPtr<LtOpExpr> ltOpExpr(
+	LtOpExpr* ltOpExpr(
 		LtOpExpr::create(
 			ltEqOpExpr,
 			varF
 	));
-	ShPtr<NeqOpExpr> neqOpExpr(
+	NeqOpExpr* neqOpExpr(
 		NeqOpExpr::create(
 			ltOpExpr,
 			varG
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(neqOpExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(neqOpExpr));
 	testFunc->setBody(returnStmt);
 	CBracketManager cBrackets(module);
 
@@ -369,48 +369,48 @@ NotEqGtEqGtLtEqLtNeqSecond) {
 	//
 	// expected output: return !a == b >= (c > (d <= (e < (f != g)));
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(16)));
-	ShPtr<Variable> varD(Variable::create("d", IntType::create(16)));
-	ShPtr<Variable> varE(Variable::create("e", IntType::create(16)));
-	ShPtr<Variable> varF(Variable::create("f", IntType::create(16)));
-	ShPtr<Variable> varG(Variable::create("g", IntType::create(16)));
-	ShPtr<NeqOpExpr> neqOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	Variable* varC(Variable::create("c", IntType::create(16)));
+	Variable* varD(Variable::create("d", IntType::create(16)));
+	Variable* varE(Variable::create("e", IntType::create(16)));
+	Variable* varF(Variable::create("f", IntType::create(16)));
+	Variable* varG(Variable::create("g", IntType::create(16)));
+	NeqOpExpr* neqOpExpr(
 		NeqOpExpr::create(
 			varF,
 			varG
 	));
-	ShPtr<LtOpExpr> ltOpExpr(
+	LtOpExpr* ltOpExpr(
 		LtOpExpr::create(
 			varE,
 			neqOpExpr
 	));
-	ShPtr<LtEqOpExpr> ltEqOpExpr(
+	LtEqOpExpr* ltEqOpExpr(
 		LtEqOpExpr::create(
 			varD,
 			ltOpExpr
 	));
-	ShPtr<GtOpExpr> gtOpExpr(
+	GtOpExpr* gtOpExpr(
 		GtOpExpr::create(
 			varC,
 			ltEqOpExpr
 	));
-	ShPtr<GtEqOpExpr> gtEqOpExpr(
+	GtEqOpExpr* gtEqOpExpr(
 		GtEqOpExpr::create(
 			varB,
 			gtOpExpr
 	));
-	ShPtr<EqOpExpr> eqOpExpr(
+	EqOpExpr* eqOpExpr(
 		EqOpExpr::create(
 			varA,
 			gtEqOpExpr
 	));
-	ShPtr<NotOpExpr> notOpExpr(
+	NotOpExpr* notOpExpr(
 		NotOpExpr::create(
 			eqOpExpr
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(notOpExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(notOpExpr));
 	testFunc->setBody(returnStmt);
 	CBracketManager cBrackets(module);
 
@@ -436,35 +436,35 @@ DivAddSub) {
 	//
 	// expected output: return a / (a + b + c + a - b);
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(16)));
-	ShPtr<AddOpExpr> addOpExprBC(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	Variable* varC(Variable::create("c", IntType::create(16)));
+	AddOpExpr* addOpExprBC(
 		AddOpExpr::create(
 			varB,
 			varC
 	));
-	ShPtr<SubOpExpr> subOpExprAB(
+	SubOpExpr* subOpExprAB(
 		SubOpExpr::create(
 			varA,
 			varB
 	));
-	ShPtr<AddOpExpr> addOpExprBCAB(
+	AddOpExpr* addOpExprBCAB(
 		AddOpExpr::create(
 			addOpExprBC,
 			subOpExprAB
 	));
-	ShPtr<AddOpExpr> addOpExprABCAB(
+	AddOpExpr* addOpExprABCAB(
 		AddOpExpr::create(
 			varA,
 			addOpExprBCAB
 	));
-	ShPtr<DivOpExpr> divOpExpr(
+	DivOpExpr* divOpExpr(
 		DivOpExpr::create(
 			varA,
 			addOpExprABCAB
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(divOpExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(divOpExpr));
 	testFunc->setBody(returnStmt);
 	CBracketManager cBrackets(module);
 
@@ -486,20 +486,20 @@ AddrDerefUnar) {
 	//
 	// expected output: return &*-a;
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<NegOpExpr> negOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	NegOpExpr* negOpExpr(
 		NegOpExpr::create(
 			varA
 	));
-	ShPtr<DerefOpExpr> derefOpExpr(
+	DerefOpExpr* derefOpExpr(
 		DerefOpExpr::create(
 			negOpExpr
 	));
-	ShPtr<AddressOpExpr> addressOpExpr(
+	AddressOpExpr* addressOpExpr(
 		AddressOpExpr::create(
 			derefOpExpr
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(addressOpExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(addressOpExpr));
 	testFunc->setBody(returnStmt);
 	CBracketManager cBrackets(module);
 
@@ -517,16 +517,16 @@ AddrBeforeArrayIndex) {
 	//
 	// expected output: return (&a)[0];
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<AddressOpExpr> addressOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	AddressOpExpr* addressOpExpr(
 		AddressOpExpr::create(varA
 	));
-	ShPtr<ArrayIndexOpExpr> arrayIndexOpExpr(
+	ArrayIndexOpExpr* arrayIndexOpExpr(
 		ArrayIndexOpExpr::create(
 			addressOpExpr,
 			ConstInt::create(0, 32)
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(arrayIndexOpExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(arrayIndexOpExpr));
 	testFunc->setBody(returnStmt);
 	CBracketManager cBrackets(module);
 
@@ -542,16 +542,16 @@ AddrAfterArrayIndex) {
 	//
 	// expected output: return &a[0];
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<ArrayIndexOpExpr> arrayIndexOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	ArrayIndexOpExpr* arrayIndexOpExpr(
 		ArrayIndexOpExpr::create(
 			varA,
 			ConstInt::create(0, 32)
 	));
-	ShPtr<AddressOpExpr> addressOpExpr(
+	AddressOpExpr* addressOpExpr(
 		AddressOpExpr::create(arrayIndexOpExpr
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(addressOpExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(addressOpExpr));
 	testFunc->setBody(returnStmt);
 	CBracketManager cBrackets(module);
 
@@ -565,34 +565,34 @@ AddrDerefAndGtLtEq) {
 	//
 	// expected output: return &(a <= b) && *(c > d);
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(16)));
-	ShPtr<Variable> varD(Variable::create("a", IntType::create(16)));
-	ShPtr<LtEqOpExpr> ltEqOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	Variable* varC(Variable::create("c", IntType::create(16)));
+	Variable* varD(Variable::create("a", IntType::create(16)));
+	LtEqOpExpr* ltEqOpExpr(
 		LtEqOpExpr::create(
 			varA,
 			varB
 	));
-	ShPtr<GtOpExpr> gtOpExpr(
+	GtOpExpr* gtOpExpr(
 		GtOpExpr::create(
 			varC,
 			varD
 	));
-	ShPtr<AddressOpExpr> addressOpExpr(
+	AddressOpExpr* addressOpExpr(
 		AddressOpExpr::create(
 			ltEqOpExpr
 	));
-	ShPtr<DerefOpExpr> derefOpExpr(
+	DerefOpExpr* derefOpExpr(
 		DerefOpExpr::create(
 			gtOpExpr
 	));
-	ShPtr<AndOpExpr> andOpExpr(
+	AndOpExpr* andOpExpr(
 		AndOpExpr::create(
 			addressOpExpr,
 			derefOpExpr
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(andOpExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(andOpExpr));
 	testFunc->setBody(returnStmt);
 	CBracketManager cBrackets(module);
 
@@ -614,66 +614,66 @@ OneOperatorFromOnePrecedenceRowFirst) {
 	//
 	// expected output: return (*a % b + c >> d & e ^ f | g) == h && i || j;
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(16)));
-	ShPtr<Variable> varD(Variable::create("d", IntType::create(16)));
-	ShPtr<Variable> varE(Variable::create("e", IntType::create(16)));
-	ShPtr<Variable> varF(Variable::create("f", IntType::create(16)));
-	ShPtr<Variable> varG(Variable::create("g", IntType::create(16)));
-	ShPtr<Variable> varH(Variable::create("h", IntType::create(16)));
-	ShPtr<Variable> varI(Variable::create("i", IntType::create(16)));
-	ShPtr<Variable> varJ(Variable::create("j", IntType::create(16)));
-	ShPtr<DerefOpExpr> derefOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	Variable* varC(Variable::create("c", IntType::create(16)));
+	Variable* varD(Variable::create("d", IntType::create(16)));
+	Variable* varE(Variable::create("e", IntType::create(16)));
+	Variable* varF(Variable::create("f", IntType::create(16)));
+	Variable* varG(Variable::create("g", IntType::create(16)));
+	Variable* varH(Variable::create("h", IntType::create(16)));
+	Variable* varI(Variable::create("i", IntType::create(16)));
+	Variable* varJ(Variable::create("j", IntType::create(16)));
+	DerefOpExpr* derefOpExpr(
 		DerefOpExpr::create(
 			varA
 	));
-	ShPtr<ModOpExpr> modOpExpr(
+	ModOpExpr* modOpExpr(
 		ModOpExpr::create(
 			derefOpExpr,
 			varB
 	));
-	ShPtr<AddOpExpr> addOpExpr(
+	AddOpExpr* addOpExpr(
 		AddOpExpr::create(
 			modOpExpr,
 			varC
 	));
-	ShPtr<BitShrOpExpr> bitShrOpExpr(
+	BitShrOpExpr* bitShrOpExpr(
 		BitShrOpExpr::create(
 			addOpExpr,
 			varD
 	));
-	ShPtr<BitAndOpExpr> bitAndOpExpr(
+	BitAndOpExpr* bitAndOpExpr(
 		BitAndOpExpr::create(
 			bitShrOpExpr,
 			varE
 	));
-	ShPtr<BitXorOpExpr> bitXorOpExpr(
+	BitXorOpExpr* bitXorOpExpr(
 		BitXorOpExpr::create(
 			bitAndOpExpr,
 			varF
 	));
-	ShPtr<BitOrOpExpr> bitOrOpExpr(
+	BitOrOpExpr* bitOrOpExpr(
 		BitOrOpExpr::create(
 			bitXorOpExpr,
 			varG
 	));
-	ShPtr<EqOpExpr> eqOpExpr(
+	EqOpExpr* eqOpExpr(
 		EqOpExpr::create(
 			bitOrOpExpr,
 			varH
 	));
-	ShPtr<AndOpExpr> andOpExpr(
+	AndOpExpr* andOpExpr(
 		AndOpExpr::create(
 			eqOpExpr,
 			varI
 	));
-	ShPtr<OrOpExpr> orOpExpr(
+	OrOpExpr* orOpExpr(
 		OrOpExpr::create(
 			andOpExpr,
 			varJ
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(orOpExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(orOpExpr));
 	testFunc->setBody(returnStmt);
 	CBracketManager cBrackets(module);
 
@@ -706,66 +706,66 @@ OneOperatorFromOnePrecedenceRowSecond) {
 	// expected output: return ((((((((a || b) && c) != d | e) ^
 	//					f) & g) << h) + i) / j)&;
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(16)));
-	ShPtr<Variable> varD(Variable::create("d", IntType::create(16)));
-	ShPtr<Variable> varE(Variable::create("e", IntType::create(16)));
-	ShPtr<Variable> varF(Variable::create("f", IntType::create(16)));
-	ShPtr<Variable> varG(Variable::create("g", IntType::create(16)));
-	ShPtr<Variable> varH(Variable::create("h", IntType::create(16)));
-	ShPtr<Variable> varI(Variable::create("i", IntType::create(16)));
-	ShPtr<Variable> varJ(Variable::create("j", IntType::create(16)));
-	ShPtr<OrOpExpr> orOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	Variable* varC(Variable::create("c", IntType::create(16)));
+	Variable* varD(Variable::create("d", IntType::create(16)));
+	Variable* varE(Variable::create("e", IntType::create(16)));
+	Variable* varF(Variable::create("f", IntType::create(16)));
+	Variable* varG(Variable::create("g", IntType::create(16)));
+	Variable* varH(Variable::create("h", IntType::create(16)));
+	Variable* varI(Variable::create("i", IntType::create(16)));
+	Variable* varJ(Variable::create("j", IntType::create(16)));
+	OrOpExpr* orOpExpr(
 		OrOpExpr::create(
 			varA,
 			varB
 	));
-	ShPtr<AndOpExpr> andOpExpr(
+	AndOpExpr* andOpExpr(
 		AndOpExpr::create(
 			orOpExpr,
 			varC
 	));
-	ShPtr<NeqOpExpr> neqOpExpr(
+	NeqOpExpr* neqOpExpr(
 		NeqOpExpr::create(
 			andOpExpr,
 			varD
 	));
-	ShPtr<BitOrOpExpr> bitOrOpExpr(
+	BitOrOpExpr* bitOrOpExpr(
 		BitOrOpExpr::create(
 			neqOpExpr,
 			varE
 	));
-	ShPtr<BitXorOpExpr> bitXorOpExpr(
+	BitXorOpExpr* bitXorOpExpr(
 		BitXorOpExpr::create(
 			bitOrOpExpr,
 			varF
 	));
-	ShPtr<BitAndOpExpr> bitAndOpExpr(
+	BitAndOpExpr* bitAndOpExpr(
 		BitAndOpExpr::create(
 			bitXorOpExpr,
 			varG
 	));
-	ShPtr<BitShlOpExpr> bitShlOpExpr(
+	BitShlOpExpr* bitShlOpExpr(
 		BitShlOpExpr::create(
 			bitAndOpExpr,
 			varH
 	));
-	ShPtr<AddOpExpr> addOpExpr(
+	AddOpExpr* addOpExpr(
 		AddOpExpr::create(
 			bitShlOpExpr,
 			varI
 	));
-	ShPtr<DivOpExpr> divOpExpr(
+	DivOpExpr* divOpExpr(
 		DivOpExpr::create(
 			addOpExpr,
 			varJ
 	));
-	ShPtr<AddressOpExpr> addressOpExpr(
+	AddressOpExpr* addressOpExpr(
 		AddressOpExpr::create(
 			divOpExpr
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(addressOpExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(addressOpExpr));
 	testFunc->setBody(returnStmt);
 	CBracketManager cBrackets(module);
 
@@ -797,26 +797,26 @@ TernaryOpBracketsAreNotNeeded) {
 	//
 	// expected output: return a < b? a : b + c;
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(16)));
-	ShPtr<LtOpExpr> ltOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	Variable* varC(Variable::create("c", IntType::create(16)));
+	LtOpExpr* ltOpExpr(
 		LtOpExpr::create(
 			varA,
 			varB
 	));
-	ShPtr<AddOpExpr> addOpExpr(
+	AddOpExpr* addOpExpr(
 		AddOpExpr::create(
 			varB,
 			varC
 	));
-	ShPtr<TernaryOpExpr> ternaryOpExpr(
+	TernaryOpExpr* ternaryOpExpr(
 		TernaryOpExpr::create(
 			ltOpExpr,
 			varA,
 			addOpExpr
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(ternaryOpExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(ternaryOpExpr));
 	testFunc->setBody(returnStmt);
 	CBracketManager cBrackets(module);
 
@@ -834,31 +834,31 @@ TernaryOpBracketsAreNeededFalseCond) {
 	//
 	// expected output: return 2 % (a < b? a : b + c);
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(16)));
-	ShPtr<LtOpExpr> ltOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	Variable* varC(Variable::create("c", IntType::create(16)));
+	LtOpExpr* ltOpExpr(
 		LtOpExpr::create(
 			varA,
 			varB
 	));
-	ShPtr<AddOpExpr> addOpExpr(
+	AddOpExpr* addOpExpr(
 		AddOpExpr::create(
 			varB,
 			varC
 	));
-	ShPtr<TernaryOpExpr> ternaryOpExpr(
+	TernaryOpExpr* ternaryOpExpr(
 		TernaryOpExpr::create(
 			ltOpExpr,
 			varA,
 			addOpExpr
 	));
-	ShPtr<ModOpExpr> modOpExpr(
+	ModOpExpr* modOpExpr(
 		ModOpExpr::create(
 			ternaryOpExpr,
 			ConstInt::create(2, 64)
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(modOpExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(modOpExpr));
 	testFunc->setBody(returnStmt);
 	CBracketManager cBrackets(module);
 
@@ -878,31 +878,31 @@ TernaryOpBracketsAreNeededTrueCond) {
 	//
 	// expected output: return (a < b? a : b + c) % 5;
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(16)));
-	ShPtr<LtOpExpr> ltOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	Variable* varC(Variable::create("c", IntType::create(16)));
+	LtOpExpr* ltOpExpr(
 		LtOpExpr::create(
 			varA,
 			varB
 	));
-	ShPtr<AddOpExpr> addOpExpr(
+	AddOpExpr* addOpExpr(
 		AddOpExpr::create(
 			varB,
 			varC
 	));
-	ShPtr<TernaryOpExpr> ternaryOpExpr(
+	TernaryOpExpr* ternaryOpExpr(
 		TernaryOpExpr::create(
 			ltOpExpr,
 			varA,
 			addOpExpr
 	));
-	ShPtr<ModOpExpr> modOpExpr(
+	ModOpExpr* modOpExpr(
 		ModOpExpr::create(
 			ConstInt::create(5, 64),
 			ternaryOpExpr
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(modOpExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(modOpExpr));
 	testFunc->setBody(returnStmt);
 	CBracketManager cBrackets(module);
 
@@ -922,18 +922,18 @@ CastBracketsNotNeeded) {
 	//
 	// expected output: return IntToPtrCastExpr(a) + 2;
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<IntToPtrCastExpr> intToPtrCastExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	IntToPtrCastExpr* intToPtrCastExpr(
 		IntToPtrCastExpr::create(
 			varA,
 			IntType::create(16)
 	));
-	ShPtr<AddOpExpr> addOpExpr(
+	AddOpExpr* addOpExpr(
 		AddOpExpr::create(
 			intToPtrCastExpr,
 			ConstInt::create(2, 64)
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(addOpExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(addOpExpr));
 	testFunc->setBody(returnStmt);
 	CBracketManager cBrackets(module);
 
@@ -947,18 +947,18 @@ CastBracketsNeeded) {
 	//
 	// expected output: return IntToPtrCastExpr(a + 2);
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<AddOpExpr> addOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	AddOpExpr* addOpExpr(
 		AddOpExpr::create(
 			varA,
 			ConstInt::create(2, 64)
 	));
-	ShPtr<IntToPtrCastExpr> intToPtrCastExpr(
+	IntToPtrCastExpr* intToPtrCastExpr(
 		IntToPtrCastExpr::create(
 			addOpExpr,
 			IntType::create(16)
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(intToPtrCastExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(intToPtrCastExpr));
 	testFunc->setBody(returnStmt);
 	CBracketManager cBrackets(module);
 
@@ -972,18 +972,18 @@ CastBeforeArrayIndexBracketsNeeded) {
 	//
 	// expected output: (IntToPtrCastExpr(a))[1]
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<IntToPtrCastExpr> intToPtrCastExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	IntToPtrCastExpr* intToPtrCastExpr(
 		IntToPtrCastExpr::create(
 			varA,
 			IntType::create(16)
 	));
-	ShPtr<ArrayIndexOpExpr> arrayIndexOpExpr(
+	ArrayIndexOpExpr* arrayIndexOpExpr(
 		ArrayIndexOpExpr::create(
 			intToPtrCastExpr,
 			ConstInt::create(1, 32)
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(arrayIndexOpExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(arrayIndexOpExpr));
 	testFunc->setBody(returnStmt);
 	CBracketManager cBrackets(module);
 
@@ -997,18 +997,18 @@ CastBeforeStructIndexBracketsNeeded) {
 	//
 	// expected output: (IntToPtrCastExpr(a)).e1
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<IntToPtrCastExpr> intToPtrCastExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	IntToPtrCastExpr* intToPtrCastExpr(
 		IntToPtrCastExpr::create(
 			varA,
 			IntType::create(16)
 	));
-	ShPtr<StructIndexOpExpr> structIndexOpExpr(
+	StructIndexOpExpr* structIndexOpExpr(
 		StructIndexOpExpr::create(
 			intToPtrCastExpr,
 			ConstInt::create(1, 32)
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(structIndexOpExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(structIndexOpExpr));
 	testFunc->setBody(returnStmt);
 	CBracketManager cBrackets(module);
 
@@ -1026,19 +1026,19 @@ CallExprWithArgumentsBracketsNotNeeded) {
 	// expected output: return varA(a + 2);
 	//
 	ExprVector args;
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<AddOpExpr> addOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	AddOpExpr* addOpExpr(
 		AddOpExpr::create(
 			varA,
 			ConstInt::create(2, 64)
 	));
 	args.push_back(addOpExpr);
-	ShPtr<CallExpr> callExpr(
+	CallExpr* callExpr(
 		CallExpr::create(
 			varA,
 			args
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(callExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(callExpr));
 	testFunc->setBody(returnStmt);
 	CBracketManager cBrackets(module);
 
@@ -1056,24 +1056,24 @@ CallExprInExpressionWithArgumentsBracketsNotNeeded) {
 	// expected output: return a * varA(a - 2);
 	//
 	ExprVector args;
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<SubOpExpr> subOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	SubOpExpr* subOpExpr(
 		SubOpExpr::create(
 			varA,
 			ConstInt::create(2, 64)
 	));
 	args.push_back(subOpExpr);
-	ShPtr<CallExpr> callExpr(
+	CallExpr* callExpr(
 		CallExpr::create(
 			varA,
 			args
 	));
-	ShPtr<MulOpExpr> mulOpExpr(
+	MulOpExpr* mulOpExpr(
 		MulOpExpr::create(
 			varA,
 			callExpr
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(mulOpExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(mulOpExpr));
 	testFunc->setBody(returnStmt);
 	CBracketManager cBrackets(module);
 
@@ -1089,18 +1089,18 @@ CallExprOfArrayIndexBracketsNotNeeded) {
 	//
 	// expected output: a[1]();
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<ArrayIndexOpExpr> arrayIndexOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	ArrayIndexOpExpr* arrayIndexOpExpr(
 		ArrayIndexOpExpr::create(
 			varA,
 			ConstInt::create(1, 64)
 	));
-	ShPtr<CallExpr> callExpr(
+	CallExpr* callExpr(
 		CallExpr::create(
 			arrayIndexOpExpr,
 			ExprVector()
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(callExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(callExpr));
 	testFunc->setBody(returnStmt);
 	CBracketManager cBrackets(module);
 
@@ -1116,18 +1116,18 @@ CalledExprIsCastBracketsAreNeeded) {
 	//
 	// expected output: ((type)a)();
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<BitCastExpr> castExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	BitCastExpr* castExpr(
 		BitCastExpr::create(
 			varA,
 			IntType::create(32)
 	));
-	ShPtr<CallExpr> callExpr(
+	CallExpr* callExpr(
 		CallExpr::create(
 			castExpr,
 			ExprVector()
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(callExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(callExpr));
 	testFunc->setBody(returnStmt);
 	CBracketManager cBrackets(module);
 
@@ -1141,16 +1141,16 @@ CalledExprIsDerefBracketsAreNeeded) {
 	//
 	// expected output: (*a)();
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<DerefOpExpr> derefOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	DerefOpExpr* derefOpExpr(
 		DerefOpExpr::create(varA)
 	);
-	ShPtr<CallExpr> callExpr(
+	CallExpr* callExpr(
 		CallExpr::create(
 			derefOpExpr,
 			ExprVector()
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(callExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(callExpr));
 	testFunc->setBody(returnStmt);
 	CBracketManager cBrackets(module);
 
@@ -1164,18 +1164,18 @@ ArrayIndexOpExprBracketsNotNeeded) {
 	//
 	// expected output: return a[a + 2];
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<AddOpExpr> addOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	AddOpExpr* addOpExpr(
 		AddOpExpr::create(
 			varA,
 			ConstInt::create(2, 64)
 	));
-	ShPtr<ArrayIndexOpExpr> arrayIndexOpExpr(
+	ArrayIndexOpExpr* arrayIndexOpExpr(
 		ArrayIndexOpExpr::create(
 			varA,
 			addOpExpr
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(arrayIndexOpExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(arrayIndexOpExpr));
 	testFunc->setBody(returnStmt);
 	CBracketManager cBrackets(module);
 
@@ -1189,13 +1189,13 @@ ArrayIndexOpExprBracketsNotNeededIfJustVariableIsIndexed) {
 	//
 	// expected output: return a[2];
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<ArrayIndexOpExpr> arrayIndexOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	ArrayIndexOpExpr* arrayIndexOpExpr(
 		ArrayIndexOpExpr::create(
 			varA,
 			ConstInt::create(2, 64)
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(arrayIndexOpExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(arrayIndexOpExpr));
 	testFunc->setBody(returnStmt);
 	CBracketManager cBrackets(module);
 
@@ -1209,23 +1209,23 @@ ArrayIndexOpExprInExpressionBracketsNotNeeded) {
 	//
 	// expected output: return a * a[a - 2];
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<SubOpExpr> subOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	SubOpExpr* subOpExpr(
 		SubOpExpr::create(
 			varA,
 			ConstInt::create(2, 64)
 	));
-	ShPtr<ArrayIndexOpExpr> arrayIndexOpExpr(
+	ArrayIndexOpExpr* arrayIndexOpExpr(
 		ArrayIndexOpExpr::create(
 			varA,
 			subOpExpr
 	));
-	ShPtr<MulOpExpr> mulOpExpr(
+	MulOpExpr* mulOpExpr(
 		MulOpExpr::create(
 			varA,
 			arrayIndexOpExpr
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(mulOpExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(mulOpExpr));
 	testFunc->setBody(returnStmt);
 	CBracketManager cBrackets(module);
 
@@ -1241,24 +1241,24 @@ StructIndexOpExprInExpressionBracketsNotNeeded) {
 	//
 	// expected output: return a * varA.e2 + 2;
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<StructIndexOpExpr> structIndexOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	StructIndexOpExpr* structIndexOpExpr(
 		StructIndexOpExpr::create(
 			varA,
 			ConstInt::create(2, 64)
 	));
-	ShPtr<MulOpExpr> mulOpExpr(
+	MulOpExpr* mulOpExpr(
 		MulOpExpr::create(
 			varA,
 			structIndexOpExpr
 	));
 
-	ShPtr<AddOpExpr> addOpExpr(
+	AddOpExpr* addOpExpr(
 		AddOpExpr::create(
 			mulOpExpr,
 			ConstInt::create(2, 64)
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(addOpExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(addOpExpr));
 	testFunc->setBody(returnStmt);
 	CBracketManager cBrackets(module);
 
@@ -1274,13 +1274,13 @@ StructIndexOpExprBracketsNotNeededIfJustVariableIsIndexed) {
 	//
 	// expected output: return a.e1;
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<StructIndexOpExpr> structIndexOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	StructIndexOpExpr* structIndexOpExpr(
 		StructIndexOpExpr::create(
 			varA,
 			ConstInt::create(1, 64)
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(structIndexOpExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(structIndexOpExpr));
 	testFunc->setBody(returnStmt);
 	CBracketManager cBrackets(module);
 

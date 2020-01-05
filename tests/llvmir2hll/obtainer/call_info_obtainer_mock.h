@@ -25,16 +25,16 @@ namespace tests {
 */
 class CallInfoMock: public CallInfo {
 public:
-	explicit CallInfoMock(ShPtr<CallExpr> callExpr): CallInfo(callExpr) {}
+	explicit CallInfoMock(CallExpr* callExpr): CallInfo(callExpr) {}
 
-	MOCK_CONST_METHOD1(isNeverRead, bool (ShPtr<Variable>));
-	MOCK_CONST_METHOD1(mayBeRead, bool (ShPtr<Variable>));
-	MOCK_CONST_METHOD1(isAlwaysRead, bool (ShPtr<Variable>));
-	MOCK_CONST_METHOD1(isNeverModified, bool (ShPtr<Variable>));
-	MOCK_CONST_METHOD1(mayBeModified, bool (ShPtr<Variable>));
-	MOCK_CONST_METHOD1(isAlwaysModified, bool (ShPtr<Variable>));
-	MOCK_CONST_METHOD1(valueIsNeverChanged, bool (ShPtr<Variable>));
-	MOCK_CONST_METHOD1(isAlwaysModifiedBeforeRead, bool (ShPtr<Variable>));
+	MOCK_CONST_METHOD1(isNeverRead, bool (Variable*));
+	MOCK_CONST_METHOD1(mayBeRead, bool (Variable*));
+	MOCK_CONST_METHOD1(isAlwaysRead, bool (Variable*));
+	MOCK_CONST_METHOD1(isNeverModified, bool (Variable*));
+	MOCK_CONST_METHOD1(mayBeModified, bool (Variable*));
+	MOCK_CONST_METHOD1(isAlwaysModified, bool (Variable*));
+	MOCK_CONST_METHOD1(valueIsNeverChanged, bool (Variable*));
+	MOCK_CONST_METHOD1(isAlwaysModifiedBeforeRead, bool (Variable*));
 };
 
 /**
@@ -42,16 +42,16 @@ public:
 */
 class FuncInfoMock: public FuncInfo {
 public:
-	explicit FuncInfoMock(ShPtr<Function> func): FuncInfo(func) {}
+	explicit FuncInfoMock(Function* func): FuncInfo(func) {}
 
-	MOCK_CONST_METHOD1(isNeverRead, bool (ShPtr<Variable>));
-	MOCK_CONST_METHOD1(mayBeRead, bool (ShPtr<Variable>));
-	MOCK_CONST_METHOD1(isAlwaysRead, bool (ShPtr<Variable>));
-	MOCK_CONST_METHOD1(isNeverModified, bool (ShPtr<Variable>));
-	MOCK_CONST_METHOD1(mayBeModified, bool (ShPtr<Variable>));
-	MOCK_CONST_METHOD1(isAlwaysModified, bool (ShPtr<Variable>));
-	MOCK_CONST_METHOD1(valueIsNeverChanged, bool (ShPtr<Variable>));
-	MOCK_CONST_METHOD1(isAlwaysModifiedBeforeRead, bool (ShPtr<Variable>));
+	MOCK_CONST_METHOD1(isNeverRead, bool (Variable*));
+	MOCK_CONST_METHOD1(mayBeRead, bool (Variable*));
+	MOCK_CONST_METHOD1(isAlwaysRead, bool (Variable*));
+	MOCK_CONST_METHOD1(isNeverModified, bool (Variable*));
+	MOCK_CONST_METHOD1(mayBeModified, bool (Variable*));
+	MOCK_CONST_METHOD1(isAlwaysModified, bool (Variable*));
+	MOCK_CONST_METHOD1(valueIsNeverChanged, bool (Variable*));
+	MOCK_CONST_METHOD1(isAlwaysModifiedBeforeRead, bool (Variable*));
 };
 
 /**
@@ -59,11 +59,11 @@ public:
 */
 class CallInfoObtainerMock: public CallInfoObtainer {
 public:
-	MOCK_METHOD2(init, void (ShPtr<CG>, ShPtr<ValueAnalysis>));
+	MOCK_METHOD2(init, void (CG*, ValueAnalysis*));
 	MOCK_CONST_METHOD0(isInitialized, bool ());
 	MOCK_CONST_METHOD0(getId, std::string ());
-	MOCK_METHOD2(getCallInfo, ShPtr<CallInfo> (ShPtr<CallExpr>, ShPtr<Function>));
-	MOCK_METHOD1(getFuncInfo, ShPtr<FuncInfo> (ShPtr<Function>));
+	MOCK_METHOD2(getCallInfo, CallInfo* (CallExpr*, Function*));
+	MOCK_METHOD1(getFuncInfo, FuncInfo* (Function*));
 };
 
 } // namespace tests
@@ -80,7 +80,7 @@ public:
 *      @endcode
 *  (2) instantiates @c cio, which is of type
 *      @code
-*      ShPtr<CallInfoObtainer>
+*      CallInfoObtainer*
 *      @endcode
 *      and delegates to the mock from (1);
 *  (3) sets some default actions for the mock from (1).
@@ -88,13 +88,13 @@ public:
 * Example of usage:
 * @code
 * INSTANTIATE_CALL_INFO_OBTAINER_MOCK();
-* ShPtr<SomeClassRequiringCIO> obj(new SomeClassRequiringCIO(cio));
+* SomeClassRequiringCIO* obj(new SomeClassRequiringCIO(cio));
 * @endcode
 */
 #define INSTANTIATE_CALL_INFO_OBTAINER_MOCK() \
 	::testing::NiceMock<CallInfoObtainerMock> *cioMock = \
 		new ::testing::NiceMock<CallInfoObtainerMock>(); \
-	ShPtr<CallInfoObtainer> cio(cioMock); \
+	CallInfoObtainer* cio(cioMock); \
 	ON_CALL(*cioMock, init(::testing::_, ::testing::_)) \
 		.WillByDefault(::testing::Return()); \
 	ON_CALL(*cioMock, isInitialized()) \

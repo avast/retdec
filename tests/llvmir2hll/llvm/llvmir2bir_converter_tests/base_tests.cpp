@@ -47,7 +47,7 @@ void printLLVMIRConversionError(const llvm::SMDiagnostic &err) {
 } // anonymous namespace
 
 LLVMIR2BIRConverterBaseTests::ConversionPass::ConversionPass(
-		ShPtr<::testing::NiceMock<ConfigMock>> configMock):
+		::testing::NiceMock<ConfigMock>* configMock):
 	llvm::ModulePass(MODULE_PASS_ID),
 	semanticsMock(std::make_shared<NiceMock<SemanticsMock>>()),
 	configMock(configMock)
@@ -79,7 +79,7 @@ void LLVMIR2BIRConverterBaseTests::ConversionPass::getAnalysisUsage(
 * This member function has to be called before @c runOnModule().
 */
 void LLVMIR2BIRConverterBaseTests::ConversionPass::setUsedConverter(
-		ShPtr<LLVMIR2BIRConverter> converter) {
+		LLVMIR2BIRConverter* converter) {
 	this->converter = converter;
 }
 
@@ -88,7 +88,7 @@ void LLVMIR2BIRConverterBaseTests::ConversionPass::setUsedConverter(
 *
 * This member function can be called only after @c runOnModule() has run.
 */
-ShPtr<Module> LLVMIR2BIRConverterBaseTests::ConversionPass::getConvertedModule() const {
+Module* LLVMIR2BIRConverterBaseTests::ConversionPass::getConvertedModule() const {
 	PRECONDITION(birModule, "runOnModule() did not run");
 	return birModule;
 }
@@ -103,7 +103,7 @@ LLVMIR2BIRConverterBaseTests::LLVMIR2BIRConverterBaseTests():
 * If the LLVM IR is invalid, an error message is written to the standard
 * error and @c std::runtime_error is thrown.
 */
-ShPtr<Module> LLVMIR2BIRConverterBaseTests::convertLLVMIR2BIR(const std::string &code) {
+Module* LLVMIR2BIRConverterBaseTests::convertLLVMIR2BIR(const std::string &code) {
 	// We have to run the converter through a pass manager to prevent the
 	// following assertion failures:
 	//
@@ -131,7 +131,7 @@ ShPtr<Module> LLVMIR2BIRConverterBaseTests::convertLLVMIR2BIR(const std::string 
 /**
 * @brief Parses the given LLVM IR code into an LLVM module.
 */
-UPtr<llvm::Module> LLVMIR2BIRConverterBaseTests::parseLLVMIR(const std::string &code) {
+llvm::Module* LLVMIR2BIRConverterBaseTests::parseLLVMIR(const std::string &code) {
 	auto mb = llvm::MemoryBuffer::getMemBuffer(code);
 	llvm::SMDiagnostic err;
 	auto module = llvm::parseIR(mb->getMemBufferRef(), err, llvmContext);
@@ -139,14 +139,14 @@ UPtr<llvm::Module> LLVMIR2BIRConverterBaseTests::parseLLVMIR(const std::string &
 		printLLVMIRConversionError(err);
 		throw std::runtime_error("invalid LLVM IR");
 	}
-	return module;
+	return module.get();
 }
 
 /**
 * @brief Returns first non-empty successor of the given statement @a statement.
 */
-ShPtr<Statement> LLVMIR2BIRConverterBaseTests::getFirstNonEmptySuccOf(
-		const ShPtr<Statement> &statement) const {
+Statement* LLVMIR2BIRConverterBaseTests::getFirstNonEmptySuccOf(
+		const Statement* &statement) const {
 	if (!statement) {
 		return nullptr;
 	}
@@ -159,7 +159,7 @@ ShPtr<Statement> LLVMIR2BIRConverterBaseTests::getFirstNonEmptySuccOf(
 *        with value @a param.
 */
 AssertionResult LLVMIR2BIRConverterBaseTests::isConstInt(
-		ShPtr<Expression> expr, int param) {
+		Expression* expr, int param) {
 	auto constInt = cast<ConstInt>(expr);
 	if (!constInt) {
 		return AssertionFailure() << expr << " is not ConstInt";
@@ -177,7 +177,7 @@ AssertionResult LLVMIR2BIRConverterBaseTests::isConstInt(
 *        statement of the function test with the given parameter @a param.
 */
 AssertionResult LLVMIR2BIRConverterBaseTests::isCallOfFuncTest(
-		ShPtr<Statement> statement, ShPtr<Variable> param) {
+		Statement* statement, Variable* param) {
 	auto callStmt = cast<CallStmt>(statement);
 	if (!callStmt) {
 		return AssertionFailure() << statement << " is not CallStmt";
@@ -208,7 +208,7 @@ AssertionResult LLVMIR2BIRConverterBaseTests::isCallOfFuncTest(
 *        statement of the function test with the given integer parameter @a param.
 */
 AssertionResult LLVMIR2BIRConverterBaseTests::isCallOfFuncTest(
-		ShPtr<Statement> statement, int param) {
+		Statement* statement, int param) {
 	auto callStmt = cast<CallStmt>(statement);
 	if (!callStmt) {
 		return AssertionFailure() << statement << " is not CallStmt";
@@ -239,7 +239,7 @@ AssertionResult LLVMIR2BIRConverterBaseTests::isCallOfFuncTest(
 *        statement with the given integer return value @a param.
 */
 AssertionResult LLVMIR2BIRConverterBaseTests::isIntReturn(
-		ShPtr<Statement> statement, int param) {
+		Statement* statement, int param) {
 	auto retStmt = cast<ReturnStmt>(statement);
 	if (!retStmt) {
 		return AssertionFailure() << statement << " is not ReturnStmt";
@@ -259,7 +259,7 @@ AssertionResult LLVMIR2BIRConverterBaseTests::isIntReturn(
 *        of integer constant @a rhs to the variable @a lhs.
 */
 AssertionResult LLVMIR2BIRConverterBaseTests::isAssignOfConstIntToVar(
-		ShPtr<Statement> statement, ShPtr<Variable> lhs, int rhs) {
+		Statement* statement, Variable* lhs, int rhs) {
 	auto assignStmt = cast<AssignStmt>(statement);
 	if (!assignStmt) {
 		return AssertionFailure() << statement << " is not AssignStmt";
@@ -284,8 +284,8 @@ AssertionResult LLVMIR2BIRConverterBaseTests::isAssignOfConstIntToVar(
 *        of variable @a rhs to the variable @a lhs.
 */
 AssertionResult LLVMIR2BIRConverterBaseTests::isAssignOfVarToVar(
-		ShPtr<Statement> statement, ShPtr<Variable> lhs,
-		ShPtr<Variable> rhs) {
+		Statement* statement, Variable* lhs,
+		Variable* rhs) {
 	auto assignStmt = cast<AssignStmt>(statement);
 	if (!assignStmt) {
 		return AssertionFailure() << statement << " is not AssignStmt";
@@ -310,8 +310,8 @@ AssertionResult LLVMIR2BIRConverterBaseTests::isAssignOfVarToVar(
 *        of variable @a rhs to the variable @a lhs dereference.
 */
 AssertionResult LLVMIR2BIRConverterBaseTests::isAssignOfVarToVarDeref(
-		ShPtr<Statement> statement, ShPtr<Variable> lhs,
-		ShPtr<Variable> rhs) {
+		Statement* statement, Variable* lhs,
+		Variable* rhs) {
 	auto assignStmt = cast<AssignStmt>(statement);
 	if (!assignStmt) {
 		return AssertionFailure() << statement << " is not AssignStmt";
@@ -342,8 +342,8 @@ AssertionResult LLVMIR2BIRConverterBaseTests::isAssignOfVarToVarDeref(
 *        of variable @a rhs dereference to the variable @a lhs.
 */
 AssertionResult LLVMIR2BIRConverterBaseTests::isAssignOfVarDerefToVar(
-		ShPtr<Statement> statement, ShPtr<Variable> lhs,
-		ShPtr<Variable> rhs) {
+		Statement* statement, Variable* lhs,
+		Variable* rhs) {
 	auto assignStmt = cast<AssignStmt>(statement);
 	if (!assignStmt) {
 		return AssertionFailure() << statement << " is not AssignStmt";
@@ -375,8 +375,8 @@ AssertionResult LLVMIR2BIRConverterBaseTests::isAssignOfVarDerefToVar(
 *        @a rhsAddConst to the variable @a lhs.
 */
 AssertionResult LLVMIR2BIRConverterBaseTests::isAssignOfAddExprToVar(
-		ShPtr<Statement> statement, ShPtr<Variable> lhs,
-		ShPtr<Variable> rhsAddVar, int rhsAddConst) {
+		Statement* statement, Variable* lhs,
+		Variable* rhsAddVar, int rhsAddConst) {
 	auto assignStmt = cast<AssignStmt>(statement);
 	if (!assignStmt) {
 		return AssertionFailure() << statement << " is not AssignStmt";
@@ -410,8 +410,8 @@ AssertionResult LLVMIR2BIRConverterBaseTests::isAssignOfAddExprToVar(
 *        @a rhsMulConst to the variable @a lhs.
 */
 AssertionResult LLVMIR2BIRConverterBaseTests::isAssignOfMulExprToVar(
-		ShPtr<Statement> statement, ShPtr<Variable> lhs,
-		ShPtr<Variable> rhsMulVar, int rhsMulConst) {
+		Statement* statement, Variable* lhs,
+		Variable* rhsMulVar, int rhsMulConst) {
 	auto assignStmt = cast<AssignStmt>(statement);
 	if (!assignStmt) {
 		return AssertionFailure() << statement << " is not AssignStmt";

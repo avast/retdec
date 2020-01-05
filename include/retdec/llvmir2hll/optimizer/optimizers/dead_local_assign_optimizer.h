@@ -41,16 +41,16 @@ class VarUsesVisitor;
 */
 class DeadLocalAssignOptimizer final: public FuncOptimizer {
 public:
-	DeadLocalAssignOptimizer(ShPtr<Module> module, ShPtr<ValueAnalysis> va);
+	DeadLocalAssignOptimizer(Module* module, ValueAnalysis* va);
 
 	virtual std::string getId() const override { return "DeadLocalAssign"; }
 
 private:
 	virtual void doOptimization() override;
-	virtual void runOnFunction(ShPtr<Function> func) override;
+	virtual void runOnFunction(Function* func) override;
 
-	bool canBeOptimized(ShPtr<Variable> var, ShPtr<VarUses> varUses);
-	bool tryToOptimize(ShPtr<Function> func);
+	bool canBeOptimized(Variable* var, VarUses* varUses);
+	bool tryToOptimize(Function* func);
 
 	/// @name Visitor Interface
 	/// @{
@@ -59,10 +59,10 @@ private:
 
 private:
 	/// Analysis of used values.
-	ShPtr<ValueAnalysis> va;
+	ValueAnalysis* va = nullptr;
 
 	/// Visitor for obtaining uses of variables.
-	ShPtr<VarUsesVisitor> vuv;
+	VarUsesVisitor* vuv = nullptr;
 };
 
 } // namespace llvmir2hll

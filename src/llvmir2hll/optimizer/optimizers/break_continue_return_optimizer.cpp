@@ -21,7 +21,7 @@ namespace llvmir2hll {
 * @par Preconditions
 *  - @a module is non-null
 */
-BreakContinueReturnOptimizer::BreakContinueReturnOptimizer(ShPtr<Module> module):
+BreakContinueReturnOptimizer::BreakContinueReturnOptimizer(Module* module):
 	FuncOptimizer(module) {
 		PRECONDITION_NON_NULL(module);
 	}
@@ -35,7 +35,7 @@ BreakContinueReturnOptimizer::BreakContinueReturnOptimizer(ShPtr<Module> module)
 *  - @a stmt is a break, continue, or return statement
 */
 void BreakContinueReturnOptimizer::removeSuccessorWhenAppropriate(
-		ShPtr<Statement> stmt) {
+		Statement* stmt) {
 	PRECONDITION(isa<BreakStmt>(stmt) || isa<ContinueStmt>(stmt) ||
 		isa<ReturnStmt>(stmt), "statement `" << stmt <<
 		"` is not a break, continue, or return statement");
@@ -43,20 +43,20 @@ void BreakContinueReturnOptimizer::removeSuccessorWhenAppropriate(
 	// We have to preserve goto targets.
 	if (auto succ = stmt->getSuccessor()) {
 		if (!succ->isGotoTarget()) {
-			stmt->setSuccessor(ShPtr<Statement>());
+			stmt->setSuccessor(nullptr);
 		}
 	}
 }
 
-void BreakContinueReturnOptimizer::visit(ShPtr<BreakStmt> stmt) {
+void BreakContinueReturnOptimizer::visit(BreakStmt* stmt) {
 	removeSuccessorWhenAppropriate(stmt);
 }
 
-void BreakContinueReturnOptimizer::visit(ShPtr<ContinueStmt> stmt) {
+void BreakContinueReturnOptimizer::visit(ContinueStmt* stmt) {
 	removeSuccessorWhenAppropriate(stmt);
 }
 
-void BreakContinueReturnOptimizer::visit(ShPtr<ReturnStmt> stmt) {
+void BreakContinueReturnOptimizer::visit(ReturnStmt* stmt) {
 	removeSuccessorWhenAppropriate(stmt);
 }
 

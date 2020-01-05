@@ -23,19 +23,15 @@ BasicAliasAnalysis::BasicAliasAnalysis(): AliasAnalysis() {}
 /**
 * @brief Creates a new basic alias analysis.
 */
-ShPtr<AliasAnalysis> BasicAliasAnalysis::create() {
-	return ShPtr<BasicAliasAnalysis>();
-
-	// TODO Uncomment after all pure virtual methods from the base class are
-	//      implemented.
-	// return ShPtr<BasicAliasAnalysis>(new BasicAliasAnalysis());
+AliasAnalysis* BasicAliasAnalysis::create() {
+	return nullptr;
 }
 
 std::string BasicAliasAnalysis::getId() const {
 	return BASIC_ALIAS_ANALYSIS_ID;
 }
 
-void BasicAliasAnalysis::init(ShPtr<Module> module) {
+void BasicAliasAnalysis::init(Module* module) {
 	AliasAnalysis::init(module);
 }
 

@@ -41,7 +41,7 @@ namespace llvmir2hll {
 *  - both @a llvmModule and @a semantics are non-null
 */
 Module::Module(const llvm::Module *llvmModule, const std::string &identifier,
-		ShPtr<Semantics> semantics, ShPtr<Config> config):
+		Semantics* semantics, Config* config):
 	llvmModule(llvmModule), identifier(identifier), semantics(semantics),
 	config(config), globalVars(), funcs(), debugVarNameMap() {
 		PRECONDITION_NON_NULL(llvmModule);
@@ -60,7 +60,7 @@ Module::Module(const llvm::Module *llvmModule, const std::string &identifier,
 * Time complexity: @c O(n), where @c n is the number of global variables in the
 * module.
 */
-void Module::addGlobalVar(ShPtr<Variable> var, ShPtr<Expression> init) {
+void Module::addGlobalVar(Variable* var, Expression* init) {
 	// Check whether the variable has already been added.
 	for (auto i = globalVars.begin(), e = globalVars.end(); i != e; ++i) {
 		if ((*i)->getVar() == var) {
@@ -82,7 +82,7 @@ void Module::addGlobalVar(ShPtr<Variable> var, ShPtr<Expression> init) {
 * Time complexity: @c O(n), where @c n is the number of global variables in the
 * module.
 */
-void Module::removeGlobalVar(ShPtr<Variable> var) {
+void Module::removeGlobalVar(Variable* var) {
 	for (auto i = globalVars.begin(), e = globalVars.end(); i != e; ++i) {
 		if ((*i)->getVar() == var) {
 			globalVars.erase(i);
@@ -97,7 +97,7 @@ void Module::removeGlobalVar(ShPtr<Variable> var) {
 * Time complexity: @c O(n), where @c n is the number of global variables in the
 * module.
 */
-bool Module::isGlobalVar(ShPtr<Variable> var) const {
+bool Module::isGlobalVar(Variable* var) const {
 	for (auto i = globalVars.begin(), e = globalVars.end(); i != e; ++i) {
 		if ((*i)->getVar() == var) {
 			return true;
@@ -124,13 +124,13 @@ bool Module::isGlobalVarStoringStringLiteral(const std::string &varName) const {
 * Time complexity: @c O(n), where @c n is the number of global variables in the
 * module.
 */
-ShPtr<Expression> Module::getInitForGlobalVar(ShPtr<Variable> var) const {
+Expression* Module::getInitForGlobalVar(Variable* var) const {
 	for (auto i = globalVars.begin(), e = globalVars.end(); i != e; ++i) {
 		if ((*i)->getVar() == var) {
 			return (*i)->getInitializer();
 		}
 	}
-	return ShPtr<Expression>();
+	return nullptr;
 }
 
 /**
@@ -143,7 +143,7 @@ ShPtr<Expression> Module::getInitForGlobalVar(ShPtr<Variable> var) const {
 * Time complexity: @c O(n), where @c n is the number of global variables in the
 * module.
 */
-ShPtr<Variable> Module::getGlobalVarByName(const std::string &varName) const {
+Variable* Module::getGlobalVarByName(const std::string &varName) const {
 	for (auto i = globalVars.begin(), e = globalVars.end(); i != e; ++i) {
 		if ((*i)->getVar()->getName() == varName) {
 			return (*i)->getVar();
@@ -151,7 +151,7 @@ ShPtr<Variable> Module::getGlobalVarByName(const std::string &varName) const {
 	}
 
 	// There is no global variable named varName.
-	return ShPtr<Variable>();
+	return nullptr;
 }
 
 /**
@@ -185,7 +185,7 @@ VarSet Module::getExternalGlobalVars() const {
 * @brief Returns the name of the register corresponding to the given global
 *        variable.
 */
-std::string Module::getRegisterForGlobalVar(ShPtr<Variable> var) const {
+std::string Module::getRegisterForGlobalVar(Variable* var) const {
 	return config->getRegisterForGlobalVar(var->getInitialName());
 }
 
@@ -193,7 +193,7 @@ std::string Module::getRegisterForGlobalVar(ShPtr<Variable> var) const {
 * @brief Returns a description of the detected cryptographic pattern for the
 *        given global variable.
 */
-std::string Module::getDetectedCryptoPatternForGlobalVar(ShPtr<Variable> var) const {
+std::string Module::getDetectedCryptoPatternForGlobalVar(Variable* var) const {
 	return config->getDetectedCryptoPatternForGlobalVar(var->getInitialName());
 }
 
@@ -216,11 +216,11 @@ std::string Module::getIdentifier(bool stripDirs) const {
 /**
 * @brief Returns the semantics of the module.
 */
-ShPtr<Semantics> Module::getSemantics() const {
+Semantics* Module::getSemantics() const {
 	return semantics;
 }
 
-ShPtr<Config> Module::getConfig() const {
+Config* Module::getConfig() const {
 	return config;
 }
 
@@ -266,7 +266,7 @@ Module::global_var_iterator Module::global_var_end() const {
 *
 * If the function already exists in the module, nothing is done.
 */
-void Module::addFunc(ShPtr<Function> func) {
+void Module::addFunc(Function* func) {
 	if (!hasItem(funcs, func)) {
 		funcs.push_back(func);
 	}
@@ -277,7 +277,7 @@ void Module::addFunc(ShPtr<Function> func) {
 *
 * If there is no matching function, nothing is removed.
 */
-void Module::removeFunc(ShPtr<Function> func) {
+void Module::removeFunc(Function* func) {
 	removeItem(funcs, func);
 }
 
@@ -286,7 +286,7 @@ void Module::removeFunc(ShPtr<Function> func) {
 *
 * @a func may be either a function definition or a function declaration.
 */
-bool Module::funcExists(ShPtr<Function> func) const {
+bool Module::funcExists(Function* func) const {
 	return hasItem(funcs, func);
 }
 
@@ -307,7 +307,7 @@ bool Module::hasMainFunc() const {
 *
 * The name of the main function depends on the used semantics.
 */
-bool Module::isMainFunc(ShPtr<Function> func) const {
+bool Module::isMainFunc(Function* func) const {
 	std::optional<std::string> mainFuncName(semantics->getMainFuncName());
 	return mainFuncName ? func->getName() == mainFuncName.value() : false;
 }
@@ -319,13 +319,13 @@ bool Module::isMainFunc(ShPtr<Function> func) const {
 *
 * If there is no function named @a funcName, it returns the null pointer.
 */
-ShPtr<Function> Module::getFuncByName(const std::string &funcName) const {
+Function* Module::getFuncByName(const std::string &funcName) const {
 	for (const auto &func : funcs) {
 		if (func->getName() == funcName) {
 			return func;
 		}
 	}
-	return ShPtr<Function>();
+	return nullptr;
 }
 
 /**
@@ -339,7 +339,7 @@ bool Module::hasFuncWithName(const std::string &funcName) const {
 /**
 * @brief Does the given variable correspond to a function?
 */
-bool Module::correspondsToFunc(ShPtr<Variable> var) const {
+bool Module::correspondsToFunc(Variable* var) const {
 	auto func = getFuncByName(var->getName());
 	return func && var == func->getAsVar();
 }
@@ -424,7 +424,7 @@ FuncSet Module::getStaticallyLinkedFuncs() const {
 /**
 * @brief Marks the given function as statically linked.
 */
-void Module::markFuncAsStaticallyLinked(ShPtr<Function> func) {
+void Module::markFuncAsStaticallyLinked(Function* func) {
 	config->markFuncAsStaticallyLinked(func->getInitialName());
 }
 
@@ -505,7 +505,7 @@ FuncSet Module::getInstructionIdiomFuncs() const {
 *
 * See the description of Config::isExportedFunc() for more details.
 */
-bool Module::isExportedFunc(ShPtr<Function> func) const {
+bool Module::isExportedFunc(Function* func) const {
 	return config->isExportedFunc(func->getInitialName());
 }
 
@@ -515,7 +515,7 @@ bool Module::isExportedFunc(ShPtr<Function> func) const {
 * If there is no real name attached to the given function, it returns the empty
 * string.
 */
-std::string Module::getRealNameForFunc(ShPtr<Function> func) const {
+std::string Module::getRealNameForFunc(Function* func) const {
 	return config->getRealNameForFunc(func->getInitialName());
 }
 
@@ -525,14 +525,14 @@ std::string Module::getRealNameForFunc(ShPtr<Function> func) const {
 * If there is no declaration string attached to the given function, it returns
 * the empty string.
 */
-std::string Module::getDeclarationStringForFunc(ShPtr<Function> func) const {
+std::string Module::getDeclarationStringForFunc(Function* func) const {
 	return config->getDeclarationStringForFunc(func->getInitialName());
 }
 
 /**
 * @brief Returns a comment for @a func.
 */
-std::string Module::getCommentForFunc(ShPtr<Function> func) const {
+std::string Module::getCommentForFunc(Function* func) const {
 	return config->getCommentForFunc(func->getInitialName());
 }
 
@@ -543,7 +543,7 @@ std::string Module::getCommentForFunc(ShPtr<Function> func) const {
 * If the given function does not use any cryptographic patterns, the empty set
 * is returned.
 */
-StringSet Module::getDetectedCryptoPatternsForFunc(ShPtr<Function> func) const {
+StringSet Module::getDetectedCryptoPatternsForFunc(Function* func) const {
 	return config->getDetectedCryptoPatternsForFunc(func->getInitialName());
 }
 
@@ -552,14 +552,14 @@ StringSet Module::getDetectedCryptoPatternsForFunc(ShPtr<Function> func) const {
 *
 * See the description of Config::getWrappedFunc() for more information.
 */
-std::string Module::getWrappedFuncName(ShPtr<Function> func) const {
+std::string Module::getWrappedFuncName(Function* func) const {
 	return config->getWrappedFunc(func->getInitialName());
 }
 
 /**
 * @brief Returns the demangled name of @a func.
 */
-std::string Module::getDemangledNameOfFunc(ShPtr<Function> func) const {
+std::string Module::getDemangledNameOfFunc(Function* func) const {
 	return config->getDemangledNameOfFunc(func->getInitialName());
 }
 
@@ -616,14 +616,14 @@ Module::func_filter_iterator Module::func_declaration_end() const {
 *
 * If there is no address range for @a func, @c NO_ADDRESS_RANGE is returned.
 */
-AddressRange Module::getAddressRangeForFunc(ShPtr<const Function> func) const {
+AddressRange Module::getAddressRangeForFunc(const Function* func) const {
 	return config->getAddressRangeForFunc(func->getInitialName());
 }
 
 /**
 * @brief Has the given function an address range?
 */
-bool Module::hasAddressRange(ShPtr<Function> func) const {
+bool Module::hasAddressRange(Function* func) const {
 	return getAddressRangeForFunc(func) != NO_ADDRESS_RANGE;
 }
 
@@ -645,14 +645,14 @@ bool Module::allFuncDefinitionsHaveAddressRange() const {
 *
 * If there is no line range for @a func, @c NO_LINE_RANGE is returned.
 */
-LineRange Module::getLineRangeForFunc(ShPtr<Function> func) const {
+LineRange Module::getLineRangeForFunc(Function* func) const {
 	return config->getLineRangeForFunc(func->getInitialName());
 }
 
 /**
 * @brief Has the given function a line range?
 */
-bool Module::hasLineRange(ShPtr<Function> func) const {
+bool Module::hasLineRange(Function* func) const {
 	return getLineRangeForFunc(func) != NO_LINE_RANGE;
 }
 
@@ -673,7 +673,7 @@ bool Module::allFuncDefinitionsHaveLineRange() const {
 * @brief Is there a function satisfying the given predicate?
 */
 bool Module::hasFuncSatisfyingPredicate(
-		std::function<bool (ShPtr<Function>)> pred) const {
+		std::function<bool (Function*)> pred) const {
 	for (auto &func : funcs) {
 		if (pred(func)) {
 			return true;
@@ -686,7 +686,7 @@ bool Module::hasFuncSatisfyingPredicate(
 * @brief Returns a set of functions satisfying the given predicate.
 */
 FuncSet Module::getFuncsSatisfyingPredicate(
-		std::function<bool (ShPtr<Function>)> pred) const {
+		std::function<bool (Function*)> pred) const {
 	return filterTo<FuncSet>(funcs, pred);
 }
 
@@ -697,7 +697,7 @@ FuncSet Module::getFuncsSatisfyingPredicate(
 * If the given variable does not come from a global variable, the empty string
 * is returned.
 */
-std::string Module::comesFromGlobalVar(ShPtr<Function> func, ShPtr<Variable> var) const {
+std::string Module::comesFromGlobalVar(Function* func, Variable* var) const {
 	return config->comesFromGlobalVar(func->getInitialName(), var->getInitialName());
 }
 
@@ -734,7 +734,7 @@ std::string Module::getDemangledNameOfClass(const std::string &cl) const {
 *
 * If @a func does not belong to any class, the empty string is returned.
 */
-std::string Module::getClassForFunc(ShPtr<Function> func) const {
+std::string Module::getClassForFunc(Function* func) const {
 	return config->getClassForFunc(func->getInitialName());
 }
 
@@ -745,7 +745,7 @@ std::string Module::getClassForFunc(ShPtr<Function> func) const {
 * "virtual member function". If @a func does not belong to @c cl, the empty
 * string is returned.
 */
-std::string Module::getTypeOfFuncInClass(ShPtr<Function> func,
+std::string Module::getTypeOfFuncInClass(Function* func,
 		const std::string &cl) const {
 	return config->getTypeOfFuncInClass(func->getInitialName(), cl);
 }
@@ -756,7 +756,7 @@ std::string Module::getTypeOfFuncInClass(ShPtr<Function> func,
 * If there is no name assigned to the given variable, the empty string is
 * returned.
 */
-std::string Module::getDebugNameForGlobalVar(ShPtr<Variable> var) const {
+std::string Module::getDebugNameForGlobalVar(Variable* var) const {
 	return config->getDebugNameForGlobalVar(var->getInitialName());
 }
 
@@ -766,8 +766,8 @@ std::string Module::getDebugNameForGlobalVar(ShPtr<Variable> var) const {
 * If there is no name assigned to the given variable, the empty string is
 * returned.
 */
-std::string Module::getDebugNameForLocalVar(ShPtr<Function> func,
-		ShPtr<Variable> var) const {
+std::string Module::getDebugNameForLocalVar(Function* func,
+		Variable* var) const {
 	return config->getDebugNameForLocalVar(func->getInitialName(), var->getInitialName());
 }
 
@@ -777,7 +777,7 @@ std::string Module::getDebugNameForLocalVar(ShPtr<Function> func,
 * If there is no name assigned to the given variable, the empty string is
 * returned.
 */
-std::string Module::getDebugNameForVar(ShPtr<Variable> var) const {
+std::string Module::getDebugNameForVar(Variable* var) const {
 	return mapGetValueOrDefault(debugVarNameMap, var);
 }
 
@@ -795,14 +795,14 @@ bool Module::isDebugInfoAvailable() const {
 * If there is no module name assigned to the given function, the empty string
 * is returned.
 */
-std::string Module::getDebugModuleNameForFunc(ShPtr<Function> func) const {
+std::string Module::getDebugModuleNameForFunc(Function* func) const {
 	return config->getDebugModuleNameForFunc(func->getInitialName());
 }
 
 /**
 * @brief Has the given function assigned a module name from debug information?
 */
-bool Module::hasAssignedDebugModuleName(ShPtr<Function> func) const {
+bool Module::hasAssignedDebugModuleName(Function* func) const {
 	return !getDebugModuleNameForFunc(func).empty();
 }
 
@@ -820,7 +820,7 @@ StringSet Module::getDebugModuleNames() const {
 * @brief Returns @c true if the given variable has assigned a name from debug
 *        information, @c false otherwise.
 */
-bool Module::hasAssignedDebugName(ShPtr<Variable> var) const {
+bool Module::hasAssignedDebugName(Variable* var) const {
 	return mapHasKey(debugVarNameMap, var);
 }
 
@@ -829,7 +829,7 @@ bool Module::hasAssignedDebugName(ShPtr<Variable> var) const {
 *
 * The new name overwrites any name that has already been set for @a var.
 */
-void Module::addDebugNameForVar(ShPtr<Variable> var, const std::string &name) {
+void Module::addDebugNameForVar(Variable* var, const std::string &name) {
 	debugVarNameMap[var] = name;
 }
 

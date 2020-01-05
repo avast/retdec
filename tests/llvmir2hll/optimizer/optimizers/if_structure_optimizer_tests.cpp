@@ -74,7 +74,7 @@ Optimization5EmptyElseClauseGetsRemoved) {
 		"expected a non-empty body";
 	EXPECT_TRUE(isa<IfStmt>(testFunc->getBody())) <<
 		"expected IfStmt, got " << testFunc->getBody();
-	ShPtr<IfStmt> ifStmtOut(cast<IfStmt>(testFunc->getBody()));
+	IfStmt* ifStmtOut(cast<IfStmt>(testFunc->getBody()));
 	EXPECT_FALSE(ifStmtOut->hasElseClause()) <<
 		"the else clause was expected to be removed";
 }
@@ -107,7 +107,7 @@ Optimization5NonemptyElseClauseDoesNotGetRemoved) {
 		"expected a non-empty body";
 	EXPECT_TRUE(isa<IfStmt>(testFunc->getBody())) <<
 		"expected IfStmt, got " << testFunc->getBody();
-	ShPtr<IfStmt> ifStmtOut(cast<IfStmt>(testFunc->getBody()));
+	IfStmt* ifStmtOut(cast<IfStmt>(testFunc->getBody()));
 	ASSERT_TRUE(ifStmtOut->hasElseClause()) <<
 		"expected the else clause to be there";
 	EXPECT_TRUE(isa<AssignStmt>(ifStmtOut->getElseClause())) <<

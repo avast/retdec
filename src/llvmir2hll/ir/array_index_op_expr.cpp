@@ -19,17 +19,17 @@ namespace llvmir2hll {
 *
 * See create() for more information.
 */
-ArrayIndexOpExpr::ArrayIndexOpExpr(ShPtr<Expression> base, ShPtr<Expression> index):
+ArrayIndexOpExpr::ArrayIndexOpExpr(Expression* base, Expression* index):
 	BinaryOpExpr(base, index) {}
 
-ShPtr<Type> ArrayIndexOpExpr::getType() const {
-	ShPtr<Type> op1Type(op1->getType());
+Type* ArrayIndexOpExpr::getType() const {
+	Type* op1Type(op1->getType());
 
-	if (ShPtr<ArrayType> op1ArrayType = cast<ArrayType>(op1Type)) {
+	if (ArrayType* op1ArrayType = cast<ArrayType>(op1Type)) {
 		return op1ArrayType->getContainedType();
 	}
 
-	if (ShPtr<PointerType> op1PointerType = cast<PointerType>(op1Type)) {
+	if (PointerType* op1PointerType = cast<PointerType>(op1Type)) {
 		return op1PointerType->getContainedType();
 	}
 
@@ -37,8 +37,8 @@ ShPtr<Type> ArrayIndexOpExpr::getType() const {
 	return UnknownType::create();
 }
 
-bool ArrayIndexOpExpr::isEqualTo(ShPtr<Value> otherValue) const {
-	if (ShPtr<ArrayIndexOpExpr> otherValueArrayIndexOpExpr =
+bool ArrayIndexOpExpr::isEqualTo(Value* otherValue) const {
+	if (ArrayIndexOpExpr* otherValueArrayIndexOpExpr =
 			cast<ArrayIndexOpExpr>(otherValue)) {
 		return op1->isEqualTo(otherValueArrayIndexOpExpr->getFirstOperand()) &&
 			op2->isEqualTo(otherValueArrayIndexOpExpr->getSecondOperand());
@@ -46,8 +46,8 @@ bool ArrayIndexOpExpr::isEqualTo(ShPtr<Value> otherValue) const {
 	return false;
 }
 
-ShPtr<Value> ArrayIndexOpExpr::clone() {
-	ShPtr<ArrayIndexOpExpr> arrayIndexOpExpr(ArrayIndexOpExpr::create(
+Value* ArrayIndexOpExpr::clone() {
+	ArrayIndexOpExpr* arrayIndexOpExpr(ArrayIndexOpExpr::create(
 		ucast<Expression>(op1->clone()), ucast<Expression>(op2->clone())));
 	arrayIndexOpExpr->setMetadata(getMetadata());
 	return arrayIndexOpExpr;
@@ -56,14 +56,14 @@ ShPtr<Value> ArrayIndexOpExpr::clone() {
 /**
 * @brief Returns the base (i.e. the first operand).
 */
-ShPtr<Expression> ArrayIndexOpExpr::getBase() const {
+Expression* ArrayIndexOpExpr::getBase() const {
 	return getFirstOperand();
 }
 
 /**
 * @brief Returns the index (i.e. the second operand).
 */
-ShPtr<Expression> ArrayIndexOpExpr::getIndex() const {
+Expression* ArrayIndexOpExpr::getIndex() const {
 	return getSecondOperand();
 }
 
@@ -78,14 +78,14 @@ ShPtr<Expression> ArrayIndexOpExpr::getIndex() const {
 * @par Preconditions
 *  - both operands are non-null
 */
-ShPtr<ArrayIndexOpExpr> ArrayIndexOpExpr::create(ShPtr<Expression> base,
-		ShPtr<Expression> index) {
+ArrayIndexOpExpr* ArrayIndexOpExpr::create(Expression* base,
+		Expression* index) {
 	PRECONDITION_NON_NULL(base);
 	PRECONDITION_NON_NULL(index);
 
-	ShPtr<ArrayIndexOpExpr> expr(new ArrayIndexOpExpr(base, index));
+	ArrayIndexOpExpr* expr(new ArrayIndexOpExpr(base, index));
 
-	// Initialization (recall that shared_from_this() cannot be called in a
+	// Initialization (recall that this cannot be called in a
 	// constructor).
 	base->addObserver(expr);
 	index->addObserver(expr);
@@ -94,7 +94,7 @@ ShPtr<ArrayIndexOpExpr> ArrayIndexOpExpr::create(ShPtr<Expression> base,
 }
 
 void ArrayIndexOpExpr::accept(Visitor *v) {
-	v->visit(ucast<ArrayIndexOpExpr>(shared_from_this()));
+	v->visit(ucast<ArrayIndexOpExpr>(this));
 }
 
 } // namespace llvmir2hll

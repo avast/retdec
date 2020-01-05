@@ -41,11 +41,11 @@ namespace llvmir2hll {
 * @param[in] varManager Variable manager managing local variables of currently
 *                       converted function.
 */
-LLVMValueConverter::LLVMValueConverter(ShPtr<Module> resModule,
-	ShPtr<VariablesManager> varManager):
-		typeConverter(std::make_shared<LLVMTypeConverter>()),
-		instConverter(std::make_shared<LLVMInstructionConverter>()),
-		constConverter(std::make_unique<LLVMConstantConverter>(
+LLVMValueConverter::LLVMValueConverter(Module* resModule,
+	VariablesManager* varManager):
+		typeConverter(new LLVMTypeConverter()),
+		instConverter(new LLVMInstructionConverter()),
+		constConverter(new LLVMConstantConverter(
 			instConverter, typeConverter)),
 		variablesManager(varManager),
 		resModule(resModule) {}
@@ -57,12 +57,12 @@ LLVMValueConverter::LLVMValueConverter(ShPtr<Module> resModule,
 * @param[in] varManager Variable manager managing local variables of currently
 *                       converted function.
 */
-ShPtr<LLVMValueConverter> LLVMValueConverter::create(ShPtr<Module> resModule,
-		ShPtr<VariablesManager> varManager) {
+LLVMValueConverter* LLVMValueConverter::create(Module* resModule,
+		VariablesManager* varManager) {
 	PRECONDITION_NON_NULL(resModule);
 	PRECONDITION_NON_NULL(varManager);
 
-	ShPtr<LLVMValueConverter> converter(new LLVMValueConverter(resModule, varManager));
+	LLVMValueConverter* converter(new LLVMValueConverter(resModule, varManager));
 	converter->instConverter->setLLVMValueConverter(converter);
 	converter->constConverter->setLLVMValueConverter(converter);
 	return converter;
@@ -79,7 +79,7 @@ ShPtr<LLVMValueConverter> LLVMValueConverter::create(ShPtr<Module> resModule,
 * @par Preconditions
 *  - @a value is non-null
 */
-ShPtr<Expression> LLVMValueConverter::convertValueToDerefExpression(
+Expression* LLVMValueConverter::convertValueToDerefExpression(
 		llvm::Value *value) {
 	PRECONDITION_NON_NULL(value);
 
@@ -103,7 +103,7 @@ ShPtr<Expression> LLVMValueConverter::convertValueToDerefExpression(
 * @par Preconditions
 *  - @a value is non-null
 */
-ShPtr<Expression> LLVMValueConverter::convertValueToExpression(llvm::Value *value) {
+Expression* LLVMValueConverter::convertValueToExpression(llvm::Value *value) {
 	PRECONDITION_NON_NULL(value);
 
 	auto expr = convertValueToExpressionDirectly(value);
@@ -120,7 +120,7 @@ ShPtr<Expression> LLVMValueConverter::convertValueToExpression(llvm::Value *valu
 * @par Preconditions
 *  - @a value is non-null
 */
-ShPtr<Expression> LLVMValueConverter::convertValueToExpressionDirectly(
+Expression* LLVMValueConverter::convertValueToExpressionDirectly(
 		llvm::Value *value) {
 	PRECONDITION_NON_NULL(value);
 
@@ -143,7 +143,7 @@ ShPtr<Expression> LLVMValueConverter::convertValueToExpressionDirectly(
 * @par Preconditions
 *  - @a value is non-null
 */
-ShPtr<Variable> LLVMValueConverter::convertValueToVariable(llvm::Value *value) {
+Variable* LLVMValueConverter::convertValueToVariable(llvm::Value *value) {
 	PRECONDITION_NON_NULL(value);
 
 	auto var = variablesManager->getVarByValue(value);
@@ -160,7 +160,7 @@ ShPtr<Variable> LLVMValueConverter::convertValueToVariable(llvm::Value *value) {
 * @par Preconditions
 *  - @a type is non-null
 */
-ShPtr<Type> LLVMValueConverter::convertType(const llvm::Type *type) {
+Type* LLVMValueConverter::convertType(const llvm::Type *type) {
 	PRECONDITION_NON_NULL(type);
 
 	return typeConverter->convert(type);
@@ -182,7 +182,7 @@ bool LLVMValueConverter::storesStringLiteral(
 * @par Preconditions
 *  - @a constant is non-null
 */
-ShPtr<Expression> LLVMValueConverter::convertConstantToExpression(
+Expression* LLVMValueConverter::convertConstantToExpression(
 		llvm::Constant *constant) {
 	PRECONDITION_NON_NULL(constant);
 
@@ -195,7 +195,7 @@ ShPtr<Expression> LLVMValueConverter::convertConstantToExpression(
 * @par Preconditions
 *  - @a inst is non-null
 */
-ShPtr<Expression> LLVMValueConverter::convertInstructionToExpression(
+Expression* LLVMValueConverter::convertInstructionToExpression(
 		llvm::Instruction *inst) {
 	PRECONDITION_NON_NULL(inst);
 
@@ -205,7 +205,7 @@ ShPtr<Expression> LLVMValueConverter::convertInstructionToExpression(
 /**
 * @brief Converts the given LLVM call instruction @a inst into an expression in BIR.
 */
-ShPtr<CallExpr> LLVMValueConverter::convertCallInstToCallExpr(llvm::CallInst &inst) {
+CallExpr* LLVMValueConverter::convertCallInstToCallExpr(llvm::CallInst &inst) {
 	return instConverter->convertCallInstToCallExpr(inst);
 }
 
@@ -217,8 +217,8 @@ ShPtr<CallExpr> LLVMValueConverter::convertCallInstToCallExpr(llvm::CallInst &in
 * @param[in] base Base expression.
 * @param[in] indices Array of indices.
 */
-ShPtr<Expression> LLVMValueConverter::generateAccessToAggregateType(
-		llvm::CompositeType *type, ShPtr<Expression> base,
+Expression* LLVMValueConverter::generateAccessToAggregateType(
+		llvm::CompositeType *type, Expression* base,
 		llvm::ArrayRef<unsigned> indices) {
 	return instConverter->generateAccessToAggregateType(type, base, indices);
 }
@@ -289,7 +289,7 @@ bool LLVMValueConverter::shouldBeConvertedAsInst(const llvm::Instruction *inst) 
 * @par Preconditions
 *  - @a value is non-null
 */
-ShPtr<Type> LLVMValueConverter::determineVariableType(llvm::Value *value) {
+Type* LLVMValueConverter::determineVariableType(llvm::Value *value) {
 	PRECONDITION_NON_NULL(value);
 
 	if (auto allocaInst = LLVMSupport::isDirectAlloca(value)) {

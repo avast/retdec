@@ -17,25 +17,25 @@ namespace llvmir2hll {
 *
 * See create() for more information.
 */
-AndOpExpr::AndOpExpr(ShPtr<Expression> op1, ShPtr<Expression> op2):
+AndOpExpr::AndOpExpr(Expression* op1, Expression* op2):
 	BinaryOpExpr(op1, op2) {}
 
-bool AndOpExpr::isEqualTo(ShPtr<Value> otherValue) const {
-	if (ShPtr<AndOpExpr> otherValueAndOpExpr = cast<AndOpExpr>(otherValue)) {
+bool AndOpExpr::isEqualTo(Value* otherValue) const {
+	if (AndOpExpr* otherValueAndOpExpr = cast<AndOpExpr>(otherValue)) {
 		return op1->isEqualTo(otherValueAndOpExpr->getFirstOperand()) &&
 			op2->isEqualTo(otherValueAndOpExpr->getSecondOperand());
 	}
 	return false;
 }
 
-ShPtr<Value> AndOpExpr::clone() {
-	ShPtr<AndOpExpr> andOpExpr(AndOpExpr::create(
+Value* AndOpExpr::clone() {
+	AndOpExpr* andOpExpr(AndOpExpr::create(
 		ucast<Expression>(op1->clone()), ucast<Expression>(op2->clone())));
 	andOpExpr->setMetadata(getMetadata());
 	return andOpExpr;
 }
 
-ShPtr<Type> AndOpExpr::getType() const {
+Type* AndOpExpr::getType() const {
 	// The type of `x && y` should be bool.
 	return IntType::create(1);
 }
@@ -49,13 +49,13 @@ ShPtr<Type> AndOpExpr::getType() const {
 * @par Preconditions
 *  - both operands are non-null
 */
-ShPtr<AndOpExpr> AndOpExpr::create(ShPtr<Expression> op1, ShPtr<Expression> op2) {
+AndOpExpr* AndOpExpr::create(Expression* op1, Expression* op2) {
 	PRECONDITION_NON_NULL(op1);
 	PRECONDITION_NON_NULL(op2);
 
-	ShPtr<AndOpExpr> expr(new AndOpExpr(op1, op2));
+	AndOpExpr* expr(new AndOpExpr(op1, op2));
 
-	// Initialization (recall that shared_from_this() cannot be called in a
+	// Initialization (recall that this cannot be called in a
 	// constructor).
 	op1->addObserver(expr);
 	op2->addObserver(expr);
@@ -64,7 +64,7 @@ ShPtr<AndOpExpr> AndOpExpr::create(ShPtr<Expression> op1, ShPtr<Expression> op2)
 }
 
 void AndOpExpr::accept(Visitor *v) {
-	v->visit(ucast<AndOpExpr>(shared_from_this()));
+	v->visit(ucast<AndOpExpr>(this));
 }
 
 } // namespace llvmir2hll

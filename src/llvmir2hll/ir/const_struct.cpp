@@ -18,10 +18,10 @@ namespace llvmir2hll {
 *
 * See create() for more information.
 */
-ConstStruct::ConstStruct(Type value, ShPtr<StructType> type):
+ConstStruct::ConstStruct(Type value, StructType* type):
 	Constant(), value(value), type(type) {}
 
-ShPtr<Value> ConstStruct::clone() {
+Value* ConstStruct::clone() {
 	// Clone all struct members.
 	Type newValue;
 	for (const auto &member : value) {
@@ -30,14 +30,14 @@ ShPtr<Value> ConstStruct::clone() {
 			ucast<Expression>(member.second->clone())));
 	}
 
-	ShPtr<ConstStruct> constStruct(ConstStruct::create(newValue, type));
+	ConstStruct* constStruct(ConstStruct::create(newValue, type));
 	constStruct->setMetadata(getMetadata());
 	return constStruct;
 }
 
-bool ConstStruct::isEqualTo(ShPtr<Value> otherValue) const {
+bool ConstStruct::isEqualTo(Value* otherValue) const {
 	// Both types and values have to be equal.
-	if (ShPtr<ConstStruct> otherConstStruct = cast<ConstStruct>(otherValue)) {
+	if (ConstStruct* otherConstStruct = cast<ConstStruct>(otherValue)) {
 		if (getType() != otherConstStruct->getType()) {
 			return false;
 		}
@@ -46,11 +46,11 @@ bool ConstStruct::isEqualTo(ShPtr<Value> otherValue) const {
 	return false;
 }
 
-ShPtr<Type> ConstStruct::getType() const {
+Type* ConstStruct::getType() const {
 	return type;
 }
 
-void ConstStruct::replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) {
+void ConstStruct::replace(Expression* oldExpr, Expression* newExpr) {
 	PRECONDITION_NON_NULL(oldExpr);
 
 	// For each structure member...
@@ -85,12 +85,12 @@ ConstStruct::Type ConstStruct::getValue() const {
 * @par Preconditions
 *  - @a type is non-null
 */
-ShPtr<ConstStruct> ConstStruct::create(Type value, ShPtr<StructType> type) {
+ConstStruct* ConstStruct::create(Type value, StructType* type) {
 	PRECONDITION_NON_NULL(type);
 
-	ShPtr<ConstStruct> constStruct(new ConstStruct(value, type));
+	ConstStruct* constStruct(new ConstStruct(value, type));
 
-	// Initialization (recall that shared_from_this() cannot be called in a
+	// Initialization (recall that this cannot be called in a
 	// constructor).
 	for (const auto &member : value) {
 		member.first->addObserver(constStruct);
@@ -118,11 +118,11 @@ ShPtr<ConstStruct> ConstStruct::create(Type value, ShPtr<StructType> type) {
 *
 * @see Subject::update()
 */
-void ConstStruct::update(ShPtr<Value> subject, ShPtr<Value> arg) {
+void ConstStruct::update(Value* subject, Value* arg) {
 	PRECONDITION_NON_NULL(subject);
 	PRECONDITION_NON_NULL(arg);
 
-	ShPtr<Expression> newExpr = cast<Expression>(arg);
+	Expression* newExpr = cast<Expression>(arg);
 	if (!newExpr) {
 		return;
 	}
@@ -135,7 +135,7 @@ void ConstStruct::update(ShPtr<Value> subject, ShPtr<Value> arg) {
 }
 
 void ConstStruct::accept(Visitor *v) {
-	v->visit(ucast<ConstStruct>(shared_from_this()));
+	v->visit(ucast<ConstStruct>(this));
 }
 
 } // namespace llvmir2hll

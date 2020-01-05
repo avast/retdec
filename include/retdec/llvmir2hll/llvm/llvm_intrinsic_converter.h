@@ -68,30 +68,30 @@ class Module;
 class LLVMIntrinsicConverter: private OrderedAllVisitor,
 		private retdec::utils::NonCopyable {
 public:
-	static void convert(ShPtr<Module> module);
+	static void convert(Module* module);
 
 private:
-	LLVMIntrinsicConverter(ShPtr<Module> module);
+	LLVMIntrinsicConverter(Module* module);
 
 	void performConversion();
-	bool isIntrinsicFunc(ShPtr<Function> func) const;
-	void convertIntrinsicFuncName(ShPtr<Function> func);
-	void renameIntrinsicFunc(ShPtr<Function> func,
+	bool isIntrinsicFunc(Function* func) const;
+	void convertIntrinsicFuncName(Function* func);
+	void renameIntrinsicFunc(Function* func,
 		const std::string &newName);
-	void renameFloatIntrinsicFunc(ShPtr<Function> func,
+	void renameFloatIntrinsicFunc(Function* func,
 		const std::string &baseName);
-	void trimLastNArgsAndParams(ShPtr<CallExpr> expr,
-		ShPtr<Function> func, unsigned m, unsigned n);
+	void trimLastNArgsAndParams(CallExpr* expr,
+		Function* func, unsigned m, unsigned n);
 
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<CallExpr> expr) override;
+	virtual void visit(CallExpr* expr) override;
 	/// @}
 
 private:
 	/// Module in which LLVM intrinsic functions are converted.
-	ShPtr<Module> module;
+	Module* module = nullptr;
 
 	/// Set of new names for changed LLVM intrinsics.
 	StringSet renamedFuncNames;

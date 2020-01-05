@@ -28,8 +28,8 @@ std::string getTextRepr(ValuePtr value) {
 
 } // anonymous namespace
 
-ShPtr<Value> Value::getSelf() {
-	return shared_from_this();
+Value* Value::getSelf() {
+	return this;
 }
 
 /**
@@ -39,13 +39,13 @@ ShPtr<Value> Value::getSelf() {
 * information.
 */
 std::string Value::getTextRepr() {
-	return ValueTextReprVisitor::getTextRepr(shared_from_this());
+	return ValueTextReprVisitor::getTextRepr(this);
 }
 
 /**
 * @brief Emits @a value into @a os.
 */
-llvm::raw_ostream &operator<<(llvm::raw_ostream &os, const ShPtr<Value> &value) {
+llvm::raw_ostream &operator<<(llvm::raw_ostream &os, Value* value) {
 	return os << getTextRepr(value);
 }
 

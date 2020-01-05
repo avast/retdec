@@ -28,7 +28,7 @@ namespace llvmir2hll {
 * public:
 *     PlanetController() {}
 *     ~PlanetController() {}
-*     virtual void update(ShPtr<SubjectType> subject, ShPtr<ArgType> arg =
+*     virtual void update(SubjectType* subject, ArgType* arg =
 *             nullptr) override {
 *         std::cout << subject->getName() << " has changed.\n";
 *     }
@@ -60,8 +60,8 @@ public:
 	*
 	* By default, it does nothing.
 	*/
-	virtual void update(ShPtr<SubjectType> subject,
-		ShPtr<ArgType> arg = nullptr) {}
+	virtual void update(SubjectType* subject,
+		ArgType* arg = nullptr) {}
 };
 
 } // namespace llvmir2hll

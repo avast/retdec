@@ -28,9 +28,9 @@ namespace {
 *
 * @return @c true if everything is alright, @c false otherwise.
 */
-bool isFirstOpUnsignedIntTypeOrPositiveConstInt(ShPtr<BinaryOpExpr> expr) {
-	ShPtr<IntType> varTypeInt(cast<IntType>(expr->getFirstOperand()->getType()));
-	ShPtr<ConstInt> firstOpConstInt(cast<ConstInt>(expr->getFirstOperand()));
+bool isFirstOpUnsignedIntTypeOrPositiveConstInt(BinaryOpExpr* expr) {
+	IntType* varTypeInt(cast<IntType>(expr->getFirstOperand()->getType()));
+	ConstInt* firstOpConstInt(cast<ConstInt>(expr->getFirstOperand()));
 
 	if (firstOpConstInt){
 		// The first operand cannot be < 0 because in this case, the
@@ -55,7 +55,7 @@ bool isFirstOpUnsignedIntTypeOrPositiveConstInt(ShPtr<BinaryOpExpr> expr) {
 *
 * @return @c true if everything is alright, @c false otherwise.
 */
-bool isFirstOpIntType(ShPtr<BinaryOpExpr> expr) {
+bool isFirstOpIntType(BinaryOpExpr* expr) {
 	return isa<IntType>(expr->getFirstOperand()->getType());
 }
 
@@ -65,8 +65,8 @@ bool isFirstOpIntType(ShPtr<BinaryOpExpr> expr) {
 *
 * @return @c true if everything is alright, @c false otherwise.
 */
-bool isSecondOpPositiveConstInt(ShPtr<BinaryOpExpr> expr) {
-	ShPtr<ConstInt> secOpConstInt(cast<ConstInt>(expr->getSecondOperand()));
+bool isSecondOpPositiveConstInt(BinaryOpExpr* expr) {
+	ConstInt* secOpConstInt(cast<ConstInt>(expr->getSecondOperand()));
 	// Check if the second operand is a constant.
 	if (!secOpConstInt) {
 		return false;
@@ -89,7 +89,7 @@ bool isSecondOpPositiveConstInt(ShPtr<BinaryOpExpr> expr) {
 * @par Preconditions
 *  - @a module is non-null
 */
-BitShiftOptimizer::BitShiftOptimizer(ShPtr<Module> module):
+BitShiftOptimizer::BitShiftOptimizer(Module* module):
 	Optimizer(module) {
 		PRECONDITION_NON_NULL(module);
 	}
@@ -98,7 +98,7 @@ void BitShiftOptimizer::doOptimization() {
 	// Visit the initializer of all global variables.
 	for (auto i = module->global_var_begin(), e = module->global_var_end();
 			i != e; ++i) {
-		if (ShPtr<Expression> init = (*i)->getInitializer()) {
+		if (Expression* init = (*i)->getInitializer()) {
 			init->accept(this);
 		}
 	}
@@ -110,7 +110,7 @@ void BitShiftOptimizer::doOptimization() {
 	}
 }
 
-void BitShiftOptimizer::visit(ShPtr<BitShlOpExpr> expr) {
+void BitShiftOptimizer::visit(BitShlOpExpr* expr) {
 	// First, visit (and possibly optimize) nested expression.
 	Optimizer::visit(expr);
 
@@ -123,13 +123,13 @@ void BitShiftOptimizer::visit(ShPtr<BitShlOpExpr> expr) {
 	}
 
 	// Replace the shift with multiplication and update the second operand.
-	ShPtr<ConstInt> secOpConstInt(cast<ConstInt>(expr->getSecondOperand()));
-	ShPtr<MulOpExpr> mulOpExpr(MulOpExpr::create(expr->getFirstOperand(),
+	ConstInt* secOpConstInt(cast<ConstInt>(expr->getSecondOperand()));
+	MulOpExpr* mulOpExpr(MulOpExpr::create(expr->getFirstOperand(),
 		ConstInt::getTwoToPositivePower(secOpConstInt)));
 	Expression::replaceExpression(expr, mulOpExpr);
 }
 
-void BitShiftOptimizer::visit(ShPtr<BitShrOpExpr> expr) {
+void BitShiftOptimizer::visit(BitShrOpExpr* expr) {
 	// First, visit (and possibly optimize) nested expression.
 	Optimizer::visit(expr);
 
@@ -142,8 +142,8 @@ void BitShiftOptimizer::visit(ShPtr<BitShrOpExpr> expr) {
 	}
 
 	// Replace the shift with division and update the second operand.
-	ShPtr<ConstInt> secOpConstInt(cast<ConstInt>(expr->getSecondOperand()));
-	ShPtr<DivOpExpr> divOpExpr(DivOpExpr::create(expr->getFirstOperand(),
+	ConstInt* secOpConstInt(cast<ConstInt>(expr->getSecondOperand()));
+	DivOpExpr* divOpExpr(DivOpExpr::create(expr->getFirstOperand(),
 		ConstInt::getTwoToPositivePower(secOpConstInt)));
 	Expression::replaceExpression(expr, divOpExpr);
 }

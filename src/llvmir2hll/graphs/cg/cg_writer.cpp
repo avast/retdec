@@ -16,7 +16,7 @@ namespace llvmir2hll {
 * @param[in] cg CG to be emitted.
 * @param[in] out Output stream where the CG is emitted.
 */
-CGWriter::CGWriter(ShPtr<CG> cg, std::ostream &out):
+CGWriter::CGWriter(CG* cg, std::ostream &out):
 	cg(cg), out(out) {}
 
 } // namespace llvmir2hll

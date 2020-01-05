@@ -20,17 +20,17 @@ namespace llvmir2hll {
 * @par Preconditions
 *  - @a module is non-null
 */
-DerefAddressOptimizer::DerefAddressOptimizer(ShPtr<Module> module):
+DerefAddressOptimizer::DerefAddressOptimizer(Module* module):
 	FuncOptimizer(module) {
 		PRECONDITION_NON_NULL(module);
 	}
 
-void DerefAddressOptimizer::visit(ShPtr<DerefOpExpr> expr) {
+void DerefAddressOptimizer::visit(DerefOpExpr* expr) {
 	expr->getOperand()->accept(this);
 
 	// Check whether we're dereferencing an address operator. If so, then
 	// remove these two dereference+address operators.
-	if (ShPtr<AddressOpExpr> addressOpExpr = cast<AddressOpExpr>(
+	if (AddressOpExpr* addressOpExpr = cast<AddressOpExpr>(
 			expr->getOperand())) {
 		Expression::replaceExpression(expr, addressOpExpr->getOperand());
 	}

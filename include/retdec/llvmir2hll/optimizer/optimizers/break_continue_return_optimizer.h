@@ -47,7 +47,7 @@ namespace llvmir2hll {
 */
 class BreakContinueReturnOptimizer final: public FuncOptimizer {
 public:
-	BreakContinueReturnOptimizer(ShPtr<Module> module);
+	BreakContinueReturnOptimizer(Module* module);
 
 	virtual std::string getId() const override { return "BreakContinueReturn"; }
 
@@ -55,12 +55,12 @@ private:
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<BreakStmt> stmt) override;
-	virtual void visit(ShPtr<ContinueStmt> stmt) override;
-	virtual void visit(ShPtr<ReturnStmt> stmt) override;
+	virtual void visit(BreakStmt* stmt) override;
+	virtual void visit(ContinueStmt* stmt) override;
+	virtual void visit(ReturnStmt* stmt) override;
 	/// @}
 
-	void removeSuccessorWhenAppropriate(ShPtr<Statement> stmt);
+	void removeSuccessorWhenAppropriate(Statement* stmt);
 };
 
 } // namespace llvmir2hll

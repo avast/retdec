@@ -30,7 +30,7 @@ REGISTER_AT_FACTORY("optim", OPTIM_CALL_INFO_OBTAINER_ID, CallInfoObtainerFactor
 * @brief Constructs a new optimistic piece of information about the given
 *        function call.
 */
-OptimCallInfo::OptimCallInfo(ShPtr<CallExpr> call): CallInfo(call) {}
+OptimCallInfo::OptimCallInfo(CallExpr* call): CallInfo(call) {}
 
 /**
 * @brief Emits the info to standard error.
@@ -41,61 +41,61 @@ void OptimCallInfo::debugPrint() {
 	llvm::errs() << "[OptimCallInfo] Debug info for '" << call << "':\n";
 
 	llvm::errs() << "  neverReadVars:      ";
-	dump(neverReadVars, dumpFuncGetName<ShPtr<Variable>>);
+	dump(neverReadVars, dumpFuncGetName<Variable*>);
 
 	llvm::errs() << "  mayBeReadVars:      ";
-	dump(mayBeReadVars, dumpFuncGetName<ShPtr<Variable>>);
+	dump(mayBeReadVars, dumpFuncGetName<Variable*>);
 
 	llvm::errs() << "  alwaysReadVars:     ";
-	dump(alwaysReadVars, dumpFuncGetName<ShPtr<Variable>>);
+	dump(alwaysReadVars, dumpFuncGetName<Variable*>);
 
 	llvm::errs() << "  neverModifiedVars:  ";
-	dump(neverModifiedVars, dumpFuncGetName<ShPtr<Variable>>);
+	dump(neverModifiedVars, dumpFuncGetName<Variable*>);
 
 	llvm::errs() << "  mayBeModifiedVars:  ";
-	dump(mayBeModifiedVars, dumpFuncGetName<ShPtr<Variable>>);
+	dump(mayBeModifiedVars, dumpFuncGetName<Variable*>);
 
 	llvm::errs() << "  alwaysModifiedVars: ";
-	dump(alwaysModifiedVars, dumpFuncGetName<ShPtr<Variable>>);
+	dump(alwaysModifiedVars, dumpFuncGetName<Variable*>);
 
 	llvm::errs() << "  varsWithNeverChangedValue: ";
-	dump(varsWithNeverChangedValue, dumpFuncGetName<ShPtr<Variable>>);
+	dump(varsWithNeverChangedValue, dumpFuncGetName<Variable*>);
 
 	llvm::errs() << "  varsAlwaysModifiedBeforeRead: ";
-	dump(varsAlwaysModifiedBeforeRead, dumpFuncGetName<ShPtr<Variable>>);
+	dump(varsAlwaysModifiedBeforeRead, dumpFuncGetName<Variable*>);
 
 	llvm::errs() << "\n";
 }
 
-bool OptimCallInfo::isNeverRead(ShPtr<Variable> var) const {
+bool OptimCallInfo::isNeverRead(Variable* var) const {
 	return hasItem(neverReadVars, var);
 }
 
-bool OptimCallInfo::mayBeRead(ShPtr<Variable> var) const {
+bool OptimCallInfo::mayBeRead(Variable* var) const {
 	return hasItem(mayBeReadVars, var);
 }
 
-bool OptimCallInfo::isAlwaysRead(ShPtr<Variable> var) const {
+bool OptimCallInfo::isAlwaysRead(Variable* var) const {
 	return hasItem(alwaysReadVars, var);
 }
 
-bool OptimCallInfo::isNeverModified(ShPtr<Variable> var) const {
+bool OptimCallInfo::isNeverModified(Variable* var) const {
 	return hasItem(neverModifiedVars, var);
 }
 
-bool OptimCallInfo::mayBeModified(ShPtr<Variable> var) const {
+bool OptimCallInfo::mayBeModified(Variable* var) const {
 	return hasItem(mayBeModifiedVars, var);
 }
 
-bool OptimCallInfo::isAlwaysModified(ShPtr<Variable> var) const {
+bool OptimCallInfo::isAlwaysModified(Variable* var) const {
 	return hasItem(alwaysModifiedVars, var);
 }
 
-bool OptimCallInfo::valueIsNeverChanged(ShPtr<Variable> var) const {
+bool OptimCallInfo::valueIsNeverChanged(Variable* var) const {
 	return hasItem(varsWithNeverChangedValue, var);
 }
 
-bool OptimCallInfo::isAlwaysModifiedBeforeRead(ShPtr<Variable> var) const {
+bool OptimCallInfo::isAlwaysModifiedBeforeRead(Variable* var) const {
 	return hasItem(varsAlwaysModifiedBeforeRead, var);
 }
 
@@ -103,7 +103,7 @@ bool OptimCallInfo::isAlwaysModifiedBeforeRead(ShPtr<Variable> var) const {
 * @brief Constructs a new optimistic piece of information about the given
 *        function.
 */
-OptimFuncInfo::OptimFuncInfo(ShPtr<Function> func): FuncInfo(func) {}
+OptimFuncInfo::OptimFuncInfo(Function* func): FuncInfo(func) {}
 
 /**
 * @brief Emits the info to standard error.
@@ -114,61 +114,61 @@ void OptimFuncInfo::debugPrint() {
 	llvm::errs() << "[OptimFuncInfo] Debug info for function '" << func->getName() << "':\n";
 
 	llvm::errs() << "  neverReadVars:      ";
-	dump(neverReadVars, dumpFuncGetName<ShPtr<Variable>>);
+	dump(neverReadVars, dumpFuncGetName<Variable*>);
 
 	llvm::errs() << "  mayBeReadVars:      ";
-	dump(mayBeReadVars, dumpFuncGetName<ShPtr<Variable>>);
+	dump(mayBeReadVars, dumpFuncGetName<Variable*>);
 
 	llvm::errs() << "  alwaysReadVars:     ";
-	dump(alwaysReadVars, dumpFuncGetName<ShPtr<Variable>>);
+	dump(alwaysReadVars, dumpFuncGetName<Variable*>);
 
 	llvm::errs() << "  neverModifiedVars:  ";
-	dump(neverModifiedVars, dumpFuncGetName<ShPtr<Variable>>);
+	dump(neverModifiedVars, dumpFuncGetName<Variable*>);
 
 	llvm::errs() << "  mayBeModifiedVars:  ";
-	dump(mayBeModifiedVars, dumpFuncGetName<ShPtr<Variable>>);
+	dump(mayBeModifiedVars, dumpFuncGetName<Variable*>);
 
 	llvm::errs() << "  alwaysModifiedVars: ";
-	dump(alwaysModifiedVars, dumpFuncGetName<ShPtr<Variable>>);
+	dump(alwaysModifiedVars, dumpFuncGetName<Variable*>);
 
 	llvm::errs() << "  varsWithNeverChangedValue: ";
-	dump(varsWithNeverChangedValue, dumpFuncGetName<ShPtr<Variable>>);
+	dump(varsWithNeverChangedValue, dumpFuncGetName<Variable*>);
 
 	llvm::errs() << "  varsAlwaysModifiedBeforeRead: ";
-	dump(varsAlwaysModifiedBeforeRead, dumpFuncGetName<ShPtr<Variable>>);
+	dump(varsAlwaysModifiedBeforeRead, dumpFuncGetName<Variable*>);
 
 	llvm::errs() << "\n";
 }
 
-bool OptimFuncInfo::isNeverRead(ShPtr<Variable> var) const {
+bool OptimFuncInfo::isNeverRead(Variable* var) const {
 	return hasItem(neverReadVars, var);
 }
 
-bool OptimFuncInfo::mayBeRead(ShPtr<Variable> var) const {
+bool OptimFuncInfo::mayBeRead(Variable* var) const {
 	return hasItem(mayBeReadVars, var);
 }
 
-bool OptimFuncInfo::isAlwaysRead(ShPtr<Variable> var) const {
+bool OptimFuncInfo::isAlwaysRead(Variable* var) const {
 	return hasItem(alwaysReadVars, var);
 }
 
-bool OptimFuncInfo::isNeverModified(ShPtr<Variable> var) const {
+bool OptimFuncInfo::isNeverModified(Variable* var) const {
 	return hasItem(neverModifiedVars, var);
 }
 
-bool OptimFuncInfo::mayBeModified(ShPtr<Variable> var) const {
+bool OptimFuncInfo::mayBeModified(Variable* var) const {
 	return hasItem(mayBeModifiedVars, var);
 }
 
-bool OptimFuncInfo::isAlwaysModified(ShPtr<Variable> var) const {
+bool OptimFuncInfo::isAlwaysModified(Variable* var) const {
 	return hasItem(alwaysModifiedVars, var);
 }
 
-bool OptimFuncInfo::valueIsNeverChanged(ShPtr<Variable> var) const {
+bool OptimFuncInfo::valueIsNeverChanged(Variable* var) const {
 	return hasItem(varsWithNeverChangedValue, var);
 }
 
-bool OptimFuncInfo::isAlwaysModifiedBeforeRead(ShPtr<Variable> var) const {
+bool OptimFuncInfo::isAlwaysModifiedBeforeRead(Variable* var) const {
 	return hasItem(varsAlwaysModifiedBeforeRead, var);
 }
 
@@ -186,7 +186,7 @@ OptimCallInfoObtainer::OptimCallInfoObtainer(): CallInfoObtainer() {}
 */
 void OptimCallInfoObtainer::computeAllFuncInfos() {
 	// Obtain the order in which function information should be computed.
-	ShPtr<FuncInfoCompOrder> fico(getFuncInfoCompOrder(cg));
+	FuncInfoCompOrder* fico(getFuncInfoCompOrder(cg));
 
 	// Compute the information from the obtained order.
 	for (const auto &func : fico->order) {
@@ -208,8 +208,8 @@ void OptimCallInfoObtainer::computeAllFuncInfos() {
 * @brief Computes @c funcInfoMap[func] for @a func from the currently known
 *        information.
 */
-void OptimCallInfoObtainer::computeFuncInfo(ShPtr<Function> func) {
-	ShPtr<OptimFuncInfo> funcInfo = func->isDeclaration() ?
+void OptimCallInfoObtainer::computeFuncInfo(Function* func) {
+	OptimFuncInfo* funcInfo = func->isDeclaration() ?
 		computeFuncInfoDeclaration(func) : computeFuncInfoDefinition(func);
 	funcInfoMap[func] = funcInfo;
 }
@@ -253,9 +253,9 @@ VarSet OptimCallInfoObtainer::skipLocalVars(const VarSet &vars) {
 * @par Preconditions
 *  - @a func is a declaration
 */
-ShPtr<OptimFuncInfo> OptimCallInfoObtainer::computeFuncInfoDeclaration(
-		ShPtr<Function> func) {
-	ShPtr<OptimFuncInfo> funcInfo(ShPtr<OptimFuncInfo>(new OptimFuncInfo(func)));
+OptimFuncInfo* OptimCallInfoObtainer::computeFuncInfoDeclaration(
+		Function* func) {
+	OptimFuncInfo* funcInfo(new OptimFuncInfo(func));
 
 	// Use our assumption of global variables (see the class description).
 	funcInfo->neverReadVars = globalVars;
@@ -273,10 +273,10 @@ ShPtr<OptimFuncInfo> OptimCallInfoObtainer::computeFuncInfoDeclaration(
 * @par Preconditions
 *  - @a func is a definition
 */
-ShPtr<OptimFuncInfo> OptimCallInfoObtainer::computeFuncInfoDefinition(
-		ShPtr<Function> func) {
+OptimFuncInfo* OptimCallInfoObtainer::computeFuncInfoDefinition(
+		Function* func) {
 	return OptimFuncInfoCFGTraversal::getOptimFuncInfo(module,
-		ucast<OptimCallInfoObtainer>(shared_from_this()), va, funcCFGMap[func]);
+		ucast<OptimCallInfoObtainer>(this), va, funcCFGMap[func]);
 }
 
 /**
@@ -286,12 +286,12 @@ ShPtr<OptimFuncInfo> OptimCallInfoObtainer::computeFuncInfoDefinition(
 * See the description of getCallInfo() for more information on the
 * preconditions.
 */
-ShPtr<OptimCallInfo> OptimCallInfoObtainer::computeCallInfo(ShPtr<CallExpr> call,
-		ShPtr<Function> caller) {
-	ShPtr<OptimCallInfo> callInfo(new OptimCallInfo(call));
+OptimCallInfo* OptimCallInfoObtainer::computeCallInfo(CallExpr* call,
+		Function* caller) {
+	OptimCallInfo* callInfo(new OptimCallInfo(call));
 
-	ShPtr<Variable> calledVar(cast<Variable>(call->getCalledExpr()));
-	ShPtr<Function> calledFunc;
+	Variable* calledVar(cast<Variable>(call->getCalledExpr()));
+	Function* calledFunc;
 	if (calledVar) {
 		calledFunc = module->getFuncByName(calledVar->getName());
 	}
@@ -326,7 +326,7 @@ ShPtr<OptimCallInfo> OptimCallInfoObtainer::computeCallInfo(ShPtr<CallExpr> call
 	//
 	// Then, if we included local variables, we would have that the variable a
 	// is modified in the call func(i - 1), which is not true.
-	ShPtr<OptimFuncInfo> calledFuncInfo(funcInfoMap[calledFunc]);
+	OptimFuncInfo* calledFuncInfo(funcInfoMap[calledFunc]);
 	callInfo->neverReadVars = skipLocalVars(calledFuncInfo->neverReadVars);
 	callInfo->mayBeReadVars = skipLocalVars(calledFuncInfo->mayBeReadVars);
 	callInfo->alwaysReadVars = skipLocalVars(calledFuncInfo->alwaysReadVars);
@@ -355,11 +355,11 @@ ShPtr<OptimCallInfo> OptimCallInfoObtainer::computeCallInfo(ShPtr<CallExpr> call
 /**
 * @brief Creates a new obtainer.
 */
-ShPtr<CallInfoObtainer> OptimCallInfoObtainer::create() {
-	return ShPtr<CallInfoObtainer>(new OptimCallInfoObtainer());
+CallInfoObtainer* OptimCallInfoObtainer::create() {
+	return new OptimCallInfoObtainer();
 }
 
-void OptimCallInfoObtainer::init(ShPtr<CG> cg, ShPtr<ValueAnalysis> va) {
+void OptimCallInfoObtainer::init(CG* cg, ValueAnalysis* va) {
 	CallInfoObtainer::init(cg, va);
 	funcInfoMap.clear();
 	callInfoMap.clear();
@@ -379,7 +379,7 @@ void OptimCallInfoObtainer::init(ShPtr<CG> cg, ShPtr<ValueAnalysis> va) {
 	// FuncInfos here before any computation.
 	// For each function in the module...
 	for (auto i = module->func_begin(), e = module->func_end(); i != e; ++i) {
-		funcInfoMap[*i] = ShPtr<OptimFuncInfo>(new OptimFuncInfo(*i));
+		funcInfoMap[*i] = new OptimFuncInfo(*i);
 	}
 
 	computeAllFuncInfos();
@@ -389,8 +389,8 @@ std::string OptimCallInfoObtainer::getId() const {
 	return OPTIM_CALL_INFO_OBTAINER_ID;
 }
 
-ShPtr<CallInfo> OptimCallInfoObtainer::getCallInfo(ShPtr<CallExpr> call,
-		ShPtr<Function> caller) {
+CallInfo* OptimCallInfoObtainer::getCallInfo(CallExpr* call,
+		Function* caller) {
 	PRECONDITION(module, "the obtainer has not been initialized");
 	PRECONDITION(module->funcExists(caller),
 		"function `" << caller->getName() << "` does not exist");
@@ -402,12 +402,12 @@ ShPtr<CallInfo> OptimCallInfoObtainer::getCallInfo(ShPtr<CallExpr> call,
 	}
 
 	// We haven't, so compute it.
-	ShPtr<OptimCallInfo> callInfo(computeCallInfo(call, caller));
+	OptimCallInfo* callInfo(computeCallInfo(call, caller));
 	callInfoMap[call] = callInfo;
 	return callInfo;
 }
 
-ShPtr<FuncInfo> OptimCallInfoObtainer::getFuncInfo(ShPtr<Function> func) {
+FuncInfo* OptimCallInfoObtainer::getFuncInfo(Function* func) {
 	PRECONDITION(module, "the obtainer has not been initialized");
 	PRECONDITION(module->funcExists(func),
 		"function `" << func->getName() << "` does not exist");
@@ -418,8 +418,8 @@ ShPtr<FuncInfo> OptimCallInfoObtainer::getFuncInfo(ShPtr<Function> func) {
 /**
 * @brief Returns @c true if @a fi1 differs from @a fi2, @c false otherwise.
 */
-bool OptimCallInfoObtainer::areDifferent(ShPtr<OptimFuncInfo> fi1,
-		ShPtr<OptimFuncInfo> fi2) {
+bool OptimCallInfoObtainer::areDifferent(OptimFuncInfo* fi1,
+		OptimFuncInfo* fi2) {
 	return fi1->getFunc() != fi2->getFunc() ||
 		fi1->neverReadVars != fi2->neverReadVars ||
 		fi1->mayBeReadVars != fi2->mayBeReadVars ||

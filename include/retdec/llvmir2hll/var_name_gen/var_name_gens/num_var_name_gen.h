@@ -25,7 +25,7 @@ namespace llvmir2hll {
 class NumVarNameGen: public VarNameGen {
 public:
 	// TODO Refactor "var" into a named constant.
-	static UPtr<VarNameGen> create(std::string prefix = "var");
+	static VarNameGen* create(std::string prefix = "var");
 
 	virtual std::string getId() const override;
 	virtual void restart() override;

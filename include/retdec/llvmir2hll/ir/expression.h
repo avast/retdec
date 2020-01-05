@@ -29,7 +29,7 @@ public:
 	* This may happen, for example, when a binary operator have its operands of
 	* incompatible type.
 	*/
-	virtual ShPtr<Type> getType() const = 0;
+	virtual Type* getType() const = 0;
 
 	/**
 	* @brief Replaces all occurrences of @a oldExpr with @a newExpr in the
@@ -45,11 +45,11 @@ public:
 	* @par Preconditions
 	*  - @a oldExpr is non-null
 	*/
-	virtual void replace(ShPtr<Expression> oldExpr,
-		ShPtr<Expression> newExpr) = 0;
+	virtual void replace(Expression* oldExpr,
+		Expression* newExpr) = 0;
 
-	static void replaceExpression(ShPtr<Expression> oldExpr,
-		ShPtr<Expression> newExpr);
+	static void replaceExpression(Expression* oldExpr,
+		Expression* newExpr);
 
 protected:
 	Expression() = default;

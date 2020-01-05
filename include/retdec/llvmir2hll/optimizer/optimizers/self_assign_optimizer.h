@@ -32,7 +32,7 @@ namespace llvmir2hll {
 */
 class SelfAssignOptimizer final: public FuncOptimizer {
 public:
-	SelfAssignOptimizer(ShPtr<Module> module);
+	SelfAssignOptimizer(Module* module);
 
 	virtual std::string getId() const override { return "SelfAssign"; }
 
@@ -40,7 +40,7 @@ private:
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<AssignStmt> stmt) override;
+	virtual void visit(AssignStmt* stmt) override;
 	/// @}
 };
 

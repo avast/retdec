@@ -59,7 +59,7 @@ REGISTER_AT_FACTORY("readable", READABLE_VAR_RENAMER_ID, VarRenamerFactory,
 *
 * For more details, see create().
 */
-ReadableVarRenamer::ReadableVarRenamer(ShPtr<VarNameGen> varNameGen,
+ReadableVarRenamer::ReadableVarRenamer(VarNameGen* varNameGen,
 	bool useDebugNames): VarRenamer(varNameGen, useDebugNames),
 		globalVarNameGen(NumVarNameGen::create("g")),
 		localVarNameGen(NumVarNameGen::create("v")),
@@ -80,24 +80,24 @@ ReadableVarRenamer::ReadableVarRenamer(ShPtr<VarNameGen> varNameGen,
 * @par Preconditions
 *  - @a varNameGen is non-null
 */
-ShPtr<VarRenamer> ReadableVarRenamer::create(ShPtr<VarNameGen> varNameGen,
+VarRenamer* ReadableVarRenamer::create(VarNameGen* varNameGen,
 		bool useDebugNames) {
 	PRECONDITION_NON_NULL(varNameGen);
 
-	return ShPtr<VarRenamer>(new ReadableVarRenamer(varNameGen, useDebugNames));
+	return new ReadableVarRenamer(varNameGen, useDebugNames);
 }
 
 std::string ReadableVarRenamer::getId() const {
 	return READABLE_VAR_RENAMER_ID;
 }
 
-void ReadableVarRenamer::renameGlobalVar(ShPtr<Variable> var) {
+void ReadableVarRenamer::renameGlobalVar(Variable* var) {
 	PRECONDITION_NON_NULL(var);
 
 	assignName(var, globalVarNameGen->getNextVarName());
 }
 
-void ReadableVarRenamer::renameVarsInFunc(ShPtr<Function> func) {
+void ReadableVarRenamer::renameVarsInFunc(Function* func) {
 	PRECONDITION_NON_NULL(func);
 
 	currFunc = func;
@@ -109,15 +109,15 @@ void ReadableVarRenamer::renameVarsInFunc(ShPtr<Function> func) {
 	renameOtherLocalVars(func);
 }
 
-void ReadableVarRenamer::renameFuncParam(ShPtr<Variable> var,
-		ShPtr<Function> func) {
+void ReadableVarRenamer::renameFuncParam(Variable* var,
+		Function* func) {
 	PRECONDITION_NON_NULL(var);
 
 	assignName(var, genNameForFuncParam(var, func), func);
 }
 
-void ReadableVarRenamer::renameFuncLocalVar(ShPtr<Variable> var,
-		ShPtr<Function> func) {
+void ReadableVarRenamer::renameFuncLocalVar(Variable* var,
+		Function* func) {
 	PRECONDITION_NON_NULL(var);
 
 	assignName(var, localVarNameGen->getNextVarName(), func);
@@ -126,7 +126,7 @@ void ReadableVarRenamer::renameFuncLocalVar(ShPtr<Variable> var,
 /**
 * @brief Visits subsequent statements of @a stmt (if any).
 */
-void ReadableVarRenamer::visitSubsequentStmts(ShPtr<Statement> stmt) {
+void ReadableVarRenamer::visitSubsequentStmts(Statement* stmt) {
 	if (stmt->hasSuccessor()) {
 		stmt->getSuccessor()->accept(this);
 	}
@@ -138,8 +138,8 @@ void ReadableVarRenamer::visitSubsequentStmts(ShPtr<Statement> stmt) {
 * If the function doesn't have a body, this function does nothing. Otherwise,
 * it sets @c currFunc, calls @c restart(), and visits the body.
 */
-void ReadableVarRenamer::visitFuncBody(ShPtr<Function> func) {
-	ShPtr<Statement> body(func->getBody());
+void ReadableVarRenamer::visitFuncBody(Function* func) {
+	Statement* body(func->getBody());
 	if (!body) {
 		return;
 	}
@@ -152,7 +152,7 @@ void ReadableVarRenamer::visitFuncBody(ShPtr<Function> func) {
 /**
 * @brief If the given function is "main", it properly renames its parameters.
 */
-void ReadableVarRenamer::renameMainParams(ShPtr<Function> func) {
+void ReadableVarRenamer::renameMainParams(Function* func) {
 	VarVector params(func->getParams());
 	if (func->getName() == "main" && params.size() == 2) {
 		// It's the main function. If we have not yet renamed the parameters
@@ -160,13 +160,13 @@ void ReadableVarRenamer::renameMainParams(ShPtr<Function> func) {
 		// argv.
 
 		// argc
-		ShPtr<Variable> argc(params.front());
+		Variable* argc(params.front());
 		if (!hasBeenRenamed(argc)) {
 			assignName(argc, "argc", func);
 		}
 
 		// argv
-		ShPtr<Variable> argv(params.back());
+		Variable* argv(params.back());
 		if (!hasBeenRenamed(argv)) {
 			assignName(argv, "argv", func);
 		}
@@ -176,7 +176,7 @@ void ReadableVarRenamer::renameMainParams(ShPtr<Function> func) {
 /**
 * @brief Properly renames induction variables in the given function.
 */
-void ReadableVarRenamer::renameInductionVars(ShPtr<Function> func) {
+void ReadableVarRenamer::renameInductionVars(Function* func) {
 	renamingInductionVars = true;
 	indVarsNamesInCurrFunc.clear();
 	visitFuncBody(func);
@@ -190,8 +190,8 @@ void ReadableVarRenamer::renameInductionVars(ShPtr<Function> func) {
 /**
 * @brief Renames the given induction variable in the given function.
 */
-void ReadableVarRenamer::renameInductionVar(ShPtr<Variable> var,
-		ShPtr<Function> func) {
+void ReadableVarRenamer::renameInductionVar(Variable* var,
+		Function* func) {
 	renameVarByChoosingNameFromList(var, currFunc, &IND_VAR_NAMES[0],
 		NUM_OF_AVAIL_IND_VAR_NAMES);
 }
@@ -199,7 +199,7 @@ void ReadableVarRenamer::renameInductionVar(ShPtr<Variable> var,
 /**
 * @brief Properly renames variables returned from the given function.
 */
-void ReadableVarRenamer::renameReturnedVars(ShPtr<Function> func) {
+void ReadableVarRenamer::renameReturnedVars(Function* func) {
 	renamingReturnVars = true;
 	visitFuncBody(func);
 	renamingReturnVars = false;
@@ -209,7 +209,7 @@ void ReadableVarRenamer::renameReturnedVars(ShPtr<Function> func) {
 * @brief Renames variables storing the results of calls to well-known
 *        functions.
 */
-void ReadableVarRenamer::renameResultsOfWellKnownFuncs(ShPtr<Function> func) {
+void ReadableVarRenamer::renameResultsOfWellKnownFuncs(Function* func) {
 	renamingResultsOfWellKnownFuncs = true;
 	visitFuncBody(func);
 	renamingResultsOfWellKnownFuncs = false;
@@ -218,7 +218,7 @@ void ReadableVarRenamer::renameResultsOfWellKnownFuncs(ShPtr<Function> func) {
 /**
 * @brief Renames variables passed as arguments to well-known functions.
 */
-void ReadableVarRenamer::renameArgsOfWellKnownFuncs(ShPtr<Function> func) {
+void ReadableVarRenamer::renameArgsOfWellKnownFuncs(Function* func) {
 	renamingArgsOfWellKnownFuncs = true;
 	visitFuncBody(func);
 	renamingArgsOfWellKnownFuncs = false;
@@ -227,7 +227,7 @@ void ReadableVarRenamer::renameArgsOfWellKnownFuncs(ShPtr<Function> func) {
 /**
 * @brief Properly renames other local variables in the given function.
 */
-void ReadableVarRenamer::renameOtherLocalVars(ShPtr<Function> func) {
+void ReadableVarRenamer::renameOtherLocalVars(Function* func) {
 	localVarNameGen->restart();
 
 	VarRenamer::renameVarsInFunc(func);
@@ -245,8 +245,8 @@ void ReadableVarRenamer::renameOtherLocalVars(ShPtr<Function> func) {
 * If there are no names that can be used, the last name of @a names is used,
 * but a suffix is appended to it.
 */
-void ReadableVarRenamer::renameVarByChoosingNameFromList(ShPtr<Variable> var,
-		ShPtr<Function> func, const char **names, std::size_t numOfAvailNames) {
+void ReadableVarRenamer::renameVarByChoosingNameFromList(Variable* var,
+		Function* func, const char **names, std::size_t numOfAvailNames) {
 	// Choose a new name for the variable.
 	std::string newName;
 	for (std::size_t i = 0, e = numOfAvailNames; i < e; ++i) {
@@ -277,22 +277,22 @@ void ReadableVarRenamer::renameVarByChoosingNameFromList(ShPtr<Variable> var,
 *    declared function
 *  - the variable has already been renamed or it is a global variable
 */
-void ReadableVarRenamer::tryRenameVarStoringCallResult(ShPtr<Statement> stmt) {
+void ReadableVarRenamer::tryRenameVarStoringCallResult(Statement* stmt) {
 	PRECONDITION_NON_NULL(stmt);
 	PRECONDITION(isVarDefOrAssignStmt(stmt), "the statement " << stmt <<
 		"is not a variable-defining statement or an assign statement");
 
-	ShPtr<Variable> lhsVar(cast<Variable>(getLhs(stmt)));
+	Variable* lhsVar(cast<Variable>(getLhs(stmt)));
 	if (!lhsVar || hasBeenRenamed(lhsVar) || isGlobalVar(lhsVar)) {
 		return;
 	}
 
-	ShPtr<CallExpr> callExpr(cast<CallExpr>(skipCasts(getRhs(stmt))));
+	CallExpr* callExpr(cast<CallExpr>(skipCasts(getRhs(stmt))));
 	if (!callExpr) {
 		return;
 	}
 
-	ShPtr<Function> calledFunc(getDeclaredFunc(callExpr));
+	Function* calledFunc(getDeclaredFunc(callExpr));
 	if (!calledFunc) {
 		return;
 	}
@@ -315,10 +315,10 @@ void ReadableVarRenamer::tryRenameVarStoringCallResult(ShPtr<Statement> stmt) {
 *  - there are no variables to be renamed
 */
 void ReadableVarRenamer::tryRenameVarsPassedAsArgsToFuncCall(
-		ShPtr<CallExpr> expr) {
+		CallExpr* expr) {
 	PRECONDITION_NON_NULL(expr);
 
-	ShPtr<Function> calledFunc(getDeclaredFunc(expr));
+	Function* calledFunc(getDeclaredFunc(expr));
 	if (!calledFunc) {
 		return;
 	}
@@ -327,7 +327,7 @@ void ReadableVarRenamer::tryRenameVarsPassedAsArgsToFuncCall(
 	const ExprVector &args(expr->getArgs());
 	unsigned argPos = 1;
 	for (auto i = args.begin(), e = args.end(); i != e; ++i, ++argPos) {
-		if (ShPtr<Variable> var = getVarFromCallArg(*i)) {
+		if (Variable* var = getVarFromCallArg(*i)) {
 			tryRenameVarPassedAsArgToFuncCall(calledFunc, var, argPos);
 		}
 	}
@@ -341,7 +341,7 @@ void ReadableVarRenamer::tryRenameVarsPassedAsArgsToFuncCall(
 *  - @a var is a global variable, function, or it has already been renamed
 */
 void ReadableVarRenamer::tryRenameVarPassedAsArgToFuncCall(
-		ShPtr<Function> calledFunc, ShPtr<Variable> var, unsigned argPos) {
+		Function* calledFunc, Variable* var, unsigned argPos) {
 	if (isGlobalVar(var) || isFunc(var) || hasBeenRenamed(var)) {
 		return;
 	}
@@ -357,15 +357,15 @@ void ReadableVarRenamer::tryRenameVarPassedAsArgToFuncCall(
 * @brief Returns the function called in the given expression provided that it
 *        is a call to a declared function, the null pointer otherwise.
 */
-ShPtr<Function> ReadableVarRenamer::getDeclaredFunc(ShPtr<CallExpr> expr) const {
-	ShPtr<Variable> callVar(cast<Variable>(expr->getCalledExpr()));
+Function* ReadableVarRenamer::getDeclaredFunc(CallExpr* expr) const {
+	Variable* callVar(cast<Variable>(expr->getCalledExpr()));
 	if (!callVar) {
-		return ShPtr<Function>();
+		return nullptr;
 	}
 
-	ShPtr<Function> calledFunc(getFuncByName(callVar->getName()));
+	Function* calledFunc(getFuncByName(callVar->getName()));
 	if (!calledFunc || !calledFunc->isDeclaration()) {
-		return ShPtr<Function>();
+		return nullptr;
 	}
 
 	return calledFunc;
@@ -376,7 +376,7 @@ ShPtr<Function> ReadableVarRenamer::getDeclaredFunc(ShPtr<CallExpr> expr) const 
 *
 * When the variable cannot be obtained, the null pointer is returned.
 */
-ShPtr<Variable> ReadableVarRenamer::getVarFromCallArg(ShPtr<Expression> arg) const {
+Variable* ReadableVarRenamer::getVarFromCallArg(Expression* arg) const {
 	// Motivation: For example, the given function call is present when
 	// decompiling file enc_1_.exe:
 	//
@@ -384,8 +384,8 @@ ShPtr<Variable> ReadableVarRenamer::getVarFromCallArg(ShPtr<Expression> arg) con
 	//
 	// We want to rename v1 to lpSystemTimeAsFileTime, so we have to skip
 	// casts, address-taking operators etc.
-	ShPtr<Expression> oldExpr;
-	ShPtr<Expression> newExpr(arg);
+	Expression* oldExpr;
+	Expression* newExpr(arg);
 	do {
 		oldExpr = newExpr;
 		newExpr = skipCasts(newExpr);
@@ -400,7 +400,7 @@ ShPtr<Variable> ReadableVarRenamer::getVarFromCallArg(ShPtr<Expression> arg) con
 * @brief Generates a name for the given parameter of the given function.
 */
 std::string ReadableVarRenamer::genNameForFuncParam(
-		ShPtr<Variable> var, ShPtr<Function> func) const {
+		Variable* var, Function* func) const {
 	// Use name "aX", where X is the position of the parameter. In this way, if
 	// there are some parameters with assigned names from debug information, we
 	// number the parameters correctly, e.g. p2 is always the second parameter,
@@ -409,12 +409,12 @@ std::string ReadableVarRenamer::genNameForFuncParam(
 	return "a"s + toString(func->getParamPos(var));
 }
 
-void ReadableVarRenamer::visit(ShPtr<ForLoopStmt> stmt) {
+void ReadableVarRenamer::visit(ForLoopStmt* stmt) {
 	//
 	// Renaming of induction variables.
 	//
 	if (renamingInductionVars) {
-		ShPtr<Variable> indVar(stmt->getIndVar());
+		Variable* indVar(stmt->getIndVar());
 		if (!hasBeenRenamed(indVar)) {
 			renameInductionVar(indVar, currFunc);
 		}
@@ -436,14 +436,14 @@ void ReadableVarRenamer::visit(ShPtr<ForLoopStmt> stmt) {
 	}
 }
 
-void ReadableVarRenamer::visit(ShPtr<ReturnStmt> stmt) {
+void ReadableVarRenamer::visit(ReturnStmt* stmt) {
 	//
 	// Renaming of variables returned from the function.
 	//
 	if (renamingReturnVars) {
 		// TODO Is this the best way of doing this? What if there are more
 		//      variables returned from the function?
-		if (ShPtr<Variable> var = cast<Variable>(stmt->getRetVal())) {
+		if (Variable* var = cast<Variable>(stmt->getRetVal())) {
 			if (!isGlobalVar(var) && !isFunc(var) && !hasBeenRenamed(var)) {
 				assignName(var, RETURN_VAR_NAME, currFunc);
 			}
@@ -455,7 +455,7 @@ void ReadableVarRenamer::visit(ShPtr<ReturnStmt> stmt) {
 	}
 }
 
-void ReadableVarRenamer::visit(ShPtr<AssignStmt> stmt) {
+void ReadableVarRenamer::visit(AssignStmt* stmt) {
 	//
 	// Renaming of variables storing the results of calls to well-known
 	// functions.
@@ -468,7 +468,7 @@ void ReadableVarRenamer::visit(ShPtr<AssignStmt> stmt) {
 	}
 }
 
-void ReadableVarRenamer::visit(ShPtr<VarDefStmt> stmt) {
+void ReadableVarRenamer::visit(VarDefStmt* stmt) {
 	//
 	// Renaming of variables storing the results of calls to well-known
 	// functions.
@@ -481,7 +481,7 @@ void ReadableVarRenamer::visit(ShPtr<VarDefStmt> stmt) {
 	}
 }
 
-void ReadableVarRenamer::visit(ShPtr<CallExpr> expr) {
+void ReadableVarRenamer::visit(CallExpr* expr) {
 	VarRenamer::visit(expr);
 
 	//
@@ -493,7 +493,7 @@ void ReadableVarRenamer::visit(ShPtr<CallExpr> expr) {
 	}
 }
 
-void ReadableVarRenamer::visit(ShPtr<Variable> var) {
+void ReadableVarRenamer::visit(Variable* var) {
 	// Do not rename already renamed variables.
 	if (hasBeenRenamed(var)) {
 		return;

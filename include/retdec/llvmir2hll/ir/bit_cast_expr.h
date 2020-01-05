@@ -25,10 +25,10 @@ class Visitor;
 */
 class BitCastExpr final: public CastExpr {
 public:
-	static ShPtr<BitCastExpr> create(ShPtr<Expression> op, ShPtr<Type> dstType);
+	static BitCastExpr* create(Expression* op, Type* dstType);
 
-	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
-	virtual ShPtr<Value> clone() override;
+	virtual bool isEqualTo(Value* otherValue) const override;
+	virtual Value* clone() override;
 
 	/// @name Visitor Interface
 	/// @{
@@ -38,7 +38,7 @@ public:
 private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
-	BitCastExpr(ShPtr<Expression> op, ShPtr<Type> type);
+	BitCastExpr(Expression* op, Type* type);
 };
 
 } // namespace llvmir2hll

@@ -132,7 +132,7 @@ namespace llvmir2hll {
 */
 class IfStructureOptimizer final: public FuncOptimizer {
 public:
-	IfStructureOptimizer(ShPtr<Module> module);
+	IfStructureOptimizer(Module* module);
 
 	virtual std::string getId() const override { return "IfStructure"; }
 
@@ -140,14 +140,14 @@ private:
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<IfStmt> stmt) override;
+	virtual void visit(IfStmt* stmt) override;
 	/// @}
 
-	bool tryOptimization1(ShPtr<IfStmt> stmt);
-	bool tryOptimization2(ShPtr<IfStmt> stmt);
-	bool tryOptimization3(ShPtr<IfStmt> stmt);
-	bool tryOptimization4(ShPtr<IfStmt> stmt);
-	bool tryOptimization5(ShPtr<IfStmt> stmt);
+	bool tryOptimization1(IfStmt* stmt);
+	bool tryOptimization2(IfStmt* stmt);
+	bool tryOptimization3(IfStmt* stmt);
+	bool tryOptimization4(IfStmt* stmt);
+	bool tryOptimization5(IfStmt* stmt);
 };
 
 } // namespace llvmir2hll

@@ -16,16 +16,16 @@ namespace llvmir2hll {
 *
 * See create() for more information.
 */
-ArrayType::ArrayType(ShPtr<Type> elemType, const Dimensions &dims):
+ArrayType::ArrayType(Type* elemType, const Dimensions &dims):
 	Type(), elemType(elemType), dims(dims) {}
 
-ShPtr<Value> ArrayType::clone() {
+Value* ArrayType::clone() {
 	return ArrayType::create(elemType, dims);
 }
 
-bool ArrayType::isEqualTo(ShPtr<Value> otherValue) const {
+bool ArrayType::isEqualTo(Value* otherValue) const {
 	// Both types and numbers of dimensions have to be equal.
-	if (ShPtr<ArrayType> otherArrayType = cast<ArrayType>(otherValue)) {
+	if (ArrayType* otherArrayType = cast<ArrayType>(otherValue)) {
 		if ((elemType == otherArrayType->elemType) &&
 				(dims == otherArrayType->dims)) {
 			return true;
@@ -37,7 +37,7 @@ bool ArrayType::isEqualTo(ShPtr<Value> otherValue) const {
 /**
 * @brief Returns the type of elements of the array.
 */
-ShPtr<Type> ArrayType::getContainedType() const {
+Type* ArrayType::getContainedType() const {
 	return elemType;
 }
 
@@ -61,13 +61,13 @@ bool ArrayType::hasEmptyDimensions() const {
 * @param[in] elemType Type of elements of the array.
 * @param[in] dims Array dimensions.
 */
-ShPtr<ArrayType> ArrayType::create(ShPtr<Type> elemType, const Dimensions &dims) {
+ArrayType* ArrayType::create(Type* elemType, const Dimensions &dims) {
 	// There is no special initialization needed.
-	return ShPtr<ArrayType>(new ArrayType(elemType, dims));
+	return new ArrayType(elemType, dims);
 }
 
 void ArrayType::accept(Visitor *v) {
-	v->visit(ucast<ArrayType>(shared_from_this()));
+	v->visit(ucast<ArrayType>(this));
 }
 
 } // namespace llvmir2hll

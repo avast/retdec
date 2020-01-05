@@ -32,35 +32,35 @@ class ValueAnalysis;
 */
 class LhsRhsUsesCFGTraversal final: public CFGTraversal {
 public:
-	static StmtSet getUses(ShPtr<Statement> stmt, ShPtr<CFG> cfg,
-		ShPtr<ValueAnalysis> va, ShPtr<CallInfoObtainer> cio);
+	static StmtSet getUses(Statement* stmt, CFG* cfg,
+		ValueAnalysis* va, CallInfoObtainer* cio);
 
 private:
 	/// Original statement.
-	ShPtr<Statement> origStmt;
+	Statement* origStmt = nullptr;
 
 	/// The left-hand side of the original statement.
-	ShPtr<Variable> origLhsVar;
+	Variable* origLhsVar = nullptr;
 
 	/// The set of variables used in the right-hand side of the original
 	/// statement.
 	const VarSet &origRhsVars;
 
 	/// Analysis of values.
-	ShPtr<ValueAnalysis> va;
+	ValueAnalysis* va = nullptr;
 
 	/// Obtainer of information about function calls.
-	ShPtr<CallInfoObtainer> cio;
+	CallInfoObtainer* cio = nullptr;
 
 	/// Uses of the variable defined in @c origStmt.
 	StmtSet uses;
 
 private:
-	LhsRhsUsesCFGTraversal(ShPtr<Statement> stmt, ShPtr<Variable> origLhsVar,
-		const VarSet &origRhsVars, ShPtr<CFG> cfg, ShPtr<ValueAnalysis> va,
-		ShPtr<CallInfoObtainer> cio);
+	LhsRhsUsesCFGTraversal(Statement* stmt, Variable* origLhsVar,
+		const VarSet &origRhsVars, CFG* cfg, ValueAnalysis* va,
+		CallInfoObtainer* cio);
 
-	virtual bool visitStmt(ShPtr<Statement> stmt) override;
+	virtual bool visitStmt(Statement* stmt) override;
 	virtual bool getEndRetVal() const override;
 	virtual bool combineRetVals(bool origRetVal, bool newRetVal) const override;
 };

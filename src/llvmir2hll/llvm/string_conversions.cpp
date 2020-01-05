@@ -123,7 +123,7 @@ bool stores8BitStringLiteral(const llvm::GlobalVariable *v) {
 * @par Preconditions
 *  - @a ca is non-null and represents a constant string
 */
-ShPtr<ConstString> toConstString(llvm::ConstantArray *ca) {
+ConstString* toConstString(llvm::ConstantArray *ca) {
 	PRECONDITION_NON_NULL(ca);
 
 	ConstString::UnderlyingStringType strValue;
@@ -142,7 +142,7 @@ ShPtr<ConstString> toConstString(llvm::ConstantArray *ca) {
 * @par Preconditions
 *  - @a cda is non-null and represents a constant string
 */
-ShPtr<ConstString> toConstString(llvm::ConstantDataArray *cda) {
+ConstString* toConstString(llvm::ConstantDataArray *cda) {
 	PRECONDITION_NON_NULL(cda);
 
 	// Do not include the last element if it is the null byte (\x00) because in
@@ -163,7 +163,7 @@ ShPtr<ConstString> toConstString(llvm::ConstantDataArray *cda) {
 /**
 * @brief Returns the initializer of the given global variable as ConstString.
 */
-ShPtr<ConstString> getInitializerAsConstString(llvm::GlobalVariable *v) {
+ConstString* getInitializerAsConstString(llvm::GlobalVariable *v) {
 	if (!v->hasInitializer() || v->getInitializer()->isNullValue()) {
 		// There is no initializer, which means it is the empty string.
 		return ConstString::create({}, getCharSize(v->getType()->getContainedType(0)));

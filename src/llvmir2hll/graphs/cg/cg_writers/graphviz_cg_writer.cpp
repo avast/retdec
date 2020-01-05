@@ -48,7 +48,7 @@ const std::string MODULE_CLUSTER_LABEL_PREFIX = "cluster_";
 *
 * See create() for the description of parameters.
 */
-GraphvizCGWriter::GraphvizCGWriter(ShPtr<CG> cg, std::ostream &out):
+GraphvizCGWriter::GraphvizCGWriter(CG* cg, std::ostream &out):
 	CGWriter(cg, out) {}
 
 /**
@@ -57,8 +57,8 @@ GraphvizCGWriter::GraphvizCGWriter(ShPtr<CG> cg, std::ostream &out):
 * @param[in] cg CG to be emitted.
 * @param[in] out Output stream into which the CG will be emitted.
 */
-ShPtr<CGWriter> GraphvizCGWriter::create(ShPtr<CG> cg, std::ostream &out) {
-	return ShPtr<CGWriter>(new GraphvizCGWriter(cg, out));
+CGWriter* GraphvizCGWriter::create(CG* cg, std::ostream &out) {
+	return new GraphvizCGWriter(cg, out);
 }
 
 std::string GraphvizCGWriter::getId() const {
@@ -66,7 +66,7 @@ std::string GraphvizCGWriter::getId() const {
 }
 
 bool GraphvizCGWriter::emitCG() {
-	ShPtr<Module> module(cg->getCorrespondingModule());
+	Module* module(cg->getCorrespondingModule());
 	StringSet moduleNames(module->getDebugModuleNames());
 
 	// If there is debug information available, generate module names in the
@@ -143,7 +143,7 @@ bool GraphvizCGWriter::emitCG() {
 /**
 * @brief Emits the node given by @a caller and @a callees.
 */
-void GraphvizCGWriter::emitNode(ShPtr<Function> caller, ShPtr<CG::CalledFuncs> callees) {
+void GraphvizCGWriter::emitNode(Function* caller, CG::CalledFuncs* callees) {
 	out << INDENT << getNodeLabelForFunc(caller) << " [";
 
 	// Should the node be of a specific color?
@@ -161,7 +161,7 @@ void GraphvizCGWriter::emitNode(ShPtr<Function> caller, ShPtr<CG::CalledFuncs> c
 /**
 * @brief Returns a node label for the given function.
 */
-std::string GraphvizCGWriter::getNodeLabelForFunc(ShPtr<Function> func) {
+std::string GraphvizCGWriter::getNodeLabelForFunc(Function* func) {
 	return NODE_LABEL_PREFIX + func->getName();
 }
 

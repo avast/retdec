@@ -54,9 +54,9 @@ namespace llvmir2hll {
 */
 class NegationOperatorSubOptimizer final: public SubOptimizer {
 public:
-	NegationOperatorSubOptimizer(ShPtr<ArithmExprEvaluator> arithmExprEvaluator);
+	NegationOperatorSubOptimizer(ArithmExprEvaluator* arithmExprEvaluator);
 
-	static ShPtr<SubOptimizer> create(ShPtr<ArithmExprEvaluator>
+	static SubOptimizer* create(ArithmExprEvaluator*
 		arithmExprEvaluator);
 	virtual std::string getId() const override;
 
@@ -64,7 +64,7 @@ private:
 	/// @name Visitor Interface
 	/// @{
 	using SubOptimizer::visit;
-	virtual void visit(ShPtr<NotOpExpr> expr) override;
+	virtual void visit(NotOpExpr* expr) override;
 	/// @}
 };
 

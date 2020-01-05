@@ -40,7 +40,7 @@ namespace llvmir2hll {
 *
 * For the description of the parameters, see @c create().
 */
-VarUsesVisitor::VarUsesVisitor(ShPtr<ValueAnalysis> va,
+VarUsesVisitor::VarUsesVisitor(ValueAnalysis* va,
 		bool enableCaching):
 	OrderedAllVisitor(true, true), va(va), varUses(), precomputing(false),
 	precomputingHasBeenDone(false), cachingEnabled(enableCaching), cache() {}
@@ -63,7 +63,7 @@ VarUsesVisitor::VarUsesVisitor(ShPtr<ValueAnalysis> va,
 * @par Preconditions
 *  - @a var and @a func are non-null
 */
-bool VarUsesVisitor::isUsed(ShPtr<Variable> var, ShPtr<Function> func,
+bool VarUsesVisitor::isUsed(Variable* var, Function* func,
 		bool doNotIncludeFirstUse) {
 	PRECONDITION_NON_NULL(var);
 	PRECONDITION_NON_NULL(func);
@@ -100,8 +100,8 @@ bool VarUsesVisitor::isUsed(ShPtr<Variable> var, ShPtr<Function> func,
 * @par Preconditions
 *  - @a var and @a func are non-null
 */
-ShPtr<VarUses> VarUsesVisitor::getUses(ShPtr<Variable> var,
-		ShPtr<Function> func) {
+VarUses* VarUsesVisitor::getUses(Variable* var,
+		Function* func) {
 	PRECONDITION_NON_NULL(var);
 	PRECONDITION_NON_NULL(func);
 
@@ -114,7 +114,7 @@ ShPtr<VarUses> VarUsesVisitor::getUses(ShPtr<Variable> var,
 	}
 
 	// Compute the uses.
-	varUses = ShPtr<VarUses>(new VarUses(var, func));
+	varUses = new VarUses(var, func);
 	this->var = var;
 	this->func = func;
 	restart(); // We have to clear accessedStmts().
@@ -180,8 +180,8 @@ bool VarUsesVisitor::isCachingEnabled() const {
 * @par Preconditions
 *  - @a stmt and @a func are non-null
 */
-void VarUsesVisitor::stmtHasBeenAdded(ShPtr<Statement> stmt,
-		ShPtr<Function> func) {
+void VarUsesVisitor::stmtHasBeenAdded(Statement* stmt,
+		Function* func) {
 	PRECONDITION_NON_NULL(stmt);
 	PRECONDITION_NON_NULL(func);
 
@@ -190,7 +190,7 @@ void VarUsesVisitor::stmtHasBeenAdded(ShPtr<Statement> stmt,
 	}
 
 	// Get all variables used in the new statement.
-	ShPtr<ValueData> stmtData(va->getValueData(stmt));
+	ValueData* stmtData(va->getValueData(stmt));
 	VarSet dirUsedVars(stmtData->getDirAccessedVars());
 	VarSet indirUsedVars(setUnion(
 		stmtData->getMayBeAccessedVars(),
@@ -215,13 +215,13 @@ void VarUsesVisitor::stmtHasBeenAdded(ShPtr<Statement> stmt,
 	// in the function before the statement was added. Add them.
 	// Directly used variables.
 	for (const auto &var : dirUsedVars) {
-		ShPtr<VarUses> varUses(new VarUses(var, func));
+		VarUses* varUses(new VarUses(var, func));
 		varUses->dirUses.insert(stmt);
 		cache[func][var] = varUses;
 	}
 	// Indirectly used variables.
 	for (const auto &var : indirUsedVars) {
-		ShPtr<VarUses> varUses(new VarUses(var, func));
+		VarUses* varUses(new VarUses(var, func));
 		varUses->indirUses.insert(stmt);
 		cache[func][var] = varUses;
 	}
@@ -245,8 +245,8 @@ void VarUsesVisitor::stmtHasBeenAdded(ShPtr<Statement> stmt,
 * @par Preconditions
 *  - @a stmt and @a func are non-null
 */
-void VarUsesVisitor::stmtHasBeenChanged(ShPtr<Statement> stmt,
-		ShPtr<Function> func) {
+void VarUsesVisitor::stmtHasBeenChanged(Statement* stmt,
+		Function* func) {
 	PRECONDITION_NON_NULL(stmt);
 	PRECONDITION_NON_NULL(func);
 
@@ -255,7 +255,7 @@ void VarUsesVisitor::stmtHasBeenChanged(ShPtr<Statement> stmt,
 	}
 
 	// Get all variables used in the new statement.
-	ShPtr<ValueData> stmtData(va->getValueData(stmt));
+	ValueData* stmtData(va->getValueData(stmt));
 	const VarSet &dirUsedVars(stmtData->getDirAccessedVars());
 	const VarSet &indirUsedVars(setUnion(
 		stmtData->getMayBeAccessedVars(),
@@ -296,8 +296,8 @@ void VarUsesVisitor::stmtHasBeenChanged(ShPtr<Statement> stmt,
 * @par Preconditions
 *  - @a stmt and @a func are non-null
 */
-void VarUsesVisitor::stmtHasBeenRemoved(ShPtr<Statement> stmt,
-		ShPtr<Function> func) {
+void VarUsesVisitor::stmtHasBeenRemoved(Statement* stmt,
+		Function* func) {
 	PRECONDITION_NON_NULL(stmt);
 	PRECONDITION_NON_NULL(func);
 
@@ -332,14 +332,14 @@ void VarUsesVisitor::stmtHasBeenRemoved(ShPtr<Statement> stmt,
 *
 * All methods of this class leave @a va in a valid state.
 */
-ShPtr<VarUsesVisitor> VarUsesVisitor::create(ShPtr<ValueAnalysis> va,
-		bool enableCaching, ShPtr<Module> module) {
+VarUsesVisitor* VarUsesVisitor::create(ValueAnalysis* va,
+		bool enableCaching, Module* module) {
 	PRECONDITION_NON_NULL(va);
 	PRECONDITION(!module || enableCaching,
 		"when module is non-null, caching has to be enabled");
 	PRECONDITION(va->isInValidState(), "it is not in a valid state");
 
-	ShPtr<VarUsesVisitor> visitor(new VarUsesVisitor(va, enableCaching));
+	VarUsesVisitor* visitor(new VarUsesVisitor(va, enableCaching));
 
 	// Pre-compute everything if requested.
 	if (module) {
@@ -352,7 +352,7 @@ ShPtr<VarUsesVisitor> VarUsesVisitor::create(ShPtr<ValueAnalysis> va,
 /**
 * @brief Pre-computes uses of variables in all functions of the given module.
 */
-void VarUsesVisitor::precomputeEverything(ShPtr<Module> module) {
+void VarUsesVisitor::precomputeEverything(Module* module) {
 	precomputing = true;
 
 	// For every function in the module...
@@ -366,14 +366,13 @@ void VarUsesVisitor::precomputeEverything(ShPtr<Module> module) {
 		// this end, we initialize an empty VarUses for every global variable.
 		for (auto j = module->global_var_begin(), f = module->global_var_end();
 				j != f; ++j) {
-			cache[func][(*j)->getVar()] = ShPtr<VarUses>(
-				new VarUses((*j)->getVar(), func));
+			cache[func][(*j)->getVar()] = new VarUses((*j)->getVar(), func);
 		}
 
 		// Do the same for all function's arguments (there may be arguments
 		// which are never used).
 		for (const auto &param : func->getParams()) {
-			cache[func][param] = ShPtr<VarUses>(new VarUses(param, func));
+			cache[func][param] = new VarUses(param, func);
 		}
 
 		restart();
@@ -389,17 +388,17 @@ void VarUsesVisitor::precomputeEverything(ShPtr<Module> module) {
 *
 * It doesn't check nested statements or successors.
 */
-void VarUsesVisitor::findAndStoreUses(ShPtr<Statement> stmt) {
-	ShPtr<ValueData> stmtData(va->getValueData(stmt));
+void VarUsesVisitor::findAndStoreUses(Statement* stmt) {
+	ValueData* stmtData(va->getValueData(stmt));
 	if (precomputing) {
 		// We are pre-computing everything.
 
 		// Directly used variables.
 		for (auto i = stmtData->dir_all_begin(), e = stmtData->dir_all_end();
 				i != e; ++i) {
-			ShPtr<VarUses> &varUses(cache[func][*i]);
+			VarUses* &varUses(cache[func][*i]);
 			if (!varUses) {
-				varUses = ShPtr<VarUses>(new VarUses(*i, func));
+				varUses = new VarUses(*i, func);
 			}
 			varUses->dirUses.insert(stmt);
 		}
@@ -410,9 +409,9 @@ void VarUsesVisitor::findAndStoreUses(ShPtr<Statement> stmt) {
 		addToSet(stmtData->getMustBeAccessedVars(), indirUsedVars);
 		// For every indirectly used variable...
 		for (const auto &var : indirUsedVars) {
-			ShPtr<VarUses> &varUses(cache[func][var]);
+			VarUses* &varUses(cache[func][var]);
 			if (!varUses) {
-				varUses = ShPtr<VarUses>(new VarUses(var, func));
+				varUses = new VarUses(var, func);
 			}
 			varUses->indirUses.insert(stmt);
 		}
@@ -444,80 +443,80 @@ void VarUsesVisitor::dumpCache() {
 		for (auto j = i->second.begin(), f = i->second.end(); j != f ; ++j) {
 			llvm::errs() << "        " << j->first->getName() << ":\n";
 			llvm::errs() << "            dir: ";
-			dump(j->second->dirUses, dumpFuncGetTextRepr<ShPtr<Statement>>);
+			dump(j->second->dirUses, dumpFuncGetTextRepr<Statement*>);
 			llvm::errs() << "            indir: ";
-			dump(j->second->indirUses, dumpFuncGetTextRepr<ShPtr<Statement>>);
+			dump(j->second->indirUses, dumpFuncGetTextRepr<Statement*>);
 		}
 	}
 	llvm::errs() << "\n";
 }
 
-void VarUsesVisitor::visit(ShPtr<AssignStmt> stmt) {
+void VarUsesVisitor::visit(AssignStmt* stmt) {
 	findAndStoreUses(stmt);
 	OrderedAllVisitor::visit(stmt);
 }
 
-void VarUsesVisitor::visit(ShPtr<VarDefStmt> stmt) {
+void VarUsesVisitor::visit(VarDefStmt* stmt) {
 	findAndStoreUses(stmt);
 	OrderedAllVisitor::visit(stmt);
 }
 
-void VarUsesVisitor::visit(ShPtr<CallStmt> stmt) {
+void VarUsesVisitor::visit(CallStmt* stmt) {
 	findAndStoreUses(stmt);
 	OrderedAllVisitor::visit(stmt);
 }
 
-void VarUsesVisitor::visit(ShPtr<ReturnStmt> stmt) {
+void VarUsesVisitor::visit(ReturnStmt* stmt) {
 	findAndStoreUses(stmt);
 	OrderedAllVisitor::visit(stmt);
 }
 
-void VarUsesVisitor::visit(ShPtr<EmptyStmt> stmt) {
+void VarUsesVisitor::visit(EmptyStmt* stmt) {
 	findAndStoreUses(stmt);
 	OrderedAllVisitor::visit(stmt);
 }
 
-void VarUsesVisitor::visit(ShPtr<IfStmt> stmt) {
+void VarUsesVisitor::visit(IfStmt* stmt) {
 	findAndStoreUses(stmt);
 	OrderedAllVisitor::visit(stmt);
 }
 
-void VarUsesVisitor::visit(ShPtr<SwitchStmt> stmt) {
+void VarUsesVisitor::visit(SwitchStmt* stmt) {
 	findAndStoreUses(stmt);
 	OrderedAllVisitor::visit(stmt);
 }
 
-void VarUsesVisitor::visit(ShPtr<WhileLoopStmt> stmt) {
+void VarUsesVisitor::visit(WhileLoopStmt* stmt) {
 	findAndStoreUses(stmt);
 	OrderedAllVisitor::visit(stmt);
 }
 
-void VarUsesVisitor::visit(ShPtr<ForLoopStmt> stmt) {
+void VarUsesVisitor::visit(ForLoopStmt* stmt) {
 	findAndStoreUses(stmt);
 	OrderedAllVisitor::visit(stmt);
 }
 
-void VarUsesVisitor::visit(ShPtr<UForLoopStmt> stmt) {
+void VarUsesVisitor::visit(UForLoopStmt* stmt) {
 	findAndStoreUses(stmt);
 	OrderedAllVisitor::visit(stmt);
 }
 
-void VarUsesVisitor::visit(ShPtr<BreakStmt> stmt) {
+void VarUsesVisitor::visit(BreakStmt* stmt) {
 	findAndStoreUses(stmt);
 	OrderedAllVisitor::visit(stmt);
 }
 
-void VarUsesVisitor::visit(ShPtr<ContinueStmt> stmt) {
+void VarUsesVisitor::visit(ContinueStmt* stmt) {
 	findAndStoreUses(stmt);
 	OrderedAllVisitor::visit(stmt);
 }
 
-void VarUsesVisitor::visit(ShPtr<GotoStmt> stmt) {
+void VarUsesVisitor::visit(GotoStmt* stmt) {
 	findAndStoreUses(stmt);
 	OrderedAllVisitor::visit(stmt);
 }
 
-void VarUsesVisitor::visit(ShPtr<UnreachableStmt> stmt) {
+void VarUsesVisitor::visit(UnreachableStmt* stmt) {
 	findAndStoreUses(stmt);
 	OrderedAllVisitor::visit(stmt);
 }

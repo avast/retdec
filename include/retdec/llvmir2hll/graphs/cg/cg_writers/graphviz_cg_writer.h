@@ -27,20 +27,20 @@ namespace llvmir2hll {
 */
 class GraphvizCGWriter: public CGWriter {
 public:
-	static ShPtr<CGWriter> create(ShPtr<CG> cg, std::ostream &out);
+	static CGWriter* create(CG* cg, std::ostream &out);
 
 	virtual std::string getId() const override;
 	virtual bool emitCG() override;
 
 private:
 	/// Mapping between a node and its label.
-	using NodeLabelMapping = std::map<ShPtr<Function>, std::string>;
+	using NodeLabelMapping = std::map<Function*, std::string>;
 
 private:
-	GraphvizCGWriter(ShPtr<CG> cg, std::ostream &out);
+	GraphvizCGWriter(CG* cg, std::ostream &out);
 
-	void emitNode(ShPtr<Function> caller, ShPtr<CG::CalledFuncs> callees);
-	std::string getNodeLabelForFunc(ShPtr<Function> func);
+	void emitNode(Function* caller, CG::CalledFuncs* callees);
+	std::string getNodeLabelForFunc(Function* func);
 };
 
 } // namespace llvmir2hll

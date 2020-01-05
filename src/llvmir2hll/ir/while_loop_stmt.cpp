@@ -18,21 +18,21 @@ namespace llvmir2hll {
 *
 * See create() for more information.
 */
-WhileLoopStmt::WhileLoopStmt(ShPtr<Expression> cond, ShPtr<Statement> body,
+WhileLoopStmt::WhileLoopStmt(Expression* cond, Statement* body,
 	Address a):
 	Statement(a), cond(cond), body(body) {}
 
-ShPtr<Value> WhileLoopStmt::clone() {
-	ShPtr<WhileLoopStmt> whileLoopStmt(WhileLoopStmt::create(
+Value* WhileLoopStmt::clone() {
+	WhileLoopStmt* whileLoopStmt(WhileLoopStmt::create(
 		ucast<Expression>(cond->clone()), ucast<Statement>(Statement::cloneStatements(body)),
 		nullptr, getAddress()));
 	whileLoopStmt->setMetadata(getMetadata());
 	return whileLoopStmt;
 }
 
-bool WhileLoopStmt::isEqualTo(ShPtr<Value> otherValue) const {
+bool WhileLoopStmt::isEqualTo(Value* otherValue) const {
 	// Both types, loop conditions, and bodies have to be equal.
-	if (ShPtr<WhileLoopStmt> otherWhileLoopStmt = cast<WhileLoopStmt>(otherValue)) {
+	if (WhileLoopStmt* otherWhileLoopStmt = cast<WhileLoopStmt>(otherValue)) {
 		return cond->isEqualTo(otherWhileLoopStmt->cond) &&
 			body->isEqualTo(otherWhileLoopStmt->body);
 
@@ -40,7 +40,7 @@ bool WhileLoopStmt::isEqualTo(ShPtr<Value> otherValue) const {
 	return false;
 }
 
-void WhileLoopStmt::replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) {
+void WhileLoopStmt::replace(Expression* oldExpr, Expression* newExpr) {
 	if (oldExpr == cond) {
 		setCondition(newExpr);
 	} else {
@@ -48,7 +48,7 @@ void WhileLoopStmt::replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr
 	}
 }
 
-ShPtr<Expression> WhileLoopStmt::asExpression() const {
+Expression* WhileLoopStmt::asExpression() const {
 	// Cannot be converted into an expression.
 	return {};
 }
@@ -56,14 +56,14 @@ ShPtr<Expression> WhileLoopStmt::asExpression() const {
 /**
 * @brief Returns the loop condition.
 */
-ShPtr<Expression> WhileLoopStmt::getCondition() const {
+Expression* WhileLoopStmt::getCondition() const {
 	return cond;
 }
 
 /**
 * @brief Returns the loop body.
 */
-ShPtr<Statement> WhileLoopStmt::getBody() const {
+Statement* WhileLoopStmt::getBody() const {
 	return body;
 }
 
@@ -73,11 +73,11 @@ ShPtr<Statement> WhileLoopStmt::getBody() const {
 * @par Preconditions
 *  - @a newCond is non-null
 */
-void WhileLoopStmt::setCondition(ShPtr<Expression> newCond) {
+void WhileLoopStmt::setCondition(Expression* newCond) {
 	PRECONDITION_NON_NULL(newCond);
 
-	cond->removeObserver(shared_from_this());
-	newCond->addObserver(shared_from_this());
+	cond->removeObserver(this);
+	newCond->addObserver(this);
 	cond = newCond;
 }
 
@@ -87,11 +87,11 @@ void WhileLoopStmt::setCondition(ShPtr<Expression> newCond) {
 * @par Preconditions
 *  - @a newBody is non-null
 */
-void WhileLoopStmt::setBody(ShPtr<Statement> newBody) {
+void WhileLoopStmt::setBody(Statement* newBody) {
 	PRECONDITION_NON_NULL(newBody);
 
-	body->removeObserver(shared_from_this());
-	newBody->addObserver(shared_from_this());
+	body->removeObserver(this);
+	newBody->addObserver(this);
 	newBody->removePredecessors(true);
 	body = newBody;
 }
@@ -109,15 +109,15 @@ void WhileLoopStmt::setBody(ShPtr<Statement> newBody) {
 * @par Preconditions
 *  - @a cond and @a body are non-null
 */
-ShPtr<WhileLoopStmt> WhileLoopStmt::create(ShPtr<Expression> cond, ShPtr<Statement> body,
-		ShPtr<Statement> succ, Address a) {
+WhileLoopStmt* WhileLoopStmt::create(Expression* cond, Statement* body,
+		Statement* succ, Address a) {
 	PRECONDITION_NON_NULL(cond);
 	PRECONDITION_NON_NULL(body);
 
-	ShPtr<WhileLoopStmt> stmt(new WhileLoopStmt(cond, body, a));
+	WhileLoopStmt* stmt(new WhileLoopStmt(cond, body, a));
 	stmt->setSuccessor(succ);
 
-	// Initialization (recall that shared_from_this() cannot be called in a
+	// Initialization (recall that this cannot be called in a
 	// constructor).
 	cond->addObserver(stmt);
 	body->addObserver(stmt);
@@ -144,23 +144,23 @@ ShPtr<WhileLoopStmt> WhileLoopStmt::create(ShPtr<Expression> cond, ShPtr<Stateme
 *
 * @see Subject::update()
 */
-void WhileLoopStmt::update(ShPtr<Value> subject, ShPtr<Value> arg) {
+void WhileLoopStmt::update(Value* subject, Value* arg) {
 	PRECONDITION_NON_NULL(subject);
 
-	ShPtr<Statement> newBody = cast<Statement>(arg);
+	Statement* newBody = cast<Statement>(arg);
 	if (subject == body && newBody) {
 		setBody(newBody);
 		return;
 	}
 
-	ShPtr<Expression> newCond = cast<Expression>(arg);
+	Expression* newCond = cast<Expression>(arg);
 	if (subject == cond && newCond) {
 		setCondition(newCond);
 	}
 }
 
 void WhileLoopStmt::accept(Visitor *v) {
-	v->visit(ucast<WhileLoopStmt>(shared_from_this()));
+	v->visit(ucast<WhileLoopStmt>(this));
 }
 
 } // namespace llvmir2hll

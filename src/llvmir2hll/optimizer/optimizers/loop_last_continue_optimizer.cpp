@@ -21,18 +21,18 @@ namespace llvmir2hll {
 * @par Preconditions
 *  - @a module is non-null
 */
-LoopLastContinueOptimizer::LoopLastContinueOptimizer(ShPtr<Module> module):
+LoopLastContinueOptimizer::LoopLastContinueOptimizer(Module* module):
 	FuncOptimizer(module) {
 		PRECONDITION_NON_NULL(module);
 	}
 
-void LoopLastContinueOptimizer::visit(ShPtr<ForLoopStmt> stmt) {
+void LoopLastContinueOptimizer::visit(ForLoopStmt* stmt) {
 	tryToOptimize(stmt);
 
 	FuncOptimizer::visit(stmt);
 }
 
-void LoopLastContinueOptimizer::visit(ShPtr<WhileLoopStmt> stmt) {
+void LoopLastContinueOptimizer::visit(WhileLoopStmt* stmt) {
 	tryToOptimize(stmt);
 
 	FuncOptimizer::visit(stmt);
@@ -44,12 +44,12 @@ void LoopLastContinueOptimizer::visit(ShPtr<WhileLoopStmt> stmt) {
 * @par Preconditions
 *  - @a stmt is either a WhileLoopStmt or ForLoopStmt
 */
-void LoopLastContinueOptimizer::tryToOptimize(ShPtr<Statement> stmt) {
+void LoopLastContinueOptimizer::tryToOptimize(Statement* stmt) {
 	// Get the loop's body.
-	ShPtr<Statement> loopBody;
-	if (ShPtr<WhileLoopStmt> whileLoop = cast<WhileLoopStmt>(stmt)) {
+	Statement* loopBody;
+	if (WhileLoopStmt* whileLoop = cast<WhileLoopStmt>(stmt)) {
 		loopBody = whileLoop->getBody();
-	} else if (ShPtr<ForLoopStmt> forLoop = cast<ForLoopStmt>(stmt)) {
+	} else if (ForLoopStmt* forLoop = cast<ForLoopStmt>(stmt)) {
 		loopBody = forLoop->getBody();
 	} else {
 		PRECONDITION(isa<WhileLoopStmt>(stmt) || isa<ForLoopStmt>(stmt),
@@ -58,10 +58,10 @@ void LoopLastContinueOptimizer::tryToOptimize(ShPtr<Statement> stmt) {
 	}
 
 	// Go to the end of the loop.
-	ShPtr<Statement> lastStmt(Statement::getLastStatement(loopBody));
+	Statement* lastStmt(Statement::getLastStatement(loopBody));
 
 	// It should be a continue statement; otherwise, there is nothing we can do.
-	ShPtr<ContinueStmt> continueStmt(cast<ContinueStmt>(lastStmt));
+	ContinueStmt* continueStmt(cast<ContinueStmt>(lastStmt));
 	if (!continueStmt) {
 		return;
 	}

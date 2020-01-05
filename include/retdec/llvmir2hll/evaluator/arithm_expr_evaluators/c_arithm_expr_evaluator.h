@@ -23,7 +23,7 @@ namespace llvmir2hll {
 */
 class CArithmExprEvaluator final: public ArithmExprEvaluator {
 public:
-	static ShPtr<ArithmExprEvaluator> create();
+	static ArithmExprEvaluator* create();
 
 	virtual std::string getId() const override;
 
@@ -31,26 +31,26 @@ private:
 	CArithmExprEvaluator() = default;
 
 	// Resolve types.
-	virtual void resolveTypesUnaryOp(ShPtr<Constant> &operand) override;
+	virtual void resolveTypesUnaryOp(Constant* &operand) override;
 	virtual void resolveTypesBinaryOp(ConstPair &constPair) override;
 
 	// Resolve operators specifications.
-	virtual void resolveOpSpecifications(ShPtr<DivOpExpr> expr,
+	virtual void resolveOpSpecifications(DivOpExpr* expr,
 		ConstPair &constPair) override;
-	virtual void resolveOpSpecifications(ShPtr<ModOpExpr> expr,
+	virtual void resolveOpSpecifications(ModOpExpr* expr,
 		ConstPair &constPair) override;
 
 	// Resolve casts.
-	virtual void resolveCast(ShPtr<BitCastExpr> expr,
-		ShPtr<Constant> &constant) override;
-	virtual void resolveCast(ShPtr<ExtCastExpr> expr,
-		ShPtr<Constant> &constant) override;
-	virtual void resolveCast(ShPtr<FPToIntCastExpr> expr,
-		ShPtr<Constant> &constant) override;
-	virtual void resolveCast(ShPtr<IntToFPCastExpr> expr,
-		ShPtr<Constant> &constant) override;
-	virtual void resolveCast(ShPtr<TruncCastExpr> expr,
-		ShPtr<Constant> &constant) override;
+	virtual void resolveCast(BitCastExpr* expr,
+		Constant* &constant) override;
+	virtual void resolveCast(ExtCastExpr* expr,
+		Constant* &constant) override;
+	virtual void resolveCast(FPToIntCastExpr* expr,
+		Constant* &constant) override;
+	virtual void resolveCast(IntToFPCastExpr* expr,
+		Constant* &constant) override;
+	virtual void resolveCast(TruncCastExpr* expr,
+		Constant* &constant) override;
 
 	// Resolve overflow.
 	virtual void resolveOverflowForAPFloat(

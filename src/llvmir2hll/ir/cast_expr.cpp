@@ -13,17 +13,17 @@ namespace llvmir2hll {
 /**
 * @brief Constructs a cast operator.
 */
-CastExpr::CastExpr(ShPtr<Expression> op, ShPtr<Type> dstType):
+CastExpr::CastExpr(Expression* op, Type* dstType):
 	op(op), dstType(dstType) {
 		PRECONDITION_NON_NULL(op);
 		PRECONDITION_NON_NULL(dstType);
 }
 
-ShPtr<Type> CastExpr::getType() const {
+Type* CastExpr::getType() const {
 	return dstType;
 }
 
-void CastExpr::replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) {
+void CastExpr::replace(Expression* oldExpr, Expression* newExpr) {
 	PRECONDITION_NON_NULL(oldExpr);
 
 	if (op == oldExpr) {
@@ -39,18 +39,18 @@ void CastExpr::replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) {
 * @par Preconditions
 *  - @a newOp is non-null
 */
-void CastExpr::setOperand(ShPtr<Expression> newOp) {
+void CastExpr::setOperand(Expression* newOp) {
 	PRECONDITION_NON_NULL(newOp);
 
-	op->removeObserver(shared_from_this());
-	newOp->addObserver(shared_from_this());
+	op->removeObserver(this);
+	newOp->addObserver(this);
 	op = newOp;
 }
 
 /**
 * @brief Returns the operand.
 */
-ShPtr<Expression> CastExpr::getOperand() const {
+Expression* CastExpr::getOperand() const {
 	return op;
 }
 
@@ -72,12 +72,12 @@ ShPtr<Expression> CastExpr::getOperand() const {
 *
 * @see Subject::update()
 */
-void CastExpr::update(ShPtr<Value> subject, ShPtr<Value> arg) {
+void CastExpr::update(Value* subject, Value* arg) {
 	PRECONDITION_NON_NULL(subject);
 	PRECONDITION_NON_NULL(arg);
 
 	if (subject == op) {
-		if (ShPtr<Expression> newOp = cast<Expression>(arg)) {
+		if (Expression* newOp = cast<Expression>(arg)) {
 			setOperand(newOp);
 		}
 	}

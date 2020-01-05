@@ -34,20 +34,20 @@ class Variable;
 */
 class SimpleAliasAnalysis: public AliasAnalysis, private OrderedAllVisitor {
 public:
-	static ShPtr<AliasAnalysis> create();
+	static AliasAnalysis* create();
 
-	virtual void init(ShPtr<Module> module) override;
+	virtual void init(Module* module) override;
 	virtual std::string getId() const override;
-	virtual const VarSet &mayPointTo(ShPtr<Variable> var) const override;
-	virtual ShPtr<Variable> pointsTo(ShPtr<Variable> var) const override;
-	virtual bool mayBePointed(ShPtr<Variable> var) const override;
+	virtual const VarSet &mayPointTo(Variable* var) const override;
+	virtual Variable* pointsTo(Variable* var) const override;
+	virtual bool mayBePointed(Variable* var) const override;
 
 private:
 	/// Mapping of a function into a set of variables.
-	using FuncVarSetMap = std::map<ShPtr<Function>, VarSet>;
+	using FuncVarSetMap = std::map<Function*, VarSet>;
 
 	/// Mapping of a variable into a function.
-	using VarFuncMap = std::map<ShPtr<Variable>, ShPtr<Function>>;
+	using VarFuncMap = std::map<Variable*, Function*>;
 
 private:
 	SimpleAliasAnalysis();
@@ -55,7 +55,7 @@ private:
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<AddressOpExpr> expr) override;
+	virtual void visit(AddressOpExpr* expr) override;
 	/// @}
 
 private:
@@ -71,7 +71,7 @@ private:
 	VarFuncMap varFuncMap;
 
 	/// Currently traversed function.
-	ShPtr<Function> func;
+	Function* func = nullptr;
 };
 
 } // namespace llvmir2hll

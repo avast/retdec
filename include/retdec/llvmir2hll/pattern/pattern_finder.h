@@ -26,7 +26,7 @@ class CallInfoObtainer;
 *
 * A concrete finder should
 *  - implement all the pure virtual functions
-*  - define a static <tt>ShPtr<PatternFinder> create()</tt> function
+*  - define a static <tt>PatternFinder* create()</tt> function
 *  - register itself at PatternFinderFactory by passing the static @c create
 *    function and the finder's ID
 *
@@ -38,7 +38,7 @@ class CallInfoObtainer;
 class PatternFinder: private retdec::utils::NonCopyable {
 public:
 	/// A list of patterns.
-	using Patterns = std::vector<ShPtr<Pattern>>;
+	using Patterns = std::vector<Pattern*>;
 
 public:
 	virtual ~PatternFinder() = default;
@@ -51,17 +51,17 @@ public:
 	/**
 	* @brief Finds patterns in the given module and returns them.
 	*/
-	virtual Patterns findPatterns(ShPtr<Module> module) = 0;
+	virtual Patterns findPatterns(Module* module) = 0;
 
 protected:
-	PatternFinder(ShPtr<ValueAnalysis> va, ShPtr<CallInfoObtainer> cio);
+	PatternFinder(ValueAnalysis* va, CallInfoObtainer* cio);
 
 protected:
 	/// Analysis of values.
-	ShPtr<ValueAnalysis> va;
+	ValueAnalysis* va = nullptr;
 
 	/// The used call info obtainer.
-	ShPtr<CallInfoObtainer> cio;
+	CallInfoObtainer* cio = nullptr;
 };
 
 } // namespace llvmir2hll

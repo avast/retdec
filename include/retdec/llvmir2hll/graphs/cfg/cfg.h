@@ -52,13 +52,13 @@ public:
 	using stmt_reverse_iterator = StmtVector::const_reverse_iterator;
 
 	/// Vector of nodes.
-	using NodeVector = std::vector<ShPtr<Node>>;
+	using NodeVector = std::vector<Node*>;
 
 	/// Nodes iterator.
 	using node_iterator = NodeVector::const_iterator;
 
 	/// Vector of edges.
-	using EdgeVector = std::vector<ShPtr<Edge>>;
+	using EdgeVector = std::vector<Edge*>;
 
 	/// Edges iterator.
 	using edge_iterator = EdgeVector::const_iterator;
@@ -71,7 +71,7 @@ public:
 
 	/// Statement in a node (first -> node, second -> position of the statement
 	/// within the node).
-	using StmtInNode = std::pair<ShPtr<Node>, stmt_iterator>;
+	using StmtInNode = std::pair<Node*, stmt_iterator>;
 
 	/**
 	* @brief A node of a CFG (represents a basic block).
@@ -91,9 +91,9 @@ public:
 		/// @{
 		bool hasStmts() const;
 		std::size_t getNumberOfStmts() const;
-		void addStmt(ShPtr<Statement> stmt);
-		void replaceStmt(ShPtr<Statement> stmt, const StmtVector &stmts);
-		void removeStmt(ShPtr<Statement> stmt);
+		void addStmt(Statement* stmt);
+		void replaceStmt(Statement* stmt, const StmtVector &stmts);
+		void removeStmt(Statement* stmt);
 
 		stmt_iterator stmt_begin() const;
 		stmt_iterator stmt_end() const;
@@ -105,11 +105,11 @@ public:
 		/// @name Successors Accessors
 		/// @{
 		bool hasSuccs() const;
-		bool hasSucc(ShPtr<Edge> edge) const;
+		bool hasSucc(Edge* edge) const;
 		std::size_t getNumberOfSuccs() const;
-		void addSucc(ShPtr<Edge> succ);
-		ShPtr<Edge> getFirstSucc() const;
-		void removeSucc(ShPtr<Edge> succ);
+		void addSucc(Edge* succ);
+		Edge* getFirstSucc() const;
+		void removeSucc(Edge* succ);
 
 		succ_iterator succ_begin() const;
 		succ_iterator succ_end() const;
@@ -118,10 +118,10 @@ public:
 		/// @name Predecessors Accessors
 		/// @{
 		bool hasPreds() const;
-		bool hasPred(ShPtr<Edge> edge) const;
+		bool hasPred(Edge* edge) const;
 		std::size_t getNumberOfPreds() const;
-		void addPred(ShPtr<Edge> pred);
-		void removePred(ShPtr<Edge> succ);
+		void addPred(Edge* pred);
+		void removePred(Edge* succ);
 
 		pred_iterator pred_begin() const;
 		pred_iterator pred_end() const;
@@ -150,51 +150,51 @@ public:
 		friend class RecursiveCFGBuilder;
 		friend class NonRecursiveCFGBuilder;
 	public:
-		Edge(ShPtr<Node> src, ShPtr<Node> dst,
-			ShPtr<Expression> label = nullptr);
+		Edge(Node* src, Node* dst,
+			Expression* label = nullptr);
 
-		ShPtr<Node> getSrc() const;
-		ShPtr<Expression> getLabel() const;
-		ShPtr<Node> getDst() const;
+		Node* getSrc() const;
+		Expression* getLabel() const;
+		Node* getDst() const;
 
 	private:
 		/// Edge source.
-		ShPtr<Node> src;
+		Node* src = nullptr;
 
 		/// Edge label.
-		ShPtr<Expression> label;
+		Expression* label = nullptr;
 
 		/// Edge destination.
-		ShPtr<Node> dst;
+		Node* dst = nullptr;
 	};
 
 public:
-	CFG(ShPtr<Function> func);
+	CFG(Function* func);
 
-	ShPtr<Function> getCorrespondingFunction() const;
+	Function* getCorrespondingFunction() const;
 
 	/// @name Nodes Accessors
 	/// @{
 	std::size_t getNumberOfNodes() const;
-	void addEntryNode(ShPtr<Node> node);
-	void addExitNode(ShPtr<Node> node);
-	ShPtr<Node> getEntryNode() const;
-	ShPtr<Node> getExitNode() const;
+	void addEntryNode(Node* node);
+	void addExitNode(Node* node);
+	Node* getEntryNode() const;
+	Node* getExitNode() const;
 	NodeVector getUnreachableNodes() const;
-	bool stmtExistsInCFG(ShPtr<Statement> stmt) const;
-	StmtInNode getNodeForStmt(ShPtr<Statement> stmt) const;
+	bool stmtExistsInCFG(Statement* stmt) const;
+	StmtInNode getNodeForStmt(Statement* stmt) const;
 	stmt_reverse_iterator getReverseIteratorFromIterator(stmt_iterator i);
-	bool hasNodeForStmt(ShPtr<Statement> stmt) const;
-	void addNode(ShPtr<Node> node);
+	bool hasNodeForStmt(Statement* stmt) const;
+	void addNode(Node* node);
 	void splitNodes();
-	void removeNode(ShPtr<Node> node);
+	void removeNode(Node* node);
 	void removeEmptyNodes();
 	void removeUnreachableNodes();
-	void removeStmtFromNode(ShPtr<Statement> stmt, ShPtr<CFG::Node> node);
-	void removeStmt(ShPtr<Statement> stmt);
-	void replaceStmt(ShPtr<Statement> stmt, const StmtVector &stmts);
+	void removeStmtFromNode(Statement* stmt, CFG::Node* node);
+	void removeStmt(Statement* stmt);
+	void replaceStmt(Statement* stmt, const StmtVector &stmts);
 
-	static ShPtr<Statement> getLastStmtInNode(ShPtr<Node> node);
+	static Statement* getLastStmtInNode(Node* node);
 
 	node_iterator node_begin() const;
 	node_iterator node_end() const;
@@ -202,9 +202,9 @@ public:
 
 	/// @name Edges Accessors
 	/// @{
-	ShPtr<Edge> addEdge(ShPtr<Node> src, ShPtr<Node> dst,
-		ShPtr<Expression> label = nullptr);
-	void removeEdge(ShPtr<Edge> edge);
+	Edge* addEdge(Node* src, Node* dst,
+		Expression* label = nullptr);
+	void removeEdge(Edge* edge);
 
 	edge_iterator edge_begin() const;
 	edge_iterator edge_end() const;
@@ -212,12 +212,12 @@ public:
 
 private:
 	/// Mapping of a statement into its corresponding node.
-	using StmtNodeMapping = std::unordered_map<ShPtr<Statement>, ShPtr<Node>>;
+	using StmtNodeMapping = std::unordered_map<Statement*, Node*>;
 
 private:
-	ShPtr<Node> addNode(const std::string &label = "");
+	Node* addNode(const std::string &label = "");
 
-	void splitNode(ShPtr<Node> node);
+	void splitNode(Node* node);
 
 	/// @name Validation
 	/// @{
@@ -229,7 +229,7 @@ private:
 
 private:
 	/// Function to which this CFG corresponds.
-	ShPtr<Function> correspondingFunction;
+	Function* correspondingFunction = nullptr;
 
 	/// Vector of nodes.
 	NodeVector nodes;
@@ -238,10 +238,10 @@ private:
 	EdgeVector edges;
 
 	/// Entry node.
-	ShPtr<Node> entryNode;
+	Node* entryNode = nullptr;
 
 	/// Exit node.
-	ShPtr<Node> exitNode;
+	Node* exitNode = nullptr;
 
 	/// Mapping between a statement and a node in which the statement is.
 	StmtNodeMapping stmtNodeMapping;

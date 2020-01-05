@@ -46,8 +46,8 @@ namespace llvmir2hll {
 * @par Preconditions
 *  - @a module, @a va, and @a cio are non-null
 */
-SimpleCopyPropagationOptimizer::SimpleCopyPropagationOptimizer(ShPtr<Module> module,
-	ShPtr<ValueAnalysis> va, ShPtr<CallInfoObtainer> cio):
+SimpleCopyPropagationOptimizer::SimpleCopyPropagationOptimizer(Module* module,
+	ValueAnalysis* va, CallInfoObtainer* cio):
 		FuncOptimizer(module), cfgBuilder(NonRecursiveCFGBuilder::create()),
 		va(va), cio(cio), vuv(),
 		globalVars(module->getGlobalVars()), currCFG(), triedVars() {
@@ -67,21 +67,21 @@ void SimpleCopyPropagationOptimizer::doOptimization() {
 	FuncOptimizer::doOptimization();
 }
 
-void SimpleCopyPropagationOptimizer::runOnFunction(ShPtr<Function> func) {
+void SimpleCopyPropagationOptimizer::runOnFunction(Function* func) {
 	currCFG = cfgBuilder->getCFG(func);
 	triedVars.clear();
 
 	FuncOptimizer::runOnFunction(func);
 }
 
-void SimpleCopyPropagationOptimizer::visit(ShPtr<AssignStmt> stmt) {
+void SimpleCopyPropagationOptimizer::visit(AssignStmt* stmt) {
 	// First, visit nested statements.
 	FuncOptimizer::visit(stmt);
 
 	tryOptimization(stmt);
 }
 
-void SimpleCopyPropagationOptimizer::visit(ShPtr<VarDefStmt> stmt) {
+void SimpleCopyPropagationOptimizer::visit(VarDefStmt* stmt) {
 	// First, visit nested statements.
 	FuncOptimizer::visit(stmt);
 
@@ -94,9 +94,9 @@ void SimpleCopyPropagationOptimizer::visit(ShPtr<VarDefStmt> stmt) {
 * @par Preconditions
 *  - @a stmt is either a VarDefStmt or AssignStmt
 */
-void SimpleCopyPropagationOptimizer::tryOptimization(ShPtr<Statement> stmt) {
-	ShPtr<Variable> lhsVar(cast<Variable>(getLhs(stmt)));
-	ShPtr<Expression> rhs(getRhs(stmt));
+void SimpleCopyPropagationOptimizer::tryOptimization(Statement* stmt) {
+	Variable* lhsVar(cast<Variable>(getLhs(stmt)));
+	Expression* rhs(getRhs(stmt));
 	if (!lhsVar || !rhs) {
 		// There is nothing we can do in this case.
 		return;
@@ -141,7 +141,7 @@ void SimpleCopyPropagationOptimizer::tryOptimization(ShPtr<Statement> stmt) {
 		return;
 	}
 
-	ShPtr<ValueData> stmtData(va->getValueData(stmt));
+	ValueData* stmtData(va->getValueData(stmt));
 	if (stmtData->hasAddressOps() || stmtData->hasDerefs() ||
 			stmtData->hasArrayAccesses() || stmtData->hasStructAccesses()) {
 		// A forbidden construction is used.
@@ -163,11 +163,11 @@ void SimpleCopyPropagationOptimizer::tryOptimization(ShPtr<Statement> stmt) {
 * this function should be called.
 */
 void SimpleCopyPropagationOptimizer::tryOptimizationCase1(
-		ShPtr<Statement> stmt, ShPtr<Variable> lhsVar, ShPtr<Expression> rhs) {
+		Statement* stmt, Variable* lhsVar, Expression* rhs) {
 	// Currently, we can only handle the situation where the right-hand side is
 	// a function call; that is, there are no other computations.
 	// TODO Add some more robust analysis to handle also this case.
-	ShPtr<CallExpr> rhsCall(cast<CallExpr>(rhs));
+	CallExpr* rhsCall(cast<CallExpr>(rhs));
 	if (!rhsCall) {
 		return;
 	}
@@ -184,15 +184,15 @@ void SimpleCopyPropagationOptimizer::tryOptimizationCase1(
 
 	// We will need the set of variables which may be accessed when calling the
 	// function from the right-hand side.
-	ShPtr<ValueData> stmtData(va->getValueData(stmt));
+	ValueData* stmtData(va->getValueData(stmt));
 	const VarSet &varsAccessedInCall(stmtData->getDirAccessedVars());
-	// ShPtr<CallInfo> rhsCallInfo(cio->getCallInfo(rhsCall, currFunc));
+	// CallInfo* rhsCallInfo(cio->getCallInfo(rhsCall, currFunc));
 
 	// Get the first statement where the variable is used by going through the
 	// successors of stmt. During this traversal, check that the optimization
 	// can be done.
-	ShPtr<Statement> firstUseStmt(stmt->getSuccessor());
-	ShPtr<ValueData> firstUseStmtData;
+	Statement* firstUseStmt(stmt->getSuccessor());
+	ValueData* firstUseStmtData;
 	while (firstUseStmt) {
 		firstUseStmtData = va->getValueData(firstUseStmt);
 		if (firstUseStmtData->isDirAccessed(lhsVar)) {
@@ -281,11 +281,11 @@ void SimpleCopyPropagationOptimizer::tryOptimizationCase1(
 			return;
 		}
 
-		if (ShPtr<ReturnStmt> returnStmt = cast<ReturnStmt>(firstUseStmt)) {
+		if (ReturnStmt* returnStmt = cast<ReturnStmt>(firstUseStmt)) {
 			if (!isa<CallExpr>(returnStmt->getRetVal())) {
 				return;
 			}
-		} else if (ShPtr<AssignStmt> assignStmt = cast<AssignStmt>(firstUseStmt)) {
+		} else if (AssignStmt* assignStmt = cast<AssignStmt>(firstUseStmt)) {
 			if (!isa<CallExpr>(assignStmt->getRhs())) {
 				return;
 			}
@@ -322,8 +322,8 @@ void SimpleCopyPropagationOptimizer::tryOptimizationCase1(
 
 	// Check that the two uses in stmt and firstUseStmt are the only uses of
 	// lhsVar, with the exception of an optional variable-defining statement.
-	ShPtr<VarDefStmt> lhsDefStmt;
-	ShPtr<VarUses> allLhsUses(vuv->getUses(lhsVar, currFunc));
+	VarDefStmt* lhsDefStmt = nullptr;
+	VarUses* allLhsUses(vuv->getUses(lhsVar, currFunc));
 	for (const auto &dirUse : allLhsUses->dirUses) {
 		if (dirUse == stmt || dirUse == firstUseStmt) {
 			continue;

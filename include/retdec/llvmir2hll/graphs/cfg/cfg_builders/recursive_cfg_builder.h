@@ -28,11 +28,11 @@ class RecursiveCFGBuilder: public CFGBuilder,
 public:
 	virtual void buildCFG() override;
 
-	static ShPtr<RecursiveCFGBuilder> create();
+	static RecursiveCFGBuilder* create();
 
 private:
 	/// Mapping of a statement into its corresponding node.
-	using StmtNodeMapping = std::unordered_map<ShPtr<Statement>, ShPtr<CFG::Node>>;
+	using StmtNodeMapping = std::unordered_map<Statement*, CFG::Node*>;
 
 private:
 	RecursiveCFGBuilder();
@@ -40,35 +40,35 @@ private:
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<Function> func) override;
-	virtual void visit(ShPtr<AssignStmt> stmt) override;
-	virtual void visit(ShPtr<VarDefStmt> stmt) override;
-	virtual void visit(ShPtr<CallStmt> stmt) override;
-	virtual void visit(ShPtr<ReturnStmt> stmt) override;
-	virtual void visit(ShPtr<EmptyStmt> stmt) override;
-	virtual void visit(ShPtr<IfStmt> stmt) override;
-	virtual void visit(ShPtr<SwitchStmt> stmt) override;
-	virtual void visit(ShPtr<WhileLoopStmt> stmt) override;
-	virtual void visit(ShPtr<ForLoopStmt> stmt) override;
-	virtual void visit(ShPtr<UForLoopStmt> stmt) override;
-	virtual void visit(ShPtr<BreakStmt> stmt) override;
-	virtual void visit(ShPtr<ContinueStmt> stmt) override;
-	virtual void visit(ShPtr<GotoStmt> stmt) override;
-	virtual void visit(ShPtr<UnreachableStmt> stmt) override;
-	virtual void visitStmt(ShPtr<Statement> stmt, bool visitSuccessors = true,
+	virtual void visit(Function* func) override;
+	virtual void visit(AssignStmt* stmt) override;
+	virtual void visit(VarDefStmt* stmt) override;
+	virtual void visit(CallStmt* stmt) override;
+	virtual void visit(ReturnStmt* stmt) override;
+	virtual void visit(EmptyStmt* stmt) override;
+	virtual void visit(IfStmt* stmt) override;
+	virtual void visit(SwitchStmt* stmt) override;
+	virtual void visit(WhileLoopStmt* stmt) override;
+	virtual void visit(ForLoopStmt* stmt) override;
+	virtual void visit(UForLoopStmt* stmt) override;
+	virtual void visit(BreakStmt* stmt) override;
+	virtual void visit(ContinueStmt* stmt) override;
+	virtual void visit(GotoStmt* stmt) override;
+	virtual void visit(UnreachableStmt* stmt) override;
+	virtual void visitStmt(Statement* stmt, bool visitSuccessors = true,
 		bool visitNestedStmts = true) override;
 	/// @}
 
-	ShPtr<CFG::Node> addNode(ShPtr<Statement> stmt);
-	void addStatement(ShPtr<Statement> stmt);
-	void addForwardOrBackwardEdge(ShPtr<Statement> stmt,
-		ShPtr<Expression> edgeCond = nullptr);
-	ShPtr<CFG::Node> getIndirectSuccessor(ShPtr<Statement> stmt);
-	void visitForOrUForLoop(ShPtr<Statement> loop, ShPtr<Statement> body);
+	CFG::Node* addNode(Statement* stmt);
+	void addStatement(Statement* stmt);
+	void addForwardOrBackwardEdge(Statement* stmt,
+		Expression* edgeCond = nullptr);
+	CFG::Node* getIndirectSuccessor(Statement* stmt);
+	void visitForOrUForLoop(Statement* loop, Statement* body);
 
 private:
 	/// Currently generated node.
-	ShPtr<CFG::Node> currNode;
+	CFG::Node* currNode = nullptr;
 
 	/// Mapping between a statement @c S and a node @c N of which @c S is the
 	/// first statement.

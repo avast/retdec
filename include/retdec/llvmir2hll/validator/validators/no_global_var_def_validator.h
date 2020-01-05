@@ -31,7 +31,7 @@ class NoGlobalVarDefValidator: public Validator {
 public:
 	virtual std::string getId() const override;
 
-	static ShPtr<Validator> create();
+	static Validator* create();
 
 private:
 	NoGlobalVarDefValidator();
@@ -39,7 +39,7 @@ private:
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<VarDefStmt> stmt) override;
+	virtual void visit(VarDefStmt* stmt) override;
 	/// @}
 };
 

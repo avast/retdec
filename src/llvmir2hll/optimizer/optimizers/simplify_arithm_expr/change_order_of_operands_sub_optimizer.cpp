@@ -22,7 +22,7 @@ REGISTER_AT_FACTORY("ChangeOrderOfOperands", CHANGE_ORDER_OF_OPERANDS_SUB_OPTIMI
 *            expressions.
 */
 ChangeOrderOfOperandsSubOptimizer::ChangeOrderOfOperandsSubOptimizer(
-		ShPtr<ArithmExprEvaluator> arithmExprEvaluator):
+		ArithmExprEvaluator* arithmExprEvaluator):
 			SubOptimizer(arithmExprEvaluator) {}
 
 /**
@@ -31,17 +31,17 @@ ChangeOrderOfOperandsSubOptimizer::ChangeOrderOfOperandsSubOptimizer(
 * @param[in] arithmExprEvaluator @a The used evaluator of arithmetical
 *            expressions.
 */
-ShPtr<SubOptimizer> ChangeOrderOfOperandsSubOptimizer::create(
-		ShPtr<ArithmExprEvaluator> arithmExprEvaluator) {
-	return ShPtr<SubOptimizer>(new ChangeOrderOfOperandsSubOptimizer(
-		arithmExprEvaluator));
+SubOptimizer* ChangeOrderOfOperandsSubOptimizer::create(
+		ArithmExprEvaluator* arithmExprEvaluator) {
+	return new ChangeOrderOfOperandsSubOptimizer(
+		arithmExprEvaluator);
 }
 
 std::string ChangeOrderOfOperandsSubOptimizer::getId() const {
 	return CHANGE_ORDER_OF_OPERANDS_SUB_OPTIMIZER_ID;
 }
 
-void ChangeOrderOfOperandsSubOptimizer::visit(ShPtr<MulOpExpr> expr) {
+void ChangeOrderOfOperandsSubOptimizer::visit(MulOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	// Optimization like "a * 3(ConstInt/ConstFloat)" -> optimized to "3 * a".
@@ -49,7 +49,7 @@ void ChangeOrderOfOperandsSubOptimizer::visit(ShPtr<MulOpExpr> expr) {
 	// optimized repeatedly.
 	if (!isConstFloatOrConstInt(expr->getFirstOperand()) &&
 			isConstFloatOrConstInt(expr->getSecondOperand())) {
-		ShPtr<MulOpExpr> mulOpExpr(MulOpExpr::create(expr->getSecondOperand(),
+		MulOpExpr* mulOpExpr(MulOpExpr::create(expr->getSecondOperand(),
 			expr->getFirstOperand()));
 		optimizeExpr(expr, mulOpExpr);
 	}

@@ -23,7 +23,7 @@ namespace llvmir2hll {
 * @par Preconditions
 *  - @a module is non-null
 */
-void AliasAnalysis::init(ShPtr<Module> module) {
+void AliasAnalysis::init(Module* module) {
 	PRECONDITION_NON_NULL(module);
 
 	this->module = module;

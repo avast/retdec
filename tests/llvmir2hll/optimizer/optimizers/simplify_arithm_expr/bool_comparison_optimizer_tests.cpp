@@ -34,7 +34,7 @@ protected:
 	BoolComparisonSubOptimizerTests();
 
 protected:
-	ShPtr<BoolComparisonSubOptimizer> optimizer;
+	BoolComparisonSubOptimizer* optimizer;
 };
 
 BoolComparisonSubOptimizerTests::BoolComparisonSubOptimizerTests():

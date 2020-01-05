@@ -20,12 +20,12 @@ namespace llvmir2hll {
 * @par Preconditions
 *  - @a module is non-null
 */
-SelfAssignOptimizer::SelfAssignOptimizer(ShPtr<Module> module):
+SelfAssignOptimizer::SelfAssignOptimizer(Module* module):
 	FuncOptimizer(module) {
 		PRECONDITION_NON_NULL(module);
 	}
 
-void SelfAssignOptimizer::visit(ShPtr<AssignStmt> stmt) {
+void SelfAssignOptimizer::visit(AssignStmt* stmt) {
 	// First, visit the successor so that when there is a list of self
 	// assignments, they are all properly removed.
 	visitStmt(stmt->getSuccessor());

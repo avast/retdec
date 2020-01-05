@@ -46,8 +46,8 @@ public:
 	VarSet getWrittenVars() const;
 	VarSet getAllVars() const;
 	std::size_t getCount(bool read = true, bool written = true) const;
-	std::size_t getNumOfUses(ShPtr<Variable> var) const;
-	bool isUsed(ShPtr<Variable> var, bool read = true,
+	std::size_t getNumOfUses(Variable* var) const;
+	bool isUsed(Variable* var, bool read = true,
 		bool written = true) const;
 
 	/// @name Used Variables Accessors
@@ -64,7 +64,7 @@ public:
 
 private:
 	/// Mapping of a variable into a count.
-	using VarCountMap = std::map<ShPtr<Variable>, std::size_t>;
+	using VarCountMap = std::map<Variable*, std::size_t>;
 
 private:
 	UsedVars();
@@ -97,14 +97,14 @@ private:
 */
 class UsedVarsVisitor: private OrderedAllVisitor,
 	private retdec::utils::NonCopyable,
-	public Caching<ShPtr<Value>, ShPtr<UsedVars>> {
+	public Caching<Value*, UsedVars*> {
 
 public:
-	ShPtr<UsedVars> getUsedVars_(ShPtr<Value> value);
+	UsedVars* getUsedVars_(Value* value);
 
-	static ShPtr<UsedVarsVisitor> create(bool visitSuccessors = true,
+	static UsedVarsVisitor* create(bool visitSuccessors = true,
 		bool visitNestedStmts = true, bool enableCaching = false);
-	static ShPtr<UsedVars> getUsedVars(ShPtr<Value> value,
+	static UsedVars* getUsedVars(Value* value,
 		bool visitSuccessors = true, bool visitNestedStmts = true);
 
 private:
@@ -114,19 +114,19 @@ private:
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<Function> func) override;
-	virtual void visit(ShPtr<Variable> var) override;
-	virtual void visit(ShPtr<ArrayIndexOpExpr> expr) override;
-	virtual void visit(ShPtr<StructIndexOpExpr> expr) override;
-	virtual void visit(ShPtr<DerefOpExpr> expr) override;
-	virtual void visit(ShPtr<AssignStmt> stmt) override;
-	virtual void visit(ShPtr<VarDefStmt> stmt) override;
-	virtual void visit(ShPtr<ForLoopStmt> stmt) override;
+	virtual void visit(Function* func) override;
+	virtual void visit(Variable* var) override;
+	virtual void visit(ArrayIndexOpExpr* expr) override;
+	virtual void visit(StructIndexOpExpr* expr) override;
+	virtual void visit(DerefOpExpr* expr) override;
+	virtual void visit(AssignStmt* stmt) override;
+	virtual void visit(VarDefStmt* stmt) override;
+	virtual void visit(ForLoopStmt* stmt) override;
 	/// @}
 
 private:
 	/// Used variables that are currently being computed.
-	ShPtr<UsedVars> usedVars;
+	UsedVars* usedVars = nullptr;
 
 	/// Are we writing into a variable?
 	bool writing;

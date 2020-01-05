@@ -28,7 +28,7 @@ class NoInitVarDefOptimizerTests: public TestsWithModule {};
 
 TEST_F(NoInitVarDefOptimizerTests,
 OptimizerHasNonEmptyID) {
-	ShPtr<NoInitVarDefOptimizer> optimizer(
+	NoInitVarDefOptimizer* optimizer(
 		new NoInitVarDefOptimizer(module));
 
 	EXPECT_TRUE(!optimizer->getId().empty()) <<
@@ -64,13 +64,13 @@ VarDefStmtsWithNoInitializerAreCorrectlyOptimized) {
 	//     return;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	testFunc->addLocalVar(varB);
-	ShPtr<VarDefStmt> varDefB(VarDefStmt::create(varB));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(ShPtr<Expression>(), varDefB));
-	ShPtr<VarDefStmt> varDefA(VarDefStmt::create(varA, ShPtr<Expression>(), returnStmt));
+	VarDefStmt* varDefB(VarDefStmt::create(varB));
+	ReturnStmt* returnStmt(ReturnStmt::create(Expression*(), varDefB));
+	VarDefStmt* varDefA(VarDefStmt::create(varA, Expression*(), returnStmt));
 	testFunc->setBody(varDefA);
 
 	// Optimize the module.
@@ -89,9 +89,9 @@ VarDefStmtsWithInitializerAreNotOptimized) {
 	//     int a = 4;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
-	ShPtr<VarDefStmt> varDefA(VarDefStmt::create(varA, ConstInt::create(4, 32)));
+	VarDefStmt* varDefA(VarDefStmt::create(varA, ConstInt::create(4, 32)));
 	testFunc->setBody(varDefA);
 
 	// Optimize the module.

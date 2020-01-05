@@ -45,14 +45,14 @@ public:
 
 protected:
 	/// Mapping between a node and its label.
-	using NodeLabelMapping = std::map<ShPtr<CFG::Node>, std::string>;
+	using NodeLabelMapping = std::map<CFG::Node*, std::string>;
 
 protected:
-	CFGWriter(ShPtr<CFG> cfg, std::ostream &out);
+	CFGWriter(CFG* cfg, std::ostream &out);
 
 protected:
 	/// CFG to be emitted.
-	ShPtr<CFG> cfg;
+	CFG* cfg = nullptr;
 
 	/// Stream, where the resulting CFG will be emitted.
 	std::ostream &out;

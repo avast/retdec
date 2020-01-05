@@ -28,7 +28,7 @@ namespace llvmir2hll {
 */
 class FruitVarNameGen: public VarNameGen {
 public:
-	static UPtr<VarNameGen> create(std::string prefix = "");
+	static VarNameGen* create(std::string prefix = "");
 
 	virtual std::string getId() const override;
 	virtual void restart() override;

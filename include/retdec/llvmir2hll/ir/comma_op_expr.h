@@ -26,11 +26,11 @@ class Visitor;
 */
 class CommaOpExpr final: public BinaryOpExpr {
 public:
-	static ShPtr<CommaOpExpr> create(ShPtr<Expression> op1,
-		ShPtr<Expression> op2);
+	static CommaOpExpr* create(Expression* op1,
+		Expression* op2);
 
-	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
-	virtual ShPtr<Value> clone() override;
+	virtual bool isEqualTo(Value* otherValue) const override;
+	virtual Value* clone() override;
 
 	/// @name Visitor Interface
 	/// @{
@@ -40,7 +40,7 @@ public:
 private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
-	CommaOpExpr(ShPtr<Expression> op1, ShPtr<Expression> op2);
+	CommaOpExpr(Expression* op1, Expression* op2);
 };
 
 } // namespace llvmir2hll

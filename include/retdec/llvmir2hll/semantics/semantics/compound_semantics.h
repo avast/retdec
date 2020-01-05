@@ -46,10 +46,10 @@ namespace llvmir2hll {
 */
 class CompoundSemantics: public Semantics {
 public:
-	static ShPtr<CompoundSemantics> create();
+	static CompoundSemantics* create();
 
-	void prependSemantics(ShPtr<Semantics> semantics);
-	void appendSemantics(ShPtr<Semantics> semantics);
+	void prependSemantics(Semantics* semantics);
+	void appendSemantics(Semantics* semantics);
 
 	/// @name Semantics Interface
 	/// @{
@@ -69,7 +69,7 @@ public:
 
 protected:
 	/// A list of semantics.
-	using SemanticsList = std::deque<ShPtr<Semantics>>;
+	using SemanticsList = std::deque<Semantics*>;
 
 protected:
 	CompoundSemantics();

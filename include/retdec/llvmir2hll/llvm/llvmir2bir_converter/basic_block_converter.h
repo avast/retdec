@@ -39,34 +39,34 @@ class Statement;
 * into statements.
 */
 class BasicBlockConverter final: private retdec::utils::NonCopyable,
-	private llvm::InstVisitor<BasicBlockConverter, ShPtr<Statement>> {
+	private llvm::InstVisitor<BasicBlockConverter, Statement*> {
 public:
-	BasicBlockConverter(ShPtr<LLVMValueConverter> converter,
-		ShPtr<LabelsHandler> labelsHandler);
+	BasicBlockConverter(LLVMValueConverter* converter,
+		LabelsHandler* labelsHandler);
 
-	ShPtr<Statement> convert(llvm::BasicBlock &bb);
+	Statement* convert(llvm::BasicBlock &bb);
 
 private:
 	bool shouldBeConverted(const llvm::Instruction &inst) const;
-	ShPtr<Statement> convertInstructionsOf(llvm::BasicBlock &bb);
+	Statement* convertInstructionsOf(llvm::BasicBlock &bb);
 
-	friend class llvm::InstVisitor<BasicBlockConverter, ShPtr<Statement>>;
-	ShPtr<Statement> visitCallInst(llvm::CallInst &inst);
-	ShPtr<Statement> visitInsertValueInst(llvm::InsertValueInst &inst);
-	ShPtr<Statement> visitLoadInst(llvm::LoadInst &inst);
-	ShPtr<Statement> visitReturnInst(llvm::ReturnInst &inst);
-	ShPtr<Statement> visitStoreInst(llvm::StoreInst &inst);
-	ShPtr<Statement> visitUnreachableInst(llvm::UnreachableInst &inst);
-	ShPtr<Statement> visitInstruction(llvm::Instruction &inst);
+	friend class llvm::InstVisitor<BasicBlockConverter, Statement*>;
+	Statement* visitCallInst(llvm::CallInst &inst);
+	Statement* visitInsertValueInst(llvm::InsertValueInst &inst);
+	Statement* visitLoadInst(llvm::LoadInst &inst);
+	Statement* visitReturnInst(llvm::ReturnInst &inst);
+	Statement* visitStoreInst(llvm::StoreInst &inst);
+	Statement* visitUnreachableInst(llvm::UnreachableInst &inst);
+	Statement* visitInstruction(llvm::Instruction &inst);
 
-	ShPtr<Statement> generateAssignOfPrevValForInsertValueInst(
+	Statement* generateAssignOfPrevValForInsertValueInst(
 		llvm::InsertValueInst &inst);
 
 	/// A converter from LLVM values to values in BIR.
-	ShPtr<LLVMValueConverter> converter;
+	LLVMValueConverter* converter = nullptr;
 
 	/// A handler of labels.
-	ShPtr<LabelsHandler> labelsHandler;
+	LabelsHandler* labelsHandler = nullptr;
 };
 
 } // namespace llvmir2hll

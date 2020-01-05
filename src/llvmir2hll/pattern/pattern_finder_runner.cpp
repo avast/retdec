@@ -22,7 +22,7 @@ namespace llvmir2hll {
 * @par Preconditions
 *  - @a module is non-null
 */
-void PatternFinderRunner::run(const PatternFinders &pfs, ShPtr<Module> module) {
+void PatternFinderRunner::run(const PatternFinders &pfs, Module* module) {
 	for (const auto &pf : pfs) {
 		run(pf, module);
 	}
@@ -43,7 +43,7 @@ void PatternFinderRunner::run(const PatternFinders &pfs, ShPtr<Module> module) {
 * @par Preconditions
 *  - @a module is non-null
 */
-void PatternFinderRunner::run(ShPtr<PatternFinder> pf, ShPtr<Module> module) {
+void PatternFinderRunner::run(PatternFinder* pf, Module* module) {
 	PRECONDITION_NON_NULL(module);
 
 	doActionsBeforePatternFinderRuns(pf);

@@ -30,27 +30,27 @@ class StructType;
 class ConstStruct final: public Constant {
 public:
 	/// A single struct item (field name, value)
-	using Item = std::pair<ShPtr<ConstInt>, ShPtr<Expression>>;
+	using Item = std::pair<ConstInt*, Expression*>;
 
 	/// Underlying type for a struct constant.
 	using Type = std::vector<Item>;
 
 public:
-	static ShPtr<ConstStruct> create(Type value, ShPtr<StructType> type);
+	static ConstStruct* create(Type value, StructType* type);
 
-	virtual ShPtr<Value> clone() override;
+	virtual Value* clone() override;
 
-	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
-	virtual ShPtr<retdec::llvmir2hll::Type> getType() const override;
-	virtual void replace(ShPtr<Expression> oldExpr,
-		ShPtr<Expression> newExpr) override;
+	virtual bool isEqualTo(Value* otherValue) const override;
+	virtual retdec::llvmir2hll::Type* getType() const override;
+	virtual void replace(Expression* oldExpr,
+		Expression* newExpr) override;
 
 	Type getValue() const;
 
 	/// @name Observer Interface
 	/// @{
-	virtual void update(ShPtr<Value> subject,
-		ShPtr<Value> arg = nullptr) override;
+	virtual void update(Value* subject,
+		Value* arg = nullptr) override;
 	/// @}
 
 	/// @name Visitor Interface
@@ -63,12 +63,12 @@ private:
 	Type value;
 
 	/// Type of the value.
-	ShPtr<StructType> type;
+	StructType* type = nullptr;
 
 private:
 	// Since instances are created by calling the static function create(),
 	// constructors can be private.
-	ConstStruct(Type value, ShPtr<StructType> type);
+	ConstStruct(Type value, StructType* type);
 };
 
 } // namespace llvmir2hll

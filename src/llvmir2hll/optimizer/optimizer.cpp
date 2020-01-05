@@ -19,7 +19,7 @@ namespace llvmir2hll {
 * @par Preconditions
 *  - @a module is non-null
 */
-Optimizer::Optimizer(ShPtr<Module> module):
+Optimizer::Optimizer(Module* module):
 	OrderedAllVisitor(), module(module) {
 		PRECONDITION_NON_NULL(module);
 	}
@@ -36,7 +36,7 @@ Optimizer::Optimizer(ShPtr<Module> module):
 *  (2) doOptimization()
 *  (3) doFinalization()
 */
-ShPtr<Module> Optimizer::optimize() {
+Module* Optimizer::optimize() {
 	doInitialization();
 	doOptimization();
 	doFinalization();

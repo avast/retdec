@@ -25,10 +25,10 @@ class Visitor;
 */
 class TruncCastExpr final: public CastExpr {
 public:
-	static ShPtr<TruncCastExpr> create(ShPtr<Expression> op, ShPtr<Type> dstType);
+	static TruncCastExpr* create(Expression* op, Type* dstType);
 
-	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
-	virtual ShPtr<Value> clone() override;
+	virtual bool isEqualTo(Value* otherValue) const override;
+	virtual Value* clone() override;
 
 	/// @name Visitor Interface
 	/// @{
@@ -38,7 +38,7 @@ public:
 private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
-	TruncCastExpr(ShPtr<Expression> op, ShPtr<Type> dstType);
+	TruncCastExpr(Expression* op, Type* dstType);
 };
 
 } // namespace llvmir2hll

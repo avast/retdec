@@ -16,25 +16,25 @@ namespace llvmir2hll {
 *
 * See create() for more information.
 */
-AddressOpExpr::AddressOpExpr(ShPtr<Expression> op):
+AddressOpExpr::AddressOpExpr(Expression* op):
 	UnaryOpExpr(op) {}
 
-bool AddressOpExpr::isEqualTo(ShPtr<Value> otherValue) const {
-	if (ShPtr<AddressOpExpr> otherValueAddressOpExpr = cast<AddressOpExpr>(otherValue)) {
+bool AddressOpExpr::isEqualTo(Value* otherValue) const {
+	if (AddressOpExpr* otherValueAddressOpExpr = cast<AddressOpExpr>(otherValue)) {
 		return op->isEqualTo(otherValueAddressOpExpr->getOperand());
 	}
 	return false;
 }
 
-ShPtr<Value> AddressOpExpr::clone() {
-	ShPtr<AddressOpExpr> addressOpExpr(AddressOpExpr::create(
+Value* AddressOpExpr::clone() {
+	AddressOpExpr* addressOpExpr(AddressOpExpr::create(
 		ucast<Expression>(op->clone())));
 	addressOpExpr->setMetadata(getMetadata());
 	return addressOpExpr;
 }
 
 void AddressOpExpr::accept(Visitor *v) {
-	v->visit(ucast<AddressOpExpr>(shared_from_this()));
+	v->visit(ucast<AddressOpExpr>(this));
 }
 
 /**
@@ -45,12 +45,12 @@ void AddressOpExpr::accept(Visitor *v) {
 * @par Preconditions
 *  - @a op is non-null
 */
-ShPtr<AddressOpExpr> AddressOpExpr::create(ShPtr<Expression> op) {
+AddressOpExpr* AddressOpExpr::create(Expression* op) {
 	PRECONDITION_NON_NULL(op);
 
-	ShPtr<AddressOpExpr> expr(new AddressOpExpr(op));
+	AddressOpExpr* expr(new AddressOpExpr(op));
 
-	// Initialization (recall that shared_from_this() cannot be called in a
+	// Initialization (recall that this cannot be called in a
 	// constructor).
 	op->addObserver(expr);
 

@@ -19,7 +19,7 @@ StmtsPattern::StmtsPattern():
 /**
 * @brief Constructs a pattern containing @a stmt.
 */
-StmtsPattern::StmtsPattern(ShPtr<Statement> stmt):
+StmtsPattern::StmtsPattern(Statement* stmt):
 	Pattern(), stmts(1, stmt) {}
 
 void StmtsPattern::print(llvm::raw_ostream &os,
@@ -46,7 +46,7 @@ bool StmtsPattern::isEmpty() const {
 * Iterators returned by stmt_begin() and stmt_end() may be invalidated after
 * this call.
 */
-void StmtsPattern::addStmt(ShPtr<Statement> stmt) {
+void StmtsPattern::addStmt(Statement* stmt) {
 	stmts.push_back(stmt);
 }
 
@@ -80,15 +80,15 @@ StmtsPattern::stmt_iterator StmtsPattern::stmt_end() const {
 /**
 * @brief Creates an empty pattern.
 */
-ShPtr<StmtsPattern> StmtsPattern::create() {
-	return ShPtr<StmtsPattern>(new StmtsPattern());
+StmtsPattern* StmtsPattern::create() {
+	return new StmtsPattern();
 }
 
 /**
 * @brief Creates a pattern containing @a stmt.
 */
-ShPtr<StmtsPattern> StmtsPattern::create(ShPtr<Statement> stmt) {
-	return ShPtr<StmtsPattern>(new StmtsPattern(stmt));
+StmtsPattern* StmtsPattern::create(Statement* stmt) {
+	return new StmtsPattern(stmt);
 }
 
 } // namespace llvmir2hll

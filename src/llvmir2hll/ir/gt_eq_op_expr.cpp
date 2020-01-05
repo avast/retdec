@@ -17,26 +17,26 @@ namespace llvmir2hll {
 *
 * See create() for more information.
 */
-GtEqOpExpr::GtEqOpExpr(ShPtr<Expression> op1, ShPtr<Expression> op2,
+GtEqOpExpr::GtEqOpExpr(Expression* op1, Expression* op2,
 		Variant variant):
 	BinaryOpExpr(op1, op2), variant(variant) {}
 
-bool GtEqOpExpr::isEqualTo(ShPtr<Value> otherValue) const {
-	if (ShPtr<GtEqOpExpr> otherValueGtEqOpExpr = cast<GtEqOpExpr>(otherValue)) {
+bool GtEqOpExpr::isEqualTo(Value* otherValue) const {
+	if (GtEqOpExpr* otherValueGtEqOpExpr = cast<GtEqOpExpr>(otherValue)) {
 		return op1->isEqualTo(otherValueGtEqOpExpr->getFirstOperand()) &&
 			op2->isEqualTo(otherValueGtEqOpExpr->getSecondOperand());
 	}
 	return false;
 }
 
-ShPtr<Value> GtEqOpExpr::clone() {
-	ShPtr<GtEqOpExpr> gtEqOpExpr(GtEqOpExpr::create(
+Value* GtEqOpExpr::clone() {
+	GtEqOpExpr* gtEqOpExpr(GtEqOpExpr::create(
 		ucast<Expression>(op1->clone()), ucast<Expression>(op2->clone())));
 	gtEqOpExpr->setMetadata(getMetadata());
 	return gtEqOpExpr;
 }
 
-ShPtr<Type> GtEqOpExpr::getType() const {
+Type* GtEqOpExpr::getType() const {
 	// The type of `x >= y` should be bool.
 	return IntType::create(1);
 }
@@ -58,14 +58,14 @@ GtEqOpExpr::Variant GtEqOpExpr::getVariant() const {
 * @par Preconditions
 *  - both operands are non-null
 */
-ShPtr<GtEqOpExpr> GtEqOpExpr::create(ShPtr<Expression> op1, ShPtr<Expression> op2,
+GtEqOpExpr* GtEqOpExpr::create(Expression* op1, Expression* op2,
 		Variant variant) {
 	PRECONDITION_NON_NULL(op1);
 	PRECONDITION_NON_NULL(op2);
 
-	ShPtr<GtEqOpExpr> expr(new GtEqOpExpr(op1, op2, variant));
+	GtEqOpExpr* expr(new GtEqOpExpr(op1, op2, variant));
 
-	// Initialization (recall that shared_from_this() cannot be called in a
+	// Initialization (recall that this cannot be called in a
 	// constructor).
 	op1->addObserver(expr);
 	op2->addObserver(expr);
@@ -74,7 +74,7 @@ ShPtr<GtEqOpExpr> GtEqOpExpr::create(ShPtr<Expression> op1, ShPtr<Expression> op
 }
 
 void GtEqOpExpr::accept(Visitor *v) {
-	v->visit(ucast<GtEqOpExpr>(shared_from_this()));
+	v->visit(ucast<GtEqOpExpr>(this));
 }
 
 } // namespace llvmir2hll

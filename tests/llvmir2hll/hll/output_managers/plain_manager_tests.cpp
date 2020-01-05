@@ -25,7 +25,7 @@ class PlainOutputManagerTests: public OutputManagerTests
 void PlainOutputManagerTests::SetUp()
 {
 	OutputManagerTests::SetUp();
-	manager = UPtr<OutputManager>(new PlainOutputManager(codeStream));
+	manager = new PlainOutputManager(codeStream);
 	manager->setCommentPrefix("//");
 }
 

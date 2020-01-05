@@ -21,7 +21,7 @@ namespace tests {
 */
 class CompoundSemanticsTests: public Test {
 protected:
-	ShPtr<CompoundSemantics> compoundSemantics;
+	CompoundSemantics* compoundSemantics;
 
 protected:
 	virtual void SetUp() override {

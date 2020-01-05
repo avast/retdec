@@ -23,22 +23,22 @@ class Visitor;
 */
 class GotoStmt final: public Statement {
 public:
-	static ShPtr<GotoStmt> create(ShPtr<Statement> target,
+	static GotoStmt* create(Statement* target,
 		Address a = Address::Undefined);
 
-	virtual ShPtr<Value> clone() override;
-	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
+	virtual Value* clone() override;
+	virtual bool isEqualTo(Value* otherValue) const override;
 	virtual bool isCompound() override { return false; }
-	virtual void replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) override;
-	virtual ShPtr<Expression> asExpression() const override;
+	virtual void replace(Expression* oldExpr, Expression* newExpr) override;
+	virtual Expression* asExpression() const override;
 
-	ShPtr<Statement> getTarget() const;
+	Statement* getTarget() const;
 
-	void setTarget(ShPtr<Statement> target);
+	void setTarget(Statement* target);
 
 	/// @name Observer Interface
 	/// @{
-	virtual void update(ShPtr<Value> subject, ShPtr<Value> arg = nullptr) override;
+	virtual void update(Value* subject, Value* arg = nullptr) override;
 	/// @}
 
 	/// @name Visitor Interface
@@ -49,11 +49,11 @@ public:
 private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
-	explicit GotoStmt(ShPtr<Statement> target, Address a = Address::Undefined);
+	explicit GotoStmt(Statement* target, Address a = Address::Undefined);
 
 private:
 	/// Jump target.
-	ShPtr<Statement> target;
+	Statement* target = nullptr;
 };
 
 } // namespace llvmir2hll

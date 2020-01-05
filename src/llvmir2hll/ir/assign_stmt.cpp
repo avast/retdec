@@ -19,27 +19,27 @@ namespace llvmir2hll {
 *
 * See create() for more information.
 */
-AssignStmt::AssignStmt(ShPtr<Expression> lhs, ShPtr<Expression> rhs, Address a):
+AssignStmt::AssignStmt(Expression* lhs, Expression* rhs, Address a):
 	Statement(a), lhs(lhs), rhs(rhs) {}
 
-ShPtr<Value> AssignStmt::clone() {
-	ShPtr<AssignStmt> assignStmt(AssignStmt::create(
+Value* AssignStmt::clone() {
+	AssignStmt* assignStmt(AssignStmt::create(
 		ucast<Expression>(lhs->clone()), ucast<Expression>(rhs->clone()),
 		nullptr, getAddress()));
 	assignStmt->setMetadata(getMetadata());
 	return assignStmt;
 }
 
-bool AssignStmt::isEqualTo(ShPtr<Value> otherValue) const {
+bool AssignStmt::isEqualTo(Value* otherValue) const {
 	// Both types and values of all operands have to be equal.
-	if (ShPtr<AssignStmt> otherAssignStmt = cast<AssignStmt>(otherValue)) {
+	if (AssignStmt* otherAssignStmt = cast<AssignStmt>(otherValue)) {
 		return lhs->isEqualTo(otherAssignStmt->lhs) &&
 			rhs->isEqualTo(otherAssignStmt->rhs);
 	}
 	return false;
 }
 
-void AssignStmt::replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) {
+void AssignStmt::replace(Expression* oldExpr, Expression* newExpr) {
 	if (oldExpr == lhs) {
 		setLhs(newExpr);
 	} else {
@@ -53,21 +53,21 @@ void AssignStmt::replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) {
 	}
 }
 
-ShPtr<Expression> AssignStmt::asExpression() const {
+Expression* AssignStmt::asExpression() const {
 	return AssignOpExpr::create(lhs, rhs);
 }
 
 /**
 * @brief Returns the left-hand side of the assignment.
 */
-ShPtr<Expression> AssignStmt::getLhs() const {
+Expression* AssignStmt::getLhs() const {
 	return lhs;
 }
 
 /**
 * @brief Returns the left-hand side of the assignment.
 */
-ShPtr<Expression> AssignStmt::getRhs() const {
+Expression* AssignStmt::getRhs() const {
 	return rhs;
 }
 
@@ -77,11 +77,11 @@ ShPtr<Expression> AssignStmt::getRhs() const {
 * @par Preconditions
 *  - @a left is non-null
 */
-void AssignStmt::setLhs(ShPtr<Expression> left) {
+void AssignStmt::setLhs(Expression* left) {
 	PRECONDITION_NON_NULL(left);
 
-	lhs->removeObserver(shared_from_this());
-	left->addObserver(shared_from_this());
+	lhs->removeObserver(this);
+	left->addObserver(this);
 	lhs = left;
 }
 
@@ -91,11 +91,11 @@ void AssignStmt::setLhs(ShPtr<Expression> left) {
 * @par Preconditions
 *  - @a right is non-null
 */
-void AssignStmt::setRhs(ShPtr<Expression> right) {
+void AssignStmt::setRhs(Expression* right) {
 	PRECONDITION_NON_NULL(right);
 
-	rhs->removeObserver(shared_from_this());
-	right->addObserver(shared_from_this());
+	rhs->removeObserver(this);
+	right->addObserver(this);
 	rhs = right;
 }
 
@@ -110,15 +110,15 @@ void AssignStmt::setRhs(ShPtr<Expression> right) {
 * @par Preconditions
 *  - @a lhs and @a rhs are non-null
 */
-ShPtr<AssignStmt> AssignStmt::create(ShPtr<Expression> lhs, ShPtr<Expression> rhs,
-			ShPtr<Statement> succ, Address a) {
+AssignStmt* AssignStmt::create(Expression* lhs, Expression* rhs,
+			Statement* succ, Address a) {
 	PRECONDITION_NON_NULL(lhs);
 	PRECONDITION_NON_NULL(rhs);
 
-	ShPtr<AssignStmt> stmt(new AssignStmt(lhs, rhs, a));
+	AssignStmt* stmt(new AssignStmt(lhs, rhs, a));
 	stmt->setSuccessor(succ);
 
-	// Initialization (recall that shared_from_this() cannot be called in a
+	// Initialization (recall that this cannot be called in a
 	// constructor).
 	lhs->addObserver(stmt);
 	rhs->addObserver(stmt);
@@ -145,11 +145,11 @@ ShPtr<AssignStmt> AssignStmt::create(ShPtr<Expression> lhs, ShPtr<Expression> rh
 *
 * @see Subject::update()
 */
-void AssignStmt::update(ShPtr<Value> subject, ShPtr<Value> arg) {
+void AssignStmt::update(Value* subject, Value* arg) {
 	PRECONDITION_NON_NULL(subject);
 	PRECONDITION_NON_NULL(arg);
 
-	ShPtr<Expression> newExpr = cast<Expression>(arg);
+	Expression* newExpr = cast<Expression>(arg);
 	if (!newExpr) {
 		return;
 	}
@@ -162,7 +162,7 @@ void AssignStmt::update(ShPtr<Value> subject, ShPtr<Value> arg) {
 }
 
 void AssignStmt::accept(Visitor *v) {
-	v->visit(ucast<AssignStmt>(shared_from_this()));
+	v->visit(ucast<AssignStmt>(this));
 }
 
 } // namespace llvmir2hll

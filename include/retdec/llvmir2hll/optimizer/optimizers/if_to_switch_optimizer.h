@@ -63,7 +63,7 @@ class ValueAnalysis;
 */
 class IfToSwitchOptimizer final: public FuncOptimizer {
 public:
-	IfToSwitchOptimizer(ShPtr<Module> module, ShPtr<ValueAnalysis> va);
+	IfToSwitchOptimizer(Module* module, ValueAnalysis* va);
 
 	virtual std::string getId() const override { return "IfToSwitch"; }
 
@@ -71,18 +71,18 @@ private:
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<IfStmt> stmt) override;
+	virtual void visit(IfStmt* stmt) override;
 
-	void appendBreakStmtIfNeeded(ShPtr<Statement> stmt);
-	ShPtr<Expression> getControlExprIfConvertibleToSwitch(ShPtr<IfStmt> ifStmt);
-	ShPtr<Expression> getNextOpIfSecondOneIsConstInt(ShPtr<EqOpExpr>
+	void appendBreakStmtIfNeeded(Statement* stmt);
+	Expression* getControlExprIfConvertibleToSwitch(IfStmt* ifStmt);
+	Expression* getNextOpIfSecondOneIsConstInt(EqOpExpr*
 		eqOpExpr);
-	void convertIfStmtToSwitchStmt(ShPtr<IfStmt> ifStmt, ShPtr<Expression>
+	void convertIfStmtToSwitchStmt(IfStmt* ifStmt, Expression*
 		controlExpr);
 
 private:
 	/// Analysis of values.
-	ShPtr<ValueAnalysis> va;
+	ValueAnalysis* va = nullptr;
 };
 
 } // namespace llvmir2hll

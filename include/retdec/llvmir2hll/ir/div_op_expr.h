@@ -34,11 +34,11 @@ public:
 	};
 
 public:
-	static ShPtr<DivOpExpr> create(ShPtr<Expression> op1,
-		ShPtr<Expression> op2, Variant variant = Variant::UDiv);
+	static DivOpExpr* create(Expression* op1,
+		Expression* op2, Variant variant = Variant::UDiv);
 
-	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
-	virtual ShPtr<Value> clone() override;
+	virtual bool isEqualTo(Value* otherValue) const override;
+	virtual Value* clone() override;
 
 	Variant getVariant() const;
 
@@ -54,7 +54,7 @@ private:
 private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
-	DivOpExpr(ShPtr<Expression> op1, ShPtr<Expression> op2,
+	DivOpExpr(Expression* op1, Expression* op2,
 		Variant variant = Variant::UDiv);
 };
 

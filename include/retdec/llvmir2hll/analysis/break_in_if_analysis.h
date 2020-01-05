@@ -29,7 +29,7 @@ class Statement;
 class BreakInIfAnalysis: private OrderedAllVisitor,
 		private retdec::utils::NonCopyable {
 public:
-	static bool hasBreakStmt(ShPtr<IfStmt> stmt);
+	static bool hasBreakStmt(IfStmt* stmt);
 
 private:
 	BreakInIfAnalysis();
@@ -37,8 +37,8 @@ private:
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<BreakStmt> stmt) override;
-	virtual void visit(ShPtr<GotoStmt> stmt) override;
+	virtual void visit(BreakStmt* stmt) override;
+	virtual void visit(GotoStmt* stmt) override;
 	/// @}
 
 private:

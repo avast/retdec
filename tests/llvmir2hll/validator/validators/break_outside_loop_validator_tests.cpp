@@ -38,7 +38,7 @@ protected:
 	}
 
 protected:
-	ShPtr<Validator> validator;
+	Validator* validator;
 };
 
 TEST_F(BreakOutsideLoopValidatorTests,
@@ -60,7 +60,7 @@ NoErrorWhenBreakIsInsideWhileLoop) {
 	//     while True:
 	//         break
 	//
-	ShPtr<WhileLoopStmt> whileLoop(WhileLoopStmt::create(
+	WhileLoopStmt* whileLoop(WhileLoopStmt::create(
 		ConstBool::create(true), BreakStmt::create()));
 	testFunc->setBody(whileLoop);
 
@@ -75,8 +75,8 @@ NoErrorWhenBreakIsInsideForLoop) {
 	//     for i in range(0, 10):
 	//         break
 	//
-	ShPtr<Variable> varI(Variable::create("i", IntType::create(16)));
-	ShPtr<ForLoopStmt> forLoopStmt(ForLoopStmt::create(
+	Variable* varI(Variable::create("i", IntType::create(16)));
+	ForLoopStmt* forLoopStmt(ForLoopStmt::create(
 		varI, ConstInt::create(0, 16), LtOpExpr::create(varI, ConstInt::create(10, 16)),
 		ConstInt::create(1, 16), BreakStmt::create()));
 	testFunc->setBody(forLoopStmt);
@@ -93,8 +93,8 @@ NoErrorWhenBreakIsInsideSwitch) {
 	//         case 1:
 	//             break
 	//
-	ShPtr<ConstInt> constInt1(ConstInt::create(1, 16));
-	ShPtr<SwitchStmt> switchStmt(SwitchStmt::create(constInt1));
+	ConstInt* constInt1(ConstInt::create(1, 16));
+	SwitchStmt* switchStmt(SwitchStmt::create(constInt1));
 	switchStmt->addClause(constInt1, BreakStmt::create());
 	testFunc->setBody(switchStmt);
 
@@ -109,7 +109,7 @@ NoErrorWhenContinueIsInsideWhileLoop) {
 	//     while True:
 	//         continue
 	//
-	ShPtr<WhileLoopStmt> whileLoop(WhileLoopStmt::create(
+	WhileLoopStmt* whileLoop(WhileLoopStmt::create(
 		ConstBool::create(true), ContinueStmt::create()));
 	testFunc->setBody(whileLoop);
 
@@ -124,8 +124,8 @@ NoErrorWhenContinueIsInsideForLoop) {
 	//     for i in range(0, 10):
 	//         continue
 	//
-	ShPtr<Variable> varI(Variable::create("i", IntType::create(16)));
-	ShPtr<ForLoopStmt> forLoopStmt(ForLoopStmt::create(
+	Variable* varI(Variable::create("i", IntType::create(16)));
+	ForLoopStmt* forLoopStmt(ForLoopStmt::create(
 		varI, ConstInt::create(0, 16), LtOpExpr::create(varI, ConstInt::create(10, 16)),
 		ConstInt::create(1, 16), ContinueStmt::create()));
 	testFunc->setBody(forLoopStmt);
@@ -142,10 +142,10 @@ NoErrorWhenBreakIsInsideIfInsideWhileLoop) {
 	//         if 1:
 	//             break
 	//
-	ShPtr<IfStmt> ifStmt(IfStmt::create(
+	IfStmt* ifStmt(IfStmt::create(
 		ConstInt::create(1, 16),
 		BreakStmt::create()));
-	ShPtr<WhileLoopStmt> whileLoop(WhileLoopStmt::create(
+	WhileLoopStmt* whileLoop(WhileLoopStmt::create(
 		ConstBool::create(true), ifStmt));
 	testFunc->setBody(whileLoop);
 
@@ -161,10 +161,10 @@ NoErrorWhenContinueIsInsideIfInsideWhileLoop) {
 	//         if 1:
 	//             continue
 	//
-	ShPtr<IfStmt> ifStmt(IfStmt::create(
+	IfStmt* ifStmt(IfStmt::create(
 		ConstInt::create(1, 16),
 		ContinueStmt::create()));
-	ShPtr<WhileLoopStmt> whileLoop(WhileLoopStmt::create(
+	WhileLoopStmt* whileLoop(WhileLoopStmt::create(
 		ConstBool::create(true), ifStmt));
 	testFunc->setBody(whileLoop);
 
@@ -180,11 +180,11 @@ NoErrorWhenBreakIsInsideIfInsideForLoop) {
 	//         if 1:
 	//             break
 	//
-	ShPtr<IfStmt> ifStmt(IfStmt::create(
+	IfStmt* ifStmt(IfStmt::create(
 		ConstInt::create(1, 16),
 		BreakStmt::create()));
-	ShPtr<Variable> varI(Variable::create("i", IntType::create(16)));
-	ShPtr<ForLoopStmt> forLoop(ForLoopStmt::create(
+	Variable* varI(Variable::create("i", IntType::create(16)));
+	ForLoopStmt* forLoop(ForLoopStmt::create(
 		varI, ConstInt::create(0, 16), LtOpExpr::create(varI, ConstInt::create(10, 16)),
 		ConstInt::create(1, 16), ifStmt));
 	testFunc->setBody(forLoop);
@@ -201,11 +201,11 @@ NoErrorWhenContinueIsInsideIfInsideForLoop) {
 	//         if 1:
 	//             continue
 	//
-	ShPtr<IfStmt> ifStmt(IfStmt::create(
+	IfStmt* ifStmt(IfStmt::create(
 		ConstInt::create(1, 16),
 		ContinueStmt::create()));
-	ShPtr<Variable> varI(Variable::create("i", IntType::create(16)));
-	ShPtr<ForLoopStmt> forLoop(ForLoopStmt::create(
+	Variable* varI(Variable::create("i", IntType::create(16)));
+	ForLoopStmt* forLoop(ForLoopStmt::create(
 		varI, ConstInt::create(0, 16), LtOpExpr::create(varI, ConstInt::create(10, 16)),
 		ConstInt::create(1, 16), ifStmt));
 	testFunc->setBody(forLoop);
@@ -222,8 +222,8 @@ ErrorWhenContinueIsInsideSwitch) {
 	//         case 1:
 	//             break
 	//
-	ShPtr<ConstInt> constInt1(ConstInt::create(1, 16));
-	ShPtr<SwitchStmt> switchStmt(SwitchStmt::create(constInt1));
+	ConstInt* constInt1(ConstInt::create(1, 16));
+	SwitchStmt* switchStmt(SwitchStmt::create(constInt1));
 	switchStmt->addClause(constInt1, ContinueStmt::create());
 	testFunc->setBody(switchStmt);
 
@@ -262,7 +262,7 @@ ErrorWhenBreakIsInsideIfWithoutSurroundingLoop) {
 	//     if 1:
 	//         break
 	//
-	ShPtr<IfStmt> ifStmt(IfStmt::create(
+	IfStmt* ifStmt(IfStmt::create(
 		ConstInt::create(1, 16),
 		ContinueStmt::create()));
 	testFunc->setBody(BreakStmt::create());
@@ -278,7 +278,7 @@ ErrorWhenContinueIsInsideIfWithoutSurroundingLoop) {
 	//     if 1:
 	//         continue
 	//
-	ShPtr<IfStmt> ifStmt(IfStmt::create(
+	IfStmt* ifStmt(IfStmt::create(
 		ConstInt::create(1, 16),
 		ContinueStmt::create()));
 	testFunc->setBody(ContinueStmt::create());

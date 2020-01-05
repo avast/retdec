@@ -115,12 +115,12 @@ private:
 	std::stack<PrevOperators> prevOperatorsStack;
 	/// This map contains Expression adresses and status to write, or doesn't write
 	/// brackets.
-	std::map<ShPtr<Expression>, bool> bracketsAreNeededMap;
+	std::map<Expression*, bool> bracketsAreNeededMap;
 	/// The module to be analyzed.
-	ShPtr<Module> module;
+	Module* module = nullptr;
 
 public:
-	BracketManager(ShPtr<Module> module);
+	BracketManager(Module* module);
 
 	void init();
 
@@ -129,58 +129,58 @@ public:
 	*/
 	virtual std::string getId() const = 0;
 
-	bool areBracketsNeeded(ShPtr<Expression> expr);
+	bool areBracketsNeeded(Expression* expr);
 
 	/// @name OrderedAllVisitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<AddressOpExpr> expr) override;
-	virtual void visit(ShPtr<AssignOpExpr> expr) override;
-	virtual void visit(ShPtr<ArrayIndexOpExpr> expr) override;
-	virtual void visit(ShPtr<StructIndexOpExpr> expr) override;
-	virtual void visit(ShPtr<DerefOpExpr> expr) override;
-	virtual void visit(ShPtr<NotOpExpr> expr) override;
-	virtual void visit(ShPtr<NegOpExpr> expr) override;
-	virtual void visit(ShPtr<EqOpExpr> expr) override;
-	virtual void visit(ShPtr<NeqOpExpr> expr) override;
-	virtual void visit(ShPtr<LtEqOpExpr> expr) override;
-	virtual void visit(ShPtr<GtEqOpExpr> expr) override;
-	virtual void visit(ShPtr<LtOpExpr> expr) override;
-	virtual void visit(ShPtr<GtOpExpr> expr) override;
-	virtual void visit(ShPtr<AddOpExpr> expr) override;
-	virtual void visit(ShPtr<SubOpExpr> expr) override;
-	virtual void visit(ShPtr<MulOpExpr> expr) override;
-	virtual void visit(ShPtr<ModOpExpr> expr) override;
-	virtual void visit(ShPtr<DivOpExpr> expr) override;
-	virtual void visit(ShPtr<AndOpExpr> expr) override;
-	virtual void visit(ShPtr<OrOpExpr> expr) override;
-	virtual void visit(ShPtr<BitAndOpExpr> expr) override;
-	virtual void visit(ShPtr<BitOrOpExpr> expr) override;
-	virtual void visit(ShPtr<BitXorOpExpr> expr) override;
-	virtual void visit(ShPtr<BitShlOpExpr> expr) override;
-	virtual void visit(ShPtr<BitShrOpExpr> expr) override;
-	virtual void visit(ShPtr<TernaryOpExpr> expr) override;
-	virtual void visit(ShPtr<CallExpr> expr) override;
-	virtual void visit(ShPtr<CommaOpExpr> expr) override;
+	virtual void visit(AddressOpExpr* expr) override;
+	virtual void visit(AssignOpExpr* expr) override;
+	virtual void visit(ArrayIndexOpExpr* expr) override;
+	virtual void visit(StructIndexOpExpr* expr) override;
+	virtual void visit(DerefOpExpr* expr) override;
+	virtual void visit(NotOpExpr* expr) override;
+	virtual void visit(NegOpExpr* expr) override;
+	virtual void visit(EqOpExpr* expr) override;
+	virtual void visit(NeqOpExpr* expr) override;
+	virtual void visit(LtEqOpExpr* expr) override;
+	virtual void visit(GtEqOpExpr* expr) override;
+	virtual void visit(LtOpExpr* expr) override;
+	virtual void visit(GtOpExpr* expr) override;
+	virtual void visit(AddOpExpr* expr) override;
+	virtual void visit(SubOpExpr* expr) override;
+	virtual void visit(MulOpExpr* expr) override;
+	virtual void visit(ModOpExpr* expr) override;
+	virtual void visit(DivOpExpr* expr) override;
+	virtual void visit(AndOpExpr* expr) override;
+	virtual void visit(OrOpExpr* expr) override;
+	virtual void visit(BitAndOpExpr* expr) override;
+	virtual void visit(BitOrOpExpr* expr) override;
+	virtual void visit(BitXorOpExpr* expr) override;
+	virtual void visit(BitShlOpExpr* expr) override;
+	virtual void visit(BitShrOpExpr* expr) override;
+	virtual void visit(TernaryOpExpr* expr) override;
+	virtual void visit(CallExpr* expr) override;
+	virtual void visit(CommaOpExpr* expr) override;
 	// Casts
-	virtual void visit(ShPtr<BitCastExpr> expr) override;
-	virtual void visit(ShPtr<ExtCastExpr> expr) override;
-	virtual void visit(ShPtr<TruncCastExpr> expr) override;
-	virtual void visit(ShPtr<FPToIntCastExpr> expr) override;
-	virtual void visit(ShPtr<IntToFPCastExpr> expr) override;
-	virtual void visit(ShPtr<IntToPtrCastExpr> expr) override;
-	virtual void visit(ShPtr<PtrToIntCastExpr> expr) override;
+	virtual void visit(BitCastExpr* expr) override;
+	virtual void visit(ExtCastExpr* expr) override;
+	virtual void visit(TruncCastExpr* expr) override;
+	virtual void visit(FPToIntCastExpr* expr) override;
+	virtual void visit(IntToFPCastExpr* expr) override;
+	virtual void visit(IntToPtrCastExpr* expr) override;
+	virtual void visit(PtrToIntCastExpr* expr) override;
 	// Constants
-	virtual void visit(ShPtr<ConstBool> constant) override;
-	virtual void visit(ShPtr<ConstFloat> constant) override;
-	virtual void visit(ShPtr<ConstInt> constant) override;
-	virtual void visit(ShPtr<ConstNullPointer> constant) override;
-	virtual void visit(ShPtr<ConstString> constant) override;
-	virtual void visit(ShPtr<ConstArray> constant) override;
-	virtual void visit(ShPtr<ConstStruct> constant) override;
-	virtual void visit(ShPtr<ConstSymbol> constant) override;
+	virtual void visit(ConstBool* constant) override;
+	virtual void visit(ConstFloat* constant) override;
+	virtual void visit(ConstInt* constant) override;
+	virtual void visit(ConstNullPointer* constant) override;
+	virtual void visit(ConstString* constant) override;
+	virtual void visit(ConstArray* constant) override;
+	virtual void visit(ConstStruct* constant) override;
+	virtual void visit(ConstSymbol* constant) override;
 	// Extra
-	virtual void visit(ShPtr<Variable> var) override;
+	virtual void visit(Variable* var) override;
 	/// @}
 
 protected:
@@ -193,21 +193,21 @@ protected:
 private:
 	void addOperatorOnStackIfSupported(Operators currentOperator,
 		Direction direction);
-	void areBracketsNeededForExpr(ShPtr<Expression> expr,
+	void areBracketsNeededForExpr(Expression* expr,
 		Operators currentOperator);
 	bool areBracketsNeededPrecTable(Operators currentOperator);
 	void removeOperatorFromStackIfSupported(Operators currentOperator);
 
 	void treeTraversalForBinaryOpWithStackOperations(
-		ShPtr<BinaryOpExpr> expr, Operators currentOperator);
+		BinaryOpExpr* expr, Operators currentOperator);
 	void treeTraversalForCallWithStackOperations(
-		ShPtr<CallExpr> expr, Operators currentOperator);
+		CallExpr* expr, Operators currentOperator);
 	void treeTraversalForCastWithStackOperations(
-		ShPtr<CastExpr> expr, Operators currentOperator);
+		CastExpr* expr, Operators currentOperator);
 	void treeTraversalForTernaryOpWithStackOperations(
-		ShPtr<TernaryOpExpr> expr, Operators currentOperator);
+		TernaryOpExpr* expr, Operators currentOperator);
 	void treeTraversalForUnaryOpWithStackOperations(
-		ShPtr<UnaryOpExpr> expr, Operators currentOperator);
+		UnaryOpExpr* expr, Operators currentOperator);
 };
 
 } // namespace llvmir2hll

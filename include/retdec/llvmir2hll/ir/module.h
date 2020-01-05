@@ -52,27 +52,27 @@ public:
 
 public:
 	Module(const llvm::Module *llvmModule, const std::string &identifier,
-		ShPtr<Semantics> semantics, ShPtr<Config> config);
+		Semantics* semantics, Config* config);
 
 	const llvm::Module *getLLVMModule() const;
 	std::string getIdentifier(bool stripDirs = true) const;
-	ShPtr<Semantics> getSemantics() const;
-	ShPtr<Config> getConfig() const;
+	Semantics* getSemantics() const;
+	Config* getConfig() const;
 
 	/// @name Global Variables Accessors
 	/// @{
-	void addGlobalVar(ShPtr<Variable> var, ShPtr<Expression> init = nullptr);
-	void removeGlobalVar(ShPtr<Variable> var);
-	bool isGlobalVar(ShPtr<Variable> var) const;
+	void addGlobalVar(Variable* var, Expression* init = nullptr);
+	void removeGlobalVar(Variable* var);
+	bool isGlobalVar(Variable* var) const;
 	bool isGlobalVarStoringStringLiteral(const std::string &varName) const;
-	ShPtr<Expression> getInitForGlobalVar(ShPtr<Variable> var) const;
-	ShPtr<Variable> getGlobalVarByName(const std::string &varName) const;
+	Expression* getInitForGlobalVar(Variable* var) const;
+	Variable* getGlobalVarByName(const std::string &varName) const;
 	bool hasGlobalVars() const;
 	bool hasGlobalVar(const std::string &name) const;
 	VarSet getGlobalVars() const;
 	VarSet getExternalGlobalVars() const;
-	std::string getRegisterForGlobalVar(ShPtr<Variable> var) const;
-	std::string getDetectedCryptoPatternForGlobalVar(ShPtr<Variable> var) const;
+	std::string getRegisterForGlobalVar(Variable* var) const;
+	std::string getDetectedCryptoPatternForGlobalVar(Variable* var) const;
 
 	global_var_iterator global_var_begin() const;
 	global_var_iterator global_var_end() const;
@@ -80,14 +80,14 @@ public:
 
 	/// @name Functions Accessors
 	/// @{
-	void addFunc(ShPtr<Function> func);
-	void removeFunc(ShPtr<Function> func);
-	bool funcExists(ShPtr<Function> func) const;
-	ShPtr<Function> getFuncByName(const std::string &funcName) const;
+	void addFunc(Function* func);
+	void removeFunc(Function* func);
+	bool funcExists(Function* func) const;
+	Function* getFuncByName(const std::string &funcName) const;
 	bool hasFuncWithName(const std::string &funcName) const;
-	bool correspondsToFunc(ShPtr<Variable> var) const;
+	bool correspondsToFunc(Variable* var) const;
 	bool hasMainFunc() const;
-	bool isMainFunc(ShPtr<Function> func) const;
+	bool isMainFunc(Function* func) const;
 	VarSet getVarsForFuncs() const;
 	std::size_t getNumOfFuncDefinitions() const;
 	bool hasFuncDefinitions() const;
@@ -97,7 +97,7 @@ public:
 
 	bool hasStaticallyLinkedFuncs() const;
 	FuncSet getStaticallyLinkedFuncs() const;
-	void markFuncAsStaticallyLinked(ShPtr<Function> func);
+	void markFuncAsStaticallyLinked(Function* func);
 
 	bool hasDynamicallyLinkedFuncs() const;
 	FuncSet getDynamicallyLinkedFuncs() const;
@@ -108,21 +108,21 @@ public:
 	bool hasInstructionIdiomFuncs() const;
 	FuncSet getInstructionIdiomFuncs() const;
 
-	bool isExportedFunc(ShPtr<Function> func) const;
+	bool isExportedFunc(Function* func) const;
 
-	std::string getRealNameForFunc(ShPtr<Function> func) const;
-	std::string getDeclarationStringForFunc(ShPtr<Function> func) const;
-	std::string getCommentForFunc(ShPtr<Function> func) const;
-	StringSet getDetectedCryptoPatternsForFunc(ShPtr<Function> func) const;
-	std::string getWrappedFuncName(ShPtr<Function> func) const;
-	std::string getDemangledNameOfFunc(ShPtr<Function> func) const;
+	std::string getRealNameForFunc(Function* func) const;
+	std::string getDeclarationStringForFunc(Function* func) const;
+	std::string getCommentForFunc(Function* func) const;
+	StringSet getDetectedCryptoPatternsForFunc(Function* func) const;
+	std::string getWrappedFuncName(Function* func) const;
+	std::string getDemangledNameOfFunc(Function* func) const;
 
-	AddressRange getAddressRangeForFunc(ShPtr<const Function> func) const;
-	bool hasAddressRange(ShPtr<Function> func) const;
+	AddressRange getAddressRangeForFunc(const Function* func) const;
+	bool hasAddressRange(Function* func) const;
 	bool allFuncDefinitionsHaveAddressRange() const;
 
-	LineRange getLineRangeForFunc(ShPtr<Function> func) const;
-	bool hasLineRange(ShPtr<Function> func) const;
+	LineRange getLineRangeForFunc(Function* func) const;
+	bool hasLineRange(Function* func) const;
 	bool allFuncDefinitionsHaveLineRange() const;
 
 	func_iterator func_begin() const;
@@ -137,15 +137,15 @@ public:
 
 	/// @name Local Variables Accessors
 	/// @{
-	std::string comesFromGlobalVar(ShPtr<Function> func, ShPtr<Variable> var) const;
+	std::string comesFromGlobalVar(Function* func, Variable* var) const;
 	/// @}
 
 	/// @name Classes Accessors
 	/// @{
 	bool hasClasses() const;
 	StringSet getClassNames() const;
-	std::string getClassForFunc(ShPtr<Function> func) const;
-	std::string getTypeOfFuncInClass(ShPtr<Function> func,
+	std::string getClassForFunc(Function* func) const;
+	std::string getTypeOfFuncInClass(Function* func,
 		const std::string &cl) const;
 	StringVector getBaseClassNames(const std::string &cl) const;
 	std::string getDemangledNameOfClass(const std::string &cl) const;
@@ -155,17 +155,17 @@ public:
 	/// @{
 	bool isDebugInfoAvailable() const;
 
-	std::string getDebugModuleNameForFunc(ShPtr<Function> func) const;
-	bool hasAssignedDebugModuleName(ShPtr<Function> func) const;
+	std::string getDebugModuleNameForFunc(Function* func) const;
+	bool hasAssignedDebugModuleName(Function* func) const;
 	StringSet getDebugModuleNames() const;
 
-	std::string getDebugNameForGlobalVar(ShPtr<Variable> var) const;
-	std::string getDebugNameForLocalVar(ShPtr<Function> func,
-		ShPtr<Variable> var) const;
+	std::string getDebugNameForGlobalVar(Variable* var) const;
+	std::string getDebugNameForLocalVar(Function* func,
+		Variable* var) const;
 
-	std::string getDebugNameForVar(ShPtr<Variable> var) const;
-	bool hasAssignedDebugName(ShPtr<Variable> var) const;
-	void addDebugNameForVar(ShPtr<Variable> var, const std::string &name);
+	std::string getDebugNameForVar(Variable* var) const;
+	bool hasAssignedDebugName(Variable* var) const;
+	void addDebugNameForVar(Variable* var, const std::string &name);
 	/// @}
 
 	/// @name Meta Information
@@ -179,20 +179,20 @@ public:
 
 private:
 	/// Mapping of a function into an address range.
-	using FuncAddressRangeMap = std::map<ShPtr<Function>, AddressRange>;
+	using FuncAddressRangeMap = std::map<Function*, AddressRange>;
 
 private:
 	/// Original module from which this module has been created.
-	const llvm::Module *llvmModule;
+	const llvm::Module *llvmModule = nullptr;
 
 	/// Identifier of the module.
 	std::string identifier;
 
 	/// The used semantics.
-	ShPtr<Semantics> semantics;
+	Semantics* semantics = nullptr;
 
 	/// The used config.
-	ShPtr<Config> config;
+	Config* config = nullptr;
 
 	/// Global variables.
 	GlobalVarDefVector globalVars;
@@ -205,10 +205,10 @@ private:
 
 private:
 	bool hasFuncSatisfyingPredicate(
-		std::function<bool (ShPtr<Function>)> pred
+		std::function<bool (Function*)> pred
 	) const;
 	FuncSet getFuncsSatisfyingPredicate(
-		std::function<bool (ShPtr<Function>)> pred
+		std::function<bool (Function*)> pred
 	) const;
 };
 

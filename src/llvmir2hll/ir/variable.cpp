@@ -17,17 +17,17 @@ namespace llvmir2hll {
 *
 * See create() for more information.
 */
-Variable::Variable(const std::string &name, ShPtr<Type> type, Address a):
+Variable::Variable(const std::string &name, Type* type, Address a):
 	initialName(name), name(name), type(type), internal(true), address(a) {}
 
-ShPtr<Value> Variable::clone() {
+Value* Variable::clone() {
 	// Variables are not cloned (see the description of Value::clone()).
-	return shared_from_this();
+	return this;
 }
 
-bool Variable::isEqualTo(ShPtr<Value> otherValue) const {
+bool Variable::isEqualTo(Value* otherValue) const {
 	// Both types, names, and internal status have to be equal.
-	if (ShPtr<Variable> otherVariable = cast<Variable>(otherValue)) {
+	if (Variable* otherVariable = cast<Variable>(otherValue)) {
 		return initialName == otherVariable->initialName &&
 			name == otherVariable->name &&
 			type->isEqualTo(otherVariable->type) &&
@@ -36,7 +36,7 @@ bool Variable::isEqualTo(ShPtr<Value> otherValue) const {
 	return false;
 }
 
-void Variable::replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) {
+void Variable::replace(Expression* oldExpr, Expression* newExpr) {
 	PRECONDITION_NON_NULL(oldExpr);
 
 	// There is nothing to be replaced.
@@ -72,7 +72,7 @@ bool Variable::hasName() const {
 /**
 * @brief Returns the type of the variable.
 */
-ShPtr<Type> Variable::getType() const {
+Type* Variable::getType() const {
 	return type;
 }
 
@@ -113,8 +113,8 @@ bool Variable::isExternal() const {
 * Value::clone()), this function may be used instead to create a copy of the
 * variable.
 */
-ShPtr<Variable> Variable::copy() const {
-	ShPtr<Variable> varCopy(Variable::create(initialName, type));
+Variable* Variable::copy() const {
+	Variable* varCopy(Variable::create(initialName, type));
 	varCopy->setName(name);
 	varCopy->internal = internal;
 	return varCopy;
@@ -133,7 +133,7 @@ void Variable::setName(const std::string &newName) {
 * @par Preconditions
 *  - @a newType is non-null
 */
-void Variable::setType(ShPtr<Type> newType) {
+void Variable::setType(Type* newType) {
 	PRECONDITION_NON_NULL(newType);
 
 	type = std::move(newType);
@@ -176,16 +176,16 @@ void Variable::markAsExternal() {
 * @par Preconditions
 *  - @a type is non-null
 */
-ShPtr<Variable> Variable::create(const std::string &name, ShPtr<Type> type,
+Variable* Variable::create(const std::string &name, Type* type,
 		Address a) {
 	PRECONDITION_NON_NULL(type);
 
 	// Currently, there is no special initialization.
-	return ShPtr<Variable>(new Variable(name, type, a));
+	return new Variable(name, type, a);
 }
 
 void Variable::accept(Visitor *v) {
-	v->visit(ucast<Variable>(shared_from_this()));
+	v->visit(ucast<Variable>(this));
 }
 
 } // namespace llvmir2hll

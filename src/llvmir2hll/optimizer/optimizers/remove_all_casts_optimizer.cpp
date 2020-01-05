@@ -28,42 +28,42 @@ namespace llvmir2hll {
 * @par Preconditions
 *  - @a module is non-null
 */
-RemoveAllCastsOptimizer::RemoveAllCastsOptimizer(ShPtr<Module> module):
+RemoveAllCastsOptimizer::RemoveAllCastsOptimizer(Module* module):
 	FuncOptimizer(module) {
 		PRECONDITION_NON_NULL(module);
 	}
 
-void RemoveAllCastsOptimizer::visit(ShPtr<BitCastExpr> expr) {
+void RemoveAllCastsOptimizer::visit(BitCastExpr* expr) {
 	FuncOptimizer::visit(expr);
 	removeCast(expr);
 }
 
-void RemoveAllCastsOptimizer::visit(ShPtr<ExtCastExpr> expr) {
+void RemoveAllCastsOptimizer::visit(ExtCastExpr* expr) {
 	FuncOptimizer::visit(expr);
 	removeCast(expr);
 }
 
-void RemoveAllCastsOptimizer::visit(ShPtr<TruncCastExpr> expr) {
+void RemoveAllCastsOptimizer::visit(TruncCastExpr* expr) {
 	FuncOptimizer::visit(expr);
 	removeCast(expr);
 }
 
-void RemoveAllCastsOptimizer::visit(ShPtr<FPToIntCastExpr> expr) {
+void RemoveAllCastsOptimizer::visit(FPToIntCastExpr* expr) {
 	FuncOptimizer::visit(expr);
 	removeCast(expr);
 }
 
-void RemoveAllCastsOptimizer::visit(ShPtr<IntToFPCastExpr> expr) {
+void RemoveAllCastsOptimizer::visit(IntToFPCastExpr* expr) {
 	FuncOptimizer::visit(expr);
 	removeCast(expr);
 }
 
-void RemoveAllCastsOptimizer::visit(ShPtr<IntToPtrCastExpr> expr) {
+void RemoveAllCastsOptimizer::visit(IntToPtrCastExpr* expr) {
 	FuncOptimizer::visit(expr);
 	removeCast(expr);
 }
 
-void RemoveAllCastsOptimizer::visit(ShPtr<PtrToIntCastExpr> expr) {
+void RemoveAllCastsOptimizer::visit(PtrToIntCastExpr* expr) {
 	FuncOptimizer::visit(expr);
 	removeCast(expr);
 }
@@ -71,8 +71,8 @@ void RemoveAllCastsOptimizer::visit(ShPtr<PtrToIntCastExpr> expr) {
 /**
 * @brief Removes the given cast.
 */
-void RemoveAllCastsOptimizer::removeCast(ShPtr<CastExpr> castExpr) {
-	ShPtr<Expression> nonCastExpr(skipCasts(castExpr));
+void RemoveAllCastsOptimizer::removeCast(CastExpr* castExpr) {
+	Expression* nonCastExpr(skipCasts(castExpr));
 	Expression::replaceExpression(castExpr, nonCastExpr);
 }
 

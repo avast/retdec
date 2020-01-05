@@ -19,11 +19,11 @@ namespace llvmir2hll {
 UnknownType::UnknownType():
 	Type() {}
 
-ShPtr<Value> UnknownType::clone() {
+Value* UnknownType::clone() {
 	return UnknownType::create();
 }
 
-bool UnknownType::isEqualTo(ShPtr<Value> otherValue) const {
+bool UnknownType::isEqualTo(Value* otherValue) const {
 	return isa<UnknownType>(otherValue);
 }
 
@@ -43,13 +43,13 @@ std::size_t UnknownType::getSize() const {
 * The returned value is re-used, i.e. this function always returns the same
 * instance.
 */
-ShPtr<UnknownType> UnknownType::create() {
-	static ShPtr<UnknownType> createdType(new UnknownType());
+UnknownType* UnknownType::create() {
+	static UnknownType* createdType(new UnknownType());
 	return createdType;
 }
 
 void UnknownType::accept(Visitor *v) {
-	v->visit(ucast<UnknownType>(shared_from_this()));
+	v->visit(ucast<UnknownType>(this));
 }
 
 } // namespace llvmir2hll

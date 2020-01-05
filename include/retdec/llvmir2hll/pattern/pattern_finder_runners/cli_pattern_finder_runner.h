@@ -26,11 +26,11 @@ public:
 	CLIPatternFinderRunner(llvm::raw_ostream &os);
 
 private:
-	virtual void doActionsBeforePatternFinderRuns(ShPtr<PatternFinder> pf) override;
-	virtual void doActionsAfterPatternFinderHasRun(ShPtr<PatternFinder> pf,
+	virtual void doActionsBeforePatternFinderRuns(PatternFinder* pf) override;
+	virtual void doActionsAfterPatternFinderHasRun(PatternFinder* pf,
 		const PatternFinder::Patterns &foundPatterns) override;
 
-	void printPatternInfo(const ShPtr<Pattern> &p);
+	void printPatternInfo(const Pattern* p);
 
 private:
 	/// Output stream, into which the patterns will be emitted.

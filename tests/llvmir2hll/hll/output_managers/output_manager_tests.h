@@ -41,7 +41,7 @@ class OutputManagerTests: public ::testing::Test
 		llvm::raw_string_ostream codeStream;
 
 		/// Manager under test.
-		UPtr<OutputManager> manager;
+		OutputManager* manager;
 };
 
 } // namespace tests

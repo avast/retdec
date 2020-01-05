@@ -35,8 +35,8 @@ namespace tests {
 class ConstSymbolConverterTests: public TestsWithModule {
 protected:
 	void scenarioChangeConstantToSymbolicNamesWorksCorrectly(
-		const std::string &funcName, ShPtr<Expression> origArg,
-		const IntStringMap &refMap, ShPtr<Expression> refNewArg);
+		const std::string &funcName, Expression* origArg,
+		const IntStringMap &refMap, Expression* refNewArg);
 };
 
 /**
@@ -45,8 +45,8 @@ protected:
 *        the given expression (refNewArg).
 */
 void ConstSymbolConverterTests::scenarioChangeConstantToSymbolicNamesWorksCorrectly(
-		const std::string &funcName, ShPtr<Expression> origArg,
-		const IntStringMap &refMap, ShPtr<Expression> refNewArg) {
+		const std::string &funcName, Expression* origArg,
+		const IntStringMap &refMap, Expression* refNewArg) {
 	// Set-up the module.
 	//
 	// int funcName(int p);
@@ -55,7 +55,7 @@ void ConstSymbolConverterTests::scenarioChangeConstantToSymbolicNamesWorksCorrec
 	//     funcName(origArg);
 	// }
 	//
-	ShPtr<Function> func(
+	Function* func(
 		FunctionBuilder(funcName)
 			.withRetType(IntType::create(32))
 			.withParam(Variable::create("p", IntType::create(32)))
@@ -64,8 +64,8 @@ void ConstSymbolConverterTests::scenarioChangeConstantToSymbolicNamesWorksCorrec
 	module->addFunc(func);
 	ExprVector funcCallArgs;
 	funcCallArgs.push_back(origArg);
-	ShPtr<CallExpr> funcCallExpr(CallExpr::create(func->getAsVar(), funcCallArgs));
-	ShPtr<CallStmt> funcCallStmt(CallStmt::create(funcCallExpr));
+	CallExpr* funcCallExpr(CallExpr::create(func->getAsVar(), funcCallArgs));
+	CallStmt* funcCallStmt(CallStmt::create(funcCallExpr));
 	testFunc->setBody(funcCallStmt);
 
 	// Set-up the semantics.
@@ -88,8 +88,8 @@ void ConstSymbolConverterTests::scenarioChangeConstantToSymbolicNamesWorksCorrec
 
 TEST_F(ConstSymbolConverterTests,
 DoNotChangeConstantIfThereIsNoMapping) {
-	ShPtr<ConstInt> origArg(ConstInt::create(128, 32));
-	ShPtr<Expression> refNewArg(origArg);
+	ConstInt* origArg(ConstInt::create(128, 32));
+	Expression* refNewArg(origArg);
 	IntStringMap refMap;
 	refMap[1] = "LOCK_SH";
 	refMap[2] = "LOCK_EX";
@@ -103,8 +103,8 @@ DoNotChangeConstantIfThereIsNoMapping) {
 
 TEST_F(ConstSymbolConverterTests,
 ChangeConstantWhenThereIsDirectMappingConstantToConstSymbol) {
-	ShPtr<ConstInt> origArg(ConstInt::create(1, 32));
-	ShPtr<Expression> refNewArg(ConstSymbol::create("LOCK_SH", origArg));
+	ConstInt* origArg(ConstInt::create(1, 32));
+	Expression* refNewArg(ConstSymbol::create("LOCK_SH", origArg));
 	IntStringMap refMap;
 	refMap[1] = "LOCK_SH";
 	refMap[2] = "LOCK_EX";
@@ -118,10 +118,10 @@ ChangeConstantWhenThereIsDirectMappingConstantToConstSymbol) {
 
 TEST_F(ConstSymbolConverterTests,
 IgnoreCastsBeforeArguments) {
-	ShPtr<ConstInt> origArgAs32bInt(ConstInt::create(1, 32));
-	ShPtr<Expression> origArg(ExtCastExpr::create(origArgAs32bInt,
+	ConstInt* origArgAs32bInt(ConstInt::create(1, 32));
+	Expression* origArg(ExtCastExpr::create(origArgAs32bInt,
 		IntType::create(64)));
-	ShPtr<Expression> refNewArg(ConstSymbol::create("LOCK_SH", origArgAs32bInt));
+	Expression* refNewArg(ConstSymbol::create("LOCK_SH", origArgAs32bInt));
 	IntStringMap refMap;
 	refMap[1] = "LOCK_SH";
 	refMap[2] = "LOCK_EX";
@@ -135,8 +135,8 @@ IgnoreCastsBeforeArguments) {
 
 TEST_F(ConstSymbolConverterTests,
 ChangeConstantWhenArgumentIsReplacedWithBitOrOfTwoSymbolicNames) {
-	ShPtr<ConstInt> origArg(ConstInt::create(3, 32)); // 3 -> 1 | 2
-	ShPtr<Expression> refNewArg(BitOrOpExpr::create(
+	ConstInt* origArg(ConstInt::create(3, 32)); // 3 -> 1 | 2
+	Expression* refNewArg(BitOrOpExpr::create(
 		ConstSymbol::create("LOCK_SH", ConstInt::create(1, 32)),
 		ConstSymbol::create("LOCK_EX", ConstInt::create(2, 32))));
 	IntStringMap refMap;
@@ -153,8 +153,8 @@ ChangeConstantWhenArgumentIsReplacedWithBitOrOfTwoSymbolicNames) {
 
 TEST_F(ConstSymbolConverterTests,
 ChangeConstantWhenArgumentIsReplacedWithBitOrOfThreeSymbolicNames) {
-	ShPtr<ConstInt> origArg(ConstInt::create(7, 32)); // 7 -> 1 | 2 | 4
-	ShPtr<Expression> refNewArg(BitOrOpExpr::create(
+	ConstInt* origArg(ConstInt::create(7, 32)); // 7 -> 1 | 2 | 4
+	Expression* refNewArg(BitOrOpExpr::create(
 		BitOrOpExpr::create(
 			ConstSymbol::create("LOCK_SH", ConstInt::create(1, 32)),
 			ConstSymbol::create("LOCK_EX", ConstInt::create(2, 32))),
@@ -184,9 +184,9 @@ ChangeNullPointerConstantWhenThereIsDirectMappingZeroToConstSymbol) {
 	//
 	//     signal(SIGNUM, NULL)
 	//
-	ShPtr<ConstNullPointer> origArg(ConstNullPointer::create(
+	ConstNullPointer* origArg(ConstNullPointer::create(
 		PointerType::create(IntType::create(32)))); // The type is irrelevant.
-	ShPtr<Expression> refNewArg(ConstSymbol::create("SIG_DFL",
+	Expression* refNewArg(ConstSymbol::create("SIG_DFL",
 		ConstInt::create(0, 32))); // See the comment in getArgAsConstInt().
 	IntStringMap refMap;
 	refMap[0] = "SIG_DFL";

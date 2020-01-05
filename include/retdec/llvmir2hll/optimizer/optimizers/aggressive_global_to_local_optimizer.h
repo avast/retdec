@@ -28,7 +28,7 @@ namespace llvmir2hll {
 */
 class AggressiveGlobalToLocalOptimizer final: public Optimizer {
 public:
-	AggressiveGlobalToLocalOptimizer(ShPtr<Module> module);
+	AggressiveGlobalToLocalOptimizer(Module* module);
 
 	virtual std::string getId() const override { return "AggressiveGlobalToLocal"; }
 

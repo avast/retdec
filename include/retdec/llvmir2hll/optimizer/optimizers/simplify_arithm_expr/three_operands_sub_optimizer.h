@@ -139,39 +139,39 @@ namespace llvmir2hll {
 */
 class ThreeOperandsSubOptimizer final: public SubOptimizer {
 public:
-	ThreeOperandsSubOptimizer(ShPtr<ArithmExprEvaluator> arithmExprEvaluator);
+	ThreeOperandsSubOptimizer(ArithmExprEvaluator* arithmExprEvaluator);
 
-	static ShPtr<SubOptimizer> create(ShPtr<ArithmExprEvaluator>
+	static SubOptimizer* create(ArithmExprEvaluator*
 		arithmExprEvaluator);
 	virtual std::string getId() const override;
 
 private:
 	/// Pair of expressions.
-	using ExprPair = std::pair<ShPtr<Expression>, ShPtr<Expression>>;
+	using ExprPair = std::pair<Expression*, Expression*>;
 
 private:
 	/// @name Visitor Interface
 	/// @{
 	using SubOptimizer::visit;
-	virtual void visit(ShPtr<AddOpExpr> expr) override;
-	virtual void visit(ShPtr<SubOpExpr> expr) override;
-	virtual void visit(ShPtr<LtOpExpr> expr) override;
-	virtual void visit(ShPtr<LtEqOpExpr> expr) override;
-	virtual void visit(ShPtr<GtOpExpr> expr) override;
-	virtual void visit(ShPtr<GtEqOpExpr> expr) override;
-	virtual void visit(ShPtr<EqOpExpr> expr) override;
-	virtual void visit(ShPtr<NeqOpExpr> expr) override;
-	virtual void visit(ShPtr<BitXorOpExpr> expr) override;
-	virtual void visit(ShPtr<OrOpExpr> expr) override;
+	virtual void visit(AddOpExpr* expr) override;
+	virtual void visit(SubOpExpr* expr) override;
+	virtual void visit(LtOpExpr* expr) override;
+	virtual void visit(LtEqOpExpr* expr) override;
+	virtual void visit(GtOpExpr* expr) override;
+	virtual void visit(GtEqOpExpr* expr) override;
+	virtual void visit(EqOpExpr* expr) override;
+	virtual void visit(NeqOpExpr* expr) override;
+	virtual void visit(BitXorOpExpr* expr) override;
+	virtual void visit(OrOpExpr* expr) override;
 	/// @}
 
-	bool analyzeOpOperOp(ShPtr<Expression> &constant, ShPtr<Expression> &expr,
-		ShPtr<BinaryOpExpr> exprToAnalyze) const;
-	ShPtr<Expression> getResult(ShPtr<Expression> expr) const;
-	void tryOptimizeBitXorOpWithRelationalOperator(ShPtr<BitXorOpExpr> expr);
+	bool analyzeOpOperOp(Expression* &constant, Expression* &expr,
+		BinaryOpExpr* exprToAnalyze) const;
+	Expression* getResult(Expression* expr) const;
+	void tryOptimizeBitXorOpWithRelationalOperator(BitXorOpExpr* expr);
 	std::optional<ExprPair> tryOptimizeExpressionWithRelationalOperator(
-		ShPtr<BinaryOpExpr> expr);
-	void tryOptimizeOrOpExprWithRelOperators(ShPtr<OrOpExpr>);
+		BinaryOpExpr* expr);
+	void tryOptimizeOrOpExprWithRelOperators(OrOpExpr*);
 };
 
 } // namespace llvmir2hll

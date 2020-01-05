@@ -25,21 +25,21 @@ namespace llvmir2hll {
 * @par Preconditions
 *  - @a module is non-null
 */
-VarDefForLoopOptimizer::VarDefForLoopOptimizer(ShPtr<Module> module):
+VarDefForLoopOptimizer::VarDefForLoopOptimizer(Module* module):
 	FuncOptimizer(module), indVars() {
 		PRECONDITION_NON_NULL(module);
 	}
 
-void VarDefForLoopOptimizer::runOnFunction(ShPtr<Function> func) {
+void VarDefForLoopOptimizer::runOnFunction(Function* func) {
 	// Obtain all induction variables for func.
 	indVars.clear();
 	FuncOptimizer::runOnFunction(func);
 
 	// Remove VarDefStmts for each induction variable from the beginning of
 	// func.
-	ShPtr<Statement> stmt(func->getBody());
+	Statement* stmt(func->getBody());
 	while (isa<VarDefStmt>(stmt)) {
-		ShPtr<VarDefStmt> varDefStmt(cast<VarDefStmt>(stmt));
+		VarDefStmt* varDefStmt(cast<VarDefStmt>(stmt));
 		if (varDefStmt->getInitializer()) {
 			// We have reached a VarDefStmt with an initializer. This means we
 			// are done as all VarDefStmts introduced to the beginning of a
@@ -49,7 +49,7 @@ void VarDefForLoopOptimizer::runOnFunction(ShPtr<Function> func) {
 
 		// We need to store the successor before removing the statement since
 		// removeStatement() clears the successor.
-		ShPtr<Statement> stmtSucc(stmt->getSuccessor());
+		Statement* stmtSucc(stmt->getSuccessor());
 
 		if (hasItem(indVars, varDefStmt->getVar())) {
 			// There should be no debug comments attached to VarDefStmts at the
@@ -63,7 +63,7 @@ void VarDefForLoopOptimizer::runOnFunction(ShPtr<Function> func) {
 	}
 }
 
-void VarDefForLoopOptimizer::visit(ShPtr<ForLoopStmt> stmt) {
+void VarDefForLoopOptimizer::visit(ForLoopStmt* stmt) {
 	indVars.insert(stmt->getIndVar());
 	FuncOptimizer::visit(stmt);
 }

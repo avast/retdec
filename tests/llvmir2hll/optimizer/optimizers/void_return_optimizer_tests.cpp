@@ -23,7 +23,7 @@ class VoidReturnOptimizerTests: public TestsWithModule {};
 
 TEST_F(VoidReturnOptimizerTests,
 OptimizerHasNonEmptyID) {
-	ShPtr<VoidReturnOptimizer> optimizer(
+	VoidReturnOptimizer* optimizer(
 		new VoidReturnOptimizer(module));
 
 	EXPECT_TRUE(!optimizer->getId().empty()) <<

@@ -23,8 +23,8 @@ namespace llvmir2hll {
 *  - @a va is in a valid state
 *  - @a cio has been initialized
 */
-APICallSeqFinder::APICallSeqFinder(ShPtr<ValueAnalysis> va,
-		ShPtr<CallInfoObtainer> cio): va(va), cio(cio) {
+APICallSeqFinder::APICallSeqFinder(ValueAnalysis* va,
+		CallInfoObtainer* cio): va(va), cio(cio) {
 	PRECONDITION_NON_NULL(va);
 	PRECONDITION_NON_NULL(cio);
 	PRECONDITION(va->isInValidState(), "it is not in a valid state");

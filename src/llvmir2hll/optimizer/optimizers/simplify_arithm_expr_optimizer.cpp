@@ -45,8 +45,8 @@ namespace llvmir2hll {
 *  - @a module is non-null
 *  - @a arithmExprEvaluator is non-null
 */
-SimplifyArithmExprOptimizer::SimplifyArithmExprOptimizer(ShPtr<Module> module,
-		ShPtr<ArithmExprEvaluator> arithmExprEvaluator):
+SimplifyArithmExprOptimizer::SimplifyArithmExprOptimizer(Module* module,
+		ArithmExprEvaluator* arithmExprEvaluator):
 			Optimizer(module) {
 	PRECONDITION_NON_NULL(module);
 	PRECONDITION_NON_NULL(arithmExprEvaluator);
@@ -61,7 +61,7 @@ void SimplifyArithmExprOptimizer::doOptimization() {
 		// Keep optimizing until there are no changes.
 		do {
 			codeChanged = false;
-			if (ShPtr<Expression> init = (*i)->getInitializer()) {
+			if (Expression* init = (*i)->getInitializer()) {
 				init->accept(this);
 			}
 		} while (codeChanged);
@@ -79,71 +79,71 @@ void SimplifyArithmExprOptimizer::doOptimization() {
 	}
 }
 
-void SimplifyArithmExprOptimizer::visit(ShPtr<AddOpExpr> expr) {
+void SimplifyArithmExprOptimizer::visit(AddOpExpr* expr) {
 	tryOptimizeInSubOptimizations(expr);
 }
 
-void SimplifyArithmExprOptimizer::visit(ShPtr<SubOpExpr> expr) {
+void SimplifyArithmExprOptimizer::visit(SubOpExpr* expr) {
 	tryOptimizeInSubOptimizations(expr);
 }
 
-void SimplifyArithmExprOptimizer::visit(ShPtr<MulOpExpr> expr) {
+void SimplifyArithmExprOptimizer::visit(MulOpExpr* expr) {
 	tryOptimizeInSubOptimizations(expr);
 }
 
-void SimplifyArithmExprOptimizer::visit(ShPtr<DivOpExpr> expr) {
+void SimplifyArithmExprOptimizer::visit(DivOpExpr* expr) {
 	tryOptimizeInSubOptimizations(expr);
 }
 
-void SimplifyArithmExprOptimizer::visit(ShPtr<ModOpExpr> expr) {
+void SimplifyArithmExprOptimizer::visit(ModOpExpr* expr) {
 	tryOptimizeInSubOptimizations(expr);
 }
 
-void SimplifyArithmExprOptimizer::visit(ShPtr<BitAndOpExpr> expr) {
+void SimplifyArithmExprOptimizer::visit(BitAndOpExpr* expr) {
 	tryOptimizeInSubOptimizations(expr);
 }
 
-void SimplifyArithmExprOptimizer::visit(ShPtr<BitOrOpExpr> expr) {
+void SimplifyArithmExprOptimizer::visit(BitOrOpExpr* expr) {
 	tryOptimizeInSubOptimizations(expr);
 }
 
-void SimplifyArithmExprOptimizer::visit(ShPtr<BitXorOpExpr> expr) {
+void SimplifyArithmExprOptimizer::visit(BitXorOpExpr* expr) {
 	tryOptimizeInSubOptimizations(expr);
 }
 
-void SimplifyArithmExprOptimizer::visit(ShPtr<LtOpExpr> expr) {
+void SimplifyArithmExprOptimizer::visit(LtOpExpr* expr) {
 	tryOptimizeInSubOptimizations(expr);
 }
 
-void SimplifyArithmExprOptimizer::visit(ShPtr<LtEqOpExpr> expr) {
+void SimplifyArithmExprOptimizer::visit(LtEqOpExpr* expr) {
 	tryOptimizeInSubOptimizations(expr);
 }
 
-void SimplifyArithmExprOptimizer::visit(ShPtr<GtOpExpr> expr) {
+void SimplifyArithmExprOptimizer::visit(GtOpExpr* expr) {
 	tryOptimizeInSubOptimizations(expr);
 }
 
-void SimplifyArithmExprOptimizer::visit(ShPtr<GtEqOpExpr> expr) {
+void SimplifyArithmExprOptimizer::visit(GtEqOpExpr* expr) {
 	tryOptimizeInSubOptimizations(expr);
 }
 
-void SimplifyArithmExprOptimizer::visit(ShPtr<EqOpExpr> expr) {
+void SimplifyArithmExprOptimizer::visit(EqOpExpr* expr) {
 	tryOptimizeInSubOptimizations(expr);
 }
 
-void SimplifyArithmExprOptimizer::visit(ShPtr<NeqOpExpr> expr) {
+void SimplifyArithmExprOptimizer::visit(NeqOpExpr* expr) {
 	tryOptimizeInSubOptimizations(expr);
 }
 
-void SimplifyArithmExprOptimizer::visit(ShPtr<NotOpExpr> expr) {
+void SimplifyArithmExprOptimizer::visit(NotOpExpr* expr) {
 	tryOptimizeInSubOptimizations(expr);
 }
 
-void SimplifyArithmExprOptimizer::visit(ShPtr<OrOpExpr> expr) {
+void SimplifyArithmExprOptimizer::visit(OrOpExpr* expr) {
 	tryOptimizeInSubOptimizations(expr);
 }
 
-void SimplifyArithmExprOptimizer::visit(ShPtr<TernaryOpExpr> expr) {
+void SimplifyArithmExprOptimizer::visit(TernaryOpExpr* expr) {
 	tryOptimizeInSubOptimizations(expr);
 }
 
@@ -156,7 +156,7 @@ void SimplifyArithmExprOptimizer::visit(ShPtr<TernaryOpExpr> expr) {
 * @param[in] expr An expression to optimize.
 */
 void SimplifyArithmExprOptimizer::tryOptimizeInSubOptimizations(
-		ShPtr<Expression> expr) {
+		Expression* expr) {
 	for (const auto &subOptim : subOptims) {
 		codeChanged |= subOptim->tryOptimize(expr);
 	}
@@ -168,7 +168,7 @@ void SimplifyArithmExprOptimizer::tryOptimizeInSubOptimizations(
 * @param[in] arithmExprEvaluator @a The used evaluator of arithmetical
 *            expressions.
 */
-void SimplifyArithmExprOptimizer::createSubOptimizers(ShPtr<ArithmExprEvaluator>
+void SimplifyArithmExprOptimizer::createSubOptimizers(ArithmExprEvaluator*
 		arithmExprEvaluator) {
 	StringVector regObjects = SubOptimizerFactory::getInstance().
 		getRegisteredObjects();

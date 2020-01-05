@@ -26,7 +26,7 @@ class CastExpr;
 */
 class RemoveAllCastsOptimizer final: public FuncOptimizer {
 public:
-	RemoveAllCastsOptimizer(ShPtr<Module> module);
+	RemoveAllCastsOptimizer(Module* module);
 
 	virtual std::string getId() const override { return "RemoveAllCasts"; }
 
@@ -34,16 +34,16 @@ private:
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<BitCastExpr> expr) override;
-	virtual void visit(ShPtr<ExtCastExpr> expr) override;
-	virtual void visit(ShPtr<TruncCastExpr> expr) override;
-	virtual void visit(ShPtr<FPToIntCastExpr> expr) override;
-	virtual void visit(ShPtr<IntToFPCastExpr> expr) override;
-	virtual void visit(ShPtr<IntToPtrCastExpr> expr) override;
-	virtual void visit(ShPtr<PtrToIntCastExpr> expr) override;
+	virtual void visit(BitCastExpr* expr) override;
+	virtual void visit(ExtCastExpr* expr) override;
+	virtual void visit(TruncCastExpr* expr) override;
+	virtual void visit(FPToIntCastExpr* expr) override;
+	virtual void visit(IntToFPCastExpr* expr) override;
+	virtual void visit(IntToPtrCastExpr* expr) override;
+	virtual void visit(PtrToIntCastExpr* expr) override;
 	/// @}
 
-	void removeCast(ShPtr<CastExpr> castExpr);
+	void removeCast(CastExpr* castExpr);
 };
 
 } // namespace llvmir2hll

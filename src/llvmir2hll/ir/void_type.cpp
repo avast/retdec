@@ -19,11 +19,11 @@ namespace llvmir2hll {
 VoidType::VoidType():
 	Type() {}
 
-ShPtr<Value> VoidType::clone() {
+Value* VoidType::clone() {
 	return VoidType::create();
 }
 
-bool VoidType::isEqualTo(ShPtr<Value> otherValue) const {
+bool VoidType::isEqualTo(Value* otherValue) const {
 	return isa<VoidType>(otherValue);
 }
 /**
@@ -39,13 +39,13 @@ std::size_t VoidType::getSize() const {
 * The returned value is re-used, i.e. this function always returns the same
 * instance.
 */
-ShPtr<VoidType> VoidType::create() {
-	static ShPtr<VoidType> createdType(new VoidType());
+VoidType* VoidType::create() {
+	static VoidType* createdType(new VoidType());
 	return createdType;
 }
 
 void VoidType::accept(Visitor *v) {
-	v->visit(ucast<VoidType>(shared_from_this()));
+	v->visit(ucast<VoidType>(this));
 }
 
 } // namespace llvmir2hll

@@ -18,11 +18,11 @@ namespace llvmir2hll {
 *
 * See create() for more information.
 */
-VarDefStmt::VarDefStmt(ShPtr<Variable> var, ShPtr<Expression> init, Address a):
+VarDefStmt::VarDefStmt(Variable* var, Expression* init, Address a):
 	Statement(a), var(var), init(init) {}
 
-ShPtr<Value> VarDefStmt::clone() {
-	ShPtr<VarDefStmt> varDefStmt(VarDefStmt::create(ucast<Variable>(var->clone()),
+Value* VarDefStmt::clone() {
+	VarDefStmt* varDefStmt(VarDefStmt::create(ucast<Variable>(var->clone()),
 		nullptr, nullptr, getAddress()));
 	varDefStmt->setMetadata(getMetadata());
 	if (init) {
@@ -31,18 +31,18 @@ ShPtr<Value> VarDefStmt::clone() {
 	return varDefStmt;
 }
 
-bool VarDefStmt::isEqualTo(ShPtr<Value> otherValue) const {
+bool VarDefStmt::isEqualTo(Value* otherValue) const {
 	// Both types, variables and variable initializers have to be equal.
-	if (ShPtr<VarDefStmt> otherVarDefStmt = cast<VarDefStmt>(otherValue)) {
+	if (VarDefStmt* otherVarDefStmt = cast<VarDefStmt>(otherValue)) {
 		return var->isEqualTo(otherVarDefStmt->var) &&
 			init->isEqualTo(otherVarDefStmt->init);
 	}
 	return false;
 }
 
-void VarDefStmt::replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) {
+void VarDefStmt::replace(Expression* oldExpr, Expression* newExpr) {
 	if (oldExpr == var) {
-		ShPtr<Variable> newVar(cast<Variable>(newExpr));
+		Variable* newVar(cast<Variable>(newExpr));
 		ASSERT_MSG(newVar, "defined variable can be replaced only with a variable");
 		setVar(newVar);
 	} else {
@@ -56,7 +56,7 @@ void VarDefStmt::replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) {
 	}
 }
 
-ShPtr<Expression> VarDefStmt::asExpression() const {
+Expression* VarDefStmt::asExpression() const {
 	// Cannot be converted into an expression.
 	return {};
 }
@@ -64,7 +64,7 @@ ShPtr<Expression> VarDefStmt::asExpression() const {
 /**
 * @brief Return the variable.
 */
-ShPtr<Variable> VarDefStmt::getVar() const {
+Variable* VarDefStmt::getVar() const {
 	return var;
 }
 
@@ -73,7 +73,7 @@ ShPtr<Variable> VarDefStmt::getVar() const {
 *
 * If there is no initializer, it returns the null pointer.
 */
-ShPtr<Expression> VarDefStmt::getInitializer() const {
+Expression* VarDefStmt::getInitializer() const {
 	return init;
 }
 
@@ -81,7 +81,7 @@ ShPtr<Expression> VarDefStmt::getInitializer() const {
 * @brief Returns @c true if the statement has an initializer, @c false otherwise.
 */
 bool VarDefStmt::hasInitializer() const {
-	return init != ShPtr<Expression>();
+	return init != nullptr;
 }
 
 /**
@@ -90,23 +90,23 @@ bool VarDefStmt::hasInitializer() const {
 * @par Preconditions
 *  - @a newVar is non-null
 */
-void VarDefStmt::setVar(ShPtr<Variable> newVar) {
+void VarDefStmt::setVar(Variable* newVar) {
 	PRECONDITION_NON_NULL(newVar);
 
-	var->removeObserver(shared_from_this());
-	newVar->addObserver(shared_from_this());
+	var->removeObserver(this);
+	newVar->addObserver(this);
 	var = newVar;
 }
 
 /**
 * @brief Sets a new initializer.
 */
-void VarDefStmt::setInitializer(ShPtr<Expression> newInit) {
+void VarDefStmt::setInitializer(Expression* newInit) {
 	if (init) {
-		init->removeObserver(shared_from_this());
+		init->removeObserver(this);
 	}
 	if (newInit) {
-		newInit->addObserver(shared_from_this());
+		newInit->addObserver(this);
 	}
 	init = newInit;
 }
@@ -115,7 +115,7 @@ void VarDefStmt::setInitializer(ShPtr<Expression> newInit) {
 * @brief Removes the initializer.
 */
 void VarDefStmt::removeInitializer() {
-	setInitializer(ShPtr<Expression>());
+	setInitializer(nullptr);
 }
 
 /**
@@ -129,14 +129,14 @@ void VarDefStmt::removeInitializer() {
 * @par Preconditions
 *  - @a var is non-null
 */
-ShPtr<VarDefStmt> VarDefStmt::create(ShPtr<Variable> var,
-		ShPtr<Expression> init, ShPtr<Statement> succ, Address a) {
+VarDefStmt* VarDefStmt::create(Variable* var,
+		Expression* init, Statement* succ, Address a) {
 	PRECONDITION_NON_NULL(var);
 
-	ShPtr<VarDefStmt> stmt(new VarDefStmt(var, init, a));
+	VarDefStmt* stmt(new VarDefStmt(var, init, a));
 	stmt->setSuccessor(succ);
 
-	// Initialization (recall that shared_from_this() cannot be called in a
+	// Initialization (recall that this cannot be called in a
 	// constructor).
 	var->addObserver(stmt);
 	if (init) {
@@ -165,23 +165,23 @@ ShPtr<VarDefStmt> VarDefStmt::create(ShPtr<Variable> var,
 *
 * @see Subject::update()
 */
-void VarDefStmt::update(ShPtr<Value> subject, ShPtr<Value> arg) {
+void VarDefStmt::update(Value* subject, Value* arg) {
 	PRECONDITION_NON_NULL(subject);
 
-	ShPtr<Variable> newVar = cast<Variable>(arg);
+	Variable* newVar = cast<Variable>(arg);
 	if (subject == var && newVar) {
 		setVar(newVar);
 		return;
 	}
 
-	ShPtr<Expression> newInit = cast<Expression>(arg);
+	Expression* newInit = cast<Expression>(arg);
 	if (subject == init && (!arg || newInit)) {
 		setInitializer(newInit);
 	}
 }
 
 void VarDefStmt::accept(Visitor *v) {
-	v->visit(ucast<VarDefStmt>(shared_from_this()));
+	v->visit(ucast<VarDefStmt>(this));
 }
 
 } // namespace llvmir2hll

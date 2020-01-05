@@ -32,9 +32,9 @@ namespace llvmir2hll {
 *
 * See getOptimFuncInfo() for the description of parameters.
 */
-OptimFuncInfoCFGTraversal::OptimFuncInfoCFGTraversal(ShPtr<Module> module,
-		ShPtr<OptimCallInfoObtainer> cio, ShPtr<ValueAnalysis> va,
-		ShPtr<CFG> cfg):
+OptimFuncInfoCFGTraversal::OptimFuncInfoCFGTraversal(Module* module,
+		OptimCallInfoObtainer* cio, ValueAnalysis* va,
+		CFG* cfg):
 	CFGTraversal(cfg, true), module(module), globalVars(module->getGlobalVars()),
 	cg(cio->getCG()), cio(cio), va(va), cfg(cfg),
 	traversedFunc(cfg->getCorrespondingFunction()),
@@ -56,16 +56,16 @@ OptimFuncInfoCFGTraversal::OptimFuncInfoCFGTraversal(ShPtr<Module> module,
 *
 * This function leaves @a va in a valid state.
 */
-ShPtr<OptimFuncInfo> OptimFuncInfoCFGTraversal::getOptimFuncInfo(
-		ShPtr<Module> module, ShPtr<OptimCallInfoObtainer> cio,
-		ShPtr<ValueAnalysis> va, ShPtr<CFG> cfg) {
+OptimFuncInfo* OptimFuncInfoCFGTraversal::getOptimFuncInfo(
+		Module* module, OptimCallInfoObtainer* cio,
+		ValueAnalysis* va, CFG* cfg) {
 	PRECONDITION_NON_NULL(module);
 	PRECONDITION_NON_NULL(cio);
 	PRECONDITION_NON_NULL(va);
 	PRECONDITION_NON_NULL(cfg);
 	PRECONDITION(va->isInValidState(), "it is not in a valid state");
 
-	ShPtr<OptimFuncInfoCFGTraversal> traverser(new OptimFuncInfoCFGTraversal(
+	OptimFuncInfoCFGTraversal* traverser(new OptimFuncInfoCFGTraversal(
 		module, cio, va, cfg));
 	return traverser->performComputation();
 }
@@ -73,7 +73,7 @@ ShPtr<OptimFuncInfo> OptimFuncInfoCFGTraversal::getOptimFuncInfo(
 /**
 * @brief Computes the FuncInfo and returns it.
 */
-ShPtr<OptimFuncInfo> OptimFuncInfoCFGTraversal::performComputation() {
+OptimFuncInfo* OptimFuncInfoCFGTraversal::performComputation() {
 	// First, we pre-compute varsAlwaysModifiedBeforeRead. The reason is that
 	// their computation differs from the computation of the rest of the sets.
 	precomputeAlwaysModifiedVarsBeforeRead();
@@ -109,12 +109,12 @@ ShPtr<OptimFuncInfo> OptimFuncInfoCFGTraversal::performComputation() {
 	// value is restored before the return statement. Hence, we may put it into
 	// funcInfo->varsWithNeverChangedValue.
 	// TODO Implement a more robust analysis.
-	ShPtr<Statement> currStmt = traversedFunc->getBody();
+	Statement* currStmt = traversedFunc->getBody();
 	while (isVarDefOrAssignStmt(currStmt)) {
 		updateFuncInfo(currStmt);
 
-		ShPtr<Expression> lhs(getLhs(currStmt));
-		ShPtr<Expression> rhs(getRhs(currStmt));
+		Expression* lhs(getLhs(currStmt));
+		Expression* rhs(getRhs(currStmt));
 
 		// If there is no right-hand side, it is a VarDefStmt with no
 		// initializer, which we may skip.
@@ -125,14 +125,14 @@ ShPtr<OptimFuncInfo> OptimFuncInfoCFGTraversal::performComputation() {
 
 		// If there are any function calls or dereferences, we have reached
 		// (2).
-		ShPtr<ValueData> currStmtData(va->getValueData(currStmt));
+		ValueData* currStmtData(va->getValueData(currStmt));
 		if (currStmtData->hasCalls() || currStmtData->hasDerefs()) {
 			break;
 		}
 
 		// Check whether the statement is of the form localVar = globalVar.
-		ShPtr<Variable> localVar(cast<Variable>(lhs));
-		ShPtr<Variable> globalVar(cast<Variable>(rhs));
+		Variable* localVar(cast<Variable>(lhs));
+		Variable* globalVar(cast<Variable>(rhs));
 		if (!localVar || !globalVar || hasItem(globalVars, localVar) ||
 				!hasItem(globalVars, globalVar)) {
 			// It is not of the abovementioned form, so skip it.
@@ -153,7 +153,7 @@ ShPtr<OptimFuncInfo> OptimFuncInfoCFGTraversal::performComputation() {
 
 	// We use the exit node of the CFG to check that every variable from
 	// storedGlobalVars is retrieved its original value before every return.
-	ShPtr<CFG::Node> exitNode(cfg->getExitNode());
+	CFG::Node* exitNode(cfg->getExitNode());
 	// For every predecessor of the exit node...
 	for (auto i = exitNode->pred_begin(), e = exitNode->pred_end(); i != e; ++i) {
 		bool checkingShouldContinue = checkExitNodesPredecessor((*i)->getSrc());
@@ -171,7 +171,7 @@ ShPtr<OptimFuncInfo> OptimFuncInfoCFGTraversal::performComputation() {
 	// untouched in this function.
 	for (auto i = module->global_var_begin(), e = module->global_var_end();
 			i != e; ++i) {
-		ShPtr<Variable> var((*i)->getVar());
+		Variable* var((*i)->getVar());
 		if (!hasItem(funcInfo->mayBeReadVars, var) &&
 				!hasItem(funcInfo->mayBeModifiedVars, var)) {
 			funcInfo->neverReadVars.insert(var);
@@ -214,7 +214,7 @@ void OptimFuncInfoCFGTraversal::precomputeAlwaysModifiedVarsBeforeRead() {
 	// statement. Moreover, we only consider global variables as the computed
 	// piece of information is useless for local variables.
 	// TODO Use a CFG traversal for this to improve the analysis.
-	ShPtr<Statement> stmt(traversedFunc->getBody());
+	Statement* stmt(traversedFunc->getBody());
 	while (stmt) {
 		if (stmt->isCompound()) {
 			// As we are not using a CFG traversal, this is the end of the
@@ -222,14 +222,14 @@ void OptimFuncInfoCFGTraversal::precomputeAlwaysModifiedVarsBeforeRead() {
 			break;
 		}
 
-		ShPtr<ValueData> stmtData(va->getValueData(stmt));
+		ValueData* stmtData(va->getValueData(stmt));
 
 		// Handle directly read variables.
 		addToSet(stmtData->getDirReadVars(), readVars);
 
 		// Handle function calls (indirectly accessed variables).
 		for (auto i = stmtData->call_begin(), e = stmtData->call_end(); i != e; ++i) {
-			ShPtr<CallInfo> callInfo(cio->computeCallInfo(*i, traversedFunc));
+			CallInfo* callInfo(cio->computeCallInfo(*i, traversedFunc));
 			for (const auto &var : globalVars) {
 				if (callInfo->mayBeRead(var)) {
 					readVars.insert(var);
@@ -256,14 +256,14 @@ void OptimFuncInfoCFGTraversal::precomputeAlwaysModifiedVarsBeforeRead() {
 * @brief Updates @c funcInfo by the information obtained from the given
 *        statement.
 */
-void OptimFuncInfoCFGTraversal::updateFuncInfo(ShPtr<Statement> stmt) {
+void OptimFuncInfoCFGTraversal::updateFuncInfo(Statement* stmt) {
 	// Update the set of variables that are read and modified in the function.
 	// Currently, we put also must-be-{read,modified} variables into
 	// funcInfo->mayBe{Read,Modified}Vars. The reason is that we do not perform
 	// any kind of analysis which variables are truly always accessed. For
 	// example, if there is an if statement in the function, its body may never
 	// be entered etc.
-	ShPtr<ValueData> stmtData(va->getValueData(stmt));
+	ValueData* stmtData(va->getValueData(stmt));
 	addToSet(stmtData->getDirReadVars(), funcInfo->mayBeReadVars);
 	addToSet(stmtData->getMayBeReadVars(), funcInfo->mayBeReadVars);
 	addToSet(stmtData->getMustBeReadVars(), funcInfo->mayBeReadVars);
@@ -291,7 +291,7 @@ void OptimFuncInfoCFGTraversal::updateFuncInfo(ShPtr<Statement> stmt) {
 	// Handle function calls.
 	// TODO What if a call modifies a local variable from storedGlobalVars?
 	for (const auto &call : stmtData->getCalls()) {
-		ShPtr<OptimCallInfo> callInfo(cast<OptimCallInfo>(
+		OptimCallInfo* callInfo(cast<OptimCallInfo>(
 			cio->computeCallInfo(call, traversedFunc)
 		));
 
@@ -310,7 +310,7 @@ void OptimFuncInfoCFGTraversal::updateFuncInfo(ShPtr<Statement> stmt) {
 * This function checks that every variable from @c storedGlobalVars is
 * retrieved its original value before the node exits.
 */
-bool OptimFuncInfoCFGTraversal::checkExitNodesPredecessor(ShPtr<CFG::Node> node) {
+bool OptimFuncInfoCFGTraversal::checkExitNodesPredecessor(CFG::Node* node) {
 	if (node == cfg->getEntryNode()) {
 		// We have reached the entry node.
 		return false;
@@ -318,7 +318,7 @@ bool OptimFuncInfoCFGTraversal::checkExitNodesPredecessor(ShPtr<CFG::Node> node)
 
 	auto currStmtRIter = node->stmt_rbegin();
 	ASSERT_MSG(currStmtRIter != node->stmt_rend(), "encountered an empty node");
-	ShPtr<Statement> currStmt = *currStmtRIter;
+	Statement* currStmt = *currStmtRIter;
 
 	// Before every return, there should be a sequence
 	//
@@ -343,13 +343,13 @@ bool OptimFuncInfoCFGTraversal::checkExitNodesPredecessor(ShPtr<CFG::Node> node)
 	// Check all variables from storedGlobalVars.
 	VarToVarMap toCheck(storedGlobalVars);
 	while (currStmtRIter != node->stmt_rend() && isa<AssignStmt>(currStmt)) {
-		ShPtr<AssignStmt> assignStmt = cast<AssignStmt>(currStmt);
-		ShPtr<Variable> lhs(cast<Variable>(assignStmt->getLhs()));
-		ShPtr<Expression> rhs(assignStmt->getRhs());
+		AssignStmt* assignStmt = cast<AssignStmt>(currStmt);
+		Variable* lhs(cast<Variable>(assignStmt->getLhs()));
+		Expression* rhs(assignStmt->getRhs());
 
 		// If the left-hand side is not a variable or there are some
 		// function calls or dereferences, stop the check.
-		ShPtr<ValueData> rhsData(va->getValueData(rhs));
+		ValueData* rhsData(va->getValueData(rhs));
 		if (!lhs || rhsData->hasCalls() || rhsData->hasDerefs()) {
 			break;
 		}
@@ -379,7 +379,7 @@ bool OptimFuncInfoCFGTraversal::checkExitNodesPredecessor(ShPtr<CFG::Node> node)
 	return !storedGlobalVars.empty();
 }
 
-bool OptimFuncInfoCFGTraversal::visitStmt(ShPtr<Statement> stmt) {
+bool OptimFuncInfoCFGTraversal::visitStmt(Statement* stmt) {
 	updateFuncInfo(stmt);
 	return true;
 }

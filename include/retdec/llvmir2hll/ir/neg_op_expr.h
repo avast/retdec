@@ -26,10 +26,10 @@ class Visitor;
 */
 class NegOpExpr final: public UnaryOpExpr {
 public:
-	static ShPtr<NegOpExpr> create(ShPtr<Expression> op);
+	static NegOpExpr* create(Expression* op);
 
-	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
-	virtual ShPtr<Value> clone() override;
+	virtual bool isEqualTo(Value* otherValue) const override;
+	virtual Value* clone() override;
 
 	/// @name Visitor Interface
 	/// @{
@@ -39,7 +39,7 @@ public:
 private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
-	explicit NegOpExpr(ShPtr<Expression> op);
+	explicit NegOpExpr(Expression* op);
 };
 
 } // namespace llvmir2hll

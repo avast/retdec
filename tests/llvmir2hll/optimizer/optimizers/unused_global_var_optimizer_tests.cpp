@@ -26,7 +26,7 @@ class UnusedGlobalVarOptimizerTests: public TestsWithModule {};
 
 TEST_F(UnusedGlobalVarOptimizerTests,
 OptimizerHasNonEmptyID) {
-	ShPtr<UnusedGlobalVarOptimizer> optimizer(
+	UnusedGlobalVarOptimizer* optimizer(
 		new UnusedGlobalVarOptimizer(module)
 	);
 

@@ -43,10 +43,10 @@ class Module;
 */
 class FuncOptimizer: public Optimizer {
 protected:
-	FuncOptimizer(ShPtr<Module> module);
+	FuncOptimizer(Module* module);
 
 	virtual void doOptimization() override;
-	virtual void runOnFunction(ShPtr<Function> func);
+	virtual void runOnFunction(Function* func);
 
 	/**
 	* @brief Visits the given statement, its nested statements, and successor
@@ -54,14 +54,14 @@ protected:
 	*
 	* This function is very handy in subclasses. Typical usage:
 	* @code
-	* void ForLoopOptimizer::visit(ShPtr<WhileLoopStmt> stmt) {
+	* void ForLoopOptimizer::visit(WhileLoopStmt* stmt) {
 	*     visitNestedAndSuccessorStatements(stmt);
 	*     tryConversionToForLoop(stmt);
 	* }
 	* @endcode
 	*/
 	template<typename T>
-	void visitNestedAndSuccessorStatements(ShPtr<T> stmt) {
+	void visitNestedAndSuccessorStatements(T* stmt) {
 		// The qualification is needed to prevent infinite recursion when this
 		// function is called from a subclass (typical usage).
 		FuncOptimizer::visit(stmt);
@@ -69,7 +69,7 @@ protected:
 
 protected:
 	/// Function that is currently being optimized.
-	ShPtr<Function> currFunc;
+	Function* currFunc = nullptr;
 };
 
 } // namespace llvmir2hll

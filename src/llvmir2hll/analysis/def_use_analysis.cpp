@@ -24,10 +24,10 @@ namespace llvmir2hll {
 namespace {
 
 /// Set of nodes in a CFG.
-using NodeSet = std::set<ShPtr<CFG::Node>>;
+using NodeSet = std::set<CFG::Node*>;
 
 /// Order of nodes in a CFG.
-using NodeOrder = std::vector<ShPtr<CFG::Node>>;
+using NodeOrder = std::vector<CFG::Node*>;
 
 } // anonymous namespace
 
@@ -84,8 +84,8 @@ void DefUseChains::debugPrint() {
 *
 * See create() for the description of the parameters.
 */
-DefUseAnalysis::DefUseAnalysis(ShPtr<Module> module,
-		ShPtr<ValueAnalysis> va, ShPtr<VarUsesVisitor> vuv):
+DefUseAnalysis::DefUseAnalysis(Module* module,
+		ValueAnalysis* va, VarUsesVisitor* vuv):
 		module(module), va(va), vuv(vuv),
 		cfgBuilder(RecursiveCFGBuilder::create()) {
 	// If we don't have a visitor for obtaining uses of variables, create one.
@@ -105,10 +105,10 @@ DefUseAnalysis::DefUseAnalysis(ShPtr<Module> module,
 * @par Preconditions
 *  - if @a cfg is non-null, it has to be a CFG corresponding to @a func
 */
-ShPtr<DefUseChains> DefUseAnalysis::getDefUseChains(
-		ShPtr<Function> func, ShPtr<CFG> cfg,
-		std::function<bool (ShPtr<Variable>)> shouldBeIncluded) {
-	auto ducs = std::make_shared<DefUseChains>();
+DefUseChains* DefUseAnalysis::getDefUseChains(
+		Function* func, CFG* cfg,
+		std::function<bool (Variable*)> shouldBeIncluded) {
+	auto ducs = new DefUseChains();
 	ducs->func = func;
 	ducs->shouldBeIncluded = shouldBeIncluded;
 
@@ -139,11 +139,11 @@ ShPtr<DefUseChains> DefUseAnalysis::getDefUseChains(
 *
 * All methods of this class leave @a va in a valid state.
 */
-ShPtr<DefUseAnalysis> DefUseAnalysis::create(ShPtr<Module> module,
-		ShPtr<ValueAnalysis> va, ShPtr<VarUsesVisitor> vuv) {
+DefUseAnalysis* DefUseAnalysis::create(Module* module,
+		ValueAnalysis* va, VarUsesVisitor* vuv) {
 	PRECONDITION(va->isInValidState(), "it is not in a valid state");
 
-	return ShPtr<DefUseAnalysis>(new DefUseAnalysis(module, va, vuv));
+	return new DefUseAnalysis(module, va, vuv);
 }
 
 /**
@@ -151,7 +151,7 @@ ShPtr<DefUseAnalysis> DefUseAnalysis::create(ShPtr<Module> module,
 *
 * This function modifies @a ducs.
 */
-void DefUseAnalysis::computeGenAndKill(ShPtr<DefUseChains> ducs) {
+void DefUseAnalysis::computeGenAndKill(DefUseChains* ducs) {
 	// For each node B...
 	for (auto i = ducs->cfg->node_begin(), e = ducs->cfg->node_end();
 			i != e; ++i) {
@@ -165,8 +165,8 @@ void DefUseAnalysis::computeGenAndKill(ShPtr<DefUseChains> ducs) {
 *
 * This function modifies @a ducs.
 */
-void DefUseAnalysis::computeGenAndKillForNode(ShPtr<DefUseChains> ducs,
-	ShPtr<CFG::Node> node) {
+void DefUseAnalysis::computeGenAndKillForNode(DefUseChains* ducs,
+	CFG::Node* node) {
 
 	// Aliases to speed up the computation.
 	auto &gen = ducs->gen[node];
@@ -235,7 +235,7 @@ void DefUseAnalysis::computeGenAndKillForNode(ShPtr<DefUseChains> ducs,
 * computeGenAndKill() has to be run before this function. This function modifies
 * @a ducs.
 */
-void DefUseAnalysis::computeInAndOut(ShPtr<DefUseChains> ducs) {
+void DefUseAnalysis::computeInAndOut(DefUseChains* ducs) {
 	// The subsequent implementation is based on Section 6.3.6 in [ItC] (see
 	// the class description). The algorithm is the same as in the analysis of
 	// live variables (see page 112 in [ItC]).
@@ -316,8 +316,8 @@ void DefUseAnalysis::computeInAndOut(ShPtr<DefUseChains> ducs) {
 * @par Preconditions
 *  - @a node is not the exit node of a CFG
 */
-bool DefUseAnalysis::computeInAndOutForNode(ShPtr<DefUseChains> ducs,
-		ShPtr<CFG::Node> node) {
+bool DefUseAnalysis::computeInAndOutForNode(DefUseChains* ducs,
+		CFG::Node* node) {
 	// See the implementation of computeInAndOut() for the description of the
 	// following algorithm.
 
@@ -364,7 +364,7 @@ bool DefUseAnalysis::computeInAndOutForNode(ShPtr<DefUseChains> ducs,
 * computeGenAndKill() and computeInAndOut() have to be run before this
 * function. This function modifies @a ducs.
 */
-void DefUseAnalysis::computeDefUseChains(ShPtr<DefUseChains> ducs) {
+void DefUseAnalysis::computeDefUseChains(DefUseChains* ducs) {
 	ducs->du.clear();
 
 	// For each node...
@@ -381,8 +381,8 @@ void DefUseAnalysis::computeDefUseChains(ShPtr<DefUseChains> ducs) {
 * This function should be run only from computeDefUseChains(), and it modifies
 * @a ducs.
 */
-void DefUseAnalysis::computeDefUseChainForNode(ShPtr<DefUseChains> ducs,
-		ShPtr<CFG::Node> node) {
+void DefUseAnalysis::computeDefUseChainForNode(DefUseChains* ducs,
+		CFG::Node* node) {
 	// For each statement in the node...
 	for (auto i = node->stmt_begin(), e = node->stmt_end(); i != e; ++i) {
 		if (const auto &defVar = getDefVarInStmt(*i)) {
@@ -402,9 +402,9 @@ void DefUseAnalysis::computeDefUseChainForNode(ShPtr<DefUseChains> ducs,
 * This function should be run only from computeDefUseChainForNode(), and it
 * modifies @a ducs.
 */
-void DefUseAnalysis::computeDefUseChainForStmt(ShPtr<DefUseChains> ducs,
-		ShPtr<CFG::Node> node, CFG::stmt_iterator varDefStmtIter,
-		ShPtr<Variable> defVar) {
+void DefUseAnalysis::computeDefUseChainForStmt(DefUseChains* ducs,
+		CFG::Node* node, CFG::stmt_iterator varDefStmtIter,
+		Variable* defVar) {
 	// For brevity, create an alias for the def-use chain that is being computed.
 	ducs->du.emplace_back(std::make_pair(*varDefStmtIter, defVar), StmtSet());
 	auto &du = ducs->du.back().second;
@@ -456,9 +456,9 @@ void DefUseAnalysis::computeDefUseChainForStmt(ShPtr<DefUseChains> ducs,
 * If @a stmt doesn't define any variable, this function returns the null
 * pointer.
 */
-ShPtr<Variable> DefUseAnalysis::getDefVarInStmt(ShPtr<Statement> stmt) {
+Variable* DefUseAnalysis::getDefVarInStmt(Statement* stmt) {
 	const auto &writtenVars = va->getValueData(stmt)->getDirWrittenVars();
-	return writtenVars.empty() ? ShPtr<Variable>() : *writtenVars.begin();
+	return writtenVars.empty() ? nullptr : *writtenVars.begin();
 }
 
 } // namespace llvmir2hll

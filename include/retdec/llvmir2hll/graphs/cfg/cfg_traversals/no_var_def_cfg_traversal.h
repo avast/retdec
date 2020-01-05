@@ -26,9 +26,9 @@ class Variable;
 */
 class NoVarDefCFGTraversal final: public CFGTraversal {
 public:
-	static bool noVarIsDefinedBetweenStmts(ShPtr<Statement> start,
-		const StmtSet &ends, const VarSet &vars, ShPtr<CFG> cfg,
-		ShPtr<ValueAnalysis> va);
+	static bool noVarIsDefinedBetweenStmts(Statement* start,
+		const StmtSet &ends, const VarSet &vars, CFG* cfg,
+		ValueAnalysis* va);
 
 private:
 	/// Statements at which we should end the traversal.
@@ -38,13 +38,13 @@ private:
 	const VarSet &vars;
 
 	/// Analysis of values.
-	ShPtr<ValueAnalysis> va;
+	ValueAnalysis* va = nullptr;
 
 private:
-	NoVarDefCFGTraversal(ShPtr<CFG> cfg, const StmtSet &ends,
-		const VarSet &vars, ShPtr<ValueAnalysis> va);
+	NoVarDefCFGTraversal(CFG* cfg, const StmtSet &ends,
+		const VarSet &vars, ValueAnalysis* va);
 
-	virtual bool visitStmt(ShPtr<Statement> stmt) override;
+	virtual bool visitStmt(Statement* stmt) override;
 	virtual bool getEndRetVal() const override;
 	virtual bool combineRetVals(bool origRetVal, bool newRetVal) const override;
 };

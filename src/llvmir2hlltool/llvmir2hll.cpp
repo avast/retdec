@@ -366,7 +366,7 @@ private:
 	retdec::llvmir2hll::StringVector getIdsOfPatternFindersToBeRun() const;
 	retdec::llvmir2hll::PatternFinderRunner::PatternFinders instantiatePatternFinders(
 		const retdec::llvmir2hll::StringVector &pfsIds);
-	ShPtr<retdec::llvmir2hll::PatternFinderRunner> instantiatePatternFinderRunner() const;
+	retdec::llvmir2hll::PatternFinderRunner* instantiatePatternFinderRunner() const;
 	retdec::llvmir2hll::StringSet getPrefixesOfFuncsToBeRemoved() const;
 
 private:
@@ -377,31 +377,32 @@ private:
 	Module *llvmModule;
 
 	/// The resulting module in BIR.
-	ShPtr<retdec::llvmir2hll::Module> resModule;
+	retdec::llvmir2hll::Module* resModule;
 
 	/// The used semantics.
-	ShPtr<retdec::llvmir2hll::Semantics> semantics;
+	retdec::llvmir2hll::Semantics* semantics;
 
 	/// The used config.
-	ShPtr<retdec::llvmir2hll::Config> config;
+	// retdec::llvmir2hll::Config* config;
+	retdec::llvmir2hll::Config* config;
 
 	/// The used HLL writer.
-	ShPtr<retdec::llvmir2hll::HLLWriter> hllWriter;
+	retdec::llvmir2hll::HLLWriter* hllWriter;
 
 	/// The used alias analysis.
-	ShPtr<retdec::llvmir2hll::AliasAnalysis> aliasAnalysis;
+	retdec::llvmir2hll::AliasAnalysis* aliasAnalysis;
 
 	/// The used obtainer of information about function and function calls.
-	ShPtr<retdec::llvmir2hll::CallInfoObtainer> cio;
+	retdec::llvmir2hll::CallInfoObtainer* cio;
 
 	/// The used evaluator of arithmetical expressions.
-	ShPtr<retdec::llvmir2hll::ArithmExprEvaluator> arithmExprEvaluator;
+	retdec::llvmir2hll::ArithmExprEvaluator* arithmExprEvaluator;
 
 	/// The used generator of variable names.
-	ShPtr<retdec::llvmir2hll::VarNameGen> varNameGen;
+	retdec::llvmir2hll::VarNameGen* varNameGen;
 
 	/// The used renamer of variables.
-	ShPtr<retdec::llvmir2hll::VarRenamer> varRenamer;
+	retdec::llvmir2hll::VarRenamer* varRenamer;
 };
 
 // Static variables and constants initialization.
@@ -788,7 +789,7 @@ void Decompiler::initAliasAnalysis() {
 * @brief Runs the optimizations over the resulting module.
 */
 void Decompiler::runOptimizations() {
-	ShPtr<retdec::llvmir2hll::OptimizerManager> optManager(new retdec::llvmir2hll::OptimizerManager(
+	retdec::llvmir2hll::OptimizerManager* optManager(new retdec::llvmir2hll::OptimizerManager(
 		parseListOfOpts(EnabledOpts), parseListOfOpts(DisabledOpts),
 		hllWriter, retdec::llvmir2hll::ValueAnalysis::create(aliasAnalysis, true), cio,
 		arithmExprEvaluator, AggressiveOpts, Debug));
@@ -821,7 +822,7 @@ void Decompiler::validateResultingModule() {
 	std::sort(regValidatorIDs.begin(), regValidatorIDs.end());
 	for (const auto &id : regValidatorIDs) {
 		if (Debug) retdec::llvm_support::printSubPhase("running " + id + "Validator");
-		ShPtr<retdec::llvmir2hll::Validator> validator(
+		retdec::llvmir2hll::Validator* validator(
 			retdec::llvmir2hll::ValidatorFactory::getInstance().createObject(id));
 		validator->validate(resModule, true);
 	}
@@ -833,7 +834,7 @@ void Decompiler::validateResultingModule() {
 void Decompiler::findPatterns() {
 	retdec::llvmir2hll::StringVector pfsIds(getIdsOfPatternFindersToBeRun());
 	retdec::llvmir2hll::PatternFinderRunner::PatternFinders pfs(instantiatePatternFinders(pfsIds));
-	ShPtr<retdec::llvmir2hll::PatternFinderRunner> pfr(instantiatePatternFinderRunner());
+	retdec::llvmir2hll::PatternFinderRunner* pfr(instantiatePatternFinderRunner());
 	pfr->run(pfs, resModule);
 }
 
@@ -882,7 +883,7 @@ void Decompiler::emitCFGs() {
 	}
 
 	// Instantiate a CFG builder.
-	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
+	retdec::llvmir2hll::CFGBuilder* cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
 
 	// Get the extension of the files that will be written (we use the CFG
 	// writer's name for this purpose).
@@ -900,8 +901,8 @@ void Decompiler::emitCFGs() {
 		}
 		// Create a CFG for the current function and emit it into the opened
 		// file.
-		ShPtr<retdec::llvmir2hll::CFGWriter> writer(retdec::llvmir2hll::CFGWriterFactory::getInstance(
-			).createObject<ShPtr<retdec::llvmir2hll::CFG>, std::ostream &>(
+		retdec::llvmir2hll::CFGWriter* writer(retdec::llvmir2hll::CFGWriterFactory::getInstance(
+			).createObject<retdec::llvmir2hll::CFG*, std::ostream &>(
 				CFGWriter, cfgBuilder->getCFG(*i), out));
 		ASSERT_MSG(writer, "instantiation of the requested CFG writer `"
 			<< CFGWriter << "` failed");
@@ -935,8 +936,8 @@ void Decompiler::emitCG() {
 	}
 
 	// Create a CG for the current module and emit it into the opened file.
-	ShPtr<retdec::llvmir2hll::CGWriter> writer(retdec::llvmir2hll::CGWriterFactory::getInstance(
-		).createObject<ShPtr<retdec::llvmir2hll::CG>, std::ostream &>(
+	retdec::llvmir2hll::CGWriter* writer(retdec::llvmir2hll::CGWriterFactory::getInstance(
+		).createObject<retdec::llvmir2hll::CG*, std::ostream &>(
 			CGWriter, retdec::llvmir2hll::CGBuilder::getCG(resModule), out));
 	ASSERT_MSG(writer,
 		"instantiation of the requested CG writer `" << CGWriter << "` failed");
@@ -982,14 +983,14 @@ retdec::llvmir2hll::PatternFinderRunner::PatternFinders Decompiler::instantiateP
 		const retdec::llvmir2hll::StringVector &pfsIds) {
 	// Pattern finders need a value analysis, so create it.
 	initAliasAnalysis();
-	ShPtr<retdec::llvmir2hll::ValueAnalysis> va(retdec::llvmir2hll::ValueAnalysis::create(aliasAnalysis, true));
+	retdec::llvmir2hll::ValueAnalysis* va(retdec::llvmir2hll::ValueAnalysis::create(aliasAnalysis, true));
 
 	// Re-initialize cio to be sure its up-to-date.
 	cio->init(retdec::llvmir2hll::CGBuilder::getCG(resModule), va);
 
 	retdec::llvmir2hll::PatternFinderRunner::PatternFinders pfs;
 	for (const auto pfId : pfsIds) {
-		ShPtr<retdec::llvmir2hll::PatternFinder> pf(
+		retdec::llvmir2hll::PatternFinder* pf(
 			retdec::llvmir2hll::PatternFinderFactory::getInstance().createObject(pfId, va, cio));
 		if (!pf && Debug) {
 			retdec::llvm_support::printWarningMessage("the requested pattern finder '" + pfId + "' does not exist");
@@ -1003,11 +1004,11 @@ retdec::llvmir2hll::PatternFinderRunner::PatternFinders Decompiler::instantiateP
 /**
 * @brief Instantiates and returns a proper PatternFinderRunner.
 */
-ShPtr<retdec::llvmir2hll::PatternFinderRunner> Decompiler::instantiatePatternFinderRunner() const {
+retdec::llvmir2hll::PatternFinderRunner* Decompiler::instantiatePatternFinderRunner() const {
 	if (Debug) {
-		return ShPtr<retdec::llvmir2hll::PatternFinderRunner>(new retdec::llvmir2hll::CLIPatternFinderRunner(llvm::errs()));
+		return new retdec::llvmir2hll::CLIPatternFinderRunner(llvm::errs());
 	}
-	return ShPtr<retdec::llvmir2hll::PatternFinderRunner>(new retdec::llvmir2hll::NoActionPatternFinderRunner());
+	return new retdec::llvmir2hll::NoActionPatternFinderRunner();
 }
 
 /**

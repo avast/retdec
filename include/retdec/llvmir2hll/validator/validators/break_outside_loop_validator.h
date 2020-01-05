@@ -30,7 +30,7 @@ class BreakOutsideLoopValidator: public Validator {
 public:
 	virtual std::string getId() const override;
 
-	static ShPtr<Validator> create();
+	static Validator* create();
 
 private:
 	using Validator::Validator;
@@ -38,8 +38,8 @@ private:
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<BreakStmt> stmt) override;
-	virtual void visit(ShPtr<ContinueStmt> stmt) override;
+	virtual void visit(BreakStmt* stmt) override;
+	virtual void visit(ContinueStmt* stmt) override;
 	/// @}
 };
 

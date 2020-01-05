@@ -35,20 +35,20 @@ namespace tests {
 */
 class SimplifyArithmExprOptimizerTests: public TestsWithModule {
 protected:
-	void optimize(ShPtr<Module> module);
+	void optimize(Module* module);
 };
 
-void SimplifyArithmExprOptimizerTests::optimize(ShPtr<Module> module) {
-	ShPtr<ArithmExprEvaluator> evaluator(StrictArithmExprEvaluator::
+void SimplifyArithmExprOptimizerTests::optimize(Module* module) {
+	ArithmExprEvaluator* evaluator(StrictArithmExprEvaluator::
 		create());
 	Optimizer::optimize<SimplifyArithmExprOptimizer>(module, evaluator);
 }
 
 TEST_F(SimplifyArithmExprOptimizerTests,
 OptimizerHasNonEmptyID) {
-	ShPtr<ArithmExprEvaluator> evaluator(StrictArithmExprEvaluator::
+	ArithmExprEvaluator* evaluator(StrictArithmExprEvaluator::
 		create());
-	ShPtr<SimplifyArithmExprOptimizer> optimizer(
+	SimplifyArithmExprOptimizer* optimizer(
 		new SimplifyArithmExprOptimizer(module, evaluator));
 
 	EXPECT_TRUE(!optimizer->getId().empty()) <<
@@ -65,8 +65,8 @@ GlobalVarTestOptimized) {
 	// int a = 7;
 	// void test() {
 	// }
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<AddOpExpr> addOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	AddOpExpr* addOpExpr(
 		AddOpExpr::create(
 			ConstInt::create(2, 64),
 			ConstInt::create(5, 64)
@@ -75,11 +75,11 @@ GlobalVarTestOptimized) {
 
 	optimize(module);
 
-	ShPtr<ConstInt> outConstInt(cast<ConstInt>(module->getInitForGlobalVar(varA)));
+	ConstInt* outConstInt(cast<ConstInt>(module->getInitForGlobalVar(varA)));
 	ASSERT_TRUE(outConstInt) <<
 		"expected `ConstInt`, "
 		"got `" << module->getInitForGlobalVar(varA) << "`";
-	ShPtr<ConstInt> result(ConstInt::create(7, 64));
+	ConstInt* result(ConstInt::create(7, 64));
 	EXPECT_EQ(result->getValue(), outConstInt->getValue()) <<
 		"expected `" << result << "`, "
 		"got `" << outConstInt << "`";
@@ -91,38 +91,38 @@ MultipleVarSubNumAddNumConstIntOptimized) {
 	//
 	// Optimized to return a + 1.
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<SubOpExpr> subOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	SubOpExpr* subOpExpr(
 		SubOpExpr::create(
 			varA,
 			ConstInt::create(5, 64)
 	));
-	ShPtr<AddOpExpr> returnExpr(
+	AddOpExpr* returnExpr(
 		AddOpExpr::create(
 			subOpExpr,
 			ConstInt::create(6, 64)
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(returnExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(returnExpr));
 	testFunc->setBody(returnStmt);
 
 	optimize(module);
 
-	ShPtr<AddOpExpr> outAddOpExpr(cast<AddOpExpr>(returnStmt->getRetVal()));
+	AddOpExpr* outAddOpExpr(cast<AddOpExpr>(returnStmt->getRetVal()));
 	ASSERT_TRUE(outAddOpExpr) <<
 		"expected `AddOpExpr`, "
 		"got `" << returnStmt->getRetVal() << "`";
-	ShPtr<Variable> outOp1(cast<Variable>(outAddOpExpr->getFirstOperand()));
+	Variable* outOp1(cast<Variable>(outAddOpExpr->getFirstOperand()));
 	ASSERT_TRUE(outOp1) <<
 		"expected `Variable`, "
 		"got `" << outAddOpExpr->getFirstOperand() << "`";
 	EXPECT_EQ(varA, outOp1) <<
 		"expected `" << varA << "`, "
 		"got `" << outOp1 << "`";
-	ShPtr<ConstInt> outOp2(cast<ConstInt>(outAddOpExpr->getSecondOperand()));
+	ConstInt* outOp2(cast<ConstInt>(outAddOpExpr->getSecondOperand()));
 	ASSERT_TRUE(outOp2) <<
 		"expected `ConstInt`, "
 		"got `" << outAddOpExpr->getSecondOperand() << "`";
-	ShPtr<ConstInt> result(ConstInt::create(1, 64));
+	ConstInt* result(ConstInt::create(1, 64));
 	EXPECT_EQ(outOp2->getValue(), result->getValue()) <<
 		"expected `" << result << "`, "
 		"got `" << outOp1 << "`";
@@ -134,46 +134,46 @@ TestForXorNegationAndOrOpEqOpAndGtOpOptimization) {
 	//
 	// Optimized to return a <= 9.
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<ConstInt> constInt9(ConstInt::create(9, 64));
-	ShPtr<EqOpExpr> eqOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	ConstInt* constInt9(ConstInt::create(9, 64));
+	EqOpExpr* eqOpExpr(
 		EqOpExpr::create(
 			varA,
 			ConstInt::create(8, 64)
 	));
-	ShPtr<GtOpExpr> gtOpExpr(
+	GtOpExpr* gtOpExpr(
 		GtOpExpr::create(
 			varA,
 			constInt9
 
 	));
-	ShPtr<BitXorOpExpr> bitXorOpExpr(
+	BitXorOpExpr* bitXorOpExpr(
 		BitXorOpExpr::create(
 			gtOpExpr,
 			ConstBool::create(true)
 	));
-	ShPtr<OrOpExpr> orOpExpr(
+	OrOpExpr* orOpExpr(
 		OrOpExpr::create(
 			eqOpExpr,
 			bitXorOpExpr
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(orOpExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(orOpExpr));
 	testFunc->setBody(returnStmt);
 
 	optimize(module);
 
-	ShPtr<LtEqOpExpr> outLtEqOpExpr(cast<LtEqOpExpr>(returnStmt->getRetVal()));
+	LtEqOpExpr* outLtEqOpExpr(cast<LtEqOpExpr>(returnStmt->getRetVal()));
 	ASSERT_TRUE(outLtEqOpExpr) <<
 		"expected `LtEqOpExpr`, "
 		"got `" << returnStmt->getRetVal() << "`";
-	ShPtr<Variable> outVariable(cast<Variable>(outLtEqOpExpr->getFirstOperand()));
+	Variable* outVariable(cast<Variable>(outLtEqOpExpr->getFirstOperand()));
 	ASSERT_TRUE(outVariable) <<
 		"expected `Variable`, "
 		"got `" << outLtEqOpExpr->getFirstOperand() << "`";
 	EXPECT_EQ(varA, outLtEqOpExpr->getFirstOperand()) <<
 		"expected `" << varA << "`, "
 		"got `" << outLtEqOpExpr->getFirstOperand() << "`";
-	ShPtr<ConstInt> outConstInt(cast<ConstInt>(outLtEqOpExpr->getSecondOperand()));
+	ConstInt* outConstInt(cast<ConstInt>(outLtEqOpExpr->getSecondOperand()));
 	ASSERT_TRUE(outConstInt) <<
 		"expected `ConstInt`, "
 		"got `" << outLtEqOpExpr->getSecondOperand() << "`";
@@ -188,36 +188,36 @@ BiggerAddAndSubAndMulExpression) {
 	//
 	// Optimized to return 52.
 	//
-	ShPtr<AddOpExpr> addOpExprFirst(
+	AddOpExpr* addOpExprFirst(
 		AddOpExpr::create(
 			ConstInt::create(3, 64),
 			ConstInt::create(7, 64)
 	));
-	ShPtr<SubOpExpr> subOpExpr(
+	SubOpExpr* subOpExpr(
 		SubOpExpr::create(
 			addOpExprFirst,
 			ConstInt::create(2, 64)
 	));
-	ShPtr<AddOpExpr> addOpExprSec(
+	AddOpExpr* addOpExprSec(
 		AddOpExpr::create(
 			subOpExpr,
 			ConstInt::create(5, 64)
 	));
-	ShPtr<MulOpExpr> returnExpr(
+	MulOpExpr* returnExpr(
 		MulOpExpr::create(
 			addOpExprSec,
 			ConstInt::create(4, 64)
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(returnExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(returnExpr));
 	testFunc->setBody(returnStmt);
 
 	optimize(module);
 
-	ShPtr<ConstInt> outConstInt(cast<ConstInt>(returnStmt->getRetVal()));
+	ConstInt* outConstInt(cast<ConstInt>(returnStmt->getRetVal()));
 	ASSERT_TRUE(outConstInt) <<
 		"expected `ConstInt`, "
 		"got `" << returnStmt->getRetVal() << "`";
-	ShPtr<ConstInt> result(ConstInt::create(52, 64));
+	ConstInt* result(ConstInt::create(52, 64));
 	EXPECT_EQ(result->getValue(), outConstInt->getValue()) <<
 		"expected `" << result << "`, "
 		"got `" << outConstInt << "`";

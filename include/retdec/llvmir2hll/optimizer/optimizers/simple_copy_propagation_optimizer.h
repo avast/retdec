@@ -65,42 +65,42 @@ class VarUsesVisitor;
 */
 class SimpleCopyPropagationOptimizer final: public FuncOptimizer {
 public:
-	SimpleCopyPropagationOptimizer(ShPtr<Module> module, ShPtr<ValueAnalysis> va,
-		ShPtr<CallInfoObtainer> cio);
+	SimpleCopyPropagationOptimizer(Module* module, ValueAnalysis* va,
+		CallInfoObtainer* cio);
 
 	virtual std::string getId() const override { return "SimpleCopyPropagation"; }
 
 private:
 	virtual void doOptimization() override;
-	virtual void runOnFunction(ShPtr<Function> func) override;
+	virtual void runOnFunction(Function* func) override;
 
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<AssignStmt> stmt) override;
-	virtual void visit(ShPtr<VarDefStmt> stmt) override;
+	virtual void visit(AssignStmt* stmt) override;
+	virtual void visit(VarDefStmt* stmt) override;
 	/// @}
 
-	void tryOptimization(ShPtr<Statement> stmt);
-	void tryOptimizationCase1(ShPtr<Statement> stmt, ShPtr<Variable> lhsVar,
-		ShPtr<Expression> rhs);
+	void tryOptimization(Statement* stmt);
+	void tryOptimizationCase1(Statement* stmt, Variable* lhsVar,
+		Expression* rhs);
 
 private:
 	/// Unordered set of variables.
-	using VarUSet = std::unordered_set<ShPtr<Variable>>;
+	using VarUSet = std::unordered_set<Variable*>;
 
 private:
 	/// The used builder of CFGs.
-	ShPtr<CFGBuilder> cfgBuilder;
+	CFGBuilder* cfgBuilder = nullptr;
 
 	/// Analysis of values.
-	ShPtr<ValueAnalysis> va;
+	ValueAnalysis* va = nullptr;
 
 	/// Obtainer of information about function calls.
-	ShPtr<CallInfoObtainer> cio;
+	CallInfoObtainer* cio = nullptr;
 
 	/// Visitor for obtaining uses of variables.
-	ShPtr<VarUsesVisitor> vuv;
+	VarUsesVisitor* vuv = nullptr;
 
 	/// Global variables in @c module. This is here to speedup the optimization.
 	/// By using this set, we do not have to ask @c module every time we need
@@ -108,7 +108,7 @@ private:
 	VarSet globalVars;
 
 	/// CFG of the currently optimized function.
-	ShPtr<CFG> currCFG;
+	CFG* currCFG = nullptr;
 
 	/// Set of variables that we have already tried to optimized.
 	VarUSet triedVars;

@@ -25,7 +25,7 @@ namespace llvmir2hll {
 * @par Preconditions
 *  - @a module is non-null
 */
-UnusedGlobalVarOptimizer::UnusedGlobalVarOptimizer(ShPtr<Module> module):
+UnusedGlobalVarOptimizer::UnusedGlobalVarOptimizer(Module* module):
 	Optimizer(module), globalVars(module->getGlobalVars()) {
 		PRECONDITION_NON_NULL(module);
 	}
@@ -35,7 +35,7 @@ void UnusedGlobalVarOptimizer::doOptimization() {
 	removeUnusedGlobalVars();
 }
 
-void UnusedGlobalVarOptimizer::visit(ShPtr<Variable> var) {
+void UnusedGlobalVarOptimizer::visit(Variable* var) {
 	if (isGlobal(var)) {
 		usedGlobalVars.insert(var);
 	}
@@ -48,7 +48,7 @@ void UnusedGlobalVarOptimizer::computeUsedGlobalVars() {
 	// Initializers of global variables.
 	for (auto i = module->global_var_begin(), e = module->global_var_end();
 			i != e; ++i) {
-		if (ShPtr<Expression> init = (*i)->getInitializer()) {
+		if (Expression* init = (*i)->getInitializer()) {
 			init->accept(this);
 		}
 	}
@@ -74,14 +74,14 @@ void UnusedGlobalVarOptimizer::removeUnusedGlobalVars() {
 /**
 * @brief Is the given variable global?
 */
-bool UnusedGlobalVarOptimizer::isGlobal(ShPtr<Variable> var) const {
+bool UnusedGlobalVarOptimizer::isGlobal(Variable* var) const {
 	return hasItem(globalVars, var);
 }
 
 /**
 * @brief Is the given global variable used?
 */
-bool UnusedGlobalVarOptimizer::isUsed(ShPtr<Variable> var) const {
+bool UnusedGlobalVarOptimizer::isUsed(Variable* var) const {
 	return hasItem(usedGlobalVars, var);
 }
 

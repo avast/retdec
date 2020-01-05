@@ -26,11 +26,11 @@ class Visitor;
 */
 class UnknownType final: public Type {
 public:
-	static ShPtr<UnknownType> create();
+	static UnknownType* create();
 
-	virtual ShPtr<Value> clone() override;
+	virtual Value* clone() override;
 
-	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
+	virtual bool isEqualTo(Value* otherValue) const override;
 
 	std::size_t getSize() const;
 

@@ -27,22 +27,22 @@ class Visitor;
 class FunctionType final: public Type {
 private:
 	/// Container to store types of parameters.
-	using Params = std::vector<ShPtr<Type>>;
+	using Params = std::vector<Type*>;
 
 public:
 	/// Parameter iterator.
 	using param_iterator = Params::const_iterator;
 
 public:
-	static ShPtr<FunctionType> create(ShPtr<Type> retType = VoidType::create());
+	static FunctionType* create(Type* retType = VoidType::create());
 
-	virtual ShPtr<Value> clone() override;
-	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
+	virtual Value* clone() override;
+	virtual bool isEqualTo(Value* otherValue) const override;
 
 	/// @name Return Type
 	/// @{
-	void setRetType(ShPtr<Type> retType);
-	ShPtr<Type> getRetType() const;
+	void setRetType(Type* retType);
+	Type* getRetType() const;
 	/// @}
 
 	/// @name Parameters
@@ -50,8 +50,8 @@ public:
 	bool hasParams() const;
 	bool hasParam(std::size_t n) const;
 	std::size_t getNumOfParams() const;
-	void addParam(ShPtr<Type> paramType);
-	ShPtr<Type> getParam(std::size_t n) const;
+	void addParam(Type* paramType);
+	Type* getParam(std::size_t n) const;
 
 	param_iterator param_begin() const;
 	param_iterator param_end() const;
@@ -71,11 +71,11 @@ public:
 private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
-	FunctionType(ShPtr<Type> retType = VoidType::create());
+	FunctionType(Type* retType = VoidType::create());
 
 private:
 	/// Return type.
-	ShPtr<Type> retType;
+	Type* retType = nullptr;
 
 	/// Parameters.
 	Params params;

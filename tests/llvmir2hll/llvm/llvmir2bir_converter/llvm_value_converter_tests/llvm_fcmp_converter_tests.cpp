@@ -37,7 +37,7 @@ namespace tests {
 */
 class LLVMFCmpConverterTests: public TestsWithLLVMValueConverter {
 protected:
-	AssertionResult isDetectionIfEitherOperandIsQNAN(ShPtr<Expression> expr);
+	AssertionResult isDetectionIfEitherOperandIsQNAN(Expression* expr);
 
 	template<class T>
 	void fcmpIsConvertedAsSimpleExpression(llvm::FCmpInst::Predicate pred);
@@ -61,7 +61,7 @@ protected:
 *        the operands is QNAN.
 */
 AssertionResult LLVMFCmpConverterTests::isDetectionIfEitherOperandIsQNAN(
-		ShPtr<Expression> expr) {
+		Expression* expr) {
 	auto birOrOpExpr = cast<OrOpExpr>(expr);
 	if (!birOrOpExpr) {
 		return AssertionFailure() << expr

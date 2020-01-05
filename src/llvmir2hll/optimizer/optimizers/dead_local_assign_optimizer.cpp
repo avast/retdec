@@ -31,8 +31,8 @@ namespace llvmir2hll {
 * @par Preconditions
 *  - @a module and @a va are non-null
 */
-DeadLocalAssignOptimizer::DeadLocalAssignOptimizer(ShPtr<Module> module,
-		ShPtr<ValueAnalysis> va):
+DeadLocalAssignOptimizer::DeadLocalAssignOptimizer(Module* module,
+		ValueAnalysis* va):
 	FuncOptimizer(module), va(va), vuv() {
 		PRECONDITION_NON_NULL(module);
 		PRECONDITION_NON_NULL(va);
@@ -49,7 +49,7 @@ void DeadLocalAssignOptimizer::doOptimization() {
 	FuncOptimizer::doOptimization();
 }
 
-void DeadLocalAssignOptimizer::runOnFunction(ShPtr<Function> func) {
+void DeadLocalAssignOptimizer::runOnFunction(Function* func) {
 	// Keep optimizing until the code is left unchanged.
 	bool codeChanged = false;
 	do {
@@ -61,8 +61,8 @@ void DeadLocalAssignOptimizer::runOnFunction(ShPtr<Function> func) {
 * @brief Returns @c true if the given variable with the given uses can be
 *        optimized, @c false otherwise.
 */
-bool DeadLocalAssignOptimizer::canBeOptimized(ShPtr<Variable> var,
-		ShPtr<VarUses> varUses) {
+bool DeadLocalAssignOptimizer::canBeOptimized(Variable* var,
+		VarUses* varUses) {
 
 	// We do not want to optimize external variables (used in a volatile
 	// load/store).
@@ -82,7 +82,7 @@ bool DeadLocalAssignOptimizer::canBeOptimized(ShPtr<Variable> var,
 		}
 
 		// The variable is not read in the use.
-		ShPtr<ValueData> useData(va->getValueData(use));
+		ValueData* useData(va->getValueData(use));
 		if (hasItem(useData->getDirReadVars(), var)) {
 			return false;
 		}
@@ -101,13 +101,13 @@ bool DeadLocalAssignOptimizer::canBeOptimized(ShPtr<Variable> var,
 *
 * @return @c true if the code of the function was changed, @c false otherwise.
 */
-bool DeadLocalAssignOptimizer::tryToOptimize(ShPtr<Function> func) {
+bool DeadLocalAssignOptimizer::tryToOptimize(Function* func) {
 	bool codeChanged = false;
 
 	// For every local variable in the function (excluding parameters)...
 	for (const auto &var : func->getLocalVars()) {
 		// Check that all uses satisfy certain conditions.
-		ShPtr<VarUses> varUses(vuv->getUses(var, func));
+		VarUses* varUses(vuv->getUses(var, func));
 		if (!canBeOptimized(var, varUses)) {
 			continue;
 		}

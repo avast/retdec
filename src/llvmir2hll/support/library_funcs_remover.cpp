@@ -28,7 +28,7 @@ namespace {
 * @param[in] module Module from which the function comes.
 * @param[in] headers Headers for declared functions in the module.
 */
-bool isLibraryFunc(ShPtr<Function> func, ShPtr<Module> module,
+bool isLibraryFunc(Function* func, Module* module,
 		const StringSet &headers) {
 	std::optional<std::string> header(
 		module->getSemantics()->getCHeaderFileForFunc(func->getName())
@@ -57,7 +57,7 @@ bool isLibraryFunc(ShPtr<Function> func, ShPtr<Module> module,
 * @param[in] func Function to be converted.
 * @param[in,out] module Module from which the function comes.
 */
-void markAsLibraryFunc(ShPtr<Function> func, ShPtr<Module> module) {
+void markAsLibraryFunc(Function* func, Module* module) {
 	func->convertToDeclaration();
 	module->markFuncAsStaticallyLinked(func);
 }
@@ -80,7 +80,7 @@ void markAsLibraryFunc(ShPtr<Function> func, ShPtr<Module> module) {
 * @par Preconditions
 *  - @a module is non-null
 */
-FuncVector LibraryFuncsRemover::removeFuncs(ShPtr<Module> module) {
+FuncVector LibraryFuncsRemover::removeFuncs(Module* module) {
 	PRECONDITION_NON_NULL(module);
 
 	FuncVector removedFuncs;

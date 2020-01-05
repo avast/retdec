@@ -25,24 +25,24 @@ class Visitor;
 */
 class AssignStmt final: public Statement {
 public:
-	static ShPtr<AssignStmt> create(ShPtr<Expression> lhs, ShPtr<Expression> rhs,
-		ShPtr<Statement> succ = nullptr, Address a = Address::Undefined);
+	static AssignStmt* create(Expression* lhs, Expression* rhs,
+		Statement* succ = nullptr, Address a = Address::Undefined);
 
-	virtual ShPtr<Value> clone() override;
-	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
+	virtual Value* clone() override;
+	virtual bool isEqualTo(Value* otherValue) const override;
 	virtual bool isCompound() override { return false; }
-	virtual void replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) override;
-	virtual ShPtr<Expression> asExpression() const override;
+	virtual void replace(Expression* oldExpr, Expression* newExpr) override;
+	virtual Expression* asExpression() const override;
 
-	ShPtr<Expression> getLhs() const;
-	ShPtr<Expression> getRhs() const;
+	Expression* getLhs() const;
+	Expression* getRhs() const;
 
-	void setLhs(ShPtr<Expression> left);
-	void setRhs(ShPtr<Expression> right);
+	void setLhs(Expression* left);
+	void setRhs(Expression* right);
 
 	/// @name Subject Interface
 	/// @{
-	virtual void update(ShPtr<Value> subject, ShPtr<Value> arg = nullptr) override;
+	virtual void update(Value* subject, Value* arg = nullptr) override;
 	/// @}
 
 	/// @name Visitor Interface
@@ -53,15 +53,15 @@ public:
 private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
-	AssignStmt(ShPtr<Expression> lhs, ShPtr<Expression> rhs,
+	AssignStmt(Expression* lhs, Expression* rhs,
 		Address a = Address::Undefined);
 
 private:
 	/// Left-hand side of the assignment.
-	ShPtr<Expression> lhs;
+	Expression* lhs = nullptr;
 
 	/// Right-hand side of the assignment.
-	ShPtr<Expression> rhs;
+	Expression* rhs = nullptr;
 };
 
 } // namespace llvmir2hll

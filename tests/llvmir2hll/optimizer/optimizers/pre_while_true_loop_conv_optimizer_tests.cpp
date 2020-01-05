@@ -41,7 +41,7 @@ TEST_F(PreWhileTrueLoopConvOptimizerTests,
 OptimizerHasNonEmptyID) {
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
 
-	ShPtr<PreWhileTrueLoopConvOptimizer> optimizer(new PreWhileTrueLoopConvOptimizer(
+	PreWhileTrueLoopConvOptimizer* optimizer(new PreWhileTrueLoopConvOptimizer(
 		module, va));
 
 	EXPECT_TRUE(!optimizer->getId().empty()) <<
@@ -93,21 +93,21 @@ OptimizeCase1Simplest) {
 	//     }
 	// }
 	//
-	ShPtr<Variable> varTmp(Variable::create("tmp", IntType::create(32)));
+	Variable* varTmp(Variable::create("tmp", IntType::create(32)));
 	testFunc->addLocalVar(varTmp);
-	ShPtr<Variable> varI(Variable::create("i", IntType::create(32)));
+	Variable* varI(Variable::create("i", IntType::create(32)));
 	testFunc->addLocalVar(varI);
-	ShPtr<AssignStmt> assignITmp(AssignStmt::create(varI, varTmp));
-	ShPtr<BreakStmt> breakIf(BreakStmt::create());
-	ShPtr<Expression> ifCond(GtEqOpExpr::create(varTmp, ConstInt::create(1, 32)));
-	ShPtr<IfStmt> ifStmt(IfStmt::create(ifCond, breakIf, assignITmp));
-	ShPtr<AssignStmt> assignTmpI1(AssignStmt::create(varTmp,
+	AssignStmt* assignITmp(AssignStmt::create(varI, varTmp));
+	BreakStmt* breakIf(BreakStmt::create());
+	Expression* ifCond(GtEqOpExpr::create(varTmp, ConstInt::create(1, 32)));
+	IfStmt* ifStmt(IfStmt::create(ifCond, breakIf, assignITmp));
+	AssignStmt* assignTmpI1(AssignStmt::create(varTmp,
 		AddOpExpr::create(varI, ConstInt::create(1, 32)), ifStmt));
-	ShPtr<WhileLoopStmt> whileLoop(WhileLoopStmt::create(
+	WhileLoopStmt* whileLoop(WhileLoopStmt::create(
 		ConstBool::create(true), assignTmpI1));
-	ShPtr<AssignStmt> assignI1(AssignStmt::create(varI, ConstInt::create(1, 32), whileLoop));
-	ShPtr<VarDefStmt> varDefI(VarDefStmt::create(varI, ShPtr<Expression>(), assignI1));
-	ShPtr<VarDefStmt> varDefTmp(VarDefStmt::create(varTmp, ShPtr<Expression>(), varDefI));
+	AssignStmt* assignI1(AssignStmt::create(varI, ConstInt::create(1, 32), whileLoop));
+	VarDefStmt* varDefI(VarDefStmt::create(varI, Expression*(), assignI1));
+	VarDefStmt* varDefTmp(VarDefStmt::create(varTmp, Expression*(), varDefI));
 	testFunc->setBody(varDefTmp);
 
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
@@ -120,15 +120,15 @@ OptimizeCase1Simplest) {
 		"expected `" << varDefI << "`, got `" << testFunc->getBody() << "`";
 	EXPECT_EQ(ifStmt, whileLoop->getBody()) <<
 		"expected `" << ifStmt << "`, got `" << whileLoop->getBody() << "`";
-	ShPtr<AssignStmt> afterIfStmt(cast<AssignStmt>(ifStmt->getSuccessor()));
+	AssignStmt* afterIfStmt(cast<AssignStmt>(ifStmt->getSuccessor()));
 	EXPECT_EQ(varI, afterIfStmt->getLhs()) <<
 		"expected `" << varI << "`, got `" << afterIfStmt->getLhs() << "`";
-	ShPtr<AddOpExpr> afterIfStmtRhs(cast<AddOpExpr>(afterIfStmt->getRhs()));
+	AddOpExpr* afterIfStmtRhs(cast<AddOpExpr>(afterIfStmt->getRhs()));
 	ASSERT_TRUE(afterIfStmtRhs) <<
 		"expected `" << afterIfStmtRhs << "`, got `" << afterIfStmt->getRhs() << "`";
 	EXPECT_EQ(varI, afterIfStmtRhs->getFirstOperand()) <<
 		"expected `" << varI << "`, got `" << afterIfStmtRhs->getFirstOperand() << "`";
-	ShPtr<GtEqOpExpr> newIfCond(cast<GtEqOpExpr>(ifStmt->getFirstIfCond()));
+	GtEqOpExpr* newIfCond(cast<GtEqOpExpr>(ifStmt->getFirstIfCond()));
 	ASSERT_TRUE(newIfCond) <<
 		"expected `" << newIfCond << "`, got `" << ifStmt->getFirstIfCond() << "`";
 	EXPECT_TRUE(isa<AddOpExpr>(newIfCond->getFirstOperand())) <<
@@ -165,21 +165,21 @@ OptimizeCase2Simplest) {
 	//     }
 	// }
 	//
-	ShPtr<Variable> varTmp(Variable::create("tmp", IntType::create(32)));
+	Variable* varTmp(Variable::create("tmp", IntType::create(32)));
 	testFunc->addLocalVar(varTmp);
-	ShPtr<Variable> varI(Variable::create("i", IntType::create(32)));
+	Variable* varI(Variable::create("i", IntType::create(32)));
 	testFunc->addLocalVar(varI);
-	ShPtr<BreakStmt> breakIf(BreakStmt::create());
-	ShPtr<Expression> ifCond(EqOpExpr::create(varTmp, ConstInt::create(100, 32)));
-	ShPtr<IfStmt> ifStmt(IfStmt::create(ifCond, breakIf));
-	ShPtr<AssignStmt> assignITmp1(AssignStmt::create(varI,
+	BreakStmt* breakIf(BreakStmt::create());
+	Expression* ifCond(EqOpExpr::create(varTmp, ConstInt::create(100, 32)));
+	IfStmt* ifStmt(IfStmt::create(ifCond, breakIf));
+	AssignStmt* assignITmp1(AssignStmt::create(varI,
 		AddOpExpr::create(varTmp, ConstInt::create(1, 32)), ifStmt));
-	ShPtr<AssignStmt> assignTmpI(AssignStmt::create(varTmp, varI, assignITmp1));
-	ShPtr<WhileLoopStmt> whileLoop(WhileLoopStmt::create(
+	AssignStmt* assignTmpI(AssignStmt::create(varTmp, varI, assignITmp1));
+	WhileLoopStmt* whileLoop(WhileLoopStmt::create(
 		ConstBool::create(true), assignTmpI));
-	ShPtr<AssignStmt> assignI1(AssignStmt::create(varI, ConstInt::create(1, 32), whileLoop));
-	ShPtr<VarDefStmt> varDefI(VarDefStmt::create(varI, ShPtr<Expression>(), assignI1));
-	ShPtr<VarDefStmt> varDefTmp(VarDefStmt::create(varTmp, ShPtr<Expression>(), varDefI));
+	AssignStmt* assignI1(AssignStmt::create(varI, ConstInt::create(1, 32), whileLoop));
+	VarDefStmt* varDefI(VarDefStmt::create(varI, Expression*(), assignI1));
+	VarDefStmt* varDefTmp(VarDefStmt::create(varTmp, Expression*(), varDefI));
 	testFunc->setBody(varDefTmp);
 
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
@@ -192,17 +192,17 @@ OptimizeCase2Simplest) {
 		"expected `" << varDefI << "`, got `" << testFunc->getBody() << "`";
 	EXPECT_EQ(ifStmt, whileLoop->getBody()) <<
 		"expected `" << ifStmt << "`, got `" << whileLoop->getBody() << "`";
-	ShPtr<AssignStmt> afterIfStmt(cast<AssignStmt>(ifStmt->getSuccessor()));
+	AssignStmt* afterIfStmt(cast<AssignStmt>(ifStmt->getSuccessor()));
 	ASSERT_TRUE(afterIfStmt) <<
 		"expected a successor of `" << ifStmt << "`";
 	EXPECT_EQ(varI, afterIfStmt->getLhs()) <<
 		"expected `" << varI << "`, got `" << afterIfStmt->getLhs() << "`";
-	ShPtr<AddOpExpr> afterIfStmtRhs(cast<AddOpExpr>(afterIfStmt->getRhs()));
+	AddOpExpr* afterIfStmtRhs(cast<AddOpExpr>(afterIfStmt->getRhs()));
 	ASSERT_TRUE(afterIfStmtRhs) <<
 		"expected `" << afterIfStmtRhs << "`, got `" << afterIfStmt->getRhs() << "`";
 	EXPECT_EQ(varI, afterIfStmtRhs->getFirstOperand()) <<
 		"expected `" << varI << "`, got `" << afterIfStmtRhs->getFirstOperand() << "`";
-	ShPtr<EqOpExpr> newIfCond(cast<EqOpExpr>(ifStmt->getFirstIfCond()));
+	EqOpExpr* newIfCond(cast<EqOpExpr>(ifStmt->getFirstIfCond()));
 	ASSERT_TRUE(newIfCond) <<
 		"expected `" << newIfCond << "`, got `" << ifStmt->getFirstIfCond() << "`";
 	EXPECT_EQ(varI, newIfCond->getFirstOperand()) <<
@@ -235,18 +235,18 @@ OptimizeCase3Simplest) {
 	//     while (true) { }
 	// }
 	//
-	ShPtr<Variable> varX(Variable::create("x", IntType::create(32)));
+	Variable* varX(Variable::create("x", IntType::create(32)));
 	testFunc->addLocalVar(varX);
-	ShPtr<Variable> varI(Variable::create("i", IntType::create(32)));
+	Variable* varI(Variable::create("i", IntType::create(32)));
 	testFunc->addLocalVar(varI);
-	ShPtr<WhileLoopStmt> whileLoop(WhileLoopStmt::create(
+	WhileLoopStmt* whileLoop(WhileLoopStmt::create(
 		ConstBool::create(true), EmptyStmt::create()));
-	ShPtr<BinaryOpExpr> ifCond(GtEqOpExpr::create(varI, varX));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create());
-	ShPtr<IfStmt> ifStmt(IfStmt::create(ifCond, returnStmt, whileLoop));
-	ShPtr<AssignStmt> assignI0(AssignStmt::create(varI, ConstInt::create(0, 32), ifStmt));
-	ShPtr<VarDefStmt> varDefI(VarDefStmt::create(varI, ShPtr<Expression>(), assignI0));
-	ShPtr<VarDefStmt> varDefX(VarDefStmt::create(varX, ShPtr<Expression>(), varDefI));
+	BinaryOpExpr* ifCond(GtEqOpExpr::create(varI, varX));
+	ReturnStmt* returnStmt(ReturnStmt::create());
+	IfStmt* ifStmt(IfStmt::create(ifCond, returnStmt, whileLoop));
+	AssignStmt* assignI0(AssignStmt::create(varI, ConstInt::create(0, 32), ifStmt));
+	VarDefStmt* varDefI(VarDefStmt::create(varI, Expression*(), assignI0));
+	VarDefStmt* varDefX(VarDefStmt::create(varX, Expression*(), varDefI));
 	testFunc->setBody(varDefX);
 
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
@@ -295,22 +295,22 @@ OptimizeCase4Simplest) {
 	//     }
 	// }
 	//
-	ShPtr<Variable> varTmp(Variable::create("tmp", IntType::create(32)));
+	Variable* varTmp(Variable::create("tmp", IntType::create(32)));
 	testFunc->addLocalVar(varTmp);
-	ShPtr<Variable> varI(Variable::create("i", IntType::create(32)));
+	Variable* varI(Variable::create("i", IntType::create(32)));
 	testFunc->addLocalVar(varI);
-	ShPtr<AssignStmt> assignII1(AssignStmt::create(varI,
+	AssignStmt* assignII1(AssignStmt::create(varI,
 		AddOpExpr::create(varI, ConstInt::create(1, 32))));
-	ShPtr<BreakStmt> breakIf(BreakStmt::create());
-	ShPtr<GtEqOpExpr> ifCond(GtEqOpExpr::create(varI, varTmp));
-	ShPtr<IfStmt> ifStmt(IfStmt::create(ifCond, breakIf, assignII1));
-	ShPtr<CallExpr> callExpr(CallExpr::create(testFunc->getAsVar()));
-	ShPtr<AssignStmt> assignTmpTest(AssignStmt::create(varTmp, callExpr, ifStmt));
-	ShPtr<WhileLoopStmt> whileLoop(WhileLoopStmt::create(
+	BreakStmt* breakIf(BreakStmt::create());
+	GtEqOpExpr* ifCond(GtEqOpExpr::create(varI, varTmp));
+	IfStmt* ifStmt(IfStmt::create(ifCond, breakIf, assignII1));
+	CallExpr* callExpr(CallExpr::create(testFunc->getAsVar()));
+	AssignStmt* assignTmpTest(AssignStmt::create(varTmp, callExpr, ifStmt));
+	WhileLoopStmt* whileLoop(WhileLoopStmt::create(
 		ConstBool::create(true), assignTmpTest));
-	ShPtr<AssignStmt> assignI1(AssignStmt::create(varI, ConstInt::create(1, 32), whileLoop));
-	ShPtr<VarDefStmt> varDefI(VarDefStmt::create(varI, ShPtr<Expression>(), whileLoop));
-	ShPtr<VarDefStmt> varDefTmp(VarDefStmt::create(varTmp, ShPtr<Expression>(), varDefI));
+	AssignStmt* assignI1(AssignStmt::create(varI, ConstInt::create(1, 32), whileLoop));
+	VarDefStmt* varDefI(VarDefStmt::create(varI, Expression*(), whileLoop));
+	VarDefStmt* varDefTmp(VarDefStmt::create(varTmp, Expression*(), varDefI));
 	testFunc->setBody(varDefTmp);
 
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
@@ -355,17 +355,17 @@ OptimizeCase5Simplest) {
 	//     }
 	// }
 	//
-	ShPtr<Variable> varI(Variable::create("i", IntType::create(32)));
+	Variable* varI(Variable::create("i", IntType::create(32)));
 	testFunc->addLocalVar(varI);
-	ShPtr<BreakStmt> breakIf(BreakStmt::create());
-	ShPtr<BinaryOpExpr> ifCond(EqOpExpr::create(varI, ConstInt::create(100, 32)));
-	ShPtr<IfStmt> ifStmt(IfStmt::create(ifCond, breakIf));
-	ShPtr<AssignStmt> assignII1(AssignStmt::create(varI,
+	BreakStmt* breakIf(BreakStmt::create());
+	BinaryOpExpr* ifCond(EqOpExpr::create(varI, ConstInt::create(100, 32)));
+	IfStmt* ifStmt(IfStmt::create(ifCond, breakIf));
+	AssignStmt* assignII1(AssignStmt::create(varI,
 		AddOpExpr::create(varI, ConstInt::create(1, 32)), ifStmt));
-	ShPtr<WhileLoopStmt> whileLoop(WhileLoopStmt::create(
+	WhileLoopStmt* whileLoop(WhileLoopStmt::create(
 		ConstBool::create(true), assignII1));
-	ShPtr<AssignStmt> assignI1(AssignStmt::create(varI, ConstInt::create(1, 32), whileLoop));
-	ShPtr<VarDefStmt> varDefI(VarDefStmt::create(varI, ShPtr<Expression>(), assignI1));
+	AssignStmt* assignI1(AssignStmt::create(varI, ConstInt::create(1, 32), whileLoop));
+	VarDefStmt* varDefI(VarDefStmt::create(varI, Expression*(), assignI1));
 	testFunc->setBody(varDefI);
 
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);

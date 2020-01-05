@@ -16,12 +16,12 @@ namespace llvmir2hll {
 *
 * See create() for more information.
 */
-BitCastExpr::BitCastExpr(ShPtr<Expression> op, ShPtr<Type> dstType):
+BitCastExpr::BitCastExpr(Expression* op, Type* dstType):
 	CastExpr(op, dstType) {}
 
-bool BitCastExpr::isEqualTo(ShPtr<Value> otherValue) const {
+bool BitCastExpr::isEqualTo(Value* otherValue) const {
 	// Both types and values of all operands have to be equal.
-	if (ShPtr<BitCastExpr> otherCastExpr = cast<BitCastExpr>(otherValue)) {
+	if (BitCastExpr* otherCastExpr = cast<BitCastExpr>(otherValue)) {
 		return dstType->isEqualTo(otherCastExpr->getType()) &&
 			op->isEqualTo(otherCastExpr->getOperand());
 	}
@@ -31,8 +31,8 @@ bool BitCastExpr::isEqualTo(ShPtr<Value> otherValue) const {
 /**
 * @brief Clones the cast operator.
 */
-ShPtr<Value> BitCastExpr::clone() {
-	ShPtr<BitCastExpr> BitCastExpr(BitCastExpr::create(
+Value* BitCastExpr::clone() {
+	BitCastExpr* BitCastExpr(BitCastExpr::create(
 		ucast<Expression>(op->clone()), dstType));
 	BitCastExpr->setMetadata(getMetadata());
 	return BitCastExpr;
@@ -47,14 +47,14 @@ ShPtr<Value> BitCastExpr::clone() {
 * @par Preconditions
 *  - both operands are non-null
 */
-ShPtr<BitCastExpr> BitCastExpr::create(ShPtr<Expression> op,
-		ShPtr<Type> dstType) {
+BitCastExpr* BitCastExpr::create(Expression* op,
+		Type* dstType) {
 	PRECONDITION_NON_NULL(op);
 	PRECONDITION_NON_NULL(dstType);
 
-	ShPtr<BitCastExpr> expr(new BitCastExpr(op, dstType));
+	BitCastExpr* expr(new BitCastExpr(op, dstType));
 
-	// Initialization (recall that shared_from_this() cannot be called in a
+	// Initialization (recall that this cannot be called in a
 	// constructor).
 	op->addObserver(expr);
 
@@ -62,7 +62,7 @@ ShPtr<BitCastExpr> BitCastExpr::create(ShPtr<Expression> op,
 }
 
 void BitCastExpr::accept(Visitor *v) {
-	v->visit(ucast<BitCastExpr>(shared_from_this()));
+	v->visit(ucast<BitCastExpr>(this));
 }
 
 } // namespace llvmir2hll

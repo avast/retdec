@@ -52,58 +52,58 @@ class VarNameGen;
 */
 class ReadableVarRenamer: public VarRenamer {
 public:
-	static ShPtr<VarRenamer> create(ShPtr<VarNameGen> varNameGen,
+	static VarRenamer* create(VarNameGen* varNameGen,
 		bool useDebugNames = true);
 
 	virtual std::string getId() const override;
 
 private:
-	virtual void renameGlobalVar(ShPtr<Variable> var) override;
-	virtual void renameVarsInFunc(ShPtr<Function> func) override;
-	virtual void renameFuncParam(ShPtr<Variable> var,
-		ShPtr<Function> func) override;
-	virtual void renameFuncLocalVar(ShPtr<Variable> var,
-		ShPtr<Function> func) override;
+	virtual void renameGlobalVar(Variable* var) override;
+	virtual void renameVarsInFunc(Function* func) override;
+	virtual void renameFuncParam(Variable* var,
+		Function* func) override;
+	virtual void renameFuncLocalVar(Variable* var,
+		Function* func) override;
 
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<ForLoopStmt> stmt) override;
-	virtual void visit(ShPtr<ReturnStmt> stmt) override;
-	virtual void visit(ShPtr<AssignStmt> stmt) override;
-	virtual void visit(ShPtr<VarDefStmt> stmt) override;
-	virtual void visit(ShPtr<CallExpr> expr) override;
-	virtual void visit(ShPtr<Variable> var) override;
+	virtual void visit(ForLoopStmt* stmt) override;
+	virtual void visit(ReturnStmt* stmt) override;
+	virtual void visit(AssignStmt* stmt) override;
+	virtual void visit(VarDefStmt* stmt) override;
+	virtual void visit(CallExpr* expr) override;
+	virtual void visit(Variable* var) override;
 	/// @}
 
-	void visitSubsequentStmts(ShPtr<Statement> stmt);
-	void visitFuncBody(ShPtr<Function> func);
-	void renameMainParams(ShPtr<Function> func);
-	void renameInductionVars(ShPtr<Function> func);
-	void renameInductionVar(ShPtr<Variable> var, ShPtr<Function> func);
-	void renameReturnedVars(ShPtr<Function> func);
-	void renameResultsOfWellKnownFuncs(ShPtr<Function> func);
-	void renameArgsOfWellKnownFuncs(ShPtr<Function> func);
-	void renameOtherLocalVars(ShPtr<Function> func);
-	void renameVarByChoosingNameFromList(ShPtr<Variable> var,
-		ShPtr<Function> func, const char **names, std::size_t numOfAvailNames);
-	void tryRenameVarStoringCallResult(ShPtr<Statement> stmt);
-	void tryRenameVarsPassedAsArgsToFuncCall(ShPtr<CallExpr> expr);
-	void tryRenameVarPassedAsArgToFuncCall(ShPtr<Function> calledFunc,
-		ShPtr<Variable> var, unsigned argPos);
-	ShPtr<Function> getDeclaredFunc(ShPtr<CallExpr> expr) const;
-	ShPtr<Variable> getVarFromCallArg(ShPtr<Expression> arg) const;
-	std::string genNameForFuncParam(ShPtr<Variable> var,
-		ShPtr<Function> func) const;
+	void visitSubsequentStmts(Statement* stmt);
+	void visitFuncBody(Function* func);
+	void renameMainParams(Function* func);
+	void renameInductionVars(Function* func);
+	void renameInductionVar(Variable* var, Function* func);
+	void renameReturnedVars(Function* func);
+	void renameResultsOfWellKnownFuncs(Function* func);
+	void renameArgsOfWellKnownFuncs(Function* func);
+	void renameOtherLocalVars(Function* func);
+	void renameVarByChoosingNameFromList(Variable* var,
+		Function* func, const char **names, std::size_t numOfAvailNames);
+	void tryRenameVarStoringCallResult(Statement* stmt);
+	void tryRenameVarsPassedAsArgsToFuncCall(CallExpr* expr);
+	void tryRenameVarPassedAsArgToFuncCall(Function* calledFunc,
+		Variable* var, unsigned argPos);
+	Function* getDeclaredFunc(CallExpr* expr) const;
+	Variable* getVarFromCallArg(Expression* arg) const;
+	std::string genNameForFuncParam(Variable* var,
+		Function* func) const;
 
-	ReadableVarRenamer(ShPtr<VarNameGen> varNameGen, bool useDebugNames);
+	ReadableVarRenamer(VarNameGen* varNameGen, bool useDebugNames);
 
 private:
 	/// Generator of names for global variables.
-	UPtr<VarNameGen> globalVarNameGen;
+	VarNameGen* globalVarNameGen = nullptr;
 
 	/// Generator of names for local variables.
-	UPtr<VarNameGen> localVarNameGen;
+	VarNameGen* localVarNameGen = nullptr;
 
 	/// Names of induction variables in the current function.
 	/// Available only after renameInductionVars() is run.

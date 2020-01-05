@@ -33,14 +33,14 @@ namespace llvmir2hll {
 * @par Preconditions
 *  - @a module and @a va are non-null
 */
-BitOpToLogOpOptimizer::BitOpToLogOpOptimizer(ShPtr<Module> module,
-		ShPtr<ValueAnalysis> va): FuncOptimizer(module), va(va),
+BitOpToLogOpOptimizer::BitOpToLogOpOptimizer(Module* module,
+		ValueAnalysis* va): FuncOptimizer(module), va(va),
 		isCondition(false) {
 	PRECONDITION_NON_NULL(module);
 	PRECONDITION_NON_NULL(va);
 }
 
-void BitOpToLogOpOptimizer::visit(ShPtr<IfStmt> stmt) {
+void BitOpToLogOpOptimizer::visit(IfStmt* stmt) {
 	// First of all, visit nested and subsequent statements.
 	FuncOptimizer::visit(stmt);
 
@@ -52,7 +52,7 @@ void BitOpToLogOpOptimizer::visit(ShPtr<IfStmt> stmt) {
 	}
 }
 
-void BitOpToLogOpOptimizer::visit(ShPtr<SwitchStmt> stmt) {
+void BitOpToLogOpOptimizer::visit(SwitchStmt* stmt) {
 	// First of all, visit nested and subsequent statements.
 	FuncOptimizer::visit(stmt);
 
@@ -60,7 +60,7 @@ void BitOpToLogOpOptimizer::visit(ShPtr<SwitchStmt> stmt) {
 	tryOptimizeCond(stmt->getControlExpr());
 }
 
-void BitOpToLogOpOptimizer::visit(ShPtr<WhileLoopStmt> stmt) {
+void BitOpToLogOpOptimizer::visit(WhileLoopStmt* stmt) {
 	// First of all, visit nested and subsequent statements.
 	FuncOptimizer::visit(stmt);
 
@@ -68,7 +68,7 @@ void BitOpToLogOpOptimizer::visit(ShPtr<WhileLoopStmt> stmt) {
 	tryOptimizeCond(stmt->getCondition());
 }
 
-void BitOpToLogOpOptimizer::visit(ShPtr<BitAndOpExpr> expr) {
+void BitOpToLogOpOptimizer::visit(BitAndOpExpr* expr) {
 	// BitAnd which is not in condition.
 	if (!isCondition) {
 		return;
@@ -80,9 +80,9 @@ void BitOpToLogOpOptimizer::visit(ShPtr<BitAndOpExpr> expr) {
 	// if (a & b) { printf("something"); }
 	// because in this case, condition result is false. But if we optimize
 	// condition to if (a and b), in this case condition result is true.
-	ShPtr<IntType> exprFirstOpTypeInt(
+	IntType* exprFirstOpTypeInt(
 		cast<IntType>(expr->getFirstOperand()->getType()));
-	ShPtr<IntType> exprSecOpTypeInt(
+	IntType* exprSecOpTypeInt(
 		cast<IntType>(expr->getSecondOperand()->getType()));
 	if (!exprFirstOpTypeInt || !exprFirstOpTypeInt->isBool()) {
 		return;
@@ -94,7 +94,7 @@ void BitOpToLogOpOptimizer::visit(ShPtr<BitAndOpExpr> expr) {
 	// Can be optimized?
 	if (canBeBitOrBitAndOptimized(expr->getSecondOperand())) {
 		// Optimize to AndOpExpr.
-		ShPtr<AndOpExpr> andOpExpr(AndOpExpr::create(
+		AndOpExpr* andOpExpr(AndOpExpr::create(
 			expr->getFirstOperand(),
 			expr->getSecondOperand()
 		));
@@ -102,7 +102,7 @@ void BitOpToLogOpOptimizer::visit(ShPtr<BitAndOpExpr> expr) {
 	}
 }
 
-void BitOpToLogOpOptimizer::visit(ShPtr<BitOrOpExpr> expr) {
+void BitOpToLogOpOptimizer::visit(BitOrOpExpr* expr) {
 	// BitAnd which is not in condition.
 	if (!isCondition) {
 		return;
@@ -111,7 +111,7 @@ void BitOpToLogOpOptimizer::visit(ShPtr<BitOrOpExpr> expr) {
 	// Can be optimized?
 	if (canBeBitOrBitAndOptimized(expr->getSecondOperand())) {
 		// Optimize to OrOpExpr.
-		ShPtr<OrOpExpr> orOpExpr(OrOpExpr::create(
+		OrOpExpr* orOpExpr(OrOpExpr::create(
 			expr->getFirstOperand(),
 			expr->getSecondOperand()
 		));
@@ -119,7 +119,7 @@ void BitOpToLogOpOptimizer::visit(ShPtr<BitOrOpExpr> expr) {
 	}
 }
 
-void BitOpToLogOpOptimizer::visit(ShPtr<DivOpExpr> expr) {
+void BitOpToLogOpOptimizer::visit(DivOpExpr* expr) {
 	// BitAnd which is not in condition.
 	if (!isCondition) {
 		return;
@@ -130,7 +130,7 @@ void BitOpToLogOpOptimizer::visit(ShPtr<DivOpExpr> expr) {
 	}
 }
 
-void BitOpToLogOpOptimizer::visit(ShPtr<ModOpExpr> expr) {
+void BitOpToLogOpOptimizer::visit(ModOpExpr* expr) {
 	// BitAnd which is not in condition.
 	if (!isCondition) {
 		return;
@@ -141,7 +141,7 @@ void BitOpToLogOpOptimizer::visit(ShPtr<ModOpExpr> expr) {
 	}
 }
 
-void BitOpToLogOpOptimizer::visit(ShPtr<MulOpExpr> expr) {
+void BitOpToLogOpOptimizer::visit(MulOpExpr* expr) {
 	// BitAnd which is not in condition.
 	if (!isCondition) {
 		return;
@@ -160,8 +160,8 @@ void BitOpToLogOpOptimizer::visit(ShPtr<MulOpExpr> expr) {
 *
 * @return @c true if @a expr can be optimized, otherwise @c false.
 */
-bool BitOpToLogOpOptimizer::canBeBitOrBitAndOptimized(ShPtr<Expression> expr) {
-	ShPtr<ValueData> exprData(va->getValueData(expr));
+bool BitOpToLogOpOptimizer::canBeBitOrBitAndOptimized(Expression* expr) {
+	ValueData* exprData(va->getValueData(expr));
 
 	if (exprData->hasCalls() || exprData->hasArrayAccesses() ||
 			exprData->hasDerefs()) {
@@ -186,10 +186,10 @@ bool BitOpToLogOpOptimizer::canBeBitOrBitAndOptimized(ShPtr<Expression> expr) {
 * @return @c true if @a divOpExpr can cause problems in optimizations,
 *         otherwise @c false.
 */
-bool BitOpToLogOpOptimizer::isPotentionalDivProblem(ShPtr<DivOpExpr> divOpExpr) {
-	ShPtr<ConstInt> firstOpConstInt(cast<ConstInt>(divOpExpr->getFirstOperand()));
-	ShPtr<ConstFloat> secOpConstFloat(cast<ConstFloat>(divOpExpr->getFirstOperand()));
-	ShPtr<ConstInt> secOpConstInt(cast<ConstInt>(divOpExpr->getSecondOperand()));
+bool BitOpToLogOpOptimizer::isPotentionalDivProblem(DivOpExpr* divOpExpr) {
+	ConstInt* firstOpConstInt(cast<ConstInt>(divOpExpr->getFirstOperand()));
+	ConstFloat* secOpConstFloat(cast<ConstFloat>(divOpExpr->getFirstOperand()));
+	ConstInt* secOpConstInt(cast<ConstInt>(divOpExpr->getSecondOperand()));
 
 	if (secOpConstInt) {
 		if (secOpConstInt->isZero()) {
@@ -229,9 +229,9 @@ bool BitOpToLogOpOptimizer::isPotentionalDivProblem(ShPtr<DivOpExpr> divOpExpr) 
 * @return @c true if @a expr is not a ConstInt or ConstFloat or is a zero, otherwise
 *         @c false.
 */
-bool BitOpToLogOpOptimizer::isPotentionalModProblem(ShPtr<Expression> expr) {
-	ShPtr<ConstInt> exprConstInt(cast<ConstInt>(expr));
-	ShPtr<ConstFloat> exprConstFloat(cast<ConstFloat>(expr));
+bool BitOpToLogOpOptimizer::isPotentionalModProblem(Expression* expr) {
+	ConstInt* exprConstInt(cast<ConstInt>(expr));
+	ConstFloat* exprConstFloat(cast<ConstFloat>(expr));
 
 	if (exprConstInt) {
 		// Is expr % 0(ConstInt)?
@@ -254,11 +254,11 @@ bool BitOpToLogOpOptimizer::isPotentionalModProblem(ShPtr<Expression> expr) {
 * @return @c true if @a divOpExpr can cause problems in optimizations,
 *         otherwise @c false.
 */
-bool BitOpToLogOpOptimizer::isPotentionalMulProblem(ShPtr<MulOpExpr> mulOpExpr) {
-	ShPtr<ConstInt> firstOpConstInt(cast<ConstInt>(mulOpExpr->getFirstOperand()));
-	ShPtr<ConstInt> secOpConstInt(cast<ConstInt>(mulOpExpr->getSecondOperand()));
-	ShPtr<ConstFloat> firstOpConstFloat(cast<ConstFloat>(mulOpExpr->getFirstOperand()));
-	ShPtr<ConstFloat> secOpConstFloat(cast<ConstFloat>(mulOpExpr->getSecondOperand()));
+bool BitOpToLogOpOptimizer::isPotentionalMulProblem(MulOpExpr* mulOpExpr) {
+	ConstInt* firstOpConstInt(cast<ConstInt>(mulOpExpr->getFirstOperand()));
+	ConstInt* secOpConstInt(cast<ConstInt>(mulOpExpr->getSecondOperand()));
+	ConstFloat* firstOpConstFloat(cast<ConstFloat>(mulOpExpr->getFirstOperand()));
+	ConstFloat* secOpConstFloat(cast<ConstFloat>(mulOpExpr->getSecondOperand()));
 
 	// The only one problem with multiplication is when one operand is -1 and
 	// the second one operand is an IntType. For example, we can have expression
@@ -304,7 +304,7 @@ bool BitOpToLogOpOptimizer::isPotentionalMulProblem(ShPtr<MulOpExpr> mulOpExpr) 
 /**
 * @brief This function try optimize on conditions.
 */
-void BitOpToLogOpOptimizer::tryOptimizeCond(ShPtr<Expression> expr) {
+void BitOpToLogOpOptimizer::tryOptimizeCond(Expression* expr) {
 	isCondition = true;
 	expr->accept(this);
 	isCondition = false;

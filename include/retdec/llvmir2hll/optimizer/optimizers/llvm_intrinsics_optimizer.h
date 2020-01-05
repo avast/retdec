@@ -31,20 +31,20 @@ namespace llvmir2hll {
 */
 class LLVMIntrinsicsOptimizer final: public FuncOptimizer {
 public:
-	LLVMIntrinsicsOptimizer(ShPtr<Module> module);
+	LLVMIntrinsicsOptimizer(Module* module);
 
 	virtual std::string getId() const override { return "LLVMIntrinsics"; }
 
 private:
 	virtual void doOptimization() override;
 
-	ShPtr<Function> getCalledFunc(ShPtr<CallExpr> expr) const;
+	Function* getCalledFunc(CallExpr* expr) const;
 
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<CallExpr> expr) override;
-	virtual void visit(ShPtr<CallStmt> stmt) override;
+	virtual void visit(CallExpr* expr) override;
+	virtual void visit(CallStmt* stmt) override;
 	/// @}
 
 private:

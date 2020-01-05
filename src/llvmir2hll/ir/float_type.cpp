@@ -19,13 +19,13 @@ namespace llvmir2hll {
 FloatType::FloatType(unsigned size):
 	Type(), size(size) {}
 
-ShPtr<Value> FloatType::clone() {
+Value* FloatType::clone() {
 	return FloatType::create(size);
 }
 
-bool FloatType::isEqualTo(ShPtr<Value> otherValue) const {
+bool FloatType::isEqualTo(Value* otherValue) const {
 	// Both types and sizes have to be equal.
-	if (ShPtr<FloatType> otherFloatType = cast<FloatType>(otherValue)) {
+	if (FloatType* otherFloatType = cast<FloatType>(otherValue)) {
 		return size == otherFloatType->size;
 	}
 	return false;
@@ -66,7 +66,7 @@ bool FloatType::existsFloatType() const {
 *
 * @param[in] size Number of bits.
 */
-ShPtr<FloatType> FloatType::create(unsigned size) {
+FloatType* FloatType::create(unsigned size) {
 	PRECONDITION(size > 0, "invalid size " << size);
 
 	// To reduce the amount of created types, we use a set of already created
@@ -79,16 +79,16 @@ ShPtr<FloatType> FloatType::create(unsigned size) {
 
 	// Create the type and store it for later use. There is no special
 	// initialization.
-	createdTypes[size] = ShPtr<FloatType>(new FloatType(size));
+	createdTypes[size] = new FloatType(size);
 	return createdTypes[size];
 }
 
 void FloatType::accept(Visitor *v) {
-	v->visit(ucast<FloatType>(shared_from_this()));
+	v->visit(ucast<FloatType>(this));
 }
 
 // Static variables and constants definitions.
-std::map<unsigned, ShPtr<FloatType>> FloatType::createdTypes;
+std::map<unsigned, FloatType*> FloatType::createdTypes;
 
 } // namespace llvmir2hll
 } // namespace retdec

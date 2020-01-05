@@ -24,7 +24,7 @@ namespace llvmir2hll {
 * @par Preconditions
 *  - @a module is non-null
 */
-GotoStmtOptimizer::GotoStmtOptimizer(ShPtr<Module> module):
+GotoStmtOptimizer::GotoStmtOptimizer(Module* module):
 	FuncOptimizer(module) {
 		PRECONDITION_NON_NULL(module);
 	}
@@ -32,7 +32,7 @@ GotoStmtOptimizer::GotoStmtOptimizer(ShPtr<Module> module):
 /**
 * @brief Optimize goto statement.
 */
-void GotoStmtOptimizer::visit(ShPtr<GotoStmt> stmt) {
+void GotoStmtOptimizer::visit(GotoStmt* stmt) {
 	auto target = stmt->getTarget();
 
 	// goto label

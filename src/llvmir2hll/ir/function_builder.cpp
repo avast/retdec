@@ -24,7 +24,7 @@ const std::string BUILD_ALREADY_CALLED_ERROR_MSG(
 * @brief Creates a default function (see the description of FunctionBuilder()
 *        for more details).
 */
-ShPtr<Function> createDefaultFunction(const std::string &funcName) {
+Function* createDefaultFunction(const std::string &funcName) {
 	return Function::create(nullptr, VoidType::create(), funcName, VarVector());
 }
 
@@ -60,7 +60,7 @@ FunctionBuilder &FunctionBuilder::definitionWithEmptyBody() {
 *  - build() has not yet been called
 *  - @a body has to be non-null
 */
-FunctionBuilder &FunctionBuilder::definitionWithBody(ShPtr<Statement> body) {
+FunctionBuilder &FunctionBuilder::definitionWithBody(Statement* body) {
 	PRECONDITION(func, BUILD_ALREADY_CALLED_ERROR_MSG);
 	PRECONDITION_NON_NULL(body);
 
@@ -74,7 +74,7 @@ FunctionBuilder &FunctionBuilder::definitionWithBody(ShPtr<Statement> body) {
 * This function can be called at most once. It is an error to call it once
 * again after it has already been called.
 */
-ShPtr<Function> FunctionBuilder::build() {
+Function* FunctionBuilder::build() {
 	PRECONDITION(func, BUILD_ALREADY_CALLED_ERROR_MSG);
 
 	return releaseFuncAndInvalidateBuilder();
@@ -87,7 +87,7 @@ ShPtr<Function> FunctionBuilder::build() {
 *  - build() has not yet been called
 *  - @a retType has to be non-null
 */
-FunctionBuilder &FunctionBuilder::withRetType(ShPtr<Type> retType) {
+FunctionBuilder &FunctionBuilder::withRetType(Type* retType) {
 	PRECONDITION(func, BUILD_ALREADY_CALLED_ERROR_MSG);
 	PRECONDITION_NON_NULL(retType);
 
@@ -102,7 +102,7 @@ FunctionBuilder &FunctionBuilder::withRetType(ShPtr<Type> retType) {
 *  - build() has not yet been called
 *  - @a param has to be non-null
 */
-FunctionBuilder &FunctionBuilder::withParam(ShPtr<Variable> param) {
+FunctionBuilder &FunctionBuilder::withParam(Variable* param) {
 	PRECONDITION(func, BUILD_ALREADY_CALLED_ERROR_MSG);
 	PRECONDITION_NON_NULL(param);
 
@@ -117,7 +117,7 @@ FunctionBuilder &FunctionBuilder::withParam(ShPtr<Variable> param) {
 *  - build() has not yet been called
 *  - @a var has to be non-null
 */
-FunctionBuilder &FunctionBuilder::withLocalVar(ShPtr<Variable> var) {
+FunctionBuilder &FunctionBuilder::withLocalVar(Variable* var) {
 	PRECONDITION(func, BUILD_ALREADY_CALLED_ERROR_MSG);
 	PRECONDITION_NON_NULL(var);
 
@@ -141,9 +141,9 @@ FunctionBuilder &FunctionBuilder::withVarArg() {
 /**
 * @brief Releases the built function and invalidates the builder.
 */
-ShPtr<Function> FunctionBuilder::releaseFuncAndInvalidateBuilder() {
-	ShPtr<Function> funcToReturn(func);
-	func.reset();
+Function* FunctionBuilder::releaseFuncAndInvalidateBuilder() {
+	Function* funcToReturn(func);
+	func = nullptr;
 	return funcToReturn;
 }
 

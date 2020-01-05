@@ -26,7 +26,7 @@ TEST_F(IfBeforeLoopOptimizerTests,
 OptimizerHasNonEmptyID) {
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(module);
 
-	ShPtr<IfBeforeLoopOptimizer> optimizer(new IfBeforeLoopOptimizer(module, va));
+	IfBeforeLoopOptimizer* optimizer(new IfBeforeLoopOptimizer(module, va));
 
 	EXPECT_TRUE(!optimizer->getId().empty()) <<
 		"the optimizer should have a non-empty ID";

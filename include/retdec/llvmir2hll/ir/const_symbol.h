@@ -26,17 +26,17 @@ class Visitor;
 */
 class ConstSymbol final: public Constant {
 public:
-	static ShPtr<ConstSymbol> create(const std::string &name,
-		ShPtr<Constant> value);
+	static ConstSymbol* create(const std::string &name,
+		Constant* value);
 
-	virtual ShPtr<Value> clone() override;
-	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
-	virtual ShPtr<Type> getType() const override;
-	virtual void replace(ShPtr<Expression> oldExpr,
-		ShPtr<Expression> newExpr) override;
+	virtual Value* clone() override;
+	virtual bool isEqualTo(Value* otherValue) const override;
+	virtual Type* getType() const override;
+	virtual void replace(Expression* oldExpr,
+		Expression* newExpr) override;
 
 	const std::string &getName() const;
-	ShPtr<Constant> getValue() const;
+	Constant* getValue() const;
 
 	/// @name Visitor Interface
 	/// @{
@@ -48,14 +48,14 @@ private:
 	std::string name;
 
 	/// Value of the constant.
-	ShPtr<Constant> value;
+	Constant* value = nullptr;
 
 private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
-	ConstSymbol(const std::string &name, ShPtr<Constant> value);
+	ConstSymbol(const std::string &name, Constant* value);
 
-	void setValue(ShPtr<Constant> newValue);
+	void setValue(Constant* newValue);
 };
 
 } // namespace llvmir2hll

@@ -27,31 +27,31 @@ void sortByName(FuncVector &vec);
 void sortByName(VarVector &vec);
 void sortByName(VarInitPairVector &vec);
 
-ShPtr<Statement> skipEmptyStmts(ShPtr<Statement> stmts);
-ShPtr<Expression> skipCasts(ShPtr<Expression> expr);
-ShPtr<Expression> skipDerefs(ShPtr<Expression> expr);
-ShPtr<Expression> skipAddresses(ShPtr<Expression> expr);
-bool endsWithRetOrUnreach(ShPtr<Statement> stmts);
-ShPtr<Expression> getLhs(ShPtr<Statement> stmt);
-ShPtr<Expression> getRhs(ShPtr<Statement> stmt);
-StmtVector removeVarDefOrAssignStatement(ShPtr<Statement> stmt,
-	ShPtr<Function> func = nullptr);
-void replaceVarWithExprInStmt(ShPtr<Variable> var,
-	ShPtr<Expression> expr, ShPtr<Statement> stmt);
-bool isVarDefOrAssignStmt(ShPtr<Statement> stmt);
-bool isLoop(ShPtr<Statement> stmt);
-bool isInfiniteEmptyLoop(ShPtr<WhileLoopStmt> stmt);
-bool isWhileTrueLoop(ShPtr<WhileLoopStmt> stmt);
-ShPtr<Function> getCalledFunc(ShPtr<CallExpr> callExpr, ShPtr<Module> module);
-std::string getNameOfCalledFunc(ShPtr<CallExpr> callExpr, ShPtr<Module> module);
-bool isCallByPointer(ShPtr<Expression> callExpr, ShPtr<Module> module);
-ShPtr<Statement> getInnermostLoop(ShPtr<Statement> stmt);
-ShPtr<Statement> getInnermostLoopOrSwitch(ShPtr<Statement> stmt);
-bool isDefOfVar(ShPtr<Statement> stmt, ShPtr<Variable> var);
-void addLocalVarToFunc(ShPtr<Variable> var, ShPtr<Function> func,
-	ShPtr<Expression> init = nullptr);
-void convertGlobalVarToLocalVarInFunc(ShPtr<Variable> var,
-	ShPtr<Function> func, ShPtr<Expression> init = nullptr);
+Statement* skipEmptyStmts(Statement* stmts);
+Expression* skipCasts(Expression* expr);
+Expression* skipDerefs(Expression* expr);
+Expression* skipAddresses(Expression* expr);
+bool endsWithRetOrUnreach(Statement* stmts);
+Expression* getLhs(Statement* stmt);
+Expression* getRhs(Statement* stmt);
+StmtVector removeVarDefOrAssignStatement(Statement* stmt,
+	Function* func = nullptr);
+void replaceVarWithExprInStmt(Variable* var,
+	Expression* expr, Statement* stmt);
+bool isVarDefOrAssignStmt(Statement* stmt);
+bool isLoop(Statement* stmt);
+bool isInfiniteEmptyLoop(WhileLoopStmt* stmt);
+bool isWhileTrueLoop(WhileLoopStmt* stmt);
+Function* getCalledFunc(CallExpr* callExpr, Module* module);
+std::string getNameOfCalledFunc(CallExpr* callExpr, Module* module);
+bool isCallByPointer(Expression* callExpr, Module* module);
+Statement* getInnermostLoop(Statement* stmt);
+Statement* getInnermostLoopOrSwitch(Statement* stmt);
+bool isDefOfVar(Statement* stmt, Variable* var);
+void addLocalVarToFunc(Variable* var, Function* func,
+	Expression* init = nullptr);
+void convertGlobalVarToLocalVarInFunc(Variable* var,
+	Function* func, Expression* init = nullptr);
 
 /// @}
 

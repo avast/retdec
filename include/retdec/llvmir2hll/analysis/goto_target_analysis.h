@@ -31,19 +31,19 @@ class Statement;
 class GotoTargetAnalysis: private OrderedAllVisitor,
 		private retdec::utils::NonCopyable {
 public:
-	static StmtSet getGotoTargets(ShPtr<Statement> stmt);
-	static bool hasGotoTargets(ShPtr<Statement> stmt);
+	static StmtSet getGotoTargets(Statement* stmt);
+	static bool hasGotoTargets(Statement* stmt);
 
 private:
 	GotoTargetAnalysis();
 
-	void putIntoGotoTargetsIfGotoTarget(ShPtr<Statement> stmt);
+	void putIntoGotoTargetsIfGotoTarget(Statement* stmt);
 
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<GotoStmt> stmt) override;
-	virtual void visitStmt(ShPtr<Statement> stmt, bool visitSuccessors = true,
+	virtual void visit(GotoStmt* stmt) override;
+	virtual void visitStmt(Statement* stmt, bool visitSuccessors = true,
 		bool visitNestedStmts = true) override;
 	/// @}
 

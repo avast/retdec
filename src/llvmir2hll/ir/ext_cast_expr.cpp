@@ -17,13 +17,13 @@ namespace llvmir2hll {
 *
 * See create() for more information.
 */
-ExtCastExpr::ExtCastExpr(ShPtr<Expression> op, ShPtr<Type> dstType,
+ExtCastExpr::ExtCastExpr(Expression* op, Type* dstType,
 		Variant variant):
 	CastExpr(op, dstType), variant(variant) {}
 
-bool ExtCastExpr::isEqualTo(ShPtr<Value> otherValue) const {
+bool ExtCastExpr::isEqualTo(Value* otherValue) const {
 	// Both types and values of all operands have to be equal.
-	if (ShPtr<ExtCastExpr> otherCastExpr = cast<ExtCastExpr>(otherValue)) {
+	if (ExtCastExpr* otherCastExpr = cast<ExtCastExpr>(otherValue)) {
 		return dstType->isEqualTo(otherCastExpr->getType()) &&
 			op->isEqualTo(otherCastExpr->getOperand());
 	}
@@ -33,8 +33,8 @@ bool ExtCastExpr::isEqualTo(ShPtr<Value> otherValue) const {
 /**
 * @brief Clones the cast operator.
 */
-ShPtr<Value> ExtCastExpr::clone() {
-	ShPtr<ExtCastExpr> castExpr(ExtCastExpr::create(
+Value* ExtCastExpr::clone() {
+	ExtCastExpr* castExpr(ExtCastExpr::create(
 		ucast<Expression>(op->clone()), dstType));
 	castExpr->setMetadata(getMetadata());
 	return castExpr;
@@ -57,14 +57,14 @@ ExtCastExpr::Variant ExtCastExpr::getVariant() const {
 * @par Preconditions
 *  - @a op is non-null
 */
-ShPtr<ExtCastExpr> ExtCastExpr::create(ShPtr<Expression> op, ShPtr<Type> dstType,
+ExtCastExpr* ExtCastExpr::create(Expression* op, Type* dstType,
 		Variant variant) {
 	PRECONDITION_NON_NULL(op);
 	PRECONDITION_NON_NULL(dstType);
 
-	ShPtr<ExtCastExpr> expr(new ExtCastExpr(op, dstType, variant));
+	ExtCastExpr* expr(new ExtCastExpr(op, dstType, variant));
 
-	// Initialization (recall that shared_from_this() cannot be called in a
+	// Initialization (recall that this cannot be called in a
 	// constructor).
 	op->addObserver(expr);
 
@@ -72,7 +72,7 @@ ShPtr<ExtCastExpr> ExtCastExpr::create(ShPtr<Expression> op, ShPtr<Type> dstType
 }
 
 void ExtCastExpr::accept(Visitor *v) {
-	v->visit(ucast<ExtCastExpr>(shared_from_this()));
+	v->visit(ucast<ExtCastExpr>(this));
 }
 
 } // namespace llvmir2hll

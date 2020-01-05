@@ -18,8 +18,8 @@ namespace llvmir2hll {
 * See the description of isDefinedPriorToEveryAccess() for information on the
 * parameters.
 */
-VarUseCFGTraversal::VarUseCFGTraversal(ShPtr<Variable> var,
-		ShPtr<CFG> cfg, ShPtr<ValueAnalysis> va):
+VarUseCFGTraversal::VarUseCFGTraversal(Variable* var,
+		CFG* cfg, ValueAnalysis* va):
 	CFGTraversal(cfg, true), var(var), va(va) {}
 
 /**
@@ -36,26 +36,26 @@ VarUseCFGTraversal::VarUseCFGTraversal(ShPtr<Variable> var,
 *
 * This function leaves @a va in a valid state.
 */
-bool VarUseCFGTraversal::isDefinedPriorToEveryAccess(ShPtr<Variable> var,
-		ShPtr<CFG> cfg, ShPtr<ValueAnalysis> va) {
+bool VarUseCFGTraversal::isDefinedPriorToEveryAccess(Variable* var,
+		CFG* cfg, ValueAnalysis* va) {
 	PRECONDITION_NON_NULL(var);
 	PRECONDITION_NON_NULL(cfg);
 	PRECONDITION_NON_NULL(va);
 	PRECONDITION(va->isInValidState(), "it is not in a valid state");
 
-	ShPtr<VarUseCFGTraversal> traverser(new VarUseCFGTraversal(var, cfg, va));
+	VarUseCFGTraversal* traverser(new VarUseCFGTraversal(var, cfg, va));
 
 	// Obtain the first statement of the function. We have to skip the entry
 	// node because there are no statements corresponding to the VarDefStmts
 	// for function parameters.
-	ShPtr<CFG::Node> funcBodyNode((*cfg->getEntryNode()->succ_begin())->getDst());
-	ShPtr<Statement> firstStmt(*funcBodyNode->stmt_begin());
+	CFG::Node* funcBodyNode((*cfg->getEntryNode()->succ_begin())->getDst());
+	Statement* firstStmt(*funcBodyNode->stmt_begin());
 
 	return traverser->performTraversal(firstStmt);
 }
 
-bool VarUseCFGTraversal::visitStmt(ShPtr<Statement> stmt) {
-	ShPtr<ValueData> stmtData(va->getValueData(stmt));
+bool VarUseCFGTraversal::visitStmt(Statement* stmt) {
+	ValueData* stmtData(va->getValueData(stmt));
 
 	/* TODO Include the following restriction?
 	// There should not be any function calls.

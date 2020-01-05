@@ -43,11 +43,11 @@ class VariablesManager;
 */
 class LLVMIR2BIRConverter: private retdec::utils::NonCopyable {
 public:
-	static ShPtr<LLVMIR2BIRConverter> create(llvm::Pass *basePass);
+	static LLVMIR2BIRConverter* create(llvm::Pass *basePass);
 
-	ShPtr<Module> convert(llvm::Module *llvmModule,
-		const std::string &moduleName, ShPtr<Semantics> semantics,
-		ShPtr<Config> config, bool enableDebug = false);
+	Module* convert(llvm::Module *llvmModule,
+		const std::string &moduleName, Semantics* semantics,
+		Config* config, bool enableDebug = false);
 
 	/// @name Options
 	/// @{
@@ -61,8 +61,8 @@ private:
 	/// @{
 	bool isExternal(const llvm::GlobalVariable &var) const;
 	bool shouldBeConvertedAndAdded(const llvm::GlobalVariable &globVar) const;
-	ShPtr<Variable> convertGlobalVariable(llvm::GlobalVariable &globVar) const;
-	ShPtr<Expression> convertGlobalVariableInitializer(
+	Variable* convertGlobalVariable(llvm::GlobalVariable &globVar) const;
+	Expression* convertGlobalVariableInitializer(
 		llvm::GlobalVariable &globVar) const;
 	void convertAndAddGlobalVariables();
 	/// @}
@@ -70,10 +70,10 @@ private:
 	/// @name Functions conversion
 	/// @{
 	VarVector convertFuncParams(llvm::Function &func);
-	ShPtr<Function> convertFuncDeclaration(llvm::Function &func);
+	Function* convertFuncDeclaration(llvm::Function &func);
 	void updateFuncToDefinition(llvm::Function &func);
 	VarVector sortLocalVars(const VarSet &vars) const;
-	void generateVarDefinitions(ShPtr<Function> func) const;
+	void generateVarDefinitions(Function* func) const;
 	bool shouldBeConvertedAndAdded(const llvm::Function &func) const;
 	void convertAndAddFuncsDeclarations();
 	void convertFuncsBodies();
@@ -84,13 +84,13 @@ private:
 	void makeIdentifiersValid();
 	void makeGlobVarsIdentifiersValid();
 	void makeFuncsIdentifiersValid();
-	void makeFuncIdentifiersValid(ShPtr<Function> func) const;
-	void makeFuncVariablesValid(ShPtr<Function> func) const;
+	void makeFuncIdentifiersValid(Function* func) const;
+	void makeFuncVariablesValid(Function* func) const;
 	/// @}
 
 private:
 	/// Pass that have instantiated the converter.
-	llvm::Pass *basePass;
+	llvm::Pass *basePass = nullptr;
 
 	/// Use strict FPU semantics?
 	bool optionStrictFPUSemantics;
@@ -99,19 +99,19 @@ private:
 	bool enableDebug;
 
 	/// A converter from LLVM values to values in BIR.
-	ShPtr<LLVMValueConverter> converter;
+	LLVMValueConverter* converter = nullptr;
 
 	/// The input LLVM module.
-	llvm::Module *llvmModule;
+	llvm::Module *llvmModule = nullptr;
 
 	/// The resulting module in BIR.
-	ShPtr<Module> resModule;
+	Module* resModule = nullptr;
 
 	/// A converter of the LLVM function structure.
-	UPtr<StructureConverter> structConverter;
+	StructureConverter* structConverter = nullptr;
 
 	/// Variables manager.
-	ShPtr<VariablesManager> variablesManager;
+	VariablesManager* variablesManager = nullptr;
 };
 
 } // namespace llvmir2hll

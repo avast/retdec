@@ -19,7 +19,7 @@ namespace llvmir2hll {
 /**
 * @brief Constructs a new builder.
 */
-CGBuilder::CGBuilder(ShPtr<Module> module):
+CGBuilder::CGBuilder(Module* module):
 	OrderedAllVisitor(), cg(new CG(module)) {}
 
 /**
@@ -28,11 +28,11 @@ CGBuilder::CGBuilder(ShPtr<Module> module):
 * @par Preconditions
 *  - @a module is non-null
 */
-ShPtr<CG> CGBuilder::getCG(ShPtr<Module> module) {
+CG* CGBuilder::getCG(Module* module) {
 	PRECONDITION_NON_NULL(module);
 
 	// Build the CG.
-	ShPtr<CGBuilder> builder(new CGBuilder(module));
+	CGBuilder* builder(new CGBuilder(module));
 	builder->computeCG();
 	return builder->cg;
 }
@@ -54,8 +54,8 @@ void CGBuilder::computeCG() {
 *
 * @a func may be a definition or a declaration.
 */
-ShPtr<CG::CalledFuncs> CGBuilder::computeCGPartForFunction(ShPtr<Function> func) {
-	calledFuncs = ShPtr<CG::CalledFuncs>(new CG::CalledFuncs(func));
+CG::CalledFuncs* CGBuilder::computeCGPartForFunction(Function* func) {
+	calledFuncs = new CG::CalledFuncs(func);
 
 	if (func->isDeclaration()) {
 		// It is a declaration, so we're done.
@@ -68,11 +68,11 @@ ShPtr<CG::CalledFuncs> CGBuilder::computeCGPartForFunction(ShPtr<Function> func)
 	return calledFuncs;
 }
 
-void CGBuilder::visit(ShPtr<CallExpr> expr) {
+void CGBuilder::visit(CallExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	// Skip any casts, which are irrelevant when looking for called functions.
-	ShPtr<Expression> callExpr(skipCasts(expr->getCalledExpr()));
+	Expression* callExpr(skipCasts(expr->getCalledExpr()));
 
 	if (isCallByPointer(callExpr, cg->module)) {
 		// There is a call by a pointer.
@@ -81,8 +81,8 @@ void CGBuilder::visit(ShPtr<CallExpr> expr) {
 	}
 
 	// Since it is not a call by a pointer, it has to be a direct call.
-	ShPtr<Variable> calledFuncVar(cast<Variable>(callExpr));
-	ShPtr<Function> calledFunc(cg->module->getFuncByName(
+	Variable* calledFuncVar(cast<Variable>(callExpr));
+	Function* calledFunc(cg->module->getFuncByName(
 		calledFuncVar->getName()));
 	ASSERT_MSG(calledFunc, "isCallByPointer() probably didn't work correctly");
 	calledFuncs->callees.insert(calledFunc);

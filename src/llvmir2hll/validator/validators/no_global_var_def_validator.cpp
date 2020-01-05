@@ -25,15 +25,15 @@ NoGlobalVarDefValidator::NoGlobalVarDefValidator(): Validator() {}
 /**
 * @brief Creates a new validator.
 */
-ShPtr<Validator> NoGlobalVarDefValidator::create() {
-	return ShPtr<NoGlobalVarDefValidator>(new NoGlobalVarDefValidator());
+Validator* NoGlobalVarDefValidator::create() {
+	return new NoGlobalVarDefValidator();
 }
 
 std::string NoGlobalVarDefValidator::getId() const {
 	return NO_GLOBAL_VAR_DEF_VALIDATOR_ID;
 }
 
-void NoGlobalVarDefValidator::visit(ShPtr<VarDefStmt> stmt) {
+void NoGlobalVarDefValidator::visit(VarDefStmt* stmt) {
 	// The left-hand side of a VarDefStmt cannot be a global variable.
 	if (module->isGlobalVar(stmt->getVar())) {
 		validationError("In ", func->getName(), "(), found a VarDefStmt `",

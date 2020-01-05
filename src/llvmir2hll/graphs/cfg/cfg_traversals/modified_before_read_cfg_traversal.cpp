@@ -19,8 +19,8 @@ namespace llvmir2hll {
 * See the description of isModifiedBeforeEveryRead() for information on the
 * parameters.
 */
-ModifiedBeforeReadCFGTraversal::ModifiedBeforeReadCFGTraversal(ShPtr<Variable> var,
-		ShPtr<CFG> cfg, ShPtr<ValueAnalysis> va, ShPtr<CallInfoObtainer> cio):
+ModifiedBeforeReadCFGTraversal::ModifiedBeforeReadCFGTraversal(Variable* var,
+		CFG* cfg, ValueAnalysis* va, CallInfoObtainer* cio):
 	// The false value passed to CFGTraversal below means that the variable was
 	// not modified when initializing the traversal.
 	CFGTraversal(cfg, false), var(var), va(va), cio(cio),
@@ -45,9 +45,9 @@ ModifiedBeforeReadCFGTraversal::ModifiedBeforeReadCFGTraversal(ShPtr<Variable> v
 *
 * If the variable is not modified at all, this function also returns @c false.
 */
-bool ModifiedBeforeReadCFGTraversal::isModifiedBeforeEveryRead(ShPtr<Variable> var,
-		ShPtr<Statement> startStmt, ShPtr<CFG> cfg, ShPtr<ValueAnalysis> va,
-		ShPtr<CallInfoObtainer> cio) {
+bool ModifiedBeforeReadCFGTraversal::isModifiedBeforeEveryRead(Variable* var,
+		Statement* startStmt, CFG* cfg, ValueAnalysis* va,
+		CallInfoObtainer* cio) {
 	PRECONDITION_NON_NULL(var);
 	PRECONDITION_NON_NULL(startStmt);
 	PRECONDITION_NON_NULL(cfg);
@@ -55,14 +55,14 @@ bool ModifiedBeforeReadCFGTraversal::isModifiedBeforeEveryRead(ShPtr<Variable> v
 	PRECONDITION(va->isInValidState(), "it is not in a valid state");
 	PRECONDITION(cio->isInitialized(), "it is not initialized");
 
-	ShPtr<ModifiedBeforeReadCFGTraversal> traverser(
+	ModifiedBeforeReadCFGTraversal* traverser(
 		new ModifiedBeforeReadCFGTraversal(var, cfg, va, cio));
 	bool wasModified(traverser->performTraversal(startStmt));
 	return wasModified && traverser->wasModifiedBeforeEveryRead;
 }
 
-bool ModifiedBeforeReadCFGTraversal::visitStmt(ShPtr<Statement> stmt) {
-	ShPtr<ValueData> stmtData(va->getValueData(stmt));
+bool ModifiedBeforeReadCFGTraversal::visitStmt(Statement* stmt) {
+	ValueData* stmtData(va->getValueData(stmt));
 
 	// If the variable is read, we are done.
 	if (stmtData->isDirRead(var) || stmtData->mayBeIndirRead(var)) {
@@ -75,7 +75,7 @@ bool ModifiedBeforeReadCFGTraversal::visitStmt(ShPtr<Statement> stmt) {
 		bool isModifiedInAllCalls(true);
 		for (auto i = stmtData->call_begin(), e = stmtData->call_end();
 				i != e; ++i) {
-			ShPtr<CallInfo> callInfo(cio->getCallInfo(*i,
+			CallInfo* callInfo(cio->getCallInfo(*i,
 				cfg->getCorrespondingFunction()));
 
 			// If the variable may be read before modifying in a

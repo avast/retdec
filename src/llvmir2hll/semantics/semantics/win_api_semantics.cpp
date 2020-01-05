@@ -28,8 +28,8 @@ WinAPISemantics::WinAPISemantics() {}
 /**
 * @brief Creates a new semantics.
 */
-ShPtr<Semantics> WinAPISemantics::create() {
-	return ShPtr<Semantics>(new WinAPISemantics());
+Semantics* WinAPISemantics::create() {
+	return new WinAPISemantics();
 }
 
 std::string WinAPISemantics::getId() const {

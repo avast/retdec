@@ -55,8 +55,8 @@ public:
 	* @par Preconditions
 	*  - @a oldExpr is non-null
 	*/
-	virtual void replace(ShPtr<Expression> oldExpr,
-		ShPtr<Expression> newExpr) = 0;
+	virtual void replace(Expression* oldExpr,
+		Expression* newExpr) = 0;
 
 	/**
 	* @brief Returns @c true if the statement is a compound statement, @c false
@@ -76,26 +76,26 @@ public:
 	* Parts of the statement are not cloned (if you want a clone, call @c
 	* clone() on the returned expression).
 	*/
-	virtual ShPtr<Expression> asExpression() const = 0;
+	virtual Expression* asExpression() const = 0;
 
 	/// @name Successor Management
 	/// @{
 	bool hasSuccessor() const;
-	ShPtr<Statement> getSuccessor() const;
-	void setSuccessor(ShPtr<Statement> newSucc);
+	Statement* getSuccessor() const;
+	void setSuccessor(Statement* newSucc);
 	void removeSuccessor();
-	void appendStatement(ShPtr<Statement> stmt);
+	void appendStatement(Statement* stmt);
 	/// @}
 
 	/// @name Predecessor Management
 	/// @{
 	bool hasPredecessors() const;
 	std::size_t getNumberOfPredecessors() const;
-	void addPredecessor(ShPtr<Statement> stmt);
-	ShPtr<Statement> getUniquePredecessor() const;
-	void removePredecessor(ShPtr<Statement> stmt);
+	void addPredecessor(Statement* stmt);
+	Statement* getUniquePredecessor() const;
+	void removePredecessor(Statement* stmt);
 	void removePredecessors(bool onlyNonGoto = false);
-	void prependStatement(ShPtr<Statement> stmt);
+	void prependStatement(Statement* stmt);
 
 	predecessor_iterator predecessor_begin() const;
 	predecessor_iterator predecessor_end() const;
@@ -107,38 +107,38 @@ public:
 	std::string getLabel() const;
 	void setLabel(const std::string &newLabel);
 	void removeLabel();
-	void transferLabelFrom(ShPtr<Statement> stmt);
-	void transferLabelTo(ShPtr<Statement> stmt);
+	void transferLabelFrom(Statement* stmt);
+	void transferLabelTo(Statement* stmt);
 	/// @}
 
-	ShPtr<Statement> getParent() const;
+	Statement* getParent() const;
 	Address getAddress() const;
 
 	/// @name Goto Targets
 	/// @{
 	bool isGotoTarget() const;
-	void redirectGotosTo(ShPtr<Statement> stmt);
+	void redirectGotosTo(Statement* stmt);
 	/// @}
 
-	static void removeStatement(ShPtr<Statement> stmt);
-	static void removeStatementButKeepDebugComment(ShPtr<Statement> stmt);
-	static bool areEqualStatements(ShPtr<Statement> stmts1, ShPtr<Statement> stmts2);
-	static bool isStatementInStatements(ShPtr<Statement> stmt,
-		ShPtr<Statement> stmts);
-	static void replaceStatement(ShPtr<Statement> oldStmt,
-		ShPtr<Statement> newStmt);
-	static void removeLastStatement(ShPtr<Statement> stmts);
-	static ShPtr<Statement> mergeStatements(
-		ShPtr<Statement> stmt1, ShPtr<Statement> stmt2);
-	static ShPtr<Statement> cloneStatements(ShPtr<Statement> stmts);
-	static ShPtr<Statement> getLastStatement(ShPtr<Statement> stmts);
+	static void removeStatement(Statement* stmt);
+	static void removeStatementButKeepDebugComment(Statement* stmt);
+	static bool areEqualStatements(Statement* stmts1, Statement* stmts2);
+	static bool isStatementInStatements(Statement* stmt,
+		Statement* stmts);
+	static void replaceStatement(Statement* oldStmt,
+		Statement* newStmt);
+	static void removeLastStatement(Statement* stmts);
+	static Statement* mergeStatements(
+		Statement* stmt1, Statement* stmt2);
+	static Statement* cloneStatements(Statement* stmts);
+	static Statement* getLastStatement(Statement* stmts);
 
 protected:
 	Statement(Address a = Address::Undefined);
 
 protected:
 	/// Successor statement.
-	ShPtr<Statement> succ;
+	Statement* succ = nullptr;
 
 	/// Predecessor statements.
 	StmtSet preds;
@@ -150,7 +150,7 @@ protected:
 	Address address;
 
 private:
-	bool targetIsCurrentStatement(ShPtr<GotoStmt> gotoStmt) const;
+	bool targetIsCurrentStatement(GotoStmt* gotoStmt) const;
 	bool containsJustGotosToCurrentStatement(const StmtSet &stmts) const;
 };
 

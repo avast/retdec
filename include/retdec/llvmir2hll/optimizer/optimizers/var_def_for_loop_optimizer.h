@@ -46,17 +46,17 @@ namespace llvmir2hll {
 */
 class VarDefForLoopOptimizer final: public FuncOptimizer {
 public:
-	VarDefForLoopOptimizer(ShPtr<Module> module);
+	VarDefForLoopOptimizer(Module* module);
 
 	virtual std::string getId() const override { return "VarDefForLoop"; }
 
 private:
-	virtual void runOnFunction(ShPtr<Function> func) override;
+	virtual void runOnFunction(Function* func) override;
 
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<ForLoopStmt> stmt) override;
+	virtual void visit(ForLoopStmt* stmt) override;
 	/// @}
 
 private:

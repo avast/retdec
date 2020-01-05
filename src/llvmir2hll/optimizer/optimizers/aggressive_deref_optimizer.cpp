@@ -24,7 +24,7 @@ namespace llvmir2hll {
 * @par Preconditions
 *  - @a module is non-null
 */
-AggressiveDerefOptimizer::AggressiveDerefOptimizer(ShPtr<Module> module):
+AggressiveDerefOptimizer::AggressiveDerefOptimizer(Module* module):
 	FuncOptimizer(module), intDerefFound(false) {
 		PRECONDITION_NON_NULL(module);
 	}
@@ -33,8 +33,8 @@ AggressiveDerefOptimizer::AggressiveDerefOptimizer(ShPtr<Module> module):
 * @brief Tries to optimize the given statement @a stmt, composed of @a lhs and
 *        @a rhs.
 */
-void AggressiveDerefOptimizer::tryToOptimizeStmt(ShPtr<Statement> stmt,
-		ShPtr<Expression> lhs, ShPtr<Expression> rhs) {
+void AggressiveDerefOptimizer::tryToOptimizeStmt(Statement* stmt,
+		Expression* lhs, Expression* rhs) {
 	intDerefFound = false;
 	lhs->accept(this);
 	if (!intDerefFound && rhs) {
@@ -45,26 +45,26 @@ void AggressiveDerefOptimizer::tryToOptimizeStmt(ShPtr<Statement> stmt,
 	}
 }
 
-void AggressiveDerefOptimizer::visit(ShPtr<DerefOpExpr> expr) {
+void AggressiveDerefOptimizer::visit(DerefOpExpr* expr) {
 	// First, visit nested expressions.
 	FuncOptimizer::visit(expr);
 
 	if (!intDerefFound) {
-		ShPtr<Expression> derefdExpr(skipCasts(expr->getOperand()));
+		Expression* derefdExpr(skipCasts(expr->getOperand()));
 		if (isa<IntType>(derefdExpr->getType())) {
 			intDerefFound = true;
 		}
 	}
 }
 
-void AggressiveDerefOptimizer::visit(ShPtr<AssignStmt> stmt) {
+void AggressiveDerefOptimizer::visit(AssignStmt* stmt) {
 	// First, visit nested/subsequent statements.
 	FuncOptimizer::visit(stmt);
 
 	tryToOptimizeStmt(stmt, stmt->getLhs(), stmt->getRhs());
 }
 
-void AggressiveDerefOptimizer::visit(ShPtr<VarDefStmt> stmt) {
+void AggressiveDerefOptimizer::visit(VarDefStmt* stmt) {
 	// First, visit nested/subsequent statements.
 	FuncOptimizer::visit(stmt);
 

@@ -44,8 +44,8 @@ WordVarNameGen::WordVarNameGen(std::string prefix):
 *
 * @param[in] prefix Prefix of all returned variable names.
 */
-UPtr<VarNameGen> WordVarNameGen::create(std::string prefix) {
-	return UPtr<VarNameGen>(new WordVarNameGen(prefix));
+VarNameGen* WordVarNameGen::create(std::string prefix) {
+	return new WordVarNameGen(prefix);
 }
 
 std::string WordVarNameGen::getId() const {

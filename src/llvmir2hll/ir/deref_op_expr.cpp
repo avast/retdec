@@ -16,18 +16,18 @@ namespace llvmir2hll {
 *
 * See create() for more information.
 */
-DerefOpExpr::DerefOpExpr(ShPtr<Expression> op):
+DerefOpExpr::DerefOpExpr(Expression* op):
 	UnaryOpExpr(op) {}
 
-bool DerefOpExpr::isEqualTo(ShPtr<Value> otherValue) const {
-	if (ShPtr<DerefOpExpr> otherValueDerefOpExpr = cast<DerefOpExpr>(otherValue)) {
+bool DerefOpExpr::isEqualTo(Value* otherValue) const {
+	if (DerefOpExpr* otherValueDerefOpExpr = cast<DerefOpExpr>(otherValue)) {
 		return op->isEqualTo(otherValueDerefOpExpr->getOperand());
 	}
 	return false;
 }
 
-ShPtr<Value> DerefOpExpr::clone() {
-	ShPtr<DerefOpExpr> derefOpExpr(DerefOpExpr::create(cast<Expression>(
+Value* DerefOpExpr::clone() {
+	DerefOpExpr* derefOpExpr(DerefOpExpr::create(cast<Expression>(
 		op->clone())));
 	derefOpExpr->setMetadata(getMetadata());
 	return derefOpExpr;
@@ -41,12 +41,12 @@ ShPtr<Value> DerefOpExpr::clone() {
 * @par Preconditions
 *  - @a op is non-null
 */
-ShPtr<DerefOpExpr> DerefOpExpr::create(ShPtr<Expression> op) {
+DerefOpExpr* DerefOpExpr::create(Expression* op) {
 	PRECONDITION_NON_NULL(op);
 
-	ShPtr<DerefOpExpr> expr(new DerefOpExpr(op));
+	DerefOpExpr* expr(new DerefOpExpr(op));
 
-	// Initialization (recall that shared_from_this() cannot be called in a
+	// Initialization (recall that this cannot be called in a
 	// constructor).
 	op->addObserver(expr);
 
@@ -54,7 +54,7 @@ ShPtr<DerefOpExpr> DerefOpExpr::create(ShPtr<Expression> op) {
 }
 
 void DerefOpExpr::accept(Visitor *v) {
-	v->visit(ucast<DerefOpExpr>(shared_from_this()));
+	v->visit(ucast<DerefOpExpr>(this));
 }
 
 } // namespace llvmir2hll

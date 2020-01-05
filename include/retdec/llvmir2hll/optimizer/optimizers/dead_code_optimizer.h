@@ -105,7 +105,7 @@ class ArithmExprEvaluator;
 */
 class DeadCodeOptimizer final: public FuncOptimizer {
 public:
-	DeadCodeOptimizer(ShPtr<Module> module, ShPtr<ArithmExprEvaluator>
+	DeadCodeOptimizer(Module* module, ArithmExprEvaluator*
 		arithmExprEvaluator);
 
 	virtual std::string getId() const override { return "DeadCode"; }
@@ -114,30 +114,30 @@ private:
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<IfStmt> stmt) override;
-	virtual void visit(ShPtr<SwitchStmt> stmt) override;
-	virtual void visit(ShPtr<ForLoopStmt> stmt) override;
-	virtual void visit(ShPtr<WhileLoopStmt> stmt) override;
+	virtual void visit(IfStmt* stmt) override;
+	virtual void visit(SwitchStmt* stmt) override;
+	virtual void visit(ForLoopStmt* stmt) override;
+	virtual void visit(WhileLoopStmt* stmt) override;
 	/// @}
 
 	SwitchStmt::clause_iterator findClauseWithCondEqualToControlExpr(
-		ShPtr<SwitchStmt> stmt, ShPtr<Constant> controlExpr);
-	IfStmt::clause_iterator findTrueClause(ShPtr<IfStmt> stmt);
-	bool hasBreakContinueReturnInAllClausesAsLastStmt(ShPtr<SwitchStmt> stmt);
-	void optimizeBecauseTrueClauseIsPresent(ShPtr<IfStmt> stmt, IfStmt::
+		SwitchStmt* stmt, Constant* controlExpr);
+	IfStmt::clause_iterator findTrueClause(IfStmt* stmt);
+	bool hasBreakContinueReturnInAllClausesAsLastStmt(SwitchStmt* stmt);
+	void optimizeBecauseTrueClauseIsPresent(IfStmt* stmt, IfStmt::
 		clause_iterator trueClause);
-	void optimizeSwitchStmt(ShPtr<SwitchStmt> stmt,
+	void optimizeSwitchStmt(SwitchStmt* stmt,
 		SwitchStmt::clause_iterator resultClause);
-	void removeFalseClausesWithoutGotoLabel(ShPtr<IfStmt> stmt);
-	void correctIfStmtDueToPresenceOfFalseClauses(ShPtr<IfStmt> stmt);
-	void tryToOptimizeForLoopStmt(ShPtr<ForLoopStmt> stmt);
-	void tryToOptimizeIfStmt(ShPtr<IfStmt> stmt);
-	void tryToOptimizeSwitchStmt(ShPtr<SwitchStmt> stmt);
-	void tryToOptimizeWhileLoopStmt(ShPtr<WhileLoopStmt> stmt);
+	void removeFalseClausesWithoutGotoLabel(IfStmt* stmt);
+	void correctIfStmtDueToPresenceOfFalseClauses(IfStmt* stmt);
+	void tryToOptimizeForLoopStmt(ForLoopStmt* stmt);
+	void tryToOptimizeIfStmt(IfStmt* stmt);
+	void tryToOptimizeSwitchStmt(SwitchStmt* stmt);
+	void tryToOptimizeWhileLoopStmt(WhileLoopStmt* stmt);
 
 private:
 	/// The used evaluator of arithmetical expressions.
-	ShPtr<ArithmExprEvaluator> arithmExprEvaluator;
+	ArithmExprEvaluator* arithmExprEvaluator = nullptr;
 };
 
 } // namespace llvmir2hll

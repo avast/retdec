@@ -28,7 +28,7 @@ class Visitor;
 class SwitchStmt final: public Statement {
 public:
 	/// `case` clause (condition and body).
-	using SwitchClause = std::pair<ShPtr<Expression>, ShPtr<Statement>>;
+	using SwitchClause = std::pair<Expression*, Statement*>;
 
 	/// A list of `case` clauses.
 	// Note to developers: We have to use std::list as the underlying container
@@ -44,30 +44,30 @@ public:
 	using clause_iterator = SwitchClauseList::const_iterator;
 
 public:
-	static ShPtr<SwitchStmt> create(ShPtr<Expression> controlExpr,
-		ShPtr<Statement> succ = nullptr,
+	static SwitchStmt* create(Expression* controlExpr,
+		Statement* succ = nullptr,
 		Address a = Address::Undefined);
 
-	virtual ShPtr<Value> clone() override;
-	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
+	virtual Value* clone() override;
+	virtual bool isEqualTo(Value* otherValue) const override;
 	virtual bool isCompound() override { return true; }
-	virtual void replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) override;
-	virtual ShPtr<Expression> asExpression() const override;
+	virtual void replace(Expression* oldExpr, Expression* newExpr) override;
+	virtual Expression* asExpression() const override;
 
 	/// @name Control Expression Accessors
 	/// @{
-	ShPtr<Expression> getControlExpr() const;
-	void setControlExpr(ShPtr<Expression> newExpr);
+	Expression* getControlExpr() const;
+	void setControlExpr(Expression* newExpr);
 	/// @}
 
 	/// @name Clause Accessors
 	/// @{
-	void addClause(ShPtr<Expression> expr, ShPtr<Statement> body);
+	void addClause(Expression* expr, Statement* body);
 	clause_iterator removeClause(clause_iterator clauseIterator);
 	bool hasDefaultClause() const;
-	ShPtr<Statement> getDefaultClauseBody() const;
-	void addDefaultClause(ShPtr<Statement> body);
-	void setDefaultClauseBody(ShPtr<Statement> body);
+	Statement* getDefaultClauseBody() const;
+	void addDefaultClause(Statement* body);
+	void setDefaultClauseBody(Statement* body);
 	void removeDefaultClause();
 
 	clause_iterator clause_begin() const;
@@ -76,7 +76,7 @@ public:
 
 	/// @name Observer Interface
 	/// @{
-	virtual void update(ShPtr<Value> subject, ShPtr<Value> arg = nullptr) override;
+	virtual void update(Value* subject, Value* arg = nullptr) override;
 	/// @}
 
 	/// @name Visitor Interface
@@ -87,7 +87,7 @@ public:
 private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
-	explicit SwitchStmt(ShPtr<Expression> controlExpr,
+	explicit SwitchStmt(Expression* controlExpr,
 		Address a = Address::Undefined);
 
 private:
@@ -95,7 +95,7 @@ private:
 	SwitchClauseList switchClauseList;
 
 	/// Control expression.
-	ShPtr<Expression> controlExpr;
+	Expression* controlExpr = nullptr;
 };
 
 } // namespace llvmir2hll

@@ -23,13 +23,13 @@ namespace llvmir2hll {
 StructType::StructType(ElementTypes elementTypes, const std::string &name):
 	Type(), elementTypes(elementTypes), name(name) {}
 
-ShPtr<Value> StructType::clone() {
+Value* StructType::clone() {
 	return StructType::create(elementTypes);
 }
 
-bool StructType::isEqualTo(ShPtr<Value> otherValue) const {
+bool StructType::isEqualTo(Value* otherValue) const {
 	// All types have to be equal.
-	if (ShPtr<StructType> otherStruct = cast<StructType>(otherValue)) {
+	if (StructType* otherStruct = cast<StructType>(otherValue)) {
 		if (elementTypes == otherStruct->elementTypes &&
 				name == otherStruct->name)
 			return true;
@@ -66,7 +66,7 @@ const StructType::ElementTypes &StructType::getElementTypes() const {
 * @par Preconditions
 *  - there is a element on index @a index
 */
-const ShPtr<Type> StructType::getTypeOfElement(ShPtr<ConstInt> index) const {
+Type* StructType::getTypeOfElement(const ConstInt* index) const {
 	std::uint64_t i = index->getValue().getZExtValue();
 	PRECONDITION(i < elementTypes.size(),
 		"there is no element on index " << i);
@@ -79,13 +79,13 @@ const ShPtr<Type> StructType::getTypeOfElement(ShPtr<ConstInt> index) const {
 * @param elementTypes Types of elements in the structure.
 * @param name Name of the structure (if any).
 */
-ShPtr<StructType> StructType::create(ElementTypes elementTypes,
+StructType* StructType::create(ElementTypes elementTypes,
 		const std::string &name) {
-	return ShPtr<StructType>(new StructType(elementTypes, name));
+	return new StructType(elementTypes, name);
 }
 
 void StructType::accept(Visitor *v) {
-	v->visit(ucast<StructType>(shared_from_this()));
+	v->visit(ucast<StructType>(this));
 }
 
 } // namespace llvmir2hll

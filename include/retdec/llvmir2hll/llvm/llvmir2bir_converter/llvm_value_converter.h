@@ -42,37 +42,37 @@ class VariablesManager;
 */
 class LLVMValueConverter final: private retdec::utils::NonCopyable {
 private:
-	LLVMValueConverter(ShPtr<Module> resModule, ShPtr<VariablesManager> varManager);
+	LLVMValueConverter(Module* resModule, VariablesManager* varManager);
 
 public:
-	static ShPtr<LLVMValueConverter> create(ShPtr<Module> resModule,
-		ShPtr<VariablesManager> varManager);
+	static LLVMValueConverter* create(Module* resModule,
+		VariablesManager* varManager);
 
 	/// @name Value conversion
 	/// @{
-	ShPtr<Expression> convertValueToDerefExpression(llvm::Value *value);
-	ShPtr<Expression> convertValueToExpression(llvm::Value *value);
-	ShPtr<Expression> convertValueToExpressionDirectly(llvm::Value *value);
-	ShPtr<Variable> convertValueToVariable(llvm::Value *value);
+	Expression* convertValueToDerefExpression(llvm::Value *value);
+	Expression* convertValueToExpression(llvm::Value *value);
+	Expression* convertValueToExpressionDirectly(llvm::Value *value);
+	Variable* convertValueToVariable(llvm::Value *value);
 	/// @}
 
 	/// @name Type conversion
 	/// @{
-	ShPtr<Type> convertType(const llvm::Type *type);
+	Type* convertType(const llvm::Type *type);
 	/// @}
 
 	/// @name Constant conversion
 	/// @{
 	bool storesStringLiteral(const llvm::GlobalVariable &globVar) const;
-	ShPtr<Expression> convertConstantToExpression(llvm::Constant *constant);
+	Expression* convertConstantToExpression(llvm::Constant *constant);
 	/// @}
 
 	/// @name Instruction conversion
 	/// @{
-	ShPtr<Expression> convertInstructionToExpression(llvm::Instruction *inst);
-	ShPtr<CallExpr> convertCallInstToCallExpr(llvm::CallInst &inst);
-	ShPtr<Expression> generateAccessToAggregateType(
-		llvm::CompositeType *type, ShPtr<Expression> base,
+	Expression* convertInstructionToExpression(llvm::Instruction *inst);
+	CallExpr* convertCallInstToCallExpr(llvm::CallInst &inst);
+	Expression* generateAccessToAggregateType(
+		llvm::CompositeType *type, Expression* base,
 		llvm::ArrayRef<unsigned> indices);
 	/// @}
 
@@ -86,22 +86,22 @@ private:
 	bool shouldBeConvertedAsConst(const llvm::Constant *constant) const;
 	bool shouldBeConvertedAsInst(const llvm::Instruction *inst) const;
 
-	ShPtr<Type> determineVariableType(llvm::Value *value);
+	Type* determineVariableType(llvm::Value *value);
 
 	/// A converter from LLVM type to type in BIR.
-	ShPtr<LLVMTypeConverter> typeConverter;
+	LLVMTypeConverter* typeConverter = nullptr;
 
 	/// A converter from LLVM instruction to expression in BIR.
-	ShPtr<LLVMInstructionConverter> instConverter;
+	LLVMInstructionConverter* instConverter = nullptr;
 
 	/// A converter from LLVM constant to constant in BIR.
-	UPtr<LLVMConstantConverter> constConverter;
+	LLVMConstantConverter* constConverter = nullptr;
 
 	/// Variables manager.
-	ShPtr<VariablesManager> variablesManager;
+	VariablesManager* variablesManager = nullptr;
 
 	/// The resulting module in BIR.
-	ShPtr<Module> resModule;
+	Module* resModule = nullptr;
 };
 
 } // namespace llvmir2hll

@@ -31,7 +31,7 @@ protected:
 	}
 
 protected:
-	ShPtr<Validator> validator;
+	Validator* validator;
 };
 
 TEST_F(NoGlobalVarDefValidatorTests,
@@ -54,10 +54,10 @@ NoErrorWhenThereIsAVariableDefiningStatementNotDefiningAGlobalVariable) {
 	// def test():
 	//     b = 1    (VarDefStmt)
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	module->addGlobalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<VarDefStmt> varDefB(VarDefStmt::create(varB, ConstInt::create(1, 16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	VarDefStmt* varDefB(VarDefStmt::create(varB, ConstInt::create(1, 16)));
 	testFunc->setBody(varDefB);
 
 	EXPECT_TRUE(validator->validate(module));
@@ -72,9 +72,9 @@ ErrorWhenThereIsAGlobalVariableDefiningStatement) {
 	// def test():
 	//     a = 1   (VarDefStmt)
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
+	Variable* varA(Variable::create("a", IntType::create(16)));
 	module->addGlobalVar(varA);
-	ShPtr<VarDefStmt> varDefA(VarDefStmt::create(varA, ConstInt::create(1, 16)));
+	VarDefStmt* varDefA(VarDefStmt::create(varA, ConstInt::create(1, 16)));
 	testFunc->setBody(varDefA);
 
 	EXPECT_FALSE(validator->validate(module));

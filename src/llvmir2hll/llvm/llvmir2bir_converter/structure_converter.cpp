@@ -70,9 +70,9 @@ const unsigned MIN_GOTO_STATEMENTS = 3;
 * purposes.
 */
 StructureConverter::StructureConverter(llvm::Pass *basePass,
-	ShPtr<LLVMValueConverter> conv, ShPtr<Module> module):
+	LLVMValueConverter* conv, Module* module):
 		basePass(basePass), loopInfo(), scalarEvolution(),
-		labelsHandler(std::make_shared<LabelsHandler>()),
+		labelsHandler(new LabelsHandler()),
 		bbConverter(conv, labelsHandler),
 		converter(conv), loopHeaders(), generatedPHINodes(),
 		reducedLoops(), reducedSwitches(), resModule(module) {}
@@ -84,7 +84,7 @@ StructureConverter::StructureConverter(llvm::Pass *basePass,
 * @par Preconditions
 *  - @a func is not a function declaration
 */
-ShPtr<Statement> StructureConverter::convertFuncBody(llvm::Function &func) {
+Statement* StructureConverter::convertFuncBody(llvm::Function &func) {
 	PRECONDITION(!func.isDeclaration(), "func cannot be a declaration");
 
 	initialiazeLLVMAnalyses(func);
@@ -127,8 +127,8 @@ ShPtr<Statement> StructureConverter::convertFuncBody(llvm::Function &func) {
 /**
  * Add goto statements created by cloning to @c targetReferences container.
  */
-void StructureConverter::fixClonedGotos(ShPtr<Statement> statement) {
-	ShPtr<Statement> stmt = statement;
+void StructureConverter::fixClonedGotos(Statement* statement) {
+	Statement* stmt = statement;
 
 	while (stmt) {
 		if (auto ifStmt = cast<IfStmt>(stmt)) {
@@ -146,7 +146,7 @@ void StructureConverter::fixClonedGotos(ShPtr<Statement> statement) {
 			fixClonedGotos(forStmt->getBody());
 		} else if (auto uforStmt = cast<UForLoopStmt>(stmt)) {
 			fixClonedGotos(uforStmt->getBody());
-		} else if (ShPtr<GotoStmt> gotostmt = cast<GotoStmt>(stmt)) {
+		} else if (GotoStmt* gotostmt = cast<GotoStmt>(stmt)) {
 			auto it = gotoTargetsToCfgNodes.find(gotostmt->getTarget());
 			if (it != gotoTargetsToCfgNodes.end()) {
 				auto it2 = targetReferences.find(it->second);
@@ -178,7 +178,7 @@ void StructureConverter::replaceGoto(CFGNodeVector &targets) {
 			// has one reference, replace goto with body of label
 			for (auto pred = targetBody->predecessor_begin();
 					pred != targetBody->predecessor_end(); ++pred) {
-				ShPtr<GotoStmt> stmt = cast<GotoStmt>(*pred);
+				GotoStmt* stmt = cast<GotoStmt>(*pred);
 				if (stmt && stmt->getTarget() == targetBody) {
 					Statement::replaceStatement(stmt, targetBody);
 					generatedNodes.insert(target);
@@ -201,18 +201,18 @@ void StructureConverter::replaceGoto(CFGNodeVector &targets) {
 			}
 			if (cnt <= MIN_GOTO_STATEMENTS) {
 				// contains just a few statements
-				ShPtr<Statement> targetBodyClone = Statement::cloneStatements(targetBody);
+				Statement* targetBodyClone = Statement::cloneStatements(targetBody);
 				if (getStatementCount(targetBodyClone) != getStatementCount(targetBody)) {
 					continue;
 				}
 
 				fixClonedGotos(targetBodyClone);
 
-				std::vector<ShPtr<Statement>> toReplace;
+				std::vector<Statement*> toReplace;
 				for (auto pred = targetBody->predecessor_begin();
 						pred != targetBody->predecessor_end(); ++pred) {
 
-					ShPtr<GotoStmt> stmt = cast<GotoStmt>(*pred);
+					GotoStmt* stmt = cast<GotoStmt>(*pred);
 					if (stmt && stmt->getTarget() == targetBody) {
 						toReplace.push_back(stmt);
 					}
@@ -237,8 +237,8 @@ void StructureConverter::replaceGoto(CFGNodeVector &targets) {
 /**
 * @brief Returns number of statements in parent statement (body of if/while etc.)
 */
-unsigned StructureConverter::getStatementCount(ShPtr<Statement> statement) {
-	ShPtr<Statement> stmt = statement;
+unsigned StructureConverter::getStatementCount(Statement* statement) {
+	Statement* stmt = statement;
 	unsigned cnt = 0;
 	while (stmt) {
 		if (auto ifStmt = cast<IfStmt>(stmt)) {
@@ -281,10 +281,10 @@ void StructureConverter::correctUndefinedLabels() {
 /**
 * @brief Replaces break/continue statements that are outside of loop with goto statements
 */
-ShPtr<Statement> StructureConverter::replaceBreakOrContinueOutsideLoop(ShPtr<Statement> statement,
+Statement* StructureConverter::replaceBreakOrContinueOutsideLoop(Statement* statement,
 		SwitchParent sp) {
 
-	ShPtr<Statement> stmt = statement;
+	Statement* stmt = statement;
 	while (stmt) {
 		// go only into IfStmt and SwitchStmt (no need to replace inside loop)
 		if (auto ifStmt = cast<IfStmt>(stmt)) {
@@ -301,7 +301,7 @@ ShPtr<Statement> StructureConverter::replaceBreakOrContinueOutsideLoop(ShPtr<Sta
 				auto it = loopTargets.find(stmt);
 				if (it != loopTargets.end()) {
 					labelsHandler->setGotoTargetLabel(it->second->getBody(), it->second->getFirstBB());
-					ShPtr<Statement> gotoStmt =
+					Statement* gotoStmt =
 						GotoStmt::create(it->second->getBody(), it->first->getAddress());
 					gotoTargetsToCfgNodes.emplace(it->second->getBody(), it->second);
 					if (isa<ContinueStmt>(stmt)) {
@@ -322,8 +322,8 @@ ShPtr<Statement> StructureConverter::replaceBreakOrContinueOutsideLoop(ShPtr<Sta
 * @brief Creates control-flow graph of the function from the given root basic
 *        block @a root.
 */
-ShPtr<CFGNode> StructureConverter::createCFG(llvm::BasicBlock &root) {
-	auto cfg = std::make_shared<CFGNode>(&root, bbConverter.convert(root));
+CFGNode* StructureConverter::createCFG(llvm::BasicBlock &root) {
+	auto cfg = new CFGNode(&root, bbConverter.convert(root));
 	CFGNodeQueue toBeVisited({cfg});
 	MapBBToCFGNode visited{
 		{&root, cfg}
@@ -335,13 +335,13 @@ ShPtr<CFGNode> StructureConverter::createCFG(llvm::BasicBlock &root) {
 		auto terminator = node->getTerm();
 		auto successorsNum = terminator->getNumSuccessors();
 		for (decltype(successorsNum) i = 0; i < successorsNum; ++i) {
-			ShPtr<CFGNode> nextNode;
+			CFGNode* nextNode;
 
 			auto succ = terminator->getSuccessor(i);
 			auto existingNodeIt = visited.find(succ);
 			if (existingNodeIt == visited.end()) {
 				auto body = bbConverter.convert(*succ);
-				nextNode = std::make_shared<CFGNode>(succ, body);
+				nextNode = new CFGNode(succ, body);
 				toBeVisited.push(nextNode);
 				visited.emplace(succ, nextNode);
 			} else {
@@ -361,7 +361,7 @@ ShPtr<CFGNode> StructureConverter::createCFG(llvm::BasicBlock &root) {
 * @par Preconditions
 *  - @a cfg is non-null
 */
-void StructureConverter::detectBackEdges(ShPtr<CFGNode> cfg) const {
+void StructureConverter::detectBackEdges(CFGNode* cfg) const {
 	PRECONDITION_NON_NULL(cfg);
 
 	CFGNodeStack toBeVisited({cfg});
@@ -397,7 +397,7 @@ void StructureConverter::detectBackEdges(ShPtr<CFGNode> cfg) const {
 * @par Preconditions
 *  - @a cfg is non-null
 */
-bool StructureConverter::reduceCFG(ShPtr<CFGNode> cfg) {
+bool StructureConverter::reduceCFG(CFGNode* cfg) {
 	PRECONDITION_NON_NULL(cfg);
 
 	return BFSTraverse(cfg, [this](const auto &node) {
@@ -414,7 +414,7 @@ bool StructureConverter::reduceCFG(ShPtr<CFGNode> cfg) {
 * @par Preconditions
 *  - @a node is non-null
 */
-bool StructureConverter::inspectCFGNode(ShPtr<CFGNode> node) {
+bool StructureConverter::inspectCFGNode(CFGNode* node) {
 	PRECONDITION_NON_NULL(node);
 
 	if (isLoopHeader(node) && !hasItem(statementsOnStack, node) &&
@@ -495,7 +495,7 @@ bool StructureConverter::inspectCFGNode(ShPtr<CFGNode> node) {
 /**
 * @brief Pop and return node from the given queue @a queue.
 */
-ShPtr<CFGNode> StructureConverter::popFromQueue(CFGNodeQueue &queue) const {
+CFGNode* StructureConverter::popFromQueue(CFGNodeQueue &queue) const {
 	PRECONDITION(!queue.empty(), "queue is empty");
 
 	auto element = queue.front();
@@ -510,7 +510,7 @@ ShPtr<CFGNode> StructureConverter::popFromQueue(CFGNodeQueue &queue) const {
 * @par Preconditions
 *  - @a node is non-null
 */
-void StructureConverter::addUnvisitedSuccessorsToQueue(const ShPtr<CFGNode> &node,
+void StructureConverter::addUnvisitedSuccessorsToQueue(CFGNode* node,
 		CFGNodeQueue &toBeVisited, CFGNode::CFGNodeSet &visited) const {
 	PRECONDITION_NON_NULL(node);
 
@@ -540,7 +540,7 @@ void StructureConverter::addUnvisitedSuccessorsToQueue(const ShPtr<CFGNode> &nod
 *  - @a node is non-null
 *  - @a loop is non-null
 */
-void StructureConverter::addUnvisitedSuccessorsToQueueInLoop(const ShPtr<CFGNode> &node,
+void StructureConverter::addUnvisitedSuccessorsToQueueInLoop(CFGNode* node,
 		CFGNodeQueue &toBeVisited, CFGNode::CFGNodeSet &visited,
 		llvm::Loop *loop) const {
 	PRECONDITION_NON_NULL(node);
@@ -567,8 +567,8 @@ void StructureConverter::addUnvisitedSuccessorsToQueueInLoop(const ShPtr<CFGNode
 * @par Preconditions
 *  - @a cfg is non-null
 */
-bool StructureConverter::BFSTraverse(ShPtr<CFGNode> cfg,
-		std::function<bool (ShPtr<CFGNode>)> inspectFunc) const {
+bool StructureConverter::BFSTraverse(CFGNode* cfg,
+		std::function<bool (CFGNode*)> inspectFunc) const {
 	PRECONDITION_NON_NULL(cfg);
 
 	bool anyTrueResult = false;
@@ -595,8 +595,8 @@ bool StructureConverter::BFSTraverse(ShPtr<CFGNode> cfg,
 * @par Preconditions
 *  - @a cfg is non-null
 */
-bool StructureConverter::BFSTraverseLoop(ShPtr<CFGNode> cfg,
-		std::function<bool (ShPtr<CFGNode>)> inspectFunc) const {
+bool StructureConverter::BFSTraverseLoop(CFGNode* cfg,
+		std::function<bool (CFGNode*)> inspectFunc) const {
 	PRECONDITION_NON_NULL(cfg);
 
 	auto loop = getLoopFor(cfg);
@@ -622,8 +622,8 @@ bool StructureConverter::BFSTraverseLoop(ShPtr<CFGNode> cfg,
 * @par Preconditions
 *  - @a cfg is non-null
 */
-ShPtr<CFGNode> StructureConverter::BFSFindFirst(ShPtr<CFGNode> cfg,
-		std::function<bool (ShPtr<CFGNode>)> pred) const {
+CFGNode* StructureConverter::BFSFindFirst(CFGNode* cfg,
+		std::function<bool (CFGNode*)> pred) const {
 	PRECONDITION_NON_NULL(cfg);
 
 	CFGNodeQueue toBeVisited({cfg});
@@ -647,8 +647,8 @@ ShPtr<CFGNode> StructureConverter::BFSFindFirst(ShPtr<CFGNode> cfg,
 * @par Preconditions
 *  - both @a node1 and @a node2 are non-null
 */
-bool StructureConverter::existsPathWithoutLoopsBetween(const ShPtr<CFGNode> &node1,
-		const ShPtr<CFGNode> &node2) const {
+bool StructureConverter::existsPathWithoutLoopsBetween(CFGNode* node1,
+		CFGNode* node2) const {
 	PRECONDITION_NON_NULL(node1);
 	PRECONDITION_NON_NULL(node2);
 
@@ -666,7 +666,7 @@ bool StructureConverter::existsPathWithoutLoopsBetween(const ShPtr<CFGNode> &nod
 * @par Preconditions
 *  - @a node is non-null
 */
-bool StructureConverter::isSequence(const ShPtr<CFGNode> &node) const {
+bool StructureConverter::isSequence(CFGNode* node) const {
 	PRECONDITION_NON_NULL(node);
 
 	return node->getSuccNum() == 1 &&
@@ -682,7 +682,7 @@ bool StructureConverter::isSequence(const ShPtr<CFGNode> &node) const {
 *  - @a node is non-null
 */
 bool StructureConverter::isSequenceWithTerminatingBranchToClone(
-		const ShPtr<CFGNode> &node) const {
+		CFGNode* node) const {
 	PRECONDITION_NON_NULL(node);
 
 	if (node->getSuccNum() != 1) {
@@ -701,7 +701,7 @@ bool StructureConverter::isSequenceWithTerminatingBranchToClone(
 * @par Preconditions
 *  - @a node is non-null
 */
-bool StructureConverter::isIfElseStatement(const ShPtr<CFGNode> &node) const {
+bool StructureConverter::isIfElseStatement(CFGNode* node) const {
 	PRECONDITION_NON_NULL(node);
 
 	return node->getSuccNum() == 2
@@ -718,7 +718,7 @@ bool StructureConverter::isIfElseStatement(const ShPtr<CFGNode> &node) const {
 *  - @a node is non-null
 *  - @a succ has value 0 or 1
 */
-bool StructureConverter::isIfStatement(const ShPtr<CFGNode> &node,
+bool StructureConverter::isIfStatement(CFGNode* node,
 		std::size_t succ) const {
 	PRECONDITION_NON_NULL(node);
 	PRECONDITION(succ == 0 || succ == 1, "succ is not 0 or 1");
@@ -739,7 +739,7 @@ bool StructureConverter::isIfStatement(const ShPtr<CFGNode> &node,
 *  - @a succ has value 0 or 1
 */
 bool StructureConverter::isIfStatementWithTerminatingBranch(
-		const ShPtr<CFGNode> &node, std::size_t succ) const {
+		CFGNode* node, std::size_t succ) const {
 	PRECONDITION_NON_NULL(node);
 	PRECONDITION(succ == 0 || succ == 1, "succ is not 0 or 1");
 
@@ -772,7 +772,7 @@ bool StructureConverter::isIfStatementWithTerminatingBranch(
 *  - @a succ has value 0 or 1
 */
 bool StructureConverter::isIfStatementWithTerminatingBranchToClone(
-		const ShPtr<CFGNode> &node, std::size_t succ) const {
+		CFGNode* node, std::size_t succ) const {
 	PRECONDITION_NON_NULL(node);
 	PRECONDITION(succ == 0 || succ == 1, "succ is not 0 or 1");
 
@@ -793,7 +793,7 @@ bool StructureConverter::isIfStatementWithTerminatingBranchToClone(
 *  - @a succ has value 0 or 1
 */
 bool StructureConverter::isIfStatementWithBreakInLoop(
-		const ShPtr<CFGNode> &node, std::size_t succ) const {
+		CFGNode* node, std::size_t succ) const {
 	PRECONDITION_NON_NULL(node);
 	PRECONDITION(succ == 0 || succ == 1, "succ is not 0 or 1");
 
@@ -826,7 +826,7 @@ bool StructureConverter::isIfStatementWithBreakInLoop(
 *  - @a succ has value 0 or 1
 */
 bool StructureConverter::isIfStatementWithBreakByGotoInLoop(
-		const ShPtr<CFGNode> &node, std::size_t succ) const {
+		CFGNode* node, std::size_t succ) const {
 	PRECONDITION_NON_NULL(node);
 	PRECONDITION(succ == 0 || succ == 1, "succ is not 0 or 1");
 
@@ -857,7 +857,7 @@ bool StructureConverter::isIfStatementWithBreakByGotoInLoop(
 *  - @a node is non-null
 *  - @a succ has value 0 or 1
 */
-bool StructureConverter::isIfElseStatementWithContinue(const ShPtr<CFGNode> &node,
+bool StructureConverter::isIfElseStatementWithContinue(CFGNode* node,
 		std::size_t succ) const {
 	PRECONDITION_NON_NULL(node);
 	PRECONDITION(succ == 0 || succ == 1, "succ is not 0 or 1");
@@ -892,7 +892,7 @@ bool StructureConverter::isIfElseStatementWithContinue(const ShPtr<CFGNode> &nod
 * @par Preconditions
 *  - @a node is non-null
 */
-bool StructureConverter::isContinueStatement(const ShPtr<CFGNode> &node) const {
+bool StructureConverter::isContinueStatement(CFGNode* node) const {
 	PRECONDITION_NON_NULL(node);
 
 	auto loop = getLoopFor(node);
@@ -924,7 +924,7 @@ bool StructureConverter::isContinueStatement(const ShPtr<CFGNode> &node) const {
 * @par Preconditions
 *  - @a node is non-null
 */
-bool StructureConverter::isForLoop(const ShPtr<CFGNode> &node) const {
+bool StructureConverter::isForLoop(CFGNode* node) const {
 	PRECONDITION_NON_NULL(node);
 
 	auto loop = getLoopFor(node);
@@ -942,7 +942,7 @@ bool StructureConverter::isForLoop(const ShPtr<CFGNode> &node) const {
 * @par Preconditions
 *  - @a node is non-null
 */
-bool StructureConverter::isWhileTrueLoop(const ShPtr<CFGNode> &node) const {
+bool StructureConverter::isWhileTrueLoop(CFGNode* node) const {
 	PRECONDITION_NON_NULL(node);
 
 	return node->getSuccNum() == 1 && node->getSucc(0) == node;
@@ -958,7 +958,7 @@ bool StructureConverter::isWhileTrueLoop(const ShPtr<CFGNode> &node) const {
 *  - @a succ has value 0 or 1
 */
 bool StructureConverter::isNestedWhileTrueLoopWithContinueInHeader(
-		const ShPtr<CFGNode> &node, std::size_t succ) const {
+		CFGNode* node, std::size_t succ) const {
 	PRECONDITION_NON_NULL(node);
 	PRECONDITION(succ == 0 || succ == 1, "succ is not 0 or 1");
 
@@ -988,7 +988,7 @@ bool StructureConverter::isNestedWhileTrueLoopWithContinueInHeader(
 * @par Preconditions
 *  - @a node is non-null
 */
-bool StructureConverter::isSwitchStatement(const ShPtr<CFGNode> &node) const {
+bool StructureConverter::isSwitchStatement(CFGNode* node) const {
 	PRECONDITION_NON_NULL(node);
 
 	auto switchInst = llvm::dyn_cast<llvm::SwitchInst>(node->getTerm());
@@ -1028,7 +1028,7 @@ bool StructureConverter::isSwitchStatement(const ShPtr<CFGNode> &node) const {
 * @par Preconditions
 *  - @a node is non-null
 */
-bool StructureConverter::canBeCloned(const ShPtr<CFGNode> &node) const {
+bool StructureConverter::canBeCloned(CFGNode* node) const {
 	PRECONDITION_NON_NULL(node);
 
 	if (node->getPredsNum() < 2) {
@@ -1056,7 +1056,7 @@ bool StructureConverter::canBeCloned(const ShPtr<CFGNode> &node) const {
 * @par Preconditions
 *  - @a node is non-null
 */
-void StructureConverter::reduceToSequence(ShPtr<CFGNode> node) {
+void StructureConverter::reduceToSequence(CFGNode* node) {
 	PRECONDITION_NON_NULL(node);
 
 	auto succ = node->getSucc(0);
@@ -1074,7 +1074,7 @@ void StructureConverter::reduceToSequence(ShPtr<CFGNode> node) {
 * @par Preconditions
 *  - @a node is non-null
 */
-void StructureConverter::reduceToSequenceClone(ShPtr<CFGNode> node) {
+void StructureConverter::reduceToSequenceClone(CFGNode* node) {
 	PRECONDITION_NON_NULL(node);
 
 	auto succ = node->getSucc(0);
@@ -1091,7 +1091,7 @@ void StructureConverter::reduceToSequenceClone(ShPtr<CFGNode> node) {
 * @par Preconditions
 *  - @a node is non-null
 */
-void StructureConverter::reduceToIfElseStatement(ShPtr<CFGNode> node) {
+void StructureConverter::reduceToIfElseStatement(CFGNode* node) {
 	PRECONDITION_NON_NULL(node);
 
 	generatedNodes.insert(node->getSucc(0));
@@ -1115,7 +1115,7 @@ void StructureConverter::reduceToIfElseStatement(ShPtr<CFGNode> node) {
 *  - @a node is non-null
 *  - @a succ has value 0 or 1
 */
-void StructureConverter::reduceToIfStatement(ShPtr<CFGNode> node,
+void StructureConverter::reduceToIfStatement(CFGNode* node,
 		std::size_t succ) {
 	PRECONDITION_NON_NULL(node);
 	PRECONDITION(succ == 0 || succ == 1, "succ is not 0 or 1");
@@ -1144,7 +1144,7 @@ void StructureConverter::reduceToIfStatement(ShPtr<CFGNode> node,
 *  - @a node is non-null
 *  - @a succ has value 0 or 1
 */
-void StructureConverter::reduceToIfStatementClone(ShPtr<CFGNode> node,
+void StructureConverter::reduceToIfStatementClone(CFGNode* node,
 		std::size_t succ) {
 	PRECONDITION_NON_NULL(node);
 	PRECONDITION(succ == 0 || succ == 1, "succ is not 0 or 1");
@@ -1173,7 +1173,7 @@ void StructureConverter::reduceToIfStatementClone(ShPtr<CFGNode> node,
 *  - @a node is non-null
 *  - @a succ has value 0 or 1
 */
-void StructureConverter::reduceToIfElseStatementWithBreakInLoop(ShPtr<CFGNode> node,
+void StructureConverter::reduceToIfElseStatementWithBreakInLoop(CFGNode* node,
 		std::size_t succ) {
 	PRECONDITION_NON_NULL(node);
 	PRECONDITION(succ == 0 || succ == 1, "succ is not 0 or 1");
@@ -1187,7 +1187,7 @@ void StructureConverter::reduceToIfElseStatementWithBreakInLoop(ShPtr<CFGNode> n
 	auto targetNode = node->getSucc(succ);
 
 	if (!canBeForLoop(loop)) {
-		ShPtr<Statement> breakStmt;
+		Statement* breakStmt;
 		if (targetNode == loopHeaders.at(loop)->getStatementSuccessor()) {
 			breakStmt = BreakStmt::create(node->getBody()->getAddress());
 			breakStmt->setMetadata("break -> " + getLabel(targetNode));
@@ -1218,7 +1218,7 @@ void StructureConverter::reduceToIfElseStatementWithBreakInLoop(ShPtr<CFGNode> n
 *  - @a node is non-null
 *  - @a succ has value 0 or 1
 */
-void StructureConverter::reduceToIfElseStatementWithBreakByGotoInLoop(ShPtr<CFGNode> node,
+void StructureConverter::reduceToIfElseStatementWithBreakByGotoInLoop(CFGNode* node,
 		std::size_t succ) {
 	PRECONDITION_NON_NULL(node);
 	PRECONDITION(succ == 0 || succ == 1, "succ is not 0 or 1");
@@ -1254,7 +1254,7 @@ void StructureConverter::reduceToIfElseStatementWithBreakByGotoInLoop(ShPtr<CFGN
 *  - @a node is non-null
 *  - @a succ has value 0 or 1
 */
-void StructureConverter::reduceToIfElseStatementWithContinue(ShPtr<CFGNode> node,
+void StructureConverter::reduceToIfElseStatementWithContinue(CFGNode* node,
 		std::size_t succ) {
 	PRECONDITION_NON_NULL(node);
 	PRECONDITION(succ == 0 || succ == 1, "succ is not 0 or 1");
@@ -1266,7 +1266,7 @@ void StructureConverter::reduceToIfElseStatementWithContinue(ShPtr<CFGNode> node
 
 	auto targetNode = node->getSucc(succ);
 
-	ShPtr<Statement> continueStmt;
+	Statement* continueStmt;
 	if (targetNode == loopHeaders.at(getLoopFor(node))) {
 		continueStmt = ContinueStmt::create(node->getBody()->getAddress());
 		continueStmt->setMetadata("continue -> " + getLabel(targetNode));
@@ -1294,12 +1294,12 @@ void StructureConverter::reduceToIfElseStatementWithContinue(ShPtr<CFGNode> node
 * @par Preconditions
 *  - @a node is non-null
 */
-void StructureConverter::reduceToContinueStatement(ShPtr<CFGNode> node) {
+void StructureConverter::reduceToContinueStatement(CFGNode* node) {
 	PRECONDITION_NON_NULL(node);
 
 	auto targetNode = node->getSucc(0);
 
-	ShPtr<Statement> continueStmt;
+	Statement* continueStmt;
 	if (targetNode == loopHeaders.at(getLoopFor(node))) {
 		continueStmt = ContinueStmt::create(node->getBody()->getAddress());
 		continueStmt->setMetadata("continue -> " + getLabel(targetNode));
@@ -1326,7 +1326,7 @@ void StructureConverter::reduceToContinueStatement(ShPtr<CFGNode> node) {
 * @par Preconditions
 *  - @a node is non-null
 */
-void StructureConverter::reduceToForLoop(ShPtr<CFGNode> node) {
+void StructureConverter::reduceToForLoop(CFGNode* node) {
 	PRECONDITION_NON_NULL(node);
 
 	auto loop = getLoopFor(node);
@@ -1361,7 +1361,7 @@ void StructureConverter::reduceToForLoop(ShPtr<CFGNode> node) {
 * @par Preconditions
 *  - @a node is non-null
 */
-void StructureConverter::reduceToWhileTrueLoop(ShPtr<CFGNode> node) {
+void StructureConverter::reduceToWhileTrueLoop(CFGNode* node) {
 	PRECONDITION_NON_NULL(node);
 
 	node->appendToBody(getAssignsToPHINodes(node, node));
@@ -1392,7 +1392,7 @@ void StructureConverter::reduceToWhileTrueLoop(ShPtr<CFGNode> node) {
 *  - @a succ has value 0 or 1
 */
 void StructureConverter::reduceToNestedWhileTrueLoopWithContinueInHeader(
-		ShPtr<CFGNode> node, std::size_t succ) {
+		CFGNode* node, std::size_t succ) {
 	PRECONDITION_NON_NULL(node);
 	PRECONDITION(succ == 0 || succ == 1, "succ is not 0 or 1");
 
@@ -1436,7 +1436,7 @@ void StructureConverter::reduceToNestedWhileTrueLoopWithContinueInHeader(
 * @par Preconditions
 *  - @a cfg is non-null
 */
-void StructureConverter::structureByGotos(ShPtr<CFGNode> cfg) {
+void StructureConverter::structureByGotos(CFGNode* cfg) {
 	PRECONDITION_NON_NULL(cfg);
 
 	CFGNodeVector flattenedCFG;
@@ -1502,8 +1502,8 @@ void StructureConverter::structureByGotos(ShPtr<CFGNode> cfg) {
 * @par Preconditions
 *  - all of @a node, @a clause and @a ifSuccessor are non-null
 */
-ShPtr<Statement> StructureConverter::getIfClauseBody(const ShPtr<CFGNode> &node,
-		const ShPtr<CFGNode> &clause, const ShPtr<CFGNode> &ifSuccessor) {
+Statement* StructureConverter::getIfClauseBody(CFGNode* node,
+		CFGNode* clause, CFGNode* ifSuccessor) {
 	PRECONDITION_NON_NULL(node);
 	PRECONDITION_NON_NULL(clause);
 	PRECONDITION_NON_NULL(ifSuccessor);
@@ -1525,8 +1525,8 @@ ShPtr<Statement> StructureConverter::getIfClauseBody(const ShPtr<CFGNode> &node,
 * @par Preconditions
 *  - all of @a node, @a clause and @a ifSuccessor are non-null
 */
-ShPtr<Statement> StructureConverter::getIfClauseBodyClone(const ShPtr<CFGNode> &node,
-		const ShPtr<CFGNode> &clause, const ShPtr<CFGNode> &ifSuccessor) {
+Statement* StructureConverter::getIfClauseBodyClone(CFGNode* node,
+		CFGNode* clause, CFGNode* ifSuccessor) {
 	PRECONDITION_NON_NULL(node);
 	PRECONDITION_NON_NULL(clause);
 	PRECONDITION_NON_NULL(ifSuccessor);
@@ -1553,9 +1553,9 @@ ShPtr<Statement> StructureConverter::getIfClauseBodyClone(const ShPtr<CFGNode> &
 * @par Preconditions
 *  - both @a cond and @a falseBody are non-null
 */
-ShPtr<IfStmt> StructureConverter::getIfStmt(const ShPtr<Expression> &cond,
-		const ShPtr<Statement> &trueBody,
-		const ShPtr<Statement> &falseBody) const {
+IfStmt* StructureConverter::getIfStmt(Expression* cond,
+		Statement* trueBody,
+		Statement* falseBody) const {
 	PRECONDITION_NON_NULL(cond);
 	PRECONDITION_NON_NULL(trueBody);
 
@@ -1587,8 +1587,8 @@ ShPtr<IfStmt> StructureConverter::getIfStmt(const ShPtr<Expression> &cond,
 * @par Preconditions
 *  - @a loopNode is non-null
 */
-ShPtr<CFGNode> StructureConverter::getLoopSuccessor(
-		const ShPtr<CFGNode> &loopNode) const {
+CFGNode* StructureConverter::getLoopSuccessor(
+		CFGNode* loopNode) const {
 	PRECONDITION_NON_NULL(loopNode);
 
 	auto loop = getLoopFor(loopNode);
@@ -1605,7 +1605,7 @@ ShPtr<CFGNode> StructureConverter::getLoopSuccessor(
 * @par Preconditions
 *  - @a loopNode is non-null
 */
-void StructureConverter::completelyReduceLoop(ShPtr<CFGNode> loopNode) {
+void StructureConverter::completelyReduceLoop(CFGNode* loopNode) {
 	PRECONDITION_NON_NULL(loopNode);
 
 	auto loop = getLoopFor(loopNode);
@@ -1630,7 +1630,7 @@ void StructureConverter::completelyReduceLoop(ShPtr<CFGNode> loopNode) {
 * @par Preconditions
 *  - @a node is non-null
 */
-void StructureConverter::reduceSwitchStatement(ShPtr<CFGNode> node) {
+void StructureConverter::reduceSwitchStatement(CFGNode* node) {
 	PRECONDITION_NON_NULL(node);
 
 	auto switchSuccessor = getSwitchSuccessor(node);
@@ -1654,8 +1654,8 @@ void StructureConverter::reduceSwitchStatement(ShPtr<CFGNode> node) {
 * @par Preconditions
 *  - @a switchNode is non-null
 */
-ShPtr<CFGNode> StructureConverter::getSwitchSuccessor(
-		const ShPtr<CFGNode> &switchNode) const {
+CFGNode* StructureConverter::getSwitchSuccessor(
+		CFGNode* switchNode) const {
 	PRECONDITION_NON_NULL(switchNode);
 
 	return BFSFindFirst(switchNode, [this, &switchNode](const auto &node) {
@@ -1670,8 +1670,8 @@ ShPtr<CFGNode> StructureConverter::getSwitchSuccessor(
 * @par Preconditions
 *  - both @a node and @a switchNode are non-null
 */
-bool StructureConverter::isNodeAfterAllSwitchClauses(const ShPtr<CFGNode> &node,
-		const ShPtr<CFGNode> &switchNode) const {
+bool StructureConverter::isNodeAfterAllSwitchClauses(CFGNode* node,
+		CFGNode* switchNode) const {
 	PRECONDITION_NON_NULL(node);
 	PRECONDITION_NON_NULL(switchNode);
 
@@ -1695,8 +1695,8 @@ bool StructureConverter::isNodeAfterAllSwitchClauses(const ShPtr<CFGNode> &node,
 * @par Preconditions
 *  - both @a node and @a clauseNode are non-null
 */
-bool StructureConverter::isNodeAfterSwitchClause(const ShPtr<CFGNode> &node,
-		const ShPtr<CFGNode> &clauseNode) const {
+bool StructureConverter::isNodeAfterSwitchClause(CFGNode* node,
+		CFGNode* clauseNode) const {
 	PRECONDITION_NON_NULL(node);
 	PRECONDITION_NON_NULL(clauseNode);
 
@@ -1721,8 +1721,8 @@ bool StructureConverter::isNodeAfterSwitchClause(const ShPtr<CFGNode> &node,
 * @par Preconditions
 *  - @a switchNode is non-null
 */
-bool StructureConverter::hasDefaultClause(const ShPtr<CFGNode> &switchNode,
-		const ShPtr<CFGNode> &switchSuccessor) const {
+bool StructureConverter::hasDefaultClause(CFGNode* switchNode,
+		CFGNode* switchSuccessor) const {
 	PRECONDITION_NON_NULL(switchNode);
 
 	return switchSuccessor != switchNode->getSucc(0);
@@ -1745,8 +1745,8 @@ bool StructureConverter::hasDefaultClause(const ShPtr<CFGNode> &switchNode,
 * @par Preconditions
 *  - both @a clauseNode and @a switchNode are non-null
 */
-bool StructureConverter::isReducibleClause(const ShPtr<CFGNode> &clauseNode,
-		const ShPtr<CFGNode> &switchNode, const ShPtr<CFGNode> &switchSuccessor,
+bool StructureConverter::isReducibleClause(CFGNode* clauseNode,
+		CFGNode* switchNode, CFGNode* switchSuccessor,
 		bool hasDefault) const {
 	PRECONDITION_NON_NULL(clauseNode);
 	PRECONDITION_NON_NULL(switchNode);
@@ -1779,8 +1779,8 @@ bool StructureConverter::isReducibleClause(const ShPtr<CFGNode> &clauseNode,
 * @par Preconditions
 *  - both @a clauseNode and @a switchNode are non-null
 */
-bool StructureConverter::hasOnlySwitchOrClausesInPreds(const ShPtr<CFGNode> &clauseNode,
-		const ShPtr<CFGNode> &switchNode, bool hasDefault) const {
+bool StructureConverter::hasOnlySwitchOrClausesInPreds(CFGNode* clauseNode,
+		CFGNode* switchNode, bool hasDefault) const {
 	PRECONDITION_NON_NULL(clauseNode);
 	PRECONDITION_NON_NULL(switchNode);
 
@@ -1810,8 +1810,8 @@ bool StructureConverter::hasOnlySwitchOrClausesInPreds(const ShPtr<CFGNode> &cla
 * @par Preconditions
 *  - both @a clauseNode and @a switchNode are non-null
 */
-bool StructureConverter::fallsThroughToAnotherCase(const ShPtr<CFGNode> &clauseNode,
-		const ShPtr<CFGNode> &switchNode, bool hasDefault) const {
+bool StructureConverter::fallsThroughToAnotherCase(CFGNode* clauseNode,
+		CFGNode* switchNode, bool hasDefault) const {
 	PRECONDITION_NON_NULL(clauseNode);
 	PRECONDITION_NON_NULL(switchNode);
 
@@ -1838,8 +1838,8 @@ bool StructureConverter::fallsThroughToAnotherCase(const ShPtr<CFGNode> &clauseN
 * @par Preconditions
 *  - @a switchNode is non-null
 */
-ShPtr<SwitchStmt> StructureConverter::getSwitchStmt(const ShPtr<CFGNode> &switchNode,
-		const ShPtr<CFGNode> &switchSuccessor, bool hasDefault) {
+SwitchStmt* StructureConverter::getSwitchStmt(CFGNode* switchNode,
+		CFGNode* switchSuccessor, bool hasDefault) {
 	PRECONDITION_NON_NULL(switchNode);
 
 	auto controlExpr = converter->convertValueToExpression(switchNode->getCond());
@@ -1869,7 +1869,7 @@ ShPtr<SwitchStmt> StructureConverter::getSwitchStmt(const ShPtr<CFGNode> &switch
 *  - @a switchNode is non-null
 */
 StructureConverter::SwitchClauseVector StructureConverter::getSwitchClauses(
-		const ShPtr<CFGNode> &switchNode, bool hasDefault) const {
+		CFGNode* switchNode, bool hasDefault) const {
 	PRECONDITION_NON_NULL(switchNode);
 
 	CFGNode::CFGNodeVector nodesOrder;
@@ -1886,7 +1886,7 @@ StructureConverter::SwitchClauseVector StructureConverter::getSwitchClauses(
 			auto &clauseConds = existingClause->first;
 			clauseConds.push_back(cond);
 		} else {
-			auto newClause = std::make_shared<SwitchClause>(
+			auto newClause = new SwitchClause(
 				ExprVector{cond}, succ);
 			mapNodeToClause.emplace(succ, newClause);
 			nodesOrder.push_back(succ);
@@ -1899,7 +1899,7 @@ StructureConverter::SwitchClauseVector StructureConverter::getSwitchClauses(
 	}
 
 	if (hasDefault) {
-		auto defaultClause = std::make_shared<SwitchClause>(
+		auto defaultClause = new SwitchClause(
 			ExprVector{nullptr}, switchNode->getSucc(0));
 		clauses.push_back(defaultClause);
 	}
@@ -1915,7 +1915,7 @@ StructureConverter::SwitchClauseVector StructureConverter::getSwitchClauses(
 */
 StructureConverter::SwitchClauseVector StructureConverter::sortSwitchClauses(
 		const SwitchClauseVector &clauses,
-		const ShPtr<CFGNode> &switchSuccessor) const {
+		CFGNode* switchSuccessor) const {
 	SwitchClauseVector unsorted(clauses);
 	SwitchClauseVector sorted;
 	CFGNode::CFGNodeSet used;
@@ -1952,7 +1952,7 @@ StructureConverter::SwitchClauseVector StructureConverter::sortSwitchClauses(
 * @brief Returns first switch clause from the vector of clauses @a clauses
 *        which has only single predecessor.
 */
-ShPtr<StructureConverter::SwitchClause> StructureConverter::findFirstClauseWithSinglePred(
+StructureConverter::SwitchClause* StructureConverter::findFirstClauseWithSinglePred(
 		const SwitchClauseVector &clauses) const {
 	for (const auto clause: clauses) {
 		const auto clauseBody = clause->second;
@@ -1976,9 +1976,9 @@ ShPtr<StructureConverter::SwitchClause> StructureConverter::findFirstClauseWithS
 * @par Preconditions
 *  - both @a clauseNode and @a switchNode are non-null
 */
-ShPtr<Statement> StructureConverter::getClauseBody(const ShPtr<CFGNode> &clauseNode,
-		const ShPtr<CFGNode> &switchNode, const ShPtr<CFGNode> &switchSuccessor,
-		const CFGNode::CFGNodeSet &generated) {
+Statement* StructureConverter::getClauseBody(CFGNode* clauseNode,
+		CFGNode* switchNode, CFGNode* switchSuccessor,
+		CFGNode::CFGNodeSet &generated) {
 	PRECONDITION_NON_NULL(clauseNode);
 	PRECONDITION_NON_NULL(switchNode);
 
@@ -2020,8 +2020,8 @@ ShPtr<Statement> StructureConverter::getClauseBody(const ShPtr<CFGNode> &clauseN
 * @par Preconditions
 *  - clauseNode is non-null
 */
-bool StructureConverter::isClauseTerminatedByBreak(const ShPtr<CFGNode> &clauseNode,
-		const ShPtr<CFGNode> &switchSuccessor) const {
+bool StructureConverter::isClauseTerminatedByBreak(CFGNode* clauseNode,
+		CFGNode* switchSuccessor) const {
 	PRECONDITION_NON_NULL(clauseNode);
 
 	return clauseNode->getSuccNum() == 1
@@ -2039,8 +2039,8 @@ bool StructureConverter::isClauseTerminatedByBreak(const ShPtr<CFGNode> &clauseN
 * @par Preconditions
 *  - both @a switchStmt and @a clauseBody are non-null
 */
-void StructureConverter::addClausesWithTheSameCond(ShPtr<SwitchStmt> switchStmt,
-		const ExprVector &conds, const ShPtr<Statement> &clauseBody) const {
+void StructureConverter::addClausesWithTheSameCond(SwitchStmt* switchStmt,
+		const ExprVector &conds, Statement* clauseBody) const {
 	PRECONDITION_NON_NULL(switchStmt);
 	PRECONDITION_NON_NULL(clauseBody);
 
@@ -2061,7 +2061,7 @@ void StructureConverter::addClausesWithTheSameCond(ShPtr<SwitchStmt> switchStmt,
 * @par Preconditions
 *  - @a switchNode is non-null
 */
-void StructureConverter::removeReducedSuccsOfSwitch(const ShPtr<CFGNode> &switchNode,
+void StructureConverter::removeReducedSuccsOfSwitch(CFGNode* switchNode,
 		bool hasDefault) const {
 	PRECONDITION_NON_NULL(switchNode);
 
@@ -2086,8 +2086,8 @@ void StructureConverter::removeReducedSuccsOfSwitch(const ShPtr<CFGNode> &switch
 * @par Preconditions
 *  - both @a node and @a succ are non-null
 */
-ShPtr<Statement> StructureConverter::getSuccessorsBody(const ShPtr<CFGNode> &node,
-		const ShPtr<CFGNode> &succ) {
+Statement* StructureConverter::getSuccessorsBody(CFGNode* node,
+		CFGNode* succ) {
 	PRECONDITION_NON_NULL(node);
 	PRECONDITION_NON_NULL(succ);
 
@@ -2102,8 +2102,8 @@ ShPtr<Statement> StructureConverter::getSuccessorsBody(const ShPtr<CFGNode> &nod
 * @par Preconditions
 *  - both @a node and @a succ are non-null
 */
-ShPtr<Statement> StructureConverter::getSuccessorsBodyClone(const ShPtr<CFGNode> &node,
-		const ShPtr<CFGNode> &succ) {
+Statement* StructureConverter::getSuccessorsBodyClone(CFGNode* node,
+		CFGNode* succ) {
 	PRECONDITION_NON_NULL(node);
 	PRECONDITION_NON_NULL(succ);
 
@@ -2120,7 +2120,7 @@ ShPtr<Statement> StructureConverter::getSuccessorsBodyClone(const ShPtr<CFGNode>
 * @brief Inserts cloned break/continue stmts in case they need replacing
 */
 void StructureConverter::insertClonedLoopTargets(
-		ShPtr<Statement> origParent, ShPtr<Statement> newParent) {
+		Statement* origParent, Statement* newParent) {
 
 	auto origStmt = StructureConverter::findContinueOrBreakStatements(origParent,
 		SwitchParent::No);
@@ -2135,11 +2135,11 @@ void StructureConverter::insertClonedLoopTargets(
 /**
 * @brief Finds break and continue statements in cloned statements
 */
-std::vector<ShPtr<Statement>> StructureConverter::findContinueOrBreakStatements(
-	ShPtr<Statement> parent, SwitchParent sp) {
+std::vector<Statement*> StructureConverter::findContinueOrBreakStatements(
+	Statement* parent, SwitchParent sp) {
 
-	std::vector<ShPtr<Statement>> stmts;
-	ShPtr<Statement> stmt = parent;
+	std::vector<Statement*> stmts;
+	Statement* stmt = parent;
 
 	while (stmt) {
 		if (auto ifStmt = cast<IfStmt>(stmt)) {
@@ -2170,8 +2170,8 @@ std::vector<ShPtr<Statement>> StructureConverter::findContinueOrBreakStatements(
 * @par Preconditions
 *  - both @a node and @a target are non-null
 */
-ShPtr<Statement> StructureConverter::getGotoForSuccessor(const ShPtr<CFGNode> &node,
-		const ShPtr<CFGNode> &target) {
+Statement* StructureConverter::getGotoForSuccessor(CFGNode* node,
+		CFGNode* target) {
 	PRECONDITION_NON_NULL(node);
 	PRECONDITION_NON_NULL(target);
 
@@ -2195,8 +2195,8 @@ ShPtr<Statement> StructureConverter::getGotoForSuccessor(const ShPtr<CFGNode> &n
 * @par Preconditions
 *  - both @a from and @a to are non-null
 */
-ShPtr<Statement> StructureConverter::getAssignsToPHINodes(const ShPtr<CFGNode> &from,
-		const ShPtr<CFGNode> &to) {
+Statement* StructureConverter::getAssignsToPHINodes(CFGNode* from,
+		CFGNode* to) {
 	PRECONDITION_NON_NULL(from);
 	PRECONDITION_NON_NULL(to);
 
@@ -2210,7 +2210,7 @@ ShPtr<Statement> StructureConverter::getAssignsToPHINodes(const ShPtr<CFGNode> &
 * @par Preconditions
 *  - both @a currBB and @a succ are non-null
 */
-ShPtr<Statement> StructureConverter::getPHICopiesForSuccessor(
+Statement* StructureConverter::getPHICopiesForSuccessor(
 		llvm::BasicBlock *currBB, llvm::BasicBlock *succ) {
 	PRECONDITION_NON_NULL(currBB);
 	PRECONDITION_NON_NULL(succ);
@@ -2230,7 +2230,7 @@ ShPtr<Statement> StructureConverter::getPHICopiesForSuccessor(
 		return nullptr;
 	}
 
-	ShPtr<Statement> phiCopies;
+	Statement* phiCopies = nullptr;
 	for (auto i = succ->begin(); llvm::isa<llvm::PHINode>(i); ++i) {
 		auto pn = llvm::cast<llvm::PHINode>(i);
 		auto val = pn->getIncomingValueForBlock(currBB);
@@ -2267,7 +2267,7 @@ void StructureConverter::initialiazeLLVMAnalyses(llvm::Function &func) {
 * @par Preconditions
 *  - @a node is non-null
 */
-llvm::Loop *StructureConverter::getLoopFor(const ShPtr<CFGNode> &node) const {
+llvm::Loop *StructureConverter::getLoopFor(CFGNode* node) const {
 	PRECONDITION_NON_NULL(node);
 
 	auto loopIt = loopInfo->getLoopFor(node->getFirstBB());
@@ -2284,7 +2284,7 @@ llvm::Loop *StructureConverter::getLoopFor(const ShPtr<CFGNode> &node) const {
 * @par Preconditions
 *  - @a node is non-null
 */
-bool StructureConverter::isLoopHeader(const ShPtr<CFGNode> &node) const {
+bool StructureConverter::isLoopHeader(CFGNode* node) const {
 	PRECONDITION_NON_NULL(node);
 
 	auto loop = loopInfo->getLoopFor(node->getFirstBB());
@@ -2302,7 +2302,7 @@ bool StructureConverter::isLoopHeader(const ShPtr<CFGNode> &node) const {
 * @par Preconditions
 *  - both @a node and @a loop are non-null
 */
-bool StructureConverter::isLoopHeader(const ShPtr<CFGNode> &node,
+bool StructureConverter::isLoopHeader(CFGNode* node,
 		llvm::Loop *loop) const {
 	PRECONDITION_NON_NULL(node);
 	PRECONDITION_NON_NULL(loop);
@@ -2317,7 +2317,7 @@ bool StructureConverter::isLoopHeader(const ShPtr<CFGNode> &node,
 * @par Preconditions
 *  - both @a node and @a loop are non-null
 */
-bool StructureConverter::isNodeOutsideLoop(const ShPtr<CFGNode> &node,
+bool StructureConverter::isNodeOutsideLoop(CFGNode* node,
 		llvm::Loop *loop) const {
 	PRECONDITION_NON_NULL(node);
 	PRECONDITION_NON_NULL(loop);
@@ -2335,7 +2335,7 @@ bool StructureConverter::isNodeOutsideLoop(const ShPtr<CFGNode> &node,
 * @par Preconditions
 *  - both @a node and @a loop are non-null
 */
-bool StructureConverter::isInParentLoopOf(const ShPtr<CFGNode> &node,
+bool StructureConverter::isInParentLoopOf(CFGNode* node,
 		llvm::Loop *loop) const {
 	PRECONDITION_NON_NULL(node);
 	PRECONDITION_NON_NULL(loop);
@@ -2391,7 +2391,7 @@ bool StructureConverter::canBeForLoop(llvm::Loop *loop) const {
 *  - @a node is non-null
 */
 void StructureConverter::addGotoTargetIfNotExists(
-		const ShPtr<CFGNode> &node) {
+		CFGNode* node) {
 	PRECONDITION_NON_NULL(node);
 
 	if (!hasItem(gotoTargetsSet, node)) {
@@ -2404,8 +2404,8 @@ void StructureConverter::addGotoTargetIfNotExists(
 * @brief Adds metadata of the form "branch -> xxx" to the @a body of the given
 *        if statement (if needed).
 */
-void StructureConverter::addBranchMetadataToEndOfBodyIfNeeded(ShPtr<Statement> &body,
-		const ShPtr<CFGNode> &clause, const ShPtr<CFGNode> &ifSuccessor) const {
+void StructureConverter::addBranchMetadataToEndOfBodyIfNeeded(Statement* body,
+		CFGNode* clause, CFGNode* ifSuccessor) const {
 	if (clause->getSuccNum() == 1 && clause->getSucc(0) == ifSuccessor) {
 		auto emptyStmt = EmptyStmt::create(nullptr,
 			Statement::getLastStatement(body)->getAddress());
@@ -2420,7 +2420,7 @@ void StructureConverter::addBranchMetadataToEndOfBodyIfNeeded(ShPtr<Statement> &
 * @par Preconditions
 *  - @a node is non-null
 */
-std::string StructureConverter::getLabel(const ShPtr<CFGNode> &node) const {
+std::string StructureConverter::getLabel(CFGNode* node) const {
 	PRECONDITION_NON_NULL(node);
 
 	return labelsHandler->getLabel(node->getFirstBB());

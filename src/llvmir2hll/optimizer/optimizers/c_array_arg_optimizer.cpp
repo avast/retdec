@@ -21,32 +21,32 @@ namespace {
 * @brief Returns the new argument if the given argument can be optimized, the
 *        null pointer otherwise.
 */
-ShPtr<Expression> canArgBeOptimized(ShPtr<Expression> arg) {
+Expression* canArgBeOptimized(Expression* arg) {
 	// We have to check that the argument is of the form
 	//
 	//    &x[0]
 	//
 	// If this is so, we return x, which is the new argument.
 
-	ShPtr<AddressOpExpr> addressOpExpr(cast<AddressOpExpr>(arg));
+	AddressOpExpr* addressOpExpr(cast<AddressOpExpr>(arg));
 	if (!addressOpExpr) {
-		return ShPtr<Expression>();
+		return nullptr;
 	}
 
-	ShPtr<ArrayIndexOpExpr> arrayIndexOpExpr(cast<ArrayIndexOpExpr>(
+	ArrayIndexOpExpr* arrayIndexOpExpr(cast<ArrayIndexOpExpr>(
 		addressOpExpr->getOperand()));
 	if (!arrayIndexOpExpr) {
-		return ShPtr<Expression>();
+		return nullptr;
 	}
 
-	ShPtr<Variable> var(cast<Variable>(arrayIndexOpExpr->getBase()));
+	Variable* var(cast<Variable>(arrayIndexOpExpr->getBase()));
 	if (!var) {
-		return ShPtr<Expression>();
+		return nullptr;
 	}
 
-	ShPtr<ConstInt> index(cast<ConstInt>(arrayIndexOpExpr->getIndex()));
+	ConstInt* index(cast<ConstInt>(arrayIndexOpExpr->getIndex()));
 	if (!index || !index->isZero()) {
-		return ShPtr<Expression>();
+		return nullptr;
 	}
 
 	return var;
@@ -62,17 +62,17 @@ ShPtr<Expression> canArgBeOptimized(ShPtr<Expression> arg) {
 * @par Preconditions
 *  - @a module is non-null
 */
-CArrayArgOptimizer::CArrayArgOptimizer(ShPtr<Module> module):
+CArrayArgOptimizer::CArrayArgOptimizer(Module* module):
 	FuncOptimizer(module) {
 		PRECONDITION_NON_NULL(module);
 	}
 
-void CArrayArgOptimizer::visit(ShPtr<CallExpr> expr) {
+void CArrayArgOptimizer::visit(CallExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	// Check each argument whether it can be optimized, and if so, do it.
 	for (const auto &arg : expr->getArgs()) {
-		if (ShPtr<Expression> newArg = canArgBeOptimized(arg)) {
+		if (Expression* newArg = canArgBeOptimized(arg)) {
 			expr->replaceArg(arg, newArg);
 		}
 	}

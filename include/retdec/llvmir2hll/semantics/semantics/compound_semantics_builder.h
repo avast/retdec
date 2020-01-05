@@ -27,7 +27,7 @@ namespace llvmir2hll {
 */
 class CompoundSemanticsBuilder: private retdec::utils::NonCopyable {
 public:
-	static ShPtr<CompoundSemantics> build(const StringVector &semanticsIds);
+	static CompoundSemantics* build(const StringVector &semanticsIds);
 
 private:
 	// Prevent instantiation.

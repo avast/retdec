@@ -22,7 +22,7 @@ namespace llvmir2hll {
 * @par Preconditions
 *  - @a module is non-null
 */
-void LLVMDebugInfoObtainer::obtainVarNames(ShPtr<Module> module) {
+void LLVMDebugInfoObtainer::obtainVarNames(Module* module) {
 	PRECONDITION_NON_NULL(module);
 
 	// Check whether global variables have assigned names.

@@ -49,63 +49,63 @@ protected:
 	// (see the implementation of convertLLVMIR2BIR()).
 	class ConversionPass: public llvm::ModulePass {
 	public:
-		ConversionPass(ShPtr<::testing::NiceMock<ConfigMock>> configMock);
+		ConversionPass(::testing::NiceMock<ConfigMock>* configMock);
 
 		virtual bool runOnModule(llvm::Module &llvmModule) override;
 		virtual void getAnalysisUsage(llvm::AnalysisUsage &au) const override;
 
-		void setUsedConverter(ShPtr<LLVMIR2BIRConverter> converter);
-		ShPtr<Module> getConvertedModule() const;
+		void setUsedConverter(LLVMIR2BIRConverter* converter);
+		Module* getConvertedModule() const;
 
 	private:
 		/// Converter to be used to convert @c llvmModule into @c birModule.
-		ShPtr<LLVMIR2BIRConverter> converter;
+		LLVMIR2BIRConverter* converter;
 
 		/// Converted module.
-		ShPtr<Module> birModule;
+		Module* birModule;
 
 		/// A mock for the used semantics.
-		ShPtr<::testing::NiceMock<SemanticsMock>> semanticsMock;
+		::testing::NiceMock<SemanticsMock>* semanticsMock;
 
 		/// A mock for the used config.
-		ShPtr<::testing::NiceMock<ConfigMock>> configMock;
+		::testing::NiceMock<ConfigMock>* configMock;
 	};
 
 protected:
 	LLVMIR2BIRConverterBaseTests();
 
-	ShPtr<Module> convertLLVMIR2BIR(const std::string &code);
+	Module* convertLLVMIR2BIR(const std::string &code);
 
-	ShPtr<Statement> getFirstNonEmptySuccOf(
-		const ShPtr<Statement> &statement) const;
+	Statement* getFirstNonEmptySuccOf(
+		const Statement* &statement) const;
 
-	AssertionResult isConstInt(ShPtr<Expression> expr, int param);
+	AssertionResult isConstInt(Expression* expr, int param);
 
-	AssertionResult isCallOfFuncTest(ShPtr<Statement> statement,
-		ShPtr<Variable> param);
-	AssertionResult isCallOfFuncTest(ShPtr<Statement> statement, int param);
-	AssertionResult isIntReturn(ShPtr<Statement> statement, int param);
-	AssertionResult isAssignOfConstIntToVar(ShPtr<Statement> statement,
-		ShPtr<Variable> lhs, int rhs);
-	AssertionResult isAssignOfVarToVar(ShPtr<Statement> statement,
-		ShPtr<Variable> lhs, ShPtr<Variable> rhs);
-	AssertionResult isAssignOfVarToVarDeref(ShPtr<Statement> statement,
-		ShPtr<Variable> lhs, ShPtr<Variable> rhs);
-	AssertionResult isAssignOfVarDerefToVar(ShPtr<Statement> statement,
-		ShPtr<Variable> lhs, ShPtr<Variable> rhs);
-	AssertionResult isAssignOfAddExprToVar(ShPtr<Statement> statement,
-		ShPtr<Variable> lhs, ShPtr<Variable> rhsAddVar, int rhsAddConst);
-	AssertionResult isAssignOfMulExprToVar(ShPtr<Statement> statement,
-		ShPtr<Variable> lhs, ShPtr<Variable> rhsMulVar, int rhsMulConst);
+	AssertionResult isCallOfFuncTest(Statement* statement,
+		Variable* param);
+	AssertionResult isCallOfFuncTest(Statement* statement, int param);
+	AssertionResult isIntReturn(Statement* statement, int param);
+	AssertionResult isAssignOfConstIntToVar(Statement* statement,
+		Variable* lhs, int rhs);
+	AssertionResult isAssignOfVarToVar(Statement* statement,
+		Variable* lhs, Variable* rhs);
+	AssertionResult isAssignOfVarToVarDeref(Statement* statement,
+		Variable* lhs, Variable* rhs);
+	AssertionResult isAssignOfVarDerefToVar(Statement* statement,
+		Variable* lhs, Variable* rhs);
+	AssertionResult isAssignOfAddExprToVar(Statement* statement,
+		Variable* lhs, Variable* rhsAddVar, int rhsAddConst);
+	AssertionResult isAssignOfMulExprToVar(Statement* statement,
+		Variable* lhs, Variable* rhsMulVar, int rhsMulConst);
 
 	template<class T>
-	AssertionResult isVarDef(ShPtr<Statement> statement, std::string name);
+	AssertionResult isVarDef(Statement* statement, std::string name);
 
-	UPtr<llvm::Module> parseLLVMIR(const std::string &code);
+	llvm::Module* parseLLVMIR(const std::string &code);
 
 protected:
 	/// A mock for the used config.
-	ShPtr<::testing::NiceMock<ConfigMock>> configMock;
+	::testing::NiceMock<ConfigMock>* configMock;
 
 	/// Use strict FPU semantics?
 	bool optionStrictFPUSemantics;
@@ -128,7 +128,7 @@ protected:
 */
 template<class T>
 AssertionResult LLVMIR2BIRConverterBaseTests::isVarDef(
-		ShPtr<Statement> statement, std::string name) {
+		Statement* statement, std::string name) {
 	auto varDefStmt = cast<VarDefStmt>(statement);
 	if (!varDefStmt) {
 		return AssertionFailure() << varDefStmt << " is not VarDefStmt";

@@ -23,7 +23,7 @@ class LastLoopContinueOptimizerTests: public TestsWithModule {};
 
 TEST_F(LastLoopContinueOptimizerTests,
 OptimizerHasNonEmptyID) {
-	ShPtr<LoopLastContinueOptimizer> optimizer(
+	LoopLastContinueOptimizer* optimizer(
 		new LoopLastContinueOptimizer(module));
 
 	EXPECT_TRUE(!optimizer->getId().empty()) <<

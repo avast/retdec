@@ -20,25 +20,25 @@ namespace llvmir2hll {
 ConstBool::ConstBool(Type value):
 	Constant(), value(value), type(IntType::create(1, false)) {}
 
-ShPtr<Value> ConstBool::clone() {
-	ShPtr<ConstBool> constBool(ConstBool::create(value));
+Value* ConstBool::clone() {
+	ConstBool* constBool(ConstBool::create(value));
 	constBool->setMetadata(getMetadata());
 	return constBool;
 }
 
-bool ConstBool::isEqualTo(ShPtr<Value> otherValue) const {
+bool ConstBool::isEqualTo(Value* otherValue) const {
 	// Both types and values have to be equal.
-	if (ShPtr<ConstBool> otherConstBool = cast<ConstBool>(otherValue)) {
+	if (ConstBool* otherConstBool = cast<ConstBool>(otherValue)) {
 		return value == otherConstBool->value;
 	}
 	return false;
 }
 
-ShPtr<Type> ConstBool::getType() const {
+Type* ConstBool::getType() const {
 	return type;
 }
 
-void ConstBool::replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) {
+void ConstBool::replace(Expression* oldExpr, Expression* newExpr) {
 	PRECONDITION_NON_NULL(oldExpr);
 
 	// There is nothing to be replaced.
@@ -77,12 +77,12 @@ bool ConstBool::isFalse() const {
 * If @a value is not given, the constant is initialized to the default bool
 * value.
 */
-ShPtr<ConstBool> ConstBool::create(Type value) {
-	return ShPtr<ConstBool>(new ConstBool(value));
+ConstBool* ConstBool::create(Type value) {
+	return new ConstBool(value);
 }
 
 void ConstBool::accept(Visitor *v) {
-	v->visit(ucast<ConstBool>(shared_from_this()));
+	v->visit(ucast<ConstBool>(this));
 }
 
 } // namespace llvmir2hll

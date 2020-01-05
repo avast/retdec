@@ -16,31 +16,31 @@ namespace llvmir2hll {
 */
 UnreachableStmt::UnreachableStmt(Address a): Statement(a) {}
 
-ShPtr<Value> UnreachableStmt::clone() {
-	ShPtr<UnreachableStmt> unreachableStmt(UnreachableStmt::create(getAddress()));
+Value* UnreachableStmt::clone() {
+	UnreachableStmt* unreachableStmt(UnreachableStmt::create(getAddress()));
 	unreachableStmt->setMetadata(getMetadata());
 	return unreachableStmt;
 }
 
-bool UnreachableStmt::isEqualTo(ShPtr<Value> otherValue) const {
+bool UnreachableStmt::isEqualTo(Value* otherValue) const {
 	return isa<UnreachableStmt>(otherValue);
 }
 
-void UnreachableStmt::replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) {
+void UnreachableStmt::replace(Expression* oldExpr, Expression* newExpr) {
 	// There is nothing to do.
 }
 
-ShPtr<Expression> UnreachableStmt::asExpression() const {
+Expression* UnreachableStmt::asExpression() const {
 	// Cannot be converted into an expression.
 	return {};
 }
 
 void UnreachableStmt::accept(Visitor *v) {
-	v->visit(ucast<UnreachableStmt>(shared_from_this()));
+	v->visit(ucast<UnreachableStmt>(this));
 }
 
-ShPtr<UnreachableStmt> UnreachableStmt::create(Address a) {
-	return ShPtr<UnreachableStmt>(new UnreachableStmt(a));
+UnreachableStmt* UnreachableStmt::create(Address a) {
+	return new UnreachableStmt(a);
 }
 
 } // namespace llvmir2hll

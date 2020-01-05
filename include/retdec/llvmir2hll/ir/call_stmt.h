@@ -25,21 +25,21 @@ class Visitor;
 */
 class CallStmt final: public Statement {
 public:
-	static ShPtr<CallStmt> create(ShPtr<CallExpr> call,
-		ShPtr<Statement> succ = nullptr, Address a = Address::Undefined);
+	static CallStmt* create(CallExpr* call,
+		Statement* succ = nullptr, Address a = Address::Undefined);
 
-	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
+	virtual bool isEqualTo(Value* otherValue) const override;
 	virtual bool isCompound() override { return false; }
-	virtual ShPtr<Value> clone() override;
-	virtual void replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) override;
-	virtual ShPtr<Expression> asExpression() const override;
+	virtual Value* clone() override;
+	virtual void replace(Expression* oldExpr, Expression* newExpr) override;
+	virtual Expression* asExpression() const override;
 
-	ShPtr<CallExpr> getCall() const;
-	void setCall(ShPtr<CallExpr> newCall);
+	CallExpr* getCall() const;
+	void setCall(CallExpr* newCall);
 
 	/// @name Observer Interface
 	/// @{
-	virtual void update(ShPtr<Value> subject, ShPtr<Value> arg = nullptr) override;
+	virtual void update(Value* subject, Value* arg = nullptr) override;
 	/// @}
 
 	/// @name Visitor Interface
@@ -50,11 +50,11 @@ public:
 private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
-	explicit CallStmt(ShPtr<CallExpr> call, Address a = Address::Undefined);
+	explicit CallStmt(CallExpr* call, Address a = Address::Undefined);
 
 private:
 	/// Wrapped call expression.
-	ShPtr<CallExpr> call;
+	CallExpr* call = nullptr;
 };
 
 } // namespace llvmir2hll

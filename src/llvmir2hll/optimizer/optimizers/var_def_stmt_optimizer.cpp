@@ -42,8 +42,8 @@ namespace llvmir2hll {
 * @par Preconditions
 *  - @a module and @a va are non-null
 */
-VarDefStmtOptimizer::VarDefStmtOptimizer(ShPtr<Module> module,
-		ShPtr<ValueAnalysis> va): FuncOptimizer(module), va(va), level(0) {
+VarDefStmtOptimizer::VarDefStmtOptimizer(Module* module,
+		ValueAnalysis* va): FuncOptimizer(module), va(va), level(0) {
 	PRECONDITION_NON_NULL(module);
 	PRECONDITION_NON_NULL(va);
 }
@@ -56,8 +56,8 @@ void VarDefStmtOptimizer::doOptimization() {
 	FuncOptimizer::doOptimization();
 }
 
-void VarDefStmtOptimizer::runOnFunction(ShPtr<Function> func) {
-	ShPtr<NoInitVarDefAnalysis> varDefStmtAnalysis(new NoInitVarDefAnalysis());
+void VarDefStmtOptimizer::runOnFunction(Function* func) {
+	NoInitVarDefAnalysis* varDefStmtAnalysis(new NoInitVarDefAnalysis());
 
 	// Get all VarDefStmt statements without an initializer.
 	VarDefStmtSet noInitVarDefStmts = varDefStmtAnalysis->getNoInitVarDefStmts(func);
@@ -72,7 +72,7 @@ void VarDefStmtOptimizer::runOnFunction(ShPtr<Function> func) {
 	sortVarDefStmts(noInitVarDefStmts);
 
 	// Get the first statement in the function.
-	ShPtr<Statement> stmt = func->getBody();
+	Statement* stmt = func->getBody();
 
 	// Start analysing of all nesting levels. Parent in this case can be
 	// anything. The first level is number 0.
@@ -100,8 +100,8 @@ void VarDefStmtOptimizer::runOnFunction(ShPtr<Function> func) {
 *
 * @return A @c VarSet of vars that are visible from this block.
 */
-VarSet VarDefStmtOptimizer::oneBlockTraversal(ShPtr<Statement> stmt,
-		ShPtr<Statement> parent, std::size_t parOrder) {
+VarSet VarDefStmtOptimizer::oneBlockTraversal(Statement* stmt,
+		Statement* parent, std::size_t parOrder) {
 	// Simple counter for order of statements.
 	std::size_t order = 0;
 	// Set of vars that are visible from this block.
@@ -111,7 +111,7 @@ VarSet VarDefStmtOptimizer::oneBlockTraversal(ShPtr<Statement> stmt,
 	for (; stmt; stmt = stmt->getSuccessor()) {
 
 		// Skip VarDefStmts. We don't need to analyse them.
-		ShPtr<VarDefStmt> varDefStmt(cast<VarDefStmt>(stmt));
+		VarDefStmt* varDefStmt(cast<VarDefStmt>(stmt));
 		if (varDefStmt){
 			order++;
 			continue;
@@ -166,8 +166,8 @@ VarSet VarDefStmtOptimizer::oneBlockTraversal(ShPtr<Statement> stmt,
 * @param[in] order Order of the current statement.
 */
 void VarDefStmtOptimizer::tryToFindAndEnterToNextNestingLevel(
-		ShPtr<Statement> stmt, VarSet &thisLvlVars, std::size_t order) {
-	if (ShPtr<IfStmt> ifStmt = cast<IfStmt>(stmt)) {
+		Statement* stmt, VarSet &thisLvlVars, std::size_t order) {
+	if (IfStmt* ifStmt = cast<IfStmt>(stmt)) {
 		for (auto i = ifStmt->clause_begin(), e = ifStmt->clause_end();
 				i != e; ++i) {
 			goToNextBlockAndAppendVisibleVars(i->second, stmt, order,
@@ -180,25 +180,25 @@ void VarDefStmtOptimizer::tryToFindAndEnterToNextNestingLevel(
 		return;
 	}
 
-	if (ShPtr<WhileLoopStmt> whileLoopStmt = cast<WhileLoopStmt>(stmt)) {
+	if (WhileLoopStmt* whileLoopStmt = cast<WhileLoopStmt>(stmt)) {
 		goToNextBlockAndAppendVisibleVars(whileLoopStmt->getBody(), stmt,
 			order, thisLvlVars);
 		return;
 	}
 
-	if (ShPtr<ForLoopStmt> forLoopStmt = cast<ForLoopStmt>(stmt)) {
+	if (ForLoopStmt* forLoopStmt = cast<ForLoopStmt>(stmt)) {
 		goToNextBlockAndAppendVisibleVars(forLoopStmt->getBody(), stmt,
 			order, thisLvlVars);
 		return;
 	}
 
-	if (ShPtr<UForLoopStmt> uforLoopStmt = cast<UForLoopStmt>(stmt)) {
+	if (UForLoopStmt* uforLoopStmt = cast<UForLoopStmt>(stmt)) {
 		goToNextBlockAndAppendVisibleVars(uforLoopStmt->getBody(), stmt,
 			order, thisLvlVars);
 		return;
 	}
 
-	if (ShPtr<SwitchStmt> switchStmt = cast<SwitchStmt>(stmt)) {
+	if (SwitchStmt* switchStmt = cast<SwitchStmt>(stmt)) {
 		for (auto i = switchStmt->clause_begin(), e = switchStmt->clause_end();
 				i != e; ++i) {
 			goToNextBlockAndAppendVisibleVars(i->second, stmt, order,
@@ -213,8 +213,8 @@ void VarDefStmtOptimizer::tryToFindAndEnterToNextNestingLevel(
 *
 * @return @c true when the optimization was performed, @c false otherwise.
 */
-bool VarDefStmtOptimizer::tryOptimizeUForLoop(ShPtr<UForLoopStmt> loop,
-		ShPtr<Variable> optimizedVar) const {
+bool VarDefStmtOptimizer::tryOptimizeUForLoop(UForLoopStmt* loop,
+		Variable* optimizedVar) const {
 	// When the variable is used in the initialization part of a
 	// universal for loop, we can mark its initialization part as a definition.
 	// This enables us to emit
@@ -246,9 +246,9 @@ bool VarDefStmtOptimizer::tryOptimizeUForLoop(ShPtr<UForLoopStmt> loop,
 * @param[in] stmt The statement to analyse.
 * @param[in,out] thisLvlVars Set of variables that are visible from this block.
 */
-void VarDefStmtOptimizer::analyseVariablesInStmt(ShPtr<Statement> stmt,
+void VarDefStmtOptimizer::analyseVariablesInStmt(Statement* stmt,
 		VarSet &thisLvlVars) {
-	ShPtr<ValueData> stmtData(va->getValueData(stmt));
+	ValueData* stmtData(va->getValueData(stmt));
 	for (auto i = stmtData->dir_all_begin(), e = stmtData-> dir_all_end();
 			i != e; ++i) {
 		// Find if this variable was in some VarDefStmt.
@@ -300,8 +300,8 @@ void VarDefStmtOptimizer::analyseVariablesInStmt(ShPtr<Statement> stmt,
 * @param[in,out] vars A @c VarSet of variables that are visible from the current
 *                 block.
 */
-void VarDefStmtOptimizer::goToNextBlockAndAppendVisibleVars(ShPtr<Statement> stmt,
-		ShPtr<Statement> parent, std::size_t order, VarSet &vars) {
+void VarDefStmtOptimizer::goToNextBlockAndAppendVisibleVars(Statement* stmt,
+		Statement* parent, std::size_t order, VarSet &vars) {
 	// Need to increment level because we go to next nesting level.
 	level++;
 	VarSet appendVarsSet = oneBlockTraversal(stmt, parent, order);
@@ -321,7 +321,7 @@ void VarDefStmtOptimizer::goToNextBlockAndAppendVisibleVars(ShPtr<Statement> stm
 * @param[in] order An order of parent in his block.
 * @param[in] vars A @c VarSet of variables that are visible from current block.
 */
-void VarDefStmtOptimizer::saveVars(ShPtr<Statement> parent, std::size_t order,
+void VarDefStmtOptimizer::saveVars(Statement* parent, std::size_t order,
 		VarSet vars) {
 	// Create structure to save of all need informations.
 	NextLvlStmts nextLvlStmts = {parent, order, vars};
@@ -376,10 +376,10 @@ void VarDefStmtOptimizer::saveCountOfUsageVars(const VarSet &vars) {
 *
 * @return A statement to prepend.
 */
-ShPtr<Statement> VarDefStmtOptimizer::findStmtToPrepend(ShPtr<Variable> var,
+Statement* VarDefStmtOptimizer::findStmtToPrepend(Variable* var,
 		std::size_t level) const {
 	std::size_t order = std::numeric_limits<std::size_t>::max();
-	ShPtr<Statement> stmt;
+	Statement* stmt = nullptr;
 
 	// Find level.
 	auto it = mapOfNextLvlStmts.find(level);
@@ -417,7 +417,7 @@ void VarDefStmtOptimizer::findStmtsToOptimize() {
 		if (j != i->second.end()) {
 			// Variable is used in two blocks.
 			// Need to find final statement to optimize.
-			ShPtr<Statement> stmt = findStmtToPrepend((*i).first, (*j).first);
+			Statement* stmt = findStmtToPrepend((*i).first, (*j).first);
 
 			// Need to check if variable was not used before two or more blocks.
 			//    a = 5;
@@ -465,7 +465,7 @@ void VarDefStmtOptimizer::removeStructAndArrayVarDefStmts(
 	//
 	// because the result is not correct C.
 	for (auto it = noInitVarDefStmts.begin(); it != noInitVarDefStmts.end(); ) {
-		ShPtr<Type> varType = (*it)->getVar()->getType();
+		Type* varType = (*it)->getVar()->getType();
 		if (!isa<IntType>(varType) && !isa<FloatType>(varType) &&
 				!isa<PointerType>(varType)) {
 			noInitVarDefStmts.erase(it++);
@@ -494,8 +494,8 @@ void VarDefStmtOptimizer::getVarsFromVarDefStmts(
 * @return @c true if the name of @a v1 comes before the name of @a v2
 *         (case-insensitively), @c false otherwise.
 */
-bool compareVarDefStms(const ShPtr<VarDefStmt> &v1,
-		const ShPtr<VarDefStmt> &v2) {
+bool compareVarDefStms(const VarDefStmt* v1,
+		const VarDefStmt* v2) {
 	return isLowerThanCaseInsensitive(v1->getVar()->getName(),
 		v2->getVar()->getName());
 }
@@ -524,7 +524,7 @@ void VarDefStmtOptimizer::sortVarDefStmts(const VarDefStmtSet &noInitVarDefStmts
 * @return Type of optimization.
 */
 VarDefStmtOptimizer::OptType VarDefStmtOptimizer::prependOrAssign(
-		ShPtr<Statement> stmt, ShPtr<Variable> var) const {
+		Statement* stmt, Variable* var) const {
 	// Statement is not an assign statement or var is not in left side of
 	// AssignStmt, need to prepend.
 	if (!isAssignStmtWithVarOnLhs(stmt, var)) {
@@ -533,7 +533,7 @@ VarDefStmtOptimizer::OptType VarDefStmtOptimizer::prependOrAssign(
 
 	// We can't optimize something like that:
 	// int a = a + 2;
-	ShPtr<ValueData> stmtData(va->getValueData(stmt));
+	ValueData* stmtData(va->getValueData(stmt));
 	return stmtData->getDirNumOfUses(var) > 1 ? OptType::P : OptType::A;
 }
 
@@ -547,15 +547,15 @@ VarDefStmtOptimizer::OptType VarDefStmtOptimizer::prependOrAssign(
 * @return @c true if the @a stmt is an @c AssignStmt and @a var is on left side
 *         of @c AssignStmt, otherwise @c false.
 */
-bool VarDefStmtOptimizer::isAssignStmtWithVarOnLhs(ShPtr<Statement> stmt,
-		ShPtr<Variable> var) const {
-	ShPtr<AssignStmt> assignStmt = cast<AssignStmt>(stmt);
+bool VarDefStmtOptimizer::isAssignStmtWithVarOnLhs(Statement* stmt,
+		Variable* var) const {
+	AssignStmt* assignStmt = cast<AssignStmt>(stmt);
 	if (!assignStmt) {
 		// Statement is not an assign statement, return false.
 		return false;
 	}
 
-	ShPtr<Variable> lhsVar(cast<Variable>(assignStmt->getLhs()));
+	Variable* lhsVar(cast<Variable>(assignStmt->getLhs()));
 	if (!lhsVar) {
 		// If variable is not found on left side of assignStmt, return false.
 		return false;
@@ -577,8 +577,8 @@ bool VarDefStmtOptimizer::isAssignStmtWithVarOnLhs(ShPtr<Statement> stmt,
 * @param[in] var A variable for VarDefStmt.
 * @param[in] stmt A statement to optimize.
 */
-void VarDefStmtOptimizer::setStmtToOptimize(ShPtr<Variable> var,
-		ShPtr<Statement> stmt) {
+void VarDefStmtOptimizer::setStmtToOptimize(Variable* var,
+		Statement* stmt) {
 	// Save statement to optimize and type of optimization.
 	StmtToOptimize stmtToOptimize = {stmt, prependOrAssign(stmt, var)};
 	optimizeStmts[var] = stmtToOptimize;
@@ -630,7 +630,7 @@ void VarDefStmtOptimizer::optimizeWithPrepend(StmtSet &toRemoveStmts) const {
 		auto it = optimizeStmts.find(stmt->getVar());
 		if (it != optimizeStmts.end() && it->second.optType == OptType::P) {
 			// Perform the optimization.
-			ShPtr<Statement> stmtClone(ucast<Statement>(stmt->clone()));
+			Statement* stmtClone(ucast<Statement>(stmt->clone()));
 
 			// Move metadata from the statement to the prepended statement (if
 			// any). This way, instead of
@@ -679,9 +679,9 @@ void VarDefStmtOptimizer::optimizeAssignStmts(StmtSet &toRemoveStmts) const {
 		auto it = optimizeStmts.find(varDefStmt->getVar());
 		if (it != optimizeStmts.end() && it->second.optType == OptType::A) {
 			// Perform the optimization.
-			ShPtr<AssignStmt> assignStmt(cast<AssignStmt>(it->second.stmt));
+			AssignStmt* assignStmt(cast<AssignStmt>(it->second.stmt));
 			assert(assignStmt);
-			ShPtr<VarDefStmt> optimizedVarDefStmt(VarDefStmt::create(
+			VarDefStmt* optimizedVarDefStmt(VarDefStmt::create(
 				varDefStmt->getVar(), assignStmt->getRhs(), nullptr,
 				assignStmt->getAddress()));
 			Statement::replaceStatement(assignStmt, optimizedVarDefStmt);

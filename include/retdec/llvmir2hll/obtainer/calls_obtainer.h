@@ -26,8 +26,8 @@ class Value;
 class CallsObtainer: private OrderedAllVisitor,
 		private retdec::utils::NonCopyable {
 public:
-	static CallVector getCalls(ShPtr<Value> value);
-	static bool hasCalls(ShPtr<Value> value);
+	static CallVector getCalls(Value* value);
+	static bool hasCalls(Value* value);
 
 private:
 	CallsObtainer();
@@ -35,7 +35,7 @@ private:
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<CallExpr> expr) override;
+	virtual void visit(CallExpr* expr) override;
 	/// @}
 
 private:

@@ -25,9 +25,9 @@ class Module;
 */
 class BasicAliasAnalysis: public AliasAnalysis {
 public:
-	static ShPtr<AliasAnalysis> create();
+	static AliasAnalysis* create();
 
-	virtual void init(ShPtr<Module> module) override;
+	virtual void init(Module* module) override;
 	virtual std::string getId() const override;
 
 private:

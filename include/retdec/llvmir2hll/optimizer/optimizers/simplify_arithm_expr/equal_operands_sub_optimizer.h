@@ -82,9 +82,9 @@ namespace llvmir2hll {
 */
 class EqualOperandsSubOptimizer final: public SubOptimizer {
 public:
-	EqualOperandsSubOptimizer(ShPtr<ArithmExprEvaluator> arithmExprEvaluator);
+	EqualOperandsSubOptimizer(ArithmExprEvaluator* arithmExprEvaluator);
 
-	static ShPtr<SubOptimizer> create(ShPtr<ArithmExprEvaluator>
+	static SubOptimizer* create(ArithmExprEvaluator*
 		arithmExprEvaluator);
 	virtual std::string getId() const override;
 
@@ -92,14 +92,14 @@ private:
 	/// @name Visitor Interface
 	/// @{
 	using SubOptimizer::visit;
-	virtual void visit(ShPtr<AddOpExpr> expr) override;
-	virtual void visit(ShPtr<SubOpExpr> expr) override;
-	virtual void visit(ShPtr<DivOpExpr> expr) override;
-	virtual void visit(ShPtr<EqOpExpr> expr) override;
-	virtual void visit(ShPtr<NeqOpExpr> expr) override;
+	virtual void visit(AddOpExpr* expr) override;
+	virtual void visit(SubOpExpr* expr) override;
+	virtual void visit(DivOpExpr* expr) override;
+	virtual void visit(EqOpExpr* expr) override;
+	virtual void visit(NeqOpExpr* expr) override;
 	/// @}
 
-	bool isaConstIntOrIntTypeVariable(ShPtr<Expression> expr);
+	bool isaConstIntOrIntTypeVariable(Expression* expr);
 };
 
 } // namespace llvmir2hll

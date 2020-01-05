@@ -33,7 +33,7 @@ class AliasAnalysis: private retdec::utils::NonCopyable {
 public:
 	virtual ~AliasAnalysis() = default;
 
-	virtual void init(ShPtr<Module> module);
+	virtual void init(Module* module);
 	virtual bool isInitialized() const;
 
 	/**
@@ -46,7 +46,7 @@ public:
 	* If the analysis hasn't been initialized, the behavior of this member
 	* function is undefined.
 	*/
-	virtual const VarSet &mayPointTo(ShPtr<Variable> var) const = 0;
+	virtual const VarSet &mayPointTo(Variable* var) const = 0;
 
 	/**
 	* @brief Returns the variable to which @a var always points.
@@ -57,13 +57,13 @@ public:
 	* If the analysis hasn't been initialized, the behavior of this member
 	* function is undefined.
 	*/
-	virtual ShPtr<Variable> pointsTo(ShPtr<Variable> var) const = 0;
+	virtual Variable* pointsTo(Variable* var) const = 0;
 
 	/**
 	* @brief Returns @c true if a pointer may point to @a var, @c false
 	*        otherwise.
 	*/
-	virtual bool mayBePointed(ShPtr<Variable> var) const = 0;
+	virtual bool mayBePointed(Variable* var) const = 0;
 
 	/**
 	* @brief Returns the ID of the analysis.
@@ -75,7 +75,7 @@ protected:
 
 protected:
 	/// The current module.
-	ShPtr<Module> module;
+	Module* module = nullptr;
 
 	/// Global variables in @c module. This is here to speedup the analysis. By
 	/// using this set, we do not have to ask @c module every time we need such

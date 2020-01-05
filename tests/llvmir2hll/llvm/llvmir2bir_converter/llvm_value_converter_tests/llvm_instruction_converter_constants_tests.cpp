@@ -60,7 +60,7 @@ class LLVMInstructionConverterConstExpressionsTests: public LLVMIR2BIRConverterB
 protected:
 	/// @name Testing conversion of integral compare constant expressions
 	/// @{
-	ShPtr<Expression> createICmpInstAndConvertToBir(const std::string &pred);
+	Expression* createICmpInstAndConvertToBir(const std::string &pred);
 	template<class T>
 	void iCmpIsConvertedCorrectly(const std::string &pred);
 	template<class T>
@@ -75,7 +75,7 @@ protected:
 *
 * @param[in] pred Predicate which is used for creating LLVM icmp instruction.
 */
-ShPtr<Expression> LLVMInstructionConverterConstExpressionsTests::createICmpInstAndConvertToBir(
+Expression* LLVMInstructionConverterConstExpressionsTests::createICmpInstAndConvertToBir(
 		const std::string &pred) {
 	auto module = convertLLVMIR2BIR(R"(
 		@g = global i32 1

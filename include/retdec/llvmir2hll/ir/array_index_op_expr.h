@@ -26,15 +26,15 @@ class Visitor;
 */
 class ArrayIndexOpExpr final: public BinaryOpExpr {
 public:
-	static ShPtr<ArrayIndexOpExpr> create(ShPtr<Expression> base,
-		ShPtr<Expression> index);
+	static ArrayIndexOpExpr* create(Expression* base,
+		Expression* index);
 
-	virtual ShPtr<Type> getType() const override;
-	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
-	virtual ShPtr<Value> clone() override;
+	virtual Type* getType() const override;
+	virtual bool isEqualTo(Value* otherValue) const override;
+	virtual Value* clone() override;
 
-	ShPtr<Expression> getBase() const;
-	ShPtr<Expression> getIndex() const;
+	Expression* getBase() const;
+	Expression* getIndex() const;
 
 	/// @name Visitor Interface
 	/// @{
@@ -44,7 +44,7 @@ public:
 private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
-	ArrayIndexOpExpr(ShPtr<Expression> base, ShPtr<Expression> index);
+	ArrayIndexOpExpr(Expression* base, Expression* index);
 };
 
 } // namespace llvmir2hll

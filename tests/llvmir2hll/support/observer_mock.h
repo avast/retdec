@@ -21,7 +21,7 @@ namespace tests {
 template<typename SubjectType, typename ArgType = SubjectType>
 class ObserverMock: public Observer<SubjectType, ArgType> {
 public:
-	MOCK_METHOD2_T(update, void (ShPtr<SubjectType>, ShPtr<ArgType>));
+	MOCK_METHOD2_T(update, void (SubjectType*, ArgType*));
 };
 
 /**
@@ -41,7 +41,7 @@ public:
 #define INSTANTIATE_OBSERVER_MOCK(observerName, MockType, SubjectType) \
 	::testing::MockType<ObserverMock<SubjectType>> *observerName##Mock = \
 		new ::testing::MockType<ObserverMock<SubjectType>>(); \
-	ShPtr<Observer<SubjectType>> observerName(observerName##Mock);
+	Observer<SubjectType> observerName(observerName##Mock);
 
 } // namespace tests
 } // namespace llvmir2hll

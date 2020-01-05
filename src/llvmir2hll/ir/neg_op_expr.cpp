@@ -16,18 +16,18 @@ namespace llvmir2hll {
 *
 * See create() for more information.
 */
-NegOpExpr::NegOpExpr(ShPtr<Expression> op):
+NegOpExpr::NegOpExpr(Expression* op):
 	UnaryOpExpr(op) {}
 
-bool NegOpExpr::isEqualTo(ShPtr<Value> otherValue) const {
-	if (ShPtr<NegOpExpr> otherValueNegOpExpr = cast<NegOpExpr>(otherValue)) {
+bool NegOpExpr::isEqualTo(Value* otherValue) const {
+	if (NegOpExpr* otherValueNegOpExpr = cast<NegOpExpr>(otherValue)) {
 		return op->isEqualTo(otherValueNegOpExpr->getOperand());
 	}
 	return false;
 }
 
-ShPtr<Value> NegOpExpr::clone() {
-	ShPtr<NegOpExpr> negOpExpr(NegOpExpr::create(ucast<Expression>(op->clone())));
+Value* NegOpExpr::clone() {
+	NegOpExpr* negOpExpr(NegOpExpr::create(ucast<Expression>(op->clone())));
 	negOpExpr->setMetadata(getMetadata());
 	return negOpExpr;
 }
@@ -40,12 +40,12 @@ ShPtr<Value> NegOpExpr::clone() {
 * @par Preconditions
 *  - @a op is non-null
 */
-ShPtr<NegOpExpr> NegOpExpr::create(ShPtr<Expression> op) {
+NegOpExpr* NegOpExpr::create(Expression* op) {
 	PRECONDITION_NON_NULL(op);
 
-	ShPtr<NegOpExpr> expr(new NegOpExpr(op));
+	NegOpExpr* expr(new NegOpExpr(op));
 
-	// Initialization (recall that shared_from_this() cannot be called in a
+	// Initialization (recall that this cannot be called in a
 	// constructor).
 	op->addObserver(expr);
 
@@ -53,7 +53,7 @@ ShPtr<NegOpExpr> NegOpExpr::create(ShPtr<Expression> op) {
 }
 
 void NegOpExpr::accept(Visitor *v) {
-	v->visit(ucast<NegOpExpr>(shared_from_this()));
+	v->visit(ucast<NegOpExpr>(this));
 }
 
 } // namespace llvmir2hll

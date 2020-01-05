@@ -30,24 +30,24 @@ class Variable;
 class VarDefCFGTraversal final: public CFGTraversal {
 public:
 	static bool isVarDefBetweenStmts(const VarSet &vars,
-		ShPtr<Statement> start, ShPtr<Statement> end, ShPtr<CFG> cfg,
-		ShPtr<ValueAnalysis> va);
+		Statement* start, Statement* end, CFG* cfg,
+		ValueAnalysis* va);
 
 private:
 	/// Variables for whose definition/modification we're looking for.
 	const VarSet &vars;
 
 	/// Statement at which we should end the traversal.
-	ShPtr<Statement> end;
+	Statement* end = nullptr;
 
 	/// The used analysis of values.
-	ShPtr<ValueAnalysis> va;
+	ValueAnalysis* va = nullptr;
 
 private:
-	VarDefCFGTraversal(ShPtr<CFG> cfg, const VarSet &vars,
-		ShPtr<Statement> end, ShPtr<ValueAnalysis> va);
+	VarDefCFGTraversal(CFG* cfg, const VarSet &vars,
+		Statement* end, ValueAnalysis* va);
 
-	virtual bool visitStmt(ShPtr<Statement> stmt) override;
+	virtual bool visitStmt(Statement* stmt) override;
 	virtual bool getEndRetVal() const override;
 	virtual bool combineRetVals(bool origRetVal, bool newRetVal) const override;
 };

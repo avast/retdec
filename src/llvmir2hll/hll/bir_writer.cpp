@@ -84,7 +84,7 @@
 namespace retdec {
 namespace llvmir2hll {
 
-void BIRWriter::emit(ShPtr<Module> m, const std::string& fileName) {
+void BIRWriter::emit(Module* m, const std::string& fileName) {
 	module = m;
 
 	out.str(std::string());
@@ -128,20 +128,20 @@ void BIRWriter::emitFunctions() {
 	}
 }
 
-void BIRWriter::emitLabel(ShPtr<Statement> stmt) {
+void BIRWriter::emitLabel(Statement* stmt) {
 	if (stmt && stmt->hasLabel()) {
 		emitIndent(2);
 		out << stmt->getLabel() << ": (" << std::hex
-				<< uint64_t(stmt.get()) << std::dec << ")" << std::endl;
+				<< uint64_t(stmt) << std::dec << ")" << std::endl;
 	}
 	else if (stmt && stmt->isGotoTarget()) {
 		emitIndent(2);
 		out << "missing label for goto target: (" << std::hex
-				<< uint64_t(stmt.get()) << std::dec << ")" << std::endl;
+				<< uint64_t(stmt) << std::dec << ")" << std::endl;
 	}
 }
 
-void BIRWriter::visit(ShPtr<GlobalVarDef> varDef) {
+void BIRWriter::visit(GlobalVarDef* varDef) {
 	currIndent = 1;
 	emitCurrentIndent();
 
@@ -156,7 +156,7 @@ void BIRWriter::visit(ShPtr<GlobalVarDef> varDef) {
 	out << std::endl;
 }
 
-void BIRWriter::visit(ShPtr<Function> func) {
+void BIRWriter::visit(Function* func) {
 	currIndent = 1;
 	emitCurrentIndent();
 	func->getAsVar()->accept(this);
@@ -198,7 +198,7 @@ void BIRWriter::visit(ShPtr<Function> func) {
 	out << std::endl;
 }
 
-void BIRWriter::visit(ShPtr<AssignStmt> stmt) {
+void BIRWriter::visit(AssignStmt* stmt) {
 	emitLabel(stmt);
 	emitCurrentIndent();
 	stmt->getLhs()->accept(this);
@@ -208,14 +208,14 @@ void BIRWriter::visit(ShPtr<AssignStmt> stmt) {
 	if (stmt->getSuccessor()) stmt->getSuccessor()->accept(this);
 }
 
-void BIRWriter::visit(ShPtr<BreakStmt> stmt) {
+void BIRWriter::visit(BreakStmt* stmt) {
 	emitLabel(stmt);
 	emitCurrentIndent();
 	out << "break" << std::endl;
 	if (stmt->getSuccessor()) stmt->getSuccessor()->accept(this);
 }
 
-void BIRWriter::visit(ShPtr<CallStmt> stmt) {
+void BIRWriter::visit(CallStmt* stmt) {
 	emitLabel(stmt);
 	emitCurrentIndent();
 	stmt->getCall()->accept(this);
@@ -223,21 +223,21 @@ void BIRWriter::visit(ShPtr<CallStmt> stmt) {
 	if (stmt->getSuccessor()) stmt->getSuccessor()->accept(this);
 }
 
-void BIRWriter::visit(ShPtr<ContinueStmt> stmt) {
+void BIRWriter::visit(ContinueStmt* stmt) {
 	emitLabel(stmt);
 	emitCurrentIndent();
 	out << "continue" << std::endl;
 	if (stmt->getSuccessor()) stmt->getSuccessor()->accept(this);
 }
 
-void BIRWriter::visit(ShPtr<EmptyStmt> stmt) {
+void BIRWriter::visit(EmptyStmt* stmt) {
 	emitLabel(stmt);
 	emitCurrentIndent();
 	out << "EmptyStmt" << std::endl;
 	if (stmt->getSuccessor()) stmt->getSuccessor()->accept(this);
 }
 
-void BIRWriter::visit(ShPtr<ForLoopStmt> stmt) {
+void BIRWriter::visit(ForLoopStmt* stmt) {
 	emitLabel(stmt);
 	emitCurrentIndent();
 	out << "for (";
@@ -260,7 +260,7 @@ void BIRWriter::visit(ShPtr<ForLoopStmt> stmt) {
 	if (stmt->getSuccessor()) stmt->getSuccessor()->accept(this);
 }
 
-void BIRWriter::visit(ShPtr<UForLoopStmt> stmt) {
+void BIRWriter::visit(UForLoopStmt* stmt) {
 	emitLabel(stmt);
 	emitCurrentIndent();
 	out << "ufor (";
@@ -281,7 +281,7 @@ void BIRWriter::visit(ShPtr<UForLoopStmt> stmt) {
 	if (stmt->getSuccessor()) stmt->getSuccessor()->accept(this);
 }
 
-void BIRWriter::visit(ShPtr<GotoStmt> stmt) {
+void BIRWriter::visit(GotoStmt* stmt) {
 	emitLabel(stmt);
 	emitCurrentIndent();
 	out << "goto ";
@@ -291,7 +291,7 @@ void BIRWriter::visit(ShPtr<GotoStmt> stmt) {
 		} else {
 			out << "<undef_label>";
 		}
-		out << " (" << std::hex << uint64_t(stmt->getTarget().get())
+		out << " (" << std::hex << uint64_t(stmt->getTarget())
 				<< std::dec << ")" << std::endl;
 	} else {
 		out << "<undef_target>" << std::endl;
@@ -299,7 +299,7 @@ void BIRWriter::visit(ShPtr<GotoStmt> stmt) {
 	if (stmt->getSuccessor()) stmt->getSuccessor()->accept(this);
 }
 
-void BIRWriter::visit(ShPtr<IfStmt> stmt) {
+void BIRWriter::visit(IfStmt* stmt) {
 	emitLabel(stmt);
 	bool first = true;
 	for (auto it = stmt->clause_begin(), e = stmt->clause_end(); it != e; ++it) {
@@ -328,7 +328,7 @@ void BIRWriter::visit(ShPtr<IfStmt> stmt) {
 	if (stmt->getSuccessor()) stmt->getSuccessor()->accept(this);
 }
 
-void BIRWriter::visit(ShPtr<ReturnStmt> stmt) {
+void BIRWriter::visit(ReturnStmt* stmt) {
 	emitLabel(stmt);
 	emitCurrentIndent();
 	out << "return ";
@@ -341,7 +341,7 @@ void BIRWriter::visit(ShPtr<ReturnStmt> stmt) {
 	if (stmt->getSuccessor()) stmt->getSuccessor()->accept(this);
 }
 
-void BIRWriter::visit(ShPtr<SwitchStmt> stmt) {
+void BIRWriter::visit(SwitchStmt* stmt) {
 	emitLabel(stmt);
 	emitCurrentIndent();
 	out << "switch (";
@@ -366,13 +366,13 @@ void BIRWriter::visit(ShPtr<SwitchStmt> stmt) {
 	if (stmt->getSuccessor()) stmt->getSuccessor()->accept(this);
 }
 
-void BIRWriter::visit(ShPtr<UnreachableStmt> stmt) {
+void BIRWriter::visit(UnreachableStmt* stmt) {
 	emitLabel(stmt);
 	out << "unreachable" << std::endl;
 	if (stmt->getSuccessor()) stmt->getSuccessor()->accept(this);
 }
 
-void BIRWriter::visit(ShPtr<VarDefStmt> stmt) {
+void BIRWriter::visit(VarDefStmt* stmt) {
 	emitLabel(stmt);
 	emitCurrentIndent();
 	stmt->getVar()->accept(this);
@@ -386,7 +386,7 @@ void BIRWriter::visit(ShPtr<VarDefStmt> stmt) {
 	if (stmt->getSuccessor()) stmt->getSuccessor()->accept(this);
 }
 
-void BIRWriter::visit(ShPtr<WhileLoopStmt> stmt) {
+void BIRWriter::visit(WhileLoopStmt* stmt) {
 	emitLabel(stmt);
 	emitCurrentIndent();
 	out << "while (";
@@ -403,67 +403,67 @@ void BIRWriter::visit(ShPtr<WhileLoopStmt> stmt) {
 	if (stmt->getSuccessor()) stmt->getSuccessor()->accept(this);
 }
 
-void BIRWriter::visit(ShPtr<AddOpExpr> expr) {
+void BIRWriter::visit(AddOpExpr* expr) {
 	expr->getFirstOperand()->accept(this);
 	out << " + ";
 	expr->getSecondOperand()->accept(this);
 }
 
-void BIRWriter::visit(ShPtr<AddressOpExpr> expr) {
+void BIRWriter::visit(AddressOpExpr* expr) {
 	out << "&";
 	expr->getOperand()->accept(this);
 }
 
-void BIRWriter::visit(ShPtr<AndOpExpr> expr) {
+void BIRWriter::visit(AndOpExpr* expr) {
 	expr->getFirstOperand()->accept(this);
 	out << " && ";
 	expr->getSecondOperand()->accept(this);
 }
 
-void BIRWriter::visit(ShPtr<ArrayIndexOpExpr> expr) {
+void BIRWriter::visit(ArrayIndexOpExpr* expr) {
 	expr->getBase()->accept(this);
 	out << "[";
 	expr->getIndex()->accept(this);
 	out << "]";
 }
 
-void BIRWriter::visit(ShPtr<AssignOpExpr> expr) {
+void BIRWriter::visit(AssignOpExpr* expr) {
 	expr->getFirstOperand()->accept(this);
 	out << " = ";
 	expr->getSecondOperand()->accept(this);
 }
 
-void BIRWriter::visit(ShPtr<BitAndOpExpr> expr) {
+void BIRWriter::visit(BitAndOpExpr* expr) {
 	expr->getFirstOperand()->accept(this);
 	out << " & ";
 	expr->getSecondOperand()->accept(this);
 }
 
-void BIRWriter::visit(ShPtr<BitOrOpExpr> expr) {
+void BIRWriter::visit(BitOrOpExpr* expr) {
 	expr->getFirstOperand()->accept(this);
 	out << " | ";
 	expr->getSecondOperand()->accept(this);
 }
 
-void BIRWriter::visit(ShPtr<BitShlOpExpr> expr) {
+void BIRWriter::visit(BitShlOpExpr* expr) {
 	expr->getFirstOperand()->accept(this);
 	out << " << ";
 	expr->getSecondOperand()->accept(this);
 }
 
-void BIRWriter::visit(ShPtr<BitShrOpExpr> expr) {
+void BIRWriter::visit(BitShrOpExpr* expr) {
 	expr->getFirstOperand()->accept(this);
 	out << " >> ";
 	expr->getSecondOperand()->accept(this);
 }
 
-void BIRWriter::visit(ShPtr<BitXorOpExpr> expr) {
+void BIRWriter::visit(BitXorOpExpr* expr) {
 	expr->getFirstOperand()->accept(this);
 	out << " ^ ";
 	expr->getSecondOperand()->accept(this);
 }
 
-void BIRWriter::visit(ShPtr<CallExpr> expr) {
+void BIRWriter::visit(CallExpr* expr) {
 	expr->getCalledExpr()->accept(this);
 	out << "(";
 	bool first = true;
@@ -478,100 +478,100 @@ void BIRWriter::visit(ShPtr<CallExpr> expr) {
 	out << ")";
 }
 
-void BIRWriter::visit(ShPtr<CommaOpExpr> expr) {
+void BIRWriter::visit(CommaOpExpr* expr) {
 	expr->getFirstOperand()->accept(this);
 	out << " , ";
 	expr->getSecondOperand()->accept(this);
 }
 
-void BIRWriter::visit(ShPtr<DerefOpExpr> expr) {
+void BIRWriter::visit(DerefOpExpr* expr) {
 	out << "*";
 	expr->getOperand()->accept(this);
 }
 
-void BIRWriter::visit(ShPtr<DivOpExpr> expr) {
+void BIRWriter::visit(DivOpExpr* expr) {
 	expr->getFirstOperand()->accept(this);
 	out << " / ";
 	expr->getSecondOperand()->accept(this);
 }
 
-void BIRWriter::visit(ShPtr<EqOpExpr> expr) {
+void BIRWriter::visit(EqOpExpr* expr) {
 	expr->getFirstOperand()->accept(this);
 	out << " == ";
 	expr->getSecondOperand()->accept(this);
 }
 
-void BIRWriter::visit(ShPtr<GtEqOpExpr> expr) {
+void BIRWriter::visit(GtEqOpExpr* expr) {
 	expr->getFirstOperand()->accept(this);
 	out << " >= ";
 	expr->getSecondOperand()->accept(this);
 }
 
-void BIRWriter::visit(ShPtr<GtOpExpr> expr) {
+void BIRWriter::visit(GtOpExpr* expr) {
 	expr->getFirstOperand()->accept(this);
 	out << " > ";
 	expr->getSecondOperand()->accept(this);
 }
 
-void BIRWriter::visit(ShPtr<LtEqOpExpr> expr) {
+void BIRWriter::visit(LtEqOpExpr* expr) {
 	expr->getFirstOperand()->accept(this);
 	out << " <= ";
 	expr->getSecondOperand()->accept(this);
 }
 
-void BIRWriter::visit(ShPtr<LtOpExpr> expr) {
+void BIRWriter::visit(LtOpExpr* expr) {
 	expr->getFirstOperand()->accept(this);
 	out << " < ";
 	expr->getSecondOperand()->accept(this);
 }
 
-void BIRWriter::visit(ShPtr<ModOpExpr> expr) {
+void BIRWriter::visit(ModOpExpr* expr) {
 	expr->getFirstOperand()->accept(this);
 	out << " % ";
 	expr->getSecondOperand()->accept(this);
 }
 
-void BIRWriter::visit(ShPtr<MulOpExpr> expr) {
+void BIRWriter::visit(MulOpExpr* expr) {
 	expr->getFirstOperand()->accept(this);
 	out << " * ";
 	expr->getSecondOperand()->accept(this);
 }
 
-void BIRWriter::visit(ShPtr<NegOpExpr> expr) {
+void BIRWriter::visit(NegOpExpr* expr) {
 	out << "-";
 	expr->getOperand()->accept(this);
 }
 
-void BIRWriter::visit(ShPtr<NeqOpExpr> expr) {
+void BIRWriter::visit(NeqOpExpr* expr) {
 	expr->getFirstOperand()->accept(this);
 	out << " != ";
 	expr->getSecondOperand()->accept(this);
 }
 
-void BIRWriter::visit(ShPtr<NotOpExpr> expr) {
+void BIRWriter::visit(NotOpExpr* expr) {
 	out << "!";
 	expr->getOperand()->accept(this);
 }
 
-void BIRWriter::visit(ShPtr<OrOpExpr> expr) {
+void BIRWriter::visit(OrOpExpr* expr) {
 	expr->getFirstOperand()->accept(this);
 	out << " || ";
 	expr->getSecondOperand()->accept(this);
 }
 
-void BIRWriter::visit(ShPtr<StructIndexOpExpr> expr) {
+void BIRWriter::visit(StructIndexOpExpr* expr) {
 	expr->getFirstOperand()->accept(this);
 	out << ".";
 	expr->getSecondOperand()->accept(this);
 }
 
-void BIRWriter::visit(ShPtr<SubOpExpr> expr) {
+void BIRWriter::visit(SubOpExpr* expr) {
 	expr->getFirstOperand()->accept(this);
 	out << " - ";
 	expr->getSecondOperand()->accept(this);
 }
 
-void BIRWriter::visit(ShPtr<TernaryOpExpr> expr) {
+void BIRWriter::visit(TernaryOpExpr* expr) {
 	expr->getCondition()->accept(this);
 	out << " ? ";
 	expr->getTrueValue()->accept(this);
@@ -579,7 +579,7 @@ void BIRWriter::visit(ShPtr<TernaryOpExpr> expr) {
 	expr->getFalseValue()->accept(this);
 }
 
-void BIRWriter::visit(ShPtr<Variable> var) {
+void BIRWriter::visit(Variable* var) {
 	auto n = var->getName();
 	auto in = var->getInitialName();
 
@@ -590,14 +590,14 @@ void BIRWriter::visit(ShPtr<Variable> var) {
 	}
 }
 
-void BIRWriter::visit(ShPtr<BitCastExpr> expr) {
+void BIRWriter::visit(BitCastExpr* expr) {
 	out << "bitcast ";
 	expr->getOperand()->accept(this);
 	out << " to ";
 	expr->getType()->accept(this);
 }
 
-void BIRWriter::visit(ShPtr<ExtCastExpr> expr) {
+void BIRWriter::visit(ExtCastExpr* expr) {
 	if (expr->getVariant() == ExtCastExpr::Variant::ZExt) {
 		out << "zext ";
 	} else if (expr->getVariant() == ExtCastExpr::Variant::SExt) {
@@ -610,42 +610,42 @@ void BIRWriter::visit(ShPtr<ExtCastExpr> expr) {
 	expr->getType()->accept(this);
 }
 
-void BIRWriter::visit(ShPtr<FPToIntCastExpr> expr) {
+void BIRWriter::visit(FPToIntCastExpr* expr) {
 	out << "fptoint ";
 	expr->getOperand()->accept(this);
 	out << " to ";
 	expr->getType()->accept(this);
 }
 
-void BIRWriter::visit(ShPtr<IntToFPCastExpr> expr) {
+void BIRWriter::visit(IntToFPCastExpr* expr) {
 	out << "inttofp ";
 	expr->getOperand()->accept(this);
 	out << " to ";
 	expr->getType()->accept(this);
 }
 
-void BIRWriter::visit(ShPtr<IntToPtrCastExpr> expr) {
+void BIRWriter::visit(IntToPtrCastExpr* expr) {
 	out << "inttoptr ";
 	expr->getOperand()->accept(this);
 	out << " to ";
 	expr->getType()->accept(this);
 }
 
-void BIRWriter::visit(ShPtr<PtrToIntCastExpr> expr) {
+void BIRWriter::visit(PtrToIntCastExpr* expr) {
 	out << "ptrtoint ";
 	expr->getOperand()->accept(this);
 	out << " to ";
 	expr->getType()->accept(this);
 }
 
-void BIRWriter::visit(ShPtr<TruncCastExpr> expr) {
+void BIRWriter::visit(TruncCastExpr* expr) {
 	out << "trunc ";
 	expr->getOperand()->accept(this);
 	out << " to ";
 	expr->getType()->accept(this);
 }
 
-void BIRWriter::visit(ShPtr<ConstArray> constant) {
+void BIRWriter::visit(ConstArray* constant) {
 	constant->getType()->accept(this);
 	out << " = [";
 	bool first = false;
@@ -659,40 +659,40 @@ void BIRWriter::visit(ShPtr<ConstArray> constant) {
 	}
 }
 
-void BIRWriter::visit(ShPtr<ConstBool> constant) {
+void BIRWriter::visit(ConstBool* constant) {
 	out << (constant->isTrue() ? "True" : "False");
 }
 
-void BIRWriter::visit(ShPtr<ConstFloat> constant) {
+void BIRWriter::visit(ConstFloat* constant) {
 	constant->getType()->accept(this);
 	out << " " << constant->toString();
 }
 
-void BIRWriter::visit(ShPtr<ConstInt> constant) {
+void BIRWriter::visit(ConstInt* constant) {
 	constant->getType()->accept(this);
 	out << " " << constant->toString();
 }
 
-void BIRWriter::visit(ShPtr<ConstNullPointer> constant) {
+void BIRWriter::visit(ConstNullPointer* constant) {
 	out << "const ";
 	constant->getType()->accept(this);
 }
 
-void BIRWriter::visit(ShPtr<ConstString> constant) {
+void BIRWriter::visit(ConstString* constant) {
 	out << "const ";
 	constant->getType()->accept(this);
 }
 
-void BIRWriter::visit(ShPtr<ConstStruct> constant) {
+void BIRWriter::visit(ConstStruct* constant) {
 	out << "const ";
 	constant->getType()->accept(this);
 }
 
-void BIRWriter::visit(ShPtr<ConstSymbol> constant) {
+void BIRWriter::visit(ConstSymbol* constant) {
 	out << "const " << constant->getName();
 }
 
-void BIRWriter::visit(ShPtr<ArrayType> type) {
+void BIRWriter::visit(ArrayType* type) {
 	out << "[";
 	for (auto d : type->getDimensions()) {
 		out << d << "x";
@@ -701,23 +701,23 @@ void BIRWriter::visit(ShPtr<ArrayType> type) {
 	out << "]";
 }
 
-void BIRWriter::visit(ShPtr<FloatType> type) {
+void BIRWriter::visit(FloatType* type) {
 	out << "float_" << type->getSize();
 }
 
-void BIRWriter::visit(ShPtr<IntType> type) {
+void BIRWriter::visit(IntType* type) {
 	if (type->isUnsigned()) {
 		out << "u";
 	}
 	out << "int_" << type->getSize();
 }
 
-void BIRWriter::visit(ShPtr<PointerType> type) {
+void BIRWriter::visit(PointerType* type) {
 	type->getContainedType()->accept(this);
 	out << "*";
 }
 
-void BIRWriter::visit(ShPtr<StringType> type) {
+void BIRWriter::visit(StringType* type) {
 	if (type->getCharSize() > 8) {
 		out << "wide_string";
 	} else {
@@ -725,11 +725,11 @@ void BIRWriter::visit(ShPtr<StringType> type) {
 	}
 }
 
-void BIRWriter::visit(ShPtr<StructType> type) {
+void BIRWriter::visit(StructType* type) {
 	out << type->getName();
 }
 
-void BIRWriter::visit(ShPtr<FunctionType> type) {
+void BIRWriter::visit(FunctionType* type) {
 	type->getRetType()->accept(this);
 	out << "(";
 	bool first = true;
@@ -748,11 +748,11 @@ void BIRWriter::visit(ShPtr<FunctionType> type) {
 	out << ")";
 }
 
-void BIRWriter::visit(ShPtr<VoidType> type) {
+void BIRWriter::visit(VoidType* type) {
 	out << "void";
 }
 
-void BIRWriter::visit(ShPtr<UnknownType> type) {
+void BIRWriter::visit(UnknownType* type) {
 	out << "type_unknown";
 }
 

@@ -65,7 +65,7 @@ class ValueAnalysis;
 */
 class VarDefStmtOptimizer final: public FuncOptimizer {
 public:
-	VarDefStmtOptimizer(ShPtr<Module> module, ShPtr<ValueAnalysis> va);
+	VarDefStmtOptimizer(Module* module, ValueAnalysis* va);
 
 	virtual std::string getId() const override { return "VarDefStmt"; }
 
@@ -78,13 +78,13 @@ private:
 
 	/// Structure that saves statement to optimize and type of optimization.
 	struct StmtToOptimize {
-		ShPtr<Statement> stmt;
+		Statement* stmt = nullptr;
 		OptType optType;
 	};
 
 	/// Structure that saves basic information about next nesting level block.
 	struct NextLvlStmts {
-		ShPtr<Statement> stmt; ///< parent statement of block
+		Statement* stmt = nullptr; ///< parent statement of block
 		std::size_t order; ///< order of parent statement in it's block
 		VarSet vars; ///< variables that are visible from this block
 	};
@@ -92,27 +92,27 @@ private:
 	/// Structure that saves statement of first use of some variable. Also saves
 	/// level of nesting.
 	struct FirstUse {
-		ShPtr<Statement> stmt;
+		Statement* stmt = nullptr;
 		std::size_t level;
 	};
 
 	/// Vector of VarDefStmt.
-	using VarDefStmtVec = std::vector<ShPtr<VarDefStmt>>;
+	using VarDefStmtVec = std::vector<VarDefStmt*>;
 
 	/// Mapping of a Variable into a VarDefStmt.
-	using VarVarDefMap = std::map<ShPtr<Variable>, ShPtr<VarDefStmt>>;
+	using VarVarDefMap = std::map<Variable*, VarDefStmt*>;
 
 	/// Mapping of a Variable into a StmtToOptimize.
-	using VarStmtToOptimizeMap = std::map<ShPtr<Variable>, StmtToOptimize>;
+	using VarStmtToOptimizeMap = std::map<Variable*, StmtToOptimize>;
 
 	/// Mapping of a Variable into a FirstUse.
-	using VarFirstUseMap = std::map<ShPtr<Variable>, FirstUse >;
+	using VarFirstUseMap = std::map<Variable*, FirstUse >;
 
 	/// Mapping of a level of nesting into a count of usage variable.
 	using LevelCountMap = std::map<std::size_t, std::size_t>;
 
 	/// Mapping of a Variable into a LevelCountMap.
-	using VarLevelCountMap = std::map<ShPtr<Variable>, LevelCountMap>;
+	using VarLevelCountMap = std::map<Variable*, LevelCountMap>;
 
 	/// Vector of NextLvlStmts.
 	using VecNextLvlStmts = std::vector<NextLvlStmts>;
@@ -123,37 +123,37 @@ private:
 private:
 	virtual void doOptimization() override;
 
-	void analyseVariablesInStmt(ShPtr<Statement> stmt, VarSet &thisLvlVars);
+	void analyseVariablesInStmt(Statement* stmt, VarSet &thisLvlVars);
 	void clearAllRecords();
-	ShPtr<Statement> findCorrectStatement(ShPtr<Variable> var, std::size_t level);
+	Statement* findCorrectStatement(Variable* var, std::size_t level);
 	void findStmtsToOptimize();
-	ShPtr<Statement> findStmtToPrepend(ShPtr<Variable> var, std::size_t level) const;
+	Statement* findStmtToPrepend(Variable* var, std::size_t level) const;
 	void getVarsFromVarDefStmts(const VarDefStmtSet &noInitVarDefStmts);
-	void goToNextBlockAndAppendVisibleVars(ShPtr<Statement> stmt,
-		ShPtr<Statement> parent, std::size_t order, VarSet &vars);
-	bool isAssignStmtWithVarOnLhs(ShPtr<Statement> stmt,
-		ShPtr<Variable> var) const;
-	VarSet oneBlockTraversal(ShPtr<Statement> stmt, ShPtr<Statement> parent,
+	void goToNextBlockAndAppendVisibleVars(Statement* stmt,
+		Statement* parent, std::size_t order, VarSet &vars);
+	bool isAssignStmtWithVarOnLhs(Statement* stmt,
+		Variable* var) const;
+	VarSet oneBlockTraversal(Statement* stmt, Statement* parent,
 		std::size_t order);
 	void optimizeAssignStmts(StmtSet &toRemoveStmts) const;
 	void optimizeVarDefStmts() const;
 	void optimizeWithPrepend(StmtSet &toRemoveStmts) const;
-	OptType prependOrAssign(ShPtr<Statement> stmt, ShPtr<Variable> var) const;
+	OptType prependOrAssign(Statement* stmt, Variable* var) const;
 	void removeStructAndArrayVarDefStmts(VarDefStmtSet &noInitVarDefStmts) const;
 	void removeToBeRemovedStmts(StmtSet toRemoveStmts) const;
-	virtual void runOnFunction(ShPtr<Function> func) override;
+	virtual void runOnFunction(Function* func) override;
 	void saveCountOfUsageVars(const VarSet &vars);
-	void saveVars(ShPtr<Statement> parent, std::size_t order, VarSet vars);
-	void setStmtToOptimize(ShPtr<Variable> var, ShPtr<Statement> stmt);
+	void saveVars(Statement* parent, std::size_t order, VarSet vars);
+	void setStmtToOptimize(Variable* var, Statement* stmt);
 	void sortVarDefStmts(const VarDefStmtSet &noInitVarDefStmts);
-	void tryToFindAndEnterToNextNestingLevel(ShPtr<Statement> stmt,
+	void tryToFindAndEnterToNextNestingLevel(Statement* stmt,
 		VarSet &thisLvlVars, std::size_t order);
-	bool tryOptimizeUForLoop(ShPtr<UForLoopStmt> loop,
-		ShPtr<Variable> optimizedVar) const;
+	bool tryOptimizeUForLoop(UForLoopStmt* loop,
+		Variable* optimizedVar) const;
 
 private:
 	/// Analysis of values.
-	ShPtr<ValueAnalysis> va;
+	ValueAnalysis* va = nullptr;
 
 	/// Saves level of current nesting.
 	std::size_t level;

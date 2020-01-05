@@ -62,13 +62,13 @@ public:
 	};
 
 	using TagVector = std::vector<ExprTag>;
-	using ExprTagsMap = std::map< ShPtr<Expression>, TagVector>;
+	using ExprTagsMap = std::map< Expression*, TagVector>;
 
 public:
-	std::size_t getCountOfTag(ShPtr<Expression> expr, ExprTag tag);
-	ExprTagsMap analyzeExprTypes(ShPtr<Module> module);
+	std::size_t getCountOfTag(Expression* expr, ExprTag tag);
+	ExprTagsMap analyzeExprTypes(Module* module);
 
-	static ShPtr<ExprTypesAnalysis> create();
+	static ExprTypesAnalysis* create();
 
 private:
 	/// Map of all analyzed expressions and tags for every expression.
@@ -77,23 +77,23 @@ private:
 private:
 	ExprTypesAnalysis();
 
-	void addTagToExpr(ShPtr<Expression> expr, ExprTag tag);
+	void addTagToExpr(Expression* expr, ExprTag tag);
 
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<ExtCastExpr> expr) override;
-	virtual void visit(ShPtr<IntToFPCastExpr> expr) override;
-	virtual void visit(ShPtr<DivOpExpr> expr) override;
-	virtual void visit(ShPtr<ModOpExpr> expr) override;
-	virtual void visit(ShPtr<AssignStmt> stmt) override;
-	virtual void visit(ShPtr<VarDefStmt> stmt) override;
-	virtual void visit(ShPtr<LtEqOpExpr> expr) override;
-	virtual void visit(ShPtr<GtEqOpExpr> expr) override;
-	virtual void visit(ShPtr<LtOpExpr> expr) override;
-	virtual void visit(ShPtr<GtOpExpr> expr) override;
-	virtual void visit(ShPtr<BitShlOpExpr> expr) override;
-	virtual void visit(ShPtr<BitShrOpExpr> expr) override;
+	virtual void visit(ExtCastExpr* expr) override;
+	virtual void visit(IntToFPCastExpr* expr) override;
+	virtual void visit(DivOpExpr* expr) override;
+	virtual void visit(ModOpExpr* expr) override;
+	virtual void visit(AssignStmt* stmt) override;
+	virtual void visit(VarDefStmt* stmt) override;
+	virtual void visit(LtEqOpExpr* expr) override;
+	virtual void visit(GtEqOpExpr* expr) override;
+	virtual void visit(LtOpExpr* expr) override;
+	virtual void visit(GtOpExpr* expr) override;
+	virtual void visit(BitShlOpExpr* expr) override;
+	virtual void visit(BitShrOpExpr* expr) override;
 	/// @}
 };
 

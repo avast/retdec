@@ -23,7 +23,7 @@ class VarDefLoopOptimizerTests: public TestsWithModule {};
 
 TEST_F(VarDefLoopOptimizerTests,
 OptimizerHasNonEmptyID) {
-	ShPtr<VarDefForLoopOptimizer> optimizer(
+	VarDefForLoopOptimizer* optimizer(
 		new VarDefForLoopOptimizer(module));
 
 	EXPECT_TRUE(!optimizer->getId().empty()) <<

@@ -33,30 +33,30 @@ class VarNameGen;
 */
 class AddressVarRenamer: public VarRenamer {
 public:
-	static ShPtr<VarRenamer> create(ShPtr<VarNameGen> varNameGen,
+	static VarRenamer* create(VarNameGen* varNameGen,
 		bool useDebugNames = true);
 
 	virtual std::string getId() const override;
 
 private:
-	AddressVarRenamer(ShPtr<VarNameGen> varNameGen, bool useDebugNames);
+	AddressVarRenamer(VarNameGen* varNameGen, bool useDebugNames);
 
-	virtual void renameGlobalVar(ShPtr<Variable> var) override;
-	virtual void renameVarsInFunc(ShPtr<Function> func) override;
-	virtual void renameFuncParam(ShPtr<Variable> var,
-		ShPtr<Function> func) override;
-	virtual void renameFuncLocalVar(ShPtr<Variable> var,
-		ShPtr<Function> func) override;
+	virtual void renameGlobalVar(Variable* var) override;
+	virtual void renameVarsInFunc(Function* func) override;
+	virtual void renameFuncParam(Variable* var,
+		Function* func) override;
+	virtual void renameFuncLocalVar(Variable* var,
+		Function* func) override;
 
 private:
 	/// Generator of names for global variables.
-	UPtr<VarNameGen> globalVarNameGen;
+	VarNameGen* globalVarNameGen = nullptr;
 
 	/// Generator of names for parameters.
-	UPtr<VarNameGen> paramVarNameGen;
+	VarNameGen* paramVarNameGen = nullptr;
 
 	/// Generator of names for local variables.
-	UPtr<VarNameGen> localVarNameGen;
+	VarNameGen* localVarNameGen = nullptr;
 };
 
 } // namespace llvmir2hll

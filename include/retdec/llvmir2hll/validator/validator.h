@@ -20,7 +20,7 @@ namespace llvmir2hll {
 * @brief A base class for all validators.
 *
 * Every concrete validator has to:
-*  - define a static <tt>ShPtr<Validator> create()</tt> function
+*  - define a static <tt>Validator* create()</tt> function
 *  - define @c getId(), which returns the ID of the validator
 *  - when there is a validation error, validationError() has to be run
 *  - in its description, mention what validations are performed
@@ -34,7 +34,7 @@ class Validator: protected OrderedAllVisitor {
 public:
 	virtual std::string getId() const = 0;
 
-	bool validate(ShPtr<Module> module, bool printMessageOnError = false);
+	bool validate(Module* module, bool printMessageOnError = false);
 
 protected:
 	Validator();
@@ -56,10 +56,10 @@ protected:
 
 protected:
 	/// The validated module.
-	ShPtr<Module> module;
+	Module* module = nullptr;
 
 	/// The currently traversed function.
-	ShPtr<Function> func;
+	Function* func = nullptr;
 
 private:
 	virtual void runValidation();

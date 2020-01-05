@@ -36,7 +36,7 @@ namespace llvmir2hll {
 * @par Preconditions
 *  - @a module is non-null
 */
-CCastOptimizer::CCastOptimizer(ShPtr<Module> module):
+CCastOptimizer::CCastOptimizer(Module* module):
 	FuncOptimizer(module), optimized(false) {
 		PRECONDITION_NON_NULL(module);
 	}
@@ -52,14 +52,14 @@ CCastOptimizer::CCastOptimizer(ShPtr<Module> module):
 *       of the expression @a dst, type of the cast @a src and type of the
 *       casted operand.
 */
-ShPtr<Expression> CCastOptimizer::checkAndOptimize(ShPtr<Expression> dst,
-		ShPtr<Expression> src) {
+Expression* CCastOptimizer::checkAndOptimize(Expression* dst,
+		Expression* src) {
 	// If source expression is the cast expression.
-	if (ShPtr<CastExpr> srcCast = cast<CastExpr>(src)) {
+	if (CastExpr* srcCast = cast<CastExpr>(src)) {
 		// Integer type optimization.
 		// Implicit conversion to an integer type.
-		if (ShPtr<IntType> dstType = cast<IntType>(dst->getType())) {
-			if (ShPtr<IntType> srcType = cast<IntType>(src->getType())) {
+		if (IntType* dstType = cast<IntType>(dst->getType())) {
+			if (IntType* srcType = cast<IntType>(src->getType())) {
 				// Both are signed or unsigned.
 				if (dstType->isSigned() == srcType->isSigned()) {
 					if (cast<IntType>(srcCast->getOperand()->getType()) ||
@@ -72,8 +72,8 @@ ShPtr<Expression> CCastOptimizer::checkAndOptimize(ShPtr<Expression> dst,
 			}
 		// Floating point type optimization.
 		// Implicit conversion to float type.
-		} else if (ShPtr<FloatType> dstFType = cast<FloatType>(dst->getType())) {
-			if (ShPtr<FloatType> srcFType = cast<FloatType>(src->getType())) {
+		} else if (isa<FloatType>(dst->getType())) {
+			if (isa<FloatType>(src->getType())) {
 				if (cast<IntType>(srcCast->getOperand()->getType()) ||
 						cast<FloatType>(srcCast->getOperand()->getType())) {
 					// Cast expression removed.
@@ -88,10 +88,10 @@ ShPtr<Expression> CCastOptimizer::checkAndOptimize(ShPtr<Expression> dst,
 }
 
 // Visitors
-void CCastOptimizer::visit(ShPtr<CallExpr> expr) {
-	if (ShPtr<Variable> function = cast<Variable>(expr->getCalledExpr())) {
+void CCastOptimizer::visit(CallExpr* expr) {
+	if (Variable* function = cast<Variable>(expr->getCalledExpr())) {
 		// Searching the function. Argument types are needed.
-		ShPtr<Function> func = module->getFuncByName(function->getName());
+		Function* func = module->getFuncByName(function->getName());
 		if (func) {
 			// Checks all expected and used arguments.
 			const VarVector &params = func->getParams();
@@ -114,15 +114,15 @@ void CCastOptimizer::visit(ShPtr<CallExpr> expr) {
 	FuncOptimizer::visit(expr);
 }
 
-void CCastOptimizer::visit(ShPtr<AssignStmt> stmt) {
+void CCastOptimizer::visit(AssignStmt* stmt) {
 	do {
 		stmt->setRhs(checkAndOptimize(stmt->getLhs(), stmt->getRhs()));
 	} while (optimized);
 	FuncOptimizer::visit(stmt);
 }
 
-void CCastOptimizer::visit(ShPtr<VarDefStmt> stmt) {
-	if (ShPtr<Expression> init = stmt->getInitializer()) {
+void CCastOptimizer::visit(VarDefStmt* stmt) {
+	if (stmt->getInitializer()) {
 		do {
 			stmt->setInitializer(checkAndOptimize(stmt->getVar(),
 				stmt->getInitializer()));
@@ -131,8 +131,8 @@ void CCastOptimizer::visit(ShPtr<VarDefStmt> stmt) {
 	FuncOptimizer::visit(stmt);
 }
 
-void CCastOptimizer::visit(ShPtr<ReturnStmt> stmt) {
-	if (ShPtr<Expression> retVal = stmt->getRetVal()) {
+void CCastOptimizer::visit(ReturnStmt* stmt) {
+	if (Expression* retVal = stmt->getRetVal()) {
 		do {
 			stmt->setRetVal(checkAndOptimize(retVal, stmt->getRetVal()));
 		} while (optimized);

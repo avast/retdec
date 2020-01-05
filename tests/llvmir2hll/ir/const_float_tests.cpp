@@ -145,8 +145,8 @@ ToMostReadableStringMostReadableRepresentationForSpecialValues) {
 
 TEST_F(ConstFloatTests,
 flipSign) {
-	ShPtr<ConstFloat> negFloat(ConstFloat::create(llvm::APFloat(-2.0)));
-	ShPtr<ConstFloat> posFloat(ConstFloat::create(llvm::APFloat(5.0)));
+	ConstFloat* negFloat(ConstFloat::create(llvm::APFloat(-2.0)));
+	ConstFloat* posFloat(ConstFloat::create(llvm::APFloat(5.0)));
 
 	// Flip sign.
 	negFloat->flipSign();

@@ -31,12 +31,12 @@ BreakInIfAnalysis::BreakInIfAnalysis():
 * @par Preconditions
 *  - @a stmt is non-null
 */
-bool BreakInIfAnalysis::hasBreakStmt(ShPtr<IfStmt> stmt) {
+bool BreakInIfAnalysis::hasBreakStmt(IfStmt* stmt) {
 	PRECONDITION_NON_NULL(stmt);
 
-	ShPtr<BreakInIfAnalysis> analysis(new BreakInIfAnalysis());
+	BreakInIfAnalysis* analysis(new BreakInIfAnalysis());
 
-	// Can't be substituted this block to stmt->accept(analysis.get()) because
+	// Can't be substituted this block to stmt->accept(analysis) because
 	// we want to find break statements only in if statement body.
 	for (auto i = stmt->clause_begin(), e = stmt->clause_end(); i != e; ++i) {
 		analysis->visitStmt(i->second);
@@ -46,11 +46,11 @@ bool BreakInIfAnalysis::hasBreakStmt(ShPtr<IfStmt> stmt) {
 	return analysis->foundBreakStmt;
 }
 
-void BreakInIfAnalysis::visit(ShPtr<BreakStmt> stmt) {
+void BreakInIfAnalysis::visit(BreakStmt* stmt) {
 	foundBreakStmt |= true;
 }
 
-void BreakInIfAnalysis::visit(ShPtr<GotoStmt> stmt) {
+void BreakInIfAnalysis::visit(GotoStmt* stmt) {
 	// Do not visit the goto's target, just its successor (if any).
 	// We don't want to find break statement that is out of if statement body.
 	OrderedAllVisitor::visitStmt(stmt->getSuccessor());

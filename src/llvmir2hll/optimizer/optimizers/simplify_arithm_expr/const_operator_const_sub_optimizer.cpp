@@ -40,7 +40,7 @@ REGISTER_AT_FACTORY("ConstOperatorConst", CONST_OPERATOR_CONST_SUB_OPTIMIZER_ID,
 *            expressions.
 */
 ConstOperatorConstSubOptimizer::ConstOperatorConstSubOptimizer(
-		ShPtr<ArithmExprEvaluator> arithmExprEvaluator):
+		ArithmExprEvaluator* arithmExprEvaluator):
 			SubOptimizer(arithmExprEvaluator) {}
 
 /**
@@ -49,95 +49,83 @@ ConstOperatorConstSubOptimizer::ConstOperatorConstSubOptimizer(
 * @param[in] arithmExprEvaluator @a The used evaluator of arithmetical
 *            expressions.
 */
-ShPtr<SubOptimizer> ConstOperatorConstSubOptimizer::create(
-		ShPtr<ArithmExprEvaluator> arithmExprEvaluator) {
-	return ShPtr<SubOptimizer>(new ConstOperatorConstSubOptimizer(
-		arithmExprEvaluator));
+SubOptimizer* ConstOperatorConstSubOptimizer::create(
+		ArithmExprEvaluator* arithmExprEvaluator) {
+	return new ConstOperatorConstSubOptimizer(
+		arithmExprEvaluator);
 }
 
 std::string ConstOperatorConstSubOptimizer::getId() const {
 	return CONST_OPERATOR_CONST_SUB_OPTIMIZER_ID;
 }
 
-void ConstOperatorConstSubOptimizer::visit(ShPtr<AddOpExpr> expr) {
+void ConstOperatorConstSubOptimizer::visit(AddOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	tryOptimizeConstConstOperand(expr);
 }
 
-void ConstOperatorConstSubOptimizer::visit(ShPtr<SubOpExpr> expr) {
+void ConstOperatorConstSubOptimizer::visit(SubOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	tryOptimizeConstConstOperand(expr);
 }
 
-void ConstOperatorConstSubOptimizer::visit(ShPtr<MulOpExpr> expr) {
+void ConstOperatorConstSubOptimizer::visit(MulOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	tryOptimizeConstConstOperand(expr);
 }
 
-void ConstOperatorConstSubOptimizer::visit(ShPtr<DivOpExpr> expr) {
+void ConstOperatorConstSubOptimizer::visit(DivOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	tryOptimizeConstConstOperand(expr);
 }
 
-void ConstOperatorConstSubOptimizer::visit(ShPtr<BitAndOpExpr> expr) {
+void ConstOperatorConstSubOptimizer::visit(BitAndOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	tryOptimizeConstConstOperand(expr);
 }
 
-void ConstOperatorConstSubOptimizer::visit(ShPtr<BitOrOpExpr> expr) {
+void ConstOperatorConstSubOptimizer::visit(BitOrOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	tryOptimizeConstConstOperand(expr);
 }
 
-void ConstOperatorConstSubOptimizer::visit(ShPtr<BitXorOpExpr> expr) {
+void ConstOperatorConstSubOptimizer::visit(BitXorOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	tryOptimizeConstConstOperand(expr);
 }
 
-void ConstOperatorConstSubOptimizer::visit(ShPtr<LtOpExpr> expr) {
+void ConstOperatorConstSubOptimizer::visit(LtOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	tryOptimizeConstConstOperand(expr);
 }
 
-void ConstOperatorConstSubOptimizer::visit(ShPtr<LtEqOpExpr> expr) {
+void ConstOperatorConstSubOptimizer::visit(LtEqOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	tryOptimizeConstConstOperand(expr);
 }
 
-void ConstOperatorConstSubOptimizer::visit(ShPtr<GtOpExpr> expr) {
+void ConstOperatorConstSubOptimizer::visit(GtOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	tryOptimizeConstConstOperand(expr);
 }
 
-void ConstOperatorConstSubOptimizer::visit(ShPtr<GtEqOpExpr> expr) {
+void ConstOperatorConstSubOptimizer::visit(GtEqOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	tryOptimizeConstConstOperand(expr);
 }
 
-void ConstOperatorConstSubOptimizer::visit(ShPtr<EqOpExpr> expr) {
-	OrderedAllVisitor::visit(expr);
-
-	// This is resolved in EqualOperandsSubOptimizer.
-	// This case has some special conditions which are resolved there.
-	if (expr->getFirstOperand()->isEqualTo(expr->getSecondOperand())) {
-		return;
-	}
-
-	tryOptimizeConstConstOperand(expr);
-}
-
-void ConstOperatorConstSubOptimizer::visit(ShPtr<NeqOpExpr> expr) {
+void ConstOperatorConstSubOptimizer::visit(EqOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	// This is resolved in EqualOperandsSubOptimizer.
@@ -149,13 +137,25 @@ void ConstOperatorConstSubOptimizer::visit(ShPtr<NeqOpExpr> expr) {
 	tryOptimizeConstConstOperand(expr);
 }
 
-void ConstOperatorConstSubOptimizer::visit(ShPtr<AndOpExpr> expr) {
+void ConstOperatorConstSubOptimizer::visit(NeqOpExpr* expr) {
+	OrderedAllVisitor::visit(expr);
+
+	// This is resolved in EqualOperandsSubOptimizer.
+	// This case has some special conditions which are resolved there.
+	if (expr->getFirstOperand()->isEqualTo(expr->getSecondOperand())) {
+		return;
+	}
+
+	tryOptimizeConstConstOperand(expr);
+}
+
+void ConstOperatorConstSubOptimizer::visit(AndOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	tryOptimizeConstConstOperand(expr);
 }
 
-void ConstOperatorConstSubOptimizer::visit(ShPtr<OrOpExpr> expr) {
+void ConstOperatorConstSubOptimizer::visit(OrOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	tryOptimizeConstConstOperand(expr);
@@ -168,9 +168,9 @@ void ConstOperatorConstSubOptimizer::visit(ShPtr<OrOpExpr> expr) {
 * @param[in] expr A @c BinaryOpExpr to optimize.
 */
 void ConstOperatorConstSubOptimizer::tryOptimizeConstConstOperand(
-		ShPtr<BinaryOpExpr> expr) {
+		BinaryOpExpr* expr) {
 	// Try to evaluate expression.
-	ShPtr<Constant> result(arithmExprEvaluator->evaluate(expr));
+	Constant* result(arithmExprEvaluator->evaluate(expr));
 	if (result) {
 		// Expression was evaluated, so optimize it to this new expression.
 		optimizeExpr(expr, result);

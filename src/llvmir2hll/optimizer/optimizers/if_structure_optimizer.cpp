@@ -23,7 +23,7 @@ namespace {
 /**
 * @brief Does @a stmt contain an else clause or some else-if clauses?
 */
-bool hasElseIfOrElseClauses(ShPtr<IfStmt> stmt) {
+bool hasElseIfOrElseClauses(IfStmt* stmt) {
 	return stmt->hasElseClause() || stmt->hasElseIfClauses();
 }
 
@@ -37,12 +37,12 @@ bool hasElseIfOrElseClauses(ShPtr<IfStmt> stmt) {
 * @par Preconditions
 *  - @a module is non-null
 */
-IfStructureOptimizer::IfStructureOptimizer(ShPtr<Module> module):
+IfStructureOptimizer::IfStructureOptimizer(Module* module):
 	FuncOptimizer(module) {
 		PRECONDITION_NON_NULL(module);
 	}
 
-void IfStructureOptimizer::visit(ShPtr<IfStmt> stmt) {
+void IfStructureOptimizer::visit(IfStmt* stmt) {
 	// First of all, visit nested and subsequent statements.
 	FuncOptimizer::visit(stmt);
 
@@ -60,7 +60,7 @@ void IfStructureOptimizer::visit(ShPtr<IfStmt> stmt) {
 *
 * @return @c true if @a stmt has been optimized, @c false otherwise.
 */
-bool IfStructureOptimizer::tryOptimization1(ShPtr<IfStmt> stmt) {
+bool IfStructureOptimizer::tryOptimization1(IfStmt* stmt) {
 	// We are going to optimize a piece of code of the following form
 	//
 	// if cond:
@@ -91,7 +91,7 @@ bool IfStructureOptimizer::tryOptimization1(ShPtr<IfStmt> stmt) {
 *
 * @return @c true if @a stmt has been optimized, @c false otherwise.
 */
-bool IfStructureOptimizer::tryOptimization2(ShPtr<IfStmt> stmt) {
+bool IfStructureOptimizer::tryOptimization2(IfStmt* stmt) {
 	// We are going to optimize a piece of code of the following form
 	//
 	// if cond:
@@ -129,7 +129,7 @@ bool IfStructureOptimizer::tryOptimization2(ShPtr<IfStmt> stmt) {
 *
 * @return @c true if @a stmt has been optimized, @c false otherwise.
 */
-bool IfStructureOptimizer::tryOptimization3(ShPtr<IfStmt> stmt) {
+bool IfStructureOptimizer::tryOptimization3(IfStmt* stmt) {
 	// We are going to optimize a piece of code of the following form
 	//
 	// if cond:
@@ -181,7 +181,7 @@ bool IfStructureOptimizer::tryOptimization3(ShPtr<IfStmt> stmt) {
 *
 * @return @c true if @a stmt has been optimized, @c false otherwise.
 */
-bool IfStructureOptimizer::tryOptimization4(ShPtr<IfStmt> stmt) {
+bool IfStructureOptimizer::tryOptimization4(IfStmt* stmt) {
 	// We are going to optimize a piece of code of the following form:
 	//
 	// if cond1:
@@ -235,7 +235,7 @@ bool IfStructureOptimizer::tryOptimization4(ShPtr<IfStmt> stmt) {
 *
 * @return @c true if @a stmt has been optimized, @c false otherwise.
 */
-bool IfStructureOptimizer::tryOptimization5(ShPtr<IfStmt> stmt) {
+bool IfStructureOptimizer::tryOptimization5(IfStmt* stmt) {
 	// We are going to optimize a piece of code of the following form:
 	//
 	// if cond:

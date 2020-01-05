@@ -56,220 +56,220 @@ private:
 		Closed   /// Visited and closed node.
 	};
 
-	using SwitchClause = std::pair<ExprVector, ShPtr<CFGNode>>;
+	using SwitchClause = std::pair<ExprVector, CFGNode*>;
 
 	using BBSet = std::unordered_set<llvm::BasicBlock *>;
-	using CFGNodeQueue = std::queue<ShPtr<CFGNode>>;
-	using CFGNodeStack = std::stack<ShPtr<CFGNode>>;
-	using CFGNodeVector = std::vector<ShPtr<CFGNode>>;
+	using CFGNodeQueue = std::queue<CFGNode*>;
+	using CFGNodeStack = std::stack<CFGNode*>;
+	using CFGNodeVector = std::vector<CFGNode*>;
 	using LoopSet = std::unordered_set<llvm::Loop *>;
-	using SwitchClauseVector = std::vector<ShPtr<SwitchClause>>;
+	using SwitchClauseVector = std::vector<SwitchClause*>;
 
 	using MapBBToBBSet = std::unordered_map<llvm::BasicBlock *, BBSet>;
-	using MapBBToCFGNode = std::unordered_map<llvm::BasicBlock *, ShPtr<CFGNode>>;
-	using MapCFGNodeToSwitchClause = std::unordered_map<ShPtr<CFGNode>, ShPtr<SwitchClause>>;
-	using MapCFGNodeToDFSNodeState = std::unordered_map<ShPtr<CFGNode>, DFSNodeState>;
-	using MapLoopToCFGNode = std::unordered_map<llvm::Loop *, ShPtr<CFGNode>>;
-	using MapStmtToTargetNode = std::unordered_map<ShPtr<Statement>, ShPtr<CFGNode>>;
-	using MapTargetToGoto = std::unordered_map<ShPtr<CFGNode>, std::vector<ShPtr<GotoStmt>>>;
-	using MapStmtToClones = std::unordered_map<ShPtr<Statement>, std::vector<ShPtr<Statement>>>;
+	using MapBBToCFGNode = std::unordered_map<llvm::BasicBlock *, CFGNode*>;
+	using MapCFGNodeToSwitchClause = std::unordered_map<CFGNode*, SwitchClause*>;
+	using MapCFGNodeToDFSNodeState = std::unordered_map<CFGNode*, DFSNodeState>;
+	using MapLoopToCFGNode = std::unordered_map<llvm::Loop *, CFGNode*>;
+	using MapStmtToTargetNode = std::unordered_map<Statement*, CFGNode*>;
+	using MapTargetToGoto = std::unordered_map<CFGNode*, std::vector<GotoStmt*>>;
+	using MapStmtToClones = std::unordered_map<Statement*, std::vector<Statement*>>;
 
 public:
-	StructureConverter(llvm::Pass *basePass, ShPtr<LLVMValueConverter> conv, ShPtr<Module> module);
+	StructureConverter(llvm::Pass *basePass, LLVMValueConverter* conv, Module* module);
 
-	ShPtr<Statement> convertFuncBody(llvm::Function &func);
+	Statement* convertFuncBody(llvm::Function &func);
 
 private:
 	/// @name Construction and traversal through control-flow graph
 	/// @{
-	ShPtr<CFGNode> createCFG(llvm::BasicBlock &root);
-	void detectBackEdges(ShPtr<CFGNode> cfg) const;
-	bool reduceCFG(ShPtr<CFGNode> cfg);
-	bool inspectCFGNode(ShPtr<CFGNode> node);
-	ShPtr<CFGNode> popFromQueue(CFGNodeQueue &queue) const;
-	void addUnvisitedSuccessorsToQueue(const ShPtr<CFGNode> &node,
+	CFGNode* createCFG(llvm::BasicBlock &root);
+	void detectBackEdges(CFGNode* cfg) const;
+	bool reduceCFG(CFGNode* cfg);
+	bool inspectCFGNode(CFGNode* node);
+	CFGNode* popFromQueue(CFGNodeQueue &queue) const;
+	void addUnvisitedSuccessorsToQueue(CFGNode* node,
 		CFGNodeQueue &toBeVisited, CFGNode::CFGNodeSet &visited) const;
-	void addUnvisitedSuccessorsToQueueInLoop(const ShPtr<CFGNode> &node,
+	void addUnvisitedSuccessorsToQueueInLoop(CFGNode* node,
 		CFGNodeQueue &toBeVisited, CFGNode::CFGNodeSet &visited,
 		llvm::Loop *loop) const;
-	bool BFSTraverse(ShPtr<CFGNode> cfg,
-		std::function<bool (ShPtr<CFGNode>)> inspectFunc) const;
-	bool BFSTraverseLoop(ShPtr<CFGNode> cfg,
-		std::function<bool (ShPtr<CFGNode>)> inspectFunc) const;
-	ShPtr<CFGNode> BFSFindFirst(ShPtr<CFGNode> cfg,
-		std::function<bool (ShPtr<CFGNode>)> pred) const;
-	bool existsPathWithoutLoopsBetween(const ShPtr<CFGNode> &node1,
-		const ShPtr<CFGNode> &node2) const;
+	bool BFSTraverse(CFGNode* cfg,
+		std::function<bool (CFGNode*)> inspectFunc) const;
+	bool BFSTraverseLoop(CFGNode* cfg,
+		std::function<bool (CFGNode*)> inspectFunc) const;
+	CFGNode* BFSFindFirst(CFGNode* cfg,
+		std::function<bool (CFGNode*)> pred) const;
+	bool existsPathWithoutLoopsBetween(CFGNode* node1,
+		CFGNode* node2) const;
 	/// @}
 
 	/// @name Detection of constructions
 	/// @{
-	bool isSequence(const ShPtr<CFGNode> &node) const;
+	bool isSequence(CFGNode* node) const;
 	bool isSequenceWithTerminatingBranchToClone(
-		const ShPtr<CFGNode> &node) const;
-	bool isIfElseStatement(const ShPtr<CFGNode> &node) const;
-	bool isIfStatement(const ShPtr<CFGNode> &node, std::size_t succ) const;
-	bool isIfStatementWithTerminatingBranch(const ShPtr<CFGNode> &node,
+		CFGNode* node) const;
+	bool isIfElseStatement(CFGNode* node) const;
+	bool isIfStatement(CFGNode* node, std::size_t succ) const;
+	bool isIfStatementWithTerminatingBranch(CFGNode* node,
 		std::size_t succ) const;
-	bool isIfStatementWithTerminatingBranchToClone(const ShPtr<CFGNode> &node,
+	bool isIfStatementWithTerminatingBranchToClone(CFGNode* node,
 		std::size_t succ) const;
-	bool isIfStatementWithBreakInLoop(const ShPtr<CFGNode> &node,
+	bool isIfStatementWithBreakInLoop(CFGNode* node,
 		std::size_t succ) const;
-	bool isIfStatementWithBreakByGotoInLoop(const ShPtr<CFGNode> &node,
+	bool isIfStatementWithBreakByGotoInLoop(CFGNode* node,
 		std::size_t succ) const;
-	bool isIfElseStatementWithContinue(const ShPtr<CFGNode> &node,
+	bool isIfElseStatementWithContinue(CFGNode* node,
 		std::size_t succ) const;
-	bool isContinueStatement(const ShPtr<CFGNode> &node) const;
-	bool isForLoop(const ShPtr<CFGNode> &node) const;
-	bool isWhileTrueLoop(const ShPtr<CFGNode> &node) const;
-	bool isNestedWhileTrueLoopWithContinueInHeader(const ShPtr<CFGNode> &node,
+	bool isContinueStatement(CFGNode* node) const;
+	bool isForLoop(CFGNode* node) const;
+	bool isWhileTrueLoop(CFGNode* node) const;
+	bool isNestedWhileTrueLoopWithContinueInHeader(CFGNode* node,
 		std::size_t succ) const;
-	bool isSwitchStatement(const ShPtr<CFGNode> &node) const;
-	bool canBeCloned(const ShPtr<CFGNode> &node) const;
+	bool isSwitchStatement(CFGNode* node) const;
+	bool canBeCloned(CFGNode* node) const;
 	/// @}
 
 	/// @name Reduction of nodes
 	/// @{
-	void reduceToSequence(ShPtr<CFGNode> node);
-	void reduceToSequenceClone(ShPtr<CFGNode> node);
-	void reduceToIfElseStatement(ShPtr<CFGNode> node);
-	void reduceToIfStatement(ShPtr<CFGNode> node, std::size_t succ);
-	void reduceToIfStatementClone(ShPtr<CFGNode> node, std::size_t succ);
-	void reduceToIfElseStatementWithBreakInLoop(ShPtr<CFGNode> node,
+	void reduceToSequence(CFGNode* node);
+	void reduceToSequenceClone(CFGNode* node);
+	void reduceToIfElseStatement(CFGNode* node);
+	void reduceToIfStatement(CFGNode* node, std::size_t succ);
+	void reduceToIfStatementClone(CFGNode* node, std::size_t succ);
+	void reduceToIfElseStatementWithBreakInLoop(CFGNode* node,
 		std::size_t succ);
-	void reduceToIfElseStatementWithBreakByGotoInLoop(ShPtr<CFGNode> node,
+	void reduceToIfElseStatementWithBreakByGotoInLoop(CFGNode* node,
 		std::size_t succ);
-	void reduceToIfElseStatementWithContinue(ShPtr<CFGNode> node,
+	void reduceToIfElseStatementWithContinue(CFGNode* node,
 		std::size_t succ);
-	void reduceToContinueStatement(ShPtr<CFGNode> node);
-	void reduceToForLoop(ShPtr<CFGNode> node);
-	void reduceToWhileTrueLoop(ShPtr<CFGNode> node);
+	void reduceToContinueStatement(CFGNode* node);
+	void reduceToForLoop(CFGNode* node);
+	void reduceToWhileTrueLoop(CFGNode* node);
 	void reduceToNestedWhileTrueLoopWithContinueInHeader(
-		ShPtr<CFGNode> node, std::size_t succ);
-	void structureByGotos(ShPtr<CFGNode> cfg);
+		CFGNode* node, std::size_t succ);
+	void structureByGotos(CFGNode* cfg);
 	/// @}
 
 	/// @name Condition refinement
 	/// @{
-	ShPtr<Statement> getIfClauseBody(const ShPtr<CFGNode> &node,
-		const ShPtr<CFGNode> &clause, const ShPtr<CFGNode> &ifSuccessor);
-	ShPtr<Statement> getIfClauseBodyClone(const ShPtr<CFGNode> &node,
-		const ShPtr<CFGNode> &clause, const ShPtr<CFGNode> &ifSuccessor);
-	ShPtr<IfStmt> getIfStmt(const ShPtr<Expression> &cond,
-		const ShPtr<Statement> &trueBody,
-		const ShPtr<Statement> &falseBody = nullptr) const;
+	Statement* getIfClauseBody(CFGNode* node,
+		CFGNode* clause, CFGNode* ifSuccessor);
+	Statement* getIfClauseBodyClone(CFGNode* node,
+		CFGNode* clause, CFGNode* ifSuccessor);
+	IfStmt* getIfStmt(Expression* cond,
+		Statement* trueBody,
+		Statement* falseBody = nullptr) const;
 	/// @}
 
 	/// @name Loop refinement
 	/// @{
-	ShPtr<CFGNode> getLoopSuccessor(const ShPtr<CFGNode> &loopNode) const;
-	void completelyReduceLoop(ShPtr<CFGNode> loopNode);
+	CFGNode* getLoopSuccessor(CFGNode* loopNode) const;
+	void completelyReduceLoop(CFGNode* loopNode);
 	/// @}
 
 	/// @name Switch refinement
 	/// @{
-	void reduceSwitchStatement(ShPtr<CFGNode> node);
-	ShPtr<CFGNode> getSwitchSuccessor(const ShPtr<CFGNode> &switchNode) const;
-	bool isNodeAfterAllSwitchClauses(const ShPtr<CFGNode> &node,
-		const ShPtr<CFGNode> &switchNode) const;
-	bool isNodeAfterSwitchClause(const ShPtr<CFGNode> &node,
-		const ShPtr<CFGNode> &clauseNode) const;
-	bool hasDefaultClause(const ShPtr<CFGNode> &switchNode,
-		const ShPtr<CFGNode> &switchSuccessor) const;
-	bool isReducibleClause(const ShPtr<CFGNode> &clauseNode,
-		const ShPtr<CFGNode> &switchNode,
-		const ShPtr<CFGNode> &switchSuccessor,
+	void reduceSwitchStatement(CFGNode* node);
+	CFGNode* getSwitchSuccessor(CFGNode* switchNode) const;
+	bool isNodeAfterAllSwitchClauses(CFGNode* node,
+		CFGNode* switchNode) const;
+	bool isNodeAfterSwitchClause(CFGNode* node,
+		CFGNode* clauseNode) const;
+	bool hasDefaultClause(CFGNode* switchNode,
+		CFGNode* switchSuccessor) const;
+	bool isReducibleClause(CFGNode* clauseNode,
+		CFGNode* switchNode,
+		CFGNode* switchSuccessor,
 		bool hasDefault = true) const;
-	bool hasOnlySwitchOrClausesInPreds(const ShPtr<CFGNode> &clauseNode,
-		const ShPtr<CFGNode> &switchNode, bool hasDefault) const;
-	bool fallsThroughToAnotherCase(const ShPtr<CFGNode> &clauseNode,
-		const ShPtr<CFGNode> &switchNode, bool hasDefault) const;
-	ShPtr<SwitchStmt> getSwitchStmt(const ShPtr<CFGNode> &switchNode,
-		const ShPtr<CFGNode> &switchSuccessor, bool hasDefault);
-	SwitchClauseVector getSwitchClauses(const ShPtr<CFGNode> &switchNode,
+	bool hasOnlySwitchOrClausesInPreds(CFGNode* clauseNode,
+		CFGNode* switchNode, bool hasDefault) const;
+	bool fallsThroughToAnotherCase(CFGNode* clauseNode,
+		CFGNode* switchNode, bool hasDefault) const;
+	SwitchStmt* getSwitchStmt(CFGNode* switchNode,
+		CFGNode* switchSuccessor, bool hasDefault);
+	SwitchClauseVector getSwitchClauses(CFGNode* switchNode,
 		bool hasDefault) const;
 	SwitchClauseVector sortSwitchClauses(const SwitchClauseVector &clauses,
-		const ShPtr<CFGNode> &switchSuccessor) const;
-	ShPtr<SwitchClause> findFirstClauseWithSinglePred(
+		CFGNode* switchSuccessor) const;
+	SwitchClause* findFirstClauseWithSinglePred(
 		const SwitchClauseVector &clauses) const;
-	ShPtr<Statement> getClauseBody(const ShPtr<CFGNode> &clauseNode,
-		const ShPtr<CFGNode> &switchNode,
-		const ShPtr<CFGNode> &switchSuccessor,
-		const CFGNode::CFGNodeSet &generated);
-	bool isClauseTerminatedByBreak(const ShPtr<CFGNode> &clauseNode,
-		const ShPtr<CFGNode> &switchSuccessor) const;
-	void addClausesWithTheSameCond(ShPtr<SwitchStmt> switchStmt,
-		const ExprVector &conds, const ShPtr<Statement> &clauseBody) const;
-	void removeReducedSuccsOfSwitch(const ShPtr<CFGNode> &switchNode,
+	Statement* getClauseBody(CFGNode* clauseNode,
+		CFGNode* switchNode,
+		CFGNode* switchSuccessor,
+		CFGNode::CFGNodeSet &generated);
+	bool isClauseTerminatedByBreak(CFGNode* clauseNode,
+		CFGNode* switchSuccessor) const;
+	void addClausesWithTheSameCond(SwitchStmt* switchStmt,
+		const ExprVector &conds, Statement* clauseBody) const;
+	void removeReducedSuccsOfSwitch(CFGNode* switchNode,
 		bool hasDefault) const;
 	/// @}
 
 	/// @name Successor getters
 	/// @{
-	ShPtr<Statement> getSuccessorsBody(const ShPtr<CFGNode> &node,
-		const ShPtr<CFGNode> &succ);
-	ShPtr<Statement> getSuccessorsBodyClone(const ShPtr<CFGNode> &node,
-		const ShPtr<CFGNode> &succ);
-	ShPtr<Statement> getGotoForSuccessor(const ShPtr<CFGNode> &node,
-		const ShPtr<CFGNode> &target);
-	ShPtr<Statement> getAssignsToPHINodes(const ShPtr<CFGNode> &from,
-		const ShPtr<CFGNode> &to);
-	ShPtr<Statement> getPHICopiesForSuccessor(llvm::BasicBlock *currBB,
+	Statement* getSuccessorsBody(CFGNode* node,
+		CFGNode* succ);
+	Statement* getSuccessorsBodyClone(CFGNode* node,
+		CFGNode* succ);
+	Statement* getGotoForSuccessor(CFGNode* node,
+		CFGNode* target);
+	Statement* getAssignsToPHINodes(CFGNode* from,
+		CFGNode* to);
+	Statement* getPHICopiesForSuccessor(llvm::BasicBlock *currBB,
 		llvm::BasicBlock *succ);
 	/// @}
 
 	/// @name Work with LLVM analyses
 	/// @{
 	void initialiazeLLVMAnalyses(llvm::Function &func);
-	llvm::Loop *getLoopFor(const ShPtr<CFGNode> &node) const;
-	bool isLoopHeader(const ShPtr<CFGNode> &node) const;
-	bool isLoopHeader(const ShPtr<CFGNode> &node, llvm::Loop *loop) const;
-	bool isNodeOutsideLoop(const ShPtr<CFGNode> &node, llvm::Loop *loop) const;
-	bool isInParentLoopOf(const ShPtr<CFGNode> &node, llvm::Loop *loop) const;
+	llvm::Loop *getLoopFor(CFGNode* node) const;
+	bool isLoopHeader(CFGNode* node) const;
+	bool isLoopHeader(CFGNode* node, llvm::Loop *loop) const;
+	bool isNodeOutsideLoop(CFGNode* node, llvm::Loop *loop) const;
+	bool isInParentLoopOf(CFGNode* node, llvm::Loop *loop) const;
 	unsigned getTripCount(llvm::Loop *loop) const;
 	bool canBeForLoop(llvm::Loop *loop) const;
 	/// @}
 
 	/// @name Postprocessing methods
 	/// @{
-	ShPtr<Statement> replaceBreakOrContinueOutsideLoop(
-		ShPtr<Statement> statement, SwitchParent sp);
+	Statement* replaceBreakOrContinueOutsideLoop(
+		Statement* statement, SwitchParent sp);
 	void replaceGoto(CFGNodeVector &targets);
 	void correctUndefinedLabels();
-	std::vector<ShPtr<Statement>> findContinueOrBreakStatements(
-		ShPtr<Statement> parent, SwitchParent sp);
-	unsigned getStatementCount(ShPtr<Statement> statement);
-	void insertClonedLoopTargets( ShPtr<Statement> origParent,
-		ShPtr<Statement> newParent);
-	void fixClonedGotos(ShPtr<Statement> statement);
+	std::vector<Statement*> findContinueOrBreakStatements(
+		Statement* parent, SwitchParent sp);
+	unsigned getStatementCount(Statement* statement);
+	void insertClonedLoopTargets( Statement* origParent,
+		Statement* newParent);
+	void fixClonedGotos(Statement* statement);
 	/// @}
 
 	/// @name Helper methods
 	/// @{
-	void addGotoTargetIfNotExists(const ShPtr<CFGNode> &node);
-	void addBranchMetadataToEndOfBodyIfNeeded(ShPtr<Statement> &body,
-		const ShPtr<CFGNode> &clause, const ShPtr<CFGNode> &ifSuccessor) const;
-	std::string getLabel(const ShPtr<CFGNode> &node) const;
+	void addGotoTargetIfNotExists(CFGNode* node);
+	void addBranchMetadataToEndOfBodyIfNeeded(Statement* body,
+		CFGNode* clause, CFGNode* ifSuccessor) const;
+	std::string getLabel(CFGNode* node) const;
 	void cleanUp();
 	/// @}
 
 	/// Pass that have instantiated the converter.
-	llvm::Pass *basePass;
+	llvm::Pass *basePass = nullptr;
 
 	/// Information about loops.
-	llvm::LoopInfo *loopInfo;
+	llvm::LoopInfo *loopInfo = nullptr;
 
 	// Anylysis of scalar expressions in loops.
-	llvm::ScalarEvolution *scalarEvolution;
+	llvm::ScalarEvolution *scalarEvolution = nullptr;
 
 	/// A handler of labels.
-	ShPtr<LabelsHandler> labelsHandler;
+	LabelsHandler* labelsHandler = nullptr;
 
 	/// A converter of the LLVM basic block.
 	BasicBlockConverter bbConverter;
 
 	/// A converter from LLVM values to values in BIR.
-	ShPtr<LLVMValueConverter> converter;
+	LLVMValueConverter* converter = nullptr;
 
 	/// A map of the corresponding loops and loop headers represented
 	/// by CFG nodes.
@@ -312,7 +312,7 @@ private:
 	CFGNode::CFGNodeSet generatedNodes;
 
 	/// The resulting module in BIR.
-	ShPtr<Module> resModule;
+	Module* resModule = nullptr;
 };
 
 } // namespace llvmir2hll

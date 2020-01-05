@@ -60,13 +60,13 @@ AddToCompoundBinaryOpVarOnLeft) {
 	//
 	// Expected output: a += 2;
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<AddOpExpr> addOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	AddOpExpr* addOpExpr(
 		AddOpExpr::create(
 			varA,
 			ConstInt::create(2, 64)
 	));
-	ShPtr<AssignStmt> assignStmt(
+	AssignStmt* assignStmt(
 		AssignStmt::create(
 			varA,
 			addOpExpr
@@ -82,13 +82,13 @@ AddToCompoundUnaryOpVarOnLeft) {
 	//
 	// Expected output: ++a;
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<AddOpExpr> addOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	AddOpExpr* addOpExpr(
 		AddOpExpr::create(
 			varA,
 			ConstInt::create(1, 64)
 	));
-	ShPtr<AssignStmt> assignStmt(
+	AssignStmt* assignStmt(
 		AssignStmt::create(
 			varA,
 			addOpExpr
@@ -103,13 +103,13 @@ AddToCompoundUnaryOpVarOnRight) {
 	//
 	// Expected output: ++a;
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<AddOpExpr> addOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	AddOpExpr* addOpExpr(
 		AddOpExpr::create(
 			ConstInt::create(1, 64),
 			varA
 	));
-	ShPtr<AssignStmt> assignStmt(
+	AssignStmt* assignStmt(
 		AssignStmt::create(
 			varA,
 			addOpExpr
@@ -124,13 +124,13 @@ SubToCompoundBinaryOpVarOnLeft) {
 	//
 	// Expected output: a -= 2;
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<SubOpExpr> subOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	SubOpExpr* subOpExpr(
 		SubOpExpr::create(
 			varA,
 			ConstInt::create(2, 64)
 	));
-	ShPtr<AssignStmt> assignStmt(
+	AssignStmt* assignStmt(
 		AssignStmt::create(
 			varA,
 			subOpExpr
@@ -146,13 +146,13 @@ SubToCompoundUnaryOpVarOnLeft) {
 	//
 	// Expected output: --a;
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<SubOpExpr> subOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	SubOpExpr* subOpExpr(
 		SubOpExpr::create(
 			varA,
 			ConstInt::create(1, 64)
 	));
-	ShPtr<AssignStmt> assignStmt(
+	AssignStmt* assignStmt(
 		AssignStmt::create(
 			varA,
 			subOpExpr
@@ -167,14 +167,14 @@ MulToCompoundOpVarOnRight) {
 	//
 	// Expected output: a *= b;
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<MulOpExpr> mulOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	MulOpExpr* mulOpExpr(
 		MulOpExpr::create(
 			varB,
 			varA
 	));
-	ShPtr<AssignStmt> assignStmt(
+	AssignStmt* assignStmt(
 		AssignStmt::create(
 			varA,
 			mulOpExpr
@@ -189,18 +189,18 @@ DivToCompoundOpArrayIndexOnLeft) {
 	//
 	// Expected output: a[2] /= a;
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<ArrayIndexOpExpr> arrayIndexOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	ArrayIndexOpExpr* arrayIndexOpExpr(
 		ArrayIndexOpExpr::create(
 			varA,
 			ConstInt::create(2, 64)
 	));
-	ShPtr<DivOpExpr> divOpExpr(
+	DivOpExpr* divOpExpr(
 		DivOpExpr::create(
 			arrayIndexOpExpr,
 			varA
 	));
-	ShPtr<AssignStmt> assignStmt(
+	AssignStmt* assignStmt(
 		AssignStmt::create(
 			arrayIndexOpExpr,
 			divOpExpr
@@ -215,19 +215,19 @@ ModToCompoundOpStructIndexOnLeft) {
 	//
 	// Expected output: a.e2 %= a;
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<StructIndexOpExpr> structIndexOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	StructIndexOpExpr* structIndexOpExpr(
 		StructIndexOpExpr::create(
 			varA,
 			ConstInt::create(2, 64)
 	));
-	ShPtr<ModOpExpr> modOpExpr(
+	ModOpExpr* modOpExpr(
 		ModOpExpr::create(
 			structIndexOpExpr,
 			varB
 	));
-	ShPtr<AssignStmt> assignStmt(
+	AssignStmt* assignStmt(
 		AssignStmt::create(
 			structIndexOpExpr,
 			modOpExpr
@@ -242,13 +242,13 @@ BitShlOpExprToCompoundOpVarOnLeft) {
 	//
 	// Expected output: a <<= 3;
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<BitShlOpExpr> bitShlOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	BitShlOpExpr* bitShlOpExpr(
 		BitShlOpExpr::create(
 			varA,
 			ConstInt::create(3, 64)
 	));
-	ShPtr<AssignStmt> assignStmt(
+	AssignStmt* assignStmt(
 		AssignStmt::create(
 			varA,
 			bitShlOpExpr
@@ -264,13 +264,13 @@ BitShrOpExprToCompoundOpVarOnLeft) {
 	//
 	// Expected output: a >>= 3;
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<BitShrOpExpr> bitShrOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	BitShrOpExpr* bitShrOpExpr(
 		BitShrOpExpr::create(
 			varA,
 			ConstInt::create(3, 64)
 	));
-	ShPtr<AssignStmt> assignStmt(
+	AssignStmt* assignStmt(
 		AssignStmt::create(
 			varA,
 			bitShrOpExpr
@@ -286,14 +286,14 @@ BitAndToCompoundOpVarOnRight) {
 	//
 	// Expected output: a &= b;
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<BitAndOpExpr> bitAndOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	BitAndOpExpr* bitAndOpExpr(
 		BitAndOpExpr::create(
 			varB,
 			varA
 	));
-	ShPtr<AssignStmt> assignStmt(
+	AssignStmt* assignStmt(
 		AssignStmt::create(
 			varA,
 			bitAndOpExpr
@@ -308,13 +308,13 @@ BitOrToCompoundOpVarOnRight) {
 	//
 	// Expected output: a |= 2;
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<BitOrOpExpr> bitOrOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	BitOrOpExpr* bitOrOpExpr(
 		BitOrOpExpr::create(
 			ConstInt::create(2, 64),
 			varA
 	));
-	ShPtr<AssignStmt> assignStmt(
+	AssignStmt* assignStmt(
 		AssignStmt::create(
 			varA,
 			bitOrOpExpr
@@ -330,13 +330,13 @@ BitXorToCompoundOpVarOnRight) {
 	//
 	// Expected output: a ^= 2;
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<BitXorOpExpr> bitXorOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	BitXorOpExpr* bitXorOpExpr(
 		BitXorOpExpr::create(
 			ConstInt::create(2, 64),
 			varA
 	));
-	ShPtr<AssignStmt> assignStmt(
+	AssignStmt* assignStmt(
 		AssignStmt::create(
 			varA,
 			bitXorOpExpr
@@ -352,23 +352,23 @@ SubToCompoundOpVarOnLeftMoreComplicatedRhsOfAssignStmt) {
 	//
 	// Expected output: a -= 2 + (a * 4) ;
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<MulOpExpr> mulOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	MulOpExpr* mulOpExpr(
 		MulOpExpr::create(
 			varA,
 			ConstInt::create(4, 64)
 	));
-	ShPtr<AddOpExpr> addOpExpr(
+	AddOpExpr* addOpExpr(
 		AddOpExpr::create(
 			ConstInt::create(2, 64),
 			mulOpExpr
 	));
-	ShPtr<SubOpExpr> subOpExpr(
+	SubOpExpr* subOpExpr(
 		SubOpExpr::create(
 			varA,
 			addOpExpr
 	));
-	ShPtr<AssignStmt> assignStmt(
+	AssignStmt* assignStmt(
 		AssignStmt::create(
 			varA,
 			subOpExpr
@@ -388,13 +388,13 @@ EqOpExprNotSupportedCompoundOperatorCantBeOptimized) {
 	//
 	// Not optimized.
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<EqOpExpr> eqOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	EqOpExpr* eqOpExpr(
 		EqOpExpr::create(
 			varA,
 			ConstInt::create(2, 64)
 	));
-	ShPtr<AssignStmt> assignStmt(
+	AssignStmt* assignStmt(
 		AssignStmt::create(
 			varA,
 			eqOpExpr
@@ -409,13 +409,13 @@ SubOpExprVarOnRightCantBeOptimized) {
 	//
 	// Not optimized.
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<SubOpExpr> subOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	SubOpExpr* subOpExpr(
 		SubOpExpr::create(
 			ConstInt::create(2, 64),
 			varA
 	));
-	ShPtr<AssignStmt> assignStmt(
+	AssignStmt* assignStmt(
 		AssignStmt::create(
 			varA,
 			subOpExpr
@@ -430,13 +430,13 @@ DivOpExprVarOnRightCantBeOptimized) {
 	//
 	// Not optimized.
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<DivOpExpr> divOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	DivOpExpr* divOpExpr(
 		DivOpExpr::create(
 			ConstInt::create(2, 64),
 			varA
 	));
-	ShPtr<AssignStmt> assignStmt(
+	AssignStmt* assignStmt(
 		AssignStmt::create(
 			varA,
 			divOpExpr
@@ -451,13 +451,13 @@ ModOpExprVarOnRightCantBeOptimized) {
 	//
 	// Not optimized.
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<ModOpExpr> modOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	ModOpExpr* modOpExpr(
 		ModOpExpr::create(
 			ConstInt::create(2, 64),
 			varA
 	));
-	ShPtr<AssignStmt> assignStmt(
+	AssignStmt* assignStmt(
 		AssignStmt::create(
 			varA,
 			modOpExpr
@@ -472,13 +472,13 @@ BitShlOpExprVarOnRightCantBeOptimized) {
 	//
 	// Not optimized.
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<BitShlOpExpr> bitShlOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	BitShlOpExpr* bitShlOpExpr(
 		BitShlOpExpr::create(
 			ConstInt::create(2, 64),
 			varA
 	));
-	ShPtr<AssignStmt> assignStmt(
+	AssignStmt* assignStmt(
 		AssignStmt::create(
 			varA,
 			bitShlOpExpr
@@ -493,13 +493,13 @@ BitShrOpExprVarOnRightCantBeOptimized) {
 	//
 	// Not optimized.
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<BitShrOpExpr> bitShrOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	BitShrOpExpr* bitShrOpExpr(
 		BitShrOpExpr::create(
 			ConstInt::create(2, 64),
 			varA
 	));
-	ShPtr<AssignStmt> assignStmt(
+	AssignStmt* assignStmt(
 		AssignStmt::create(
 			varA,
 			bitShrOpExpr
@@ -514,18 +514,18 @@ SubOpExprRightOperandAddOpExprWithVarEqWithLhsOfAssignCantBeOptimized) {
 	//
 	// Not optimized.
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<AddOpExpr> addOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	AddOpExpr* addOpExpr(
 		AddOpExpr::create(
 			varA,
 			ConstInt::create(4, 64)
 	));
-	ShPtr<SubOpExpr> subOpExpr(
+	SubOpExpr* subOpExpr(
 		SubOpExpr::create(
 			ConstInt::create(2, 64),
 			addOpExpr
 	));
-	ShPtr<AssignStmt> assignStmt(
+	AssignStmt* assignStmt(
 		AssignStmt::create(
 			varA,
 			subOpExpr
@@ -540,14 +540,14 @@ AddOpExprNotVarOrArrayIndexOrStructIndexOnLhsOfAssignStmtCantBeOptimized) {
 	//
 	// Not optimized.
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<ConstInt> constInt(ConstInt::create(2, 64));
-	ShPtr<AddOpExpr> addOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	ConstInt* constInt(ConstInt::create(2, 64));
+	AddOpExpr* addOpExpr(
 		AddOpExpr::create(
 			constInt,
 			varA
 	));
-	ShPtr<AssignStmt> assignStmt(
+	AssignStmt* assignStmt(
 		AssignStmt::create(
 			constInt,
 			addOpExpr
@@ -562,14 +562,14 @@ AddOpExprNotEqLhsOfAssignStmtWithOneOperandOfAddOpExprCantBeOptimized) {
 	//
 	// Not optimized.
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<AddOpExpr> addOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	AddOpExpr* addOpExpr(
 		AddOpExpr::create(
 			varB,
 			varB
 	));
-	ShPtr<AssignStmt> assignStmt(
+	AssignStmt* assignStmt(
 		AssignStmt::create(
 			varA,
 			addOpExpr

@@ -28,7 +28,7 @@ class Module;
 */
 class LibraryFuncsRemover: private retdec::utils::NonCopyable {
 public:
-	static FuncVector removeFuncs(ShPtr<Module> module);
+	static FuncVector removeFuncs(Module* module);
 };
 
 } // namespace llvmir2hll

@@ -30,7 +30,7 @@ class NonRecursiveCFGBuilder: public CFGBuilder, private VisitorAdapter {
 public:
 	virtual void buildCFG() override;
 
-	static ShPtr<NonRecursiveCFGBuilder> create();
+	static NonRecursiveCFGBuilder* create();
 
 private:
 	/// Structure for jobs that have to be performed.
@@ -42,17 +42,17 @@ private:
 		* @param[in] cond Condition.
 		* @param[in] stmt First statement of job.
 		*/
-		Job(ShPtr<CFG::Node> pred, ShPtr<Expression> cond, ShPtr<Statement>
+		Job(CFG::Node* pred, Expression* cond, Statement*
 			stmt): pred(pred), cond(cond), stmt(stmt) {}
 
 		/// Predecessor node of this job.
-		ShPtr<CFG::Node> pred;
+		CFG::Node* pred = nullptr;
 
 		/// Condition for edge.
-		ShPtr<Expression> cond;
+		Expression* cond = nullptr;
 
 		/// First statement from which job starts.
-		ShPtr<Statement> stmt;
+		Statement* stmt = nullptr;
 	};
 
 	/// Structure for edges that will be added to CFG.
@@ -64,18 +64,18 @@ private:
 		* @param[in] succStmt Statement of second one node.
 		* @param[in] cond Condition for edge.
 		*/
-		EdgeToAdd(ShPtr<CFG::Node> node, ShPtr<Statement> succStmt,
-			ShPtr<Expression> cond = nullptr):
+		EdgeToAdd(CFG::Node* node, Statement* succStmt,
+			Expression* cond = nullptr):
 				node(node), succStmt(succStmt), cond(cond) {}
 
 		/// Predecessor node.
-		ShPtr<CFG::Node> node;
+		CFG::Node* node = nullptr;
 
 		/// Statement of second one node.
-		ShPtr<Statement> succStmt;
+		Statement* succStmt = nullptr;
 
 		/// Condition for edge.
-		ShPtr<Expression> cond;
+		Expression* cond = nullptr;
 	};
 
 	/// Queue of jobs.
@@ -85,7 +85,7 @@ private:
 	using EdgesToAdd = std::vector<EdgeToAdd>;
 
 	/// Mapping of a statement into its corresponding node.
-	using StmtNodeMapping = std::unordered_map<ShPtr<Statement>, ShPtr<CFG::Node>>;
+	using StmtNodeMapping = std::unordered_map<Statement*, CFG::Node*>;
 
 private:
 	NonRecursiveCFGBuilder();
@@ -93,47 +93,47 @@ private:
 	/// @name Visitor Interface
 	/// @{
 	using VisitorAdapter::visit;
-	virtual void visit(ShPtr<AssignStmt> stmt) override;
-	virtual void visit(ShPtr<BreakStmt> stmt) override;
-	virtual void visit(ShPtr<CallStmt> stmt) override;
-	virtual void visit(ShPtr<ContinueStmt> stmt) override;
-	virtual void visit(ShPtr<EmptyStmt> stmt) override;
-	virtual void visit(ShPtr<ForLoopStmt> stmt) override;
-	virtual void visit(ShPtr<UForLoopStmt> stmt) override;
-	virtual void visit(ShPtr<GotoStmt> stmt) override;
-	virtual void visit(ShPtr<IfStmt> stmt) override;
-	virtual void visit(ShPtr<ReturnStmt> stmt) override;
-	virtual void visit(ShPtr<SwitchStmt> stmt) override;
-	virtual void visit(ShPtr<UnreachableStmt> stmt) override;
-	virtual void visit(ShPtr<VarDefStmt> stmt) override;
-	virtual void visit(ShPtr<WhileLoopStmt> stmt) override;
+	virtual void visit(AssignStmt* stmt) override;
+	virtual void visit(BreakStmt* stmt) override;
+	virtual void visit(CallStmt* stmt) override;
+	virtual void visit(ContinueStmt* stmt) override;
+	virtual void visit(EmptyStmt* stmt) override;
+	virtual void visit(ForLoopStmt* stmt) override;
+	virtual void visit(UForLoopStmt* stmt) override;
+	virtual void visit(GotoStmt* stmt) override;
+	virtual void visit(IfStmt* stmt) override;
+	virtual void visit(ReturnStmt* stmt) override;
+	virtual void visit(SwitchStmt* stmt) override;
+	virtual void visit(UnreachableStmt* stmt) override;
+	virtual void visit(VarDefStmt* stmt) override;
+	virtual void visit(WhileLoopStmt* stmt) override;
 	/// @}
 
-	void addEdgeFromCurrNodeToSuccNode(ShPtr<Statement> stmt,
+	void addEdgeFromCurrNodeToSuccNode(Statement* stmt,
 		EdgesToAdd &edgesToAdd,
-		ShPtr<Expression> edgeCond = nullptr);
+		Expression* edgeCond = nullptr);
 	void addEdgeFromVector(const EdgeToAdd &edge);
-	void addJobToQueue(ShPtr<CFG::Node> pred, ShPtr<Expression> cond,
-		ShPtr<Statement> stmt);
+	void addJobToQueue(CFG::Node* pred, Expression* cond,
+		Statement* stmt);
 	void addEdgesFromVector(const EdgesToAdd &edgesToAdd);
-	void addStatement(ShPtr<Statement> stmt);
-	void addStmtToNodeAndToMapOfStmtToNode(ShPtr<Statement> stmt);
-	void resolveGotoTargets(ShPtr<Statement> stmt);
+	void addStatement(Statement* stmt);
+	void addStmtToNodeAndToMapOfStmtToNode(Statement* stmt);
+	void resolveGotoTargets(Statement* stmt);
 	void createAndAddNode();
 	void createEdgesToBeAdded();
 	void createEntryNode();
 	void createExitNode();
-	void createNewNodeAndConnectWithPredNode(ShPtr<Statement> stmt);
+	void createNewNodeAndConnectWithPredNode(Statement* stmt);
 	void createNewNodeForIfSwitchForWhileStmtAndAddStmtToNode(
-		ShPtr<Statement> stmt);
-	void createNewNodeIfStmtHasSucc(ShPtr<Statement> stmt);
+		Statement* stmt);
+	void createNewNodeIfStmtHasSucc(Statement* stmt);
 	void createOtherNodes();
 	void doJob(const Job &job);
 	void doJobs();
 	void initializeCFGBuild();
 	void purgeCFG();
 	void validateCFG();
-	void visitForOrUForLoop(ShPtr<Statement> loop, ShPtr<Statement> body);
+	void visitForOrUForLoop(Statement* loop, Statement* body);
 
 private:
 	/// Queue of all jobs.
@@ -146,7 +146,7 @@ private:
 	EdgesToAdd edgesToAddLast;
 
 	/// Currently generated node.
-	ShPtr<CFG::Node> currNode;
+	CFG::Node* currNode = nullptr;
 
 	/// Mapping of an empty statement to its node.
 	StmtNodeMapping emptyStmtToNodeMap;

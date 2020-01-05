@@ -26,14 +26,14 @@ class VariableTests: public Test {};
 
 TEST_F(VariableTests,
 CreateCreatedVariableIsNonNull) {
-	ShPtr<Variable> var(Variable::create("a", IntType::create(32)));
+	Variable* var(Variable::create("a", IntType::create(32)));
 
 	EXPECT_TRUE(var);
 }
 
 TEST_F(VariableTests,
 CreateCreatedVariableIsInternalByDefault) {
-	ShPtr<Variable> var(Variable::create("a", IntType::create(32)));
+	Variable* var(Variable::create("a", IntType::create(32)));
 
 	EXPECT_TRUE(var->isInternal());
 }
@@ -44,11 +44,11 @@ CreateCreatedVariableIsInternalByDefault) {
 
 TEST_F(VariableTests,
 CopyCreatesExactCopyOfVariable) {
-	ShPtr<Variable> var(Variable::create("a", IntType::create(32)));
+	Variable* var(Variable::create("a", IntType::create(32)));
 	var->setName("b");
 	var->markAsExternal();
 
-	ShPtr<Variable> varCopy(var->copy());
+	Variable* varCopy(var->copy());
 
 	ASSERT_TRUE(varCopy);
 	EXPECT_NE(var, varCopy);
@@ -65,7 +65,7 @@ CopyCreatesExactCopyOfVariable) {
 
 TEST_F(VariableTests,
 IsInternalReturnsTrueIfVariableIsInternal) {
-	ShPtr<Variable> var(Variable::create("a", IntType::create(32)));
+	Variable* var(Variable::create("a", IntType::create(32)));
 
 	var->markAsInternal();
 
@@ -74,7 +74,7 @@ IsInternalReturnsTrueIfVariableIsInternal) {
 
 TEST_F(VariableTests,
 IsInternalReturnsFalseIfVariableIsExternal) {
-	ShPtr<Variable> var(Variable::create("a", IntType::create(32)));
+	Variable* var(Variable::create("a", IntType::create(32)));
 
 	var->markAsExternal();
 
@@ -87,7 +87,7 @@ IsInternalReturnsFalseIfVariableIsExternal) {
 
 TEST_F(VariableTests,
 IsExternalReturnsTrueIfVariableIsExternal) {
-	ShPtr<Variable> var(Variable::create("a", IntType::create(32)));
+	Variable* var(Variable::create("a", IntType::create(32)));
 
 	var->markAsExternal();
 
@@ -96,7 +96,7 @@ IsExternalReturnsTrueIfVariableIsExternal) {
 
 TEST_F(VariableTests,
 IsExternalReturnsFalseIfVariableIsInternal) {
-	ShPtr<Variable> var(Variable::create("a", IntType::create(32)));
+	Variable* var(Variable::create("a", IntType::create(32)));
 
 	var->markAsInternal();
 
@@ -109,7 +109,7 @@ IsExternalReturnsFalseIfVariableIsInternal) {
 
 TEST_F(VariableTests,
 GetOrigNameOriginalNameBeforeRenameIsCorrectlyReturned) {
-	ShPtr<Variable> var(Variable::create("original", IntType::create(32)));
+	Variable* var(Variable::create("original", IntType::create(32)));
 
 	EXPECT_EQ("original", var->getName());
 	EXPECT_EQ("original", var->getInitialName());
@@ -117,7 +117,7 @@ GetOrigNameOriginalNameBeforeRenameIsCorrectlyReturned) {
 
 TEST_F(VariableTests,
 GetOrigNameOriginalNameAfterRenameIsCorrectlyReturned) {
-	ShPtr<Variable> var(Variable::create("original", IntType::create(32)));
+	Variable* var(Variable::create("original", IntType::create(32)));
 	var->setName("new");
 
 	EXPECT_EQ("new", var->getName());

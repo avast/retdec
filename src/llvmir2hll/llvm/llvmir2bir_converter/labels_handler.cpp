@@ -32,7 +32,7 @@ std::string LabelsHandler::getLabel(const llvm::BasicBlock *bb) const {
 	);
 }
 
-std::string LabelsHandler::getLabel(ShPtr<Statement> stmt) const {
+std::string LabelsHandler::getLabel(Statement* stmt) const {
 	auto a = stmt->getAddress();
 	return a.isDefined()
 			? LLVMSupport::getBasicBlockLabelPrefix() + a.toHexPrefixString()
@@ -49,7 +49,7 @@ void LabelsHandler::removeLabel(const std::string &label) {
 /**
 * @brief Sets a proper label of a goto target that is in the given basic block.
 */
-void LabelsHandler::setGotoTargetLabel(ShPtr<Statement> target,
+void LabelsHandler::setGotoTargetLabel(Statement* target,
 		const llvm::BasicBlock *targetBB) {
 // std::cout << target << " @ " << targetBB->getName().str() << " @ " << target->getAddress() << std::endl;
 	auto label = createLabelFor(targetBB, target);
@@ -59,7 +59,7 @@ void LabelsHandler::setGotoTargetLabel(ShPtr<Statement> target,
 
 std::string LabelsHandler::createLabelFor(
 		const llvm::BasicBlock *bb,
-		ShPtr<Statement> stmt) const {
+		Statement* stmt) const {
 	auto label = getLabel(bb);
 	if (label.empty()) {
 		label = getLabel(stmt);

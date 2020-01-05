@@ -28,7 +28,7 @@ class Module;
 */
 class LLVMDebugInfoObtainer: private retdec::utils::NonCopyable {
 public:
-	static void obtainVarNames(ShPtr<Module> module);
+	static void obtainVarNames(Module* module);
 };
 
 } // namespace llvmir2hll

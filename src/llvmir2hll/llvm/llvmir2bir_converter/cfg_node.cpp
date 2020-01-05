@@ -22,13 +22,13 @@ namespace llvmir2hll {
 *
 * @param[in] target A target of the currently created edge.
 */
-CFGNode::CFGEdge::CFGEdge(ShPtr<CFGNode> target):
+CFGNode::CFGEdge::CFGEdge(CFGNode* target):
 	target(target), backEdge(false) {}
 
 /**
 * @brief Returns the target of this edge.
 */
-ShPtr<CFGNode> CFGNode::CFGEdge::getTarget() const {
+CFGNode* CFGNode::CFGEdge::getTarget() const {
 	return target;
 }
 
@@ -52,7 +52,7 @@ void CFGNode::CFGEdge::setBackEdge(bool isBackEdge) {
 * @param[in] bb An LLVM basic block to store to this tree node.
 * @param[in] body A converted body of this tree node.
 */
-CFGNode::CFGNode(llvm::BasicBlock *bb, ShPtr<Statement> body):
+CFGNode::CFGNode(llvm::BasicBlock *bb, Statement* body):
 	firstBasicBlock(bb), lastBasicBlock(bb), body(body),
 	predecessors(), successors(), statementSuccessor() {}
 
@@ -108,7 +108,7 @@ llvm::Value *CFGNode::getCond() const {
 /**
 * @brief Returns the body in BIR of this node.
 */
-ShPtr<Statement> CFGNode::getBody() const {
+Statement* CFGNode::getBody() const {
 	return body;
 }
 
@@ -118,7 +118,7 @@ ShPtr<Statement> CFGNode::getBody() const {
 * @par Preconditions
 *  - @a body is non-null
 */
-void CFGNode::setBody(ShPtr<Statement> body) {
+void CFGNode::setBody(Statement* body) {
 	PRECONDITION_NON_NULL(body);
 
 	this->body = body;
@@ -129,7 +129,7 @@ void CFGNode::setBody(ShPtr<Statement> body) {
 *
 * Appended statement @a statement could be also @c nullptr.
 */
-void CFGNode::appendToBody(ShPtr<Statement> statement) {
+void CFGNode::appendToBody(Statement* statement) {
 	body = Statement::mergeStatements(body, statement);
 }
 
@@ -141,11 +141,11 @@ void CFGNode::appendToBody(ShPtr<Statement> statement) {
 * @par Preconditions
 *  - @a succ is non-null
 */
-void CFGNode::addSuccessor(ShPtr<CFGNode> succ) {
+void CFGNode::addSuccessor(CFGNode* succ) {
 	PRECONDITION_NON_NULL(succ);
 
-	successors.push_back(std::make_shared<CFGEdge>(succ));
-	succ->predecessors.insert(shared_from_this());
+	successors.push_back(new CFGEdge(succ));
+	succ->predecessors.insert(this);
 }
 
 /**
@@ -154,12 +154,12 @@ void CFGNode::addSuccessor(ShPtr<CFGNode> succ) {
 * @par Preconditions
 *  - @a node is non-null
 */
-void CFGNode::moveSuccessorsFrom(const ShPtr<CFGNode> &node) {
+void CFGNode::moveSuccessorsFrom(CFGNode* node) {
 	PRECONDITION_NON_NULL(node);
 
 	for (const auto &succ: node->successors) {
 		successors.push_back(succ);
-		succ->getTarget()->predecessors.insert(shared_from_this());
+		succ->getTarget()->predecessors.insert(this);
 	}
 
 	deleteSucc(0);
@@ -184,7 +184,7 @@ void CFGNode::removeSucc(std::size_t i) {
 	// If currently removed successor is also the statement successor,
 	// do not remove it from successor's predecessors.
 	if (statementSuccessor != succ) {
-		succ->predecessors.erase(shared_from_this());
+		succ->predecessors.erase(this);
 	}
 
 	successors.erase(successors.begin() + i);
@@ -239,14 +239,14 @@ std::size_t CFGNode::getSuccNum() const {
 /**
 * @brief Returns a set of predecessors of this node.
 */
-CFGNode::CFGNodeSet CFGNode::getPredecessors() {
+CFGNode::CFGNodeSet CFGNode::getPredecessors() const {
 	return predecessors;
 }
 
 /**
 * @brief Returns a vector of successors of this node.
 */
-CFGNode::CFGNodeVector CFGNode::getSuccessors() {
+CFGNode::CFGNodeVector CFGNode::getSuccessors() const {
 	CFGNodeVector succs;
 	for (const auto &elem: successors) {
 		succs.push_back(elem->getTarget());
@@ -262,7 +262,7 @@ CFGNode::CFGNodeVector CFGNode::getSuccessors() {
 *  - <tt>i < NUM_NODE_SUCC</tt>, where @c NUM_NODE_SUCC is the number of node's
 *    successors
 */
-ShPtr<CFGNode> CFGNode::getSucc(std::size_t i) const {
+CFGNode* CFGNode::getSucc(std::size_t i) const {
 	PRECONDITION(i < getSuccNum(), "i `" << i << "`" << " is greater "
 		"than node's successors (`" << getSuccNum() << "`)");
 
@@ -273,7 +273,7 @@ ShPtr<CFGNode> CFGNode::getSucc(std::size_t i) const {
 * @brief Returns a successor of this node on the index @a i. If this node does
 *        not have a successor on the index @a i, it returns @c nullptr.
 */
-ShPtr<CFGNode> CFGNode::getSuccOrNull(std::size_t i) const {
+CFGNode* CFGNode::getSuccOrNull(std::size_t i) const {
 	if (i >= getSuccNum()) {
 		return nullptr;
 	}
@@ -287,7 +287,7 @@ ShPtr<CFGNode> CFGNode::getSuccOrNull(std::size_t i) const {
 * @par Preconditions
 *  - @a node is non-null
 */
-bool CFGNode::hasSuccessor(const ShPtr<CFGNode> &node) const {
+bool CFGNode::hasSuccessor(CFGNode* node) const {
 	PRECONDITION_NON_NULL(node);
 
 	for (const auto &succ: successors) {
@@ -302,7 +302,7 @@ bool CFGNode::hasSuccessor(const ShPtr<CFGNode> &node) const {
 /**
 * @brief Sets flag that this node's succ @a node is a back-edge.
 */
-void CFGNode::markAsBackEdge(const ShPtr<CFGNode> &node) {
+void CFGNode::markAsBackEdge(CFGNode* node) {
 	for (auto &succ: successors) {
 		if (succ->getTarget() == node) {
 			succ->setBackEdge();
@@ -314,7 +314,7 @@ void CFGNode::markAsBackEdge(const ShPtr<CFGNode> &node) {
 /**
 * @brief Returns @c true if this node's succ @a node is a back-edge.
 */
-bool CFGNode::isBackEdge(const ShPtr<CFGNode> &node) const {
+bool CFGNode::isBackEdge(CFGNode* node) const {
 	PRECONDITION_NON_NULL(node);
 
 	for (const auto &succ: successors) {
@@ -336,19 +336,19 @@ bool CFGNode::hasStatementSuccessor() const {
 /**
 * @brief Returns the statement successor.
 */
-ShPtr<CFGNode> CFGNode::getStatementSuccessor() const {
+CFGNode* CFGNode::getStatementSuccessor() const {
 	return statementSuccessor;
 }
 
 /**
 * @brief Sets @a succ as a new statement successor.
 */
-void CFGNode::setStatementSuccessor(ShPtr<CFGNode> succ) {
+void CFGNode::setStatementSuccessor(CFGNode* succ) {
 	removeStatementSuccessor();
 
 	if (succ) {
 		statementSuccessor = succ;
-		succ->predecessors.insert(shared_from_this());
+		succ->predecessors.insert(this);
 	}
 }
 
@@ -360,7 +360,7 @@ void CFGNode::removeStatementSuccessor() {
 		// If currently removed statement successor is also a successor,
 		// do not remove it from successor's predecessors.
 		if (!hasSuccessor(statementSuccessor)) {
-			statementSuccessor->predecessors.erase(shared_from_this());
+			statementSuccessor->predecessors.erase(this);
 		}
 
 		statementSuccessor = nullptr;

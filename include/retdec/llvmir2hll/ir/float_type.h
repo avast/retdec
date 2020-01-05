@@ -25,11 +25,11 @@ class Visitor;
 */
 class FloatType final: public Type {
 public:
-	static ShPtr<FloatType> create(unsigned size);
+	static FloatType* create(unsigned size);
 
-	virtual ShPtr<Value> clone() override;
+	virtual Value* clone() override;
 
-	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
+	virtual bool isEqualTo(Value* otherValue) const override;
 
 	unsigned getSize() const;
 
@@ -44,7 +44,7 @@ public:
 
 private:
 	/// Mapping of float point type sizes into FloatType instances.
-	using SizeToFloatTypeMap = std::map<unsigned, ShPtr<FloatType>>;
+	using SizeToFloatTypeMap = std::map<unsigned, FloatType*>;
 
 private:
 	/// Number of bits (size of the float point type).

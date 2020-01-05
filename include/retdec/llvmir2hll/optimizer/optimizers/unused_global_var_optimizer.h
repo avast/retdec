@@ -21,7 +21,7 @@ namespace llvmir2hll {
 */
 class UnusedGlobalVarOptimizer final: public Optimizer {
 public:
-	UnusedGlobalVarOptimizer(ShPtr<Module> module);
+	UnusedGlobalVarOptimizer(Module* module);
 
 	virtual std::string getId() const override { return "UnusedGlobalVar"; }
 
@@ -31,13 +31,13 @@ private:
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<Variable> var) override;
+	virtual void visit(Variable* var) override;
 	/// @}
 
 	void computeUsedGlobalVars();
 	void removeUnusedGlobalVars();
-	bool isGlobal(ShPtr<Variable> var) const;
-	bool isUsed(ShPtr<Variable> var) const;
+	bool isGlobal(Variable* var) const;
+	bool isUsed(Variable* var) const;
 
 private:
 	/// Global variables in @c module. This is here to speedup the optimization.

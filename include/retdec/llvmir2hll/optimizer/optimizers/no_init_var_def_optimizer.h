@@ -22,7 +22,7 @@ namespace llvmir2hll {
 */
 class NoInitVarDefOptimizer final: public FuncOptimizer {
 public:
-	NoInitVarDefOptimizer(ShPtr<Module> module);
+	NoInitVarDefOptimizer(Module* module);
 
 	virtual std::string getId() const override { return "NoInitVarDef"; }
 
@@ -30,7 +30,7 @@ private:
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<VarDefStmt> stmt) override;
+	virtual void visit(VarDefStmt* stmt) override;
 	/// @}
 };
 

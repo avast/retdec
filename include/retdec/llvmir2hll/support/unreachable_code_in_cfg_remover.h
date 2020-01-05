@@ -29,30 +29,30 @@ class Module;
 class UnreachableCodeInCFGRemover: private OrderedAllVisitor,
 		private retdec::utils::NonCopyable {
 public:
-	static void removeCode(ShPtr<Module> module);
+	static void removeCode(Module* module);
 
 private:
-	UnreachableCodeInCFGRemover(ShPtr<Module> module);
+	UnreachableCodeInCFGRemover(Module* module);
 
 	void performRemoval();
-	void performRemovalInFunc(ShPtr<Function> func);
+	void performRemovalInFunc(Function* func);
 
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visitStmt(ShPtr<Statement> stmt, bool visitSuccessors = true,
+	virtual void visitStmt(Statement* stmt, bool visitSuccessors = true,
 		bool visitNestedStmts = true) override;
 	/// @}
 
 private:
 	/// Module in which the code is removed.
-	ShPtr<Module> module;
+	Module* module = nullptr;
 
 	/// The CFG of the current function.
-	ShPtr<CFG> cfg;
+	CFG* cfg = nullptr;
 
 	/// The used builder of CFGs.
-	ShPtr<CFGBuilder> cfgBuilder;
+	CFGBuilder* cfgBuilder = nullptr;
 };
 
 } // namespace llvmir2hll

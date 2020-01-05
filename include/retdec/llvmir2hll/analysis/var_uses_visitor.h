@@ -23,15 +23,15 @@ namespace llvmir2hll {
 */
 class VarUses {
 public:
-	VarUses(ShPtr<Variable> var = nullptr, ShPtr<Function> func = nullptr,
+	VarUses(Variable* var = nullptr, Function* func = nullptr,
 		StmtSet dirUses = StmtSet(), StmtSet indirUses = StmtSet()):
 			var(var), func(func), dirUses(dirUses), indirUses(indirUses) {}
 
 	/// Variable whose uses this class contains.
-	ShPtr<Variable> var;
+	Variable* var = nullptr;
 
 	/// Function which contains the uses.
-	ShPtr<Function> func;
+	Function* func = nullptr;
 
 	/// Direct uses of @c var.
 	StmtSet dirUses;
@@ -52,9 +52,9 @@ public:
 class VarUsesVisitor: private OrderedAllVisitor,
 		private retdec::utils::NonCopyable {
 public:
-	bool isUsed(ShPtr<Variable> var, ShPtr<Function> func,
+	bool isUsed(Variable* var, Function* func,
 		bool doNotIncludeFirstUse = false);
-	ShPtr<VarUses> getUses(ShPtr<Variable> var, ShPtr<Function> func);
+	VarUses* getUses(Variable* var, Function* func);
 
 	/// @name Caching
 	/// @{
@@ -62,61 +62,61 @@ public:
 	void disableCaching();
 	void clearCache();
 	bool isCachingEnabled() const;
-	void stmtHasBeenAdded(ShPtr<Statement> stmt, ShPtr<Function> func);
-	void stmtHasBeenChanged(ShPtr<Statement> stmt, ShPtr<Function> func);
-	void stmtHasBeenRemoved(ShPtr<Statement> stmt, ShPtr<Function> func);
+	void stmtHasBeenAdded(Statement* stmt, Function* func);
+	void stmtHasBeenChanged(Statement* stmt, Function* func);
+	void stmtHasBeenRemoved(Statement* stmt, Function* func);
 	/// @}
 
-	static ShPtr<VarUsesVisitor> create(ShPtr<ValueAnalysis> va,
-		bool enableCaching = false, ShPtr<Module> module = nullptr);
+	static VarUsesVisitor* create(ValueAnalysis* va,
+		bool enableCaching = false, Module* module = nullptr);
 
 private:
 	/// Mapping of a variable into its uses.
 	// Note: Using a hash table (i.e. std::unordered_map) does not
 	//       significantly speeds up the execution.
-	using VarUsesMap = std::map<ShPtr<Variable>, ShPtr<VarUses>>;
+	using VarUsesMap = std::map<Variable*, VarUses*>;
 
 	/// Mapping of a function into uses of its variables.
-	using FuncVarUsesMap = std::map<ShPtr<Function>, VarUsesMap>;
+	using FuncVarUsesMap = std::map<Function*, VarUsesMap>;
 
 private:
-	VarUsesVisitor(ShPtr<ValueAnalysis> va, bool enableCaching = false);
+	VarUsesVisitor(ValueAnalysis* va, bool enableCaching = false);
 
-	void precomputeEverything(ShPtr<Module> module);
-	void findAndStoreUses(ShPtr<Statement> stmt);
+	void precomputeEverything(Module* module);
+	void findAndStoreUses(Statement* stmt);
 	void dumpCache();
 
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<AssignStmt> stmt) override;
-	virtual void visit(ShPtr<VarDefStmt> stmt) override;
-	virtual void visit(ShPtr<CallStmt> stmt) override;
-	virtual void visit(ShPtr<ReturnStmt> stmt) override;
-	virtual void visit(ShPtr<EmptyStmt> stmt) override;
-	virtual void visit(ShPtr<IfStmt> stmt) override;
-	virtual void visit(ShPtr<SwitchStmt> stmt) override;
-	virtual void visit(ShPtr<WhileLoopStmt> stmt) override;
-	virtual void visit(ShPtr<ForLoopStmt> stmt) override;
-	virtual void visit(ShPtr<UForLoopStmt> stmt) override;
-	virtual void visit(ShPtr<BreakStmt> stmt) override;
-	virtual void visit(ShPtr<ContinueStmt> stmt) override;
-	virtual void visit(ShPtr<GotoStmt> stmt) override;
-	virtual void visit(ShPtr<UnreachableStmt> stmt) override;
+	virtual void visit(AssignStmt* stmt) override;
+	virtual void visit(VarDefStmt* stmt) override;
+	virtual void visit(CallStmt* stmt) override;
+	virtual void visit(ReturnStmt* stmt) override;
+	virtual void visit(EmptyStmt* stmt) override;
+	virtual void visit(IfStmt* stmt) override;
+	virtual void visit(SwitchStmt* stmt) override;
+	virtual void visit(WhileLoopStmt* stmt) override;
+	virtual void visit(ForLoopStmt* stmt) override;
+	virtual void visit(UForLoopStmt* stmt) override;
+	virtual void visit(BreakStmt* stmt) override;
+	virtual void visit(ContinueStmt* stmt) override;
+	virtual void visit(GotoStmt* stmt) override;
+	virtual void visit(UnreachableStmt* stmt) override;
 	/// @}
 
 private:
 	/// Variable whose uses are obtained.
-	ShPtr<Variable> var;
+	Variable* var = nullptr;
 
 	/// Function whose body is being traversed.
-	ShPtr<Function> func;
+	Function* func = nullptr;
 
 	/// Analysis of values.
-	ShPtr<ValueAnalysis> va;
+	ValueAnalysis* va = nullptr;
 
 	/// Uses of @c var.
-	ShPtr<VarUses> varUses;
+	VarUses* varUses = nullptr;
 
 	/// Are we pre-computing everything?
 	bool precomputing;

@@ -29,7 +29,7 @@ REGISTER_AT_FACTORY("One", ONE_SUB_OPTIMIZER_ID, SubOptimizerFactory,
 * @param[in] arithmExprEvaluator @a The used evaluator of arithmetical
 *            expressions.
 */
-OneSubOptimizer::OneSubOptimizer(ShPtr<ArithmExprEvaluator>
+OneSubOptimizer::OneSubOptimizer(ArithmExprEvaluator*
 		arithmExprEvaluator): SubOptimizer(arithmExprEvaluator) {}
 
 /**
@@ -38,16 +38,16 @@ OneSubOptimizer::OneSubOptimizer(ShPtr<ArithmExprEvaluator>
 * @param[in] arithmExprEvaluator @a The used evaluator of arithmetical
 *            expressions.
 */
-ShPtr<SubOptimizer> OneSubOptimizer::create(ShPtr<ArithmExprEvaluator>
+SubOptimizer* OneSubOptimizer::create(ArithmExprEvaluator*
 		arithmExprEvaluator) {
-	return ShPtr<SubOptimizer>(new OneSubOptimizer(arithmExprEvaluator));
+	return new OneSubOptimizer(arithmExprEvaluator);
 }
 
 std::string OneSubOptimizer::getId() const {
 	return ONE_SUB_OPTIMIZER_ID;
 }
 
-void OneSubOptimizer::visit(ShPtr<MulOpExpr> expr) {
+void OneSubOptimizer::visit(MulOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	if (isOpOne(expr->getFirstOperand())) {
@@ -59,7 +59,7 @@ void OneSubOptimizer::visit(ShPtr<MulOpExpr> expr) {
 	}
 }
 
-void OneSubOptimizer::visit(ShPtr<DivOpExpr> expr) {
+void OneSubOptimizer::visit(DivOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	if (isOpOne(expr->getSecondOperand())) {
@@ -68,21 +68,21 @@ void OneSubOptimizer::visit(ShPtr<DivOpExpr> expr) {
 	}
 }
 
-void OneSubOptimizer::visit(ShPtr<BitXorOpExpr> expr) {
+void OneSubOptimizer::visit(BitXorOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
 	if (isConstIntOne(expr->getFirstOperand())) {
 		// Optimization like "1 ^ (a == b)" -> optimized to "a != b" or
 		// optimization like 1 ^ someCasts(a == b) -> optimized to "a != b."
-		ShPtr<Expression> tempExpr(expr->getSecondOperand());
+		Expression* tempExpr(expr->getSecondOperand());
 		// Go through casts.
 		while (isa<CastExpr>(tempExpr)) {
 			tempExpr = cast<CastExpr>(tempExpr)->getOperand();
 		}
-		ShPtr<EqOpExpr> eqOpExpr(cast<EqOpExpr>(tempExpr));
+		EqOpExpr* eqOpExpr(cast<EqOpExpr>(tempExpr));
 		if (eqOpExpr) {
 			// The second operand must be EqOpExpr.
-			ShPtr<NeqOpExpr> neqOpExpr(
+			NeqOpExpr* neqOpExpr(
 				NeqOpExpr::create(
 					eqOpExpr->getFirstOperand(),
 					eqOpExpr->getSecondOperand()
@@ -95,15 +95,15 @@ void OneSubOptimizer::visit(ShPtr<BitXorOpExpr> expr) {
 	if (isConstIntOne(expr->getSecondOperand())) {
 		// Optimization like "(a == b) ^ 1" -> optimized to "a != b" or
 		// optimization like someCasts(a == b) ^ 1 -> optimized to "a != b."
-		ShPtr<Expression> tempExpr(expr->getFirstOperand());
+		Expression* tempExpr(expr->getFirstOperand());
 		// Go through casts.
 		while (isa<CastExpr>(tempExpr)) {
 			tempExpr = cast<CastExpr>(tempExpr)->getOperand();
 		}
-		ShPtr<EqOpExpr> eqOpExpr(cast<EqOpExpr>(tempExpr));
+		EqOpExpr* eqOpExpr(cast<EqOpExpr>(tempExpr));
 		if (eqOpExpr) {
 			// The first operand must be EqOpExpr.
-			ShPtr<NeqOpExpr> neqOpExpr(
+			NeqOpExpr* neqOpExpr(
 				NeqOpExpr::create(
 					eqOpExpr->getFirstOperand(),
 					eqOpExpr->getSecondOperand()
@@ -122,7 +122,7 @@ void OneSubOptimizer::visit(ShPtr<BitXorOpExpr> expr) {
 * @return @c true if @a value is a float constant with the value @c 1.0,
 *         otherwise @c false.
 */
-bool OneSubOptimizer::isOne(ShPtr<ConstFloat> value) const {
+bool OneSubOptimizer::isOne(ConstFloat* value) const {
 	return value->isEqualTo(ConstFloat::create(llvm::APFloat(value->getValue().
 		getSemantics(), "1.0")));
 }
@@ -135,7 +135,7 @@ bool OneSubOptimizer::isOne(ShPtr<ConstFloat> value) const {
 * @return @c true if @a value is a constant integer with the value @c 1,
 *         otherwise @c false.
 */
-bool OneSubOptimizer::isOne(ShPtr<ConstInt> value) const {
+bool OneSubOptimizer::isOne(ConstInt* value) const {
 	return value->isEqualTo(ConstInt::create(1, value->getValue().getBitWidth()));
 }
 
@@ -146,8 +146,8 @@ bool OneSubOptimizer::isOne(ShPtr<ConstInt> value) const {
 *
 * @return @c true if @a expr is a @c ConstInt one, otherwise @c false.
 */
-bool OneSubOptimizer::isConstIntOne(ShPtr<Expression> expr) const {
-	ShPtr<ConstInt> opConstInt(cast<ConstInt>(expr));
+bool OneSubOptimizer::isConstIntOne(Expression* expr) const {
+	ConstInt* opConstInt(cast<ConstInt>(expr));
 	return opConstInt && isOne(opConstInt);
 }
 
@@ -158,8 +158,8 @@ bool OneSubOptimizer::isConstIntOne(ShPtr<Expression> expr) const {
 *
 * @return @c true if @a expr is a @c ConstFloat one, otherwise @c false.
 */
-bool OneSubOptimizer::isConstFloatOne(ShPtr<Expression> expr) const {
-	ShPtr<ConstFloat> opConstFloat(cast<ConstFloat>(expr));
+bool OneSubOptimizer::isConstFloatOne(Expression* expr) const {
+	ConstFloat* opConstFloat(cast<ConstFloat>(expr));
 	return opConstFloat && isOne(opConstFloat);
 }
 
@@ -171,7 +171,7 @@ bool OneSubOptimizer::isConstFloatOne(ShPtr<Expression> expr) const {
 * @return @c true if @a expr is a @c ConstInt or @c ConstFloat one,
 *         otherwise @c false.
 */
-bool OneSubOptimizer::isOpOne(ShPtr<Expression> expr) const {
+bool OneSubOptimizer::isOpOne(Expression* expr) const {
 	return isConstIntOne(expr) || isConstFloatOne(expr);
 }
 

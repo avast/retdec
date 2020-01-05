@@ -18,14 +18,14 @@ namespace llvmir2hll {
 *
 * See create() for more information.
 */
-ForLoopStmt::ForLoopStmt(ShPtr<Variable> indVar, ShPtr<Expression> startValue,
-	ShPtr<Expression> endCond, ShPtr<Expression> step, ShPtr<Statement> body,
+ForLoopStmt::ForLoopStmt(Variable* indVar, Expression* startValue,
+	Expression* endCond, Expression* step, Statement* body,
 	Address a):
 		Statement(a), indVar(indVar), startValue(startValue), endCond(endCond),
 		step(step), body(body) {}
 
-ShPtr<Value> ForLoopStmt::clone() {
-	ShPtr<ForLoopStmt> forLoopStmt(ForLoopStmt::create(
+Value* ForLoopStmt::clone() {
+	ForLoopStmt* forLoopStmt(ForLoopStmt::create(
 		ucast<Variable>(indVar->clone()),
 		ucast<Expression>(startValue->clone()),
 		ucast<Expression>(endCond->clone()),
@@ -37,10 +37,10 @@ ShPtr<Value> ForLoopStmt::clone() {
 	return forLoopStmt;
 }
 
-bool ForLoopStmt::isEqualTo(ShPtr<Value> otherValue) const {
+bool ForLoopStmt::isEqualTo(Value* otherValue) const {
 	// Both types, induction variables, starting values, end conditions, steps,
 	// and bodies have to be equal.
-	if (ShPtr<ForLoopStmt> otherForLoopStmt = cast<ForLoopStmt>(otherValue)) {
+	if (ForLoopStmt* otherForLoopStmt = cast<ForLoopStmt>(otherValue)) {
 		return indVar->isEqualTo(otherForLoopStmt->indVar) &&
 			startValue->isEqualTo(otherForLoopStmt->startValue) &&
 			endCond->isEqualTo(otherForLoopStmt->endCond) &&
@@ -50,9 +50,9 @@ bool ForLoopStmt::isEqualTo(ShPtr<Value> otherValue) const {
 	return false;
 }
 
-void ForLoopStmt::replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) {
+void ForLoopStmt::replace(Expression* oldExpr, Expression* newExpr) {
 	if (oldExpr == indVar) {
-		ShPtr<Variable> newIndVar(cast<Variable>(newExpr));
+		Variable* newIndVar(cast<Variable>(newExpr));
 		ASSERT_MSG(newIndVar,
 			"induction variable can be replaced only with a variable");
 		setIndVar(newIndVar);
@@ -79,7 +79,7 @@ void ForLoopStmt::replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) 
 	}
 }
 
-ShPtr<Expression> ForLoopStmt::asExpression() const {
+Expression* ForLoopStmt::asExpression() const {
 	// Cannot be converted into an expression.
 	return {};
 }
@@ -87,35 +87,35 @@ ShPtr<Expression> ForLoopStmt::asExpression() const {
 /**
 * @brief Returns the induction variable.
 */
-ShPtr<Variable> ForLoopStmt::getIndVar() const {
+Variable* ForLoopStmt::getIndVar() const {
 	return indVar;
 }
 
 /**
 * @brief Returns the starting value.
 */
-ShPtr<Expression> ForLoopStmt::getStartValue() const {
+Expression* ForLoopStmt::getStartValue() const {
 	return startValue;
 }
 
 /**
 * @brief Returns the end condition.
 */
-ShPtr<Expression> ForLoopStmt::getEndCond() const {
+Expression* ForLoopStmt::getEndCond() const {
 	return endCond;
 }
 
 /**
 * @brief Returns the step.
 */
-ShPtr<Expression> ForLoopStmt::getStep() const {
+Expression* ForLoopStmt::getStep() const {
 	return step;
 }
 
 /**
 * @brief Returns the body.
 */
-ShPtr<Statement> ForLoopStmt::getBody() const {
+Statement* ForLoopStmt::getBody() const {
 	return body;
 }
 
@@ -125,11 +125,11 @@ ShPtr<Statement> ForLoopStmt::getBody() const {
 * @par Preconditions
 *  - @a newIndVar is non-null
 */
-void ForLoopStmt::setIndVar(ShPtr<Variable> newIndVar) {
+void ForLoopStmt::setIndVar(Variable* newIndVar) {
 	PRECONDITION_NON_NULL(newIndVar);
 
-	indVar->removeObserver(shared_from_this());
-	newIndVar->addObserver(shared_from_this());
+	indVar->removeObserver(this);
+	newIndVar->addObserver(this);
 	indVar = newIndVar;
 }
 
@@ -139,11 +139,11 @@ void ForLoopStmt::setIndVar(ShPtr<Variable> newIndVar) {
 * @par Preconditions
 *  - @a newStartValue is non-null
 */
-void ForLoopStmt::setStartValue(ShPtr<Expression> newStartValue) {
+void ForLoopStmt::setStartValue(Expression* newStartValue) {
 	PRECONDITION_NON_NULL(newStartValue);
 
-	startValue->removeObserver(shared_from_this());
-	newStartValue->addObserver(shared_from_this());
+	startValue->removeObserver(this);
+	newStartValue->addObserver(this);
 	startValue = newStartValue;
 }
 
@@ -153,11 +153,11 @@ void ForLoopStmt::setStartValue(ShPtr<Expression> newStartValue) {
 * @par Preconditions
 *  - @a newEndCond is non-null
 */
-void ForLoopStmt::setEndCond(ShPtr<Expression> newEndCond) {
+void ForLoopStmt::setEndCond(Expression* newEndCond) {
 	PRECONDITION_NON_NULL(newEndCond);
 
-	endCond->removeObserver(shared_from_this());
-	newEndCond->addObserver(shared_from_this());
+	endCond->removeObserver(this);
+	newEndCond->addObserver(this);
 	endCond = newEndCond;
 }
 
@@ -167,11 +167,11 @@ void ForLoopStmt::setEndCond(ShPtr<Expression> newEndCond) {
 * @par Preconditions
 *  - @a newStep is non-null
 */
-void ForLoopStmt::setStep(ShPtr<Expression> newStep) {
+void ForLoopStmt::setStep(Expression* newStep) {
 	PRECONDITION_NON_NULL(newStep);
 
-	step->removeObserver(shared_from_this());
-	newStep->addObserver(shared_from_this());
+	step->removeObserver(this);
+	newStep->addObserver(this);
 	step = newStep;
 }
 
@@ -181,11 +181,11 @@ void ForLoopStmt::setStep(ShPtr<Expression> newStep) {
 * @par Preconditions
 *  - @a newBody is non-null
 */
-void ForLoopStmt::setBody(ShPtr<Statement> newBody) {
+void ForLoopStmt::setBody(Statement* newBody) {
 	PRECONDITION_NON_NULL(newBody);
 
-	body->removeObserver(shared_from_this());
-	newBody->addObserver(shared_from_this());
+	body->removeObserver(this);
+	newBody->addObserver(this);
 	body = newBody;
 }
 
@@ -209,9 +209,9 @@ void ForLoopStmt::setBody(ShPtr<Statement> newBody) {
 * @par Preconditions
 *  - all operands except @a succ are non-null
 */
-ShPtr<ForLoopStmt> ForLoopStmt::create(ShPtr<Variable> indVar,
-		ShPtr<Expression> startValue, ShPtr<Expression> endCond,
-		ShPtr<Expression> step, ShPtr<Statement> body, ShPtr<Statement> succ,
+ForLoopStmt* ForLoopStmt::create(Variable* indVar,
+		Expression* startValue, Expression* endCond,
+		Expression* step, Statement* body, Statement* succ,
 		Address a) {
 	PRECONDITION_NON_NULL(indVar);
 	PRECONDITION_NON_NULL(startValue);
@@ -219,11 +219,11 @@ ShPtr<ForLoopStmt> ForLoopStmt::create(ShPtr<Variable> indVar,
 	PRECONDITION_NON_NULL(step);
 	PRECONDITION_NON_NULL(body);
 
-	ShPtr<ForLoopStmt> stmt(new ForLoopStmt(indVar, startValue, endCond,
+	ForLoopStmt* stmt(new ForLoopStmt(indVar, startValue, endCond,
 		step, body, a));
 	stmt->setSuccessor(succ);
 
-	// Initialization (recall that shared_from_this() cannot be called in a
+	// Initialization (recall that this cannot be called in a
 	// constructor).
 	indVar->addObserver(stmt);
 	startValue->addObserver(stmt);
@@ -252,22 +252,22 @@ ShPtr<ForLoopStmt> ForLoopStmt::create(ShPtr<Variable> indVar,
 *
 * @see Subject::update()
 */
-void ForLoopStmt::update(ShPtr<Value> subject, ShPtr<Value> arg) {
+void ForLoopStmt::update(Value* subject, Value* arg) {
 	PRECONDITION_NON_NULL(subject);
 
-	ShPtr<Statement> newBody = cast<Statement>(arg);
+	Statement* newBody = cast<Statement>(arg);
 	if (subject == body && newBody) {
 		setBody(newBody);
 		return;
 	}
 
-	ShPtr<Variable> newIndVar = cast<Variable>(arg);
+	Variable* newIndVar = cast<Variable>(arg);
 	if (subject == indVar && newIndVar) {
 		setIndVar(newIndVar);
 		return;
 	}
 
-	ShPtr<Expression> newExpr = cast<Expression>(arg);
+	Expression* newExpr = cast<Expression>(arg);
 	if (!newExpr) {
 		return;
 	}
@@ -282,7 +282,7 @@ void ForLoopStmt::update(ShPtr<Value> subject, ShPtr<Value> arg) {
 }
 
 void ForLoopStmt::accept(Visitor *v) {
-	v->visit(ucast<ForLoopStmt>(shared_from_this()));
+	v->visit(ucast<ForLoopStmt>(this));
 }
 
 } // namespace llvmir2hll

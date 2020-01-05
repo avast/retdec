@@ -19,21 +19,21 @@ namespace tests {
 */
 class IntTypeTests: public Test {
 protected:
-	ShPtr<IntType> getSignedIntType(unsigned size = 32);
-	ShPtr<IntType> getUnsignedIntType(unsigned size = 32);
+	IntType* getSignedIntType(unsigned size = 32);
+	IntType* getUnsignedIntType(unsigned size = 32);
 };
 
 /**
 * @brief Returns a signed int type of the given @a size.
 */
-ShPtr<IntType> IntTypeTests::getSignedIntType(unsigned size) {
+IntType* IntTypeTests::getSignedIntType(unsigned size) {
 	return IntType::create(size, true);
 }
 
 /**
 * @brief Returns an unsigned int type of the given @a size.
 */
-ShPtr<IntType> IntTypeTests::getUnsignedIntType(unsigned size) {
+IntType* IntTypeTests::getUnsignedIntType(unsigned size) {
 	return IntType::create(size, false);
 }
 

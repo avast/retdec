@@ -23,8 +23,8 @@ REGISTER_AT_FACTORY("strict", STRICT_ARITHM_EXPR_EVALUATOR_ID,
 /**
 * @brief Creates a new StrictArithmExprEvaluator.
 */
-ShPtr<ArithmExprEvaluator> StrictArithmExprEvaluator::create() {
-	return ShPtr<ArithmExprEvaluator>(new StrictArithmExprEvaluator());
+ArithmExprEvaluator* StrictArithmExprEvaluator::create() {
+	return new StrictArithmExprEvaluator();
 }
 
 std::string StrictArithmExprEvaluator::getId() const {
@@ -52,7 +52,7 @@ void StrictArithmExprEvaluator::resolveTypesBinaryOp(ConstPair &constPair) {
 	}
 }
 
-void StrictArithmExprEvaluator::resolveOpSpecifications(ShPtr<DivOpExpr> expr,
+void StrictArithmExprEvaluator::resolveOpSpecifications(DivOpExpr* expr,
 		ConstPair &constPair) {
 	if (!canBeEvaluated) {
 		return;
@@ -67,7 +67,7 @@ void StrictArithmExprEvaluator::resolveOpSpecifications(ShPtr<DivOpExpr> expr,
 	// Supported only division without remainder.
 	if (std::optional<ConstIntPair> constIntPair = castConstPair<ConstInt>(constPair)) {
 		APSIntPair apsIntPair = getAPSIntsFromConstants(constIntPair);
-		ShPtr<ConstInt> remConstInt(ConstInt::create(apsIntPair.first.srem(
+		ConstInt* remConstInt(ConstInt::create(apsIntPair.first.srem(
 			apsIntPair.second)));
 		if (!remConstInt->isZero()) {
 			canBeEvaluated = false;
@@ -75,16 +75,16 @@ void StrictArithmExprEvaluator::resolveOpSpecifications(ShPtr<DivOpExpr> expr,
 	}
 }
 
-void StrictArithmExprEvaluator::resolveOpSpecifications(ShPtr<ModOpExpr> expr,
+void StrictArithmExprEvaluator::resolveOpSpecifications(ModOpExpr* expr,
 		ConstPair &constPair) {
 	// Remaindering with zero not supported.
 	canBeEvaluated &= !isConstantZero(constPair.second);
 }
 
-void StrictArithmExprEvaluator::resolveOpSpecifications(ShPtr<NegOpExpr> expr,
-		ShPtr<Constant> &constant) {
-	ShPtr<ConstInt> opConstInt(cast<ConstInt>(constant));
-	ShPtr<ConstFloat> opConstFloat(cast<ConstFloat>(constant));
+void StrictArithmExprEvaluator::resolveOpSpecifications(NegOpExpr* expr,
+		Constant* &constant) {
+	ConstInt* opConstInt(cast<ConstInt>(constant));
+	ConstFloat* opConstFloat(cast<ConstFloat>(constant));
 	if (opConstInt && opConstInt->isSigned() && opConstInt->isMinSigned()) {
 		// Don't evaluate -128 on 8 bits to 128. Overflow.
 		canBeEvaluated = false;
@@ -95,28 +95,28 @@ void StrictArithmExprEvaluator::resolveOpSpecifications(ShPtr<NegOpExpr> expr,
 	}
 }
 
-void StrictArithmExprEvaluator::resolveCast(ShPtr<BitCastExpr> expr,
-		ShPtr<Constant> &constant) {
+void StrictArithmExprEvaluator::resolveCast(BitCastExpr* expr,
+		Constant* &constant) {
 	canBeEvaluated = false;
 }
 
-void StrictArithmExprEvaluator::resolveCast(ShPtr<ExtCastExpr> expr,
-		ShPtr<Constant> &constant) {
+void StrictArithmExprEvaluator::resolveCast(ExtCastExpr* expr,
+		Constant* &constant) {
 	canBeEvaluated = false;
 }
 
-void StrictArithmExprEvaluator::resolveCast(ShPtr<FPToIntCastExpr> expr,
-		ShPtr<Constant> &constant) {
+void StrictArithmExprEvaluator::resolveCast(FPToIntCastExpr* expr,
+		Constant* &constant) {
 	canBeEvaluated = false;
 }
 
-void StrictArithmExprEvaluator::resolveCast(ShPtr<IntToFPCastExpr> expr,
-		ShPtr<Constant> &constant) {
+void StrictArithmExprEvaluator::resolveCast(IntToFPCastExpr* expr,
+		Constant* &constant) {
 	canBeEvaluated = false;
 }
 
-void StrictArithmExprEvaluator::resolveCast(ShPtr<TruncCastExpr> expr,
-		ShPtr<Constant> &constant) {
+void StrictArithmExprEvaluator::resolveCast(TruncCastExpr* expr,
+		Constant* &constant) {
 	canBeEvaluated = false;
 }
 

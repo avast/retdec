@@ -27,15 +27,15 @@ ConstInt::ConstInt(const llvm::APSInt &value):
 	Constant(), value(value),
 	type(IntType::create(value.getBitWidth(), value.isSigned())) {}
 
-ShPtr<Value> ConstInt::clone() {
-	ShPtr<ConstInt> constInt(ConstInt::create(value));
+Value* ConstInt::clone() {
+	ConstInt* constInt(ConstInt::create(value));
 	constInt->setMetadata(getMetadata());
 	return constInt;
 }
 
-bool ConstInt::isEqualTo(ShPtr<Value> otherValue) const {
+bool ConstInt::isEqualTo(Value* otherValue) const {
 	// Both types and values have to be equal.
-	if (ShPtr<ConstInt> otherConstInt = cast<ConstInt>(otherValue)) {
+	if (ConstInt* otherConstInt = cast<ConstInt>(otherValue)) {
 		if (getType() != otherConstInt->getType()) { // Signed/unsigned included.
 			return false;
 		}
@@ -44,11 +44,11 @@ bool ConstInt::isEqualTo(ShPtr<Value> otherValue) const {
 	return false;
 }
 
-ShPtr<Type> ConstInt::getType() const {
+Type* ConstInt::getType() const {
 	return type;
 }
 
-void ConstInt::replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) {
+void ConstInt::replace(Expression* oldExpr, Expression* newExpr) {
 	PRECONDITION_NON_NULL(oldExpr);
 
 	// There is nothing to be replaced.
@@ -297,7 +297,7 @@ bool ConstInt::isMoreReadableInHexa() const {
 * This function should be used only for small constants, like -1, 0, 1, which
 * always fit into int.
 */
-ShPtr<ConstInt> ConstInt::create(std::int64_t value, unsigned bitWidth,
+ConstInt* ConstInt::create(std::int64_t value, unsigned bitWidth,
 		bool isSigned) {
 	return ConstInt::create(llvm::APInt(bitWidth, value, isSigned), isSigned);
 }
@@ -311,10 +311,10 @@ ShPtr<ConstInt> ConstInt::create(std::int64_t value, unsigned bitWidth,
 // Note: We cannot obtain the signed/unsigned information from llvm::APInt
 //       because in an LLVM module, signed and unsigned constants are not
 //       distinguished.
-ShPtr<ConstInt> ConstInt::create(const llvm::APInt &value, bool isSigned) {
+ConstInt* ConstInt::create(const llvm::APInt &value, bool isSigned) {
 	// Since the second parameter of llvm::APSInt() is "isUnsigned", we have to
 	// negate the value of isSigned.
-	return ShPtr<ConstInt>(new ConstInt(llvm::APSInt(value, !isSigned)));
+	return new ConstInt(llvm::APSInt(value, !isSigned));
 }
 
 /**
@@ -322,8 +322,8 @@ ShPtr<ConstInt> ConstInt::create(const llvm::APInt &value, bool isSigned) {
 *
 * @param[in] value Value of the constant.
 */
-ShPtr<ConstInt> ConstInt::create(const llvm::APSInt &value) {
-	return ShPtr<ConstInt>(new ConstInt(value));
+ConstInt* ConstInt::create(const llvm::APSInt &value) {
+	return new ConstInt(value);
 }
 
 /**
@@ -332,7 +332,7 @@ ShPtr<ConstInt> ConstInt::create(const llvm::APSInt &value) {
 * @par Preconditions
 *  - @a x is non-null and <tt>>= 0</tt>
 */
-ShPtr<ConstInt> ConstInt::getTwoToPositivePower(ShPtr<ConstInt> x) {
+ConstInt* ConstInt::getTwoToPositivePower(ConstInt* x) {
 	PRECONDITION_NON_NULL(x);
 	PRECONDITION(!x->isNegative(), "x, which is " << x << ", is not >= 0");
 
@@ -342,7 +342,7 @@ ShPtr<ConstInt> ConstInt::getTwoToPositivePower(ShPtr<ConstInt> x) {
 }
 
 void ConstInt::accept(Visitor *v) {
-	v->visit(ucast<ConstInt>(shared_from_this()));
+	v->visit(ucast<ConstInt>(this));
 }
 
 } // namespace llvmir2hll

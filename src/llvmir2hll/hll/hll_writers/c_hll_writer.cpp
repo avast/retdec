@@ -151,13 +151,13 @@ std::string validateIdentifier(const std::string &identifier) {
 * If @a type is either not a pointer or it does not point to FunctionType, the
 * null pointer is returned.
 */
-ShPtr<FunctionType> getFuncTypeFromPointerToFunc(ShPtr<Type> type) {
+FunctionType* getFuncTypeFromPointerToFunc(Type* type) {
 	if (!isa<PointerType>(type)) {
-		return ShPtr<FunctionType>();
+		return nullptr;
 	}
 
-	ShPtr<Type> pointedType(type);
-	while (ShPtr<PointerType> containedPointerType = cast<PointerType>(pointedType)) {
+	Type* pointedType(type);
+	while (PointerType* containedPointerType = cast<PointerType>(pointedType)) {
 		pointedType = containedPointerType->getContainedType();
 	}
 	return cast<FunctionType>(pointedType);
@@ -167,7 +167,7 @@ ShPtr<FunctionType> getFuncTypeFromPointerToFunc(ShPtr<Type> type) {
 * @brief Returns @c true if @a type is a (possibly indirect) pointer to a
 *        function, @c false otherwise.
 */
-bool isPointerToFunc(ShPtr<Type> type) {
+bool isPointerToFunc(Type* type) {
 	return getFuncTypeFromPointerToFunc(type) != nullptr;
 }
 
@@ -178,13 +178,13 @@ bool isPointerToFunc(ShPtr<Type> type) {
 * If @a type is either not a pointer or it does not point to ArrayType, the
 * null pointer is returned.
 */
-ShPtr<ArrayType> getArrayTypeFromPointerToArray(ShPtr<Type> type) {
+ArrayType* getArrayTypeFromPointerToArray(Type* type) {
 	if (!isa<PointerType>(type)) {
-		return ShPtr<ArrayType>();
+		return nullptr;
 	}
 
-	ShPtr<Type> pointedType(type);
-	while (ShPtr<PointerType> containedPointerType = cast<PointerType>(pointedType)) {
+	Type* pointedType(type);
+	while (PointerType* containedPointerType = cast<PointerType>(pointedType)) {
 		pointedType = containedPointerType->getContainedType();
 	}
 	return cast<ArrayType>(pointedType);
@@ -194,7 +194,7 @@ ShPtr<ArrayType> getArrayTypeFromPointerToArray(ShPtr<Type> type) {
 * @brief Returns @c true if @a type is a (possibly indirect) pointer to an
 *        array, @c false otherwise.
 */
-bool isPointerToArray(ShPtr<Type> type) {
+bool isPointerToArray(Type* type) {
 	return getArrayTypeFromPointerToArray(type) != nullptr;
 }
 
@@ -202,8 +202,8 @@ bool isPointerToArray(ShPtr<Type> type) {
 * @brief Returns @c true if @a type is an array of (possibly indirect) pointers
 *        to functions, @c false otherwise.
 */
-bool isArrayOfFuncPointers(ShPtr<Type> type) {
-	ShPtr<ArrayType> arrayType(cast<ArrayType>(type));
+bool isArrayOfFuncPointers(Type* type) {
+	ArrayType* arrayType(cast<ArrayType>(type));
 	if (!arrayType) {
 		return false;
 	}
@@ -215,8 +215,8 @@ bool isArrayOfFuncPointers(ShPtr<Type> type) {
 * @brief Returns @c true if the given expression is an uninitialized array, @c
 *        false otherwise.
 */
-bool isUninitializedConstArray(ShPtr<Expression> expr) {
-	ShPtr<ConstArray> constArray(cast<ConstArray>(expr));
+bool isUninitializedConstArray(Expression* expr) {
+	ConstArray* constArray(cast<ConstArray>(expr));
 	return constArray && !constArray->isInitialized();
 }
 
@@ -224,7 +224,7 @@ bool isUninitializedConstArray(ShPtr<Expression> expr) {
 * @brief Returns @c true if the given constant has only fields that should be
 *        initialized as an uninitialized array, @c false otherwise.
 */
-bool hasOnlyUninitializedConstArrayInits(ShPtr<ConstStruct> constant) {
+bool hasOnlyUninitializedConstArrayInits(ConstStruct* constant) {
 	ConstStruct::Type value(constant->getValue());
 	for (const auto &member : value) {
 		if (!isUninitializedConstArray(member.second)) {
@@ -257,10 +257,10 @@ CHLLWriter::CHLLWriter(llvm::raw_ostream &o, const std::string& outputFormat):
 * @param[in] out Output stream into which the HLL code will be emitted.
 * @param[in] outputFormat
 */
-ShPtr<HLLWriter> CHLLWriter::create(
+HLLWriter* CHLLWriter::create(
 		llvm::raw_ostream &out,
 		const std::string& outputFormat) {
-	return ShPtr<HLLWriter>(new CHLLWriter(out, outputFormat));
+	return new CHLLWriter(out, outputFormat);
 }
 
 std::string CHLLWriter::getId() const {
@@ -280,7 +280,7 @@ bool CHLLWriter::emitFileHeader() {
 	//
 	// Header files
 	//
-	ShPtr<UsedTypes> usedTypes(UsedTypesVisitor::getUsedTypes(module));
+	UsedTypes* usedTypes(UsedTypesVisitor::getUsedTypes(module));
 	StringSet headerFiles;
 
 	// If the module uses the bool type, we have to #include stdbool.h.
@@ -491,7 +491,7 @@ bool CHLLWriter::emitFunctionPrototypes() {
 	return somethingEmitted;
 }
 
-bool CHLLWriter::emitExternalFunction(ShPtr<Function> func) {
+bool CHLLWriter::emitExternalFunction(Function* func) {
 	out->addressPush(func->getStartAddress());
 	auto funcDeclString = module->getDeclarationStringForFunc(func);
 	if (!funcDeclString.empty()) {
@@ -505,9 +505,9 @@ bool CHLLWriter::emitExternalFunction(ShPtr<Function> func) {
 	return true;
 }
 
-void CHLLWriter::visit(ShPtr<GlobalVarDef> varDef) {
-	ShPtr<Variable> var(varDef->getVar());
-	ShPtr<Expression> init(varDef->getInitializer());
+void CHLLWriter::visit(GlobalVarDef* varDef) {
+	Variable* var(varDef->getVar());
+	Expression* init(varDef->getInitializer());
 
 	out->space(getCurrentIndent());
 	out->addressPush(varDef->getAddress());
@@ -516,13 +516,13 @@ void CHLLWriter::visit(ShPtr<GlobalVarDef> varDef) {
 	// Initializer.
 	if (init) {
 		emitConstantsInStructuredWay = true;
-		if (ShPtr<ConstArray> constArrayInit = cast<ConstArray>(init)) {
+		if (ConstArray* constArrayInit = cast<ConstArray>(init)) {
 			if (constArrayInit->isInitialized()) {
 				out->operatorX("=", true, true);
 
 				emitInitializedConstArray(constArrayInit);
 			}
-		} else if (ShPtr<ConstStruct> constStructInit = cast<ConstStruct>(init)) {
+		} else if (ConstStruct* constStructInit = cast<ConstStruct>(init)) {
 			out->operatorX("=", true, true);
 
 			// When defining a structure, we do not need to emit a cast.
@@ -542,7 +542,7 @@ void CHLLWriter::visit(ShPtr<GlobalVarDef> varDef) {
 	out->newLine();
 }
 
-void CHLLWriter::visit(ShPtr<Function> func) {
+void CHLLWriter::visit(Function* func) {
 	if (func->isDeclaration()) {
 		emitFunctionPrototype(func);
 	} else {
@@ -550,37 +550,37 @@ void CHLLWriter::visit(ShPtr<Function> func) {
 	}
 }
 
-bool CHLLWriter::emitTargetCode(ShPtr<Module> module) {
+bool CHLLWriter::emitTargetCode(Module* module) {
 	if (optionKeepAllBrackets) {
-		bracketsManager = ShPtr<BracketManager>(new NoBracketManager(module));
+		bracketsManager = new NoBracketManager(module);
 	} else {
-		bracketsManager = ShPtr<BracketManager>(new CBracketManager(module));
+		bracketsManager = new CBracketManager(module);
 	}
 
 	if (optionUseCompoundOperators) {
-		compoundOpManager = ShPtr<CompoundOpManager>(new CCompoundOpManager());
+		compoundOpManager = new CCompoundOpManager();
 	} else {
-		compoundOpManager = ShPtr<CompoundOpManager>(new NoCompoundOpManager());
+		compoundOpManager = new NoCompoundOpManager();
 	}
 
 	return HLLWriter::emitTargetCode(module);
 }
 
-void CHLLWriter::visit(ShPtr<Variable> var) {
+void CHLLWriter::visit(Variable* var) {
 	if (var->getAddress().isDefined()) out->addressPush(var->getAddress());
 	out->variableId(var->getName());
 	if (var->getAddress().isDefined()) out->addressPop();
 }
 
-void CHLLWriter::visit(ShPtr<AddressOpExpr> expr) {
+void CHLLWriter::visit(AddressOpExpr* expr) {
 	emitUnaryOpExpr("&", expr);
 }
 
-void CHLLWriter::visit(ShPtr<AssignOpExpr> expr) {
+void CHLLWriter::visit(AssignOpExpr* expr) {
 	emitAssignment(expr->getFirstOperand(), expr->getSecondOperand());
 }
 
-void CHLLWriter::visit(ShPtr<ArrayIndexOpExpr> expr) {
+void CHLLWriter::visit(ArrayIndexOpExpr* expr) {
 	// Base.
 	emitExprWithBracketsIfNeeded(expr->getBase());
 
@@ -590,9 +590,9 @@ void CHLLWriter::visit(ShPtr<ArrayIndexOpExpr> expr) {
 	out->punctuation(']');
 }
 
-void CHLLWriter::visit(ShPtr<StructIndexOpExpr> expr) {
+void CHLLWriter::visit(StructIndexOpExpr* expr) {
 	// Base.
-	ShPtr<Expression> base(expr->getFirstOperand());
+	Expression* base(expr->getFirstOperand());
 	emitExprWithBracketsIfNeeded(base);
 
 	// Access.
@@ -600,47 +600,47 @@ void CHLLWriter::visit(ShPtr<StructIndexOpExpr> expr) {
 
 	// Element.
 	assert(isa<ConstInt>(expr->getSecondOperand()));
-	ShPtr<ConstInt> ci = cast<ConstInt>(expr->getSecondOperand());
+	ConstInt* ci = cast<ConstInt>(expr->getSecondOperand());
 	out->memberId("e" + ci->getTextRepr());
 }
 
-void CHLLWriter::visit(ShPtr<DerefOpExpr> expr) {
+void CHLLWriter::visit(DerefOpExpr* expr) {
 	emitUnaryOpExpr("*", expr);
 }
 
-void CHLLWriter::visit(ShPtr<NotOpExpr> expr) {
+void CHLLWriter::visit(NotOpExpr* expr) {
 	emitUnaryOpExpr("!", expr);
 }
 
-void CHLLWriter::visit(ShPtr<NegOpExpr> expr) {
+void CHLLWriter::visit(NegOpExpr* expr) {
 	emitUnaryOpExpr("-", expr);
 }
 
-void CHLLWriter::visit(ShPtr<EqOpExpr> expr) {
+void CHLLWriter::visit(EqOpExpr* expr) {
 	emitBinaryOpExpr("==", expr);
 }
 
-void CHLLWriter::visit(ShPtr<NeqOpExpr> expr) {
+void CHLLWriter::visit(NeqOpExpr* expr) {
 	emitBinaryOpExpr("!=", expr);
 }
 
-void CHLLWriter::visit(ShPtr<LtOpExpr> expr) {
+void CHLLWriter::visit(LtOpExpr* expr) {
 	emitBinaryOpExpr("<", expr);
 }
 
-void CHLLWriter::visit(ShPtr<GtOpExpr> expr) {
+void CHLLWriter::visit(GtOpExpr* expr) {
 	emitBinaryOpExpr(">", expr);
 }
 
-void CHLLWriter::visit(ShPtr<LtEqOpExpr> expr) {
+void CHLLWriter::visit(LtEqOpExpr* expr) {
 	emitBinaryOpExpr("<=", expr);
 }
 
-void CHLLWriter::visit(ShPtr<GtEqOpExpr> expr) {
+void CHLLWriter::visit(GtEqOpExpr* expr) {
 	emitBinaryOpExpr(">=", expr);
 }
 
-void CHLLWriter::visit(ShPtr<TernaryOpExpr> expr) {
+void CHLLWriter::visit(TernaryOpExpr* expr) {
 	bool bracketsAreNeeded = bracketsManager->areBracketsNeeded(expr);
 	if (bracketsAreNeeded) {
 		out->punctuation('(');
@@ -655,58 +655,58 @@ void CHLLWriter::visit(ShPtr<TernaryOpExpr> expr) {
 	}
 }
 
-void CHLLWriter::visit(ShPtr<AddOpExpr> expr) {
+void CHLLWriter::visit(AddOpExpr* expr) {
 	emitBinaryOpExpr("+", expr);
 }
 
-void CHLLWriter::visit(ShPtr<SubOpExpr> expr) {
+void CHLLWriter::visit(SubOpExpr* expr) {
 	emitBinaryOpExpr("-", expr);
 }
 
-void CHLLWriter::visit(ShPtr<MulOpExpr> expr) {
+void CHLLWriter::visit(MulOpExpr* expr) {
 	emitBinaryOpExpr("*", expr);
 }
 
-void CHLLWriter::visit(ShPtr<ModOpExpr> expr) {
+void CHLLWriter::visit(ModOpExpr* expr) {
 	emitBinaryOpExpr("%", expr);
 }
 
-void CHLLWriter::visit(ShPtr<DivOpExpr> expr) {
+void CHLLWriter::visit(DivOpExpr* expr) {
 	emitBinaryOpExpr("/", expr);
 }
 
-void CHLLWriter::visit(ShPtr<AndOpExpr> expr) {
+void CHLLWriter::visit(AndOpExpr* expr) {
 	emitBinaryOpExpr("&&", expr);
 }
 
-void CHLLWriter::visit(ShPtr<OrOpExpr> expr) {
+void CHLLWriter::visit(OrOpExpr* expr) {
 	emitBinaryOpExpr("||", expr);
 }
 
-void CHLLWriter::visit(ShPtr<BitAndOpExpr> expr) {
+void CHLLWriter::visit(BitAndOpExpr* expr) {
 	emitBinaryOpExpr("&", expr);
 }
 
-void CHLLWriter::visit(ShPtr<BitOrOpExpr> expr) {
+void CHLLWriter::visit(BitOrOpExpr* expr) {
 	emitBinaryOpExpr("|", expr);
 }
 
-void CHLLWriter::visit(ShPtr<BitXorOpExpr> expr) {
+void CHLLWriter::visit(BitXorOpExpr* expr) {
 	emitBinaryOpExpr("^", expr);
 }
 
-void CHLLWriter::visit(ShPtr<BitShlOpExpr> expr) {
+void CHLLWriter::visit(BitShlOpExpr* expr) {
 	emitBinaryOpExpr("<<", expr);
 }
 
-void CHLLWriter::visit(ShPtr<BitShrOpExpr> expr) {
+void CHLLWriter::visit(BitShrOpExpr* expr) {
 	// TODO Distinguish between logical and arithmetical shifts (recall that if
 	// the first operand is of a signed type with a negative value, it is
 	// implementation-defined whether >> is logical or arithmetical).
 	emitBinaryOpExpr(">>", expr);
 }
 
-void CHLLWriter::visit(ShPtr<CallExpr> expr) {
+void CHLLWriter::visit(CallExpr* expr) {
 	// Called expression.
 	emitExprWithBracketsIfNeeded(expr->getCalledExpr());
 
@@ -716,19 +716,19 @@ void CHLLWriter::visit(ShPtr<CallExpr> expr) {
 	out->punctuation(')');
 }
 
-void CHLLWriter::visit(ShPtr<CommaOpExpr> expr) {
+void CHLLWriter::visit(CommaOpExpr* expr) {
 	emitBinaryOpExpr(",", expr, false, true);
 }
 
-void CHLLWriter::visit(ShPtr<BitCastExpr> expr) {
+void CHLLWriter::visit(BitCastExpr* expr) {
 	emitCastInStandardWay(expr);
 }
 
-void CHLLWriter::visit(ShPtr<ExtCastExpr> expr) {
+void CHLLWriter::visit(ExtCastExpr* expr) {
 	emitCastInStandardWay(expr);
 }
 
-void CHLLWriter::visit(ShPtr<TruncCastExpr> expr) {
+void CHLLWriter::visit(TruncCastExpr* expr) {
 	// Specific property, see the LLVM reference manual.
 	if (isa<IntType>(expr->getType()) &&
 			(cast<IntType>(expr->getType())->isBool())) {
@@ -742,9 +742,9 @@ void CHLLWriter::visit(ShPtr<TruncCastExpr> expr) {
 	}
 }
 
-void CHLLWriter::visit(ShPtr<FPToIntCastExpr> expr) {
+void CHLLWriter::visit(FPToIntCastExpr* expr) {
 	out->punctuation('(');
-	ShPtr<IntType> type = cast<IntType>(expr->getType());
+	IntType* type = cast<IntType>(expr->getType());
 	if (type->isBool()) {
 		out->dataType("bool");
 	} else {
@@ -754,24 +754,24 @@ void CHLLWriter::visit(ShPtr<FPToIntCastExpr> expr) {
 	expr->getOperand()->accept(this);
 }
 
-void CHLLWriter::visit(ShPtr<IntToFPCastExpr> expr) {
+void CHLLWriter::visit(IntToFPCastExpr* expr) {
 	emitCastInStandardWay(expr);
 }
 
-void CHLLWriter::visit(ShPtr<IntToPtrCastExpr> expr) {
+void CHLLWriter::visit(IntToPtrCastExpr* expr) {
 	emitCastInStandardWay(expr);
 }
 
-void CHLLWriter::visit(ShPtr<PtrToIntCastExpr> expr) {
+void CHLLWriter::visit(PtrToIntCastExpr* expr) {
 	emitCastInStandardWay(expr);
 }
 
-void CHLLWriter::visit(ShPtr<ConstBool> constant) {
+void CHLLWriter::visit(ConstBool* constant) {
 	// from stdbool.h
 	constant->getValue() ? out->constantBool("true") : out->constantBool("false");
 }
 
-void CHLLWriter::visit(ShPtr<ConstFloat> constant) {
+void CHLLWriter::visit(ConstFloat* constant) {
 	ConstFloat::Type value(constant->getValue());
 	// Special values, like inf or nan, have to treated specifically.
 	if (value.isInfinity()) {
@@ -790,7 +790,7 @@ void CHLLWriter::visit(ShPtr<ConstFloat> constant) {
 	}
 }
 
-void CHLLWriter::visit(ShPtr<ConstInt> constant) {
+void CHLLWriter::visit(ConstInt* constant) {
 	if (shouldBeEmittedInHexa(constant)) {
 		out->constantInt(constant->toString(16, "0x"));
 	} else {
@@ -798,11 +798,11 @@ void CHLLWriter::visit(ShPtr<ConstInt> constant) {
 	}
 }
 
-void CHLLWriter::visit(ShPtr<ConstNullPointer> constant) {
+void CHLLWriter::visit(ConstNullPointer* constant) {
 	out->constantPointer(getConstNullPointerTextRepr());
 }
 
-void CHLLWriter::visit(ShPtr<ConstString> constant) {
+void CHLLWriter::visit(ConstString* constant) {
 	std::string str;
 	if (constant->isWideString()) {
 		str += "L";
@@ -812,7 +812,7 @@ void CHLLWriter::visit(ShPtr<ConstString> constant) {
 	out->constantString(str);
 }
 
-void CHLLWriter::visit(ShPtr<ConstArray> constant) {
+void CHLLWriter::visit(ConstArray* constant) {
 	if (constant->isInitialized()) {
 		emitInitializedConstArray(constant);
 	} else {
@@ -820,17 +820,17 @@ void CHLLWriter::visit(ShPtr<ConstArray> constant) {
 	}
 }
 
-void CHLLWriter::visit(ShPtr<ConstStruct> constant) {
+void CHLLWriter::visit(ConstStruct* constant) {
 	emitConstStruct(constant);
 }
 
-void CHLLWriter::visit(ShPtr<ConstSymbol> constant) {
+void CHLLWriter::visit(ConstSymbol* constant) {
 	out->constantSymbol(constant->getName());
 }
 
-void CHLLWriter::visit(ShPtr<AssignStmt> stmt) {
+void CHLLWriter::visit(AssignStmt* stmt) {
 	// Special treatment of constant arrays.
-	if (ShPtr<ConstArray> constArray = cast<ConstArray>(stmt->getRhs())) {
+	if (ConstArray* constArray = cast<ConstArray>(stmt->getRhs())) {
 		if (!constArray->isInitialized()) {
 			return;
 		}
@@ -845,7 +845,7 @@ void CHLLWriter::visit(ShPtr<AssignStmt> stmt) {
 /**
 * @brief Emits the given assignment (without leading or trailing whitespace).
 */
-void CHLLWriter::emitAssignment(ShPtr<Expression> lhs, ShPtr<Expression> rhs) {
+void CHLLWriter::emitAssignment(Expression* lhs, Expression* rhs) {
 	CompoundOpManager::CompoundOp compoundOp(
 		compoundOpManager->tryOptimizeToCompoundOp(lhs, rhs));
 	lhs->accept(this);
@@ -866,7 +866,7 @@ void CHLLWriter::emitAssignment(ShPtr<Expression> lhs, ShPtr<Expression> rhs) {
 * @brief Emits the definition of the initialization variable of the given loop
 *        when it is needed.
 */
-void CHLLWriter::emitInitVarDefWhenNeeded(ShPtr<UForLoopStmt> loop) {
+void CHLLWriter::emitInitVarDefWhenNeeded(UForLoopStmt* loop) {
 	// When the initialization part of the loop is a definition, we want to
 	// emit, e.g.,
 	//
@@ -895,16 +895,16 @@ void CHLLWriter::emitInitVarDefWhenNeeded(ShPtr<UForLoopStmt> loop) {
 }
 
 // Only here is variables type emitted.
-void CHLLWriter::visit(ShPtr<VarDefStmt> stmt) {
+void CHLLWriter::visit(VarDefStmt* stmt) {
 	out->space(getCurrentIndent());
 	emitVarWithType(stmt->getVar());
 
 	// Initializer.
-	if (ShPtr<Expression> init = stmt->getInitializer()) {
+	if (Expression* init = stmt->getInitializer()) {
 		out->operatorX("=", true, true);
 
 		emitConstantsInStructuredWay = true;
-		if (ShPtr<ConstStruct> constStruct = cast<ConstStruct>(init)) {
+		if (ConstStruct* constStruct = cast<ConstStruct>(init)) {
 			// When defining a structure, we do not need to emit a cast.
 			emitConstStruct(constStruct, false);
 		} else {
@@ -920,17 +920,17 @@ void CHLLWriter::visit(ShPtr<VarDefStmt> stmt) {
 	out->newLine();
 }
 
-void CHLLWriter::visit(ShPtr<CallStmt> stmt) {
+void CHLLWriter::visit(CallStmt* stmt) {
 	out->space(getCurrentIndent());
 	stmt->getCall()->accept(this);
 	out->punctuation(';');
 	out->newLine();
 }
 
-void CHLLWriter::visit(ShPtr<ReturnStmt> stmt) {
+void CHLLWriter::visit(ReturnStmt* stmt) {
 	out->space(getCurrentIndent());
 	out->keyword("return");
-	if (ShPtr<Expression> retVal = stmt->getRetVal()) {
+	if (Expression* retVal = stmt->getRetVal()) {
 		out->space();
 		retVal->accept(this);
 	}
@@ -938,11 +938,11 @@ void CHLLWriter::visit(ShPtr<ReturnStmt> stmt) {
 	out->newLine();
 }
 
-void CHLLWriter::visit(ShPtr<EmptyStmt> stmt) {
+void CHLLWriter::visit(EmptyStmt* stmt) {
 	// Nothing to be emitted.
 }
 
-void CHLLWriter::visit(ShPtr<IfStmt> stmt) {
+void CHLLWriter::visit(IfStmt* stmt) {
 	// Emit the first if clause and other else-if clauses (if any).
 	for (auto i = stmt->clause_begin(), e = stmt->clause_end(); i != e; ++i) {
 		out->space(getCurrentIndent());
@@ -973,7 +973,7 @@ void CHLLWriter::visit(ShPtr<IfStmt> stmt) {
 	out->newLine();
 }
 
-void CHLLWriter::visit(ShPtr<SwitchStmt> stmt) {
+void CHLLWriter::visit(SwitchStmt* stmt) {
 	out->space(getCurrentIndent());
 	out->keyword("switch");
 	out->space();
@@ -1011,7 +1011,7 @@ void CHLLWriter::visit(ShPtr<SwitchStmt> stmt) {
 	out->newLine();
 }
 
-void CHLLWriter::visit(ShPtr<WhileLoopStmt> stmt) {
+void CHLLWriter::visit(WhileLoopStmt* stmt) {
 	out->space(getCurrentIndent());
 	out->keyword("while");
 	out->space();
@@ -1024,7 +1024,7 @@ void CHLLWriter::visit(ShPtr<WhileLoopStmt> stmt) {
 	out->newLine();
 }
 
-void CHLLWriter::visit(ShPtr<ForLoopStmt> stmt) {
+void CHLLWriter::visit(ForLoopStmt* stmt) {
 	out->space(getCurrentIndent());
 	out->keyword("for");
 	out->space();
@@ -1040,7 +1040,7 @@ void CHLLWriter::visit(ShPtr<ForLoopStmt> stmt) {
 	out->punctuation(';');
 	out->space();
 	// Try to emit as readable step as possible.
-	if (ShPtr<ConstInt> stepInt = cast<ConstInt>(stmt->getStep())) {
+	if (ConstInt* stepInt = cast<ConstInt>(stmt->getStep())) {
 		if (stepInt->getValue() == 1) {
 			// i++
 			stmt->getIndVar()->accept(this);
@@ -1054,7 +1054,7 @@ void CHLLWriter::visit(ShPtr<ForLoopStmt> stmt) {
 			// i -= x
 			stmt->getIndVar()->accept(this);
 			out->operatorX("-=", true, true);
-			ShPtr<ConstInt> negStepInt(ConstInt::create(-stepInt->getValue()));
+			ConstInt* negStepInt(ConstInt::create(-stepInt->getValue()));
 			negStepInt->accept(this);
 		} else {
 			// i += x
@@ -1074,7 +1074,7 @@ void CHLLWriter::visit(ShPtr<ForLoopStmt> stmt) {
 	out->newLine();
 }
 
-void CHLLWriter::visit(ShPtr<UForLoopStmt> stmt) {
+void CHLLWriter::visit(UForLoopStmt* stmt) {
 	out->space(getCurrentIndent());
 	out->keyword("for");
 	out->space();
@@ -1099,21 +1099,21 @@ void CHLLWriter::visit(ShPtr<UForLoopStmt> stmt) {
 	out->newLine();
 }
 
-void CHLLWriter::visit(ShPtr<BreakStmt> stmt) {
+void CHLLWriter::visit(BreakStmt* stmt) {
 	out->space(getCurrentIndent());
 	out->keyword("break");
 	out->punctuation(';');
 	out->newLine();
 }
 
-void CHLLWriter::visit(ShPtr<ContinueStmt> stmt) {
+void CHLLWriter::visit(ContinueStmt* stmt) {
 	out->space(getCurrentIndent());
 	out->keyword("continue");
 	out->punctuation(';');
 	out->newLine();
 }
 
-void CHLLWriter::visit(ShPtr<GotoStmt> stmt) {
+void CHLLWriter::visit(GotoStmt* stmt) {
 	out->space(getCurrentIndent());
 	out->keyword("goto");
 	out->space();
@@ -1122,16 +1122,16 @@ void CHLLWriter::visit(ShPtr<GotoStmt> stmt) {
 	out->newLine();
 }
 
-void CHLLWriter::visit(ShPtr<UnreachableStmt> stmt) {
+void CHLLWriter::visit(UnreachableStmt* stmt) {
 	out->space(getCurrentIndent());
 	out->commentLine("UNREACHABLE");
 }
 
-void CHLLWriter::visit(ShPtr<FloatType> type) {
+void CHLLWriter::visit(FloatType* type) {
 	out->dataType("float" + std::to_string(type->getSize()) + "_t");
 }
 
-void CHLLWriter::visit(ShPtr<IntType> type) {
+void CHLLWriter::visit(IntType* type) {
 	if (type->isBool()) {
 		out->dataType("bool");
 		return;
@@ -1150,7 +1150,7 @@ void CHLLWriter::visit(ShPtr<IntType> type) {
 		+ std::to_string(type->getSize()) + "_t");
 }
 
-void CHLLWriter::visit(ShPtr<PointerType> type) {
+void CHLLWriter::visit(PointerType* type) {
 	// Pointers to functions have to emitted in a special way because of C
 	// syntax.
 	if (isPointerToFunc(type)) {
@@ -1167,7 +1167,7 @@ void CHLLWriter::visit(ShPtr<PointerType> type) {
 
 	int numOfStars = 1; // It is a pointer, min one "*".
 	// Compute the number of '*'s before the pointed-to value.
-	ShPtr<PointerType> pointedType(type);
+	PointerType* pointedType(type);
 	while (cast<PointerType>(pointedType->getContainedType())) {
 		pointedType = cast<PointerType>(pointedType->getContainedType());
 		numOfStars++;
@@ -1184,14 +1184,14 @@ void CHLLWriter::visit(ShPtr<PointerType> type) {
 	}
 }
 
-void CHLLWriter::visit(ShPtr<StringType> type) {
+void CHLLWriter::visit(StringType* type) {
 }
 
-void CHLLWriter::visit(ShPtr<ArrayType> type) {
+void CHLLWriter::visit(ArrayType* type) {
 	emitTypeOfElementsInArray(type);
 }
 
-void CHLLWriter::visit(ShPtr<StructType> type) {
+void CHLLWriter::visit(StructType* type) {
 	// Named structures can be emitted by using their name, unnamed structures
 	// are emitted inline including their full type.
 	auto i = structNames.find(type);
@@ -1206,19 +1206,19 @@ void CHLLWriter::visit(ShPtr<StructType> type) {
 	}
 }
 
-void CHLLWriter::visit(ShPtr<FunctionType> type) {
+void CHLLWriter::visit(FunctionType* type) {
 	// Due to C syntax, function type has to be handled outside of this visit.
 	// The reason is that in C, only a pointer to a function is correct, and a
 	// pointer to a function has code before '*' and after '*'. This is why we
 	// cannot emit a function type in here.
-	FAIL("FunctionType should be handled outside of visit(ShPtr<FunctionType>)");
+	FAIL("FunctionType should be handled outside of visit(FunctionType*)");
 }
 
-void CHLLWriter::visit(ShPtr<VoidType> type) {
+void CHLLWriter::visit(VoidType* type) {
 	out->dataType("void");
 }
 
-void CHLLWriter::visit(ShPtr<UnknownType> type) {
+void CHLLWriter::visit(UnknownType* type) {
 	out->dataType("unknown");
 }
 
@@ -1308,7 +1308,7 @@ bool CHLLWriter::emitFunctionPrototypesForNonLibraryFuncs() {
 * @par Preconditions
 *  - @a func is non-null
 */
-bool CHLLWriter::emitFunctionPrototype(ShPtr<Function> func) {
+bool CHLLWriter::emitFunctionPrototype(Function* func) {
 	// Emit a prototype for the main function only if it is referenced
 	// indirectly somewhere in the module (see the description of
 	// IndirectFuncRefAnalysis for more details). Otherwise, its prototype is
@@ -1332,7 +1332,7 @@ bool CHLLWriter::emitFunctionPrototype(ShPtr<Function> func) {
 * @par Preconditions
 *  - @a func is a function efinition
 */
-void CHLLWriter::emitFunctionDefinition(ShPtr<Function> func) {
+void CHLLWriter::emitFunctionDefinition(Function* func) {
 	PRECONDITION(func->isDefinition(), "it has to be a definition");
 
 	out->addressPush(func->getStartAddress());
@@ -1362,8 +1362,8 @@ void CHLLWriter::emitFunctionDefinition(ShPtr<Function> func) {
 *
 * A newline is NOT emitted.
 */
-void CHLLWriter::emitFunctionHeader(ShPtr<Function> func) {
-	ShPtr<Type> retType(func->getRetType());
+void CHLLWriter::emitFunctionHeader(Function* func) {
+	Type* retType(func->getRetType());
 
 	// C has a special syntax for functions returning a pointer to a function.
 	if (isPointerToFunc(retType)) {
@@ -1419,7 +1419,7 @@ void CHLLWriter::emitFunctionHeader(ShPtr<Function> func) {
 *
 * @see emitFunctionHeader()
 */
-void CHLLWriter::emitHeaderOfFuncReturningPointerToFunc(ShPtr<Function> func) {
+void CHLLWriter::emitHeaderOfFuncReturningPointerToFunc(Function* func) {
 	// Instead of
 	//
 	//     void (*)(int, int) func(int a)
@@ -1430,8 +1430,8 @@ void CHLLWriter::emitHeaderOfFuncReturningPointerToFunc(ShPtr<Function> func) {
 	//
 	// because of the special syntax of C for functions returning a pointer to
 	// a function.
-	ShPtr<Type> retType(func->getRetType());
-	ShPtr<FunctionType> retFuncType(getFuncTypeFromPointerToFunc(retType));
+	Type* retType(func->getRetType());
+	FunctionType* retFuncType(getFuncTypeFromPointerToFunc(retType));
 
 	emitReturnType(retFuncType);
 	out->space();
@@ -1453,7 +1453,7 @@ void CHLLWriter::emitHeaderOfFuncReturningPointerToFunc(ShPtr<Function> func) {
 *
 * @see emitFunctionHeader()
 */
-void CHLLWriter::emitHeaderOfFuncReturningPointerToArray(ShPtr<Function> func) {
+void CHLLWriter::emitHeaderOfFuncReturningPointerToArray(Function* func) {
 	// Instead of
 	//
 	//     int (*)[10] func(int a)
@@ -1464,8 +1464,8 @@ void CHLLWriter::emitHeaderOfFuncReturningPointerToArray(ShPtr<Function> func) {
 	//
 	// because of the special syntax of C for functions returning a pointer to
 	// an array.
-	ShPtr<Type> retType(func->getRetType());
-	ShPtr<ArrayType> retArrayType(getArrayTypeFromPointerToArray(retType));
+	Type* retType(func->getRetType());
+	ArrayType* retArrayType(getArrayTypeFromPointerToArray(retType));
 
 	emitTypeOfElementsInArray(retArrayType);
 	out->space();
@@ -1491,7 +1491,7 @@ void CHLLWriter::emitHeaderOfFuncReturningPointerToArray(ShPtr<Function> func) {
 * int a, char *p, ...
 * @endcode
 */
-void CHLLWriter::emitFunctionParameters(ShPtr<Function> func) {
+void CHLLWriter::emitFunctionParameters(Function* func) {
 	// For each parameter...
 	bool paramEmitted = false;
 	for (const auto &param : func->getParams()) {
@@ -1530,10 +1530,10 @@ void CHLLWriter::emitFunctionParameters(ShPtr<Function> func) {
 * @par Preconditions
 *  - @a var is non-null
 */
-void CHLLWriter::emitVarWithType(ShPtr<Variable> var) {
+void CHLLWriter::emitVarWithType(Variable* var) {
 	PRECONDITION_NON_NULL(var);
 
-	ShPtr<Type> varType(var->getType());
+	Type* varType(var->getType());
 
 	// Pointers to functions have to emitted in a special way because of C
 	// syntax.
@@ -1561,7 +1561,7 @@ void CHLLWriter::emitVarWithType(ShPtr<Variable> var) {
 	var->accept(this);
 
 	// For an array, emit its dimensions.
-	if (ShPtr<ArrayType> arrayType = cast<ArrayType>(varType)) {
+	if (ArrayType* arrayType = cast<ArrayType>(varType)) {
 		emitArrayDimensions(arrayType);
 	}
 }
@@ -1585,9 +1585,9 @@ void CHLLWriter::emitVarWithType(ShPtr<Variable> var) {
 * @par Preconditions
 *  - @a pointerToFuncType is a pointer to a function
 */
-void CHLLWriter::emitPointerToFunc(ShPtr<PointerType> pointerToFuncType,
-		ShPtr<Variable> var) {
-	ShPtr<FunctionType> funcType(getFuncTypeFromPointerToFunc(pointerToFuncType));
+void CHLLWriter::emitPointerToFunc(PointerType* pointerToFuncType,
+		Variable* var) {
+	FunctionType* funcType(getFuncTypeFromPointerToFunc(pointerToFuncType));
 	PRECONDITION(funcType,
 		"pointerToFuncType is expected to be a pointer to a function");
 
@@ -1621,14 +1621,14 @@ void CHLLWriter::emitPointerToFunc(ShPtr<PointerType> pointerToFuncType,
 * @par Preconditions
 *  - @a arrayType is an array of function pointers
 */
-void CHLLWriter::emitArrayOfFuncPointers(ShPtr<ArrayType> arrayType,
-		ShPtr<Variable> var) {
+void CHLLWriter::emitArrayOfFuncPointers(ArrayType* arrayType,
+		Variable* var) {
 	PRECONDITION(isArrayOfFuncPointers(arrayType),
 		"arrayType is expected to be an array of function pointers");
 
-	ShPtr<PointerType> ptrToFuncType(ucast<PointerType>(
+	PointerType* ptrToFuncType(ucast<PointerType>(
 		arrayType->getContainedType()));
-	ShPtr<FunctionType> funcType(getFuncTypeFromPointerToFunc(ptrToFuncType));
+	FunctionType* funcType(getFuncTypeFromPointerToFunc(ptrToFuncType));
 
 	emitReturnType(funcType);
 	out->space();
@@ -1659,9 +1659,9 @@ void CHLLWriter::emitArrayOfFuncPointers(ShPtr<ArrayType> arrayType,
 * @par Preconditions
 *  - @a pointerToArrayType is a pointer to an array
 */
-void CHLLWriter::emitPointerToArray(ShPtr<PointerType> pointerToArrayType,
-		ShPtr<Variable> var) {
-	ShPtr<ArrayType> arrayType(getArrayTypeFromPointerToArray(pointerToArrayType));
+void CHLLWriter::emitPointerToArray(PointerType* pointerToArrayType,
+		Variable* var) {
+	ArrayType* arrayType(getArrayTypeFromPointerToArray(pointerToArrayType));
 	PRECONDITION(arrayType,
 		"pointerToArrayType is expected to be a pointer to an array");
 
@@ -1677,7 +1677,7 @@ void CHLLWriter::emitPointerToArray(ShPtr<PointerType> pointerToArrayType,
 /**
 * @brief Emits the dimensions of the given array.
 */
-void CHLLWriter::emitArrayDimensions(ShPtr<ArrayType> arrayType) {
+void CHLLWriter::emitArrayDimensions(ArrayType* arrayType) {
 	for (const auto &dim : arrayType->getDimensions()) {
 		emitArrayDimension(dim);
 	}
@@ -1703,7 +1703,7 @@ void CHLLWriter::emitArrayDimension(std::size_t dimension) {
 * lines. Whether it is actually emitted in this way depends on the result of
 * shouldBeEmittedInStructuredWay().
 */
-void CHLLWriter::emitInitializedConstArray(ShPtr<ConstArray> array) {
+void CHLLWriter::emitInitializedConstArray(ConstArray* array) {
 	if (shouldBeEmittedInStructuredWay(array)) {
 		emitInitializedConstArrayInStructuredWay(array);
 	} else {
@@ -1714,7 +1714,7 @@ void CHLLWriter::emitInitializedConstArray(ShPtr<ConstArray> array) {
 /**
 * @brief Emits the given array inline.
 */
-void CHLLWriter::emitInitializedConstArrayInline(ShPtr<ConstArray> array) {
+void CHLLWriter::emitInitializedConstArrayInline(ConstArray* array) {
 	// We emit the array in the following way (just an example):
 	//
 	//     char *arr[3] = {"string1", "string2", "string3"}
@@ -1728,7 +1728,7 @@ void CHLLWriter::emitInitializedConstArrayInline(ShPtr<ConstArray> array) {
 * @brief Emits the given array in a structured way (may span over multiple
 *        lines).
 */
-void CHLLWriter::emitInitializedConstArrayInStructuredWay(ShPtr<ConstArray> array) {
+void CHLLWriter::emitInitializedConstArrayInStructuredWay(ConstArray* array) {
 	// We emit the array in the following way (just an example):
 	//
 	//     char *arr[3] = {
@@ -1754,7 +1754,7 @@ void CHLLWriter::emitInitializedConstArrayInStructuredWay(ShPtr<ConstArray> arra
 * @par Preconditions
 *  - @a array is non-null and uninitialized
 */
-void CHLLWriter::emitUninitializedConstArray(ShPtr<ConstArray> array) {
+void CHLLWriter::emitUninitializedConstArray(ConstArray* array) {
 	// We cannot emit just '{}' because ISO C99 forbids empty initializer
 	// braces. Therefore, we have to initialize the array to zeros. There is
 	// nothing else to do than initializing the array to some values, and zero
@@ -1767,14 +1767,14 @@ void CHLLWriter::emitUninitializedConstArray(ShPtr<ConstArray> array) {
 /**
 * @brief Emits the type of elements in the given array.
 */
-void CHLLWriter::emitTypeOfElementsInArray(ShPtr<ArrayType> arrayType) {
+void CHLLWriter::emitTypeOfElementsInArray(ArrayType* arrayType) {
 	arrayType->getContainedType()->accept(this);
 }
 
 /**
 * @brief Emits the given cast in the standard way.
 */
-void CHLLWriter::emitCastInStandardWay(ShPtr<CastExpr> expr) {
+void CHLLWriter::emitCastInStandardWay(CastExpr* expr) {
 	out->punctuation('(');
 	expr->getType()->accept(this);
 	out->punctuation(')');
@@ -1784,7 +1784,7 @@ void CHLLWriter::emitCastInStandardWay(ShPtr<CastExpr> expr) {
 /**
 * @brief Emits @c '*'s before the pointed value (there can be more than one).
 */
-void CHLLWriter::emitStarsBeforePointedValue(ShPtr<PointerType> ptrType) {
+void CHLLWriter::emitStarsBeforePointedValue(PointerType* ptrType) {
 	do {
 		out->operatorX("*");
 	} while ((ptrType = cast<PointerType>(ptrType->getContainedType())));
@@ -1793,7 +1793,7 @@ void CHLLWriter::emitStarsBeforePointedValue(ShPtr<PointerType> ptrType) {
 /**
 * @brief Emits parameters of the given function.
 */
-void CHLLWriter::emitFunctionParameters(ShPtr<FunctionType> funcType) {
+void CHLLWriter::emitFunctionParameters(FunctionType* funcType) {
 	for (auto i = funcType->param_begin(), e = funcType->param_end();
 			i != e; ++i) {
 		if (i != funcType->param_begin()) {
@@ -1807,14 +1807,14 @@ void CHLLWriter::emitFunctionParameters(ShPtr<FunctionType> funcType) {
 /**
 * @brief Emits the return type of the given function.
 */
-void CHLLWriter::emitReturnType(ShPtr<FunctionType> funcType) {
+void CHLLWriter::emitReturnType(FunctionType* funcType) {
 	funcType->getRetType()->accept(this);
 }
 
 /**
 * @brief Emits the name of @a var if it is a non-null pointer.
 */
-void CHLLWriter::emitNameOfVarIfExists(ShPtr<Variable> var) {
+void CHLLWriter::emitNameOfVarIfExists(Variable* var) {
 	if (var) {
 		var->accept(this);
 	}
@@ -1853,7 +1853,7 @@ void CHLLWriter::emitNameOfVarIfExists(ShPtr<Variable> var) {
 * lines. Whether it is actually emitted in this way depends on the result of
 * shouldBeEmittedInStructuredWay().
 */
-void CHLLWriter::emitConstStruct(ShPtr<ConstStruct> constant, bool emitCast) {
+void CHLLWriter::emitConstStruct(ConstStruct* constant, bool emitCast) {
 	if (emitCast && !emittingGlobalVarDefs) {
 		out->punctuation('(');
 		constant->getType()->accept(this);
@@ -1935,7 +1935,7 @@ void CHLLWriter::emitConstStruct(ShPtr<ConstStruct> constant, bool emitCast) {
 * @endcode
 * Again, there is no trailing newline.
 */
-void CHLLWriter::emitStructDeclaration(ShPtr<StructType> structType,
+void CHLLWriter::emitStructDeclaration(StructType* structType,
 		bool emitInline) {
 	if (!emitInline) {
 		out->space(getCurrentIndent());
@@ -1961,7 +1961,7 @@ void CHLLWriter::emitStructDeclaration(ShPtr<StructType> structType,
 		if (!emitInline) {
 			out->space(getCurrentIndent());
 		}
-		ShPtr<Type> elemType(elements.at(i));
+		Type* elemType(elements.at(i));
 		// Create a dummy variable so we can use emitVarWithType().
 		// All elements are named e#, where # is a number.
 		emitVarWithType(Variable::create("e" + toString(i), elemType));
@@ -1990,7 +1990,7 @@ void CHLLWriter::emitStructDeclaration(ShPtr<StructType> structType,
 * If a statement has some associated metadata, they're emitted in a comment
 * before the statement.
 */
-void CHLLWriter::emitBlock(ShPtr<Statement> stmt) {
+void CHLLWriter::emitBlock(Statement* stmt) {
 	out->punctuation('{');
 	out->newLine();
 	increaseIndentLevel();
@@ -2021,7 +2021,7 @@ void CHLLWriter::emitBlock(ShPtr<Statement> stmt) {
 *
 * A label is needed if @a stmt is the target of a goto statement.
 */
-void CHLLWriter::emitGotoLabelIfNeeded(ShPtr<Statement> stmt) {
+void CHLLWriter::emitGotoLabelIfNeeded(Statement* stmt) {
 	if (stmt->isGotoTarget()) {
 		out->space(getIndentForGotoLabel());
 		out->labelId(getGotoLabel(stmt));
@@ -2050,7 +2050,7 @@ void CHLLWriter::emitGotoLabelIfNeeded(ShPtr<Statement> stmt) {
 /**
 * @return Get a suffix for the given floating-point constant (if needed).
 */
-std::string CHLLWriter::getConstFloatSuffixIfNeeded(ShPtr<ConstFloat> constant) {
+std::string CHLLWriter::getConstFloatSuffixIfNeeded(ConstFloat* constant) {
 	auto size = constant->getSize();
 	if (size <= 32) {
 		return "f"; // float

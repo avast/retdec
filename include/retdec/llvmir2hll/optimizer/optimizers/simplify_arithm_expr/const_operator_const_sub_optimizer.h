@@ -113,9 +113,9 @@ namespace llvmir2hll {
 class ConstOperatorConstSubOptimizer final: public SubOptimizer {
 public:
 	ConstOperatorConstSubOptimizer(
-		ShPtr<ArithmExprEvaluator> arithmExprEvaluator);
+		ArithmExprEvaluator* arithmExprEvaluator);
 
-	static ShPtr<SubOptimizer> create(ShPtr<ArithmExprEvaluator>
+	static SubOptimizer* create(ArithmExprEvaluator*
 		arithmExprEvaluator);
 	virtual std::string getId() const override;
 
@@ -123,24 +123,24 @@ private:
 	/// @name Visitor Interface
 	/// @{
 	using SubOptimizer::visit;
-	virtual void visit(ShPtr<AddOpExpr> expr) override;
-	virtual void visit(ShPtr<SubOpExpr> expr) override;
-	virtual void visit(ShPtr<MulOpExpr> expr) override;
-	virtual void visit(ShPtr<DivOpExpr> expr) override;
-	virtual void visit(ShPtr<BitAndOpExpr> expr) override;
-	virtual void visit(ShPtr<BitOrOpExpr> expr) override;
-	virtual void visit(ShPtr<BitXorOpExpr> expr) override;
-	virtual void visit(ShPtr<LtOpExpr> expr) override;
-	virtual void visit(ShPtr<LtEqOpExpr> expr) override;
-	virtual void visit(ShPtr<GtOpExpr> expr) override;
-	virtual void visit(ShPtr<GtEqOpExpr> expr) override;
-	virtual void visit(ShPtr<EqOpExpr> expr) override;
-	virtual void visit(ShPtr<NeqOpExpr> expr) override;
-	virtual void visit(ShPtr<AndOpExpr> expr) override;
-	virtual void visit(ShPtr<OrOpExpr> expr) override;
+	virtual void visit(AddOpExpr* expr) override;
+	virtual void visit(SubOpExpr* expr) override;
+	virtual void visit(MulOpExpr* expr) override;
+	virtual void visit(DivOpExpr* expr) override;
+	virtual void visit(BitAndOpExpr* expr) override;
+	virtual void visit(BitOrOpExpr* expr) override;
+	virtual void visit(BitXorOpExpr* expr) override;
+	virtual void visit(LtOpExpr* expr) override;
+	virtual void visit(LtEqOpExpr* expr) override;
+	virtual void visit(GtOpExpr* expr) override;
+	virtual void visit(GtEqOpExpr* expr) override;
+	virtual void visit(EqOpExpr* expr) override;
+	virtual void visit(NeqOpExpr* expr) override;
+	virtual void visit(AndOpExpr* expr) override;
+	virtual void visit(OrOpExpr* expr) override;
 	/// @}
 
-	void tryOptimizeConstConstOperand(ShPtr<BinaryOpExpr> expr);
+	void tryOptimizeConstConstOperand(BinaryOpExpr* expr);
 };
 
 } // namespace llvmir2hll

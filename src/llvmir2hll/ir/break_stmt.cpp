@@ -13,21 +13,21 @@ namespace llvmir2hll {
 
 BreakStmt::BreakStmt(Address a) : Statement(a) {}
 
-bool BreakStmt::isEqualTo(ShPtr<Value> otherValue) const {
+bool BreakStmt::isEqualTo(Value* otherValue) const {
 	return isa<BreakStmt>(otherValue);
 }
 
-void BreakStmt::replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) {
+void BreakStmt::replace(Expression* oldExpr, Expression* newExpr) {
 	// There is nothing to do.
 }
 
-ShPtr<Expression> BreakStmt::asExpression() const {
+Expression* BreakStmt::asExpression() const {
 	// Cannot be converted into an expression.
 	return {};
 }
 
-ShPtr<Value> BreakStmt::clone() {
-	ShPtr<BreakStmt> breakStmt(BreakStmt::create(getAddress()));
+Value* BreakStmt::clone() {
+	BreakStmt* breakStmt(BreakStmt::create(getAddress()));
 	breakStmt->setMetadata(getMetadata());
 	return breakStmt;
 }
@@ -36,12 +36,12 @@ ShPtr<Value> BreakStmt::clone() {
 * @brief Creates a new break statement.
 * @param[in] a Address.
 */
-ShPtr<BreakStmt> BreakStmt::create(Address a) {
-	return ShPtr<BreakStmt>(new BreakStmt(a));
+BreakStmt* BreakStmt::create(Address a) {
+	return new BreakStmt(a);
 }
 
 void BreakStmt::accept(Visitor *v) {
-	v->visit(ucast<BreakStmt>(shared_from_this()));
+	v->visit(ucast<BreakStmt>(this));
 }
 
 } // namespace llvmir2hll

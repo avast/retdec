@@ -27,18 +27,18 @@ class PessimCallInfo: public CallInfo {
 	friend class PessimCallInfoObtainer;
 
 public:
-	explicit PessimCallInfo(ShPtr<CallExpr> call);
+	explicit PessimCallInfo(CallExpr* call);
 
-	virtual bool isNeverRead(ShPtr<Variable> var) const override;
-	virtual bool mayBeRead(ShPtr<Variable> var) const override;
-	virtual bool isAlwaysRead(ShPtr<Variable> var) const override;
+	virtual bool isNeverRead(Variable* var) const override;
+	virtual bool mayBeRead(Variable* var) const override;
+	virtual bool isAlwaysRead(Variable* var) const override;
 
-	virtual bool isNeverModified(ShPtr<Variable> var) const override;
-	virtual bool mayBeModified(ShPtr<Variable> var) const override;
-	virtual bool isAlwaysModified(ShPtr<Variable> var) const override;
+	virtual bool isNeverModified(Variable* var) const override;
+	virtual bool mayBeModified(Variable* var) const override;
+	virtual bool isAlwaysModified(Variable* var) const override;
 
-	virtual bool valueIsNeverChanged(ShPtr<Variable> var) const override;
-	virtual bool isAlwaysModifiedBeforeRead(ShPtr<Variable> var) const override;
+	virtual bool valueIsNeverChanged(Variable* var) const override;
+	virtual bool isAlwaysModifiedBeforeRead(Variable* var) const override;
 };
 
 /**
@@ -52,18 +52,18 @@ class PessimFuncInfo: public FuncInfo {
 	friend class PessimCallInfoObtainer;
 
 public:
-	explicit PessimFuncInfo(ShPtr<Function> func);
+	explicit PessimFuncInfo(Function* func);
 
-	virtual bool isNeverRead(ShPtr<Variable> var) const override;
-	virtual bool mayBeRead(ShPtr<Variable> var) const override;
-	virtual bool isAlwaysRead(ShPtr<Variable> var) const override;
+	virtual bool isNeverRead(Variable* var) const override;
+	virtual bool mayBeRead(Variable* var) const override;
+	virtual bool isAlwaysRead(Variable* var) const override;
 
-	virtual bool isNeverModified(ShPtr<Variable> var) const override;
-	virtual bool mayBeModified(ShPtr<Variable> var) const override;
-	virtual bool isAlwaysModified(ShPtr<Variable> var) const override;
+	virtual bool isNeverModified(Variable* var) const override;
+	virtual bool mayBeModified(Variable* var) const override;
+	virtual bool isAlwaysModified(Variable* var) const override;
 
-	virtual bool valueIsNeverChanged(ShPtr<Variable> var) const override;
-	virtual bool isAlwaysModifiedBeforeRead(ShPtr<Variable> var) const override;
+	virtual bool valueIsNeverChanged(Variable* var) const override;
+	virtual bool isAlwaysModifiedBeforeRead(Variable* var) const override;
 };
 
 /**
@@ -77,12 +77,12 @@ public:
 */
 class PessimCallInfoObtainer: public CallInfoObtainer {
 public:
-	static ShPtr<CallInfoObtainer> create();
+	static CallInfoObtainer* create();
 
 	virtual std::string getId() const override;
-	virtual ShPtr<CallInfo> getCallInfo(ShPtr<CallExpr> call,
-		ShPtr<Function> caller) override;
-	virtual ShPtr<FuncInfo> getFuncInfo(ShPtr<Function> func) override;
+	virtual CallInfo* getCallInfo(CallExpr* call,
+		Function* caller) override;
+	virtual FuncInfo* getFuncInfo(Function* func) override;
 
 private:
 	PessimCallInfoObtainer();

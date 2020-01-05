@@ -34,7 +34,7 @@ class BitShiftOptimizerTests: public TestsWithModule {};
 
 TEST_F(BitShiftOptimizerTests,
 OptimizerHasNonEmptyID) {
-	ShPtr<BitShiftOptimizer> optimizer(new BitShiftOptimizer(module));
+	BitShiftOptimizer* optimizer(new BitShiftOptimizer(module));
 
 	EXPECT_TRUE(!optimizer->getId().empty()) <<
 		"the optimizer should have a non-empty ID";
@@ -46,13 +46,13 @@ FirstOperandIsVariableLeftShiftOptimized) {
 	//
 	// Optimized to a * 4.
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<BitShlOpExpr> returnExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	BitShlOpExpr* returnExpr(
 		BitShlOpExpr::create(
 			varA,
 			ConstInt::create(2, 64)
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(returnExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(returnExpr));
 	testFunc->setBody(returnStmt);
 
 	// Optimize the module.
@@ -61,15 +61,15 @@ FirstOperandIsVariableLeftShiftOptimized) {
 	// Check that the output is correct.
 	ASSERT_TRUE(testFunc->getBody()) <<
 		"expected a non-empty body";
-	ShPtr<ReturnStmt> outReturnBody(cast<ReturnStmt>(testFunc->getBody()));
+	ReturnStmt* outReturnBody(cast<ReturnStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outReturnBody) <<
 		"expected ReturnStmt, got " << testFunc->getBody();
-	ShPtr<MulOpExpr> outMulOpExpr(cast<MulOpExpr>(outReturnBody->getRetVal()));
+	MulOpExpr* outMulOpExpr(cast<MulOpExpr>(outReturnBody->getRetVal()));
 	ASSERT_TRUE(outMulOpExpr) <<
 		"expected MulOpExpr, got " << outReturnBody;
-	ShPtr<Variable> outOp1(cast<Variable>(outMulOpExpr->getFirstOperand()));
+	Variable* outOp1(cast<Variable>(outMulOpExpr->getFirstOperand()));
 	EXPECT_EQ(varA, outOp1);
-	ShPtr<ConstInt> outOp2(cast<ConstInt>(outMulOpExpr->getSecondOperand()));
+	ConstInt* outOp2(cast<ConstInt>(outMulOpExpr->getSecondOperand()));
 	ASSERT_TRUE(outOp2) <<
 		"expected ConstInt, got " << outMulOpExpr->getSecondOperand()->getType();
 	EXPECT_EQ(ConstInt::create(4, 64)->getValue(), outOp2->getValue());
@@ -84,9 +84,9 @@ GlobalVarLeftShiftOptimized) {
 	// void test() {
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<BitShlOpExpr> bitShlOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	BitShlOpExpr* bitShlOpExpr(
 		BitShlOpExpr::create(
 			varA,
 			ConstInt::create(2, 64)
@@ -97,12 +97,12 @@ GlobalVarLeftShiftOptimized) {
 	Optimizer::optimize<BitShiftOptimizer>(module);
 
 	// Check whether BitShlOpExpr was changed to MulOpExpr.
-	ShPtr<MulOpExpr> outMulOpExpr(cast<MulOpExpr>(module->getInitForGlobalVar(varB)));
+	MulOpExpr* outMulOpExpr(cast<MulOpExpr>(module->getInitForGlobalVar(varB)));
 	ASSERT_TRUE(outMulOpExpr) <<
 		"expected MulOpExpr, got " << module->getInitForGlobalVar(varB);
-	ShPtr<Variable> outOp1(cast<Variable>(outMulOpExpr->getFirstOperand()));
+	Variable* outOp1(cast<Variable>(outMulOpExpr->getFirstOperand()));
 	EXPECT_EQ(varA, outOp1);
-	ShPtr<ConstInt> outOp2(cast<ConstInt>(outMulOpExpr->getSecondOperand()));
+	ConstInt* outOp2(cast<ConstInt>(outMulOpExpr->getSecondOperand()));
 	ASSERT_TRUE(outOp2) <<
 		"expected ConstInt, got " << outMulOpExpr->getSecondOperand()->getType();
 	EXPECT_EQ(ConstInt::create(4, 64)->getValue(), outOp2->getValue());
@@ -114,19 +114,19 @@ FirstOperandIsIntTypeExprOptimized) {
 	//
 	// Optimized to (a + b) * 4.
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<AddOpExpr> addOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	AddOpExpr* addOpExpr(
 		AddOpExpr::create(
 			varA,
 			varB
 	));
-	ShPtr<BitShlOpExpr> returnExpr(
+	BitShlOpExpr* returnExpr(
 		BitShlOpExpr::create(
 			addOpExpr,
 			ConstInt::create(2, 64)
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(returnExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(returnExpr));
 	testFunc->setBody(returnStmt);
 
 	// Optimize the module.
@@ -135,16 +135,16 @@ FirstOperandIsIntTypeExprOptimized) {
 	// Check that the output is correct.
 	ASSERT_TRUE(testFunc->getBody()) <<
 		"expected a non-empty body";
-	ShPtr<ReturnStmt> outReturnBody(cast<ReturnStmt>(testFunc->getBody()));
+	ReturnStmt* outReturnBody(cast<ReturnStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outReturnBody) <<
 		"expected ReturnStmt, got " << testFunc->getBody();
-	ShPtr<MulOpExpr> outMulOpExpr(cast<MulOpExpr>(outReturnBody->getRetVal()));
+	MulOpExpr* outMulOpExpr(cast<MulOpExpr>(outReturnBody->getRetVal()));
 	ASSERT_TRUE(outMulOpExpr) <<
 		"expected MulOpExpr, got " << outReturnBody;
-	ShPtr<AddOpExpr> outAddOpExpr(cast<AddOpExpr>(outMulOpExpr->getFirstOperand()));
+	AddOpExpr* outAddOpExpr(cast<AddOpExpr>(outMulOpExpr->getFirstOperand()));
 	ASSERT_TRUE(outAddOpExpr) <<
 		"expected AddOpExpr, got " << outReturnBody;
-	ShPtr<ConstInt> outOp2(cast<ConstInt>(outMulOpExpr->getSecondOperand()));
+	ConstInt* outOp2(cast<ConstInt>(outMulOpExpr->getSecondOperand()));
 	ASSERT_TRUE(outOp2) <<
 		"expected ConstInt, got " << outMulOpExpr->getSecondOperand()->getType();
 	EXPECT_EQ(ConstInt::create(4, 64)->getValue(), outOp2->getValue());
@@ -156,19 +156,19 @@ FirstOperandIsFloatTypeExprNotOptimized) {
 	//
 	// Not optimized.
 	//
-	ShPtr<Variable> varA(Variable::create("a", FloatType::create(16)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<AddOpExpr> addOpExpr(
+	Variable* varA(Variable::create("a", FloatType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	AddOpExpr* addOpExpr(
 		AddOpExpr::create(
 			varA,
 			varB
 	));
-	ShPtr<BitShlOpExpr> returnExpr(
+	BitShlOpExpr* returnExpr(
 		BitShlOpExpr::create(
 			addOpExpr,
 			ConstInt::create(2, 64)
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(returnExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(returnExpr));
 	testFunc->setBody(returnStmt);
 
 	// Optimize the module.
@@ -177,16 +177,16 @@ FirstOperandIsFloatTypeExprNotOptimized) {
 	// Check that the output is correct.
 	ASSERT_TRUE(testFunc->getBody()) <<
 		"expected a non-empty body";
-	ShPtr<ReturnStmt> outReturnBody(cast<ReturnStmt>(testFunc->getBody()));
+	ReturnStmt* outReturnBody(cast<ReturnStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outReturnBody) <<
 		"expected ReturnStmt, got " << testFunc->getBody();
-	ShPtr<BitShlOpExpr> outBitShlOpExpr(cast<BitShlOpExpr>(outReturnBody->getRetVal()));
+	BitShlOpExpr* outBitShlOpExpr(cast<BitShlOpExpr>(outReturnBody->getRetVal()));
 	ASSERT_TRUE(outBitShlOpExpr) <<
 		"expected BitShlOpExpr, got " << outReturnBody;
-	ShPtr<AddOpExpr> outAddOpExpr(cast<AddOpExpr>(outBitShlOpExpr->getFirstOperand()));
+	AddOpExpr* outAddOpExpr(cast<AddOpExpr>(outBitShlOpExpr->getFirstOperand()));
 	ASSERT_TRUE(outAddOpExpr) <<
 		"expected AddOpExpr, got " << outReturnBody;
-	ShPtr<ConstInt> outOp2(cast<ConstInt>(outBitShlOpExpr->getSecondOperand()));
+	ConstInt* outOp2(cast<ConstInt>(outBitShlOpExpr->getSecondOperand()));
 	ASSERT_TRUE(outOp2) <<
 		"expected ConstInt, got " << outBitShlOpExpr->getSecondOperand()->getType();
 	EXPECT_EQ(ConstInt::create(2, 64)->getValue(), outOp2->getValue());
@@ -198,14 +198,14 @@ SecondOperandIsNegConstIntLeftShiftNotOptimized) {
 	//
 	// Not optimized.
 	//
-	ShPtr<ConstInt> firstConstInt(ConstInt::create(5, 64));
-	ShPtr<ConstInt> secConstInt(ConstInt::create(-1, 64));
-	ShPtr<BitShlOpExpr> returnExpr(
+	ConstInt* firstConstInt(ConstInt::create(5, 64));
+	ConstInt* secConstInt(ConstInt::create(-1, 64));
+	BitShlOpExpr* returnExpr(
 		BitShlOpExpr::create(
 			firstConstInt,
 			secConstInt
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(returnExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(returnExpr));
 	testFunc->setBody(returnStmt);
 
 	// Optimize the module.
@@ -214,17 +214,17 @@ SecondOperandIsNegConstIntLeftShiftNotOptimized) {
 	// Check that the output is correct.
 	ASSERT_TRUE(testFunc->getBody()) <<
 		"expected a non-empty body";
-	ShPtr<ReturnStmt> outReturnBody(cast<ReturnStmt>(testFunc->getBody()));
+	ReturnStmt* outReturnBody(cast<ReturnStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outReturnBody) <<
 		"expected ReturnStmt, got " << testFunc->getBody();
-	ShPtr<BitShlOpExpr> outBitShlOpExpr(cast<BitShlOpExpr>(outReturnBody->getRetVal()));
+	BitShlOpExpr* outBitShlOpExpr(cast<BitShlOpExpr>(outReturnBody->getRetVal()));
 	ASSERT_TRUE(outBitShlOpExpr) <<
 		"expected BitShlOpExpr, got " << outReturnBody;
-	ShPtr<ConstInt> outOp1(cast<ConstInt>(outBitShlOpExpr->getFirstOperand()));
+	ConstInt* outOp1(cast<ConstInt>(outBitShlOpExpr->getFirstOperand()));
 	ASSERT_TRUE(outOp1) <<
 		"expected ConstInt, got " << outBitShlOpExpr->getFirstOperand()->getType();
 	EXPECT_EQ(firstConstInt->getValue(), outOp1->getValue());
-	ShPtr<ConstInt> outOp2(cast<ConstInt>(outBitShlOpExpr->getSecondOperand()));
+	ConstInt* outOp2(cast<ConstInt>(outBitShlOpExpr->getSecondOperand()));
 	ASSERT_TRUE(outOp2) <<
 		"expected ConstInt, got " << outBitShlOpExpr->getSecondOperand()->getType();
 	EXPECT_EQ(secConstInt->getValue(), outOp2->getValue());
@@ -236,15 +236,15 @@ FirstOperandIsSignedVariableRightShiftLogicNotOptimized) {
 	//
 	// Not optimized.
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16, true)));
-	ShPtr<ConstInt> secConstInt(ConstInt::create(2, 64));
-	ShPtr<BitShrOpExpr> returnExpr(
+	Variable* varA(Variable::create("a", IntType::create(16, true)));
+	ConstInt* secConstInt(ConstInt::create(2, 64));
+	BitShrOpExpr* returnExpr(
 		BitShrOpExpr::create(
 			varA,
 			secConstInt,
 			BitShrOpExpr::Variant::Logical
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(returnExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(returnExpr));
 	testFunc->setBody(returnStmt);
 
 	// Optimize the module.
@@ -253,15 +253,15 @@ FirstOperandIsSignedVariableRightShiftLogicNotOptimized) {
 	// Check that the output is correct.
 	ASSERT_TRUE(testFunc->getBody()) <<
 		"expected a non-empty body";
-	ShPtr<ReturnStmt> outReturnBody(cast<ReturnStmt>(testFunc->getBody()));
+	ReturnStmt* outReturnBody(cast<ReturnStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outReturnBody) <<
 		"expected ReturnStmt, got " << testFunc->getBody();
-	ShPtr<BitShrOpExpr> outBitShrOpExpr(cast<BitShrOpExpr>(outReturnBody->getRetVal()));
+	BitShrOpExpr* outBitShrOpExpr(cast<BitShrOpExpr>(outReturnBody->getRetVal()));
 	ASSERT_TRUE(outBitShrOpExpr) <<
 		"expected BitShrOpExpr, got " << outReturnBody;
-	ShPtr<Variable> outOp1(cast<Variable>(outBitShrOpExpr->getFirstOperand()));
+	Variable* outOp1(cast<Variable>(outBitShrOpExpr->getFirstOperand()));
 	EXPECT_EQ(varA, outOp1);
-	ShPtr<ConstInt> outOp2(cast<ConstInt>(outBitShrOpExpr->getSecondOperand()));
+	ConstInt* outOp2(cast<ConstInt>(outBitShrOpExpr->getSecondOperand()));
 	ASSERT_TRUE(outOp2) <<
 		"expected ConstInt, got " << outBitShrOpExpr->getSecondOperand()->getType();
 	EXPECT_EQ(secConstInt->getValue(), outOp2->getValue());
@@ -273,14 +273,14 @@ FirstOperandIsUnsignedVariableRightShiftLogicOptimized) {
 	//
 	// Optimized to a / 4.
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16, false)));
-	ShPtr<BitShrOpExpr> returnExpr(
+	Variable* varA(Variable::create("a", IntType::create(16, false)));
+	BitShrOpExpr* returnExpr(
 		BitShrOpExpr::create(
 			varA,
 			ConstInt::create(2, 64),
 			BitShrOpExpr::Variant::Logical
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(returnExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(returnExpr));
 	testFunc->setBody(returnStmt);
 
 	// Optimize the module.
@@ -289,15 +289,15 @@ FirstOperandIsUnsignedVariableRightShiftLogicOptimized) {
 	// Check that the output is correct.
 	ASSERT_TRUE(testFunc->getBody()) <<
 		"expected a non-empty body";
-	ShPtr<ReturnStmt> outReturnBody(cast<ReturnStmt>(testFunc->getBody()));
+	ReturnStmt* outReturnBody(cast<ReturnStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outReturnBody) <<
 		"expected ReturnStmt, got " << testFunc->getBody();
-	ShPtr<DivOpExpr> outDivOpExpr(cast<DivOpExpr>(outReturnBody->getRetVal()));
+	DivOpExpr* outDivOpExpr(cast<DivOpExpr>(outReturnBody->getRetVal()));
 	ASSERT_TRUE(outDivOpExpr) <<
 		"expected DivOpExpr, got " << outReturnBody;
-	ShPtr<Variable> outOp1(cast<Variable>(outDivOpExpr->getFirstOperand()));
+	Variable* outOp1(cast<Variable>(outDivOpExpr->getFirstOperand()));
 	EXPECT_EQ(varA, outOp1);
-	ShPtr<ConstInt> outOp2(cast<ConstInt>(outDivOpExpr->getSecondOperand()));
+	ConstInt* outOp2(cast<ConstInt>(outDivOpExpr->getSecondOperand()));
 	ASSERT_TRUE(outOp2) <<
 		"expected ConstInt, got " << outDivOpExpr->getSecondOperand()->getType();
 	EXPECT_EQ(ConstInt::create(4, 64)->getValue(), outOp2->getValue());
@@ -309,15 +309,15 @@ FirstOperandIsNegConstIntRightShiftLogicNotOptimized) {
 	//
 	// Not optimized.
 	//
-	ShPtr<ConstInt> firstConstInt(ConstInt::create(-2, 64));
-	ShPtr<ConstInt> secConstInt(ConstInt::create(5, 64));
-	ShPtr<BitShrOpExpr> returnExpr(
+	ConstInt* firstConstInt(ConstInt::create(-2, 64));
+	ConstInt* secConstInt(ConstInt::create(5, 64));
+	BitShrOpExpr* returnExpr(
 		BitShrOpExpr::create(
 			firstConstInt,
 			secConstInt,
 			BitShrOpExpr::Variant::Logical
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(returnExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(returnExpr));
 	testFunc->setBody(returnStmt);
 
 	// Optimize the module.
@@ -326,17 +326,17 @@ FirstOperandIsNegConstIntRightShiftLogicNotOptimized) {
 	// Check that the output is correct.
 	ASSERT_TRUE(testFunc->getBody()) <<
 		"expected a non-empty body";
-	ShPtr<ReturnStmt> outReturnBody(cast<ReturnStmt>(testFunc->getBody()));
+	ReturnStmt* outReturnBody(cast<ReturnStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outReturnBody) <<
 		"expected ReturnStmt, got " << testFunc->getBody();
-	ShPtr<BitShrOpExpr> outBitShrOpExpr(cast<BitShrOpExpr>(outReturnBody->getRetVal()));
+	BitShrOpExpr* outBitShrOpExpr(cast<BitShrOpExpr>(outReturnBody->getRetVal()));
 	ASSERT_TRUE(outBitShrOpExpr) <<
 		"expected BitShrOpExpr, got " << outReturnBody;
-	ShPtr<ConstInt> outOp1(cast<ConstInt>(outBitShrOpExpr->getFirstOperand()));
+	ConstInt* outOp1(cast<ConstInt>(outBitShrOpExpr->getFirstOperand()));
 	ASSERT_TRUE(outOp1) <<
 		"expected ConstInt, got " << outBitShrOpExpr->getFirstOperand()->getType();
 	EXPECT_EQ(firstConstInt->getValue(), outOp1->getValue());
-	ShPtr<ConstInt> outOp2(cast<ConstInt>(outBitShrOpExpr->getSecondOperand()));
+	ConstInt* outOp2(cast<ConstInt>(outBitShrOpExpr->getSecondOperand()));
 	ASSERT_TRUE(outOp2) <<
 		"expected ConstInt, got " << outBitShrOpExpr->getSecondOperand()->getType();
 	EXPECT_EQ(secConstInt->getValue(), outOp2->getValue());
@@ -348,14 +348,14 @@ FirstOperandIsNonNegConstIntRightShiftLogicOptimized) {
 	//
 	// Optimized to 2 / 4.
 	//
-	ShPtr<ConstInt> firstConstInt(ConstInt::create(2, 64));
-	ShPtr<BitShrOpExpr> returnExpr(
+	ConstInt* firstConstInt(ConstInt::create(2, 64));
+	BitShrOpExpr* returnExpr(
 		BitShrOpExpr::create(
 			firstConstInt,
 			ConstInt::create(2, 64),
 			BitShrOpExpr::Variant::Logical
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(returnExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(returnExpr));
 	testFunc->setBody(returnStmt);
 
 	// Optimize the module.
@@ -364,17 +364,17 @@ FirstOperandIsNonNegConstIntRightShiftLogicOptimized) {
 	// Check that the output is correct.
 	ASSERT_TRUE(testFunc->getBody()) <<
 		"expected a non-empty body";
-	ShPtr<ReturnStmt> outReturnBody(cast<ReturnStmt>(testFunc->getBody()));
+	ReturnStmt* outReturnBody(cast<ReturnStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outReturnBody) <<
 		"expected ReturnStmt, got " << testFunc->getBody();
-	ShPtr<DivOpExpr> outDivOpExpr(cast<DivOpExpr>(outReturnBody->getRetVal()));
+	DivOpExpr* outDivOpExpr(cast<DivOpExpr>(outReturnBody->getRetVal()));
 	ASSERT_TRUE(outDivOpExpr) <<
 		"expected DivOpExpr, got " << outReturnBody;
-	ShPtr<ConstInt> outOp1(cast<ConstInt>(outDivOpExpr->getFirstOperand()));
+	ConstInt* outOp1(cast<ConstInt>(outDivOpExpr->getFirstOperand()));
 	ASSERT_TRUE(outOp1) <<
 		"expected ConstInt, got " << outDivOpExpr->getFirstOperand()->getType();
 	EXPECT_EQ(firstConstInt->getValue(), outOp1->getValue());
-	ShPtr<ConstInt> outOp2(cast<ConstInt>(outDivOpExpr->getSecondOperand()));
+	ConstInt* outOp2(cast<ConstInt>(outDivOpExpr->getSecondOperand()));
 	ASSERT_TRUE(outOp2) <<
 		"expected ConstInt, got " << outDivOpExpr->getSecondOperand()->getType();
 	EXPECT_EQ(ConstInt::create(4, 64)->getValue(), outOp2->getValue());
@@ -386,14 +386,14 @@ FirstOperandIsNegConstIntRightArithmeticalShiftNotOptimized) {
 	//
 	// Not optimized.
 	//
-	ShPtr<ConstInt> firstConstInt(ConstInt::create(-2, 64));
-	ShPtr<BitShrOpExpr> returnExpr(
+	ConstInt* firstConstInt(ConstInt::create(-2, 64));
+	BitShrOpExpr* returnExpr(
 		BitShrOpExpr::create(
 			firstConstInt,
 			ConstInt::create(2, 64),
 			BitShrOpExpr::Variant::Arithmetical
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(returnExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(returnExpr));
 	testFunc->setBody(returnStmt);
 
 	// Optimize the module.
@@ -402,17 +402,17 @@ FirstOperandIsNegConstIntRightArithmeticalShiftNotOptimized) {
 	// Check that the output is correct.
 	ASSERT_TRUE(testFunc->getBody()) <<
 		"expected a non-empty body";
-	ShPtr<ReturnStmt> outReturnBody(cast<ReturnStmt>(testFunc->getBody()));
+	ReturnStmt* outReturnBody(cast<ReturnStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outReturnBody) <<
 		"expected ReturnStmt, got " << testFunc->getBody();
-	ShPtr<BitShrOpExpr> outBitShrOpExpr(cast<BitShrOpExpr>(outReturnBody->getRetVal()));
+	BitShrOpExpr* outBitShrOpExpr(cast<BitShrOpExpr>(outReturnBody->getRetVal()));
 	ASSERT_TRUE(outBitShrOpExpr) <<
 		"expected BitShrOpExpr, got " << outReturnBody;
-	ShPtr<ConstInt> outOp1(cast<ConstInt>(outBitShrOpExpr->getFirstOperand()));
+	ConstInt* outOp1(cast<ConstInt>(outBitShrOpExpr->getFirstOperand()));
 	ASSERT_TRUE(outOp1) <<
 		"expected ConstInt, got " << outBitShrOpExpr->getFirstOperand()->getType();
 	EXPECT_EQ(firstConstInt->getValue(), outOp1->getValue());
-	ShPtr<ConstInt> outOp2(cast<ConstInt>(outBitShrOpExpr->getSecondOperand()));
+	ConstInt* outOp2(cast<ConstInt>(outBitShrOpExpr->getSecondOperand()));
 	ASSERT_TRUE(outOp2) <<
 		"expected ConstInt, got " << outBitShrOpExpr->getSecondOperand()->getType();
 	EXPECT_EQ(ConstInt::create(2, 64)->getValue(), outOp2->getValue());
@@ -424,14 +424,14 @@ SecondOperandIsNegConstIntRightArithmeticalShiftNotOptimized) {
 	//
 	// Not optimized.
 	//
-	ShPtr<ConstInt> firstConstInt(ConstInt::create(5, 64));
-	ShPtr<ConstInt> secConstInt(ConstInt::create(-2, 64));
-	ShPtr<BitShrOpExpr> returnExpr(
+	ConstInt* firstConstInt(ConstInt::create(5, 64));
+	ConstInt* secConstInt(ConstInt::create(-2, 64));
+	BitShrOpExpr* returnExpr(
 		BitShrOpExpr::create(
 			firstConstInt,
 			secConstInt
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(returnExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(returnExpr));
 	testFunc->setBody(returnStmt);
 
 	// Optimize the module.
@@ -440,17 +440,17 @@ SecondOperandIsNegConstIntRightArithmeticalShiftNotOptimized) {
 	// Check that the output is correct.
 	ASSERT_TRUE(testFunc->getBody()) <<
 		"expected a non-empty body";
-	ShPtr<ReturnStmt> outReturnBody(cast<ReturnStmt>(testFunc->getBody()));
+	ReturnStmt* outReturnBody(cast<ReturnStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outReturnBody) <<
 		"expected ReturnStmt, got " << testFunc->getBody();
-	ShPtr<BitShrOpExpr> outBitShrOpExpr(cast<BitShrOpExpr>(outReturnBody->getRetVal()));
+	BitShrOpExpr* outBitShrOpExpr(cast<BitShrOpExpr>(outReturnBody->getRetVal()));
 	ASSERT_TRUE(outBitShrOpExpr) <<
 		"expected BitShrOpExpr, got " << outReturnBody;
-	ShPtr<ConstInt> outOp1(cast<ConstInt>(outBitShrOpExpr->getFirstOperand()));
+	ConstInt* outOp1(cast<ConstInt>(outBitShrOpExpr->getFirstOperand()));
 	ASSERT_TRUE(outOp1) <<
 		"expected ConstInt, got " << outBitShrOpExpr->getFirstOperand()->getType();
 	EXPECT_EQ(firstConstInt->getValue(), outOp1->getValue());
-	ShPtr<ConstInt> outOp2(cast<ConstInt>(outBitShrOpExpr->getSecondOperand()));
+	ConstInt* outOp2(cast<ConstInt>(outBitShrOpExpr->getSecondOperand()));
 	ASSERT_TRUE(outOp2) <<
 		"expected ConstInt, got " << outBitShrOpExpr->getSecondOperand()->getType();
 	EXPECT_EQ(secConstInt->getValue(), outOp2->getValue());
@@ -462,14 +462,14 @@ SecondOperandIsVariableRightArithmeticalShiftNotOptimized) {
 	//
 	// Not optimized.
 	//
-	ShPtr<ConstInt> firstConstInt(ConstInt::create(2, 64));
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<BitShrOpExpr> returnExpr(
+	ConstInt* firstConstInt(ConstInt::create(2, 64));
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	BitShrOpExpr* returnExpr(
 		BitShrOpExpr::create(
 			firstConstInt,
 			varA
 	));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(returnExpr));
+	ReturnStmt* returnStmt(ReturnStmt::create(returnExpr));
 	testFunc->setBody(returnStmt);
 
 	// Optimize the module.
@@ -478,17 +478,17 @@ SecondOperandIsVariableRightArithmeticalShiftNotOptimized) {
 	// Check that the output is correct.
 	ASSERT_TRUE(testFunc->getBody()) <<
 		"expected a non-empty body";
-	ShPtr<ReturnStmt> outReturnBody(cast<ReturnStmt>(testFunc->getBody()));
+	ReturnStmt* outReturnBody(cast<ReturnStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outReturnBody) <<
 		"expected ReturnStmt, got " << testFunc->getBody();
-	ShPtr<BitShrOpExpr> outBitShrOpExpr(cast<BitShrOpExpr>(outReturnBody->getRetVal()));
+	BitShrOpExpr* outBitShrOpExpr(cast<BitShrOpExpr>(outReturnBody->getRetVal()));
 	ASSERT_TRUE(outBitShrOpExpr) <<
 		"expected BitShrOpExpr, got " << outReturnBody;
-	ShPtr<ConstInt> outOp1(cast<ConstInt>(outBitShrOpExpr->getFirstOperand()));
+	ConstInt* outOp1(cast<ConstInt>(outBitShrOpExpr->getFirstOperand()));
 	ASSERT_TRUE(outOp1) <<
 		"expected ConstInt, got " << outBitShrOpExpr->getFirstOperand()->getType();
 	EXPECT_EQ(firstConstInt->getValue(), outOp1->getValue());
-	ShPtr<Variable> outOp2(cast<Variable>(outBitShrOpExpr->getSecondOperand()));
+	Variable* outOp2(cast<Variable>(outBitShrOpExpr->getSecondOperand()));
 	EXPECT_EQ(varA, outOp2);
 }
 

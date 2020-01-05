@@ -21,7 +21,7 @@ namespace {
 /**
 * @brief Ensures that the label is preserved.
 */
-void preserveLabel(ShPtr<Statement> origStmt, ShPtr<Statement> newStmt) {
+void preserveLabel(Statement* origStmt, Statement* newStmt) {
 	if (origStmt->hasLabel()) {
 		newStmt->setLabel(origStmt->getLabel());
 	}
@@ -56,7 +56,7 @@ Statement::Statement(Address a):
 * The original successor (if any) is discarded. If you do not want it to be
 * discarded, use appendStatement() instead.
 */
-void Statement::setSuccessor(ShPtr<Statement> newSucc) {
+void Statement::setSuccessor(Statement* newSucc) {
 	if (succ) {
 		// Update the predecessors of the old successor.
 		succ->preds.erase(succ);
@@ -65,7 +65,7 @@ void Statement::setSuccessor(ShPtr<Statement> newSucc) {
 	if (newSucc) {
 		// Update the non-goto predecessors of the new successor.
 		newSucc->removePredecessors(true);
-		newSucc->addPredecessor(ucast<Statement>(shared_from_this()));
+		newSucc->addPredecessor(ucast<Statement>(this));
 	}
 
 	succ = newSucc;
@@ -78,7 +78,7 @@ void Statement::setSuccessor(ShPtr<Statement> newSucc) {
 * function, the statement will no longer have a successor.
 */
 void Statement::removeSuccessor() {
-	setSuccessor(ShPtr<Statement>());
+	setSuccessor(nullptr);
 }
 
 /**
@@ -86,7 +86,7 @@ void Statement::removeSuccessor() {
 *
 * If there is no successor, it returns the null pointer.
 */
-ShPtr<Statement> Statement::getSuccessor() const {
+Statement* Statement::getSuccessor() const {
 	return succ;
 }
 
@@ -94,7 +94,7 @@ ShPtr<Statement> Statement::getSuccessor() const {
 * @brief Returns @c true if the statement has a successor, @c false otherwise.
 */
 bool Statement::hasSuccessor() const {
-	return succ != ShPtr<Statement>();
+	return succ != nullptr;
 }
 
 /**
@@ -128,14 +128,14 @@ bool Statement::hasSuccessor() const {
 * @par Preconditions
 *  - @a stmt is non-null
 */
-void Statement::prependStatement(ShPtr<Statement> stmt) {
+void Statement::prependStatement(Statement* stmt) {
 	PRECONDITION_NON_NULL(stmt);
 
 	// Point direct (e.g. not via goto) predecessors of the current statement
 	// to stmt. Since we may modify the predecessors set of the current
 	// statement in the following loop, we have to create a copy of it and
 	// iterate over this copy rather than over preds.
-	auto thisStmt = shared_from_this();
+	auto thisStmt = this;
 	for (auto &pred : StmtSet(preds)) {
 		if (pred->getSuccessor() == thisStmt) {
 			pred->setSuccessor(stmt);
@@ -143,7 +143,7 @@ void Statement::prependStatement(ShPtr<Statement> stmt) {
 	}
 
 	// Get to the end of a possible sequence of statements in stmt.
-	ShPtr<Statement> lastStmt(Statement::getLastStatement(stmt));
+	Statement* lastStmt(Statement::getLastStatement(stmt));
 
 	// Set lastStmt as the only non-goto predecessor of the current statement.
 	removePredecessors(true);
@@ -186,17 +186,17 @@ void Statement::prependStatement(ShPtr<Statement> stmt) {
 * @par Preconditions
 *  - @a stmt is non-null
 */
-void Statement::appendStatement(ShPtr<Statement> stmt) {
+void Statement::appendStatement(Statement* stmt) {
 	PRECONDITION_NON_NULL(stmt);
 
 	// Get to the end of a possible sequence of statements in stmt.
-	ShPtr<Statement> lastStmt(Statement::getLastStatement(stmt));
+	Statement* lastStmt(Statement::getLastStatement(stmt));
 
 	lastStmt->setSuccessor(succ);
 	succ = stmt;
 
 	stmt->removePredecessors(true);
-	stmt->addPredecessor(ucast<Statement>(shared_from_this()));
+	stmt->addPredecessor(ucast<Statement>(this));
 }
 
 /**
@@ -236,7 +236,7 @@ bool Statement::hasPredecessors() const {
 * By using this function, a statement may have more than one predecessor. This
 * comes handy in terms of goto statements.
 */
-void Statement::addPredecessor(ShPtr<Statement> stmt) {
+void Statement::addPredecessor(Statement* stmt) {
 	preds.insert(stmt);
 }
 
@@ -256,9 +256,9 @@ std::size_t Statement::getNumberOfPredecessors() const {
 * If the statement has no predecessors, or if there is more than one
 * predecessor, the null pointer is returned.
 */
-ShPtr<Statement> Statement::getUniquePredecessor() const {
+Statement* Statement::getUniquePredecessor() const {
 	if (preds.size() != 1) {
-		return ShPtr<Statement>();
+		return nullptr;
 	}
 	return *(preds.begin());
 }
@@ -288,7 +288,7 @@ Statement::predecessor_iterator Statement::predecessor_end() const {
 * @par Preconditions
 *  - @a stmt is non-null
 */
-void Statement::removeStatement(ShPtr<Statement> stmt) {
+void Statement::removeStatement(Statement* stmt) {
 	PRECONDITION_NON_NULL(stmt);
 
 	// If the stamement to remove is goto, we need to remove it from its
@@ -322,7 +322,7 @@ void Statement::removeStatement(ShPtr<Statement> stmt) {
 		}
 
 		// In gotos, we may need to change both the successor and target.
-		if (ShPtr<GotoStmt> gotoStmt = cast<GotoStmt>(pred)) {
+		if (GotoStmt* gotoStmt = cast<GotoStmt>(pred)) {
 			if (gotoStmt->getTarget() == stmt) {
 				gotoStmt->setTarget(stmt->getSuccessor());
 			}
@@ -352,7 +352,7 @@ void Statement::removeStatement(ShPtr<Statement> stmt) {
 * After calling this function, @a stmt will have no predecessors and no
 * successor.
 */
-void Statement::removeStatementButKeepDebugComment(ShPtr<Statement> stmt) {
+void Statement::removeStatementButKeepDebugComment(Statement* stmt) {
 	if (stmt->getMetadata() == "") {
 		// There is no debug comment.
 		Statement::removeStatement(stmt);
@@ -360,7 +360,7 @@ void Statement::removeStatementButKeepDebugComment(ShPtr<Statement> stmt) {
 	}
 
 	// Check whether we can store the metadata of stmt into its successor.
-	if (ShPtr<Statement> stmtSuccessor = stmt->getSuccessor()) {
+	if (Statement* stmtSuccessor = stmt->getSuccessor()) {
 		if (stmtSuccessor->getMetadata() == "") {
 			stmtSuccessor->setMetadata(stmt->getMetadata());
 			Statement::removeStatement(stmt);
@@ -370,7 +370,7 @@ void Statement::removeStatementButKeepDebugComment(ShPtr<Statement> stmt) {
 
 	// We cannot exploit the successor, so create an empty statement, attach
 	// the metadata to it, and replace stmt with the empty statement.
-	ShPtr<EmptyStmt> emptyStmt(EmptyStmt::create(nullptr, stmt->getAddress()));
+	EmptyStmt* emptyStmt(EmptyStmt::create(nullptr, stmt->getAddress()));
 	emptyStmt->setMetadata(stmt->getMetadata());
 	Statement::replaceStatement(stmt, emptyStmt);
 }
@@ -386,8 +386,8 @@ void Statement::removeStatementButKeepDebugComment(ShPtr<Statement> stmt) {
 *
 * This function recursively calls itself.
 */
-bool Statement::areEqualStatements(ShPtr<Statement> stmts1,
-		ShPtr<Statement> stmts2) {
+bool Statement::areEqualStatements(Statement* stmts1,
+		Statement* stmts2) {
 	// Check that both statements are non-null.
 	if (!stmts1 && !stmts2) {
 		return true;
@@ -420,11 +420,11 @@ bool Statement::areEqualStatements(ShPtr<Statement> stmts1,
 * Precondition:
 *  - @a stmt is non-null
 */
-bool Statement::isStatementInStatements(ShPtr<Statement> stmt, ShPtr<Statement>
+bool Statement::isStatementInStatements(Statement* stmt, Statement*
 		stmts) {
 	PRECONDITION_NON_NULL(stmt);
 
-	ShPtr<Statement> currStmt(stmts);
+	Statement* currStmt(stmts);
 	while (currStmt && currStmt != stmt) {
 		currStmt = currStmt->getSuccessor();
 	}
@@ -437,7 +437,7 @@ bool Statement::isStatementInStatements(ShPtr<Statement> stmt, ShPtr<Statement>
 * @par Preconditions
 *  - @a stmts is non-null
 */
-void Statement::removeLastStatement(ShPtr<Statement> stmts) {
+void Statement::removeLastStatement(Statement* stmts) {
 	PRECONDITION_NON_NULL(stmts);
 
 	Statement::removeStatement(Statement::getLastStatement(stmts));
@@ -461,8 +461,8 @@ void Statement::removeLastStatement(ShPtr<Statement> stmts) {
 * After calling this function, @a oldStmt will have no predecessors and no
 * successor.
 */
-void Statement::replaceStatement(ShPtr<Statement> oldStmt,
-		ShPtr<Statement> newStmt) {
+void Statement::replaceStatement(Statement* oldStmt,
+		Statement* newStmt) {
 	PRECONDITION_NON_NULL(oldStmt);
 
 	// Copy the successor of oldStmt (since newStmt can be a list of
@@ -482,7 +482,7 @@ void Statement::replaceStatement(ShPtr<Statement> oldStmt,
 		}
 
 		// In gotos, we may need to change both the successor and target.
-		if (ShPtr<GotoStmt> gotoStmt = cast<GotoStmt>(pred)) {
+		if (GotoStmt* gotoStmt = cast<GotoStmt>(pred)) {
 			if (gotoStmt->getTarget() == oldStmt) {
 				gotoStmt->setTarget(newStmt);
 			}
@@ -519,8 +519,8 @@ void Statement::replaceStatement(ShPtr<Statement> oldStmt,
 * If @a stmt1 contains a, b, c, ..., and @a stmt2 contains 0, 1, 2, ...,
 * then the result will contain a, b, c, ..., 0, 1, 2, ...
 */
-ShPtr<Statement> Statement::mergeStatements(ShPtr<Statement> stmt1,
-		ShPtr<Statement> stmt2) {
+Statement* Statement::mergeStatements(Statement* stmt1,
+		Statement* stmt2) {
 	if (!stmt1) {
 		return stmt2;
 	} else if (!stmt2) {
@@ -529,7 +529,7 @@ ShPtr<Statement> Statement::mergeStatements(ShPtr<Statement> stmt1,
 
 	// Both stmt1 and stmt2 are nonempty. Go through stmt1 to its end and append
 	// stmt2 there.
-	ShPtr<Statement> lastStmt(getLastStatement(stmt1));
+	Statement* lastStmt(getLastStatement(stmt1));
 	lastStmt->setSuccessor(stmt2);
 	return stmt1;
 }
@@ -547,10 +547,10 @@ ShPtr<Statement> Statement::mergeStatements(ShPtr<Statement> stmt1,
 * to clone a sequence of statements, including successors, use this
 * function.
 */
-ShPtr<Statement> Statement::cloneStatements(ShPtr<Statement> stmts) {
-	ShPtr<Statement> clonedStmts;
+Statement* Statement::cloneStatements(Statement* stmts) {
+	Statement* clonedStmts = nullptr;
 
-	ShPtr<Statement> currStmt = stmts;
+	Statement* currStmt = stmts;
 	while (currStmt) {
 		// TODO This can be done more efficiently.
 		clonedStmts = Statement::mergeStatements(clonedStmts,
@@ -568,12 +568,12 @@ ShPtr<Statement> Statement::cloneStatements(ShPtr<Statement> stmts) {
 *
 * If @a stmts is null, then it returns the null pointer.
 */
-ShPtr<Statement> Statement::getLastStatement(ShPtr<Statement> stmts) {
+Statement* Statement::getLastStatement(Statement* stmts) {
 	if (!stmts) {
-		return ShPtr<Statement>();
+		return nullptr;
 	}
 
-	ShPtr<Statement> lastStmt(stmts);
+	Statement* lastStmt(stmts);
 	while (lastStmt->hasSuccessor()) {
 		lastStmt = lastStmt->getSuccessor();
 	}
@@ -588,7 +588,7 @@ ShPtr<Statement> Statement::getLastStatement(ShPtr<Statement> stmts) {
 * If @a stmt is not a predecessor of the current statement, this function does
 * nothing.
 */
-void Statement::removePredecessor(ShPtr<Statement> stmt) {
+void Statement::removePredecessor(Statement* stmt) {
 	preds.erase(stmt);
 }
 
@@ -612,7 +612,7 @@ void Statement::removePredecessors(bool onlyNonGoto) {
 	// circumvent this limitation, we store them into a separate set and erase
 	// them afterwards.
 	StmtSet toRemoveStmts;
-	auto thisStmt = shared_from_this();
+	auto thisStmt = this;
 	for (const auto &pred : preds) {
 		if (pred->getSuccessor() == thisStmt) {
 			toRemoveStmts.insert(pred);
@@ -641,12 +641,12 @@ void Statement::removePredecessors(bool onlyNonGoto) {
 * In this example, statements (1), (2), and (5) do not have any parents, and
 * statement (2) is the parent of statements (3) and (4).
 */
-ShPtr<Statement> Statement::getParent() const {
+Statement* Statement::getParent() const {
 	// If there are no non-goto predecessors, we're done, i.e. we can use the
 	// set of observers.
 	if (preds.empty() || containsJustGotosToCurrentStatement(preds)) {
 		for (auto i = observer_begin(), e = observer_end(); i != e ; ++i) {
-			if (ShPtr<Statement> observerStmt = cast<Statement>(i->lock())) {
+			if (Statement* observerStmt = cast<Statement>(*i)) {
 				// Skip goto observers.
 				if (isa<GotoStmt>(observerStmt)) {
 					continue;
@@ -661,7 +661,7 @@ ShPtr<Statement> Statement::getParent() const {
 		// For each predecessor...
 		for (auto &pred : preds) {
 			// Skip goto predecessors that jump to the current statement.
-			if (ShPtr<GotoStmt> gotoPred = cast<GotoStmt>(pred)) {
+			if (GotoStmt* gotoPred = cast<GotoStmt>(pred)) {
 				if (targetIsCurrentStatement(gotoPred)) {
 					continue;
 				}
@@ -672,7 +672,7 @@ ShPtr<Statement> Statement::getParent() const {
 	}
 
 	// There is no parent.
-	return ShPtr<Statement>();
+	return nullptr;
 }
 
 /**
@@ -707,7 +707,7 @@ bool Statement::isGotoTarget() const {
 * @par Preconditions
 *  - @a stmt is non-null
 */
-void Statement::redirectGotosTo(ShPtr<Statement> stmt) {
+void Statement::redirectGotosTo(Statement* stmt) {
 	PRECONDITION_NON_NULL(stmt);
 
 	// We need to iterate over a copy of predecessors because we may need to
@@ -759,7 +759,7 @@ void Statement::setLabel(const std::string &newLabel) {
 /**
 * @brief Transfers the label from the given statement to the current statement.
 */
-void Statement::transferLabelFrom(ShPtr<Statement> stmt) {
+void Statement::transferLabelFrom(Statement* stmt) {
 	label = stmt->label;
 	stmt->label.clear();
 }
@@ -767,7 +767,7 @@ void Statement::transferLabelFrom(ShPtr<Statement> stmt) {
 /**
 * @brief Transfers the label from the current statement to the given statement.
 */
-void Statement::transferLabelTo(ShPtr<Statement> stmt) {
+void Statement::transferLabelTo(Statement* stmt) {
 	stmt->label = label;
 	label.clear();
 }
@@ -775,7 +775,7 @@ void Statement::transferLabelTo(ShPtr<Statement> stmt) {
 /**
 * @brief Does @a gotoStmt target the current statement?
 */
-bool Statement::targetIsCurrentStatement(ShPtr<GotoStmt> gotoStmt) const {
+bool Statement::targetIsCurrentStatement(GotoStmt* gotoStmt) const {
 	// When iterating over predecessors, it may happen that the predecessor is
 	// a goto statement but its target is not the current statement, e.g.
 	//
@@ -784,7 +784,7 @@ bool Statement::targetIsCurrentStatement(ShPtr<GotoStmt> gotoStmt) const {
 	//
 	// To this end, we have to also check if the target of the predecessor is
 	// the current statement.
-	return gotoStmt->getTarget() == shared_from_this();
+	return gotoStmt->getTarget() == this;
 }
 
 /**

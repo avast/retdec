@@ -28,17 +28,17 @@ class Visitor;
 class StructType final: public Type {
 public:
 	/// Vector of types of elements in the structure.
-	using ElementTypes = std::vector<ShPtr<Type>>;
+	using ElementTypes = std::vector<Type*>;
 
 public:
-	static ShPtr<StructType> create(ElementTypes elementTypes,
+	static StructType* create(ElementTypes elementTypes,
 		const std::string &name = "");
 
-	virtual ShPtr<Value> clone() override;
-	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
+	virtual Value* clone() override;
+	virtual bool isEqualTo(Value* otherValue) const override;
 
 	const ElementTypes &getElementTypes() const;
-	const ShPtr<Type> getTypeOfElement(ShPtr<ConstInt> index) const;
+	Type* getTypeOfElement(const ConstInt* index) const;
 	bool hasName() const;
 	const std::string &getName() const;
 

@@ -32,23 +32,23 @@ class IRTests: public Test {};
 
 TEST_F(IRTests,
 SkipDerefsInExpressionWithNoDereferencesReturnsTheOriginalExpression) {
-	ShPtr<Variable> varX(Variable::create("x", IntType::create(32)));
+	Variable* varX(Variable::create("x", IntType::create(32)));
 	EXPECT_EQ(varX, skipDerefs(varX));
 }
 
 TEST_F(IRTests,
 SkipDerefsInExpressionWithDereferencesSkipsThem) {
-	ShPtr<Variable> varX(Variable::create("x", IntType::create(32)));
-	ShPtr<DerefOpExpr> derefVarX(DerefOpExpr::create(varX));
-	ShPtr<DerefOpExpr> derefDerefVarX(DerefOpExpr::create(derefVarX));
+	Variable* varX(Variable::create("x", IntType::create(32)));
+	DerefOpExpr* derefVarX(DerefOpExpr::create(varX));
+	DerefOpExpr* derefDerefVarX(DerefOpExpr::create(derefVarX));
 	EXPECT_EQ(varX, skipDerefs(derefVarX));
 }
 
 TEST_F(IRTests,
 SkipDerefsDereferencesInsideExpressionAreNotSkipped) {
-	ShPtr<Variable> varX(Variable::create("x", IntType::create(32)));
-	ShPtr<DerefOpExpr> derefVarX(DerefOpExpr::create(varX));
-	ShPtr<AddressOpExpr> addressDerefVarX(AddressOpExpr::create(derefVarX));
+	Variable* varX(Variable::create("x", IntType::create(32)));
+	DerefOpExpr* derefVarX(DerefOpExpr::create(varX));
+	AddressOpExpr* addressDerefVarX(AddressOpExpr::create(derefVarX));
 	EXPECT_EQ(addressDerefVarX, skipDerefs(addressDerefVarX));
 }
 
@@ -58,23 +58,23 @@ SkipDerefsDereferencesInsideExpressionAreNotSkipped) {
 
 TEST_F(IRTests,
 SkipAddressesInExpressionWithNoAddressesReturnsTheOriginalExpression) {
-	ShPtr<Variable> varX(Variable::create("x", IntType::create(32)));
+	Variable* varX(Variable::create("x", IntType::create(32)));
 	EXPECT_EQ(varX, skipAddresses(varX));
 }
 
 TEST_F(IRTests,
 SkipAddressesInExpressionWithAddressesSkipsThem) {
-	ShPtr<Variable> varX(Variable::create("x", IntType::create(32)));
-	ShPtr<AddressOpExpr> derefVarX(AddressOpExpr::create(varX));
-	ShPtr<AddressOpExpr> derefDerefVarX(AddressOpExpr::create(derefVarX));
+	Variable* varX(Variable::create("x", IntType::create(32)));
+	AddressOpExpr* derefVarX(AddressOpExpr::create(varX));
+	AddressOpExpr* derefDerefVarX(AddressOpExpr::create(derefVarX));
 	EXPECT_EQ(varX, skipAddresses(derefVarX));
 }
 
 TEST_F(IRTests,
 SkipAddressesDereferencesInsideExpressionAreNotSkipped) {
-	ShPtr<Variable> varX(Variable::create("x", IntType::create(32)));
-	ShPtr<AddressOpExpr> addressVarX(AddressOpExpr::create(varX));
-	ShPtr<DerefOpExpr> derefAddressVarX(DerefOpExpr::create(addressVarX));
+	Variable* varX(Variable::create("x", IntType::create(32)));
+	AddressOpExpr* addressVarX(AddressOpExpr::create(varX));
+	DerefOpExpr* derefAddressVarX(DerefOpExpr::create(addressVarX));
 	EXPECT_EQ(derefAddressVarX, skipAddresses(derefAddressVarX));
 }
 
@@ -84,16 +84,16 @@ SkipAddressesDereferencesInsideExpressionAreNotSkipped) {
 
 TEST_F(IRTests,
 IsWhileTrueLoopReturnsTrueForWhileTrueLoop) {
-	ShPtr<EmptyStmt> emptyStmt(EmptyStmt::create());
-	ShPtr<WhileLoopStmt> whileLoopStmt(WhileLoopStmt::create(
+	EmptyStmt* emptyStmt(EmptyStmt::create());
+	WhileLoopStmt* whileLoopStmt(WhileLoopStmt::create(
 		ConstBool::create(true), emptyStmt));
 	EXPECT_TRUE(isWhileTrueLoop(whileLoopStmt));
 }
 
 TEST_F(IRTests,
 IsWhileTrueLoopReturnsFalseForNonWhileTrueLoop) {
-	ShPtr<EmptyStmt> emptyStmt(EmptyStmt::create());
-	ShPtr<WhileLoopStmt> whileLoopStmt(WhileLoopStmt::create(
+	EmptyStmt* emptyStmt(EmptyStmt::create());
+	WhileLoopStmt* whileLoopStmt(WhileLoopStmt::create(
 		ConstBool::create(false), emptyStmt));
 	EXPECT_FALSE(isWhileTrueLoop(whileLoopStmt));
 }

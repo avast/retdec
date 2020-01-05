@@ -26,8 +26,8 @@ class Module;
 */
 class HeadersForDeclaredFuncs: private retdec::utils::NonCopyable {
 public:
-	static StringSet getHeaders(ShPtr<Module> module);
-	static bool hasAssocHeader(ShPtr<Module> module, ShPtr<Function> func);
+	static StringSet getHeaders(Module* module);
+	static bool hasAssocHeader(Module* module, Function* func);
 };
 
 } // namespace llvmir2hll

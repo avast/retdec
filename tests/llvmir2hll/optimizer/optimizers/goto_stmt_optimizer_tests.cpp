@@ -32,7 +32,7 @@ class GotoStmtOptimizerTests: public TestsWithModule {};
 
 TEST_F(GotoStmtOptimizerTests,
 OptimizerHasNonEmptyID) {
-	ShPtr<GotoStmtOptimizer> optimizer(
+	GotoStmtOptimizer* optimizer(
 		new GotoStmtOptimizer(module));
 
 	EXPECT_TRUE(!optimizer->getId().empty()) <<
@@ -58,7 +58,7 @@ Goto2Return) {
 	// a = 1 (...)
 	// return 2
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
 	auto retStmt = ReturnStmt::create(ConstInt::create(1, 64));
 	auto assignA = AssignStmt::create(varA, ConstInt::create(1, 32), retStmt);
@@ -70,11 +70,11 @@ Goto2Return) {
 
 	ASSERT_TRUE(testFunc->getBody()) <<
 		"expected a non-empty body";
-	ShPtr<ReturnStmt> outRetStmt1(cast<ReturnStmt>(testFunc->getBody()));
+	ReturnStmt* outRetStmt1(cast<ReturnStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outRetStmt1) << "expected ReturnStmt, got" << testFunc->getBody();
-	ShPtr<AssignStmt> outAssignA(cast<AssignStmt>(outRetStmt1->getSuccessor()));
+	AssignStmt* outAssignA(cast<AssignStmt>(outRetStmt1->getSuccessor()));
 	ASSERT_TRUE(outAssignA) << "expected AssignStmt, got " << outRetStmt1->getSuccessor();
-	ShPtr<ReturnStmt> outRetStmt2(cast<ReturnStmt>(outAssignA->getSuccessor()));
+	ReturnStmt* outRetStmt2(cast<ReturnStmt>(outAssignA->getSuccessor()));
 	ASSERT_TRUE(outRetStmt2) << "expected ReturnStmt, got" << outAssignA->getSuccessor();
 }
 
@@ -92,7 +92,7 @@ Goto2Break) {
 	// a = 1 (...)
 	// break
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
 	auto breakStmt = BreakStmt::create();
 	auto assignA = AssignStmt::create(varA, ConstInt::create(1, 32), breakStmt);
@@ -104,11 +104,11 @@ Goto2Break) {
 
 	ASSERT_TRUE(testFunc->getBody()) <<
 		"expected a non-empty body";
-	ShPtr<BreakStmt> outBreakStmt1(cast<BreakStmt>(testFunc->getBody()));
+	BreakStmt* outBreakStmt1(cast<BreakStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outBreakStmt1) << "expected BreakStmt, got" << testFunc->getBody();
-	ShPtr<AssignStmt> outAssignA(cast<AssignStmt>(outBreakStmt1->getSuccessor()));
+	AssignStmt* outAssignA(cast<AssignStmt>(outBreakStmt1->getSuccessor()));
 	ASSERT_TRUE(outAssignA) << "expected AssignStmt, got " << outBreakStmt1->getSuccessor();
-	ShPtr<BreakStmt> outBreakStmt2(cast<BreakStmt>(outAssignA->getSuccessor()));
+	BreakStmt* outBreakStmt2(cast<BreakStmt>(outAssignA->getSuccessor()));
 	ASSERT_TRUE(outBreakStmt2) << "expected BreakStmt, got" << outAssignA->getSuccessor();
 }
 
@@ -126,7 +126,7 @@ Goto2Continue) {
 	// a = 1 (...)
 	// continue
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	testFunc->addLocalVar(varA);
 	auto continueStmt = ContinueStmt::create();
 	auto assignA = AssignStmt::create(varA, ConstInt::create(1, 32), continueStmt);
@@ -138,11 +138,11 @@ Goto2Continue) {
 
 	ASSERT_TRUE(testFunc->getBody()) <<
 		"expected a non-empty body";
-	ShPtr<ContinueStmt> outContinueStmt1(cast<ContinueStmt>(testFunc->getBody()));
+	ContinueStmt* outContinueStmt1(cast<ContinueStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outContinueStmt1) << "expected ContinueStmt, got" << testFunc->getBody();
-	ShPtr<AssignStmt> outAssignA(cast<AssignStmt>(outContinueStmt1->getSuccessor()));
+	AssignStmt* outAssignA(cast<AssignStmt>(outContinueStmt1->getSuccessor()));
 	ASSERT_TRUE(outAssignA) << "expected AssignStmt, got " << outContinueStmt1->getSuccessor();
-	ShPtr<ContinueStmt> outContinueStmt2(cast<ContinueStmt>(outAssignA->getSuccessor()));
+	ContinueStmt* outContinueStmt2(cast<ContinueStmt>(outAssignA->getSuccessor()));
 	ASSERT_TRUE(outContinueStmt2) << "expected ContinueStmt, got" << outAssignA->getSuccessor();
 }
 

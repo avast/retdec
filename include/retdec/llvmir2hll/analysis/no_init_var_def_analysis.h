@@ -19,13 +19,13 @@ namespace llvmir2hll {
 class NoInitVarDefAnalysis: private OrderedAllVisitor,
 		private retdec::utils::NonCopyable {
 public:
-	VarDefStmtSet getNoInitVarDefStmts(ShPtr<Function> func);
+	VarDefStmtSet getNoInitVarDefStmts(Function* func);
 
 private:
 	/// @name OrderedAllVisitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<VarDefStmt> stmt) override;
+	virtual void visit(VarDefStmt* stmt) override;
 	/// @}
 
 private:

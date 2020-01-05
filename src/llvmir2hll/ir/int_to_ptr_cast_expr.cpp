@@ -16,12 +16,12 @@ namespace llvmir2hll {
 *
 * See create() for more information.
 */
-IntToPtrCastExpr::IntToPtrCastExpr(ShPtr<Expression> op, ShPtr<Type> dstType):
+IntToPtrCastExpr::IntToPtrCastExpr(Expression* op, Type* dstType):
 	CastExpr(op, dstType) {}
 
-bool IntToPtrCastExpr::isEqualTo(ShPtr<Value> otherValue) const {
+bool IntToPtrCastExpr::isEqualTo(Value* otherValue) const {
 	// Both types and values of all operands have to be equal.
-	if (ShPtr<IntToPtrCastExpr> otherCastExpr = cast<IntToPtrCastExpr>(otherValue)) {
+	if (IntToPtrCastExpr* otherCastExpr = cast<IntToPtrCastExpr>(otherValue)) {
 		return dstType->isEqualTo(otherCastExpr->getType()) &&
 			op->isEqualTo(otherCastExpr->getOperand());
 	}
@@ -31,8 +31,8 @@ bool IntToPtrCastExpr::isEqualTo(ShPtr<Value> otherValue) const {
 /**
 * @brief Clones the cast operator.
 */
-ShPtr<Value> IntToPtrCastExpr::clone() {
-	ShPtr<IntToPtrCastExpr> castExpr(IntToPtrCastExpr::create(
+Value* IntToPtrCastExpr::clone() {
+	IntToPtrCastExpr* castExpr(IntToPtrCastExpr::create(
 		ucast<Expression>(op->clone()), dstType));
 	castExpr->setMetadata(getMetadata());
 	return castExpr;
@@ -47,14 +47,14 @@ ShPtr<Value> IntToPtrCastExpr::clone() {
 * @par Preconditions
 *  - operand is non-null
 */
-ShPtr<IntToPtrCastExpr> IntToPtrCastExpr::create(ShPtr<Expression> op,
-		ShPtr<Type> dstType) {
+IntToPtrCastExpr* IntToPtrCastExpr::create(Expression* op,
+		Type* dstType) {
 	PRECONDITION_NON_NULL(op);
 	PRECONDITION_NON_NULL(dstType);
 
-	ShPtr<IntToPtrCastExpr> expr(new IntToPtrCastExpr(op, dstType));
+	IntToPtrCastExpr* expr(new IntToPtrCastExpr(op, dstType));
 
-	// Initialization (recall that shared_from_this() cannot be called in a
+	// Initialization (recall that this cannot be called in a
 	// constructor).
 	op->addObserver(expr);
 
@@ -62,7 +62,7 @@ ShPtr<IntToPtrCastExpr> IntToPtrCastExpr::create(ShPtr<Expression> op,
 }
 
 void IntToPtrCastExpr::accept(Visitor *v) {
-	v->visit(ucast<IntToPtrCastExpr>(shared_from_this()));
+	v->visit(ucast<IntToPtrCastExpr>(this));
 }
 
 } // namespace llvmir2hll

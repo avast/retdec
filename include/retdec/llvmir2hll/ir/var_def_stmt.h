@@ -25,28 +25,28 @@ class Visitor;
 */
 class VarDefStmt final: public Statement {
 public:
-	static ShPtr<VarDefStmt> create(ShPtr<Variable> var,
-		ShPtr<Expression> init = nullptr,
-		ShPtr<Statement> succ = nullptr,
+	static VarDefStmt* create(Variable* var,
+		Expression* init = nullptr,
+		Statement* succ = nullptr,
 		Address a = Address::Undefined);
 
-	virtual ShPtr<Value> clone() override;
-	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
+	virtual Value* clone() override;
+	virtual bool isEqualTo(Value* otherValue) const override;
 	virtual bool isCompound() override { return false; }
-	virtual void replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) override;
-	virtual ShPtr<Expression> asExpression() const override;
+	virtual void replace(Expression* oldExpr, Expression* newExpr) override;
+	virtual Expression* asExpression() const override;
 
-	ShPtr<Variable> getVar() const;
-	ShPtr<Expression> getInitializer() const;
+	Variable* getVar() const;
+	Expression* getInitializer() const;
 	bool hasInitializer() const;
 
-	void setVar(ShPtr<Variable> newVar);
-	void setInitializer(ShPtr<Expression> newInit);
+	void setVar(Variable* newVar);
+	void setInitializer(Expression* newInit);
 	void removeInitializer();
 
 	/// @name Observer Interface
 	/// @{
-	virtual void update(ShPtr<Value> subject, ShPtr<Value> arg = nullptr) override;
+	virtual void update(Value* subject, Value* arg = nullptr) override;
 	/// @}
 
 	/// @name Visitor Interface
@@ -57,15 +57,15 @@ public:
 private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
-	explicit VarDefStmt(ShPtr<Variable> var, ShPtr<Expression> init = nullptr,
+	explicit VarDefStmt(Variable* var, Expression* init = nullptr,
 		Address a = Address::Undefined);
 
 private:
 	/// Variable.
-	ShPtr<Variable> var;
+	Variable* var = nullptr;
 
 	/// Variable initializer.
-	ShPtr<Expression> init;
+	Expression* init = nullptr;
 };
 
 } // namespace llvmir2hll

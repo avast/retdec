@@ -49,7 +49,7 @@ namespace llvmir2hll {
 */
 class LoopLastContinueOptimizer final: public FuncOptimizer {
 public:
-	LoopLastContinueOptimizer(ShPtr<Module> module);
+	LoopLastContinueOptimizer(Module* module);
 
 	virtual std::string getId() const override { return "LoopLastContinue"; }
 
@@ -57,11 +57,11 @@ private:
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<ForLoopStmt> stmt) override;
-	virtual void visit(ShPtr<WhileLoopStmt> stmt) override;
+	virtual void visit(ForLoopStmt* stmt) override;
+	virtual void visit(WhileLoopStmt* stmt) override;
 	/// @}
 
-	void tryToOptimize(ShPtr<Statement> stmt);
+	void tryToOptimize(Statement* stmt);
 };
 
 } // namespace llvmir2hll

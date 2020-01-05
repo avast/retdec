@@ -30,12 +30,12 @@ public:
 	using Dimensions = std::vector<std::size_t>;
 
 public:
-	static ShPtr<ArrayType> create(ShPtr<Type> elemType, const Dimensions &dims);
+	static ArrayType* create(Type* elemType, const Dimensions &dims);
 
-	virtual ShPtr<Value> clone() override;
-	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
+	virtual Value* clone() override;
+	virtual bool isEqualTo(Value* otherValue) const override;
 
-	ShPtr<Type> getContainedType() const;
+	Type* getContainedType() const;
 	Dimensions getDimensions() const;
 	bool hasEmptyDimensions() const;
 
@@ -46,7 +46,7 @@ public:
 
 private:
 	/// Type of elements of the array.
-	ShPtr<Type> elemType;
+	Type* elemType = nullptr;
 
 	/// Array dimensions.
 	Dimensions dims;
@@ -54,7 +54,7 @@ private:
 private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
-	ArrayType(ShPtr<Type> elemType, const Dimensions &dims);
+	ArrayType(Type* elemType, const Dimensions &dims);
 };
 
 } // namespace llvmir2hll

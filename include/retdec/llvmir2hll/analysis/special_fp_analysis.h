@@ -28,7 +28,7 @@ class Module;
 class SpecialFPAnalysis: private OrderedAllVisitor,
 		private retdec::utils::NonCopyable {
 public:
-	static bool hasSpecialFP(ShPtr<Module> module);
+	static bool hasSpecialFP(Module* module);
 
 private:
 	explicit SpecialFPAnalysis();
@@ -36,7 +36,7 @@ private:
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<ConstFloat> constant) override;
+	virtual void visit(ConstFloat* constant) override;
 	/// @}
 
 private:

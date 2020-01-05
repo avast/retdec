@@ -25,14 +25,14 @@ class ConstBoolTests: public Test {};
 
 TEST_F(ConstBoolTests,
 IsTrueForTrueConstBoolReturnsTrue) {
-	ShPtr<ConstBool> constBool(ConstBool::create(true));
+	ConstBool* constBool(ConstBool::create(true));
 
 	EXPECT_TRUE(constBool->isTrue());
 }
 
 TEST_F(ConstBoolTests,
 IsTrueForFalseConstBoolReturnsFalse) {
-	ShPtr<ConstBool> constBool(ConstBool::create(false));
+	ConstBool* constBool(ConstBool::create(false));
 
 	EXPECT_FALSE(constBool->isTrue());
 }
@@ -43,14 +43,14 @@ IsTrueForFalseConstBoolReturnsFalse) {
 
 TEST_F(ConstBoolTests,
 IsFalseForTrueConstBoolReturnsFalse) {
-	ShPtr<ConstBool> constBool(ConstBool::create(true));
+	ConstBool* constBool(ConstBool::create(true));
 
 	EXPECT_FALSE(constBool->isFalse());
 }
 
 TEST_F(ConstBoolTests,
 IsFalseForFalseConstBoolReturnsTrue) {
-	ShPtr<ConstBool> constBool(ConstBool::create(false));
+	ConstBool* constBool(ConstBool::create(false));
 
 	EXPECT_TRUE(constBool->isFalse());
 }

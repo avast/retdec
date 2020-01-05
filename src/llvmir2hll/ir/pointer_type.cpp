@@ -16,16 +16,16 @@ namespace llvmir2hll {
 *
 * See create() for more information.
 */
-PointerType::PointerType(ShPtr<Type> containedType):
+PointerType::PointerType(Type* containedType):
 	Type(), containedType(containedType) {}
 
-ShPtr<Value> PointerType::clone() {
+Value* PointerType::clone() {
 	return PointerType::create(ucast<Type>(containedType->clone()));
 }
 
-bool PointerType::isEqualTo(ShPtr<Value> otherValue) const {
+bool PointerType::isEqualTo(Value* otherValue) const {
 	// Both types and contained types have to be equal.
-	if (ShPtr<PointerType> otherPointerType = cast<PointerType>(otherValue)) {
+	if (PointerType* otherPointerType = cast<PointerType>(otherValue)) {
 		return containedType->isEqualTo(otherPointerType->containedType);
 	}
 	return false;
@@ -37,7 +37,7 @@ bool PointerType::isEqualTo(ShPtr<Value> otherValue) const {
 * @par Preconditions
 *  - @a newContainedType is non-null
 */
-void PointerType::setContainedType(ShPtr<Type> newContainedType) {
+void PointerType::setContainedType(Type* newContainedType) {
 	PRECONDITION_NON_NULL(newContainedType);
 
 	containedType = newContainedType;
@@ -46,7 +46,7 @@ void PointerType::setContainedType(ShPtr<Type> newContainedType) {
 /**
 * @brief Returns the contained type.
 */
-ShPtr<Type> PointerType::getContainedType() const {
+Type* PointerType::getContainedType() const {
 	return containedType;
 }
 
@@ -58,15 +58,15 @@ ShPtr<Type> PointerType::getContainedType() const {
 * @par Preconditions
 *  - @a containedType is non-null
 */
-ShPtr<PointerType> PointerType::create(ShPtr<Type> containedType) {
+PointerType* PointerType::create(Type* containedType) {
 	PRECONDITION_NON_NULL(containedType);
 
 	// There is no special initialization.
-	return ShPtr<PointerType>(new PointerType(containedType));
+	return new PointerType(containedType);
 }
 
 void PointerType::accept(Visitor *v) {
-	v->visit(ucast<PointerType>(shared_from_this()));
+	v->visit(ucast<PointerType>(this));
 }
 
 } // namespace llvmir2hll

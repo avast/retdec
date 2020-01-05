@@ -40,20 +40,20 @@ namespace tests {
 */
 class DeadCodeOptimizerTests: public TestsWithModule {
 protected:
-	void optimize(ShPtr<Module> module);
+	void optimize(Module* module);
 };
 
-void DeadCodeOptimizerTests::optimize(ShPtr<Module> module) {
-	ShPtr<ArithmExprEvaluator> evaluator(StrictArithmExprEvaluator::
+void DeadCodeOptimizerTests::optimize(Module* module) {
+	ArithmExprEvaluator* evaluator(StrictArithmExprEvaluator::
 		create());
 	Optimizer::optimize<DeadCodeOptimizer>(module, evaluator);
 }
 
 TEST_F(DeadCodeOptimizerTests,
 OptimizerHasNonEmptyID) {
-	ShPtr<ArithmExprEvaluator> evaluator(StrictArithmExprEvaluator::
+	ArithmExprEvaluator* evaluator(StrictArithmExprEvaluator::
 		create());
-	ShPtr<DeadCodeOptimizer> optimizer(
+	DeadCodeOptimizer* optimizer(
 		new DeadCodeOptimizer(module, evaluator));
 
 	EXPECT_TRUE(!optimizer->getId().empty()) <<
@@ -74,35 +74,35 @@ ForLoopStmtEndCondWithIndVarEvaluatedToFalseIsOptimized) {
 	// Can be optimized to
 	// a = 1 + 3;
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<Variable> varI(Variable::create("i", IntType::create(16)));
-	ShPtr<AddOpExpr> addOpExprB(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	Variable* varI(Variable::create("i", IntType::create(16)));
+	AddOpExpr* addOpExprB(
 		AddOpExpr::create(
 			ConstInt::create(2, 64),
 			ConstInt::create(4, 64)
 	));
-	ShPtr<AssignStmt> assignStmtB(
+	AssignStmt* assignStmtB(
 		AssignStmt::create(
 			varB,
 			addOpExprB
 	));
-	ShPtr<AddOpExpr> addOpExprA(
+	AddOpExpr* addOpExprA(
 		AddOpExpr::create(
 			ConstInt::create(1, 64),
 			ConstInt::create(3, 64)
 	));
-	ShPtr<AssignStmt> assignStmtA(
+	AssignStmt* assignStmtA(
 		AssignStmt::create(
 			varA,
 			addOpExprA
 	));
-	ShPtr<LtOpExpr> ltOpExpr(
+	LtOpExpr* ltOpExpr(
 		LtOpExpr::create(
 			varI,
 			ConstInt::create(4, 64)
 	));
-	ShPtr<ForLoopStmt> forLoopStmt(
+	ForLoopStmt* forLoopStmt(
 		ForLoopStmt::create(
 			varI,
 			ConstInt::create(5, 64),
@@ -115,7 +115,7 @@ ForLoopStmtEndCondWithIndVarEvaluatedToFalseIsOptimized) {
 
 	optimize(module);
 
-	ShPtr<AssignStmt> outAssignStmt(cast<AssignStmt>(testFunc->getBody()));
+	AssignStmt* outAssignStmt(cast<AssignStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outAssignStmt) <<
 		"expected `AssignStmt`, "
 		"got `" << testFunc->getBody() << "`";
@@ -134,35 +134,35 @@ ForLoopStmtEndCondEvaluatedToFalseIsOptimized) {
 	// Can be optimized to
 	// a = 1 + 3;
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<Variable> varI(Variable::create("i", IntType::create(16)));
-	ShPtr<AddOpExpr> addOpExprB(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	Variable* varI(Variable::create("i", IntType::create(16)));
+	AddOpExpr* addOpExprB(
 		AddOpExpr::create(
 			ConstInt::create(2, 64),
 			ConstInt::create(4, 64)
 	));
-	ShPtr<AssignStmt> assignStmtB(
+	AssignStmt* assignStmtB(
 		AssignStmt::create(
 			varB,
 			addOpExprB
 	));
-	ShPtr<AddOpExpr> addOpExprA(
+	AddOpExpr* addOpExprA(
 		AddOpExpr::create(
 			ConstInt::create(1, 64),
 			ConstInt::create(3, 64)
 	));
-	ShPtr<AssignStmt> assignStmtA(
+	AssignStmt* assignStmtA(
 		AssignStmt::create(
 			varA,
 			addOpExprA
 	));
-	ShPtr<LtOpExpr> ltOpExpr(
+	LtOpExpr* ltOpExpr(
 		LtOpExpr::create(
 			varI,
 			ConstInt::create(4, 64)
 	));
-	ShPtr<ForLoopStmt> forLoopStmt(
+	ForLoopStmt* forLoopStmt(
 		ForLoopStmt::create(
 			varI,
 			ConstInt::create(5, 64),
@@ -175,7 +175,7 @@ ForLoopStmtEndCondEvaluatedToFalseIsOptimized) {
 
 	optimize(module);
 
-	ShPtr<AssignStmt> outAssignStmt(cast<AssignStmt>(testFunc->getBody()));
+	AssignStmt* outAssignStmt(cast<AssignStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outAssignStmt) <<
 		"expected `AssignStmt`, "
 		"got `" << testFunc->getBody() << "`";
@@ -193,36 +193,36 @@ ForLoopStmtEndCondWithIndVarEvaluatedToFalseWithGotoLabelNotOptimized) {
 	//
 	// Can't be optimized because body of for loop has goto label.
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<Variable> varI(Variable::create("i", IntType::create(16)));
-	ShPtr<AddOpExpr> addOpExprB(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	Variable* varI(Variable::create("i", IntType::create(16)));
+	AddOpExpr* addOpExprB(
 		AddOpExpr::create(
 			ConstInt::create(2, 64),
 			ConstInt::create(4, 64)
 	));
-	ShPtr<AssignStmt> assignStmtB(
+	AssignStmt* assignStmtB(
 		AssignStmt::create(
 			varB,
 			addOpExprB
 	));
-	ShPtr<AddOpExpr> addOpExprA(
+	AddOpExpr* addOpExprA(
 		AddOpExpr::create(
 			ConstInt::create(1, 64),
 			ConstInt::create(3, 64)
 	));
-	ShPtr<AssignStmt> assignStmtA(
+	AssignStmt* assignStmtA(
 		AssignStmt::create(
 			varA,
 			addOpExprA
 	));
-	ShPtr<LtOpExpr> ltOpExpr(
+	LtOpExpr* ltOpExpr(
 		LtOpExpr::create(
 			varI,
 			ConstInt::create(4, 64)
 	));
 	GotoStmt::create(assignStmtB);
-	ShPtr<ForLoopStmt> forLoopStmt(
+	ForLoopStmt* forLoopStmt(
 		ForLoopStmt::create(
 			varI,
 			ConstInt::create(5, 64),
@@ -235,7 +235,7 @@ ForLoopStmtEndCondWithIndVarEvaluatedToFalseWithGotoLabelNotOptimized) {
 
 	optimize(module);
 
-	ShPtr<ForLoopStmt> outForLoopStmt(cast<ForLoopStmt>(testFunc->getBody()));
+	ForLoopStmt* outForLoopStmt(cast<ForLoopStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outForLoopStmt) <<
 		"expected `ForLoopStmt`, "
 		"got `" << testFunc->getBody() << "`";
@@ -251,40 +251,40 @@ ForLoopStmtEndCondWithIndVarCantBeEvaluatedNotOptimized) {
 	// Can't be optimized because end condition can't be evaluated. We don't
 	// know value of variable A
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<Variable> varI(Variable::create("i", IntType::create(16)));
-	ShPtr<AddOpExpr> addOpExprB(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	Variable* varI(Variable::create("i", IntType::create(16)));
+	AddOpExpr* addOpExprB(
 		AddOpExpr::create(
 			ConstInt::create(2, 64),
 			ConstInt::create(4, 64)
 	));
-	ShPtr<AssignStmt> assignStmtB(
+	AssignStmt* assignStmtB(
 		AssignStmt::create(
 			varB,
 			addOpExprB
 	));
-	ShPtr<AddOpExpr> addOpExprA(
+	AddOpExpr* addOpExprA(
 		AddOpExpr::create(
 			ConstInt::create(1, 64),
 			ConstInt::create(3, 64)
 	));
-	ShPtr<AssignStmt> assignStmtA(
+	AssignStmt* assignStmtA(
 		AssignStmt::create(
 			varA,
 			addOpExprA
 	));
-	ShPtr<AddOpExpr> addOpExprEndCond(
+	AddOpExpr* addOpExprEndCond(
 		AddOpExpr::create(
 			varA,
 			varI
 	));
-	ShPtr<LtOpExpr> ltOpExpr(
+	LtOpExpr* ltOpExpr(
 		LtOpExpr::create(
 			addOpExprEndCond,
 			ConstInt::create(4, 64)
 	));
-	ShPtr<ForLoopStmt> forLoopStmt(
+	ForLoopStmt* forLoopStmt(
 		ForLoopStmt::create(
 			varI,
 			ConstInt::create(5, 64),
@@ -297,7 +297,7 @@ ForLoopStmtEndCondWithIndVarCantBeEvaluatedNotOptimized) {
 
 	optimize(module);
 
-	ShPtr<ForLoopStmt> outForLoopStmt(cast<ForLoopStmt>(testFunc->getBody()));
+	ForLoopStmt* outForLoopStmt(cast<ForLoopStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outForLoopStmt) <<
 		"expected `ForLoopStmt`, "
 		"got `" << testFunc->getBody() << "`";
@@ -312,35 +312,35 @@ ForLoopStmtEndCondWithIndVarEvaluatedToTrueNotOptimized) {
 	//
 	// Can't be optimized because end condition is evaluated as true.
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<Variable> varI(Variable::create("i", IntType::create(16)));
-	ShPtr<AddOpExpr> addOpExprB(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	Variable* varI(Variable::create("i", IntType::create(16)));
+	AddOpExpr* addOpExprB(
 		AddOpExpr::create(
 			ConstInt::create(2, 64),
 			ConstInt::create(4, 64)
 	));
-	ShPtr<AssignStmt> assignStmtB(
+	AssignStmt* assignStmtB(
 		AssignStmt::create(
 			varB,
 			addOpExprB
 	));
-	ShPtr<AddOpExpr> addOpExprA(
+	AddOpExpr* addOpExprA(
 		AddOpExpr::create(
 			ConstInt::create(1, 64),
 			ConstInt::create(3, 64)
 	));
-	ShPtr<AssignStmt> assignStmtA(
+	AssignStmt* assignStmtA(
 		AssignStmt::create(
 			varA,
 			addOpExprA
 	));
-	ShPtr<GtOpExpr> ltOpExpr(
+	GtOpExpr* ltOpExpr(
 		GtOpExpr::create(
 			varI,
 			ConstInt::create(4, 64)
 	));
-	ShPtr<ForLoopStmt> forLoopStmt(
+	ForLoopStmt* forLoopStmt(
 		ForLoopStmt::create(
 			varI,
 			ConstInt::create(5, 64),
@@ -353,7 +353,7 @@ ForLoopStmtEndCondWithIndVarEvaluatedToTrueNotOptimized) {
 
 	optimize(module);
 
-	ShPtr<ForLoopStmt> outForLoopStmt(cast<ForLoopStmt>(testFunc->getBody()));
+	ForLoopStmt* outForLoopStmt(cast<ForLoopStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outForLoopStmt) <<
 		"expected `ForLoopStmt`, "
 		"got `" << testFunc->getBody() << "`";
@@ -373,29 +373,29 @@ WhileLoopStmtWithBoolCondEvaluatedToFalseIsOptimized) {
 	// Can be optimized to
 	// a = 1 + 3;
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<AddOpExpr> addOpExprInWhile(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	AddOpExpr* addOpExprInWhile(
 		AddOpExpr::create(
 			ConstInt::create(2, 64),
 			ConstInt::create(4, 64)
 	));
-	ShPtr<AssignStmt> assignStmtInWhile(
+	AssignStmt* assignStmtInWhile(
 		AssignStmt::create(
 			varB,
 			addOpExprInWhile
 	));
-	ShPtr<AddOpExpr> addOpExprOutWhile(
+	AddOpExpr* addOpExprOutWhile(
 		AddOpExpr::create(
 			ConstInt::create(1, 64),
 			ConstInt::create(3, 64)
 	));
-	ShPtr<AssignStmt> assignStmtOutWhile(
+	AssignStmt* assignStmtOutWhile(
 		AssignStmt::create(
 			varA,
 			addOpExprOutWhile
 	));
-	ShPtr<WhileLoopStmt> whileLoopStmt(
+	WhileLoopStmt* whileLoopStmt(
 		WhileLoopStmt::create(
 			ConstBool::create(false),
 			assignStmtInWhile,
@@ -405,7 +405,7 @@ WhileLoopStmtWithBoolCondEvaluatedToFalseIsOptimized) {
 
 	optimize(module);
 
-	ShPtr<AssignStmt> outAssignStmt(cast<AssignStmt>(testFunc->getBody()));
+	AssignStmt* outAssignStmt(cast<AssignStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outAssignStmt) <<
 		"expected `AssignStmt`, "
 		"got `" << testFunc->getBody() << "`";
@@ -424,34 +424,34 @@ WhileLoopStmtWithFloatCondEvaluatedToFalseIsOptimized) {
 	// Can be optimized to
 	// a = 1 + 3;
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<SubOpExpr> subOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	SubOpExpr* subOpExpr(
 		SubOpExpr::create(
 			ConstFloat::create(llvm::APFloat(2.0)),
 			ConstFloat::create(llvm::APFloat(2.0))
 	));
-	ShPtr<AddOpExpr> addOpExprInWhile(
+	AddOpExpr* addOpExprInWhile(
 		AddOpExpr::create(
 			ConstInt::create(2, 64),
 			ConstInt::create(4, 64)
 	));
-	ShPtr<AssignStmt> assignStmtInWhile(
+	AssignStmt* assignStmtInWhile(
 		AssignStmt::create(
 			varB,
 			addOpExprInWhile
 	));
-	ShPtr<AddOpExpr> addOpExprOutWhile(
+	AddOpExpr* addOpExprOutWhile(
 		AddOpExpr::create(
 			ConstInt::create(1, 64),
 			ConstInt::create(3, 64)
 	));
-	ShPtr<AssignStmt> assignStmtOutWhile(
+	AssignStmt* assignStmtOutWhile(
 		AssignStmt::create(
 			varA,
 			addOpExprOutWhile
 	));
-	ShPtr<WhileLoopStmt> whileLoopStmt(
+	WhileLoopStmt* whileLoopStmt(
 		WhileLoopStmt::create(
 			subOpExpr,
 			assignStmtInWhile,
@@ -461,7 +461,7 @@ WhileLoopStmtWithFloatCondEvaluatedToFalseIsOptimized) {
 
 	optimize(module);
 
-	ShPtr<AssignStmt> outAssignStmt(cast<AssignStmt>(testFunc->getBody()));
+	AssignStmt* outAssignStmt(cast<AssignStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outAssignStmt) <<
 		"expected `AssignStmt`, "
 		"got `" << testFunc->getBody() << "`";
@@ -478,18 +478,18 @@ WhileLoopStmtWithBoolCondEvaluatedToTrueNotOptimized) {
 	//
 	// Not optimized because we don't want optimize infinite while loop.
 	//
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<AddOpExpr> addOpExpr(
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	AddOpExpr* addOpExpr(
 		AddOpExpr::create(
 			ConstInt::create(2, 64),
 			ConstInt::create(4, 64)
 	));
-	ShPtr<AssignStmt> assignStmt(
+	AssignStmt* assignStmt(
 		AssignStmt::create(
 			varB,
 			addOpExpr
 	));
-	ShPtr<WhileLoopStmt> whileLoopStmt(
+	WhileLoopStmt* whileLoopStmt(
 		WhileLoopStmt::create(
 			ConstBool::create(true),
 			assignStmt
@@ -498,7 +498,7 @@ WhileLoopStmtWithBoolCondEvaluatedToTrueNotOptimized) {
 
 	optimize(module);
 
-	ShPtr<WhileLoopStmt> outWhileLoopStmt(cast<WhileLoopStmt>(testFunc->getBody()));
+	WhileLoopStmt* outWhileLoopStmt(cast<WhileLoopStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outWhileLoopStmt) <<
 		"expected `WhileLoopStmt`, "
 		"got `" << testFunc->getBody() << "`";
@@ -512,19 +512,19 @@ WhileLoopStmtWithBoolCondEvaluatedToFalseWithGotoLabelNotOptimized) {
 	//
 	// Not optimized because body of while loop contains goto label.
 	//
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<AddOpExpr> addOpExpr(
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	AddOpExpr* addOpExpr(
 		AddOpExpr::create(
 			ConstInt::create(2, 64),
 			ConstInt::create(4, 64)
 	));
-	ShPtr<AssignStmt> assignStmt(
+	AssignStmt* assignStmt(
 		AssignStmt::create(
 			varB,
 			addOpExpr
 	));
 	GotoStmt::create(assignStmt);
-	ShPtr<WhileLoopStmt> whileLoopStmt(
+	WhileLoopStmt* whileLoopStmt(
 		WhileLoopStmt::create(
 			ConstBool::create(true),
 			assignStmt
@@ -533,7 +533,7 @@ WhileLoopStmtWithBoolCondEvaluatedToFalseWithGotoLabelNotOptimized) {
 
 	optimize(module);
 
-	ShPtr<WhileLoopStmt> outWhileLoopStmt(cast<WhileLoopStmt>(testFunc->getBody()));
+	WhileLoopStmt* outWhileLoopStmt(cast<WhileLoopStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outWhileLoopStmt) <<
 		"expected `WhileLoopStmt`, "
 		"got `" << testFunc->getBody() << "`";
@@ -553,34 +553,34 @@ IfStmtWithFloatCondEvaluatedToFalseIsOptimized) {
 	// Can be optimized to
 	// a = 1 + 3;
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<SubOpExpr> subOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	SubOpExpr* subOpExpr(
 		SubOpExpr::create(
 			ConstFloat::create(llvm::APFloat(2.0)),
 			ConstFloat::create(llvm::APFloat(2.0))
 	));
-	ShPtr<AddOpExpr> addOpExprInIf(
+	AddOpExpr* addOpExprInIf(
 		AddOpExpr::create(
 			ConstInt::create(2, 64),
 			ConstInt::create(4, 64)
 	));
-	ShPtr<AssignStmt> assignStmtInIf(
+	AssignStmt* assignStmtInIf(
 		AssignStmt::create(
 			varB,
 			addOpExprInIf
 	));
-	ShPtr<AddOpExpr> addOpExprOutIf(
+	AddOpExpr* addOpExprOutIf(
 		AddOpExpr::create(
 			ConstInt::create(1, 64),
 			ConstInt::create(3, 64)
 	));
-	ShPtr<AssignStmt> assignStmtOutIf(
+	AssignStmt* assignStmtOutIf(
 		AssignStmt::create(
 			varA,
 			addOpExprOutIf
 	));
-	ShPtr<IfStmt> ifStmt(
+	IfStmt* ifStmt(
 		IfStmt::create(
 			subOpExpr,
 			assignStmtInIf,
@@ -590,7 +590,7 @@ IfStmtWithFloatCondEvaluatedToFalseIsOptimized) {
 
 	optimize(module);
 
-	ShPtr<AssignStmt> outAssignStmt(cast<AssignStmt>(testFunc->getBody()));
+	AssignStmt* outAssignStmt(cast<AssignStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outAssignStmt) <<
 		"expected `AssignStmt`, "
 		"got `" << testFunc->getBody() << "`";
@@ -612,34 +612,34 @@ IfStmtWithElseWithFloatCondEvaluatedToFalseIsOptimized) {
 	// b = 2 + 4;
 	// a = 1 + 3;
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<SubOpExpr> subOpExpr(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	SubOpExpr* subOpExpr(
 		SubOpExpr::create(
 			ConstFloat::create(llvm::APFloat(2.0)),
 			ConstFloat::create(llvm::APFloat(2.0))
 	));
-	ShPtr<AddOpExpr> addOpExprInIf(
+	AddOpExpr* addOpExprInIf(
 		AddOpExpr::create(
 			ConstInt::create(2, 64),
 			ConstInt::create(4, 64)
 	));
-	ShPtr<AssignStmt> assignStmtInIf(
+	AssignStmt* assignStmtInIf(
 		AssignStmt::create(
 			varB,
 			addOpExprInIf
 	));
-	ShPtr<AddOpExpr> addOpExprOutIf(
+	AddOpExpr* addOpExprOutIf(
 		AddOpExpr::create(
 			ConstInt::create(1, 64),
 			ConstInt::create(3, 64)
 	));
-	ShPtr<AssignStmt> assignStmtOutIf(
+	AssignStmt* assignStmtOutIf(
 		AssignStmt::create(
 			varA,
 			addOpExprOutIf
 	));
-	ShPtr<IfStmt> ifStmt(
+	IfStmt* ifStmt(
 		IfStmt::create(
 			subOpExpr,
 			assignStmtInIf,
@@ -650,14 +650,14 @@ IfStmtWithElseWithFloatCondEvaluatedToFalseIsOptimized) {
 
 	optimize(module);
 
-	ShPtr<AssignStmt> outAssignStmtB(cast<AssignStmt>(testFunc->getBody()));
+	AssignStmt* outAssignStmtB(cast<AssignStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outAssignStmtB) <<
 		"expected `AssignStmt`, "
 		"got `" << testFunc->getBody() << "`";
 	EXPECT_EQ(outAssignStmtB, assignStmtInIf) <<
 		"expected `" << assignStmtInIf << "`, "
 		"got `" << outAssignStmtB << "`";
-	ShPtr<AssignStmt> outAssignStmtA(cast<AssignStmt>(
+	AssignStmt* outAssignStmtA(cast<AssignStmt>(
 		outAssignStmtB->getSuccessor()));
 	EXPECT_EQ(outAssignStmtA, assignStmtOutIf) <<
 		"expected `" << assignStmtOutIf << "`, "
@@ -675,29 +675,29 @@ IfStmtWithBoolCondEvaluatedToTrueIsOptimized) {
 	// b = 2 + 4;
 	// a = 1 + 3;
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<AddOpExpr> addOpExprInIf(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	AddOpExpr* addOpExprInIf(
 		AddOpExpr::create(
 			ConstInt::create(2, 64),
 			ConstInt::create(4, 64)
 	));
-	ShPtr<AssignStmt> assignStmtInIf(
+	AssignStmt* assignStmtInIf(
 		AssignStmt::create(
 			varB,
 			addOpExprInIf
 	));
-	ShPtr<AddOpExpr> addOpExprOutIf(
+	AddOpExpr* addOpExprOutIf(
 		AddOpExpr::create(
 			ConstInt::create(1, 64),
 			ConstInt::create(3, 64)
 	));
-	ShPtr<AssignStmt> assignStmtOutIf(
+	AssignStmt* assignStmtOutIf(
 		AssignStmt::create(
 			varA,
 			addOpExprOutIf
 	));
-	ShPtr<IfStmt> ifStmt(
+	IfStmt* ifStmt(
 		IfStmt::create(
 			ConstBool::create(true),
 			assignStmtInIf,
@@ -707,14 +707,14 @@ IfStmtWithBoolCondEvaluatedToTrueIsOptimized) {
 
 	optimize(module);
 
-	ShPtr<AssignStmt> outAssignStmtB(cast<AssignStmt>(testFunc->getBody()));
+	AssignStmt* outAssignStmtB(cast<AssignStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outAssignStmtB) <<
 		"expected `AssignStmt`, "
 		"got `" << testFunc->getBody() << "`";
 	EXPECT_EQ(outAssignStmtB, assignStmtInIf) <<
 		"expected `" << assignStmtInIf << "`, "
 		"got `" << outAssignStmtB << "`";
-	ShPtr<AssignStmt> outAssignStmtA(cast<AssignStmt>(
+	AssignStmt* outAssignStmtA(cast<AssignStmt>(
 		outAssignStmtB->getSuccessor()));
 	EXPECT_EQ(outAssignStmtA, assignStmtOutIf) <<
 		"expected `" << assignStmtOutIf << "`, "
@@ -734,29 +734,29 @@ IfStmtWithElseWithBoolCondEvaluatedToTrueIsOptimized) {
 	// b = 2 + 4;
 	// a = 1 + 3;
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<AddOpExpr> addOpExprInIf(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	AddOpExpr* addOpExprInIf(
 		AddOpExpr::create(
 			ConstInt::create(2, 64),
 			ConstInt::create(4, 64)
 	));
-	ShPtr<AssignStmt> assignStmtInIf(
+	AssignStmt* assignStmtInIf(
 		AssignStmt::create(
 			varB,
 			addOpExprInIf
 	));
-	ShPtr<AddOpExpr> addOpExprOutIf(
+	AddOpExpr* addOpExprOutIf(
 		AddOpExpr::create(
 			ConstInt::create(1, 64),
 			ConstInt::create(3, 64)
 	));
-	ShPtr<AssignStmt> assignStmtOutIf(
+	AssignStmt* assignStmtOutIf(
 		AssignStmt::create(
 			varA,
 			addOpExprOutIf
 	));
-	ShPtr<IfStmt> ifStmt(
+	IfStmt* ifStmt(
 		IfStmt::create(
 			ConstBool::create(true),
 			assignStmtInIf,
@@ -767,14 +767,14 @@ IfStmtWithElseWithBoolCondEvaluatedToTrueIsOptimized) {
 
 	optimize(module);
 
-	ShPtr<AssignStmt> outAssignStmtB(cast<AssignStmt>(testFunc->getBody()));
+	AssignStmt* outAssignStmtB(cast<AssignStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outAssignStmtB) <<
 		"expected `AssignStmt`, "
 		"got `" << testFunc->getBody() << "`";
 	EXPECT_EQ(outAssignStmtB, assignStmtInIf) <<
 		"expected `" << assignStmtInIf << "`, "
 		"got `" << outAssignStmtB << "`";
-	ShPtr<AssignStmt> outAssignStmtA(cast<AssignStmt>(
+	AssignStmt* outAssignStmtA(cast<AssignStmt>(
 		outAssignStmtB->getSuccessor()));
 	EXPECT_EQ(outAssignStmtA, assignStmtOutIf) <<
 		"expected `" << assignStmtOutIf << "`, "
@@ -794,29 +794,29 @@ IfStmtWithElseIfWithBoolCondEvaluatedToTrueIsOptimized) {
 	// Can be optimized to
 	// c = 2 + 4;
 	//
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(16)));
-	ShPtr<AddOpExpr> addOpExprB(
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	Variable* varC(Variable::create("c", IntType::create(16)));
+	AddOpExpr* addOpExprB(
 		AddOpExpr::create(
 			ConstInt::create(2, 64),
 			ConstInt::create(4, 64)
 	));
-	ShPtr<AssignStmt> assignStmtB(
+	AssignStmt* assignStmtB(
 		AssignStmt::create(
 			varB,
 			addOpExprB
 	));
-	ShPtr<AddOpExpr> addOpExprC(
+	AddOpExpr* addOpExprC(
 		AddOpExpr::create(
 			ConstInt::create(2, 64),
 			ConstInt::create(4, 64)
 	));
-	ShPtr<AssignStmt> assignStmtC(
+	AssignStmt* assignStmtC(
 		AssignStmt::create(
 			varC,
 			addOpExprC
 	));
-	ShPtr<IfStmt> ifStmt(
+	IfStmt* ifStmt(
 		IfStmt::create(
 			ConstBool::create(true),
 			assignStmtC
@@ -827,7 +827,7 @@ IfStmtWithElseIfWithBoolCondEvaluatedToTrueIsOptimized) {
 
 	optimize(module);
 
-	ShPtr<AssignStmt> outAssignStmtC(cast<AssignStmt>(testFunc->getBody()));
+	AssignStmt* outAssignStmtC(cast<AssignStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outAssignStmtC) <<
 		"expected `AssignStmt`, "
 		"got `" << testFunc->getBody() << "`";
@@ -853,39 +853,39 @@ IfStmtWithElseIfWithNotEvaluatedCondAndOneElseIfWithEvaluatedToFalseIsOptimized)
 	//     b = 2 + 4;
 	// }
 	//
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(16)));
-	ShPtr<AddOpExpr> addOpExprBInCond(
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	Variable* varC(Variable::create("c", IntType::create(16)));
+	AddOpExpr* addOpExprBInCond(
 		AddOpExpr::create(
 			varB,
 			ConstInt::create(5, 64)
 	));
-	ShPtr<AddOpExpr> addOpExprCInCond(
+	AddOpExpr* addOpExprCInCond(
 		AddOpExpr::create(
 			varC,
 			ConstInt::create(4, 64)
 	));
-	ShPtr<AddOpExpr> addOpExprB(
+	AddOpExpr* addOpExprB(
 		AddOpExpr::create(
 			ConstInt::create(2, 64),
 			ConstInt::create(4, 64)
 	));
-	ShPtr<AssignStmt> assignStmtB(
+	AssignStmt* assignStmtB(
 		AssignStmt::create(
 			varB,
 			addOpExprB
 	));
-	ShPtr<AddOpExpr> addOpExprC(
+	AddOpExpr* addOpExprC(
 		AddOpExpr::create(
 			ConstInt::create(2, 64),
 			ConstInt::create(4, 64)
 	));
-	ShPtr<AssignStmt> assignStmtC(
+	AssignStmt* assignStmtC(
 		AssignStmt::create(
 			varC,
 			addOpExprC
 	));
-	ShPtr<IfStmt> ifStmt(
+	IfStmt* ifStmt(
 		IfStmt::create(
 			addOpExprBInCond,
 			assignStmtC
@@ -896,7 +896,7 @@ IfStmtWithElseIfWithNotEvaluatedCondAndOneElseIfWithEvaluatedToFalseIsOptimized)
 
 	optimize(module);
 
-	ShPtr<IfStmt> outIfStmt(cast<IfStmt>(testFunc->getBody()));
+	IfStmt* outIfStmt(cast<IfStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outIfStmt) <<
 		"expected `IfStmt`, "
 		"got `" << testFunc->getBody() << "`";
@@ -928,39 +928,39 @@ IfStmtWithElseIfWithNotEvaluatedCondAndOneFirstIfWithEvaluatedToFalseIsOptimized
 	//     b = 2 + 4;
 	// }
 	//
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(16)));
-	ShPtr<AddOpExpr> addOpExprBInCond(
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	Variable* varC(Variable::create("c", IntType::create(16)));
+	AddOpExpr* addOpExprBInCond(
 		AddOpExpr::create(
 			varB,
 			ConstInt::create(5, 64)
 	));
-	ShPtr<AddOpExpr> addOpExprCInCond(
+	AddOpExpr* addOpExprCInCond(
 		AddOpExpr::create(
 			varC,
 			ConstInt::create(4, 64)
 	));
-	ShPtr<AddOpExpr> addOpExprB(
+	AddOpExpr* addOpExprB(
 		AddOpExpr::create(
 			ConstInt::create(2, 64),
 			ConstInt::create(4, 64)
 	));
-	ShPtr<AssignStmt> assignStmtB(
+	AssignStmt* assignStmtB(
 		AssignStmt::create(
 			varB,
 			addOpExprB
 	));
-	ShPtr<AddOpExpr> addOpExprC(
+	AddOpExpr* addOpExprC(
 		AddOpExpr::create(
 			ConstInt::create(2, 64),
 			ConstInt::create(4, 64)
 	));
-	ShPtr<AssignStmt> assignStmtC(
+	AssignStmt* assignStmtC(
 		AssignStmt::create(
 			varC,
 			addOpExprC
 	));
-	ShPtr<IfStmt> ifStmt(
+	IfStmt* ifStmt(
 		IfStmt::create(
 			ConstBool::create(false),
 			assignStmtC
@@ -971,7 +971,7 @@ IfStmtWithElseIfWithNotEvaluatedCondAndOneFirstIfWithEvaluatedToFalseIsOptimized
 
 	optimize(module);
 
-	ShPtr<IfStmt> outIfStmt(cast<IfStmt>(testFunc->getBody()));
+	IfStmt* outIfStmt(cast<IfStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outIfStmt) <<
 		"expected `IfStmt`, "
 		"got `" << testFunc->getBody() << "`";
@@ -1002,30 +1002,30 @@ IfStmtWithElseIfWithGotoLabelWithBoolCondEvaluatedToTrueIsOptimized) {
 	// } else if (false) {
 	//    label: c = 2 + 4;
 	// }
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(16)));
-	ShPtr<AddOpExpr> addOpExprB(
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	Variable* varC(Variable::create("c", IntType::create(16)));
+	AddOpExpr* addOpExprB(
 		AddOpExpr::create(
 			ConstInt::create(2, 64),
 			ConstInt::create(4, 64)
 	));
-	ShPtr<AssignStmt> assignStmtB(
+	AssignStmt* assignStmtB(
 		AssignStmt::create(
 			varB,
 			addOpExprB
 	));
-	ShPtr<AddOpExpr> addOpExprC(
+	AddOpExpr* addOpExprC(
 		AddOpExpr::create(
 			ConstInt::create(2, 64),
 			ConstInt::create(4, 64)
 	));
-	ShPtr<AssignStmt> assignStmtC(
+	AssignStmt* assignStmtC(
 		AssignStmt::create(
 			varC,
 			addOpExprC
 	));
 	GotoStmt::create(assignStmtC);
-	ShPtr<IfStmt> ifStmt(
+	IfStmt* ifStmt(
 		IfStmt::create(
 			ConstBool::create(true),
 			assignStmtB
@@ -1036,14 +1036,14 @@ IfStmtWithElseIfWithGotoLabelWithBoolCondEvaluatedToTrueIsOptimized) {
 
 	optimize(module);
 
-	ShPtr<IfStmt> outIfStmt(cast<IfStmt>(testFunc->getBody()));
+	IfStmt* outIfStmt(cast<IfStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outIfStmt) <<
 		"expected `IfStmt`, "
 		"got `" << testFunc->getBody() << "`";
 	ASSERT_TRUE(outIfStmt->hasElseIfClauses()) <<
 		"expected `Else-If clause`";
 	auto it = outIfStmt->clause_begin();
-	ShPtr<ConstBool> outConstBool(cast<ConstBool>((++it)->first));
+	ConstBool* outConstBool(cast<ConstBool>((++it)->first));
 	ASSERT_TRUE(outConstBool) <<
 		"expected `ConstBool`, "
 		"got `" << (++it)->first << "`";
@@ -1068,31 +1068,31 @@ SwitchStmtOneClauseWithConditionEqualToControlExprIsOptimized) {
 	// b = 2 + 4;
 	// a = 1 + 3;
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<AddOpExpr> addOpExprInSwitch(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	AddOpExpr* addOpExprInSwitch(
 		AddOpExpr::create(
 			ConstInt::create(2, 64),
 			ConstInt::create(4, 64)
 	));
-	ShPtr<BreakStmt> breakStmt(BreakStmt::create());
-	ShPtr<AssignStmt> assignStmtB(
+	BreakStmt* breakStmt(BreakStmt::create());
+	AssignStmt* assignStmtB(
 		AssignStmt::create(
 			varB,
 			addOpExprInSwitch,
 			breakStmt
 	));
-	ShPtr<AddOpExpr> addOpExprOutSwitch(
+	AddOpExpr* addOpExprOutSwitch(
 		AddOpExpr::create(
 			ConstInt::create(1, 64),
 			ConstInt::create(3, 64)
 	));
-	ShPtr<AssignStmt> assignStmtA(
+	AssignStmt* assignStmtA(
 		AssignStmt::create(
 			varA,
 			addOpExprOutSwitch
 	));
-	ShPtr<SwitchStmt> switchStmt(
+	SwitchStmt* switchStmt(
 		SwitchStmt::create(
 			ConstInt::create(2, 64),
 			assignStmtA
@@ -1102,14 +1102,14 @@ SwitchStmtOneClauseWithConditionEqualToControlExprIsOptimized) {
 
 	optimize(module);
 
-	ShPtr<AssignStmt> outAssignStmtB(cast<AssignStmt>(testFunc->getBody()));
+	AssignStmt* outAssignStmtB(cast<AssignStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outAssignStmtB) <<
 		"expected `AssignStmt`, "
 		"got `" << testFunc->getBody() << "`";
 	EXPECT_EQ(outAssignStmtB, assignStmtB) <<
 		"expected `" << assignStmtB << "`, "
 		"got `" << outAssignStmtB << "`";
-	ShPtr<AssignStmt> outAssignStmtA(cast<AssignStmt>(
+	AssignStmt* outAssignStmtA(cast<AssignStmt>(
 		outAssignStmtB->getSuccessor()));
 	EXPECT_EQ(outAssignStmtA, assignStmtA) <<
 		"expected `" << assignStmtA << "`, "
@@ -1127,29 +1127,29 @@ SwitchStmtOneClauseWithConditionEqualToControlExprWithoutBreakNotOptimized) {
 	// statement at last statement. Optimization now supported only clauses with
 	// break, continue or return statement on last statement.
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<AddOpExpr> addOpExprInSwitch(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	AddOpExpr* addOpExprInSwitch(
 		AddOpExpr::create(
 			ConstInt::create(2, 64),
 			ConstInt::create(4, 64)
 	));
-	ShPtr<AssignStmt> assignStmtB(
+	AssignStmt* assignStmtB(
 		AssignStmt::create(
 			varB,
 			addOpExprInSwitch
 	));
-	ShPtr<AddOpExpr> addOpExprOutSwitch(
+	AddOpExpr* addOpExprOutSwitch(
 		AddOpExpr::create(
 			ConstInt::create(1, 64),
 			ConstInt::create(3, 64)
 	));
-	ShPtr<AssignStmt> assignStmtA(
+	AssignStmt* assignStmtA(
 		AssignStmt::create(
 			varA,
 			addOpExprOutSwitch
 	));
-	ShPtr<SwitchStmt> switchStmt(
+	SwitchStmt* switchStmt(
 		SwitchStmt::create(
 			ConstInt::create(2, 64),
 			assignStmtA
@@ -1159,7 +1159,7 @@ SwitchStmtOneClauseWithConditionEqualToControlExprWithoutBreakNotOptimized) {
 
 	optimize(module);
 
-	ShPtr<SwitchStmt> outSwitchStmt(cast<SwitchStmt>(testFunc->getBody()));
+	SwitchStmt* outSwitchStmt(cast<SwitchStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outSwitchStmt) <<
 		"expected `SwitchStmt`, "
 		"got `" << testFunc->getBody() << "`";
@@ -1184,29 +1184,29 @@ SwitchStmtWithClauseThatContainsGotoLabelIsOptimized) {
 	//             break;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(16)));
-	ShPtr<AddOpExpr> addOpExprInSwitch(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	Variable* varC(Variable::create("c", IntType::create(16)));
+	AddOpExpr* addOpExprInSwitch(
 		AddOpExpr::create(
 			ConstInt::create(2, 64),
 			ConstInt::create(4, 64)
 	));
-	ShPtr<BreakStmt> breakStmt(BreakStmt::create());
-	ShPtr<AssignStmt> assignStmtB(
+	BreakStmt* breakStmt(BreakStmt::create());
+	AssignStmt* assignStmtB(
 		AssignStmt::create(
 			varB,
 			addOpExprInSwitch,
 			breakStmt
 	));
-	ShPtr<AssignStmt> assignStmtC(
+	AssignStmt* assignStmtC(
 		AssignStmt::create(
 			varC,
 			addOpExprInSwitch,
 			breakStmt
 	));
 	GotoStmt::create(assignStmtC);
-	ShPtr<SwitchStmt> switchStmt(SwitchStmt::create(ConstInt::create(2, 64)));
+	SwitchStmt* switchStmt(SwitchStmt::create(ConstInt::create(2, 64)));
 	switchStmt->addClause(ConstInt::create(2, 64), assignStmtB);
 	switchStmt->addClause(ConstInt::create(8, 64), assignStmtB);
 	switchStmt->addClause(ConstInt::create(4, 64), assignStmtC);
@@ -1214,16 +1214,16 @@ SwitchStmtWithClauseThatContainsGotoLabelIsOptimized) {
 
 	optimize(module);
 
-	ShPtr<SwitchStmt> outSwitchStmt(cast<SwitchStmt>(testFunc->getBody()));
+	SwitchStmt* outSwitchStmt(cast<SwitchStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outSwitchStmt) <<
 		"expected `SwitchStmt`, "
 		"got `" << testFunc->getBody() << "`";
 	auto it = outSwitchStmt->clause_begin();
-	ShPtr<ConstInt> outConstInt(cast<ConstInt>((++it)->first));
+	ConstInt* outConstInt(cast<ConstInt>((++it)->first));
 	ASSERT_TRUE(outConstInt) <<
 		"expected `ConstInt`, "
 		"got `" << (++it)->first << "`";
-	ShPtr<ConstInt> result(ConstInt::create(4, 64));
+	ConstInt* result(ConstInt::create(4, 64));
 	EXPECT_EQ(result->getValue(), outConstInt->getValue()) <<
 		"expected `" << result << "`, "
 		"got `" << outConstInt << "`";
@@ -1242,38 +1242,38 @@ SwitchStmtWithDefaultClauseWhichContainsGotoLabelNotOptimized) {
 	// Not optimized. Output must be same as input due to default which contains
 	// goto label.
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(16)));
-	ShPtr<AddOpExpr> addOpExprInSwitch(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	Variable* varC(Variable::create("c", IntType::create(16)));
+	AddOpExpr* addOpExprInSwitch(
 		AddOpExpr::create(
 			ConstInt::create(2, 64),
 			ConstInt::create(4, 64)
 	));
-	ShPtr<AssignStmt> assignStmtB(
+	AssignStmt* assignStmtB(
 		AssignStmt::create(
 			varB,
 			addOpExprInSwitch,
 			ReturnStmt::create(ConstInt::create(2, 64))
 	));
-	ShPtr<AssignStmt> assignStmtC(
+	AssignStmt* assignStmtC(
 		AssignStmt::create(
 			varC,
 			addOpExprInSwitch,
 			ContinueStmt::create()
 	));
 	GotoStmt::create(assignStmtC);
-	ShPtr<AddOpExpr> addOpExprOutSwitch(
+	AddOpExpr* addOpExprOutSwitch(
 		AddOpExpr::create(
 			ConstInt::create(1, 64),
 			ConstInt::create(3, 64)
 	));
-	ShPtr<AssignStmt> assignStmtA(
+	AssignStmt* assignStmtA(
 		AssignStmt::create(
 			varA,
 			addOpExprOutSwitch
 	));
-	ShPtr<SwitchStmt> switchStmt(
+	SwitchStmt* switchStmt(
 		SwitchStmt::create(
 			ConstInt::create(2, 64),
 			assignStmtA
@@ -1284,16 +1284,16 @@ SwitchStmtWithDefaultClauseWhichContainsGotoLabelNotOptimized) {
 
 	optimize(module);
 
-	ShPtr<SwitchStmt> outSwitchStmt(cast<SwitchStmt>(testFunc->getBody()));
+	SwitchStmt* outSwitchStmt(cast<SwitchStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outSwitchStmt) <<
 		"expected `SwitchStmt`, "
 		"got `" << testFunc->getBody() << "`";
 	auto it = outSwitchStmt->clause_begin();
-	ShPtr<ConstInt> outConstInt(cast<ConstInt>(it->first));
+	ConstInt* outConstInt(cast<ConstInt>(it->first));
 	ASSERT_TRUE(outConstInt) <<
 		"expected `ConstInt`, "
 		"got `" << it->first << "`";
-	ShPtr<ConstInt> result(ConstInt::create(2, 64));
+	ConstInt* result(ConstInt::create(2, 64));
 	EXPECT_EQ(result->getValue(), outConstInt->getValue()) <<
 		"expected `" << result << "`, "
 		"got `" << outConstInt << "`";
@@ -1316,38 +1316,38 @@ SwitchStmtWithDefaultClauseFirstClauseContainsReturnIsOptimized) {
 	// return 2;
 	// a = 1 + 3;
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(16)));
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(16)));
-	ShPtr<Variable> varC(Variable::create("c", IntType::create(16)));
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(ConstInt::create(2, 64)));
-	ShPtr<AddOpExpr> addOpExprInSwitch(
+	Variable* varA(Variable::create("a", IntType::create(16)));
+	Variable* varB(Variable::create("b", IntType::create(16)));
+	Variable* varC(Variable::create("c", IntType::create(16)));
+	ReturnStmt* returnStmt(ReturnStmt::create(ConstInt::create(2, 64)));
+	AddOpExpr* addOpExprInSwitch(
 		AddOpExpr::create(
 			ConstInt::create(2, 64),
 			ConstInt::create(4, 64)
 	));
-	ShPtr<AssignStmt> assignStmtB(
+	AssignStmt* assignStmtB(
 		AssignStmt::create(
 			varB,
 			addOpExprInSwitch,
 			returnStmt
 	));
-	ShPtr<AssignStmt> assignStmtC(
+	AssignStmt* assignStmtC(
 		AssignStmt::create(
 			varC,
 			addOpExprInSwitch,
 			ContinueStmt::create()
 	));
-	ShPtr<AddOpExpr> addOpExprOutSwitch(
+	AddOpExpr* addOpExprOutSwitch(
 		AddOpExpr::create(
 			ConstInt::create(1, 64),
 			ConstInt::create(3, 64)
 	));
-	ShPtr<AssignStmt> assignStmtA(
+	AssignStmt* assignStmtA(
 		AssignStmt::create(
 			varA,
 			addOpExprOutSwitch
 	));
-	ShPtr<SwitchStmt> switchStmt(
+	SwitchStmt* switchStmt(
 		SwitchStmt::create(
 			ConstInt::create(2, 64),
 			assignStmtA
@@ -1358,14 +1358,14 @@ SwitchStmtWithDefaultClauseFirstClauseContainsReturnIsOptimized) {
 
 	optimize(module);
 
-	ShPtr<AssignStmt> outAssignStmtB(cast<AssignStmt>(testFunc->getBody()));
+	AssignStmt* outAssignStmtB(cast<AssignStmt>(testFunc->getBody()));
 	ASSERT_TRUE(outAssignStmtB) <<
 		"expected `AssignStmt`, "
 		"got `" << testFunc->getBody() << "`";
 	EXPECT_EQ(outAssignStmtB, assignStmtB) <<
 		"expected `" << assignStmtB << "`, "
 		"got `" << outAssignStmtB << "`";
-	ShPtr<ReturnStmt> outReturnStmt(cast<ReturnStmt>(
+	ReturnStmt* outReturnStmt(cast<ReturnStmt>(
 		outAssignStmtB->getSuccessor()));
 	ASSERT_TRUE(outReturnStmt) <<
 		"expected `ReturnStmt`, "
@@ -1373,7 +1373,7 @@ SwitchStmtWithDefaultClauseFirstClauseContainsReturnIsOptimized) {
 	EXPECT_EQ(outReturnStmt, returnStmt) <<
 		"expected `" << returnStmt << "`, "
 		"got `" << outReturnStmt << "`";
-	ShPtr<AssignStmt> outAssignStmtA(cast<AssignStmt>(
+	AssignStmt* outAssignStmtA(cast<AssignStmt>(
 		outReturnStmt->getSuccessor()));
 	ASSERT_TRUE(outAssignStmtA) <<
 		"expected `AssignStmt`, "

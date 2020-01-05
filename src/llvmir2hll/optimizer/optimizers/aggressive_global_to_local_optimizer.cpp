@@ -24,7 +24,7 @@ namespace llvmir2hll {
 *  - @a module is non-null
 */
 AggressiveGlobalToLocalOptimizer::AggressiveGlobalToLocalOptimizer(
-			ShPtr<Module> module): Optimizer(module)  {
+			Module* module): Optimizer(module)  {
 		PRECONDITION_NON_NULL(module);
 	}
 
@@ -55,7 +55,7 @@ void AggressiveGlobalToLocalOptimizer::convertGlobalVarsToLocalVars() {
 				continue;
 			}
 
-			ShPtr<Expression> init(module->getInitForGlobalVar(var));
+			Expression* init(module->getInitForGlobalVar(var));
 			convertGlobalVarToLocalVarInFunc(var, *i, init);
 			module->removeGlobalVar(var);
 		}

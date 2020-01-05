@@ -53,19 +53,19 @@
 	/* (1) */ \
 	NiceMock<AliasAnalysisMock> *aliasAnalysisMock = \
 		new NiceMock<AliasAnalysisMock>(); \
-	ShPtr<AliasAnalysis> aliasAnalysis(aliasAnalysisMock); \
+	AliasAnalysis* aliasAnalysis(aliasAnalysisMock); \
 	/* (2) */ \
 	const VarSet EMPTY_VAR_SET; \
 	ON_CALL(*aliasAnalysisMock, mayPointTo(_)) \
 		.WillByDefault(ReturnRef(EMPTY_VAR_SET)); \
 	ON_CALL(*aliasAnalysisMock, pointsTo(_)) \
-		.WillByDefault(Return(ShPtr<Variable>())); \
+		.WillByDefault(Return(Variable*())); \
 	ON_CALL(*aliasAnalysisMock, mayBePointed(_)) \
 		.WillByDefault(Return(false)); \
 	ON_CALL(*aliasAnalysisMock, isInitialized()) \
 		.WillByDefault(Return(true)); \
 	/* (4) */ \
-	ShPtr<ValueAnalysis> va(ValueAnalysis::create(aliasAnalysis, useCache))
+	ValueAnalysis* va(ValueAnalysis::create(aliasAnalysis, useCache))
 
 using namespace ::testing;
 
@@ -85,12 +85,12 @@ ReturnStmtWithNoReturnValueNoCache) {
 	// def test():
 	//    return
 	//
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create());
+	ReturnStmt* returnStmt(ReturnStmt::create());
 	testFunc->setBody(returnStmt);
 
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(false);
 
-	ShPtr<ValueData> data(va->getValueData(returnStmt));
+	ValueData* data(va->getValueData(returnStmt));
 	// Directly read/written variables.
 	//  - variables: get*()
 	EXPECT_EQ(VarSet(), data->getDirReadVars());
@@ -100,7 +100,7 @@ ReturnStmtWithNoReturnValueNoCache) {
 	EXPECT_EQ(0, data->getNumOfDirReadVars());
 	EXPECT_EQ(0, data->getNumOfDirWrittenVars());
 	EXPECT_EQ(0, data->getNumOfDirAccessedVars());
-	ShPtr<Variable> dummyVar(Variable::create("dummy", IntType::create(32)));
+	Variable* dummyVar(Variable::create("dummy", IntType::create(32)));
 	EXPECT_EQ(0, data->getDirNumOfUses(dummyVar));
 	EXPECT_FALSE(data->isDirRead(dummyVar));
 	EXPECT_FALSE(data->isDirWritten(dummyVar));
@@ -129,13 +129,13 @@ VarDefStmtWithNoInitializerNoCache) {
 	// def test():
 	//    a
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
-	ShPtr<VarDefStmt> varDefStmt(VarDefStmt::create(varA));
+	Variable* varA(Variable::create("a", IntType::create(32)));
+	VarDefStmt* varDefStmt(VarDefStmt::create(varA));
 	testFunc->setBody(varDefStmt);
 
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(false);
 
-	ShPtr<ValueData> data(va->getValueData(varDefStmt));
+	ValueData* data(va->getValueData(varDefStmt));
 	// Directly read/written variables.
 	//  - variables: get*()
 	VarSet refDirReadVars;
@@ -154,7 +154,7 @@ VarDefStmtWithNoInitializerNoCache) {
 	EXPECT_FALSE(data->isDirRead(varA));
 	EXPECT_TRUE(data->isDirWritten(varA));
 	EXPECT_TRUE(data->isDirAccessed(varA));
-	ShPtr<Variable> dummyVar(Variable::create("dummy", IntType::create(32)));
+	Variable* dummyVar(Variable::create("dummy", IntType::create(32)));
 	EXPECT_EQ(0, data->getDirNumOfUses(dummyVar));
 	EXPECT_FALSE(data->isDirRead(dummyVar));
 	EXPECT_FALSE(data->isDirWritten(dummyVar));
@@ -186,14 +186,14 @@ VarDefStmtWithConstIntInitializerNoCache) {
 	// def test():
 	//    a = 1
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
-	ShPtr<VarDefStmt> varDefStmt(VarDefStmt::create(
+	Variable* varA(Variable::create("a", IntType::create(32)));
+	VarDefStmt* varDefStmt(VarDefStmt::create(
 		varA, ConstInt::create(1, 32)));
 	testFunc->setBody(varDefStmt);
 
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(false);
 
-	ShPtr<ValueData> data(va->getValueData(varDefStmt));
+	ValueData* data(va->getValueData(varDefStmt));
 	// Directly read/written variables.
 	//  - variables: get*()
 	VarSet refDirReadVars;
@@ -212,7 +212,7 @@ VarDefStmtWithConstIntInitializerNoCache) {
 	EXPECT_FALSE(data->isDirRead(varA));
 	EXPECT_TRUE(data->isDirWritten(varA));
 	EXPECT_TRUE(data->isDirAccessed(varA));
-	ShPtr<Variable> dummyVar(Variable::create("dummy", IntType::create(32)));
+	Variable* dummyVar(Variable::create("dummy", IntType::create(32)));
 	EXPECT_EQ(0, data->getDirNumOfUses(dummyVar));
 	EXPECT_FALSE(data->isDirRead(dummyVar));
 	EXPECT_FALSE(data->isDirWritten(dummyVar));
@@ -246,15 +246,15 @@ VarDefStmtInitializedWithGlobalVariableNoCache) {
 	// def test():
 	//    a = g
 	//
-	ShPtr<Variable> varG(Variable::create("g", IntType::create(32)));
+	Variable* varG(Variable::create("g", IntType::create(32)));
 	module->addGlobalVar(varG);
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
-	ShPtr<VarDefStmt> varDefStmt(VarDefStmt::create(varA, varG));
+	Variable* varA(Variable::create("a", IntType::create(32)));
+	VarDefStmt* varDefStmt(VarDefStmt::create(varA, varG));
 	testFunc->setBody(varDefStmt);
 
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(false);
 
-	ShPtr<ValueData> data(va->getValueData(varDefStmt));
+	ValueData* data(va->getValueData(varDefStmt));
 	// Directly read/written variables.
 	//  - variables: get*()
 	VarSet refDirReadVars;
@@ -279,7 +279,7 @@ VarDefStmtInitializedWithGlobalVariableNoCache) {
 	EXPECT_TRUE(data->isDirRead(varG));
 	EXPECT_FALSE(data->isDirWritten(varG));
 	EXPECT_TRUE(data->isDirAccessed(varG));
-	ShPtr<Variable> dummyVar(Variable::create("dummy", IntType::create(32)));
+	Variable* dummyVar(Variable::create("dummy", IntType::create(32)));
 	EXPECT_EQ(0, data->getDirNumOfUses(dummyVar));
 	EXPECT_FALSE(data->isDirRead(dummyVar));
 	EXPECT_FALSE(data->isDirWritten(dummyVar));
@@ -313,15 +313,15 @@ ReturnStmtReturningAddressOfVariableNoCache) {
 	// def test():
 	//    return &g
 	//
-	ShPtr<Variable> varG(Variable::create("g", IntType::create(32)));
+	Variable* varG(Variable::create("g", IntType::create(32)));
 	module->addGlobalVar(varG);
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(
+	ReturnStmt* returnStmt(ReturnStmt::create(
 		AddressOpExpr::create(varG)));
 	testFunc->setBody(returnStmt);
 
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(false);
 
-	ShPtr<ValueData> data(va->getValueData(returnStmt));
+	ValueData* data(va->getValueData(returnStmt));
 	// Directly read/written variables.
 	//  - variables: get*()
 	VarSet refDirReadVars;
@@ -340,7 +340,7 @@ ReturnStmtReturningAddressOfVariableNoCache) {
 	EXPECT_TRUE(data->isDirRead(varG));
 	EXPECT_FALSE(data->isDirWritten(varG));
 	EXPECT_TRUE(data->isDirAccessed(varG));
-	ShPtr<Variable> dummyVar(Variable::create("dummy", IntType::create(32)));
+	Variable* dummyVar(Variable::create("dummy", IntType::create(32)));
 	EXPECT_EQ(0, data->getDirNumOfUses(dummyVar));
 	EXPECT_FALSE(data->isDirRead(dummyVar));
 	EXPECT_FALSE(data->isDirWritten(dummyVar));
@@ -375,15 +375,15 @@ ReturnStmtReturningDerefOfVariableNoCache) {
 	// def test():
 	//    return *g
 	//
-	ShPtr<Variable> varG(Variable::create("g", IntType::create(32)));
+	Variable* varG(Variable::create("g", IntType::create(32)));
 	module->addGlobalVar(varG);
-	ShPtr<ReturnStmt> returnStmt(ReturnStmt::create(
+	ReturnStmt* returnStmt(ReturnStmt::create(
 		DerefOpExpr::create(varG)));
 	testFunc->setBody(returnStmt);
 
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(false);
 
-	ShPtr<ValueData> data(va->getValueData(returnStmt));
+	ValueData* data(va->getValueData(returnStmt));
 	// Directly read/written variables.
 	//  - variables: get*()
 	VarSet refDirReadVars;
@@ -402,7 +402,7 @@ ReturnStmtReturningDerefOfVariableNoCache) {
 	EXPECT_TRUE(data->isDirRead(varG));
 	EXPECT_FALSE(data->isDirWritten(varG));
 	EXPECT_TRUE(data->isDirAccessed(varG));
-	ShPtr<Variable> dummyVar(Variable::create("dummy", IntType::create(32)));
+	Variable* dummyVar(Variable::create("dummy", IntType::create(32)));
 	EXPECT_EQ(0, data->getDirNumOfUses(dummyVar));
 	EXPECT_FALSE(data->isDirRead(dummyVar));
 	EXPECT_FALSE(data->isDirWritten(dummyVar));
@@ -435,15 +435,15 @@ FunctionCallNoCache) {
 	// def test():
 	//    test()
 	//
-	ShPtr<Variable> varG(Variable::create("g", IntType::create(32)));
+	Variable* varG(Variable::create("g", IntType::create(32)));
 	module->addGlobalVar(varG);
-	ShPtr<CallExpr> callExpr(CallExpr::create(testFunc->getAsVar()));
-	ShPtr<CallStmt> callStmt(CallStmt::create(callExpr));
+	CallExpr* callExpr(CallExpr::create(testFunc->getAsVar()));
+	CallStmt* callStmt(CallStmt::create(callExpr));
 	testFunc->setBody(callStmt);
 
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(false);
 
-	ShPtr<ValueData> data(va->getValueData(callStmt));
+	ValueData* data(va->getValueData(callStmt));
 	// Directly read/written variables.
 	//  - variables: get*()
 	VarSet refDirReadVars;
@@ -461,7 +461,7 @@ FunctionCallNoCache) {
 	EXPECT_TRUE(data->isDirRead(testFunc->getAsVar()));
 	EXPECT_FALSE(data->isDirWritten(testFunc->getAsVar()));
 	EXPECT_TRUE(data->isDirAccessed(testFunc->getAsVar()));
-	ShPtr<Variable> dummyVar(Variable::create("dummy", IntType::create(32)));
+	Variable* dummyVar(Variable::create("dummy", IntType::create(32)));
 	EXPECT_EQ(0, data->getDirNumOfUses(dummyVar));
 	EXPECT_FALSE(data->isDirRead(dummyVar));
 	EXPECT_FALSE(data->isDirWritten(dummyVar));
@@ -497,17 +497,17 @@ ArrayAccessNoCache) {
 	// def test():
 	//    a[0] = 1;
 	//
-	ShPtr<Variable> varA(Variable::create("a", ArrayType::create(
+	Variable* varA(Variable::create("a", ArrayType::create(
 		IntType::create(16), ArrayType::Dimensions())));
 	module->addGlobalVar(varA);
-	ShPtr<AssignStmt> assignA01(AssignStmt::create(
+	AssignStmt* assignA01(AssignStmt::create(
 		ArrayIndexOpExpr::create(varA, ConstInt::create(0, 16)),
 		ConstInt::create(1, 16)));
 	testFunc->setBody(assignA01);
 
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(false);
 
-	ShPtr<ValueData> data(va->getValueData(assignA01));
+	ValueData* data(va->getValueData(assignA01));
 	// Directly read/written variables.
 	//  - variables: get*()
 	VarSet refDirReadVars;
@@ -526,7 +526,7 @@ ArrayAccessNoCache) {
 	EXPECT_TRUE(data->isDirRead(varA));
 	EXPECT_FALSE(data->isDirWritten(varA));
 	EXPECT_TRUE(data->isDirAccessed(varA));
-	ShPtr<Variable> dummyVar(Variable::create("dummy", IntType::create(32)));
+	Variable* dummyVar(Variable::create("dummy", IntType::create(32)));
 	EXPECT_EQ(0, data->getDirNumOfUses(dummyVar));
 	EXPECT_FALSE(data->isDirRead(dummyVar));
 	EXPECT_FALSE(data->isDirWritten(dummyVar));
@@ -560,17 +560,17 @@ StructAccessNoCache) {
 	// def test():
 	//    a[0] = 1;
 	//
-	ShPtr<Variable> varA(Variable::create("a", StructType::create(
+	Variable* varA(Variable::create("a", StructType::create(
 		StructType::ElementTypes())));
 	module->addGlobalVar(varA);
-	ShPtr<AssignStmt> assignA01(AssignStmt::create(
+	AssignStmt* assignA01(AssignStmt::create(
 		StructIndexOpExpr::create(varA, ConstInt::create(0, 16)),
 		ConstInt::create(1, 16)));
 	testFunc->setBody(assignA01);
 
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(false);
 
-	ShPtr<ValueData> data(va->getValueData(assignA01));
+	ValueData* data(va->getValueData(assignA01));
 	// Directly read/written variables.
 	//  - variables: get*()
 	VarSet refDirReadVars;
@@ -589,7 +589,7 @@ StructAccessNoCache) {
 	EXPECT_TRUE(data->isDirRead(varA));
 	EXPECT_FALSE(data->isDirWritten(varA));
 	EXPECT_TRUE(data->isDirAccessed(varA));
-	ShPtr<Variable> dummyVar(Variable::create("dummy", IntType::create(32)));
+	Variable* dummyVar(Variable::create("dummy", IntType::create(32)));
 	EXPECT_EQ(0, data->getDirNumOfUses(dummyVar));
 	EXPECT_FALSE(data->isDirRead(dummyVar));
 	EXPECT_FALSE(data->isDirWritten(dummyVar));
@@ -623,14 +623,14 @@ Caching) {
 	// def test():
 	//    a = 1
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
-	ShPtr<VarDefStmt> varDefStmt(VarDefStmt::create(
+	Variable* varA(Variable::create("a", IntType::create(32)));
+	VarDefStmt* varDefStmt(VarDefStmt::create(
 		varA, ConstInt::create(1, 32)));
 	testFunc->setBody(varDefStmt);
 
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(true);
 
-	ShPtr<ValueData> data(va->getValueData(varDefStmt));
+	ValueData* data(va->getValueData(varDefStmt));
 	// Directly read/written variables.
 	//  - variables: get*()
 	VarSet refDirReadVars;
@@ -647,10 +647,10 @@ Caching) {
 	// def test():
 	//    b = 1
 	//
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	varDefStmt->setVar(varB);
 
-	ShPtr<ValueData> dataAfterChange(va->getValueData(varDefStmt));
+	ValueData* dataAfterChange(va->getValueData(varDefStmt));
 	VarSet refDirWrittenVarsAfterChange;
 	refDirWrittenVarsAfterChange.insert(varA);
 	EXPECT_EQ(refDirWrittenVarsAfterChange, dataAfterChange->getDirWrittenVars()) <<
@@ -658,7 +658,7 @@ Caching) {
 
 	va->clearCache();
 
-	ShPtr<ValueData> dataAfterCacheClear(va->getValueData(varDefStmt));
+	ValueData* dataAfterCacheClear(va->getValueData(varDefStmt));
 	VarSet refDirWrittenVarsAfterCacheClear;
 	refDirWrittenVarsAfterCacheClear.insert(varB);
 	EXPECT_EQ(refDirWrittenVarsAfterCacheClear,
@@ -677,11 +677,11 @@ AfterStatementChangeAndCacheUpdateCorrectResultsAreReturned) {
 	//     return a;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	module->addGlobalVar(varA);
-	ShPtr<Variable> varB(Variable::create("b", IntType::create(32)));
+	Variable* varB(Variable::create("b", IntType::create(32)));
 	module->addGlobalVar(varB);
-	ShPtr<ReturnStmt> returnA(ReturnStmt::create(varA));
+	ReturnStmt* returnA(ReturnStmt::create(varA));
 	testFunc->setBody(returnA);
 
 	INSTANTIATE_ALIAS_ANALYSIS_AND_VALUE_ANALYSIS(true);
@@ -711,13 +711,13 @@ MayBeReadNoCaching) {
 	//     return *p;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	module->addGlobalVar(varA);
-	ShPtr<Variable> varP(Variable::create("p",
+	Variable* varP(Variable::create("p",
 		PointerType::create(IntType::create(32))));
 	testFunc->addLocalVar(varP);
-	ShPtr<ReturnStmt> returnP(ReturnStmt::create(DerefOpExpr::create(varP)));
-	ShPtr<VarDefStmt> varDefP(VarDefStmt::create(
+	ReturnStmt* returnP(ReturnStmt::create(DerefOpExpr::create(varP)));
+	VarDefStmt* varDefP(VarDefStmt::create(
 		varP, AddressOpExpr::create(varA), returnP));
 	testFunc->setBody(varDefP);
 
@@ -731,7 +731,7 @@ MayBeReadNoCaching) {
 	ON_CALL(*aliasAnalysisMock, mayBePointed(varA))
 		.WillByDefault(Return(true));
 
-	ShPtr<ValueData> data(va->getValueData(returnP));
+	ValueData* data(va->getValueData(returnP));
 	// Indirectly read variables.
 	VarSet refMayBeReadVars;
 	refMayBeReadVars.insert(varA);
@@ -765,14 +765,14 @@ MayBeWrittenNoCaching) {
 	//     *p = 1;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	module->addGlobalVar(varA);
-	ShPtr<Variable> varP(Variable::create("p",
+	Variable* varP(Variable::create("p",
 		PointerType::create(IntType::create(32))));
 	testFunc->addLocalVar(varP);
-	ShPtr<AssignStmt> assignP1(AssignStmt::create(
+	AssignStmt* assignP1(AssignStmt::create(
 		DerefOpExpr::create(varP), ConstInt::create(1, 32)));
-	ShPtr<VarDefStmt> varDefP(VarDefStmt::create(
+	VarDefStmt* varDefP(VarDefStmt::create(
 		varP, AddressOpExpr::create(varA), assignP1));
 	testFunc->setBody(varDefP);
 
@@ -786,7 +786,7 @@ MayBeWrittenNoCaching) {
 	ON_CALL(*aliasAnalysisMock, mayBePointed(varA))
 		.WillByDefault(Return(true));
 
-	ShPtr<ValueData> data(va->getValueData(assignP1));
+	ValueData* data(va->getValueData(assignP1));
 	// Indirectly read variables.
 	VarSet refMayBeReadVars;
 	EXPECT_EQ(refMayBeReadVars, data->getMayBeReadVars());
@@ -820,13 +820,13 @@ MustBeReadNoCaching) {
 	//     return *p;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	module->addGlobalVar(varA);
-	ShPtr<Variable> varP(Variable::create("p",
+	Variable* varP(Variable::create("p",
 		PointerType::create(IntType::create(32))));
 	testFunc->addLocalVar(varP);
-	ShPtr<ReturnStmt> returnP(ReturnStmt::create(DerefOpExpr::create(varP)));
-	ShPtr<VarDefStmt> varDefP(VarDefStmt::create(
+	ReturnStmt* returnP(ReturnStmt::create(DerefOpExpr::create(varP)));
+	VarDefStmt* varDefP(VarDefStmt::create(
 		varP, AddressOpExpr::create(varA), returnP));
 	testFunc->setBody(varDefP);
 
@@ -838,7 +838,7 @@ MustBeReadNoCaching) {
 	ON_CALL(*aliasAnalysisMock, mayBePointed(varA))
 		.WillByDefault(Return(true));
 
-	ShPtr<ValueData> data(va->getValueData(returnP));
+	ValueData* data(va->getValueData(returnP));
 	// Indirectly read variables.
 	VarSet refMustBeReadVars;
 	refMustBeReadVars.insert(varA);
@@ -869,14 +869,14 @@ MustBeWrittenNoCaching) {
 	//     *p = 1;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	module->addGlobalVar(varA);
-	ShPtr<Variable> varP(Variable::create("p",
+	Variable* varP(Variable::create("p",
 		PointerType::create(IntType::create(32))));
 	testFunc->addLocalVar(varP);
-	ShPtr<AssignStmt> assignP1(AssignStmt::create(
+	AssignStmt* assignP1(AssignStmt::create(
 		DerefOpExpr::create(varP), ConstInt::create(1, 32)));
-	ShPtr<VarDefStmt> varDefP(VarDefStmt::create(
+	VarDefStmt* varDefP(VarDefStmt::create(
 		varP, AddressOpExpr::create(varA), assignP1));
 	testFunc->setBody(varDefP);
 
@@ -888,7 +888,7 @@ MustBeWrittenNoCaching) {
 	ON_CALL(*aliasAnalysisMock, mayBePointed(varA))
 		.WillByDefault(Return(true));
 
-	ShPtr<ValueData> data(va->getValueData(assignP1));
+	ValueData* data(va->getValueData(assignP1));
 	// Indirectly read variables.
 	VarSet refMustBeReadVars;
 	EXPECT_EQ(refMustBeReadVars, data->getMustBeReadVars());
@@ -920,19 +920,19 @@ MustBeReadNestedDereferencesNoCaching) {
 	//     return **pp;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	module->addGlobalVar(varA);
-	ShPtr<Variable> varP(Variable::create("p",
+	Variable* varP(Variable::create("p",
 		PointerType::create(IntType::create(32))));
 	testFunc->addLocalVar(varP);
-	ShPtr<Variable> varPP(Variable::create("pp",
+	Variable* varPP(Variable::create("pp",
 		PointerType::create(IntType::create(32))));
 	testFunc->addLocalVar(varPP);
-	ShPtr<ReturnStmt> returnPP(ReturnStmt::create(
+	ReturnStmt* returnPP(ReturnStmt::create(
 		DerefOpExpr::create(DerefOpExpr::create(varPP))));
-	ShPtr<VarDefStmt> varDefPP(VarDefStmt::create(
+	VarDefStmt* varDefPP(VarDefStmt::create(
 		varPP, AddressOpExpr::create(varP), returnPP));
-	ShPtr<VarDefStmt> varDefP(VarDefStmt::create(
+	VarDefStmt* varDefP(VarDefStmt::create(
 		varP, AddressOpExpr::create(varA), varDefPP));
 	testFunc->setBody(varDefP);
 
@@ -948,7 +948,7 @@ MustBeReadNestedDereferencesNoCaching) {
 	ON_CALL(*aliasAnalysisMock, mayBePointed(varP))
 		.WillByDefault(Return(true));
 
-	ShPtr<ValueData> data(va->getValueData(returnPP));
+	ValueData* data(va->getValueData(returnPP));
 	// Indirectly read variables.
 	VarSet refMustBeReadVars;
 	refMustBeReadVars.insert(varA);
@@ -982,19 +982,19 @@ MayBeReadNestedDereferencesNoCaching) {
 	//     return **pp;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	module->addGlobalVar(varA);
-	ShPtr<Variable> varP(Variable::create("p",
+	Variable* varP(Variable::create("p",
 		PointerType::create(IntType::create(32))));
 	testFunc->addLocalVar(varP);
-	ShPtr<Variable> varPP(Variable::create("pp",
+	Variable* varPP(Variable::create("pp",
 		PointerType::create(IntType::create(32))));
 	testFunc->addLocalVar(varPP);
-	ShPtr<ReturnStmt> returnPP(ReturnStmt::create(
+	ReturnStmt* returnPP(ReturnStmt::create(
 		DerefOpExpr::create(DerefOpExpr::create(varPP))));
-	ShPtr<VarDefStmt> varDefPP(VarDefStmt::create(
+	VarDefStmt* varDefPP(VarDefStmt::create(
 		varPP, AddressOpExpr::create(varP), returnPP));
-	ShPtr<VarDefStmt> varDefP(VarDefStmt::create(
+	VarDefStmt* varDefP(VarDefStmt::create(
 		varP, AddressOpExpr::create(varA), varDefPP));
 	testFunc->setBody(varDefP);
 
@@ -1014,7 +1014,7 @@ MayBeReadNestedDereferencesNoCaching) {
 	ON_CALL(*aliasAnalysisMock, mayBePointed(varP))
 		.WillByDefault(Return(true));
 
-	ShPtr<ValueData> data(va->getValueData(returnPP));
+	ValueData* data(va->getValueData(returnPP));
 	// Indirectly read variables.
 	VarSet refMayBeReadVars;
 	refMayBeReadVars.insert(varA);
@@ -1054,19 +1054,19 @@ MustBeWrittenNestedDereferencesNoCaching) {
 	//     **pp = 1;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	module->addGlobalVar(varA);
-	ShPtr<Variable> varP(Variable::create("p",
+	Variable* varP(Variable::create("p",
 		PointerType::create(IntType::create(32))));
 	testFunc->addLocalVar(varP);
-	ShPtr<Variable> varPP(Variable::create("pp",
+	Variable* varPP(Variable::create("pp",
 		PointerType::create(IntType::create(32))));
 	testFunc->addLocalVar(varPP);
-	ShPtr<AssignStmt> assignPP1(AssignStmt::create(
+	AssignStmt* assignPP1(AssignStmt::create(
 		DerefOpExpr::create(DerefOpExpr::create(varPP)), ConstInt::create(1, 32)));
-	ShPtr<VarDefStmt> varDefPP(VarDefStmt::create(
+	VarDefStmt* varDefPP(VarDefStmt::create(
 		varPP, AddressOpExpr::create(varP), assignPP1));
-	ShPtr<VarDefStmt> varDefP(VarDefStmt::create(
+	VarDefStmt* varDefP(VarDefStmt::create(
 		varP, AddressOpExpr::create(varA), varDefPP));
 	testFunc->setBody(varDefP);
 
@@ -1082,7 +1082,7 @@ MustBeWrittenNestedDereferencesNoCaching) {
 	ON_CALL(*aliasAnalysisMock, mayBePointed(varP))
 		.WillByDefault(Return(true));
 
-	ShPtr<ValueData> data(va->getValueData(assignPP1));
+	ValueData* data(va->getValueData(assignPP1));
 	// Indirectly read variables.
 	VarSet refMustBeReadVars;
 	refMustBeReadVars.insert(varP);
@@ -1116,19 +1116,19 @@ MayBeWrittenNestedDereferencesNoCaching) {
 	//     **pp = 1;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	module->addGlobalVar(varA);
-	ShPtr<Variable> varP(Variable::create("p",
+	Variable* varP(Variable::create("p",
 		PointerType::create(IntType::create(32))));
 	testFunc->addLocalVar(varP);
-	ShPtr<Variable> varPP(Variable::create("pp",
+	Variable* varPP(Variable::create("pp",
 		PointerType::create(IntType::create(32))));
 	testFunc->addLocalVar(varPP);
-	ShPtr<AssignStmt> assignPP1(AssignStmt::create(
+	AssignStmt* assignPP1(AssignStmt::create(
 		DerefOpExpr::create(DerefOpExpr::create(varPP)), ConstInt::create(1, 32)));
-	ShPtr<VarDefStmt> varDefPP(VarDefStmt::create(
+	VarDefStmt* varDefPP(VarDefStmt::create(
 		varPP, AddressOpExpr::create(varP), assignPP1));
-	ShPtr<VarDefStmt> varDefP(VarDefStmt::create(
+	VarDefStmt* varDefP(VarDefStmt::create(
 		varP, AddressOpExpr::create(varA), varDefPP));
 	testFunc->setBody(varDefP);
 
@@ -1148,7 +1148,7 @@ MayBeWrittenNestedDereferencesNoCaching) {
 	ON_CALL(*aliasAnalysisMock, mayBePointed(varP))
 		.WillByDefault(Return(true));
 
-	ShPtr<ValueData> data(va->getValueData(assignPP1));
+	ValueData* data(va->getValueData(assignPP1));
 	// Indirectly read variables.
 	VarSet refMayBeReadVars;
 	refMayBeReadVars.insert(varP);
@@ -1187,13 +1187,13 @@ DelegationOfMethodsToAliasAnalysis) {
 	//     return *p;
 	// }
 	//
-	ShPtr<Variable> varA(Variable::create("a", IntType::create(32)));
+	Variable* varA(Variable::create("a", IntType::create(32)));
 	module->addGlobalVar(varA);
-	ShPtr<Variable> varP(Variable::create("p",
+	Variable* varP(Variable::create("p",
 		PointerType::create(IntType::create(32))));
 	testFunc->addLocalVar(varP);
-	ShPtr<ReturnStmt> returnP(ReturnStmt::create(DerefOpExpr::create(varP)));
-	ShPtr<VarDefStmt> varDefP(VarDefStmt::create(
+	ReturnStmt* returnP(ReturnStmt::create(DerefOpExpr::create(varP)));
+	VarDefStmt* varDefP(VarDefStmt::create(
 		varP, AddressOpExpr::create(varA), returnP));
 	testFunc->setBody(varDefP);
 

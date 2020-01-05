@@ -44,7 +44,7 @@ bool LLVMTypeConverter::isBool(const llvm::IntegerType *type) const {
 * @par Preconditions
 *  - @a type is non-null
 */
-ShPtr<Type> LLVMTypeConverter::convert(const llvm::Type *type) {
+Type* LLVMTypeConverter::convert(const llvm::Type *type) {
 	PRECONDITION_NON_NULL(type);
 
 	auto existingTypeIt = mapLLVMTypeToType.find(type);
@@ -52,7 +52,7 @@ ShPtr<Type> LLVMTypeConverter::convert(const llvm::Type *type) {
 		return existingTypeIt->second;
 	}
 
-	ShPtr<Type> birType;
+	Type* birType = nullptr;
 	if (type->isIntegerTy()) {
 		birType = IntType::create(type->getIntegerBitWidth());
 	} else if (type->isFloatingPointTy()) {
@@ -88,7 +88,7 @@ ShPtr<Type> LLVMTypeConverter::convert(const llvm::Type *type) {
 * @par Preconditions
 *  - @a type is non-null
 */
-ShPtr<PointerType> LLVMTypeConverter::convert(const llvm::PointerType *type) {
+PointerType* LLVMTypeConverter::convert(const llvm::PointerType *type) {
 	PRECONDITION_NON_NULL(type);
 
 	auto birType = PointerType::create(UnknownType::create());
@@ -104,7 +104,7 @@ ShPtr<PointerType> LLVMTypeConverter::convert(const llvm::PointerType *type) {
 * @par Preconditions
 *  - @a type is non-null
 */
-ShPtr<ArrayType> LLVMTypeConverter::convert(const llvm::ArrayType *type) {
+ArrayType* LLVMTypeConverter::convert(const llvm::ArrayType *type) {
 	PRECONDITION_NON_NULL(type);
 
 	ArrayType::Dimensions arrayDims = {static_cast<std::size_t>(type->getNumElements())};
@@ -125,7 +125,7 @@ ShPtr<ArrayType> LLVMTypeConverter::convert(const llvm::ArrayType *type) {
 * @par Preconditions
 *  - @a type is non-null
 */
-ShPtr<StructType> LLVMTypeConverter::convert(const llvm::StructType *type) {
+StructType* LLVMTypeConverter::convert(const llvm::StructType *type) {
 	PRECONDITION_NON_NULL(type);
 
 	StructType::ElementTypes elemTypes;
@@ -143,7 +143,7 @@ ShPtr<StructType> LLVMTypeConverter::convert(const llvm::StructType *type) {
 * @par Preconditions
 *  - @a type is non-null
 */
-ShPtr<FunctionType> LLVMTypeConverter::convert(const llvm::FunctionType *type) {
+FunctionType* LLVMTypeConverter::convert(const llvm::FunctionType *type) {
 	PRECONDITION_NON_NULL(type);
 
 	auto retType = convert(type->getReturnType());

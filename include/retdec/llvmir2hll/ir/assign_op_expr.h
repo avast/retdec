@@ -26,11 +26,11 @@ class Visitor;
 */
 class AssignOpExpr final: public BinaryOpExpr {
 public:
-	static ShPtr<AssignOpExpr> create(ShPtr<Expression> op1,
-		ShPtr<Expression> op2);
+	static AssignOpExpr* create(Expression* op1,
+		Expression* op2);
 
-	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
-	virtual ShPtr<Value> clone() override;
+	virtual bool isEqualTo(Value* otherValue) const override;
+	virtual Value* clone() override;
 
 	/// @name Visitor Interface
 	/// @{
@@ -40,7 +40,7 @@ public:
 private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
-	AssignOpExpr(ShPtr<Expression> op1, ShPtr<Expression> op2);
+	AssignOpExpr(Expression* op1, Expression* op2);
 };
 
 } // namespace llvmir2hll

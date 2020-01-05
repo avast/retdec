@@ -35,7 +35,7 @@ namespace {
 * @return @c true if @a expr is supported left-hand side of AssignStmt,
 *         otherwise @c false.
 */
-bool isSupportedLhs(ShPtr<Expression> expr) {
+bool isSupportedLhs(Expression* expr) {
 	return isa<Variable>(expr) || isa<ArrayIndexOpExpr>(expr) ||
 		isa<StructIndexOpExpr>(expr);
 }
@@ -61,7 +61,7 @@ CompoundOpManager::CompoundOp::CompoundOp(std::string op):
 *   - @a operand is non-null
 */
 CompoundOpManager::CompoundOp::CompoundOp(std::string op,
-		ShPtr<Expression> operand):
+		Expression* operand):
 	op(op), operand(operand) {
 		PRECONDITION(!op.empty(), "the operator cannot be empty");
 		PRECONDITION_NON_NULL(operand);
@@ -80,7 +80,7 @@ const std::string &CompoundOpManager::CompoundOp::getOperator() const {
 * @par Preconditions
 *   - the operator is binary
 */
-ShPtr<Expression> CompoundOpManager::CompoundOp::getOperand() const {
+Expression* CompoundOpManager::CompoundOp::getOperand() const {
 	PRECONDITION(operand, "trying to get an operand of a unary operator");
 	return operand;
 }
@@ -122,7 +122,7 @@ CompoundOpManager::CompoundOpManager():
 *         operator if it can't be optimized. Also returns the right operand.
 */
 CompoundOpManager::CompoundOp CompoundOpManager::tryOptimizeToCompoundOp(
-		ShPtr<AssignStmt> stmt) {
+		AssignStmt* stmt) {
 	return tryOptimizeToCompoundOp(stmt->getLhs(), stmt->getRhs());
 }
 
@@ -135,7 +135,7 @@ CompoundOpManager::CompoundOp CompoundOpManager::tryOptimizeToCompoundOp(
 *         operator if it can't be optimized. Also returns the right operand.
 */
 CompoundOpManager::CompoundOp CompoundOpManager::tryOptimizeToCompoundOp(
-		ShPtr<AssignOpExpr> expr) {
+		AssignOpExpr* expr) {
 	return tryOptimizeToCompoundOp(
 		expr->getFirstOperand(),
 		expr->getSecondOperand()
@@ -154,7 +154,7 @@ CompoundOpManager::CompoundOp CompoundOpManager::tryOptimizeToCompoundOp(
 *         operand.
 */
 CompoundOpManager::CompoundOp CompoundOpManager::tryOptimizeToCompoundOp(
-		ShPtr<Expression> lhs, ShPtr<Expression> rhs) {
+		Expression* lhs, Expression* rhs) {
 	// Set to default result.
 	createResultingBinaryCompoundOp("=", rhs);
 
@@ -169,43 +169,43 @@ CompoundOpManager::CompoundOp CompoundOpManager::tryOptimizeToCompoundOp(
 	return compoundOp;
 }
 
-void CompoundOpManager::visit(ShPtr<AddOpExpr> expr) {
+void CompoundOpManager::visit(AddOpExpr* expr) {
 	tryOptimizeWhenOneOfOperandsEqWithLhsOfAssignStmt(expr);
 }
 
-void CompoundOpManager::visit(ShPtr<SubOpExpr> expr) {
+void CompoundOpManager::visit(SubOpExpr* expr) {
 	tryOptimizeWhenLeftOperandEqWithLhsOfAssignStmt(expr);
 }
 
-void CompoundOpManager::visit(ShPtr<MulOpExpr> expr) {
+void CompoundOpManager::visit(MulOpExpr* expr) {
 	tryOptimizeWhenOneOfOperandsEqWithLhsOfAssignStmt(expr);
 }
 
-void CompoundOpManager::visit(ShPtr<DivOpExpr> expr) {
+void CompoundOpManager::visit(DivOpExpr* expr) {
 	tryOptimizeWhenLeftOperandEqWithLhsOfAssignStmt(expr);
 }
 
-void CompoundOpManager::visit(ShPtr<ModOpExpr> expr) {
+void CompoundOpManager::visit(ModOpExpr* expr) {
 	tryOptimizeWhenLeftOperandEqWithLhsOfAssignStmt(expr);
 }
 
-void CompoundOpManager::visit(ShPtr<BitShlOpExpr> expr) {
+void CompoundOpManager::visit(BitShlOpExpr* expr) {
 	tryOptimizeWhenLeftOperandEqWithLhsOfAssignStmt(expr);
 }
 
-void CompoundOpManager::visit(ShPtr<BitShrOpExpr> expr) {
+void CompoundOpManager::visit(BitShrOpExpr* expr) {
 	tryOptimizeWhenLeftOperandEqWithLhsOfAssignStmt(expr);
 }
 
-void CompoundOpManager::visit(ShPtr<BitAndOpExpr> expr) {
+void CompoundOpManager::visit(BitAndOpExpr* expr) {
 	tryOptimizeWhenOneOfOperandsEqWithLhsOfAssignStmt(expr);
 }
 
-void CompoundOpManager::visit(ShPtr<BitOrOpExpr> expr) {
+void CompoundOpManager::visit(BitOrOpExpr* expr) {
 	tryOptimizeWhenOneOfOperandsEqWithLhsOfAssignStmt(expr);
 }
 
-void CompoundOpManager::visit(ShPtr<BitXorOpExpr> expr) {
+void CompoundOpManager::visit(BitXorOpExpr* expr) {
 	tryOptimizeWhenOneOfOperandsEqWithLhsOfAssignStmt(expr);
 }
 
@@ -219,62 +219,62 @@ void CompoundOpManager::visit(ShPtr<BitXorOpExpr> expr) {
 * @param[in] expr Type of operator.
 * @param[in] operand The right operand of result operator.
 */
-void CompoundOpManager::optimizeToCompoundOp(ShPtr<AddOpExpr> expr,
-		ShPtr<Expression> operand) {
+void CompoundOpManager::optimizeToCompoundOp(AddOpExpr* expr,
+		Expression* operand) {
 	createResultingBinaryCompoundOp("=", expr);
 }
 
 /// @see optimizeToCompoundOp
-void CompoundOpManager::optimizeToCompoundOp(ShPtr<SubOpExpr> expr,
-		ShPtr<Expression> operand) {
+void CompoundOpManager::optimizeToCompoundOp(SubOpExpr* expr,
+		Expression* operand) {
 	createResultingBinaryCompoundOp("=", expr);
 }
 
 /// @see optimizeToCompoundOp
-void CompoundOpManager::optimizeToCompoundOp(ShPtr<MulOpExpr> expr,
-		ShPtr<Expression> operand) {
+void CompoundOpManager::optimizeToCompoundOp(MulOpExpr* expr,
+		Expression* operand) {
 	createResultingBinaryCompoundOp("=", expr);
 }
 
 /// @see optimizeToCompoundOp
-void CompoundOpManager::optimizeToCompoundOp(ShPtr<DivOpExpr> expr,
-		ShPtr<Expression> operand) {
+void CompoundOpManager::optimizeToCompoundOp(DivOpExpr* expr,
+		Expression* operand) {
 	createResultingBinaryCompoundOp("=", expr);
 }
 
 /// @see optimizeToCompoundOp
-void CompoundOpManager::optimizeToCompoundOp(ShPtr<ModOpExpr> expr,
-		ShPtr<Expression> operand) {
+void CompoundOpManager::optimizeToCompoundOp(ModOpExpr* expr,
+		Expression* operand) {
 	createResultingBinaryCompoundOp("=", expr);
 }
 
 /// @see optimizeToCompoundOp
-void CompoundOpManager::optimizeToCompoundOp(ShPtr<BitShlOpExpr> expr,
-		ShPtr<Expression> operand) {
+void CompoundOpManager::optimizeToCompoundOp(BitShlOpExpr* expr,
+		Expression* operand) {
 	createResultingBinaryCompoundOp("=", expr);
 }
 
 /// @see optimizeToCompoundOp
-void CompoundOpManager::optimizeToCompoundOp(ShPtr<BitShrOpExpr> expr,
-		ShPtr<Expression> operand) {
+void CompoundOpManager::optimizeToCompoundOp(BitShrOpExpr* expr,
+		Expression* operand) {
 	createResultingBinaryCompoundOp("=", expr);
 }
 
 /// @see optimizeToCompoundOp
-void CompoundOpManager::optimizeToCompoundOp(ShPtr<BitAndOpExpr> expr,
-		ShPtr<Expression> operand) {
+void CompoundOpManager::optimizeToCompoundOp(BitAndOpExpr* expr,
+		Expression* operand) {
 	createResultingBinaryCompoundOp("=", expr);
 }
 
 /// @see optimizeToCompoundOp
-void CompoundOpManager::optimizeToCompoundOp(ShPtr<BitOrOpExpr> expr,
-		ShPtr<Expression> operand) {
+void CompoundOpManager::optimizeToCompoundOp(BitOrOpExpr* expr,
+		Expression* operand) {
 	createResultingBinaryCompoundOp("=", expr);
 }
 
 /// @see optimizeToCompoundOp
-void CompoundOpManager::optimizeToCompoundOp(ShPtr<BitXorOpExpr> expr,
-		ShPtr<Expression> operand) {
+void CompoundOpManager::optimizeToCompoundOp(BitXorOpExpr* expr,
+		Expression* operand) {
 	createResultingBinaryCompoundOp("=", expr);
 }
 
@@ -296,7 +296,7 @@ void CompoundOpManager::createResultingUnaryCompoundOp(const std::string &op) {
 * @param[in] operand Result right operand for @a op.
 */
 void CompoundOpManager::createResultingBinaryCompoundOp(const std::string &op,
-		ShPtr<Expression> operand) {
+		Expression* operand) {
 	compoundOp = CompoundOp(op, operand);
 }
 
@@ -309,14 +309,14 @@ void CompoundOpManager::createResultingBinaryCompoundOp(const std::string &op,
 * @return The next one operand if one of operands are equal with saved
 *         left-hand side of AssignStmt, otherwise the null pointer.
 */
-ShPtr<Expression> CompoundOpManager::getNextOpIfSecondOneIsEqWithLhsOfAssign(
-		ShPtr<BinaryOpExpr> expr) {
+Expression* CompoundOpManager::getNextOpIfSecondOneIsEqWithLhsOfAssign(
+		BinaryOpExpr* expr) {
 	if (lhsOfAssignStmt->isEqualTo(expr->getFirstOperand())) {
 		return expr->getSecondOperand();
 	} else if (lhsOfAssignStmt->isEqualTo(expr->getSecondOperand())) {
 		return expr->getFirstOperand();
 	} else {
-		return ShPtr<Expression>();
+		return nullptr;
 	}
 }
 
@@ -328,8 +328,8 @@ ShPtr<Expression> CompoundOpManager::getNextOpIfSecondOneIsEqWithLhsOfAssign(
 */
 template<typename ToOptimizeExpr>
 void CompoundOpManager::tryOptimizeWhenOneOfOperandsEqWithLhsOfAssignStmt(
-		ShPtr<ToOptimizeExpr> expr) {
-	ShPtr<Expression> operand(getNextOpIfSecondOneIsEqWithLhsOfAssign(expr));
+		ToOptimizeExpr* expr) {
+	Expression* operand(getNextOpIfSecondOneIsEqWithLhsOfAssign(expr));
 	if (operand) {
 		optimizeToCompoundOp(expr, operand);
 	}
@@ -343,7 +343,7 @@ void CompoundOpManager::tryOptimizeWhenOneOfOperandsEqWithLhsOfAssignStmt(
 */
 template<typename ToOptimizeExpr>
 void CompoundOpManager::tryOptimizeWhenLeftOperandEqWithLhsOfAssignStmt(
-		ShPtr<ToOptimizeExpr> expr) {
+		ToOptimizeExpr* expr) {
 	if (lhsOfAssignStmt->isEqualTo(expr->getFirstOperand())) {
 		optimizeToCompoundOp(expr, expr->getSecondOperand());
 	}

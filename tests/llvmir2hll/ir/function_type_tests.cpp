@@ -27,7 +27,7 @@ class FunctionTypeTests: public Test {};
 
 TEST_F(FunctionTypeTests,
 VoidFunctionHasReturnTypeVoid) {
-	ShPtr<FunctionType> ft(FunctionType::create());
+	FunctionType* ft(FunctionType::create());
 	EXPECT_TRUE(isa<VoidType>(ft->getRetType())) <<
 		"expected VoidType, " <<
 		"got `" << ft->getRetType() << "`";
@@ -35,8 +35,8 @@ VoidFunctionHasReturnTypeVoid) {
 
 TEST_F(FunctionTypeTests,
 IntFunctionHasReturnTypeInt) {
-	ShPtr<IntType> refRetType(IntType::create(32));
-	ShPtr<FunctionType> ft(FunctionType::create(refRetType));
+	IntType* refRetType(IntType::create(32));
+	FunctionType* ft(FunctionType::create(refRetType));
 	EXPECT_TRUE(refRetType->isEqualTo(ft->getRetType())) <<
 		"expected `" << refRetType << "`, " <<
 		"got `" << ft->getRetType() << "`";
@@ -44,9 +44,9 @@ IntFunctionHasReturnTypeInt) {
 
 TEST_F(FunctionTypeTests,
 SetReturnTypeCorrectlySetsTheType) {
-	ShPtr<FunctionType> ft(FunctionType::create());
+	FunctionType* ft(FunctionType::create());
 	ASSERT_TRUE(isa<VoidType>(ft->getRetType()));
-	ShPtr<IntType> refRetType(IntType::create(32));
+	IntType* refRetType(IntType::create(32));
 	ft->setRetType(refRetType);
 	EXPECT_TRUE(refRetType->isEqualTo(ft->getRetType())) <<
 		"expected `" << refRetType << "`, " <<
@@ -59,13 +59,13 @@ SetReturnTypeCorrectlySetsTheType) {
 
 TEST_F(FunctionTypeTests,
 FunctionIsByDefaultNotVarArg) {
-	ShPtr<FunctionType> ft(FunctionType::create());
+	FunctionType* ft(FunctionType::create());
 	EXPECT_FALSE(ft->isVarArg());
 }
 
 TEST_F(FunctionTypeTests,
 FunctionThatIsSetAsVarArgIsVarArg) {
-	ShPtr<FunctionType> ft(FunctionType::create());
+	FunctionType* ft(FunctionType::create());
 	ASSERT_FALSE(ft->isVarArg());
 	ft->setVarArg();
 	EXPECT_TRUE(ft->isVarArg());
@@ -73,7 +73,7 @@ FunctionThatIsSetAsVarArgIsVarArg) {
 
 TEST_F(FunctionTypeTests,
 FunctionThatIsSetAsNotVarArgAfterBeingVarArgIsNotVarArg) {
-	ShPtr<FunctionType> ft(FunctionType::create());
+	FunctionType* ft(FunctionType::create());
 	ft->setVarArg();
 	ASSERT_TRUE(ft->isVarArg());
 	ft->setVarArg(false);
@@ -86,7 +86,7 @@ FunctionThatIsSetAsNotVarArgAfterBeingVarArgIsNotVarArg) {
 
 TEST_F(FunctionTypeTests,
 FunctionWithoutParametersDoesNotHaveParameters) {
-	ShPtr<FunctionType> ft(FunctionType::create());
+	FunctionType* ft(FunctionType::create());
 	EXPECT_FALSE(ft->hasParams());
 	EXPECT_EQ(0, ft->getNumOfParams());
 	EXPECT_EQ(ft->param_begin(), ft->param_end());
@@ -94,13 +94,13 @@ FunctionWithoutParametersDoesNotHaveParameters) {
 
 TEST_F(FunctionTypeTests,
 ParameterToFunctionWithoutParametersIsAddedCorrectly) {
-	ShPtr<FunctionType> ft(FunctionType::create());
+	FunctionType* ft(FunctionType::create());
 	ASSERT_FALSE(ft->hasParams());
 	ASSERT_EQ(0, ft->getNumOfParams());
 	ASSERT_FALSE(ft->hasParam(1));
 	ASSERT_EQ(ft->param_begin(), ft->param_end());
 
-	ShPtr<IntType> refParamType(IntType::create(32));
+	IntType* refParamType(IntType::create(32));
 	ft->addParam(refParamType);
 	EXPECT_TRUE(ft->hasParams());
 	EXPECT_EQ(1, ft->getNumOfParams());
@@ -117,14 +117,14 @@ ParameterToFunctionWithoutParametersIsAddedCorrectly) {
 
 TEST_F(FunctionTypeTests,
 ParameterToFunctionWithParameterIsAddedCorrectly) {
-	ShPtr<FunctionType> ft(FunctionType::create());
-	ShPtr<IntType> refParam1Type(IntType::create(32));
+	FunctionType* ft(FunctionType::create());
+	IntType* refParam1Type(IntType::create(32));
 	ft->addParam(refParam1Type);
 	ASSERT_TRUE(ft->hasParams());
 	ASSERT_EQ(1, ft->getNumOfParams());
 	ASSERT_FALSE(ft->hasParam(2));
 
-	ShPtr<IntType> refParam2Type(IntType::create(64));
+	IntType* refParam2Type(IntType::create(64));
 	ft->addParam(refParam2Type);
 	EXPECT_TRUE(ft->hasParams());
 	EXPECT_EQ(2, ft->getNumOfParams());
@@ -153,20 +153,20 @@ ParameterToFunctionWithParameterIsAddedCorrectly) {
 
 TEST_F(FunctionTypeTests,
 TwoFunctionTypesDifferingInReturnTypeAreNotEqual) {
-	ShPtr<VoidType> f1RetType(VoidType::create());
-	ShPtr<FunctionType> ft1(FunctionType::create(f1RetType));
+	VoidType* f1RetType(VoidType::create());
+	FunctionType* ft1(FunctionType::create(f1RetType));
 
-	ShPtr<IntType> f2RetType(IntType::create(32));
-	ShPtr<FunctionType> ft2(FunctionType::create(f2RetType));
+	IntType* f2RetType(IntType::create(32));
+	FunctionType* ft2(FunctionType::create(f2RetType));
 
 	EXPECT_FALSE(ft1->isEqualTo(ft2));
 }
 
 TEST_F(FunctionTypeTests,
 TwoFunctionTypesDifferingInVarArgAreNotEqual) {
-	ShPtr<FunctionType> ft1(FunctionType::create());
+	FunctionType* ft1(FunctionType::create());
 
-	ShPtr<FunctionType> ft2(FunctionType::create());
+	FunctionType* ft2(FunctionType::create());
 	ft2->setVarArg();
 
 	EXPECT_FALSE(ft1->isEqualTo(ft2));
@@ -174,10 +174,10 @@ TwoFunctionTypesDifferingInVarArgAreNotEqual) {
 
 TEST_F(FunctionTypeTests,
 TwoFunctionTypesDifferingInNumberOfParametersAreNotEqual) {
-	ShPtr<FunctionType> ft1(FunctionType::create());
+	FunctionType* ft1(FunctionType::create());
 
-	ShPtr<FunctionType> ft2(FunctionType::create());
-	ShPtr<IntType> paramType(IntType::create(32));
+	FunctionType* ft2(FunctionType::create());
+	IntType* paramType(IntType::create(32));
 	ft2->addParam(paramType);
 
 	EXPECT_FALSE(ft1->isEqualTo(ft2));
@@ -185,12 +185,12 @@ TwoFunctionTypesDifferingInNumberOfParametersAreNotEqual) {
 
 TEST_F(FunctionTypeTests,
 TwoFunctionTypesDifferingInTypeOfParametersAreNotEqual) {
-	ShPtr<FunctionType> ft1(FunctionType::create());
-	ShPtr<IntType> param1Type(IntType::create(32));
+	FunctionType* ft1(FunctionType::create());
+	IntType* param1Type(IntType::create(32));
 	ft1->addParam(param1Type);
 
-	ShPtr<FunctionType> ft2(FunctionType::create());
-	ShPtr<IntType> param2Type(IntType::create(64));
+	FunctionType* ft2(FunctionType::create());
+	IntType* param2Type(IntType::create(64));
 	ft2->addParam(param2Type);
 
 	EXPECT_FALSE(ft1->isEqualTo(ft2));
@@ -198,16 +198,16 @@ TwoFunctionTypesDifferingInTypeOfParametersAreNotEqual) {
 
 TEST_F(FunctionTypeTests,
 TwoFunctionTypesWithSameDataAreEqual) {
-	ShPtr<IntType> retType(IntType::create(16));
-	ShPtr<IntType> param1Type(IntType::create(32));
-	ShPtr<IntType> param2Type(IntType::create(64));
+	IntType* retType(IntType::create(16));
+	IntType* param1Type(IntType::create(32));
+	IntType* param2Type(IntType::create(64));
 
-	ShPtr<FunctionType> ft1(FunctionType::create(retType));
+	FunctionType* ft1(FunctionType::create(retType));
 	ft1->addParam(param1Type);
 	ft1->addParam(param2Type);
 	ft1->setVarArg();
 
-	ShPtr<FunctionType> ft2(FunctionType::create(retType));
+	FunctionType* ft2(FunctionType::create(retType));
 	ft2->addParam(param1Type);
 	ft2->addParam(param2Type);
 	ft2->setVarArg();
@@ -221,15 +221,15 @@ TwoFunctionTypesWithSameDataAreEqual) {
 
 TEST_F(FunctionTypeTests,
 CloningCreatesEqualFunctionType) {
-	ShPtr<IntType> retType(IntType::create(16));
-	ShPtr<IntType> param1Type(IntType::create(32));
-	ShPtr<IntType> param2Type(IntType::create(64));
-	ShPtr<FunctionType> ft1(FunctionType::create(retType));
+	IntType* retType(IntType::create(16));
+	IntType* param1Type(IntType::create(32));
+	IntType* param2Type(IntType::create(64));
+	FunctionType* ft1(FunctionType::create(retType));
 	ft1->addParam(param1Type);
 	ft1->addParam(param2Type);
 	ft1->setVarArg();
 
-	ShPtr<FunctionType> ft2(ucast<FunctionType>(ft1->clone()));
+	FunctionType* ft2(ucast<FunctionType>(ft1->clone()));
 
 	EXPECT_TRUE(ft1->isEqualTo(ft2));
 }

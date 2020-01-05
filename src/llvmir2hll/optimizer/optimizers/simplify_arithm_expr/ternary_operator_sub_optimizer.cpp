@@ -23,7 +23,7 @@ REGISTER_AT_FACTORY("TernaryOperator", TERNARY_OPERATOR_SUB_OPTIMIZER_ID,
 *            expressions.
 */
 TernaryOperatorSubOptimizer::TernaryOperatorSubOptimizer(
-		ShPtr<ArithmExprEvaluator> arithmExprEvaluator):
+		ArithmExprEvaluator* arithmExprEvaluator):
 			SubOptimizer(arithmExprEvaluator) {}
 
 /**
@@ -32,20 +32,20 @@ TernaryOperatorSubOptimizer::TernaryOperatorSubOptimizer(
 * @param[in] arithmExprEvaluator @a The used evaluator of arithmetical
 *            expressions.
 */
-ShPtr<SubOptimizer> TernaryOperatorSubOptimizer::create(
-		ShPtr<ArithmExprEvaluator> arithmExprEvaluator) {
-	return ShPtr<SubOptimizer>(new TernaryOperatorSubOptimizer(
-		arithmExprEvaluator));
+SubOptimizer* TernaryOperatorSubOptimizer::create(
+		ArithmExprEvaluator* arithmExprEvaluator) {
+	return new TernaryOperatorSubOptimizer(
+		arithmExprEvaluator);
 }
 
 std::string TernaryOperatorSubOptimizer::getId() const {
 	return TERNARY_OPERATOR_SUB_OPTIMIZER_ID;
 }
 
-void TernaryOperatorSubOptimizer::visit(ShPtr<TernaryOpExpr> expr) {
+void TernaryOperatorSubOptimizer::visit(TernaryOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
-	ShPtr<ConstBool> constBool(cast<ConstBool>(expr->getCondition()));
+	ConstBool* constBool(cast<ConstBool>(expr->getCondition()));
 	if (!constBool) {
 		return;
 	}

@@ -18,11 +18,11 @@ namespace llvmir2hll {
 *
 * See create() for more information.
 */
-SwitchStmt::SwitchStmt(ShPtr<Expression> controlExpr, Address a):
+SwitchStmt::SwitchStmt(Expression* controlExpr, Address a):
 	Statement(a), switchClauseList(), controlExpr(controlExpr) {}
 
-ShPtr<Value> SwitchStmt::clone() {
-	ShPtr<SwitchStmt> switchStmt(SwitchStmt::create(
+Value* SwitchStmt::clone() {
+	SwitchStmt* switchStmt(SwitchStmt::create(
 		ucast<Expression>(controlExpr->clone()), nullptr, getAddress()));
 
 	// Clone all clauses.
@@ -40,9 +40,9 @@ ShPtr<Value> SwitchStmt::clone() {
 	return switchStmt;
 }
 
-bool SwitchStmt::isEqualTo(ShPtr<Value> otherValue) const {
+bool SwitchStmt::isEqualTo(Value* otherValue) const {
 	// The types of compared instances have to match.
-	ShPtr<SwitchStmt> otherSwitchStmt = cast<SwitchStmt>(otherValue);
+	SwitchStmt* otherSwitchStmt = cast<SwitchStmt>(otherValue);
 	if (!otherSwitchStmt) {
 		return false;
 	}
@@ -89,7 +89,7 @@ bool SwitchStmt::isEqualTo(ShPtr<Value> otherValue) const {
 	return controlExpr->isEqualTo(otherSwitchStmt->controlExpr);
 }
 
-void SwitchStmt::replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) {
+void SwitchStmt::replace(Expression* oldExpr, Expression* newExpr) {
 	if (oldExpr == controlExpr) {
 		setControlExpr(newExpr);
 	}
@@ -98,14 +98,14 @@ void SwitchStmt::replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr) {
 	for (auto i = switchClauseList.begin(), e = switchClauseList.end();
 			i != e; ++i) {
 		if (i->first == oldExpr) {
-			i->first->removeObserver(shared_from_this());
-			newExpr->addObserver(shared_from_this());
+			i->first->removeObserver(this);
+			newExpr->addObserver(this);
 			i->first = newExpr;
 		}
 	}
 }
 
-ShPtr<Expression> SwitchStmt::asExpression() const {
+Expression* SwitchStmt::asExpression() const {
 	// Cannot be converted into an expression.
 	return {};
 }
@@ -125,15 +125,15 @@ ShPtr<Expression> SwitchStmt::asExpression() const {
 *  - if @a expr is the null pointer, there cannot be a default clause
 *  - @a body is non-null
 */
-void SwitchStmt::addClause(ShPtr<Expression> expr, ShPtr<Statement> body) {
+void SwitchStmt::addClause(Expression* expr, Statement* body) {
 	PRECONDITION_NON_NULL(body);
 	PRECONDITION(expr || !hasDefaultClause(),
 		"adding a default clause when there already is one");
 
 	if (expr) {
-		expr->addObserver(shared_from_this());
+		expr->addObserver(this);
 	}
-	body->addObserver(shared_from_this());
+	body->addObserver(this);
 	switchClauseList.push_back(SwitchClause(expr, body));
 }
 
@@ -164,25 +164,25 @@ SwitchStmt::clause_iterator SwitchStmt::removeClause(
 		clause_iterator clauseIterator) {
 	// We assume that the used container is std::list.
 	if (clauseIterator->first) {
-		clauseIterator->first->removeObserver(shared_from_this());
+		clauseIterator->first->removeObserver(this);
 	}
-	clauseIterator->second->removeObserver(shared_from_this());
+	clauseIterator->second->removeObserver(this);
 	return switchClauseList.erase(clauseIterator);
 }
 
 /**
 * @brief Returns the control expression.
 */
-ShPtr<Expression> SwitchStmt::getControlExpr() const {
+Expression* SwitchStmt::getControlExpr() const {
 	return controlExpr;
 }
 
 /**
 * @brief Sets a new control expression.
 */
-void SwitchStmt::setControlExpr(ShPtr<Expression> newExpr) {
-	controlExpr->removeObserver(shared_from_this());
-	newExpr->addObserver(shared_from_this());
+void SwitchStmt::setControlExpr(Expression* newExpr) {
+	controlExpr->removeObserver(this);
+	newExpr->addObserver(this);
 	controlExpr = newExpr;
 }
 
@@ -203,13 +203,13 @@ bool SwitchStmt::hasDefaultClause() const {
 *
 * If there is no default clause, the null pointer is returned.
 */
-ShPtr<Statement> SwitchStmt::getDefaultClauseBody() const {
+Statement* SwitchStmt::getDefaultClauseBody() const {
 	for (auto i = clause_begin(), e = clause_end(); i != e; ++i) {
 		if (!i->first) {
 			return i->second;
 		}
 	}
-	return ShPtr<Statement>();
+	return nullptr;
 }
 
 /**
@@ -217,7 +217,7 @@ ShPtr<Statement> SwitchStmt::getDefaultClauseBody() const {
 *
 * This function is equivalent to calling
 * @code
-* addClause(ShPtr<Expression>(), body)
+* addClause(nullptr, body)
 * @endcode
 *
 * Does not invalidate any existing iterators to this switch statement.
@@ -226,12 +226,12 @@ ShPtr<Statement> SwitchStmt::getDefaultClauseBody() const {
 *  - there is no default clause
 *  - @a body is non-null
 */
-void SwitchStmt::addDefaultClause(ShPtr<Statement> body) {
+void SwitchStmt::addDefaultClause(Statement* body) {
 	PRECONDITION_NON_NULL(body);
 	PRECONDITION(!hasDefaultClause(),
 		"adding a default clause when there already is one");
 
-	addClause(ShPtr<Expression>(), body);
+	addClause(nullptr, body);
 }
 
 /**
@@ -241,7 +241,7 @@ void SwitchStmt::addDefaultClause(ShPtr<Statement> body) {
 *  - there is a default clause
 *  - @a body is non-null
 */
-void SwitchStmt::setDefaultClauseBody(ShPtr<Statement> body) {
+void SwitchStmt::setDefaultClauseBody(Statement* body) {
 	PRECONDITION_NON_NULL(body);
 
 	// If there is already a default clause, just change its body.
@@ -266,7 +266,7 @@ void SwitchStmt::removeDefaultClause() {
 	for (auto i = switchClauseList.begin(), e = switchClauseList.end();
 			i != e; ++i) {
 		if (!i->first) {
-			i->first->removeObserver(shared_from_this());
+			i->first->removeObserver(this);
 			switchClauseList.erase(i);
 			return;
 		}
@@ -299,14 +299,14 @@ SwitchStmt::clause_iterator SwitchStmt::clause_end() const {
 * @par Preconditions
 *  - @a controlExpr is non-null
 */
-ShPtr<SwitchStmt> SwitchStmt::create(ShPtr<Expression> controlExpr,
-		ShPtr<Statement> succ, Address a) {
+SwitchStmt* SwitchStmt::create(Expression* controlExpr,
+		Statement* succ, Address a) {
 	PRECONDITION_NON_NULL(controlExpr);
 
-	ShPtr<SwitchStmt> stmt(new SwitchStmt(controlExpr, a));
+	SwitchStmt* stmt(new SwitchStmt(controlExpr, a));
 	stmt->setSuccessor(succ);
 
-	// Initialization (recall that shared_from_this() cannot be called in a
+	// Initialization (recall that this cannot be called in a
 	// constructor).
 	controlExpr->addObserver(stmt);
 
@@ -335,16 +335,16 @@ ShPtr<SwitchStmt> SwitchStmt::create(ShPtr<Expression> controlExpr,
 *
 * @see Subject::update()
 */
-void SwitchStmt::update(ShPtr<Value> subject, ShPtr<Value> arg) {
+void SwitchStmt::update(Value* subject, Value* arg) {
 	// TODO Refactor the handling of observers into a separate function?
 
-	ShPtr<Expression> newExpr = cast<Expression>(arg);
-	ShPtr<Statement> newBody = cast<Statement>(arg);
+	Expression* newExpr = cast<Expression>(arg);
+	Statement* newBody = cast<Statement>(arg);
 
 	// Check the control expression.
 	if (subject == controlExpr && newExpr) {
-		controlExpr->removeObserver(shared_from_this());
-		newExpr->addObserver(shared_from_this());
+		controlExpr->removeObserver(this);
+		newExpr->addObserver(this);
 		controlExpr = newExpr;
 	}
 
@@ -352,21 +352,21 @@ void SwitchStmt::update(ShPtr<Value> subject, ShPtr<Value> arg) {
 	for (auto i = switchClauseList.begin(), e = switchClauseList.end();
 			i != e; ++i) {
 		if (subject == i->first) {
-			i->first->removeObserver(shared_from_this());
+			i->first->removeObserver(this);
 			if (newExpr) {
-				newExpr->addObserver(shared_from_this());
+				newExpr->addObserver(this);
 			}
 			i->first = newExpr;
 		} else if (subject == i->second && newBody) {
-			i->second->removeObserver(shared_from_this());
-			newBody->addObserver(shared_from_this());
+			i->second->removeObserver(this);
+			newBody->addObserver(this);
 			i->second = newBody;
 		}
 	}
 }
 
 void SwitchStmt::accept(Visitor *v) {
-	v->visit(ucast<SwitchStmt>(shared_from_this()));
+	v->visit(ucast<SwitchStmt>(this));
 }
 
 } // namespace llvmir2hll

@@ -54,18 +54,18 @@ namespace {
 * not cond1 and not cond2 and currCond
 * @endcode
 */
-ShPtr<Expression> generateIfCondEdgeLabel(const ExprVector &conds,
-		ShPtr<Expression> currCond = nullptr) {
+Expression* generateIfCondEdgeLabel(const ExprVector &conds,
+		Expression* currCond = nullptr) {
 	if (conds.empty()) {
 		if (currCond) {
 			return ucast<Expression>(currCond->clone());
 		} else {
 			// The if statement didn't have any clauses.
-			return ShPtr<Expression>();
+			return nullptr;
 		}
 	}
 
-	ShPtr<Expression> label;
+	Expression* label = nullptr;
 	for (const auto &cond : conds) {
 		if (label) {
 			label = AndOpExpr::create(ucast<Expression>(label->clone()),
@@ -86,8 +86,8 @@ ShPtr<Expression> generateIfCondEdgeLabel(const ExprVector &conds,
 *
 * If there are no non-default clauses in @a stmt, it returns the null pointer.
 */
-ShPtr<Expression> generateSwitchDefaultCondLabel(ShPtr<SwitchStmt> stmt) {
-	ShPtr<Expression> label;
+Expression* generateSwitchDefaultCondLabel(SwitchStmt* stmt) {
+	Expression* label = nullptr;
 
 	// For example, for the following switch statement:
 	//
@@ -103,7 +103,7 @@ ShPtr<Expression> generateSwitchDefaultCondLabel(ShPtr<SwitchStmt> stmt) {
 	//
 
 	// For each clause...
-	ShPtr<Expression> switchCond(stmt->getControlExpr());
+	Expression* switchCond(stmt->getControlExpr());
 	for (auto i = stmt->clause_begin(), e = stmt->clause_end(); i != e; ++i) {
 		if (!i->first) {
 			// The default clause.
@@ -129,8 +129,8 @@ ShPtr<Expression> generateSwitchDefaultCondLabel(ShPtr<SwitchStmt> stmt) {
 * @return When statement is in loop body, returns the first parent of @a stmt
 *         which is not a loop statement, otherwise return same @a stmt.
 */
-ShPtr<Statement> findParentWhichIsNotLoopIfStmtIsInLoop(ShPtr<Statement> stmt) {
-	ShPtr<Statement> parent(stmt->getParent());
+Statement* findParentWhichIsNotLoopIfStmtIsInLoop(Statement* stmt) {
+	Statement* parent(stmt->getParent());
 	if (parent && isLoop(parent)) {
 		return findParentWhichIsNotLoopIfStmtIsInLoop(parent);
 	} else {
@@ -149,8 +149,8 @@ NonRecursiveCFGBuilder::NonRecursiveCFGBuilder():
 /**
 * @brief Creates and returns a new NonRecursiveCFGBuilder.
 */
-ShPtr<NonRecursiveCFGBuilder> NonRecursiveCFGBuilder::create() {
-	return ShPtr<NonRecursiveCFGBuilder>(new NonRecursiveCFGBuilder());
+NonRecursiveCFGBuilder* NonRecursiveCFGBuilder::create() {
+	return new NonRecursiveCFGBuilder();
 }
 
 /**
@@ -160,7 +160,7 @@ void NonRecursiveCFGBuilder::initializeCFGBuild() {
 	clear(jobQueue);
 	clear(edgesToAddFirst);
 	clear(edgesToAddLast);
-	currNode.reset();
+	currNode = nullptr;
 	clear(emptyStmtToNodeMap);
 	stopIterNextStmts = false;
 }
@@ -169,14 +169,14 @@ void NonRecursiveCFGBuilder::initializeCFGBuild() {
 * @brief Creates entry node.
 */
 void NonRecursiveCFGBuilder::createEntryNode() {
-	cfg->addEntryNode(ShPtr<CFG::Node>(new CFG::Node("entry")));
+	cfg->addEntryNode(new CFG::Node("entry"));
 
 	// We introduce a VarDefStmt for each parameter into the entry block. This
 	// way, we can store the function's parameters into the CFG in a uniform
 	// way.
 	// For each parameter...
 	for (const auto &param : func->getParams()) {
-		ShPtr<Statement> varDefStmt(
+		Statement* varDefStmt(
 			VarDefStmt::create(param, nullptr, nullptr, func->getStartAddress()));
 		cfg->stmtNodeMapping[varDefStmt] = cfg->entryNode;
 		cfg->entryNode->stmts.push_back(varDefStmt);
@@ -187,7 +187,7 @@ void NonRecursiveCFGBuilder::createEntryNode() {
 * @brief Creates exit node.
 */
 void NonRecursiveCFGBuilder::createExitNode() {
-	cfg->addExitNode(ShPtr<CFG::Node>(new CFG::Node("exit")));
+	cfg->addExitNode(new CFG::Node("exit"));
 }
 
 /**
@@ -195,7 +195,7 @@ void NonRecursiveCFGBuilder::createExitNode() {
 */
 void NonRecursiveCFGBuilder::createOtherNodes() {
 	// Add first job for top level of function body.
-	addJobToQueue(cfg->entryNode, ShPtr<Expression>(), func->getBody());
+	addJobToQueue(cfg->entryNode, nullptr, func->getBody());
 
 	// Start of doing jobs and creating new jobs.
 	doJobs();
@@ -222,21 +222,21 @@ void NonRecursiveCFGBuilder::validateCFG() {
 /**
 * @brief Implementation of visit() for for loops.
 */
-void NonRecursiveCFGBuilder::visitForOrUForLoop(ShPtr<Statement> loop,
-		ShPtr<Statement> body) {
+void NonRecursiveCFGBuilder::visitForOrUForLoop(Statement* loop,
+		Statement* body) {
 	createNewNodeForIfSwitchForWhileStmtAndAddStmtToNode(loop);
 
 	// Generate the loop's condition.
 	// TODO Should we generate the condition? If so, how?
-	// ShPtr<Expression> loopCond;
+	// Expression* loopCond;
 
 	// Create a job for the loop's body.
-	addJobToQueue(currNode, ShPtr<Expression>(), body);
+	addJobToQueue(currNode, nullptr, body);
 
 	// Create an edge for the loop's successor.
-	if (ShPtr<Statement> loopSucc = loop->getSuccessor()) {
+	if (loop->getSuccessor()) {
 		edgesToAddLast.push_back(EdgeToAdd(currNode, loop->getSuccessor(),
-			ShPtr<Expression>()));
+			nullptr));
 	} else {
 		addEdgeFromCurrNodeToSuccNode(loop, edgesToAddLast);
 	}
@@ -270,8 +270,8 @@ void NonRecursiveCFGBuilder::buildCFG() {
 *                 node.
 * @param[in] stmt First statement of new node.
 */
-void NonRecursiveCFGBuilder::addJobToQueue(ShPtr<CFG::Node> pred, ShPtr<
-		Expression> cond, ShPtr<Statement> stmt) {
+void NonRecursiveCFGBuilder::addJobToQueue(CFG::Node* pred,
+		Expression* cond, Statement* stmt) {
 	jobQueue.push(Job(pred, cond, stmt));
 }
 
@@ -299,7 +299,7 @@ void NonRecursiveCFGBuilder::doJob(const Job &job) {
 	createAndAddNode();
 
 	// Iterates through one nested level from statement saved in the job.
-	for (ShPtr<Statement> stmt = job.stmt; stmt; stmt = stmt->getSuccessor()) {
+	for (Statement* stmt = job.stmt; stmt; stmt = stmt->getSuccessor()) {
 		if (cfg->getNodeForStmt(stmt).first) {
 			// When goto statement point backward we don't want to do jobs and
 			// visit statements where we were one time before. Because if we
@@ -400,7 +400,7 @@ void NonRecursiveCFGBuilder::addEdgeFromVector(const EdgeToAdd &edge) {
 		cfg->addEdge(edge.node, i->second, edge.cond);
 	} else {
 		// Find the target node for the connection and create it.
-		ShPtr<CFG::Node> targetNode(cfg->getNodeForStmt(edge.succStmt).first);
+		CFG::Node* targetNode(cfg->getNodeForStmt(edge.succStmt).first);
 
 		// TODO There is the following problem with some decompilations: In
 		// addEdgeFromCurrNodeToSuccNode(), an edge to a statement is
@@ -447,13 +447,13 @@ void NonRecursiveCFGBuilder::addEdgeFromVector(const EdgeToAdd &edge) {
 * @param[out] edgesToAdd Place to save edge.
 * @param[in] edgeCond Condition of edge.
 */
-void NonRecursiveCFGBuilder::addEdgeFromCurrNodeToSuccNode(ShPtr<Statement> stmt,
-		EdgesToAdd &edgesToAdd, ShPtr<Expression> edgeCond) {
+void NonRecursiveCFGBuilder::addEdgeFromCurrNodeToSuccNode(Statement* stmt,
+		EdgesToAdd &edgesToAdd, Expression* edgeCond) {
 	if (isa<ContinueStmt>(stmt)) {
 		// A continue statement has to be inside of a loop.
-		ShPtr<Statement> innLoop(getInnermostLoop(stmt));
+		Statement* innLoop(getInnermostLoop(stmt));
 		if (!innLoop) {
-			edgesToAdd.push_back(EdgeToAdd(currNode, ShPtr<Statement>()));
+			edgesToAdd.push_back(EdgeToAdd(currNode, nullptr));
 			return;
 		}
 		edgesToAdd.push_back(EdgeToAdd(currNode, innLoop));
@@ -462,13 +462,13 @@ void NonRecursiveCFGBuilder::addEdgeFromCurrNodeToSuccNode(ShPtr<Statement> stmt
 
 	if (isa<BreakStmt>(stmt)) {
 		// A break statement has to be inside a loop or switch.
-		ShPtr<Statement> innLoopOrSwitch(getInnermostLoopOrSwitch(stmt));
+		Statement* innLoopOrSwitch(getInnermostLoopOrSwitch(stmt));
 		if (!innLoopOrSwitch) {
-			edgesToAdd.push_back(EdgeToAdd(currNode, ShPtr<Statement>()));
+			edgesToAdd.push_back(EdgeToAdd(currNode, nullptr));
 			return;
 		}
 
-		if (ShPtr<Statement> succ = innLoopOrSwitch->getSuccessor()) {
+		if (Statement* succ = innLoopOrSwitch->getSuccessor()) {
 			edgesToAdd.push_back(EdgeToAdd(currNode, succ));
 			return;
 		}
@@ -476,10 +476,10 @@ void NonRecursiveCFGBuilder::addEdgeFromCurrNodeToSuccNode(ShPtr<Statement> stmt
 		return;
 	}
 
-	ShPtr<Statement> stmtParent(stmt->getParent());
+	Statement* stmtParent(stmt->getParent());
 	if (!stmtParent) {
 		// There is an implicit return from the function.
-		edgesToAdd.push_back(EdgeToAdd(currNode, ShPtr<Statement>(), edgeCond));
+		edgesToAdd.push_back(EdgeToAdd(currNode, nullptr, edgeCond));
 		return;
 	}
 
@@ -494,7 +494,7 @@ void NonRecursiveCFGBuilder::addEdgeFromCurrNodeToSuccNode(ShPtr<Statement> stmt
 		return;
 	}
 
-	if (ShPtr<SwitchStmt> stmtParentSwitch = cast<SwitchStmt>(stmtParent)) {
+	if (SwitchStmt* stmtParentSwitch = cast<SwitchStmt>(stmtParent)) {
 		// There should be a fall-through to the next switch clause (or to the
 		// switch's successor, if there is no next clause).
 		// Find out in which clause we are.
@@ -520,14 +520,14 @@ void NonRecursiveCFGBuilder::addEdgeFromCurrNodeToSuccNode(ShPtr<Statement> stmt
 	// found. If there is no such parent, then there is an implicit return from
 	// the current function.
 	do {
-		if (ShPtr<Statement> stmtParentSucc = stmtParent->getSuccessor()) {
+		if (Statement* stmtParentSucc = stmtParent->getSuccessor()) {
 			edgesToAdd.push_back(EdgeToAdd(currNode, stmtParentSucc));
 			return;
 		}
 	} while ((stmtParent = stmtParent->getParent()));
 
 	// There is an implicit return from the function.
-	edgesToAdd.push_back(EdgeToAdd(currNode, ShPtr<Statement>()));
+	edgesToAdd.push_back(EdgeToAdd(currNode, nullptr));
 }
 
 /**
@@ -539,7 +539,7 @@ void NonRecursiveCFGBuilder::addEdgeFromCurrNodeToSuccNode(ShPtr<Statement> stmt
 *
 * @param[in] stmt Statement to check.
 */
-void NonRecursiveCFGBuilder::resolveGotoTargets(ShPtr<Statement> stmt) {
+void NonRecursiveCFGBuilder::resolveGotoTargets(Statement* stmt) {
 	if (stmt->isGotoTarget() && !currNode->stmts.empty()) {
 		createNewNodeAndConnectWithPredNode(stmt);
 	}
@@ -551,7 +551,7 @@ void NonRecursiveCFGBuilder::resolveGotoTargets(ShPtr<Statement> stmt) {
 * @param[in] stmt Statement to add.
 */
 void NonRecursiveCFGBuilder::addStmtToNodeAndToMapOfStmtToNode(
-		ShPtr<Statement> stmt) {
+		Statement* stmt) {
 	cfg->stmtNodeMapping[stmt] = currNode;
 	currNode->addStmt(stmt);
 }
@@ -563,7 +563,7 @@ void NonRecursiveCFGBuilder::addStmtToNodeAndToMapOfStmtToNode(
 *
 * @param[in] stmt Statement to add.
 */
-void NonRecursiveCFGBuilder::addStatement(ShPtr<Statement> stmt) {
+void NonRecursiveCFGBuilder::addStatement(Statement* stmt) {
 	resolveGotoTargets(stmt);
 	addStmtToNodeAndToMapOfStmtToNode(stmt);
 
@@ -579,9 +579,9 @@ void NonRecursiveCFGBuilder::addStatement(ShPtr<Statement> stmt) {
 *
 * @param[in] stmt Statement of new node.
 */
-void NonRecursiveCFGBuilder::createNewNodeAndConnectWithPredNode(ShPtr<Statement>
+void NonRecursiveCFGBuilder::createNewNodeAndConnectWithPredNode(Statement*
 		stmt) {
-	ShPtr<CFG::Node> prevNode(currNode);
+	CFG::Node* prevNode(currNode);
 	createAndAddNode();
 	edgesToAddFirst.push_back(EdgeToAdd(prevNode, stmt));
 }
@@ -593,7 +593,7 @@ void NonRecursiveCFGBuilder::createNewNodeAndConnectWithPredNode(ShPtr<Statement
 * @param[in] stmt Statement to add.
 */
 void NonRecursiveCFGBuilder::createNewNodeForIfSwitchForWhileStmtAndAddStmtToNode(
-		ShPtr<Statement> stmt) {
+		Statement* stmt) {
 	if (stmt->hasPredecessors()) {
 		// Create new node is needed only when statement has predecessors.
 		// It is needed because when this statement don't have predecessors the
@@ -609,7 +609,7 @@ void NonRecursiveCFGBuilder::createNewNodeForIfSwitchForWhileStmtAndAddStmtToNod
 *
 * @param[in] stmt Statement to check if has a successor.
 */
-void NonRecursiveCFGBuilder::createNewNodeIfStmtHasSucc(ShPtr<Statement> stmt) {
+void NonRecursiveCFGBuilder::createNewNodeIfStmtHasSucc(Statement* stmt) {
 	if (stmt->hasSuccessor()) {
 		// If we have successor we add new node for next statements.
 		createAndAddNode();
@@ -620,29 +620,29 @@ void NonRecursiveCFGBuilder::createNewNodeIfStmtHasSucc(ShPtr<Statement> stmt) {
 * @brief Creates new node and set it to current node.
 */
 void NonRecursiveCFGBuilder::createAndAddNode() {
-	currNode = ShPtr<CFG::Node>(new CFG::Node());
+	currNode = new CFG::Node();
 	cfg->addNode(currNode);
 }
 
-void NonRecursiveCFGBuilder::visit(ShPtr<AssignStmt> stmt) {
+void NonRecursiveCFGBuilder::visit(AssignStmt* stmt) {
 	addStatement(stmt);
 }
 
-void NonRecursiveCFGBuilder::visit(ShPtr<VarDefStmt> stmt) {
+void NonRecursiveCFGBuilder::visit(VarDefStmt* stmt) {
 	addStatement(stmt);
 }
 
-void NonRecursiveCFGBuilder::visit(ShPtr<CallStmt> stmt) {
+void NonRecursiveCFGBuilder::visit(CallStmt* stmt) {
 	addStatement(stmt);
 }
 
-void NonRecursiveCFGBuilder::visit(ShPtr<ReturnStmt> stmt) {
+void NonRecursiveCFGBuilder::visit(ReturnStmt* stmt) {
 	resolveGotoTargets(stmt);
 	addStmtToNodeAndToMapOfStmtToNode(stmt);
 
 	// Add edge to exit-node because return end function. Create edge to exit-
-	// node is possible when save ShPtr<Statement>() to second parameter of edge.
-	edgesToAddFirst.push_back(EdgeToAdd(currNode, ShPtr<Statement>()));
+	// node is possible when save nullptr to second parameter of edge.
+	edgesToAddFirst.push_back(EdgeToAdd(currNode, nullptr));
 
 	if (stmt->hasSuccessor()) {
 		// After return statement we don't want iterate next statements.
@@ -650,7 +650,7 @@ void NonRecursiveCFGBuilder::visit(ShPtr<ReturnStmt> stmt) {
 	}
 }
 
-void NonRecursiveCFGBuilder::visit(ShPtr<EmptyStmt> stmt) {
+void NonRecursiveCFGBuilder::visit(EmptyStmt* stmt) {
 	resolveGotoTargets(stmt);
 
 	// We don't add EmptyStmt to mapping statement to node and don't add
@@ -664,7 +664,7 @@ void NonRecursiveCFGBuilder::visit(ShPtr<EmptyStmt> stmt) {
 	}
 }
 
-void NonRecursiveCFGBuilder::visit(ShPtr<IfStmt> stmt) {
+void NonRecursiveCFGBuilder::visit(IfStmt* stmt) {
 	createNewNodeForIfSwitchForWhileStmtAndAddStmtToNode(stmt);
 
 	// Create new jobs for the bodies of the if statement.
@@ -682,7 +682,7 @@ void NonRecursiveCFGBuilder::visit(ShPtr<IfStmt> stmt) {
 	} else {
 		// When we don't have else clause we need to create false edge for
 		// if statement.
-		ShPtr<Expression> edgeCond(generateIfCondEdgeLabel(conds));
+		Expression* edgeCond(generateIfCondEdgeLabel(conds));
 		if (stmt->hasSuccessor()) {
 			edgesToAddLast.push_back(EdgeToAdd(currNode, stmt->getSuccessor(),
 				edgeCond));
@@ -694,12 +694,12 @@ void NonRecursiveCFGBuilder::visit(ShPtr<IfStmt> stmt) {
 	createNewNodeIfStmtHasSucc(stmt);
 }
 
-void NonRecursiveCFGBuilder::visit(ShPtr<SwitchStmt> stmt) {
+void NonRecursiveCFGBuilder::visit(SwitchStmt* stmt) {
 	createNewNodeForIfSwitchForWhileStmtAndAddStmtToNode(stmt);
 
 	// Create a new job for each clause.
 	for (auto i = stmt->clause_begin(), e = stmt->clause_end(); i != e; ++i) {
-		ShPtr<Expression> cond;
+		Expression* cond;
 		if (i->first) {
 			// Generate a label of the form `switchCond == clauseCond`.
 			cond = EqOpExpr::create(stmt->getControlExpr(), i->first);
@@ -722,7 +722,7 @@ void NonRecursiveCFGBuilder::visit(ShPtr<SwitchStmt> stmt) {
 	createNewNodeIfStmtHasSucc(stmt);
 }
 
-void NonRecursiveCFGBuilder::visit(ShPtr<WhileLoopStmt> stmt) {
+void NonRecursiveCFGBuilder::visit(WhileLoopStmt* stmt) {
 	createNewNodeForIfSwitchForWhileStmtAndAddStmtToNode(stmt);
 
 	// Create a job for the loop's body.
@@ -731,7 +731,7 @@ void NonRecursiveCFGBuilder::visit(ShPtr<WhileLoopStmt> stmt) {
 	// Create an edge for the loop's successor. However, do this only
 	// if it is not a "while True" loop (the "False" edge is never taken).
 	if (!isWhileTrueLoop(stmt)) {
-		ShPtr<Expression> edgeCond(ExpressionNegater::negate(ucast<Expression>(
+		Expression* edgeCond(ExpressionNegater::negate(ucast<Expression>(
 			stmt->getCondition()->clone())));
 		if (stmt->hasSuccessor()) {
 			edgesToAddLast.push_back(EdgeToAdd(currNode, stmt->getSuccessor(),
@@ -743,15 +743,15 @@ void NonRecursiveCFGBuilder::visit(ShPtr<WhileLoopStmt> stmt) {
 	createNewNodeIfStmtHasSucc(stmt);
 }
 
-void NonRecursiveCFGBuilder::visit(ShPtr<ForLoopStmt> stmt) {
+void NonRecursiveCFGBuilder::visit(ForLoopStmt* stmt) {
 	visitForOrUForLoop(stmt, stmt->getBody());
 }
 
-void NonRecursiveCFGBuilder::visit(ShPtr<UForLoopStmt> stmt) {
+void NonRecursiveCFGBuilder::visit(UForLoopStmt* stmt) {
 	visitForOrUForLoop(stmt, stmt->getBody());
 }
 
-void NonRecursiveCFGBuilder::visit(ShPtr<BreakStmt> stmt) {
+void NonRecursiveCFGBuilder::visit(BreakStmt* stmt) {
 	resolveGotoTargets(stmt);
 	addStmtToNodeAndToMapOfStmtToNode(stmt);
 
@@ -764,7 +764,7 @@ void NonRecursiveCFGBuilder::visit(ShPtr<BreakStmt> stmt) {
 	}
 }
 
-void NonRecursiveCFGBuilder::visit(ShPtr<ContinueStmt> stmt) {
+void NonRecursiveCFGBuilder::visit(ContinueStmt* stmt) {
 	resolveGotoTargets(stmt);
 	addStmtToNodeAndToMapOfStmtToNode(stmt);
 
@@ -777,21 +777,21 @@ void NonRecursiveCFGBuilder::visit(ShPtr<ContinueStmt> stmt) {
 	}
 }
 
-void NonRecursiveCFGBuilder::visit(ShPtr<GotoStmt> stmt) {
+void NonRecursiveCFGBuilder::visit(GotoStmt* stmt) {
 	resolveGotoTargets(stmt);
 	addStmtToNodeAndToMapOfStmtToNode(stmt);
 
-	if (ShPtr<Statement> gotoTarget = stmt->getTarget()) {
-		ShPtr<Statement> stmtToTargetJob = findParentWhichIsNotLoopIfStmtIsInLoop(
+	if (Statement* gotoTarget = stmt->getTarget()) {
+		Statement* stmtToTargetJob = findParentWhichIsNotLoopIfStmtIsInLoop(
 			gotoTarget);
 		if (stmtToTargetJob != stmt->getTarget()) {
 			// We need to iterate not from targe statement, bud for another one.
 			// For example when target is in loop, but we need iterate from
 			// this loop.
 			edgesToAddFirst.push_back(EdgeToAdd(currNode, gotoTarget));
-			addJobToQueue(ShPtr<CFG::Node>(), ShPtr<Expression>(), stmtToTargetJob);
+			addJobToQueue(nullptr, nullptr, stmtToTargetJob);
 		} else {
-			addJobToQueue(currNode, ShPtr<Expression>(), stmtToTargetJob);
+			addJobToQueue(currNode, nullptr, stmtToTargetJob);
 		}
 		if (stmt->hasSuccessor()) {
 			// After goto we don't want to iterate next statements.
@@ -800,12 +800,12 @@ void NonRecursiveCFGBuilder::visit(ShPtr<GotoStmt> stmt) {
 	}
 }
 
-void NonRecursiveCFGBuilder::visit(ShPtr<UnreachableStmt> stmt) {
+void NonRecursiveCFGBuilder::visit(UnreachableStmt* stmt) {
 	resolveGotoTargets(stmt);
 	addStmtToNodeAndToMapOfStmtToNode(stmt);
 
 	// Create edge to exit node.
-	edgesToAddFirst.push_back(EdgeToAdd(currNode, ShPtr<Statement>()));
+	edgesToAddFirst.push_back(EdgeToAdd(currNode, nullptr));
 
 	if (stmt->hasSuccessor()) {
 		// After unreachable statement we don't want iterate next statements.

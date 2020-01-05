@@ -68,9 +68,9 @@ namespace llvmir2hll {
 */
 class OneSubOptimizer final: public SubOptimizer {
 public:
-	OneSubOptimizer(ShPtr<ArithmExprEvaluator> arithmExprEvaluator);
+	OneSubOptimizer(ArithmExprEvaluator* arithmExprEvaluator);
 
-	static ShPtr<SubOptimizer> create(ShPtr<ArithmExprEvaluator>
+	static SubOptimizer* create(ArithmExprEvaluator*
 		arithmExprEvaluator);
 	virtual std::string getId() const override;
 
@@ -78,16 +78,16 @@ private:
 	/// @name Visitor Interface
 	/// @{
 	using SubOptimizer::visit;
-	virtual void visit(ShPtr<MulOpExpr> expr) override;
-	virtual void visit(ShPtr<DivOpExpr> expr) override;
-	virtual void visit(ShPtr<BitXorOpExpr> expr) override;
+	virtual void visit(MulOpExpr* expr) override;
+	virtual void visit(DivOpExpr* expr) override;
+	virtual void visit(BitXorOpExpr* expr) override;
 	/// @}
 
-	bool isConstFloatOne(ShPtr<Expression> expr) const;
-	bool isConstIntOne(ShPtr<Expression> expr) const;
-	bool isOne(ShPtr<ConstFloat> value) const;
-	bool isOne(ShPtr<ConstInt> value) const;
-	bool isOpOne(ShPtr<Expression> expr) const;
+	bool isConstFloatOne(Expression* expr) const;
+	bool isConstIntOne(Expression* expr) const;
+	bool isOne(ConstFloat* value) const;
+	bool isOne(ConstInt* value) const;
+	bool isOpOne(Expression* expr) const;
 };
 
 } // namespace llvmir2hll

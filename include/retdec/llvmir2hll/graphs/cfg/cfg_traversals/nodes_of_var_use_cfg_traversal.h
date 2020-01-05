@@ -33,35 +33,35 @@ class VarDefStmt;
 class NodesOfVarUseCFGTraversal final: public CFGTraversal {
 public:
 	/// Set of cfg nodes.
-	using CFGNodeSet = std::set<ShPtr<CFG::Node>>;
+	using CFGNodeSet = std::set<CFG::Node*>;
 
 	/// Mapping of a VarDefStmt into a Node.
 	/// Saves all nodes where variable from it's own definition is used.
-	using VarDefStmtNodeMap = std::map<ShPtr<VarDefStmt>, CFGNodeSet>;
+	using VarDefStmtNodeMap = std::map<VarDefStmt*, CFGNodeSet>;
 
 public:
-	static ShPtr<VarDefStmtNodeMap> getNodesOfUseVariable(const VarDefStmtSet
-		&setOfVarDefStmt, ShPtr<CFG> cfg, ShPtr<ValueAnalysis> va);
+	static VarDefStmtNodeMap* getNodesOfUseVariable(const VarDefStmtSet
+		&setOfVarDefStmt, CFG* cfg, ValueAnalysis* va);
 
 private:
 	/// Maping of a variable into a VarDefStmt.
-	using VarVarDefMap = std::map<ShPtr<Variable>, ShPtr<VarDefStmt>>;
+	using VarVarDefMap = std::map<Variable*, VarDefStmt*>;
 
 private:
 	NodesOfVarUseCFGTraversal(const VarDefStmtSet &setOfVarDefStmt,
-		ShPtr<CFG> cfg, ShPtr<ValueAnalysis> va);
+		CFG* cfg, ValueAnalysis* va);
 
-	virtual bool visitStmt(ShPtr<Statement> stmt) override;
+	virtual bool visitStmt(Statement* stmt) override;
 	virtual bool getEndRetVal() const override;
 	virtual bool combineRetVals(bool origRetVal, bool newRetVal) const override;
 
 private:
 	/// Analysis of values.
-	ShPtr<ValueAnalysis> va;
+	ValueAnalysis* va = nullptr;
 
 	/// A result map where key is a VarDefStmt statement and item is a set of
 	/// nodes where variable from VarDefStmt statement is used.
-	ShPtr<VarDefStmtNodeMap> mapOfVarDefStmtNodes;
+	VarDefStmtNodeMap* mapOfVarDefStmtNodes = nullptr;
 
 	/// Mapping a variable from VarDefStmt to VarDefStmt.
 	VarVarDefMap mapOfVarVarDef;

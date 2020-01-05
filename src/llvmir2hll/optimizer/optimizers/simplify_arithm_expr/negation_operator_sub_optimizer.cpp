@@ -22,8 +22,8 @@ REGISTER_AT_FACTORY("NegationOperator", NEGATION_OPERATOR_SUB_OPTIMIZER_ID,
 * @param[in] arithmExprEvaluator @a The used evaluator of arithmetical
 *            expressions.
 */
-NegationOperatorSubOptimizer::NegationOperatorSubOptimizer(ShPtr<
-	ArithmExprEvaluator> arithmExprEvaluator):
+NegationOperatorSubOptimizer::NegationOperatorSubOptimizer(
+	ArithmExprEvaluator* arithmExprEvaluator):
 		SubOptimizer(arithmExprEvaluator) {}
 
 /**
@@ -32,20 +32,20 @@ NegationOperatorSubOptimizer::NegationOperatorSubOptimizer(ShPtr<
 * @param[in] arithmExprEvaluator @a The used evaluator of arithmetical
 *            expressions.
 */
-ShPtr<SubOptimizer> NegationOperatorSubOptimizer::create(ShPtr<
-		ArithmExprEvaluator> arithmExprEvaluator) {
-	return ShPtr<SubOptimizer>(new NegationOperatorSubOptimizer(
-		arithmExprEvaluator));
+SubOptimizer* NegationOperatorSubOptimizer::create(
+		ArithmExprEvaluator* arithmExprEvaluator) {
+	return new NegationOperatorSubOptimizer(
+		arithmExprEvaluator);
 }
 
 std::string NegationOperatorSubOptimizer::getId() const {
 	return NEGATION_OPERATOR_SUB_OPTIMIZER_ID;
 }
 
-void NegationOperatorSubOptimizer::visit(ShPtr<NotOpExpr> expr) {
+void NegationOperatorSubOptimizer::visit(NotOpExpr* expr) {
 	OrderedAllVisitor::visit(expr);
 
-	ShPtr<Expression> negatedExpr(ExpressionNegater::negate(expr->getOperand()));
+	Expression* negatedExpr(ExpressionNegater::negate(expr->getOperand()));
 	// !(a + b) is not optimized to !(a + b) because this is uselessly. Not to
 	// optimize expression to the same one is implemented in optimizeExpr(...).
 	optimizeExpr(expr, negatedExpr);

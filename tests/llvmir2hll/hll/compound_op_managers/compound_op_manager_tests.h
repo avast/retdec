@@ -18,11 +18,11 @@ namespace tests {
 */
 class CompoundOpManagerTests: public ::testing::Test {
 protected:
-	void tryToOptimizeAndCheckResult(ShPtr<AssignStmt> stmt, CompoundOpManager::
+	void tryToOptimizeAndCheckResult(AssignStmt* stmt, CompoundOpManager::
 		CompoundOp expectedResult);
 
 protected:
-		ShPtr<CompoundOpManager> compoundOpManager;
+		CompoundOpManager* compoundOpManager;
 };
 
 } // namespace tests

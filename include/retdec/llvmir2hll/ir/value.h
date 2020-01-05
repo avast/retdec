@@ -33,7 +33,7 @@ class Value: public Visitable, public Metadatable<std::string>,
 public:
 	virtual ~Value() = default;
 
-	virtual ShPtr<Value> getSelf() override;
+	virtual Value* getSelf() override;
 
 	/**
 	* @brief Returns a clone of the value.
@@ -53,7 +53,7 @@ public:
 	* returns @c true) are cloned without their successors; therefore, e.g.,
 	* just the first statement of every if's clause is cloned.
 	*/
-	virtual ShPtr<Value> clone() = 0;
+	virtual Value* clone() = 0;
 
 	/**
 	* @brief Returns @c true if this value is equal to @a otherValue, @c false
@@ -64,7 +64,7 @@ public:
 	*
 	* This function doesn't consider observers, metadata, etc.
 	*/
-	virtual bool isEqualTo(ShPtr<Value> otherValue) const = 0;
+	virtual bool isEqualTo(Value* otherValue) const = 0;
 
 	std::string getTextRepr();
 
@@ -77,9 +77,9 @@ protected:
 
 // These functions have to be declared in the same namespace that defines Value
 // and its subclasses; C++ lookup rules rely on that.
-llvm::raw_ostream &operator<<(llvm::raw_ostream &os, const ShPtr<Value> &value);
+llvm::raw_ostream &operator<<(llvm::raw_ostream &os, Value* value);
 // The following function is used to print values in tests (Google Tests
-// framework). It must have this signature; ShPtr<Value> does not work.
+// framework). It must have this signature; Value* does not work.
 std::ostream &operator<<(std::ostream &os, Value *value);
 
 /// @}

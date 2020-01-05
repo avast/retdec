@@ -27,10 +27,10 @@ GotoTargetAnalysis::GotoTargetAnalysis():
 * @par Preconditions
 *  - @a stmt is non-null
 */
-StmtSet GotoTargetAnalysis::getGotoTargets(ShPtr<Statement> stmt) {
+StmtSet GotoTargetAnalysis::getGotoTargets(Statement* stmt) {
 	PRECONDITION_NON_NULL(stmt);
 
-	ShPtr<GotoTargetAnalysis> analysis(new GotoTargetAnalysis());
+	GotoTargetAnalysis* analysis(new GotoTargetAnalysis());
 	analysis->visitStmt(stmt);
 	return analysis->gotoTargets;
 }
@@ -44,10 +44,10 @@ StmtSet GotoTargetAnalysis::getGotoTargets(ShPtr<Statement> stmt) {
 * @par Preconditions
 *  - @a stmt is non-null
 */
-bool GotoTargetAnalysis::hasGotoTargets(ShPtr<Statement> stmt) {
+bool GotoTargetAnalysis::hasGotoTargets(Statement* stmt) {
 	PRECONDITION_NON_NULL(stmt);
 
-	ShPtr<GotoTargetAnalysis> analysis(new GotoTargetAnalysis());
+	GotoTargetAnalysis* analysis(new GotoTargetAnalysis());
 	analysis->visitStmt(stmt);
 	return !analysis->gotoTargets.empty();
 }
@@ -56,18 +56,18 @@ bool GotoTargetAnalysis::hasGotoTargets(ShPtr<Statement> stmt) {
 * @brief Checks whether the given statement is a goto target, and if so, puts
 *        it into @c gotoTargets.
 */
-void GotoTargetAnalysis::putIntoGotoTargetsIfGotoTarget(ShPtr<Statement> stmt) {
+void GotoTargetAnalysis::putIntoGotoTargetsIfGotoTarget(Statement* stmt) {
 	if (stmt && stmt->isGotoTarget()) {
 		gotoTargets.insert(stmt);
 	}
 }
 
-void GotoTargetAnalysis::visit(ShPtr<GotoStmt> stmt) {
+void GotoTargetAnalysis::visit(GotoStmt* stmt) {
 	// Do not visit the goto's target, just its successor (if any).
 	visitStmt(stmt->getSuccessor());
 }
 
-void GotoTargetAnalysis::visitStmt(ShPtr<Statement> stmt, bool visitSuccessors,
+void GotoTargetAnalysis::visitStmt(Statement* stmt, bool visitSuccessors,
 		bool visitNestedStmts) {
 	putIntoGotoTargetsIfGotoTarget(stmt);
 	OrderedAllVisitor::visitStmt(stmt, visitSuccessors, visitNestedStmts);

@@ -26,16 +26,16 @@ namespace llvmir2hll {
 class APICallSeqPatternFinder: public PatternFinder {
 public:
 	virtual const std::string getId() const override;
-	virtual Patterns findPatterns(ShPtr<Module> module) override;
+	virtual Patterns findPatterns(Module* module) override;
 
-	static ShPtr<PatternFinder> create(ShPtr<ValueAnalysis> va,
-		ShPtr<CallInfoObtainer> cio);
+	static PatternFinder* create(ValueAnalysis* va,
+		CallInfoObtainer* cio);
 
 	// TODO Add possibility of setting API_CALL_INFO_SEQ_MAP.
 
 private:
-	APICallSeqPatternFinder(ShPtr<ValueAnalysis> va,
-		ShPtr<CallInfoObtainer> cio);
+	APICallSeqPatternFinder(ValueAnalysis* va,
+		CallInfoObtainer* cio);
 
 private:
 	/// Patterns to be returned.

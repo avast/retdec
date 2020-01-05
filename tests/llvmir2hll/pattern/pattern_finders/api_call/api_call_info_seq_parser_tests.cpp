@@ -27,7 +27,7 @@ protected:
 	}
 
 protected:
-	ShPtr<APICallInfoSeqParser> parser;
+	APICallInfoSeqParser* parser;
 };
 
 TEST_F(APICallInfoSeqParserTests,

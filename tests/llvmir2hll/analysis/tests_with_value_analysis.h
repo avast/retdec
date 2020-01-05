@@ -38,18 +38,18 @@
 	/* (1) */ \
 	::testing::NiceMock<AliasAnalysisMock> *aliasAnalysisMock = \
 		new ::testing::NiceMock<AliasAnalysisMock>(); \
-	ShPtr<AliasAnalysis> aliasAnalysis(aliasAnalysisMock); \
+	AliasAnalysis* aliasAnalysis(aliasAnalysisMock); \
 	/* (2) */ \
 	const VarSet EMPTY_VAR_SET; \
 	ON_CALL(*aliasAnalysisMock, mayPointTo(::testing::_)) \
 		.WillByDefault(::testing::ReturnRef(EMPTY_VAR_SET)); \
 	ON_CALL(*aliasAnalysisMock, pointsTo(::testing::_)) \
-		.WillByDefault(::testing::Return(ShPtr<Variable>())); \
+		.WillByDefault(::testing::Return(Variable*())); \
 	ON_CALL(*aliasAnalysisMock, mayBePointed(::testing::_)) \
 		.WillByDefault(::testing::Return(false)); \
 	ON_CALL(*aliasAnalysisMock, isInitialized()) \
 		.WillByDefault(::testing::Return(true)); \
 	/* (3) */ \
-	ShPtr<ValueAnalysis> va(ValueAnalysis::create(aliasAnalysis, false))
+	ValueAnalysis* va(ValueAnalysis::create(aliasAnalysis, false))
 
 #endif

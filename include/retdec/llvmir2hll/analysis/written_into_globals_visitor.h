@@ -27,27 +27,27 @@ class Function;
 class WrittenIntoGlobalsVisitor: private OrderedAllVisitor,
 		private retdec::utils::NonCopyable {
 public:
-	static VarSet getWrittenIntoGlobals(ShPtr<Function> func,
-		ShPtr<Module> module);
+	static VarSet getWrittenIntoGlobals(Function* func,
+		Module* module);
 
 private:
-	WrittenIntoGlobalsVisitor(ShPtr<Module> module);
+	WrittenIntoGlobalsVisitor(Module* module);
 
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<Variable> var) override;
-	virtual void visit(ShPtr<ArrayIndexOpExpr> expr) override;
-	virtual void visit(ShPtr<StructIndexOpExpr> expr) override;
-	virtual void visit(ShPtr<DerefOpExpr> expr) override;
-	virtual void visit(ShPtr<AssignStmt> stmt) override;
-	virtual void visit(ShPtr<VarDefStmt> stmt) override;
-	virtual void visit(ShPtr<ForLoopStmt> stmt) override;
+	virtual void visit(Variable* var) override;
+	virtual void visit(ArrayIndexOpExpr* expr) override;
+	virtual void visit(StructIndexOpExpr* expr) override;
+	virtual void visit(DerefOpExpr* expr) override;
+	virtual void visit(AssignStmt* stmt) override;
+	virtual void visit(VarDefStmt* stmt) override;
+	virtual void visit(ForLoopStmt* stmt) override;
 	/// @}
 
 private:
 	/// The current module.
-	ShPtr<Module> module;
+	Module* module = nullptr;
 
 	/// Global variables in @c module. This is here to speedup the analysis. By
 	/// using this set, we do not have to ask @c module every time we need such

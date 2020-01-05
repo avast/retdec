@@ -55,10 +55,10 @@ public:
 	std::size_t getNumOfDirReadVars() const;
 	std::size_t getNumOfDirWrittenVars() const;
 	std::size_t getNumOfDirAccessedVars() const;
-	std::size_t getDirNumOfUses(ShPtr<Variable> var) const;
-	bool isDirRead(ShPtr<Variable> var) const;
-	bool isDirWritten(ShPtr<Variable> var) const;
-	bool isDirAccessed(ShPtr<Variable> var) const;
+	std::size_t getDirNumOfUses(Variable* var) const;
+	bool isDirRead(Variable* var) const;
+	bool isDirWritten(Variable* var) const;
+	bool isDirAccessed(Variable* var) const;
 
 	var_iterator dir_read_begin() const;
 	var_iterator dir_read_end() const;
@@ -76,9 +76,9 @@ public:
 	const VarSet &getMayBeReadVars() const;
 	const VarSet &getMayBeWrittenVars() const;
 	const VarSet &getMayBeAccessedVars() const;
-	bool mayBeIndirRead(ShPtr<Variable> var) const;
-	bool mayBeIndirWritten(ShPtr<Variable> var) const;
-	bool mayBeIndirAccessed(ShPtr<Variable> var) const;
+	bool mayBeIndirRead(Variable* var) const;
+	bool mayBeIndirWritten(Variable* var) const;
+	bool mayBeIndirAccessed(Variable* var) const;
 
 	var_iterator may_be_read_begin() const;
 	var_iterator may_be_read_end() const;
@@ -93,9 +93,9 @@ public:
 	const VarSet &getMustBeReadVars() const;
 	const VarSet &getMustBeWrittenVars() const;
 	const VarSet &getMustBeAccessedVars() const;
-	bool mustBeIndirRead(ShPtr<Variable> var) const;
-	bool mustBeIndirWritten(ShPtr<Variable> var) const;
-	bool mustBeIndirAccessed(ShPtr<Variable> var) const;
+	bool mustBeIndirRead(Variable* var) const;
+	bool mustBeIndirWritten(Variable* var) const;
+	bool mustBeIndirAccessed(Variable* var) const;
 
 	var_iterator must_be_read_begin() const;
 	var_iterator must_be_read_end() const;
@@ -120,7 +120,7 @@ public:
 	/// @name Address Operators Accessors
 	/// @{
 	bool hasAddressOps() const;
-	bool hasAddressTaken(ShPtr<Variable> var) const;
+	bool hasAddressTaken(Variable* var) const;
 	/// @}
 
 	/// @name Dereferences Accessors
@@ -140,7 +140,7 @@ public:
 
 private:
 	/// Mapping of a variable into a count.
-	using VarCountMap = std::map<ShPtr<Variable>, std::size_t>;
+	using VarCountMap = std::map<Variable*, std::size_t>;
 
 private:
 	ValueData();
@@ -210,107 +210,107 @@ private:
 */
 class ValueAnalysis: private OrderedAllVisitor,
 	private retdec::utils::NonCopyable, public ValidState,
-	public Caching<ShPtr<Value>, ShPtr<ValueData>> {
+	public Caching<Value*, ValueData*> {
 
 public:
-	ShPtr<ValueData> getValueData(ShPtr<Value> value);
+	ValueData* getValueData(Value* value);
 
 	/// @name Caching
 	/// @{
 	void clearCache();
-	void removeFromCache(ShPtr<Value> value, bool recursive = true);
+	void removeFromCache(Value* value, bool recursive = true);
 	/// @}
 
 	/// @name Access To Alias Analysis
 	/// @{
-	void initAliasAnalysis(ShPtr<Module> module);
-	const VarSet &mayPointTo(ShPtr<Variable> var) const;
-	ShPtr<Variable> pointsTo(ShPtr<Variable> var) const;
-	bool mayBePointed(ShPtr<Variable> var) const;
+	void initAliasAnalysis(Module* module);
+	const VarSet &mayPointTo(Variable* var) const;
+	Variable* pointsTo(Variable* var) const;
+	bool mayBePointed(Variable* var) const;
 	/// @}
 
-	static ShPtr<ValueAnalysis> create(ShPtr<AliasAnalysis> aliasAnalysis,
+	static ValueAnalysis* create(AliasAnalysis* aliasAnalysis,
 		bool enableCaching = false);
 
 private:
-	explicit ValueAnalysis(ShPtr<AliasAnalysis> aliasAnalysis,
+	explicit ValueAnalysis(AliasAnalysis* aliasAnalysis,
 		bool enableCaching = false);
 
-	void computeAndStoreIndirectlyUsedVars(ShPtr<DerefOpExpr> expr);
+	void computeAndStoreIndirectlyUsedVars(DerefOpExpr* expr);
 
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<Function> func) override;
+	virtual void visit(Function* func) override;
 	// Statements
-	virtual void visit(ShPtr<AssignStmt> stmt) override;
-	virtual void visit(ShPtr<BreakStmt> stmt) override;
-	virtual void visit(ShPtr<CallStmt> stmt) override;
-	virtual void visit(ShPtr<ContinueStmt> stmt) override;
-	virtual void visit(ShPtr<EmptyStmt> stmt) override;
-	virtual void visit(ShPtr<ForLoopStmt> stmt) override;
-	virtual void visit(ShPtr<UForLoopStmt> stmt) override;
-	virtual void visit(ShPtr<GotoStmt> stmt) override;
-	virtual void visit(ShPtr<IfStmt> stmt) override;
-	virtual void visit(ShPtr<ReturnStmt> stmt) override;
-	virtual void visit(ShPtr<SwitchStmt> stmt) override;
-	virtual void visit(ShPtr<UnreachableStmt> stmt) override;
-	virtual void visit(ShPtr<VarDefStmt> stmt) override;
-	virtual void visit(ShPtr<WhileLoopStmt> stmt) override;
+	virtual void visit(AssignStmt* stmt) override;
+	virtual void visit(BreakStmt* stmt) override;
+	virtual void visit(CallStmt* stmt) override;
+	virtual void visit(ContinueStmt* stmt) override;
+	virtual void visit(EmptyStmt* stmt) override;
+	virtual void visit(ForLoopStmt* stmt) override;
+	virtual void visit(UForLoopStmt* stmt) override;
+	virtual void visit(GotoStmt* stmt) override;
+	virtual void visit(IfStmt* stmt) override;
+	virtual void visit(ReturnStmt* stmt) override;
+	virtual void visit(SwitchStmt* stmt) override;
+	virtual void visit(UnreachableStmt* stmt) override;
+	virtual void visit(VarDefStmt* stmt) override;
+	virtual void visit(WhileLoopStmt* stmt) override;
 	// Expressions
-	virtual void visit(ShPtr<AddOpExpr> expr) override;
-	virtual void visit(ShPtr<AddressOpExpr> expr) override;
-	virtual void visit(ShPtr<AndOpExpr> expr) override;
-	virtual void visit(ShPtr<ArrayIndexOpExpr> expr) override;
-	virtual void visit(ShPtr<AssignOpExpr> expr) override;
-	virtual void visit(ShPtr<BitAndOpExpr> expr) override;
-	virtual void visit(ShPtr<BitOrOpExpr> expr) override;
-	virtual void visit(ShPtr<BitShlOpExpr> expr) override;
-	virtual void visit(ShPtr<BitShrOpExpr> expr) override;
-	virtual void visit(ShPtr<BitXorOpExpr> expr) override;
-	virtual void visit(ShPtr<CallExpr> expr) override;
-	virtual void visit(ShPtr<CommaOpExpr> expr) override;
-	virtual void visit(ShPtr<DerefOpExpr> expr) override;
-	virtual void visit(ShPtr<DivOpExpr> expr) override;
-	virtual void visit(ShPtr<EqOpExpr> expr) override;
-	virtual void visit(ShPtr<GtEqOpExpr> expr) override;
-	virtual void visit(ShPtr<GtOpExpr> expr) override;
-	virtual void visit(ShPtr<LtEqOpExpr> expr) override;
-	virtual void visit(ShPtr<LtOpExpr> expr) override;
-	virtual void visit(ShPtr<ModOpExpr> expr) override;
-	virtual void visit(ShPtr<MulOpExpr> expr) override;
-	virtual void visit(ShPtr<NegOpExpr> expr) override;
-	virtual void visit(ShPtr<NeqOpExpr> expr) override;
-	virtual void visit(ShPtr<NotOpExpr> expr) override;
-	virtual void visit(ShPtr<OrOpExpr> expr) override;
-	virtual void visit(ShPtr<StructIndexOpExpr> expr) override;
-	virtual void visit(ShPtr<SubOpExpr> expr) override;
-	virtual void visit(ShPtr<TernaryOpExpr> expr) override;
-	virtual void visit(ShPtr<Variable> var) override;
+	virtual void visit(AddOpExpr* expr) override;
+	virtual void visit(AddressOpExpr* expr) override;
+	virtual void visit(AndOpExpr* expr) override;
+	virtual void visit(ArrayIndexOpExpr* expr) override;
+	virtual void visit(AssignOpExpr* expr) override;
+	virtual void visit(BitAndOpExpr* expr) override;
+	virtual void visit(BitOrOpExpr* expr) override;
+	virtual void visit(BitShlOpExpr* expr) override;
+	virtual void visit(BitShrOpExpr* expr) override;
+	virtual void visit(BitXorOpExpr* expr) override;
+	virtual void visit(CallExpr* expr) override;
+	virtual void visit(CommaOpExpr* expr) override;
+	virtual void visit(DerefOpExpr* expr) override;
+	virtual void visit(DivOpExpr* expr) override;
+	virtual void visit(EqOpExpr* expr) override;
+	virtual void visit(GtEqOpExpr* expr) override;
+	virtual void visit(GtOpExpr* expr) override;
+	virtual void visit(LtEqOpExpr* expr) override;
+	virtual void visit(LtOpExpr* expr) override;
+	virtual void visit(ModOpExpr* expr) override;
+	virtual void visit(MulOpExpr* expr) override;
+	virtual void visit(NegOpExpr* expr) override;
+	virtual void visit(NeqOpExpr* expr) override;
+	virtual void visit(NotOpExpr* expr) override;
+	virtual void visit(OrOpExpr* expr) override;
+	virtual void visit(StructIndexOpExpr* expr) override;
+	virtual void visit(SubOpExpr* expr) override;
+	virtual void visit(TernaryOpExpr* expr) override;
+	virtual void visit(Variable* var) override;
 	// Casts
-	virtual void visit(ShPtr<BitCastExpr> expr) override;
-	virtual void visit(ShPtr<ExtCastExpr> expr) override;
-	virtual void visit(ShPtr<FPToIntCastExpr> expr) override;
-	virtual void visit(ShPtr<IntToFPCastExpr> expr) override;
-	virtual void visit(ShPtr<IntToPtrCastExpr> expr) override;
-	virtual void visit(ShPtr<PtrToIntCastExpr> expr) override;
-	virtual void visit(ShPtr<TruncCastExpr> expr) override;
+	virtual void visit(BitCastExpr* expr) override;
+	virtual void visit(ExtCastExpr* expr) override;
+	virtual void visit(FPToIntCastExpr* expr) override;
+	virtual void visit(IntToFPCastExpr* expr) override;
+	virtual void visit(IntToPtrCastExpr* expr) override;
+	virtual void visit(PtrToIntCastExpr* expr) override;
+	virtual void visit(TruncCastExpr* expr) override;
 	// Constants
-	virtual void visit(ShPtr<ConstArray> constant) override;
-	virtual void visit(ShPtr<ConstBool> constant) override;
-	virtual void visit(ShPtr<ConstFloat> constant) override;
-	virtual void visit(ShPtr<ConstInt> constant) override;
-	virtual void visit(ShPtr<ConstNullPointer> constant) override;
-	virtual void visit(ShPtr<ConstString> constant) override;
-	virtual void visit(ShPtr<ConstStruct> constant) override;
+	virtual void visit(ConstArray* constant) override;
+	virtual void visit(ConstBool* constant) override;
+	virtual void visit(ConstFloat* constant) override;
+	virtual void visit(ConstInt* constant) override;
+	virtual void visit(ConstNullPointer* constant) override;
+	virtual void visit(ConstString* constant) override;
+	virtual void visit(ConstStruct* constant) override;
 	/// @}
 
 private:
 	/// The used alias analysis.
-	ShPtr<AliasAnalysis> aliasAnalysis;
+	AliasAnalysis* aliasAnalysis = nullptr;
 
 	/// Information about the currently computed value.
-	ShPtr<ValueData> valueData;
+	ValueData* valueData = nullptr;
 
 	/// Are we writing into a variable?
 	bool writing;

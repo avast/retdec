@@ -28,18 +28,18 @@ class Module;
 class PatternFinderRunner {
 public:
 	/// A container storing pattern finders.
-	using PatternFinders = std::vector<ShPtr<PatternFinder>>;
+	using PatternFinders = std::vector<PatternFinder*>;
 
 public:
 	virtual ~PatternFinderRunner() = default;
-	void run(const PatternFinders &pfs, ShPtr<Module> module);
-	void run(ShPtr<PatternFinder> pf, ShPtr<Module> module);
+	void run(const PatternFinders &pfs, Module* module);
+	void run(PatternFinder* pf, Module* module);
 
 protected:
 	/**
 	* @brief Performs actions before pattern finder @a pf runs.
 	*/
-	virtual void doActionsBeforePatternFinderRuns(ShPtr<PatternFinder> pf) = 0;
+	virtual void doActionsBeforePatternFinderRuns(PatternFinder* pf) = 0;
 
 	/**
 	* @brief Performs actions after pattern finder @a pf has run.
@@ -47,7 +47,7 @@ protected:
 	* @param[in] pf Pattern finder that has run.
 	* @param[in] foundPatterns The result of @c pf->findPatterns(module).
 	*/
-	virtual void doActionsAfterPatternFinderHasRun(ShPtr<PatternFinder> pf,
+	virtual void doActionsAfterPatternFinderHasRun(PatternFinder* pf,
 		const PatternFinder::Patterns &foundPatterns) = 0;
 };
 

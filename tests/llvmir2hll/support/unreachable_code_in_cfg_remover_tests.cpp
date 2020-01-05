@@ -57,10 +57,10 @@ IfThereIsUnreachableCodeAfterIfStatementRemoveIt) {
 	//     return 0;       <-- to be removed
 	// }
 	//
-	ShPtr<ReturnStmt> return0(ReturnStmt::create(ConstInt::create(0, 32)));
-	ShPtr<ReturnStmt> return1(ReturnStmt::create(ConstInt::create(1, 32)));
-	ShPtr<ReturnStmt> return2(ReturnStmt::create(ConstInt::create(2, 32)));
-	ShPtr<IfStmt> ifStmt(IfStmt::create(ConstInt::create(1, 32),
+	ReturnStmt* return0(ReturnStmt::create(ConstInt::create(0, 32)));
+	ReturnStmt* return1(ReturnStmt::create(ConstInt::create(1, 32)));
+	ReturnStmt* return2(ReturnStmt::create(ConstInt::create(2, 32)));
+	IfStmt* ifStmt(IfStmt::create(ConstInt::create(1, 32),
 		return1, return0));
 	ifStmt->setElseClause(return2);
 	testFunc->setBody(ifStmt);
@@ -88,11 +88,11 @@ EmptyStatementIsRemovedIfItHadSuccessorThatWasRemoved) {
 	//     return 0;              <-- to be removed
 	// }
 	//
-	ShPtr<ReturnStmt> return0(ReturnStmt::create(ConstInt::create(0, 32)));
-	ShPtr<EmptyStmt> emptyStmt(EmptyStmt::create(return0));
-	ShPtr<ReturnStmt> return1(ReturnStmt::create(ConstInt::create(1, 32)));
-	ShPtr<ReturnStmt> return2(ReturnStmt::create(ConstInt::create(2, 32)));
-	ShPtr<IfStmt> ifStmt(IfStmt::create(ConstInt::create(1, 32),
+	ReturnStmt* return0(ReturnStmt::create(ConstInt::create(0, 32)));
+	EmptyStmt* emptyStmt(EmptyStmt::create(return0));
+	ReturnStmt* return1(ReturnStmt::create(ConstInt::create(1, 32)));
+	ReturnStmt* return2(ReturnStmt::create(ConstInt::create(2, 32)));
+	IfStmt* ifStmt(IfStmt::create(ConstInt::create(1, 32),
 		return1, emptyStmt));
 	ifStmt->setElseClause(return2);
 	testFunc->setBody(ifStmt);
@@ -120,11 +120,11 @@ EmptyStatementWhoseSuccessorIsNotRemovedIsKept) {
 	//     return 0;                  <-- to be removed
 	// }
 	//
-	ShPtr<ReturnStmt> return0(ReturnStmt::create(ConstInt::create(0, 32)));
-	ShPtr<ReturnStmt> return1(ReturnStmt::create(ConstInt::create(1, 32)));
-	ShPtr<EmptyStmt> emptyStmt(EmptyStmt::create(return1));
-	ShPtr<ReturnStmt> return2(ReturnStmt::create(ConstInt::create(2, 32)));
-	ShPtr<IfStmt> ifStmt(IfStmt::create(ConstInt::create(1, 32),
+	ReturnStmt* return0(ReturnStmt::create(ConstInt::create(0, 32)));
+	ReturnStmt* return1(ReturnStmt::create(ConstInt::create(1, 32)));
+	EmptyStmt* emptyStmt(EmptyStmt::create(return1));
+	ReturnStmt* return2(ReturnStmt::create(ConstInt::create(2, 32)));
+	IfStmt* ifStmt(IfStmt::create(ConstInt::create(1, 32),
 		emptyStmt, return0));
 	ifStmt->setElseClause(return2);
 	testFunc->setBody(ifStmt);

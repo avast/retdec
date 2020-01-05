@@ -23,7 +23,7 @@ namespace llvmir2hll {
 * For the description of parameters, see the description of data members of
 * CalledFuncs.
 */
-CG::CalledFuncs::CalledFuncs(ShPtr<Function> caller, bool callsOnlyDefinedFuncs,
+CG::CalledFuncs::CalledFuncs(Function* caller, bool callsOnlyDefinedFuncs,
 	bool callsByPointer): caller(caller),
 		callsOnlyDefinedFuncs(callsOnlyDefinedFuncs),
 		callsByPointer(callsByPointer) {}
@@ -33,12 +33,12 @@ CG::CalledFuncs::CalledFuncs(ShPtr<Function> caller, bool callsOnlyDefinedFuncs,
 *
 * @param[in] module Module for which this call graph is created.
 */
-CG::CG(ShPtr<Module> module): module(module), callerCalleeMap() {}
+CG::CG(Module* module): module(module), callerCalleeMap() {}
 
 /**
 * @brief Returns the module for which this call graph has been created.
 */
-ShPtr<Module> CG::getCorrespondingModule() const {
+Module* CG::getCorrespondingModule() const {
 	return module;
 }
 
@@ -57,7 +57,7 @@ ShPtr<Module> CG::getCorrespondingModule() const {
 * If @a func doesn't belong to the underlying module, the null pointer is
 * returned.
 */
-ShPtr<CG::CalledFuncs> CG::getCalledFuncs(ShPtr<Function> func,
+CG::CalledFuncs* CG::getCalledFuncs(Function* func,
 		bool includeIndirectCalls) const {
 	auto i = callerCalleeMap.find(func);
 	if (i != callerCalleeMap.end()) {
@@ -69,7 +69,7 @@ ShPtr<CG::CalledFuncs> CG::getCalledFuncs(ShPtr<Function> func,
 	}
 
 	// func is not present in the underlying module.
-	return ShPtr<CalledFuncs>();
+	return nullptr;
 }
 
 /**
@@ -77,9 +77,9 @@ ShPtr<CG::CalledFuncs> CG::getCalledFuncs(ShPtr<Function> func,
 *
 * This function doesn't change @a calledFuncs.
 */
-ShPtr<CG::CalledFuncs> CG::computeIndirectCalls(ShPtr<CalledFuncs> calledFuncs) const {
+CG::CalledFuncs* CG::computeIndirectCalls(CalledFuncs* calledFuncs) const {
 	// Initialization.
-	ShPtr<CalledFuncs> indCalledFuncs(new CalledFuncs(calledFuncs->caller));
+	CalledFuncs* indCalledFuncs(new CalledFuncs(calledFuncs->caller));
 	indCalledFuncs->callees = calledFuncs->callees;
 	indCalledFuncs->callsOnlyDefinedFuncs = calledFuncs->callsOnlyDefinedFuncs;
 	indCalledFuncs->callsByPointer = calledFuncs->callsByPointer;
@@ -105,7 +105,7 @@ ShPtr<CG::CalledFuncs> CG::computeIndirectCalls(ShPtr<CalledFuncs> calledFuncs) 
 		// For each callee...
 		for (const auto &callee : indCalledFuncs->callees) {
 			// Update the result.
-			ShPtr<CalledFuncs> calleeCalledFuncs(getCalledFuncs(callee));
+			CalledFuncs* calleeCalledFuncs(getCalledFuncs(callee));
 			addToSet(calleeCalledFuncs->callees, newFuncCalls);
 			if (!calleeCalledFuncs->callsOnlyDefinedFuncs) {
 				indCalledFuncs->callsOnlyDefinedFuncs = false;

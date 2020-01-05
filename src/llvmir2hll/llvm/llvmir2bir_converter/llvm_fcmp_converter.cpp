@@ -31,8 +31,8 @@ namespace llvmir2hll {
 * @param[in] op2 Already converted second operand as expression in BIR.
 * @param[in] predicate Given fcmp predicate.
 */
-ShPtr<Expression> LLVMFCmpConverter::convertToExpression(ShPtr<Expression> op1,
-		ShPtr<Expression> op2, unsigned predicate) {
+Expression* LLVMFCmpConverter::convertToExpression(Expression* op1,
+		Expression* op2, unsigned predicate) {
 	switch (predicate) {
 		case llvm::CmpInst::FCMP_FALSE:
 			// always yields false, regardless of operands
@@ -133,7 +133,7 @@ void LLVMFCmpConverter::setOptionStrictFPUSemantics(bool strict) {
 /**
 * @brief Returns expression which determines if given Expression @a op is a QNAN.
 */
-ShPtr<Expression> LLVMFCmpConverter::getExprIsQNAN(ShPtr<Expression> op) const {
+Expression* LLVMFCmpConverter::getExprIsQNAN(Expression* op) const {
 	return NeqOpExpr::create(op, op);
 }
 
@@ -141,7 +141,7 @@ ShPtr<Expression> LLVMFCmpConverter::getExprIsQNAN(ShPtr<Expression> op) const {
 * @brief Returns expression which determines if given Expression @a op is not
 *        a QNAN.
 */
-ShPtr<Expression> LLVMFCmpConverter::getExprIsNotQNAN(ShPtr<Expression> op) const {
+Expression* LLVMFCmpConverter::getExprIsNotQNAN(Expression* op) const {
 	return EqOpExpr::create(op, op);
 }
 
@@ -152,8 +152,8 @@ ShPtr<Expression> LLVMFCmpConverter::getExprIsNotQNAN(ShPtr<Expression> op) cons
 * @tparam T Class that represents a comparison operator in BIR.
 */
 template<class T>
-ShPtr<Expression> LLVMFCmpConverter::getOrdFCmpExpr(ShPtr<Expression> op1,
-		ShPtr<Expression> op2) const {
+Expression* LLVMFCmpConverter::getOrdFCmpExpr(Expression* op1,
+		Expression* op2) const {
 	return T::create(op1, op2);
 }
 
@@ -164,8 +164,8 @@ ShPtr<Expression> LLVMFCmpConverter::getOrdFCmpExpr(ShPtr<Expression> op1,
 * @tparam T Class that represents a comparison operator in BIR.
 */
 template<class T>
-ShPtr<Expression> LLVMFCmpConverter::getUnordFCmpExpr(ShPtr<Expression> op1,
-		ShPtr<Expression> op2) const {
+Expression* LLVMFCmpConverter::getUnordFCmpExpr(Expression* op1,
+		Expression* op2) const {
 	if (!optionStrictFPUSemantics) {
 		return getOrdFCmpExpr<T>(op1, op2);
 	}

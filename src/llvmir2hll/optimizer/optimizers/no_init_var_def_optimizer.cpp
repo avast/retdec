@@ -19,12 +19,12 @@ namespace llvmir2hll {
 * @par Preconditions
 *  - @a module is non-null
 */
-NoInitVarDefOptimizer::NoInitVarDefOptimizer(ShPtr<Module> module):
+NoInitVarDefOptimizer::NoInitVarDefOptimizer(Module* module):
 	FuncOptimizer(module) {
 		PRECONDITION_NON_NULL(module);
 	}
 
-void NoInitVarDefOptimizer::visit(ShPtr<VarDefStmt> stmt) {
+void NoInitVarDefOptimizer::visit(VarDefStmt* stmt) {
 	if (stmt->hasInitializer()) {
 		// There is an initializer, so keep traversing.
 		visitStmt(stmt->getSuccessor());
@@ -33,7 +33,7 @@ void NoInitVarDefOptimizer::visit(ShPtr<VarDefStmt> stmt) {
 
 	// We have to store the statement's successor because
 	// Statement::removeStatement() resets it.
-	ShPtr<Statement> stmtSucc(stmt->getSuccessor());
+	Statement* stmtSucc(stmt->getSuccessor());
 	Statement::removeStatement(stmt);
 	visitStmt(stmtSucc);
 }

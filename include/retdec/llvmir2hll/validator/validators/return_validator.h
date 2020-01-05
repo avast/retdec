@@ -29,7 +29,7 @@ class ReturnValidator: public Validator {
 public:
 	virtual std::string getId() const override;
 
-	static ShPtr<Validator> create();
+	static Validator* create();
 
 private:
 	ReturnValidator();
@@ -37,7 +37,7 @@ private:
 	/// @name Visitor Interface
 	/// @{
 	using OrderedAllVisitor::visit;
-	virtual void visit(ShPtr<ReturnStmt> stmt) override;
+	virtual void visit(ReturnStmt* stmt) override;
 	/// @}
 };
 

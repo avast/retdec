@@ -26,7 +26,7 @@ namespace llvmir2hll {
 *
 * See removeCode() for the description of all parameters and preconditions.
 */
-UnreachableCodeInCFGRemover::UnreachableCodeInCFGRemover(ShPtr<Module> module):
+UnreachableCodeInCFGRemover::UnreachableCodeInCFGRemover(Module* module):
 	module(module), cfg(), cfgBuilder(NonRecursiveCFGBuilder::create()) {}
 
 /**
@@ -53,10 +53,10 @@ UnreachableCodeInCFGRemover::UnreachableCodeInCFGRemover(ShPtr<Module> module):
 * @par Preconditions
 *  - @a module is non-null
 */
-void UnreachableCodeInCFGRemover::removeCode(ShPtr<Module> module) {
+void UnreachableCodeInCFGRemover::removeCode(Module* module) {
 	PRECONDITION_NON_NULL(module);
 
-	ShPtr<UnreachableCodeInCFGRemover> remover(new UnreachableCodeInCFGRemover(
+	UnreachableCodeInCFGRemover* remover(new UnreachableCodeInCFGRemover(
 		module));
 	remover->performRemoval();
 }
@@ -76,10 +76,10 @@ void UnreachableCodeInCFGRemover::performRemoval() {
 /**
 * @brief Performs the removal of code in the given function.
 */
-void UnreachableCodeInCFGRemover::performRemovalInFunc(ShPtr<Function> func) {
+void UnreachableCodeInCFGRemover::performRemovalInFunc(Function* func) {
 	cfg = cfgBuilder->getCFG(func);
 
-	ShPtr<Statement> body(func->getBody());
+	Statement* body(func->getBody());
 	if (!skipEmptyStmts(body)) {
 		// The body is empty.
 		return;
@@ -87,7 +87,7 @@ void UnreachableCodeInCFGRemover::performRemovalInFunc(ShPtr<Function> func) {
 	visitStmt(body);
 }
 
-void UnreachableCodeInCFGRemover::visitStmt(ShPtr<Statement> stmt,
+void UnreachableCodeInCFGRemover::visitStmt(Statement* stmt,
 		bool visitSuccessors, bool visitNestedStmts) {
 	if (!stmt || hasItem(accessedStmts, stmt)) {
 		return;

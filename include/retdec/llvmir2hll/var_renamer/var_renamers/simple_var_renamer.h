@@ -24,13 +24,13 @@ namespace llvmir2hll {
 */
 class SimpleVarRenamer: public VarRenamer {
 public:
-	static ShPtr<VarRenamer> create(ShPtr<VarNameGen> varNameGen,
+	static VarRenamer* create(VarNameGen* varNameGen,
 		bool useDebugNames = true);
 
 	virtual std::string getId() const override;
 
 private:
-	SimpleVarRenamer(ShPtr<VarNameGen> varNameGen, bool useDebugNames);
+	SimpleVarRenamer(VarNameGen* varNameGen, bool useDebugNames);
 };
 
 } // namespace llvmir2hll

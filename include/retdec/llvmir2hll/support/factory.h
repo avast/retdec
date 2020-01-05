@@ -69,8 +69,8 @@ public:
 	* @param[in] id Object's ID.
 	* @return The null pointer.
 	*/
-	static ShPtr<AbstractObject> onUnknownType(ObjectIDType id) {
-		return ShPtr<AbstractObject>();
+	static AbstractObject* onUnknownType(ObjectIDType id) {
+		return nullptr;
 	}
 
 protected:
@@ -108,7 +108,7 @@ protected:
 *    @c ObjectIDType and @c AbstractObject.
 *  - Defines a public function
 *    @code
-*    static ShPtr<AbstractObject> onUnknownType(ObjectIDType id);
+*    static AbstractObject* onUnknownType(ObjectIDType id);
 *    @endcode
 *    which handles the "Unknown Type" error.
 *
@@ -117,7 +117,7 @@ protected:
 template<
 	class AbstractObject,
 	typename ObjectIDType,
-	typename ObjectCreator = ShPtr<AbstractObject> (*)(),
+	typename ObjectCreator = AbstractObject* (*)(),
 	template<typename, class>
 		class FactoryErrorPolicy = DefaultFactoryError
 >
@@ -165,7 +165,7 @@ public:
 	* @return Instance of the given object.
 	*/
 	template<typename... Args>
-	ShPtr<AbstractObject> createObject(const ObjectIDType &id,
+	AbstractObject* createObject(const ObjectIDType &id,
 			Args &&... args) const {
 		auto i = associations.find(id);
 		if (i != associations.end()) {

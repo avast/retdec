@@ -22,7 +22,7 @@ namespace llvmir2hll {
 * @par Preconditions
 *  - @a module is non-null
 */
-EmptyArrayToStringOptimizer::EmptyArrayToStringOptimizer(ShPtr<Module> module):
+EmptyArrayToStringOptimizer::EmptyArrayToStringOptimizer(Module* module):
 	Optimizer(module) {
 		PRECONDITION_NON_NULL(module);
 	}
@@ -31,7 +31,7 @@ void EmptyArrayToStringOptimizer::doOptimization() {
 	// For each global variable in the module...
 	for (auto i = module->global_var_begin(), e = module->global_var_end();
 			i != e; ++i) {
-		ShPtr<ConstArray> array(cast<ConstArray>((*i)->getInitializer()));
+		ConstArray* array(cast<ConstArray>((*i)->getInitializer()));
 		if (!array || !isArrayOfStrings(array)) {
 			continue;
 		}
@@ -51,7 +51,7 @@ void EmptyArrayToStringOptimizer::doOptimization() {
 *
 * If the array is not initialized, this function returns @c false.
 */
-bool EmptyArrayToStringOptimizer::isArrayOfStrings(ShPtr<ConstArray> array) {
+bool EmptyArrayToStringOptimizer::isArrayOfStrings(ConstArray* array) {
 	if (!array->isInitialized()) {
 		return false;
 	}
@@ -78,8 +78,8 @@ bool EmptyArrayToStringOptimizer::isArrayOfStrings(ShPtr<ConstArray> array) {
 * @brief Returns @c true if @a expr is an empty array, @c false
 *        otherwise.
 */
-bool EmptyArrayToStringOptimizer::isEmptyArray(ShPtr<Expression> expr) {
-	ShPtr<ConstArray> array(cast<ConstArray>(expr));
+bool EmptyArrayToStringOptimizer::isEmptyArray(Expression* expr) {
+	ConstArray* array(cast<ConstArray>(expr));
 	if (!array) {
 		return false;
 	}

@@ -25,21 +25,21 @@ class Variable;
 */
 class VarUseCFGTraversal final: public CFGTraversal {
 public:
-	static bool isDefinedPriorToEveryAccess(ShPtr<Variable> var,
-		ShPtr<CFG> cfg, ShPtr<ValueAnalysis> va);
+	static bool isDefinedPriorToEveryAccess(Variable* var,
+		CFG* cfg, ValueAnalysis* va);
 
 private:
 	/// Variable whose definition/modification is looked for.
-	ShPtr<Variable> var;
+	Variable* var = nullptr;
 
 	/// Analysis of values.
-	ShPtr<ValueAnalysis> va;
+	ValueAnalysis* va = nullptr;
 
 private:
-	VarUseCFGTraversal(ShPtr<Variable> var,
-		ShPtr<CFG> cfg, ShPtr<ValueAnalysis> va);
+	VarUseCFGTraversal(Variable* var,
+		CFG* cfg, ValueAnalysis* va);
 
-	virtual bool visitStmt(ShPtr<Statement> stmt) override;
+	virtual bool visitStmt(Statement* stmt) override;
 	virtual bool getEndRetVal() const override;
 	virtual bool combineRetVals(bool origRetVal, bool newRetVal) const override;
 };

@@ -18,7 +18,7 @@ namespace llvmir2hll {
 */
 class CBracketManager: public BracketManager {
 public:
-	CBracketManager(ShPtr<Module> module);
+	CBracketManager(Module* module);
 
 	virtual std::string getId() const override;
 
