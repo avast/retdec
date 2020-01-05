@@ -44,18 +44,50 @@ class SymbolicTree
 	// Ctors, dtors.
 	//
 	public:
-		SymbolicTree(
-				llvm::Value* v,
-				unsigned maxNodeLevel = 10);
-		SymbolicTree(
+		/**
+		 * The basic SymbolicTree construction method uses a precomputed
+		 * Reaching Definition Analysis (RDA) in order to fully expand the
+		 * value in question up to the maximal tree node level.
+		 */
+		static SymbolicTree PrecomputedRda(
 				ReachingDefinitionsAnalysis& rda,
 				llvm::Value* v,
-				unsigned maxNodeLevel = 10);
-		SymbolicTree(
+				unsigned maxNodeLevel = 10
+		);
+		/**
+		 * The same as the basic SymbolicTree construction method, but an
+		 * additional value to value mapping is used for node expansion.
+		 * If the node to be expanded is a key in the map, an associated value
+		 * is used as its expansion. Otherwise, the node is expanded as usual.
+		 */
+		static SymbolicTree PrecomputedRdaWithValueMap(
 				ReachingDefinitionsAnalysis& rda,
 				llvm::Value* v,
 				std::map<llvm::Value*, llvm::Value*>* val2val,
-				unsigned maxNodeLevel = 10);
+				unsigned maxNodeLevel = 10
+		);
+		/**
+		 * SymbolicTree is constructed using on demand RDA features.
+		 * I.e. RDA is not precomputed, but it is constructed as needed.
+		 * This is useful if control flow changes between tree computations
+		 * (i.e. RDA gets invalid), or if only a few trees need to be
+		 * constructed.
+		 * Otherwise, it is much more efficient to precompute RDA before trees
+		 * are constructed.
+		 */
+		static SymbolicTree OnDemandRda(
+				llvm::Value* v,
+				unsigned maxNodeLevel = 10
+		);
+		/**
+		 * A lightweight construction method where no RDA is used.
+		 * Tree is successfully constructed only if it can be fully expanded
+		 * using only linear control flow backtracking.
+		 */
+		static SymbolicTree Linear(
+				llvm::Value* v,
+				unsigned maxNodeLevel = 10
+		);
 
 	// Copy/move ctors, operators, etc.
 	//
@@ -130,7 +162,7 @@ class SymbolicTree
 				ReachingDefinitionsAnalysis* RDA,
 				std::map<llvm::Value*, llvm::Value*>* val2val,
 				unsigned maxNodeLevel,
-				std::unordered_set<llvm::Value*>& processed);
+				bool linear);
 
 		void _simplifyNode();
 		void fixLevel(unsigned level = 0);
@@ -139,23 +171,20 @@ class SymbolicTree
 		void _getPostOrder(std::vector<SymbolicTree*>& res) const;
 
 	// Private ctors, dtors.
-	// This is a private constructor, do not use it. It is made public only
-	// so it can be used in std::vector<>::emplace_back().
 	//
 	public:
-		SymbolicTree(
-				ReachingDefinitionsAnalysis* rda,
-				llvm::Value* v,
-				std::map<llvm::Value*, llvm::Value*>* val2val,
-				unsigned maxNodeLevel = 14);
+		/**
+		 * This is a private constructor, do not use it. It is made public only
+		 * so it can be used in std::vector<>::emplace_back().
+		 */
 		SymbolicTree(
 				ReachingDefinitionsAnalysis* rda,
 				llvm::Value* v,
 				llvm::Value* u,
-				std::unordered_set<llvm::Value*>& processed,
 				unsigned nodeLevel,
 				unsigned maxNodeLevel,
-				std::map<llvm::Value*, llvm::Value*>* v2v = nullptr);
+				std::map<llvm::Value*, llvm::Value*>* v2v,
+				bool linear);
 
 	// Private data.
 	//

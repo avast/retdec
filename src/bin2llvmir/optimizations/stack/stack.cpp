@@ -135,7 +135,7 @@ void StackAnalysis::handleInstruction(
 {
 	LOG << llvmObjToString(inst) << std::endl;
 
-	SymbolicTree root(RDA, val, &val2val);
+	auto root = SymbolicTree::PrecomputedRdaWithValueMap(RDA, val, &val2val);
 	LOG << root << std::endl;
 
 	if (!root.isVal2ValMapUsed())

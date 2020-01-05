@@ -86,7 +86,9 @@ bool Decoder::runCatcher()
 	//
 	try
 	{
-		return run();
+		auto b = run();;
+// exit(1);
+		return b;
 	}
 	catch (const BaseError& e)
 	{
@@ -779,9 +781,10 @@ bool Decoder::getJumpTargetsFromInstruction(
 			// reconstructed - matching only constants is safe and should be
 			// enough for most cases.
 			//
-			if (auto* l = llvm::dyn_cast<llvm::LoadInst>(&i))
+			auto* l = llvm::dyn_cast<llvm::LoadInst>(&i);
+			if (l && !_abi->isRegister(l->getPointerOperand()))
 			{
-				SymbolicTree st(_RDA, l->getPointerOperand(), nullptr, 8);
+				auto st = SymbolicTree::Linear(l->getPointerOperand(), 8);
 				st.simplifyNode();
 
 				auto* ci = llvm::dyn_cast<llvm::ConstantInt>(st.value);
@@ -799,7 +802,7 @@ bool Decoder::getJumpTargetsFromInstruction(
 						rangeSize = t - nextAddr;
 					}
 
-					LOG << "\t\t\t\t" << "skip " << r << std::endl;
+					LOG << "\t\t\t\t" << "critical skip " << r << std::endl;
 				}
 			}
 		}
@@ -818,7 +821,7 @@ common::Address Decoder::getJumpTarget(
 		llvm::CallInst* branchCall,
 		llvm::Value* val)
 {
-	SymbolicTree st(_RDA, val, nullptr, 20);
+	auto st = SymbolicTree::OnDemandRda(val, 20);
 
 	// TODO: better implementation.
 	// PIC code.
@@ -1075,7 +1078,7 @@ bool Decoder::getJumpTargetSwitch(
 	unsigned tableSize = 0;
 if (brToSwitch)
 {
-	SymbolicTree stCond(_RDA, brToSwitch->getCondition());
+	auto stCond = SymbolicTree::OnDemandRda(brToSwitch->getCondition());
 	stCond.simplifyNode();
 
 	auto levelOrd = stCond.getLevelOrder();
@@ -1132,7 +1135,7 @@ if (brToSwitch)
 	//
 	std::vector<unsigned> idxs;
 	unsigned maxIdx = 0;
-	SymbolicTree idxRoot(_RDA, idx);
+	auto idxRoot = SymbolicTree::OnDemandRda(idx);
 	idxRoot.simplifyNode();
 
 	llvm::LoadInst* l = nullptr;
