@@ -14,7 +14,8 @@ namespace llvmir2hll {
 /**
 * @brief Constructs a new continue statement.
 */
-ContinueStmt::ContinueStmt(Address a): Statement(a) {}
+ContinueStmt::ContinueStmt(Address a)
+	: Statement(Value::ValueKind::ContinueStmt, a) {}
 
 ShPtr<Value> ContinueStmt::clone() {
 	ShPtr<ContinueStmt> continueStmt(ContinueStmt::create(getAddress()));

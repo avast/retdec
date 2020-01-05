@@ -51,8 +51,12 @@ public:
 	static void replaceExpression(ShPtr<Expression> oldExpr,
 		ShPtr<Expression> newExpr);
 
+	static bool classof(const Value* v) {
+		return v->getKind() >= Value::ValueKind::Expression
+				&& v->getKind() <= Value::ValueKind::_Expression_END; }
+
 protected:
-	Expression() = default;
+	Expression(Value::ValueKind k) : Value(k) {}
 };
 
 } // namespace llvmir2hll

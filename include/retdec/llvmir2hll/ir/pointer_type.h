@@ -37,6 +37,9 @@ public:
 	virtual void accept(Visitor *v) override;
 	/// @}
 
+    static bool classof(const Value* v) {
+        return v->getKind() == Value::ValueKind::PointerType; }
+
 private:
 	/// Contained type.
 	ShPtr<Type> containedType;

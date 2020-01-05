@@ -17,7 +17,7 @@ namespace llvmir2hll {
 * See create() for more information.
 */
 ConstSymbol::ConstSymbol(const std::string &name, ShPtr<Constant> value):
-	Constant(), name(name), value(value) {}
+	Constant(Value::ValueKind::ConstSymbol), name(name), value(value) {}
 
 ShPtr<Value> ConstSymbol::clone() {
 	ShPtr<ConstSymbol> constSymbol(ConstSymbol::create(name, value));

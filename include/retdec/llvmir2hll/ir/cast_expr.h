@@ -37,8 +37,12 @@ public:
 		ShPtr<Value> arg = nullptr) override;
 	/// @}
 
+	static bool classof(const Value* v) {
+		return v->getKind() >= Value::ValueKind::CastExpr
+				&& v->getKind() <= Value::ValueKind::_CastExpr_END; }
+
 protected:
-	CastExpr(ShPtr<Expression> op, ShPtr<Type> dstType);
+	CastExpr(Value::ValueKind k, ShPtr<Expression> op, ShPtr<Type> dstType);
 
 protected:
 	/// Operand.

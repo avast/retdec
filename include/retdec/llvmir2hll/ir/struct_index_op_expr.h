@@ -40,6 +40,9 @@ public:
 	virtual void accept(Visitor *v) override;
 	/// @}
 
+    static bool classof(const Value* v) {
+        return v->getKind() == Value::ValueKind::StructIndexOpExpr; }
+
 private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.

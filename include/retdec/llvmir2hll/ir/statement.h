@@ -133,8 +133,12 @@ public:
 	static ShPtr<Statement> cloneStatements(ShPtr<Statement> stmts);
 	static ShPtr<Statement> getLastStatement(ShPtr<Statement> stmts);
 
+	static bool classof(const Value* v) {
+		return v->getKind() >= Value::ValueKind::Statement
+				&& v->getKind() <= Value::ValueKind::_Statement_END; }
+
 protected:
-	Statement(Address a = Address::Undefined);
+	Statement(Value::ValueKind k, Address a = Address::Undefined);
 
 protected:
 	/// Successor statement.

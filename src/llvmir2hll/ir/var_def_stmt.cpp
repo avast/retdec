@@ -19,7 +19,7 @@ namespace llvmir2hll {
 * See create() for more information.
 */
 VarDefStmt::VarDefStmt(ShPtr<Variable> var, ShPtr<Expression> init, Address a):
-	Statement(a), var(var), init(init) {}
+	Statement(Value::ValueKind::VarDefStmt, a), var(var), init(init) {}
 
 ShPtr<Value> VarDefStmt::clone() {
 	ShPtr<VarDefStmt> varDefStmt(VarDefStmt::create(ucast<Variable>(var->clone()),

@@ -17,7 +17,7 @@ namespace llvmir2hll {
 * See create() for more information.
 */
 TruncCastExpr::TruncCastExpr(ShPtr<Expression> op, ShPtr<Type> dstType):
-	CastExpr(op, dstType) {}
+	CastExpr(Value::ValueKind::TruncCastExpr, op, dstType) {}
 
 bool TruncCastExpr::isEqualTo(ShPtr<Value> otherValue) const {
 	// Both types and values of all operands have to be equal.

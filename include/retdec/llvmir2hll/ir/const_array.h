@@ -70,6 +70,9 @@ public:
 	virtual void accept(Visitor *v) override;
 	/// @}
 
+	static bool classof(const Value* v) {
+		return v->getKind() == Value::ValueKind::ConstArray; }
+
 private:
 	/// Value of an initialized array.
 	ArrayValue value;

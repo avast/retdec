@@ -20,7 +20,7 @@ namespace llvmir2hll {
 * See create() for more information.
 */
 AssignStmt::AssignStmt(ShPtr<Expression> lhs, ShPtr<Expression> rhs, Address a):
-	Statement(a), lhs(lhs), rhs(rhs) {}
+	Statement(Value::ValueKind::AssignStmt, a), lhs(lhs), rhs(rhs) {}
 
 ShPtr<Value> AssignStmt::clone() {
 	ShPtr<AssignStmt> assignStmt(AssignStmt::create(

@@ -21,7 +21,7 @@ namespace llvmir2hll {
 * See create() for more information.
 */
 StructType::StructType(ElementTypes elementTypes, const std::string &name):
-	Type(), elementTypes(elementTypes), name(name) {}
+	Type(Value::ValueKind::StructType), elementTypes(elementTypes), name(name) {}
 
 ShPtr<Value> StructType::clone() {
 	return StructType::create(elementTypes);

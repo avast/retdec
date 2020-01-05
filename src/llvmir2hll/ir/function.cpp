@@ -30,6 +30,7 @@ namespace llvmir2hll {
 */
 Function::Function(ShPtr<Module> module, ShPtr<Type> retType, std::string name,
 		VarVector params, VarSet localVars, ShPtr<Statement> body, bool isVarArg):
+			Value(Value::ValueKind::Function),
 			module(module), retType(retType), params(params), localVars(localVars),
 			body(body), funcVar(), varArg(isVarArg) {
 	includeParamsIntoLocalVars();

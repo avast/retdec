@@ -58,7 +58,8 @@ ShPtr<FloatType> getTypeOfValue(const ConstFloat::Type &value) {
 * See create() for more information.
 */
 ConstFloat::ConstFloat(Type value):
-	Constant(), value(value), type(getTypeOfValue(value)) {}
+	Constant(Value::ValueKind::ConstFloat), value(value),
+	type(getTypeOfValue(value)) {}
 
 ShPtr<Value> ConstFloat::clone() {
 	ShPtr<ConstFloat> constFloat(ConstFloat::create(value));

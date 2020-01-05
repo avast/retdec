@@ -20,7 +20,7 @@ namespace llvmir2hll {
 */
 WhileLoopStmt::WhileLoopStmt(ShPtr<Expression> cond, ShPtr<Statement> body,
 	Address a):
-	Statement(a), cond(cond), body(body) {}
+	Statement(Value::ValueKind::WhileLoopStmt, a), cond(cond), body(body) {}
 
 ShPtr<Value> WhileLoopStmt::clone() {
 	ShPtr<WhileLoopStmt> whileLoopStmt(WhileLoopStmt::create(

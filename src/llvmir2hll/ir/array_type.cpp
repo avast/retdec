@@ -17,7 +17,7 @@ namespace llvmir2hll {
 * See create() for more information.
 */
 ArrayType::ArrayType(ShPtr<Type> elemType, const Dimensions &dims):
-	Type(), elemType(elemType), dims(dims) {}
+	Type(Value::ValueKind::ArrayType), elemType(elemType), dims(dims) {}
 
 ShPtr<Value> ArrayType::clone() {
 	return ArrayType::create(elemType, dims);

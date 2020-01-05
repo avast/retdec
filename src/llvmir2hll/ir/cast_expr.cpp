@@ -13,8 +13,8 @@ namespace llvmir2hll {
 /**
 * @brief Constructs a cast operator.
 */
-CastExpr::CastExpr(ShPtr<Expression> op, ShPtr<Type> dstType):
-	op(op), dstType(dstType) {
+CastExpr::CastExpr(Value::ValueKind k, ShPtr<Expression> op, ShPtr<Type> dstType):
+	Expression(k), op(op), dstType(dstType) {
 		PRECONDITION_NON_NULL(op);
 		PRECONDITION_NON_NULL(dstType);
 }

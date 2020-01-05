@@ -291,7 +291,7 @@ void OptimFuncInfoCFGTraversal::updateFuncInfo(ShPtr<Statement> stmt) {
 	// Handle function calls.
 	// TODO What if a call modifies a local variable from storedGlobalVars?
 	for (const auto &call : stmtData->getCalls()) {
-		ShPtr<OptimCallInfo> callInfo(cast<OptimCallInfo>(
+		ShPtr<OptimCallInfo> callInfo(std::dynamic_pointer_cast<OptimCallInfo>(
 			cio->computeCallInfo(call, traversedFunc)
 		));
 

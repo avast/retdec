@@ -18,7 +18,7 @@ namespace llvmir2hll {
 * See create() for more information.
 */
 CallStmt::CallStmt(ShPtr<CallExpr> call, Address a):
-	Statement(a), call(call) {}
+	Statement(Value::ValueKind::CallStmt, a), call(call) {}
 
 bool CallStmt::isEqualTo(ShPtr<Value> otherValue) const {
 	// Both types and values have to be equal.

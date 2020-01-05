@@ -19,7 +19,9 @@ namespace llvmir2hll {
 */
 TernaryOpExpr::TernaryOpExpr(ShPtr<Expression> cond, ShPtr<Expression> trueValue,
 	ShPtr<Expression> falseValue):
-		Expression(), cond(cond), trueValue(trueValue), falseValue(falseValue) {}
+		Expression(Value::ValueKind::TernaryOpExpr), cond(cond),
+		trueValue(trueValue), falseValue(falseValue)
+{}
 
 ShPtr<Value> TernaryOpExpr::clone() {
 	ShPtr<TernaryOpExpr> ternaryOpExpr(TernaryOpExpr::create(

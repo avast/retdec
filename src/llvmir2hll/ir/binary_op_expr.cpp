@@ -22,8 +22,9 @@ namespace llvmir2hll {
 * @par Preconditions
 *  - both operands are non-null
 */
-BinaryOpExpr::BinaryOpExpr(ShPtr<Expression> op1, ShPtr<Expression> op2):
-		op1(op1), op2(op2) {
+BinaryOpExpr::BinaryOpExpr(Value::ValueKind k, ShPtr<Expression> op1,
+		ShPtr<Expression> op2)
+		: Expression(k), op1(op1), op2(op2) {
 	PRECONDITION_NON_NULL(op1);
 	PRECONDITION_NON_NULL(op2);
 }

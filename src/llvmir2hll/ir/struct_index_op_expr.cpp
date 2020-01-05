@@ -22,7 +22,7 @@ namespace llvmir2hll {
 */
 StructIndexOpExpr::StructIndexOpExpr(ShPtr<Expression> base,
 	ShPtr<ConstInt> fieldNumber):
-		BinaryOpExpr(base, fieldNumber) {}
+		BinaryOpExpr(Value::ValueKind::StructIndexOpExpr, base, fieldNumber) {}
 
 ShPtr<Type> StructIndexOpExpr::getType() const {
 	ShPtr<Type> op1Type(op1->getType());

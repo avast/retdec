@@ -42,6 +42,9 @@ public:
 	virtual void accept(Visitor *v) override;
 	/// @}
 
+    static bool classof(const Value* v) {
+        return v->getKind() == Value::ValueKind::FloatType; }
+
 private:
 	/// Mapping of float point type sizes into FloatType instances.
 	using SizeToFloatTypeMap = std::map<unsigned, ShPtr<FloatType>>;

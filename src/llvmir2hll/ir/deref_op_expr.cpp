@@ -17,7 +17,7 @@ namespace llvmir2hll {
 * See create() for more information.
 */
 DerefOpExpr::DerefOpExpr(ShPtr<Expression> op):
-	UnaryOpExpr(op) {}
+	UnaryOpExpr(Value::ValueKind::DerefOpExpr, op) {}
 
 bool DerefOpExpr::isEqualTo(ShPtr<Value> otherValue) const {
 	if (ShPtr<DerefOpExpr> otherValueDerefOpExpr = cast<DerefOpExpr>(otherValue)) {

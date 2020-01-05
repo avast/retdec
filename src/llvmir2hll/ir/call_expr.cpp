@@ -21,7 +21,8 @@ namespace llvmir2hll {
 * See create() for more information.
 */
 CallExpr::CallExpr(ShPtr<Expression> calledExpr, ExprVector args):
-	calledExpr(calledExpr), args(args) {}
+	Expression(Value::ValueKind::CallExpr), calledExpr(calledExpr), args(args)
+{}
 
 ShPtr<Value> CallExpr::clone() {
 	// Clone all arguments.

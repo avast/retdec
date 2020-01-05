@@ -21,7 +21,7 @@ namespace llvmir2hll {
 * See create() for more information.
 */
 FunctionType::FunctionType(ShPtr<Type> retType):
-	Type(), retType(retType), varArg(false) {}
+	Type(Value::ValueKind::FunctionType), retType(retType), varArg(false) {}
 
 ShPtr<Value> FunctionType::clone() {
 	ShPtr<FunctionType> cloned(FunctionType::create());

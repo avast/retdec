@@ -17,7 +17,7 @@ namespace llvmir2hll {
 * See create() for more information.
 */
 CommaOpExpr::CommaOpExpr(ShPtr<Expression> op1, ShPtr<Expression> op2):
-	BinaryOpExpr(op1, op2) {}
+	BinaryOpExpr(Value::ValueKind::CommaOpExpr, op1, op2) {}
 
 bool CommaOpExpr::isEqualTo(ShPtr<Value> otherValue) const {
 	if (auto otherExpr = cast<CommaOpExpr>(otherValue)) {

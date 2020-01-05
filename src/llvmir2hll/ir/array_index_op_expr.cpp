@@ -20,7 +20,7 @@ namespace llvmir2hll {
 * See create() for more information.
 */
 ArrayIndexOpExpr::ArrayIndexOpExpr(ShPtr<Expression> base, ShPtr<Expression> index):
-	BinaryOpExpr(base, index) {}
+	BinaryOpExpr(Value::ValueKind::ArrayIndexOpExpr, base, index) {}
 
 ShPtr<Type> ArrayIndexOpExpr::getType() const {
 	ShPtr<Type> op1Type(op1->getType());

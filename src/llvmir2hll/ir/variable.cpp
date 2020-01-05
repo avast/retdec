@@ -18,7 +18,9 @@ namespace llvmir2hll {
 * See create() for more information.
 */
 Variable::Variable(const std::string &name, ShPtr<Type> type, Address a):
-	initialName(name), name(name), type(type), internal(true), address(a) {}
+	Expression(Value::ValueKind::Variable), initialName(name), name(name),
+	type(type), internal(true), address(a)
+{}
 
 ShPtr<Value> Variable::clone() {
 	// Variables are not cloned (see the description of Value::clone()).

@@ -44,6 +44,9 @@ public:
 	virtual void accept(Visitor *v) override;
 	/// @}
 
+	static bool classof(const Value* v) {
+		return v->getKind() == Value::ValueKind::ArrayType; }
+
 private:
 	/// Type of elements of the array.
 	ShPtr<Type> elemType;

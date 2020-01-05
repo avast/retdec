@@ -17,7 +17,7 @@ namespace llvmir2hll {
 * See create() for more information.
 */
 IntToPtrCastExpr::IntToPtrCastExpr(ShPtr<Expression> op, ShPtr<Type> dstType):
-	CastExpr(op, dstType) {}
+	CastExpr(Value::ValueKind::IntToPtrCastExpr, op, dstType) {}
 
 bool IntToPtrCastExpr::isEqualTo(ShPtr<Value> otherValue) const {
 	// Both types and values of all operands have to be equal.

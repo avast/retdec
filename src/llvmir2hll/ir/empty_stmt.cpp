@@ -11,7 +11,7 @@
 namespace retdec {
 namespace llvmir2hll {
 
-EmptyStmt::EmptyStmt(Address a) : Statement(a) {}
+EmptyStmt::EmptyStmt(Address a) : Statement(Value::ValueKind::EmptyStmt, a) {}
 
 ShPtr<Value> EmptyStmt::clone() {
 	ShPtr<EmptyStmt> emptyStmt(EmptyStmt::create(nullptr, getAddress()));

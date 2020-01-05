@@ -18,7 +18,7 @@ namespace llvmir2hll {
 */
 IntToFPCastExpr::IntToFPCastExpr(ShPtr<Expression> op, ShPtr<Type> dstType,
 		Variant variant):
-	CastExpr(op, dstType), variant(variant) {}
+	CastExpr(Value::ValueKind::IntToFPCastExpr, op, dstType), variant(variant) {}
 
 bool IntToFPCastExpr::isEqualTo(ShPtr<Value> otherValue) const {
 	// Both types and values of all operands have to be equal.

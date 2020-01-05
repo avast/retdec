@@ -18,8 +18,13 @@ namespace llvmir2hll {
 * Instances of this class have reference object semantics.
 */
 class Constant: public Expression {
+public:
+	static bool classof(const Value* v) {
+		return v->getKind() >= Value::ValueKind::Constant
+				&& v->getKind() <= Value::ValueKind::_Constant_END; }
+
 protected:
-	Constant() = default;
+	Constant(Value::ValueKind k) : Expression(k) {}
 };
 
 } // namespace llvmir2hll

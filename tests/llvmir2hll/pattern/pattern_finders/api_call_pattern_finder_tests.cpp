@@ -83,7 +83,7 @@ WhenThereIsAPICallAsStatementPatternContainingThisStatementIsReturned) {
 	PatternFinder::Patterns foundPatterns(pf->findPatterns(module));
 
 	ASSERT_EQ(1, foundPatterns.size());
-	ShPtr<StmtsPattern> p(cast<StmtsPattern>(foundPatterns[0]));
+	ShPtr<StmtsPattern> p(std::dynamic_pointer_cast<StmtsPattern>(foundPatterns[0]));
 	ASSERT_TRUE(p) << "the pattern is not of type StmtsPattern";
 	ASSERT_FALSE(p->isEmpty());
 	EXPECT_EQ(callStmt, *p->stmt_begin());
@@ -138,11 +138,11 @@ WhenThereAreMoreAPICallsAsStatementsPatternsContainingTheseStatementsAreReturned
 	PatternFinder::Patterns foundPatterns(pf->findPatterns(module));
 
 	ASSERT_EQ(2, foundPatterns.size());
-	ShPtr<StmtsPattern> p1(cast<StmtsPattern>(foundPatterns[0]));
+	ShPtr<StmtsPattern> p1(std::dynamic_pointer_cast<StmtsPattern>(foundPatterns[0]));
 	ASSERT_TRUE(p1) << "the pattern is not of type StmtsPattern";
 	ASSERT_FALSE(p1->isEmpty());
 	EXPECT_EQ(callStmt1, *p1->stmt_begin());
-	ShPtr<StmtsPattern> p2(cast<StmtsPattern>(foundPatterns[1]));
+	ShPtr<StmtsPattern> p2(std::dynamic_pointer_cast<StmtsPattern>(foundPatterns[1]));
 	ASSERT_FALSE(p2->isEmpty());
 	EXPECT_EQ(callStmt2, *p2->stmt_begin());
 }

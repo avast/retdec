@@ -17,7 +17,7 @@ namespace llvmir2hll {
 * See create() for more information.
 */
 NegOpExpr::NegOpExpr(ShPtr<Expression> op):
-	UnaryOpExpr(op) {}
+	UnaryOpExpr(Value::ValueKind::NegOpExpr, op) {}
 
 bool NegOpExpr::isEqualTo(ShPtr<Value> otherValue) const {
 	if (ShPtr<NegOpExpr> otherValueNegOpExpr = cast<NegOpExpr>(otherValue)) {

@@ -32,8 +32,8 @@ void preserveLabel(ShPtr<Statement> origStmt, ShPtr<Statement> newStmt) {
 /**
 * @brief Constructs a new statement.
 */
-Statement::Statement(Address a):
-	succ(), preds(), label(), address(a) {
+Statement::Statement(Value::ValueKind k, Address a):
+	Value(k), succ(), preds(), label(), address(a) {
 }
 
 /**
@@ -646,7 +646,8 @@ ShPtr<Statement> Statement::getParent() const {
 	// set of observers.
 	if (preds.empty() || containsJustGotosToCurrentStatement(preds)) {
 		for (auto i = observer_begin(), e = observer_end(); i != e ; ++i) {
-			if (ShPtr<Statement> observerStmt = cast<Statement>(i->lock())) {
+			if (ShPtr<Statement> observerStmt = cast<Statement>(
+					std::static_pointer_cast<Value>(i->lock()))) {
 				// Skip goto observers.
 				if (isa<GotoStmt>(observerStmt)) {
 					continue;

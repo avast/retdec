@@ -14,7 +14,8 @@ namespace llvmir2hll {
 /**
 * @brief Constructs a new unreachable statement.
 */
-UnreachableStmt::UnreachableStmt(Address a): Statement(a) {}
+UnreachableStmt::UnreachableStmt(Address a)
+	: Statement(Value::ValueKind::UnreachableStmt, a) {}
 
 ShPtr<Value> UnreachableStmt::clone() {
 	ShPtr<UnreachableStmt> unreachableStmt(UnreachableStmt::create(getAddress()));

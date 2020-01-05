@@ -23,7 +23,7 @@ namespace llvmir2hll {
 * See create() for more information.
 */
 ConstString::ConstString(const UnderlyingStringType &value, std::size_t charSize):
-	Constant(), value(value), charSize(charSize),
+	Constant(Value::ValueKind::ConstString), value(value), charSize(charSize),
 	type(StringType::create(charSize)) {}
 
 ShPtr<Value> ConstString::clone() {

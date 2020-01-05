@@ -19,7 +19,7 @@ namespace llvmir2hll {
 * See create() for more information.
 */
 ReturnStmt::ReturnStmt(ShPtr<Expression> retVal, Address a):
-	Statement(a), retVal(retVal) {}
+	Statement(Value::ValueKind::ReturnStmt, a), retVal(retVal) {}
 
 ShPtr<Value> ReturnStmt::clone() {
 	ShPtr<ReturnStmt> returnStmt(

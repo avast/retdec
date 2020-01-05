@@ -19,7 +19,7 @@ namespace llvmir2hll {
 */
 ExtCastExpr::ExtCastExpr(ShPtr<Expression> op, ShPtr<Type> dstType,
 		Variant variant):
-	CastExpr(op, dstType), variant(variant) {}
+	CastExpr(Value::ValueKind::ExtCastExpr, op, dstType), variant(variant) {}
 
 bool ExtCastExpr::isEqualTo(ShPtr<Value> otherValue) const {
 	// Both types and values of all operands have to be equal.

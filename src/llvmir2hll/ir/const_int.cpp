@@ -24,7 +24,7 @@ namespace llvmir2hll {
 * See create() for more information.
 */
 ConstInt::ConstInt(const llvm::APSInt &value):
-	Constant(), value(value),
+	Constant(Value::ValueKind::ConstInt), value(value),
 	type(IntType::create(value.getBitWidth(), value.isSigned())) {}
 
 ShPtr<Value> ConstInt::clone() {

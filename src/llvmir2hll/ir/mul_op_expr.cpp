@@ -17,7 +17,7 @@ namespace llvmir2hll {
 * See create() for more information.
 */
 MulOpExpr::MulOpExpr(ShPtr<Expression> op1, ShPtr<Expression> op2):
-	BinaryOpExpr(op1, op2) {}
+	BinaryOpExpr(Value::ValueKind::MulOpExpr, op1, op2) {}
 
 bool MulOpExpr::isEqualTo(ShPtr<Value> otherValue) const {
 	if (ShPtr<MulOpExpr> otherValueMulOpExpr = cast<MulOpExpr>(otherValue)) {

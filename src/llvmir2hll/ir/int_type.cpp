@@ -17,7 +17,7 @@ namespace llvmir2hll {
 * See create() for more information.
 */
 IntType::IntType(unsigned size, bool isSigned):
-	Type(), size(size), signedInt(isSigned) {}
+	Type(Value::ValueKind::IntType), size(size), signedInt(isSigned) {}
 
 ShPtr<Value> IntType::clone() {
 	return IntType::create(size);

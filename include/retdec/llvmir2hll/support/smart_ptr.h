@@ -49,22 +49,6 @@ protected:
 };
 
 /**
-* @brief Equivalent of dynamic_cast<> for shared pointers.
-*
-* @param[in] ptr Pointer to be casted.
-*
-* @tparam To Output type.
-* @tparam From Input type.
-*
-* The purpose of this function is to provide a more concise notation. Indeed,
-* @c cast<X>(ptr) is more concise than @c std::dynamic_pointer_cast<X>(ptr).
-*/
-template<typename To, typename From>
-ShPtr<To> cast(const ShPtr<From> &ptr) noexcept {
-	return std::dynamic_pointer_cast<To>(ptr);
-}
-
-/**
 * @brief Equivalent of static_cast<> for shared pointers (unchecked cast).
 *
 * @param[in] ptr Pointer to be casted.
@@ -92,21 +76,31 @@ ShPtr<To> ucast(const ShPtr<From> &ptr) noexcept {
 * @tparam To Desired output type.
 * @tparam From Input type.
 *
-* The purpose of this function is to provide a more concise notation. Indeed,
-* @c isa<X>(ptr) is more concise than @c std::dynamic_pointer_cast<X>(ptr).
-*
-* Furthermore,
-* @code
-* if (isa<EmptyStmt>(stmt)) {
-* @endcode
-* is more readable than
-* @code
-* if (cast<EmptyStmt>(stmt)) {
-* @endcode
+* The purpose of this function is to provide faster and more concise notation
+* than @c std::dynamic_pointer_cast<X>(ptr).
+* The function is using a custom RTTI implementation based on:
+* https://llvm.org/docs/HowToSetUpLLVMStyleRTTI.html
 */
 template<typename To, typename From>
-bool isa(const ShPtr<From> &ptr) noexcept {
-	return cast<To>(ptr) != nullptr;
+bool isa(ShPtr<From> ptr) noexcept {
+	return ptr && To::classof(ptr.get());
+}
+
+/**
+* @brief Equivalent of dynamic_cast<> for shared pointers.
+*
+* @param[in] ptr Pointer to be casted.
+*
+* @tparam To Output type.
+* @tparam From Input type.
+*
+* The purpose of this function is to provide faster and more concise notation
+* than @c std::dynamic_pointer_cast<X>(ptr).
+* See @c isa<> for more details on how this is faster than dynamic cast.
+*/
+template<typename To, typename From>
+ShPtr<To> cast(ShPtr<From> ptr) noexcept {
+	return isa<To>(ptr) ? ucast<To>(ptr) : ShPtr<To>();
 }
 
 /**

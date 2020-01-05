@@ -17,7 +17,7 @@ namespace llvmir2hll {
 * See create() for more information.
 */
 AddressOpExpr::AddressOpExpr(ShPtr<Expression> op):
-	UnaryOpExpr(op) {}
+	UnaryOpExpr(Value::ValueKind::AddressOpExpr, op) {}
 
 bool AddressOpExpr::isEqualTo(ShPtr<Value> otherValue) const {
 	if (ShPtr<AddressOpExpr> otherValueAddressOpExpr = cast<AddressOpExpr>(otherValue)) {

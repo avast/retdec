@@ -17,7 +17,7 @@ namespace llvmir2hll {
 * See create() for more information.
 */
 PointerType::PointerType(ShPtr<Type> containedType):
-	Type(), containedType(containedType) {}
+	Type(Value::ValueKind::PointerType), containedType(containedType) {}
 
 ShPtr<Value> PointerType::clone() {
 	return PointerType::create(ucast<Type>(containedType->clone()));

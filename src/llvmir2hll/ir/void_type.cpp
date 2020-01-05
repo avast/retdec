@@ -17,7 +17,7 @@ namespace llvmir2hll {
 * See create() for more information.
 */
 VoidType::VoidType():
-	Type() {}
+	Type(Value::ValueKind::VoidType) {}
 
 ShPtr<Value> VoidType::clone() {
 	return VoidType::create();

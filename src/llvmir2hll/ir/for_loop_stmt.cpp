@@ -21,8 +21,8 @@ namespace llvmir2hll {
 ForLoopStmt::ForLoopStmt(ShPtr<Variable> indVar, ShPtr<Expression> startValue,
 	ShPtr<Expression> endCond, ShPtr<Expression> step, ShPtr<Statement> body,
 	Address a):
-		Statement(a), indVar(indVar), startValue(startValue), endCond(endCond),
-		step(step), body(body) {}
+		Statement(Value::ValueKind::ForLoopStmt, a), indVar(indVar),
+		startValue(startValue), endCond(endCond), step(step), body(body) {}
 
 ShPtr<Value> ForLoopStmt::clone() {
 	ShPtr<ForLoopStmt> forLoopStmt(ForLoopStmt::create(
