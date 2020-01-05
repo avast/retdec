@@ -784,10 +784,30 @@ bool Decoder::getJumpTargetsFromInstruction(
 			auto* l = llvm::dyn_cast<llvm::LoadInst>(&i);
 			if (l && !_abi->isRegister(l->getPointerOperand()))
 			{
-				auto st = SymbolicTree::Linear(l->getPointerOperand(), 8);
-				st.simplifyNode();
+				// auto st = SymbolicTree::Linear(l->getPointerOperand(), 8);
+				// st.simplifyNode();
+				// auto* ci = llvm::dyn_cast<llvm::ConstantInt>(st.value);
 
-				auto* ci = llvm::dyn_cast<llvm::ConstantInt>(st.value);
+				auto* ptrOp = l->getPointerOperand();
+				llvm::ConstantInt* ci = nullptr;
+
+				if (auto* i2pi = llvm::dyn_cast<llvm::IntToPtrInst>(ptrOp))
+				{
+					ci = llvm::dyn_cast<llvm::ConstantInt>(i2pi->getOperand(0));
+
+					// auto st = SymbolicTree::Linear(i2pi->getOperand(0), 4);
+					// st.simplifyNode();
+					// ci = llvm::dyn_cast<llvm::ConstantInt>(st.value);
+				}
+				else if (auto* expr = llvm::dyn_cast<llvm::ConstantExpr>(ptrOp))
+				{
+					if (expr->getOpcode() == llvm::Instruction::IntToPtr)
+					{
+						ci = llvm::dyn_cast<llvm::ConstantInt>(
+								expr->getOperand(0));
+					}
+				}
+
 				if (ci && !ci->isNegative())
 				{
 					Address t(ci->getZExtValue());
