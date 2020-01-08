@@ -122,7 +122,7 @@ void ConstantsAnalysis::checkForGlobalInInstruction(
 {
 	LOG << llvmObjToString(inst) << std::endl;
 
-	SymbolicTree root(RDA, val);
+	auto root = SymbolicTree::PrecomputedRda(RDA, val);
 	root.simplifyNode();
 
 	LOG << root << std::endl;

@@ -172,7 +172,7 @@ void Decoder::initializeGpReg_mips()
 
 		if (lastStore)
 		{
-			SymbolicTree root(_RDA, lastStore->getValueOperand());
+			auto root = SymbolicTree::OnDemandRda(lastStore->getValueOperand());
 			root.simplifyNode();
 
 			ConstantInt* ci = nullptr;

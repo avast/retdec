@@ -96,7 +96,7 @@ bool CondBranchOpt::runOnInstruction(
 
 	LOG << llvmObjToString(br) << std::endl;
 
-	SymbolicTree root(RDA, cond);
+	auto root = SymbolicTree::PrecomputedRda(RDA, cond);
 	LOG << root << std::endl;
 
 	root.simplifyNode();
