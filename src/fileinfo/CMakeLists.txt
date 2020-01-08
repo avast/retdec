@@ -116,7 +116,7 @@ target_link_libraries(retdec-fileinfo
 	retdec-ar-extractor
 	retdec-fileformat
 	retdec-cpdetect
-	yaracpp
+	retdec-yaracpp
 	retdec-utils
 	retdec-common
 	retdec-config

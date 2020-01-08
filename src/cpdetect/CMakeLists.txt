@@ -20,5 +20,9 @@ set(CPDETECT_SOURCES
 )
 
 add_library(retdec-cpdetect STATIC ${CPDETECT_SOURCES})
-target_link_libraries(retdec-cpdetect libdwarf retdec-fileformat yaracpp tinyxml2)
+target_link_libraries(retdec-cpdetect
+	libdwarf
+	retdec-fileformat
+	retdec-yaracpp
+	tinyxml2)
 target_include_directories(retdec-cpdetect PUBLIC ${PROJECT_SOURCE_DIR}/include/)

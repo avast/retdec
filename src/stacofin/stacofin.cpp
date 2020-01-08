@@ -9,7 +9,7 @@
 #include <string>
 
 #include "retdec/stacofin/stacofin.h"
-#include "yaracpp/yara_detector/yara_detector.h"
+#include "retdec/yaracpp/yara_detector/yara_detector.h"
 #include "retdec/loader/loader/image.h"
 #include "retdec/utils/string.h"
 
