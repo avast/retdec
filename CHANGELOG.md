@@ -27,6 +27,7 @@
 * Enhancement: Updated Yaramod to version v3.0.0 ([#680](https://github.com/avast/retdec/pull/680)). RetDec no longer requires Flex and Bison. This fixes [#103](https://github.com/avast/retdec/issues/103).
 * Enhancement: Take out most of the types from `config` library and place them to a separate `common` library that could be used across an entire RetDec source base ([#686](https://github.com/avast/retdec/issues/686)).
 * Enhancement: Move Yaracpp from its own repository to the main RetDec repository as `retdec-yaracpp` target. YARA becomes a direct RetDec dependency. This reduces the complexity of RetDec dependencies and flattens the dependency tree to a single level.
+* Enhancement: Move ELFIO sources from its own repository to the main RetDec repository. This simplifies the complexity of RetDec dependencies.
 * Fix: Increased the limit for the number of entries in import directory when deciding whether a PE file is corrupted or not ([avast/pelib#13](https://github.com/avast/pelib/pull/13)).
 * Fix: Fixed build on BSD systems ([#598](https://github.com/avast/retdec/pull/598)).
 * Fix: Resources which are located in the different section than resource tree are now properly parsed ([#596](https://github.com/avast/retdec/pull/596)).
