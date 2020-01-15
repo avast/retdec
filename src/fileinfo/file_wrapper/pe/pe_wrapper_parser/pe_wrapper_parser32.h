@@ -7,9 +7,8 @@
 #ifndef FILEINFO_FILE_WRAPPER_PE_PE_WRAPPER_PARSER_PE_WRAPPER_PARSER32_H
 #define FILEINFO_FILE_WRAPPER_PE_PE_WRAPPER_PARSER_PE_WRAPPER_PARSER32_H
 
-#include <pelib/PeLib.h>
-
 #include "fileinfo/file_wrapper/pe/pe_wrapper_parser/pe_wrapper_parser.h"
+#include "retdec/pelib/PeLib.h"
 
 namespace fileinfo {
 

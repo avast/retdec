@@ -242,7 +242,7 @@ You can pass the following additional parameters to `cmake`:
 * `-DRETDEC_COMPILE_YARA=OFF` to disable YARA rules compilation at installation step (enabled by default).
 * `-DCMAKE_BUILD_TYPE=Debug` to build with debugging information, which is useful during development. By default, the project is built in the `Release` mode. This has no effect on Windows, but the same thing can be achieved by running `cmake --build .` with the `--config Debug` parameter.
 * `-DCMAKE_PROGRAM_PATH=<path>` to use Perl at `<path>` (probably useful only on Windows).
-* `-D<dep>_LOCAL_DIR=<path>` where `<dep>` is from `{CAPSTONE, GOOGLETEST, KEYSTONE, LIBDWARF, LLVM, PELIB, YARA, YARAMOD}` (e.g. `-DCAPSTONE_LOCAL_DIR=<path>`), to use the local repository clone at `<path>` for RetDec dependency instead of downloading a fresh copy at build time. Multiple such options may be used at the same time.
+* `-D<dep>_LOCAL_DIR=<path>` where `<dep>` is from `{CAPSTONE, GOOGLETEST, KEYSTONE, LIBDWARF, LLVM, YARA, YARAMOD}` (e.g. `-DCAPSTONE_LOCAL_DIR=<path>`), to use the local repository clone at `<path>` for RetDec dependency instead of downloading a fresh copy at build time. Multiple such options may be used at the same time.
 * `-DRETDEC_ENABLE_<component>=ON` to build only the specified component(s) (multiple such options can be used at once), and its (theirs) dependencies. By default, all the components are built. If at least one component is enabled via this mechanism, all the other components that were not explicitly enabled (and are not needed as dependencies of enabled components) are not built. See [cmake/options.cmake](https://github.com/avast/retdec/blob/master/cmake/options.cmake) for all the available component options.
   * `-DRETDEC_ENABLE_ALL=ON` can be used to (re-)enable all the components.
   * Alternatively, `-DRETDEC_ENABLE=<comma-separated component list>` can be used instead of `-DRETDEC_ENABLE_<component>=ON` (e.g. `-DRETDEC_ENABLE=fileformat,loader,ctypesparser` is equivalent to `-DRETDEC_ENABLE_FILEFORMAT=ON -DRETDEC_ENABLE_LOADER=ON -DRETDEC_ENABLE_CTYPESPARSER=ON`).
@@ -310,6 +310,7 @@ This repository contains the following libraries:
 * `macho-extractor` - library for extracting regular Mach-O binaries from fat Mach-O binaries (based on LLVM).
 * `patterngen` - binary pattern extractor library.
 * `pdbparser` - Microsoft PDB files parser library.
+* `pelib` - Microsoft Portable Executable files manipulation library.
 * `stacofin` - static code finder library.
 * `unpacker` - collection of unpacking functions.
 * `utils` - general C++ utility library.
@@ -358,6 +359,9 @@ See the [project documentation](https://retdec-tc.avast.com/repository/download/
 ## License
 
 Copyright (c) 2017 Avast Software, licensed under the MIT license. See the [`LICENSE`](https://github.com/avast/retdec/blob/master/LICENSE) file for more details.
+
+RetDec incorporates a modified PeLib library. New modules added by Avast Software are licensed under the MIT license. The original sources are licensed under the following license:
+* Copyright (c) 2004 - 2005 Sebastian Porst (webmaster@the-interweb.com), licensed under the zlib/libpng License. See the [`LICENSE-PELIB`](https://github.com/avast/retdec/blob/master/LICENSE-PELIB) file for more details.
 
 RetDec uses third-party libraries or other resources listed, along with their licenses, in the [`LICENSE-THIRD-PARTY`](https://github.com/avast/retdec/blob/master/LICENSE-THIRD-PARTY) file.
 

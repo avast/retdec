@@ -7,8 +7,7 @@
 #include <algorithm>
 #include <cstring>
 
-#include <pelib/PeLib.h>
-
+#include "retdec/pelib/PeLib.h"
 #include "retdec/utils/alignment.h"
 #include "retdec/utils/file_io.h"
 #include "unpackertool/plugins/upx/decompressors/decompressors.h"
