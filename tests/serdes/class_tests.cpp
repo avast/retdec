@@ -5,7 +5,11 @@
  */
 
 #include <gtest/gtest.h>
-#include <json/json.h>
+
+#include <rapidjson/error/en.h>
+#include <rapidjson/document.h>
+#include <rapidjson/prettywriter.h>
+#include <rapidjson/stringbuffer.h>
 
 #include "retdec/common/class.h"
 #include "retdec/serdes/class.h"
@@ -24,7 +28,7 @@ class ClassTests : public Test
 
 TEST_F(ClassTests, ClassIsParsedCorrectlyFromJSONWhenClassIsFullySpecified)
 {
-	std::istringstream input(R"({
+	std::string input(R"({
 			"name" : "A",
 			"constructors" : [ "Actor" ],
 			"destructors" : [ "Adtor" ],
@@ -33,13 +37,11 @@ TEST_F(ClassTests, ClassIsParsedCorrectlyFromJSONWhenClassIsFullySpecified)
 			"virtualMethods" : [ "Avirtual" ],
 			"virtualTables" : [ "Avtable" ]
 	})");
-	Json::Value val;
-	std::string errs;
-	Json::CharReaderBuilder rbuilder;
-	bool success = Json::parseFromStream(rbuilder, input, &val, &errs);
-	ASSERT_TRUE(success);
+	rapidjson::Document root;
+	rapidjson::ParseResult ok = root.Parse(input);
+	ASSERT_TRUE(ok);
 
-	deserialize(val, cl);
+	deserialize(root, cl);
 
 	EXPECT_EQ("A", cl.getName());
 	EXPECT_EQ(std::set<std::string>({"Actor"}), cl.constructors);
@@ -52,16 +54,14 @@ TEST_F(ClassTests, ClassIsParsedCorrectlyFromJSONWhenClassIsFullySpecified)
 
 TEST_F(ClassTests, ClassIsParsedCorrectlyFromJSONWhenClassHasOnlyNameSpecified)
 {
-	std::istringstream input(R"({
+	std::string input(R"({
 			"name" : "A"
 	})");
-	Json::Value val;
-	std::string errs;
-	Json::CharReaderBuilder rbuilder;
-	bool success = Json::parseFromStream(rbuilder, input, &val, &errs);
-	ASSERT_TRUE(success);
+	rapidjson::Document root;
+	rapidjson::ParseResult ok = root.Parse(input);
+	ASSERT_TRUE(ok);
 
-	deserialize(val, cl);
+	deserialize(root, cl);
 
 	EXPECT_EQ("A", cl.getName());
 	EXPECT_TRUE(cl.constructors.empty());

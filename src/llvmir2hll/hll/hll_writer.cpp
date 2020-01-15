@@ -151,9 +151,9 @@ HLLWriter::HLLWriter(llvm::raw_ostream &o, const std::string& outputFormat):
 	currentIndent(DEFAULT_LEVEL_INDENT)
 {
 	if (outputFormat == "json") {
-		out = UPtr<OutputManager>(new JsonOutputManager(o));
+		out = UPtr<OutputManager>(new JsonOutputManagerPlain(o));
 	} else if (outputFormat == "json-human") {
-		out = UPtr<OutputManager>(new JsonOutputManager(o, true));
+		out = UPtr<OutputManager>(new JsonOutputManagerPretty(o));
 	} else {
 		out = UPtr<OutputManager>(new PlainOutputManager(o));
 	}

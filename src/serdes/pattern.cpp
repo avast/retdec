@@ -7,12 +7,15 @@
 #include <algorithm>
 #include <vector>
 
+#include <rapidjson/prettywriter.h>
+#include <rapidjson/stringbuffer.h>
+
 #include "retdec/common/pattern.h"
 #include "retdec/serdes/address.h"
 #include "retdec/serdes/pattern.h"
 #include "retdec/serdes/std.h"
 
-#include "serdes/utils.h"
+#include "retdec/serdes/std.h"
 
 namespace {
 
@@ -46,68 +49,64 @@ const std::string JSON_val_endianBig     = "big";
 namespace retdec {
 namespace serdes {
 
-Json::Value serialize(const common::Pattern::Match& pm)
+template <typename Writer>
+void serialize(Writer& writer, const common::Pattern::Match& pm)
 {
-	Json::Value match;
+	writer.StartObject();
 
-	if (pm.isOffsetDefined())
-	{
-		match[JSON_offset] = serdes::serialize(pm.getOffset());
-	}
-	if (pm.isAddressDefined())
-	{
-		match[JSON_address] = serdes::serialize(pm.getAddress());
-	}
+	serialize(writer, JSON_offset, pm.getOffset(), pm.isOffsetDefined());
+	serialize(writer, JSON_address, pm.getAddress(), pm.isAddressDefined());
 	if (pm.isSizeDefined())
 	{
-		match[JSON_size] = pm.getSize().value();
+		serializeUint64(writer, JSON_size, pm.getSize().value());
 	}
 	if (pm.isEntrySizeDefined())
 	{
-		match[JSON_entrySize] = pm.getEntrySize().value();
+		serializeUint64(writer, JSON_entrySize, pm.getEntrySize().value());
 	}
 
 	if (pm.isTypeIntegral())
 	{
-		match[JSON_match_type] = JSON_val_typeIntegral;
+		serializeString(writer, JSON_match_type, JSON_val_typeIntegral);
 	}
 	else if (pm.isTypeFloatingPoint())
 	{
-		match[JSON_match_type] = JSON_val_typeFP;
+		serializeString(writer, JSON_match_type, JSON_val_typeFP);
 	}
 	else
 	{
-		match[JSON_match_type] = JSON_val_typeUnknown;
+		serializeString(writer, JSON_match_type, JSON_val_typeUnknown);
 	}
 
-	return match;
+	writer.EndObject();
 }
+SERIALIZE_EXPLICIT_INSTANTIATION(common::Pattern::Match);
 
-void deserialize(const Json::Value& val, common::Pattern::Match& pm)
+void deserialize(const rapidjson::Value& val, common::Pattern::Match& pm)
 {
-	if (val.isNull() || !val.isObject())
+	if (val.IsNull() || !val.IsObject())
 	{
 		return;
 	}
 
 	common::Address offset;
-	serdes::deserialize(val[JSON_offset], offset);
+	deserialize(val, JSON_offset, offset);
 	pm.setOffset(offset);
 
 	common::Address addr;
-	serdes::deserialize(val[JSON_address], addr);
+	deserialize(val, JSON_address, addr);
 	pm.setAddress(addr);
 
-	if (val.isMember(JSON_size))
+	if (val.HasMember(JSON_size))
 	{
-		pm.setSize(safeGetUint(val, JSON_size));
+		pm.setSize(deserializeUint64(val, JSON_size));
 	}
-	if (val.isMember(JSON_entrySize))
+	if (val.HasMember(JSON_entrySize))
 	{
-		pm.setEntrySize(safeGetUint(val, JSON_entrySize));
+		pm.setEntrySize(deserializeUint64(val, JSON_entrySize));
 	}
 
-	std::string e = safeGetString(val, JSON_match_type);
+	std::string e = deserializeString(val, JSON_match_type);
 	if (e == JSON_val_typeIntegral)
 	{
 		pm.setIsTypeIntegral();
@@ -122,57 +121,59 @@ void deserialize(const Json::Value& val, common::Pattern::Match& pm)
 	}
 }
 
-Json::Value serialize(const common::Pattern& p)
+template <typename Writer>
+void serialize(Writer& writer, const common::Pattern& p)
 {
-	Json::Value ret;
+	writer.StartObject();
 
-	ret[JSON_name] = p.getName();
-	ret[JSON_description] = p.getDescription();
-	ret[JSON_yara_rule_name] = p.getYaraRuleName();
+	serializeString(writer, JSON_name, p.getName());
+	serializeString(writer, JSON_description, p.getDescription());
+	serializeString(writer, JSON_yara_rule_name, p.getYaraRuleName());
 
 	if (p.isTypeCrypto())
 	{
-		ret[JSON_patternType] = JSON_val_typeCrypto;
+		serializeString(writer, JSON_patternType, JSON_val_typeCrypto);
 	}
 	else if (p.isTypeMalware())
 	{
-		ret[JSON_patternType] = JSON_val_typeMalware;
+		serializeString(writer, JSON_patternType, JSON_val_typeMalware);
 	}
 	else
 	{
-		ret[JSON_patternType] = JSON_val_typeOther;
+		serializeString(writer, JSON_patternType, JSON_val_typeOther);
 	}
 
 	if (p.isEndianLittle())
 	{
-		ret[JSON_patternEndian] = JSON_val_endianLittle;
+		serializeString(writer, JSON_patternEndian, JSON_val_endianLittle);
 	}
 	else if (p.isEndianBig())
 	{
-		ret[JSON_patternEndian] = JSON_val_endianBig;
+		serializeString(writer, JSON_patternEndian, JSON_val_endianBig);
 	}
 	else
 	{
-		ret[JSON_patternEndian] = JSON_val_endianUnknown;
+		serializeString(writer, JSON_patternEndian, JSON_val_endianUnknown);
 	}
 
-	ret[JSON_matches] = serialize(p.matches);
+	serializeContainer(writer, JSON_matches, p.matches);
 
-	return ret;
+	writer.EndObject();
 }
+SERIALIZE_EXPLICIT_INSTANTIATION(common::Pattern);
 
-void deserialize(const Json::Value& val, common::Pattern& p)
+void deserialize(const rapidjson::Value& val, common::Pattern& p)
 {
-	if (val.isNull() || !val.isObject())
+	if (val.IsNull() || !val.IsObject())
 	{
 		return;
 	}
 
-	p.setName(safeGetString(val, JSON_name));
-	p.setDescription(safeGetString(val, JSON_description));
-	p.setYaraRuleName(safeGetString(val, JSON_yara_rule_name));
+	p.setName(deserializeString(val, JSON_name));
+	p.setDescription(deserializeString(val, JSON_description));
+	p.setYaraRuleName(deserializeString(val, JSON_yara_rule_name));
 
-	std::string t = safeGetString(val, JSON_patternType);
+	std::string t = deserializeString(val, JSON_patternType);
 	if (t == JSON_val_typeCrypto)
 	{
 		p.setIsTypeCrypto();
@@ -186,7 +187,7 @@ void deserialize(const Json::Value& val, common::Pattern& p)
 		p.setIsTypeOther();
 	}
 
-	std::string e = safeGetString(val, JSON_patternEndian);
+	std::string e = deserializeString(val, JSON_patternEndian);
 	if (e == JSON_val_endianLittle)
 	{
 		p.setIsEndianLittle();
@@ -200,7 +201,7 @@ void deserialize(const Json::Value& val, common::Pattern& p)
 		p.setIsEndianUnknown();
 	}
 
-	deserialize(val[JSON_matches], p.matches);
+	deserializeContainer(val, JSON_matches, p.matches);
 }
 
 } // namespace serdes

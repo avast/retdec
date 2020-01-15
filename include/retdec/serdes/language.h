@@ -7,7 +7,7 @@
 #ifndef RETDEC_SERDES_LANGUAGE_H
 #define RETDEC_SERDES_LANGUAGE_H
 
-#include <json/json.h>
+#include <rapidjson/document.h>
 
 namespace retdec {
 
@@ -17,8 +17,9 @@ class Language;
 
 namespace serdes {
 
-Json::Value serialize(const common::Language& l);
-void deserialize(const Json::Value& val, common::Language& l);
+template <typename Writer>
+void serialize(Writer& writer, const common::Language& l);
+void deserialize(const rapidjson::Value& val, common::Language& l);
 
 } // namespace serdes
 } // namespace retdec

@@ -29,7 +29,7 @@ class PatternConfigGetter
 		~PatternConfigGetter();
 
 		bool isEmpty() const;
-		Json::Value getJsonValue() const;
+		retdec::common::PatternContainer& getPatterns();
 };
 
 } // namespace fileinfo

@@ -7,10 +7,12 @@
 #include <algorithm>
 #include <vector>
 
+#include <rapidjson/prettywriter.h>
+#include <rapidjson/stringbuffer.h>
+
 #include "retdec/common/tool_info.h"
 #include "retdec/serdes/tool_info.h"
-
-#include "serdes/utils.h"
+#include "retdec/serdes/std.h"
 
 namespace {
 
@@ -28,44 +30,39 @@ const std::string JSON_heuristics       = "heuristics";
 namespace retdec {
 namespace serdes {
 
-Json::Value serialize(const common::ToolInfo& ti)
+template <typename Writer>
+void serialize(Writer& writer, const common::ToolInfo& ti)
 {
-	Json::Value comp;
+	writer.StartObject();
 
-	comp[JSON_type] = ti.getType();
-	comp[JSON_name] = ti.getName();
-	comp[JSON_percentage] = ti.getPercentage();
-	comp[JSON_idSignNibbles] = ti.getIdenticalSignificantNibbles();
-	comp[JSON_totalSignNibbles] = ti.getTotalSignificantNibbles();
-	comp[JSON_heuristics] = ti.isFromHeuristics();
+	serializeString(writer, JSON_type, ti.getType());
+	serializeString(writer, JSON_name, ti.getName());
+	serializeDouble(writer, JSON_percentage, ti.getPercentage());
+	serializeUint64(writer, JSON_percentage, ti.getIdenticalSignificantNibbles());
+	serializeUint64(writer, JSON_percentage, ti.getTotalSignificantNibbles());
+	serializeBool(writer, JSON_heuristics, ti.isFromHeuristics());
+	serializeString(writer, JSON_version, ti.getVersion());
+	serializeString(writer, JSON_additional, ti.getAdditionalInfo());
 
-	if (!ti.getVersion().empty())
-	{
-		comp[JSON_version] = ti.getVersion();
-	}
-	if (!ti.getAdditionalInfo().empty())
-	{
-		comp[JSON_additional] = ti.getAdditionalInfo();
-	}
-
-	return comp;
+	writer.EndObject();
 }
+SERIALIZE_EXPLICIT_INSTANTIATION(common::ToolInfo);
 
-void deserialize(const Json::Value& val, common::ToolInfo& ti)
+void deserialize(const rapidjson::Value& val, common::ToolInfo& ti)
 {
-	if (val.isNull() || !val.isObject())
+	if (val.IsNull() || !val.IsObject())
 	{
 		return;
 	}
 
-	ti.setVersion( safeGetString(val, JSON_version) );
-	ti.setType( safeGetString(val, JSON_type) );
-	ti.setName( safeGetString(val, JSON_name) );
-	ti.setAdditionalInfo( safeGetString(val, JSON_additional) );
-	ti.setPercentage( safeGetDouble(val, JSON_percentage) );
-	ti.setIdenticalSignificantNibbles( safeGetUint(val, JSON_idSignNibbles) );
-	ti.setTotalSignificantNibbles( safeGetUint(val, JSON_totalSignNibbles) );
-	ti.setIsFromHeuristics( safeGetBool(val, JSON_heuristics) );
+	ti.setVersion( deserializeString(val, JSON_version) );
+	ti.setType( deserializeString(val, JSON_type) );
+	ti.setName( deserializeString(val, JSON_name) );
+	ti.setAdditionalInfo( deserializeString(val, JSON_additional) );
+	ti.setPercentage( deserializeDouble(val, JSON_percentage) );
+	ti.setIdenticalSignificantNibbles( deserializeUint64(val, JSON_idSignNibbles) );
+	ti.setTotalSignificantNibbles( deserializeUint64(val, JSON_totalSignNibbles) );
+	ti.setIsFromHeuristics( deserializeBool(val, JSON_heuristics) );
 }
 
 } // namespace serdes

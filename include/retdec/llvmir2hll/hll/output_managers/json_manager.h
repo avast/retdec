@@ -9,7 +9,9 @@
 
 #include <stack>
 
-#include <json/json.h>
+#include <rapidjson/writer.h>
+#include <rapidjson/prettywriter.h>
+#include <rapidjson/stringbuffer.h>
 
 #include <llvm/Support/raw_ostream.h>
 
@@ -20,18 +22,12 @@ namespace llvmir2hll {
 
 class OutputManager;
 
+template <typename Writer>
 class JsonOutputManager : public OutputManager
 {
 	public:
-		JsonOutputManager(llvm::raw_ostream& out, bool humanReadable = false);
+		JsonOutputManager(llvm::raw_ostream& out);
 		virtual ~JsonOutputManager();
-
-	// JSON-output-manager-specific configuration.
-	//
-	public:
-		void setHumanReadable(bool b);
-		/// Manager is NOT set to produce human readable output by default.
-		bool isHumanReadable() const;
 
 	public:
 		virtual void newLine() override;
@@ -61,13 +57,15 @@ class JsonOutputManager : public OutputManager
 		virtual void addressPop() override;
 
 	private:
-		Json::Value jsonToken(const std::string& k, const std::string& v);
+		void jsonToken(const std::string& k, const std::string& v);
 		void generateAddressEntry(Address a);
 
 	private:
 		llvm::raw_ostream& _out;
-		bool _humanReadable = true;
-		Json::Value _tokens;
+
+		rapidjson::StringBuffer sb;
+		Writer writer;
+
 		std::stack<std::pair<Address, bool>> _addrs;
 		std::pair<Address, bool> _addrToGenerate;
 		/**
@@ -85,6 +83,12 @@ class JsonOutputManager : public OutputManager
 		bool _commentModifierOn = false;
 		std::string _runningComment;
 };
+
+using JsonOutputManagerPlain =
+		JsonOutputManager<rapidjson::Writer<rapidjson::StringBuffer>>;
+
+using JsonOutputManagerPretty =
+		JsonOutputManager<rapidjson::PrettyWriter<rapidjson::StringBuffer>>;
 
 } // namespace llvmir2hll
 } // namespace retdec

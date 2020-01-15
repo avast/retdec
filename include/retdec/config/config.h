@@ -17,7 +17,7 @@
 #include "retdec/common/tool_info.h"
 #include "retdec/common/vtable.h"
 #include "retdec/common/type.h"
-#include "retdec/config/base.h"
+#include "retdec/config/config_exceptions.h"
 #include "retdec/config/parameters.h"
 
 namespace retdec {

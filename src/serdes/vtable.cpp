@@ -4,12 +4,13 @@
  * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
 
+#include <rapidjson/prettywriter.h>
+#include <rapidjson/stringbuffer.h>
+
 #include "retdec/common/vtable.h"
 #include "retdec/serdes/address.h"
 #include "retdec/serdes/vtable.h"
 #include "retdec/serdes/std.h"
-
-#include "serdes/utils.h"
 
 namespace {
 
@@ -25,83 +26,73 @@ const std::string JSON_items         = "items";
 namespace retdec {
 namespace serdes {
 
-Json::Value serialize(const common::VtableItem& vti)
+template <typename Writer>
+void serialize(Writer& writer, const common::VtableItem& vti)
 {
-	Json::Value val;
+	writer.StartObject();
 
-	if (vti.getAddress().isDefined())
-	{
-		val[JSON_address] = serialize(vti.getAddress());
-	}
-	if (vti.getTargetFunctionAddress().isDefined())
-	{
-		val[JSON_targetAddress] = serialize(
-				vti.getTargetFunctionAddress());
-	}
-	if (!vti.getTargetFunctionName().empty())
-	{
-		val[JSON_targetName] = vti.getTargetFunctionName();
-	}
-	if (vti.isThumb())
-	{
-		val[JSON_isThumb] = vti.isThumb();
-	}
+	serialize(
+			writer,
+			JSON_address,
+			vti.getAddress(),
+			vti.getAddress().isDefined());
+	serialize(
+			writer,
+			JSON_targetAddress,
+			vti.getTargetFunctionAddress(),
+			vti.getTargetFunctionAddress().isDefined());
+	serializeString(writer, JSON_targetName, vti.getTargetFunctionName());
+	serializeBool(writer, JSON_isThumb, vti.isThumb(), false);
 
-	return val;
+	writer.EndObject();
 }
+SERIALIZE_EXPLICIT_INSTANTIATION(common::VtableItem);
 
-void deserialize(const Json::Value& val, common::VtableItem& vti)
+void deserialize(const rapidjson::Value& val, common::VtableItem& vti)
 {
-	if (val.isNull() || !val.isObject())
+	if (val.IsNull() || !val.IsObject())
 	{
 		return;
 	}
 
 	common::Address a;
-	deserialize(val[JSON_address], a);
+	deserialize(val, JSON_address, a);
 	vti.setAddress(a);
 
 	common::Address ta;
-	deserialize(val[JSON_targetAddress], ta);
+	deserialize(val, JSON_targetAddress, ta);
 	vti.setTargetFunctionAddress(ta);
 
-	vti.setTargetFunctionName(safeGetString(val, JSON_targetName));
-	vti.setIsThumb(safeGetBool(val, JSON_isThumb, false));
+	vti.setTargetFunctionName(deserializeString(val, JSON_targetName));
+	vti.setIsThumb(deserializeBool(val, JSON_isThumb));
 }
 
-Json::Value serialize(const common::Vtable& vt)
+template <typename Writer>
+void serialize(Writer& writer, const common::Vtable& vt)
 {
-	Json::Value val;
+	writer.StartObject();
 
-	if (!vt.getName().empty())
-	{
-		val[JSON_name] = vt.getName();
-	}
-	if (vt.getAddress().isDefined())
-	{
-		val[JSON_address] = serialize(vt.getAddress());
-	}
-	if (!vt.items.empty())
-	{
-		val[JSON_items] = serialize(vt.items);
-	}
+	serializeString(writer, JSON_name, vt.getName());
+	serialize(writer, JSON_address, vt.getAddress(), vt.getAddress().isDefined());
+	serializeContainer(writer, JSON_items, vt.items);
 
-	return val;
+	writer.EndObject();
 }
+SERIALIZE_EXPLICIT_INSTANTIATION(common::Vtable);
 
-void deserialize(const Json::Value& val, common::Vtable& vt)
+void deserialize(const rapidjson::Value& val, common::Vtable& vt)
 {
-	if (val.isNull() || !val.isObject())
+	if (val.IsNull() || !val.IsObject())
 	{
 		return;
 	}
 
 	common::Address a;
-	deserialize(val[JSON_address], a);
+	deserialize(val, JSON_address, a);
 	vt.setAddress(a);
 
-	vt.setName(safeGetString(val, JSON_name));
-	deserialize(val[JSON_items], vt.items);
+	vt.setName(deserializeString(val, JSON_name));
+	deserializeContainer(val, JSON_items, vt.items);
 }
 
 } // namespace serdes

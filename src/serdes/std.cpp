@@ -6,29 +6,75 @@
 
 #include "retdec/serdes/std.h"
 
-#include "serdes/utils.h"
+#include "retdec/serdes/std.h"
 
 namespace retdec {
 namespace serdes {
 
-Json::Value serialize(const char*& str)
+void deserialize(const rapidjson::Value& val, const char*& str)
 {
-	return str;
+	str = val.GetString();
 }
 
-Json::Value serialize(const std::string& s)
+void deserialize(const rapidjson::Value& val, std::string& s)
 {
-	return s;
+	s = val.GetString();
 }
 
-void deserialize(const Json::Value& val, const char*& str)
+int64_t deserializeInt64(
+	const rapidjson::Value& val,
+	const std::string& key,
+	int64_t defaultValue)
 {
-	str = val.asCString();
+	auto res = val.FindMember(key);
+	return res != val.MemberEnd() && res->value.IsInt64()
+			? res->value.GetInt64()
+			: defaultValue;
 }
 
-void deserialize(const Json::Value& val, std::string& s)
+
+uint64_t deserializeUint64(
+	const rapidjson::Value& val,
+	const std::string& key,
+	uint64_t defaultValue)
 {
-	s = val.asString();
+	auto res = val.FindMember(key);
+	return res != val.MemberEnd() && res->value.IsUint64()
+			? res->value.GetUint64()
+			: defaultValue;
+}
+
+bool deserializeBool(
+	const rapidjson::Value& val,
+	const std::string& key,
+	bool defaultValue)
+{
+	auto res = val.FindMember(key);
+	return res != val.MemberEnd() && res->value.IsBool()
+			? res->value.GetBool()
+			: defaultValue;
+}
+
+bool deserializeDouble(
+	const rapidjson::Value& val,
+	const std::string& key,
+	double defaultValue)
+{
+	auto res = val.FindMember(key);
+	return res != val.MemberEnd() && res->value.IsDouble()
+			? res->value.GetDouble()
+			: defaultValue;
+}
+
+std::string deserializeString(
+	const rapidjson::Value& val,
+	const std::string& key,
+	const std::string& defaultValue)
+{
+	auto res = val.FindMember(key);
+	return res != val.MemberEnd() && res->value.IsString()
+			? res->value.GetString()
+			: defaultValue;
 }
 
 } // namespace serdes

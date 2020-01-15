@@ -7,7 +7,7 @@
 #ifndef RETDEC_SERDES_VTABLE_H
 #define RETDEC_SERDES_VTABLE_H
 
-#include <json/json.h>
+#include <rapidjson/document.h>
 
 namespace retdec {
 
@@ -18,11 +18,13 @@ class Vtable;
 
 namespace serdes {
 
-Json::Value serialize(const common::VtableItem& vti);
-void deserialize(const Json::Value& val, common::VtableItem& vti);
+template <typename Writer>
+void serialize(Writer& writer, const common::VtableItem& vti);
+void deserialize(const rapidjson::Value& val, common::VtableItem& vti);
 
-Json::Value serialize(const common::Vtable& vt);
-void deserialize(const Json::Value& val, common::Vtable& vt);
+template <typename Writer>
+void serialize(Writer& writer, const common::Vtable& vt);
+void deserialize(const rapidjson::Value& val, common::Vtable& vt);
 
 } // namespace serdes
 } // namespace retdec

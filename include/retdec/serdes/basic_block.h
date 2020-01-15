@@ -7,7 +7,7 @@
 #ifndef RETDEC_SERDES_BASIC_BLOCK_H
 #define RETDEC_SERDES_BASIC_BLOCK_H
 
-#include <json/json.h>
+#include <rapidjson/document.h>
 
 namespace retdec {
 
@@ -17,11 +17,13 @@ class BasicBlock;
 
 namespace serdes {
 
-Json::Value serialize(const common::BasicBlock::CallEntry& ce);
-void deserialize(const Json::Value& val, common::BasicBlock::CallEntry& ce);
+template <typename Writer>
+void serialize(Writer& writer, const common::BasicBlock::CallEntry& ce);
+void deserialize(const rapidjson::Value& val, common::BasicBlock::CallEntry& ce);
 
-Json::Value serialize(const common::BasicBlock& bb);
-void deserialize(const Json::Value& val, common::BasicBlock& bb);
+template <typename Writer>
+void serialize(Writer& writer, const common::BasicBlock& bb);
+void deserialize(const rapidjson::Value& val, common::BasicBlock& bb);
 
 } // namespace serdes
 } // namespace retdec

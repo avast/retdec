@@ -6,8 +6,12 @@
 
 #include <gtest/gtest.h>
 
+#include <rapidjson/prettywriter.h>
+#include <rapidjson/stringbuffer.h>
+
 #include "retdec/common/calling_convention.h"
 #include "retdec/serdes/calling_convention.h"
+#include "retdec/utils/string.h"
 
 using namespace ::testing;
 
@@ -19,97 +23,109 @@ class CallingConventionTests : public Test
 {
 	protected:
 		common::CallingConvention cc;
+
+		std::string _serialize()
+		{
+			rapidjson::StringBuffer sb;
+			rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(sb);
+
+			serialize(writer, cc);
+			std::string ret = sb.GetString();
+			// First and last character should be '"'.
+			ret = utils::trim(ret, "\"");
+			return ret;
+		}
 };
 
 TEST_F(CallingConventionTests, CheckSerialization)
 {
 	// Uninitialized CC is unknown.
-	EXPECT_EQ("unknown", serialize(cc).asString());
+	EXPECT_EQ("unknown", _serialize());
 
 	cc.setIsUnknown();
-	EXPECT_EQ("unknown", serialize(cc).asString());
+	EXPECT_EQ("unknown", _serialize());
 
 	cc.setIsVoidarg();
-	EXPECT_EQ("voidarg", serialize(cc).asString());
+	EXPECT_EQ("voidarg", _serialize());
 
 	cc.setIsCdecl();
-	EXPECT_EQ("cdecl", serialize(cc).asString());
+	EXPECT_EQ("cdecl", _serialize());
 
 	cc.setIsEllipsis();
-	EXPECT_EQ("ellipsis", serialize(cc).asString());
+	EXPECT_EQ("ellipsis", _serialize());
 
 	cc.setIsStdcall();
-	EXPECT_EQ("stdcall", serialize(cc).asString());
+	EXPECT_EQ("stdcall", _serialize());
 
 	cc.setIsPascal();
-	EXPECT_EQ("pascal", serialize(cc).asString());
+	EXPECT_EQ("pascal", _serialize());
 
 	cc.setIsFastcall();
-	EXPECT_EQ("fastcall", serialize(cc).asString());
+	EXPECT_EQ("fastcall", _serialize());
 
 	cc.setIsThiscall();
-	EXPECT_EQ("thiscall", serialize(cc).asString());
+	EXPECT_EQ("thiscall", _serialize());
 
 	cc.setIsManual();
-	EXPECT_EQ("manual", serialize(cc).asString());
+	EXPECT_EQ("manual", _serialize());
 
 	cc.setIsSpoiled();
-	EXPECT_EQ("spoiled", serialize(cc).asString());
+	EXPECT_EQ("spoiled", _serialize());
 
 	cc.setIsSpecialE();
-	EXPECT_EQ("speciale", serialize(cc).asString());
+	EXPECT_EQ("speciale", _serialize());
 
 	cc.setIsSpecialP();
-	EXPECT_EQ("specialp", serialize(cc).asString());
+	EXPECT_EQ("specialp", _serialize());
 
 	cc.setIsSpecial();
-	EXPECT_EQ("special", serialize(cc).asString());
+	EXPECT_EQ("special", _serialize());
 }
 
 TEST_F(CallingConventionTests, CheckDeserialization)
 {
 	EXPECT_TRUE(cc.isUnknown());
 
-	deserialize("", cc);
+	deserialize(rapidjson::Value(""), cc);
 	EXPECT_TRUE(cc.isUnknown());
 
-	deserialize("unknown", cc);
+	deserialize(rapidjson::Value("unknown"), cc);
 	EXPECT_TRUE(cc.isUnknown());
 
-	deserialize("voidarg", cc);
+	deserialize(rapidjson::Value("voidarg"), cc);
 	EXPECT_TRUE(cc.isVoidarg());
 
-	deserialize("cdecl", cc);
+	deserialize(rapidjson::Value("cdecl"), cc);
 	EXPECT_TRUE(cc.isCdecl());
 
-	deserialize("ellipsis", cc);
+	deserialize(rapidjson::Value("ellipsis"), cc);
 	EXPECT_TRUE(cc.isEllipsis());
 
-	deserialize("stdcall", cc);
+	deserialize(rapidjson::Value("stdcall"), cc);
 	EXPECT_TRUE(cc.isStdcall());
 
-	deserialize("pascal", cc);
+	deserialize(rapidjson::Value("pascal"), cc);
 	EXPECT_TRUE(cc.isPascal());
 
-	deserialize("fastcall", cc);
+	deserialize(rapidjson::Value("fastcall"), cc);
 	EXPECT_TRUE(cc.isFastcall());
 
-	deserialize("thiscall", cc);
+	deserialize(rapidjson::Value("thiscall"), cc);
 	EXPECT_TRUE(cc.isThiscall());
 
-	deserialize("manual", cc);
+	deserialize(rapidjson::Value("manual"), cc);
 	EXPECT_TRUE(cc.isManual());
 
-	deserialize("spoiled", cc);
+	deserialize(rapidjson::Value("spoiled"), cc);
 	EXPECT_TRUE(cc.isSpoiled());
 
-	deserialize("speciale", cc);
+	deserialize(rapidjson::Value("speciale"), cc);
 	EXPECT_TRUE(cc.isSpecialE());
 
-	deserialize("specialp", cc);
+	deserialize(rapidjson::Value("specialp"), cc);
 	EXPECT_TRUE(cc.isSpecialP());
 
-	deserialize("special", cc);
+	deserialize(rapidjson::Value("special"), cc);
 	EXPECT_TRUE(cc.isSpecial());
 }
 

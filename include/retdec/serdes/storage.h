@@ -7,7 +7,7 @@
 #ifndef RETDEC_SERDES_STORAGE_H
 #define RETDEC_SERDES_STORAGE_H
 
-#include <json/json.h>
+#include <rapidjson/document.h>
 
 namespace retdec {
 
@@ -17,8 +17,9 @@ class Storage;
 
 namespace serdes {
 
-Json::Value serialize(const common::Storage& s);
-void deserialize(const Json::Value& val, common::Storage& s);
+template <typename Writer>
+void serialize(Writer& writer, const common::Storage& s);
+void deserialize(const rapidjson::Value& val, common::Storage& s);
 
 } // namespace serdes
 } // namespace retdec

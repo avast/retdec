@@ -15,12 +15,11 @@ add_library(retdec-serdes STATIC
 	storage.cpp
 	tool_info.cpp
 	type.cpp
-	utils.cpp
 	vtable.cpp
 )
 target_link_libraries(retdec-serdes
 	retdec-common
-	jsoncpp
+	rapidjson
 )
 target_include_directories(retdec-serdes
 	PUBLIC ${PROJECT_SOURCE_DIR}/include/

@@ -7,7 +7,7 @@
 #ifndef RETDEC_SERDES_FILE_TYPE_H
 #define RETDEC_SERDES_FILE_TYPE_H
 
-#include <json/json.h>
+#include <rapidjson/document.h>
 
 namespace retdec {
 
@@ -17,8 +17,9 @@ class FileType;
 
 namespace serdes {
 
-Json::Value serialize(const common::FileType& ft);
-void deserialize(const Json::Value& val, common::FileType& ft);
+template <typename Writer>
+void serialize(Writer& writer, const common::FileType& ft);
+void deserialize(const rapidjson::Value& val, common::FileType& ft);
 
 } // namespace serdes
 } // namespace retdec

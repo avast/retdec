@@ -6,17 +6,17 @@
 
 #include <iostream>
 
-#include <json/json.h>
-
 #include "retdec/utils/conversion.h"
 #include "retdec/utils/string.h"
 #include "retdec/fileformat/utils/conversions.h"
+#include "retdec/serdes/pattern.h"
+#include "retdec/serdes/std.h"
 #include "fileinfo/file_presentation/getters/json_getters.h"
 #include "fileinfo/file_presentation/getters/pattern_config_getter/pattern_config_getter.h"
 #include "fileinfo/file_presentation/json_presentation.h"
 
+using namespace retdec;
 using namespace retdec::utils;
-using namespace Json;
 using namespace retdec::cpdetect;
 using namespace retdec::fileformat;
 
@@ -26,40 +26,66 @@ namespace
 {
 
 /**
+ * All unprintable characters are replaced with their byte values as '\x??'.
+ * This is not ideal, but fileinfo consumers expect it like this.
+ * It would be better to leave this for the rapidjson serializer to deal with.
+ * It would serialize it as '\u????'.
+ */
+template <typename Writer>
+void serializeString(
+		Writer& writer,
+		const std::string& key,
+		const std::string& val,
+		bool serializeIfValueEmpty = false)
+{
+	serdes::serializeString(
+			writer,
+			key,
+			utils::replaceNonprintableChars(val),
+			serializeIfValueEmpty);
+}
+
+/**
  * Present information from simple getter
  * @param getter Instance of SimpleGetter class
- * @param root Parent node in output document
+ * @param writer JSON writer to write to
+ * @param key If set then everything is written into a JSO object with the name.
  * @return @c true if at least one record from getter is presented, @c false otherwise
  */
-bool presentSimple(const SimpleGetter &getter, Json::Value &root)
+bool presentSimple(
+		const SimpleGetter &getter,
+		JsonPresentation::Writer& writer,
+		const std::string& key = std::string())
 {
 	bool result = false;
 	std::vector<std::string> desc, info;
+
+	bool first = !key.empty();
+	bool objectGenerated = false;
 
 	for(std::size_t i = 0, e = getter.loadInformation(desc, info); i < e; ++i)
 	{
 		if(!desc[i].empty() && !info[i].empty())
 		{
-			root[desc[i]] = info[i];
+			if (first)
+			{
+				writer.String(key);
+				writer.StartObject();
+				objectGenerated = true;
+				first = false;
+			}
+
+			serializeString(writer, desc[i], info[i]);
 			result = true;
 		}
 	}
 
-	return result;
-}
-
-/**
- * Present information from value as key
- * @param key Key for JSON attribute
- * @param value Value to present
- * @param root Parent node in output document
- */
-void presentIfNotEmpty(const std::string &key, const std::string &value, Json::Value& root)
-{
-	if(!value.empty())
+	if (objectGenerated)
 	{
-		root[key] = replaceNonprintableChars(value);
+		writer.EndObject();
 	}
+
+	return result;
 }
 
 } // anonymous namespace
@@ -67,17 +93,17 @@ void presentIfNotEmpty(const std::string &key, const std::string &value, Json::V
 /**
  * Constructor
  */
-JsonPresentation::JsonPresentation(FileInformation &fileinfo_, bool verbose_) :
-	FilePresentation(fileinfo_), verbose(verbose_)
+JsonPresentation::JsonPresentation(FileInformation &fileinfo_, bool verbose_)
+		: FilePresentation(fileinfo_)
+		, verbose(verbose_)
 {
 
 }
 
 /**
  * Present information about warning and error messages
- * @param root Parent node in output document
  */
-void JsonPresentation::presentErrors(Json::Value &root) const
+void JsonPresentation::presentErrors(Writer& writer) const
 {
 	std::vector<std::string> messages;
 	if(returnCode != ReturnCode::OK)
@@ -101,6 +127,7 @@ void JsonPresentation::presentErrors(Json::Value &root) const
 		messages.push_back(message);
 	}
 
+	std::map<std::string, std::vector<std::string>> result;
 	for(const auto message : messages)
 	{
 		const auto pos = message.find(':');
@@ -119,86 +146,125 @@ void JsonPresentation::presentErrors(Json::Value &root) const
 			content += '.';
 		}
 		content[0] = toupper(static_cast<unsigned char>(content[0]));
-		root[prefix + "s"].append(content);
+		result[prefix + "s"].push_back(content);
+	}
+
+	for (auto& p : result)
+	{
+		writer.String(p.first);
+		writer.StartArray();
+		for (auto& msg : p.second)
+		{
+			writer.String(msg);
+		}
+		writer.EndArray();
 	}
 }
 
 /**
 * Present information about Windows PE loader error
-* @param root Parent node in output document
 */
-void JsonPresentation::presentLoaderError(Json::Value &root) const
+void JsonPresentation::presentLoaderError(Writer& writer) const
 {
 	auto ldrErrInfo = fileinfo.getLoaderErrorInfo();
 
 	if (ldrErrInfo.loaderErrorCode != 0)
 	{
-		Json::Value loaderErrorNode;
+		writer.String("loaderError");
+		writer.StartObject();
 
-		loaderErrorNode["code"] = ldrErrInfo.loaderErrorCode;
-		loaderErrorNode["code_text"] = ldrErrInfo.loaderError;
-		loaderErrorNode["description"] = ldrErrInfo.loaderErrorUserFriendly;
-		loaderErrorNode["loadable_anyway"] = ldrErrInfo.isLoadableAnyway ? "true" : "false";
+		serdes::serializeUint64(writer, "code", ldrErrInfo.loaderErrorCode);
+		serializeString(writer, "code_text", ldrErrInfo.loaderError);
+		serializeString(writer, "description", ldrErrInfo.loaderErrorUserFriendly);
+		serializeString(
+				writer,
+				"loadable_anyway",
+				ldrErrInfo.isLoadableAnyway ? "true" : "false"
+		);
 
-		root["loaderError"] = loaderErrorNode;
+		writer.EndObject();
 	}
 }
 
 /**
  * Present information about detected compilers and packers
- * @param root Parent node in output document
  */
-void JsonPresentation::presentCompiler(Json::Value &root) const
+void JsonPresentation::presentCompiler(Writer& writer) const
 {
+	if (fileinfo.toolInfo.detectedTools.empty())
+	{
+		return;
+	}
+
+	writer.String("tools");
+	writer.StartArray();
+
 	for(const auto &tool : fileinfo.toolInfo.detectedTools)
 	{
-		Value jDetected;
-		jDetected["type"] = toolTypeToString(tool.type);
-		if(!tool.name.empty())
-		{
-			jDetected["name"] = tool.name;
-		}
-		if(!tool.versionInfo.empty())
-		{
-			jDetected["version"] = tool.versionInfo;
-		}
-		if(!tool.additionalInfo.empty())
-		{
-			jDetected["additional"] = tool.additionalInfo;
-		}
-		jDetected["method"] = detectionMetodToString(tool.source);
-		jDetected["heuristics"] = (tool.source != DetectionMethod::SIGNATURE);
-		jDetected["identicalSignificantNibbles"] = static_cast<Json::Value::UInt64>(tool.agreeCount);
-		jDetected["totalSignificantNibbles"] = static_cast<Json::Value::UInt64>(tool.impCount);
-		jDetected["percentage"] = tool.impCount ? static_cast<double>(tool.agreeCount) / tool.impCount * 100 : 0.0;
-		root["tools"].append(jDetected);
+		writer.StartObject();
+
+		serializeString(writer, "type", toolTypeToString(tool.type));
+		serializeString(writer, "name", tool.name);
+		serializeString(writer, "version", tool.versionInfo);
+		serializeString(writer, "additional", tool.additionalInfo);
+		serializeString(
+				writer,
+				"method",
+				detectionMetodToString(tool.source));
+		serdes::serializeBool(
+				writer,
+				"heuristics",
+				tool.source != DetectionMethod::SIGNATURE);
+		serdes::serializeUint64(
+				writer,
+				"identicalSignificantNibbles",
+				tool.agreeCount);
+		serdes::serializeUint64(
+				writer,
+				"totalSignificantNibbles",
+				tool.impCount);
+		serdes::serializeDouble(
+				writer,
+				"percentage",
+				tool.impCount
+					? static_cast<double>(tool.agreeCount) / tool.impCount * 100
+					: 0.0);
+
+		writer.EndObject();
 	}
+
+	writer.EndArray();
 }
 
 /**
  * Present information about detected languages
- * @param root Parent node in output document
  */
-void JsonPresentation::presentLanguages(Json::Value &root) const
+void JsonPresentation::presentLanguages(Writer& writer) const
 {
+	if (fileinfo.toolInfo.detectedLanguages.empty())
+	{
+		return;
+	}
+
+	writer.String("languages");
+	writer.StartArray();
+
 	for(const auto &l : fileinfo.toolInfo.detectedLanguages)
 	{
-		Value jLan;
-		jLan["name"] = l.name;
-		jLan["bytecode"] = l.bytecode;
-		if(!l.additionalInfo.empty())
-		{
-			jLan["additional"] = l.additionalInfo;
-		}
-		root["languages"].append(jLan);
+		writer.StartObject();
+		serializeString(writer, "name", l.name);
+		serdes::serializeBool(writer, "bytecode", l.bytecode);
+		serializeString(writer, "additional", l.additionalInfo);
+		writer.EndObject();
 	}
+
+	writer.EndArray();
 }
 
 /**
  * Present basic information about rich header
- * @param root Parent node in output document
  */
-void JsonPresentation::presentRichHeader(Json::Value &root) const
+void JsonPresentation::presentRichHeader(Writer& writer) const
 {
 	const auto offset = fileinfo.getRichHeaderOffsetStr(hexWithPrefix);
 	const auto key = fileinfo.getRichHeaderKeyStr(hexWithPrefix);
@@ -208,123 +274,83 @@ void JsonPresentation::presentRichHeader(Json::Value &root) const
 		return;
 	}
 
-	Value jRich;
-	if(!offset.empty())
-	{
-		jRich["offset"] = offset;
-	}
-	if(!key.empty())
-	{
-		jRich["key"] = key;
-	}
-	if(!sig.empty())
-	{
-		jRich["signature"] = sig;
-	}
-	root["richHeader"] = jRich;
+	writer.String("richHeader");
+	writer.StartObject();
+	serializeString(writer, "offset", offset);
+	serializeString(writer, "key", key);
+	serializeString(writer, "signature", sig);
+	writer.EndObject();
 }
 
 /**
  * Present information about packing
- * @param root Parent node in output document
  */
-void JsonPresentation::presentPackingInfo(Value &root) const
+void JsonPresentation::presentPackingInfo(Writer& writer) const
 {
 	const auto packed = fileinfo.toolInfo.isPacked();
-	root["packed"] = toLower(packedToString(packed));
+	serializeString(writer, "packed", toLower(packedToString(packed)));
 }
 
 /**
  * Present information about overlay
- * @param root Parent node in output document
  */
-void JsonPresentation::presentOverlay(Json::Value &root) const
+void JsonPresentation::presentOverlay(Writer& writer) const
 {
 	const auto offset = fileinfo.getOverlayOffsetStr(hexWithPrefix);
 	const auto size = fileinfo.getOverlaySizeStr(hexWithPrefix);
 	const auto entropy = fileinfo.getOverlayEntropyStr(truncFloat);
 	if(!offset.empty() || !size.empty())
 	{
-		Value jOverlay;
-		if(!offset.empty())
-		{
-			jOverlay["offset"] = offset;
-		}
-		if(!size.empty())
-		{
-			jOverlay["size"] = size;
-		}
-		if(!entropy.empty())
-		{
-			jOverlay["entropy"] = entropy;
-		}
-		root["overlay"] = jOverlay;
+		writer.String("overlay");
+		writer.StartObject();
+		serializeString(writer, "offset", offset);
+		serializeString(writer, "size", size);
+		serializeString(writer, "entropy", entropy);
+		writer.EndObject();
 	}
 }
 
 /**
  * Present detected patterns
- * @param root Parent node in output document
  */
-void JsonPresentation::presentPatterns(Json::Value &root) const
+void JsonPresentation::presentPatterns(Writer& writer) const
 {
 	auto pcg = PatternConfigGetter(fileinfo);
 	if(pcg.isEmpty())
 	{
 		return;
 	}
-	auto patterns = pcg.getJsonValue();
 
-	for(auto &pattern : patterns)
-	{
-		if(!pattern.isMember("matches"))
-		{
-			continue;
-		}
-
-		for(auto &match : pattern["matches"])
-		{
-			if(match.isMember("offset") && match["offset"].isIntegral())
-			{
-				match["offset"] = numToStr(match["offset"].asLargestUInt(), hexWithPrefix);
-			}
-			if(match.isMember("address") && match["address"].isIntegral())
-			{
-				match["address"] = numToStr(match["address"].asLargestUInt(), hexWithPrefix);
-			}
-		}
-	}
-
-	root["patterns"] = patterns;
+	serdes::serializeContainer(writer, "patterns", pcg.getPatterns());
 }
 
 /**
  * Present information about missing dependencies
- * @param root Parent node in output document
  */
-void JsonPresentation::presentMissingDepsInfo(Json::Value &root) const
+void JsonPresentation::presentMissingDepsInfo(Writer& writer) const
 {
-	if (returnCode == ReturnCode::FILE_NOT_EXIST || returnCode == ReturnCode::UNKNOWN_FORMAT)
+	if (returnCode == ReturnCode::FILE_NOT_EXIST
+			|| returnCode == ReturnCode::UNKNOWN_FORMAT)
 	{
 		return;
 	}
 
 	const auto numberOfMissingDeps = fileinfo.getNumberOfMissingDeps();
 
-	Value jMissingDeps;
-	jMissingDeps["count"] = numToStr(numberOfMissingDeps);
-
-	presentIterativeSubtitle(jMissingDeps, MissingDepsJsonGetter(fileinfo));
-	root["missingDeps"] = jMissingDeps;
+	writer.String("missingDeps");
+	writer.StartObject();
+	serializeString(writer, "count", numToStr(numberOfMissingDeps));
+	presentIterativeSubtitle(writer, MissingDepsJsonGetter(fileinfo));
+	writer.EndObject();
 }
 
 /**
  * Present information about loader
- * @param root Parent node in output document
  */
-void JsonPresentation::presentLoaderInfo(Json::Value &root) const
+void JsonPresentation::presentLoaderInfo(Writer& writer) const
 {
-	if(returnCode == ReturnCode::FILE_NOT_EXIST || returnCode == ReturnCode::UNKNOWN_FORMAT)
+	if(returnCode == ReturnCode::FILE_NOT_EXIST
+			|| returnCode == ReturnCode::UNKNOWN_FORMAT)
 	{
 		return;
 	}
@@ -332,229 +358,468 @@ void JsonPresentation::presentLoaderInfo(Json::Value &root) const
 	const auto baseAddress = fileinfo.getLoadedBaseAddressStr(hexWithPrefix);
 	const auto numberOfSegments = fileinfo.getNumberOfLoadedSegmentsStr(std::dec);
 
-	Value jLoaderInfo;
-	jLoaderInfo["baseAddress"] = baseAddress;
-	jLoaderInfo["numberOfSegments"] = numberOfSegments;
-
-	presentIterativeSubtitle(jLoaderInfo, LoaderInfoJsonGetter(fileinfo));
-
-	root["loaderInfo"] = jLoaderInfo;
+	writer.String("loaderInfo");
+	writer.StartObject();
+	serializeString(writer, "baseAddress", baseAddress);
+	serializeString(writer, "numberOfSegments", numberOfSegments);
+	presentIterativeSubtitle(writer, LoaderInfoJsonGetter(fileinfo));
+	writer.EndObject();
 }
 
 /**
- * Present information about certificate attributes into certificate table
- * @param root Parent node in output document
+ * Present information about certificates into certificate table
  */
-void JsonPresentation::presentCertificateAttributes(Json::Value &root) const
+void JsonPresentation::presentCertificates(Writer& writer) const
 {
 	if(!fileinfo.hasCertificateTableRecords())
 	{
 		return;
 	}
 
+	writer.String("certificateTable");
+	writer.StartObject();
+
+	// Basic info.
+	serializeString(
+			writer,
+			"numberOfCertificates",
+			numToStr(fileinfo.getNumberOfStoredCertificates()));
+	if (fileinfo.hasCertificateTableSignerCertificate())
+	{
+		serializeString(
+				writer,
+				"signerCertificateIndex",
+				numToStr(fileinfo.getCertificateTableSignerCertificateIndex()));
+	}
+	if (fileinfo.hasCertificateTableCounterSignerCertificate())
+	{
+		serializeString(
+				writer,
+				"counterSignerCertificateIndex",
+				numToStr(fileinfo.getCertificateTableCounterSignerCertificateIndex()));
+	}
+
+	writer.String("certificates");
+	writer.StartArray();
 	for(std::size_t i = 0; i < fileinfo.getNumberOfStoredCertificates(); ++i)
 	{
-		Value& jCert = root["certificateTable"]["certificates"][ArrayIndex(i)];
+		writer.StartObject();
 
-		Value jCertAttrsIssuer, jCertAttrsSubject;
-		presentIfNotEmpty("country", fileinfo.getCertificateIssuerCountry(i), jCertAttrsIssuer);
-		presentIfNotEmpty("organization", fileinfo.getCertificateIssuerOrganization(i), jCertAttrsIssuer);
-		presentIfNotEmpty("organizationalUnit", fileinfo.getCertificateIssuerOrganizationalUnit(i), jCertAttrsIssuer);
-		presentIfNotEmpty("nameQualifier", fileinfo.getCertificateIssuerNameQualifier(i), jCertAttrsIssuer);
-		presentIfNotEmpty("state", fileinfo.getCertificateIssuerState(i), jCertAttrsIssuer);
-		presentIfNotEmpty("commonName", fileinfo.getCertificateIssuerCommonName(i), jCertAttrsIssuer);
-		presentIfNotEmpty("serialNumber", fileinfo.getCertificateIssuerSerialNumber(i), jCertAttrsIssuer);
-		presentIfNotEmpty("locality", fileinfo.getCertificateIssuerLocality(i), jCertAttrsIssuer);
-		presentIfNotEmpty("title", fileinfo.getCertificateIssuerTitle(i), jCertAttrsIssuer);
-		presentIfNotEmpty("surname", fileinfo.getCertificateIssuerSurname(i), jCertAttrsIssuer);
-		presentIfNotEmpty("givenName", fileinfo.getCertificateIssuerGivenName(i), jCertAttrsIssuer);
-		presentIfNotEmpty("initials", fileinfo.getCertificateIssuerInitials(i), jCertAttrsIssuer);
-		presentIfNotEmpty("pseudonym", fileinfo.getCertificateIssuerPseudonym(i), jCertAttrsIssuer);
-		presentIfNotEmpty("generationQualifier", fileinfo.getCertificateIssuerGenerationQualifier(i), jCertAttrsIssuer);
-		presentIfNotEmpty("emailAddress", fileinfo.getCertificateIssuerEmailAddress(i), jCertAttrsIssuer);
+		serializeString(
+			writer,
+			"index",
+			numToStr(i));
+		serializeString(
+			writer,
+			"validSince",
+			fileinfo.getCertificateValidSince(i));
+		serializeString(
+			writer,
+			"validUntil",
+			fileinfo.getCertificateValidUntil(i));
+		serializeString(
+			writer,
+			"publicKey",
+			fileinfo.getCertificatePublicKey(i));
+		serializeString(
+			writer,
+			"publicKeyAlgorithm",
+			fileinfo.getCertificatePublicKeyAlgorithm(i));
+		serializeString(
+			writer,
+			"signatureAlgorithm",
+			fileinfo.getCertificateSignatureAlgorithm(i));
+		serializeString(
+			writer,
+			"serialNumber",
+			fileinfo.getCertificateSerialNumber(i));
+		serializeString(
+			writer,
+			"issuer",
+			fileinfo.getCertificateIssuerRawStr(i));
+		serializeString(
+			writer,
+			"subject",
+			fileinfo.getCertificateSubjectRawStr(i));
+		serializeString(
+			writer,
+			"sha1",
+			fileinfo.getCertificateSha1Digest(i));
+		serializeString(
+			writer,
+			"sha256",
+			fileinfo.getCertificateSha256Digest(i));
 
-		presentIfNotEmpty("country", fileinfo.getCertificateSubjectCountry(i), jCertAttrsSubject);
-		presentIfNotEmpty("organization", fileinfo.getCertificateSubjectOrganization(i), jCertAttrsSubject);
-		presentIfNotEmpty("organizationalUnit", fileinfo.getCertificateSubjectOrganizationalUnit(i), jCertAttrsSubject);
-		presentIfNotEmpty("nameQualifier", fileinfo.getCertificateSubjectNameQualifier(i), jCertAttrsSubject);
-		presentIfNotEmpty("state", fileinfo.getCertificateSubjectState(i), jCertAttrsSubject);
-		presentIfNotEmpty("commonName", fileinfo.getCertificateSubjectCommonName(i), jCertAttrsSubject);
-		presentIfNotEmpty("serialNumber", fileinfo.getCertificateSubjectSerialNumber(i), jCertAttrsSubject);
-		presentIfNotEmpty("locality", fileinfo.getCertificateSubjectLocality(i), jCertAttrsSubject);
-		presentIfNotEmpty("title", fileinfo.getCertificateSubjectTitle(i), jCertAttrsSubject);
-		presentIfNotEmpty("surname", fileinfo.getCertificateSubjectSurname(i), jCertAttrsSubject);
-		presentIfNotEmpty("givenName", fileinfo.getCertificateSubjectGivenName(i), jCertAttrsSubject);
-		presentIfNotEmpty("initials", fileinfo.getCertificateSubjectInitials(i), jCertAttrsSubject);
-		presentIfNotEmpty("pseudonym", fileinfo.getCertificateSubjectPseudonym(i), jCertAttrsSubject);
-		presentIfNotEmpty("generationQualifier", fileinfo.getCertificateSubjectGenerationQualifier(i), jCertAttrsSubject);
-		presentIfNotEmpty("emailAddress", fileinfo.getCertificateSubjectEmailAddress(i), jCertAttrsSubject);
+		writer.String("attributes");
+		writer.StartObject();
 
-		jCert["attributes"]["issuer"] = jCertAttrsIssuer.empty() ? objectValue : jCertAttrsIssuer;
-		jCert["attributes"]["subject"] = jCertAttrsSubject.empty() ? objectValue : jCertAttrsSubject;
+		writer.String("issuer");
+		writer.StartObject();
+		serializeString(writer, "country", fileinfo.getCertificateIssuerCountry(i));
+		serializeString(writer, "organization", fileinfo.getCertificateIssuerOrganization(i));
+		serializeString(writer, "organizationalUnit", fileinfo.getCertificateIssuerOrganizationalUnit(i));
+		serializeString(writer, "nameQualifier", fileinfo.getCertificateIssuerNameQualifier(i));
+		serializeString(writer, "state", fileinfo.getCertificateIssuerState(i));
+		serializeString(writer, "commonName", fileinfo.getCertificateIssuerCommonName(i));
+		serializeString(writer, "serialNumber", fileinfo.getCertificateIssuerSerialNumber(i));
+		serializeString(writer, "locality", fileinfo.getCertificateIssuerLocality(i));
+		serializeString(writer, "title", fileinfo.getCertificateIssuerTitle(i));
+		serializeString(writer, "surname", fileinfo.getCertificateIssuerSurname(i));
+		serializeString(writer, "givenName", fileinfo.getCertificateIssuerGivenName(i));
+		serializeString(writer, "initials", fileinfo.getCertificateIssuerInitials(i));
+		serializeString(writer, "pseudonym", fileinfo.getCertificateIssuerPseudonym(i));
+		serializeString(writer, "generationQualifier", fileinfo.getCertificateIssuerGenerationQualifier(i));
+		serializeString(writer, "emailAddress", fileinfo.getCertificateIssuerEmailAddress(i));
+		writer.EndObject();
+
+		writer.String("subject");
+		writer.StartObject();
+		serializeString(writer, "country", fileinfo.getCertificateSubjectCountry(i));
+		serializeString(writer, "organization", fileinfo.getCertificateSubjectOrganization(i));
+		serializeString(writer, "organizationalUnit", fileinfo.getCertificateSubjectOrganizationalUnit(i));
+		serializeString(writer, "nameQualifier", fileinfo.getCertificateSubjectNameQualifier(i));
+		serializeString(writer, "state", fileinfo.getCertificateSubjectState(i));
+		serializeString(writer, "commonName", fileinfo.getCertificateSubjectCommonName(i));
+		serializeString(writer, "serialNumber", fileinfo.getCertificateSubjectSerialNumber(i));
+		serializeString(writer, "locality", fileinfo.getCertificateSubjectLocality(i));
+		serializeString(writer, "title", fileinfo.getCertificateSubjectTitle(i));
+		serializeString(writer, "surname", fileinfo.getCertificateSubjectSurname(i));
+		serializeString(writer, "givenName", fileinfo.getCertificateSubjectGivenName(i));
+		serializeString(writer, "initials", fileinfo.getCertificateSubjectInitials(i));
+		serializeString(writer, "pseudonym", fileinfo.getCertificateSubjectPseudonym(i));
+		serializeString(writer, "generationQualifier", fileinfo.getCertificateSubjectGenerationQualifier(i));
+		serializeString(writer, "emailAddress", fileinfo.getCertificateSubjectEmailAddress(i));
+		writer.EndObject();
+
+		writer.EndObject();
+
+		writer.EndObject();
 	}
+	writer.EndArray();
+
+	writer.EndObject();
 }
 
 /**
  * Present information about TLS
- * @param root Parent node in output document
  */
-void JsonPresentation::presentTlsInfo(Json::Value &root) const
+void JsonPresentation::presentTlsInfo(Writer& writer) const
 {
 	if (!fileinfo.isTlsUsed())
 	{
 		return;
 	}
 
-	Value jTlsInfo;
-	presentIfNotEmpty("rawDataStartAddress", fileinfo.getTlsRawDataStartAddrStr(hexWithPrefix), jTlsInfo);
-	presentIfNotEmpty("rawDataEndAddress", fileinfo.getTlsRawDataEndAddrStr(hexWithPrefix), jTlsInfo);
-	presentIfNotEmpty("indexAddress", fileinfo.getTlsIndexAddrStr(hexWithPrefix), jTlsInfo);
-	presentIfNotEmpty("callbacksAddress", fileinfo.getTlsCallBacksAddrStr(hexWithPrefix), jTlsInfo);
-	presentIfNotEmpty("sizeOfZeroFill", fileinfo.getTlsZeroFillSizeStr(std::dec), jTlsInfo);
-	presentIfNotEmpty("characteristics", fileinfo.getTlsCharacteristicsStr(), jTlsInfo);
+	writer.String("tlsInfo");
+	writer.StartObject();
+
+	serializeString(writer, "rawDataStartAddress", fileinfo.getTlsRawDataStartAddrStr(hexWithPrefix));
+	serializeString(writer, "rawDataEndAddress", fileinfo.getTlsRawDataEndAddrStr(hexWithPrefix));
+	serializeString(writer, "indexAddress", fileinfo.getTlsIndexAddrStr(hexWithPrefix));
+	serializeString(writer, "callbacksAddress", fileinfo.getTlsCallBacksAddrStr(hexWithPrefix));
+	serializeString(writer, "sizeOfZeroFill", fileinfo.getTlsZeroFillSizeStr(std::dec));
+	serializeString(writer, "characteristics", fileinfo.getTlsCharacteristicsStr());
 
 	if (fileinfo.getTlsNumberOfCallBacks() > 0)
 	{
-		Value jCallbacks;
+		writer.String("callbacks");
+		writer.StartArray();
 		for (std::size_t i = 0; i < fileinfo.getTlsNumberOfCallBacks(); i++)
 		{
-			jCallbacks.append(fileinfo.getTlsCallBackAddrStr(i, hexWithPrefix));
+			writer.String(fileinfo.getTlsCallBackAddrStr(i, hexWithPrefix));
 		}
-		jTlsInfo["callbacks"] = jCallbacks;
+		writer.EndArray();
 	}
 
-	root["tlsInfo"] = jTlsInfo;
+	writer.EndObject();
 }
 
 /**
  * Present information about .NET
- * @param root Parent node in output document
  */
-void JsonPresentation::presentDotnetInfo(Json::Value &root) const
+void JsonPresentation::presentDotnetInfo(Writer& writer) const
 {
-	Value jDotnet;
-	if (!presentSimple(DotnetJsonGetter(fileinfo), jDotnet))
+	if (!fileinfo.isDotnetUsed())
 	{
 		return;
 	}
 
+	writer.String("dotnetInfo");
+	writer.StartObject();
+
+	// Basic info.
+	//
+	serializeString(
+			writer,
+			"runtimeVersion",
+			fileinfo.getDotnetRuntimeVersion());
+	serializeString(
+			writer,
+			"metadataHeaderAddress",
+			fileinfo.getDotnetMetadataHeaderAddressStr(hexWithPrefix));
+	serializeString(
+			writer,
+			"moduleVersionId",
+			fileinfo.getDotnetModuleVersionId());
+	if (fileinfo.hasDotnetTypeLibId())
+	{
+		serializeString(writer, "typeLibId", fileinfo.getDotnetTypeLibId());
+	}
+
+	// Streams.
+	//
 	if (fileinfo.hasDotnetMetadataStream())
 	{
-		jDotnet["metadataStream"]["offset"] = fileinfo.getDotnetMetadataStreamOffsetStr(hexWithPrefix);
-		jDotnet["metadataStream"]["size"] = fileinfo.getDotnetMetadataStreamSizeStr(hexWithPrefix);
+		writer.String("metadataStream");
+		writer.StartObject();
+		serializeString(
+				writer,
+				"offset",
+				fileinfo.getDotnetMetadataStreamOffsetStr(hexWithPrefix));
+		serializeString(
+				writer,
+				"size",
+				fileinfo.getDotnetMetadataStreamSizeStr(hexWithPrefix));
+		writer.EndObject();
 	}
 	if (fileinfo.hasDotnetStringStream())
 	{
-		jDotnet["stringStream"]["offset"] = fileinfo.getDotnetStringStreamOffsetStr(hexWithPrefix);
-		jDotnet["stringStream"]["size"] = fileinfo.getDotnetStringStreamSizeStr(hexWithPrefix);
+		writer.String("stringStream");
+		writer.StartObject();
+		serializeString(
+				writer,
+				"offset",
+				fileinfo.getDotnetStringStreamOffsetStr(hexWithPrefix));
+		serializeString(
+				writer,
+				"size",
+				fileinfo.getDotnetStringStreamSizeStr(hexWithPrefix));
+		writer.EndObject();
 	}
 	if (fileinfo.hasDotnetBlobStream())
 	{
-		jDotnet["blobStream"]["offset"] = fileinfo.getDotnetBlobStreamOffsetStr(hexWithPrefix);
-		jDotnet["blobStream"]["size"] = fileinfo.getDotnetBlobStreamSizeStr(hexWithPrefix);
+		writer.String("blobStream");
+		writer.StartObject();
+		serializeString(
+				writer,
+				"offset",
+				fileinfo.getDotnetBlobStreamOffsetStr(hexWithPrefix));
+		serializeString(
+				writer,
+				"size",
+				fileinfo.getDotnetBlobStreamSizeStr(hexWithPrefix));
+		writer.EndObject();
 	}
 	if (fileinfo.hasDotnetGuidStream())
 	{
-		jDotnet["guidStream"]["offset"] = fileinfo.getDotnetGuidStreamOffsetStr(hexWithPrefix);
-		jDotnet["guidStream"]["size"] = fileinfo.getDotnetGuidStreamSizeStr(hexWithPrefix);
+		writer.String("guidStream");
+		writer.StartObject();
+		serializeString(
+				writer,
+				"offset",
+				fileinfo.getDotnetGuidStreamOffsetStr(hexWithPrefix));
+		serializeString(
+				writer,
+				"size",
+				fileinfo.getDotnetGuidStreamSizeStr(hexWithPrefix));
+		writer.EndObject();
 	}
 	if (fileinfo.hasDotnetUserStringStream())
 	{
-		jDotnet["userStringStream"]["offset"] = fileinfo.getDotnetUserStringStreamOffsetStr(hexWithPrefix);
-		jDotnet["userStringStream"]["size"] = fileinfo.getDotnetUserStringStreamSizeStr(hexWithPrefix);
+		writer.String("userStringStream");
+		writer.StartObject();
+		serializeString(
+				writer,
+				"offset",
+				fileinfo.getDotnetUserStringStreamOffsetStr(hexWithPrefix));
+		serializeString(
+				writer,
+				"size",
+				fileinfo.getDotnetUserStringStreamSizeStr(hexWithPrefix));
+		writer.EndObject();
 	}
 
+	// Classes.
+	//
 	const auto& classes = fileinfo.getDotnetDefinedClassList();
-	for (const auto& dotnetClass : classes)
+	if (!classes.empty())
 	{
-		Value jClass;
-		jClass["name"] = dotnetClass->getName();
-		jClass["fullyQualifiedName"] = dotnetClass->getFullyQualifiedName();
-		jClass["namespace"] = dotnetClass->getNameSpace();
-		jClass["visibility"] = dotnetClass->getVisibilityString();
-		jClass["type"] = dotnetClass->getTypeString();
-		jClass["abstract"] = dotnetClass->isAbstract();
-		jClass["sealed"] = dotnetClass->isSealed();
-		for (const auto& genericParam : dotnetClass->getGenericParameters())
-			jClass["genericParameters"].append(genericParam);
-		for (const auto& baseType : dotnetClass->getBaseTypes())
-			jClass["baseTypes"].append(baseType->getText());
+		writer.String("classes");
+		writer.StartArray();
 
-		for (const auto& dotnetMethod : dotnetClass->getMethods())
+		for (const auto& dotnetClass : classes)
 		{
-			Value jMethod;
-			jMethod["name"] = dotnetMethod->getName();
-			jMethod["visibility"] = dotnetMethod->getVisibilityString();
-			jMethod["static"] = dotnetMethod->isStatic();
-			jMethod["virtual"] = dotnetMethod->isVirtual();
-			jMethod["final"] = dotnetMethod->isFinal();
-			jMethod["abstract"] = dotnetMethod->isAbstract();
-			if (!dotnetMethod->isConstructor())
-				jMethod["returnType"] = dotnetMethod->getReturnType()->getText();
-			jMethod["parameters"] = arrayValue;
-			for (const auto& dotnetParam : dotnetMethod->getParameters())
+			writer.StartObject();
+
+			serializeString(writer, "name", dotnetClass->getName());
+			serializeString(writer, "fullyQualifiedName", dotnetClass->getFullyQualifiedName());
+			serializeString(writer, "namespace", dotnetClass->getNameSpace());
+			serializeString(writer, "visibility", dotnetClass->getVisibilityString());
+			serializeString(writer, "type", dotnetClass->getTypeString());
+			serdes::serializeBool(writer, "abstract", dotnetClass->isAbstract());
+			serdes::serializeBool(writer, "sealed", dotnetClass->isSealed());
+
+			serdes::serializeContainer(
+					writer,
+					"genericParameters",
+					dotnetClass->getGenericParameters());
+
+			if (!dotnetClass->getBaseTypes().empty())
 			{
-				Value jParam;
-				jParam["name"] = dotnetParam->getName();
-				jParam["type"] = dotnetParam->getDataType()->getText();
-
-				jMethod["parameters"].append(jParam);
+				writer.String("baseTypes");
+				writer.StartArray();
+				for (const auto& baseType : dotnetClass->getBaseTypes())
+				{
+					writer.String(utils::replaceNonprintableChars(baseType->getText()));
+				}
+				writer.EndArray();
 			}
-			for (const auto& genericParam : dotnetMethod->getGenericParameters())
-				jMethod["genericParameters"].append(genericParam);
 
-			jClass["methods"].append(jMethod);
+			if (!dotnetClass->getMethods().empty())
+			{
+				writer.String("methods");
+				writer.StartArray();
+				for (const auto& dotnetMethod : dotnetClass->getMethods())
+				{
+					writer.StartObject();
+
+					serializeString(writer, "name", dotnetMethod->getName());
+					serializeString(writer, "visibility", dotnetMethod->getVisibilityString());
+					serdes::serializeBool(writer, "static", dotnetMethod->isStatic());
+					serdes::serializeBool(writer, "virtual", dotnetMethod->isVirtual());
+					serdes::serializeBool(writer, "final", dotnetMethod->isFinal());
+					serdes::serializeBool(writer, "abstract", dotnetMethod->isAbstract());
+
+					if (!dotnetMethod->isConstructor())
+					{
+						serializeString(
+								writer,
+								"returnType",
+								dotnetMethod->getReturnType()->getText());
+					}
+
+					writer.String("parameters");
+					writer.StartArray();
+					for (const auto& dotnetParam : dotnetMethod->getParameters())
+					{
+						writer.StartObject();
+						serializeString(
+								writer,
+								"name",
+								dotnetParam->getName());
+						serializeString(
+								writer,
+								"type",
+								dotnetParam->getDataType()->getText());
+						writer.EndObject();
+					}
+					writer.EndArray();
+
+					if (!dotnetMethod->getGenericParameters().empty())
+					{
+						writer.String("genericParameters");
+						writer.StartArray();
+						for (const auto& genericParam : dotnetMethod->getGenericParameters())
+							writer.String(
+									utils::replaceNonprintableChars(genericParam));
+						writer.EndArray();
+					}
+
+					writer.EndObject();
+				}
+				writer.EndArray();
+			}
+
+			if (!dotnetClass->getFields().empty())
+			{
+				writer.String("fields");
+				writer.StartArray();
+				for (const auto& dotnetField : dotnetClass->getFields())
+				{
+					writer.StartObject();
+					serializeString(writer, "name", dotnetField->getName());
+					serializeString(writer, "type", dotnetField->getDataType()->getText());
+					serializeString(writer, "visibility", dotnetField->getVisibilityString());
+					serdes::serializeBool(writer, "static", dotnetField->isStatic());
+					writer.EndObject();
+				}
+				writer.EndArray();
+			}
+
+			if (!dotnetClass->getProperties().empty())
+			{
+				writer.String("properties");
+				writer.StartArray();
+				for (const auto& dotnetProperty : dotnetClass->getProperties())
+				{
+					writer.StartObject();
+					serializeString(writer, "name", dotnetProperty->getName());
+					serializeString(writer, "type", dotnetProperty->getDataType()->getText());
+					serializeString(writer, "visibility", dotnetProperty->getVisibilityString());
+					serdes::serializeBool(writer, "static", dotnetProperty->isStatic());
+					writer.EndObject();
+				}
+				writer.EndArray();
+			}
+
+			writer.EndObject();
 		}
 
-		for (const auto& dotnetField : dotnetClass->getFields())
-		{
-			Value jField;
-			jField["name"] = dotnetField->getName();
-			jField["type"] = dotnetField->getDataType()->getText();
-			jField["visibility"] = dotnetField->getVisibilityString();
-			jField["static"] = dotnetField->isStatic();
-
-			jClass["fields"].append(jField);
-		}
-
-		for (const auto& dotnetProperty : dotnetClass->getProperties())
-		{
-			Value jProperty;
-			jProperty["name"] = dotnetProperty->getName();
-			jProperty["type"] = dotnetProperty->getDataType()->getText();
-			jProperty["visibility"] = dotnetProperty->getVisibilityString();
-			jProperty["static"] = dotnetProperty->isStatic();
-
-			jClass["properties"].append(jProperty);
-		}
-
-		jDotnet["classes"].append(jClass);
+		writer.EndArray();
 	}
 
-	presentIterativeSubtitle(jDotnet, TypeRefTableJsonGetter(fileinfo));
+	presentIterativeSubtitle(writer, TypeRefTableJsonGetter(fileinfo));
 
-	root["dotnetInfo"] = jDotnet;
+	writer.EndObject();
 }
 
 /**
  * Present information about Visual Basic
- * @param root Parent node in output document
  */
-void JsonPresentation::presentVisualBasicInfo(Json::Value &root) const
+void JsonPresentation::presentVisualBasicInfo(Writer& writer) const
 {
-	Value jVBasic;
-	if (!presentSimple(VisualBasicJsonGetter(fileinfo), jVBasic))
+	if (!fileinfo.isVisualBasicUsed())
 	{
 		return;
 	}
 
-	auto nExterns = fileinfo.getVisualBasicNumberOfExterns();
-	if (nExterns)
+	writer.String("visualBasicInfo");
+	writer.StartObject();
+
+	// Basic info.
+	serializeString(writer, "projectName", fileinfo.getVisualBasicProjectName());
+	serializeString(writer, "projectExeName", fileinfo.getVisualBasicProjectExeName());
+	serializeString(writer, "projectPath", fileinfo.getVisualBasicProjectPath());
+	serializeString(writer, "projectDescription", fileinfo.getVisualBasicProjectDescription());
+	serializeString(writer, "projectHelpFile", fileinfo.getVisualBasicProjectHelpFile());
+	serializeString(writer, "languageDLL", fileinfo.getVisualBasicLanguageDLL());
+	serializeString(writer, "backupLanguageDLL", fileinfo.getVisualBasicBackupLanguageDLL());
+	serializeString(writer, "languageDLLPrimaryLCID", fileinfo.getVisualBasicLanguageDLLPrimaryLCIDStr());
+	serializeString(writer, "languageDLLSecondaryLCID", fileinfo.getVisualBasicLanguageDLLSecondaryLCIDStr());
+	serializeString(writer, "projectPrimaryLCID", fileinfo.getVisualBasicProjectPrimaryLCIDStr());
+	serializeString(writer, "projectSecondaryLCID", fileinfo.getVisualBasicProjectSecondaryLCIDStr());
+	serializeString(writer, "typeLibCLSID", fileinfo.getVisualBasicTypeLibCLSID());
+	serializeString(writer, "typeLibMajorVersion", fileinfo.getVisualBasicTypeLibMajorVersionStr());
+	serializeString(writer, "typeLibMinorVersion", fileinfo.getVisualBasicTypeLibMinorVersionStr());
+	serializeString(writer, "typeLibLCID", fileinfo.getVisualBasicTypeLibLCIDStr());
+	serializeString(writer, "comObjectName", fileinfo.getVisualBasicCOMObjectName());
+	serializeString(writer, "comObjectDescription", fileinfo.getVisualBasicCOMObjectDescription());
+	serializeString(writer, "comObjectCLSID", fileinfo.getVisualBasicCOMObjectCLSID());
+	serializeString(writer, "comObjectInterfaceCLSID", fileinfo.getVisualBasicCOMObjectInterfaceCLSID());
+	serializeString(writer, "comObjectEventsCLSID", fileinfo.getVisualBasicCOMObjectEventsCLSID());
+	serializeString(writer, "comObjectType", fileinfo.getVisualBasicCOMObjectType());
+	serializeString(writer, "isPCode", (fileinfo.getVisualBasicIsPcode() ? "yes" : "no"));
+
+	if (auto nExterns = fileinfo.getVisualBasicNumberOfExterns())
 	{
-		Value jExternTable;
-		jExternTable["crc32"] = fileinfo.getVisualBasicExternTableHashCrc32();
-		jExternTable["md5"] = fileinfo.getVisualBasicExternTableHashMd5();
-		jExternTable["sha256"] = fileinfo.getVisualBasicExternTableHashSha256();
+		writer.String("externTable");
+		writer.StartObject();
+
+		serializeString(writer, "crc32", fileinfo.getVisualBasicExternTableHashCrc32());
+		serializeString(writer, "md5", fileinfo.getVisualBasicExternTableHashMd5());
+		serializeString(writer, "sha256", fileinfo.getVisualBasicExternTableHashSha256());
+
+		bool first = true;
 		for (std::size_t i = 0; i < nExterns; i++)
 		{
 			auto ext = fileinfo.getVisualBasicExtern(i);
@@ -562,28 +827,48 @@ void JsonPresentation::presentVisualBasicInfo(Json::Value &root) const
 			{
 				continue;
 			}
-			Value jExtern;
-			jExtern["moduleName"] = ext->getModuleName();
-			jExtern["apiName"] = ext->getApiName();
-			jExternTable["externs"].append(jExtern);
+
+			if (first)
+			{
+				writer.String("externs");
+				writer.StartArray();
+				first = false;
+			}
+
+			writer.StartObject();
+			serializeString(writer, "moduleName", ext->getModuleName());
+			serializeString(writer, "apiName", ext->getApiName());
+			writer.EndObject();
 		}
-		jVBasic["externTable"] = jExternTable;
+		if (!first)
+		{
+			writer.EndArray();
+		}
+
+		writer.EndObject();
 	}
 
-	Value jObjectTable;
 	auto guid = fileinfo.getVisualBasicObjectTableGUID();
+	auto nObjects = fileinfo.getVisualBasicNumberOfObjects();
+	if (guid.empty() && nObjects == 0)
+	{
+		writer.EndObject();
+		return;
+	}
 
+	writer.String("objectTable");
+	writer.StartObject();
 	if (!guid.empty())
 	{
-		jObjectTable["guid"] = guid;
+		serializeString(writer, "guid", guid);
 	}
-
-	auto nObjects = fileinfo.getVisualBasicNumberOfObjects();
 	if (nObjects)
 	{
-		jObjectTable["crc32"] = fileinfo.getVisualBasicObjectTableHashCrc32();
-		jObjectTable["md5"] = fileinfo.getVisualBasicObjectTableHashMd5();
-		jObjectTable["sha256"] = fileinfo.getVisualBasicObjectTableHashSha256();
+		serializeString(writer, "crc32", fileinfo.getVisualBasicObjectTableHashCrc32());
+		serializeString(writer, "md5", fileinfo.getVisualBasicObjectTableHashMd5());
+		serializeString(writer, "sha256", fileinfo.getVisualBasicObjectTableHashSha256());
+
+		bool first = true;
 		for (std::size_t i = 0; i < nObjects; i++)
 		{
 			auto obj = fileinfo.getVisualBasicObject(i);
@@ -591,67 +876,90 @@ void JsonPresentation::presentVisualBasicInfo(Json::Value &root) const
 			{
 				continue;
 			}
-			Value jObject;
-			jObject["name"] = obj->getName();
-			for (const auto &method : obj->getMethods())
+
+			if (first)
 			{
-				jObject["methods"].append(method);
+				writer.String("objects");
+				writer.StartArray();
+				first = false;
 			}
-			jObjectTable["objects"].append(jObject);
+
+			writer.StartObject();
+			serializeString(writer, "name", obj->getName());
+			const auto& methods = obj->getMethods();
+			if (!methods.empty())
+			{
+				writer.String("methods");
+				writer.StartArray();
+				for (const auto &method : methods)
+				{
+					writer.String(utils::replaceNonprintableChars(method));
+				}
+				writer.EndArray();
+			}
+			writer.EndObject();
+		}
+		if (!first)
+		{
+			writer.EndArray();
 		}
 	}
+	writer.EndObject();
 
-	if (!jObjectTable["guid"].empty() || nObjects > 0)
-	{
-		jVBasic["objectTable"] = jObjectTable;
-	}
-	root["visualBasicInfo"] = jVBasic;
+	writer.EndObject();
 }
 
 /**
  * Present version information
- * @param root Parent node in output document
  */
-void JsonPresentation::presentVersionInfo(Json::Value &root) const
+void JsonPresentation::presentVersionInfo(Writer& writer) const
 {
-	Value jVerInfo;
+	writer.String("versionInfo");
+	writer.StartObject();
 
 	auto nStrings = fileinfo.getNumberOfVersionInfoStrings();
 	if (nStrings)
 	{
-		Value jStrings;
+		writer.String("strings");
+		writer.StartArray();
+
 		for (std::size_t i = 0; i < nStrings; i++)
 		{
-			Value jStr;
-			jStr["name"] = fileinfo.getVersionInfoStringName(i);
-			jStr["value"] = fileinfo.getVersionInfoStringValue(i);
-			jStrings.append(jStr);
+			writer.StartObject();
+			serializeString(writer, "name", fileinfo.getVersionInfoStringName(i));
+			serializeString(
+					writer,
+					"value",
+					fileinfo.getVersionInfoStringValue(i),
+					true);
+			writer.EndObject();
 		}
-		jVerInfo["strings"] = jStrings;
+
+		writer.EndArray();
 	}
 
 	auto nLangs = fileinfo.getNumberOfVersionInfoLanguages();
 	if (nLangs)
 	{
-		Value jLanguages;
+		writer.String("languages");
+		writer.StartArray();
 		for (std::size_t i = 0; i < nLangs; i++)
 		{
-			Value jLang;
-			jLang["lcid"] = fileinfo.getVersionInfoLanguageLcid(i);
-			jLang["codePage"] = fileinfo.getVersionInfoLanguageCodePage(i);
-			jLanguages.append(jLang);
+			writer.StartObject();
+			serializeString(writer, "lcid", fileinfo.getVersionInfoLanguageLcid(i));
+			serializeString(writer, "codePage", fileinfo.getVersionInfoLanguageCodePage(i));
+			writer.EndObject();
 		}
-		jVerInfo["languages"] = jLanguages;
+		writer.EndArray();
 	}
 
-	root["versionInfo"] = jVerInfo;
+	writer.EndObject();
 }
 
 /**
  * Present ELF notes
- * @param root Parent node in output document
  */
-void JsonPresentation::presentElfNotes(Json::Value& root) const
+void JsonPresentation::presentElfNotes(Writer& writer) const
 {
 	auto& noteSection = fileinfo.getElfNotes();
 	if(noteSection.empty())
@@ -659,127 +967,139 @@ void JsonPresentation::presentElfNotes(Json::Value& root) const
 		return;
 	}
 
-	Value jNotesArr;
+	writer.String("elfNotes");
+	writer.StartArray();
 	for(const auto& notes : noteSection)
 	{
-		Value jNotes;
+		writer.StartObject();
 
 		if(notes.isNamedSection())
 		{
-			jNotes["name"] = replaceNonprintableChars(notes.getSectionName());
+			serializeString(writer, "name", notes.getSectionName());
 		}
 		if(notes.isMalformed())
 		{
-			jNotes["warning"] = notes.getErrorMessage();
+			serializeString(
+					writer,
+					"warning",
+					notes.getErrorMessage());
 		}
 
-		jNotes["size"] = static_cast<std::uint64_t>(notes.getSecSegLength());
-		jNotes["offset"] = static_cast<std::uint64_t>(notes.getSecSegOffset());
-		jNotes["numberOfNotes"] = static_cast<std::uint64_t>(notes.getNotes().size());
+		serdes::serializeUint64(writer, "size", notes.getSecSegLength());
+		serdes::serializeUint64(writer, "offset", notes.getSecSegOffset());
+		serdes::serializeUint64(writer, "numberOfNotes", notes.getNotes().size());
 
-		Value jNoteArr;
+		writer.String("noteEntries");
+		writer.StartArray();
 		std::size_t idx = 0;
 		for(const auto& note : notes.getNotes())
 		{
-			Value jNote;
-
-			jNote["index"] = static_cast<std::uint64_t>(idx++);
-			jNote["owner"] = replaceNonprintableChars(note.owner);
-			jNote["type"] = static_cast<std::uint64_t>(note.type);
-			jNote["dataSize"] = static_cast<std::uint64_t>(note.dataLength);
-			jNote["dataOffset"] = static_cast<std::uint64_t>(note.dataOffset);
-			jNote["description"] = replaceNonprintableChars(note.description);
-			jNoteArr.append(jNote);
+			writer.StartObject();
+			serdes::serializeUint64(writer, "index", idx++);
+			serializeString(writer, "owner", note.owner);
+			serdes::serializeUint64(writer, "type", note.type);
+			serdes::serializeUint64(writer, "dataSize", note.dataLength);
+			serdes::serializeUint64(writer, "dataOffset", note.dataOffset);
+			serializeString(writer, "description", note.description);
+			writer.EndObject();
 		}
+		writer.EndArray();
 
-		jNotes["noteEntries"] = jNoteArr;
-		jNotesArr.append(jNotes);
+		writer.EndObject();
 	}
-
-	root["elfNotes"] = jNotesArr;
-
-	Value jCoreInfo;
-	auto someCoreInfo = false;
+	writer.EndArray();
 
 	const auto& core = fileinfo.getElfCoreInfo();
+	if (!core.hasAuxVector() && !core.hasFileMap())
+	{
+		return;
+	}
+
+	writer.String("elfCore");
+	writer.StartObject();
+
 	if(core.hasAuxVector())
 	{
-		Value jAuxInfo;
-		someCoreInfo =  true;
-
 		const auto& auxVec = core.getAuxVector();
+		serdes::serializeUint64(writer, "numberOfAuxVectorEntries", auxVec.size());
+
+		writer.String("auxVector");
+		writer.StartArray();
 		for(const auto& auxEntry : auxVec)
 		{
-			Value jAuxEntry;
-			jAuxEntry["name"] = auxEntry.first;
-			jAuxEntry["value"] = auxEntry.second;
-			jAuxInfo.append(jAuxEntry);
+			writer.StartObject();
+			serializeString(writer, "name", auxEntry.first);
+			serdes::serializeUint64(writer, "value", auxEntry.second);
+			writer.EndObject();
 		}
-
-		jCoreInfo["numberOfAuxVectorEntries"] = static_cast<std::uint64_t>(auxVec.size());
-		jCoreInfo["auxVector"] = jAuxInfo;
+		writer.EndArray();
 	}
 	if(core.hasFileMap())
 	{
-		Value jMapInfo;
-		someCoreInfo =  true;
-
 		const auto& fileMap = core.getFileMap();
+		serdes::serializeUint64(writer, "numberOfFileMapEntries", fileMap.size());
+
+		writer.String("fileMap");
+		writer.StartArray();
 		for(const auto& mapEntry : fileMap)
 		{
-			Value jMapEntry;
-			jMapEntry["address"] = mapEntry.address;
-			jMapEntry["size"] = mapEntry.size;
-			jMapEntry["page"] = mapEntry.page;
-			jMapEntry["path"] = replaceNonprintableChars(mapEntry.path);
-			jMapInfo.append(jMapEntry);
+			writer.StartObject();
+			serdes::serializeUint64(writer, "address", mapEntry.address);
+			serdes::serializeUint64(writer, "size", mapEntry.size);
+			serdes::serializeUint64(writer, "page", mapEntry.page);
+			serializeString(writer, "path", mapEntry.path);
+			writer.EndObject();
 		}
-
-		jCoreInfo["numberOfFileMapEntries"] = static_cast<std::uint64_t>(fileMap.size());
-		jCoreInfo["fileMap"] = jMapInfo;
+		writer.EndArray();
 	}
 
-	if(someCoreInfo)
-	{
-		root["elfCore"] = jCoreInfo;
-	}
+	writer.EndObject();
 }
 
 /**
  * Present information about flags
- * @param root Parent node in output document
+ * @param writer JSON writter
  * @param title Flags title
  * @param flags Flags in binary string representation
  * @param desc Vector of descriptors (descriptor is complete information about flag)
  */
-void JsonPresentation::presentFlags(Json::Value &root, const std::string &title, const std::string &flags, const std::vector<std::string> &desc) const
+void JsonPresentation::presentFlags(
+		Writer& writer,
+		const std::string &title,
+		const std::string &flags,
+		const std::vector<std::string> &desc) const
 {
 	if(flags.empty() && desc.empty())
 	{
 		return;
 	}
 
-	Value jFlags;
-	if(!flags.empty())
+	writer.String(title);
+	writer.StartObject();
+
+	serializeString(writer, "value", flags);
+
+	if (!desc.empty())
 	{
-		jFlags["value"] = flags;
+		writer.String("descriptors");
+		writer.StartArray();
+		for(const auto &d : desc)
+		{
+			writer.String(d);
+		}
+		writer.EndArray();
 	}
 
-	for(const auto &d : desc)
-	{
-		jFlags["descriptors"].append(d);
-	}
-
-	root[title] = jFlags;
+	writer.EndObject();
 }
 
 /**
  * Present information from one structure of iterative subtitle getter
- * @param root Parent node in output document
- * @param getter Instance of IterativeSubtitleGetter class
- * @param structIndex Index of selected structure (indexed from 0)
  */
-void JsonPresentation::presentIterativeSubtitleStructure(Json::Value &root, const IterativeSubtitleGetter &getter, std::size_t structIndex) const
+void JsonPresentation::presentIterativeSubtitleStructure(
+		Writer& writer,
+		const IterativeSubtitleGetter &getter,
+		std::size_t structIndex) const
 {
 	if(structIndex >= getter.getNumberOfStructures())
 	{
@@ -805,13 +1125,27 @@ void JsonPresentation::presentIterativeSubtitleStructure(Json::Value &root, cons
 		return;
 	}
 
-	Value jTitle;
+	bool genArray = false;
+	if (simplyStructure)
+	{
+		writer.String(title);
+
+		if (!basicLen)
+		{
+			writer.StartArray();
+			genArray = true;
+		}
+	}
+	if (!genArray)
+	{
+		writer.StartObject();
+	}
 
 	for(std::size_t i = 0; i < basicLen; ++i)
 	{
 		if(!desc[i].empty() && !info[i].empty())
 		{
-			jTitle[desc[i]] = info[i];
+			serializeString(writer, desc[i], info[i]);
 		}
 	}
 
@@ -819,109 +1153,139 @@ void JsonPresentation::presentIterativeSubtitleStructure(Json::Value &root, cons
 	std::string flags;
 	std::vector<std::string> flagsDesc;
 
+	if (!genArray)
+	{
+		writer.String(subtitle);
+		writer.StartArray();
+	}
 	for(std::size_t i = 0; getter.getRecord(structIndex, i, info); ++i)
 	{
-		Value jEntry;
-
+		writer.StartObject();
 		for(std::size_t j = 0; j < elements; ++j)
 		{
 			if(!desc[j].empty() && !info[j].empty())
 			{
-				jEntry[desc[j]] = info[j];
+				serializeString(writer, desc[j], info[j]);
 			}
 		}
-
 		getter.getFlags(structIndex, i, flags, flagsDesc);
-		presentFlags(jEntry, "flags", flags, flagsDesc);
-		simplyStructure && !basicLen ? jTitle.append(jEntry) : jTitle[subtitle].append(jEntry);
+		presentFlags(writer, "flags", flags, flagsDesc);
+		writer.EndObject();
+	}
+	if (!genArray)
+	{
+		writer.EndArray();
 	}
 
-	simplyStructure ? root[title] = jTitle : root[header].append(jTitle);
+	if (genArray)
+	{
+		writer.EndArray();
+	}
+	else
+	{
+		writer.EndObject();
+	}
 }
 
 /**
  * Present information from iterative subtitle getter
- * @param root Parent node in output document
- * @param getter Instance of IterativeSubtitleGetter class
  */
-void JsonPresentation::presentIterativeSubtitle(Json::Value &root, const IterativeSubtitleGetter &getter) const
+void JsonPresentation::presentIterativeSubtitle(
+		Writer& writer,
+		const IterativeSubtitleGetter &getter) const
 {
+	if (getter.getNumberOfStructures() == 0)
+	{
+		return;
+	}
+
+	std::string header;
+	getter.getHeader(header);
+	if (!header.empty())
+	{
+		writer.String(header);
+		writer.StartArray();
+	}
+
 	for(std::size_t i = 0, e = getter.getNumberOfStructures(); i < e; ++i)
 	{
-		presentIterativeSubtitleStructure(root, getter, i);
+		presentIterativeSubtitleStructure(writer, getter, i);
+	}
+
+	if (!header.empty())
+	{
+		writer.EndArray();
 	}
 }
 
 bool JsonPresentation::present()
 {
-	Value root, jEp;
-	root["inputFile"] = fileinfo.getPathToFile();
-	presentErrors(root);
-	presentLoaderError(root);
-	presentSimple(BasicJsonGetter(fileinfo), root);
-	if(presentSimple(EntryPointJsonGetter(fileinfo), jEp))
-	{
-		root["entryPoint"] = jEp;
-	}
-	presentCompiler(root);
-	presentLanguages(root);
-	presentOverlay(root);
+	rapidjson::StringBuffer sb;
+	Writer writer(sb);
+	writer.StartObject();
+
+	serializeString(writer, "inputFile", fileinfo.getPathToFile());
+
+	presentErrors(writer);
+	presentLoaderError(writer);
+	presentSimple(BasicJsonGetter(fileinfo), writer);
+	presentSimple(EntryPointJsonGetter(fileinfo), writer, "entryPoint");
+	presentCompiler(writer);
+	presentLanguages(writer);
+	presentOverlay(writer);
 
 	if(verbose)
 	{
 		std::string flags, title;
 		std::vector<std::string> desc, info;
 
-		presentPackingInfo(root);
+		presentPackingInfo(writer);
 
 		HeaderJsonGetter headerInfo(fileinfo);
-		presentSimple(headerInfo, root);
+		presentSimple(headerInfo, writer);
 		headerInfo.getFileFlags(title, flags, desc, info);
-		presentFlags(root, title, flags, desc);
+		presentFlags(writer, title, flags, desc);
 		headerInfo.getDllFlags(title, flags, desc, info);
-		presentFlags(root, title, flags, desc);
-		Value jPdb;
-		if(presentSimple(PdbJsonGetter(fileinfo), jPdb))
-		{
-			root["pdbInfo"] = jPdb;
-		}
+		presentFlags(writer, title, flags, desc);
 
-		presentIterativeSubtitle(root, RichHeaderJsonGetter(fileinfo));
-		presentIterativeSubtitle(root, DataDirectoryJsonGetter(fileinfo));
-		presentIterativeSubtitle(root, SegmentJsonGetter(fileinfo));
-		presentIterativeSubtitle(root, SectionJsonGetter(fileinfo));
-		presentIterativeSubtitle(root, SymbolTablesJsonGetter(fileinfo));
-		presentIterativeSubtitle(root, ImportTableJsonGetter(fileinfo));
-		presentIterativeSubtitle(root, ExportTableJsonGetter(fileinfo));
-		presentIterativeSubtitle(root, RelocationTablesJsonGetter(fileinfo));
-		presentIterativeSubtitle(root, DynamicSectionsJsonGetter(fileinfo));
-		presentIterativeSubtitle(root, ResourceJsonGetter(fileinfo));
-		presentIterativeSubtitle(root, CertificateTableJsonGetter(fileinfo));
-		presentIterativeSubtitle(root, AnomaliesJsonGetter(fileinfo));
+		presentSimple(PdbJsonGetter(fileinfo), writer, "pdbInfo");
+
+		presentIterativeSubtitle(writer, RichHeaderJsonGetter(fileinfo));
+		presentIterativeSubtitle(writer, DataDirectoryJsonGetter(fileinfo));
+		presentIterativeSubtitle(writer, SegmentJsonGetter(fileinfo));
+		presentIterativeSubtitle(writer, SectionJsonGetter(fileinfo));
+		presentIterativeSubtitle(writer, SymbolTablesJsonGetter(fileinfo));
+		presentIterativeSubtitle(writer, ImportTableJsonGetter(fileinfo));
+		presentIterativeSubtitle(writer, ExportTableJsonGetter(fileinfo));
+		presentIterativeSubtitle(writer, RelocationTablesJsonGetter(fileinfo));
+		presentIterativeSubtitle(writer, DynamicSectionsJsonGetter(fileinfo));
+		presentIterativeSubtitle(writer, ResourceJsonGetter(fileinfo));
+		presentIterativeSubtitle(writer, AnomaliesJsonGetter(fileinfo));
 		const auto manifest = fileinfo.getCompactManifest();
 		if(!manifest.empty())
 		{
-			root["manifest"] = replaceNonasciiChars(manifest);
+			serializeString(writer, "manifest", manifest);
 		}
-		presentElfNotes(root);
-		presentMissingDepsInfo(root);
-		presentLoaderInfo(root);
-		presentPatterns(root);
-		presentCertificateAttributes(root);
-		presentTlsInfo(root);
-		presentDotnetInfo(root);
-		presentVisualBasicInfo(root);
-		presentVersionInfo(root);
+		presentElfNotes(writer);
+		presentMissingDepsInfo(writer);
+		presentLoaderInfo(writer);
+		presentPatterns(writer);
+		presentCertificates(writer);
+		presentTlsInfo(writer);
+		presentDotnetInfo(writer);
+		presentVisualBasicInfo(writer);
+		presentVersionInfo(writer);
 	}
 	else
 	{
-		presentRichHeader(root);
+		presentRichHeader(writer);
 	}
 
-	presentIterativeSubtitle(root, StringsJsonGetter(fileinfo));
+	presentIterativeSubtitle(writer, StringsJsonGetter(fileinfo));
 
-	StreamWriterBuilder builder;
-	std::cout << writeString(builder, root) << std::endl;
+	writer.EndObject();
+	std::cout << sb.GetString() << std::endl;
+
 	return true;
 }
 

@@ -4,14 +4,12 @@
  * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
 
-#include <algorithm>
-#include <vector>
+#include <rapidjson/prettywriter.h>
+#include <rapidjson/stringbuffer.h>
 
 #include "retdec/common/class.h"
 #include "retdec/serdes/class.h"
 #include "retdec/serdes/std.h"
-
-#include "serdes/utils.h"
 
 namespace {
 
@@ -29,47 +27,43 @@ const std::string JSON_vtables        = "virtualTables";
 namespace retdec {
 namespace serdes {
 
-Json::Value serialize(const common::Class& c)
+template <typename Writer>
+void serialize(Writer& writer, const common::Class& c)
 {
-	Json::Value val;
+	writer.StartObject();
 
-	if (!c.getName().empty())
-	{
-		val[JSON_name] = c.getName();
-	}
-	if (!c.getDemangledName().empty())
-	{
-		val[JSON_demangledName] = c.getDemangledName();
-	}
+	serializeString(writer, JSON_name, c.getName());
+	serializeString(writer, JSON_demangledName, c.getDemangledName());
 
-	val[JSON_superClasses]   = serdes::serialize(c.getSuperClasses());
-	val[JSON_virtualMethods] = serdes::serialize(c.virtualMethods);
-	val[JSON_constructors]   = serdes::serialize(c.constructors);
-	val[JSON_destructors]    = serdes::serialize(c.destructors);
-	val[JSON_methods]        = serdes::serialize(c.methods);
-	val[JSON_vtables]        = serdes::serialize(c.virtualTables);
+	serializeContainer(writer, JSON_superClasses, c.getSuperClasses());
+	serializeContainer(writer, JSON_virtualMethods, c.virtualMethods);
+	serializeContainer(writer, JSON_constructors, c.constructors);
+	serializeContainer(writer, JSON_destructors, c.destructors);
+	serializeContainer(writer, JSON_methods, c.methods);
+	serializeContainer(writer, JSON_vtables, c.virtualTables);
 
-	return val;
+	writer.EndObject();
 }
+SERIALIZE_EXPLICIT_INSTANTIATION(common::Class);
 
-void deserialize(const Json::Value& val, common::Class& c)
+void deserialize(const rapidjson::Value& val, common::Class& c)
 {
-	if (val.isNull() || !val.isObject())
+	if (val.IsNull() || !val.IsObject())
 	{
 		return;
 	}
 
-	c.setName(safeGetString(val, JSON_name));
-	c.setDemangledName(safeGetString(val, JSON_demangledName));
+	c.setName(deserializeString(val, JSON_name));
+	c.setDemangledName(deserializeString(val, JSON_demangledName));
 
-	serdes::deserialize(val[JSON_virtualMethods], c.virtualMethods);
-	serdes::deserialize(val[JSON_constructors], c.constructors);
-	serdes::deserialize(val[JSON_destructors], c.destructors);
-	serdes::deserialize(val[JSON_methods], c.methods);
-	serdes::deserialize(val[JSON_vtables], c.virtualTables);
+	deserializeContainer(val, JSON_virtualMethods, c.virtualMethods);
+	deserializeContainer(val, JSON_constructors, c.constructors);
+	deserializeContainer(val, JSON_destructors, c.destructors);
+	deserializeContainer(val, JSON_methods, c.methods);
+	deserializeContainer(val, JSON_vtables, c.virtualTables);
 
 	std::vector<std::string> superClasses;
-	serdes::deserialize(val[JSON_superClasses], superClasses);
+	deserializeContainer(val, JSON_superClasses, superClasses);
 	for (auto& s : superClasses)
 	{
 		c.addSuperClass(s);

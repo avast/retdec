@@ -297,7 +297,12 @@ set(LLVMIR2HLL_SOURCES
 )
 
 add_library(retdec-llvmir2hll STATIC ${LLVMIR2HLL_SOURCES})
-target_link_libraries(retdec-llvmir2hll retdec-config retdec-utils retdec-llvm-support llvm)
+target_link_libraries(retdec-llvmir2hll
+	retdec-config
+	retdec-utils
+	retdec-llvm-support
+	rapidjson
+	llvm)
 target_include_directories(retdec-llvmir2hll PUBLIC ${PROJECT_SOURCE_DIR}/include/)
 
 # We need to compile source files with /bigobj to prevent the following

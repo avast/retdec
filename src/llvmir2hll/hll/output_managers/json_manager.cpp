@@ -55,41 +55,36 @@ const std::string JSON_TOKEN_COMMENT       = "cmnt";
 
 } // anonymous namespace
 
-JsonOutputManager::JsonOutputManager(llvm::raw_ostream& out, bool humanReadable) :
+
+
+template <typename Writer>
+JsonOutputManager<Writer>::JsonOutputManager(llvm::raw_ostream& out) :
 		_out(out),
-		_humanReadable(humanReadable),
-		_tokens(Json::arrayValue)
+		writer(sb)
 {
+	writer.StartObject();
+
+	writer.String(JSON_KEY_TOKENS);
+	writer.StartArray();
+
 	addressPush(Address::Undefined);
 }
 
-JsonOutputManager::~JsonOutputManager()
+template <typename Writer>
+JsonOutputManager<Writer>::~JsonOutputManager()
 {
-	Json::StreamWriterBuilder builder;
+	writer.EndArray();
 
-	if (!isHumanReadable())
-	{
-		builder["commentStyle"] = "None";
-		builder["indentation"] = "";
-	}
+	writer.String(JSON_KEY_LANGUAGE);
+	writer.String(getOutputLanguage());
 
-	Json::Value root;
-	root[JSON_KEY_LANGUAGE] = getOutputLanguage();
-	root[JSON_KEY_TOKENS] = _tokens;
-	_out << writeString(builder, root);
+	writer.EndObject();
+
+	_out << sb.GetString();
 }
 
-void JsonOutputManager::setHumanReadable(bool b)
-{
-	_humanReadable = b;
-}
-
-bool JsonOutputManager::isHumanReadable() const
-{
-	return _humanReadable;
-}
-
-void JsonOutputManager::newLine()
+template <typename Writer>
+void JsonOutputManager<Writer>::newLine()
 {
 	if (_commentModifierOn)
 	{
@@ -103,118 +98,137 @@ void JsonOutputManager::newLine()
 		}
 	}
 
-	_tokens.append(jsonToken(JSON_TOKEN_NEWLINE, "\n"));
+	jsonToken(JSON_TOKEN_NEWLINE, "\n");
 }
 
-void JsonOutputManager::space(const std::string& space)
+template <typename Writer>
+void JsonOutputManager<Writer>::space(const std::string& space)
 {
 	HANDLE_COMMENT_MODIFIER(space);
-	_tokens.append(jsonToken(JSON_TOKEN_SPACE, space));
+	jsonToken(JSON_TOKEN_SPACE, space);
 }
 
-void JsonOutputManager::punctuation(char p)
+template <typename Writer>
+void JsonOutputManager<Writer>::punctuation(char p)
 {
 	HANDLE_COMMENT_MODIFIER(p);
-	_tokens.append(jsonToken(JSON_TOKEN_PUNCTUATION, std::string(1, p)));
+	jsonToken(JSON_TOKEN_PUNCTUATION, std::string(1, p));
 }
 
-void JsonOutputManager::operatorX(const std::string& op)
+template <typename Writer>
+void JsonOutputManager<Writer>::operatorX(const std::string& op)
 {
 	HANDLE_COMMENT_MODIFIER(op);
-	_tokens.append(jsonToken(JSON_TOKEN_OPERATOR, op));
+	jsonToken(JSON_TOKEN_OPERATOR, op);
 }
 
-void JsonOutputManager::variableId(const std::string& id)
+template <typename Writer>
+void JsonOutputManager<Writer>::variableId(const std::string& id)
 {
 	HANDLE_COMMENT_MODIFIER(id);
-	_tokens.append(jsonToken(JSON_TOKEN_ID_VAR, id));
+	jsonToken(JSON_TOKEN_ID_VAR, id);
 }
 
-void JsonOutputManager::memberId(const std::string& id)
+template <typename Writer>
+void JsonOutputManager<Writer>::memberId(const std::string& id)
 {
 	HANDLE_COMMENT_MODIFIER(id);
-	_tokens.append(jsonToken(JSON_TOKEN_ID_MEMBER, id));
+	jsonToken(JSON_TOKEN_ID_MEMBER, id);
 }
 
-void JsonOutputManager::labelId(const std::string& id)
+template <typename Writer>
+void JsonOutputManager<Writer>::labelId(const std::string& id)
 {
 	HANDLE_COMMENT_MODIFIER(id);
-	_tokens.append(jsonToken(JSON_TOKEN_ID_LABEL, id));
+	jsonToken(JSON_TOKEN_ID_LABEL, id);
 }
 
-void JsonOutputManager::functionId(const std::string& id)
+template <typename Writer>
+void JsonOutputManager<Writer>::functionId(const std::string& id)
 {
 	HANDLE_COMMENT_MODIFIER(id);
-	_tokens.append(jsonToken(JSON_TOKEN_ID_FUNCTION, id));
+	jsonToken(JSON_TOKEN_ID_FUNCTION, id);
 }
 
-void JsonOutputManager::parameterId(const std::string& id)
+template <typename Writer>
+void JsonOutputManager<Writer>::parameterId(const std::string& id)
 {
 	HANDLE_COMMENT_MODIFIER(id);
-	_tokens.append(jsonToken(JSON_TOKEN_ID_PARAMETER, id));
+	jsonToken(JSON_TOKEN_ID_PARAMETER, id);
 }
 
-void JsonOutputManager::keyword(const std::string& k)
+template <typename Writer>
+void JsonOutputManager<Writer>::keyword(const std::string& k)
 {
 	HANDLE_COMMENT_MODIFIER(k);
-	_tokens.append(jsonToken(JSON_TOKEN_KEYWORD, k));
+	jsonToken(JSON_TOKEN_KEYWORD, k);
 }
 
-void JsonOutputManager::dataType(const std::string& t)
+template <typename Writer>
+void JsonOutputManager<Writer>::dataType(const std::string& t)
 {
 	HANDLE_COMMENT_MODIFIER(t);
-	_tokens.append(jsonToken(JSON_TOKEN_DATA_TYPE, t));
+	jsonToken(JSON_TOKEN_DATA_TYPE, t);
 }
 
-void JsonOutputManager::preprocessor(const std::string& p)
+template <typename Writer>
+void JsonOutputManager<Writer>::preprocessor(const std::string& p)
 {
 	HANDLE_COMMENT_MODIFIER(p);
-	_tokens.append(jsonToken(JSON_TOKEN_PREPROCESSOR, p));
+	jsonToken(JSON_TOKEN_PREPROCESSOR, p);
 }
 
-void JsonOutputManager::include(const std::string& i)
+template <typename Writer>
+void JsonOutputManager<Writer>::include(const std::string& i)
 {
 	HANDLE_COMMENT_MODIFIER(i);
-	_tokens.append(jsonToken(JSON_TOKEN_INCLUDE, "<" + i + ">"));
+	jsonToken(JSON_TOKEN_INCLUDE, "<" + i + ">");
 }
 
-void JsonOutputManager::constantBool(const std::string& c)
+template <typename Writer>
+void JsonOutputManager<Writer>::constantBool(const std::string& c)
 {
 	HANDLE_COMMENT_MODIFIER(c);
-	_tokens.append(jsonToken(JSON_TOKEN_CONST_BOOL, c));
+	jsonToken(JSON_TOKEN_CONST_BOOL, c);
 }
 
-void JsonOutputManager::constantInt(const std::string& c)
+template <typename Writer>
+void JsonOutputManager<Writer>::constantInt(const std::string& c)
 {
 	HANDLE_COMMENT_MODIFIER(c);
-	_tokens.append(jsonToken(JSON_TOKEN_CONST_INT, c));
+	jsonToken(JSON_TOKEN_CONST_INT, c);
 }
 
-void JsonOutputManager::constantFloat(const std::string& c)
+template <typename Writer>
+void JsonOutputManager<Writer>::constantFloat(const std::string& c)
 {
 	HANDLE_COMMENT_MODIFIER(c);
-	_tokens.append(jsonToken(JSON_TOKEN_CONST_FLOAT, c));
+	jsonToken(JSON_TOKEN_CONST_FLOAT, c);
 }
 
-void JsonOutputManager::constantString(const std::string& c)
+template <typename Writer>
+void JsonOutputManager<Writer>::constantString(const std::string& c)
 {
 	HANDLE_COMMENT_MODIFIER(c);
-	_tokens.append(jsonToken(JSON_TOKEN_CONST_STRING, c));
+	jsonToken(JSON_TOKEN_CONST_STRING, c);
 }
 
-void JsonOutputManager::constantSymbol(const std::string& c)
+template <typename Writer>
+void JsonOutputManager<Writer>::constantSymbol(const std::string& c)
 {
 	HANDLE_COMMENT_MODIFIER(c);
-	_tokens.append(jsonToken(JSON_TOKEN_CONST_SYMBOL, c));
+	jsonToken(JSON_TOKEN_CONST_SYMBOL, c);
 }
 
-void JsonOutputManager::constantPointer(const std::string& c)
+template <typename Writer>
+void JsonOutputManager<Writer>::constantPointer(const std::string& c)
 {
 	HANDLE_COMMENT_MODIFIER(c);
-	_tokens.append(jsonToken(JSON_TOKEN_CONST_POINTER, c));
+	jsonToken(JSON_TOKEN_CONST_POINTER, c);
 }
 
-void JsonOutputManager::comment(const std::string& c)
+template <typename Writer>
+void JsonOutputManager<Writer>::comment(const std::string& c)
 {
 	HANDLE_COMMENT_MODIFIER(" " + c);
 	std::string str = getCommentPrefix();
@@ -222,15 +236,17 @@ void JsonOutputManager::comment(const std::string& c)
 	{
 		str += " " + utils::replaceCharsWithStrings(c, '\n', " ");
 	}
-	_tokens.append(jsonToken(JSON_TOKEN_COMMENT, str));
+	jsonToken(JSON_TOKEN_COMMENT, str);
 }
 
-void JsonOutputManager::commentModifier()
+template <typename Writer>
+void JsonOutputManager<Writer>::commentModifier()
 {
 	_commentModifierOn = true;
 }
 
-void JsonOutputManager::addressPush(Address a)
+template <typename Writer>
+void JsonOutputManager<Writer>::addressPush(Address a)
 {
 	bool generate = true;
 
@@ -264,7 +280,8 @@ void JsonOutputManager::addressPush(Address a)
 	}
 }
 
-void JsonOutputManager::addressPop()
+template <typename Writer>
+void JsonOutputManager<Writer>::addressPop()
 {
 	// Never pop the last entry.
 	if (_addrs.size() < 2)
@@ -288,16 +305,19 @@ void JsonOutputManager::addressPop()
 	}
 }
 
-void JsonOutputManager::generateAddressEntry(Address a)
+template <typename Writer>
+void JsonOutputManager<Writer>::generateAddressEntry(Address a)
 {
-	Json::Value r;
+	writer.StartObject();
 
-	r[JSON_KEY_ADDRESS] = a.isDefined() ? a.toHexPrefixString() : "";
+	writer.String(JSON_KEY_ADDRESS);
+	writer.String(a.isDefined() ? a.toHexPrefixString() : "");
 
-	_tokens.append(r);
+	writer.EndObject();
 }
 
-Json::Value JsonOutputManager::jsonToken(
+template <typename Writer>
+void JsonOutputManager<Writer>::jsonToken(
 		const std::string& k,
 		const std::string& v)
 {
@@ -307,11 +327,19 @@ Json::Value JsonOutputManager::jsonToken(
 		_addrToGenerate = std::make_pair(Address::Undefined, false);
 	}
 
-	Json::Value r;
-	r[JSON_KEY_KIND] = k;
-	r[JSON_KEY_VALUE] = v;
-	return r;
+	writer.StartObject();
+
+	writer.String(JSON_KEY_KIND);
+	writer.String(k);
+
+	writer.String(JSON_KEY_VALUE);
+	writer.String(v);
+
+	writer.EndObject();
 }
+
+template class JsonOutputManager<rapidjson::Writer<rapidjson::StringBuffer>>;
+template class JsonOutputManager<rapidjson::PrettyWriter<rapidjson::StringBuffer>>;
 
 } // namespace llvmir2hll
 } // namespace retdec

@@ -7,7 +7,7 @@
 #ifndef RETDEC_SERDES_FILE_FORMAT_H
 #define RETDEC_SERDES_FILE_FORMAT_H
 
-#include <json/json.h>
+#include <rapidjson/document.h>
 
 namespace retdec {
 
@@ -17,8 +17,9 @@ class FileFormat;
 
 namespace serdes {
 
-Json::Value serialize(const common::FileFormat& ff);
-void deserialize(const Json::Value& val, common::FileFormat& ff);
+template <typename Writer>
+void serialize(Writer& writer, const common::FileFormat& ff);
+void deserialize(const rapidjson::Value& val, common::FileFormat& ff);
 
 } // namespace serdes
 } // namespace retdec

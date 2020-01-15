@@ -126,13 +126,9 @@ bool PatternConfigGetter::isEmpty() const
 	return empty;
 }
 
-/**
- * Get JSON value of detected patterns
- * @return JSON value of detected patterns
- */
-Json::Value PatternConfigGetter::getJsonValue() const
+retdec::common::PatternContainer& PatternConfigGetter::getPatterns()
 {
-	return retdec::serdes::serialize(outDoc->patterns);
+	return outDoc->patterns;
 }
 
 } // namespace fileinfo

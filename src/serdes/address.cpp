@@ -4,51 +4,62 @@
  * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
 
-#include "retdec/serdes/address.h"
+#include <rapidjson/prettywriter.h>
+#include <rapidjson/stringbuffer.h>
 
-#include "serdes/utils.h"
+#include "retdec/serdes/address.h"
+#include "retdec/serdes/std.h"
+
+namespace {
+
+const std::string JSON_start  = "start";
+const std::string JSON_end    = "end";
+
+} // anonymous namespace
 
 namespace retdec {
 namespace serdes {
 
-Json::Value serialize(const common::Address& a)
+template <typename Writer>
+void serialize(Writer& writer, const common::Address& a)
 {
-	return a.isDefined() ? a.toHexPrefixString() : std::string();
+	writer.String(a.isDefined() ? a.toHexPrefixString() : std::string());
 }
+SERIALIZE_EXPLICIT_INSTANTIATION(common::Address);
 
-void deserialize(const Json::Value& val, common::Address& a)
+void deserialize(const rapidjson::Value& val, common::Address& a)
 {
-	if (val.isNull() || !val.isString())
+	if (val.IsNull() || !val.IsString())
 	{
 		return;
 	}
 
-	a = common::Address(val.asString());
+	a = common::Address(val.GetString());
 }
 
-Json::Value serialize(const common::AddressRange& r)
+template <typename Writer>
+void serialize(Writer& writer, const common::AddressRange& r)
 {
-	Json::Value pair;
-
+	writer.StartObject();
 	if (r.getStart().isDefined() && r.getEnd().isDefined())
 	{
-		pair["start"] = serialize(r.getStart());
-		pair["end"] = serialize(r.getEnd());
+		serialize(writer, JSON_start, r.getStart());
+		serialize(writer, JSON_end, r.getEnd());
 	}
-
-	return pair;
+	writer.EndObject();
 }
+SERIALIZE_EXPLICIT_INSTANTIATION(common::AddressRange);
 
-void deserialize(const Json::Value& val, common::AddressRange& r)
+void deserialize(const rapidjson::Value& val, common::AddressRange& r)
 {
-	if (val.isNull())
+	if (val.IsNull() || !val.IsObject())
 	{
 		return;
 	}
 
 	common::Address s, e;
-	deserialize(val["start"], s);
-	deserialize(val["end"], e);
+	deserialize(val, JSON_start, s);
+	deserialize(val, JSON_end, e);
 	r.setStartEnd(s, e);
 }
 
