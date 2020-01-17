@@ -37,6 +37,7 @@
 * Fix: Fixed build on Microsoft Windows via MSYS2 ([#606](https://github.com/avast/retdec/pulls/606)).
 * Fix: Fixed build on macOS Mojave by updating OpenSSL and using `xcrun` ([#439](https://github.com/avast/retdec/issues/439)).
 * Fix: Fixed computation of the _"RVA of the import name is invalid"_ loader error ([avast/pelib#11](https://github.com/avast/pelib/pull/11)).
+* Fix: Fixed computation of the _"Import directory is cut"_ loader error ([avast/pelib#17](https://github.com/avast/pelib/pull/17)).
 * Fix: Export ordinals are now correctly calculated as relative to the base ([#612](https://github.com/avast/retdec/issues/612), [avast/pelib#10](https://github.com/avast/pelib/pull/10)).
 * Fix: Fixed crash in the decoding phase ([#637](https://github.com/avast/retdec/issues/637), [#641](https://github.com/avast/retdec/pull/641)).
 * Fix: Fixed global variable naming issue ([#636](https://github.com/avast/retdec/issues/636), [#645](https://github.com/avast/retdec/pull/645)).
