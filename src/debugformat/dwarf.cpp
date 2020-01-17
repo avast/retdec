@@ -8,6 +8,8 @@
 
 #include <iostream>
 
+#include <llvm/DebugInfo/DWARF/DWARFExpression.h>
+
 #include "retdec/demangler/demangler.h"
 #include "retdec/utils/debug.h"
 #include "retdec/utils/string.h"
@@ -99,26 +101,42 @@ void DebugFormat::loadDwarf()
 			loadDwarf_CU(unitDie);
 		}
 	}
-
-	// exit(1);
 }
 
 void DebugFormat::loadDwarf_CU(llvm::DWARFDie die)
 {
+std::cout << std::hex << die.getOffset() << " @ DIE" << std::endl;
 	for (auto c : die.children())
 	{
+std::cout << std::hex << "\t" << c.getOffset() << std::endl;
+
 		switch (c.getTag())
 		{
 			case llvm::dwarf::DW_TAG_subprogram:
-				loadDwarf_subprogram(c);
+			{
+std::cout << std::hex << "\t\t" << "subprogram" << std::endl;
+				auto f = loadDwarf_subprogram(c);
+				if (!f.getName().empty() && f.getStart().isDefined())
+				{
+					functions.insert({f.getStart(), f});
+				}
 				break;
+			}
+			case llvm::dwarf::DW_TAG_variable:
+			{
+				auto v = loadDwarf_variable(c);
+				if (!v.getName().empty())
+				{
+					globals.insert(v);
+				}
+			}
 			default:
 				break;
 		}
 	}
 }
 
-void DebugFormat::loadDwarf_subprogram(llvm::DWARFDie die)
+retdec::common::Function DebugFormat::loadDwarf_subprogram(llvm::DWARFDie die)
 {
 	// Start & end address.
 	//
@@ -127,13 +145,24 @@ void DebugFormat::loadDwarf_subprogram(llvm::DWARFDie die)
 	{
 		start = s.getValue();
 	}
+	else if (auto s = llvm::dwarf::toUnsigned(die.find(llvm::dwarf::DW_AT_low_pc)))
+	{
+		start = s.getValue();
+	}
 	if (auto e = llvm::dwarf::toAddress(die.find(llvm::dwarf::DW_AT_high_pc)))
 	{
 		end = e.getValue();
 	}
-	if (start.isUndefined() || end.isUndefined())
+	else if (auto e = llvm::dwarf::toUnsigned(die.find(llvm::dwarf::DW_AT_high_pc)))
 	{
-		return;
+		if (start)
+		{
+			end = start + e.getValue();
+		}
+	}
+	if (start.isUndefined() || end.isUndefined() || end <= start)
+	{
+		return retdec::common::Function();
 	}
 
 	// Names
@@ -153,7 +182,7 @@ void DebugFormat::loadDwarf_subprogram(llvm::DWARFDie die)
 	}
 	if (name.empty() && linkageName.empty())
 	{
-		return;
+		return retdec::common::Function();
 	}
 
 	auto* unit = die.getDwarfUnit();
@@ -225,14 +254,18 @@ void DebugFormat::loadDwarf_subprogram(llvm::DWARFDie die)
 				dif.parameters.push_back(loadDwarf_formal_parameter(c, argCntr++));
 				break;
 			case llvm::dwarf::DW_TAG_variable:
-				dif.locals.insert(loadDwarf_variable(c));
+			{
+				auto var = loadDwarf_variable(c);
+				if (!var.getName().empty())
+				{
+					dif.locals.insert(var);
+				}
 				break;
+			}
 			default:
 				break;
 		}
 	}
-
-	functions.insert({dif.getStart(), dif});
 
 //==============================================================================
 std::cout << std::endl;
@@ -266,17 +299,63 @@ for (auto& l : dif.locals)
 }
 //==============================================================================
 
+	return dif;
 }
 
 std::string DebugFormat::loadDwarf_type(llvm::DWARFDie die)
 {
-	std::string ret = "i32";
+	std::string ret = getDefaultDataType();
 
 	switch (die.getTag())
 	{
 		case llvm::dwarf::DW_TAG_base_type:
 		{
+			auto n = llvm::dwarf::toString(die.find(llvm::dwarf::DW_AT_name));
+			auto e = llvm::dwarf::toUnsigned(die.find(llvm::dwarf::DW_AT_encoding));
+			auto Bs = llvm::dwarf::toUnsigned(die.find(llvm::dwarf::DW_AT_byte_size));
+			auto bs = llvm::dwarf::toUnsigned(die.find(llvm::dwarf::DW_AT_bit_size));
 
+			if (n && n.getValue() == "void")
+			{
+				return "void";
+			}
+			else if (e && e.getValue() == llvm::dwarf::DW_ATE_boolean)
+			{
+				return "i1";
+			}
+			else if (e && (
+				e.getValue() == llvm::dwarf::DW_ATE_signed ||
+				e.getValue() == llvm::dwarf::DW_ATE_signed_char ||
+				e.getValue() == llvm::dwarf::DW_ATE_unsigned ||
+				e.getValue() == llvm::dwarf::DW_ATE_unsigned_char ||
+				e.getValue() == llvm::dwarf::DW_ATE_signed_fixed ||
+				e.getValue() == llvm::dwarf::DW_ATE_unsigned_fixed))
+			{
+				if (bs) return "i" + std::to_string(bs.getValue());
+				else if (Bs) return "i" + std::to_string(Bs.getValue() * 8);
+				else return getDefaultDataType();
+			}
+			else if (e && (
+				e.getValue() == llvm::dwarf::DW_ATE_complex_float ||
+				e.getValue() == llvm::dwarf::DW_ATE_float ||
+				e.getValue() == llvm::dwarf::DW_ATE_imaginary_float ||
+				e.getValue() == llvm::dwarf::DW_ATE_decimal_float))
+			{
+				unsigned sz = bs ? bs.getValue() : (Bs ? Bs.getValue()*8 : 32);
+				switch (sz)
+				{
+					case 16: return "half";
+					case 32: return "float";
+					case 64: return "double";
+					case 128: return "fp128";
+					case 80: return "x86_fp80";
+					default: return "double";
+				}
+			}
+			else
+			{
+				return getDefaultDataType();;
+			}
 			break;
 		}
 		default:
@@ -291,7 +370,7 @@ retdec::common::Object DebugFormat::loadDwarf_formal_parameter(
 		llvm::DWARFDie die,
 		unsigned argCntr)
 {
-	std::string name = std::string("arg") + std::to_string(argCntr);
+	std::string name = std::string("a") + std::to_string(argCntr);
 	if (auto n = llvm::dwarf::toString(die.find(
 			llvm::dwarf::DW_AT_name)))
 	{
@@ -318,11 +397,37 @@ retdec::common::Object DebugFormat::loadDwarf_variable(llvm::DWARFDie die)
 	{
 		name = n.getValue();
 	}
+	if (name.empty())
+	{
+		return retdec::common::Object();
+	}
 
 	retdec::common::Storage storage;
-	// storage = retdec::common::Storage::onStack(address, regNum);
-	retdec::common::Object var(name, storage);
+	if (auto o = llvm::dwarf::toBlock(die.find(llvm::dwarf::DW_AT_location)))
+	{
+		if (o.getValue().size() == 2
+				&& o.getValue()[0] >= llvm::dwarf::DW_OP_breg0
+				&& o.getValue()[0] <= llvm::dwarf::DW_OP_breg31)
+		{
+			unsigned regNum = o.getValue()[0] - llvm::dwarf::DW_OP_breg0;
+			int offset = static_cast<int8_t>(o.getValue()[1]);
+			storage = retdec::common::Storage::onStack(offset, regNum);
+		}
+		else if (o.getValue().size() == 2
+				&& o.getValue()[0] == llvm::dwarf::DW_OP_fbreg)
+		{
+			unsigned regNum = -1;
+			int offset = static_cast<int8_t>(o.getValue()[1]);
+			storage = retdec::common::Storage::onStack(offset, regNum);
+		}
+	}
 
+	if (storage.isUndefined())
+	{
+		return retdec::common::Object();
+	}
+
+	retdec::common::Object var(name, storage);
 	if (auto o = llvm::dwarf::toReference(die.find(llvm::dwarf::DW_AT_type)))
 	{
 		if (auto odie = die.getDwarfUnit()->getDIEForOffset(o.getValue()))
@@ -333,69 +438,6 @@ retdec::common::Object DebugFormat::loadDwarf_variable(llvm::DWARFDie die)
 
 	return var;
 }
-
-// void DebugFormat::loadDwarfFunctions()
-// {
-// 		for (auto* var : *df->getVars())
-// 		{
-// 			if (var->location == nullptr || var->location->isEmpty() || var->name.empty())
-// 			{
-// 				continue;
-// 			}
-// 			retdec::common::Storage storage;
-// 			Dwarf_Signed address;
-// 			int regNum = -1;
-// 			bool deref;
-// 			if (var->isOnStack(&address, &deref, 0, &regNum))
-// 			{
-// 				storage = retdec::common::Storage::onStack(address, regNum);
-// 			}
-// 			retdec::common::Object newLocalVar(var->name, storage);
-// 		}
-// }
-
-// void DebugFormat::loadDwarfGlobalVariables()
-// {
-// std::cout << "loadDwarfGlobalVariables():" << std::endl;
-// 	auto* dwarfGvars = _dwarfFile->getGlobalVars();
-// 	if (dwarfGvars == nullptr)
-// 		return;
-
-// 	for (auto* gvar : *dwarfGvars)
-// 	{
-// 		if (gvar->location == nullptr || !gvar->location->isNormal() || gvar->name.empty())
-// 		{
-// 			continue;
-// 		}
-
-// 		Dwarf_Addr address;
-// 		std::string n;
-// 		retdec::dwarfparser::DwarfLocationDesc::cLocType loc = gvar->getLocation(&n, &address, 1);
-// 		if (loc.isAddress())
-// 		{
-// 			auto addr = retdec::common::Address(address);
-// 			std::string name = gvar->name.empty() ? "glob_var_" + addr.toHexString() : gvar->name;
-// 			if (!addr.isDefined())
-// 				continue;
-// 			retdec::common::Object gv(name, retdec::common::Storage::inMemory(addr));
-// 			gv.type = loadDwarfType(gvar->type);
-// 			if (gv.type.getLlvmIr() == "void")
-// 				gv.type.setLlvmIr("i32");
-// std::cout << "\t" << addr << " @ " << name << " : " << gv.type.getLlvmIr() << std::endl;
-// 			globals.insert(gv);
-// 		}
-// 	}
-// }
-
-// retdec::common::Type DebugFormat::loadDwarfType(retdec::dwarfparser::DwarfType* type)
-// {
-	// if (type == nullptr)
-	// {
-	// 	return retdec::common::Type("i32");
-	// }
-	// auto t = retdec::common::Type(type->toLLVMString());
-	// return t.isDefined() ? t : retdec::common::Type("i32");
-// }
 
 } // namespace debugformat
 } // namespace retdec

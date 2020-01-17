@@ -54,9 +54,11 @@ class Object
 
 		/// @name Object set methods.
 		/// @{
+		void setName(const std::string& n);
 		void setRealName(const std::string& n);
 		void setCryptoDescription(const std::string& d);
 		void setIsFromDebug(bool b);
+		void setStorage(const common::Storage& s);
 		/// @}
 
 		/// @name Object get methods.

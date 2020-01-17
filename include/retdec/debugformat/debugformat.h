@@ -57,7 +57,7 @@ class DebugFormat
 
 		void loadDwarf();
 		void loadDwarf_CU(llvm::DWARFDie die);
-		void loadDwarf_subprogram(llvm::DWARFDie die);
+		retdec::common::Function loadDwarf_subprogram(llvm::DWARFDie die);
 		std::string loadDwarf_type(llvm::DWARFDie die);
 		retdec::common::Object loadDwarf_formal_parameter(
 				llvm::DWARFDie die,

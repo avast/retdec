@@ -48,6 +48,11 @@ bool Object::operator<(const Object& o) const
 	return _name < o._name;
 }
 
+void Object::setName(const std::string& n)
+{
+	_name = n;
+}
+
 void Object::setRealName(const std::string& n)
 {
 	_realName = n;
@@ -61,6 +66,11 @@ void Object::setCryptoDescription(const std::string& d)
 void Object::setIsFromDebug(bool b)
 {
 	_fromDebug = b;
+}
+
+void Object::setStorage(const common::Storage& s)
+{
+	_storage = s;
 }
 
 bool Object::isFromDebug() const
