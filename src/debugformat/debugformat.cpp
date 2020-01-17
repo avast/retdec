@@ -40,7 +40,6 @@ DebugFormat::DebugFormat(
 {
 	_pdbFile = new retdec::pdbparser::PDBFile();
 	auto s = _pdbFile->load_pdb_file(pdbFile.c_str());
-	_dwarfFile = new retdec::dwarfparser::DwarfFile(_inFile->getFileFormat()->getPathToFile(), _inFile->getFileFormat());
 
 	if (s == retdec::pdbparser::PDB_STATE_OK)
 	{
@@ -48,11 +47,13 @@ DebugFormat::DebugFormat(
 		_pdbFile->initialize(imageBase);
 		loadPdb();
 	}
-	else if (_dwarfFile->hasDwarfInfo())
-	{
-		LOG << "\n*** DebugFormat::DebugFormat(): DWARF" << std::endl;
-		loadDwarf();
-	}
+	// else if (_dwarfFile->hasDwarfInfo())
+	// {
+	// 	LOG << "\n*** DebugFormat::DebugFormat(): DWARF" << std::endl;
+	// 	// loadDwarf();
+	// }
+
+	loadDwarf();
 
 	loadSymtab();
 }
