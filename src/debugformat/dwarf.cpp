@@ -17,33 +17,6 @@
 
 namespace {
 
-retdec::common::Address getLineFromAddress(
-		const llvm::DWARFDebugLine::LineTable* table,
-		retdec::common::Address addr)
-{
-	retdec::common::Address ret;
-
-	if (table == nullptr)
-	{
-		return ret;
-	}
-
-	llvm::DWARFDebugLine::Row tmpRow;
-	tmpRow.Address = addr;
-	auto it = std::upper_bound(
-			table->Rows.begin(),
-			table->Rows.end(),
-			tmpRow,
-			llvm::DWARFDebugLine::Row::orderByAddress);
-	if (it != table->Rows.begin())
-	{
-		--it;
-		ret = it->Line;
-	}
-
-	return ret;
-}
-
 std::string getDefaultDataType()
 {
 	return "i32";
@@ -105,16 +78,12 @@ void DebugFormat::loadDwarf()
 
 void DebugFormat::loadDwarf_CU(llvm::DWARFDie die)
 {
-std::cout << std::hex << die.getOffset() << " @ DIE" << std::endl;
 	for (auto c : die.children())
 	{
-std::cout << std::hex << "\t" << c.getOffset() << std::endl;
-
 		switch (c.getTag())
 		{
 			case llvm::dwarf::DW_TAG_subprogram:
 			{
-std::cout << std::hex << "\t\t" << "subprogram" << std::endl;
 				auto f = loadDwarf_subprogram(c);
 				if (!f.getName().empty() && f.getStart().isDefined())
 				{
@@ -173,8 +142,12 @@ retdec::common::Function DebugFormat::loadDwarf_subprogram(llvm::DWARFDie die)
 	{
 		name = n.getValue();
 	}
-	if (auto ln = llvm::dwarf::toString(die.find(
-				llvm::dwarf::DW_AT_linkage_name)))
+	auto ln = llvm::dwarf::toString(die.find(llvm::dwarf::DW_AT_linkage_name));
+	if (!ln.hasValue())
+	{
+		ln = llvm::dwarf::toString(die.find(llvm::dwarf::DW_AT_MIPS_linkage_name));
+	}
+	if (ln.hasValue())
 	{
 		linkageName = ln.getValue();
 		auto dn = _demangler->demangleToString(linkageName);
@@ -222,11 +195,20 @@ retdec::common::Function DebugFormat::loadDwarf_subprogram(llvm::DWARFDie die)
 	{
 		startLine = s.getValue();
 	}
-	if (startLine.isUndefined())
+	if (startLine.isUndefined() && lines)
 	{
-		startLine = getLineFromAddress(lines, start);
+		if (auto l = lines->lookupAddress(start); l != lines->UnknownRowIndex)
+		{
+			startLine = lines->Rows[l].Line;
+		}
 	}
-	endLine = getLineFromAddress(lines, end-1);
+	if (lines)
+	{
+		if (auto l = lines->lookupAddress(end-1); l != lines->UnknownRowIndex)
+		{
+			endLine = lines->Rows[l].Line;
+		}
+	}
 	dif.setStartLine(startLine);
 	dif.setEndLine(endLine);
 
@@ -238,6 +220,10 @@ retdec::common::Function DebugFormat::loadDwarf_subprogram(llvm::DWARFDie die)
 		{
 			dif.returnType = loadDwarf_type(odie);
 		}
+	}
+	else
+	{
+		dif.returnType.setLlvmIr("void");
 	}
 
 	// Children.
@@ -266,38 +252,6 @@ retdec::common::Function DebugFormat::loadDwarf_subprogram(llvm::DWARFDie die)
 				break;
 		}
 	}
-
-//==============================================================================
-std::cout << std::endl;
-std::cout << "\t" << "name       : " << dif.getName() << std::endl;
-std::cout << "\t" << "range      : " << dif.getStart() << " - " << dif.getEnd() << std::endl;
-std::cout << "\t" << "demangled  : " << dif.getDemangledName() << std::endl;
-std::cout << "\t" << "src file   : " << dif.getSourceFileName() << std::endl;
-std::cout << "\t" << "variadic?  : " << dif.isVariadic() << std::endl;
-std::cout << "\t" << "ret type   : " << dif.returnType.getLlvmIr() << std::endl;
-std::cout << "\t" << "lines      : " << dif.getStartLine() << " - " << dif.getEndLine() << std::endl;
-std::cout << "\t" << "thumb?     : " << dif.isThumb() << std::endl;
-std::cout << "\t" << "param #    : " << dif.parameters.size() << std::endl;
-for (auto& p : dif.parameters)
-{
-	std::cout << std::endl;
-	std::cout << "\t\t" << "name    : " << p.getName() << std::endl;
-	std::cout << "\t\t" << "type    : " << p.type.getLlvmIr() << std::endl;
-}
-std::cout << "\t" << "local #    : " << dif.locals.size() << std::endl;
-for (auto& l : dif.locals)
-{
-	std::cout << std::endl;
-	std::cout << "\t\t" << "name    : " << l.getName() << std::endl;
-	std::cout << "\t\t" << "type    : " << l.type.getLlvmIr() << std::endl;
-	std::cout << "\t\t" << "stack   : " << l.getStorage().getStackOffset()
-			<< " from "
-			<< (l.getStorage().getRegisterNumber().has_value()
-				? l.getStorage().getRegisterNumber().value()
-				: -1)
-			<< std::endl;
-}
-//==============================================================================
 
 	return dif;
 }
@@ -354,9 +308,81 @@ std::string DebugFormat::loadDwarf_type(llvm::DWARFDie die)
 			}
 			else
 			{
-				return getDefaultDataType();;
+				return getDefaultDataType();
 			}
 			break;
+		}
+		case llvm::dwarf::DW_TAG_pointer_type:
+		{
+			if (auto o = llvm::dwarf::toReference(die.find(llvm::dwarf::DW_AT_type)))
+			{
+				if (auto odie = die.getDwarfUnit()->getDIEForOffset(o.getValue()))
+				{
+					return loadDwarf_type(odie) + "*";
+				}
+			}
+			// Default here is pointer to void.
+			return "void*";
+		}
+		case llvm::dwarf::DW_TAG_array_type:
+		{
+			ret.clear();
+			std::string type = getDefaultDataType();
+			if (auto o = llvm::dwarf::toReference(die.find(llvm::dwarf::DW_AT_type)))
+			{
+				if (auto odie = die.getDwarfUnit()->getDIEForOffset(o.getValue()))
+				{
+					type = loadDwarf_type(odie);
+				}
+			}
+			unsigned dimensions = 0;
+			for (auto c : die.children())
+			{
+				if (c.getTag() == llvm::dwarf::DW_TAG_subrange_type)
+				{
+					unsigned bound = 0;
+					if (auto b = llvm::dwarf::toUnsigned(
+							c.find(llvm::dwarf::DW_AT_upper_bound)))
+					{
+						bound = b.getValue();
+					}
+					ret += "[ " + std::to_string(bound+1) + " x ";
+					++dimensions;
+				}
+			}
+			if (dimensions < 1)
+			{
+				dimensions = 1;
+				ret += "[ 1 x ";
+			}
+			ret += type;
+			for (std::size_t i=0; i<dimensions; i++)
+			{
+				ret += " ]";
+			}
+			return ret;
+		}
+		case llvm::dwarf::DW_TAG_typedef:
+		{
+			if (auto o = llvm::dwarf::toReference(die.find(llvm::dwarf::DW_AT_type)))
+			{
+				if (auto odie = die.getDwarfUnit()->getDIEForOffset(o.getValue()))
+				{
+					return loadDwarf_type(odie);
+				}
+			}
+			return getDefaultDataType();
+		}
+		case llvm::dwarf::DW_TAG_const_type:
+		{
+			if (auto o = llvm::dwarf::toReference(die.find(llvm::dwarf::DW_AT_type)))
+			{
+				if (auto odie = die.getDwarfUnit()->getDIEForOffset(o.getValue()))
+				{
+					return loadDwarf_type(odie);
+				}
+			}
+			return getDefaultDataType();
 		}
 		default:
 			break;
@@ -405,20 +431,42 @@ retdec::common::Object DebugFormat::loadDwarf_variable(llvm::DWARFDie die)
 	retdec::common::Storage storage;
 	if (auto o = llvm::dwarf::toBlock(die.find(llvm::dwarf::DW_AT_location)))
 	{
-		if (o.getValue().size() == 2
-				&& o.getValue()[0] >= llvm::dwarf::DW_OP_breg0
-				&& o.getValue()[0] <= llvm::dwarf::DW_OP_breg31)
+		auto* unit = die.getDwarfUnit();
+		auto& ctx = unit->getContext();
+		llvm::DataExtractor data(llvm::toStringRef(*o), ctx.isLittleEndian(), 0);
+		llvm::DWARFExpression expr(
+				data,
+				unit->getVersion(),
+				unit->getAddressByteSize());
+
+		if (expr.begin() != expr.end())
 		{
-			unsigned regNum = o.getValue()[0] - llvm::dwarf::DW_OP_breg0;
-			int offset = static_cast<int8_t>(o.getValue()[1]);
-			storage = retdec::common::Storage::onStack(offset, regNum);
-		}
-		else if (o.getValue().size() == 2
-				&& o.getValue()[0] == llvm::dwarf::DW_OP_fbreg)
-		{
-			unsigned regNum = -1;
-			int offset = static_cast<int8_t>(o.getValue()[1]);
-			storage = retdec::common::Storage::onStack(offset, regNum);
+			auto& e = *expr.begin();
+
+			if (e.getCode() >= llvm::dwarf::DW_OP_breg0
+					&& e.getCode() <= llvm::dwarf::DW_OP_breg31
+					&& e.getDescription().Op[0] & llvm::DWARFExpression::Operation::SignBit
+					&& e.getDescription().Op[1] & llvm::DWARFExpression::Operation::SizeNA)
+			{
+				unsigned regNum = e.getCode() - llvm::dwarf::DW_OP_breg0;
+				int offset = static_cast<int64_t>(e.getRawOperand(0));
+				storage = retdec::common::Storage::onStack(offset, regNum);
+			}
+			else if (e.getCode() == llvm::dwarf::DW_OP_fbreg
+					&& e.getDescription().Op[0] & llvm::DWARFExpression::Operation::SignBit
+					&& e.getDescription().Op[1] & llvm::DWARFExpression::Operation::SizeNA)
+			{
+				unsigned regNum = -1;
+				int offset = static_cast<int64_t>(e.getRawOperand(0));
+				storage = retdec::common::Storage::onStack(offset, regNum);
+			}
+			else if (e.getCode() == llvm::dwarf::DW_OP_addr
+					&& e.getDescription().Op[0] & llvm::DWARFExpression::Operation::SizeAddr
+					&& e.getDescription().Op[1] & llvm::DWARFExpression::Operation::SizeNA)
+			{
+				retdec::common::Address addr = e.getRawOperand(0);
+				storage = retdec::common::Storage::inMemory(addr);
+			}
 		}
 	}
 
@@ -435,7 +483,6 @@ retdec::common::Object DebugFormat::loadDwarf_variable(llvm::DWARFDie die)
 			var.type = loadDwarf_type(odie);
 		}
 	}
-
 	return var;
 }
 
