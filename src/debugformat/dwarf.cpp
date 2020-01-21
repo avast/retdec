@@ -258,8 +258,33 @@ retdec::common::Function DebugFormat::loadDwarf_subprogram(llvm::DWARFDie die)
 
 std::string DebugFormat::loadDwarf_type(llvm::DWARFDie die)
 {
-	std::string ret = getDefaultDataType();
+	// Try to use cache.
+	auto it = dieOff2type.find({die.getDwarfUnit(), die.getOffset()});
+	if (it != dieOff2type.end())
+	{
+		return it->second;
+	}
 
+	// Insert default type for this die to cache.
+	// If procesing this die does not recursively end up here, the cache will
+	// get updated with the correct type after it is get and this dummy
+	// type is not used.
+	// If it does end up here, this will protect us from infinite recursion.
+	// Named types (e.g. structures) needs some more hacking in their
+	/// processing.
+	dieOff2type.insert(
+			{{die.getDwarfUnit(), die.getOffset()},
+			getDefaultDataType()});
+
+	auto ret = _loadDwarf_type(die);
+
+	dieOff2type[{die.getDwarfUnit(), die.getOffset()}] = ret;
+
+	return ret;
+}
+
+std::string DebugFormat::_loadDwarf_type(llvm::DWARFDie die)
+{
 	switch (die.getTag())
 	{
 		case llvm::dwarf::DW_TAG_base_type:
@@ -326,7 +351,7 @@ std::string DebugFormat::loadDwarf_type(llvm::DWARFDie die)
 		}
 		case llvm::dwarf::DW_TAG_array_type:
 		{
-			ret.clear();
+			std::string ret;
 			std::string type = getDefaultDataType();
 			if (auto o = llvm::dwarf::toReference(die.find(llvm::dwarf::DW_AT_type)))
 			{
@@ -362,7 +387,15 @@ std::string DebugFormat::loadDwarf_type(llvm::DWARFDie die)
 			}
 			return ret;
 		}
+		case llvm::dwarf::DW_TAG_const_type:
 		case llvm::dwarf::DW_TAG_typedef:
+		case llvm::dwarf::DW_TAG_enumeration_type:
+		case llvm::dwarf::DW_TAG_packed_type:
+		case llvm::dwarf::DW_TAG_reference_type:
+		case llvm::dwarf::DW_TAG_restrict_type:
+		case llvm::dwarf::DW_TAG_rvalue_reference_type:
+		case llvm::dwarf::DW_TAG_shared_type:
+		case llvm::dwarf::DW_TAG_volatile_type:
 		{
 			if (auto o = llvm::dwarf::toReference(die.find(llvm::dwarf::DW_AT_type)))
 			{
@@ -373,23 +406,89 @@ std::string DebugFormat::loadDwarf_type(llvm::DWARFDie die)
 			}
 			return getDefaultDataType();
 		}
-		case llvm::dwarf::DW_TAG_const_type:
+		case llvm::dwarf::DW_TAG_structure_type:
+		case llvm::dwarf::DW_TAG_class_type:
 		{
+			auto it = dieOff2type.find({die.getDwarfUnit(), die.getOffset()});
+			// Because we insert default type to cache before processing the
+			// type, we need to ignore default types in the map.
+			if (it != dieOff2type.end() && it->second != getDefaultDataType())
+			{
+				return it->second;
+			}
+
+			static unsigned anonStuctCntr = 0;
+			auto n = llvm::dwarf::toString(die.find(llvm::dwarf::DW_AT_name));
+			std::string name = n
+					? std::string("%") + n.getValue()
+					: "%anon_struct_" + std::to_string(anonStuctCntr++);
+
+			// It is important to insert an entry into cache container before
+			// calling loadDwarf_type() recursively.
+			// This will prevent infinite cycle if structure contains pointer to
+			// itself.
+			dieOff2type[{die.getDwarfUnit(), die.getOffset()}] = name;
+
+			std::string body;
+			for (auto c : die.children())
+			{
+				if (c.getTag() == llvm::dwarf::DW_TAG_member)
+				{
+					std::string elem = getDefaultDataType();
+					if (auto o = llvm::dwarf::toReference(c.find(llvm::dwarf::DW_AT_type)))
+					{
+						if (auto odie = c.getDwarfUnit()->getDIEForOffset(o.getValue()))
+						{
+							elem = loadDwarf_type(odie);
+						}
+					}
+
+					body += body.empty() ? "{" : ", ";
+					body += elem;
+				}
+			}
+			body += body.empty() ? "{" + getDefaultDataType() + "}" : "}";
+
+			types.insert(name + " = type " + body);
+			return name;
+		}
+		case llvm::dwarf::DW_TAG_subroutine_type:
+		{
+			std::string ret = "void";
 			if (auto o = llvm::dwarf::toReference(die.find(llvm::dwarf::DW_AT_type)))
 			{
 				if (auto odie = die.getDwarfUnit()->getDIEForOffset(o.getValue()))
 				{
-					return loadDwarf_type(odie);
+					ret = loadDwarf_type(odie);
 				}
 			}
-			return getDefaultDataType();
+
+			std::string body;
+			for (auto c : die.children())
+			{
+				if (c.getTag() == llvm::dwarf::DW_TAG_formal_parameter)
+				{
+					std::string param = getDefaultDataType();
+					if (auto o = llvm::dwarf::toReference(c.find(llvm::dwarf::DW_AT_type)))
+					{
+						if (auto odie = c.getDwarfUnit()->getDIEForOffset(o.getValue()))
+						{
+							param = loadDwarf_type(odie);
+						}
+					}
+
+					body += body.empty() ? "(" : ", ";
+					body += param;
+				}
+			}
+			body += body.empty() ? "()" : ")";
+			return ret + " " + body;
 		}
 		default:
-			break;
+		{
+			return getDefaultDataType();
+		}
 	}
-
-	types.insert(ret);
-	return ret;
 }
 
 retdec::common::Object DebugFormat::loadDwarf_formal_parameter(

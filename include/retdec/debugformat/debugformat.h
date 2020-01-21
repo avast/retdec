@@ -59,6 +59,7 @@ class DebugFormat
 		void loadDwarf_CU(llvm::DWARFDie die);
 		retdec::common::Function loadDwarf_subprogram(llvm::DWARFDie die);
 		std::string loadDwarf_type(llvm::DWARFDie die);
+		std::string _loadDwarf_type(llvm::DWARFDie die);
 		retdec::common::Object loadDwarf_formal_parameter(
 				llvm::DWARFDie die,
 				unsigned argCntr);
@@ -77,6 +78,9 @@ class DebugFormat
 		retdec::pdbparser::PDBFile* _pdbFile = nullptr;
 		/// Demangler.
 		retdec::bin2llvmir::Demangler* _demangler = nullptr;
+
+		/// Dwarf named types cache.
+		std::map<std::pair<llvm::DWARFUnit*, uint32_t>, std::string> dieOff2type;
 
 	public:
 		retdec::common::GlobalVarContainer globals;
