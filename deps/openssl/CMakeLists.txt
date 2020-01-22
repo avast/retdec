@@ -126,8 +126,9 @@ set(OPENSSL_PREFIX         "${CMAKE_CURRENT_BINARY_DIR}/openssl")
 set(OPENSSL_SRC_DIR        "${OPENSSL_PREFIX}/src/openssl")
 set(OPENSSL_INSTALL_DIR    "${OPENSSL_PREFIX}/src/openssl-install")
 set(OPENSSL_VERSION        "1.1.1c")
-set(OPENSSL_URL            "https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz")
-set(OPENSSL_ARCHIVE_SHA256 "f6fb3079ad15076154eda9413fed42877d668e7069d9b87396d0804fdb3f4c90")
+# Commit for tag 1.1.1c
+set(OPENSSL_URL            "https://github.com/openssl/openssl/archive/97ace46e11dba4c4c2b7cb67140b6ec152cfaaf4.zip")
+set(OPENSSL_ARCHIVE_SHA256 "f093df5cfd7521d8f6a09f250d7e69159d1001c47419130e806488de8a6312d8")
 set(OPENSSL_DOWNLOAD_NAME  "openssl.tar.gz")
 
 set(OPENSSL_CONFIGURE_OPTIONS
