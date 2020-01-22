@@ -542,7 +542,8 @@ namespace PeLib
 		}
 
 		std::uint64_t ulFileSize = fileSize(inStream_w);
-		unsigned int uiOffset = (unsigned int)peHeader.rvaToOffset(peHeader.getIddImportRva());
+		unsigned int uiRva = peHeader.getIddImportRva();
+		unsigned int uiOffset = (unsigned int)peHeader.rvaToOffset(uiRva);
 
 		if ((uiOffset + PELIB_IMAGE_IMPORT_DESCRIPTOR::size()) > ulFileSize)
 		{
@@ -563,15 +564,26 @@ namespace PeLib
 		// Read and store all descriptors
 		for (;;)
 		{
-			// Are we getting out of the file?
-			if (uiDescOffset + PELIB_IMAGE_IMPORT_DESCRIPTOR::size() > ulFileSize)
-			{
-				setLoaderError(LDR_ERROR_IMPDIR_CUT);
-				break;
-			}
-
 			std::vector<unsigned char> vImportDescriptor(PELIB_IMAGE_IMPORT_DESCRIPTOR::size());
-			inStream_w.read(reinterpret_cast<char*>(vImportDescriptor.data()), PELIB_IMAGE_IMPORT_DESCRIPTOR::size());
+
+			// If the required range is within the file, then we read the data.
+			// If not, it's RVA may still be valid due mapping -> keep zeros.
+			// Example sample: de0dea00414015bacbcbfc1fa53af9f6731522687d82f5de2e9402410488d190
+			// (single entry in the import directory at file offset 0x3EC4 followed by end-of-file)
+			if ((uiDescOffset + PELIB_IMAGE_IMPORT_DESCRIPTOR::size()) <= ulFileSize)
+			{
+				// The offset is within the file range -> read it from the file
+				inStream_w.read(reinterpret_cast<char*>(vImportDescriptor.data()), PELIB_IMAGE_IMPORT_DESCRIPTOR::size());
+			}
+			else
+			{
+				// The offset is out of physical file -> is the RVA still valid?
+				if (!peHeader.isValidRva(uiRva + PELIB_IMAGE_IMPORT_DESCRIPTOR::size()))
+				{
+					setLoaderError(LDR_ERROR_IMPDIR_CUT);
+					break;
+				}
+			}
 
 			InputBuffer inpBuffer(vImportDescriptor);
 
@@ -582,6 +594,7 @@ namespace PeLib
 			inpBuffer >> iidCurr.impdesc.FirstThunk;
 
 			uiDescOffset += PELIB_IMAGE_IMPORT_DESCRIPTOR::size();
+			uiRva += PELIB_IMAGE_IMPORT_DESCRIPTOR::size();
 			uiDescCounter++;
 
 			// If Name or FirstThunk are 0, this descriptor is considered as null-terminator.
