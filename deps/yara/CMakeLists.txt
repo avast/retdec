@@ -57,10 +57,13 @@ else()
 
     ExternalProject_Add(yara
         PREFIX "yara"
-        URL https://github.com/avast/yara/archive/e3ae3848d66cdb551e149f1a87a45bcc87578f9c.zip
-        URL_HASH SHA256=3acc49dc9c7f892b0d20c380727ac6f893e10d8e756924bb158db0531cac36fe
+        URL https://github.com/VirusTotal/yara/archive/b9f925bb4e2b998bd6bb2f2e3cc2087c62fdd5b9.zip # 3.11.0
+        URL_HASH SHA256=8ebec236ede6f20f27ad597452a02dcc54ac3c73f09fea8c93c3a6bf10fbc890
         DOWNLOAD_NAME yara.zip
         BUILD_IN_SOURCE 1
+		# Patch the Yara sources.
+		PATCH_COMMAND
+			${CMAKE_COMMAND} -Dyara_path=<SOURCE_DIR> -P ${CMAKE_CURRENT_SOURCE_DIR}/patch.cmake
         CONFIGURE_COMMAND ""
         BUILD_COMMAND ""
             ${YARA_BUILD_COMMAND}

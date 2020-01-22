@@ -64,6 +64,8 @@ YaraDetector::YaraDetector() : compiler(nullptr), files(), detectedRules(), unde
 	precompiledRules(), stateIsValid(true), needsRecompilation(true)
 {
 	stateIsValid = ((yr_initialize() == ERROR_SUCCESS) && (yr_compiler_create(&compiler) == ERROR_SUCCESS));
+	std::uint32_t max_match_data = 65536;
+	yr_set_configuration(YR_CONFIG_MAX_MATCH_DATA, &max_match_data);
 }
 
 /**
