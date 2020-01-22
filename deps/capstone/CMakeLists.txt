@@ -39,6 +39,9 @@ if(CAPSTONE_LOCAL_DIR)
 			# compiler, which may result in link errors.
 			"${CMAKE_C_COMPILER_OPTION}"
 			"${CMAKE_CXX_COMPILER_OPTION}"
+		# Patch the Capstone sources.
+		PATCH_COMMAND
+			${CMAKE_COMMAND} -Dcapstone_path=<SOURCE_DIR> -P ${CMAKE_CURRENT_SOURCE_DIR}/patch.cmake
 		# Disable the update step.
 		UPDATE_COMMAND ""
 		# Disable the install step.
@@ -49,8 +52,8 @@ else()
 	message(STATUS "Capstone: using remote Capstone revision.")
 
 	ExternalProject_Add(capstone-project
-		URL https://github.com/avast/capstone/archive/27c713fe4f6eaf9721785932d850b6291a6073fe.zip
-		URL_HASH SHA256=4d8d0461d7d5737893253698cd0b6d0d64545c1a74b166e8b1d823156a3109cb
+		URL https://github.com/aquynh/capstone/archive/bc8a649b35188786754ea1b0bddd5cb48a039162.zip
+		URL_HASH SHA256=7d3075bce1f5622279c16a6f62fe8c548d4544bfc82292f6bf43907d0317fd10
 		DOWNLOAD_NAME capstone.zip
 		CMAKE_ARGS
 			# This does not work on MSVC, but may be useful on Linux.
@@ -78,6 +81,9 @@ else()
 			# compiler, which may result in link errors.
 			"${CMAKE_C_COMPILER_OPTION}"
 			"${CMAKE_CXX_COMPILER_OPTION}"
+		# Patch the Capstone sources.
+		PATCH_COMMAND
+			${CMAKE_COMMAND} -Dcapstone_path=<SOURCE_DIR> -P ${CMAKE_CURRENT_SOURCE_DIR}/patch.cmake
 		# Disable the update step.
 		UPDATE_COMMAND ""
 		# Disable the install step.
