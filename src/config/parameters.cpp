@@ -145,6 +145,8 @@ void Parameters::serialize(Writer& writer) const
 }
 template void Parameters::serialize(
 	rapidjson::PrettyWriter<rapidjson::StringBuffer>&) const;
+template void Parameters::serialize(
+	rapidjson::PrettyWriter<rapidjson::StringBuffer, rapidjson::ASCII<>>&) const;
 
 /**
  * Reads JSON object (associative array) holding parameters information.

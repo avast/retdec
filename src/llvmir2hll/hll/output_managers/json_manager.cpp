@@ -338,8 +338,8 @@ void JsonOutputManager<Writer>::jsonToken(
 	writer.EndObject();
 }
 
-template class JsonOutputManager<rapidjson::Writer<rapidjson::StringBuffer>>;
-template class JsonOutputManager<rapidjson::PrettyWriter<rapidjson::StringBuffer>>;
+template class JsonOutputManager<rapidjson::Writer<rapidjson::StringBuffer, rapidjson::ASCII<>>>;
+template class JsonOutputManager<rapidjson::PrettyWriter<rapidjson::StringBuffer, rapidjson::ASCII<>>>;
 
 } // namespace llvmir2hll
 } // namespace retdec

@@ -12,6 +12,7 @@
 #include <rapidjson/writer.h>
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
+#include <rapidjson/encodings.h>
 
 #include <llvm/Support/raw_ostream.h>
 
@@ -85,10 +86,10 @@ class JsonOutputManager : public OutputManager
 };
 
 using JsonOutputManagerPlain =
-		JsonOutputManager<rapidjson::Writer<rapidjson::StringBuffer>>;
+		JsonOutputManager<rapidjson::Writer<rapidjson::StringBuffer, rapidjson::ASCII<>>>;
 
 using JsonOutputManagerPretty =
-		JsonOutputManager<rapidjson::PrettyWriter<rapidjson::StringBuffer>>;
+		JsonOutputManager<rapidjson::PrettyWriter<rapidjson::StringBuffer, rapidjson::ASCII<>>>;
 
 } // namespace llvmir2hll
 } // namespace retdec

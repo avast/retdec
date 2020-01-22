@@ -8,6 +8,7 @@
 #include <rapidjson/error/en.h>
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
+#include <rapidjson/encodings.h>
 
 #include "retdec/config/config.h"
 #include "retdec/serdes/address.h"
@@ -165,7 +166,7 @@ std::string Config::generateJsonFile(const std::string& outputFilePath) const
 std::string Config::generateJsonString() const
 {
 	rapidjson::StringBuffer sb;
-	rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(sb);
+	rapidjson::PrettyWriter<rapidjson::StringBuffer, rapidjson::ASCII<>> writer(sb);
 
 	writer.StartObject();
 
