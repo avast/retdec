@@ -32,7 +32,7 @@ else()
 
 	ExternalProject_Add(pelib-project
 		URL https://github.com/avast/pelib/archive/6b4462835ec80ac808f5f384494863ac32043818.zip
-		URL_HASH SHA256=cb302f5b29441dbaddb19dc9ccd7b0536750860e6c94d5a30d5c6d3341f740dc
+		URL_HASH SHA256=75df8ff58b9d1e2c36da24ce55aa5d8847806ee90380d29103f0279169f4da53
 		DOWNLOAD_NAME pelib.zip
 		CMAKE_ARGS
 			# This does not work on MSVC, but may be useful on Linux.
