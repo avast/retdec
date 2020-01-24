@@ -841,10 +841,11 @@ void PeFormat::loadRichHeader()
 	for(const auto &item : header)
 	{
 		LinkerInfo info;
-		info.setMajorVersion(item.MajorVersion);
-		info.setMinorVersion(item.MinorVersion);
-		info.setBuildVersion(item.Build);
+		info.setProductId(item.ProductId);
+		info.setProductBuild(item.ProductBuild);
 		info.setNumberOfUses(item.Count);
+		info.setProductName(item.ProductName);
+		info.setVisualStudioName(item.VisualStudioName);
 		signature += item.Signature;
 		richHeader->addRecord(info);
 	}

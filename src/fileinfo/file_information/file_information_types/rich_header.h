@@ -25,10 +25,11 @@ class RichHeader
 		std::string getSignature() const;
 		std::string getOffsetStr(std::ios_base &(* format)(std::ios_base &)) const;
 		std::string getKeyStr(std::ios_base &(* format)(std::ios_base &)) const;
-		std::string getRecordMajorVersionStr(std::size_t position) const;
-		std::string getRecordMinorVersionStr(std::size_t position) const;
-		std::string getRecordBuildVersionStr(std::size_t position) const;
+		std::string getRecordProductIdStr(std::size_t position) const;
+		std::string getRecordProductBuildStr(std::size_t position) const;
 		std::string getRecordNumberOfUsesStr(std::size_t position) const;
+		std::string getRecordProductNameStr(std::size_t position) const;
+		std::string getRecordVisualStudioNameStr(std::size_t position) const;
 		std::vector<std::uint8_t> getRawBytes() const;
 		/// @}
 
