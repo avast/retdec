@@ -52,6 +52,10 @@ option(RETDEC_ENABLE_UNPACKERTOOL "" OFF)
 option(RETDEC_ENABLE_UTILS "" OFF)
 option(RETDEC_ENABLE_YARACPP "" OFF)
 
+# Dependency options.
+#
+include(${PROJECT_SOURCE_DIR}/cmake/deps.cmake)
+
 # Default: ALL build is enabled.
 #
 set(RETDEC_ENABLE_ALL ON)

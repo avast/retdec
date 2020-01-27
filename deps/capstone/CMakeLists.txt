@@ -52,8 +52,8 @@ else()
 	message(STATUS "Capstone: using remote Capstone revision.")
 
 	ExternalProject_Add(capstone-project
-		URL https://github.com/aquynh/capstone/archive/bc8a649b35188786754ea1b0bddd5cb48a039162.zip
-		URL_HASH SHA256=7d3075bce1f5622279c16a6f62fe8c548d4544bfc82292f6bf43907d0317fd10
+		URL ${CAPSTONE_URL}
+		URL_HASH SHA256=${CAPSTONE_ARCHIVE_SHA256}
 		DOWNLOAD_NAME capstone.zip
 		CMAKE_ARGS
 			# This does not work on MSVC, but may be useful on Linux.

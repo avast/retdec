@@ -57,8 +57,8 @@ else()
 
     ExternalProject_Add(yara
         PREFIX "yara"
-        URL https://github.com/VirusTotal/yara/archive/b9f925bb4e2b998bd6bb2f2e3cc2087c62fdd5b9.zip # 3.11.0
-        URL_HASH SHA256=8ebec236ede6f20f27ad597452a02dcc54ac3c73f09fea8c93c3a6bf10fbc890
+        URL ${YARA_URL}
+        URL_HASH SHA256=${YARA_ARCHIVE_SHA256}
         DOWNLOAD_NAME yara.zip
         BUILD_IN_SOURCE 1
 		# Patch the Yara sources.
