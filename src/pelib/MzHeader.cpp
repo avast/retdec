@@ -21,7 +21,7 @@ namespace PeLib
 	* It's required that the size of the input buffer is at least as big as the
 	* size of a MZ header. Otherwise we get undefined behaviour.
 	* @param ibBuffer InputBuffer that holds the data.
-	* @return A non-zero value is returned if a problem occured.
+	* @return A non-zero value is returned if a problem occurred.
 	**/
 	void MzHeader::read(InputBuffer& ibBuffer)
 	{
@@ -122,7 +122,7 @@ namespace PeLib
 	* For this purpose see #PeFile::MzHeader::isValid. The reason for this is simple: Otherwise it might not
 	* be possible to load damaged PE files to repair them.
 	* @param inStream Input stream.
-	* @return A non-zero value is returned if a problem occured.
+	* @return A non-zero value is returned if a problem occurred.
 	**/
 	int MzHeader::read(std::istream& inStream)
 	{
@@ -175,7 +175,7 @@ namespace PeLib
 	* at this location is treated like a MZ header structure. The MZ header does not need to be valid.
 	* @param pcBuffer Pointer to a MZ header.
 	* @param uiSize Length of the buffer.
-	* @return A non-zero value is returned if a problem occured.
+	* @return A non-zero value is returned if a problem occurred.
 	**/
 	int MzHeader::read(unsigned char* pcBuffer, unsigned int uiSize, unsigned int originalOffs)
 	{
@@ -251,7 +251,7 @@ namespace PeLib
 	* it will be created.
 	* @param strFilename Name of the file the header will be written to.
 	* @param dwOffset Offset the header will be written to (defaults to 0).
-	* @return A non-zero value is returned if a problem occured.
+	* @return A non-zero value is returned if a problem occurred.
 	**/
 	int MzHeader::write(const std::string& strFilename, dword dwOffset = 0) const
 	{

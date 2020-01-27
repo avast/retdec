@@ -1078,7 +1078,7 @@ bool HLLWriter::tryEmitVarInfoInComment(ShPtr<Variable> var, ShPtr<Statement> st
 
 	auto globalVarName = module->comesFromGlobalVar(currFunc, var);
 	if (!globalVarName.empty()) {
-		// It is a local variable comming from a global variable. We want to
+		// It is a local variable coming from a global variable. We want to
 		// emit the global variable's name in a comment so we know from which
 		// global variable this local variable comes from.
 		out->comment(globalVarName, " ");
