@@ -210,6 +210,10 @@ namespace PeLib
 		  int readDelayImportDirectory() ;
 		  /// Reads the security directory of the current file.
 		  int readSecurityDirectory() ;
+
+		  /// Checks the entry point code
+		  LoaderError checkEntryPointErrors() const;
+
 		  /// Returns a loader error, if there was any
 		  LoaderError loaderError() const;
 
@@ -696,6 +700,43 @@ namespace PeLib
 		return ERROR_DIRECTORY_DOES_NOT_EXIST;
 	}
 
+	template<int bits>
+	LoaderError PeFileT<bits>::checkEntryPointErrors() const
+	{
+		unsigned int uiEntryPointRva = peHeader().getAddressOfEntryPoint();
+		std::uint64_t uiOffset = peHeader().rvaToOffset(uiEntryPointRva);
+		std::uint64_t entryPointCode[2];
+
+		// No point of reading entry point that is beyond the file size
+		std::uint64_t ulFileSize = fileSize(m_iStream);
+		if (uiOffset > ulFileSize)
+		{
+			return LDR_ERROR_ENTRY_POINT_OUT_OF_IMAGE;
+		}
+
+		// Only check PE files compiled for i386 or x64 processors.
+		if (peHeader().getMachine() == PELIB_IMAGE_FILE_MACHINE_I386 || peHeader().getMachine() == PELIB_IMAGE_FILE_MACHINE_AMD64)
+		{
+			// Check if 16 bytes of code are available in the file
+			if ((uiOffset + sizeof(entryPointCode)) < ulFileSize)
+			{
+				// Read the entry point code
+				m_iStream.seekg(uiOffset, std::ios::beg);
+				m_iStream.read((char *)entryPointCode, sizeof(entryPointCode));
+
+				// Zeroed instructions at entry point map either to "add [eax], al" (i386) or "add [rax], al" (AMD64).
+				// Neither of these instructions makes sense on the entry point. We check 16 bytes of the entry point,
+				// in order to make sure it's really a corruption.
+				if ((entryPointCode[0] | entryPointCode[1]) == 0)
+				{
+					return LDR_ERROR_ENTRY_POINT_ZEROED;
+				}
+			}
+		}
+
+		return LDR_ERROR_NONE;
+	}
+
 	// Returns an error code indicating loader problem. We check every part of the PE file
 	// for possible loader problem. If anything wrong was found, we report it
 	template<int bits>
@@ -725,6 +766,11 @@ namespace PeLib
 
 		// Check errors in resource directory
 		ldrError = resDir().loaderError();
+		if (ldrError != LDR_ERROR_NONE)
+			return ldrError;
+
+		// Check errors in entry point
+		ldrError = checkEntryPointErrors();
 		if (ldrError != LDR_ERROR_NONE)
 			return ldrError;
 

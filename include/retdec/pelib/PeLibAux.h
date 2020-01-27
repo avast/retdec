@@ -96,6 +96,10 @@ namespace PeLib
 		// Errors from resource parser
 		LDR_ERROR_RSRC_OVER_END_OF_IMAGE,           // Array of resource directory entries goes beyond end of the image
 
+		// Errors from entry point checker
+		LDR_ERROR_ENTRY_POINT_OUT_OF_IMAGE,         // The entry point is out of the image
+		LDR_ERROR_ENTRY_POINT_ZEROED,               // The entry point is zeroed
+
 		LDR_ERROR_MAX
 
 	};
@@ -1290,13 +1294,13 @@ namespace PeLib
 	struct PELIB_IMAGE_RICH_HEADER_RECORD
 	{
 		std::string Signature;
-		word MajorVersion;
-		word MinorVersion;
-		word Build;
+		word ProductId;
+		word ProductBuild;
 		dword Count;
+		std::string ProductName;
+		std::string VisualStudioName;
 
-		PELIB_IMAGE_RICH_HEADER_RECORD() : MajorVersion(0), MinorVersion(0),
-			Build(0), Count(0)
+		PELIB_IMAGE_RICH_HEADER_RECORD() : ProductId(0), ProductBuild(0), Count(0)
 		{
 
 		}

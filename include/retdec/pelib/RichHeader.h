@@ -9,6 +9,7 @@
 
 #include <cstdint>
 #include <vector>
+#include <map>
 
 namespace PeLib
 {
@@ -29,6 +30,7 @@ namespace PeLib
 
 			void init();
 			void setValidStructure();
+			void getUserFriendlyProductName(PELIB_IMAGE_RICH_HEADER_RECORD & record);
 			bool analyze(bool ignoreInvalidKey = false);
 			void read(InputBuffer& inputbuffer, std::size_t uiSize, bool ignoreInvalidKey);
 		public:
