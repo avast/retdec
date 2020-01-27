@@ -26,7 +26,7 @@
 * Enhancement: Replaced uses of `mpark::variant` from `deps/variant` with standard C++17 `std::variant`. Removed the `variant` dependency.
 * Enhancement: Updated Yaramod to version v3.0.0 ([#680](https://github.com/avast/retdec/pull/680)). RetDec no longer requires Flex and Bison. This fixes [#103](https://github.com/avast/retdec/issues/103).
 * Enhancement: Take out most of the types from `config` library and place them to a separate `common` library that could be used across an entire RetDec source base ([#686](https://github.com/avast/retdec/issues/686)).
-* Enhancement: Reduce RetDec's external dependencies:
+* Enhancement: Reduced RetDec's external dependencies:
    * The sources of the following 3rd-party projects were moved from their own repositories directly to the main RetDec repository (to `/deps/`): ELFIO, RapidJSON, TinyXML2.
    * The sources of the following Avast projects were moved from their own repositories directly to the main RetDec repository (to `/src/`): Yaracpp, PeLib.
    * The following 3rd-party dependencies use upstream project repositories, not modified Avast forks as before: Capstone, Yara.
