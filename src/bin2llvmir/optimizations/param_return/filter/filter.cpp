@@ -741,22 +741,29 @@ void Filter::filterRetsByKnownTypes(FilterableLayout& lay) const
 	else if (!retType->isVoidTy())
 	{
 		assert(!gpRegs.empty());
-
-		std::size_t typeSize = _abi->getTypeByteSize(retType);
-		Type* registerType = _abi->getRegister(gpRegs.front())->getType();
-		std::size_t registerSize = _abi->getTypeByteSize(registerType);
-
-		if (typeSize <= registerSize ||
-				(typeSize > registerSize*gpRegs.size()))
+		if (auto* defaultReg = _abi->getRegister(gpRegs.front()))
 		{
-			regGPValues.push_back(gpRegs.front());
+			std::size_t typeSize = _abi->getTypeByteSize(retType);
+			Type* registerType = defaultReg->getType();
+			std::size_t registerSize = _abi->getTypeByteSize(registerType);
+
+			if (typeSize <= registerSize ||
+					(typeSize > registerSize*gpRegs.size()))
+			{
+				regGPValues.push_back(gpRegs.front());
+			}
+
+			std::size_t numOfRegs = typeSize/registerSize;
+			for (std::size_t i = 0; i < numOfRegs && i < gpRegs.size(); i++)
+			{
+				regGPValues.push_back(gpRegs[i]);
+			}
+		}
+		else
+		{
+			retType = nullptr;
 		}
 
-		std::size_t numOfRegs = typeSize/registerSize;
-		for (std::size_t i = 0; i < numOfRegs && i < gpRegs.size(); i++)
-		{
-			regGPValues.push_back(gpRegs[i]);
-		}
 	}
 
 	lay.gpRegisters = std::move(regGPValues);
