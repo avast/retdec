@@ -62,7 +62,7 @@ bool ToolInfo::isMsvc(const std::string& version) const
 
 /**
  * Checks if this tool instance matches with the provided tool name.
- * Matching is successfull if instance's name contains (case insensitive) the provided name.
+ * Matching is successful if instance's name contains (case insensitive) the provided name.
  * @param n Name to match with.
  * @return @c True if matching successful, @c false otherwise.
  */
@@ -74,7 +74,7 @@ bool ToolInfo::isTool(const std::string& n) const
 
 /**
  * Checks if this tool version matches with the provided tool version.
- * Matching is successfull if instance's version contains (case insensitive) the provided version.
+ * Matching is successful if instance's version contains (case insensitive) the provided version.
  * @param v Version to match with.
  * @return @c True if matching successful, @c false otherwise.
  */
