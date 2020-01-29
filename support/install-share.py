@@ -11,38 +11,27 @@ import shutil
 import tarfile
 import urllib.request
 
-###############################################################################
-
-version_filename = 'version.txt'
-arch_suffix = 'tar.xz'
-
-sha256hash_ref = '629351609bca0f4b8edbd4e53789192305256aeb908e953f5546e121a911d54e'
-version = '2019-03-08'
-
-arch_name = 'retdec-support' + '_' + version + '.' + arch_suffix
-
-###############################################################################
-
 def cleanup(support_dir):
     shutil.rmtree(support_dir, ignore_errors=True)
 
 
-def get_install_path(argv):
-    if len(argv) != 2:
+def get_args(argv):
+    if len(argv) != 5:
         print('ERROR: Unexpected number of arguments.')
+        print('       Expecting tuple: (install path, URL, SHA256, version).')
         sys.exit(1)
     else:
-        return argv[1]
+        return (argv[1], argv[2], argv[3], argv[4])
 
 
 def main():
-    install_path = get_install_path(sys.argv)
+    install_path, arch_url, sha256hash_ref, version = get_args(sys.argv)
     support_dir = os.path.join(install_path, 'share', 'retdec', 'support')
-    arch_path = os.path.join(support_dir, arch_name)
+    arch_path = os.path.join(support_dir, 'retdec-support.tar.xz')
 
     # Share directory exists.
     if os.path.exists(support_dir):
-        version_path = os.path.join(support_dir, version_filename)
+        version_path = os.path.join(support_dir, 'version.txt')
         if os.path.isfile(version_path):
             with open(version_path) as version_file:
                 version_from_file = version_file.read().split('\n')[0]
@@ -58,8 +47,6 @@ def main():
     os.makedirs(support_dir, exist_ok=True)
 
     # Download archive
-    arch_url = 'https://github.com/avast/retdec-support/releases/download/%s/%s' % (version, arch_name)
-    print('Downloading archive from %s ...' % arch_url)
     try:
         urllib.request.urlretrieve(arch_url, arch_path)
     except (urllib.request.HTTPError, urllib.request.URLError) as ex:

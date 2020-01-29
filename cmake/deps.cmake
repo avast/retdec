@@ -42,3 +42,10 @@ set(YARAMOD_URL
     CACHE STRING "URL of YaraMod archive to use."
 )
 set(YARAMOD_ARCHIVE_SHA256 "f40c168996e9a137cfd4d83181b05bb92d8b1c4615aad923b48ab13f2aca1129")
+
+set(SUPPORT_PKG_URL
+    "https://github.com/avast/retdec-support/releases/download/2019-03-08/retdec-support_2019-03-08.tar.xz"
+    CACHE STRING "URL of RetDec support package to use."
+)
+set(SUPPORT_PKG_SHA256 "629351609bca0f4b8edbd4e53789192305256aeb908e953f5546e121a911d54e")
+set(SUPPORT_PKG_VERSION "2019-03-08")
