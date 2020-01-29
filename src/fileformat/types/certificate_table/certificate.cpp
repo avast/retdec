@@ -188,13 +188,6 @@ Certificate::Certificate(X509* cert) : certImpl(cert)
 	load();
 }
 
-/**
- * Destructor
- */
-Certificate::~Certificate()
-{
-}
-
 void Certificate::load()
 {
 	loadValidity();

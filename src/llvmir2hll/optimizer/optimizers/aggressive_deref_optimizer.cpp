@@ -30,11 +30,6 @@ AggressiveDerefOptimizer::AggressiveDerefOptimizer(ShPtr<Module> module):
 	}
 
 /**
-* @brief Destructs the optimizer.
-*/
-AggressiveDerefOptimizer::~AggressiveDerefOptimizer() {}
-
-/**
 * @brief Tries to optimize the given statement @a stmt, composed of @a lhs and
 *        @a rhs.
 */

@@ -20,7 +20,7 @@ namespace {
 * @param[in] memFunc Pointer to a member function to be called on every
 *                    semantics.
 *
-* @tparam ReturnType Type to be returned from the function (@c Maybe<ReturnType>).
+* @tparam ReturnType Type to be returned from the function (@c std::optional<ReturnType>).
 * @tparam SemanticsListType Type of @a semanticsList.
 * @tparam MemFuncType Type of @a memFunc.
 *
@@ -30,51 +30,51 @@ namespace {
 */
 template<typename ReturnType, typename SemanticsListType,
 	typename MemFuncType>
-Maybe<ReturnType> getAnswer(const SemanticsListType &semanticsList,
+std::optional<ReturnType> getAnswer(const SemanticsListType &semanticsList,
 		MemFuncType memFunc) {
 	// Go through all the semantics in the list and try to get an answer.
 	for (const auto &semantics : semanticsList) {
 		// The following code utilizes pointers to member functions. Since
 		// ShPtr does not provide ->*, the syntax below is rather obscure,
 		// although working.
-		Maybe<ReturnType> answer(((*semantics).*memFunc)());
+		std::optional<ReturnType> answer(((*semantics).*memFunc)());
 		if (answer) {
 			return answer;
 		}
 	}
 
 	// Don't know.
-	return Nothing<ReturnType>();
+	return std::nullopt;
 }
 
 /// Overloaded version of getAnswer<> for functions with one parameter.
 /// See it and its implementation for more details.
 template<typename ReturnType, typename SemanticsListType,
 	typename MemFuncType, typename ParamType>
-Maybe<ReturnType> getAnswer(const SemanticsListType &semanticsList,
+std::optional<ReturnType> getAnswer(const SemanticsListType &semanticsList,
 		MemFuncType memFunc, const ParamType &param) {
 	for (const auto &semantics : semanticsList) {
-		Maybe<ReturnType> answer(((*semantics).*memFunc)(param));
+		std::optional<ReturnType> answer(((*semantics).*memFunc)(param));
 		if (answer) {
 			return answer;
 		}
 	}
-	return Nothing<ReturnType>();
+	return std::nullopt;
 }
 
 /// Overloaded version of getAnswer<> for functions with two parameters.
 /// See it and its implementation for more details.
 template<typename ReturnType, typename SemanticsListType,
 	typename MemFuncType, typename Param1Type, typename Param2Type>
-Maybe<ReturnType> getAnswer(const SemanticsListType &semanticsList,
+std::optional<ReturnType> getAnswer(const SemanticsListType &semanticsList,
 		MemFuncType memFunc, const Param1Type &param1, const Param2Type &param2) {
 	for (const auto &semantics : semanticsList) {
-		Maybe<ReturnType> answer(((*semantics).*memFunc)(param1, param2));
+		std::optional<ReturnType> answer(((*semantics).*memFunc)(param1, param2));
 		if (answer) {
 			return answer;
 		}
 	}
-	return Nothing<ReturnType>();
+	return std::nullopt;
 }
 
 } // anonymous namespace
@@ -113,36 +113,36 @@ void CompoundSemantics::appendSemantics(ShPtr<Semantics> semantics) {
 	providedSemantics.push_back(semantics);
 }
 
-Maybe<std::string> CompoundSemantics::getMainFuncName() const {
+std::optional<std::string> CompoundSemantics::getMainFuncName() const {
 	return getAnswer<std::string>(providedSemantics,
 		&Semantics::getMainFuncName);
 }
 
-Maybe<std::string> CompoundSemantics::getCHeaderFileForFunc(
+std::optional<std::string> CompoundSemantics::getCHeaderFileForFunc(
 		const std::string &funcName) const {
 	return getAnswer<std::string>(providedSemantics,
 		&Semantics::getCHeaderFileForFunc, funcName);
 }
 
-Maybe<bool> CompoundSemantics::funcNeverReturns(
+std::optional<bool> CompoundSemantics::funcNeverReturns(
 		const std::string &funcName) const {
 	return getAnswer<bool>(providedSemantics,
 		&Semantics::funcNeverReturns, funcName);
 }
 
-Maybe<std::string> CompoundSemantics::getNameOfVarStoringResult(
+std::optional<std::string> CompoundSemantics::getNameOfVarStoringResult(
 		const std::string &funcName) const {
 	return getAnswer<std::string>(providedSemantics,
 		&Semantics::getNameOfVarStoringResult, funcName);
 }
 
-Maybe<std::string> CompoundSemantics::getNameOfParam(
+std::optional<std::string> CompoundSemantics::getNameOfParam(
 		const std::string &funcName, unsigned paramPos) const {
 	return getAnswer<std::string>(providedSemantics,
 		&Semantics::getNameOfParam, funcName, paramPos);
 }
 
-Maybe<IntStringMap> CompoundSemantics::getSymbolicNamesForParam(
+std::optional<IntStringMap> CompoundSemantics::getSymbolicNamesForParam(
 		const std::string &funcName, unsigned paramPos) const {
 	return getAnswer<IntStringMap>(providedSemantics,
 		&Semantics::getSymbolicNamesForParam, funcName, paramPos);

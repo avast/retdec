@@ -10,22 +10,6 @@ namespace retdec {
 namespace fileformat {
 
 /**
- * Constructor
- */
-VisualBasicObject::VisualBasicObject()
-{
-
-}
-
-/**
- * Destructor
- */
-VisualBasicObject::~VisualBasicObject()
-{
-
-}
-
-/**
  * Get name
  * @return name
  */

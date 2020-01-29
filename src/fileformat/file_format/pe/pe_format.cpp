@@ -556,6 +556,7 @@ void PeFormat::initLoaderErrorInfo(PeLib::LoaderError ldrError)
 		_ldrErrInfo.loaderErrorCode = static_cast<std::uint32_t>(ldrError);
 		_ldrErrInfo.loaderError = getLoaderErrorString(ldrError, false);
 		_ldrErrInfo.loaderErrorUserFriendly = getLoaderErrorString(ldrError, true);
+		_ldrErrInfo.isLoadableAnyway = getLoaderErrorLoadableAnyway(ldrError);
 	}
 }
 
@@ -840,10 +841,11 @@ void PeFormat::loadRichHeader()
 	for(const auto &item : header)
 	{
 		LinkerInfo info;
-		info.setMajorVersion(item.MajorVersion);
-		info.setMinorVersion(item.MinorVersion);
-		info.setBuildVersion(item.Build);
+		info.setProductId(item.ProductId);
+		info.setProductBuild(item.ProductBuild);
 		info.setNumberOfUses(item.Count);
+		info.setProductName(item.ProductName);
+		info.setVisualStudioName(item.VisualStudioName);
 		signature += item.Signature;
 		richHeader->addRecord(info);
 	}
@@ -1503,7 +1505,7 @@ void PeFormat::loadImports()
 
 	for(auto&& addressRange : formatParser->getImportDirectoryOccupiedAddresses())
 	{
-		nonDecodableRanges.addRange(std::move(addressRange));
+		nonDecodableRanges.insert(std::move(addressRange));
 	}
 }
 
@@ -1531,7 +1533,7 @@ void PeFormat::loadExports()
 
 	for(auto&& addressRange : formatParser->getExportDirectoryOccupiedAddresses())
 	{
-		nonDecodableRanges.addRange(std::move(addressRange));
+		nonDecodableRanges.insert(std::move(addressRange));
 	}
 }
 
@@ -1610,7 +1612,7 @@ void PeFormat::loadPdbInfo()
 
 	for (auto&& addressRange : formatParser->getDebugDirectoryOccupiedAddresses())
 	{
-		nonDecodableRanges.addRange(std::move(addressRange));
+		nonDecodableRanges.insert(std::move(addressRange));
 	}
 }
 
@@ -1794,7 +1796,7 @@ void PeFormat::loadResources()
 
 	for (auto&& addressRange : formatParser->getResourceDirectoryOccupiedAddresses())
 	{
-		nonDecodableRanges.addRange(std::move(addressRange));
+		nonDecodableRanges.insert(std::move(addressRange));
 	}
 }
 

@@ -25,9 +25,6 @@ class Module;
 */
 class CGBuilder: private OrderedAllVisitor, private retdec::utils::NonCopyable {
 public:
-	// It needs to be public so it can be called in ShPtr's destructor.
-	virtual ~CGBuilder() override;
-
 	static ShPtr<CG> getCG(ShPtr<Module> module);
 
 private:

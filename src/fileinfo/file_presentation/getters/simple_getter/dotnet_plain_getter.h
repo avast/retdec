@@ -18,7 +18,6 @@ class DotnetPlainGetter : public SimpleGetter
 {
 	public:
 		DotnetPlainGetter(FileInformation &fileInfo);
-		virtual ~DotnetPlainGetter() override;
 
 		virtual std::size_t loadInformation(std::vector<std::string> &desc, std::vector<std::string> &info) const override;
 };

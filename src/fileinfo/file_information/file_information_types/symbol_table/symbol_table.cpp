@@ -10,23 +10,6 @@
 namespace fileinfo {
 
 /**
- * Constructor
- */
-SymbolTable::SymbolTable() : offset(std::numeric_limits<unsigned long long>::max()),
-								declaredSymbols(std::numeric_limits<unsigned long long>::max())
-{
-
-}
-
-/**
- * Destructor
- */
-SymbolTable::~SymbolTable()
-{
-
-}
-
-/**
  * Get number of symbols in table
  * @return Number of symbols in table
  *

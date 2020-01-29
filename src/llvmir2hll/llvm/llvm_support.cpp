@@ -298,5 +298,24 @@ bool LLVMSupport::isBasicBlockLabel(const std::string &str) {
 		hasOnlyHexadecimalDigits(str.substr(expectedPrefix.size()));
 }
 
+/**
+* @brief Get instruction's ASM address from metadata.
+* @return Address, or undefined address if metadata entry is not present.
+*
+* @par Preconditions
+*  - @a i is non-null
+*/
+Address LLVMSupport::getInstAddress(const llvm::Instruction *i) {
+	PRECONDITION_NON_NULL(i);
+
+	if (llvm::MDNode* mdn = i->getMetadata("insn.addr")) {
+		llvm::ConstantInt* CI = llvm::mdconst::dyn_extract<llvm::ConstantInt>(
+			mdn->getOperand(0));
+		return CI->getZExtValue();
+	}
+
+	return Address::Undefined;
+}
+
 } // namespace llvmir2hll
 } // namespace retdec

@@ -49,7 +49,6 @@ class LLVMConstantConverter final: private retdec::utils::NonCopyable {
 public:
 	LLVMConstantConverter(ShPtr<LLVMInstructionConverter> instConverter,
 		ShPtr<LLVMTypeConverter> typeConverter);
-	~LLVMConstantConverter();
 
 	ShPtr<Expression> convertToExpression(llvm::Constant *constant);
 

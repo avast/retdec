@@ -43,7 +43,6 @@ class ElfImage : public Image
 
 public:
 	ElfImage(const std::shared_ptr<retdec::fileformat::FileFormat>& fileFormat);
-	virtual ~ElfImage();
 
 	virtual bool load() override;
 

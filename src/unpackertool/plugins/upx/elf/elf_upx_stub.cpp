@@ -49,15 +49,6 @@ template <int bits> ElfUpxStub<bits>::ElfUpxStub(retdec::loader::Image* inputFil
 }
 
 /**
- * Destructor.
- *
- * @tparam bits Number of bits of the architecture.
- */
-template <int bits> ElfUpxStub<bits>::~ElfUpxStub()
-{
-}
-
-/**
  * Performs the whole process of unpacking. This is the method that is being run from @ref UpxPlugin to start
  * unpacking stub.
  *

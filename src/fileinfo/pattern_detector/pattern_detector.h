@@ -45,7 +45,6 @@ class PatternDetector
 		/// @}
 	public:
 		PatternDetector(const retdec::fileformat::FileFormat *fparser, FileInformation &finfo);
-		~PatternDetector();
 
 		/// @name Detection methods
 		/// @{

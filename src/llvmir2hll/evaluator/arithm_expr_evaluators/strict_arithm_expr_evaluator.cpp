@@ -4,6 +4,8 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
+#include <optional>
+
 #include "retdec/llvmir2hll/evaluator/arithm_expr_evaluator_factory.h"
 #include "retdec/llvmir2hll/evaluator/arithm_expr_evaluators/strict_arithm_expr_evaluator.h"
 #include "retdec/llvmir2hll/ir/ext_cast_expr.h"
@@ -17,16 +19,6 @@ namespace llvmir2hll {
 
 REGISTER_AT_FACTORY("strict", STRICT_ARITHM_EXPR_EVALUATOR_ID,
 	ArithmExprEvaluatorFactory, StrictArithmExprEvaluator::create);
-
-/**
-* @brief Constructs the StrictArithmExprEvaluator.
-*/
-StrictArithmExprEvaluator::StrictArithmExprEvaluator() {}
-
-/**
-* @brief Destructor.
-*/
-StrictArithmExprEvaluator::~StrictArithmExprEvaluator() {}
 
 /**
 * @brief Creates a new StrictArithmExprEvaluator.
@@ -50,7 +42,7 @@ void StrictArithmExprEvaluator::resolveTypesBinaryOp(ConstPair &constPair) {
 		canBeEvaluated = false;
 	}
 
-	if (Maybe<ConstIntPair> constIntPair = castConstPair<ConstInt>(constPair)) {
+	if (std::optional<ConstIntPair> constIntPair = castConstPair<ConstInt>(constPair)) {
 		APSIntPair apsIntPair(getAPSIntsFromConstants(constIntPair));
 		if (apsIntPair.first.getBitWidth() !=
 				apsIntPair.second.getBitWidth()) {
@@ -73,7 +65,7 @@ void StrictArithmExprEvaluator::resolveOpSpecifications(ShPtr<DivOpExpr> expr,
 	}
 
 	// Supported only division without remainder.
-	if (Maybe<ConstIntPair> constIntPair = castConstPair<ConstInt>(constPair)) {
+	if (std::optional<ConstIntPair> constIntPair = castConstPair<ConstInt>(constPair)) {
 		APSIntPair apsIntPair = getAPSIntsFromConstants(constIntPair);
 		ShPtr<ConstInt> remConstInt(ConstInt::create(apsIntPair.first.srem(
 			apsIntPair.second)));

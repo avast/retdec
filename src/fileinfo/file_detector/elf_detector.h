@@ -45,8 +45,11 @@ class ElfDetector : public FileDetector
 		virtual retdec::cpdetect::CompilerDetector* createCompilerDetector() const override;
 		/// @}
 	public:
-		ElfDetector(std::string pathToInputFile, FileInformation &finfo, retdec::cpdetect::DetectParams &searchPar, retdec::fileformat::LoadFlags loadFlags);
-		virtual ~ElfDetector() override;
+		ElfDetector(
+				std::string pathToInputFile,
+				FileInformation &finfo,
+				retdec::cpdetect::DetectParams &searchPar,
+				retdec::fileformat::LoadFlags loadFlags);
 };
 
 } // namespace fileinfo

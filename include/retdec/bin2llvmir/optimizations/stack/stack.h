@@ -7,6 +7,8 @@
 #ifndef RETDEC_BIN2LLVMIR_OPTIMIZATIONS_STACK_STACK_H
 #define RETDEC_BIN2LLVMIR_OPTIMIZATIONS_STACK_STACK_H
 
+#include <optional>
+
 #include <llvm/IR/Module.h>
 #include <llvm/Pass.h>
 
@@ -38,7 +40,11 @@ class StackAnalysis : public llvm::ModulePass
 				llvm::Value* val,
 				llvm::Type* type,
 				std::map<llvm::Value*, llvm::Value*>& val2val);
-		retdec::config::Object* getDebugStackVariable(
+		std::optional<int> getBaseOffset(SymbolicTree &root);
+		const retdec::common::Object* getDebugStackVariable(
+				llvm::Function* fnc,
+				SymbolicTree& root);
+		const retdec::common::Object* getConfigStackVariable(
 				llvm::Function* fnc,
 				SymbolicTree& root);
 

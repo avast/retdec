@@ -18,8 +18,7 @@ namespace capstone2llvmir {
  */
 class Capstone2LlvmIrTranslatorPowerpc : virtual public Capstone2LlvmIrTranslator
 {
-	public:
-		virtual ~Capstone2LlvmIrTranslatorPowerpc() {};
+
 };
 
 } // namespace capstone2llvmir

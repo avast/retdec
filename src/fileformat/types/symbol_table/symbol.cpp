@@ -13,24 +13,6 @@ namespace retdec {
 namespace fileformat {
 
 /**
- * Constructor
- */
-Symbol::Symbol() : type(Type::UNDEFINED_SYM), usageType(UsageType::UNKNOWN),
-	index(0), address(0), size(0), linkToSection(0), addressIsValid(false),
-	sizeIsValid(false), linkIsValid(false), thumbSymbol(false)
-{
-
-}
-
-/**
- * Destructor
- */
-Symbol::~Symbol()
-{
-
-}
-
-/**
  * @return @c true if symbol is undefined, @c false otherwise
  */
 bool Symbol::isUndefined() const

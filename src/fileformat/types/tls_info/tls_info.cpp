@@ -12,25 +12,6 @@ namespace retdec {
 namespace fileformat {
 
 /**
- * Constructor
- */
-TlsInfo::TlsInfo() : callBacks(0), rawDataStartAddr(0), rawDataEndAddr(0), indexAddr(0), callBacksAddr(0),
-					zeroFillSize(0), characteristics(0), rawDataStartAddrValid(false), rawDataEndAddrValid(false),
-					indexAddrValid(false), callBacksAddrValid(false), zeroFillSizeValid(false),
-					characteristicsValid(false)
-{
-
-}
-
-/**
- * Destructor
- */
-TlsInfo::~TlsInfo()
-{
-
-}
-
-/**
  * Get start of raw data address
  * @param res Variable to store the result to
  * @return @c true on success, @c false otherwise

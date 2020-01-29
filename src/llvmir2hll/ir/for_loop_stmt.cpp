@@ -19,14 +19,10 @@ namespace llvmir2hll {
 * See create() for more information.
 */
 ForLoopStmt::ForLoopStmt(ShPtr<Variable> indVar, ShPtr<Expression> startValue,
-	ShPtr<Expression> endCond, ShPtr<Expression> step, ShPtr<Statement> body):
-		indVar(indVar), startValue(startValue), endCond(endCond), step(step),
-		body(body) {}
-
-/**
-* @brief Destructs the statement.
-*/
-ForLoopStmt::~ForLoopStmt() {}
+	ShPtr<Expression> endCond, ShPtr<Expression> step, ShPtr<Statement> body,
+	Address a):
+		Statement(a), indVar(indVar), startValue(startValue), endCond(endCond),
+		step(step), body(body) {}
 
 ShPtr<Value> ForLoopStmt::clone() {
 	ShPtr<ForLoopStmt> forLoopStmt(ForLoopStmt::create(
@@ -34,7 +30,9 @@ ShPtr<Value> ForLoopStmt::clone() {
 		ucast<Expression>(startValue->clone()),
 		ucast<Expression>(endCond->clone()),
 		ucast<Expression>(step->clone()),
-		ucast<Statement>(body->clone())));
+		ucast<Statement>(Statement::cloneStatements(body)),
+		nullptr,
+		getAddress()));
 	forLoopStmt->setMetadata(getMetadata());
 	return forLoopStmt;
 }
@@ -200,6 +198,7 @@ void ForLoopStmt::setBody(ShPtr<Statement> newBody) {
 * @param[in] step Step.
 * @param[in] body Body.
 * @param[in] succ Follower of the statement in the program flow.
+* @param[in] a Address.
 *
 * The loop is of the following form (written in C):
 * @code
@@ -212,7 +211,8 @@ void ForLoopStmt::setBody(ShPtr<Statement> newBody) {
 */
 ShPtr<ForLoopStmt> ForLoopStmt::create(ShPtr<Variable> indVar,
 		ShPtr<Expression> startValue, ShPtr<Expression> endCond,
-		ShPtr<Expression> step, ShPtr<Statement> body, ShPtr<Statement> succ) {
+		ShPtr<Expression> step, ShPtr<Statement> body, ShPtr<Statement> succ,
+		Address a) {
 	PRECONDITION_NON_NULL(indVar);
 	PRECONDITION_NON_NULL(startValue);
 	PRECONDITION_NON_NULL(endCond);
@@ -220,7 +220,7 @@ ShPtr<ForLoopStmt> ForLoopStmt::create(ShPtr<Variable> indVar,
 	PRECONDITION_NON_NULL(body);
 
 	ShPtr<ForLoopStmt> stmt(new ForLoopStmt(indVar, startValue, endCond,
-		step, body));
+		step, body, a));
 	stmt->setSuccessor(succ);
 
 	// Initialization (recall that shared_from_this() cannot be called in a

@@ -50,11 +50,6 @@ WhileTrueToForLoopOptimizer::WhileTrueToForLoopOptimizer(ShPtr<Module> module,
 		PRECONDITION_NON_NULL(arithmExprEvaluator);
 	}
 
-/**
-* @brief Destructs the optimizer.
-*/
-WhileTrueToForLoopOptimizer::~WhileTrueToForLoopOptimizer() {}
-
 void WhileTrueToForLoopOptimizer::doOptimization() {
 	if (!va->isInValidState()) {
 		va->clearCache();
@@ -90,24 +85,24 @@ void WhileTrueToForLoopOptimizer::visit(ShPtr<WhileLoopStmt> stmt) {
 		return;
 	}
 
-	// Gather information needed to transform the loop, (1) and (2).
-	// (1) Parts in the loop, i.e.
-	//     ...
-	//     if cond:
-	//         break/return
-	//     i = i + 1
-	auto splittedLoop = splitWhileTrueLoop(stmt);
-	if (!splittedLoop) {
-		// The loop cannot be optimized.
-		return;
-	}
-
 	// (2) Induction variable before the loop, i.e.
 	//   ...
 	//   i = 0
 	//   ...
 	auto indVarInfo = getIndVarInfo(stmt);
 	if (!indVarInfo) {
+		// The loop cannot be optimized.
+		return;
+	}
+
+	// Gather information needed to transform the loop, (1) and (2).
+	// (1) Parts in the loop, i.e.
+	//     ...
+	//     if cond:
+	//         break/return
+	//     i = i + 1
+	auto splittedLoop = splitWhileTrueLoop(stmt, indVarInfo);
+	if (!splittedLoop) {
 		// The loop cannot be optimized.
 		return;
 	}
@@ -133,6 +128,10 @@ void WhileTrueToForLoopOptimizer::visit(ShPtr<WhileLoopStmt> stmt) {
 		return;
 	}
 
+	if (indVarInfo->updateBeforeExit) {
+		Statement::removeStatement(indVarInfo->updateStmt);
+	}
+
 	// Store the last statement of the original loop for later use. Usually,
 	// the last empty statement in a "while true" loop contains metadata of the
 	// form "continue -> bb". To preserve this piece of information, we store
@@ -148,12 +147,12 @@ void WhileTrueToForLoopOptimizer::visit(ShPtr<WhileLoopStmt> stmt) {
 	// Create the for loop's body. We have to make sure that it is non-empty.
 	auto body = splittedLoop->beforeLoopEndStmts;
 	if (!body) {
-		body = EmptyStmt::create();
+		body = EmptyStmt::create(nullptr, stmt->getAddress());
 	}
 
 	// Create the resulting for loop and replace the original loop with it.
 	auto forLoop = ForLoopStmt::create(
-		indVarInfo->indVar, startValue, endCond, step, body);
+		indVarInfo->indVar, startValue, endCond, step, body, nullptr, stmt->getAddress());
 	Statement::replaceStatement(stmt, forLoop);
 
 	// Put lastLoopStmt at the end of the new loop.
@@ -319,7 +318,9 @@ ShPtr<Expression> WhileTrueToForLoopOptimizer::computeEndCondOfForLoop(
 
 		// Since in a "while true" loop, the loop body is entered at least
 		// once, we need to add 1 to the end value.
-		endValue = AddOpExpr::create(endValue, ConstInt::create(1, 32));
+		if (!indVarInfo->updateBeforeExit) {
+			endValue = AddOpExpr::create(endValue, ConstInt::create(1, 32));
+		}
 
 		// The resulting condition is of the form `indVar < endValue`.
 		return LtOpExpr::create(indVarInfo->indVar, endValue);
@@ -332,7 +333,9 @@ ShPtr<Expression> WhileTrueToForLoopOptimizer::computeEndCondOfForLoop(
 
 		// Since in a "while true" loop, the loop body is entered at least
 		// once, we need to add 1 to the end value.
-		endValue = AddOpExpr::create(endValue, ConstInt::create(1, 32));
+		if (!indVarInfo->updateBeforeExit) {
+			endValue = AddOpExpr::create(endValue, ConstInt::create(1, 32));
+		}
 
 		// The resulting condition is of the form `indVar < endValue`.
 		return LtOpExpr::create(indVarInfo->indVar, endValue);
@@ -343,21 +346,32 @@ ShPtr<Expression> WhileTrueToForLoopOptimizer::computeEndCondOfForLoop(
 		// in a "while true" loop, the loop body is entered at least once, so
 		// we have to subtract 1 from the end value. This can be done by
 		// replacing > with >=.
-		return GtEqOpExpr::create(gtOpExpr->getFirstOperand(),
-			gtOpExpr->getSecondOperand());
+		if (indVarInfo->updateBeforeExit) {
+			return gtOpExpr;
+		} else {
+			return GtEqOpExpr::create(gtOpExpr->getFirstOperand(),
+				gtOpExpr->getSecondOperand());
+		}
 	} else if (auto gtEqOpExpr = cast<GtEqOpExpr>(endCondOpExpr)) {
 		// >=
 
 		// The resulting condition is of the form `indVar >= endValue - 1`
 		// because in a "while true" loop, the loop body is entered at least
 		// once.
-		return GtEqOpExpr::create(
-			gtEqOpExpr->getFirstOperand(),
-			SubOpExpr::create(
-				gtEqOpExpr->getSecondOperand(),
-				ConstInt::create(1, 32)
-			)
-		);
+		if (indVarInfo->updateBeforeExit) {
+			return GtEqOpExpr::create(
+				gtEqOpExpr->getFirstOperand(),
+				gtEqOpExpr->getSecondOperand()
+			);
+		} else {
+			return GtEqOpExpr::create(
+				gtEqOpExpr->getFirstOperand(),
+				SubOpExpr::create(
+					gtEqOpExpr->getSecondOperand(),
+					ConstInt::create(1, 32)
+				)
+			);
+		}
 	} else if (auto neqOpExpr = cast<NeqOpExpr>(endCondOpExpr)) {
 		// !=
 		auto endValue = neqOpExpr->getSecondOperand();
@@ -377,7 +391,9 @@ ShPtr<Expression> WhileTrueToForLoopOptimizer::computeEndCondOfForLoop(
 
 			// Since in a "while true" loop, the loop body is entered at least
 			// once, we need to add 1 to the end value.
-			endValue = AddOpExpr::create(endValue, ConstInt::create(1, 32));
+			if (!indVarInfo->updateBeforeExit) {
+				endValue = AddOpExpr::create(endValue, ConstInt::create(1, 32));
+			}
 
 			// The resulting condition is of the form `indVar < endValue`.
 			return LtOpExpr::create(indVarInfo->indVar, endValue);
@@ -395,7 +411,9 @@ ShPtr<Expression> WhileTrueToForLoopOptimizer::computeEndCondOfForLoop(
 
 		// Since in a "while true" loop, the loop body is entered at least
 		// once, we need to subtract 1 from the end value.
-		endValue = SubOpExpr::create(endValue, ConstInt::create(1, 32));
+		if (!indVarInfo->updateBeforeExit) {
+			endValue = SubOpExpr::create(endValue, ConstInt::create(1, 32));
+		}
 
 		// The resulting condition is of the form `indVar > endValue`.
 		return GtOpExpr::create(indVarInfo->indVar, endValue);

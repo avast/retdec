@@ -59,7 +59,6 @@ AssignmentToOtherInfoWorkCorrectly) {
 TEST_F(APICallInfoTests,
 AssignmentToSelfWorksCorrectly) {
 	APICallInfo info("test");
-	info = info;
 	EXPECT_EQ("test", info.getFuncName());
 }
 

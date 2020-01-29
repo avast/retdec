@@ -24,7 +24,6 @@ class ElfNotesPlainGetter : public IterativeDistributionGetter
 
 	public:
 		ElfNotesPlainGetter(FileInformation &fileInfo);
-		virtual ~ElfNotesPlainGetter() override;
 
 		virtual std::size_t getBasicInfo(
 				std::size_t structIndex,

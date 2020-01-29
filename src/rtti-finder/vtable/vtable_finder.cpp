@@ -16,12 +16,13 @@
 	else std::cout << std::showbase
 const bool debug_enabled = false;
 
+using namespace retdec::common;
 using namespace retdec::utils;
 using namespace retdec::rtti_finder;
 
 void findPossibleVtables(
 		const retdec::loader::Image* img,
-		std::set<retdec::utils::Address>& possibleVtables,
+		std::set<retdec::common::Address>& possibleVtables,
 		bool gcc)
 {
 	auto wordSz = img->getBytesPerWord();
@@ -72,12 +73,12 @@ void findPossibleVtables(
  */
 bool fillVtable(
 		const retdec::loader::Image* img,
-		std::set<retdec::utils::Address>& processedAddresses,
+		std::set<retdec::common::Address>& processedAddresses,
 		Address a,
 		Vtable& vt)
 {
 	LOG << "\t\t" << "fillVtable() @ " << a << std::endl;
-	std::set<retdec::utils::Address> items;
+	std::set<retdec::common::Address> items;
 
 	bool isThumb = false;
 	auto bpw = img->getBytesPerWord();
@@ -118,7 +119,7 @@ bool fillVtable(
 		}
 
 		LOG << "\t\t\t" << a << " @ OK" << std::endl;
-		vt.virtualFncAddresses.emplace_back(VtableItem(ptr, isThumb));
+		vt.items.emplace(VtableItem(a, ptr, isThumb));
 		items.insert(ptr);
 		processedAddresses.insert(a);
 
@@ -126,7 +127,7 @@ bool fillVtable(
 		isPtr = img->isPointer(a, &ptr);
 	}
 
-	if (vt.virtualFncAddresses.empty())
+	if (vt.items.empty())
 	{
 		LOG << "\t\t\t" << "===> FAIL" << std::endl;
 		return false;
@@ -146,10 +147,10 @@ void retdec::rtti_finder::findGccVtables(
 		retdec::rtti_finder::VtablesGcc& vtables,
 		retdec::rtti_finder::RttiGcc& rttis)
 {
-	std::set<retdec::utils::Address> possibleVtables;
+	std::set<retdec::common::Address> possibleVtables;
 	findPossibleVtables(img, possibleVtables, true);
 
-	std::set<retdec::utils::Address> processedAddresses;
+	std::set<retdec::common::Address> processedAddresses;
 	for (auto addr : possibleVtables)
 	{
 		LOG << "\t" << "possible vtable @ " << addr << std::endl;
@@ -165,7 +166,7 @@ void retdec::rtti_finder::findGccVtables(
 		std::uint64_t rttiAddr = 0;
 		if (img->getWord(rttiPtrAddr, rttiAddr))
 		{
-			std::set<retdec::utils::Address> visited;
+			std::set<retdec::common::Address> visited;
 			vt.rttiAddress = rttiAddr;
 			vt.rtti = parseGccRtti(img, rttis, vt.rttiAddress, visited);
 			if (vt.rtti == nullptr)
@@ -196,10 +197,10 @@ void retdec::rtti_finder::findMsvcVtables(
 		retdec::rtti_finder::VtablesMsvc& vtables,
 		retdec::rtti_finder::RttiMsvc& rttis)
 {
-	std::set<retdec::utils::Address> possibleVtables;
+	std::set<retdec::common::Address> possibleVtables;
 	findPossibleVtables(img, possibleVtables, false);
 
-	std::set<retdec::utils::Address> processedAddresses;
+	std::set<retdec::common::Address> processedAddresses;
 	for (auto addr : possibleVtables)
 	{
 		retdec::rtti_finder::VtableMsvc vt(addr);

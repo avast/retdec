@@ -13,22 +13,6 @@ namespace retdec {
 namespace fileformat {
 
 /**
- * Constructor
- */
-RelocationTable::RelocationTable()
-{
-
-}
-
-/**
- * Destructor
- */
-RelocationTable::~RelocationTable()
-{
-
-}
-
-/**
  * Get number of relocations in table
  * @return Number of relocations in table
  */

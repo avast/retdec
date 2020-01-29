@@ -17,6 +17,7 @@
 namespace retdec {
 namespace llvmir2hll {
 
+class Module;
 class Statement;
 class Type;
 class Variable;
@@ -31,11 +32,9 @@ class Visitor;
 */
 class Function final: public Value {
 public:
-	static ShPtr<Function> create(ShPtr<Type> retType, std::string name,
-		VarVector params, VarSet localVars = VarSet(),
+	static ShPtr<Function> create(ShPtr<Module> module, ShPtr<Type> retType,
+		std::string name, VarVector params, VarSet localVars = VarSet(),
 		ShPtr<Statement> body = nullptr, bool isVarArg = false);
-
-	virtual ~Function() override;
 
 	virtual ShPtr<Value> clone() override;
 
@@ -54,6 +53,10 @@ public:
 	ShPtr<Statement> getBody() const;
 	ShPtr<Variable> getAsVar() const;
 	ShPtr<Type> getType() const;
+	ShPtr<Module> getModule() const;
+	AddressRange getAddressRange() const;
+	Address getStartAddress() const;
+	Address getEndAddress() const;
 
 	bool isVarArg() const;
 	bool isDeclaration() const;
@@ -86,6 +89,9 @@ public:
 	/// @}
 
 private:
+	/// The module to which the function belongs.
+	WkPtr<Module> module;
+
 	/// Return type.
 	ShPtr<Type> retType;
 
@@ -108,9 +114,9 @@ private:
 private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
-	Function(ShPtr<Type>, std::string name, VarVector params,
-		VarSet localVars = VarSet(), ShPtr<Statement> body = nullptr,
-		bool isVarArg = false);
+	Function(ShPtr<Module> module, ShPtr<Type>, std::string name,
+		VarVector params, VarSet localVars = VarSet(),
+		ShPtr<Statement> body = nullptr, bool isVarArg = false);
 
 	void updateUnderlyingVarType();
 	void includeParamsIntoLocalVars();

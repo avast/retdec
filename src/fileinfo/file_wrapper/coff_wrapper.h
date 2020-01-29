@@ -20,7 +20,6 @@ class CoffWrapper : public retdec::fileformat::CoffFormat
 {
 	public:
 		CoffWrapper(std::string pathToFile, retdec::fileformat::LoadFlags loadFlags);
-		virtual ~CoffWrapper() override;
 
 		/// @name Detection methods
 		/// {

@@ -38,11 +38,6 @@ DeadLocalAssignOptimizer::DeadLocalAssignOptimizer(ShPtr<Module> module,
 		PRECONDITION_NON_NULL(va);
 	}
 
-/**
-* @brief Destructs the optimizer.
-*/
-DeadLocalAssignOptimizer::~DeadLocalAssignOptimizer() {}
-
 void DeadLocalAssignOptimizer::doOptimization() {
 	// Initialization.
 	if (!va->isInValidState()) {

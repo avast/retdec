@@ -21,11 +21,6 @@ CallsInModuleObtainer::CallsInModuleObtainer(ShPtr<Module> module):
 	OrderedAllVisitor(), module(module), currFunc(), foundCalls() {}
 
 /**
-* @brief Destructs the obtainer.
-*/
-CallsInModuleObtainer::~CallsInModuleObtainer() {}
-
-/**
 * @brief Returns a list of all function calls in the given @a module.
 *
 * @par Preconditions

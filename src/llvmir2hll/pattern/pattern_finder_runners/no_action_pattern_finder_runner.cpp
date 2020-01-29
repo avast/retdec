@@ -12,16 +12,6 @@ namespace retdec {
 namespace llvmir2hll {
 
 /**
-* @brief Constructs a runner of pattern finders.
-*/
-NoActionPatternFinderRunner::NoActionPatternFinderRunner() {}
-
-/**
-* @brief Destructs the finder.
-*/
-NoActionPatternFinderRunner::~NoActionPatternFinderRunner() {}
-
-/**
 * @brief Does nothing.
 */
 void NoActionPatternFinderRunner::doActionsBeforePatternFinderRuns(

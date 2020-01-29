@@ -23,8 +23,6 @@ class UnusedGlobalVarOptimizer final: public Optimizer {
 public:
 	UnusedGlobalVarOptimizer(ShPtr<Module> module);
 
-	virtual ~UnusedGlobalVarOptimizer() override;
-
 	virtual std::string getId() const override { return "UnusedGlobalVar"; }
 
 private:

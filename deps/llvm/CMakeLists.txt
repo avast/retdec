@@ -82,9 +82,6 @@ if(LLVM_LOCAL_DIR)
 			# It looks like terminal colors are working even without this.
 			-DLLVM_ENABLE_TERMINFO=OFF
 
-			# Necessary for builds with older MS Visual Studios (e.g. 2015).
-			-DLLVM_TEMPORARILY_ALLOW_OLD_TOOLCHAIN=ON
-
 			# Force the use of the same compiler as used to build the top-level
 			# project. Otherwise, the external project may pick up a different
 			# compiler, which may result in link errors.
@@ -100,8 +97,8 @@ else()
 	message(STATUS "LLVM: using remote LLVM revision.")
 
 	ExternalProject_Add(llvm-project
-		URL https://github.com/avast/llvm/archive/21dfb69c7547c525466b0c7481f4bbd9cb0dd032.zip
-		URL_HASH SHA256=e3cbcc2bbdaf09e75943e04ce291dcf00aecc6359bd7673c7169e03541eb0125
+		URL ${LLVM_URL}
+		URL_HASH SHA256=${LLVM_ARCHIVE_SHA256}
 		DOWNLOAD_NAME llvm.zip
 		CMAKE_ARGS
 			# Force a release build (we don't need to debug LLVM).
@@ -152,9 +149,6 @@ else()
 			# It looks like terminal colors are working even without this.
 			-DLLVM_ENABLE_TERMINFO=OFF
 
-			# Necessary for builds with older MS Visual Studios (e.g. 2015).
-			-DLLVM_TEMPORARILY_ALLOW_OLD_TOOLCHAIN=ON
-
 			# Force the use of the same compiler as used to build the top-level
 			# project. Otherwise, the external project may pick up a different
 			# compiler, which may result in link errors.
@@ -181,6 +175,7 @@ add_library(llvm INTERFACE)
 add_dependencies(llvm llvm-project)
 
 set(LLVM_LIB_LIST
+	LLVMDebugInfoDWARF
 	LLVMBitWriter
 	LLVMIRReader
 	LLVMObject

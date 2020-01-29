@@ -16,26 +16,6 @@ namespace retdec {
 namespace fileformat {
 
 /**
- * Constructor
- */
-VisualBasicInfo::VisualBasicInfo() : languageDLLPrimaryLCID(0), languageDLLSecondaryLCID(0),
-	projectPrimaryLCID(0), projectSecondaryLCID(0), typeLibLCID(0), typeLibMajorVersion(0),
-	typeLibMinorVersion(0), validLanguageDLLPrimaryLCID(false), validLanguageDLLSecondaryLCID(false),
-	validProjectPrimaryLCID(false), validProjectSecondaryLCID(false), validTypeLibLCID(false),
-	validTypeLibMajorVersion(false), validTypeLibMinorVersion(false), pcodeFlag(false)
-{
-
-}
-
-/**
- * Destructor
- */
-VisualBasicInfo::~VisualBasicInfo()
-{
-
-}
-
-/**
  * Get language DLL
  * @return language DLL
  */

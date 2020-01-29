@@ -147,11 +147,6 @@ NonRecursiveCFGBuilder::NonRecursiveCFGBuilder():
 	CFGBuilder(), stopIterNextStmts(false) {}
 
 /**
-* @brief Destructs the builder.
-*/
-NonRecursiveCFGBuilder::~NonRecursiveCFGBuilder() {}
-
-/**
 * @brief Creates and returns a new NonRecursiveCFGBuilder.
 */
 ShPtr<NonRecursiveCFGBuilder> NonRecursiveCFGBuilder::create() {
@@ -181,7 +176,8 @@ void NonRecursiveCFGBuilder::createEntryNode() {
 	// way.
 	// For each parameter...
 	for (const auto &param : func->getParams()) {
-		ShPtr<Statement> varDefStmt(VarDefStmt::create(param));
+		ShPtr<Statement> varDefStmt(
+			VarDefStmt::create(param, nullptr, nullptr, func->getStartAddress()));
 		cfg->stmtNodeMapping[varDefStmt] = cfg->entryNode;
 		cfg->entryNode->stmts.push_back(varDefStmt);
 	}

@@ -9,9 +9,8 @@
 
 #include <unordered_set>
 
-#include <pelib/PeLib.h>
-
 #include "unpackertool/plugins/upx/upx_stub.h"
+#include "retdec/pelib/PeLib.h"
 #include "retdec/utils/dynamic_buffer.h"
 #include "retdec/unpacker/signature.h"
 
@@ -115,8 +114,6 @@ template <int bits> class PeUpxStub : public UpxStub
 public:
 	PeUpxStub(retdec::loader::Image* inputFile, const UpxStubData* stubData, const DynamicBuffer& stubCapturedData,
 			std::unique_ptr<Decompressor> decompressor, const UpxMetadata& metadata);
-
-	virtual ~PeUpxStub() override;
 
 	virtual void unpack(const std::string& ouputFile) override;
 	virtual void setupPackingMethod(std::uint8_t packingMethod);

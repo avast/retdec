@@ -15,7 +15,7 @@ namespace loader {
  * @param overlap The overlap type.
  * @param ranges The ranges to store in the result.
  */
-OverlapResolver::Result::Result(Overlap overlap, const std::vector<retdec::utils::Range<std::uint64_t>>& ranges) : _overlap(overlap), _ranges(ranges)
+OverlapResolver::Result::Result(Overlap overlap, const std::vector<retdec::common::Range<std::uint64_t>>& ranges) : _overlap(overlap), _ranges(ranges)
 {
 }
 
@@ -34,7 +34,7 @@ Overlap OverlapResolver::Result::getOverlap() const
  *
  * @return The ranges.
  */
-const std::vector<retdec::utils::Range<std::uint64_t>>& OverlapResolver::Result::getRanges() const
+const std::vector<retdec::common::Range<std::uint64_t>>& OverlapResolver::Result::getRanges() const
 {
 	return _ranges;
 }
@@ -50,7 +50,7 @@ const std::vector<retdec::utils::Range<std::uint64_t>>& OverlapResolver::Result:
  *
  * @return OverlapResolver::Result object.
  */
-OverlapResolver::Result OverlapResolver::resolve(const retdec::utils::Range<std::uint64_t>& first, const retdec::utils::Range<std::uint64_t>& second)
+OverlapResolver::Result OverlapResolver::resolve(const retdec::common::Range<std::uint64_t>& first, const retdec::common::Range<std::uint64_t>& second)
 {
 	std::int64_t startDiff = first.getStart() - second.getStart();
 	std::int64_t endDiff = first.getEnd() - second.getEnd();
@@ -69,25 +69,25 @@ OverlapResolver::Result OverlapResolver::resolve(const retdec::utils::Range<std:
 	// Check whether start of the second range is in the first range but end is not.
 	if ((startInRange && !endInRange) || (startInRange && endDiff == 0))
 	{
-		retdec::utils::Range<std::uint64_t> newRange = retdec::utils::Range<std::uint64_t>(first.getStart(), second.getStart());
+		retdec::common::Range<std::uint64_t> newRange = retdec::common::Range<std::uint64_t>(first.getStart(), second.getStart());
 		return Result(Overlap::OverEnd, { newRange, second });
 	}
 	// Check whether end of the second range is in the first range but start is not.
 	else if ((!startInRange && endInRange) || (startDiff == 0 && endInRange))
 	{
-		retdec::utils::Range<std::uint64_t> newRange = retdec::utils::Range<std::uint64_t>(second.getEnd(), first.getEnd());
+		retdec::common::Range<std::uint64_t> newRange = retdec::common::Range<std::uint64_t>(second.getEnd(), first.getEnd());
 		return Result(Overlap::OverStart, { second, newRange });
 	}
 	// Check whether both the start and the end of the second range are in the first range.
 	else if (startInRange && endInRange)
 	{
-		retdec::utils::Range<std::uint64_t> newRange1 = retdec::utils::Range<std::uint64_t>(first.getStart(), second.getStart());
-		retdec::utils::Range<std::uint64_t> newRange2 = retdec::utils::Range<std::uint64_t>(second.getEnd(), first.getEnd());
+		retdec::common::Range<std::uint64_t> newRange1 = retdec::common::Range<std::uint64_t>(first.getStart(), second.getStart());
+		retdec::common::Range<std::uint64_t> newRange2 = retdec::common::Range<std::uint64_t>(second.getEnd(), first.getEnd());
 		return Result(Overlap::InMiddle, { newRange1, second, newRange2 });
 	}
 
 	// No overlap, but we still need to put them in ascending order.
-	std::vector<retdec::utils::Range<std::uint64_t>> defaultRet;
+	std::vector<retdec::common::Range<std::uint64_t>> defaultRet;
 	if (first.getStart() < second.getStart())
 		defaultRet = { first, second };
 	else

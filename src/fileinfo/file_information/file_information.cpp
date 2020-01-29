@@ -6,11 +6,11 @@
 
 #include <algorithm>
 
-#include "retdec/utils/address.h"
+#include "retdec/common/address.h"
 #include "fileinfo/file_information/file_information.h"
 #include "fileinfo/file_information/file_information_types/type_conversions.h"
 
-using namespace retdec::utils;
+using namespace retdec::common;
 using namespace retdec::cpdetect;
 using namespace retdec::fileformat;
 
@@ -85,22 +85,6 @@ void sortPatternMatches(std::vector<Pattern> &patterns)
 }
 
 } // anonymous namespace
-
-/**
- * Constructor
- */
-FileInformation::FileInformation() : status(ReturnCode::OK), fileFormatEnum(Format::UNKNOWN)
-{
-
-}
-
-/**
- * Destructor
- */
-FileInformation::~FileInformation()
-{
-
-}
 
 /**
  * Get status
@@ -736,9 +720,9 @@ std::string FileInformation::getRichHeaderKeyStr(std::ios_base &(* format)(std::
  * @param position Index of selected record from header (indexed from 0)
  * @return Major version of linker
  */
-std::string FileInformation::getRichHeaderRecordMajorVersionStr(std::size_t position) const
+std::string FileInformation::getRichHeaderRecordProductIdStr(std::size_t position) const
 {
-	return richHeader.getRecordMajorVersionStr(position);
+	return richHeader.getRecordProductIdStr(position);
 }
 
 /**
@@ -746,19 +730,9 @@ std::string FileInformation::getRichHeaderRecordMajorVersionStr(std::size_t posi
  * @param position Index of selected record from header (indexed from 0)
  * @return Minor version of linker
  */
-std::string FileInformation::getRichHeaderRecordMinorVersionStr(std::size_t position) const
+std::string FileInformation::getRichHeaderRecordProductBuildStr(std::size_t position) const
 {
-	return richHeader.getRecordMinorVersionStr(position);
-}
-
-/**
- * Get build version
- * @param position Index of selected record from header (indexed from 0)
- * @return Build version of linker
- */
-std::string FileInformation::getRichHeaderRecordBuildVersionStr(std::size_t position) const
-{
-	return richHeader.getRecordBuildVersionStr(position);
+	return richHeader.getRecordProductBuildStr(position);
 }
 
 /**
@@ -769,6 +743,26 @@ std::string FileInformation::getRichHeaderRecordBuildVersionStr(std::size_t posi
 std::string FileInformation::getRichHeaderRecordNumberOfUsesStr(std::size_t position) const
 {
 	return richHeader.getRecordNumberOfUsesStr(position);
+}
+
+/**
+ * Retrieve the product name
+ * @param position Index of selected record from header (indexed from 0)
+ * @return Product name as std::string
+ */
+std::string FileInformation::getRichHeaderRecordProductNameStr(std::size_t position) const
+{
+	return richHeader.getRecordProductNameStr(position);
+}
+
+/**
+ * Retrieve the Visual Studio name
+ * @param position Index of selected record from header (indexed from 0)
+ * @return Visual Studio name as std::string
+ */
+std::string FileInformation::getRichHeaderRecordVisualStudioNameStr(std::size_t position) const
+{
+	return richHeader.getRecordVisualStudioNameStr(position);
 }
 
 /**
@@ -3219,7 +3213,7 @@ bool FileInformation::hasStrings() const
  */
 bool FileInformation::isSignaturePresent() const
 {
-	return signatureVerified.isDefined();
+	return signatureVerified.has_value();
 }
 
 /**
@@ -3228,7 +3222,7 @@ bool FileInformation::isSignaturePresent() const
  */
 bool FileInformation::isSignatureVerified() const
 {
-	return signatureVerified.isDefined() && signatureVerified.getValue();
+	return signatureVerified.has_value() && signatureVerified.value();
 }
 
 /**

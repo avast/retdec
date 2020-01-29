@@ -18,7 +18,6 @@ class AnomaliesJsonGetter : public IterativeSubtitleGetter
 {
 	public:
 		AnomaliesJsonGetter(FileInformation &fileInfo);
-		virtual ~AnomaliesJsonGetter() override;
 
 		virtual std::size_t getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const override;
 		virtual bool getRecord(std::size_t structIndex, std::size_t recIndex, std::vector<std::string> &record) const override;

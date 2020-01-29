@@ -19,13 +19,6 @@ namespace llvmir2hll {
 CommaOpExpr::CommaOpExpr(ShPtr<Expression> op1, ShPtr<Expression> op2):
 	BinaryOpExpr(op1, op2) {}
 
-/**
-* @brief Destructs the operator.
-*/
-CommaOpExpr::~CommaOpExpr() {
-	// Observers are removed in the superclass.
-}
-
 bool CommaOpExpr::isEqualTo(ShPtr<Value> otherValue) const {
 	if (auto otherExpr = cast<CommaOpExpr>(otherValue)) {
 		return op1->isEqualTo(otherExpr->getFirstOperand()) &&

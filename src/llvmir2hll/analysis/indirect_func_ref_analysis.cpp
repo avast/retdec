@@ -24,11 +24,6 @@ IndirectFuncRefAnalysis::IndirectFuncRefAnalysis(ShPtr<Module> module):
 	OrderedAllVisitor(), module(module) {}
 
 /**
-* @brief Destructs the analysis.
-*/
-IndirectFuncRefAnalysis::~IndirectFuncRefAnalysis() {}
-
-/**
 * @brief Returns the set of functions that are referenced outside of direct
 *        function calls in the given @a module.
 *

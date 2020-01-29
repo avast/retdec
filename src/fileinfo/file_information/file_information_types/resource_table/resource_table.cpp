@@ -10,22 +10,6 @@
 namespace fileinfo {
 
 /**
- * Constructor
- */
-ResourceTable::ResourceTable() : table(nullptr)
-{
-
-}
-
-/**
- * Destructor
- */
-ResourceTable::~ResourceTable()
-{
-
-}
-
-/**
  * Get number of resources in table
  * @return Number of resources in table
  */

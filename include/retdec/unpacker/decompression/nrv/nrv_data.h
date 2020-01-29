@@ -20,8 +20,6 @@ public:
 	NrvData(const DynamicBuffer& buffer, BitParser* bitParser) : CompressedData(buffer), _readPos(0), _writePos(0), _bitParser(bitParser) {}
 	NrvData(const NrvData&) = delete;
 
-	virtual ~NrvData() override {}
-
 	void reset()
 	{
 		_readPos = 0;

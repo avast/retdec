@@ -28,14 +28,16 @@ class ElfFormat : public FileFormat
 		 */
 		struct RelocationTableInfo
 		{
-			unsigned long long address;   ///< start address of relocation table
-			unsigned long long size;      ///< size of table
-			unsigned long long entrySize; ///< size of one entry in table
-			unsigned long long type;      ///< type of relocations (SHT_REL or SHT_RELA)
-			bool plt = false;             ///< associated with Procedure Linkage Table.
-
-			RelocationTableInfo();
-			~RelocationTableInfo();
+			/// start address of relocation table
+			unsigned long long address = 0;
+			/// size of table
+			unsigned long long size = 0;
+			/// size of one entry in table
+			unsigned long long entrySize = 0;
+			/// type of relocations (SHT_REL or SHT_RELA)
+			unsigned long long type = SHT_NULL;
+			/// associated with Procedure Linkage Table.
+			bool plt = false;
 		};
 
 		/// @name Initialization methods
@@ -90,7 +92,6 @@ class ElfFormat : public FileFormat
 		ElfFormat(std::string pathToFile, LoadFlags loadFlags = LoadFlags::NONE);
 		ElfFormat(std::istream &inputStream, LoadFlags loadFlags = LoadFlags::NONE);
 		ElfFormat(const std::uint8_t *data, std::size_t size, LoadFlags loadFlags = LoadFlags::NONE);
-		virtual ~ElfFormat() override;
 
 		/// @name Byte value storage methods
 		/// @{

@@ -11,7 +11,7 @@
 #include "retdec/rtti-finder/rtti/rtti_msvc.h"
 #include "retdec/rtti-finder/vtable/vtable_gcc.h"
 #include "retdec/rtti-finder/vtable/vtable_msvc.h"
-#include "retdec/utils/address.h"
+#include "retdec/common/address.h"
 
 namespace retdec {
 namespace rtti_finder {
@@ -31,7 +31,7 @@ class RttiFinder
 		const RttiGcc& getRttiGcc() const;
 		const RttiMsvc& getRttiMsvc() const;
 
-		const Vtable* getVtable(retdec::utils::Address a) const;
+		const retdec::common::Vtable* getVtable(retdec::common::Address a) const;
 
 	private:
 		/// C++ GCC/Clang vtables, including RTTIs.

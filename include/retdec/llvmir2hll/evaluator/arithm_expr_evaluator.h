@@ -7,6 +7,7 @@
 #ifndef RETDEC_LLVMIR2HLL_EVALUATOR_ARITHM_EXPR_EVALUATOR_H
 #define RETDEC_LLVMIR2HLL_EVALUATOR_ARITHM_EXPR_EVALUATOR_H
 
+#include <optional>
 #include <stack>
 #include <string>
 
@@ -15,7 +16,6 @@
 #include "retdec/llvmir2hll/ir/const_float.h"
 #include "retdec/llvmir2hll/ir/const_int.h"
 #include "retdec/llvmir2hll/ir/constant.h"
-#include "retdec/llvmir2hll/support/maybe.h"
 #include "retdec/llvmir2hll/support/types.h"
 #include "retdec/llvmir2hll/support/visitors/ordered_all_visitor.h"
 #include "retdec/utils/non_copyable.h"
@@ -61,13 +61,11 @@ public:
 	using VarConstMap = std::map<ShPtr<Variable>, ShPtr<Constant>>;
 
 public:
-	virtual ~ArithmExprEvaluator() override;
-
 	/**
 	* @brief Returns the ID of the optimizer.
 	*/
 	virtual std::string getId() const = 0;
-	virtual Maybe<bool> toBool(ShPtr<Expression> expr, VarConstMap
+	virtual std::optional<bool> toBool(ShPtr<Expression> expr, VarConstMap
 		varValues = VarConstMap());
 
 	ShPtr<Constant> evaluate(ShPtr<Expression> expr);
@@ -75,21 +73,21 @@ public:
 		&varValues);
 
 	template<typename ConstType>
-	static Maybe<std::pair<ShPtr<ConstType>, ShPtr<ConstType>>> castConstPair(
+	static std::optional<std::pair<ShPtr<ConstType>, ShPtr<ConstType>>> castConstPair(
 		const ConstPair &constPair);
 
 protected:
-	ArithmExprEvaluator();
+	ArithmExprEvaluator() = default;
 
-	static APSIntPair getAPSIntsFromConstants(const Maybe<ConstIntPair>
+	static APSIntPair getAPSIntsFromConstants(const std::optional<ConstIntPair>
 		&constIntPair);
-	static APFloatPair getAPFloatsFromConstants(const Maybe<ConstFloatPair>
+	static APFloatPair getAPFloatsFromConstants(const std::optional<ConstFloatPair>
 		&ConstFloatPair);
 	static bool isConstantZero(ShPtr<Constant> constant);
 
 protected:
 	/// Signalizes if evaluation can go on.
-	bool canBeEvaluated;
+	bool canBeEvaluated = true;
 
 private:
 	using LLVMAPIntAPIntBoolOp = llvm::APInt (llvm::APInt::*)(
@@ -218,17 +216,17 @@ private:
 	virtual void resolveOverflowForAPFloat(llvm::APFloat::opStatus opStatus);
 
 	// Perform functions.
-	ShPtr<ConstFloat> performOperationOverApFloat(const Maybe<ConstFloatPair>
+	ShPtr<ConstFloat> performOperationOverApFloat(const std::optional<ConstFloatPair>
 		&constFloatPair, LLVMAPFloatOp op, llvm::APFloat::opStatus &status);
-	ShPtr<ConstFloat> performOperationOverApFloat(const Maybe<ConstFloatPair>
+	ShPtr<ConstFloat> performOperationOverApFloat(const std::optional<ConstFloatPair>
 		&constFloatPair, LLVMAPFloatOpNoRounding op, llvm::APFloat::opStatus &status);
-	llvm::APFloat::cmpResult performOperationOverApFloat(const Maybe<
+	llvm::APFloat::cmpResult performOperationOverApFloat(const std::optional<
 		ConstFloatPair> &constFloatPair);
-	ShPtr<ConstInt> performOperationOverApInt(const Maybe<ConstIntPair>
+	ShPtr<ConstInt> performOperationOverApInt(const std::optional<ConstIntPair>
 		&constIntPair, LLVMAPIntAPIntBoolOp op, bool &overflow);
-	ShPtr<ConstInt> performOperationOverApInt(const Maybe<ConstIntPair>
+	ShPtr<ConstInt> performOperationOverApInt(const std::optional<ConstIntPair>
 		&constIntPair, LLVMAPIntAPIntOp op);
-	ShPtr<ConstBool> performOperationOverApInt(const Maybe<ConstIntPair>
+	ShPtr<ConstBool> performOperationOverApInt(const std::optional<ConstIntPair>
 		&constIntPair, LLVMBoolAPIntOp op);
 
 	// Other functions.

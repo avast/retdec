@@ -77,7 +77,7 @@ TEST_F(ConfigTests, SuccessfulReadJsonStringResetsAllConfigData)
 
 TEST_F(ConfigTests, ClassesGetElementByIdReturnsNullPointerWhenThereIsNoSuchClass)
 {
-	ASSERT_EQ(nullptr, config.classes.getElementById("ClassName"));
+	ASSERT_EQ(config.classes.end(), config.classes.find("ClassName"));
 }
 
 } // namespace tests

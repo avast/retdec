@@ -59,7 +59,6 @@ namespace llvmir2hll {
 class NegativeOperandSubOptimizer final: public SubOptimizer {
 public:
 	NegativeOperandSubOptimizer(ShPtr<ArithmExprEvaluator> arithmExprEvaluator);
-	virtual ~NegativeOperandSubOptimizer() override;
 
 	static ShPtr<SubOptimizer> create(ShPtr<ArithmExprEvaluator>
 		arithmExprEvaluator);

@@ -18,21 +18,18 @@ namespace llvmir2hll {
 *
 * See create() for more information.
 */
-IfStmt::IfStmt(ShPtr<Expression> cond, ShPtr<Statement> body):
-		ifClauseList{IfClause(cond, body)}, elseClause() {}
-
-/**
-* @brief Destructs the statement.
-*/
-IfStmt::~IfStmt() {}
+IfStmt::IfStmt(ShPtr<Expression> cond, ShPtr<Statement> body, Address a):
+		Statement(a), ifClauseList{IfClause(cond, body)}, elseClause() {}
 
 ShPtr<Value> IfStmt::clone() {
 	ShPtr<IfStmt> ifStmt(IfStmt::create(
 		ucast<Expression>(ifClauseList.front().first->clone()),
-		ucast<Statement>(ifClauseList.front().second->clone())));
+		ucast<Statement>(Statement::cloneStatements(ifClauseList.front().second)),
+		nullptr,
+		getAddress()));
 	if (elseClause) {
 		ifStmt->setElseClause(
-			ucast<Statement>(elseClause->clone()));
+			ucast<Statement>(Statement::cloneStatements(elseClause)));
 	}
 
 	// Clone all other clauses.
@@ -43,7 +40,7 @@ ShPtr<Value> IfStmt::clone() {
 		}
 		ifStmt->addClause(
 			ucast<Expression>(clause.first->clone()),
-			ucast<Statement>(clause.second->clone()));
+			ucast<Statement>(Statement::cloneStatements(clause.second)));
 	}
 
 	ifStmt->setMetadata(getMetadata());
@@ -259,16 +256,17 @@ ShPtr<Statement> IfStmt::getElseClause() const {
 * @param[in] cond Statement condition.
 * @param[in] body Statement body.
 * @param[in] succ Follower of the statement in the program flow.
+* @param[in] a Address.
 *
 * @par Preconditions
 *  - @a cond and @a body are non-null
 */
 ShPtr<IfStmt> IfStmt::create(ShPtr<Expression> cond, ShPtr<Statement> body,
-			ShPtr<Statement> succ) {
+			ShPtr<Statement> succ, Address a) {
 	PRECONDITION_NON_NULL(cond);
 	PRECONDITION_NON_NULL(body);
 
-	ShPtr<IfStmt> stmt(new IfStmt(cond, body));
+	ShPtr<IfStmt> stmt(new IfStmt(cond, body, a));
 	stmt->setSuccessor(succ);
 
 	// Initialization (recall that shared_from_this() cannot be called in a

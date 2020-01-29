@@ -19,13 +19,6 @@ namespace llvmir2hll {
 FPToIntCastExpr::FPToIntCastExpr(ShPtr<Expression> op, ShPtr<Type> dstType):
 	CastExpr(op, dstType) {}
 
-/**
-* @brief Destructs the operator.
-*/
-FPToIntCastExpr::~FPToIntCastExpr() {
-	// Observers are removed in the superclass.
-}
-
 bool FPToIntCastExpr::isEqualTo(ShPtr<Value> otherValue) const {
 	// Both types and values of all operands have to be equal.
 	if (ShPtr<FPToIntCastExpr> otherCastExpr = cast<FPToIntCastExpr>(otherValue)) {

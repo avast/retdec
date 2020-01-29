@@ -62,6 +62,7 @@ class ParamReturn : public llvm::ModulePass
 		void collectExtraData(CallEntry* ce) const;
 
 		void collectCallSpecificTypes(CallEntry* ce) const;
+		common::CallingConventionID toCallConv(const std::string &cc) const;
 
 	// Collection of functions usage data.
 	//

@@ -24,12 +24,6 @@ namespace retdec {
 namespace llvmir2hll {
 
 /**
-* @brief Constructs a new fcmp converter.
-*/
-LLVMFCmpConverter::LLVMFCmpConverter():
-	optionStrictFPUSemantics(false) {}
-
-/**
 * @brief Converts the given LLVM fcmp instruction @a inst into an expression
 *        in BIR.
 *

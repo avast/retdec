@@ -26,10 +26,6 @@ SegmentDataSource::SegmentDataSource(const SegmentDataSource& dataSource)
 {
 }
 
-SegmentDataSource::~SegmentDataSource()
-{
-}
-
 bool SegmentDataSource::isDataSet() const
 {
 	return !_data.empty();

@@ -42,8 +42,6 @@ public:
 	using predecessor_iterator = StmtSet::const_iterator;
 
 public:
-	virtual ~Statement() override;
-
 	/**
 	* @brief Replaces all occurrences of @a oldExpr with @a newExpr in the
 	*        current statement.
@@ -114,9 +112,10 @@ public:
 	/// @}
 
 	ShPtr<Statement> getParent() const;
+	Address getAddress() const;
 
 	/// @name Goto Targets
-	/// @}
+	/// @{
 	bool isGotoTarget() const;
 	void redirectGotosTo(ShPtr<Statement> stmt);
 	/// @}
@@ -135,7 +134,7 @@ public:
 	static ShPtr<Statement> getLastStatement(ShPtr<Statement> stmts);
 
 protected:
-	Statement();
+	Statement(Address a = Address::Undefined);
 
 protected:
 	/// Successor statement.
@@ -146,6 +145,9 @@ protected:
 
 	/// Label.
 	std::string label;
+
+	/// Address of ASM instruction from which this statement was created from.
+	Address address;
 
 private:
 	bool targetIsCurrentStatement(ShPtr<GotoStmt> gotoStmt) const;

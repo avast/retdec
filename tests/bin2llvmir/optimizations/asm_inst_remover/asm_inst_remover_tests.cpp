@@ -59,8 +59,8 @@ TEST_F(AsmInstructionRemoverTests, passRemovesEverythingRelatedToLlvmToAsmMappin
 	)");
 	auto* gv = getGlobalByName("specialGv");
 	AsmInstruction::setLlvmToAsmGlobalVariable(module.get(), gv);
-	auto s = retdec::config::Storage::inRegister("esp");
-	auto r = retdec::config::Object("esp", s);
+	auto s = retdec::common::Storage::inRegister("esp");
+	auto r = retdec::common::Object("esp", s);
 
 	bool b = pass.runOnModuleCustom(*module);
 
@@ -68,11 +68,14 @@ TEST_F(AsmInstructionRemoverTests, passRemovesEverythingRelatedToLlvmToAsmMappin
 		@reg = global i32 0
 		define i32 @func() {
 			%a = load i32, i32* @reg
-			%v0_1000 = add i32 %a, 1234
-			store i32 %v0_1000, i32* @reg
-			%v0_2000 = load i32, i32* @reg
-			ret i32 %v0_2000
+			%b = add i32 %a, 1234, !insn.addr !0
+			store i32 %b, i32* @reg, !insn.addr !1
+			%c = load i32, i32* @reg, !insn.addr !1
+			ret i32 %c, !insn.addr !2
 		}
+		!0 = !{i64 4096}
+		!1 = !{i64 8192}
+		!2 = !{i64 12288}
 	)";
 	checkModuleAgainstExpectedIr(exp);
 	EXPECT_TRUE(b);

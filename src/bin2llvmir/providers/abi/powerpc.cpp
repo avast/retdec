@@ -21,11 +21,6 @@ AbiPowerpc::AbiPowerpc(llvm::Module* m, Config* c) :
 	_defcc = CallingConvention::ID::CC_POWERPC;
 }
 
-AbiPowerpc::~AbiPowerpc()
-{
-
-}
-
 bool AbiPowerpc::isGeneralPurposeRegister(const llvm::Value* val) const
 {
 	uint32_t rid = getRegisterId(val);

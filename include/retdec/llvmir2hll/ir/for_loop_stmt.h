@@ -27,9 +27,8 @@ class ForLoopStmt final: public Statement {
 public:
 	static ShPtr<ForLoopStmt> create(ShPtr<Variable> indVar, ShPtr<Expression> startValue,
 		ShPtr<Expression> endCond, ShPtr<Expression> step,
-		ShPtr<Statement> body, ShPtr<Statement> succ = nullptr);
-
-	virtual ~ForLoopStmt() override;
+		ShPtr<Statement> body, ShPtr<Statement> succ = nullptr,
+		Address a = Address::Undefined);
 
 	virtual ShPtr<Value> clone() override;
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
@@ -64,7 +63,7 @@ private:
 	// constructor can be private.
 	ForLoopStmt(ShPtr<Variable> indVar, ShPtr<Expression> startValue,
 		ShPtr<Expression> endCond, ShPtr<Expression> step,
-		ShPtr<Statement> body);
+		ShPtr<Statement> body, Address a);
 
 private:
 	/// Induction variable.

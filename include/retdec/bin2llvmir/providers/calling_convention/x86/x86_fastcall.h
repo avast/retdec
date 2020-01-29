@@ -18,7 +18,6 @@ class FastcallCallingConvention: public X86CallingConvention
 	//
 	public:
 		FastcallCallingConvention(const Abi* a);
-		virtual ~FastcallCallingConvention();
 
 	// Construcor method.
 	//
@@ -32,7 +31,6 @@ class PascalFastcallCallingConvention: public X86CallingConvention
 	//
 	public:
 		PascalFastcallCallingConvention(const Abi* a);
-		virtual ~PascalFastcallCallingConvention();
 };
 
 }

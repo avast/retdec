@@ -25,7 +25,6 @@ class SpecialInformation
 		std::vector<std::string> values; ///< values of special information
 	public:
 		SpecialInformation(std::string desc_, std::string abbv_);
-		~SpecialInformation();
 
 		/// @name Getters
 		/// @{

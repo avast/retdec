@@ -16,20 +16,6 @@ namespace unpackertool {
 namespace upx {
 
 /**
- * Constructor.
- */
-Decompressor::Decompressor()
-{
-}
-
-/**
- * Destructor.
- */
-Decompressor::~Decompressor()
-{
-}
-
-/**
  * Performs decompression using provided compressed data and decompresses it into provided buffer.
  * If it fails to decompress them, it uses XOR bruteforce on the packed data.
  *

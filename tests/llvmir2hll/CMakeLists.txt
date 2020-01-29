@@ -15,14 +15,14 @@ set(RETDEC_TESTS_LLVMIR2HLL_SOURCES
 	graphs/cfg/cfg_traversals/lhs_rhs_uses_cfg_traversal_tests.cpp
 	hll/bracket_managers/c_bracket_manager_tests.cpp
 	hll/bracket_managers/no_bracket_manager_tests.cpp
-	hll/bracket_managers/py_bracket_manager_tests.cpp
 	hll/compound_op_managers/c_compound_op_manager_tests.cpp
 	hll/compound_op_managers/compound_op_manager_tests.cpp
 	hll/compound_op_managers/no_compound_op_manager_tests.cpp
-	hll/compound_op_managers/py_compound_op_manager_tests.cpp
 	hll/hll_writers/c_hll_writer_tests.cpp
 	hll/hll_writers/hll_writer_tests.cpp
-	hll/hll_writers/py_hll_writer_tests.cpp
+	hll/output_managers/json_manager_tests.cpp
+	hll/output_managers/output_manager_tests.cpp
+	hll/output_managers/plain_manager_tests.cpp
 	ir/array_index_op_expr_tests.cpp
 	ir/array_type_tests.cpp
 	ir/assign_stmt_tests.cpp
@@ -71,7 +71,6 @@ set(RETDEC_TESTS_LLVMIR2HLL_SOURCES
 	llvm/llvmir2bir_converter_tests/functions_tests.cpp
 	llvm/llvmir2bir_converter_tests/glob_vars_tests.cpp
 	llvm/string_conversions_tests.cpp
-	optimizer/optimizers/auxiliary_variables_optimizer_tests.cpp
 	optimizer/optimizers/bit_op_to_log_op_optimizer_tests.cpp
 	optimizer/optimizers/bit_shift_optimizer_tests.cpp
 	optimizer/optimizers/break_continue_return_optimizer_tests.cpp
@@ -133,7 +132,6 @@ set(RETDEC_TESTS_LLVMIR2HLL_SOURCES
 	support/global_vars_sorter_tests.cpp
 	support/headers_for_declared_funcs_tests.cpp
 	support/library_funcs_remover_tests.cpp
-	support/maybe_tests.cpp
 	support/struct_types_sorter_tests.cpp
 	support/unreachable_code_in_cfg_remover_tests.cpp
 	utils/ir_tests.cpp

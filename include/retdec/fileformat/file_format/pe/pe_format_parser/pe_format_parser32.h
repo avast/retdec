@@ -19,7 +19,6 @@ class PeFormatParser32 : public PeFormatParser
 		PeLib::PeHeaderT<32> &peHeader; ///< header of 32-bit PE file
 	public:
 		PeFormatParser32(const FileFormat *fInputFile, PeLib::PeFileT<32> *peFile32);
-		virtual ~PeFormatParser32() override;
 
 		/// @name Detection methods
 		/// @{
@@ -83,10 +82,10 @@ class PeFormatParser32 : public PeFormatParser
 		virtual unsigned long long getSecurityDirFileOffset() const override;
 		virtual unsigned long long getSecurityDirRva() const override;
 		virtual unsigned long long getSecurityDirSize() const override;
-		virtual retdec::utils::RangeContainer<std::uint64_t> getImportDirectoryOccupiedAddresses() const override;
-		virtual retdec::utils::RangeContainer<std::uint64_t> getExportDirectoryOccupiedAddresses() const override;
-		virtual retdec::utils::RangeContainer<std::uint64_t> getDebugDirectoryOccupiedAddresses() const override;
-		virtual retdec::utils::RangeContainer<std::uint64_t> getResourceDirectoryOccupiedAddresses() const override;
+		virtual retdec::common::RangeContainer<std::uint64_t> getImportDirectoryOccupiedAddresses() const override;
+		virtual retdec::common::RangeContainer<std::uint64_t> getExportDirectoryOccupiedAddresses() const override;
+		virtual retdec::common::RangeContainer<std::uint64_t> getDebugDirectoryOccupiedAddresses() const override;
+		virtual retdec::common::RangeContainer<std::uint64_t> getResourceDirectoryOccupiedAddresses() const override;
 		/// @}
 };
 

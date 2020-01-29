@@ -134,8 +134,6 @@ class IfStructureOptimizer final: public FuncOptimizer {
 public:
 	IfStructureOptimizer(ShPtr<Module> module);
 
-	virtual ~IfStructureOptimizer() override;
-
 	virtual std::string getId() const override { return "IfStructure"; }
 
 private:

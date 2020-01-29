@@ -24,13 +24,6 @@ StructIndexOpExpr::StructIndexOpExpr(ShPtr<Expression> base,
 	ShPtr<ConstInt> fieldNumber):
 		BinaryOpExpr(base, fieldNumber) {}
 
-/**
-* @brief Destructs the operator.
-*/
-StructIndexOpExpr::~StructIndexOpExpr() {
-	// Observers are deleted in the superclass.
-}
-
 ShPtr<Type> StructIndexOpExpr::getType() const {
 	ShPtr<Type> op1Type(op1->getType());
 

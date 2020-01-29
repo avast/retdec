@@ -19,11 +19,6 @@ namespace llvmir2hll {
 UnknownType::UnknownType():
 	Type() {}
 
-/**
-* @brief Destructs the type.
-*/
-UnknownType::~UnknownType() {}
-
 ShPtr<Value> UnknownType::clone() {
 	return UnknownType::create();
 }

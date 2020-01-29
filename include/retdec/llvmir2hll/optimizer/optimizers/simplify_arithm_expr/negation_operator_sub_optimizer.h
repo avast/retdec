@@ -55,7 +55,6 @@ namespace llvmir2hll {
 class NegationOperatorSubOptimizer final: public SubOptimizer {
 public:
 	NegationOperatorSubOptimizer(ShPtr<ArithmExprEvaluator> arithmExprEvaluator);
-	virtual ~NegationOperatorSubOptimizer() override;
 
 	static ShPtr<SubOptimizer> create(ShPtr<ArithmExprEvaluator>
 		arithmExprEvaluator);

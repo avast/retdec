@@ -8,8 +8,6 @@
 
 #include <iostream>
 
-#include "retdec/utils/debug.h"
-#include "retdec/utils/string.h"
 #include "retdec/debugformat/debugformat.h"
 
 namespace retdec {
@@ -55,11 +53,11 @@ void DebugFormat::loadPdbGlobalVariables()
 		auto& pgv = gvItem.second;
 
 		std::string n = pgv.name;
-		std::string name = n.empty() ? "glob_var_" + retdec::utils::toHexString(pgv.address) : n;
-		auto addr = retdec::utils::Address(pgv.address);
+		auto addr = retdec::common::Address(pgv.address);
+		std::string name = n.empty() ? "glob_var_" + addr.toHexString() : n;
 		if (!addr.isDefined())
 			continue;
-		retdec::config::Object gv(name, retdec::config::Storage::inMemory(addr));
+		retdec::common::Object gv(name, retdec::common::Storage::inMemory(addr));
 		gv.type = loadPdbType(pgv.type_def);
 		if (gv.type.getLlvmIr() == "void")
 			gv.type.setLlvmIr("i32");
@@ -80,7 +78,7 @@ void DebugFormat::loadPdbFunctions()
 
 		retdec::pdbparser::PDBFunction *pfnc = f.second;
 
-		retdec::config::Function fnc(pfnc->getNameWithOverloadIndex());
+		retdec::common::Function fnc(pfnc->getNameWithOverloadIndex());
 
 		fnc.setStartEnd(pfnc->address, pfnc->address + pfnc->length);
 		fnc.setSourceFileName(_pdbFile->get_module_name(pfnc->module_index));
@@ -104,22 +102,22 @@ void DebugFormat::loadPdbFunctions()
 		unsigned argCntr = 0;
 		for (auto& a : pfnc->arguments)
 		{
-			retdec::config::Storage storage;
+			retdec::common::Storage storage;
 			if (a.location == retdec::pdbparser::PDBLVLOC_REGISTER) // in register
 			{
-				storage = retdec::config::Storage::inRegister(a.register_num);
+				storage = retdec::common::Storage::inRegister(a.register_num);
 			}
 			else // in register-relative stack
 			{
 				auto num = a.location == retdec::pdbparser::PDBLVLOC_BPREL32 ? 22 /*CV_REG_EBP*/ : a.register_num;
-				storage = retdec::config::Storage::onStack(a.offset, num);
+				storage = retdec::common::Storage::onStack(a.offset, num);
 			}
 
 			std::string n = a.name;
 			std::string name = n.empty() ? std::string("arg") + std::to_string(argCntr) : n;
-			retdec::config::Object newArg(name, storage);
+			retdec::common::Object newArg(name, storage);
 			newArg.type = loadPdbType(a.type_def);
-			fnc.parameters.insert(newArg);
+			fnc.parameters.push_back(newArg);
 			++argCntr;
 		}
 
@@ -131,18 +129,18 @@ void DebugFormat::loadPdbFunctions()
 				continue;
 			}
 
-			retdec::config::Storage storage;
+			retdec::common::Storage storage;
 			if (lv.location == retdec::pdbparser::PDBLVLOC_REGISTER) // in register
 			{
-				storage = retdec::config::Storage::inRegister(lv.register_num);
+				storage = retdec::common::Storage::inRegister(lv.register_num);
 			}
 			else  // in register-relative stack
 			{
 				auto num = lv.location == retdec::pdbparser::PDBLVLOC_BPREL32 ? 22 /*CV_REG_EBP*/ : lv.register_num;
-				storage = retdec::config::Storage::onStack(lv.offset, num);
+				storage = retdec::common::Storage::onStack(lv.offset, num);
 			}
 
-			retdec::config::Object newLocalVar(name, storage);
+			retdec::common::Object newLocalVar(name, storage);
 			newLocalVar.type = loadPdbType(lv.type_def);
 			fnc.locals.insert(newLocalVar);
 		}
@@ -157,14 +155,14 @@ void DebugFormat::loadPdbFunctions()
  * @param type PDB type.
  * @return Common type representation.
  */
-retdec::config::Type DebugFormat::loadPdbType(retdec::pdbparser::PDBTypeDef* type)
+retdec::common::Type DebugFormat::loadPdbType(retdec::pdbparser::PDBTypeDef* type)
 {
 	if (type == nullptr)
 	{
-		return retdec::config::Type("i32");
+		return retdec::common::Type("i32");
 	}
-	auto t = retdec::config::Type(type->to_llvm());
-	return t.isDefined() ? t : retdec::config::Type("i32");
+	auto t = retdec::common::Type(type->to_llvm());
+	return t.isDefined() ? t : retdec::common::Type("i32");
 }
 
 } // namespace debugformat

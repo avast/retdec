@@ -17,11 +17,8 @@ namespace fileinfo {
 class TlsInfo
 {
 	private:
-		const retdec::fileformat::TlsInfo *tlsInfo;
+		const retdec::fileformat::TlsInfo *tlsInfo = nullptr;
 	public:
-		TlsInfo();
-		~TlsInfo();
-
 		/// @name Getters
 		/// @{
 		std::string getRawDataStartAddrStr(std::ios_base &(* format)(std::ios_base &)) const;

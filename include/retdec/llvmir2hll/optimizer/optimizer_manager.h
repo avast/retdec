@@ -34,7 +34,6 @@ public:
 		ShPtr<HLLWriter> hllWriter, ShPtr<ValueAnalysis> va,
 		ShPtr<CallInfoObtainer> cio, ShPtr<ArithmExprEvaluator> arithmExprEvaluator,
 		bool enableAggressiveOpts, bool enableDebug = false);
-	~OptimizerManager();
 
 	void optimize(ShPtr<Module> m);
 

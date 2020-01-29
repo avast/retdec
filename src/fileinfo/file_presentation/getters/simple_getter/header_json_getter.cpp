@@ -20,14 +20,6 @@ HeaderJsonGetter::HeaderJsonGetter(FileInformation &fileInfo) : SimpleGetter(fil
 
 }
 
-/**
- * Destructor
- */
-HeaderJsonGetter::~HeaderJsonGetter()
-{
-
-}
-
 std::size_t HeaderJsonGetter::loadInformation(std::vector<std::string> &desc, std::vector<std::string> &info) const
 {
 	desc.clear();

@@ -23,7 +23,6 @@ class ElfAuxVPlainGetter : public IterativeDistributionGetter
 
 	public:
 		ElfAuxVPlainGetter(FileInformation &fileInfo);
-		virtual ~ElfAuxVPlainGetter() override;
 
 		virtual std::size_t getBasicInfo(
 				std::size_t structIndex,

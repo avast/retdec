@@ -22,9 +22,6 @@ class VisualBasicObject
 		std::string name;
 		std::vector<std::string> methods;
 	public:
-		VisualBasicObject();
-		~VisualBasicObject();
-
 		/// @name Getters
 		/// @{
 		const std::string &getName() const;

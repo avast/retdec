@@ -42,7 +42,6 @@ class BreakMachOUniversal
 
 	public:
 		BreakMachOUniversal(const std::string &path);
-		~BreakMachOUniversal();
 
 		/// @brief Information methods
 		/// @{

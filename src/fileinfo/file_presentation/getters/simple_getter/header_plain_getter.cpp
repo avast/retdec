@@ -20,14 +20,6 @@ HeaderPlainGetter::HeaderPlainGetter(FileInformation &fileInfo) : SimpleGetter(f
 
 }
 
-/**
- * Destructor
- */
-HeaderPlainGetter::~HeaderPlainGetter()
-{
-
-}
-
 std::size_t HeaderPlainGetter::loadInformation(std::vector<std::string> &desc, std::vector<std::string> &info) const
 {
 	desc.clear();

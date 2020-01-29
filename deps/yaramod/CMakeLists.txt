@@ -1,7 +1,3 @@
-# Requirements.
-find_package(FLEX REQUIRED)
-find_package(BISON REQUIRED)
-
 include(ExternalProject)
 
 if(CMAKE_C_COMPILER)
@@ -35,8 +31,8 @@ else()
 	message(STATUS "YaraMod: using remote YaraMod revision.")
 
 	ExternalProject_Add(yaramod-project
-		URL https://github.com/avast/yaramod/archive/v2.5.0.zip
-		URL_HASH SHA256=872d04dbb8c7c14aebe04fd6f091d37e8d252e3f80f1b8dae921e3ff629f53b3
+		URL ${YARAMOD_URL}
+		URL_HASH SHA256=${YARAMOD_ARCHIVE_SHA256}
 		DOWNLOAD_NAME yaramod.zip
 		CMAKE_ARGS
 			# This does not work on MSVC, but may be useful on Linux.
@@ -72,6 +68,19 @@ add_dependencies(yaramod yaramod-project)
 target_include_directories(yaramod SYSTEM INTERFACE ${source_dir}/include)
 target_include_directories(yaramod SYSTEM INTERFACE ${source_dir}/deps)
 target_include_directories(yaramod SYSTEM INTERFACE ${binary_dir}/src)
-target_include_directories(yaramod SYSTEM INTERFACE "${FLEX_INCLUDE_DIRS}")
-target_link_libraries(yaramod INTERFACE debug     ${binary_dir}/src/${DEBUG_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}yaramod${CMAKE_STATIC_LIBRARY_SUFFIX})
-target_link_libraries(yaramod INTERFACE optimized ${binary_dir}/src/${RELEASE_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}yaramod${CMAKE_STATIC_LIBRARY_SUFFIX})
+target_include_directories(yaramod SYSTEM INTERFACE ${source_dir}/deps/pog/include)
+target_include_directories(yaramod SYSTEM INTERFACE ${source_dir}/deps/pog/include/pog)
+target_include_directories(yaramod SYSTEM INTERFACE ${source_dir}/deps/pog/deps/fmt/fmt/include)
+target_include_directories(yaramod SYSTEM INTERFACE ${source_dir}/deps/pog/deps/re2/re2)
+target_link_libraries(yaramod
+	INTERFACE debug
+		${binary_dir}/src/${DEBUG_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}yaramod${CMAKE_STATIC_LIBRARY_SUFFIX}
+		${binary_dir}/deps/pog/deps/fmt/fmt/${CMAKE_INSTALL_LIBDIR}/${CMAKE_STATIC_LIBRARY_PREFIX}pog_fmt${CMAKE_STATIC_LIBRARY_SUFFIX}
+		${binary_dir}/deps/pog/deps/re2/re2/${CMAKE_INSTALL_LIBDIR}/${CMAKE_STATIC_LIBRARY_PREFIX}pog_re2${CMAKE_STATIC_LIBRARY_SUFFIX}
+)
+target_link_libraries(yaramod
+	INTERFACE optimized
+		${binary_dir}/src/${RELEASE_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}yaramod${CMAKE_STATIC_LIBRARY_SUFFIX}
+		${binary_dir}/deps/pog/deps/fmt/fmt/${CMAKE_INSTALL_LIBDIR}/${CMAKE_STATIC_LIBRARY_PREFIX}pog_fmt${CMAKE_STATIC_LIBRARY_SUFFIX}
+		${binary_dir}/deps/pog/deps/re2/re2/${CMAKE_INSTALL_LIBDIR}/${CMAKE_STATIC_LIBRARY_PREFIX}pog_re2${CMAKE_STATIC_LIBRARY_SUFFIX}
+)

@@ -19,13 +19,6 @@ namespace llvmir2hll {
 TruncCastExpr::TruncCastExpr(ShPtr<Expression> op, ShPtr<Type> dstType):
 	CastExpr(op, dstType) {}
 
-/**
-* @brief Destructs the operator.
-*/
-TruncCastExpr::~TruncCastExpr() {
-	// Observers are removed in the superclass.
-}
-
 bool TruncCastExpr::isEqualTo(ShPtr<Value> otherValue) const {
 	// Both types and values of all operands have to be equal.
 	if (ShPtr<TruncCastExpr> otherCastExpr = cast<TruncCastExpr>(otherValue)) {

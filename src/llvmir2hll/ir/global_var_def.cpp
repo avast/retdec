@@ -21,11 +21,6 @@ namespace llvmir2hll {
 GlobalVarDef::GlobalVarDef(ShPtr<Variable> var, ShPtr<Expression> init):
 	var(var), init(init) {}
 
-/**
-* @brief Destructs the definition.
-*/
-GlobalVarDef::~GlobalVarDef() {}
-
 ShPtr<Value> GlobalVarDef::clone() {
 	ShPtr<GlobalVarDef> varDefStmt(GlobalVarDef::create(ucast<Variable>(var->clone())));
 	varDefStmt->setMetadata(getMetadata());
@@ -91,6 +86,10 @@ bool GlobalVarDef::hasInitializer() const {
 */
 bool GlobalVarDef::definesExternalVar() const {
 	return var->isExternal();
+}
+
+Address GlobalVarDef::getAddress() const {
+	return var->getAddress();
 }
 
 /**

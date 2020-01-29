@@ -42,9 +42,6 @@ class ResourceTable
 		bool parseStringFileInfoChild(const std::vector<std::uint8_t> &bytes, std::size_t &offset);
 		bool parseVarString(const std::vector<std::uint8_t> &bytes, std::size_t &offset);
 	public:
-		ResourceTable();
-		~ResourceTable();
-
 		/// @name Getters
 		/// @{
 		std::size_t getNumberOfResources() const;

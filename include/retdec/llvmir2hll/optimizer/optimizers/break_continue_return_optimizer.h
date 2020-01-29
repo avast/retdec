@@ -49,8 +49,6 @@ class BreakContinueReturnOptimizer final: public FuncOptimizer {
 public:
 	BreakContinueReturnOptimizer(ShPtr<Module> module);
 
-	virtual ~BreakContinueReturnOptimizer() override;
-
 	virtual std::string getId() const override { return "BreakContinueReturn"; }
 
 private:

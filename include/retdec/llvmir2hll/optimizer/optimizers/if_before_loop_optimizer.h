@@ -64,8 +64,6 @@ class IfBeforeLoopOptimizer final: public FuncOptimizer {
 public:
 	IfBeforeLoopOptimizer(ShPtr<Module> module, ShPtr<ValueAnalysis> va);
 
-	virtual ~IfBeforeLoopOptimizer() override;
-
 	virtual std::string getId() const override { return "IfBeforeLoop"; }
 
 private:

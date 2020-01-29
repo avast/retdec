@@ -25,9 +25,6 @@ class DynamicTable
 		/// Name of the section this table was created from.
 		std::string sectionName;
 	public:
-		DynamicTable();
-		~DynamicTable();
-
 		/// @name Getters
 		/// @{
 		std::size_t getNumberOfRecords() const;

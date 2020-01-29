@@ -10,22 +10,6 @@ namespace retdec {
 namespace fileformat {
 
 /**
- * Constructor
- */
-Export::Export() : address(0), ordinalNumber(0), ordinalNumberIsValid(false)
-{
-
-}
-
-/**
- * Destructor
- */
-Export::~Export()
-{
-
-}
-
-/**
  * Get export name
  * @return Export name
  */

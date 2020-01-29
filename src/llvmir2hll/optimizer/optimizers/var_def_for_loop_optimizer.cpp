@@ -30,11 +30,6 @@ VarDefForLoopOptimizer::VarDefForLoopOptimizer(ShPtr<Module> module):
 		PRECONDITION_NON_NULL(module);
 	}
 
-/**
-* @brief Destructs the optimizer.
-*/
-VarDefForLoopOptimizer::~VarDefForLoopOptimizer() {}
-
 void VarDefForLoopOptimizer::runOnFunction(ShPtr<Function> func) {
 	// Obtain all induction variables for func.
 	indVars.clear();

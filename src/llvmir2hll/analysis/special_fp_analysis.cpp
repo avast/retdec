@@ -24,11 +24,6 @@ SpecialFPAnalysis::SpecialFPAnalysis():
 	OrderedAllVisitor(), specialFPFound(false) {}
 
 /**
-* @brief Destructs the visitor.
-*/
-SpecialFPAnalysis::~SpecialFPAnalysis() {}
-
-/**
 * @brief Returns @c true if @a module uses a special floating-point value, like
 *        infinity, @c false otherwise.
 */

@@ -4,6 +4,7 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
+#include <optional>
 #include <vector>
 
 #include "retdec/llvmir2hll/ir/bit_or_op_expr.h"
@@ -18,7 +19,6 @@
 #include "retdec/llvmir2hll/semantics/semantics.h"
 #include "retdec/llvmir2hll/support/const_symbol_converter.h"
 #include "retdec/llvmir2hll/support/debug.h"
-#include "retdec/llvmir2hll/support/maybe.h"
 #include "retdec/llvmir2hll/support/types.h"
 #include "retdec/llvmir2hll/utils/ir.h"
 
@@ -73,11 +73,6 @@ ShPtr<ConstInt> getArgAsConstInt(ShPtr<Expression> arg) {
 */
 ConstSymbolConverter::ConstSymbolConverter(ShPtr<Module> module):
 	module(module) {}
-
-/**
-* @brief Destructs the converter.
-*/
-ConstSymbolConverter::~ConstSymbolConverter() {}
 
 /**
 * @brief Converts the constants in function calls in the given module into
@@ -151,7 +146,7 @@ void ConstSymbolConverter::convertArgsToSymbolicNames(
 			continue;
 		}
 
-		Maybe<IntStringMap> symbolicNamesMap(
+		std::optional<IntStringMap> symbolicNamesMap(
 			module->getSemantics()->getSymbolicNamesForParam(
 				calledFuncName, currArgPos));
 		if (!symbolicNamesMap) {
@@ -161,7 +156,7 @@ void ConstSymbolConverter::convertArgsToSymbolicNames(
 
 		// Perform the conversion of the argument.
 		ShPtr<Expression> newArg(convertArgToSymbolicNames(
-			argAsConstInt, symbolicNamesMap.get()));
+			argAsConstInt, symbolicNamesMap.value()));
 		callExpr->setArg(currArgPos - 1, newArg); // index starts at 0
 	}
 }

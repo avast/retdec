@@ -25,9 +25,7 @@ class Visitor;
 class ReturnStmt final: public Statement {
 public:
 	static ShPtr<ReturnStmt> create(ShPtr<Expression> retVal = nullptr,
-		ShPtr<Statement> succ = nullptr);
-
-	virtual ~ReturnStmt() override;
+		ShPtr<Statement> succ = nullptr, Address a = Address::Undefined);
 
 	virtual ShPtr<Value> clone() override;
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
@@ -52,7 +50,8 @@ public:
 private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
-	explicit ReturnStmt(ShPtr<Expression> retVal = nullptr);
+	explicit ReturnStmt(ShPtr<Expression> retVal = nullptr,
+		Address a = Address::Undefined);
 
 private:
 	/// Return value.

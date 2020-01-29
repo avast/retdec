@@ -22,7 +22,6 @@ class Capstone2LlvmIrTranslatorX86_impl :
 				llvm::Module* m,
 				cs_mode basic = CS_MODE_32,
 				cs_mode extra = CS_MODE_LITTLE_ENDIAN);
-		virtual ~Capstone2LlvmIrTranslatorX86_impl();
 //
 //==============================================================================
 // Mode query & modification methods - from Capstone2LlvmIrTranslator.
@@ -120,12 +119,12 @@ class Capstone2LlvmIrTranslatorX86_impl :
 				uint32_t r,
 				llvm::Value* val,
 				llvm::IRBuilder<>& irb,
-				eOpConv ct = eOpConv::ZEXT_TRUNC) override;
+				eOpConv ct = eOpConv::ZEXT_TRUNC_OR_BITCAST) override;
 		virtual llvm::Instruction* storeOp(
 				cs_x86_op& op,
 				llvm::Value* val,
 				llvm::IRBuilder<>& irb,
-				eOpConv ct = eOpConv::ZEXT_TRUNC) override;
+				eOpConv ct = eOpConv::ZEXT_TRUNC_OR_BITCAST) override;
 
 		void storeRegisters(
 				llvm::IRBuilder<>& irb,

@@ -13,18 +13,18 @@ namespace semantics {
 /**
 * @brief Returns symbolic names for the given parameter from the given map.
 */
-Maybe<IntStringMap> getSymbolicNamesForParamFromMap(const std::string &funcName,
+std::optional<IntStringMap> getSymbolicNamesForParamFromMap(const std::string &funcName,
 		unsigned paramPos, const FuncParamsMap &map) {
 	// Try to find the function.
 	auto funcIter = map.find(funcName);
 	if (funcIter == map.end()) {
-		return Nothing<IntStringMap>();
+		return std::nullopt;
 	}
 
 	// Try to find the parameter by its position.
 	auto paramIter = funcIter->second.find(paramPos);
 	return paramIter != funcIter->second.end() ?
-		Just(paramIter->second) : Nothing<IntStringMap>();
+		std::optional<IntStringMap>(paramIter->second) : std::nullopt;
 }
 
 } // namespace semantics

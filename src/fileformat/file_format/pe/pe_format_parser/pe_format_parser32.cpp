@@ -24,14 +24,6 @@ PeFormatParser32::PeFormatParser32(const FileFormat *fInputFile, PeLib::PeFileT<
 
 }
 
-/**
- * Destructor
- */
-PeFormatParser32::~PeFormatParser32()
-{
-
-}
-
 unsigned long long PeFormatParser32::getDeclaredNumberOfSections() const
 {
 	return peDeclaredNumberOfSections(peHeader);
@@ -353,22 +345,22 @@ unsigned long long PeFormatParser32::getSecurityDirSize() const
 	return peSecurityDirSize(peHeader);
 }
 
-retdec::utils::RangeContainer<std::uint64_t> PeFormatParser32::getImportDirectoryOccupiedAddresses() const
+retdec::common::RangeContainer<std::uint64_t> PeFormatParser32::getImportDirectoryOccupiedAddresses() const
 {
 	return peImportDirectoryOccupiedAddresses(peFile->impDir());
 }
 
-retdec::utils::RangeContainer<std::uint64_t> PeFormatParser32::getExportDirectoryOccupiedAddresses() const
+retdec::common::RangeContainer<std::uint64_t> PeFormatParser32::getExportDirectoryOccupiedAddresses() const
 {
 	return peExportDirectoryOccupiedAddresses(peFile->expDir());
 }
 
-retdec::utils::RangeContainer<std::uint64_t> PeFormatParser32::getDebugDirectoryOccupiedAddresses() const
+retdec::common::RangeContainer<std::uint64_t> PeFormatParser32::getDebugDirectoryOccupiedAddresses() const
 {
 	return peDebugDirectoryOccupiedAddresses(peFile->debugDir());
 }
 
-retdec::utils::RangeContainer<std::uint64_t> PeFormatParser32::getResourceDirectoryOccupiedAddresses() const
+retdec::common::RangeContainer<std::uint64_t> PeFormatParser32::getResourceDirectoryOccupiedAddresses() const
 {
 	return peResourceDirectoryOccupiedAddresses(peFile->resDir());
 }

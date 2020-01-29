@@ -23,11 +23,8 @@ namespace fileinfo {
 class ResourceTable
 {
 	private:
-		const retdec::fileformat::ResourceTable *table;
+		const retdec::fileformat::ResourceTable *table = nullptr;
 	public:
-		ResourceTable();
-		~ResourceTable();
-
 		/// @name Getters
 		/// @{
 		std::size_t getNumberOfResources() const;

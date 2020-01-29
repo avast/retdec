@@ -12,15 +12,12 @@
 #include <iostream>
 #include <sstream>
 
-#include <pelib/PeLibInc.h>
-
 #include "retdec/crypto/crypto.h"
 #include "retdec/utils/conversion.h"
 #include "retdec/utils/file_io.h"
 #include "retdec/utils/string.h"
 #include "retdec/utils/system.h"
 #include "retdec/fileformat/file_format/file_format.h"
-
 #include "retdec/fileformat/utils/byte_array_buffer.h"
 #include "retdec/fileformat/file_format/intel_hex/intel_hex_format.h"
 #include "retdec/fileformat/file_format/raw_data/raw_data_format.h"
@@ -28,6 +25,7 @@
 #include "retdec/fileformat/utils/conversions.h"
 #include "retdec/fileformat/utils/file_io.h"
 #include "retdec/fileformat/utils/other.h"
+#include "retdec/pelib/PeLibInc.h"
 
 using namespace retdec::utils;
 using namespace PeLib;
@@ -343,8 +341,8 @@ void FileFormat::initArchitecture(
 		Architecture arch,
 		retdec::utils::Endianness endian,
 		std::size_t bytesPerWord,
-		retdec::utils::Address entryPoint,
-		retdec::utils::Address sectionVMA)
+		retdec::common::Address entryPoint,
+		retdec::common::Address sectionVMA)
 {
 	if(IntelHexFormat *ihex = dynamic_cast<IntelHexFormat*>(this))
 	{
@@ -1757,7 +1755,7 @@ const Resource* FileFormat::getVersionResource() const
  */
 bool FileFormat::isSignaturePresent() const
 {
-	return signatureVerified.isDefined();
+	return signatureVerified.has_value();
 }
 
 /**
@@ -1766,14 +1764,14 @@ bool FileFormat::isSignaturePresent() const
  */
 bool FileFormat::isSignatureVerified() const
 {
-	return signatureVerified.isDefined() && signatureVerified.getValue();
+	return signatureVerified.has_value() && signatureVerified.value();
 }
 
 /**
  * Get non-decodable address ranges.
  * @return Non-decodable address ranges.
  */
-const retdec::utils::RangeContainer<std::uint64_t>& FileFormat::getNonDecodableAddressRanges() const
+const retdec::common::RangeContainer<std::uint64_t>& FileFormat::getNonDecodableAddressRanges() const
 {
 	return nonDecodableRanges;
 }
@@ -1940,7 +1938,6 @@ const std::vector<std::pair<std::string,std::string>> &FileFormat::getAnomalies(
 {
 	return anomalies;
 }
-
 
 /**
  * Get integer (@a x bytes) located at provided address using the specified endian or default file endian

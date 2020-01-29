@@ -36,9 +36,6 @@ class ElfCore
 		std::vector<FileMapEntry> fileMap;
 
 	public:
-		ElfCore();
-		~ElfCore() = default;
-
 		/// @name Queries
 		/// @{
 		bool hasAuxVector() const;

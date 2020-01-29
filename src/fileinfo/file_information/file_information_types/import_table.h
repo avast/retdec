@@ -17,11 +17,8 @@ namespace fileinfo {
 class ImportTable
 {
 	private:
-		const retdec::fileformat::ImportTable *table;
+		const retdec::fileformat::ImportTable *table = nullptr;
 	public:
-		ImportTable();
-		~ImportTable();
-
 		/// @name Getters
 		/// @{
 		std::size_t getNumberOfLibraries() const;

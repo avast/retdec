@@ -10,7 +10,7 @@
 #include "retdec/utils/filesystem_path.h"
 #include "retdec/utils/string.h"
 #include "fileinfo/pattern_detector/pattern_detector.h"
-#include "yaracpp/yara_detector/yara_detector.h"
+#include "retdec/yaracpp/yara_detector/yara_detector.h"
 
 using namespace retdec::utils;
 using namespace yaracpp;
@@ -24,14 +24,6 @@ namespace fileinfo {
  */
 PatternDetector::PatternDetector(const retdec::fileformat::FileFormat *fparser, FileInformation &finfo) :
 	fileParser(fparser), fileinfo(finfo)
-{
-
-}
-
-/**
- * Destructor
- */
-PatternDetector::~PatternDetector()
 {
 
 }

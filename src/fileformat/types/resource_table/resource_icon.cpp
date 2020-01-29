@@ -10,23 +10,6 @@ namespace retdec {
 namespace fileformat {
 
 /**
- * Constructor
- */
-ResourceIcon::ResourceIcon() : width(0), height(0), iconSize(0), colorCount(0), planes(0), bitCount(0),
-	iconGroup(0), loadedProperties(false)
-{
-
-}
-
-/**
- * Destructor
- */
-ResourceIcon::~ResourceIcon()
-{
-
-}
-
-/**
  * Get icon width
  * @return Icon with
  */

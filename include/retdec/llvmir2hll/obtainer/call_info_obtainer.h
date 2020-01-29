@@ -36,7 +36,7 @@ class CallInfo: private retdec::utils::NonCopyable {
 
 public:
 	// It needs to be public so it can be called in ShPtr's destructor.
-	virtual ~CallInfo() = 0;
+	virtual ~CallInfo() = default;
 
 	ShPtr<CallExpr> getCall() const;
 
@@ -121,7 +121,7 @@ class FuncInfo: private retdec::utils::NonCopyable {
 
 public:
 	// It needs to be public so it can be called in ShPtr's destructor.
-	virtual ~FuncInfo() = 0;
+	virtual ~FuncInfo() = default;
 
 	ShPtr<Function> getFunc() const;
 
@@ -217,7 +217,7 @@ protected:
 class CallInfoObtainer: public SharableFromThis<CallInfoObtainer>,
 	private retdec::utils::NonCopyable {
 public:
-	virtual ~CallInfoObtainer() = 0;
+	virtual ~CallInfoObtainer() = default;
 
 	ShPtr<CG> getCG() const;
 	ShPtr<CFG> getCFGForFunc(ShPtr<Function> func) const;
@@ -340,8 +340,6 @@ private:
 	*/
 	class SCCComputer: private retdec::utils::NonCopyable {
 	public:
-		~SCCComputer();
-
 		// We use a vector of function sets because:
 		//
 		// 1. Tarjan's algorithm outputs SCCs in a topological order

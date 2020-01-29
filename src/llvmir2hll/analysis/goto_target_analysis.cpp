@@ -18,11 +18,6 @@ namespace llvmir2hll {
 GotoTargetAnalysis::GotoTargetAnalysis():
 	OrderedAllVisitor(), gotoTargets() {}
 
-/**
-* @brief Destructs the analysis.
-*/
-GotoTargetAnalysis::~GotoTargetAnalysis() {}
-
 /*
 * @brief Returns the set of all goto targets reachable from the given
 *        statement.

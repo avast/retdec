@@ -18,7 +18,6 @@ class Mips64CallingConvention: public CallingConvention
 	//
 	public:
 		Mips64CallingConvention(const Abi* a);
-		virtual ~Mips64CallingConvention();
 
 	// Construcor method.
 	//

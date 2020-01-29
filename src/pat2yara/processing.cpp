@@ -159,10 +159,12 @@ void processFiles(
 	bool firstFile = true;
 	std::vector<std::unique_ptr<Rule>> rules;
 
+	Yaramod ym;
+
 	std::size_t counter = 0;
 	for (const auto &file : options.input) {
 		// Parse file.
-		auto yaraFile = parseFile(file);
+		auto yaraFile = ym.parseFile(file);
 
 		// Add architecture info rule.
 		if (firstFile) {

@@ -17,13 +17,8 @@ namespace llvmir2hll {
 *
 * See create() for more information.
 */
-Variable::Variable(const std::string &name, ShPtr<Type> type):
-	initialName(name), name(name), type(type), internal(true) {}
-
-/**
-* @brief Destructs the variable.
-*/
-Variable::~Variable() {}
+Variable::Variable(const std::string &name, ShPtr<Type> type, Address a):
+	initialName(name), name(name), type(type), internal(true), address(a) {}
 
 ShPtr<Value> Variable::clone() {
 	// Variables are not cloned (see the description of Value::clone()).
@@ -61,6 +56,10 @@ const std::string &Variable::getInitialName() const {
 */
 const std::string &Variable::getName() const {
 	return name;
+}
+
+Address Variable::getAddress() const {
+	return address;
 }
 
 /**
@@ -140,6 +139,10 @@ void Variable::setType(ShPtr<Type> newType) {
 	type = std::move(newType);
 }
 
+void Variable::setAddress(Address a) {
+	address = a;
+}
+
 /**
 * @brief Sets the variable as internal.
 *
@@ -165,6 +168,7 @@ void Variable::markAsExternal() {
 *
 * @param[in] name Name of the variable.
 * @param[in] type Type of the variable.
+* @param[in] a Address.
 *
 * By default, the created variable is internal. See isInternal() for more
 * details.
@@ -172,11 +176,12 @@ void Variable::markAsExternal() {
 * @par Preconditions
 *  - @a type is non-null
 */
-ShPtr<Variable> Variable::create(const std::string &name, ShPtr<Type> type) {
+ShPtr<Variable> Variable::create(const std::string &name, ShPtr<Type> type,
+		Address a) {
 	PRECONDITION_NON_NULL(type);
 
 	// Currently, there is no special initialization.
-	return ShPtr<Variable>(new Variable(name, type));
+	return ShPtr<Variable>(new Variable(name, type, a));
 }
 
 void Variable::accept(Visitor *v) {

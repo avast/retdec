@@ -46,8 +46,6 @@ public:
 	LzmaData(const DynamicBuffer& buffer, uint8_t pb, uint8_t lp, uint8_t lc);
 	LzmaData(const LzmaData& data) = delete;
 
-	virtual ~LzmaData() override;
-
 	virtual bool decompress(DynamicBuffer& outputBuffer) override;
 
 private:

@@ -20,14 +20,6 @@ BasicJsonGetter::BasicJsonGetter(FileInformation &fileInfo) : SimpleGetter(fileI
 
 }
 
-/**
- * Destructor
- */
-BasicJsonGetter::~BasicJsonGetter()
-{
-
-}
-
 std::size_t BasicJsonGetter::loadInformation(std::vector<std::string> &desc, std::vector<std::string> &info) const
 {
 	desc.clear();

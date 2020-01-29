@@ -48,14 +48,6 @@ SymbolTablesJsonGetter::SymbolTablesJsonGetter(FileInformation &fileInfo) : Iter
 	commonHeaderElements.push_back("associatedSize");
 }
 
-/**
- * Destructor
- */
-SymbolTablesJsonGetter::~SymbolTablesJsonGetter()
-{
-
-}
-
 std::size_t SymbolTablesJsonGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const
 {
 	if(structIndex >= numberOfStructures)

@@ -23,14 +23,12 @@ namespace llvmir2hll {
 */
 class CArithmExprEvaluator final: public ArithmExprEvaluator {
 public:
-	virtual ~CArithmExprEvaluator() override;
-
 	static ShPtr<ArithmExprEvaluator> create();
 
 	virtual std::string getId() const override;
 
 private:
-	CArithmExprEvaluator();
+	CArithmExprEvaluator() = default;
 
 	// Resolve types.
 	virtual void resolveTypesUnaryOp(ShPtr<Constant> &operand) override;

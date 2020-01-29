@@ -36,8 +36,6 @@ public:
 	DynamicBuffer(const DynamicBuffer& dynamicBuffer);
 	DynamicBuffer(const DynamicBuffer& dynamicBuffer, uint32_t startPos, uint32_t amount);
 
-	~DynamicBuffer();
-
 	DynamicBuffer& operator =(DynamicBuffer dynamicBuffer);
 
 	void setCapacity(uint32_t capacity);

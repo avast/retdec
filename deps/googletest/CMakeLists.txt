@@ -37,8 +37,8 @@ else()
 	message(STATUS "Googletest: using remote Googletest revision.")
 
 	ExternalProject_Add(googletest
-		URL https://github.com/google/googletest/archive/90a443f9c2437ca8a682a1ac625eba64e1d74a8a.zip
-		URL_HASH SHA256=6fb9a49ad77656c860cfdafbb3148a91f076a3a8bda9c6d8809075c832549dd4
+		URL ${GOOGLETEST_URL}
+		URL_HASH SHA256=${GOOGLETEST_ARCHIVE_SHA256}
 		DOWNLOAD_NAME googletest.zip
 		CMAKE_ARGS
 			# This does not work on MSVC, but is useful on Linux.

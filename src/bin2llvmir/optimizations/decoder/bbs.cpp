@@ -6,8 +6,7 @@
 
 #include "retdec/bin2llvmir/optimizations/decoder/decoder.h"
 
-using namespace retdec::utils;
-using namespace llvm;
+using namespace retdec::common;
 
 namespace retdec {
 namespace bin2llvmir {
@@ -15,7 +14,7 @@ namespace bin2llvmir {
 /**
  * \return Start address for basic block \p f.
  */
-utils::Address Decoder::getBasicBlockAddress(llvm::BasicBlock* b)
+common::Address Decoder::getBasicBlockAddress(llvm::BasicBlock* b)
 {
 	auto likelyIt = _likelyBb2Target.find(b);
 	if (likelyIt != _likelyBb2Target.end())
@@ -31,7 +30,7 @@ utils::Address Decoder::getBasicBlockAddress(llvm::BasicBlock* b)
  * \return End address for basic block \p b - the end address of the last
  *         instruction in the basic block.
  */
-utils::Address Decoder::getBasicBlockEndAddress(llvm::BasicBlock* b)
+common::Address Decoder::getBasicBlockEndAddress(llvm::BasicBlock* b)
 {
 	if (b->empty())
 	{
@@ -45,7 +44,7 @@ utils::Address Decoder::getBasicBlockEndAddress(llvm::BasicBlock* b)
 /**
  * \return Address of the first basic block after address \p a.
  */
-utils::Address Decoder::getBasicBlockAddressAfter(utils::Address a)
+common::Address Decoder::getBasicBlockAddressAfter(common::Address a)
 {
 	auto it = _addr2bb.upper_bound(a);
 	return it != _addr2bb.end() ? it->first : Address();
@@ -54,7 +53,7 @@ utils::Address Decoder::getBasicBlockAddressAfter(utils::Address a)
 /**
  * \return Basic block exactly at address \p a.
  */
-llvm::BasicBlock* Decoder::getBasicBlockAtAddress(utils::Address a)
+llvm::BasicBlock* Decoder::getBasicBlockAtAddress(common::Address a)
 {
 	auto fIt = _addr2bb.find(a);
 	return fIt != _addr2bb.end() ? fIt->second : nullptr;
@@ -63,7 +62,7 @@ llvm::BasicBlock* Decoder::getBasicBlockAtAddress(utils::Address a)
 /**
  * \return The first basic block before or at address \p a.
  */
-llvm::BasicBlock* Decoder::getBasicBlockBeforeAddress(utils::Address a)
+llvm::BasicBlock* Decoder::getBasicBlockBeforeAddress(common::Address a)
 {
 	if (_addr2bb.empty())
 	{
@@ -94,7 +93,7 @@ llvm::BasicBlock* Decoder::getBasicBlockBeforeAddress(utils::Address a)
 /**
  * \return The first basic block after address \p a.
  */
-llvm::BasicBlock* Decoder::getBasicBlockAfterAddress(utils::Address a)
+llvm::BasicBlock* Decoder::getBasicBlockAfterAddress(common::Address a)
 {
 	auto it = _addr2bb.upper_bound(a);
 	return it != _addr2bb.end() ? it->second : nullptr;
@@ -104,7 +103,7 @@ llvm::BasicBlock* Decoder::getBasicBlockAfterAddress(utils::Address a)
  * \return Basic block that contains the address \p a. I.e. \p a is between
  * basic blocks's start and end address.
  */
-llvm::BasicBlock* Decoder::getBasicBlockContainingAddress(utils::Address a)
+llvm::BasicBlock* Decoder::getBasicBlockContainingAddress(common::Address a)
 {
 	auto* b = getBasicBlockBeforeAddress(a);
 	if (b == nullptr)
@@ -136,7 +135,7 @@ llvm::BasicBlock* Decoder::getBasicBlockContainingAddress(utils::Address a)
  * \return Created function.
  */
 llvm::BasicBlock* Decoder::createBasicBlock(
-		utils::Address a,
+		common::Address a,
 		llvm::Function* f,
 		llvm::BasicBlock* insertAfter)
 {
@@ -146,21 +145,21 @@ llvm::BasicBlock* Decoder::createBasicBlock(
 		next = next->getNextNode();
 	}
 
-	auto* b = BasicBlock::Create(
+	auto* b = llvm::BasicBlock::Create(
 			_module->getContext(),
 			names::generateBasicBlockName(a),
 			f,
 			next);
 
-	IRBuilder<> irb(b);
-	irb.CreateRet(UndefValue::get(f->getReturnType()));
+	llvm::IRBuilder<> irb(b);
+	irb.CreateRet(llvm::UndefValue::get(f->getReturnType()));
 
 	addBasicBlock(a, b);
 
 	return b;
 }
 
-void Decoder::addBasicBlock(utils::Address a, llvm::BasicBlock* b)
+void Decoder::addBasicBlock(common::Address a, llvm::BasicBlock* b)
 {
 	_addr2bb[a] = b;
 	_bb2addr[b] = a;

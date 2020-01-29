@@ -48,14 +48,6 @@ ElfHeuristics::ElfHeuristics(
 }
 
 /**
- * Destructor
- */
-ElfHeuristics::~ElfHeuristics()
-{
-
-}
-
-/**
  * Try to detect UPX
  */
 void ElfHeuristics::getUpxHeuristics()

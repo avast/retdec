@@ -19,7 +19,7 @@ namespace fileinfo {
 class PeWrapper : public retdec::fileformat::PeFormat
 {
 	private:
-		PeWrapperParser *wrapperParser; ///< parser of PE file
+		PeWrapperParser *wrapperParser = nullptr; ///< parser of PE file
 	public:
 		PeWrapper(const std::string & pathToFile, const std::string & dllListFile, retdec::fileformat::LoadFlags loadFlags);
 		virtual ~PeWrapper() override;

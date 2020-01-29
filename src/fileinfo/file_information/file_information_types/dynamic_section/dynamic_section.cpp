@@ -10,22 +10,6 @@
 namespace fileinfo {
 
 /**
- * Constructor
- */
-DynamicSection::DynamicSection() : declaredEntries(std::numeric_limits<unsigned long long>::max())
-{
-
-}
-
-/**
- * Destructor
- */
-DynamicSection::~DynamicSection()
-{
-
-}
-
-/**
  * Get number of entries in section
  * @return Number of entries in section
  *

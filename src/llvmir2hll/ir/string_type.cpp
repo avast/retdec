@@ -19,11 +19,6 @@ namespace llvmir2hll {
 StringType::StringType(std::size_t charSize):
 	Type(), charSize(charSize) {}
 
-/**
-* @brief Destructs the type.
-*/
-StringType::~StringType() {}
-
 ShPtr<Value> StringType::clone() {
 	return StringType::create(charSize);
 }

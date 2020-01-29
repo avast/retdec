@@ -32,11 +32,6 @@ AbiArm::AbiArm(llvm::Module* m, Config* c) :
 	_defcc = CallingConvention::ID::CC_ARM;
 }
 
-AbiArm::~AbiArm()
-{
-
-}
-
 bool AbiArm::isGeneralPurposeRegister(const llvm::Value* val) const
 {
 	uint32_t rid = getRegisterId(val);

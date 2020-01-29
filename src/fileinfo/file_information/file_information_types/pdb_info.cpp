@@ -10,23 +10,6 @@
 namespace fileinfo {
 
 /**
- * Constructor
- */
-PdbInfo::PdbInfo() : age(std::numeric_limits<std::size_t>::max()),
-						timeStamp(std::numeric_limits<std::size_t>::max())
-{
-
-}
-
-/**
- * Destructor
- */
-PdbInfo::~PdbInfo()
-{
-
-}
-
-/**
  * Get type of PDB file
  * @return Type of PDB file
  */

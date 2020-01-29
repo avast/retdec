@@ -57,11 +57,6 @@ LLVMIntrinsicConverter::LLVMIntrinsicConverter(ShPtr<Module> module):
 	OrderedAllVisitor(), module(module), renamedFuncNames() {}
 
 /**
-* @brief Destructs the converter.
-*/
-LLVMIntrinsicConverter::~LLVMIntrinsicConverter() {}
-
-/**
 * @brief Converts LLVM intrinsic functions in @a module into standard-C-library
 *        functions.
 *

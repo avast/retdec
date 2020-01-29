@@ -66,9 +66,6 @@ class BitmapImage
 		std::vector<std::vector<struct BitmapPixel>> image;    ///< bitmap image map row x column
 
 	public:
-		BitmapImage();
-		~BitmapImage();
-
 		/// @name Getters
 		/// @{
 		std::size_t getWidth() const;

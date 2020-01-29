@@ -10,27 +10,6 @@ namespace retdec {
 namespace fileformat {
 
 /**
- * Constructor
- */
-Import::Import() :
-		libraryIndex(0),
-		address(0),
-		ordinalNumber(0),
-		ordinalNumberIsValid(false),
-		usageType(Import::UsageType::UNKNOWN)
-{
-
-}
-
-/**
- * Destructor
- */
-Import::~Import()
-{
-
-}
-
-/**
  * Get import name
  * @return Import name
  */

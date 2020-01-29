@@ -55,8 +55,12 @@ class FileDetector : private retdec::utils::NonCopyable
 		virtual retdec::cpdetect::CompilerDetector* createCompilerDetector() const = 0;
 		/// @}
 	public:
-		FileDetector(const std::string & pathToInputFile, FileInformation &finfo, retdec::cpdetect::DetectParams &searchPar, retdec::fileformat::LoadFlags loadFlags);
-		virtual ~FileDetector();
+		FileDetector(
+				const std::string& pathToInputFile,
+				FileInformation &finfo,
+				retdec::cpdetect::DetectParams &searchPar,
+				retdec::fileformat::LoadFlags loadFlags);
+		virtual ~FileDetector() = default;
 
 		void setConfigFile(retdec::config::Config &config);
 		void getAllInformation();

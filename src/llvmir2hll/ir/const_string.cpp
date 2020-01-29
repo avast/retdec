@@ -26,11 +26,6 @@ ConstString::ConstString(const UnderlyingStringType &value, std::size_t charSize
 	Constant(), value(value), charSize(charSize),
 	type(StringType::create(charSize)) {}
 
-/**
-* @brief Destructs the constant.
-*/
-ConstString::~ConstString() {}
-
 ShPtr<Value> ConstString::clone() {
 	auto constString = ConstString::create(value, charSize);
 	constString->setMetadata(getMetadata());

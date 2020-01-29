@@ -9,14 +9,17 @@
 
 #include <cstddef>
 #include <string>
+#include <sstream>
 
 #include <llvm/Support/raw_ostream.h>
 
+#include "retdec/llvmir2hll/hll/output_manager.h"
 #include "retdec/llvmir2hll/ir/module.h"
 #include "retdec/llvmir2hll/support/smart_ptr.h"
 #include "retdec/llvmir2hll/support/types.h"
 #include "retdec/llvmir2hll/support/visitor.h"
 #include "retdec/utils/non_copyable.h"
+#include "retdec/utils/string.h"
 
 namespace retdec {
 namespace llvmir2hll {
@@ -37,8 +40,6 @@ class UnaryOpExpr;
 */
 class HLLWriter: public Visitor, private retdec::utils::NonCopyable {
 public:
-	virtual ~HLLWriter() override;
-
 	/**
 	* @brief Returns the ID of the writer.
 	*/
@@ -55,7 +56,7 @@ public:
 	/// @}
 
 protected:
-	HLLWriter(llvm::raw_ostream &out);
+	HLLWriter(llvm::raw_ostream &out, const std::string& outputFormat = "");
 
 	/// @name Commenting
 	/// @{
@@ -65,7 +66,6 @@ protected:
 	* For example, in C, it should return @c "//".
 	*/
 	virtual std::string getCommentPrefix() = 0;
-	virtual std::string comment(const std::string &code);
 	/// @}
 
 	/// @name Indentation
@@ -80,53 +80,44 @@ protected:
 	/// @name Emission
 	/// @{
 	virtual bool emitFileHeader();
-	virtual bool emitFileFooter();
 
 	virtual bool emitGlobalVariablesHeader();
 	virtual bool emitGlobalVariables();
 	virtual bool emitGlobalVariable(ShPtr<GlobalVarDef> varDef);
-	virtual bool emitGlobalVariablesFooter();
 
 	virtual bool emitClassesHeader();
 	virtual bool emitClasses();
 	virtual bool emitClass(const std::string &className);
-	virtual bool emitClassesFooter();
 
 	virtual bool emitFunctionPrototypesHeader();
 	virtual bool emitFunctionPrototypes();
-	virtual bool emitFunctionPrototypesFooter();
 
 	virtual bool emitFunctionsHeader();
 	virtual bool emitFunctions();
 	virtual bool emitFunction(ShPtr<Function> func);
-	virtual bool emitFunctionsFooter();
 
 	virtual bool emitStaticallyLinkedFunctionsHeader();
 	virtual bool emitStaticallyLinkedFunctions();
-	virtual bool emitStaticallyLinkedFunctionsFooter();
 
 	virtual bool emitDynamicallyLinkedFunctionsHeader();
 	virtual bool emitDynamicallyLinkedFunctions();
-	virtual bool emitDynamicallyLinkedFunctionsFooter();
 
 	virtual bool emitSyscallFunctionsHeader();
 	virtual bool emitSyscallFunctions();
-	virtual bool emitSyscallFunctionsFooter();
 
 	virtual bool emitInstructionIdiomFunctionsHeader();
 	virtual bool emitInstructionIdiomFunctions();
-	virtual bool emitInstructionIdiomFunctionsFooter();
 
 	virtual bool emitExternalFunctions(const FuncSet &funcs);
 	virtual bool emitExternalFunction(ShPtr<Function> func);
 
 	virtual bool emitMetaInfoHeader();
 	virtual bool emitMetaInfo();
-	virtual bool emitMetaInfoFooter();
 
 	virtual void emitExprWithBracketsIfNeeded(ShPtr<Expression> expr);
 	void emitUnaryOpExpr(const std::string &opRepr, ShPtr<UnaryOpExpr> expr);
-	void emitBinaryOpExpr(const std::string &opRepr, ShPtr<BinaryOpExpr> expr);
+	void emitBinaryOpExpr(const std::string &opRepr, ShPtr<BinaryOpExpr> expr,
+			bool spaceBefore = true, bool spaceAfter = true);
 
 	bool emitDetectedCryptoPatternForGlobalVarIfAvailable(ShPtr<Variable> var);
 	bool emitModuleNameForFuncIfAvailable(ShPtr<Function> func);
@@ -137,24 +128,29 @@ protected:
 	bool emitDemangledNameIfAvailable(ShPtr<Function> func);
 	bool emitCommentIfAvailable(ShPtr<Function> func);
 	bool emitDetectedCryptoPatternsForFuncIfAvailable(ShPtr<Function> func);
-	bool emitLLVMIRFixerWarningForFuncIfAny(ShPtr<Function> func);
 
 	void emitSectionHeader(const std::string &sectionName);
 
 	/**
 	* @brief Emits the given sequence @a seq by calling @c accept on every value.
+	*        Separator = ','
 	*
-	* @param[in] seq Sequence of values to be emitted.
-	* @param[in] sep Separater of the emitted values.
+	* @param[in] seq     Sequence of values to be emitted.
+	* @param[in] space   Space to insert after separator.
+	* @param[in] newline If @c true, newline is inserted after separator and
+	*                    before space.
 	*
 	* @tparam ContainerType Container of Visitable values.
 	*/
 	template<class ContainerType>
-	void emitSequenceWithAccept(const ContainerType &seq, const std::string &sep) {
+	void emitSequenceWithAccept(const ContainerType &seq,
+			const std::string& space = " ",	bool newline = false) {
 		bool first = true;
 		for (const auto &item : seq) {
 			if (!first) {
-				out << sep;
+				out->operatorX(",");
+				if (newline) out->newLine();
+				out->space(space);
 			}
 			item->accept(this);
 			first = false;
@@ -168,9 +164,8 @@ protected:
 	/// @}
 
 	void sortFuncsForEmission(FuncVector &funcs);
-	bool tryEmitVarInfoInComment(ShPtr<Variable> var);
+	bool tryEmitVarInfoInComment(ShPtr<Variable> var, ShPtr<Statement> stmt = nullptr);
 	bool tryEmitVarAddressInComment(ShPtr<Variable> var);
-	bool tryEmitVarOffsetInComment(ShPtr<Variable> var);
 	bool shouldBeEmittedInHexa(ShPtr<ConstInt> constant) const;
 	bool shouldBeEmittedInStructuredWay(ShPtr<ConstArray> array) const;
 	bool shouldBeEmittedInStructuredWay(ShPtr<ConstStruct> structure) const;
@@ -181,8 +176,8 @@ protected:
 	/// The module to be written.
 	ShPtr<Module> module;
 
-	/// Stream, where the resulting code will be generated.
-	llvm::raw_ostream &out;
+	/// Output where the resulting code will be generated.
+	UPtr<OutputManager> out;
 
 	/// Recognizes which brackets around expressions are needed.
 	ShPtr<BracketManager> bracketsManager;
@@ -199,13 +194,10 @@ protected:
 	bool optionKeepAllBrackets;
 
 	/// Emit time-varying information, like dates?
-	bool optionEmitTimeVaryingInfo;
+	bool optionEmitTimeVaryingInfo; // TODO: default = TRUE, fix hacks
 
 	/// Use compound operators (like @c +=) instead of assignments?
 	bool optionUseCompoundOperators;
-
-	/// Names of functions that were fixed by the LLVM IR fixing script.
-	StringSet namesOfFuncsWithFixedIR;
 
 	/// The currently emitted function definition (if any).
 	ShPtr<Function> currFunc;
@@ -221,8 +213,6 @@ private:
 	bool emitMetaInfoNumberOfDetectedFuncs();
 	bool emitMetaInfoSelectedButNotFoundFuncs();
 	bool emitMetaInfoDecompilationDate();
-	bool emitMetaInfoFuncsRemovedDueErrors();
-	bool emitMetaInfoNumberOfDecompilationErrors();
 	/// @}
 
 	std::string getRawGotoLabel(ShPtr<Statement> stmt);

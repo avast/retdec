@@ -7,8 +7,7 @@
 #include <algorithm>
 #include <cstring>
 
-#include <pelib/PeLib.h>
-
+#include "retdec/pelib/PeLib.h"
 #include "retdec/utils/alignment.h"
 #include "retdec/utils/file_io.h"
 #include "unpackertool/plugins/upx/decompressors/decompressors.h"
@@ -164,13 +163,6 @@ template <int bits> PeUpxStub<bits>::PeUpxStub(retdec::loader::Image* inputFile,
 	unsigned long long ep;
 	_file->getFileFormat()->getEpAddress(ep);
 	_realEpAddress = ep;
-}
-
-/**
- * Destructor.
- */
-template <int bits> PeUpxStub<bits>::~PeUpxStub()
-{
 }
 
 /**

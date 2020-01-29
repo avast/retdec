@@ -22,7 +22,6 @@ public:
 	SegmentDataSource();
 	SegmentDataSource(const llvm::StringRef& data);
 	SegmentDataSource(const SegmentDataSource& dataLoader);
-	virtual ~SegmentDataSource();
 
 	bool isDataSet() const;
 

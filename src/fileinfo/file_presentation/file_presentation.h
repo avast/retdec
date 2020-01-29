@@ -21,7 +21,7 @@ class FilePresentation
 		retdec::cpdetect::ReturnCode returnCode; ///< return code of data member @a fileinfo
 	public:
 		FilePresentation(FileInformation &fileinfo_);
-		virtual ~FilePresentation();
+		virtual ~FilePresentation() = default;
 
 		virtual bool present() = 0;
 };

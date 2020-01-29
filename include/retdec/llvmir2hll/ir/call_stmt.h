@@ -26,9 +26,7 @@ class Visitor;
 class CallStmt final: public Statement {
 public:
 	static ShPtr<CallStmt> create(ShPtr<CallExpr> call,
-		ShPtr<Statement> succ = nullptr);
-
-	virtual ~CallStmt() override;
+		ShPtr<Statement> succ = nullptr, Address a = Address::Undefined);
 
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
 	virtual bool isCompound() override { return false; }
@@ -52,7 +50,7 @@ public:
 private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
-	explicit CallStmt(ShPtr<CallExpr> call);
+	explicit CallStmt(ShPtr<CallExpr> call, Address a = Address::Undefined);
 
 private:
 	/// Wrapped call expression.

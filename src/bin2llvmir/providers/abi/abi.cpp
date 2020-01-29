@@ -35,11 +35,6 @@ Abi::Abi(llvm::Module* m, Config* c) :
 
 }
 
-Abi::~Abi()
-{
-
-}
-
 bool Abi::isRegister(const llvm::Value* val) const
 {
 	return _regs2id.count(val);
@@ -262,6 +257,16 @@ bool Abi::isPowerPC64() const
 bool Abi::isPic32() const
 {
 	return _config->getConfig().architecture.isPic32();
+}
+
+bool Abi::supportsCallingConvention(const CallingConvention::ID& cc)
+{
+	return getCallingConvention(cc) != nullptr;
+}
+
+CallingConvention::ID Abi::getDefaultCallingConventionID() const
+{
+	return _defcc;
 }
 
 CallingConvention* Abi::getDefaultCallingConvention()

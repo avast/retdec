@@ -33,8 +33,10 @@ bool isIdChar(std::string::value_type c) {
 * underscores ('_').
 */
 bool isId(const std::string &token) {
-	return std::find_if(token.begin(), token.end(),
-		std::not1(std::ptr_fun(isIdChar))) == token.end();
+	return std::find_if(
+			token.begin(),
+			token.end(),
+			[](char c){return !isIdChar(c);}) == token.end();
 }
 
 /**
@@ -81,12 +83,12 @@ std::size_t left(const StringVector &tokens, std::size_t i) {
 /**
 * @brief Parses APICallInfo from @a tokens, starting at @a i, and advances @a i.
 *
-* @return <tt>Just(info)</tt> if the info was parsed correctly,
-*         <tt>Nothing<APICallInfo>()</tt> otherwise.
+* @return @c info if the info was parsed correctly,
+*         @c std::nullopt otherwise.
 */
-Maybe<APICallInfo> parseAPICallInfo(const StringVector &tokens, std::size_t &i) {
+std::optional<APICallInfo> parseAPICallInfo(const StringVector &tokens, std::size_t &i) {
 	if (left(tokens, i) < 3) {
-		return Nothing<APICallInfo>();
+		return std::nullopt;
 	}
 
 	// consume `X =` (optional)
@@ -99,7 +101,7 @@ Maybe<APICallInfo> parseAPICallInfo(const StringVector &tokens, std::size_t &i) 
 	// consume `func(`
 	if (left(tokens, i) < 2 || !isId(tokens[i]) ||
 			tokens[i+1] != "(") {
-		return Nothing<APICallInfo>();
+		return std::nullopt;
 	}
 	APICallInfo info(tokens[i]);
 	i += 2;
@@ -113,7 +115,7 @@ Maybe<APICallInfo> parseAPICallInfo(const StringVector &tokens, std::size_t &i) 
 	while (left(tokens, i) >= 2 && tokens[i] != ")") {
 		// expect `X` or `_`
 		if (!isId(tokens[i]) && tokens[i] != "_") {
-			return Nothing<APICallInfo>();
+			return std::nullopt;
 		}
 
 		// consume `X` or `_`
@@ -127,13 +129,13 @@ Maybe<APICallInfo> parseAPICallInfo(const StringVector &tokens, std::size_t &i) 
 		if (tokens[i] == ",") {
 			++i;
 		} else if (tokens[i] != ")") {
-			return Nothing<APICallInfo>();
+			return std::nullopt;
 		}
 	}
 
 	// consume `)`
 	if (left(tokens, i) < 1 || tokens[i] != ")") {
-		return Nothing<APICallInfo>();
+		return std::nullopt;
 	}
 	++i;
 
@@ -142,7 +144,7 @@ Maybe<APICallInfo> parseAPICallInfo(const StringVector &tokens, std::size_t &i) 
 		++i;
 	}
 
-	return Just(info);
+	return info;
 }
 
 } // anonymous namespace
@@ -157,29 +159,29 @@ APICallInfoSeqParser::APICallInfoSeqParser() {}
 *
 * See the class description for a description of the format of @a text.
 *
-* If @a text is invalid, it returns <tt>Nothing<APICallInfoSeq>()</tt>. If @a
+* If @a text is invalid, it returns @c std::nullopt. If @a
 * text is empty, it returns an empty sequence.
 */
-Maybe<APICallInfoSeq> APICallInfoSeqParser::parse(const std::string &text) const {
+std::optional<APICallInfoSeq> APICallInfoSeqParser::parse(const std::string &text) const {
 	if (text.empty()) {
-		return Just(APICallInfoSeq());
+		return APICallInfoSeq();
 	}
 
 	StringVector tokens(tokenize(text));
 	if (tokens.empty()) {
-		return Nothing<APICallInfoSeq>();
+		return std::nullopt;
 	}
 
 	APICallInfoSeq seq;
 	std::size_t i = 0;
 	while (left(tokens, i) > 0) {
-		Maybe<APICallInfo> info(parseAPICallInfo(tokens, i));
+		std::optional<APICallInfo> info(parseAPICallInfo(tokens, i));
 		if (!info) {
-			return Nothing<APICallInfoSeq>();
+			return std::nullopt;
 		}
-		seq.add(info.get());
+		seq.add(info.value());
 	}
-	return Just(seq);
+	return seq;
 }
 
 /**

@@ -41,7 +41,7 @@ Currently, we support Windows (7 or later), Linux, macOS, and (experimentally) F
 
 1. Either download and unpack a [pre-built package](https://github.com/avast/retdec/releases), or build and install the decompiler by yourself (the process is described below).
 
-2. Install [Microsoft Visual C++ Redistributable for Visual Studio 2015](https://www.microsoft.com/en-us/download/details.aspx?id=48145).
+2. Install [Microsoft Visual C++ Redistributable for Visual Studio 2017](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads).
 
 3. Install the following programs:
 
@@ -120,13 +120,11 @@ This section describes a local build and installation of RetDec. Instructions fo
 
 #### Linux
 
-* A C++ compiler and standard C++ library supporting C++14 (e.g. GCC >= 5)
+* A C++ compiler and standard C++ library supporting C++17 (e.g. GCC >= 7)
 * [CMake](https://cmake.org/) (version >= 3.6)
 * [Git](https://git-scm.com/)
 * [Perl](https://www.perl.org/)
 * [Python](https://www.python.org/) (version >= 3.4)
-* [Bison](https://www.gnu.org/software/bison/) (version >= 3.0)
-* [Flex](https://www.gnu.org/software/flex/) (version >= 2.6)
 * [autotools](https://en.wikipedia.org/wiki/GNU_Build_System) ([autoconf](https://www.gnu.org/software/autoconf/autoconf.html), [automake](https://www.gnu.org/software/automake/), and [libtool](https://www.gnu.org/software/libtool/))
 * [pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config/)
 * [m4](https://www.gnu.org/software/m4/m4.html)
@@ -136,27 +134,26 @@ This section describes a local build and installation of RetDec. Instructions fo
 On Debian-based distributions (e.g. Ubuntu), the required packages can be installed with `apt-get`:
 
 ```sh
-sudo apt-get install build-essential cmake git perl python3 bison flex libfl-dev autoconf automake libtool pkg-config m4 zlib1g-dev upx doxygen graphviz
+sudo apt-get install build-essential cmake git perl python3 autoconf automake libtool pkg-config m4 zlib1g-dev upx doxygen graphviz
 ```
 
 On RPM-based distributions (e.g. Fedora), the required packages can be installed with `dnf`:
 
 ```sh
-sudo dnf install gcc gcc-c++ cmake make git perl python3 bison flex autoconf automake libtool pkg-config m4 zlib-devel upx doxygen graphviz
+sudo dnf install gcc gcc-c++ cmake make git perl python3 autoconf automake libtool pkg-config m4 zlib-devel upx doxygen graphviz
 ```
 
 On Arch Linux, the required packages can be installed with `pacman`:
 
 ```sh
-sudo pacman --needed -S base-devel cmake git perl python3 bison flex autoconf automake libtool pkg-config m4 zlib upx doxygen graphviz
+sudo pacman --needed -S base-devel cmake git perl python3 autoconf automake libtool pkg-config m4 zlib upx doxygen graphviz
 ```
 
 #### Windows
 
-* Microsoft Visual C++ (version >= Visual Studio 2015 Update 2)
+* Microsoft Visual C++ (version >= Visual Studio 2017 version 15.7)
 * [CMake](https://cmake.org/) (version >= 3.6)
 * [Git](https://git-scm.com/)
-* [Flex + Bison](https://sourceforge.net/projects/winflexbison/files/win_flex_bison3-latest.zip/download) ([mirror](https://github.com/avast/retdec-support/releases/download/2018-07-27/win_flex_bison3-latest.zip)) from the [Win flex-bison project](https://sourceforge.net/projects/winflexbison/). Add the extracted directory to the system `Path` ([HOWTO](https://www.computerhope.com/issues/ch000549.htm)).
 * [Active Perl](https://www.activestate.com/activeperl). It needs to be the first Perl in `PATH`, or it has to be provided to CMake using `CMAKE_PROGRAM_PATH` variable, e.g. `-DCMAKE_PROGRAM_PATH=/c/perl/bin`. Does NOT work with Strawberry Perl or MSYS2 Perl (you would have to install a pre-built version of OpenSSL, see below).
   * Alternatively, you can install OpenSSL directly from [here](https://slproweb.com/products/Win32OpenSSL.html). This means OpenSSL won't be built and you don't need to install any Perl. Do not install Light version of OpenSSL as they don't contain development files.
 * [Python](https://www.python.org/) (version >= 3.4)
@@ -166,13 +163,12 @@ sudo pacman --needed -S base-devel cmake git perl python3 bison flex autoconf au
 
 Packages should be preferably installed via [Homebrew](https://brew.sh).
 
+* macOS >= 10.14
 * Full Xcode installation ([including command-line tools](https://github.com/frida/frida/issues/338#issuecomment-426777849), see [#425](https://github.com/avast/retdec/issues/425) and [#433](https://github.com/avast/retdec/issues/433))
 * [CMake](https://cmake.org/) (version >= 3.6)
 * [Git](https://git-scm.com/)
 * [Perl](https://www.perl.org/)
 * [Python](https://www.python.org/) (version >= 3.4)
-* [Bison](https://www.gnu.org/software/bison/) (version >= 3.0)
-* [Flex](https://www.gnu.org/software/flex/) (version >= 2.6)
 * [autotools](https://en.wikipedia.org/wiki/GNU_Build_System) ([autoconf](https://www.gnu.org/software/autoconf/autoconf.html), [automake](https://www.gnu.org/software/automake/), and [libtool](https://www.gnu.org/software/libtool/))
 * Optional: [Doxygen](http://www.stack.nl/~dimitri/doxygen/) and [Graphviz](http://www.graphviz.org/) for generating API documentation
 
@@ -181,7 +177,7 @@ Packages should be preferably installed via [Homebrew](https://brew.sh).
 Packages should be installed via FreeBSDs pre-compiled package repository using the `pkg` command or built from scratch using the `ports` database method.
 
 * Full "pkg" tool instructions: [handbook pkg method](https://www.freebsd.org/doc/handbook/pkgng-intro.html)
-  * `pkg install cmake python37 bison git autotools`
+  * `pkg install cmake python37 git autotools`
 OR
 * Full "ports" instructions: [handbook ports method](https://www.freebsd.org/doc/handbook/ports-using.html)
   * `portsnap fetch`
@@ -214,12 +210,6 @@ Note: Although RetDec now supports a system-wide installation ([#94](https://git
 * macOS:
   * `cd retdec`
   * `mkdir build && cd build`
-  * ```sh
-    # Apple ships old Flex & Bison, so Homebrew versions should be used.
-    export CMAKE_INCLUDE_PATH="/usr/local/opt/flex/include"
-    export CMAKE_LIBRARY_PATH="/usr/local/opt/flex/lib;/usr/local/opt/bison/lib"
-    export PATH="/usr/local/opt/flex/bin:/usr/local/opt/bison/bin:$PATH"
-    ```
   * `cmake .. -DCMAKE_INSTALL_PREFIX=<path>`
   * `make -jN` (`N` is the number of processes to use for parallel build, typically number of cores + 1 gives fastest compilation time)
   * `make install`
@@ -229,12 +219,12 @@ Note: Although RetDec now supports a system-wide installation ([#94](https://git
   * `cd retdec`
   * `mkdir build && cd build`
   * ```sh
-    # FreeBSD (and other BSDs) do need cmake, python3, bison, git, autotools. Flex and perl are pre-installed in the OS but check versions.
+    # FreeBSD (and other BSDs) do need cmake, python3, git, autotools. Perl is pre-installed in the OS but check its version.
     # Later versions may be available for each of the packages.
     # See what is installed:
-    sudo pkg info cmake python37 bison autotools
+    sudo pkg info cmake python37 autotools
     # Install/upgrade them:
-    sudo pkg install cmake python37 bison autotools
+    sudo pkg install cmake python37 autotools
     ```
   * `cmake .. -DCMAKE_INSTALL_PREFIX=<path>`
   * `make -jN` (`N` is the number of processes to use for parallel build, typically number of cores + 1 gives fastest compilation time)
@@ -242,7 +232,7 @@ Note: Although RetDec now supports a system-wide installation ([#94](https://git
 
 You have to pass the following parameters to `cmake`:
 * `-DCMAKE_INSTALL_PREFIX=<path>` to set the installation path to `<path>`. Quote the path if you are using backslashes on Windows (e.g. `-DCMAKE_INSTALL_PREFIX="C:\retdec"`).
-* (Windows only) `-G<generator>` is `-G"Visual Studio 14 2015"` for 32-bit build using Visual Studio 2015, or `-G"Visual Studio 14 2015 Win64"` for 64-bit build using Visual Studio 2015. Later versions of Visual Studio may be used.
+* (Windows only) `-G<generator>` is `-G"Visual Studio 15 2017"` for 32-bit build using Visual Studio 2017, or `-G"Visual Studio 15 2017 Win64"` for 64-bit build using Visual Studio 2017. Later versions of Visual Studio may be used.
 
 You can pass the following additional parameters to `cmake`:
 * `-DRETDEC_DOC=ON` to build with API documentation (requires Doxygen and Graphviz, disabled by default).
@@ -252,7 +242,10 @@ You can pass the following additional parameters to `cmake`:
 * `-DRETDEC_COMPILE_YARA=OFF` to disable YARA rules compilation at installation step (enabled by default).
 * `-DCMAKE_BUILD_TYPE=Debug` to build with debugging information, which is useful during development. By default, the project is built in the `Release` mode. This has no effect on Windows, but the same thing can be achieved by running `cmake --build .` with the `--config Debug` parameter.
 * `-DCMAKE_PROGRAM_PATH=<path>` to use Perl at `<path>` (probably useful only on Windows).
-* `-D<dep>_LOCAL_DIR=<path>` where `<dep>` is from `{CAPSTONE, ELFIO, GOOGLETEST, JSONCPP, KEYSTONE, LIBDWARF, LLVM, PELIB, RAPIDJSON, TINYXML, YARACPP, YARAMOD}` (e.g. `-DCAPSTONE_LOCAL_DIR=<path>`), to use the local repository clone at `<path>` for RetDec dependency instead of downloading a fresh copy at build time. Multiple such options may be used at the same time.
+* `-D<dep>_LOCAL_DIR=<path>` where `<dep>` is from `{CAPSTONE, GOOGLETEST, KEYSTONE, LLVM, YARA, YARAMOD}` (e.g. `-DCAPSTONE_LOCAL_DIR=<path>`), to use the local repository clone at `<path>` for RetDec dependency instead of downloading a fresh copy at build time. Multiple such options may be used at the same time.
+* `-DRETDEC_ENABLE_<component>=ON` to build only the specified component(s) (multiple such options can be used at once), and its (theirs) dependencies. By default, all the components are built. If at least one component is enabled via this mechanism, all the other components that were not explicitly enabled (and are not needed as dependencies of enabled components) are not built. See [cmake/options.cmake](https://github.com/avast/retdec/blob/master/cmake/options.cmake) for all the available component options.
+  * `-DRETDEC_ENABLE_ALL=ON` can be used to (re-)enable all the components.
+  * Alternatively, `-DRETDEC_ENABLE=<comma-separated component list>` can be used instead of `-DRETDEC_ENABLE_<component>=ON` (e.g. `-DRETDEC_ENABLE=fileformat,loader,ctypesparser` is equivalent to `-DRETDEC_ENABLE_FILEFORMAT=ON -DRETDEC_ENABLE_LOADER=ON -DRETDEC_ENABLE_CTYPESPARSER=ON`).
 
 ## Build in Docker
 
@@ -294,7 +287,7 @@ You can use these as you wish, but keep in mind that there are no guarantees the
 
 * [Windows Server 2016, version 10.0](https://retdec-tc.avast.com/repository/download/Retdec_WinBuild/.lastSuccessful/package/retdec-master-windows-64b.zip?guest=1)
 * [Ubuntu Bionic Linux, version 18.04](https://retdec-tc.avast.com/repository/download/RetDec_LinuxBuild/.lastSuccessful/package/retdec-master-linux-64b.zip?guest=1)
-* [Mac OS X, version 10.13.4](https://retdec-tc.avast.com/repository/download/Retdec_MacBuild/.lastSuccessful/package/retdec-master-macos-64b.zip?guest=1)
+* [Mac OS X, version 10.14.6](https://retdec-tc.avast.com/repository/download/Retdec_MacBuild/.lastSuccessful/package/retdec-master-macos-64b.zip?guest=1)
 
 ## Repository Overview
 
@@ -308,7 +301,6 @@ This repository contains the following libraries:
 * `ctypes` - C++ library for representing C function data types.
 * `debugformat` - library for uniform representation of DWARF and PDB debugging information.
 * `demangler` - demangling library capable to handle names generated by the GCC/Clang, Microsoft Visual C++, and Borland C++ compilers.
-* `dwarfparser` - library for high-level representation of DWARF debugging information.
 * `fileformat` - library for parsing and uniform representation of various object file formats. Currently supporting the following formats: COFF, ELF, Intel HEX, Mach-O, PE, raw data.
 * `llvm-support` - set of LLVM related utility functions.
 * `llvmir-emul` - LLVM IR emulation library used for unit testing.
@@ -317,9 +309,11 @@ This repository contains the following libraries:
 * `macho-extractor` - library for extracting regular Mach-O binaries from fat Mach-O binaries (based on LLVM).
 * `patterngen` - binary pattern extractor library.
 * `pdbparser` - Microsoft PDB files parser library.
+* `pelib` - Microsoft Portable Executable files manipulation library.
 * `stacofin` - static code finder library.
 * `unpacker` - collection of unpacking functions.
 * `utils` - general C++ utility library.
+* `yaracpp` - C++ wrapper for YARA.
 
 This repository contains the following tools:
 * `ar-extractortool` - frontend for the ar-extractor library (installed as `retdec-ar-extractor`).
@@ -341,7 +335,6 @@ This repository contains the following tools:
 This repository contains the following scripts:
 * `retdec-decompiler.py` - the main decompilation script binding it all together. This is the tool to use for full binary-to-C decompilations.
 * Support scripts used by `retdec-decompiler.py`:
-  * `retdec-color-c.py` - decorates output C sources with IDA color tags - syntax highlighting for IDA.
   * `retdec-config.py` - decompiler's configuration file.
   * `retdec-archive-decompiler.py` - decompiles objects in the given AR archive.
   * `retdec-fileinfo.py` - a Fileinfo tool wrapper.
@@ -365,6 +358,9 @@ See the [project documentation](https://retdec-tc.avast.com/repository/download/
 ## License
 
 Copyright (c) 2017 Avast Software, licensed under the MIT license. See the [`LICENSE`](https://github.com/avast/retdec/blob/master/LICENSE) file for more details.
+
+RetDec incorporates a modified PeLib library. New modules added by Avast Software are licensed under the MIT license. The original sources are licensed under the following license:
+* Copyright (c) 2004 - 2005 Sebastian Porst (webmaster@the-interweb.com), licensed under the zlib/libpng License. See the [`LICENSE-PELIB`](https://github.com/avast/retdec/blob/master/LICENSE-PELIB) file for more details.
 
 RetDec uses third-party libraries or other resources listed, along with their licenses, in the [`LICENSE-THIRD-PARTY`](https://github.com/avast/retdec/blob/master/LICENSE-THIRD-PARTY) file.
 

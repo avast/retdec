@@ -17,8 +17,6 @@ class GotoStmtOptimizer final: public FuncOptimizer {
 public:
 	GotoStmtOptimizer(ShPtr<Module> module);
 
-	virtual ~GotoStmtOptimizer() override;
-
 	virtual std::string getId() const override { return "GotoStmt"; }
 
 private:

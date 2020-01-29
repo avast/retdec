@@ -48,10 +48,6 @@ PowerPCCallingConvention::PowerPCCallingConvention(const Abi* a) :
 	_respectsRegCouples = true;
 }
 
-PowerPCCallingConvention::~PowerPCCallingConvention()
-{
-}
-
 CallingConvention::Ptr PowerPCCallingConvention::create(const Abi* a)
 {
 	if (!a->isPowerPC())

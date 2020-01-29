@@ -24,8 +24,6 @@ TestsWithLLVMValueConverter::TestsWithLLVMValueConverter():
 		variablesManager(std::make_shared<VariablesManager>(module)),
 		converter(LLVMValueConverter::create(module, variablesManager)) {}
 
-TestsWithLLVMValueConverter::~TestsWithLLVMValueConverter() {}
-
 /**
 * @brief Assertion that BIR binary expression @a expr has two operands, when
 *        both are variables and first is named "arg1" and second is named "arg2".

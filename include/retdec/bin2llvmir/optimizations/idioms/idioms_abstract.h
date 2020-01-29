@@ -35,7 +35,7 @@ protected:
 	llvm::Module * getModule() const { return m_module; }
 
 	virtual bool doAnalysis(llvm::Function &, llvm::Pass *) = 0;
-	virtual ~IdiomsAbstract() {}
+	virtual ~IdiomsAbstract() = default;
 
 	bool findBranchDependingOn(llvm::BranchInst ** br, llvm::BasicBlock & bb,
 		const llvm::Value * val) const;

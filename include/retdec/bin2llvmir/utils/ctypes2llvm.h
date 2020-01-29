@@ -22,7 +22,7 @@ class Ctypes2LlvmTypeVisitor: public retdec::ctypes::Visitor
 {
 public:
 	Ctypes2LlvmTypeVisitor(llvm::Module* m, Config* c);
-	virtual ~Ctypes2LlvmTypeVisitor() override;
+	virtual ~Ctypes2LlvmTypeVisitor() override = default;
 
 	virtual void visit(
 		const std::shared_ptr<retdec::ctypes::ArrayType>&) override;

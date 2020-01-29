@@ -25,11 +25,6 @@ DerefAddressOptimizer::DerefAddressOptimizer(ShPtr<Module> module):
 		PRECONDITION_NON_NULL(module);
 	}
 
-/**
-* @brief Destructs the optimizer.
-*/
-DerefAddressOptimizer::~DerefAddressOptimizer() {}
-
 void DerefAddressOptimizer::visit(ShPtr<DerefOpExpr> expr) {
 	expr->getOperand()->accept(this);
 

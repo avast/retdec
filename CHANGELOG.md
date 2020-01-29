@@ -9,6 +9,7 @@
 * New Feature: Added presentation of missing dependencies of PE files in `retdec-fileinfo` ([#585](https://github.com/avast/retdec/pull/585)).
 * New Feature: Added presentation of anomalies of PE files in `retdec-fileinfo` ([#415](https://github.com/avast/retdec/issues/415), [#570](https://github.com/avast/retdec/pull/570)).
 * New Feature: Added heuristic detection of StarForce, SecuROM, SafeDisc, MPRMMGVA, ActiveMark, Petite, and RLPack ([#600](https://github.com/avast/retdec/pull/600), [#607](https://github.com/avast/retdec/pull/607), [#615](https://github.com/avast/retdec/pull/615)).
+* New Feature: Added control flow related information to RetDec config ([#646](https://github.com/avast/retdec/issues/646)).
 * Enhancement: Improved handling of ELF object files and ELF thunks (implemented in PR [#577](https://github.com/avast/retdec/pull/577), solved issues [#184](https://github.com/avast/retdec/issues/184), [#480](https://github.com/avast/retdec/issues/480), and partially solved [#201](https://github.com/avast/retdec/issues/201)).
 * Enhancement: Demangler rewritten ([#95](https://github.com/avast/retdec/issues/95)).
 * Enhancement: Added macOS and Linux (Ubuntu, Debian, Fedora) release builds ([#526](https://github.com/avast/retdec/issues/526)).
@@ -17,6 +18,21 @@
 * Enhancement: Updated LLVM to version 8.0.0 ([#110](https://github.com/avast/retdec/issues/110)).
 * Enhancement: Updated YARA to version 3.9 ([#527](https://github.com/avast/retdec/pull/527)).
 * Enhancement: Updated OpenSSL to version 1.1.1c ([#601](https://github.com/avast/retdec/pull/601)). This fixes build of OpenSSL on macOS Mojave ([#439](https://github.com/avast/retdec/issues/439)).
+* Enhancement: Added support for relocations that pair multiple `R_MIPS_LO16` against a single `R_MIPS_HI16` ([#627](https://github.com/avast/retdec/issues/627), [#628](https://github.com/avast/retdec/pull/628)).
+* Enhancement: Added handling of all x86 FPU instructions in assembly to LLVM IR translation ([#394](https://github.com/avast/retdec/issues/394), [#643](https://github.com/avast/retdec/pull/643)).
+* Enhancement: All registers are localized - i.e. transformed from global variables to local variables ([#652](https://github.com/avast/retdec/issues/652)). This significantly (20% on average) speeds up the decompilation process and greatly reduces noise in output.
+* Enhancement: Added CMake options to build and install only specific targets ([#510](https://github.com/avast/retdec/issues/510)).
+* Enhancement: Switched from C++14 to C++17 ([#650](https://github.com/avast/retdec/issues/650)).
+* Enhancement: Replaced uses of `mpark::variant` from `deps/variant` with standard C++17 `std::variant`. Removed the `variant` dependency.
+* Enhancement: Updated Yaramod to version v3.0.0 ([#680](https://github.com/avast/retdec/pull/680)). RetDec no longer requires Flex and Bison. This fixes [#103](https://github.com/avast/retdec/issues/103).
+* Enhancement: Take out most of the types from `config` library and place them to a separate `common` library that could be used across an entire RetDec source base ([#686](https://github.com/avast/retdec/issues/686)).
+* Enhancement: `retdec-fileinfo` is now able to produce human-readable representation of a product name and VS version from Rich header ([#691](https://github.com/avast/retdec/pull/691)).
+* Enhancement: Reduced RetDec's external dependencies:
+   * The sources of the following 3rd-party projects were moved from their own repositories directly to the main RetDec repository (to `/deps/`): ELFIO, RapidJSON, TinyXML2.
+   * The sources of the following Avast projects were moved from their own repositories directly to the main RetDec repository (to `/src/`): Yaracpp, PeLib.
+   * The following 3rd-party dependencies use upstream project repositories, not modified Avast forks as before: Capstone, Yara.
+   * The following dependencies are no longer needed: JsonCpp, Libdwarf, Libelf.
+* Fix: Increased the limit for the number of entries in import directory when deciding whether a PE file is corrupted or not ([avast/pelib#13](https://github.com/avast/pelib/pull/13)).
 * Fix: Fixed build on BSD systems ([#598](https://github.com/avast/retdec/pull/598)).
 * Fix: Resources which are located in the different section than resource tree are now properly parsed ([#596](https://github.com/avast/retdec/pull/596)).
 * Fix: Version information which contained strings shorter than reported are now properly parsed ([#596](https://github.com/avast/retdec/pull/596)).
@@ -27,7 +43,12 @@
 * Fix: Fixed build on Microsoft Windows via MSYS2 ([#606](https://github.com/avast/retdec/pulls/606)).
 * Fix: Fixed build on macOS Mojave by updating OpenSSL and using `xcrun` ([#439](https://github.com/avast/retdec/issues/439)).
 * Fix: Fixed computation of the _"RVA of the import name is invalid"_ loader error ([avast/pelib#11](https://github.com/avast/pelib/pull/11)).
+* Fix: Fixed computation of the _"Import directory is cut"_ loader error ([avast/pelib#17](https://github.com/avast/pelib/pull/17)).
 * Fix: Export ordinals are now correctly calculated as relative to the base ([#612](https://github.com/avast/retdec/issues/612), [avast/pelib#10](https://github.com/avast/pelib/pull/10)).
+* Fix: Fixed crash in the decoding phase ([#637](https://github.com/avast/retdec/issues/637), [#641](https://github.com/avast/retdec/pull/641)).
+* Fix: Fixed global variable naming issue ([#636](https://github.com/avast/retdec/issues/636), [#645](https://github.com/avast/retdec/pull/645)).
+* Fix: Fixed binary to LLVM IR translation of some MIPS instructions ([#633](https://github.com/avast/retdec/issues/633)), and made the translation process less error prone altogether ([#672](https://github.com/avast/retdec/pull/672)).
+* Fix: Fixed incorrect translation of PHI nodes in `llvmir2hll` ([#658](https://github.com/avast/retdec/issues/658)).
 
 # v3.3 (2019-03-18)
 

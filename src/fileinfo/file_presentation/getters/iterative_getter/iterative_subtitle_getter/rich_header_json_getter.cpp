@@ -26,16 +26,10 @@ RichHeaderJsonGetter::RichHeaderJsonGetter(FileInformation &fileInfo) : Iterativ
 	title = "richHeader";
 	subtitle = "richHeaderRecords";
 	commonHeaderElements.push_back("index");
-	commonHeaderElements.push_back("version");
+	commonHeaderElements.push_back("product_id");
 	commonHeaderElements.push_back("count");
-}
-
-/**
- * Destructor
- */
-RichHeaderJsonGetter::~RichHeaderJsonGetter()
-{
-
+	commonHeaderElements.push_back("product_name");
+	commonHeaderElements.push_back("vs_name");
 }
 
 std::size_t RichHeaderJsonGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const
@@ -71,10 +65,12 @@ bool RichHeaderJsonGetter::getRecord(std::size_t structIndex, std::size_t recInd
 
 	record.clear();
 	record.push_back(numToStr(recIndex));
-	const auto major = fileinfo.getRichHeaderRecordMajorVersionStr(recIndex);
-	const auto build = fileinfo.getRichHeaderRecordBuildVersionStr(recIndex);
-	record.push_back(!major.empty() && !build.empty() ? major + "." + build : "");
+	const auto productId = fileinfo.getRichHeaderRecordProductIdStr(recIndex);
+	const auto productBuild = fileinfo.getRichHeaderRecordProductBuildStr(recIndex);
+	record.push_back(!productId.empty() && !productBuild.empty() ? productId + "." + productBuild : "");
 	record.push_back(fileinfo.getRichHeaderRecordNumberOfUsesStr(recIndex));
+	record.push_back(fileinfo.getRichHeaderRecordProductNameStr(recIndex));
+	record.push_back(fileinfo.getRichHeaderRecordVisualStudioNameStr(recIndex));
 
 	return true;
 }

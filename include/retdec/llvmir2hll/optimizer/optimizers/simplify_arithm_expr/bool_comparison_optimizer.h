@@ -42,7 +42,6 @@ class ArithmExprEvaluator;
 class BoolComparisonSubOptimizer final: public SubOptimizer {
 public:
 	BoolComparisonSubOptimizer(ShPtr<ArithmExprEvaluator> arithmExprEvaluator);
-	virtual ~BoolComparisonSubOptimizer() override;
 
 	static ShPtr<SubOptimizer> create(
 		ShPtr<ArithmExprEvaluator> arithmExprEvaluator);

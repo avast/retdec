@@ -46,8 +46,6 @@ class CArrayArgOptimizer final: public FuncOptimizer {
 public:
 	CArrayArgOptimizer(ShPtr<Module> module);
 
-	virtual ~CArrayArgOptimizer() override;
-
 	virtual std::string getId() const override { return "CArrayArg"; }
 
 	/// @name Visitor Interface

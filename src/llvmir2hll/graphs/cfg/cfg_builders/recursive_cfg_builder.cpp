@@ -147,11 +147,6 @@ bool isStatementInStatements(ShPtr<Statement> stmt, ShPtr<Statement> stmts) {
 RecursiveCFGBuilder::RecursiveCFGBuilder():
 	CFGBuilder(), OrderedAllVisitor(), currNode(), firstStmtNodeMapping() {}
 
-/**
-* @brief Destructs the builder.
-*/
-RecursiveCFGBuilder::~RecursiveCFGBuilder() {}
-
 void RecursiveCFGBuilder::buildCFG() {
 	// Initialization.
 	currNode.reset();
@@ -196,7 +191,8 @@ void RecursiveCFGBuilder::visit(ShPtr<Function> func) {
 	// way.
 	// For each parameter...
 	for (const auto &param : func->getParams()) {
-		ShPtr<Statement> varDefStmt(VarDefStmt::create(param));
+		ShPtr<Statement> varDefStmt(
+			VarDefStmt::create(param, nullptr, nullptr, func->getStartAddress()));
 		cfg->stmtNodeMapping[varDefStmt] = cfg->entryNode;
 		cfg->entryNode->stmts.push_back(varDefStmt);
 	}

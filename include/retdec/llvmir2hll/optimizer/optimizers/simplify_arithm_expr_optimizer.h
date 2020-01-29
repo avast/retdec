@@ -31,8 +31,6 @@ public:
 	SimplifyArithmExprOptimizer(ShPtr<Module> module,
 		ShPtr<ArithmExprEvaluator> arithmExprEvaluator);
 
-	virtual ~SimplifyArithmExprOptimizer() override;
-
 	virtual std::string getId() const override { return "SimplifyArithmExpr"; }
 
 private:

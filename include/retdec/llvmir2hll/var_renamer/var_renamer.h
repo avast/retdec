@@ -48,8 +48,6 @@ namespace llvmir2hll {
 */
 class VarRenamer: protected OrderedAllVisitor {
 public:
-	virtual ~VarRenamer() override;
-
 	/**
 	* @brief Returns the ID of the renamer.
 	*/

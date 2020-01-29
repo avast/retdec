@@ -37,8 +37,6 @@ public:
 	static ShPtr<ModOpExpr> create(ShPtr<Expression> op1,
 		ShPtr<Expression> op2,  Variant variant = Variant::UMod);
 
-	virtual ~ModOpExpr() override;
-
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
 	virtual ShPtr<Value> clone() override;
 

@@ -18,7 +18,6 @@ class AbiPic32 : public Abi
 	//
 	public:
 		AbiPic32(llvm::Module* m, Config* c);
-		virtual ~AbiPic32();
 
 	// Types
 	//

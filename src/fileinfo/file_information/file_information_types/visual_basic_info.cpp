@@ -14,22 +14,6 @@ using namespace retdec::fileformat;
 namespace fileinfo {
 
 /**
- * Constructor
- */
-VisualBasicInfo::VisualBasicInfo() : used(false), visualBasicInfo(nullptr)
-{
-
-}
-
-/**
- * Destructor
- */
-VisualBasicInfo::~VisualBasicInfo()
-{
-
-}
-
-/**
  * Get language DLL
  * @return Visual basic language DLL
  */

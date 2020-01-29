@@ -18,7 +18,6 @@ class AbiArm : public Abi
 	//
 	public:
 		AbiArm(llvm::Module* m, Config* c);
-		virtual ~AbiArm();
 
 	// Registers.
 	//

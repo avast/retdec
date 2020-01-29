@@ -12,7 +12,7 @@
 #include <llvm/Support/FileSystem.h>
 #include <llvm/Support/raw_ostream.h>
 
-#include "retdec/utils/address.h"
+#include "retdec/common/address.h"
 #include "retdec/utils/conversion.h"
 #include "retdec/utils/string.h"
 

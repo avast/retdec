@@ -52,16 +52,19 @@ bool AsmInstructionRemover::run(Module& M)
 	for (auto& F : M.getFunctionList())
 	for (auto ai = AsmInstruction(&F); ai.isValid();)
 	{
-		// Set names to instructions.
+		// Set ASM addresses metadata to instructions.
 		//
-		unsigned c = 0;
+		llvm::MDNode* N = llvm::MDNode::get(
+			M.getContext(),
+			llvm::ValueAsMetadata::get(llvm::ConstantInt::get(
+				llvm::Type::getInt64Ty(M.getContext()),
+				ai.getAddress(),
+				false
+			))
+		);
 		for (auto& i : ai)
 		{
-			if (!i.getType()->isVoidTy())
-			{
-				i.setName(names::generateTempVariableName(ai.getAddress(), c));
-				++c;
-			}
+			i.setMetadata("insn.addr", N);
 		}
 
 		// Remove special instructions.

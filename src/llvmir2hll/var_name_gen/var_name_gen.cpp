@@ -19,11 +19,6 @@ VarNameGen::VarNameGen(std::string prefix):
 		prefix(prefix) {}
 
 /**
-* @brief Destructor.
-*/
-VarNameGen::~VarNameGen() {}
-
-/**
 * @brief Returns the prefix used by the generator.
 */
 const std::string &VarNameGen::getPrefix() const {

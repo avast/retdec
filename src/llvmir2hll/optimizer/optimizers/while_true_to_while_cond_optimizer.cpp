@@ -36,11 +36,6 @@ WhileTrueToWhileCondOptimizer::WhileTrueToWhileCondOptimizer(ShPtr<Module> modul
 		PRECONDITION_NON_NULL(module);
 	}
 
-/**
-* @brief Destructs the optimizer.
-*/
-WhileTrueToWhileCondOptimizer::~WhileTrueToWhileCondOptimizer() {}
-
 void WhileTrueToWhileCondOptimizer::visit(ShPtr<WhileLoopStmt> stmt) {
 	// First of all, visit nested and subsequent statements.
 	FuncOptimizer::visit(stmt);
@@ -179,7 +174,7 @@ void WhileTrueToWhileCondOptimizer::visit(ShPtr<WhileLoopStmt> stmt) {
 	// to the first statement of the new loop.
 	if (stmt->getBody()->getMetadata() != "") {
 		// An empty statement need to be used.
-		ShPtr<EmptyStmt> emptyStmt(EmptyStmt::create());
+		ShPtr<EmptyStmt> emptyStmt(EmptyStmt::create(nullptr, stmt->getAddress()));
 		emptyStmt->setMetadata(firstStmtMetadata);
 		stmt->getBody()->prependStatement(emptyStmt);
 	} else {

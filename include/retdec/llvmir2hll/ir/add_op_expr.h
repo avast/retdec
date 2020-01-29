@@ -29,8 +29,6 @@ public:
 	static ShPtr<AddOpExpr> create(ShPtr<Expression> op1,
 		ShPtr<Expression> op2);
 
-	virtual ~AddOpExpr() override;
-
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
 	virtual ShPtr<Value> clone() override;
 

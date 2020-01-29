@@ -40,7 +40,6 @@ class IterativeDistributionGetter : public IterativeGetter
 		/// @}
 	public:
 		IterativeDistributionGetter(FileInformation &fileInfo);
-		virtual ~IterativeDistributionGetter() override;
 
 		/// @name Getters
 		/// @{

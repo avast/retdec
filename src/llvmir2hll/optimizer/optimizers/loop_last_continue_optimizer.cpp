@@ -26,11 +26,6 @@ LoopLastContinueOptimizer::LoopLastContinueOptimizer(ShPtr<Module> module):
 		PRECONDITION_NON_NULL(module);
 	}
 
-/**
-* @brief Destructs the optimizer.
-*/
-LoopLastContinueOptimizer::~LoopLastContinueOptimizer() {}
-
 void LoopLastContinueOptimizer::visit(ShPtr<ForLoopStmt> stmt) {
 	tryToOptimize(stmt);
 

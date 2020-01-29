@@ -23,8 +23,6 @@ namespace llvmir2hll {
 */
 class SubOptimizer: public OrderedAllVisitor, private retdec::utils::NonCopyable {
 public:
-	virtual ~SubOptimizer() override;
-
 	/**
 	* @brief Returns the ID of the optimizer.
 	*/

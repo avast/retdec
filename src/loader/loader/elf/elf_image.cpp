@@ -18,7 +18,7 @@
 #include "retdec/loader/loader/elf/elf_image.h"
 #include "retdec/loader/utils/overlap_resolver.h"
 #include "retdec/loader/utils/range.h"
-#include "retdec/utils/address.h"
+#include "retdec/common/address.h"
 
 #define R_AARCH64_CALL26 283
 #define R_AARCH64_ADR_PRE 275
@@ -28,10 +28,6 @@ namespace retdec {
 namespace loader {
 
 ElfImage::ElfImage(const std::shared_ptr<retdec::fileformat::FileFormat>& fileFormat) : Image(fileFormat)
-{
-}
-
-ElfImage::~ElfImage()
 {
 }
 
@@ -111,7 +107,7 @@ void ElfImage::createExternSegment()
 	// Iterate over imports and gather functions to be created
 	for (const auto &imp : *it)
 	{
-		utils::Address a = imp->getAddress();
+		common::Address a = imp->getAddress();
 		if (a.isUndefined())
 		{
 			continue;
@@ -327,7 +323,7 @@ ElfImage::SegmentToSectionsTable ElfImage::createSegmentToSectionsTable()
 			return segToSecsTable;
 		}
 
-		retdec::utils::Range<std::uint64_t> segRange = retdec::utils::Range<std::uint64_t>(address, endAddress);
+		retdec::common::Range<std::uint64_t> segRange = retdec::common::Range<std::uint64_t>(address, endAddress);
 
 		for (const auto& sec : sections)
 		{
@@ -360,7 +356,7 @@ ElfImage::SegmentToSectionsTable ElfImage::createSegmentToSectionsTable()
 				continue;
 			}
 
-			auto overlapResult = OverlapResolver::resolve(segRange, retdec::utils::Range<std::uint64_t>(start, end));
+			auto overlapResult = OverlapResolver::resolve(segRange, retdec::common::Range<std::uint64_t>(start, end));
 			switch (overlapResult.getOverlap())
 			{
 				// In case of no overlap, this section does not belong to the current segment, skip it
@@ -420,7 +416,7 @@ const Segment* ElfImage::addSegment(const retdec::fileformat::SecSeg* secSeg, st
 	std::vector<Segment*> segmentsToRemove;
 	for (const auto& segment : getSegments())
 	{
-		auto overlapResult = OverlapResolver::resolve(segment->getAddressRange(), retdec::utils::Range<std::uint64_t>(start, end));
+		auto overlapResult = OverlapResolver::resolve(segment->getAddressRange(), retdec::common::Range<std::uint64_t>(start, end));
 		switch (overlapResult.getOverlap())
 		{
 			// In case of no overlap, just do nothing.
@@ -433,14 +429,14 @@ const Segment* ElfImage::addSegment(const retdec::fileformat::SecSeg* secSeg, st
 			// Shrink existing segment using the second range from the result.
 			case Overlap::OverStart:
 			{
-				const retdec::utils::Range<std::uint64_t>& newRange = overlapResult.getRanges()[1];
+				const retdec::common::Range<std::uint64_t>& newRange = overlapResult.getRanges()[1];
 				segment->shrink(newRange.getStart(), newRange.getSize());
 				break;
 			}
 			// Shrink existing segment using the first range from the result.
 			case Overlap::OverEnd:
 			{
-				const retdec::utils::Range<std::uint64_t>& newRange = overlapResult.getRanges()[0];
+				const retdec::common::Range<std::uint64_t>& newRange = overlapResult.getRanges()[0];
 				segment->shrink(newRange.getStart(), newRange.getSize());
 				break;
 			}
@@ -448,8 +444,8 @@ const Segment* ElfImage::addSegment(const retdec::fileformat::SecSeg* secSeg, st
 			// Shrink the copied one with the third range from the result.
 			case Overlap::InMiddle:
 			{
-				const retdec::utils::Range<std::uint64_t>& newRange1 = overlapResult.getRanges()[0];
-				const retdec::utils::Range<std::uint64_t>& newRange2 = overlapResult.getRanges()[2];
+				const retdec::common::Range<std::uint64_t>& newRange1 = overlapResult.getRanges()[0];
+				const retdec::common::Range<std::uint64_t>& newRange2 = overlapResult.getRanges()[2];
 
 				auto segmentCopy = std::make_unique<Segment>(*segment.get());
 				segment->shrink(newRange1.getStart(), newRange1.getSize());
@@ -543,7 +539,7 @@ void ElfImage::fixBssSegments()
 					if (static_cast<const retdec::fileformat::ElfSegment*>(phdr)->getElfType() != PT_LOAD)
 						continue;
 
-					if (retdec::utils::Range<std::uint64_t>(phdr->getAddress(), phdr->getEndAddress()).contains(bssSegment->getAddress()))
+					if (retdec::common::Range<std::uint64_t>(phdr->getAddress(), phdr->getEndAddress()).contains(bssSegment->getAddress()))
 						programHeader = static_cast<const retdec::fileformat::ElfSegment*>(phdr);
 				}
 
@@ -761,6 +757,7 @@ void ElfImage::resolveRelocation(const retdec::fileformat::Relocation& rel, cons
 		case retdec::fileformat::Architecture::MIPS:
 		{
 			static const retdec::fileformat::Relocation* lastMipsHi16 = nullptr;
+			static const retdec::fileformat::Relocation* prevMipsHi16 = nullptr;
 
 			switch (rel.getType())
 			{
@@ -791,6 +788,11 @@ void ElfImage::resolveRelocation(const retdec::fileformat::Relocation& rel, cons
 				}
 				case R_MIPS_LO16:
 				{
+					// MIPS abi allows a single hi16 value to be used with multiple lo16 values
+					// if lo16 is found without a matching hi16, use the previous hi16 value
+					if (lastMipsHi16 == nullptr)
+						lastMipsHi16 = prevMipsHi16;
+
 					if (lastMipsHi16 == nullptr)
 						return;
 
@@ -806,6 +808,7 @@ void ElfImage::resolveRelocation(const retdec::fileformat::Relocation& rel, cons
 					valueLo = value & 0xFFFF;
 					set2Byte(lastMipsHi16->getAddress() + 2, valueHi);
 					set2Byte(rel.getAddress() + 2, valueLo);
+					prevMipsHi16 = lastMipsHi16;
 					lastMipsHi16 = nullptr;
 					break;
 				}

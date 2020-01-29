@@ -29,14 +29,6 @@ IterativeGetter::IterativeGetter(FileInformation &fileInfo) : fileinfo(fileInfo)
 }
 
 /**
- * Destructor
- */
-IterativeGetter::~IterativeGetter()
-{
-
-}
-
-/**
  * Get number of stored structures (e.g. number of symbol tables)
  * @return Number of stored structures
  */

@@ -4,6 +4,8 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
+// #include <iostream>
+
 #include <llvm/IR/BasicBlock.h>
 
 #include "retdec/llvmir2hll/ir/statement.h"
@@ -16,10 +18,6 @@ using retdec::utils::hasItem;
 
 namespace retdec {
 namespace llvmir2hll {
-
-LabelsHandler::LabelsHandler() = default;
-
-LabelsHandler::~LabelsHandler() = default;
 
 /**
 * @brief Returns the label of the given basic block.
@@ -34,6 +32,13 @@ std::string LabelsHandler::getLabel(const llvm::BasicBlock *bb) const {
 	);
 }
 
+std::string LabelsHandler::getLabel(ShPtr<Statement> stmt) const {
+	auto a = stmt->getAddress();
+	return a.isDefined()
+			? LLVMSupport::getBasicBlockLabelPrefix() + a.toHexPrefixString()
+			: std::string();
+}
+
 /**
 * @brief Removes the given label from the set of used labels.
 */
@@ -46,13 +51,22 @@ void LabelsHandler::removeLabel(const std::string &label) {
 */
 void LabelsHandler::setGotoTargetLabel(ShPtr<Statement> target,
 		const llvm::BasicBlock *targetBB) {
-	auto label = createLabelFor(targetBB);
+// std::cout << target << " @ " << targetBB->getName().str() << " @ " << target->getAddress() << std::endl;
+	auto label = createLabelFor(targetBB, target);
 	target->setLabel(label);
 	markLabelAsUsed(label);
 }
 
-std::string LabelsHandler::createLabelFor(const llvm::BasicBlock *bb) const {
+std::string LabelsHandler::createLabelFor(
+		const llvm::BasicBlock *bb,
+		ShPtr<Statement> stmt) const {
 	auto label = getLabel(bb);
+	if (label.empty()) {
+		label = getLabel(stmt);
+	}
+	if (label.empty()) {
+		label = LLVMSupport::getBasicBlockLabelPrefix() + "unknown";
+	}
 	label = ensureLabelIsValid(label);
 	label = ensureLabelIsUnique(label);
 	return label;

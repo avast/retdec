@@ -33,8 +33,6 @@ class DerefAddressOptimizer final: public FuncOptimizer {
 public:
 	DerefAddressOptimizer(ShPtr<Module> module);
 
-	virtual ~DerefAddressOptimizer() override;
-
 	virtual std::string getId() const override { return "DerefAddress"; }
 
 private:

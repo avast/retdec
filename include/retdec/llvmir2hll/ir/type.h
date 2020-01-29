@@ -19,10 +19,10 @@ namespace llvmir2hll {
 */
 class Type: public Value {
 public:
-	virtual ~Type() = 0;
+	virtual ~Type() = default;
 
 protected:
-	Type();
+	Type() = default;
 };
 
 } // namespace llvmir2hll

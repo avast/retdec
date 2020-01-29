@@ -39,8 +39,6 @@ public:
 	static ShPtr<ConstInt> create(const llvm::APSInt &value);
 	static ShPtr<ConstInt> getTwoToPositivePower(ShPtr<ConstInt> x);
 
-	virtual ~ConstInt() override;
-
 	virtual ShPtr<Value> clone() override;
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
 	virtual ShPtr<retdec::llvmir2hll::Type> getType() const override;

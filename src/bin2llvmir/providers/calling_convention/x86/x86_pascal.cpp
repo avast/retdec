@@ -28,10 +28,6 @@ PascalCallingConvention::PascalCallingConvention(const Abi* a) :
 	_stackParamOrder = LTR;
 }
 
-PascalCallingConvention::~PascalCallingConvention()
-{
-}
-
 CallingConvention::Ptr PascalCallingConvention::create(const Abi* a)
 {
 	if (!a->isX86())

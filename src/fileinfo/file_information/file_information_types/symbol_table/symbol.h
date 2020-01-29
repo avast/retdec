@@ -24,14 +24,11 @@ class Symbol
 		std::string bind;           ///< symbol bind
 		std::string other;          ///< other information
 		std::string linkToSection;  ///< link to associated section
-		unsigned long long index;   ///< index of symbol in symbol table
-		unsigned long long value;   ///< value of symbol
-		unsigned long long address; ///< symbol address
-		unsigned long long size;    ///< size associated with symbol
+		unsigned long long index = std::numeric_limits<unsigned long long>::max();   ///< index of symbol in symbol table
+		unsigned long long value = std::numeric_limits<unsigned long long>::max();   ///< value of symbol
+		unsigned long long address = std::numeric_limits<unsigned long long>::max(); ///< symbol address
+		unsigned long long size = std::numeric_limits<unsigned long long>::max();    ///< size associated with symbol
 	public:
-		Symbol();
-		~Symbol();
-
 		/// @name Getters
 		/// @{
 		std::string getName() const;

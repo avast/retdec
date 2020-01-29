@@ -52,7 +52,7 @@ class Filter
 
 	public:
 		Filter(const Abi* _abi, const CallingConvention* _cc);
-		virtual ~Filter();
+		virtual ~Filter() = default;
 
 		void filterDefinition(DataFlowEntry* de) const;
 		void filterCalls(DataFlowEntry* de) const;

@@ -45,8 +45,6 @@ class LLVMIR2BIRConverter: private retdec::utils::NonCopyable {
 public:
 	static ShPtr<LLVMIR2BIRConverter> create(llvm::Pass *basePass);
 
-	~LLVMIR2BIRConverter();
-
 	ShPtr<Module> convert(llvm::Module *llvmModule,
 		const std::string &moduleName, ShPtr<Semantics> semantics,
 		ShPtr<Config> config, bool enableDebug = false);

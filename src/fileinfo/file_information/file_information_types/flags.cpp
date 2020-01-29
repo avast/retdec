@@ -13,22 +13,6 @@
 namespace fileinfo {
 
 /**
- * Constructor
- */
-Flags::Flags() : size(0), flagsArray(0)
-{
-
-}
-
-/**
- * Destructor
- */
-Flags::~Flags()
-{
-
-}
-
-/**
  * Get number of flags
  * @return Number of binary flags
  */

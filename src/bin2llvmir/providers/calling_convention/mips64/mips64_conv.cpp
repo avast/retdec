@@ -46,10 +46,6 @@ Mips64CallingConvention::Mips64CallingConvention(const Abi* a) :
 	_respectsRegCouples = true;
 }
 
-Mips64CallingConvention::~Mips64CallingConvention()
-{
-}
-
 CallingConvention::Ptr Mips64CallingConvention::create(const Abi* a)
 {
 	if (!a->isMips64())

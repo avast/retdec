@@ -28,11 +28,6 @@ BinaryOpExpr::BinaryOpExpr(ShPtr<Expression> op1, ShPtr<Expression> op2):
 	PRECONDITION_NON_NULL(op2);
 }
 
-/**
-* @brief Destructs the operator.
-*/
-BinaryOpExpr::~BinaryOpExpr() {}
-
 ShPtr<Type> BinaryOpExpr::getType() const {
 	ShPtr<Type> op1Type(op1->getType());
 	ShPtr<Type> op2Type(op2->getType());

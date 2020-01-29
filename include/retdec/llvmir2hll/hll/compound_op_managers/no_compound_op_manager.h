@@ -22,8 +22,6 @@ class NoCompoundOpManager final: public CompoundOpManager {
 public:
 	NoCompoundOpManager();
 
-	virtual ~NoCompoundOpManager() override;
-
 	virtual std::string getId() const override;
 };
 

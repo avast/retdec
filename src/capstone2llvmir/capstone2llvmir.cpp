@@ -191,10 +191,5 @@ std::unique_ptr<Capstone2LlvmIrTranslator> Capstone2LlvmIrTranslator::createXcor
 	return nullptr;
 }
 
-Capstone2LlvmIrTranslator::~Capstone2LlvmIrTranslator()
-{
-
-}
-
 } // namespace capstone2llvmir
 } // namespace retdec

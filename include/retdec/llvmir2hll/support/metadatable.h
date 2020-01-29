@@ -19,11 +19,6 @@ template<typename T>
 class Metadatable {
 public:
 	/**
-	* @brief Destructs the object.
-	*/
-	~Metadatable() {}
-
-	/**
 	* @brief Attaches new metadata.
 	*
 	* @param[in] data Metadata to be attached.

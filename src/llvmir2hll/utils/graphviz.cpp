@@ -20,16 +20,6 @@ namespace retdec {
 namespace llvmir2hll {
 
 /**
-* @brief Default constructor.
-*/
-UtilsGraphviz::UtilsGraphviz() {}
-
-/**
-* @brief Destructor.
-*/
-UtilsGraphviz::~UtilsGraphviz() {}
-
-/**
 * @brief Creates a label from the given @a str so it can be used in labels in
 *        the @c dot format.
 */

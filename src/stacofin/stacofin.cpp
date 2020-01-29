@@ -9,7 +9,7 @@
 #include <string>
 
 #include "retdec/stacofin/stacofin.h"
-#include "yaracpp/yara_detector/yara_detector.h"
+#include "retdec/yaracpp/yara_detector/yara_detector.h"
 #include "retdec/loader/loader/image.h"
 #include "retdec/utils/string.h"
 
@@ -21,9 +21,10 @@
 	else std::cout << std::showbase
 static bool debug_enabled = false;
 
+using namespace retdec::common;
+using namespace retdec::loader;
 using namespace retdec::utils;
 using namespace yaracpp;
-using namespace retdec::loader;
 
 namespace retdec {
 namespace stacofin {
@@ -335,14 +336,14 @@ std::set<std::string> selectSignaturePaths(
 
 void collectImports(
 		const retdec::loader::Image* image,
-		std::map<utils::Address, std::string>& imports)
+		std::map<common::Address, std::string>& imports)
 {
 	LOG << "\t collectImports():" << std::endl;
 
 	if (auto* impTbl = image->getFileFormat()->getImportTable())
 	for (const auto &imp : *impTbl)
 	{
-		retdec::utils::Address addr = imp->getAddress();
+		retdec::common::Address addr = imp->getAddress();
 		if (addr.isUndefined())
 		{
 			continue;
@@ -410,8 +411,8 @@ std::string dumpDetectedFunctions(
 Reference::Reference(
 		std::size_t o,
 		const std::string& n,
-		utils::Address a,
-		utils::Address t,
+		common::Address a,
+		common::Address t,
 		DetectedFunction* tf,
 		bool k)
 		:
@@ -544,7 +545,7 @@ void DetectedFunction::setReferences(const std::string &refsString)
 /**
  * Setting an address will also fix addresses of all the function's references.
  */
-void DetectedFunction::setAddress(retdec::utils::Address a)
+void DetectedFunction::setAddress(retdec::common::Address a)
 {
 	address = a;
 	for (auto& r : references)
@@ -553,7 +554,7 @@ void DetectedFunction::setAddress(retdec::utils::Address a)
 	}
 }
 
-retdec::utils::Address DetectedFunction::getAddress() const
+retdec::common::Address DetectedFunction::getAddress() const
 {
 	return address;
 }
@@ -563,20 +564,6 @@ retdec::utils::Address DetectedFunction::getAddress() const
 // Finder.
 //==============================================================================
 //
-
-/**
- * Default constructor.
- */
-Finder::Finder()
-{
-}
-
-/**
- * Default destructor.
- */
-Finder::~Finder()
-{
-}
 
 /**
  * Return detected code coverage.
@@ -857,7 +844,7 @@ void Finder::solveReferences()
 	}
 }
 
-utils::Address Finder::getAddressFromRef(utils::Address ref)
+common::Address Finder::getAddressFromRef(common::Address ref)
 {
 	if (_config->architecture.isX86())
 	{
@@ -882,7 +869,7 @@ utils::Address Finder::getAddressFromRef(utils::Address ref)
 	}
 }
 
-utils::Address Finder::getAddressFromRef_x86(utils::Address ref)
+common::Address Finder::getAddressFromRef_x86(common::Address ref)
 {
 	uint64_t val = 0;
 	if (!_image->getWord(ref, val))
@@ -997,7 +984,7 @@ bool isAddInsn_mips(csh ce, cs_insn* i)
  * On MIPS, reference is an instruction that needs to be disassembled and
  * inspected for reference target.
  */
-utils::Address Finder::getAddressFromRef_mips(utils::Address ref)
+common::Address Finder::getAddressFromRef_mips(common::Address ref)
 {
 	uint64_t addr = ref;
 	ByteData data = _image->getRawSegmentData(ref);
@@ -1088,7 +1075,7 @@ utils::Address Finder::getAddressFromRef_mips(utils::Address ref)
  * a word after the function that just needs to be read (it should point
  * somewhere to the loaded image, but that is checked later).
  */
-utils::Address Finder::getAddressFromRef_arm(utils::Address ref)
+common::Address Finder::getAddressFromRef_arm(common::Address ref)
 {
 	std::uint64_t ci = 0;
 	if (_image->getWord(ref, ci))
@@ -1166,7 +1153,7 @@ utils::Address Finder::getAddressFromRef_arm(utils::Address ref)
 	return Address();
 }
 
-utils::Address Finder::getAddressFromRef_ppc(utils::Address ref)
+common::Address Finder::getAddressFromRef_ppc(common::Address ref)
 {
 	std::uint64_t ci = 0;
 	if (_image->getWord(ref, ci))

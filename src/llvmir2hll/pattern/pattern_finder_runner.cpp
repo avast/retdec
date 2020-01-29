@@ -11,16 +11,6 @@ namespace retdec {
 namespace llvmir2hll {
 
 /**
-* @brief Constructs a runner of pattern finders.
-*/
-PatternFinderRunner::PatternFinderRunner() {}
-
-/**
-* @brief Destructs the finder.
-*/
-PatternFinderRunner::~PatternFinderRunner() {}
-
-/**
 * @brief Runs all the given pattern finders in @a pfs on @a module.
 *
 * @param[in] pfs Pattern finders to be run.

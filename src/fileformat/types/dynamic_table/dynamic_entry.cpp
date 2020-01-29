@@ -10,22 +10,6 @@ namespace retdec {
 namespace fileformat {
 
 /**
- * Constructor
- */
-DynamicEntry::DynamicEntry() : type(0), value(0)
-{
-
-}
-
-/**
- * Destructor
- */
-DynamicEntry::~DynamicEntry()
-{
-
-}
-
-/**
  * Get type of dynamic entry
  * @return Type of dynamic entry
  */

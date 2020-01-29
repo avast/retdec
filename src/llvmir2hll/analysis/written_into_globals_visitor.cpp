@@ -34,11 +34,6 @@ WrittenIntoGlobalsVisitor::WrittenIntoGlobalsVisitor(ShPtr<Module> module):
 	OrderedAllVisitor(), module(module), globalVars(module->getGlobalVars()),
 			writtenIntoGlobals(), writing(false) {}
 
-/**
-* @brief Destructs the visitor.
-*/
-WrittenIntoGlobalsVisitor::~WrittenIntoGlobalsVisitor() {}
-
 /*
 * @brief Returns the set of all written-into variables in the given function.
 *

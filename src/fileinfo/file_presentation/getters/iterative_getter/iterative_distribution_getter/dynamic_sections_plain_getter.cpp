@@ -45,14 +45,6 @@ DynamicSectionsPlainGetter::DynamicSectionsPlainGetter(FileInformation &fileInfo
 	loadRecords();
 }
 
-/**
- * Destructor
- */
-DynamicSectionsPlainGetter::~DynamicSectionsPlainGetter()
-{
-
-}
-
 std::size_t DynamicSectionsPlainGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const
 {
 	if(structIndex >= numberOfStructures)

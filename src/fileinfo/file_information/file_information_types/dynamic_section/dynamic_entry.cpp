@@ -10,22 +10,6 @@
 namespace fileinfo {
 
 /**
- * Constructor
- */
-DynamicEntry::DynamicEntry() : value(std::numeric_limits<unsigned long long>::max())
-{
-
-}
-
-/**
- * Destructor
- */
-DynamicEntry::~DynamicEntry()
-{
-
-}
-
-/**
  * Get type of dynamic entry
  * @return Type of dynamic entry
  */

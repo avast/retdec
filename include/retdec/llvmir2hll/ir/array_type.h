@@ -32,8 +32,6 @@ public:
 public:
 	static ShPtr<ArrayType> create(ShPtr<Type> elemType, const Dimensions &dims);
 
-	virtual ~ArrayType() override;
-
 	virtual ShPtr<Value> clone() override;
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
 

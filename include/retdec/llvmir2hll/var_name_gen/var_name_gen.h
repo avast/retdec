@@ -25,7 +25,7 @@ namespace llvmir2hll {
 */
 class VarNameGen: private retdec::utils::NonCopyable {
 public:
-	virtual ~VarNameGen();
+	virtual ~VarNameGen() = default;
 
 	/**
 	* @brief Returns the ID of the generator.

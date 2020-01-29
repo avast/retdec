@@ -35,22 +35,22 @@ std::string GCCGeneralSemantics::getId() const {
 	return GCC_GENERAL_SEMANTICS_ID;
 }
 
-Maybe<std::string> GCCGeneralSemantics::getCHeaderFileForFunc(
+std::optional<std::string> GCCGeneralSemantics::getCHeaderFileForFunc(
 		const std::string &funcName) const {
 	return semantics::gcc_general::getCHeaderFileForFunc(funcName);
 }
 
-Maybe<std::string> GCCGeneralSemantics::getNameOfVarStoringResult(
+std::optional<std::string> GCCGeneralSemantics::getNameOfVarStoringResult(
 		const std::string &funcName) const {
 	return semantics::gcc_general::getNameOfVarStoringResult(funcName);
 }
 
-Maybe<std::string> GCCGeneralSemantics::getNameOfParam(
+std::optional<std::string> GCCGeneralSemantics::getNameOfParam(
 		const std::string &funcName, unsigned paramPos) const {
 	return semantics::gcc_general::getNameOfParam(funcName, paramPos);
 }
 
-Maybe<IntStringMap> GCCGeneralSemantics::getSymbolicNamesForParam(
+std::optional<IntStringMap> GCCGeneralSemantics::getSymbolicNamesForParam(
 		const std::string &funcName, unsigned paramPos) const {
 	return semantics::gcc_general::getSymbolicNamesForParam(funcName, paramPos);
 }

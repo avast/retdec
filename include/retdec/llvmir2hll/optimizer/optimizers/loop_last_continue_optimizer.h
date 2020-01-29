@@ -51,8 +51,6 @@ class LoopLastContinueOptimizer final: public FuncOptimizer {
 public:
 	LoopLastContinueOptimizer(ShPtr<Module> module);
 
-	virtual ~LoopLastContinueOptimizer() override;
-
 	virtual std::string getId() const override { return "LoopLastContinue"; }
 
 private:

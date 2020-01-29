@@ -24,11 +24,9 @@ ARM_ORDS_DIR = os.path.join(INSTALL_SUPPORT_DIR, 'arm', 'ords')
 # X86-specific configuration
 X86_ORDS_DIR = os.path.join(INSTALL_SUPPORT_DIR, 'x86', 'ords')
 
+# TODO: disable-inlining
+
 """BIN2LLVMIR parameters
-The following list of passes is -O3
-   * with -disable-inlining -disable-simplify-libcalls -constprop -die -dce -ipconstprop -instnamer
-   * without -internalize -inline -inline-cost -notti -deadargelim -argpromotion -simplify-libcalls -loop-unroll
-      -loop-unswitch -sroa -tailcallelim -functionattrs -memcpyopt -prune-eh
 
 The following options are useful during debugging of bin2llvmirl optimizations.
 parameters beginning with -disable-* may be included only once, which is the
@@ -43,29 +41,18 @@ parameters beginning with -disable-* may be included only once, which is the
  - Optimization -phi2seq is needed to be run at the end and not to run two
  times. This is the reason why it is placed at the very end.
 """
-BIN2LLVMIR_PARAMS_DISABLES = [
-    '-disable-inlining',
-    '-disable-simplify-libcalls',
-]
 BIN2LLVMIR_LLVM_PASSES_ONLY = [
     '-instcombine',
     '-tbaa',
-    '-targetlibinfo',
     '-basicaa',
-    '-domtree',
     '-simplifycfg',
-    '-domtree',
     '-early-cse',
-    '-lower-expect',
-    '-targetlibinfo',
     '-tbaa',
     '-basicaa',
     '-globalopt',
     '-mem2reg',
     '-instcombine',
     '-simplifycfg',
-    '-basiccg',
-    '-domtree',
     '-early-cse',
     '-lazy-value-info',
     '-jump-threading',
@@ -74,7 +61,6 @@ BIN2LLVMIR_LLVM_PASSES_ONLY = [
     '-instcombine',
     '-simplifycfg',
     '-reassociate',
-    '-domtree',
     '-loops',
     '-loop-simplify',
     '-lcssa',
@@ -82,7 +68,6 @@ BIN2LLVMIR_LLVM_PASSES_ONLY = [
     '-licm',
     '-lcssa',
     '-instcombine',
-    '-scalar-evolution',
     '-loop-simplifycfg',
     '-loop-simplify',
     '-aa',
@@ -92,29 +77,21 @@ BIN2LLVMIR_LLVM_PASSES_ONLY = [
     '-indvars',
     '-loop-idiom',
     '-loop-deletion',
-    '-memdep',
     '-gvn',
-    '-memdep',
     '-sccp',
     '-instcombine',
     '-lazy-value-info',
     '-jump-threading',
     '-correlated-propagation',
-    '-domtree',
-    '-memdep',
     '-dse',
-    '-dce',
     '-bdce',
     '-adce',
-    '-die',
     '-simplifycfg',
     '-instcombine',
     '-strip-dead-prototypes',
     '-globaldce',
     '-constmerge',
     '-constprop',
-    '-instnamer',
-    '-domtree',
     '-instcombine',
 ]
 
@@ -141,20 +118,20 @@ BIN2LLVMIR_PARAMS = [
     '-unreachable-funcs',
     '-inst-opt',
     '-x86-addr-spaces',
+    '-register-localization',
     '-value-protect',
 ] + BIN2LLVMIR_LLVM_PASSES_ONLY + BIN2LLVMIR_LLVM_PASSES_ONLY + [
     '-inst-opt',
     '-simple-types',
     '-stack-ptr-op-remove',
     '-idioms',
-    '-global-to-local',
-    '-dead-global-assign',
     '-instcombine',
     '-inst-opt',
     '-idioms',
-    '-phi2seq',
+    '-remove-phi',
     '-value-protect',
-] + BIN2LLVMIR_PARAMS_DISABLES
+    '-sink'
+]
 
 # Paths to tools.
 FILEINFO = os.path.join(INSTALL_BIN_DIR, 'retdec-fileinfo')
@@ -177,7 +154,6 @@ SIG_FROM_LIB = os.path.join(INSTALL_BIN_DIR, 'retdec_signature_from_library_crea
 UNPACK = os.path.join(INSTALL_BIN_DIR, 'retdec_unpacker.py')
 LLVMIR2HLL = os.path.join(INSTALL_BIN_DIR, 'retdec-llvmir2hll')
 BIN2LLVMIR = os.path.join(INSTALL_BIN_DIR, 'retdec-bin2llvmir')
-IDA_COLORIZER = os.path.join(INSTALL_BIN_DIR, 'retdec-color-c.py')
 UNPACKER = os.path.join(INSTALL_BIN_DIR, 'retdec-unpacker')
 
 # Other.

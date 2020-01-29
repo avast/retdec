@@ -26,7 +26,6 @@ set(LLVMIR2HLL_SOURCES
 	graphs/cfg/cfg_builders/non_recursive_cfg_builder.cpp
 	graphs/cfg/cfg_builders/recursive_cfg_builder.cpp
 	graphs/cfg/cfg_traversal.cpp
-	graphs/cfg/cfg_traversals/auxiliary_variables_cfg_traversal.cpp
 	graphs/cfg/cfg_traversals/lhs_rhs_uses_cfg_traversal.cpp
 	graphs/cfg/cfg_traversals/modified_before_read_cfg_traversal.cpp
 	graphs/cfg/cfg_traversals/no_var_def_cfg_traversal.cpp
@@ -44,14 +43,14 @@ set(LLVMIR2HLL_SOURCES
 	hll/bracket_manager.cpp
 	hll/bracket_managers/c_bracket_manager.cpp
 	hll/bracket_managers/no_bracket_manager.cpp
-	hll/bracket_managers/py_bracket_manager.cpp
 	hll/compound_op_manager.cpp
 	hll/compound_op_managers/c_compound_op_manager.cpp
 	hll/compound_op_managers/no_compound_op_manager.cpp
-	hll/compound_op_managers/py_compound_op_manager.cpp
 	hll/hll_writer.cpp
 	hll/hll_writers/c_hll_writer.cpp
-	hll/hll_writers/py_hll_writer.cpp
+	hll/output_manager.cpp
+	hll/output_managers/json_manager.cpp
+	hll/output_managers/plain_manager.cpp
 	ir/add_op_expr.cpp
 	ir/address_op_expr.cpp
 	ir/and_op_expr.cpp
@@ -79,7 +78,6 @@ set(LLVMIR2HLL_SOURCES
 	ir/const_string.cpp
 	ir/const_struct.cpp
 	ir/const_symbol.cpp
-	ir/constant.cpp
 	ir/continue_stmt.cpp
 	ir/deref_op_expr.cpp
 	ir/div_op_expr.cpp
@@ -121,7 +119,6 @@ set(LLVMIR2HLL_SOURCES
 	ir/switch_stmt.cpp
 	ir/ternary_op_expr.cpp
 	ir/trunc_cast_expr.cpp
-	ir/type.cpp
 	ir/ufor_loop_stmt.cpp
 	ir/unary_op_expr.cpp
 	ir/unknown_type.cpp
@@ -156,7 +153,6 @@ set(LLVMIR2HLL_SOURCES
 	optimizer/optimizer_manager.cpp
 	optimizer/optimizers/aggressive_deref_optimizer.cpp
 	optimizer/optimizers/aggressive_global_to_local_optimizer.cpp
-	optimizer/optimizers/auxiliary_variables_optimizer.cpp
 	optimizer/optimizers/bit_op_to_log_op_optimizer.cpp
 	optimizer/optimizers/bit_shift_optimizer.cpp
 	optimizer/optimizers/break_continue_return_optimizer.cpp
@@ -200,7 +196,6 @@ set(LLVMIR2HLL_SOURCES
 	optimizer/optimizers/while_true_to_for_loop_optimizer.cpp
 	optimizer/optimizers/while_true_to_ufor_loop_optimizer.cpp
 	optimizer/optimizers/while_true_to_while_cond_optimizer.cpp
-	pattern/pattern.cpp
 	pattern/pattern_finder.cpp
 	pattern/pattern_finder_runner.cpp
 	pattern/pattern_finder_runners/cli_pattern_finder_runner.cpp
@@ -214,7 +209,6 @@ set(LLVMIR2HLL_SOURCES
 	pattern/pattern_finders/api_call_pattern_finder.cpp
 	pattern/pattern_finders/api_call_seq_pattern_finder.cpp
 	pattern/patterns/stmts_pattern.cpp
-	semantics/semantics.cpp
 	semantics/semantics/compound_semantics.cpp
 	semantics/semantics/compound_semantics_builder.cpp
 	semantics/semantics/default_semantics.cpp
@@ -281,7 +275,6 @@ set(LLVMIR2HLL_SOURCES
 	support/valid_state.cpp
 	support/value_text_repr_visitor.cpp
 	support/variable_replacer.cpp
-	support/visitor.cpp
 	support/visitors/ordered_all_visitor.cpp
 	utils/graphviz.cpp
 	utils/ir.cpp
@@ -304,7 +297,12 @@ set(LLVMIR2HLL_SOURCES
 )
 
 add_library(retdec-llvmir2hll STATIC ${LLVMIR2HLL_SOURCES})
-target_link_libraries(retdec-llvmir2hll retdec-config retdec-utils retdec-llvm-support llvm)
+target_link_libraries(retdec-llvmir2hll
+	retdec-config
+	retdec-utils
+	retdec-llvm-support
+	rapidjson
+	llvm)
 target_include_directories(retdec-llvmir2hll PUBLIC ${PROJECT_SOURCE_DIR}/include/)
 
 # We need to compile source files with /bigobj to prevent the following

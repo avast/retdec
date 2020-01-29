@@ -10,22 +10,6 @@
 namespace fileinfo {
 
 /**
- * Constructor
- */
-TlsInfo::TlsInfo() : tlsInfo(nullptr)
-{
-
-}
-
-/**
- * Destructor
- */
-TlsInfo::~TlsInfo()
-{
-
-}
-
-/**
  * Get raw data start address
  * @param format Format of resulting string (e.g. std::dec, std::hex)
  * @return Raw data start address

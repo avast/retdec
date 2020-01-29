@@ -18,7 +18,6 @@ class EntryPointJsonGetter : public SimpleGetter
 {
 	public:
 		EntryPointJsonGetter(FileInformation &fileInfo);
-		virtual ~EntryPointJsonGetter() override;
 
 		virtual std::size_t loadInformation(std::vector<std::string> &desc, std::vector<std::string> &info) const override;
 };

@@ -31,7 +31,7 @@ protected:
 	// The destructor is protected and non-virtual on a purpose. Indeed,
 	// concrete CFG traversers are not meant to be used by a pointer to the
 	// base class.
-	~CFGTraversal();
+	~CFGTraversal() = default;
 
 	bool getCurrRetVal() const;
 	bool performTraversal(ShPtr<Statement> startStmt);

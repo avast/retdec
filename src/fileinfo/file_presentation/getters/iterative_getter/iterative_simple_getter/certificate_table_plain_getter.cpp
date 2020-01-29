@@ -40,14 +40,6 @@ CertificateTablePlainGetter::CertificateTablePlainGetter(FileInformation &fileIn
 	commonHeaderElements.push_back("SHA256              : ");
 }
 
-/**
- * Destructor
- */
-CertificateTablePlainGetter::~CertificateTablePlainGetter()
-{
-
-}
-
 std::size_t CertificateTablePlainGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const
 {
 	if(structIndex >= numberOfStructures || !fileinfo.hasCertificateTableRecords())

@@ -18,17 +18,14 @@ namespace llvmir2hll {
 *
 * See create() for more information.
 */
-WhileLoopStmt::WhileLoopStmt(ShPtr<Expression> cond, ShPtr<Statement> body):
-	cond(cond), body(body) {}
-
-/**
-* @brief Destructs the statement.
-*/
-WhileLoopStmt::~WhileLoopStmt() {}
+WhileLoopStmt::WhileLoopStmt(ShPtr<Expression> cond, ShPtr<Statement> body,
+	Address a):
+	Statement(a), cond(cond), body(body) {}
 
 ShPtr<Value> WhileLoopStmt::clone() {
 	ShPtr<WhileLoopStmt> whileLoopStmt(WhileLoopStmt::create(
-		ucast<Expression>(cond->clone()), ucast<Statement>(body->clone())));
+		ucast<Expression>(cond->clone()), ucast<Statement>(Statement::cloneStatements(body)),
+		nullptr, getAddress()));
 	whileLoopStmt->setMetadata(getMetadata());
 	return whileLoopStmt;
 }
@@ -105,6 +102,7 @@ void WhileLoopStmt::setBody(ShPtr<Statement> newBody) {
 * @param[in] cond Loop condition.
 * @param[in] body Loop body.
 * @param[in] succ Follower of the statement in the program flow.
+* @param[in] a Address.
 *
 * An equivalent to the while loop in C, i.e. <tt>while (cond) body</tt>.
 *
@@ -112,11 +110,11 @@ void WhileLoopStmt::setBody(ShPtr<Statement> newBody) {
 *  - @a cond and @a body are non-null
 */
 ShPtr<WhileLoopStmt> WhileLoopStmt::create(ShPtr<Expression> cond, ShPtr<Statement> body,
-		ShPtr<Statement> succ) {
+		ShPtr<Statement> succ, Address a) {
 	PRECONDITION_NON_NULL(cond);
 	PRECONDITION_NON_NULL(body);
 
-	ShPtr<WhileLoopStmt> stmt(new WhileLoopStmt(cond, body));
+	ShPtr<WhileLoopStmt> stmt(new WhileLoopStmt(cond, body, a));
 	stmt->setSuccessor(succ);
 
 	// Initialization (recall that shared_from_this() cannot be called in a

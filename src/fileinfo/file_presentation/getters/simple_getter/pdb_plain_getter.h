@@ -18,7 +18,6 @@ class PdbPlainGetter : public SimpleGetter
 {
 	public:
 		PdbPlainGetter(FileInformation &fileInfo);
-		virtual ~PdbPlainGetter() override;
 
 		virtual std::size_t loadInformation(std::vector<std::string> &desc, std::vector<std::string> &info) const override;
 };

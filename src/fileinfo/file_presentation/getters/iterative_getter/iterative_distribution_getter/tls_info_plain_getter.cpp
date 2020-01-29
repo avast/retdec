@@ -39,14 +39,6 @@ TlsInfoPlainGetter::TlsInfoPlainGetter(FileInformation &fileInfo) : IterativeDis
 	loadRecords();
 }
 
-/**
- * Destructor
- */
-TlsInfoPlainGetter::~TlsInfoPlainGetter()
-{
-
-}
-
 std::size_t TlsInfoPlainGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const
 {
 	if(structIndex >= numberOfStructures || !fileinfo.isTlsUsed())

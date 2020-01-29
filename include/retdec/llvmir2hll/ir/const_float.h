@@ -39,8 +39,6 @@ public:
 public:
 	static ShPtr<ConstFloat> create(Type value);
 
-	virtual ~ConstFloat() override;
-
 	virtual ShPtr<Value> clone() override;
 
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;

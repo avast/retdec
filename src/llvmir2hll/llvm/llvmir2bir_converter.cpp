@@ -7,6 +7,7 @@
 #include <llvm/IR/Module.h>
 
 #include "retdec/llvm-support/diagnostics.h"
+#include "retdec/llvmir2hll/config/config.h"
 #include "retdec/llvmir2hll/ir/expression.h"
 #include "retdec/llvmir2hll/ir/function.h"
 #include "retdec/llvmir2hll/ir/module.h"
@@ -34,11 +35,6 @@ LLVMIR2BIRConverter::LLVMIR2BIRConverter(llvm::Pass *basePass):
 	basePass(basePass), optionStrictFPUSemantics(false),
 	enableDebug(false), converter(),
 	llvmModule(nullptr), resModule(), structConverter(), variablesManager() {}
-
-/**
-* @brief Destructor.
-*/
-LLVMIR2BIRConverter::~LLVMIR2BIRConverter() {}
 
 /**
 * @brief Creates a new converter.
@@ -126,6 +122,9 @@ ShPtr<Variable> LLVMIR2BIRConverter::convertGlobalVariable(
 		var->markAsExternal();
 	}
 
+	auto a = resModule->getConfig()->getAddressForGlobalVar(globVar.getName());
+	var->setAddress(a);
+
 	return var;
 }
 
@@ -187,7 +186,7 @@ ShPtr<Function> LLVMIR2BIRConverter::convertFuncDeclaration(
 	auto retType = converter->convertType(func.getReturnType());
 	auto params = convertFuncParams(func);
 
-	auto birFunc = Function::create(retType, func.getName(), params);
+	auto birFunc = Function::create(resModule, retType, func.getName(), params);
 	variablesManager->addGlobalValVarPair(&func, birFunc->getAsVar());
 	birFunc->setVarArg(func.isVarArg());
 	return birFunc;
@@ -230,7 +229,10 @@ VarVector LLVMIR2BIRConverter::sortLocalVars(const VarSet &vars) const {
 void LLVMIR2BIRConverter::generateVarDefinitions(ShPtr<Function> func) const {
 	auto vars = sortLocalVars(func->getLocalVars());
 	for (auto i = vars.crbegin(), e = vars.crend(); i != e; ++i) {
-		func->getBody()->prependStatement(VarDefStmt::create(*i));
+		Address a = (*i)->getAddress();
+		if (a.isUndefined()) a = func->getStartAddress();
+		func->getBody()->prependStatement(
+			VarDefStmt::create(*i, nullptr, nullptr, a));
 	}
 }
 

@@ -71,22 +71,6 @@ namespace retdec {
 namespace fileformat {
 
 /**
- * Constructor
- */
-ResourceIconGroup::ResourceIconGroup() : iconGroupID(0)
-{
-
-}
-
-/**
- * Destructor
- */
-ResourceIconGroup::~ResourceIconGroup()
-{
-
-}
-
-/**
  * Get entry offset
  * @param eIndex Index of selected entry (indexed from 0)
  * @return Entry offset
@@ -148,7 +132,7 @@ std::size_t ResourceIconGroup::getIconGroupID() const
 /**
  * Get number of entries
  * @param nEntries Destination for result to be stored
- * @return @c true if get was successfull, otherwise false
+ * @return @c true if get was successful, otherwise false
 */
 bool ResourceIconGroup::getNumberOfEntries(std::size_t &nEntries) const
 {
@@ -168,7 +152,7 @@ bool ResourceIconGroup::getNumberOfEntries(std::size_t &nEntries) const
  * Get entry name ID
  * @param eIndex Index of selected entry (indexed from 0)
  * @param nameID Destination for result to be stored
- * @return @c true if get was successfull, otherwise false
+ * @return @c true if get was successful, otherwise false
 */
 bool ResourceIconGroup::getEntryNameID(std::size_t eIndex, std::size_t &nameID) const
 {
@@ -188,7 +172,7 @@ bool ResourceIconGroup::getEntryNameID(std::size_t eIndex, std::size_t &nameID) 
  * Get entry width
  * @param eIndex Index of selected entry (indexed from 0)
  * @param width Destination for result to be stored
- * @return @c true if get was successfull, otherwise false
+ * @return @c true if get was successful, otherwise false
 */
 bool ResourceIconGroup::getEntryWidth(std::size_t eIndex, std::uint16_t &width) const
 {
@@ -208,7 +192,7 @@ bool ResourceIconGroup::getEntryWidth(std::size_t eIndex, std::uint16_t &width) 
  * Get entry height
  * @param eIndex Index of selected entry (indexed from 0)
  * @param height Destination for result to be stored
- * @return @c true if get was successfull, otherwise false
+ * @return @c true if get was successful, otherwise false
 */
 bool ResourceIconGroup::getEntryHeight(std::size_t eIndex, std::uint16_t &height) const
 {
@@ -228,7 +212,7 @@ bool ResourceIconGroup::getEntryHeight(std::size_t eIndex, std::uint16_t &height
  * Get entry icon size
  * @param eIndex Index of selected entry (indexed from 0)
  * @param iconSize Destination for result to be stored
- * @return @c true if get was successfull, otherwise false
+ * @return @c true if get was successful, otherwise false
 */
 bool ResourceIconGroup::getEntryIconSize(std::size_t eIndex, std::size_t &iconSize) const
 {
@@ -248,7 +232,7 @@ bool ResourceIconGroup::getEntryIconSize(std::size_t eIndex, std::size_t &iconSi
  * Get entry color count
  * @param eIndex Index of selected entry (indexed from 0)
  * @param colorCount Destination for result to be stored
- * @return @c true if get was successfull, otherwise false
+ * @return @c true if get was successful, otherwise false
 */
 bool ResourceIconGroup::getEntryColorCount(std::size_t eIndex, std::uint8_t &colorCount) const
 {
@@ -268,7 +252,7 @@ bool ResourceIconGroup::getEntryColorCount(std::size_t eIndex, std::uint8_t &col
  * Get entry planes
  * @param eIndex Index of selected entry (indexed from 0)
  * @param planes Destination for result to be stored
- * @return @c true if get was successfull, otherwise false
+ * @return @c true if get was successful, otherwise false
 */
 bool ResourceIconGroup::getEntryPlanes(std::size_t eIndex, std::uint16_t &planes) const
 {
@@ -288,7 +272,7 @@ bool ResourceIconGroup::getEntryPlanes(std::size_t eIndex, std::uint16_t &planes
  * Get entry bit count
  * @param eIndex Index of selected entry (indexed from 0)
  * @param bitCount Destination for result to be stored
- * @return @c true if get was successfull, otherwise false
+ * @return @c true if get was successful, otherwise false
 */
 bool ResourceIconGroup::getEntryBitCount(std::size_t eIndex, std::uint16_t &bitCount) const
 {

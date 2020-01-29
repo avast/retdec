@@ -11,7 +11,6 @@
 #include "retdec/utils/os.h"
 #include "retdec/utils/scope_exit.h"
 #include "retdec/utils/string.h"
-#include "retdec/utils/value.h"
 
 #ifdef OS_WINDOWS
 	#include <windows.h>
@@ -280,9 +279,7 @@ FilesystemPath::FilesystemPath(const FilesystemPath& fspath) : FilesystemPath(fs
 /**
  * Destructor.
  */
-FilesystemPath::~FilesystemPath()
-{
-}
+FilesystemPath::~FilesystemPath() = default;
 
 /**
  * Returns the path in the normalized textual representation

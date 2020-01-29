@@ -15,12 +15,7 @@ namespace bin2llvmir {
 class CollectorPic32 : public Collector
 {
 	public:
-		CollectorPic32(
-			const Abi* abi,
-			llvm::Module* m,
-			const ReachingDefinitionsAnalysis* rda);
-
-		virtual ~CollectorPic32() override;
+		using Collector::Collector;
 
 	public:
 		virtual void collectCallSpecificTypes(CallEntry* ce) const override;

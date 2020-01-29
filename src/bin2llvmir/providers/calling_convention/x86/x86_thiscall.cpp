@@ -30,10 +30,6 @@ ThiscallCallingConvention::ThiscallCallingConvention(const Abi* a) :
 	};
 }
 
-ThiscallCallingConvention::~ThiscallCallingConvention()
-{
-}
-
 CallingConvention::Ptr ThiscallCallingConvention::create(const Abi* a)
 {
 	if (!a->isX86())

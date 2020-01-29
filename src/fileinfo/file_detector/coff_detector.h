@@ -38,8 +38,11 @@ class CoffDetector : public FileDetector
 		virtual retdec::cpdetect::CompilerDetector* createCompilerDetector() const override;
 		/// @}
 	public:
-		CoffDetector(std::string pathToInputFile, FileInformation &finfo, retdec::cpdetect::DetectParams &searchPar, retdec::fileformat::LoadFlags loadFlags);
-		virtual ~CoffDetector() override;
+		CoffDetector(
+				std::string pathToInputFile,
+				FileInformation &finfo,
+				retdec::cpdetect::DetectParams &searchPar,
+				retdec::fileformat::LoadFlags loadFlags);
 };
 
 } // namespace fileinfo

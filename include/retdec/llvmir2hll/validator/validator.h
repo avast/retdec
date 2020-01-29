@@ -32,8 +32,6 @@ namespace llvmir2hll {
 */
 class Validator: protected OrderedAllVisitor {
 public:
-	virtual ~Validator() override;
-
 	virtual std::string getId() const = 0;
 
 	bool validate(ShPtr<Module> module, bool printMessageOnError = false);

@@ -21,14 +21,6 @@ VisualBasicPlainGetter::VisualBasicPlainGetter(FileInformation &fileInfo) : Simp
 
 }
 
-/**
- * Destructor
- */
-VisualBasicPlainGetter::~VisualBasicPlainGetter()
-{
-
-}
-
 std::size_t VisualBasicPlainGetter::loadInformation(std::vector<std::string> &desc, std::vector<std::string> &info) const
 {
 	desc.clear();

@@ -1,4 +1,5 @@
-set(LOADER_SOURCES
+
+add_library(retdec-loader STATIC
 	utils/range.cpp
 	utils/overlap_resolver.cpp
 	utils/name_generator.cpp
@@ -13,7 +14,9 @@ set(LOADER_SOURCES
 	loader/segment_data_source.cpp
 	loader/elf/elf_image.cpp
 )
-
-add_library(retdec-loader STATIC ${LOADER_SOURCES})
-target_link_libraries(retdec-loader retdec-fileformat retdec-utils)
+target_link_libraries(retdec-loader
+	retdec-fileformat
+	retdec-common
+	retdec-utils
+)
 target_include_directories(retdec-loader PUBLIC ${PROJECT_SOURCE_DIR}/include/)

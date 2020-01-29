@@ -36,8 +36,8 @@ else()
 	message(STATUS "Keystone: using remote Keystone revision.")
 
 	ExternalProject_Add(keystone-project
-		URL https://github.com/keystone-engine/keystone/archive/d7ba8e378e5284e6384fc9ecd660ed5f6532e922.zip
-		URL_HASH SHA256=13bd00e062e9c778fe76aaab5c163348b3c9457c0e9b2a4c2fb3e2d8747694ca
+		URL ${KEYSTONE_URL}
+		URL_HASH SHA256=${KEYSTONE_ARCHIVE_SHA256}
 		DOWNLOAD_NAME keystone.zip
 		CMAKE_ARGS
 			# This does not work on MSVC, but may be useful on Linux.

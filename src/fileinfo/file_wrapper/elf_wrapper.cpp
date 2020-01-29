@@ -21,14 +21,6 @@ ElfWrapper::ElfWrapper(std::string pathToFile, retdec::fileformat::LoadFlags loa
 }
 
 /**
- * Destructor
- */
-ElfWrapper::~ElfWrapper()
-{
-
-}
-
-/**
  * Get file segment
  * @param segIndex Index of required segment (indexed from 0)
  * @return Pointer to segment or @c nullptr if any error

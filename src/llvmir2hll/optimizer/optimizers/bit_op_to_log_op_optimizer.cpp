@@ -40,11 +40,6 @@ BitOpToLogOpOptimizer::BitOpToLogOpOptimizer(ShPtr<Module> module,
 	PRECONDITION_NON_NULL(va);
 }
 
-/**
-* @brief Destructs the optimizer.
-*/
-BitOpToLogOpOptimizer::~BitOpToLogOpOptimizer() {}
-
 void BitOpToLogOpOptimizer::visit(ShPtr<IfStmt> stmt) {
 	// First of all, visit nested and subsequent statements.
 	FuncOptimizer::visit(stmt);

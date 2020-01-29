@@ -23,9 +23,6 @@ namespace {
 */
 class CallAnalysis: private InstVisitor<CallAnalysis> {
 public:
-	CallAnalysis();
-	~CallAnalysis();
-
 	bool isFuncDirectlySelfRecursive(Function &func);
 
 private:
@@ -34,21 +31,11 @@ private:
 
 private:
 	/// Signals if we have self recursive function.
-	bool isSelfRecursive;
+	bool isSelfRecursive = false;
 
 	/// Function to analyze.
-	Function *funcToAnalyze;
+	Function *funcToAnalyze = nullptr;
 };
-
-/**
-* @brief Constructs a call analysis.
-*/
-CallAnalysis::CallAnalysis(): isSelfRecursive(false), funcToAnalyze(nullptr) {}
-
-/**
-* @brief Destructs a call analysis.
-*/
-CallAnalysis::~CallAnalysis() {}
 
 /**
 * @brief Returns @c true if @a func is self directly recursive, otherwise
@@ -85,9 +72,6 @@ void CallAnalysis::visitCallInst(CallInst &callInst) {
 */
 class IndirectCallsFinder: private InstVisitor<IndirectCallsFinder> {
 public:
-	IndirectCallsFinder();
-	~IndirectCallsFinder();
-
 	std::set<llvm::CallInst*> getIndirectCallsFor(const std::set<llvm::Function*> &funcs);
 
 private:
@@ -98,16 +82,6 @@ private:
 	/// Set of indirect calls.
 	std::set<llvm::CallInst*> indirectCalls;
 };
-
-/**
-* @brief Constructs an indirect calls finder.
-*/
-IndirectCallsFinder::IndirectCallsFinder() {}
-
-/**
-* @brief Destructs an indirect calls finder.
-*/
-IndirectCallsFinder::~IndirectCallsFinder() {}
 
 /**
 * @brief Finds indirect calls.
@@ -157,16 +131,6 @@ bool containsDefinedFunc(CallGraphNode &funcNodeToCheck) {
 }
 
 } // anonymous namespace
-
-/**
-* @brief Constructs a new reachable functions analysis.
-*/
-ReachableFuncsAnalysis::ReachableFuncsAnalysis() {}
-
-/**
-* @brief Destructs a reachable functions analysis.
-*/
-ReachableFuncsAnalysis::~ReachableFuncsAnalysis() {}
 
 /**
 * @brief Returns defined functions that are reachable directly and indirectly

@@ -28,11 +28,6 @@ LoadedSegment::LoadedSegment(LoadedSegment&& segment)
 
 }
 
-LoadedSegment::~LoadedSegment()
-{
-
-}
-
 std::string LoadedSegment::getIndexStr(std::ios_base &(* format)(std::ios_base &)) const
 {
 	return getNumberAsString(_index, format);
@@ -51,14 +46,6 @@ std::string LoadedSegment::getAddressStr(std::ios_base &(* format)(std::ios_base
 std::string LoadedSegment::getSizeStr(std::ios_base &(* format)(std::ios_base &)) const
 {
 	return getNumberAsString(_size, format);
-}
-
-LoaderInfo::LoaderInfo() : _baseAddress(0), _loadedSegments(), _statusMessage()
-{
-}
-
-LoaderInfo::~LoaderInfo()
-{
 }
 
 std::string LoaderInfo::getBaseAddressStr(std::ios_base &(* format)(std::ios_base &)) const

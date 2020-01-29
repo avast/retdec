@@ -48,8 +48,6 @@ class VarDefForLoopOptimizer final: public FuncOptimizer {
 public:
 	VarDefForLoopOptimizer(ShPtr<Module> module);
 
-	virtual ~VarDefForLoopOptimizer() override;
-
 	virtual std::string getId() const override { return "VarDefForLoop"; }
 
 private:

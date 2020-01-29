@@ -34,7 +34,7 @@ public:
 	/**
 	 * Destructor.
 	 */
-	virtual ~UnpackingStub() {}
+	virtual ~UnpackingStub() = default;
 
 	/**
 	 * Pure virtual method that should implement unpacking process in its subclasses.

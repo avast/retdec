@@ -7,7 +7,7 @@
 #ifndef RETDEC_FILEFORMAT_FILE_FORMAT_PE_PE_TEMPLATE_AUX_H
 #define RETDEC_FILEFORMAT_FILE_FORMAT_PE_PE_TEMPLATE_AUX_H
 
-#include <pelib/PeLib.h>
+#include "retdec/pelib/PeLib.h"
 
 namespace retdec {
 namespace fileformat {

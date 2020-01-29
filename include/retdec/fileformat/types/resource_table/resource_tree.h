@@ -21,7 +21,6 @@ class ResourceTree
 		std::vector<std::vector<std::size_t>> tree; ///< resource tree structure
 	public:
 		ResourceTree();
-		~ResourceTree();
 
 		/// @name Queries
 		/// @{

@@ -29,14 +29,6 @@ MissingDepsJsonGetter::MissingDepsJsonGetter(FileInformation &fileInfo) : Iterat
 	commonHeaderElements.push_back("name");
 }
 
-/**
- * Destructor
- */
-MissingDepsJsonGetter::~MissingDepsJsonGetter()
-{
-
-}
-
 std::size_t MissingDepsJsonGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const
 {
 	if(structIndex >= numberOfStructures)

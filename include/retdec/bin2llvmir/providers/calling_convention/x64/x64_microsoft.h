@@ -18,7 +18,6 @@ class MicrosoftX64CallingConvention : public CallingConvention
 	//
 	public:
 		MicrosoftX64CallingConvention(const Abi* a);
-		virtual ~MicrosoftX64CallingConvention();
 };
 
 }

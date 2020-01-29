@@ -19,11 +19,6 @@ namespace llvmir2hll {
 FloatType::FloatType(unsigned size):
 	Type(), size(size) {}
 
-/**
-* @brief Destructs the type.
-*/
-FloatType::~FloatType() {}
-
 ShPtr<Value> FloatType::clone() {
 	return FloatType::create(size);
 }

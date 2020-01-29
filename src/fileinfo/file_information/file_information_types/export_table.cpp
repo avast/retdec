@@ -10,22 +10,6 @@
 namespace fileinfo {
 
 /**
- * Constructor
- */
-ExportTable::ExportTable() : table(nullptr)
-{
-
-}
-
-/**
- * Destructor
- */
-ExportTable::~ExportTable()
-{
-
-}
-
-/**
  * Get number of exports in table
  * @return Number of exports in table
  */

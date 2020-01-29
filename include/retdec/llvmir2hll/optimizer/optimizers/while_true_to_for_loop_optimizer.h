@@ -48,8 +48,6 @@ public:
 	WhileTrueToForLoopOptimizer(ShPtr<Module> module, ShPtr<ValueAnalysis> va,
 		ShPtr<ArithmExprEvaluator> arithmExprEvaluator);
 
-	virtual ~WhileTrueToForLoopOptimizer() override;
-
 	virtual std::string getId() const override { return "WhileTrueToForLoop"; }
 
 private:

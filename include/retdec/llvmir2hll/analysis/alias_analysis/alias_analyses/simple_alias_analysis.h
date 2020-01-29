@@ -34,8 +34,6 @@ class Variable;
 */
 class SimpleAliasAnalysis: public AliasAnalysis, private OrderedAllVisitor {
 public:
-	virtual ~SimpleAliasAnalysis() override;
-
 	static ShPtr<AliasAnalysis> create();
 
 	virtual void init(ShPtr<Module> module) override;

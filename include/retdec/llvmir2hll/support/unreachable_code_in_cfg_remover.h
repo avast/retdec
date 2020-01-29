@@ -29,9 +29,6 @@ class Module;
 class UnreachableCodeInCFGRemover: private OrderedAllVisitor,
 		private retdec::utils::NonCopyable {
 public:
-	// It needs to be public so it can be called in ShPtr's destructor.
-	virtual ~UnreachableCodeInCFGRemover() override;
-
 	static void removeCode(ShPtr<Module> module);
 
 private:

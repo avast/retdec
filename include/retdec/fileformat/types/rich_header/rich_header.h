@@ -22,19 +22,16 @@ class RichHeader
 {
 	private:
 		using richHeaderIterator = std::vector<LinkerInfo>::const_iterator;
-		std::string signature;          ///< header in string representation
-		unsigned long long offset;      ///< offset of rich header in file
-		unsigned long long key;         ///< key for decryption
-		std::vector<LinkerInfo> header; ///< all records in header
-		bool isOffsetValid;             ///< @c true if @a offset is valid
-		bool isKeyValid;                ///< @c true if @a key is valid
-		bool isValidStructure;          ///< @c true if header has valid structure
-		bool isSuspicious;              ///< @c true if content of header is suspicious
-		std::vector<std::uint8_t> bytes;///< decrypted content of rich header
+		std::string signature;           ///< header in string representation
+		unsigned long long offset = 0;   ///< offset of rich header in file
+		unsigned long long key = 0;      ///< key for decryption
+		std::vector<LinkerInfo> header;  ///< all records in header
+		bool isOffsetValid = false;      ///< @c true if @a offset is valid
+		bool isKeyValid = false;         ///< @c true if @a key is valid
+		bool isValidStructure = false;   ///< @c true if header has valid structure
+		bool isSuspicious = false;       ///< @c true if content of header is suspicious
+		std::vector<std::uint8_t> bytes; ///< decrypted content of rich header
 	public:
-		RichHeader();
-		~RichHeader();
-
 		/// @name Getters
 		/// @{
 		std::string getSignature() const;

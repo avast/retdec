@@ -20,11 +20,7 @@ namespace upx {
 class DecompressorUpxshit : public DecompressorScrambler
 {
 public:
-	DecompressorUpxshit();
-	virtual ~DecompressorUpxshit();
-
 	virtual void readUnpackingStub(PeUpxStub<32>* stub, DynamicBuffer& unpackingStub) override;
-
 	virtual void readUnpackingStub(PeUpxStub<64>* stub, DynamicBuffer& unpackingStub) override;
 };
 

@@ -39,8 +39,6 @@ public:
 	static ShPtr<ConstArray> create(ArrayValue value, ShPtr<ArrayType> type);
 	static ShPtr<ConstArray> createUninitialized(ShPtr<ArrayType> type);
 
-	virtual ~ConstArray() override;
-
 	virtual ShPtr<Value> clone() override;
 
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;

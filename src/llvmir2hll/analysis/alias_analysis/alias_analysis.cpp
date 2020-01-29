@@ -12,16 +12,6 @@ namespace retdec {
 namespace llvmir2hll {
 
 /**
-* @brief Constructs a new analysis.
-*/
-AliasAnalysis::AliasAnalysis() {}
-
-/**
-* @brief Destructs the analysis.
-*/
-AliasAnalysis::~AliasAnalysis() {}
-
-/**
 * @brief Initializes the analysis.
 *
 * @param[in] module The module to be analyzed.

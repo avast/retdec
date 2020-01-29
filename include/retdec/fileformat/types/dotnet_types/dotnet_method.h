@@ -65,6 +65,7 @@ class DotnetMethod : public DotnetType
 		/// @}
 
 		/// @name Parameter
+		/// @{
 		void addParameter(std::unique_ptr<DotnetParameter>&& param);
 		void addGenericParameter(std::string&& genericParam);
 		/// @}

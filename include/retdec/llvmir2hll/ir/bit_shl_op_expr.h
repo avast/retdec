@@ -28,8 +28,6 @@ public:
 	static ShPtr<BitShlOpExpr> create(ShPtr<Expression> op1,
 		ShPtr<Expression> op2);
 
-	virtual ~BitShlOpExpr() override;
-
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
 	virtual ShPtr<Value> clone() override;
 

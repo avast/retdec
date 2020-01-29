@@ -23,11 +23,6 @@ VarUseCFGTraversal::VarUseCFGTraversal(ShPtr<Variable> var,
 	CFGTraversal(cfg, true), var(var), va(va) {}
 
 /**
-* @brief Destructs the traverser.
-*/
-VarUseCFGTraversal::~VarUseCFGTraversal() {}
-
-/**
 * @brief Returns @c true if the given variable @a var is defined/modified prior
 *        to every read access to it in @a cfg.
 *

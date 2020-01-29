@@ -12,16 +12,6 @@ namespace retdec {
 namespace llvmir2hll {
 
 /**
-* @brief Constructs a new builder.
-*/
-CFGBuilder::CFGBuilder() {}
-
-/**
-* @brief Destructs the builder.
-*/
-CFGBuilder::~CFGBuilder() {}
-
-/**
 * @brief Returns a CFG of the given function @a func.
 *
 * @par Preconditions

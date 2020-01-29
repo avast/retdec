@@ -114,7 +114,6 @@ class MachOFormat : public FileFormat
 		MachOFormat(std::string pathToFile, LoadFlags loadFlags = LoadFlags::NONE);
 		MachOFormat(std::istream &inputStream, LoadFlags loadFlags = LoadFlags::NONE);
 		MachOFormat(const std::uint8_t *data, std::size_t size, LoadFlags loadFlags = LoadFlags::NONE);
-		virtual ~MachOFormat() override;
 
 		/// @name Byte value storage methods
 		/// @{

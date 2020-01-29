@@ -21,24 +21,6 @@ namespace retdec {
 namespace fileformat {
 
 /**
- * Constructor
- */
-Resource::Resource() : offset(0), size(0), nameId(0), typeId(0), languageId(0), sublanguageId(0),
-	nameIdIsValid(false), typeIdIsValid(false), languageIdIsValid(false),
-	sublanguageIdIsValid(false), loaded(false)
-{
-
-}
-
-/**
- * Destructor
- */
-Resource::~Resource()
-{
-
-}
-
-/**
  * Get CRC32
  * @return CRC32 of resource content
  */

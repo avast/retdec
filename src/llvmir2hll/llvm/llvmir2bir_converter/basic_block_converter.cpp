@@ -34,11 +34,6 @@ BasicBlockConverter::BasicBlockConverter(ShPtr<LLVMValueConverter> converter,
 		converter(converter), labelsHandler(labelsHandler) {}
 
 /**
-* @brief Destructs the converter.
-*/
-BasicBlockConverter::~BasicBlockConverter() {}
-
-/**
 * @brief Converts the given LLVM basic block @a bb into a sequence of statements
 *        in BIR.
 */
@@ -100,11 +95,11 @@ ShPtr<Statement> BasicBlockConverter::visitCallInst(llvm::CallInst &inst) {
 	auto callExpr = converter->convertCallInstToCallExpr(inst);
 
 	if (inst.hasNUses(0)) {
-		return CallStmt::create(callExpr);
+		return CallStmt::create(callExpr, nullptr, LLVMSupport::getInstAddress(&inst));
 	}
 
 	auto lhs = converter->convertValueToVariable(&inst);
-	return AssignStmt::create(lhs, callExpr);
+	return AssignStmt::create(lhs, callExpr, nullptr, LLVMSupport::getInstAddress(&inst));
 }
 
 /**
@@ -140,7 +135,7 @@ ShPtr<Statement> BasicBlockConverter::visitInsertValueInst(llvm::InsertValueInst
 
 	auto lhs = converter->generateAccessToAggregateType(type, base, inst.getIndices());
 	auto rhs = converter->convertValueToExpression(inst.getInsertedValueOperand());
-	auto assignStmt = AssignStmt::create(lhs, rhs);
+	auto assignStmt = AssignStmt::create(lhs, rhs, nullptr, LLVMSupport::getInstAddress(&inst));
 
 	auto varDef = generateAssignOfPrevValForInsertValueInst(inst);
 	varDef->setSuccessor(assignStmt);
@@ -158,7 +153,7 @@ ShPtr<Statement> BasicBlockConverter::visitLoadInst(llvm::LoadInst &inst) {
 	}
 
 	auto rhs = converter->convertValueToDerefExpression(inst.getPointerOperand());
-	return AssignStmt::create(lhs, cast<Expression>(rhs));
+	return AssignStmt::create(lhs, cast<Expression>(rhs), nullptr, LLVMSupport::getInstAddress(&inst));
 }
 
 /**
@@ -166,11 +161,11 @@ ShPtr<Statement> BasicBlockConverter::visitLoadInst(llvm::LoadInst &inst) {
 */
 ShPtr<Statement> BasicBlockConverter::visitReturnInst(llvm::ReturnInst &inst) {
 	if (inst.getNumOperands() == 0) {
-		return ReturnStmt::create();
+		return ReturnStmt::create(nullptr, nullptr, LLVMSupport::getInstAddress(&inst));
 	}
 
 	auto retVal = converter->convertValueToExpression(inst.getReturnValue());
-	return ReturnStmt::create(retVal);
+	return ReturnStmt::create(retVal, nullptr, LLVMSupport::getInstAddress(&inst));
 }
 
 /**
@@ -186,7 +181,7 @@ ShPtr<Statement> BasicBlockConverter::visitStoreInst(llvm::StoreInst &inst) {
 	}
 
 	auto rhs = converter->convertValueToExpression(inst.getValueOperand());
-	return AssignStmt::create(lhs, rhs);
+	return AssignStmt::create(lhs, rhs, nullptr, LLVMSupport::getInstAddress(&inst));
 }
 
 /**
@@ -194,7 +189,7 @@ ShPtr<Statement> BasicBlockConverter::visitStoreInst(llvm::StoreInst &inst) {
 *        unreachable statement in BIR.
 */
 ShPtr<Statement> BasicBlockConverter::visitUnreachableInst(llvm::UnreachableInst &inst) {
-	return UnreachableStmt::create();
+	return UnreachableStmt::create(LLVMSupport::getInstAddress(&inst));
 }
 
 /**
@@ -204,7 +199,7 @@ ShPtr<Statement> BasicBlockConverter::visitUnreachableInst(llvm::UnreachableInst
 ShPtr<Statement> BasicBlockConverter::visitInstruction(llvm::Instruction &inst) {
 	auto lhs = converter->convertValueToVariable(&inst);
 	auto rhs = converter->convertInstructionToExpression(&inst);
-	return AssignStmt::create(lhs, rhs);
+	return AssignStmt::create(lhs, rhs, nullptr, LLVMSupport::getInstAddress(&inst));
 }
 
 /**
@@ -215,7 +210,7 @@ ShPtr<Statement> BasicBlockConverter::generateAssignOfPrevValForInsertValueInst(
 		llvm::InsertValueInst &inst) {
 	auto base = converter->convertValueToExpression(&inst);
 	auto prevVal = converter->convertValueToExpression(inst.getAggregateOperand());
-	return AssignStmt::create(base, prevVal);
+	return AssignStmt::create(base, prevVal, nullptr, LLVMSupport::getInstAddress(&inst));
 }
 
 } // namespace llvmir2hll

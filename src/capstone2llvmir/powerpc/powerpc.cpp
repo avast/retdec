@@ -24,11 +24,6 @@ Capstone2LlvmIrTranslatorPowerpc_impl::Capstone2LlvmIrTranslatorPowerpc_impl(
 	initialize();
 }
 
-Capstone2LlvmIrTranslatorPowerpc_impl::~Capstone2LlvmIrTranslatorPowerpc_impl()
-{
-	// Nothing specific to PowerPC.
-}
-
 //
 //==============================================================================
 // Mode query & modification methods - from Capstone2LlvmIrTranslator.
@@ -610,7 +605,7 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateAdd(cs_insn* i, cs_ppc* pi,
 {
 	EXPECT_IS_BINARY_OR_TERNARY(i, pi, irb);
 
-	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::SEXT_TRUNC);
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::SEXT_TRUNC_OR_BITCAST, eOpConv::FPCAST_OR_BITCAST);
 	auto* add = irb.CreateAdd(op1, op2);
 	storeOp(pi->operands[0], add, irb);
 	storeCr0(irb, pi, add);
@@ -623,7 +618,7 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateAddc(cs_insn* i, cs_ppc* pi
 {
 	EXPECT_IS_BINARY_OR_TERNARY(i, pi, irb);
 
-	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::SEXT_TRUNC);
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::SEXT_TRUNC_OR_BITCAST);
 	auto* add = irb.CreateAdd(op1, op2);
 	storeOp(pi->operands[0], add, irb);
 	storeCr0(irb, pi, add);
@@ -637,7 +632,7 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateAdde(cs_insn* i, cs_ppc* pi
 {
 	EXPECT_IS_BINARY_OR_TERNARY(i, pi, irb);
 
-	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::SEXT_TRUNC);
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::SEXT_TRUNC_OR_BITCAST);
 	auto* add = irb.CreateAdd(op1, op2);
 	auto* carry = loadRegister(PPC_REG_CARRY, irb);
 	carry = irb.CreateZExtOrTrunc(carry, add->getType());
@@ -656,7 +651,7 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateAddis(cs_insn* i, cs_ppc* p
 {
 	EXPECT_IS_BINARY_OR_TERNARY(i, pi, irb);
 
-	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::ZEXT_TRUNC);
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::ZEXT_TRUNC_OR_BITCAST);
 	op2 = irb.CreateShl(op2, llvm::ConstantInt::get(op2->getType(), 16));
 	auto* add = irb.CreateAdd(op1, op2);
 	storeOp(pi->operands[0], add, irb);
@@ -714,7 +709,7 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateAnd(cs_insn* i, cs_ppc* pi,
 {
 	EXPECT_IS_BINARY_OR_TERNARY(i, pi, irb);
 
-	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::ZEXT_TRUNC);
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::ZEXT_TRUNC_OR_BITCAST);
 	auto* val = irb.CreateAnd(op1, op2);
 	storeOp(pi->operands[0], val, irb);
 	storeCr0(irb, pi, val);
@@ -727,7 +722,7 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateAndc(cs_insn* i, cs_ppc* pi
 {
 	EXPECT_IS_BINARY_OR_TERNARY(i, pi, irb);
 
-	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::ZEXT_TRUNC);
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::ZEXT_TRUNC_OR_BITCAST);
 	op2 = generateValueNegate(irb, op2);
 	auto* val = irb.CreateAnd(op1, op2);
 	storeOp(pi->operands[0], val, irb);
@@ -741,7 +736,7 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateAndis(cs_insn* i, cs_ppc* p
 {
 	EXPECT_IS_BINARY_OR_TERNARY(i, pi, irb);
 
-	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::ZEXT_TRUNC);
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::ZEXT_TRUNC_OR_BITCAST);
 	op2 = irb.CreateShl(op2, llvm::ConstantInt::get(op2->getType(), 16));
 	auto* val = irb.CreateAnd(op1, op2);
 	storeOp(pi->operands[0], val, irb);
@@ -755,7 +750,7 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateClrlwi(cs_insn* i, cs_ppc* 
 {
 	EXPECT_IS_BINARY_OR_TERNARY(i, pi, irb);
 
-	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::ZEXT_TRUNC);
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::ZEXT_TRUNC_OR_BITCAST);
 	op2 = irb.CreateAnd(op2, llvm::ConstantInt::get(op2->getType(), 31));
 	op1 = irb.CreateShl(op1, op2);
 	op1 = irb.CreateLShr(op1, op2);
@@ -782,7 +777,7 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateCmp(cs_insn* i, cs_ppc* pi,
 	if (pi->op_count == 2)
 	{
 		crReg = PPC_REG_CR0;
-		std::tie(op0, op1) = loadOpBinary(pi, irb, eOpConv::SEXT_TRUNC);
+		std::tie(op0, op1) = loadOpBinary(pi, irb, eOpConv::SEXT_TRUNC_OR_BITCAST);
 	}
 	else if (pi->op_count == 3
 			&& pi->operands[0].type == PPC_OP_REG
@@ -790,7 +785,7 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateCmp(cs_insn* i, cs_ppc* pi,
 			&& pi->operands[0].reg <= PPC_REG_CR7)
 	{
 		crReg = pi->operands[0].reg;
-		std::tie(op0, op1) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::SEXT_TRUNC);
+		std::tie(op0, op1) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::SEXT_TRUNC_OR_BITCAST);
 	}
 	else
 	{
@@ -857,7 +852,7 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateEqv(cs_insn* i, cs_ppc* pi,
 {
 	EXPECT_IS_BINARY_OR_TERNARY(i, pi, irb);
 
-	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::ZEXT_TRUNC);
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::ZEXT_TRUNC_OR_BITCAST);
 	auto* val = irb.CreateXor(op1, op2);
 	val = generateValueNegate(irb, val);
 	storeOp(pi->operands[0], val, irb);
@@ -924,10 +919,10 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateLoad(cs_insn* i, cs_ppc* pi
 
 	op1 = loadOpBinaryOp1(pi, irb, ty);
 
-	eOpConv conv = eOpConv::ZEXT_TRUNC;
+	eOpConv conv = eOpConv::ZEXT_TRUNC_OR_BITCAST;
 	if (i->id == PPC_INS_LHA || i->id == PPC_INS_LHAU)
 	{
-		conv = eOpConv::SEXT_TRUNC;
+		conv = eOpConv::SEXT_TRUNC_OR_BITCAST;
 	}
 	storeOp(pi->operands[0], op1, irb, conv);
 
@@ -953,7 +948,7 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateLoadIndexed(cs_insn* i, cs_
 {
 	EXPECT_IS_BINARY_OR_TERNARY(i, pi, irb);
 
-	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::ZEXT_TRUNC);
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::ZEXT_TRUNC_OR_BITCAST);
 	auto* add = irb.CreateAdd(op1, op2);
 
 	llvm::Type* ty = nullptr;
@@ -981,10 +976,10 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateLoadIndexed(cs_insn* i, cs_
 	auto* addr = irb.CreateIntToPtr(add, pty);
 	auto* l = irb.CreateLoad(addr);
 
-	eOpConv conv = eOpConv::ZEXT_TRUNC;
+	eOpConv conv = eOpConv::ZEXT_TRUNC_OR_BITCAST;
 	if (i->id == PPC_INS_LHAX || i->id == PPC_INS_LHAUX)
 	{
-		conv = eOpConv::SEXT_TRUNC;
+		conv = eOpConv::SEXT_TRUNC_OR_BITCAST;
 	}
 	storeOp(pi->operands[0], l, irb, conv);
 
@@ -1106,7 +1101,7 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateLhbrx(cs_insn* i, cs_ppc* p
 {
 	EXPECT_IS_BINARY_OR_TERNARY(i, pi, irb);
 
-	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::ZEXT_TRUNC);
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::ZEXT_TRUNC_OR_BITCAST);
 
 	auto* pty = llvm::PointerType::get(irb.getInt8Ty(), 0);
 
@@ -1123,7 +1118,7 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateLhbrx(cs_insn* i, cs_ppc* p
 
 	auto* val = irb.CreateOr(lLo, lHi);
 
-	storeOp(pi->operands[0], val, irb, eOpConv::ZEXT_TRUNC);
+	storeOp(pi->operands[0], val, irb, eOpConv::ZEXT_TRUNC_OR_BITCAST);
 }
 
 /**
@@ -1134,7 +1129,7 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateLi(cs_insn* i, cs_ppc* pi, 
 	EXPECT_IS_BINARY(i, pi, irb);
 
 	op1 = loadOpBinaryOp1(pi, irb);
-	storeOp(pi->operands[0], op1, irb, eOpConv::SEXT_TRUNC);
+	storeOp(pi->operands[0], op1, irb, eOpConv::SEXT_TRUNC_OR_BITCAST);
 	storeCr0(irb, pi, op1); // ?
 }
 
@@ -1147,7 +1142,7 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateLis(cs_insn* i, cs_ppc* pi,
 
 	op1 = loadOpBinaryOp1(pi, irb);
 	op1 = irb.CreateShl(op1, llvm::ConstantInt::get(op1->getType(), 16));
-	storeOp(pi->operands[0], op1, irb, eOpConv::SEXT_TRUNC);
+	storeOp(pi->operands[0], op1, irb, eOpConv::SEXT_TRUNC_OR_BITCAST);
 	storeCr0(irb, pi, op1); // ?
 }
 
@@ -1502,7 +1497,7 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateMullw(cs_insn* i, cs_ppc* p
 {
 	EXPECT_IS_BINARY_OR_TERNARY(i, pi, irb);
 
-	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::SEXT_TRUNC);
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::SEXT_TRUNC_OR_BITCAST);
 	auto* val = irb.CreateMul(op1, op2);
 	storeOp(pi->operands[0], val, irb);
 	storeCr0(irb, pi, val);
@@ -1515,7 +1510,7 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateNand(cs_insn* i, cs_ppc* pi
 {
 	EXPECT_IS_BINARY_OR_TERNARY(i, pi, irb);
 
-	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::ZEXT_TRUNC);
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::ZEXT_TRUNC_OR_BITCAST);
 	auto* val = irb.CreateAnd(op1, op2);
 	val = generateValueNegate(irb, val);
 	storeOp(pi->operands[0], val, irb);
@@ -1550,7 +1545,7 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateNor(cs_insn* i, cs_ppc* pi,
 {
 	EXPECT_IS_BINARY_OR_TERNARY(i, pi, irb);
 
-	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::ZEXT_TRUNC);
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::ZEXT_TRUNC_OR_BITCAST);
 	auto* val = irb.CreateOr(op1, op2);
 	val = generateValueNegate(irb, val);
 	storeOp(pi->operands[0], val, irb);
@@ -1579,7 +1574,7 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateOr(cs_insn* i, cs_ppc* pi, 
 {
 	EXPECT_IS_BINARY_OR_TERNARY(i, pi, irb);
 
-	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::ZEXT_TRUNC);
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::ZEXT_TRUNC_OR_BITCAST);
 	auto* val = irb.CreateOr(op1, op2);
 	storeOp(pi->operands[0], val, irb);
 	storeCr0(irb, pi, val);
@@ -1592,7 +1587,7 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateOrc(cs_insn* i, cs_ppc* pi,
 {
 	EXPECT_IS_BINARY_OR_TERNARY(i, pi, irb);
 
-	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::ZEXT_TRUNC);
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::ZEXT_TRUNC_OR_BITCAST);
 	op2 = generateValueNegate(irb, op2);
 	auto* val = irb.CreateOr(op1, op2);
 	storeOp(pi->operands[0], val, irb);
@@ -1606,7 +1601,7 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateOris(cs_insn* i, cs_ppc* pi
 {
 	EXPECT_IS_BINARY_OR_TERNARY(i, pi, irb);
 
-	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::ZEXT_TRUNC);
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::ZEXT_TRUNC_OR_BITCAST);
 	op2 = irb.CreateShl(op2, llvm::ConstantInt::get(op2->getType(), 16));
 	auto* val = irb.CreateOr(op1, op2);
 	storeOp(pi->operands[0], val, irb);
@@ -1647,7 +1642,7 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateRotlw(cs_insn* i, cs_ppc* p
 {
 	EXPECT_IS_BINARY_OR_TERNARY(i, pi, irb);
 
-	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::ZEXT_TRUNC);
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::ZEXT_TRUNC_OR_BITCAST);
 	unsigned op0BitW = llvm::cast<llvm::IntegerType>(op1->getType())->getBitWidth();
 	unsigned maskC = op0BitW == 64 ? 0x3f : 0x1f;
 	auto* mask = llvm::ConstantInt::get(op2->getType(), maskC);
@@ -1675,7 +1670,7 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateShiftLeft(cs_insn* i, cs_pp
 	op2 = irb.CreateZExtOrTrunc(op2, op1->getType());
 
 	auto* val = irb.CreateShl(op1, op2);
-	storeOp(pi->operands[0], val, irb, eOpConv::ZEXT_TRUNC); // TODO: check it all others are using correct conversion
+	storeOp(pi->operands[0], val, irb, eOpConv::ZEXT_TRUNC_OR_BITCAST); // TODO: check it all others are using correct conversion
 	storeCr0(irb, pi, val);
 }
 
@@ -1692,7 +1687,7 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateShiftRight(cs_insn* i, cs_p
 	op2 = irb.CreateZExtOrTrunc(op2, op1->getType());
 
 	auto* val = irb.CreateLShr(op1, op2);
-	storeOp(pi->operands[0], val, irb, eOpConv::ZEXT_TRUNC);
+	storeOp(pi->operands[0], val, irb, eOpConv::ZEXT_TRUNC_OR_BITCAST);
 	storeCr0(irb, pi, val);
 }
 
@@ -1740,7 +1735,7 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateSraw(cs_insn* i, cs_ppc* pi
 //	auto* c = irb.CreateCall(fnc, {op1, op2});
 //	op0 = irb.CreateExtractValue(c, {0});
 //
-//	storeOp(pi->operands[0], op0, irb, eOpConv::ZEXT_TRUNC);
+//	storeOp(pi->operands[0], op0, irb, eOpConv::ZEXT_TRUNC_OR_BITCAST);
 //	storeRegister(PPC_REG_CARRY, irb.CreateExtractValue(c, {1}), irb);
 //	storeCr0(irb, pi, op0);
 
@@ -1787,7 +1782,7 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateSubf(cs_insn* i, cs_ppc* pi
 {
 	EXPECT_IS_BINARY_OR_TERNARY(i, pi, irb);
 
-	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::SEXT_TRUNC);
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::SEXT_TRUNC_OR_BITCAST);
 	if (i->id == PPC_INS_SUB)
 	{
 		std::swap(op1, op2);
@@ -1807,7 +1802,7 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateSubfc(cs_insn* i, cs_ppc* p
 {
 	EXPECT_IS_BINARY_OR_TERNARY(i, pi, irb);
 
-	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::SEXT_TRUNC);
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::SEXT_TRUNC_OR_BITCAST);
 	if (i->id == PPC_INS_SUBC)
 	{
 		std::swap(op1, op2);
@@ -1840,7 +1835,7 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateSubfe(cs_insn* i, cs_ppc* p
 {
 	EXPECT_IS_BINARY_OR_TERNARY(i, pi, irb);
 
-	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::SEXT_TRUNC);
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::SEXT_TRUNC_OR_BITCAST);
 	auto* op1Neg = generateValueNegate(irb, op1);
 	auto* val = irb.CreateAdd(op1Neg, op2);
 	auto* carry = loadRegister(PPC_REG_CARRY, irb);
@@ -1903,7 +1898,7 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateXor(cs_insn* i, cs_ppc* pi,
 {
 	EXPECT_IS_BINARY_OR_TERNARY(i, pi, irb);
 
-	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::ZEXT_TRUNC);
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::ZEXT_TRUNC_OR_BITCAST);
 	auto* val = irb.CreateXor(op1, op2);
 	storeOp(pi->operands[0], val, irb);
 	storeCr0(irb, pi, val);
@@ -1916,7 +1911,7 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateXoris(cs_insn* i, cs_ppc* p
 {
 	EXPECT_IS_BINARY_OR_TERNARY(i, pi, irb);
 
-	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::ZEXT_TRUNC);
+	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::ZEXT_TRUNC_OR_BITCAST);
 	op2 = irb.CreateShl(op2, llvm::ConstantInt::get(op2->getType(), 16));
 	auto* val = irb.CreateXor(op1, op2);
 	storeOp(pi->operands[0], val, irb);

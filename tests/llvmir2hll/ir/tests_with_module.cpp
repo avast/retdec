@@ -13,6 +13,7 @@
 #include "llvmir2hll/ir/tests_with_module.h"
 #include "retdec/llvmir2hll/ir/variable.h"
 #include "retdec/llvmir2hll/ir/void_type.h"
+#include "retdec/llvmir2hll/support/debug.h"
 
 using namespace ::testing;
 
@@ -42,7 +43,7 @@ TestsWithModule::TestsWithModule():
 * @return The constructed function declaration.
 */
 ShPtr<Function> TestsWithModule::addFuncDecl(const std::string &funcName) {
-	ShPtr<Function> func(Function::create(VoidType::create(), funcName,
+	ShPtr<Function> func(Function::create(nullptr, VoidType::create(), funcName,
 		VarVector(), VarSet(), ShPtr<Statement>(), false));
 	module->addFunc(func);
 	return func;
@@ -54,7 +55,7 @@ ShPtr<Function> TestsWithModule::addFuncDecl(const std::string &funcName) {
 * @return The constructed function definition.
 */
 ShPtr<Function> TestsWithModule::addFuncDef(const std::string &funcName) {
-	ShPtr<Function> func(Function::create(VoidType::create(), funcName,
+	ShPtr<Function> func(Function::create(nullptr, VoidType::create(), funcName,
 		VarVector(), VarSet(), EmptyStmt::create(), false));
 	module->addFunc(func);
 	return func;

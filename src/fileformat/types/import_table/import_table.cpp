@@ -568,22 +568,6 @@ namespace retdec {
 namespace fileformat {
 
 /**
- * Constructor
- */
-ImportTable::ImportTable()
-{
-
-}
-
-/**
- * Destructor
- */
-ImportTable::~ImportTable()
-{
-
-}
-
-/**
  * Get number of libraries which are imported
  * @return Number of libraries which are imported
  */

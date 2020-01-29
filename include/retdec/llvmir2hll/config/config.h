@@ -38,7 +38,7 @@ private:
 */
 class Config: private retdec::utils::NonCopyable {
 public:
-	virtual ~Config();
+	virtual ~Config() = default;
 
 	/// @name Loading and Saving
 	/// @{
@@ -86,6 +86,14 @@ public:
 	* register name attached, the empty string is returned.
 	*/
 	virtual std::string getRegisterForGlobalVar(const std::string &var) const = 0;
+
+	/**
+	* @brief Returns the address of the given global variable.
+	*
+	* If the given variable is not a global variable or it does not have any
+	* address attached, the undefined address is returned.
+	*/
+	virtual Address getAddressForGlobalVar(const std::string &var) const = 0;
 
 	/**
 	* @brief Returns a description of the detected cryptographic pattern for
@@ -210,11 +218,6 @@ public:
 	* string is returned.
 	*/
 	virtual std::string getDemangledNameOfFunc(const std::string &func) const = 0;
-
-	/**
-	* @brief Returns a set of functions that were fixed by our LLVM-IR fixer.
-	*/
-	virtual StringSet getFuncsFixedWithLLVMIRFixer() const = 0;
 
 	/// @}
 

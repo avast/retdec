@@ -36,11 +36,6 @@ IfToSwitchOptimizer::IfToSwitchOptimizer(ShPtr<Module> module,
 	PRECONDITION_NON_NULL(va);
 }
 
-/**
-* @brief Destructs the optimizer.
-*/
-IfToSwitchOptimizer::~IfToSwitchOptimizer() {}
-
 void IfToSwitchOptimizer::visit(ShPtr<IfStmt> stmt) {
 	ShPtr<Expression> controlExpr(getControlExprIfConvertibleToSwitch(stmt));
 	if (!controlExpr) {
@@ -128,7 +123,8 @@ ShPtr<Expression> IfToSwitchOptimizer::getControlExprIfConvertibleToSwitch(
 */
 void IfToSwitchOptimizer::convertIfStmtToSwitchStmt(ShPtr<IfStmt> ifStmt,
 		ShPtr<Expression> controlExpr) {
-	ShPtr<SwitchStmt> switchStmt(SwitchStmt::create(controlExpr));
+	ShPtr<SwitchStmt> switchStmt(
+		SwitchStmt::create(controlExpr, nullptr, ifStmt->getAddress()));
 	for (auto i = ifStmt->clause_begin(), e = ifStmt->clause_end(); i != e; ++i) {
 		// Append break statement at last statement of statements block. Because
 		// then we paste this statements block to case clause.
@@ -176,7 +172,7 @@ void IfToSwitchOptimizer::convertIfStmtToSwitchStmt(ShPtr<IfStmt> ifStmt,
 void IfToSwitchOptimizer::appendBreakStmtIfNeeded(ShPtr<Statement> stmt) {
 	if (!isa<ContinueStmt>(stmt) && !isa<ReturnStmt>(stmt) &&
 			!isa<GotoStmt>(stmt)) {
-		stmt->setSuccessor(BreakStmt::create());
+		stmt->setSuccessor(BreakStmt::create(stmt->getAddress()));
 	}
 }
 

@@ -20,13 +20,6 @@ namespace llvmir2hll {
 AndOpExpr::AndOpExpr(ShPtr<Expression> op1, ShPtr<Expression> op2):
 	BinaryOpExpr(op1, op2) {}
 
-/**
-* @brief Destructs the operator.
-*/
-AndOpExpr::~AndOpExpr() {
-	// Observers are removed in the superclass.
-}
-
 bool AndOpExpr::isEqualTo(ShPtr<Value> otherValue) const {
 	if (ShPtr<AndOpExpr> otherValueAndOpExpr = cast<AndOpExpr>(otherValue)) {
 		return op1->isEqualTo(otherValueAndOpExpr->getFirstOperand()) &&

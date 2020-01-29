@@ -111,9 +111,6 @@ public:
 */
 class DefUseAnalysis: private retdec::utils::NonCopyable {
 public:
-	// It needs to be public so it can be called in ShPtr's destructor.
-	~DefUseAnalysis();
-
 	ShPtr<DefUseChains> getDefUseChains(
 		ShPtr<Function> func,
 		ShPtr<CFG> cfg = nullptr,

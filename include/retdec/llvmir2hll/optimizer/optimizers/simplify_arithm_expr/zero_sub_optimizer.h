@@ -135,7 +135,6 @@ namespace llvmir2hll {
 class ZeroSubOptimizer final: public SubOptimizer {
 public:
 	ZeroSubOptimizer(ShPtr<ArithmExprEvaluator> arithmExprEvaluator);
-	virtual ~ZeroSubOptimizer() override;
 
 	static ShPtr<SubOptimizer> create(ShPtr<ArithmExprEvaluator>
 		arithmExprEvaluator);

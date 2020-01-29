@@ -7,8 +7,6 @@
 #ifndef RETDEC_FILEFORMAT_FILE_FORMAT_PE_PE_FORMAT_H
 #define RETDEC_FILEFORMAT_FILE_FORMAT_PE_PE_FORMAT_H
 
-#include <pelib/PeLib.h>
-
 #include "retdec/crypto/hash_context.h"
 #include "retdec/fileformat/file_format/file_format.h"
 #include "retdec/fileformat/file_format/pe/pe_format_parser/pe_format_parser.h"
@@ -19,6 +17,7 @@
 #include "retdec/fileformat/types/dotnet_headers/user_string_stream.h"
 #include "retdec/fileformat/types/dotnet_types/dotnet_class.h"
 #include "retdec/fileformat/types/visual_basic/visual_basic_info.h"
+#include "retdec/pelib/PeLib.h"
 
 namespace retdec {
 namespace fileformat {

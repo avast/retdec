@@ -53,14 +53,6 @@ IterativeDistributionGetter::IterativeDistributionGetter(FileInformation &fileIn
 }
 
 /**
- * Destructor
- */
-IterativeDistributionGetter::~IterativeDistributionGetter()
-{
-
-}
-
-/**
  * @fn bool IterativeDistributionGetter::loadRecord(std::size_t structIndex, std::size_t recIndex, std::vector<std::string> &record)
  * Load one record
  * @param structIndex Index of selected structure (indexed from 0)

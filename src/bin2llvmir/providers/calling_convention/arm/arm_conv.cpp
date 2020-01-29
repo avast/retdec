@@ -31,10 +31,6 @@ ArmCallingConvention::ArmCallingConvention(const Abi* a) :
 	_numOfVectorRegsPerParam = 4;
 }
 
-ArmCallingConvention::~ArmCallingConvention()
-{
-}
-
 CallingConvention::Ptr ArmCallingConvention::create(const Abi* a)
 {
 	if (!a->isArm())

@@ -22,14 +22,6 @@ BasicPlainGetter::BasicPlainGetter(FileInformation &fileInfo) : SimpleGetter(fil
 
 }
 
-/**
- * Destructor
- */
-BasicPlainGetter::~BasicPlainGetter()
-{
-
-}
-
 std::size_t BasicPlainGetter::loadInformation(std::vector<std::string> &desc, std::vector<std::string> &info) const
 {
 	const char * loaderErrorUserFriendly = fileinfo.getLoaderErrorInfo().loaderErrorUserFriendly;
@@ -46,7 +38,10 @@ std::size_t BasicPlainGetter::loadInformation(std::vector<std::string> &desc, st
 
 	// Save the title for loader error (if there was a loader error detected)
 	if(loaderErrorUserFriendly != nullptr)
+	{
 		desc.push_back("Loader error             : ");
+		desc.push_back("Loadable anyway          : ");
+	}
 
 	desc.push_back("Architecture             : ");
 	desc.push_back("Endianness               : ");
@@ -65,8 +60,11 @@ std::size_t BasicPlainGetter::loadInformation(std::vector<std::string> &desc, st
 	info.push_back(fileinfo.getFileType());
 
 	// Save the text loader error
-	if(loaderErrorUserFriendly != nullptr)
+	if (loaderErrorUserFriendly != nullptr)
+	{
 		info.push_back(loaderErrorUserFriendly);
+		info.push_back(fileinfo.getLoaderErrorInfo().isLoadableAnyway ? "Yes" : "No");
+	}
 
 	info.push_back(fileinfo.getTargetArchitecture());
 	info.push_back(fileinfo.getEndianness());
