@@ -4,13 +4,13 @@
  * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
 
-#include <algorithm>
-#include <vector>
+#include <rapidjson/prettywriter.h>
+#include <rapidjson/stringbuffer.h>
 
 #include "retdec/common/language.h"
 #include "retdec/serdes/language.h"
 
-#include "serdes/utils.h"
+#include "retdec/serdes/std.h"
 
 namespace {
 
@@ -23,35 +23,34 @@ const std::string JSON_bytecode    = "bytecode";
 namespace retdec {
 namespace serdes {
 
-Json::Value serialize(const common::Language& l)
+template <typename Writer>
+void serialize(Writer& writer, const common::Language& l)
 {
-	Json::Value lang;
+	writer.StartObject();
 
-	lang[JSON_name] = l.getName();
-	if (l.isModuleCountSet())
-	{
-		lang[JSON_moduleCount] = l.getModuleCount();
-	}
-	lang[JSON_bytecode] = l.isBytecode();
+	serializeString(writer, JSON_name, l.getName());
+	serializeUint64(writer, JSON_moduleCount, l.getModuleCount(), l.isModuleCountSet());
+	serializeBool(writer, JSON_bytecode, l.isBytecode());
 
-	return lang;
+	writer.EndObject();
 }
+SERIALIZE_EXPLICIT_INSTANTIATION(common::Language);
 
-void deserialize(const Json::Value& val, common::Language& l)
+void deserialize(const rapidjson::Value& val, common::Language& l)
 {
-	if (val.isNull() || !val.isObject())
+	if (val.IsNull() || !val.IsObject())
 	{
 		return;
 	}
 
-	l.setName(safeGetString(val, JSON_name));
+	l.setName(deserializeString(val, JSON_name));
 
-	int c = safeGetInt(val, JSON_moduleCount, -1);
+	int c = deserializeUint64(val, JSON_moduleCount, -1);
 	if (c >= 0)
 	{
 		l.setModuleCount(c);
 	}
-	l.setIsBytecode(safeGetBool(val, JSON_bytecode));
+	l.setIsBytecode(deserializeBool(val, JSON_bytecode));
 }
 
 } // namespace serdes

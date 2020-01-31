@@ -4,15 +4,13 @@
  * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
 
-#include <algorithm>
-#include <vector>
+#include <rapidjson/prettywriter.h>
+#include <rapidjson/stringbuffer.h>
 
 #include "retdec/common/basic_block.h"
 #include "retdec/serdes/address.h"
 #include "retdec/serdes/basic_block.h"
 #include "retdec/serdes/std.h"
-
-#include "serdes/utils.h"
 
 namespace {
 
@@ -29,71 +27,61 @@ const std::string JSON_calls      = "calls";
 namespace retdec {
 namespace serdes {
 
-Json::Value serialize(const common::BasicBlock::CallEntry& ce)
+template <typename Writer>
+void serialize(Writer& writer, const common::BasicBlock::CallEntry& ce)
 {
-	Json::Value e;
-
-	e[JSON_srcAddr] = serdes::serialize(ce.srcAddr);
-	e[JSON_targetAddr] = serdes::serialize(ce.targetAddr);
-
-	return e;
+	writer.StartObject();
+	serialize(writer, JSON_srcAddr, ce.srcAddr);
+	serialize(writer, JSON_targetAddr, ce.targetAddr);
+	writer.EndObject();
 }
+SERIALIZE_EXPLICIT_INSTANTIATION(common::BasicBlock::CallEntry);
 
-void deserialize(const Json::Value& val, common::BasicBlock::CallEntry& ce)
+void deserialize(const rapidjson::Value& val, common::BasicBlock::CallEntry& ce)
 {
-	if (val.isNull() || !val.isObject())
+	if (val.IsNull() || !val.IsObject())
 	{
 		return;
 	}
 
-	serdes::deserialize(val[JSON_srcAddr], ce.srcAddr);
-	serdes::deserialize(val[JSON_targetAddr], ce.targetAddr);
+	deserialize(val, JSON_srcAddr, ce.srcAddr);
+	deserialize(val, JSON_targetAddr, ce.targetAddr);
 }
 
-Json::Value serialize(const common::BasicBlock& bb)
+template <typename Writer>
+void serialize(Writer& writer, const common::BasicBlock& bb)
 {
-	Json::Value b;
+	writer.StartObject();
 
-	b[JSON_startAddr] = serdes::serialize(bb.getStart());
+	serialize(writer, JSON_startAddr, bb.getStart());
+	serialize(writer, JSON_endAddr, bb.getEnd());
 
-	if (bb.getEnd().isDefined())
-	{
-		b[JSON_endAddr] = serdes::serialize(bb.getEnd());
-	}
-	if (!bb.preds.empty())
-	{
-		b[JSON_preds] = serdes::serialize(bb.preds);
-	}
-	if (!bb.succs.empty())
-	{
-		b[JSON_succs] = serdes::serialize(bb.succs);
-	}
-	if (!bb.calls.empty())
-	{
-		b[JSON_calls] = serdes::serialize(bb.calls);
-	}
+	serializeContainer(writer, JSON_preds, bb.preds);
+	serializeContainer(writer, JSON_succs, bb.succs);
+	serializeContainer(writer, JSON_calls, bb.calls);
 
-	return b;
+	writer.EndObject();
 }
+SERIALIZE_EXPLICIT_INSTANTIATION(common::BasicBlock);
 
-void deserialize(const Json::Value& val, common::BasicBlock& bb)
+void deserialize(const rapidjson::Value& val, common::BasicBlock& bb)
 {
-	if (val.isNull() || !val.isObject())
+	if (val.IsNull() || !val.IsObject())
 	{
 		return;
 	}
 
 	common::Address s;
-	serdes::deserialize(val[JSON_startAddr], s);
+	deserialize(val, JSON_startAddr, s);
 	bb.setStart(s);
 
 	common::Address e;
-	serdes::deserialize(val[JSON_endAddr], e);
+	deserialize(val, JSON_endAddr, e);
 	bb.setEnd(e);
 
-	serdes::deserialize(val[JSON_preds], bb.preds);
-	serdes::deserialize(val[JSON_succs], bb.succs);
-	serdes::deserialize(val[JSON_calls], bb.calls);
+	deserializeContainer(val, JSON_preds, bb.preds);
+	deserializeContainer(val, JSON_succs, bb.succs);
+	deserializeContainer(val, JSON_calls, bb.calls);
 }
 
 } // namespace serdes

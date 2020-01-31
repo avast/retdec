@@ -7,7 +7,7 @@
 #ifndef RETDEC_SERDES_OBJECT_H
 #define RETDEC_SERDES_OBJECT_H
 
-#include <json/json.h>
+#include <rapidjson/document.h>
 
 namespace retdec {
 
@@ -17,8 +17,9 @@ class Object;
 
 namespace serdes {
 
-Json::Value serialize(const common::Object& o);
-void deserialize(const Json::Value& val, common::Object& o);
+template <typename Writer>
+void serialize(Writer& writer, const common::Object& o);
+void deserialize(const rapidjson::Value& val, common::Object& o);
 
 } // namespace serdes
 } // namespace retdec

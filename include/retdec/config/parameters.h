@@ -10,7 +10,8 @@
 #include <set>
 #include <string>
 
-#include <json/json.h>
+#include <rapidjson/document.h>
+#include <rapidjson/writer.h>
 
 #include "retdec/common/address.h"
 
@@ -47,8 +48,9 @@ class Parameters
 		std::string getOrdinalNumbersDirectory() const;
 		/// @}
 
-		Json::Value getJsonValue() const;
-		void readJsonValue(const Json::Value& val);
+template <typename Writer>
+void serialize(Writer& writer) const;
+void deserialize(const rapidjson::Value& val);
 
 	public:
 		std::set<std::string> userStaticSignaturePaths;

@@ -15,9 +15,9 @@ namespace fileinfo {
 namespace
 {
 
-const std::size_t distributionArray[] = {6, 20, 20};
-const std::string headerArray[] = {"i", "version", "count"};
-const std::string headerDesc[] = {"index", "used version", "number of uses"};
+const std::size_t distributionArray[] = {6, 20, 20, 20, 20};
+const std::string headerArray[] = {"i", "product_id", "count", "product_name", "vs_version"};
+const std::string headerDesc[] = {"index", "product id", "number of uses", "product name", "vs_version"};
 
 } // anonymous namespace
 
@@ -62,10 +62,12 @@ bool RichHeaderPlainGetter::loadRecord(std::size_t structIndex, std::size_t recI
 
 	record.clear();
 	record.push_back(numToStr(recIndex));
-	const auto major = fileinfo.getRichHeaderRecordMajorVersionStr(recIndex);
-	const auto build = fileinfo.getRichHeaderRecordBuildVersionStr(recIndex);
-	record.push_back(!major.empty() && !build.empty() ? major + "." + build : "");
+	const auto productId = fileinfo.getRichHeaderRecordProductIdStr(recIndex);
+	const auto productBuild = fileinfo.getRichHeaderRecordProductBuildStr(recIndex);
+	record.push_back(!productId.empty() && !productBuild.empty() ? productId + "." + productBuild : "");
 	record.push_back(fileinfo.getRichHeaderRecordNumberOfUsesStr(recIndex));
+	record.push_back(fileinfo.getRichHeaderRecordProductNameStr(recIndex));
+	record.push_back(fileinfo.getRichHeaderRecordVisualStudioNameStr(recIndex));
 
 	return true;
 }

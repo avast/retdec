@@ -7,7 +7,8 @@
 #ifndef RETDEC_SERDES_ARCHITECTURE_H
 #define RETDEC_SERDES_ARCHITECTURE_H
 
-#include <json/json.h>
+#include <rapidjson/document.h>
+#include <rapidjson/writer.h>
 
 namespace retdec {
 
@@ -17,8 +18,9 @@ class Architecture;
 
 namespace serdes {
 
-Json::Value serialize(const common::Architecture& a);
-void deserialize(const Json::Value& val, common::Architecture& a);
+template <typename Writer>
+void serialize(Writer& writer, const common::Architecture& a);
+void deserialize(const rapidjson::Value& val, common::Architecture& a);
 
 } // namespace serdes
 } // namespace retdec

@@ -4,8 +4,11 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "retdec/config/base.h"
+#include <rapidjson/prettywriter.h>
+#include <rapidjson/stringbuffer.h>
+
 #include "retdec/config/parameters.h"
+#include "retdec/serdes/address.h"
 #include "retdec/serdes/std.h"
 
 namespace {
@@ -118,56 +121,58 @@ std::string Parameters::getOrdinalNumbersDirectory() const
  * Returns JSON object (associative array) holding parameters information.
  * @return JSON object.
  */
-Json::Value Parameters::getJsonValue() const
+template <typename Writer>
+void Parameters::serialize(Writer& writer) const
 {
-	Json::Value params;
+	writer.StartObject();
 
-	params[JSON_verboseOut]         = isVerboseOutput();
-	params[JSON_keepAllFuncs]       = isKeepAllFunctions();
-	params[JSON_selectedDecodeOnly] = isSelectedDecodeOnly();
-	params[JSON_outputFile]         = getOutputFile();
+	serdes::serializeBool(writer, JSON_verboseOut, isVerboseOutput());
+	serdes::serializeBool(writer, JSON_keepAllFuncs, isKeepAllFunctions());
+	serdes::serializeBool(writer, JSON_selectedDecodeOnly, isSelectedDecodeOnly());
+	serdes::serializeString(writer, JSON_outputFile, getOutputFile());
+	serdes::serializeString(writer, JSON_ordinalNumDir, getOrdinalNumbersDirectory());
 
-	if (!getOrdinalNumbersDirectory().empty()) params[JSON_ordinalNumDir] = getOrdinalNumbersDirectory();
+	serdes::serializeContainer(writer, JSON_selectedRanges, selectedRanges);
+	serdes::serializeContainer(writer, JSON_userStaticSigPaths, userStaticSignaturePaths);
+	serdes::serializeContainer(writer, JSON_staticSigPaths, staticSignaturePaths);
+	serdes::serializeContainer(writer, JSON_libraryTypeInfoPaths, libraryTypeInfoPaths);
+	serdes::serializeContainer(writer, JSON_abiPaths, abiPaths);
+	serdes::serializeContainer(writer, JSON_selectedFunctions, selectedFunctions);
+	serdes::serializeContainer(writer, JSON_frontendFunctions, frontendFunctions);
+	serdes::serializeContainer(writer, JSON_selectedNotFoundFncs, selectedNotFoundFunctions);
 
-	params[JSON_selectedRanges]       = serdes::serialize(selectedRanges);
-
-	params[JSON_userStaticSigPaths]       = serdes::serialize(userStaticSignaturePaths);
-	params[JSON_staticSigPaths]           = serdes::serialize(staticSignaturePaths);
-	params[JSON_libraryTypeInfoPaths]     = serdes::serialize(libraryTypeInfoPaths);
-	params[JSON_abiPaths]                 = serdes::serialize(abiPaths);
-	params[JSON_selectedFunctions]        = serdes::serialize(selectedFunctions);
-	params[JSON_frontendFunctions]        = serdes::serialize(frontendFunctions);
-	params[JSON_selectedNotFoundFncs]     = serdes::serialize(selectedNotFoundFunctions);
-
-	return params;
+	writer.EndObject();
 }
+template void Parameters::serialize(
+	rapidjson::PrettyWriter<rapidjson::StringBuffer>&) const;
+template void Parameters::serialize(
+	rapidjson::PrettyWriter<rapidjson::StringBuffer, rapidjson::ASCII<>>&) const;
 
 /**
  * Reads JSON object (associative array) holding parameters information.
  * @param val JSON object.
  */
-void Parameters::readJsonValue(const Json::Value& val)
+void Parameters::deserialize(const rapidjson::Value& val)
 {
-	if ( val.isNull() || !val.isObject() )
+	if ( val.IsNull() || !val.IsObject() )
 	{
 		return;
 	}
 
-	setIsVerboseOutput( safeGetBool(val, JSON_verboseOut, false) );
-	setIsKeepAllFunctions( safeGetBool(val, JSON_keepAllFuncs) );
-	setIsSelectedDecodeOnly( safeGetBool(val, JSON_selectedDecodeOnly) );
-	setOrdinalNumbersDirectory( safeGetString(val, JSON_ordinalNumDir) );
-	setOutputFile( safeGetString(val, JSON_outputFile) );
+	setIsVerboseOutput( serdes::deserializeBool(val, JSON_verboseOut, false) );
+	setIsKeepAllFunctions( serdes::deserializeBool(val, JSON_keepAllFuncs) );
+	setIsSelectedDecodeOnly( serdes::deserializeBool(val, JSON_selectedDecodeOnly) );
+	setOrdinalNumbersDirectory( serdes::deserializeString(val, JSON_ordinalNumDir) );
+	setOutputFile( serdes::deserializeString(val, JSON_outputFile) );
 
-	serdes::deserialize(val[JSON_selectedRanges], selectedRanges);
-
-	serdes::deserialize(val[JSON_staticSigPaths], staticSignaturePaths);
-	serdes::deserialize(val[JSON_userStaticSigPaths], userStaticSignaturePaths);
-	serdes::deserialize(val[JSON_libraryTypeInfoPaths], libraryTypeInfoPaths);
-	serdes::deserialize(val[JSON_abiPaths], abiPaths);
-	serdes::deserialize(val[JSON_selectedFunctions], selectedFunctions);
-	serdes::deserialize(val[JSON_frontendFunctions], frontendFunctions);
-	serdes::deserialize(val[JSON_selectedNotFoundFncs], selectedNotFoundFunctions);
+	serdes::deserializeContainer(val, JSON_selectedRanges, selectedRanges);
+	serdes::deserializeContainer(val, JSON_staticSigPaths, staticSignaturePaths);
+	serdes::deserializeContainer(val, JSON_userStaticSigPaths, userStaticSignaturePaths);
+	serdes::deserializeContainer(val, JSON_libraryTypeInfoPaths, libraryTypeInfoPaths);
+	serdes::deserializeContainer(val, JSON_abiPaths, abiPaths);
+	serdes::deserializeContainer(val, JSON_selectedFunctions, selectedFunctions);
+	serdes::deserializeContainer(val, JSON_frontendFunctions, frontendFunctions);
+	serdes::deserializeContainer(val, JSON_selectedNotFoundFncs, selectedNotFoundFunctions);
 }
 
 } // namespace config

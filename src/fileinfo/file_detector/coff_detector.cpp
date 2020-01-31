@@ -7,12 +7,12 @@
 #include <sstream>
 
 #include <llvm/Object/COFF.h>
-#include <pelib/PeLibInc.h>
 
+#include "fileinfo/file_detector/coff_detector.h"
 #include "retdec/utils/array.h"
 #include "retdec/utils/conversion.h"
 #include "retdec/fileformat/utils/other.h"
-#include "fileinfo/file_detector/coff_detector.h"
+#include "retdec/pelib/PeLibInc.h"
 
 using namespace retdec::utils;
 using namespace llvm;

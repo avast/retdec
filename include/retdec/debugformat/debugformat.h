@@ -7,13 +7,19 @@
 #ifndef RETDEC_DEBUGFORMAT_DEBUGFORMAT_H
 #define RETDEC_DEBUGFORMAT_DEBUGFORMAT_H
 
+#include <llvm/DebugInfo/DIContext.h>
+#include <llvm/DebugInfo/DWARF/DWARFContext.h>
+#include <llvm/Object/ObjectFile.h>
+#include <llvm/Support/Debug.h>
+#include <llvm/Support/Format.h>
+#include <llvm/Support/MemoryBuffer.h>
+
 #include "retdec/common/function.h"
 #include "retdec/common/object.h"
 #include "retdec/common/type.h"
 #include "retdec/pdbparser/pdb_file.h"
 
 #include "retdec/bin2llvmir/providers/demangler.h"
-#include "retdec/dwarfparser/dwarf_file.h"
 #include "retdec/fileformat/fileformat.h"
 #include "retdec/loader/loader.h"
 
@@ -50,10 +56,14 @@ class DebugFormat
 		retdec::common::Type loadPdbType(retdec::pdbparser::PDBTypeDef* type);
 
 		void loadDwarf();
-		void loadDwarfTypes();
-		void loadDwarfGlobalVariables();
-		void loadDwarfFunctions();
-		retdec::common::Type loadDwarfType(retdec::dwarfparser::DwarfType* type);
+		void loadDwarf_CU(llvm::DWARFDie die);
+		retdec::common::Function loadDwarf_subprogram(llvm::DWARFDie die);
+		std::string loadDwarf_type(llvm::DWARFDie die);
+		std::string _loadDwarf_type(llvm::DWARFDie die);
+		retdec::common::Object loadDwarf_formal_parameter(
+				llvm::DWARFDie die,
+				unsigned argCntr);
+		retdec::common::Object loadDwarf_variable(llvm::DWARFDie die);
 
 		void loadSymtab();
 
@@ -66,10 +76,11 @@ class DebugFormat
 		retdec::loader::Image* _inFile = nullptr;
 		/// Underlying PDB representation.
 		retdec::pdbparser::PDBFile* _pdbFile = nullptr;
-		/// Underlying DWARF representation.
-		retdec::dwarfparser::DwarfFile* _dwarfFile = nullptr;
 		/// Demangler.
 		retdec::bin2llvmir::Demangler* _demangler = nullptr;
+
+		/// Dwarf named types cache.
+		std::map<std::pair<llvm::DWARFUnit*, uint32_t>, std::string> dieOff2type;
 
 	public:
 		retdec::common::GlobalVarContainer globals;

@@ -11,12 +11,12 @@
 
 #include <llvm/Object/COFF.h>
 #include <llvm/Support/Host.h>
-#include <pelib/PeLib.h>
 
 #include "retdec/utils/conversion.h"
 #include "retdec/utils/string.h"
 #include "retdec/fileformat/utils/byte_array_buffer.h"
 #include "retdec/fileformat/utils/format_detection.h"
+#include "retdec/pelib/PeLib.h"
 
 using namespace retdec::utils;
 using namespace llvm;

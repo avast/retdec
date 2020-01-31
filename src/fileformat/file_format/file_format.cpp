@@ -12,15 +12,12 @@
 #include <iostream>
 #include <sstream>
 
-#include <pelib/PeLibInc.h>
-
 #include "retdec/crypto/crypto.h"
 #include "retdec/utils/conversion.h"
 #include "retdec/utils/file_io.h"
 #include "retdec/utils/string.h"
 #include "retdec/utils/system.h"
 #include "retdec/fileformat/file_format/file_format.h"
-
 #include "retdec/fileformat/utils/byte_array_buffer.h"
 #include "retdec/fileformat/file_format/intel_hex/intel_hex_format.h"
 #include "retdec/fileformat/file_format/raw_data/raw_data_format.h"
@@ -28,6 +25,7 @@
 #include "retdec/fileformat/utils/conversions.h"
 #include "retdec/fileformat/utils/file_io.h"
 #include "retdec/fileformat/utils/other.h"
+#include "retdec/pelib/PeLibInc.h"
 
 using namespace retdec::utils;
 using namespace PeLib;

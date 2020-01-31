@@ -4,10 +4,12 @@
  * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
 
+#include <rapidjson/prettywriter.h>
+#include <rapidjson/stringbuffer.h>
+
 #include "retdec/common/type.h"
 #include "retdec/serdes/type.h"
-
-#include "serdes/utils.h"
+#include "retdec/serdes/std.h"
 
 namespace {
 
@@ -19,31 +21,27 @@ const std::string JSON_wideString = "isWideString";
 namespace retdec {
 namespace serdes {
 
-Json::Value serialize(const common::Type& t)
+template <typename Writer>
+void serialize(Writer& writer, const common::Type& t)
 {
-	Json::Value type;
+	writer.StartObject();
 
-	if (t.isDefined())
-	{
-		type[JSON_llvmIr] = t.getLlvmIr();
-	}
-	if (t.isDefined() && t.isWideString())
-	{
-		type[JSON_wideString] = t.isWideString();
-	}
+	serializeString(writer, JSON_llvmIr, t.getLlvmIr(), t.isDefined());
+	serializeBool(writer, JSON_wideString, t.isWideString(), t.isDefined() && t.isWideString());
 
-	return type;
+	writer.EndObject();
 }
+SERIALIZE_EXPLICIT_INSTANTIATION(common::Type);
 
-void deserialize(const Json::Value& val, common::Type& t)
+void deserialize(const rapidjson::Value& val, common::Type& t)
 {
-	if (val.isNull() || !val.isObject())
+	if (val.IsNull() || !val.IsObject())
 	{
 		return;
 	}
 
-	t.setLlvmIr(safeGetString(val, JSON_llvmIr));
-	t.setIsWideString(safeGetBool(val, JSON_wideString));
+	t.setLlvmIr(deserializeString(val, JSON_llvmIr));
+	t.setIsWideString(deserializeBool(val, JSON_wideString));
 }
 
 } // namespace serdes

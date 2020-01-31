@@ -151,9 +151,9 @@ HLLWriter::HLLWriter(llvm::raw_ostream &o, const std::string& outputFormat):
 	currentIndent(DEFAULT_LEVEL_INDENT)
 {
 	if (outputFormat == "json") {
-		out = UPtr<OutputManager>(new JsonOutputManager(o));
+		out = UPtr<OutputManager>(new JsonOutputManagerPlain(o));
 	} else if (outputFormat == "json-human") {
-		out = UPtr<OutputManager>(new JsonOutputManager(o, true));
+		out = UPtr<OutputManager>(new JsonOutputManagerPretty(o));
 	} else {
 		out = UPtr<OutputManager>(new PlainOutputManager(o));
 	}
@@ -1078,7 +1078,7 @@ bool HLLWriter::tryEmitVarInfoInComment(ShPtr<Variable> var, ShPtr<Statement> st
 
 	auto globalVarName = module->comesFromGlobalVar(currFunc, var);
 	if (!globalVarName.empty()) {
-		// It is a local variable comming from a global variable. We want to
+		// It is a local variable coming from a global variable. We want to
 		// emit the global variable's name in a comment so we know from which
 		// global variable this local variable comes from.
 		out->comment(globalVarName, " ");

@@ -5,11 +5,14 @@
  */
 
 #include <algorithm>
+#include <vector>
+
+#include <rapidjson/prettywriter.h>
+#include <rapidjson/stringbuffer.h>
 
 #include "retdec/common/calling_convention.h"
 #include "retdec/serdes/calling_convention.h"
-
-#include "serdes/utils.h"
+#include "retdec/serdes/std.h"
 
 namespace {
 
@@ -44,27 +47,29 @@ const std::vector<std::string> ccStrings =
 namespace retdec {
 namespace serdes {
 
-Json::Value serialize(const common::CallingConvention& cc)
+template <typename Writer>
+void serialize(Writer& writer, const common::CallingConvention& cc)
 {
-	if (ccStrings.size() > static_cast<size_t>(cc.getID()))
+	if (ccStrings.size() > static_cast<uint64_t>(cc.getID()))
 	{
-		return ccStrings[static_cast<size_t>(cc.getID())];
+		writer.String(ccStrings[static_cast<uint64_t>(cc.getID())]);
 	}
 	else
 	{
-		return ccStrings[static_cast<size_t>(
-				common::CallingConvention::eCC::CC_UNKNOWN)];
+		writer.String(ccStrings[static_cast<uint64_t>(
+				common::CallingConvention::eCC::CC_UNKNOWN)]);
 	}
 }
+SERIALIZE_EXPLICIT_INSTANTIATION(common::CallingConvention);
 
-void deserialize(const Json::Value& val, common::CallingConvention& cc)
+void deserialize(const rapidjson::Value& val, common::CallingConvention& cc)
 {
-	if (val.isNull())
+	if (val.IsNull() || !val.IsString())
 	{
 		return;
 	}
 
-	std::string enumStr = safeGetString(val);
+	std::string enumStr = val.GetString();
 	auto it = std::find(ccStrings.begin(), ccStrings.end(), enumStr);
 	if (it == ccStrings.end())
 	{

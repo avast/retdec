@@ -22,7 +22,7 @@ endif()
 install(CODE "
 	execute_process(
 		# -u = unbuffered -> print debug messages right away.
-		COMMAND \"${PYTHON_EXECUTABLE}\" -u \"${CMAKE_SOURCE_DIR}/support/install-share.py\" \"${CMAKE_INSTALL_PREFIX}\"
+		COMMAND \"${PYTHON_EXECUTABLE}\" -u \"${CMAKE_SOURCE_DIR}/support/install-share.py\" \"${CMAKE_INSTALL_PREFIX}\" \"${SUPPORT_PKG_URL}\" \"${SUPPORT_PKG_SHA256}\" \"${SUPPORT_PKG_VERSION}\"
 		RESULT_VARIABLE INSTALL_SHARE_RES
 	)
 	if(INSTALL_SHARE_RES)

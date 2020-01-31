@@ -4,10 +4,12 @@
  * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
 
+#include <rapidjson/prettywriter.h>
+#include <rapidjson/stringbuffer.h>
+
 #include "retdec/common/file_format.h"
 #include "retdec/serdes/file_format.h"
-
-#include "serdes/utils.h"
+#include "retdec/serdes/std.h"
 
 namespace {
 
@@ -23,21 +25,27 @@ const std::string JSON_val_big    = "big";
 namespace retdec {
 namespace serdes {
 
-Json::Value serialize(const common::FileFormat& ff)
+template <typename Writer>
+void serialize(Writer& writer, const common::FileFormat& ff)
 {
 	if (ff.getFileClassBits())
-		return ff.getName() + std::to_string(ff.getFileClassBits());
+	{
+		writer.String(ff.getName() + std::to_string(ff.getFileClassBits()));
+	}
 	else
-		return ff.getName();
+	{
+		writer.String(ff.getName());
+	}
 }
+SERIALIZE_EXPLICIT_INSTANTIATION(common::FileFormat);
 
-void deserialize(const Json::Value& val, common::FileFormat& ff)
+void deserialize(const rapidjson::Value& val, common::FileFormat& ff)
 {
-	if (val.isNull())
+	if (val.IsNull() || !val.IsString())
 	{
 		return;
 	}
-	ff.setName(safeGetString(val));
+	ff.setName(val.GetString());
 }
 
 } // namespace serdes

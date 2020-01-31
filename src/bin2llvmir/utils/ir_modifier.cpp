@@ -282,10 +282,18 @@ Value* convertToType(
 			conv = insertBeforeAfter(i, before, a);
 		}
 	}
+	else if (val->getType()->isVoidTy())
+	{
+		auto* module = before ? before->getModule() : after->getModule();
+		auto* config = ConfigProvider::getConfig(module);
+		auto* dummy = config->getGlobalDummy();
+		conv = convertToType(dummy, type, before, after, constExpr);
+	}
 	else
 	{
 		errs() << "\nconvertValueToType(): unhandled type conversion\n";
 		errs() << *val << "\n";
+		errs() << *val->getType() << "\n";
 		errs() << *type << "\n\n";
 		assert(false);
 		conv = nullptr;

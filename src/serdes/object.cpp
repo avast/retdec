@@ -7,12 +7,15 @@
 #include <algorithm>
 #include <vector>
 
+#include <rapidjson/prettywriter.h>
+#include <rapidjson/stringbuffer.h>
+
 #include "retdec/common/object.h"
 #include "retdec/serdes/object.h"
 #include "retdec/serdes/storage.h"
 #include "retdec/serdes/type.h"
 
-#include "serdes/utils.h"
+#include "retdec/serdes/std.h"
 
 namespace {
 
@@ -28,55 +31,39 @@ const std::string JSON_cryptoDesc = "cryptoDescription";
 namespace retdec {
 namespace serdes {
 
-Json::Value serialize(const common::Object& o)
+template <typename Writer>
+void serialize(Writer& writer, const common::Object& o)
 {
-	Json::Value obj;
+	writer.StartObject();
 
-	if (!o.getName().empty())
-	{
-		obj[JSON_name] = o.getName();
-	}
-	if (!o.getRealName().empty())
-	{
-		obj[JSON_realName] = o.getRealName();
-	}
-	if (!o.getCryptoDescription().empty())
-	{
-		obj[JSON_cryptoDesc] = o.getCryptoDescription();
-	}
-	if (o.isFromDebug())
-	{
-		obj[JSON_fromDebug] = o.isFromDebug();
-	}
+	serializeString(writer, JSON_name, o.getName());
+	serializeString(writer, JSON_realName, o.getRealName());
+	serializeString(writer, JSON_cryptoDesc, o.getCryptoDescription());
+	serializeBool(writer, JSON_fromDebug, o.isFromDebug(), false);
 
-	if (o.type.isDefined())
-	{
-		obj[JSON_type] = serdes::serialize(o.type);
-	}
-	if (o.getStorage().isDefined())
-	{
-		obj[JSON_storage] = serdes::serialize(o.getStorage());
-	}
+	serialize(writer, JSON_type, o.type, o.type.isDefined());
+	serialize(writer, JSON_storage, o.getStorage(), o.getStorage().isDefined());
 
-	return obj;
+	writer.EndObject();
 }
+SERIALIZE_EXPLICIT_INSTANTIATION(common::Object);
 
-void deserialize(const Json::Value& val, common::Object& o)
+void deserialize(const rapidjson::Value& val, common::Object& o)
 {
-	if (val.isNull() || !val.isObject())
+	if (val.IsNull() || !val.IsObject())
 	{
 		return;
 	}
 
 	common::Storage storage;
-	serdes::deserialize(val[JSON_storage], storage);
+	deserialize(val, JSON_storage, storage);
 
-	o = common::Object(safeGetString(val, JSON_name), storage);
+	o = common::Object(deserializeString(val, JSON_name), storage);
 
-	o.setRealName( safeGetString(val, JSON_realName) );
-	o.setCryptoDescription( safeGetString(val, JSON_cryptoDesc) );
-	o.setIsFromDebug( safeGetBool(val, JSON_fromDebug) );
-	serdes::deserialize(val[JSON_type], o.type);
+	o.setRealName( deserializeString(val, JSON_realName) );
+	o.setCryptoDescription( deserializeString(val, JSON_cryptoDesc) );
+	o.setIsFromDebug( deserializeBool(val, JSON_fromDebug) );
+	deserialize(val, JSON_type, o.type);
 }
 
 } // namespace serdes

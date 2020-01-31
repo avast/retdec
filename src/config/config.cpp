@@ -3,8 +3,12 @@
  * @brief Decompilation configuration manipulation.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
-
 #include <fstream>
+
+#include <rapidjson/error/en.h>
+#include <rapidjson/prettywriter.h>
+#include <rapidjson/stringbuffer.h>
+#include <rapidjson/encodings.h>
 
 #include "retdec/config/config.h"
 #include "retdec/serdes/address.h"
@@ -19,11 +23,10 @@
 #include "retdec/serdes/vtable.h"
 #include "retdec/serdes/tool_info.h"
 #include "retdec/serdes/type.h"
-#include "retdec/serdes/std.h"
 #include "retdec/utils/string.h"
 #include "retdec/utils/time.h"
 
-using namespace Json;
+#include "retdec/serdes/std.h"
 
 namespace {
 
@@ -162,37 +165,43 @@ std::string Config::generateJsonFile(const std::string& outputFilePath) const
  */
 std::string Config::generateJsonString() const
 {
-	Json::Value root;
+	rapidjson::StringBuffer sb;
+	rapidjson::PrettyWriter<rapidjson::StringBuffer, rapidjson::ASCII<>> writer(sb);
 
-	root[JSON_date]           = retdec::utils::getCurrentDate();
-	root[JSON_time]           = retdec::utils::getCurrentTime();
-	root[JSON_inputFile]      = getInputFile();
+	writer.StartObject();
 
-	if (isIda()) root[JSON_ida] = isIda();
-	if (!getUnpackedInputFile().empty()) root[JSON_unpackedInputFile] = getUnpackedInputFile();
-	if (!getPdbInputFile().empty()) root[JSON_pdbInputFile] = getPdbInputFile();
-	if (!getFrontendVersion().empty()) root[JSON_frontendVersion] = getFrontendVersion();
-	if (getEntryPoint().isDefined()) root[JSON_entryPoint] = serdes::serialize(getEntryPoint());
-	if (getMainAddress().isDefined()) root[JSON_mainAddress] = serdes::serialize(getMainAddress());
-	if (getSectionVMA().isDefined()) root[JSON_sectionVMA] = serdes::serialize(getSectionVMA());
-	if (getImageBase().isDefined()) root[JSON_imageBase] = serdes::serialize(getImageBase());
+	serdes::serializeString(writer, JSON_date, retdec::utils::getCurrentDate());
+	serdes::serializeString(writer, JSON_time, retdec::utils::getCurrentTime());
+	serdes::serializeString(writer, JSON_inputFile, getInputFile());
 
-	root[JSON_parameters]     = parameters.getJsonValue();
-	root[JSON_architecture]   = serdes::serialize(architecture);
-	root[JSON_fileType]       = serdes::serialize(fileType);
-	root[JSON_fileFormat]     = serdes::serialize(fileFormat);
-	root[JSON_tools]          = serdes::serialize(tools);
-	root[JSON_languages]      = serdes::serialize(languages);
-	root[JSON_functions]      = serdes::serialize(functions);
-	root[JSON_globals]        = serdes::serialize(globals);
-	root[JSON_registers]      = serdes::serialize(registers);
-	root[JSON_structures]     = serdes::serialize(structures);
-	root[JSON_vtables]        = serdes::serialize(vtables);
-	root[JSON_classes]        = serdes::serialize(classes);
-	root[JSON_patterns]       = serdes::serialize(patterns);
+	if (isIda()) serdes::serializeBool(writer, JSON_ida, isIda());
+	if (!getUnpackedInputFile().empty()) serdes::serializeString(writer, JSON_unpackedInputFile, getUnpackedInputFile());
+	if (!getPdbInputFile().empty()) serdes::serializeString(writer, JSON_pdbInputFile, getPdbInputFile());
+	if (!getFrontendVersion().empty()) serdes::serializeString(writer, JSON_frontendVersion, getFrontendVersion());
+	if (getEntryPoint().isDefined()) serdes::serialize(writer, JSON_entryPoint, getEntryPoint());
+	if (getMainAddress().isDefined()) serdes::serialize(writer, JSON_mainAddress, getMainAddress());
+	if (getSectionVMA().isDefined()) serdes::serialize(writer, JSON_sectionVMA, getSectionVMA());
+	if (getImageBase().isDefined()) serdes::serialize(writer, JSON_imageBase, getImageBase());
 
-	StreamWriterBuilder builder;
-	return writeString(builder, root);
+	writer.String(JSON_parameters);
+	parameters.serialize(writer);
+
+	serdes::serialize(writer, JSON_architecture, architecture);
+	serdes::serialize(writer, JSON_fileType, fileType);
+	serdes::serialize(writer, JSON_fileFormat, fileFormat);
+	serdes::serializeContainer(writer, JSON_tools, tools);
+	serdes::serializeContainer(writer, JSON_languages, languages);
+	serdes::serializeContainer(writer, JSON_functions, functions);
+	serdes::serializeContainer(writer, JSON_globals, globals);
+	serdes::serializeContainer(writer, JSON_registers, registers);
+	serdes::serializeContainer(writer, JSON_structures, structures);
+	serdes::serializeContainer(writer, JSON_vtables, vtables);
+	serdes::serializeContainer(writer, JSON_classes, classes);
+	serdes::serializeContainer(writer, JSON_patterns, patterns);
+
+	writer.EndObject();
+
+	return sb.GetString();
 }
 
 /**
@@ -202,68 +211,51 @@ std::string Config::generateJsonString() const
  */
 void Config::readJsonString(const std::string& json)
 {
-	Json::Value root;
-	std::string errs;
-
-	std::istringstream input(json);
-	Json::CharReaderBuilder rbuilder;
-	bool success = Json::parseFromStream(rbuilder, input, &root, &errs);
-	if (!success || root.isNull() || !root.isObject() )
+	rapidjson::Document root;
+	rapidjson::ParseResult ok = root.Parse(json);
+	if (!ok)
 	{
-		std::string errMsg = "Failed to parse configuration";
-		std::size_t line = 0;
-		std::size_t column = 0;
+		std::string errMsg = "Failed to parse configuration!";
 
-		if (!errs.empty())
-		{
-			const auto posNL = errs.find('\n');
-			const auto posLine = errs.find("Line");
-			const auto posColumn = errs.find("Column");
+		errMsg = GetParseError_En(ok.Code());
 
-			if (posNL != std::string::npos
-					&& posLine != std::string::npos
-					&& posColumn != std::string::npos)
-			{
-				// Get error postion from message
-				line = std::stoul(errs.substr(posLine + 5));
-				column = std::stoul(errs.substr(posColumn + 7));
-
-				// Get error description from message
-				auto message = errs.substr(posNL + 1);
-				errMsg = retdec::utils::trim(message, " .\r\n");
-			}
-		}
-
-		throw ParseException(errMsg, line, column);
+		auto loc = retdec::utils::getLineAndColumnFromPosition(json, ok.Offset());
+		throw ParseException(errMsg, loc.first, loc.second);
 	}
 
 	*this = Config();
 
 	try
 	{
-		setIsIda( safeGetBool(root, JSON_ida) );
-		setInputFile( safeGetString(root, JSON_inputFile) );
-		setUnpackedInputFile( safeGetString(root, JSON_unpackedInputFile) );
-		setPdbInputFile( safeGetString(root, JSON_pdbInputFile) );
-		setFrontendVersion( safeGetString(root, JSON_frontendVersion) );
-		serdes::deserialize(root[JSON_entryPoint], _entryPoint);
-		serdes::deserialize(root[JSON_mainAddress], _mainAddress);
-		serdes::deserialize(root[JSON_sectionVMA], _sectionVMA);
-		serdes::deserialize(root[JSON_imageBase], _imageBase);
+		setIsIda( serdes::deserializeBool(root, JSON_ida) );
+		setInputFile( serdes::deserializeString(root, JSON_inputFile) );
+		setUnpackedInputFile( serdes::deserializeString(root, JSON_unpackedInputFile) );
+		setPdbInputFile( serdes::deserializeString(root, JSON_pdbInputFile) );
+		setFrontendVersion( serdes::deserializeString(root, JSON_frontendVersion) );
+		serdes::deserialize(root, JSON_entryPoint, _entryPoint);
+		serdes::deserialize(root, JSON_mainAddress, _mainAddress);
+		serdes::deserialize(root, JSON_sectionVMA, _sectionVMA);
+		serdes::deserialize(root, JSON_imageBase, _imageBase);
 
-		parameters.readJsonValue( root[JSON_parameters] );
-		serdes::deserialize(root[JSON_architecture], architecture);
-		serdes::deserialize(root[JSON_fileType], fileType);
-		serdes::deserialize(root[JSON_fileFormat], fileFormat);
-		serdes::deserialize(root[JSON_tools], tools);
-		serdes::deserialize(root[JSON_languages], languages);
-		serdes::deserialize(root[JSON_functions], functions);
-		serdes::deserialize(root[JSON_globals], globals);
-		serdes::deserialize(root[JSON_registers], registers);
-		serdes::deserialize(root[JSON_structures], structures);
-		serdes::deserialize(root[JSON_vtables], vtables);
-		serdes::deserialize(root[JSON_classes], classes);
-		serdes::deserialize(root[JSON_patterns], patterns);
+		auto params = root.FindMember(JSON_parameters);
+		if (params != root.MemberEnd())
+		{
+			parameters.deserialize(params->value);
+		}
+
+		serdes::deserialize(root, JSON_architecture, architecture);
+		serdes::deserialize(root, JSON_fileType, fileType);
+		serdes::deserialize(root, JSON_fileFormat, fileFormat);
+
+		serdes::deserializeContainer(root, JSON_tools, tools);
+		serdes::deserializeContainer(root, JSON_languages, languages);
+		serdes::deserializeContainer(root, JSON_functions, functions);
+		serdes::deserializeContainer(root, JSON_globals, globals);
+		serdes::deserializeContainer(root, JSON_registers, registers);
+		serdes::deserializeContainer(root, JSON_structures, structures);
+		serdes::deserializeContainer(root, JSON_vtables, vtables);
+		serdes::deserializeContainer(root, JSON_classes, classes);
+		serdes::deserializeContainer(root, JSON_patterns, patterns);
 	}
 	catch (const InternalException& e)
 	{

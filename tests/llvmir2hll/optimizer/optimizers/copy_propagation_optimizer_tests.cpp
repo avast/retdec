@@ -829,7 +829,7 @@ TEST_F(CopyPropagationOptimizerTests,
 OptimizeNoAssignStmtOneUseEvenIfLhsVarIsExternal) {
 	// Add a body to the testing function:
 	//
-	//   a = 1  (VarDefStmt, where 'a' is an 'external' variable comming from a
+	//   a = 1  (VarDefStmt, where 'a' is an 'external' variable coming from a
 	//           volatile load/store)
 	//   b = a  (VarDefStmt)
 	//   return b
@@ -1067,7 +1067,7 @@ DoNotOptimizeWhenAuxiliaryVariableIsExternal) {
 	// Add a body to the testing function:
 	//
 	//   a = 1  (VarDefStmt)
-	//   b = a  (VarDefStmt, where 'b' is an 'external' variable comming from a
+	//   b = a  (VarDefStmt, where 'b' is an 'external' variable coming from a
 	//           volatile load/store)
 	//   return b
 	//

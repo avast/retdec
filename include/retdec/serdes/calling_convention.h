@@ -7,7 +7,7 @@
 #ifndef RETDEC_SERDES_CALLING_CONVENTION_H
 #define RETDEC_SERDES_CALLING_CONVENTION_H
 
-#include <json/json.h>
+#include <rapidjson/document.h>
 
 namespace retdec {
 
@@ -17,8 +17,9 @@ class CallingConvention;
 
 namespace serdes {
 
-Json::Value serialize(const common::CallingConvention& cc);
-void deserialize(const Json::Value& val, common::CallingConvention& cc);
+template <typename Writer>
+void serialize(Writer& writer, const common::CallingConvention& cc);
+void deserialize(const rapidjson::Value& val, common::CallingConvention& cc);
 
 } // namespace serdes
 } // namespace retdec

@@ -279,9 +279,8 @@ void RichHeader::dump(std::string &dumpHeader) const
 		ret << ";\n";
 		for(const auto &item : header)
 		{
-			ret << "; (major: " << item.getMajorVersion() <<
-				", minor: " << item.getMinorVersion() <<
-				", build: " << item.getBuildVersion() <<
+			ret << "; (product_id: " << item.getProductId() <<
+				", build: " << item.getProductBuild() <<
 				", count: " << item.getNumberOfUses() << ")\n";
 		}
 	}

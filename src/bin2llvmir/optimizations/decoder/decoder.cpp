@@ -4,8 +4,6 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include <json/json.h>
-
 #include <llvm/IR/Dominators.h>
 #include <llvm/IR/PatternMatch.h>
 

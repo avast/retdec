@@ -8,10 +8,10 @@
 #include <system_error>
 
 #include <llvm/Object/COFF.h>
-#include <pelib/PeLibInc.h>
 
 #include "retdec/utils/string.h"
 #include "retdec/fileformat/file_format/coff/coff_format.h"
+#include "retdec/pelib/PeLibInc.h"
 
 using namespace retdec::utils;
 using namespace llvm;

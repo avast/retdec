@@ -7,10 +7,13 @@
 #include <algorithm>
 #include <vector>
 
+#include <rapidjson/prettywriter.h>
+#include <rapidjson/stringbuffer.h>
+
 #include "retdec/common/file_type.h"
 #include "retdec/serdes/file_type.h"
 
-#include "serdes/utils.h"
+#include "retdec/serdes/std.h"
 
 namespace {
 
@@ -28,27 +31,29 @@ const std::vector<std::string> ftStrings =
 namespace retdec {
 namespace serdes {
 
-Json::Value serialize(const common::FileType& ft)
+template <typename Writer>
+void serialize(Writer& writer, const common::FileType& ft)
 {
 	if (ftStrings.size() > static_cast<size_t>(ft.getID()))
 	{
-		return ftStrings[static_cast<size_t>(ft.getID())];
+		writer.String(ftStrings[static_cast<size_t>(ft.getID())]);
 	}
 	else
 	{
-		return ftStrings[static_cast<size_t>(
-			common::FileType::eFileType::FT_UNKNOWN)];
+		writer.String(ftStrings[static_cast<size_t>(
+			common::FileType::eFileType::FT_UNKNOWN)]);
 	}
 }
+SERIALIZE_EXPLICIT_INSTANTIATION(common::FileType);
 
-void deserialize(const Json::Value& val, common::FileType& ft)
+void deserialize(const rapidjson::Value& val, common::FileType& ft)
 {
-	if (val.isNull())
+	if (val.IsNull() || !val.IsString())
 	{
 		return;
 	}
 
-	std::string enumStr = safeGetString(val);
+	std::string enumStr = val.GetString();
 	auto it = std::find(ftStrings.begin(), ftStrings.end(), enumStr);
 	if (it == ftStrings.end())
 	{

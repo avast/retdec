@@ -68,7 +68,6 @@ set(FILEINFO_SOURCES
 	file_presentation/getters/iterative_getter/iterative_simple_getter/certificate_table_plain_getter.cpp
 	file_presentation/getters/iterative_getter/iterative_simple_getter/iterative_simple_getter.cpp
 	file_presentation/getters/iterative_getter/iterative_subtitle_getter/anomalies_json_getter.cpp
-	file_presentation/getters/iterative_getter/iterative_subtitle_getter/certificate_table_json_getter.cpp
 	file_presentation/getters/iterative_getter/iterative_subtitle_getter/data_directory_json_getter.cpp
 	file_presentation/getters/iterative_getter/iterative_subtitle_getter/dynamic_sections_json_getter.cpp
 	file_presentation/getters/iterative_getter/iterative_subtitle_getter/export_table_json_getter.cpp
@@ -87,10 +86,8 @@ set(FILEINFO_SOURCES
 	file_presentation/getters/pattern_config_getter/pattern_config_getter.cpp
 	file_presentation/getters/simple_getter/basic_json_getter.cpp
 	file_presentation/getters/simple_getter/basic_plain_getter.cpp
-	file_presentation/getters/simple_getter/dotnet_json_getter.cpp
 	file_presentation/getters/simple_getter/dotnet_plain_getter.cpp
 	file_presentation/getters/simple_getter/visual_basic_plain_getter.cpp
-	file_presentation/getters/simple_getter/visual_basic_json_getter.cpp
 	file_presentation/getters/simple_getter/entry_point_json_getter.cpp
 	file_presentation/getters/simple_getter/header_json_getter.cpp
 	file_presentation/getters/simple_getter/header_plain_getter.cpp
@@ -116,12 +113,12 @@ target_link_libraries(retdec-fileinfo
 	retdec-ar-extractor
 	retdec-fileformat
 	retdec-cpdetect
-	yaracpp
+	retdec-yaracpp
 	retdec-utils
 	retdec-common
 	retdec-config
 	retdec-serdes
-	jsoncpp
+	rapidjson
 	tinyxml2)
 target_include_directories(retdec-fileinfo PUBLIC ${PROJECT_SOURCE_DIR}/src/)
 install(TARGETS retdec-fileinfo RUNTIME DESTINATION bin)

@@ -4,8 +4,8 @@
  * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
 
-#include <algorithm>
-#include <vector>
+#include <rapidjson/prettywriter.h>
+#include <rapidjson/stringbuffer.h>
 
 #include "retdec/common/function.h"
 #include "retdec/serdes/address.h"
@@ -17,7 +17,7 @@
 #include "retdec/serdes/type.h"
 #include "retdec/serdes/std.h"
 
-#include "serdes/utils.h"
+#include "retdec/serdes/std.h"
 
 namespace {
 
@@ -63,92 +63,100 @@ std::vector<std::string> fncTypes =
 namespace retdec {
 namespace serdes {
 
-Json::Value serialize(const common::Function& f)
+template <typename Writer>
+void serialize(Writer& writer, const common::Function& f)
 {
-	Json::Value fnc;
+	writer.StartObject();
 
-	fnc[JSON_name]      = f.getName();
-	fnc[JSON_cc]        = serdes::serialize(f.callingConvention);
-	fnc[JSON_fncType]   = fncTypes[ static_cast<size_t>(f.getLinkType()) ];
+	serializeString(writer, JSON_name, f.getName());
+	serialize(writer, JSON_cc, f.callingConvention);
+	serializeString(
+			writer,
+			JSON_fncType,
+			fncTypes[static_cast<size_t>(f.getLinkType())]
+	);
 
-	if (!f.getRealName().empty()) fnc[JSON_realName] = f.getRealName();
-	if (!f.getDemangledName().empty()) fnc[JSON_demangledName] = f.getDemangledName();
-	if (!f.getComment().empty()) fnc[JSON_comment] = f.getComment();
-	if (!f.getDeclarationString().empty()) fnc[JSON_decStr] = f.getDeclarationString();
-	if (!f.getWrappedFunctionName().empty()) fnc[JSON_wrappedName] = f.getWrappedFunctionName();
-	if (!f.getSourceFileName().empty()) fnc[JSON_srcFileName] = f.getSourceFileName();
-	if (f.getStart().isDefined()) fnc[JSON_startAddr] = serdes::serialize(f.getStart());
-	if (f.getEnd().isDefined()) fnc[JSON_endAddr] = serdes::serialize(f.getEnd());
-	if (f.getStartLine().isDefined()) fnc[JSON_startLine] = serdes::serialize(f.getStartLine());
-	if (f.getEndLine().isDefined()) fnc[JSON_endLine] = serdes::serialize(f.getEndLine());
-	if (f.isFromDebug()) fnc[JSON_fromDebug] = f.isFromDebug();
-	if (f.isConstructor()) fnc[JSON_isConstructor] = f.isConstructor();
-	if (f.isDestructor()) fnc[JSON_isDestructor] = f.isDestructor();
-	if (f.isVirtual()) fnc[JSON_isVirtual] = f.isVirtual();
-	if (f.isExported()) fnc[JSON_isExported] = f.isExported();
-	if (f.isVariadic()) fnc[JSON_isVariadic] = f.isVariadic();
-	if (f.isThumb()) fnc[JSON_isThumb] = f.isThumb();
+	serializeString(writer, JSON_realName, f.getRealName());
+	serializeString(writer, JSON_demangledName, f.getDemangledName());
+	serializeString(writer, JSON_comment, f.getComment());
+	serializeString(writer, JSON_decStr, f.getDeclarationString());
+	serializeString(writer, JSON_wrappedName, f.getWrappedFunctionName());
+	serializeString(writer, JSON_srcFileName, f.getSourceFileName());
+	serialize(writer, JSON_startAddr, f.getStart(), f.getStart().isDefined());
+	serialize(writer, JSON_endAddr, f.getEnd(), f.getEnd().isDefined());
+	serialize(writer, JSON_startLine, f.getStartLine(), f.getStartLine().isDefined());
+	serialize(writer, JSON_endLine, f.getEndLine(), f.getEndLine().isDefined());
 
-	if (!f.locals.empty()) fnc[JSON_locals] = serdes::serialize(f.locals);
-	if (!f.parameters.empty()) fnc[JSON_parameters] = serdes::serialize(f.parameters);
-	if (f.returnStorage.isDefined()) fnc[JSON_returnStorage] = serdes::serialize(f.returnStorage);
-	if (f.frameBaseStorage.isDefined()) fnc[JSON_fbStorage] = serdes::serialize(f.frameBaseStorage);
-	if (f.returnType.isDefined()) fnc[JSON_returnType] = serdes::serialize(f.returnType);
-	if (!f.basicBlocks.empty()) fnc[JSON_basicBlocks] = serdes::serialize(f.basicBlocks);
+	serializeBool(writer, JSON_fromDebug, f.isFromDebug(), false);
+	serializeBool(writer, JSON_isConstructor, f.isConstructor(), false);
+	serializeBool(writer, JSON_isDestructor, f.isDestructor(), false);
+	serializeBool(writer, JSON_isVirtual, f.isVirtual(), false);
+	serializeBool(writer, JSON_isExported, f.isExported(), false);
+	serializeBool(writer, JSON_isVariadic, f.isVariadic(), false);
+	serializeBool(writer, JSON_isThumb, f.isThumb(), false);
 
-	fnc[JSON_usedCrypto] = serdes::serialize(f.usedCryptoConstants);
+	serialize(writer, JSON_returnStorage, f.returnStorage, f.returnStorage.isDefined());
+	serialize(writer, JSON_fbStorage, f.frameBaseStorage, f.frameBaseStorage.isDefined());
+	serialize(writer, JSON_returnType, f.returnType, f.returnType.isDefined());
 
-	return fnc;
+	serializeContainer(writer, JSON_locals, f.locals);
+	serializeContainer(writer, JSON_parameters, f.parameters);
+	serializeContainer(writer, JSON_basicBlocks, f.basicBlocks);
+	serializeContainer(writer, JSON_usedCrypto, f.usedCryptoConstants);
+
+	writer.EndObject();
 }
+SERIALIZE_EXPLICIT_INSTANTIATION(common::Function);
 
-void deserialize(const Json::Value& val, common::Function& f)
+void deserialize(const rapidjson::Value& val, common::Function& f)
 {
-	if (val.isNull() || !val.isObject())
+	if (val.IsNull() || !val.IsObject())
 	{
 		return;
 	}
 
-	f.setName(safeGetString(val, JSON_name));
-	f.setRealName( safeGetString(val, JSON_realName) );
-	f.setDemangledName( safeGetString(val, JSON_demangledName) );
-	f.setComment( safeGetString(val, JSON_comment) );
-	f.setDeclarationString( safeGetString(val, JSON_decStr) );
-	f.setWrappedFunctionName( safeGetString(val, JSON_wrappedName) );
-	f.setSourceFileName( safeGetString(val, JSON_srcFileName) );
-	f.setIsFromDebug( safeGetBool(val, JSON_fromDebug) );
-	f.setIsConstructor( safeGetBool(val, JSON_isConstructor) );
-	f.setIsDestructor( safeGetBool(val, JSON_isDestructor) );
-	f.setIsVirtual( safeGetBool(val, JSON_isVirtual) );
-	f.setIsExported( safeGetBool(val, JSON_isExported) );
-	f.setIsVariadic( safeGetBool(val, JSON_isVariadic) );
-	f.setIsThumb( safeGetBool(val, JSON_isThumb) );
+	f.setName( deserializeString(val, JSON_name) );
+	f.setRealName( deserializeString(val, JSON_realName) );
+	f.setDemangledName( deserializeString(val, JSON_demangledName) );
+	f.setComment( deserializeString(val, JSON_comment) );
+	f.setDeclarationString( deserializeString(val, JSON_decStr) );
+	f.setWrappedFunctionName( deserializeString(val, JSON_wrappedName) );
+	f.setSourceFileName( deserializeString(val, JSON_srcFileName) );
+	f.setIsFromDebug( deserializeBool(val, JSON_fromDebug) );
+	f.setIsConstructor( deserializeBool(val, JSON_isConstructor) );
+	f.setIsDestructor( deserializeBool(val, JSON_isDestructor) );
+	f.setIsVirtual( deserializeBool(val, JSON_isVirtual) );
+	f.setIsExported( deserializeBool(val, JSON_isExported) );
+	f.setIsVariadic( deserializeBool(val, JSON_isVariadic) );
+	f.setIsThumb( deserializeBool(val, JSON_isThumb) );
 
 	common::Address s;
-	serdes::deserialize(val[JSON_startAddr], s);
+	deserialize(val, JSON_startAddr, s);
 	f.setStart(s);
 
 	common::Address e;
-	serdes::deserialize(val[JSON_endAddr], e);
+	deserialize(val, JSON_endAddr, e);
 	f.setEnd(e);
 
 	common::Address sl;
-	serdes::deserialize(val[JSON_startLine], sl);
+	deserialize(val, JSON_startLine, sl);
 	f.setStartLine(sl);
 
 	common::Address el;
-	serdes::deserialize(val[JSON_endLine], el);
+	deserialize(val, JSON_endLine, el);
 	f.setEndLine(el);
 
-	serdes::deserialize(val[JSON_cc], f.callingConvention);
-	serdes::deserialize(val[JSON_returnStorage], f.returnStorage);
-	serdes::deserialize(val[JSON_fbStorage], f.frameBaseStorage);
-	serdes::deserialize(val[JSON_returnType], f.returnType);
-	serdes::deserialize(val[JSON_locals], f.locals);
-	serdes::deserialize(val[JSON_parameters], f.parameters);
-	serdes::deserialize(val[JSON_usedCrypto], f.usedCryptoConstants);
-	serdes::deserialize(val[JSON_basicBlocks], f.basicBlocks);
+	deserialize(val, JSON_cc, f.callingConvention);
+	deserialize(val, JSON_returnStorage, f.returnStorage);
+	deserialize(val, JSON_fbStorage, f.frameBaseStorage);
+	deserialize(val, JSON_returnType, f.returnType);
 
-	std::string enumStr = safeGetString(val, JSON_fncType);
+	deserializeContainer(val, JSON_locals, f.locals);
+	deserializeContainer(val, JSON_parameters, f.parameters);
+	deserializeContainer(val, JSON_usedCrypto, f.usedCryptoConstants);
+	deserializeContainer(val, JSON_basicBlocks, f.basicBlocks);
+
+	std::string enumStr = deserializeString(val, JSON_fncType);
 	auto it = std::find(fncTypes.begin(), fncTypes.end(), enumStr);
 	if (it != fncTypes.end())
 	{

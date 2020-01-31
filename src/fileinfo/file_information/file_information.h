@@ -150,10 +150,11 @@ class FileInformation
 		std::string getRichHeaderSignature() const;
 		std::string getRichHeaderOffsetStr(std::ios_base &(* format)(std::ios_base &)) const;
 		std::string getRichHeaderKeyStr(std::ios_base &(* format)(std::ios_base &)) const;
-		std::string getRichHeaderRecordMajorVersionStr(std::size_t position) const;
-		std::string getRichHeaderRecordMinorVersionStr(std::size_t position) const;
-		std::string getRichHeaderRecordBuildVersionStr(std::size_t position) const;
+		std::string getRichHeaderRecordProductIdStr(std::size_t position) const;
+		std::string getRichHeaderRecordProductBuildStr(std::size_t position) const;
 		std::string getRichHeaderRecordNumberOfUsesStr(std::size_t position) const;
+		std::string getRichHeaderRecordProductNameStr(std::size_t position) const;
+		std::string getRichHeaderRecordVisualStudioNameStr(std::size_t position) const;
 		std::string getRichHeaderRawBytesStr() const;
 		bool hasRichHeaderRecords() const;
 		/// @}

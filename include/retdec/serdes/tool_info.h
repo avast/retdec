@@ -7,7 +7,7 @@
 #ifndef RETDEC_SERDES_TOOL_INFO_H
 #define RETDEC_SERDES_TOOL_INFO_H
 
-#include <json/json.h>
+#include <rapidjson/document.h>
 
 namespace retdec {
 
@@ -17,8 +17,9 @@ class ToolInfo;
 
 namespace serdes {
 
-Json::Value serialize(const common::ToolInfo& ti);
-void deserialize(const Json::Value& val, common::ToolInfo& ti);
+template <typename Writer>
+void serialize(Writer& writer, const common::ToolInfo& ti);
+void deserialize(const rapidjson::Value& val, common::ToolInfo& ti);
 
 } // namespace serdes
 } // namespace retdec

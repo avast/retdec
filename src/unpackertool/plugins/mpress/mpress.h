@@ -7,9 +7,8 @@
 #ifndef UNPACKERTOOL_PLUGINS_MPRESS_MPRESS_H
 #define UNPACKERTOOL_PLUGINS_MPRESS_MPRESS_H
 
-#include <pelib/PeLib.h>
-
 #include "retdec/loader/loader.h"
+#include "retdec/pelib/PeLib.h"
 #include "retdec/utils/dynamic_buffer.h"
 #include "retdec/unpacker/plugin.h"
 

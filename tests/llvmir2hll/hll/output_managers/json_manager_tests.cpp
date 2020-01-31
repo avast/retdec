@@ -27,7 +27,7 @@ class JsonOutputManagerTests: public OutputManagerTests
 void JsonOutputManagerTests::SetUp()
 {
 	OutputManagerTests::SetUp();
-	manager = UPtr<OutputManager>(new JsonOutputManager(codeStream));
+	manager = UPtr<OutputManager>(new JsonOutputManagerPlain(codeStream));
 	manager->setCommentPrefix("//");
 	manager->setOutputLanguage("C");
 }
@@ -44,8 +44,8 @@ std::string JsonOutputManagerTests::emitSingleToken()
 {
 	std::string all = emitCode();
 
-	std::string prefix = R"({"language":"C","tokens":[{"addr":""},)";
-	std::string suffix = R"(]})";
+	std::string prefix = R"({"tokens":[{"addr":""},)";
+	std::string suffix = R"(],"language":"C"})";
 
 	if (!retdec::utils::startsWith(all, prefix))
 	{
@@ -59,26 +59,6 @@ std::string JsonOutputManagerTests::emitSingleToken()
 
 	auto tmp = all.erase(0, prefix.length());
 	return tmp.erase(tmp.length() - suffix.length());
-}
-
-//
-// human readable
-//
-
-TEST_F(JsonOutputManagerTests, default_is_not_human_readable)
-{
-	auto derived = static_cast<JsonOutputManager*>(manager.release());
-
-	ASSERT_FALSE(derived->isHumanReadable());
-}
-
-TEST_F(JsonOutputManagerTests, set_human_readable)
-{
-	auto derived = static_cast<JsonOutputManager*>(manager.release());
-
-	derived->setHumanReadable(true);
-
-	ASSERT_TRUE(derived->isHumanReadable());
 }
 
 //
