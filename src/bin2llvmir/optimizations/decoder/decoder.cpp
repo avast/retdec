@@ -84,9 +84,7 @@ bool Decoder::runCatcher()
 	//
 	try
 	{
-		auto b = run();;
-// exit(1);
-		return b;
+		return run();
 	}
 	catch (const BaseError& e)
 	{
@@ -782,10 +780,9 @@ bool Decoder::getJumpTargetsFromInstruction(
 			auto* l = llvm::dyn_cast<llvm::LoadInst>(&i);
 			if (l && !_abi->isRegister(l->getPointerOperand()))
 			{
-				auto st = SymbolicTree::Linear(l->getPointerOperand(), 8);
-				st.simplifyNode();
+				auto* val = llvm_utils::skipCasts(l->getPointerOperand());
+				auto* ci = llvm::dyn_cast<llvm::ConstantInt>(val);
 
-				auto* ci = llvm::dyn_cast<llvm::ConstantInt>(st.value);
 				if (ci && !ci->isNegative())
 				{
 					Address t(ci->getZExtValue());
