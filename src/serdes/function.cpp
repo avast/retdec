@@ -51,6 +51,7 @@ const std::string JSON_basicBlocks   = "basicBlocks";
 
 std::vector<std::string> fncTypes =
 {
+	"decompilerDefined",
 	"userDefined",
 	"staticallyLinked",
 	"dynamicallyLinked",

@@ -35,9 +35,23 @@ using LineNumber = retdec::common::Address;
 class Function : public retdec::common::AddressRange
 {
 	public:
+		/**
+		 * Recognized types of a function that will determine
+		 * how the decompiler will treat the specified function.
+		 *
+		 * When the type is DECOMPILER_DEFINED the decompiler is
+		 * allowed to prefer info recieved from some heuristics,
+		 * instead of info specified in the config.
+		 *
+		 * When the type is USER_DEFINED the info about the function
+		 * (params, type) specified in a config file will be projected
+		 * on the decompiler output and the decompiler should not do
+		 * any heuristcs.
+		 */
 		enum eLinkType
 		{
-			USER_DEFINED = 0,
+			DECOMPILER_DEFINED = 0,
+			USER_DEFINED,
 			STATICALLY_LINKED,
 			DYNAMICALLY_LINKED,
 			SYSCALL,
@@ -53,6 +67,7 @@ class Function : public retdec::common::AddressRange
 
 		/// @name Function query methods.
 		/// @{
+		bool isDecompilerDefined() const;
 		bool isUserDefined() const;
 		bool isStaticallyLinked() const;
 		bool isDynamicallyLinked() const;
@@ -80,6 +95,7 @@ class Function : public retdec::common::AddressRange
 		void setWrappedFunctionName(const std::string& n);
 		void setStartLine(const retdec::common::Address& l);
 		void setEndLine(const retdec::common::Address& l);
+		void setIsDecompilerDefined();
 		void setIsUserDefined();
 		void setIsStaticallyLinked() const;
 		void setIsDynamicallyLinked() const;
@@ -134,7 +150,7 @@ class Function : public retdec::common::AddressRange
 		std::string _declarationString;
 		std::string _sourceFileName;
 		std::string _wrapperdFunctionName;
-		mutable eLinkType _linkType = USER_DEFINED;
+		mutable eLinkType _linkType = DECOMPILER_DEFINED;
 		LineNumber _startLine;
 		LineNumber _endLine;
 		bool _fromDebug = false;
