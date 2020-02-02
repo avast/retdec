@@ -37,6 +37,7 @@ Function::Function(
 
 }
 
+bool Function::isDecompilerDefined() const { return _linkType == DECOMPILER_DEFINED; }
 bool Function::isUserDefined() const       { return _linkType == USER_DEFINED; }
 bool Function::isStaticallyLinked() const  { return _linkType == STATICALLY_LINKED; }
 bool Function::isDynamicallyLinked() const { return _linkType == DYNAMICALLY_LINKED; }
@@ -68,6 +69,7 @@ void Function::setSourceFileName(const std::string& n)      { _sourceFileName = 
 void Function::setWrappedFunctionName(const std::string& n) { _wrapperdFunctionName = n; }
 void Function::setStartLine(const retdec::common::Address& l)       { _startLine = l; }
 void Function::setEndLine(const retdec::common::Address& l)         { _endLine = l; }
+void Function::setIsDecompilerDefined()                     { _linkType = DECOMPILER_DEFINED; }
 void Function::setIsUserDefined()                           { _linkType = USER_DEFINED; }
 void Function::setIsStaticallyLinked() const                { _linkType = STATICALLY_LINKED; }
 void Function::setIsDynamicallyLinked() const               { _linkType = DYNAMICALLY_LINKED; }
