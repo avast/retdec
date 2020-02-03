@@ -11,6 +11,7 @@ set(RETDEC_TESTS_BIN2LLVMIR_SOURCES
 	optimizations/value_protect/value_protect_test.cpp
 	optimizations/x86_addr_spaces/x86_addr_spaces_pass_test.cpp
 	optimizations/x86_addr_spaces/x86_addr_spaces_test.cpp
+	optimizations/x87_fpu/x87_fpu_test.cpp
 	providers/asm_instruction_tests.cpp
 	providers/config_tests.cpp
 	providers/debugformat_tests.cpp
@@ -21,8 +22,7 @@ set(RETDEC_TESTS_BIN2LLVMIR_SOURCES
 	utils/instcombine_tests.cpp
 	utils/ir_modifier_tests.cpp
 	utils/llvm_tests.cpp
-	utils/simplifycfg_tests.cpp
-        optimizations/x87_fpu/x87_fpu_test.cpp)
+	utils/simplifycfg_tests.cpp)
 
 add_executable(retdec-tests-bin2llvmir ${RETDEC_TESTS_BIN2LLVMIR_SOURCES})
 target_link_libraries(retdec-tests-bin2llvmir retdec-bin2llvmir retdec-utils gmock_main)
