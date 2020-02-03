@@ -11,7 +11,8 @@
 
 #include <llvm/IR/Module.h>
 #include <llvm/Pass.h>
-#include <opencv2/core.hpp>
+
+#include "eigen/include/Eigen/Dense"
 
 #include "retdec/bin2llvmir/analyses/symbolic_tree.h"
 #include "retdec/bin2llvmir/providers/abi/abi.h"
@@ -43,9 +44,9 @@ class FunctionAnalyzeMetadata
 
 		std::list<llvm::BasicBlock*> terminatingBasicBlocks;
 		// A * x = B
-		cv::Mat A;
-		cv::Mat B;
-		cv::Mat x;
+		Eigen::MatrixXd A;
+		Eigen::MatrixXd B;
+		Eigen::MatrixXd x;
 
 		int numberOfEquations = 0;
 
@@ -88,6 +89,8 @@ class X87FpuAnalysis : public llvm::ModulePass
 	bool optimizeAnalyzedFpuInstruction();
 	int expectedTopBasedOnCallingConvention(llvm::Instruction& inst);
 	int expectedTopBasedOnRestOfBlock(llvm::Instruction& analyzedInstr);
+	int matrixRank(Eigen::MatrixXd &mat);
+	bool consistenSystem(Eigen::MatrixXd &A, Eigen::MatrixXd &B);
 
 	private:
 
