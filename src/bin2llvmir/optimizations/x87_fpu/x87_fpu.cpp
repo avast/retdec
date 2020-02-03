@@ -7,9 +7,6 @@
 #include <llvm/IR/CFG.h>
 #include <llvm/IR/InstIterator.h>
 #include <llvm/IR/Operator.h>
-#include <llvm/ADT/SCCIterator.h>
-#include <llvm/ADT/DepthFirstIterator.h>
-#include <llvm/ADT/BreadthFirstIterator.h>
 
 #include "retdec/bin2llvmir/optimizations/x87_fpu/x87_fpu.h"
 #include "retdec/utils/string.h"
@@ -20,7 +17,7 @@
 #include "retdec/bin2llvmir/utils/llvm.h"
 
 #include <libalglib/ap.h>
-#include <opencv2/core.hpp>
+#include "eigen/include/Eigen/Dense"
 
 using namespace llvm;
 using namespace retdec::bin2llvmir::llvm_utils;
@@ -98,21 +95,21 @@ std::list<FunctionAnalyzeMetadata> X87FpuAnalysis::getFunctions2Analyze()
 }
 
 
-int matrixRank(cv::Mat& mat)
+int X87FpuAnalysis::matrixRank(Eigen::MatrixXd &mat)
 {
-	float treshHold = 0.0001;
-	cv::Mat singularValues;
-	cv::SVD::compute(mat, singularValues);
-	singularValues = cv::abs(singularValues);
-	return cv::countNonZero(singularValues > treshHold);
+	double treshHold = 0.0001;
+	Eigen::BDCSVD<Eigen::MatrixXd> svd(mat);
+	auto singularValues = svd.singularValues();
+	singularValues = singularValues.cwiseAbs();
+	return (singularValues.array() > treshHold).count();
 }
 
-bool consistenSystem(cv::Mat& A, cv::Mat& B)
+bool X87FpuAnalysis::consistenSystem(Eigen::MatrixXd &A, Eigen::MatrixXd &B)
 {
 	int rankA = matrixRank(A);
 
-	cv::Mat augmented;
-	cv::hconcat(A, B, augmented);
+	Eigen::MatrixXd augmented(A.rows(),  A.cols() + B.cols());
+	augmented << A, B; //horizontal concat
 	int rankAugmentedA = matrixRank(augmented);
 
 	return (rankA == rankAugmentedA);
@@ -120,14 +117,26 @@ bool consistenSystem(cv::Mat& A, cv::Mat& B)
 
 void FunctionAnalyzeMetadata::addEquation(std::list<std::tuple<llvm::BasicBlock&,int,IndexType >> vars, int result)
 {
-	cv::Mat rowA = cv::Mat_<float>::zeros(1, 2*function.size());
-	cv::Mat rowB = cv::Mat_<float>(1,1) << result;
+	if (A.rows() == 0 && B.rows() == 0)
+	{
+		A.resize(1, 2*function.size());
+		B.resize(1, 1);
+	}
+	else
+	{
+		A.conservativeResize(A.rows() + 1, Eigen::NoChange);
+		B.conservativeResize(B.rows() + 1, Eigen::NoChange);
+	}
+
+	A.row(A.rows()-1).setZero();
+	B.row(B.rows()-1).setZero();
+
+	B(B.rows()-1, 0) = result;
 	for (auto var : vars)
 	{
-		rowA.at<float>(0, indexes[&std::get<0>(var)][std::get<2>(var)]) = std::get<1>(var);
+		A(A.rows()-1, indexes[&std::get<0>(var)][std::get<2>(var)]) = std::get<1>(var);
 	}
-	A.push_back(rowA);
-	B.push_back(rowB);
+
 	numberOfEquations++;
 }
 
@@ -183,8 +192,9 @@ bool X87FpuAnalysis::run()
 		{
 			funMd.analyzeSuccess = false;
 		}
-		cv::solve(funMd.A, funMd.B, funMd.x, cv::DECOMP_SVD);
-		funMd.x.convertTo(funMd.x, CV_32S);
+
+		// solve overdetermined linear equation system of BBs by SVD decompisition
+		funMd.x = funMd.A.bdcSvd(Eigen::ComputeFullU | Eigen::ComputeFullV).solve(funMd.B);
 	}
 
 	return optimizeAnalyzedFpuInstruction();
@@ -204,8 +214,8 @@ void X87FpuAnalysis::printBlocksAnalyzeResult()
 			int inputIndex = funMd.indexes[bb][funMd.inIndex];
 			int outputIndex = funMd.indexes[bb][funMd.outIndex];
 			std::cerr << bb->getName().str()<<":";
-			std::cerr << " (in=" << funMd.x.at<int>(inputIndex, 0);;
-			std::cerr << ",out=" << funMd.x.at<int>(outputIndex, 0) << ")\n";
+			std::cerr << " (in=" << funMd.x(inputIndex, 0);;
+			std::cerr << ",out=" << funMd.x(outputIndex, 0) << ")\n";
 		}
 	}
 }
@@ -386,7 +396,7 @@ bool X87FpuAnalysis::optimizeAnalyzedFpuInstruction()
 		{
 			auto *callStore = _config->isLlvmX87StorePseudoFunctionCall(&i.second);
 			auto *callLoad = _config->isLlvmX87LoadPseudoFunctionCall(&i.second);
-			int registerIndex = i.first + 7 - fun.x.at<int>(fun.indexes[i.second.getParent()][fun.inIndex], 0);
+			int registerIndex = i.first + 7 - fun.x(fun.indexes[i.second.getParent()][fun.inIndex], 0);
 			auto *reg = _abi->getRegister(registerIndex);
 			if (!reg)
 			{
