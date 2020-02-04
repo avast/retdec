@@ -37,6 +37,8 @@ void HLLWriterTests::SetUp() {
 		.WillByDefault(Return(NO_LINE_RANGE));
 	ON_CALL(*configMock, isUserDefinedFunc(_))
 		.WillByDefault(Return(false));
+	ON_CALL(*configMock, isDecompilerDefinedFunc(_))
+		.WillByDefault(Return(false));
 	ON_CALL(*configMock, isStaticallyLinkedFunc(_))
 		.WillByDefault(Return(false));
 	ON_CALL(*configMock, isDynamicallyLinkedFunc(_))
