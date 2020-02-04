@@ -375,6 +375,29 @@ bool Module::hasFuncDefinitions() const {
 }
 
 /**
+* @brief Are there any decompiler-defined functions in the module?
+*/
+bool Module::hasDecompilerDefinedFuncs() const {
+	for (auto &func : funcs) {
+		if (config->isDecompilerDefinedFunc(func->getInitialName())) {
+			return true;
+		}
+	}
+	return false;
+}
+
+/**
+* @brief Returns all decompiler-defined functions in the module.
+*/
+FuncSet Module::getDecompilerDefinedFuncs() const {
+	return getFuncsSatisfyingPredicate(
+		[this](auto func) {
+			return config->isDecompilerDefinedFunc(func->getInitialName());
+		}
+	);
+}
+
+/**
 * @brief Are there any user-defied functions in the module?
 */
 bool Module::hasUserDefinedFuncs() const {
