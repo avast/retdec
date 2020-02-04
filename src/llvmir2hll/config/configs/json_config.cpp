@@ -221,11 +221,16 @@ LineRange JSONConfig::getLineRangeForFunc(const std::string &func) const {
 	return LineRange(startLine.getValue(), endLine.getValue());
 }
 
-bool JSONConfig::isUserDefinedFunc(const std::string &func) const {
+bool JSONConfig::isDecompilerDefinedFunc(const std::string &func) const {
 	// We cannot use getConfigFunctionByNameOrEmptyFunction() because config
-	// functions are user-defined by default.
+	// functions are decompiler-defined by default.
 	const auto f = impl->getConfigFunctionByName(func);
-	return f ? f->isUserDefined() : false;
+	return f ? f->isDecompilerDefined() : false;
+}
+
+bool JSONConfig::isUserDefinedFunc(const std::string &func) const {
+	const auto &f = impl->getConfigFunctionByNameOrEmptyFunction(func);
+	return f.isUserDefined();
 }
 
 bool JSONConfig::isStaticallyLinkedFunc(const std::string &func) const {
