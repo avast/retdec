@@ -404,7 +404,7 @@ namespace PeLib
 	}
 
 	/** Compares the passed filename to the struct's filename.
-	* @param strModuleName A filename.
+	* @param strModuleName2 A filename.
 	* @return True, if the passed filename equals the struct's filename. The comparison is case-sensitive.
 	**/
 	bool PELIB_IMAGE_BOUND_DIRECTORY::equal(const std::string strModuleName2) const

@@ -307,6 +307,7 @@ namespace PeLib
 	* @param uiOffset Offset of the resource leaf that's to be read.
 	* @param uiRva RVA of the beginning of the resource directory.
 	* @param uiFileSize Size of the input file.
+	* @param uiSizeOfImage Size of the image.
 	* @param resDir Resource directory.
 	**/
 	int ResourceLeaf::read(
@@ -652,6 +653,7 @@ namespace PeLib
 	* @param uiOffset Offset of the resource node that's to be read.
 	* @param uiRva RVA of the beginning of the resource directory.
 	* @param uiFileSize Size of the input file.
+	* @param uiSizeOfImage Size of the image.
 	* @param resDir Resource directory.
 	**/
 	int ResourceNode::read(

@@ -119,7 +119,7 @@ namespace PeLib
 
 	/**
 	* Reads the MZ header from a file. Note that this function does not verify if a file is actually a MZ file.
-	* For this purpose see #PeFile::MzHeader::isValid. The reason for this is simple: Otherwise it might not
+	* For this purpose see #PeLib::MzHeader::isValid. The reason for this is simple: Otherwise it might not
 	* be possible to load damaged PE files to repair them.
 	* @param inStream Input stream.
 	* @return A non-zero value is returned if a problem occurred.
@@ -175,6 +175,7 @@ namespace PeLib
 	* at this location is treated like a MZ header structure. The MZ header does not need to be valid.
 	* @param pcBuffer Pointer to a MZ header.
 	* @param uiSize Length of the buffer.
+	* @param originalOffs Offset of the MZ header in the original file to be saved.
 	* @return A non-zero value is returned if a problem occurred.
 	**/
 	int MzHeader::read(unsigned char* pcBuffer, unsigned int uiSize, unsigned int originalOffs)

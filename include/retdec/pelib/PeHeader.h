@@ -49,7 +49,7 @@ namespace PeLib
 		  std::vector<PELIB_IMAGE_SECTION_HEADER> m_vIsh; ///< Stores section header information.
 		  PELIB_IMAGE_NT_HEADERS<x> m_inthHeader; ///< Stores Nt header information.
 		  MzHeader m_mzHeader; ///< Stored DOS header.
-		  dword m_uiOffset; ///< Equivalent to the value returned by #PeLib::MzHeader::getAddressOfPeFile
+		  dword m_uiOffset; ///< Equivalent to the value returned by #PeLib::MzHeader::getAddressOfPeHeader
 		  LoaderError m_ldrError;
 		  unsigned long m_checksumFileOffset; ///< File offset of checksum field in optional PE header
 		  unsigned long m_secDirFileOffset; ///< File offset of security data directory
@@ -1240,7 +1240,7 @@ namespace PeLib
 	* For this purpose see #PeLib::PeHeaderT<x>::isValid. The only check this function makes is a check to see if
 	* the file is large enough to be a PE header. If the data is valid doesn't matter.
 	* @param inStream Input stream.
-	* @param uiOffset File offset of PE header (see #PeLib::MzHeader::getAddressOfPeHeader).
+	* @param ntHeaderOffset File offset of PE header (see #PeLib::MzHeader::getAddressOfPeHeader).
 	* @param mzHeader Reference to MZ header.
 	**/
 	template<int x>
@@ -1583,7 +1583,7 @@ namespace PeLib
 
 	/**
 	* Saves the PE header to a file. Note that this only saves the header information, if you have added sections
-	* and want to save these to the file you have to call #PeLib::PeHeaderT<x>::saveSections too. This function also
+	* and want to save these to the file you have to call #PeLib::PeHeaderT<x>::writeSections too. This function also
 	* does not verify if the PE header is correct. If you want to make sure that the current PE header is valid,
 	* call #PeLib::PeHeaderT<x>::isValid and #PeLib::PeHeaderT<x>::makeValid first.
 	* @param strFilename Filename of the file the header will be written to.
@@ -1746,7 +1746,7 @@ namespace PeLib
 
 	/**
 	* Returns the file's number of sections as defined in the header. Note that this value can be different
-	* from the number of defined sections (#see PeLib::PeHeaderT<x>::getNumberOfSections).
+	* from the number of defined sections (see #PeLib::PeHeaderT<x>::getNumberOfSections).
 	* @return The NumberOfSections value from the PE header.
 	**/
 	template<int x>
@@ -2690,7 +2690,7 @@ namespace PeLib
 
 	/**
 	* Changes the file's ImageBase.
-	* @param dwValue New value.
+	* @param value New value.
 	**/
 	template<int x>
 	void PeHeaderT<x>::setImageBase(typename FieldSizes<x>::VAR4_8 dwValue)
@@ -2840,7 +2840,7 @@ namespace PeLib
 
 	/**
 	* Changes the file's SizeOfStackReserve.
-	* @param dwValue New value.
+	* @param value New value.
 	**/
 	template<int x>
 	void PeHeaderT<x>::setSizeOfStackReserve(typename FieldSizes<x>::VAR4_8 dwValue)
@@ -2850,7 +2850,7 @@ namespace PeLib
 
 	/**
 	* Changes the file's SizeOfStackCommit.
-	* @param dwValue New value.
+	* @param value New value.
 	**/
 	template<int x>
 	void PeHeaderT<x>::setSizeOfStackCommit(typename FieldSizes<x>::VAR4_8 dwValue)
@@ -2860,7 +2860,7 @@ namespace PeLib
 
 	/**
 	* Changes the file's SizeOfHeapReserve.
-	* @param dwValue New value.
+	* @param value New value.
 	**/
 	template<int x>
 	void PeHeaderT<x>::setSizeOfHeapReserve(typename FieldSizes<x>::VAR4_8 dwValue)
@@ -2870,7 +2870,7 @@ namespace PeLib
 
 	/**
 	* Changes the file's SizeOfHeapCommit.
-	* @param dwValue New value.
+	* @param value New value.
 	**/
 	template<int x>
 	void PeHeaderT<x>::setSizeOfHeapCommit(typename FieldSizes<x>::VAR4_8 dwValue)

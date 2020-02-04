@@ -840,6 +840,7 @@ namespace PeLib
 	* Rebuilds the import directory.
 	* @param vBuffer Buffer the rebuilt import directory will be written to.
 	* @param dwRva The RVA of the ImportDirectory in the file.
+	* @param fixEntries Boolean flag.
 	* \todo uiSizeoffuncnames is not used.
 	**/
 	template<int bits>
@@ -1180,7 +1181,7 @@ namespace PeLib
 	}
 
 	/**
-	* @param strFilename Name of the imported file.
+	* @param dwFilenr Name of the imported file.
 	* @param cdDir Flag to decide if the OLDDIR or new import directory is used.
 	* @return FirstThunk value of an imported file.
 	**/
@@ -1211,7 +1212,7 @@ namespace PeLib
 	}
 
 	/**
-	* @param strFilename Name of the imported file.
+	* @param dwFilenr Name of the imported file.
 	* @param cdDir Flag to decide if the OLDDIR or new import directory is used.
 	* @return OriginalFirstThunk value of an imported file.
 	**/
@@ -1242,7 +1243,7 @@ namespace PeLib
 	}
 
 	/**
-	* @param strFilename Name of the imported file.
+	* @param dwFilenr Name of the imported file.
 	* @param cdDir Flag to decide if the OLDDIR or new import directory is used.
 	* @return ForwarderChain value of an imported file.
 	**/
@@ -1273,7 +1274,7 @@ namespace PeLib
 	}
 
 	/**
-	* @param strFilename Name of the imported file.
+	* @param dwFilenr Name of the imported file.
 	* @param cdDir Flag to decide if the OLDDIR or new import directory is used.
 	* @return TimeDateStamp value of an imported file.
 	**/
