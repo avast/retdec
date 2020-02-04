@@ -425,6 +425,46 @@ IsUserDefinedFuncReturnsTrueWhenFuncIsUserDefined) {
 }
 
 //
+// isDecompilerDefinedFunc()
+//
+
+TEST_F(JSONConfigTests,
+IsDecompilerDefinedFuncReturnsFalseWhenThereIsNoInfoForFunc) {
+	auto config = JSONConfig::empty();
+
+	ASSERT_FALSE(config->isDecompilerDefinedFunc("my_func"));
+}
+
+TEST_F(JSONConfigTests,
+IsDecompilerDefinedFuncReturnsFalseWhenFuncIsDynamicallyLinked) {
+	auto config = JSONConfig::fromString(R"({
+		"functions": [
+			{
+				"name": "my_func",
+				"fncType": "dynamicallyLinked"
+			}
+		]
+	})");
+
+	ASSERT_FALSE(config->isDecompilerDefinedFunc("my_func"));
+}
+
+
+TEST_F(JSONConfigTests,
+IsDecompilerDefinedFuncReturnsTrueWhenFuncIsDecompilerDefined) {
+	auto config = JSONConfig::fromString(R"({
+		"functions": [
+			{
+				"name": "my_func",
+				"fncType": "decompilerDefined"
+			}
+		]
+	})");
+
+	ASSERT_TRUE(config->isDecompilerDefinedFunc("my_func"));
+}
+
+//
 // isStaticallyLinkedFunc()
 //
 

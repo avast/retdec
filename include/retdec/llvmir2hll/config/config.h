@@ -134,6 +134,11 @@ public:
 	virtual LineRange getLineRangeForFunc(const std::string &func) const = 0;
 
 	/**
+	* @brief Is the given function decompiler-defined?
+	*/
+	virtual bool isDecompilerDefinedFunc(const std::string &func) const = 0;
+
+	/**
 	* @brief Is the given function user-defined?
 	*/
 	virtual bool isUserDefinedFunc(const std::string &func) const = 0;
