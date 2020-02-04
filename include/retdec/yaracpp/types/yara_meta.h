@@ -1,5 +1,5 @@
 /**
- * @file include/yaracpp/types/yara_meta.h
+ * @file include/retdec/yaracpp/types/yara_meta.h
  * @brief Library representation of one YARA meta.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */

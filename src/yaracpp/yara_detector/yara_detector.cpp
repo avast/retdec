@@ -1,5 +1,5 @@
 /**
- * @file src/yara_detector/yara_detector.cpp
+ * @file src/yaracpp/yara_detector/yara_detector.cpp
  * @brief Interpret of YARA rules.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
