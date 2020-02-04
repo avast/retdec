@@ -298,7 +298,7 @@ void ParamReturn::collectExtraData(DataFlowEntry* dataflow) const
 	}
 
 	auto configFnc = _config->getConfigFunction(fnc);
-	if (_config->getConfig().isIda() && configFnc)
+	if (configFnc && configFnc->isUserDefined())
 	{
 		std::vector<Type*> argTypes;
 		std::vector<std::string> argNames;
