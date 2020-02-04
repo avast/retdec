@@ -56,7 +56,7 @@ std::string LinkerInfo::getVisualStudioName() const
 
 /**
  * Set major version of linker
- * @param linkerMajorVersion Major version of linker
+ * @param richProductId Major version of linker
  */
 void LinkerInfo::setProductId(uint32_t richProductId)
 {
@@ -65,7 +65,7 @@ void LinkerInfo::setProductId(uint32_t richProductId)
 
 /**
  * Set build version
- * @param linkerBuildVersion Build version
+ * @param richProductBuild Build version
  */
 void LinkerInfo::setProductBuild(uint32_t richProductBuild)
 {
@@ -74,7 +74,7 @@ void LinkerInfo::setProductBuild(uint32_t richProductBuild)
 
 /**
  * Set number of uses
- * @param linkerCount Number of uses
+ * @param richProductCount Number of uses
  */
 void LinkerInfo::setNumberOfUses(uint32_t richProductCount)
 {
