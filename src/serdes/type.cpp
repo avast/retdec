@@ -31,7 +31,7 @@ void serialize(Writer& writer, const common::Type& t)
 
 	writer.EndObject();
 }
-SERIALIZE_EXPLICIT_INSTANTIATION(common::Type);
+SERIALIZE_EXPLICIT_INSTANTIATION(common::Type)
 
 void deserialize(const rapidjson::Value& val, common::Type& t)
 {

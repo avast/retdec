@@ -46,7 +46,7 @@ void serialize(Writer& writer, const common::VtableItem& vti)
 
 	writer.EndObject();
 }
-SERIALIZE_EXPLICIT_INSTANTIATION(common::VtableItem);
+SERIALIZE_EXPLICIT_INSTANTIATION(common::VtableItem)
 
 void deserialize(const rapidjson::Value& val, common::VtableItem& vti)
 {
@@ -78,7 +78,7 @@ void serialize(Writer& writer, const common::Vtable& vt)
 
 	writer.EndObject();
 }
-SERIALIZE_EXPLICIT_INSTANTIATION(common::Vtable);
+SERIALIZE_EXPLICIT_INSTANTIATION(common::Vtable)
 
 void deserialize(const rapidjson::Value& val, common::Vtable& vt)
 {

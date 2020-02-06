@@ -71,7 +71,7 @@ void serialize(Writer& writer, const common::Storage& s)
 
 	writer.EndObject();
 }
-SERIALIZE_EXPLICIT_INSTANTIATION(common::Storage);
+SERIALIZE_EXPLICIT_INSTANTIATION(common::Storage)
 
 void deserialize(const rapidjson::Value& val, common::Storage& s)
 {

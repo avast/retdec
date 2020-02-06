@@ -37,7 +37,7 @@ void serialize(Writer& writer, const common::FileFormat& ff)
 		writer.String(ff.getName());
 	}
 }
-SERIALIZE_EXPLICIT_INSTANTIATION(common::FileFormat);
+SERIALIZE_EXPLICIT_INSTANTIATION(common::FileFormat)
 
 void deserialize(const rapidjson::Value& val, common::FileFormat& ff)
 {
