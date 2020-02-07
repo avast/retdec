@@ -78,6 +78,7 @@ if(LLVM_LOCAL_DIR)
 			-DLLVM_BUILD_TESTS=OFF
 			-DLLVM_BUILD_BENCHMARKS=OFF
 			-DLLVM_BUILD_DOCS=OFF
+			-DLLVM_ENABLE_BINDINGS=OFF
 			# We don't want this so that we don't have to link with tinfo.
 			# It looks like terminal colors are working even without this.
 			-DLLVM_ENABLE_TERMINFO=OFF
@@ -145,6 +146,7 @@ else()
 			-DLLVM_BUILD_TESTS=OFF
 			-DLLVM_BUILD_BENCHMARKS=OFF
 			-DLLVM_BUILD_DOCS=OFF
+			-DLLVM_ENABLE_BINDINGS=OFF
 			# We don't want this so that we don't have to link with tinfo.
 			# It looks like terminal colors are working even without this.
 			-DLLVM_ENABLE_TERMINFO=OFF
