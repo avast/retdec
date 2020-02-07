@@ -104,7 +104,6 @@ std::string RichHeader::getRecordVisualStudioNameStr(std::size_t position) const
 	return record ? record->getVisualStudioName() : "";
 }
 
-
 /**
  * Get raw bytes
  * @return Raw bytes of rich header.

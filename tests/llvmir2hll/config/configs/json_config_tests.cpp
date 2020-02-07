@@ -449,7 +449,6 @@ IsDecompilerDefinedFuncReturnsFalseWhenFuncIsDynamicallyLinked) {
 	ASSERT_FALSE(config->isDecompilerDefinedFunc("my_func"));
 }
 
-
 TEST_F(JSONConfigTests,
 IsDecompilerDefinedFuncReturnsTrueWhenFuncIsDecompilerDefined) {
 	auto config = JSONConfig::fromString(R"({
