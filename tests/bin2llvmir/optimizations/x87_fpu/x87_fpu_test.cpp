@@ -545,7 +545,7 @@ TEST_F(X87FpuAnalysisTests, x86_16bit_watcom)
 
 	setX86Environment("16", "watcom");
 	bool b = pass.runOnModuleCustom(*module, &config, abi);
-	EXPECT_FALSE(b);
+	EXPECT_TRUE(b);
 } // x86_16bit_watcom
 
 //
