@@ -89,6 +89,7 @@ class X87FpuAnalysis : public llvm::ModulePass
 	bool optimizeAnalyzedFpuInstruction();
 	int expectedTopBasedOnCallingConvention(llvm::Instruction& inst);
 	int expectedTopBasedOnRestOfBlock(llvm::Instruction& analyzedInstr);
+	bool validTopForTerminatingBasicBlock(int top);
 	int matrixRank(Eigen::MatrixXd &mat);
 	bool consistenSystem(Eigen::MatrixXd &A, Eigen::MatrixXd &B);
 
