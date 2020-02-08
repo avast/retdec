@@ -140,6 +140,24 @@ void FunctionAnalyzeMetadata::addEquation(std::list<std::tuple<llvm::BasicBlock&
 	numberOfEquations++;
 }
 
+bool X87FpuAnalysis::validTopForTerminatingBasicBlock(int top)
+{
+	if (_config->getConfig().architecture.isX86_16() && top != 0)
+	{
+		return false; //16bit must be empty at the end of function
+	}
+	else if (_config->getConfig().architecture.isX86_32())
+	{
+		return true; // TODO maybe improve with function dependencies
+	}
+	else if (_config->getConfig().architecture.isX86_64() && top != 0)
+	{
+		return false; //64bit must be empty at the end of function
+	}
+
+	return true;
+}
+
 bool X87FpuAnalysis::run()
 {
 	if (_config == nullptr || _abi == nullptr)
@@ -176,6 +194,10 @@ bool X87FpuAnalysis::run()
 			}
 			if (std::find(funMd.terminatingBasicBlocks.begin(), funMd.terminatingBasicBlocks.end(), bb) != funMd.terminatingBasicBlocks.end())
 			{
+				if (!validTopForTerminatingBasicBlock(outTop))
+				{
+					funMd.analyzeSuccess = false;
+				}
 				funMd.addEquation({{*bb, 1, funMd.outIndex}}, 8+outTop);
 			}
 
