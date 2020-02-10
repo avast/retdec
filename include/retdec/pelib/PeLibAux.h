@@ -930,7 +930,7 @@ namespace PeLib
 			NumberOfFunctions = 0;
 			NumberOfNames = 0;
 			AddressOfFunctions = 0;
-			NumberOfNames = 0;
+			AddressOfNames = 0;
 			AddressOfNameOrdinals = 0;
 		}
 
