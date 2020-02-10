@@ -222,15 +222,7 @@ int handleArguments(std::vector<std::string> &args)
 				retdec::common::ToolInfo ci;
 				ci.setName(val);
 				ci.setPercentage(101);
-
-				if (config.tools.empty())
-				{
-					config.tools.push_back(ci);
-				}
-				else
-				{
-					config.tools.push_back(ci);
-				}
+				config.tools.push_back(ci);
 			}
 			else if (opt == "--arch")
 			{
