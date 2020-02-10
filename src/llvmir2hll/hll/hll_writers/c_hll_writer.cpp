@@ -1174,10 +1174,7 @@ void CHLLWriter::visit(ShPtr<PointerType> type) {
 	}
 	// If type is a pointer get the contained type.
 	pointedType->getContainedType()->accept(this);
-	// If type is followed by "*"s, emit a space.
-	if (numOfStars > 0) {
-		out->space();
-	}
+	out->space();
 	// Emit "*"s.
 	for (int star = 0; star < numOfStars; ++star) {
 		out->operatorX("*");
