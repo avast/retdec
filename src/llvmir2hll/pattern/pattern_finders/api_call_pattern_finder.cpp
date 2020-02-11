@@ -34,10 +34,6 @@ namespace {
 StringSet getAPICallFuncNames() {
 	StringSet funcNames;
 
-	// The following list is based on the "List of API sequences being logged
-	// by GVMA64" document from AVG. Additionally, it contains all the A/W
-	// variants.
-
 	funcNames.insert("ShellExecute");
 	funcNames.insert("ShellExecuteA");
 	funcNames.insert("ShellExecuteW");
