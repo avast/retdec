@@ -34,9 +34,6 @@ namespace {
 StringSet getAPICallFuncNames() {
 	StringSet funcNames;
 
-	funcNames.insert("ShellExecute");
-	funcNames.insert("ShellExecuteA");
-	funcNames.insert("ShellExecuteW");
 	funcNames.insert("CreateFile");
 	funcNames.insert("CreateFileA");
 	funcNames.insert("CreateFileW");
