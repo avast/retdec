@@ -297,7 +297,7 @@ SwitchStmt::clause_iterator DeadCodeOptimizer::
 		findClauseWithCondEqualToControlExpr(ShPtr<SwitchStmt> stmt,
 			ShPtr<Constant> controlExpr) {
 	auto controlExprConstInt = cast<ConstInt>(controlExpr);
-	auto controlExprConstFloat = cast<ConstInt>(controlExpr);
+	auto controlExprConstFloat = cast<ConstFloat>(controlExpr);
 	if (!controlExprConstInt && !controlExprConstFloat) {
 		return stmt->clause_end();
 	}
