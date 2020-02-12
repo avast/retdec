@@ -21,10 +21,9 @@ CallingConvention::Ptr X64CallingConvention::create(const Abi* a)
 	}
 
 	auto c = a->getConfig();
-	bool isMinGW = c->getConfig().tools.isGcc()
-			&& c->getConfig().fileFormat.isPe();
+	bool isPe = c->getConfig().fileFormat.isPe();
 
-	if (isMinGW || c->getConfig().tools.isMsvc())
+	if (isPe || c->getConfig().tools.isMsvc())
 	{
 		return std::make_unique<MicrosoftX64CallingConvention>(a);
 	}
