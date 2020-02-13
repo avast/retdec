@@ -984,6 +984,11 @@ void ParamReturn::applyToIr(DataFlowEntry& de)
 			definitionArgs.push_back(a);
 		}
 	}
+	std::vector<llvm::Type*> definitionArgTypes;
+	for (auto& t : de.argTypes())
+	{
+		definitionArgTypes.push_back(t != nullptr ? t : _abi->getDefaultType());
+	}
 
 	// Set used calling convention to config
 	auto* cf = _config->getConfigFunction(fnc);
@@ -996,7 +1001,7 @@ void ParamReturn::applyToIr(DataFlowEntry& de)
 	auto* newFnc = irm.modifyFunction(
 			fnc,
 			de.getRetType(),
-			de.argTypes(),
+			definitionArgTypes,
 			de.isVariadic(),
 			rets2vals,
 			loadsOfCalls,
@@ -1129,7 +1134,8 @@ std::map<CallInst*, std::vector<Value*>> ParamReturn::fetchLoadsOfCalls(
 
 			if (tIt != types.end())
 			{
-				l = IrModifier::convertValueToType(l, *tIt, call);
+				auto t = *tIt != nullptr ? *tIt : _abi->getDefaultType();
+				l = IrModifier::convertValueToType(l, t, call);
 				tIt++;
 			}
 			else

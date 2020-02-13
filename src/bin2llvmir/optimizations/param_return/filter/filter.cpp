@@ -482,7 +482,10 @@ std::vector<Type*> Filter::expandTypes(const std::vector<Type*>& types) const
 			auto t = toExpand.front();
 			toExpand.pop_front();
 
-			if (auto* st = dyn_cast<StructType>(t))
+			if (t == nullptr) {
+				expanded.push_back(_abi->getDefaultType());
+			}
+			else if (auto* st = dyn_cast<StructType>(t))
 			{
 				for (auto& e : st->elements())
 				{
