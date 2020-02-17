@@ -78,7 +78,7 @@ if(CHANGED)
 	clean_cmake_files(${binary_dir})
 endif()
 
-# https://github.com/avast-tl/retdec/issues/439
+# https://github.com/avast/retdec/issues/439
 if(APPLE)
     execute_process(
         COMMAND xcrun --show-sdk-path
