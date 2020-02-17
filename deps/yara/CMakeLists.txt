@@ -84,7 +84,7 @@ if(APPLE)
         COMMAND xcrun --show-sdk-path
         OUTPUT_VARIABLE MACOS_SDK_PATH
     )
-    list(APPEND CMAKE_C_FLAGS "--sysroot=${MACOS_SDK_PATH}")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --sysroot=${MACOS_SDK_PATH}")
 endif()
 
 if(NOT MSVC)
