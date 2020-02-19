@@ -1,7 +1,7 @@
 /**
 * @file src/bin2llvmir/optimizations/x87_fpu/x87_fpu.cpp
 * @brief x87 FPU analysis - replace fpu stack operations with FPU registers.
-* @copyright (c) 2019 Avast Software, licensed under the MIT license
+* @copyright (c) 2020 Avast Software, licensed under the MIT license
 */
 
 #include <llvm/IR/CFG.h>
@@ -140,22 +140,62 @@ void FunctionAnalyzeMetadata::addEquation(std::list<std::tuple<llvm::BasicBlock&
 	numberOfEquations++;
 }
 
-bool X87FpuAnalysis::validTopForTerminatingBasicBlock(int top)
+int X87FpuAnalysis::getFpuStackTopForTerminatingBlockOfX86_32Arch(int top)
 {
-	if (_config->getConfig().architecture.isX86_16() && top != 0)
+	if (_config->getConfig().architecture.isX86_32() && top == -1)
 	{
-		return false; //16bit must be empty at the end of function
+		return top;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+bool X87FpuAnalysis::isFpuStackTopValidForActualArchitectureAndCallingConvention(llvm::Function* fun)
+{
+	using CallingConvention = common::CallingConvention::eCC;
+
+	auto configFunctionMetadata = _config->getConfig().functions.getFunctionByName(fun->getName());
+	if (!configFunctionMetadata)
+		return true;
+
+	auto convention = configFunctionMetadata->callingConvention.getID();
+
+	if (_config->getConfig().architecture.isX86_16())
+	{
+		switch (convention)
+		{
+			case CallingConvention::CC_CDECL:
+			case CallingConvention::CC_PASCAL:
+			case CallingConvention::CC_FASTCALL:
+			case CallingConvention::CC_UNKNOWN:
+			default:
+				return true;
+			case CallingConvention::CC_WATCOM:
+				return false; //inconsistent
+		}
 	}
 	else if (_config->getConfig().architecture.isX86_32())
 	{
-		return true; // TODO maybe improve with function dependencies
+		switch (convention)
+		{
+			case CallingConvention::CC_CDECL:
+			case CallingConvention::CC_STDCALL:
+			case CallingConvention::CC_PASCAL:
+			case CallingConvention::CC_FASTCALL:
+			case CallingConvention::CC_THISCALL:
+			case CallingConvention::CC_UNKNOWN:
+			default:
+				return true;
+			case CallingConvention::CC_WATCOM:
+				return false; //inconsisten
+		}
 	}
-	else if (_config->getConfig().architecture.isX86_64() && top != 0)
+	else // x86-64bit architecture
 	{
-		return false; //64bit must be empty at the end of function
+		return true;
 	}
-
-	return true;
 }
 
 bool X87FpuAnalysis::run()
@@ -180,12 +220,13 @@ bool X87FpuAnalysis::run()
 	for (auto& funMd: analyzedFunctionsMetadata)
 	{
 		BasicBlock& enterBlock = funMd.function.begin().operator*();
-		funMd.addEquation({{enterBlock, 1, funMd.inIndex}}, 8);
+		funMd.addEquation({{enterBlock, 1, funMd.inIndex}}, 0);
 
 		for (Function::iterator bbIt=funMd.function.begin(),
 		 	bbEndIt = funMd.function.end(); bbIt != bbEndIt; ++bbIt)
 		{
 			BasicBlock* bb = bbIt.operator->();
+			auto name = bb->getName().str();
 			int outTop=0;
 
 			if (!analyzeBasicBlock(funMd, bb, outTop))
@@ -194,11 +235,12 @@ bool X87FpuAnalysis::run()
 			}
 			if (std::find(funMd.terminatingBasicBlocks.begin(), funMd.terminatingBasicBlocks.end(), bb) != funMd.terminatingBasicBlocks.end())
 			{
-				if (!validTopForTerminatingBasicBlock(outTop))
+				if (!isFpuStackTopValidForActualArchitectureAndCallingConvention(bb->getParent()))
 				{
 					funMd.analyzeSuccess = false;
 				}
-				funMd.addEquation({{*bb, 1, funMd.outIndex}}, 8+outTop);
+				int terminatingTop = getFpuStackTopForTerminatingBlockOfX86_32Arch(outTop);
+				funMd.addEquation({{*bb, 1, funMd.outIndex}}, terminatingTop);
 			}
 
 			funMd.addEquation({{*bb, -1, funMd.inIndex},{*bb, 1, funMd.outIndex}}, outTop);
@@ -359,28 +401,8 @@ bool X87FpuAnalysis::analyzeInstruction(
 	// pseudo load/store of fpu top
 	else if (callStore || callLoad)
 	{
-		CallInst *pseudoCall;
-		uint32_t regBase;
-		if (callStore)
-		{
-			pseudoCall = callStore;
-			regBase = _config->isLlvmX87DataStorePseudoFunctionCall(pseudoCall)
-				  ? uint32_t(X86_REG_ST0) : uint32_t(X87_REG_TAG0);
-		}
-		else // callLoad
-		{
-			pseudoCall = callLoad;
-			regBase = _config->isLlvmX87DataLoadPseudoFunctionCall(pseudoCall)
-					  ? uint32_t(X86_REG_ST0) : uint32_t(X87_REG_TAG0);
-		}
-
-		// st(0) == TOP(7) ... st(7) == TOP(0) => st(X) = 7 - TOP(X)
-		int relativeIndexOfRegister = outTop*(-1);
-
-		uint32_t absoluteIndexOfRegister = regBase + relativeIndexOfRegister;
-
 		//pseudo call will be replaced by store/load of concrete register but only if whole analyze succed
-		funMd.pseudoCalls.push_back({absoluteIndexOfRegister, i});
+		funMd.pseudoCalls.push_back({outTop, i});
 	}
 
 	return ANALYZE_SUCCESS;
@@ -414,11 +436,28 @@ bool X87FpuAnalysis::optimizeAnalyzedFpuInstruction()
 			analyzeSucces = false;
 			continue;
 		}
+
 		for (auto& i : fun.pseudoCalls)
 		{
+			int regBase;
 			auto *callStore = _config->isLlvmX87StorePseudoFunctionCall(&i.second);
 			auto *callLoad = _config->isLlvmX87LoadPseudoFunctionCall(&i.second);
-			int registerIndex = i.first + 7 - fun.x(fun.indexes[i.second.getParent()][fun.inIndex], 0);
+			if (callStore)
+			{
+				regBase = _config->isLlvmX87DataStorePseudoFunctionCall(callStore)
+						  ? uint32_t(X86_REG_ST0) : uint32_t(X87_REG_TAG0);
+			}
+			else // callLoad
+			{
+				regBase = _config->isLlvmX87DataLoadPseudoFunctionCall(callLoad)
+						  ? uint32_t(X86_REG_ST0) : uint32_t(X87_REG_TAG0);
+			}
+
+			double bbIn = fun.x(fun.indexes[i.second.getParent()][fun.inIndex], 0);
+			// relativeIndexOFBB + calculatedIndexAtTheBeginnigofBB
+			int top = (int)i.first + (int)round(bbIn);
+
+			int registerIndex = regBase - top;
 			auto *reg = _abi->getRegister(registerIndex);
 			if (!reg)
 			{
