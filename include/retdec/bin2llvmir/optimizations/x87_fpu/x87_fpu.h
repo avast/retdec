@@ -100,7 +100,6 @@ class X87FpuAnalysis : public llvm::ModulePass
 	 * @pre Expect first call isInstructionFunctionCall().
 	 */
 	bool isFunctionReturnTypeFloatingPoint(llvm::Value* inst);
-	config::CallingConvention::eCallingConvention getCallingConvention(llvm::Value* function);
 
 	private:
 
