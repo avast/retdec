@@ -51,7 +51,7 @@ class FunctionAnalyzeMetadata
 		int numberOfEquations = 0;
 
 		// 1. index to register, 2.pseudo instruction
-		std::list<std::pair<uint32_t ,llvm::Instruction&>> pseudoCalls;
+		std::list<std::pair<uint32_t ,llvm::Instruction*>> pseudoCalls;
 
 	void addEquation(std::list<std::tuple<llvm::BasicBlock&,int,IndexType >> vars, int result);
 	FunctionAnalyzeMetadata(llvm::Function &function1) : function(function1) {};
@@ -77,8 +77,8 @@ class X87FpuAnalysis : public llvm::ModulePass
 				int& outTop);
 		bool analyzeInstruction(
 				FunctionAnalyzeMetadata& funMd,
-				llvm::Instruction& i,
-				std::list<int>& topVals,
+				llvm::Instruction* i,
+				std::map<llvm::Value*, int>& topVals,
 				int& outTop);
 	std::list<FunctionAnalyzeMetadata> getFunctions2Analyze();
 

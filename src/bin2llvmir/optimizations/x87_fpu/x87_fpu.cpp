@@ -16,7 +16,6 @@
 #include "retdec/bin2llvmir/utils/ir_modifier.h"
 #include "retdec/bin2llvmir/utils/llvm.h"
 
-#include <libalglib/ap.h>
 #include "eigen/include/Eigen/Dense"
 
 using namespace llvm;
@@ -339,35 +338,27 @@ int X87FpuAnalysis::expectedTopBasedOnRestOfBlock(llvm::Instruction& analyzedIns
 
 bool X87FpuAnalysis::analyzeInstruction(
 	FunctionAnalyzeMetadata& funMd,
-	Instruction& i,
-	std::list<int>& topVals,
+	Instruction* i,
+	std::map<llvm::Value*, int>& topVals,
 	int& outTop)
 {
-	auto *callFunction = dyn_cast<CallInst>(&i);
-	auto *loadFpuTop = dyn_cast<LoadInst>(&i);
-	auto *storeFpuTop = dyn_cast<StoreInst>(&i);
-	auto *add = dyn_cast<AddOperator>(&i);
-	auto *sub = dyn_cast<SubOperator>(&i);
-	auto *callStore = _config->isLlvmX87StorePseudoFunctionCall(&i);
-	auto *callLoad = _config->isLlvmX87LoadPseudoFunctionCall(&i);
+	auto *callFunction = dyn_cast<CallInst>(i);
+	auto *loadFpuTop = dyn_cast<LoadInst>(i);
+	auto *storeFpuTop = dyn_cast<StoreInst>(i);
+	auto *add = dyn_cast<AddOperator>(i);
+	auto *sub = dyn_cast<SubOperator>(i);
+	auto *callStore = _config->isLlvmX87StorePseudoFunctionCall(i);
+	auto *callLoad = _config->isLlvmX87LoadPseudoFunctionCall(i);
 
 	// read actual value of fpu top
 	if (loadFpuTop && loadFpuTop->getPointerOperand() == top)
 	{
-		if (topVals.empty())
-		{
-			topVals.push_back(0); // init FPU TOP with zero
-		}
-		outTop = topVals.back();
+		topVals[i] = outTop;
 	}
 	// store actual value of fpu top
-	else if (storeFpuTop && storeFpuTop->getPointerOperand() == top)
+	else if (storeFpuTop && storeFpuTop->getPointerOperand() == top && topVals.find(storeFpuTop->getValueOperand()) != topVals.end())
 	{
-		if (topVals.empty())
-		{
-			return ANALYZE_FAIL;
-		}
-		outTop = topVals.back();
+		outTop = topVals.find(storeFpuTop->getValueOperand())->second;
 	}
 	// function call -> possible change value of fpu top
 	else if (callFunction && !callStore && !callLoad)
@@ -377,26 +368,24 @@ bool X87FpuAnalysis::analyzeInstruction(
 		{
 			return ANALYZE_FAIL;
 		}
-		outTop = expectedTopBasedOnCallingConvention(i);
-		topVals.push_back(outTop);
+		outTop = expectedTopBasedOnCallingConvention(*i);
+		topVals[i] = outTop;
 	}
 	// increment fpu top
-	else if (add && isa<ConstantInt>(add->getOperand(1)))
+	else if (add && isa<ConstantInt>(add->getOperand(1)) && topVals.find(add->getOperand(0)) != topVals.end())
 	{
-		int oldTopValue = topVals.back();
+		int oldTopValue = topVals.find(add->getOperand(0))->second;
 		int constValue = cast<ConstantInt>(add->getOperand(1))->getZExtValue();//it should be 1
 		int newTopValue = oldTopValue + constValue;
-		outTop = newTopValue;
-		topVals.push_back(outTop);
+		topVals[i] = newTopValue;
 	}
 	// decrement fpu top
-	else if (sub && isa<ConstantInt>(sub->getOperand(1)))
+	else if (sub && isa<ConstantInt>(sub->getOperand(1)) && topVals.find(sub->getOperand(0)) != topVals.end())
 	{
-		int oldTopValue = topVals.back();
+		int oldTopValue = topVals.find(sub->getOperand(0))->second;
 		int constValue = cast<ConstantInt>(sub->getOperand(1))->getZExtValue();//it should be 1
 		int newTopValue = oldTopValue - constValue;
-		outTop = newTopValue;
-		topVals.push_back(outTop);
+		topVals[i] = newTopValue;
 	}
 	// pseudo load/store of fpu top
 	else if (callStore || callLoad)
@@ -413,10 +402,10 @@ bool X87FpuAnalysis::analyzeBasicBlock(
 	llvm::BasicBlock* bb,
 	int& outTop)
 {
-	std::list<int> topVals;
+	std::map<llvm::Value*, int> topVals;
 	for (BasicBlock::iterator it = bb->begin(), e = bb->end(); it != e; ++it)
 	{
-		Instruction& inst = it.operator*();
+		Instruction* inst = it.operator->();
 		if (!analyzeInstruction(funMd, inst, topVals, outTop))
 		{
 			return ANALYZE_FAIL;
@@ -440,8 +429,8 @@ bool X87FpuAnalysis::optimizeAnalyzedFpuInstruction()
 		for (auto& i : fun.pseudoCalls)
 		{
 			int regBase;
-			auto *callStore = _config->isLlvmX87StorePseudoFunctionCall(&i.second);
-			auto *callLoad = _config->isLlvmX87LoadPseudoFunctionCall(&i.second);
+			auto *callStore = _config->isLlvmX87StorePseudoFunctionCall(i.second);
+			auto *callLoad = _config->isLlvmX87LoadPseudoFunctionCall(i.second);
 			if (callStore)
 			{
 				regBase = _config->isLlvmX87DataStorePseudoFunctionCall(callStore)
@@ -453,7 +442,7 @@ bool X87FpuAnalysis::optimizeAnalyzedFpuInstruction()
 						  ? uint32_t(X86_REG_ST0) : uint32_t(X87_REG_TAG0);
 			}
 
-			double bbIn = fun.x(fun.indexes[i.second.getParent()][fun.inIndex], 0);
+			double bbIn = fun.x(fun.indexes[i.second->getParent()][fun.inIndex], 0);
 			// relativeIndexOFBB + calculatedIndexAtTheBeginnigofBB
 			int top = (int)i.first + (int)round(bbIn);
 
