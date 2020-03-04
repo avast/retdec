@@ -13729,7 +13729,7 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FXRSTOR64_memory_operand)
 	EXPECT_JUST_MEMORY_LOADED({0x1234});
 	EXPECT_NO_MEMORY_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_fxrstor64"), {0xffff}},
+		{_module.getFunction("__asm_fxrstor"), {0xffff}},
 	});
 }
 
@@ -13752,7 +13752,7 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FXRSTOR64_register_operand)
 	EXPECT_JUST_MEMORY_LOADED({0x1234});
 	EXPECT_NO_MEMORY_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_module.getFunction("__asm_fxrstor64"), {0xffff}},
+		{_module.getFunction("__asm_fxrstor"), {0xffff}},
 	});
 }
 
@@ -13812,6 +13812,47 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FXTRACT)
 		{_module.getFunction("__pseudo_get_significand"), {17.0}},
 		{_module.getFunction("__pseudo_get_exponent"), {17.0}},
 	});
+}
+
+//
+// X86_INS_FNSTSW
+//
+
+// DD /7	FNSTSW m2byte	Store FPU status word at m2byte without checking for pending unmasked floating-point exceptions.
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FNSTSW_m2byte)
+{
+	ALL_MODES;
+
+	setRegisters({
+						 {X86_REG_FPSW, 0xFF},
+						 });
+
+	emulate("fnstsw [0x1234]");
+
+	EXPECT_JUST_REGISTERS_LOADED({X86_REG_FPSW});
+	EXPECT_NO_REGISTERS_STORED();
+	EXPECT_NO_MEMORY_LOADED();
+	EXPECT_JUST_MEMORY_STORED({
+									  {0x1234, 0xFF_dw},
+							  });
+}
+
+// DF E0	FNSTSW AX	Store FPU status word in AX register without checking for pending unmasked floating-point exceptions.
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FNSTSW_AX)
+{
+	SKIP_MODE_16;
+
+	setRegisters({
+						 {X86_REG_FPSW, 0xFF},
+				 });
+
+	emulate("fnstsw AX");
+
+	EXPECT_JUST_REGISTERS_LOADED({X86_REG_FPSW, X86_REG_AX});
+	EXPECT_JUST_REGISTERS_STORED({
+										 {X86_REG_AX, 0xFF},
+								 });
+	EXPECT_NO_MEMORY_LOADED_STORED();
 }
 
 //
