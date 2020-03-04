@@ -103,24 +103,15 @@ TEST_F(X87FpuAnalysisTests, x86_16bit_cdecl_call_of_analyzed_function_success)
 	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
 		define void @foo() {
 		bb:
-			; ...
 			%0 = load i3, i3* @fpu_stat_TOP
-			call void @__frontend_reg_store.fpu_tag(i3 %0, i2 0)
-			call void @__frontend_reg_store.fpr(i3 %0, x86_fp80 0xK3FFF8000000000000000)
-			;; push st(1)
 			%1 = sub i3 %0, 1
-			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
-			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
 			store i3 %1, i3* @fpu_stat_TOP
-			; ...
-			;; pop st(1)
 			%2 = load i3, i3* @fpu_stat_TOP
+			call void @__frontend_reg_store.fpu_tag(i3 %2, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %2, x86_fp80 0xK3FFF8000000000000000)
 			call void @__frontend_reg_store.fpu_tag(i3 %2, i2 -1)
 			%3 = add i3 %2, 1
-			%4 = call x86_fp80 @__frontend_reg_load.fpr(i3 %3)
-			call void @__frontend_reg_store.fpu_tag(i3 %3, i2 -1)
 			store i3 %3, i3* @fpu_stat_TOP
-			; ...
 			ret void
 		}
 		define void @boo() {
@@ -138,20 +129,16 @@ TEST_F(X87FpuAnalysisTests, x86_16bit_cdecl_call_of_analyzed_function_success)
 	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
 		define void @foo() {
 		bb:
-			%0 = load i3, i3* @fpu_stat_TOP
-			store i2 0, i2* @fpu_tag_0
-			store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
-			%1 = sub i3 %0, 1
-			store i2 0, i2* @fpu_tag_1
-			store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st1
-			store i3 %1, i3* @fpu_stat_TOP
-			%2 = load i3, i3* @fpu_stat_TOP
-			store i2 -1, i2* @fpu_tag_1
-			%3 = add i3 %2, 1
-			%4 = load x86_fp80, x86_fp80* @st0
-			store i2 -1, i2* @fpu_tag_0
-			store i3 %3, i3* @fpu_stat_TOP
-			ret void
+		  %0 = load i3, i3* @fpu_stat_TOP
+		  %1 = sub i3 %0, 1
+		  store i3 %1, i3* @fpu_stat_TOP
+		  %2 = load i3, i3* @fpu_stat_TOP
+		  store i2 0, i2* @fpu_tag_7
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st7
+		  store i2 -1, i2* @fpu_tag_7
+		  %3 = add i3 %2, 1
+		  store i3 %3, i3* @fpu_stat_TOP
+		  ret void
 		}
 		define void @boo() {
 		bb:
@@ -179,16 +166,15 @@ TEST_F(X87FpuAnalysisTests, x86_16bit_cdecl_call_of_not_analyzed_function_succes
 			call void @__frontend_reg_store.fpu_tag(i3 %0, i2 0)
 			call void @__frontend_reg_store.fpr(i3 %0, x86_fp80 0xK3FFF8000000000000000)
 			%1 = sub i3 %0, 1
-			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
-			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
 			store i3 %1, i3* @fpu_stat_TOP
-			; ...
 			%2 = load i3, i3* @fpu_stat_TOP
+			call void @__frontend_reg_store.fpu_tag(i3 %2, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %2, x86_fp80 0xK3FFF8000000000000000)
 			%3 = call x86_fp80 @__frontend_reg_load.fpr(i3 %2)
 			call void @__frontend_reg_store.fpu_tag(i3 %2, i2 -1)
 			%4 = add i3 %2, 1
-			call void @__frontend_reg_store.fpu_tag(i3 %4, i2 -1)
 			store i3 %4, i3* @fpu_stat_TOP
+			call void @__frontend_reg_store.fpu_tag(i3 %4, i2 -1)
 			; ...
 			ret void
 		})");
@@ -208,15 +194,15 @@ TEST_F(X87FpuAnalysisTests, x86_16bit_cdecl_call_of_not_analyzed_function_succes
 		  store i2 0, i2* @fpu_tag_0
 		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
 		  %1 = sub i3 %0, 1
-		  store i2 0, i2* @fpu_tag_1
-		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st1
 		  store i3 %1, i3* @fpu_stat_TOP
 		  %2 = load i3, i3* @fpu_stat_TOP
-		  %3 = load x86_fp80, x86_fp80* @st1
-		  store i2 -1, i2* @fpu_tag_1
+		  store i2 0, i2* @fpu_tag_7
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st7
+		  %3 = load x86_fp80, x86_fp80* @st7
+		  store i2 -1, i2* @fpu_tag_7
 		  %4 = add i3 %2, 1
-		  store i2 -1, i2* @fpu_tag_0
 		  store i3 %4, i3* @fpu_stat_TOP
+		  store i2 -1, i2* @fpu_tag_0
 		  ret void
 		})";
 	checkModuleAgainstExpectedIr(exp);
@@ -229,9 +215,7 @@ TEST_F(X87FpuAnalysisTests, x86_16bit_cdecl_analyze_fail)
 		define void @foo() {
 		bb:
 			%0 = load i3, i3* @fpu_stat_TOP
-			call void @__frontend_reg_store.fpu_tag(i3 %0, i2 0)
-			call void @__frontend_reg_store.fpr(i3 %0, x86_fp80 0xK3FFF8000000000000000)
-			%1 = sub i3 %0, 1
+			%1 = sub i3 %0, 3
 			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
 			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
 			store i3 %1, i3* @fpu_stat_TOP
@@ -258,12 +242,18 @@ TEST_F(X87FpuAnalysisTests, x86_16bit_pascal_call_of_analyzed_function_success)
 			%1 = sub i3 %0, 1
 			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
 			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
-			%2 = call x86_fp80 @__frontend_reg_load.fpr(i3 %1)
-			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 -1)
-			%3 = add i3 %1, 1
+			%2 = sub i3 %0, 2
+			call void @__frontend_reg_store.fpu_tag(i3 %2, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %2, x86_fp80 0xK3FFF8000000000000000)
+			store i3 %2, i3* @fpu_stat_TOP
+			%3 = load i3, i3* @fpu_stat_TOP
 			%4 = call x86_fp80 @__frontend_reg_load.fpr(i3 %3)
 			call void @__frontend_reg_store.fpu_tag(i3 %3, i2 -1)
-			store i3 %3, i3* @fpu_stat_TOP
+			%5 = add i3 %3, 1
+			%6 = add i3 %3, 2
+			call void @__frontend_reg_store.fpu_tag(i3 %5, i2 -1)
+			call void @__frontend_reg_store.fpu_tag(i3 %6, i2 -1)
+			store i3 %6, i3* @fpu_stat_TOP
 			ret void
 		}
 		define void @boo() {
@@ -279,18 +269,24 @@ TEST_F(X87FpuAnalysisTests, x86_16bit_pascal_call_of_analyzed_function_success)
 		define void @foo() {
 		bb:
 		  %0 = load i3, i3* @fpu_stat_TOP
-			store i2 0, i2* @fpu_tag_0
-			store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
-			%1 = sub i3 %0, 1
-			store i2 0, i2* @fpu_tag_1
-			store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st1
-			%2 = load x86_fp80, x86_fp80* @st1
-			store i2 -1, i2* @fpu_tag_1
-			%3 = add i3 %1, 1
-			%4 = load x86_fp80, x86_fp80* @st0
-			store i2 -1, i2* @fpu_tag_0
-			store i3 %3, i3* @fpu_stat_TOP
-			ret void
+		  store i2 0, i2* @fpu_tag_0
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
+		  %1 = sub i3 %0, 1
+		  store i2 0, i2* @fpu_tag_7
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st7
+		  %2 = sub i3 %0, 2
+		  store i2 0, i2* @fpu_tag_6
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st6
+		  store i3 %2, i3* @fpu_stat_TOP
+		  %3 = load i3, i3* @fpu_stat_TOP
+		  %4 = load x86_fp80, x86_fp80* @st6
+		  store i2 -1, i2* @fpu_tag_6
+		  %5 = add i3 %3, 1
+		  %6 = add i3 %3, 2
+		  store i2 -1, i2* @fpu_tag_7
+		  store i2 -1, i2* @fpu_tag_0
+		  store i3 %6, i3* @fpu_stat_TOP
+		  ret void
 		}
 		define void @boo() {
 		bb:
@@ -315,14 +311,20 @@ TEST_F(X87FpuAnalysisTests, x86_16bit_pascal_call_of_not_analyzed_function_succe
 			call void @__frontend_reg_store.fpu_tag(i3 %0, i2 0)
 			call void @__frontend_reg_store.fpr(i3 %0, x86_fp80 0xK3FFF8000000000000000)
 			%1 = sub i3 %0, 1
+			%2 = sub i3 %1, 1
 			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
 			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
-			%2 = call x86_fp80 @__frontend_reg_load.fpr(i3 %1)
-			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 -1)
-			%3 = add i3 %1, 1
+			call void @__frontend_reg_store.fpu_tag(i3 %2, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %2, x86_fp80 0xK3FFF8000000000000000)
+			store i3 %2, i3* @fpu_stat_TOP
+			%3 = load i3, i3* @fpu_stat_TOP
 			%4 = call x86_fp80 @__frontend_reg_load.fpr(i3 %3)
 			call void @__frontend_reg_store.fpu_tag(i3 %3, i2 -1)
-			store i3 %3, i3* @fpu_stat_TOP
+			%5 = add i3 %3, 1
+			%6 = add i3 %5, 1
+			call void @__frontend_reg_store.fpu_tag(i3 %5, i2 -1)
+			call void @__frontend_reg_store.fpu_tag(i3 %6, i2 -1)
+			store i3 %6, i3* @fpu_stat_TOP
 			ret void
 		})");
 
@@ -337,19 +339,25 @@ TEST_F(X87FpuAnalysisTests, x86_16bit_pascal_call_of_not_analyzed_function_succe
 		}
 		define void @foo() {
 		bb:
-			%0 = load i3, i3* @fpu_stat_TOP
-			store i2 0, i2* @fpu_tag_0
-			store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
-			%1 = sub i3 %0, 1
-			store i2 0, i2* @fpu_tag_1
-			store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st1
-			%2 = load x86_fp80, x86_fp80* @st1
-			store i2 -1, i2* @fpu_tag_1
-			%3 = add i3 %1, 1
-			%4 = load x86_fp80, x86_fp80* @st0
-			store i2 -1, i2* @fpu_tag_0
-			store i3 %3, i3* @fpu_stat_TOP
-			ret void
+		  %0 = load i3, i3* @fpu_stat_TOP
+		  store i2 0, i2* @fpu_tag_0
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
+		  %1 = sub i3 %0, 1
+		  %2 = sub i3 %1, 1
+		  store i2 0, i2* @fpu_tag_7
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st7
+		  store i2 0, i2* @fpu_tag_6
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st6
+		  store i3 %2, i3* @fpu_stat_TOP
+		  %3 = load i3, i3* @fpu_stat_TOP
+		  %4 = load x86_fp80, x86_fp80* @st6
+		  store i2 -1, i2* @fpu_tag_6
+		  %5 = add i3 %3, 1
+		  %6 = add i3 %5, 1
+		  store i2 -1, i2* @fpu_tag_7
+		  store i2 -1, i2* @fpu_tag_0
+		  store i3 %6, i3* @fpu_stat_TOP
+		  ret void
 		})";
 	checkModuleAgainstExpectedIr(exp);
 	EXPECT_TRUE(b);
@@ -361,12 +369,11 @@ TEST_F(X87FpuAnalysisTests, x86_16bit_pascal_analyze_fail)
 		define void @foo() {
 		bb:
 			%0 = load i3, i3* @fpu_stat_TOP
-			call void @__frontend_reg_store.fpu_tag(i3 %0, i2 0)
-			call void @__frontend_reg_store.fpr(i3 %0, x86_fp80 0xK3FFF8000000000000000)
-			%1 = sub i3 %0, 1
-			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
-			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
+			%1 = add i3 %0, 2
 			store i3 %1, i3* @fpu_stat_TOP
+			%2 = load i3, i3* @fpu_stat_TOP
+			call void @__frontend_reg_store.fpu_tag(i3 %2, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %2, x86_fp80 0xK3FFF8000000000000000)
 			ret void
 		})");
 
@@ -390,20 +397,27 @@ TEST_F(X87FpuAnalysisTests, x86_16bit_fastcall_call_of_analyzed_function_success
 			call void @__frontend_reg_store.fpu_tag(i3 %0, i2 0)
 			call void @__frontend_reg_store.fpr(i3 %0, x86_fp80 0xK3FFF8000000000000000)
 			%1 = sub i3 %0, 1
-			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
-			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
-			%2 = sub i3 %1, 1
+			store i3 %1, i3* @fpu_stat_TOP
+			%2 = load i3, i3* @fpu_stat_TOP
 			call void @__frontend_reg_store.fpu_tag(i3 %2, i2 0)
 			call void @__frontend_reg_store.fpr(i3 %2, x86_fp80 0xK3FFF8000000000000000)
-			%3 = call x86_fp80 @__frontend_reg_load.fpr(i3 %2)
-			call void @__frontend_reg_store.fpu_tag(i3 %2, i2 -1)
-			%4 = add i3 %2, 1
+			%3 = sub i3 %2, 1
+			store i3 %3, i3* @fpu_stat_TOP
+			%4 = load i3, i3* @fpu_stat_TOP
+			call void @__frontend_reg_store.fpu_tag(i3 %4, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %4, x86_fp80 0xK3FFF8000000000000000)
 			%5 = call x86_fp80 @__frontend_reg_load.fpr(i3 %4)
 			call void @__frontend_reg_store.fpu_tag(i3 %4, i2 -1)
 			%6 = add i3 %4, 1
-			%7 = call x86_fp80 @__frontend_reg_load.fpr(i3 %6)
-			call void @__frontend_reg_store.fpu_tag(i3 %6, i2 -1)
 			store i3 %6, i3* @fpu_stat_TOP
+			%7 = load i3, i3* @fpu_stat_TOP
+			%8 = call x86_fp80 @__frontend_reg_load.fpr(i3 %7)
+			call void @__frontend_reg_store.fpu_tag(i3 %7, i2 -1)
+			%9 = add i3 %7, 1
+			store i3 %9, i3* @fpu_stat_TOP
+			%10 = load i3, i3* @fpu_stat_TOP
+			%11 = call x86_fp80 @__frontend_reg_load.fpr(i3 %10)
+			call void @__frontend_reg_store.fpu_tag(i3 %10, i2 -1)
 			ret void
 		}
 		define void @boo() {
@@ -422,20 +436,27 @@ TEST_F(X87FpuAnalysisTests, x86_16bit_fastcall_call_of_analyzed_function_success
 		  store i2 0, i2* @fpu_tag_0
 		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
 		  %1 = sub i3 %0, 1
-		  store i2 0, i2* @fpu_tag_1
-		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st1
-		  %2 = sub i3 %1, 1
-		  store i2 0, i2* @fpu_tag_2
-		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st2
-		  %3 = load x86_fp80, x86_fp80* @st2
-		  store i2 -1, i2* @fpu_tag_2
-		  %4 = add i3 %2, 1
-		  %5 = load x86_fp80, x86_fp80* @st1
-		  store i2 -1, i2* @fpu_tag_1
+		  store i3 %1, i3* @fpu_stat_TOP
+		  %2 = load i3, i3* @fpu_stat_TOP
+		  store i2 0, i2* @fpu_tag_7
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st7
+		  %3 = sub i3 %2, 1
+		  store i3 %3, i3* @fpu_stat_TOP
+		  %4 = load i3, i3* @fpu_stat_TOP
+		  store i2 0, i2* @fpu_tag_6
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st6
+		  %5 = load x86_fp80, x86_fp80* @st6
+		  store i2 -1, i2* @fpu_tag_6
 		  %6 = add i3 %4, 1
-		  %7 = load x86_fp80, x86_fp80* @st0
-		  store i2 -1, i2* @fpu_tag_0
 		  store i3 %6, i3* @fpu_stat_TOP
+		  %7 = load i3, i3* @fpu_stat_TOP
+		  %8 = load x86_fp80, x86_fp80* @st7
+		  store i2 -1, i2* @fpu_tag_7
+		  %9 = add i3 %7, 1
+		  store i3 %9, i3* @fpu_stat_TOP
+		  %10 = load i3, i3* @fpu_stat_TOP
+		  %11 = load x86_fp80, x86_fp80* @st0
+		  store i2 -1, i2* @fpu_tag_0
 		  ret void
 		}
 		define void @boo() {
@@ -460,13 +481,26 @@ TEST_F(X87FpuAnalysisTests, x86_16bit_fastcall_call_of_not_analyzed_function_suc
 			%0 = load i3, i3* @fpu_stat_TOP
 			call void @__frontend_reg_store.fpu_tag(i3 %0, i2 0)
 			call void @__frontend_reg_store.fpr(i3 %0, x86_fp80 0xK3FFF8000000000000000)
-			%1 = sub i3 %0, 1
-			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
-			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
-			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 -1)
-			%2 = add i3 %1, 1
-			call void @__frontend_reg_store.fpu_tag(i3 %2, i2 -1)
-			store i3 %2, i3* @fpu_stat_TOP
+			%1 = sub i3 %0, 3
+			%2 = sub i3 %1, 3
+			call void @__frontend_reg_store.fpu_tag(i3 %2, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %2, x86_fp80 0xK3FFF8000000000000000)
+			%3 = sub i3 %2, 2
+			call void @__frontend_reg_store.fpu_tag(i3 %3, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %3, x86_fp80 0xK3FFF8000000000000000)
+			%4 = sub i3 %3, 2
+			call void @__frontend_reg_store.fpu_tag(i3 %4, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %4, x86_fp80 0xK3FFF8000000000000000)
+			store i3 %4, i3* @fpu_stat_TOP
+			%5 = load i3, i3* @fpu_stat_TOP
+			%6 = call x86_fp80 @__frontend_reg_load.fpr(i3 %5)
+			%7 = add i3 %5, 3
+			%8 = add i3 %7, 3; can not add 10 cause of 3bit overflow
+			%9 = call x86_fp80 @__frontend_reg_load.fpr(i3 %8)
+			%10 = add i3 %8, 2
+			%11 = add i3 %10, 2
+			%12 = call x86_fp80 @__frontend_reg_load.fpr(i3 %11)
+			store i3 %11, i3* @fpu_stat_TOP
 			ret void
 		})");
 
@@ -481,17 +515,30 @@ TEST_F(X87FpuAnalysisTests, x86_16bit_fastcall_call_of_not_analyzed_function_suc
 		}
 		define void @foo() {
 		bb:
-			%0 = load i3, i3* @fpu_stat_TOP
-			store i2 0, i2* @fpu_tag_0
-			store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
-			%1 = sub i3 %0, 1
-			store i2 0, i2* @fpu_tag_1
-			store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st1
-			store i2 -1, i2* @fpu_tag_1
-			%2 = add i3 %1, 1
-			store i2 -1, i2* @fpu_tag_0
-			store i3 %2, i3* @fpu_stat_TOP
-			ret void
+		  %0 = load i3, i3* @fpu_stat_TOP
+		  store i2 0, i2* @fpu_tag_0
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
+		  %1 = sub i3 %0, 3
+		  %2 = sub i3 %1, 3
+		  store i2 0, i2* @fpu_tag_2
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st2
+		  %3 = sub i3 %2, 2
+		  store i2 0, i2* @fpu_tag_0
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
+		  %4 = sub i3 %3, 2
+		  store i2 0, i2* @fpu_tag_6
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st6
+		  store i3 %4, i3* @fpu_stat_TOP
+		  %5 = load i3, i3* @fpu_stat_TOP
+		  %6 = load x86_fp80, x86_fp80* @st6
+		  %7 = add i3 %5, 3
+		  %8 = add i3 %7, 3
+		  %9 = load x86_fp80, x86_fp80* @st4
+		  %10 = add i3 %8, 2
+		  %11 = add i3 %10, 2
+		  %12 = load x86_fp80, x86_fp80* @st0
+		  store i3 %11, i3* @fpu_stat_TOP
+		  ret void
 		})";
 	checkModuleAgainstExpectedIr(exp);
 	EXPECT_TRUE(b);
@@ -506,7 +553,8 @@ TEST_F(X87FpuAnalysisTests, x86_16bit_fastcall_analyze_fail)
 			%1 = sub i3 %0, 1
 			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
 			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
-			store i3 %1, i3* @fpu_stat_TOP
+			%2 = sub i3 %1, 3
+			store i3 %2, i3* @fpu_stat_TOP
 			ret void
 		})");
 
@@ -514,39 +562,6 @@ TEST_F(X87FpuAnalysisTests, x86_16bit_fastcall_analyze_fail)
 	bool b = pass.runOnModuleCustom(*module, &config, abi);
 	EXPECT_FALSE(b);
 } // x86_16bit_fastcall_analyze_fail
-
-//
-// Architecture: 		16bit
-// Calling convention: 	watcom
-// Operation:			Call function returning floating-point value.
-//
-TEST_F(X87FpuAnalysisTests, x86_16bit_watcom)
-{
-	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
-		define void @foo() {
-		bb:
-			%0 = load i3, i3* @fpu_stat_TOP
-			call void @__frontend_reg_store.fpu_tag(i3 %0, i2 0)
-			call void @__frontend_reg_store.fpr(i3 %0, x86_fp80 0xK3FFF8000000000000000)
-			%1 = sub i3 %0, 1
-			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
-			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
-			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 -1)
-			%2 = add i3 %1, 1
-			call void @__frontend_reg_store.fpu_tag(i3 %2, i2 -1)
-			store i3 %2, i3* @fpu_stat_TOP
-			ret void
-		}
-		define void @boo() {
-		bb:
-			call void @foo()
-			ret void
-		})");
-
-	setX86Environment("16", "watcom");
-	bool b = pass.runOnModuleCustom(*module, &config, abi);
-	EXPECT_FALSE(b);
-} // x86_16bit_watcom
 
 //
 // Architecture: 		32bit
@@ -563,9 +578,10 @@ TEST_F(X87FpuAnalysisTests, x86_32bit_cdecl_call_of_analyzed_function_success)
 			call void @__frontend_reg_store.fpu_tag(i3 %0, i2 0)
 			call void @__frontend_reg_store.fpr(i3 %0, x86_fp80 0xK3FFF8000000000000000)
 			%1 = sub i3 %0, 1
-			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
-			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
 			store i3 %1, i3* @fpu_stat_TOP
+			%2 = load i3, i3* @fpu_stat_TOP
+			call void @__frontend_reg_store.fpu_tag(i3 %2, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %2, x86_fp80 0xK3FFF8000000000000000)
 			ret void
 		}
 		define void @boo() {
@@ -575,9 +591,10 @@ TEST_F(X87FpuAnalysisTests, x86_32bit_cdecl_call_of_analyzed_function_success)
 			%1 = call x86_fp80 @__frontend_reg_load.fpr(i3 %0)
 			call void @__frontend_reg_store.fpu_tag(i3 %0, i2 -1)
 			%2 = add i3 %0, 1
-			%3 = call x86_fp80 @__frontend_reg_load.fpr(i3 %2)
-			call void @__frontend_reg_store.fpu_tag(i3 %2, i2 -1)
 			store i3 %2, i3* @fpu_stat_TOP
+			%3 = load i3, i3* @fpu_stat_TOP
+			%4 = call x86_fp80 @__frontend_reg_load.fpr(i3 %3)
+			call void @__frontend_reg_store.fpu_tag(i3 %3, i2 -1)
 			ret void
 		})");
 
@@ -591,21 +608,23 @@ TEST_F(X87FpuAnalysisTests, x86_32bit_cdecl_call_of_analyzed_function_success)
 		  store i2 0, i2* @fpu_tag_0
 		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
 		  %1 = sub i3 %0, 1
-		  store i2 0, i2* @fpu_tag_1
-		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st1
 		  store i3 %1, i3* @fpu_stat_TOP
+		  %2 = load i3, i3* @fpu_stat_TOP
+		  store i2 0, i2* @fpu_tag_7
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st7
 		  ret void
 		}
 		define void @boo() {
 		bb:
 		  call void @foo()
 		  %0 = load i3, i3* @fpu_stat_TOP
-		  %1 = load x86_fp80, x86_fp80* @st1
-		  store i2 -1, i2* @fpu_tag_1
+		  %1 = load x86_fp80, x86_fp80* @st7
+		  store i2 -1, i2* @fpu_tag_7
 		  %2 = add i3 %0, 1
-		  %3 = load x86_fp80, x86_fp80* @st0
-		  store i2 -1, i2* @fpu_tag_0
 		  store i3 %2, i3* @fpu_stat_TOP
+		  %3 = load i3, i3* @fpu_stat_TOP
+		  %4 = load x86_fp80, x86_fp80* @st0
+		  store i2 -1, i2* @fpu_tag_0
 		  ret void
 		})";
 	checkModuleAgainstExpectedIr(exp);
@@ -622,9 +641,10 @@ TEST_F(X87FpuAnalysisTests, x86_32bit_cdecl_call_of_not_analyzed_function_succes
 			%1 = call x86_fp80 @__frontend_reg_load.fpr(i3 %0)
 			call void @__frontend_reg_store.fpu_tag(i3 %0, i2 -1)
 			%2 = add i3 %0, 1
-			%3 = call x86_fp80 @__frontend_reg_load.fpr(i3 %2)
-			call void @__frontend_reg_store.fpu_tag(i3 %2, i2 -1)
 			store i3 %2, i3* @fpu_stat_TOP
+			%3 = load i3, i3* @fpu_stat_TOP
+			%4 = call x86_fp80 @__frontend_reg_load.fpr(i3 %3)
+			call void @__frontend_reg_store.fpu_tag(i3 %3, i2 -1)
 			ret void
 		}
 		define void @foo() {
@@ -633,9 +653,10 @@ TEST_F(X87FpuAnalysisTests, x86_32bit_cdecl_call_of_not_analyzed_function_succes
 			call void @__frontend_reg_store.fpu_tag(i3 %0, i2 0)
 			call void @__frontend_reg_store.fpr(i3 %0, x86_fp80 0xK3FFF8000000000000000)
 			%1 = sub i3 %0, 1
-			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
-			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
 			store i3 %1, i3* @fpu_stat_TOP
+			%2 = load i3, i3* @fpu_stat_TOP
+			call void @__frontend_reg_store.fpu_tag(i3 %2, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %2, x86_fp80 0xK3FFF8000000000000000)
 			ret void
 		})");
 
@@ -647,12 +668,13 @@ TEST_F(X87FpuAnalysisTests, x86_32bit_cdecl_call_of_not_analyzed_function_succes
 		bb:
 		  call void @foo()
 		  %0 = load i3, i3* @fpu_stat_TOP
-		  %1 = load x86_fp80, x86_fp80* @st1
-		  store i2 -1, i2* @fpu_tag_1
+		  %1 = load x86_fp80, x86_fp80* @st7
+		  store i2 -1, i2* @fpu_tag_7
 		  %2 = add i3 %0, 1
-		  %3 = load x86_fp80, x86_fp80* @st0
-		  store i2 -1, i2* @fpu_tag_0
 		  store i3 %2, i3* @fpu_stat_TOP
+		  %3 = load i3, i3* @fpu_stat_TOP
+		  %4 = load x86_fp80, x86_fp80* @st0
+		  store i2 -1, i2* @fpu_tag_0
 		  ret void
 		}
 		define void @foo() {
@@ -661,9 +683,10 @@ TEST_F(X87FpuAnalysisTests, x86_32bit_cdecl_call_of_not_analyzed_function_succes
 		  store i2 0, i2* @fpu_tag_0
 		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
 		  %1 = sub i3 %0, 1
-		  store i2 0, i2* @fpu_tag_1
-		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st1
 		  store i3 %1, i3* @fpu_stat_TOP
+		  %2 = load i3, i3* @fpu_stat_TOP
+		  store i2 0, i2* @fpu_tag_7
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st7
 		  ret void
 		})";
 	checkModuleAgainstExpectedIr(exp);
@@ -686,17 +709,22 @@ TEST_F(X87FpuAnalysisTests, x86_32bit_stdcall_call_of_analyzed_function_success)
 			call void @__frontend_reg_store.fpu_tag(i3 %0, i2 0)
 			call void @__frontend_reg_store.fpr(i3 %0, x86_fp80 0xK3FFF8000000000000000)
 			%1 = sub i3 %0, 1
-			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
-			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
-			%2 = sub i3 %1, 1
+			store i3 %1, i3* @fpu_stat_TOP
+			%2 = load i3, i3* @fpu_stat_TOP
 			call void @__frontend_reg_store.fpu_tag(i3 %2, i2 0)
 			call void @__frontend_reg_store.fpr(i3 %2, x86_fp80 0xK3FFF8000000000000000)
-			%3 = call x86_fp80 @__frontend_reg_load.fpr(i3 %0)
-			call void @__frontend_reg_store.fpu_tag(i3 %2, i2 -1)
-			%4 = add i3 %2, 1
+			%3 = sub i3 %2, 1
+			store i3 %3, i3* @fpu_stat_TOP
+			%4 = load i3, i3* @fpu_stat_TOP
+			call void @__frontend_reg_store.fpu_tag(i3 %4, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %4, x86_fp80 0xK3FFF8000000000000000)
 			%5 = call x86_fp80 @__frontend_reg_load.fpr(i3 %4)
 			call void @__frontend_reg_store.fpu_tag(i3 %4, i2 -1)
-			store i3 %2, i3* @fpu_stat_TOP
+			%6 = add i3 %4, 1
+			store i3 %6, i3* @fpu_stat_TOP
+			%7 = load i3, i3* @fpu_stat_TOP
+			%8 = call x86_fp80 @__frontend_reg_load.fpr(i3 %7)
+			call void @__frontend_reg_store.fpu_tag(i3 %7, i2 -1)
 			ret void
 		}
 		define void @boo() {
@@ -706,9 +734,10 @@ TEST_F(X87FpuAnalysisTests, x86_32bit_stdcall_call_of_analyzed_function_success)
 			%1 = call x86_fp80 @__frontend_reg_load.fpr(i3 %0)
 			call void @__frontend_reg_store.fpu_tag(i3 %0, i2 -1)
 			%2 = add i3 %0, 1
-			%3 = call x86_fp80 @__frontend_reg_load.fpr(i3 %2)
-			call void @__frontend_reg_store.fpu_tag(i3 %2, i2 -1)
 			store i3 %2, i3* @fpu_stat_TOP
+			%3 = load i3, i3* @fpu_stat_TOP
+			%4 = call x86_fp80 @__frontend_reg_load.fpr(i3 %3)
+			call void @__frontend_reg_store.fpu_tag(i3 %3, i2 -1)
 			ret void
 		})");
 
@@ -722,29 +751,35 @@ TEST_F(X87FpuAnalysisTests, x86_32bit_stdcall_call_of_analyzed_function_success)
 		  store i2 0, i2* @fpu_tag_0
 		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
 		  %1 = sub i3 %0, 1
-		  store i2 0, i2* @fpu_tag_1
-		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st1
-		  %2 = sub i3 %1, 1
-		  store i2 0, i2* @fpu_tag_2
-		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st2
-		  %3 = load x86_fp80, x86_fp80* @st2
-		  store i2 -1, i2* @fpu_tag_2
-		  %4 = add i3 %2, 1
-		  %5 = load x86_fp80, x86_fp80* @st1
-		  store i2 -1, i2* @fpu_tag_1
-		  store i3 %2, i3* @fpu_stat_TOP
+		  store i3 %1, i3* @fpu_stat_TOP
+		  %2 = load i3, i3* @fpu_stat_TOP
+		  store i2 0, i2* @fpu_tag_7
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st7
+		  %3 = sub i3 %2, 1
+		  store i3 %3, i3* @fpu_stat_TOP
+		  %4 = load i3, i3* @fpu_stat_TOP
+		  store i2 0, i2* @fpu_tag_6
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st6
+		  %5 = load x86_fp80, x86_fp80* @st6
+		  store i2 -1, i2* @fpu_tag_6
+		  %6 = add i3 %4, 1
+		  store i3 %6, i3* @fpu_stat_TOP
+		  %7 = load i3, i3* @fpu_stat_TOP
+		  %8 = load x86_fp80, x86_fp80* @st7
+		  store i2 -1, i2* @fpu_tag_7
 		  ret void
 		}
 		define void @boo() {
 		bb:
 		  call void @foo()
 		  %0 = load i3, i3* @fpu_stat_TOP
-		  %1 = load x86_fp80, x86_fp80* @st1
-		  store i2 -1, i2* @fpu_tag_1
+		  %1 = load x86_fp80, x86_fp80* @st7
+		  store i2 -1, i2* @fpu_tag_7
 		  %2 = add i3 %0, 1
-		  %3 = load x86_fp80, x86_fp80* @st0
-		  store i2 -1, i2* @fpu_tag_0
 		  store i3 %2, i3* @fpu_stat_TOP
+		  %3 = load i3, i3* @fpu_stat_TOP
+		  %4 = load x86_fp80, x86_fp80* @st0
+		  store i2 -1, i2* @fpu_tag_0
 		  ret void
 		})";
 	checkModuleAgainstExpectedIr(exp);
@@ -761,9 +796,10 @@ TEST_F(X87FpuAnalysisTests, x86_32bit_stdcall_call_of_not_analyzed_function_succ
 			%1 = call x86_fp80 @__frontend_reg_load.fpr(i3 %0)
 			call void @__frontend_reg_store.fpu_tag(i3 %0, i2 -1)
 			%2 = add i3 %0, 1
-			%3 = call x86_fp80 @__frontend_reg_load.fpr(i3 %2)
-			call void @__frontend_reg_store.fpu_tag(i3 %2, i2 -1)
 			store i3 %2, i3* @fpu_stat_TOP
+			%3 = load i3, i3* @fpu_stat_TOP
+			%4 = call x86_fp80 @__frontend_reg_load.fpr(i3 %3)
+			call void @__frontend_reg_store.fpu_tag(i3 %3, i2 -1)
 			ret void
 		}
 		define void @foo() {
@@ -774,6 +810,9 @@ TEST_F(X87FpuAnalysisTests, x86_32bit_stdcall_call_of_not_analyzed_function_succ
 			%1 = sub i3 %0, 1
 			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
 			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
+			%2 = sub i3 %0, 2
+			call void @__frontend_reg_store.fpu_tag(i3 %2, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %2, x86_fp80 0xK3FFF8000000000000000)
 			store i3 %1, i3* @fpu_stat_TOP
 			ret void
 		})");
@@ -786,12 +825,13 @@ TEST_F(X87FpuAnalysisTests, x86_32bit_stdcall_call_of_not_analyzed_function_succ
 		bb:
 		  call void @foo()
 		  %0 = load i3, i3* @fpu_stat_TOP
-		  %1 = load x86_fp80, x86_fp80* @st1
-		  store i2 -1, i2* @fpu_tag_1
+		  %1 = load x86_fp80, x86_fp80* @st7
+		  store i2 -1, i2* @fpu_tag_7
 		  %2 = add i3 %0, 1
-		  %3 = load x86_fp80, x86_fp80* @st0
-		  store i2 -1, i2* @fpu_tag_0
 		  store i3 %2, i3* @fpu_stat_TOP
+		  %3 = load i3, i3* @fpu_stat_TOP
+		  %4 = load x86_fp80, x86_fp80* @st0
+		  store i2 -1, i2* @fpu_tag_0
 		  ret void
 		}
 		define void @foo() {
@@ -800,8 +840,11 @@ TEST_F(X87FpuAnalysisTests, x86_32bit_stdcall_call_of_not_analyzed_function_succ
 		  store i2 0, i2* @fpu_tag_0
 		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
 		  %1 = sub i3 %0, 1
-		  store i2 0, i2* @fpu_tag_1
-		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st1
+		  store i2 0, i2* @fpu_tag_7
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st7
+		  %2 = sub i3 %0, 2
+		  store i2 0, i2* @fpu_tag_6
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st6
 		  store i3 %1, i3* @fpu_stat_TOP
 		  ret void
 		})";
@@ -826,19 +869,17 @@ TEST_F(X87FpuAnalysisTests, x86_32bit_pascal_call_of_analyzed_function_success)
 			%1 = sub i3 %0, 1
 			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
 			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
-			store i3 %1, i3* @fpu_stat_TOP
 			ret void
 		}
 		define void @boo() {
 		bb:
 			call void @foo()
 			%0 = load i3, i3* @fpu_stat_TOP
-			%1 = call x86_fp80 @__frontend_reg_load.fpr(i3 %0)
-			call void @__frontend_reg_store.fpu_tag(i3 %0, i2 -1)
-			%2 = add i3 %0, 1
-			%3 = call x86_fp80 @__frontend_reg_load.fpr(i3 %0)
-			call void @__frontend_reg_store.fpu_tag(i3 %0, i2 -1)
-			store i3 %2, i3* @fpu_stat_TOP
+			call void @__frontend_reg_store.fpu_tag(i3 %0, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %0, x86_fp80 0xK3FFF8000000000000000)
+			%1 = sub i3 %0, 1
+			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
 			ret void
 		})");
 
@@ -852,21 +893,19 @@ TEST_F(X87FpuAnalysisTests, x86_32bit_pascal_call_of_analyzed_function_success)
 		  store i2 0, i2* @fpu_tag_0
 		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
 		  %1 = sub i3 %0, 1
-		  store i2 0, i2* @fpu_tag_1
-		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st1
-		  store i3 %1, i3* @fpu_stat_TOP
+		  store i2 0, i2* @fpu_tag_7
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st7
 		  ret void
 		}
 		define void @boo() {
 		bb:
 		  call void @foo()
 		  %0 = load i3, i3* @fpu_stat_TOP
-		  %1 = load x86_fp80, x86_fp80* @st1
-		  store i2 -1, i2* @fpu_tag_1
-		  %2 = add i3 %0, 1
-		  %3 = load x86_fp80, x86_fp80* @st0
-		  store i2 -1, i2* @fpu_tag_0
-		  store i3 %2, i3* @fpu_stat_TOP
+		  store i2 0, i2* @fpu_tag_0
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
+		  %1 = sub i3 %0, 1
+		  store i2 0, i2* @fpu_tag_7
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st7
 		  ret void
 		})";
 	checkModuleAgainstExpectedIr(exp);
@@ -894,8 +933,18 @@ TEST_F(X87FpuAnalysisTests, x86_32bit_pascal_call_of_not_analyzed_function_succe
 			call void @__frontend_reg_store.fpu_tag(i3 %0, i2 0)
 			call void @__frontend_reg_store.fpr(i3 %0, x86_fp80 0xK3FFF8000000000000000)
 			%1 = sub i3 %0, 1
-			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
-			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
+			br i1 1, label %A, label %B
+		A:
+			%2 = sub i3 %1, 1
+			call void @__frontend_reg_store.fpu_tag(i3 %2, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %2, x86_fp80 0xK3FFF8000000000000000)
+			br label %C
+		B:
+			%3 = sub i3 %1, 2
+			call void @__frontend_reg_store.fpu_tag(i3 %3, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %3, x86_fp80 0xK3FFF8000000000000000)
+			br label %C
+		C:
 			store i3 %1, i3* @fpu_stat_TOP
 			ret void
 		})");
@@ -908,8 +957,8 @@ TEST_F(X87FpuAnalysisTests, x86_32bit_pascal_call_of_not_analyzed_function_succe
 		bb:
 		  call void @foo()
 		  %0 = load i3, i3* @fpu_stat_TOP
-		  %1 = load x86_fp80, x86_fp80* @st1
-		  store i2 -1, i2* @fpu_tag_1
+		  %1 = load x86_fp80, x86_fp80* @st7
+		  store i2 -1, i2* @fpu_tag_7
 		  %2 = add i3 %0, 1
 		  %3 = load x86_fp80, x86_fp80* @st0
 		  store i2 -1, i2* @fpu_tag_0
@@ -922,8 +971,18 @@ TEST_F(X87FpuAnalysisTests, x86_32bit_pascal_call_of_not_analyzed_function_succe
 		  store i2 0, i2* @fpu_tag_0
 		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
 		  %1 = sub i3 %0, 1
-		  store i2 0, i2* @fpu_tag_1
-		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st1
+		  br i1 true, label %A, label %B
+		A:
+		  %2 = sub i3 %1, 1
+		  store i2 0, i2* @fpu_tag_6
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st6
+		  br label %C
+		B:
+		  %3 = sub i3 %1, 2
+		  store i2 0, i2* @fpu_tag_5
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st5
+		  br label %C
+		C:
 		  store i3 %1, i3* @fpu_stat_TOP
 		  ret void
 		})";
@@ -943,12 +1002,23 @@ TEST_F(X87FpuAnalysisTests, x86_32bit_fastcall_call_of_analyzed_function_success
 		define void @foo() {
 		bb:
 			%0 = load i3, i3* @fpu_stat_TOP
-			call void @__frontend_reg_store.fpu_tag(i3 %0, i2 0)
 			call void @__frontend_reg_store.fpr(i3 %0, x86_fp80 0xK3FFF8000000000000000)
-			%1 = sub i3 %0, 1
-			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
-			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
+			%1 = sub i3 %0, 2
 			store i3 %1, i3* @fpu_stat_TOP
+			br i1 1, label %A, label %B
+		A:
+			%2 = load i3, i3* @fpu_stat_TOP
+			%3 = add i3 %2, 1
+			call void @__frontend_reg_store.fpr(i3 %3, x86_fp80 0xK3FFF8000000000000000)
+			store i3 %3, i3* @fpu_stat_TOP
+			br label %C
+		B:
+			%4 = load i3, i3* @fpu_stat_TOP
+			%5 = add i3 %4, 1
+			call void @__frontend_reg_store.fpr(i3 %5, x86_fp80 0xK3FFF8000000000000000)
+			store i3 %5, i3* @fpu_stat_TOP
+			br label %C
+		C:
 			ret void
 		}
 		define void @boo() {
@@ -971,24 +1041,35 @@ TEST_F(X87FpuAnalysisTests, x86_32bit_fastcall_call_of_analyzed_function_success
 		define void @foo() {
 		bb:
 		  %0 = load i3, i3* @fpu_stat_TOP
-		  store i2 0, i2* @fpu_tag_0
 		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
-		  %1 = sub i3 %0, 1
-		  store i2 0, i2* @fpu_tag_1
-		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st1
+		  %1 = sub i3 %0, 2
 		  store i3 %1, i3* @fpu_stat_TOP
+		  br i1 true, label %A, label %B
+		A:
+		  %2 = load i3, i3* @fpu_stat_TOP
+		  %3 = add i3 %2, 1
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st7
+		  store i3 %3, i3* @fpu_stat_TOP
+		  br label %C
+		B:
+		  %4 = load i3, i3* @fpu_stat_TOP
+		  %5 = add i3 %4, 1
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st7
+		  store i3 %5, i3* @fpu_stat_TOP
+		  br label %C
+		C:
 		  ret void
 		}
 		define void @boo() {
 		bb:
 		  call void @foo()
 		  %0 = load i3, i3* @fpu_stat_TOP
-		  %1 = load x86_fp80, x86_fp80* @st1
-		  store i2 -1, i2* @fpu_tag_1
+		  %1 = load x86_fp80, x86_fp80* @st7
+		  store i2 -1, i2* @fpu_tag_7
 		  %2 = add i3 %0, 1
 		  %3 = load x86_fp80, x86_fp80* @st0
 		  store i2 -1, i2* @fpu_tag_0
-		  store i3 %2, i3* @fpu_stat_TOP
+	      store i3 %2, i3* @fpu_stat_TOP
 		  ret void
 		})";
 	checkModuleAgainstExpectedIr(exp);
@@ -1002,23 +1083,33 @@ TEST_F(X87FpuAnalysisTests, x86_32bit_fastcall_call_of_not_analyzed_function_suc
 		bb:
 			call void @foo()
 			%0 = load i3, i3* @fpu_stat_TOP
-			%1 = call x86_fp80 @__frontend_reg_load.fpr(i3 %0)
-			call void @__frontend_reg_store.fpu_tag(i3 %0, i2 -1)
-			%2 = add i3 %0, 1
-			%3 = call x86_fp80 @__frontend_reg_load.fpr(i3 %2)
-			call void @__frontend_reg_store.fpu_tag(i3 %2, i2 -1)
-			store i3 %2, i3* @fpu_stat_TOP
+			call void @__frontend_reg_store.fpr(i3 %0, x86_fp80 0xK3FFF8000000000000000)
 			ret void
 		}
 		define void @foo() {
 		bb:
 			%0 = load i3, i3* @fpu_stat_TOP
-			call void @__frontend_reg_store.fpu_tag(i3 %0, i2 0)
 			call void @__frontend_reg_store.fpr(i3 %0, x86_fp80 0xK3FFF8000000000000000)
-			%1 = sub i3 %0, 1
-			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
-			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
+			%1 = sub i3 %0, 2
 			store i3 %1, i3* @fpu_stat_TOP
+			br i1 1, label %A, label %B
+		A:
+			%2 = load i3, i3* @fpu_stat_TOP
+			%3 = add i3 %2, 1
+			call void @__frontend_reg_store.fpr(i3 %3, x86_fp80 0xK3FFF8000000000000000)
+			store i3 %3, i3* @fpu_stat_TOP
+			br label %C
+		B:
+			%4 = load i3, i3* @fpu_stat_TOP
+			%5 = add i3 %4, 1
+			call void @__frontend_reg_store.fpr(i3 %5, x86_fp80 0xK3FFF8000000000000000)
+			store i3 %5, i3* @fpu_stat_TOP
+			br label %C
+		C:
+			%6 = load i3, i3* @fpu_stat_TOP
+			%7 = add i3 %6, 1
+			call void @__frontend_reg_store.fpr(i3 %7, x86_fp80 0xK3FFF8000000000000000)
+			store i3 %7, i3* @fpu_stat_TOP
 			ret void
 		})");
 
@@ -1030,23 +1121,33 @@ TEST_F(X87FpuAnalysisTests, x86_32bit_fastcall_call_of_not_analyzed_function_suc
 		bb:
 		  call void @foo()
 		  %0 = load i3, i3* @fpu_stat_TOP
-		  %1 = load x86_fp80, x86_fp80* @st1
-		  store i2 -1, i2* @fpu_tag_1
-		  %2 = add i3 %0, 1
-		  %3 = load x86_fp80, x86_fp80* @st0
-		  store i2 -1, i2* @fpu_tag_0
-		  store i3 %2, i3* @fpu_stat_TOP
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
 		  ret void
 		}
 		define void @foo() {
 		bb:
 		  %0 = load i3, i3* @fpu_stat_TOP
-		  store i2 0, i2* @fpu_tag_0
 		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
-		  %1 = sub i3 %0, 1
-		  store i2 0, i2* @fpu_tag_1
-		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st1
+		  %1 = sub i3 %0, 2
 		  store i3 %1, i3* @fpu_stat_TOP
+		  br i1 true, label %A, label %B
+		A:
+		  %2 = load i3, i3* @fpu_stat_TOP
+		  %3 = add i3 %2, 1
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st7
+		  store i3 %3, i3* @fpu_stat_TOP
+		  br label %C
+		B:
+		  %4 = load i3, i3* @fpu_stat_TOP
+		  %5 = add i3 %4, 1
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st7
+		  store i3 %5, i3* @fpu_stat_TOP
+		  br label %C
+		C:
+		  %6 = load i3, i3* @fpu_stat_TOP
+		  %7 = add i3 %6, 1
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
+		  store i3 %7, i3* @fpu_stat_TOP
 		  ret void
 		})";
 	checkModuleAgainstExpectedIr(exp);
@@ -1059,7 +1160,7 @@ TEST_F(X87FpuAnalysisTests, x86_32bit_fastcall_call_of_not_analyzed_function_suc
 // Operation:			Call function with floating-point arguments and return value.
 //
 
-TEST_F(X87FpuAnalysisTests, x86_32bit_thiscall_call_of_analyzed_function_success)
+TEST_F(X87FpuAnalysisTests, x86_32bit_thiscall)
 {
 	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
 		define void @foo() {
@@ -1096,8 +1197,8 @@ TEST_F(X87FpuAnalysisTests, x86_32bit_thiscall_call_of_analyzed_function_success
 		  store i2 0, i2* @fpu_tag_0
 		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
 		  %1 = sub i3 %0, 1
-		  store i2 0, i2* @fpu_tag_1
-		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st1
+		  store i2 0, i2* @fpu_tag_7
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st7
 		  store i3 %1, i3* @fpu_stat_TOP
 		  ret void
 		}
@@ -1105,8 +1206,8 @@ TEST_F(X87FpuAnalysisTests, x86_32bit_thiscall_call_of_analyzed_function_success
 		bb:
 		  call void @foo()
 		  %0 = load i3, i3* @fpu_stat_TOP
-		  %1 = load x86_fp80, x86_fp80* @st1
-		  store i2 -1, i2* @fpu_tag_1
+		  %1 = load x86_fp80, x86_fp80* @st7
+		  store i2 -1, i2* @fpu_tag_7
 		  %2 = add i3 %0, 1
 		  %3 = load x86_fp80, x86_fp80* @st0
 		  store i2 -1, i2* @fpu_tag_0
@@ -1115,65 +1216,7 @@ TEST_F(X87FpuAnalysisTests, x86_32bit_thiscall_call_of_analyzed_function_success
 		})";
 	checkModuleAgainstExpectedIr(exp);
 	EXPECT_TRUE(b);
-} // x86_32bit_thiscall_call_of_analyzed_function_success
-
-TEST_F(X87FpuAnalysisTests, x86_32bit_thiscall_call_of_not_analyzed_function_success)
-{
-	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
-		define void @boo() {
-		bb:
-			call void @foo()
-			%0 = load i3, i3* @fpu_stat_TOP
-			%1 = call x86_fp80 @__frontend_reg_load.fpr(i3 %0)
-			call void @__frontend_reg_store.fpu_tag(i3 %0, i2 -1)
-			%2 = add i3 %0, 1
-			%3 = call x86_fp80 @__frontend_reg_load.fpr(i3 %2)
-			call void @__frontend_reg_store.fpu_tag(i3 %2, i2 -1)
-			store i3 %2, i3* @fpu_stat_TOP
-			ret void
-		}
-		define void @foo() {
-		bb:
-			%0 = load i3, i3* @fpu_stat_TOP
-			call void @__frontend_reg_store.fpu_tag(i3 %0, i2 0)
-			call void @__frontend_reg_store.fpr(i3 %0, x86_fp80 0xK3FFF8000000000000000)
-			%1 = sub i3 %0, 1
-			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
-			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
-			store i3 %1, i3* @fpu_stat_TOP
-			ret void
-		})");
-
-	setX86Environment("32", "thiscall");
-	bool b = pass.runOnModuleCustom(*module, &config, abi);
-
-	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
-		define void @boo() {
-		bb:
-		  call void @foo()
-		  %0 = load i3, i3* @fpu_stat_TOP
-		  %1 = load x86_fp80, x86_fp80* @st1
-		  store i2 -1, i2* @fpu_tag_1
-		  %2 = add i3 %0, 1
-		  %3 = load x86_fp80, x86_fp80* @st0
-		  store i2 -1, i2* @fpu_tag_0
-		  store i3 %2, i3* @fpu_stat_TOP
-		  ret void
-		}
-		define void @foo() {
-		bb:
-		  %0 = load i3, i3* @fpu_stat_TOP
-		  store i2 0, i2* @fpu_tag_0
-		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
-		  %1 = sub i3 %0, 1
-		  store i2 0, i2* @fpu_tag_1
-		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st1
-		  store i3 %1, i3* @fpu_stat_TOP
-		  ret void
-		})";
-	checkModuleAgainstExpectedIr(exp);
-	EXPECT_TRUE(b);
-} // x86_32bit_thiscall_call_of_not_analyzed_function_success
+} // x86_32bit_thiscall
 
 //
 // Architecture: 		32bit
@@ -1189,28 +1232,50 @@ TEST_F(X87FpuAnalysisTests, x86_32bit_watcom)
 			%0 = load i3, i3* @fpu_stat_TOP
 			call void @__frontend_reg_store.fpu_tag(i3 %0, i2 0)
 			call void @__frontend_reg_store.fpr(i3 %0, x86_fp80 0xK3FFF8000000000000000)
-			%1 = sub i3 %0, 1
+			%1 = sub i3 %0, 3
 			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
 			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
-			store i3 %1, i3* @fpu_stat_TOP
 			ret void
 		}
 		define void @boo() {
 		bb:
 			call void @foo()
 			%0 = load i3, i3* @fpu_stat_TOP
-			%1 = call x86_fp80 @__frontend_reg_load.fpr(i3 %0)
-			call void @__frontend_reg_store.fpu_tag(i3 %0, i2 -1)
-			%2 = add i3 %0, 1
-			%3 = call x86_fp80 @__frontend_reg_load.fpr(i3 %2)
-			call void @__frontend_reg_store.fpu_tag(i3 %2, i2 -1)
-			store i3 %2, i3* @fpu_stat_TOP
+			call void @__frontend_reg_store.fpu_tag(i3 %0, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %0, x86_fp80 0xK3FFF8000000000000000)
+			%1 = add i3 %0, 2
+			%2 = call x86_fp80 @__frontend_reg_load.fpr(i3 %1)
+			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 -1)
 			ret void
 		})");
 
 	setX86Environment("32", "watcom");
 	bool b = pass.runOnModuleCustom(*module, &config, abi);
-	EXPECT_FALSE(b);
+
+	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
+		define void @foo() {
+		bb:
+		  %0 = load i3, i3* @fpu_stat_TOP
+		  store i2 0, i2* @fpu_tag_0
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
+		  %1 = sub i3 %0, 3
+		  store i2 0, i2* @fpu_tag_5
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st5
+		  ret void
+		}
+		define void @boo() {
+		bb:
+		  call void @foo()
+		  %0 = load i3, i3* @fpu_stat_TOP
+		  store i2 0, i2* @fpu_tag_0
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
+		  %1 = add i3 %0, 2
+		  %2 = load x86_fp80, x86_fp80* @st2
+		  store i2 -1, i2* @fpu_tag_2
+		  ret void
+		})";
+	checkModuleAgainstExpectedIr(exp);
+	EXPECT_TRUE(b);
 } // x86_32bit_watcom
 
 //
@@ -1228,14 +1293,17 @@ TEST_F(X87FpuAnalysisTests, x86_32bit_analyze_not_FP_return_success)
 			call void @__frontend_reg_store.fpu_tag(i3 %0, i2 0)
 			call void @__frontend_reg_store.fpr(i3 %0, x86_fp80 0xK3FFF8000000000000000)
 			%1 = sub i3 %0, 1
-			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
-			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
-			%2 = call x86_fp80 @__frontend_reg_load.fpr(i3 %1)
-			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 -1)
-			%3 = add i3 %1, 1
-			%4 = call x86_fp80 @__frontend_reg_load.fpr(i3 %3)
-			call void @__frontend_reg_store.fpu_tag(i3 %3, i2 -1)
-			store i3 %3, i3* @fpu_stat_TOP
+			store i3 %1, i3* @fpu_stat_TOP
+			%2 = load i3, i3* @fpu_stat_TOP
+			call void @__frontend_reg_store.fpu_tag(i3 %2, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %2, x86_fp80 0xK3FFF8000000000000000)
+			%3 = call x86_fp80 @__frontend_reg_load.fpr(i3 %2)
+			call void @__frontend_reg_store.fpu_tag(i3 %2, i2 -1)
+			%4 = add i3 %2, 1
+			store i3 %4, i3* @fpu_stat_TOP
+			%5 = load i3, i3* @fpu_stat_TOP
+			%6 = call x86_fp80 @__frontend_reg_load.fpr(i3 %5)
+			call void @__frontend_reg_store.fpu_tag(i3 %5, i2 -1)
 			ret void
 		}
 		define void @boo() {
@@ -1254,14 +1322,17 @@ TEST_F(X87FpuAnalysisTests, x86_32bit_analyze_not_FP_return_success)
 		  store i2 0, i2* @fpu_tag_0
 		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
 		  %1 = sub i3 %0, 1
-		  store i2 0, i2* @fpu_tag_1
-		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st1
-		  %2 = load x86_fp80, x86_fp80* @st1
-		  store i2 -1, i2* @fpu_tag_1
-		  %3 = add i3 %1, 1
-		  %4 = load x86_fp80, x86_fp80* @st0
+		  store i3 %1, i3* @fpu_stat_TOP
+		  %2 = load i3, i3* @fpu_stat_TOP
+		  store i2 0, i2* @fpu_tag_7
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st7
+		  %3 = load x86_fp80, x86_fp80* @st7
+		  store i2 -1, i2* @fpu_tag_7
+		  %4 = add i3 %2, 1
+		  store i3 %4, i3* @fpu_stat_TOP
+		  %5 = load i3, i3* @fpu_stat_TOP
+		  %6 = load x86_fp80, x86_fp80* @st0
 		  store i2 -1, i2* @fpu_tag_0
-		  store i3 %3, i3* @fpu_stat_TOP
 		  ret void
 		}
 		define void @boo() {
@@ -1272,33 +1343,6 @@ TEST_F(X87FpuAnalysisTests, x86_32bit_analyze_not_FP_return_success)
 	checkModuleAgainstExpectedIr(exp);
 	EXPECT_TRUE(b);
 } // x86_32bit_analyze_not_FP_return_success
-
-// TODO: function dependencies validations
-// TEST_F(X87FpuAnalysisTests, x86_32bit_analyze_not_FP_return_fail)
-// {
-// 	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
-// 		define void @foo() {
-// 		bb:
-// 			ret void
-// 		}
-// 		define void @boo() {
-// 		bb:
-// 			;FPU stack is empty => foo return type is not FP
-// 			call void @foo()
-// 			; this call of foo behave like it retun value is FP
-// 			%0 = load i3, i3* @fpu_stat_TOP
-// 			%1 = call x86_fp80 @__frontend_reg_load.fpr(i3 %0)
-// 			%2 = add i3 %0, 1
-// 			store i3 %2, i3* @fpu_stat_TOP
-// 			ret void
-// 		})");
-//
-// 	setX86Environment("32", "unknown");
-// 	bool b = pass.runOnModuleCustom(*module, &config, abi);
-// 	std::string exp = "";
-// 	checkModuleAgainstExpectedIr(exp);
-// 	EXPECT_FALSE(b);
-// } // x86_32bit_analyze_not_FP_return_fail
 
 //
 // Architecture: 		64bit
@@ -1312,17 +1356,20 @@ TEST_F(X87FpuAnalysisTests, x86_64bit_call_of_analyzed_function_success)
 		define void @foo() {
 		bb:
 			%0 = load i3, i3* @fpu_stat_TOP
-			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
-			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
+			call void @__frontend_reg_store.fpu_tag(i3 %0, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %0, x86_fp80 0xK3FFF8000000000000000)
 			%1 = sub i3 %0, 1
-			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
-			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
-			%2 = call x86_fp80 @__frontend_reg_load.fpr(i3 %1)
-			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 -1)
-			%3 = add i3 %1, 1
-			%4 = call x86_fp80 @__frontend_reg_load.fpr(i3 %3); this val will be saved to xmm0
-			call void @__frontend_reg_store.fpu_tag(i3 %3, i2 -1)
-			store i3 %3, i3* @fpu_stat_TOP
+			store i3 %1, i3* @fpu_stat_TOP
+			%2 = load i3, i3* @fpu_stat_TOP
+			call void @__frontend_reg_store.fpu_tag(i3 %2, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %2, x86_fp80 0xK3FFF8000000000000000)
+			%3 = call x86_fp80 @__frontend_reg_load.fpr(i3 %2)
+			call void @__frontend_reg_store.fpu_tag(i3 %2, i2 -1)
+			%4 = add i3 %2, 1
+			store i3 %4, i3* @fpu_stat_TOP
+			%5 = load i3, i3* @fpu_stat_TOP
+			%6 = call x86_fp80 @__frontend_reg_load.fpr(i3 %5); this val will be saved to xmm0
+			call void @__frontend_reg_store.fpu_tag(i3 %5, i2 -1)
 			ret void
 		}
 		define void @boo() {
@@ -1341,14 +1388,17 @@ TEST_F(X87FpuAnalysisTests, x86_64bit_call_of_analyzed_function_success)
 		  store i2 0, i2* @fpu_tag_0
 		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
 		  %1 = sub i3 %0, 1
-		  store i2 0, i2* @fpu_tag_1
-		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st1
-		  %2 = load x86_fp80, x86_fp80* @st1
-		  store i2 -1, i2* @fpu_tag_1
-		  %3 = add i3 %1, 1
-		  %4 = load x86_fp80, x86_fp80* @st0
+		  store i3 %1, i3* @fpu_stat_TOP
+		  %2 = load i3, i3* @fpu_stat_TOP
+		  store i2 0, i2* @fpu_tag_7
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st7
+		  %3 = load x86_fp80, x86_fp80* @st7
+		  store i2 -1, i2* @fpu_tag_7
+		  %4 = add i3 %2, 1
+		  store i3 %4, i3* @fpu_stat_TOP
+		  %5 = load i3, i3* @fpu_stat_TOP
+		  %6 = load x86_fp80, x86_fp80* @st0
 		  store i2 -1, i2* @fpu_tag_0
-		  store i3 %3, i3* @fpu_stat_TOP
 		  ret void
 		}
 		define void @boo() {
@@ -1374,14 +1424,17 @@ TEST_F(X87FpuAnalysisTests, x86_64bit_call_of_not_analyzed_function_success)
 			call void @__frontend_reg_store.fpu_tag(i3 %0, i2 0)
 			call void @__frontend_reg_store.fpr(i3 %0, x86_fp80 0xK3FFF8000000000000000)
 			%1 = sub i3 %0, 1
-			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
-			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
-			%2 = call x86_fp80 @__frontend_reg_load.fpr(i3 %1);
-			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 -1)
-			%3 = add i3 %1, 1
-			%4 = call x86_fp80 @__frontend_reg_load.fpr(i3 %3); this val will be saved to xmm0
-			call void @__frontend_reg_store.fpu_tag(i3 %3, i2 -1)
-			store i3 %3, i3* @fpu_stat_TOP
+			store i3 %1, i3* @fpu_stat_TOP
+			%2 = load i3, i3* @fpu_stat_TOP
+			call void @__frontend_reg_store.fpu_tag(i3 %2, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %2, x86_fp80 0xK3FFF8000000000000000)
+			%3 = call x86_fp80 @__frontend_reg_load.fpr(i3 %2);
+			call void @__frontend_reg_store.fpu_tag(i3 %2, i2 -1)
+			%4 = add i3 %2, 1
+			store i3 %4, i3* @fpu_stat_TOP
+			%5 = load i3, i3* @fpu_stat_TOP
+			%6 = call x86_fp80 @__frontend_reg_load.fpr(i3 %5); this val will be saved to xmm0
+			call void @__frontend_reg_store.fpu_tag(i3 %5, i2 -1)
 			ret void
 		})");
 
@@ -1400,14 +1453,17 @@ TEST_F(X87FpuAnalysisTests, x86_64bit_call_of_not_analyzed_function_success)
 		  store i2 0, i2* @fpu_tag_0
 		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
 		  %1 = sub i3 %0, 1
-		  store i2 0, i2* @fpu_tag_1
-		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st1
-		  %2 = load x86_fp80, x86_fp80* @st1
-		  store i2 -1, i2* @fpu_tag_1
-		  %3 = add i3 %1, 1
-		  %4 = load x86_fp80, x86_fp80* @st0
+		  store i3 %1, i3* @fpu_stat_TOP
+		  %2 = load i3, i3* @fpu_stat_TOP
+		  store i2 0, i2* @fpu_tag_7
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st7
+		  %3 = load x86_fp80, x86_fp80* @st7
+		  store i2 -1, i2* @fpu_tag_7
+		  %4 = add i3 %2, 1
+		  store i3 %4, i3* @fpu_stat_TOP
+		  %5 = load i3, i3* @fpu_stat_TOP
+		  %6 = load x86_fp80, x86_fp80* @st0
 		  store i2 -1, i2* @fpu_tag_0
-		  store i3 %3, i3* @fpu_stat_TOP
 		  ret void
 		})";
 	checkModuleAgainstExpectedIr(exp);
@@ -1427,29 +1483,33 @@ TEST_F(X87FpuAnalysisTests, if_branch_or_loop)
 			call void @__frontend_reg_store.fpu_tag(i3 %0, i2 0)
 			call void @__frontend_reg_store.fpr(i3 %0, x86_fp80 0xK3FFF8000000000000000)
 			%1 = sub i3 %0, 1
-			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
-			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
 			store i3 %1, i3* @fpu_stat_TOP
+			%2 = load i3, i3* @fpu_stat_TOP
+			call void @__frontend_reg_store.fpu_tag(i3 %2, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %2, x86_fp80 0xK3FFF8000000000000000)
 			br i1 1, label %dec_label_if_true, label %dec_label_end_branch
-			dec_label_if_true:
-				%2 = load i3, i3* @fpu_stat_TOP
-				%3 = call x86_fp80 @__frontend_reg_load.fpr(i3 %2);
-				%4 = sub i3 %2, 1
-				call void @__frontend_reg_store.fpu_tag(i3 %4, i2 0)
-				call void @__frontend_reg_store.fpr(i3 %4, x86_fp80 0xK3FFF8000000000000000)
-				%5 = call x86_fp80 @__frontend_reg_load.fpr(i3 %4);
-				call void @__frontend_reg_store.fpu_tag(i3 %4, i2 -1)
-				%6 = add i3 %4, 1
-				store i3 %6, i3* @fpu_stat_TOP
-				br label %dec_label_end_branch
-			dec_label_end_branch:
-			%7 = load i3, i3* @fpu_stat_TOP
-			%8 = call x86_fp80 @__frontend_reg_load.fpr(i3 %7);
-			call void @__frontend_reg_store.fpu_tag(i3 %7, i2 -1)
-			%9 = add i3 %7, 1
+		dec_label_if_true:
+			%3 = load i3, i3* @fpu_stat_TOP
+			%4 = call x86_fp80 @__frontend_reg_load.fpr(i3 %3);
+			%5 = sub i3 %3, 1
+			store i3 %5, i3* @fpu_stat_TOP
+			%6 = load i3, i3* @fpu_stat_TOP
+			call void @__frontend_reg_store.fpu_tag(i3 %6, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %6, x86_fp80 0xK3FFF8000000000000000)
+			%7 = call x86_fp80 @__frontend_reg_load.fpr(i3 %6);
+			call void @__frontend_reg_store.fpu_tag(i3 %6, i2 -1)
+			%8 = add i3 %6, 1
+			store i3 %8, i3* @fpu_stat_TOP
+			br label %dec_label_end_branch
+		dec_label_end_branch:
+			%9 = load i3, i3* @fpu_stat_TOP
 			%10 = call x86_fp80 @__frontend_reg_load.fpr(i3 %9);
 			call void @__frontend_reg_store.fpu_tag(i3 %9, i2 -1)
-			store i3 %9, i3* @fpu_stat_TOP
+			%11 = add i3 %9, 1
+			store i3 %11, i3* @fpu_stat_TOP
+			%12 = load i3, i3* @fpu_stat_TOP
+			%13 = call x86_fp80 @__frontend_reg_load.fpr(i3 %12);
+			call void @__frontend_reg_store.fpu_tag(i3 %12, i2 -1)
 			ret void
 		})");
 
@@ -1459,34 +1519,38 @@ TEST_F(X87FpuAnalysisTests, if_branch_or_loop)
 	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
 		define void @foo() {
 		bb:
-			%0 = load i3, i3* @fpu_stat_TOP
-			store i2 0, i2* @fpu_tag_0
-			store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
-			%1 = sub i3 %0, 1
-			store i2 0, i2* @fpu_tag_1
-			store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st1
-			store i3 %1, i3* @fpu_stat_TOP
-			br i1 true, label %dec_label_if_true, label %dec_label_end_branch
+		  %0 = load i3, i3* @fpu_stat_TOP
+		  store i2 0, i2* @fpu_tag_0
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
+		  %1 = sub i3 %0, 1
+		  store i3 %1, i3* @fpu_stat_TOP
+		  %2 = load i3, i3* @fpu_stat_TOP
+		  store i2 0, i2* @fpu_tag_7
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st7
+		  br i1 true, label %dec_label_if_true, label %dec_label_end_branch
 		dec_label_if_true:
-			%2 = load i3, i3* @fpu_stat_TOP
-			%3 = load x86_fp80, x86_fp80* @st1
-			%4 = sub i3 %2, 1
-			store i2 0, i2* @fpu_tag_2
-			store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st2
-			%5 = load x86_fp80, x86_fp80* @st2
-			store i2 -1, i2* @fpu_tag_2
-			%6 = add i3 %4, 1
-			store i3 %6, i3* @fpu_stat_TOP
-			br label %dec_label_end_branch
+		  %3 = load i3, i3* @fpu_stat_TOP
+		  %4 = load x86_fp80, x86_fp80* @st7
+		  %5 = sub i3 %3, 1
+		  store i3 %5, i3* @fpu_stat_TOP
+		  %6 = load i3, i3* @fpu_stat_TOP
+		  store i2 0, i2* @fpu_tag_6
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st6
+		  %7 = load x86_fp80, x86_fp80* @st6
+		  store i2 -1, i2* @fpu_tag_6
+		  %8 = add i3 %6, 1
+		  store i3 %8, i3* @fpu_stat_TOP
+		  br label %dec_label_end_branch
 		dec_label_end_branch:
-			%7 = load i3, i3* @fpu_stat_TOP
-			%8 = load x86_fp80, x86_fp80* @st1
-			store i2 -1, i2* @fpu_tag_1
-			%9 = add i3 %7, 1
-			%10 = load x86_fp80, x86_fp80* @st0
-			store i2 -1, i2* @fpu_tag_0
-			store i3 %9, i3* @fpu_stat_TOP
-			ret void
+		  %9 = load i3, i3* @fpu_stat_TOP
+		  %10 = load x86_fp80, x86_fp80* @st7
+		  store i2 -1, i2* @fpu_tag_7
+		  %11 = add i3 %9, 1
+		  store i3 %11, i3* @fpu_stat_TOP
+		  %12 = load i3, i3* @fpu_stat_TOP
+		  %13 = load x86_fp80, x86_fp80* @st0
+		  store i2 -1, i2* @fpu_tag_0
+		  ret void
 })";
 	checkModuleAgainstExpectedIr(exp);
 	EXPECT_TRUE(b);
@@ -1501,40 +1565,46 @@ TEST_F(X87FpuAnalysisTests, if_else_branch)
 			call void @__frontend_reg_store.fpu_tag(i3 %0, i2 0)
 			call void @__frontend_reg_store.fpr(i3 %0, x86_fp80 0xK3FFF8000000000000000)
 			%1 = sub i3 %0, 1
-			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
-			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
 			store i3 %1, i3* @fpu_stat_TOP
+			%2 = load i3, i3* @fpu_stat_TOP
+			call void @__frontend_reg_store.fpu_tag(i3 %2, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %2, x86_fp80 0xK3FFF8000000000000000)
 			br i1 1, label %dec_label_if_true, label %dec_label_if_false
 		dec_label_if_true:
-			%2 = load i3, i3* @fpu_stat_TOP
-			%3 = call x86_fp80 @__frontend_reg_load.fpr(i3 %2);
-			%4 = sub i3 %2, 1
-			call void @__frontend_reg_store.fpu_tag(i3 %4, i2 0)
-			call void @__frontend_reg_store.fpr(i3 %4, x86_fp80 0xK3FFF8000000000000000)
-			%5 = call x86_fp80 @__frontend_reg_load.fpr(i3 %4);
-			call void @__frontend_reg_store.fpu_tag(i3 %4, i2 -1)
-			%6 = add i3 %4, 1
-			store i3 %6, i3* @fpu_stat_TOP
+			%3 = load i3, i3* @fpu_stat_TOP
+			%4 = call x86_fp80 @__frontend_reg_load.fpr(i3 %3);
+			%5 = sub i3 %3, 1
+			store i3 %5, i3* @fpu_stat_TOP
+			%6 = load i3, i3* @fpu_stat_TOP
+			call void @__frontend_reg_store.fpu_tag(i3 %6, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %6, x86_fp80 0xK3FFF8000000000000000)
+			%7 = call x86_fp80 @__frontend_reg_load.fpr(i3 %6);
+			call void @__frontend_reg_store.fpu_tag(i3 %6, i2 -1)
+			%8 = add i3 %6, 1
+			store i3 %8, i3* @fpu_stat_TOP
 			br label %dec_label_end_branch
 		dec_label_if_false:
-			%7 = load i3, i3* @fpu_stat_TOP
-			%8 = call x86_fp80 @__frontend_reg_load.fpr(i3 %7);
-			%9 = sub i3 %7, 1
-			call void @__frontend_reg_store.fpu_tag(i3 %9, i2 0)
-			call void @__frontend_reg_store.fpr(i3 %9, x86_fp80 0xK3FFF8000000000000000)
+			%9 = load i3, i3* @fpu_stat_TOP
 			%10 = call x86_fp80 @__frontend_reg_load.fpr(i3 %9);
-			call void @__frontend_reg_store.fpu_tag(i3 %9, i2 -1)
-			%11 = add i3 %9, 1
+			%11 = sub i3 %9, 1
 			store i3 %11, i3* @fpu_stat_TOP
-			br label %dec_label_end_branch
-		dec_label_end_branch:
 			%12 = load i3, i3* @fpu_stat_TOP
+			call void @__frontend_reg_store.fpu_tag(i3 %12, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %12, x86_fp80 0xK3FFF8000000000000000)
 			%13 = call x86_fp80 @__frontend_reg_load.fpr(i3 %12);
 			call void @__frontend_reg_store.fpu_tag(i3 %12, i2 -1)
 			%14 = add i3 %12, 1
-			%15 = call x86_fp80 @__frontend_reg_load.fpr(i3 %14);
-			call void @__frontend_reg_store.fpu_tag(i3 %14, i2 -1)
 			store i3 %14, i3* @fpu_stat_TOP
+			br label %dec_label_end_branch
+		dec_label_end_branch:
+			%15 = load i3, i3* @fpu_stat_TOP
+			%16 = call x86_fp80 @__frontend_reg_load.fpr(i3 %15);
+			call void @__frontend_reg_store.fpu_tag(i3 %15, i2 -1)
+			%17 = add i3 %15, 1
+			store i3 %17, i3* @fpu_stat_TOP
+			%18 = load i3, i3* @fpu_stat_TOP
+			%19 = call x86_fp80 @__frontend_reg_load.fpr(i3 %18);
+			call void @__frontend_reg_store.fpu_tag(i3 %18, i2 -1)
 			ret void
 		}
 )");
@@ -1545,45 +1615,51 @@ TEST_F(X87FpuAnalysisTests, if_else_branch)
 	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
 		define void @foo() {
 		bb:
-			%0 = load i3, i3* @fpu_stat_TOP
-			store i2 0, i2* @fpu_tag_0
-			store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
-			%1 = sub i3 %0, 1
-			store i2 0, i2* @fpu_tag_1
-			store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st1
-			store i3 %1, i3* @fpu_stat_TOP
-			br i1 true, label %dec_label_if_true, label %dec_label_if_false
+		  %0 = load i3, i3* @fpu_stat_TOP
+		  store i2 0, i2* @fpu_tag_0
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
+		  %1 = sub i3 %0, 1
+		  store i3 %1, i3* @fpu_stat_TOP
+		  %2 = load i3, i3* @fpu_stat_TOP
+		  store i2 0, i2* @fpu_tag_7
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st7
+		  br i1 true, label %dec_label_if_true, label %dec_label_if_false
 		dec_label_if_true:
-			%2 = load i3, i3* @fpu_stat_TOP
-			%3 = load x86_fp80, x86_fp80* @st1
-			%4 = sub i3 %2, 1
-			store i2 0, i2* @fpu_tag_2
-			store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st2
-			%5 = load x86_fp80, x86_fp80* @st2
-			store i2 -1, i2* @fpu_tag_2
-			%6 = add i3 %4, 1
-			store i3 %6, i3* @fpu_stat_TOP
-			br label %dec_label_end_branch
+		  %3 = load i3, i3* @fpu_stat_TOP
+		  %4 = load x86_fp80, x86_fp80* @st7
+		  %5 = sub i3 %3, 1
+		  store i3 %5, i3* @fpu_stat_TOP
+		  %6 = load i3, i3* @fpu_stat_TOP
+		  store i2 0, i2* @fpu_tag_6
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st6
+		  %7 = load x86_fp80, x86_fp80* @st6
+		  store i2 -1, i2* @fpu_tag_6
+		  %8 = add i3 %6, 1
+		  store i3 %8, i3* @fpu_stat_TOP
+		  br label %dec_label_end_branch
 		dec_label_if_false:
-			%7 = load i3, i3* @fpu_stat_TOP
-			%8 = load x86_fp80, x86_fp80* @st1
-			%9 = sub i3 %7, 1
-			store i2 0, i2* @fpu_tag_2
-			store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st2
-			%10 = load x86_fp80, x86_fp80* @st2
-			store i2 -1, i2* @fpu_tag_2
-			%11 = add i3 %9, 1
-			store i3 %11, i3* @fpu_stat_TOP
-			br label %dec_label_end_branch
+		  %9 = load i3, i3* @fpu_stat_TOP
+		  %10 = load x86_fp80, x86_fp80* @st7
+		  %11 = sub i3 %9, 1
+		  store i3 %11, i3* @fpu_stat_TOP
+		  %12 = load i3, i3* @fpu_stat_TOP
+		  store i2 0, i2* @fpu_tag_6
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st6
+		  %13 = load x86_fp80, x86_fp80* @st6
+		  store i2 -1, i2* @fpu_tag_6
+		  %14 = add i3 %12, 1
+		  store i3 %14, i3* @fpu_stat_TOP
+		  br label %dec_label_end_branch
 		dec_label_end_branch:
-			%12 = load i3, i3* @fpu_stat_TOP
-			%13 = load x86_fp80, x86_fp80* @st1
-			store i2 -1, i2* @fpu_tag_1
-			%14 = add i3 %12, 1
-			%15 = load x86_fp80, x86_fp80* @st0
-			store i2 -1, i2* @fpu_tag_0
-			store i3 %14, i3* @fpu_stat_TOP
-			ret void
+		  %15 = load i3, i3* @fpu_stat_TOP
+		  %16 = load x86_fp80, x86_fp80* @st7
+		  store i2 -1, i2* @fpu_tag_7
+		  %17 = add i3 %15, 1
+		  store i3 %17, i3* @fpu_stat_TOP
+		  %18 = load i3, i3* @fpu_stat_TOP
+		  %19 = load x86_fp80, x86_fp80* @st0
+		  store i2 -1, i2* @fpu_tag_0
+		  ret void
 })";
 	checkModuleAgainstExpectedIr(exp);
 	EXPECT_TRUE(b);
@@ -1598,44 +1674,50 @@ TEST_F(X87FpuAnalysisTests, if_elseif_else_branch_or_switch)
 			call void @__frontend_reg_store.fpu_tag(i3 %0, i2 0)
 			call void @__frontend_reg_store.fpr(i3 %0, x86_fp80 0xK3FFF8000000000000000)
 			%1 = sub i3 %0, 1
-			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
-			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
 			store i3 %1, i3* @fpu_stat_TOP
+			%2 = load i3, i3* @fpu_stat_TOP
+			call void @__frontend_reg_store.fpu_tag(i3 %2, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %2, x86_fp80 0xK3FFF8000000000000000)
 			br i1 1, label %dec_label_if_then_true, label %dec_label_if_then_false
 		dec_label_if_then_true:
-			%2 = load i3, i3* @fpu_stat_TOP
-			%3 = call x86_fp80 @__frontend_reg_load.fpr(i3 %2);
-			%4 = sub i3 %2, 1
-			call void @__frontend_reg_store.fpu_tag(i3 %4, i2 0)
-			call void @__frontend_reg_store.fpr(i3 %4, x86_fp80 0xK3FFF8000000000000000)
-			%5 = call x86_fp80 @__frontend_reg_load.fpr(i3 %4);
-			call void @__frontend_reg_store.fpu_tag(i3 %4, i2 -1)
-			%6 = add i3 %4, 1
-			store i3 %6, i3* @fpu_stat_TOP
+			%3 = load i3, i3* @fpu_stat_TOP
+			%4 = call x86_fp80 @__frontend_reg_load.fpr(i3 %3);
+			%5 = sub i3 %3, 1
+			store i3 %5, i3* @fpu_stat_TOP
+			%6 = load i3, i3* @fpu_stat_TOP
+			call void @__frontend_reg_store.fpu_tag(i3 %6, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %6, x86_fp80 0xK3FFF8000000000000000)
+			%7 = call x86_fp80 @__frontend_reg_load.fpr(i3 %6);
+			call void @__frontend_reg_store.fpu_tag(i3 %6, i2 -1)
+			%8 = add i3 %6, 1
+			store i3 %8, i3* @fpu_stat_TOP
 			br label %dec_label_end_branch
 		dec_label_if_then_false:
 			br i1 1, label %dec_label_else_if_true, label %dec_label_else_if_false
 		dec_label_else_if_true:
-			%7 = load i3, i3* @fpu_stat_TOP
-			%8 = call x86_fp80 @__frontend_reg_load.fpr(i3 %7);
-			%9 = sub i3 %7, 1
-			call void @__frontend_reg_store.fpu_tag(i3 %9, i2 0)
-			call void @__frontend_reg_store.fpr(i3 %9, x86_fp80 0xK3FFF8000000000000000)
+			%9 = load i3, i3* @fpu_stat_TOP
 			%10 = call x86_fp80 @__frontend_reg_load.fpr(i3 %9);
-			call void @__frontend_reg_store.fpu_tag(i3 %9, i2 -1)
-			%11 = add i3 %9, 1
+			%11 = sub i3 %9, 1
 			store i3 %11, i3* @fpu_stat_TOP
+			%12 = load i3, i3* @fpu_stat_TOP
+			call void @__frontend_reg_store.fpu_tag(i3 %12, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %12, x86_fp80 0xK3FFF8000000000000000)
+			%13 = call x86_fp80 @__frontend_reg_load.fpr(i3 %12);
+			call void @__frontend_reg_store.fpu_tag(i3 %12, i2 -1)
+			%14 = add i3 %12, 1
+			store i3 %14, i3* @fpu_stat_TOP
 			br label %dec_label_end_branch
 		dec_label_else_if_false:
 			br label %dec_label_end_branch
 		dec_label_end_branch:
-			%12 = load i3, i3* @fpu_stat_TOP
-			%13 = call x86_fp80 @__frontend_reg_load.fpr(i3 %12);
-			call void @__frontend_reg_store.fpu_tag(i3 %12, i2 -1)
-			%14 = add i3 %12, 1
-			%15 = call x86_fp80 @__frontend_reg_load.fpr(i3 %14);
-			call void @__frontend_reg_store.fpu_tag(i3 %14, i2 -1)
-			store i3 %14, i3* @fpu_stat_TOP
+			%15 = load i3, i3* @fpu_stat_TOP
+			%16 = call x86_fp80 @__frontend_reg_load.fpr(i3 %15);
+			call void @__frontend_reg_store.fpu_tag(i3 %15, i2 -1)
+			%17 = add i3 %15, 1
+			store i3 %17, i3* @fpu_stat_TOP
+			%18 = load i3, i3* @fpu_stat_TOP
+			%19 = call x86_fp80 @__frontend_reg_load.fpr(i3 %18);
+			call void @__frontend_reg_store.fpu_tag(i3 %18, i2 -1)
 			ret void
 		}
 )");
@@ -1646,49 +1728,55 @@ TEST_F(X87FpuAnalysisTests, if_elseif_else_branch_or_switch)
 	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
 		define void @foo() {
 		bb:
-			%0 = load i3, i3* @fpu_stat_TOP
-			store i2 0, i2* @fpu_tag_0
-			store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
-			%1 = sub i3 %0, 1
-			store i2 0, i2* @fpu_tag_1
-			store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st1
-			store i3 %1, i3* @fpu_stat_TOP
-			br i1 true, label %dec_label_if_then_true, label %dec_label_if_then_false
+		  %0 = load i3, i3* @fpu_stat_TOP
+		  store i2 0, i2* @fpu_tag_0
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
+		  %1 = sub i3 %0, 1
+		  store i3 %1, i3* @fpu_stat_TOP
+		  %2 = load i3, i3* @fpu_stat_TOP
+		  store i2 0, i2* @fpu_tag_7
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st7
+		  br i1 true, label %dec_label_if_then_true, label %dec_label_if_then_false
 		dec_label_if_then_true:
-			%2 = load i3, i3* @fpu_stat_TOP
-			%3 = load x86_fp80, x86_fp80* @st1
-			%4 = sub i3 %2, 1
-			store i2 0, i2* @fpu_tag_2
-			store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st2
-			%5 = load x86_fp80, x86_fp80* @st2
-			store i2 -1, i2* @fpu_tag_2
-			%6 = add i3 %4, 1
-			store i3 %6, i3* @fpu_stat_TOP
-			br label %dec_label_end_branch
+		  %3 = load i3, i3* @fpu_stat_TOP
+		  %4 = load x86_fp80, x86_fp80* @st7
+		  %5 = sub i3 %3, 1
+		  store i3 %5, i3* @fpu_stat_TOP
+		  %6 = load i3, i3* @fpu_stat_TOP
+		  store i2 0, i2* @fpu_tag_6
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st6
+		  %7 = load x86_fp80, x86_fp80* @st6
+		  store i2 -1, i2* @fpu_tag_6
+		  %8 = add i3 %6, 1
+		  store i3 %8, i3* @fpu_stat_TOP
+		  br label %dec_label_end_branch
 		dec_label_if_then_false:
-			br i1 true, label %dec_label_else_if_true, label %dec_label_else_if_false
+		  br i1 true, label %dec_label_else_if_true, label %dec_label_else_if_false
 		dec_label_else_if_true:
-			%7 = load i3, i3* @fpu_stat_TOP
-			%8 = load x86_fp80, x86_fp80* @st1
-			%9 = sub i3 %7, 1
-			store i2 0, i2* @fpu_tag_2
-			store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st2
-			%10 = load x86_fp80, x86_fp80* @st2
-			store i2 -1, i2* @fpu_tag_2
-			%11 = add i3 %9, 1
-			store i3 %11, i3* @fpu_stat_TOP
-			br label %dec_label_end_branch
+		  %9 = load i3, i3* @fpu_stat_TOP
+		  %10 = load x86_fp80, x86_fp80* @st7
+		  %11 = sub i3 %9, 1
+		  store i3 %11, i3* @fpu_stat_TOP
+		  %12 = load i3, i3* @fpu_stat_TOP
+		  store i2 0, i2* @fpu_tag_6
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st6
+		  %13 = load x86_fp80, x86_fp80* @st6
+		  store i2 -1, i2* @fpu_tag_6
+		  %14 = add i3 %12, 1
+		  store i3 %14, i3* @fpu_stat_TOP
+		  br label %dec_label_end_branch
 		dec_label_else_if_false:
-			br label %dec_label_end_branch
+		  br label %dec_label_end_branch
 		dec_label_end_branch:
-			%12 = load i3, i3* @fpu_stat_TOP
-			%13 = load x86_fp80, x86_fp80* @st1
-			store i2 -1, i2* @fpu_tag_1
-			%14 = add i3 %12, 1
-			%15 = load x86_fp80, x86_fp80* @st0
-			store i2 -1, i2* @fpu_tag_0
-			store i3 %14, i3* @fpu_stat_TOP
-			ret void
+		  %15 = load i3, i3* @fpu_stat_TOP
+		  %16 = load x86_fp80, x86_fp80* @st7
+		  store i2 -1, i2* @fpu_tag_7
+		  %17 = add i3 %15, 1
+		  store i3 %17, i3* @fpu_stat_TOP
+		  %18 = load i3, i3* @fpu_stat_TOP
+		  %19 = load x86_fp80, x86_fp80* @st0
+		  store i2 -1, i2* @fpu_tag_0
+		  ret void
 		}
 )";
 	checkModuleAgainstExpectedIr(exp);
@@ -1698,62 +1786,66 @@ TEST_F(X87FpuAnalysisTests, if_elseif_else_branch_or_switch)
 TEST_F(X87FpuAnalysisTests, nested_branch_0)
 {
 	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
-		define void @foo() {
-			A:
-				br i1 1, label %B, label %C
-			B:
-				%0 = load i3, i3* @fpu_stat_TOP
-				call void @__frontend_reg_store.fpu_tag(i3 %0, i2 0)
-				call void @__frontend_reg_store.fpr(i3 %0, x86_fp80 0xK3FFF8000000000000000)
-				%1 = sub i3 %0, 1
-				call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
-				call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
-				store i3 %1, i3* @fpu_stat_TOP
-				br i1 1, label %D, label %E
-			D:
-				%2 = load i3, i3* @fpu_stat_TOP
-				%3 = call x86_fp80 @__frontend_reg_load.fpr(i3 %2)
-				br label %E
-			E:
-				%4 = load i3, i3* @fpu_stat_TOP
-				%5 = add i3 %4, 1
-				%6 = call x86_fp80 @__frontend_reg_load.fpr(i3 %5)
-				store i3 %5, i3* @fpu_stat_TOP
-				br label %C
-			C:
-			ret void
-		}
+	define void @foo() {
+		A:
+			br i1 1, label %B, label %C
+		B:
+			%0 = load i3, i3* @fpu_stat_TOP
+			call void @__frontend_reg_store.fpu_tag(i3 %0, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %0, x86_fp80 0xK3FFF8000000000000000)
+			%1 = sub i3 %0, 1
+			store i3 %1, i3* @fpu_stat_TOP
+			%2 = load i3, i3* @fpu_stat_TOP
+			call void @__frontend_reg_store.fpu_tag(i3 %2, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %2, x86_fp80 0xK3FFF8000000000000000)
+			br i1 1, label %D, label %E
+		D:
+			%3 = load i3, i3* @fpu_stat_TOP
+			%4 = call x86_fp80 @__frontend_reg_load.fpr(i3 %3)
+			br label %E
+		E:
+			%5 = load i3, i3* @fpu_stat_TOP
+			%6 = add i3 %5, 1
+			store i3 %6, i3* @fpu_stat_TOP
+			%7 = load i3, i3* @fpu_stat_TOP
+			%8 = call x86_fp80 @__frontend_reg_load.fpr(i3 %7)
+			br label %C
+		C:
+		ret void
+	}
 )");
 
 	setX86Environment("64", "unknown");
 	bool b = pass.runOnModuleCustom(*module, &config, abi);
 
 	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
-		define void @foo() {
-			A:
-				br i1 1, label %B, label %C
-			B:
-				%0 = load i3, i3* @fpu_stat_TOP
-				store i2 0, i2* @fpu_tag_0
-				store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
-				%1 = sub i3 %0, 1
-				store i2 0, i2* @fpu_tag_1
-				store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st1
-				store i3 %1, i3* @fpu_stat_TOP
-				br i1 1, label %D, label %E
-			D:
-				%2 = load i3, i3* @fpu_stat_TOP
-				%3 = load x86_fp80, x86_fp80* @st1
-				br label %E
-			E:
-				%4 = load i3, i3* @fpu_stat_TOP
-				%5 = add i3 %4, 1
-				%6 = load x86_fp80, x86_fp80* @st0
-				store i3 %5, i3* @fpu_stat_TOP
-				br label %C
-			C:
-			ret void
-		}
+	define void @foo() {
+		A:
+		  br i1 true, label %B, label %C
+		B:
+		  %0 = load i3, i3* @fpu_stat_TOP
+		  store i2 0, i2* @fpu_tag_0
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
+		  %1 = sub i3 %0, 1
+		  store i3 %1, i3* @fpu_stat_TOP
+		  %2 = load i3, i3* @fpu_stat_TOP
+		  store i2 0, i2* @fpu_tag_7
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st7
+		  br i1 true, label %D, label %E
+		D:
+		  %3 = load i3, i3* @fpu_stat_TOP
+		  %4 = load x86_fp80, x86_fp80* @st7
+		  br label %E
+		E:
+		  %5 = load i3, i3* @fpu_stat_TOP
+		  %6 = add i3 %5, 1
+		  store i3 %6, i3* @fpu_stat_TOP
+		  %7 = load i3, i3* @fpu_stat_TOP
+		  %8 = load x86_fp80, x86_fp80* @st0
+		  br label %C
+		C:
+		  ret void
+	}
 )";
 	checkModuleAgainstExpectedIr(exp);
 	EXPECT_TRUE(b);
@@ -1762,84 +1854,96 @@ TEST_F(X87FpuAnalysisTests, nested_branch_0)
 TEST_F(X87FpuAnalysisTests, nested_branch_1)
 {
 	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
-		define void @foo() {
-			A:
-				br i1 1, label %B, label %C
-			B:
-				%0 = load i3, i3* @fpu_stat_TOP
-				call void @__frontend_reg_store.fpu_tag(i3 %0, i2 0)
-				call void @__frontend_reg_store.fpr(i3 %0, x86_fp80 0xK3FFF8000000000000000)
-				%1 = sub i3 %0, 1
-				call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
-				call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
-				%2 = sub i3 %1, 1
-				call void @__frontend_reg_store.fpu_tag(i3 %2, i2 0)
-				call void @__frontend_reg_store.fpr(i3 %2, x86_fp80 0xK3FFF8000000000000000)
-				%3 = sub i3 %2, 1
-				call void @__frontend_reg_store.fpu_tag(i3 %3, i2 0)
-				call void @__frontend_reg_store.fpr(i3 %3, x86_fp80 0xK3FFF8000000000000000)
-				store i3 %3, i3* @fpu_stat_TOP
-				br i1 1, label %D, label %E
-			D:
-				%4 = load i3, i3* @fpu_stat_TOP
-				%5 = call x86_fp80 @__frontend_reg_load.fpr(i3 %4)
-				br label %E
-			E:
-				%6 = load i3, i3* @fpu_stat_TOP
-				%7 = call x86_fp80 @__frontend_reg_load.fpr(i3 %6)
-				%8 = add i3 %6, 1
-				%9 = call x86_fp80 @__frontend_reg_load.fpr(i3 %8)
-				%10 = add i3 %8, 1
-				%11 = call x86_fp80 @__frontend_reg_load.fpr(i3 %10)
-				%12 = add i3 %10, 1
-				%13 = call x86_fp80 @__frontend_reg_load.fpr(i3 %12)
-				store i3 %12, i3* @fpu_stat_TOP
-				br label %C
-			C:
-			ret void
-		}
+	define void @foo() {
+		A:
+			br i1 1, label %B, label %C
+		B:
+			%0 = load i3, i3* @fpu_stat_TOP
+			call void @__frontend_reg_store.fpu_tag(i3 %0, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %0, x86_fp80 0xK3FFF8000000000000000)
+			%1 = sub i3 %0, 1
+			store i3 %1, i3* @fpu_stat_TOP
+			%2 = load i3, i3* @fpu_stat_TOP
+			call void @__frontend_reg_store.fpu_tag(i3 %2, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %2, x86_fp80 0xK3FFF8000000000000000)
+			%3 = sub i3 %2, 1
+			store i3 %3, i3* @fpu_stat_TOP
+			%4 = load i3, i3* @fpu_stat_TOP
+			call void @__frontend_reg_store.fpu_tag(i3 %4, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %4, x86_fp80 0xK3FFF8000000000000000)
+			%5 = sub i3 %4, 1
+			store i3 %5, i3* @fpu_stat_TOP
+			%6 = load i3, i3* @fpu_stat_TOP
+			call void @__frontend_reg_store.fpu_tag(i3 %6, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %6, x86_fp80 0xK3FFF8000000000000000)
+			br i1 1, label %D, label %E
+		D:
+			%7 = load i3, i3* @fpu_stat_TOP
+			%8 = call x86_fp80 @__frontend_reg_load.fpr(i3 %7)
+			br label %E
+		E:
+			%9 = load i3, i3* @fpu_stat_TOP
+			%10 = call x86_fp80 @__frontend_reg_load.fpr(i3 %9)
+			%11 = add i3 %9, 1
+			store i3 %11, i3* @fpu_stat_TOP
+			%12 = load i3, i3* @fpu_stat_TOP
+			%13 = add i3 %12, 1
+			%14 = add i3 %13, 1
+			store i3 %14, i3* @fpu_stat_TOP
+			%15 = load i3, i3* @fpu_stat_TOP
+			%16 = call x86_fp80 @__frontend_reg_load.fpr(i3 %15)
+			br label %C
+		C:
+		ret void
+	}
 )");
 
 	setX86Environment("64", "unknown");
 	bool b = pass.runOnModuleCustom(*module, &config, abi);
 
 	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
-		define void @foo() {
-			A:
-				br i1 1, label %B, label %C
-			B:
-				%0 = load i3, i3* @fpu_stat_TOP
-				store i2 0, i2* @fpu_tag_0
-				store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
-				%1 = sub i3 %0, 1
-				store i2 0, i2* @fpu_tag_1
-				store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st1
-				%2 = sub i3 %1, 1
-				store i2 0, i2* @fpu_tag_2
-				store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st2
-				%3 = sub i3 %2, 1
-				store i2 0, i2* @fpu_tag_3
-				store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st3
-				store i3 %3, i3* @fpu_stat_TOP
-				br i1 1, label %D, label %E
-			D:
-				%4 = load i3, i3* @fpu_stat_TOP
-				%5 = load x86_fp80, x86_fp80* @st3
-				br label %E
-			E:
-				%6 = load i3, i3* @fpu_stat_TOP
-				%7 = load x86_fp80, x86_fp80* @st3
-				%8 = add i3 %6, 1
-				%9 = load x86_fp80, x86_fp80* @st2
-				%10 = add i3 %8, 1
-				%11 = load x86_fp80, x86_fp80* @st1
-				%12 = add i3 %10, 1
-				%13 = load x86_fp80, x86_fp80* @st0
-				store i3 %12, i3* @fpu_stat_TOP
-				br label %C
-			C:
-			ret void
-		}
+	define void @foo() {
+		A:
+		  br i1 true, label %B, label %C
+		B:
+		  %0 = load i3, i3* @fpu_stat_TOP
+		  store i2 0, i2* @fpu_tag_0
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st0
+		  %1 = sub i3 %0, 1
+		  store i3 %1, i3* @fpu_stat_TOP
+		  %2 = load i3, i3* @fpu_stat_TOP
+		  store i2 0, i2* @fpu_tag_7
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st7
+		  %3 = sub i3 %2, 1
+		  store i3 %3, i3* @fpu_stat_TOP
+		  %4 = load i3, i3* @fpu_stat_TOP
+		  store i2 0, i2* @fpu_tag_6
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st6
+		  %5 = sub i3 %4, 1
+		  store i3 %5, i3* @fpu_stat_TOP
+		  %6 = load i3, i3* @fpu_stat_TOP
+		  store i2 0, i2* @fpu_tag_5
+		  store x86_fp80 0xK3FFF8000000000000000, x86_fp80* @st5
+		  br i1 true, label %D, label %E
+		D:
+		  %7 = load i3, i3* @fpu_stat_TOP
+		  %8 = load x86_fp80, x86_fp80* @st5
+		  br label %E
+		E:
+		  %9 = load i3, i3* @fpu_stat_TOP
+		  %10 = load x86_fp80, x86_fp80* @st5
+		  %11 = add i3 %9, 1
+		  store i3 %11, i3* @fpu_stat_TOP
+		  %12 = load i3, i3* @fpu_stat_TOP
+		  %13 = add i3 %12, 1
+		  %14 = add i3 %13, 1
+		  store i3 %14, i3* @fpu_stat_TOP
+		  %15 = load i3, i3* @fpu_stat_TOP
+		  %16 = load x86_fp80, x86_fp80* @st0
+		  br label %C
+		C:
+		  ret void
+	}
 )";
 	checkModuleAgainstExpectedIr(exp);
 	EXPECT_TRUE(b);
@@ -1848,25 +1952,26 @@ TEST_F(X87FpuAnalysisTests, nested_branch_1)
 TEST_F(X87FpuAnalysisTests, if_else_branch_fail)
 {
 	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
-		define void @foo() {
-		bb:
-			br i1 1, label %dec_label_if_true, label %dec_label_if_false
-			dec_label_if_true:
-				%0 = load i3, i3* @fpu_stat_TOP
-				%1 = sub i3 %0, 1
-				call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
-				call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
-				store i3 %1, i3* @fpu_stat_TOP
-				br label %dec_label_end_branch
-			dec_label_if_false:
-				%2 = load i3, i3* @fpu_stat_TOP
-				call void @__frontend_reg_store.fpu_tag(i3 %2, i2 -1)
-				%3 = add i3 %2, 1
-				store i3 %3, i3* @fpu_stat_TOP
-				br label %dec_label_end_branch
-			dec_label_end_branch:
-			ret void
-		}
+	define void @foo() {
+	bb:
+		br i1 1, label %dec_label_if_true, label %dec_label_if_false
+		dec_label_if_true:
+			%0 = load i3, i3* @fpu_stat_TOP
+			%1 = sub i3 %0, 1
+			store i3 %1, i3* @fpu_stat_TOP
+			%2 = load i3, i3* @fpu_stat_TOP
+			call void @__frontend_reg_store.fpu_tag(i3 %2, i2 0)
+			call void @__frontend_reg_store.fpr(i3 %2, x86_fp80 0xK3FFF8000000000000000)
+			br label %dec_label_end_branch
+		dec_label_if_false:
+			%3 = load i3, i3* @fpu_stat_TOP
+			call void @__frontend_reg_store.fpu_tag(i3 %3, i2 -1)
+			%4 = add i3 %3, 1
+			store i3 %4, i3* @fpu_stat_TOP
+			br label %dec_label_end_branch
+		dec_label_end_branch:
+		ret void
+	}
 )");
 
 	setX86Environment("64", "unknown");
