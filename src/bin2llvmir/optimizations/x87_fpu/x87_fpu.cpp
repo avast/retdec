@@ -68,6 +68,7 @@ std::list<FunctionAnalyzeMetadata> X87FpuAnalysis::getFunctions2Analyze()
 			functions.push_back(ins->getParent()->getParent());
 		}
 	}
+	functions.sort();
 	functions.unique();
 
 	std::list<FunctionAnalyzeMetadata> functionsMetadata;
@@ -103,7 +104,7 @@ int X87FpuAnalysis::matrixRank(Eigen::MatrixXd &mat)
 	return (singularValues.array() > treshHold).count();
 }
 
-bool X87FpuAnalysis::consistenSystem(Eigen::MatrixXd &A, Eigen::MatrixXd &B)
+bool X87FpuAnalysis::consistentSystem(Eigen::MatrixXd &A, Eigen::MatrixXd &B)
 {
 	int rankA = matrixRank(A);
 
@@ -139,43 +140,17 @@ void FunctionAnalyzeMetadata::addEquation(std::list<std::tuple<llvm::BasicBlock&
 	numberOfEquations++;
 }
 
-int X87FpuAnalysis::getFpuStackTopForTerminatingBlockOfX86_32Arch(int top)
-{
-	if (_config->getConfig().architecture.isX86_32() && top == -1)
-	{
-		return top;
-	}
-	else
-	{
-		return 0;
-	}
-}
-
-bool X87FpuAnalysis::isFpuStackTopValidForActualArchitectureAndCallingConvention(llvm::Function* fun)
+bool X87FpuAnalysis::checkArchAndCallConvException(llvm::Function* fun)
 {
 	using CallingConvention = common::CallingConvention::eCC;
 
 	auto configFunctionMetadata = _config->getConfig().functions.getFunctionByName(fun->getName());
 	if (!configFunctionMetadata)
-		return true;
+		return false;
 
 	auto convention = configFunctionMetadata->callingConvention.getID();
 
-	if (_config->getConfig().architecture.isX86_16())
-	{
-		switch (convention)
-		{
-			case CallingConvention::CC_CDECL:
-			case CallingConvention::CC_PASCAL:
-			case CallingConvention::CC_FASTCALL:
-			case CallingConvention::CC_UNKNOWN:
-			default:
-				return true;
-			case CallingConvention::CC_WATCOM:
-				return false; //inconsistent
-		}
-	}
-	else if (_config->getConfig().architecture.isX86_32())
+	if (_config->getConfig().architecture.isX86_16() || _config->getConfig().architecture.isX86_32())
 	{
 		switch (convention)
 		{
@@ -193,7 +168,7 @@ bool X87FpuAnalysis::isFpuStackTopValidForActualArchitectureAndCallingConvention
 	}
 	else // x86-64bit architecture
 	{
-		return true;
+		return false;
 	}
 }
 
@@ -218,31 +193,33 @@ bool X87FpuAnalysis::run()
 
 	for (auto& funMd: analyzedFunctionsMetadata)
 	{
+		if (funMd.function.size() > MAX_PERFORMANCE_CEIL)
+		{
+			funMd.analyzeSuccess = false;
+			continue; // skip optimization due to unacceptable performance lack
+		}
+
 		BasicBlock& enterBlock = funMd.function.begin().operator*();
-		funMd.addEquation({{enterBlock, 1, funMd.inIndex}}, 0);
+		funMd.addEquation({{enterBlock, 1, funMd.inIndex}}, EMPTY_FPU_STACK);
 
 		for (Function::iterator bbIt=funMd.function.begin(),
 		 	bbEndIt = funMd.function.end(); bbIt != bbEndIt; ++bbIt)
 		{
 			BasicBlock* bb = bbIt.operator->();
-			auto name = bb->getName().str();
-			int outTop=0;
+			int relativeOutBbTop = 0;
 
-			if (!analyzeBasicBlock(funMd, bb, outTop))
+			if (!analyzeBasicBlock(funMd, bb, relativeOutBbTop))
 			{
 				funMd.analyzeSuccess = false;
 			}
-			if (std::find(funMd.terminatingBasicBlocks.begin(), funMd.terminatingBasicBlocks.end(), bb) != funMd.terminatingBasicBlocks.end())
-			{
-				if (!isFpuStackTopValidForActualArchitectureAndCallingConvention(bb->getParent()))
-				{
-					funMd.analyzeSuccess = false;
-				}
-				int terminatingTop = getFpuStackTopForTerminatingBlockOfX86_32Arch(outTop);
-				funMd.addEquation({{*bb, 1, funMd.outIndex}}, terminatingTop);
-			}
 
-			funMd.addEquation({{*bb, -1, funMd.inIndex},{*bb, 1, funMd.outIndex}}, outTop);
+			funMd.addEquation({{*bb, -1, funMd.inIndex},{*bb, 1, funMd.outIndex}}, relativeOutBbTop);
+
+			if (_config->getConfig().architecture.isX86_16() || _config->getConfig().architecture.isX86_64()
+				&& std::find(funMd.terminatingBasicBlocks.begin(), funMd.terminatingBasicBlocks.end(), bb) != funMd.terminatingBasicBlocks.end())
+			{
+				funMd.addEquation({{*bb, 1, funMd.outIndex}}, EMPTY_FPU_STACK);
+			}
 
 			for (auto it = pred_begin(bb), et=pred_end(bb); it != et; ++it)
 			{
@@ -251,7 +228,7 @@ bool X87FpuAnalysis::run()
 			}
 		}
 
-		if (!consistenSystem(funMd.A, funMd.B))
+		if (!consistentSystem(funMd.A, funMd.B))
 		{
 			funMd.analyzeSuccess = false;
 		}
@@ -283,63 +260,24 @@ void X87FpuAnalysis::printBlocksAnalyzeResult()
 	}
 }
 
-int X87FpuAnalysis::expectedTopBasedOnCallingConvention(llvm::Instruction& inst)
+std::list<FunctionAnalyzeMetadata>::iterator X87FpuAnalysis::getFunMd(llvm::Function* fun)
 {
-	Function* f = inst.getParent()->getParent();
-	auto configFunctionMetadata = _config->getConfig().functions.getFunctionByName(f->getName());
-	if (!configFunctionMetadata)
+	std::list<FunctionAnalyzeMetadata>::iterator it;
+	for (it = analyzedFunctionsMetadata.begin(); it != analyzedFunctionsMetadata.end(); ++it)
 	{
-		return 0;
-	}
-
-	if (_config->getConfig().architecture.isX86_16())
-	{
-		return 0;
-	}
-	else if (_config->getConfig().architecture.isX86_32())
-	{
-		return expectedTopBasedOnRestOfBlock(inst);
-	}
-	else // x86-64bit architecture
-	{
-		return 0;
-	}
-}
-
-int X87FpuAnalysis::expectedTopBasedOnRestOfBlock(llvm::Instruction& analyzedInstr)
-{
-	BasicBlock* bb = analyzedInstr.getParent();
-	for (BasicBlock::iterator it = bb->begin(), e = bb->end(); it != e; ++it)
-	{
-		Instruction* inst = it.operator->();
-		if (inst == &analyzedInstr)
+		auto& funMd = it.operator*();
+		if (&funMd.function == fun)
 		{
-			while (it != e)
-			{
-				inst = it.operator->();
-				auto *add = dyn_cast<AddOperator>(inst);
-				auto *sub = dyn_cast<SubOperator>(inst);
-				auto *callLoad = _config->isLlvmX87LoadPseudoFunctionCall(inst);
-				if (sub	&& isa<ConstantInt>(sub->getOperand(1)))
-				{
-					return 0;
-				}
-				else if (callLoad || (add && isa<ConstantInt>(add->getOperand(1))))
-				{
-					return -1;
-				}
-				++it;
-			}
+			return it;
 		}
 	}
 
-	return 0;
+	return analyzedFunctionsMetadata.end();
 }
 
 bool X87FpuAnalysis::analyzeInstruction(
 	FunctionAnalyzeMetadata& funMd,
 	Instruction* i,
-	std::map<llvm::Value*, int>& topVals,
 	int& outTop)
 {
 	auto *callFunction = dyn_cast<CallInst>(i);
@@ -353,48 +291,128 @@ bool X87FpuAnalysis::analyzeInstruction(
 	// read actual value of fpu top
 	if (loadFpuTop && loadFpuTop->getPointerOperand() == top)
 	{
-		topVals[i] = outTop;
+		funMd.topVals[i] = outTop;
 	}
 	// store actual value of fpu top
-	else if (storeFpuTop && storeFpuTop->getPointerOperand() == top && topVals.find(storeFpuTop->getValueOperand()) != topVals.end())
+	else if (storeFpuTop && storeFpuTop->getPointerOperand() == top && funMd.topVals.find(storeFpuTop->getValueOperand()) != funMd.topVals.end())
 	{
-		outTop = topVals.find(storeFpuTop->getValueOperand())->second;
+		outTop = funMd.topVals.find(storeFpuTop->getValueOperand())->second;
 	}
 	// function call -> possible change value of fpu top
-	else if (callFunction && !callStore && !callLoad)
+	else if (callFunction && !callStore && !callLoad && !callFunction->getCalledFunction()->isIntrinsic())
 	{
-		auto* function = _module->getFunction(callFunction->getCalledValue()->getName().str());
-		if (!function)
+		auto it = getFunMd(callFunction->getCalledFunction());
+
+		if (it != analyzedFunctionsMetadata.end())
 		{
-			return ANALYZE_FAIL;
+			auto& fun = it.operator*();
+			if (fun.expectedTopAnalyzed)
+			{
+				outTop += fun.expectedTop;
+			}
+			else
+			{
+				outTop += expectedTopBasedOnRestOfBlock(*i);
+			}
 		}
-		outTop = expectedTopBasedOnCallingConvention(*i);
-		topVals[i] = outTop;
+		else // some library function e.g "roundf()"
+		{
+			outTop += expectedTopBasedOnRestOfBlock(*i);
+		}
 	}
 	// increment fpu top
-	else if (add && isa<ConstantInt>(add->getOperand(1)) && topVals.find(add->getOperand(0)) != topVals.end())
+	else if (add && isa<ConstantInt>(add->getOperand(1)) && funMd.topVals.find(add->getOperand(0)) != funMd.topVals.end())
 	{
-		int oldTopValue = topVals.find(add->getOperand(0))->second;
+		//auto *op0 = dyn_cast<Instruction>(add->getOperand(0));
+		int oldTopValue = funMd.topVals.find(add->getOperand(0))->second;
 		int constValue = cast<ConstantInt>(add->getOperand(1))->getZExtValue();//it should be 1
 		int newTopValue = oldTopValue + constValue;
-		topVals[i] = newTopValue;
+		funMd.topVals[i] = newTopValue;
 	}
 	// decrement fpu top
-	else if (sub && isa<ConstantInt>(sub->getOperand(1)) && topVals.find(sub->getOperand(0)) != topVals.end())
+	else if (sub && isa<ConstantInt>(sub->getOperand(1)) && funMd.topVals.find(sub->getOperand(0)) != funMd.topVals.end())
 	{
-		int oldTopValue = topVals.find(sub->getOperand(0))->second;
+		//auto *op0 = dyn_cast<Instruction>(sub->getOperand(0));
+		int oldTopValue = funMd.topVals.find(sub->getOperand(0))->second;
 		int constValue = cast<ConstantInt>(sub->getOperand(1))->getZExtValue();//it should be 1
 		int newTopValue = oldTopValue - constValue;
-		topVals[i] = newTopValue;
+		funMd.topVals[i] = newTopValue;
 	}
 	// pseudo load/store of fpu top
 	else if (callStore || callLoad)
 	{
 		//pseudo call will be replaced by store/load of concrete register but only if whole analyze succed
-		funMd.pseudoCalls.push_back({outTop, i});
+		int tmp;
+		if (callStore && funMd.topVals.find(callStore->getArgOperand(0)) != funMd.topVals.end())
+		{
+			tmp = funMd.topVals.find(callStore->getArgOperand(0))->second;
+		}
+		else if (callLoad && funMd.topVals.find(callLoad->getArgOperand(0)) != funMd.topVals.end())
+		{
+			tmp = funMd.topVals.find(callLoad->getArgOperand(0))->second;
+		}
+		else
+		{
+			return ANALYZE_FAIL;
+		}
+
+		funMd.pseudoCalls.push_back({tmp, i});
 	}
 
 	return ANALYZE_SUCCESS;
+}
+
+int X87FpuAnalysis::expectedTopBasedOnRestOfBlock(llvm::Instruction& analyzedInstr)
+{
+	if (!checkArchAndCallConvException(analyzedInstr.getParent()->getParent()))
+	{
+		return NOP_FPU_STACK;
+	}
+
+	std::map<llvm::Value*, bool> topVals;
+	BasicBlock* bb = analyzedInstr.getParent();
+	Instruction *next = analyzedInstr.getNextNode();
+
+	if (!next || next->getParent() != bb)
+	{
+		return NOP_FPU_STACK;
+	}
+
+	for (BasicBlock::iterator it = next->getIterator(), e = bb->end(); it != e; ++it)
+	{
+		Instruction *i = it.operator->();
+		auto *loadFpuTop = dyn_cast<LoadInst>(i);
+		auto *sub = dyn_cast<SubOperator>(i);
+		auto *callLoad = _config->isLlvmX87LoadPseudoFunctionCall(i);
+		auto *callFunction = dyn_cast<CallInst>(i);
+
+		if (loadFpuTop && loadFpuTop->getPointerOperand() == top)
+		{
+			topVals[i] = true;
+		}
+		else if (sub && isa<ConstantInt>(sub->getOperand(1)) && topVals.find(sub->getOperand(0)) != topVals.end())
+		{
+			return NOP_FPU_STACK;
+		}
+		else if (callFunction && !callLoad)
+		{
+			return NOP_FPU_STACK;
+		}
+		else if (callLoad && topVals.find(callLoad->getArgOperand(0)) != topVals.end())
+		{
+			auto *callFunction = dyn_cast<CallInst>(&analyzedInstr);
+			auto it = getFunMd(callFunction->getCalledFunction());
+			if (it != analyzedFunctionsMetadata.end())
+			{
+				auto& fun = it.operator*();
+				fun.expectedTop = RETURN_VALUE_PASSED_THROUGH_ST0;
+				fun.expectedTopAnalyzed = true;
+			}
+			return DECREMENT_FPU_STACK;
+		}
+	}
+
+	return NOP_FPU_STACK;
 }
 
 bool X87FpuAnalysis::analyzeBasicBlock(
@@ -406,7 +424,7 @@ bool X87FpuAnalysis::analyzeBasicBlock(
 	for (BasicBlock::iterator it = bb->begin(), e = bb->end(); it != e; ++it)
 	{
 		Instruction* inst = it.operator->();
-		if (!analyzeInstruction(funMd, inst, topVals, outTop))
+		if (!analyzeInstruction(funMd, inst, outTop))
 		{
 			return ANALYZE_FAIL;
 		}
@@ -415,18 +433,23 @@ bool X87FpuAnalysis::analyzeBasicBlock(
 	return ANALYZE_SUCCESS;
 }
 
+bool X87FpuAnalysis::isValidRegisterIndex(int index)
+{
+	return (X86_REG_ST0 <= index && index <= X86_REG_ST7) || (X87_REG_TAG0 <= index && index <= X87_REG_TAG7);
+}
+
 bool X87FpuAnalysis::optimizeAnalyzedFpuInstruction()
 {
 	bool analyzeSucces = true;
-	for (auto& fun : analyzedFunctionsMetadata)
+	for (auto& funMd : analyzedFunctionsMetadata)
 	{
-		if (!fun.analyzeSuccess)
+		if (!funMd.analyzeSuccess)
 		{
 			analyzeSucces = false;
 			continue;
 		}
 
-		for (auto& i : fun.pseudoCalls)
+		for (auto& i : funMd.pseudoCalls)
 		{
 			int regBase;
 			auto *callStore = _config->isLlvmX87StorePseudoFunctionCall(i.second);
@@ -442,15 +465,16 @@ bool X87FpuAnalysis::optimizeAnalyzedFpuInstruction()
 						  ? uint32_t(X86_REG_ST0) : uint32_t(X87_REG_TAG0);
 			}
 
-			double bbIn = fun.x(fun.indexes[i.second->getParent()][fun.inIndex], 0);
-			// relativeIndexOFBB + calculatedIndexAtTheBeginnigofBB
-			int top = (int)i.first + (int)round(bbIn);
+			double bbIn = funMd.x(funMd.indexes[i.second->getParent()][funMd.inIndex], 0);
+			int diff = (int)i.first % EMPTY_FPU_STACK; // correction of possible stack over/under-flow
+			int top = (int)round(bbIn) + diff; // value of stack at the beginnig of BB + difference at actual instr
 
-			int registerIndex = regBase - top;
-			auto *reg = _abi->getRegister(registerIndex);
-			if (!reg)
+			int registerIndex;
+			GlobalVariable *reg;
+			if (!isValidRegisterIndex(registerIndex = regBase + top%EMPTY_FPU_STACK) || !(reg =_abi->getRegister(registerIndex)))
 			{
-				continue; // analyze fail -> skip
+				analyzeSucces = false;
+				continue;
 			}
 
 			if (callStore)

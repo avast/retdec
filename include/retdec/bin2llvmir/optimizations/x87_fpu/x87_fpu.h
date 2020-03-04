@@ -19,13 +19,12 @@
 #include "retdec/bin2llvmir/providers/config.h"
 
 #define EMPTY_FPU_STACK 8
-#define FULL_FPU_STACK 0
 #define RETURN_VALUE_PASSED_THROUGH_ST0 7
-#define UNKNOWN_CALLING_CONVENTION -1
-#define INCONSISTENT_CALLING_CONVENTION -2
-#define INCORRECT_STACK_OPERATION -3
+#define DECREMENT_FPU_STACK -1
+#define NOP_FPU_STACK 0
 #define ANALYZE_FAIL false
 #define ANALYZE_SUCCESS true
+#define MAX_PERFORMANCE_CEIL 30
 
 namespace retdec {
 namespace bin2llvmir {
@@ -52,6 +51,11 @@ class FunctionAnalyzeMetadata
 
 		// 1. index to register, 2.pseudo instruction
 		std::list<std::pair<uint32_t ,llvm::Instruction*>> pseudoCalls;
+		std::map<llvm::Value*, int> topVals;
+
+		int expectedTop = 0;
+		bool expectedTopAnalyzed = false;
+		std::set<llvm::Function*> calledFunctions;
 
 	void addEquation(std::list<std::tuple<llvm::BasicBlock&,int,IndexType >> vars, int result);
 	FunctionAnalyzeMetadata(llvm::Function &function1) : function(function1) {};
@@ -78,7 +82,6 @@ class X87FpuAnalysis : public llvm::ModulePass
 		bool analyzeInstruction(
 				FunctionAnalyzeMetadata& funMd,
 				llvm::Instruction* i,
-				std::map<llvm::Value*, int>& topVals,
 				int& outTop);
 	std::list<FunctionAnalyzeMetadata> getFunctions2Analyze();
 
@@ -87,19 +90,11 @@ class X87FpuAnalysis : public llvm::ModulePass
 	 * Replace all FPU pseudo load and store function by load and store with concrete FPU registers.
 	 */
 	bool optimizeAnalyzedFpuInstruction();
-	int expectedTopBasedOnCallingConvention(llvm::Instruction& inst);
 	int expectedTopBasedOnRestOfBlock(llvm::Instruction& analyzedInstr);
-	bool validTopForTerminatingBasicBlock(int top);
 	int matrixRank(Eigen::MatrixXd &mat);
-	bool consistenSystem(Eigen::MatrixXd &A, Eigen::MatrixXd &B);
-	bool isFpuStackTopValidForActualArchitectureAndCallingConvention(llvm::Function* function);
-	int getFpuStackTopForTerminatingBlockOfX86_32Arch(int top);
-
-	bool isInstructionFunctionCall(llvm::Value* inst);
-	/**
-	 * @pre Expect first call isInstructionFunctionCall().
-	 */
-	bool isFunctionReturnTypeFloatingPoint(llvm::Value* inst);
+	bool consistentSystem(Eigen::MatrixXd &A, Eigen::MatrixXd &B);
+	bool checkArchAndCallConvException(llvm::Function* fun);
+	bool isValidRegisterIndex(int index);
 
 	private:
 
@@ -109,6 +104,7 @@ class X87FpuAnalysis : public llvm::ModulePass
 		llvm::GlobalVariable* top = nullptr;
 
 		std::list<FunctionAnalyzeMetadata> analyzedFunctionsMetadata; //functions where detected FPU stack access
+		std::list<FunctionAnalyzeMetadata>::iterator getFunMd(llvm::Function* fun);
 
 };
 
