@@ -1234,8 +1234,6 @@ namespace PeLib
 	std::uint32_t BytesToPages(std::uint32_t ByteSize);
 	std::uint32_t AlignToSize(std::uint32_t ByteSize, std::uint32_t AlignSize);
 
-	bool pelibIsBufferZeroed(const void * buffer, size_t length);
-
 	std::uint64_t fileSize(const std::string& filename);
 	std::uint64_t fileSize(std::istream& stream);
 	std::uint64_t fileSize(std::ofstream& file);

@@ -139,23 +139,6 @@ namespace PeLib
 		return (ByteSize >> PELIB_PAGE_SIZE_SHIFT) + ((ByteSize & (PELIB_PAGE_SIZE - 1)) != 0);
 	}
 
-	bool pelibIsBufferZeroed(const void * buffer, size_t length)
-	{
-		const uint32_t * buffer32 = reinterpret_cast<const uint32_t *>(buffer);
-		size_t length32 = length / 4;
-		size_t value32 = 0;
-
-		for (size_t i = 0; i < length32; i++, buffer32++)
-			value32 |= buffer32[0];
-
-		const uint8_t * buffer8 = reinterpret_cast<const uint8_t *>(buffer32);
-		size_t length8 = length % 8;
-		for (size_t i = 0; i < length8; i++)
-			value32 |= buffer8[i];
-
-		return (value32 == 0);
-	}
-
 	std::uint64_t fileSize(const std::string& filename)
 	{
 		std::fstream file(filename.c_str());

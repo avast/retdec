@@ -54,7 +54,7 @@ namespace PeLib
 		inStream_w.read(reinterpret_cast<char*>(vCertDirectory.data()), uiSize);
 
 		// Verify zeroed certificates (00002edec5247488029b2cc69568dda90714eeed8de0d84f1488635196b7e708)
-		if (pelibIsBufferZeroed(vCertDirectory.data(), uiSize))
+		if (std::all_of(vCertDirectory.begin(), vCertDirectory.end(), [](unsigned char item) { return item == 0; }))
 		{
 			m_ldrError = LDR_ERROR_DIGITAL_SIGNATURE_ZEROED;
 			return ERROR_INVALID_FILE;
