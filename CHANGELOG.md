@@ -27,6 +27,7 @@
 * Enhancement: Updated Yaramod to version v3.0.0 ([#680](https://github.com/avast/retdec/pull/680)). RetDec no longer requires Flex and Bison. This fixes [#103](https://github.com/avast/retdec/issues/103).
 * Enhancement: Take out most of the types from `config` library and place them to a separate `common` library that could be used across an entire RetDec source base ([#686](https://github.com/avast/retdec/issues/686)).
 * Enhancement: `retdec-fileinfo` is now able to produce human-readable representation of a product name and VS version from Rich header ([#691](https://github.com/avast/retdec/pull/691)).
+* Enhancement: Added a new corruption check into `retdec-fileinfo` that detects cut or zeroed digital signature ([#719](https://github.com/avast/retdec/pull/719)).
 * Enhancement: Reduced RetDec's external dependencies:
    * The sources of the following 3rd-party projects were moved from their own repositories directly to the main RetDec repository (to `/deps/`): ELFIO, RapidJSON, TinyXML2.
    * The sources of the following Avast projects were moved from their own repositories directly to the main RetDec repository (to `/src/`): Yaracpp, PeLib.
