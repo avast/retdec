@@ -77,7 +77,11 @@ namespace PeLib
 		// Entry point error detection
 		{"LDR_ERROR_ENTRY_POINT_OUT_OF_IMAGE",     "The position of the entry point is out of the image" },
 		{"LDR_ERROR_ENTRY_POINT_ZEROED",           "The entry point is zeroed; probably damaged file" },
-	};
+
+		// Signature error detection
+		{"LDR_ERROR_DIGITAL_SIGNATURE_CUT",        "The digital signature is cut or missing; probably damaged file" },
+		{"LDR_ERROR_DIGITAL_SIGNATURE_ZEROED",     "The digital signature is zeroed; probably damaged file" },
+    };
 
 	PELIB_IMAGE_FILE_MACHINE_ITERATOR::PELIB_IMAGE_FILE_MACHINE_ITERATOR()
 	{
@@ -133,6 +137,23 @@ namespace PeLib
 	std::uint32_t BytesToPages(std::uint32_t ByteSize)
 	{
 		return (ByteSize >> PELIB_PAGE_SIZE_SHIFT) + ((ByteSize & (PELIB_PAGE_SIZE - 1)) != 0);
+	}
+
+	bool pelibIsBufferZeroed(const void * buffer, size_t length)
+	{
+		const uint32_t * buffer32 = reinterpret_cast<const uint32_t *>(buffer);
+		size_t length32 = length / 4;
+		size_t value32 = 0;
+
+		for (size_t i = 0; i < length32; i++, buffer32++)
+			value32 |= buffer32[0];
+
+		const uint8_t * buffer8 = reinterpret_cast<const uint8_t *>(buffer32);
+		size_t length8 = length % 8;
+		for (size_t i = 0; i < length8; i++)
+			value32 |= buffer8[i];
+
+		return (value32 == 0);
 	}
 
 	std::uint64_t fileSize(const std::string& filename)
@@ -191,7 +212,9 @@ namespace PeLib
 		return (ldrError == LDR_ERROR_FILE_IS_CUT_LOADABLE ||
 				ldrError == LDR_ERROR_RSRC_OVER_END_OF_IMAGE ||
 				ldrError == LDR_ERROR_ENTRY_POINT_OUT_OF_IMAGE ||
-				ldrError == LDR_ERROR_ENTRY_POINT_ZEROED);
+				ldrError == LDR_ERROR_ENTRY_POINT_ZEROED ||
+				ldrError == LDR_ERROR_DIGITAL_SIGNATURE_CUT ||
+				ldrError == LDR_ERROR_DIGITAL_SIGNATURE_ZEROED);
 	}
 
 	// Anti-assert feature. Debug version of isprint in MS Visual C++ asserts
