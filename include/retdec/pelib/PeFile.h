@@ -774,6 +774,11 @@ namespace PeLib
 		if (ldrError != LDR_ERROR_NONE)
 			return ldrError;
 
+		// Check errors in entry point
+		ldrError = securityDir().loaderError();
+		if (ldrError != LDR_ERROR_NONE)
+			return ldrError;
+
 		// Nothing wrond found
 		return LDR_ERROR_NONE;
 	}
