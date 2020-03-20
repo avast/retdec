@@ -58,6 +58,8 @@ class IrModifier
 				llvm::ArrayRef<llvm::Value*> args);
 
 		static void eraseUnusedInstructionRecursive(llvm::Value* insn);
+		static void eraseUnusedInstructionsRecursive(
+				std::unordered_set<llvm::Value*>& insns);
 
 	public:
 		IrModifier(llvm::Module* m, Config* c);

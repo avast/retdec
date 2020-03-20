@@ -1502,7 +1502,9 @@ llvm::CallInst* IrModifier::modifyCallInst(
  * Erase @a insn if it is an unused instruction, and also all its operands
  * that are also unused instructions.
  */
-void IrModifier::eraseUnusedInstructionRecursive(llvm::Value* insn)
+void _eraseUnusedInstructionRecursive(
+		llvm::Value* insn,
+		std::unordered_set<llvm::Value*>* insnsWorklist = nullptr)
 {
 	auto* i = llvm::dyn_cast<llvm::Instruction>(insn);
 	if (i == nullptr)
@@ -1528,6 +1530,10 @@ void IrModifier::eraseUnusedInstructionRecursive(llvm::Value* insn)
 					}
 				}
 				it = worklist.erase(it);
+				if (insnsWorklist)
+				{
+					insnsWorklist->erase(i);
+				}
 				i->eraseFromParent();
 				erased = true;
 			}
@@ -1535,6 +1541,25 @@ void IrModifier::eraseUnusedInstructionRecursive(llvm::Value* insn)
 			{
 				++it;
 			}
+		}
+	}
+}
+
+void IrModifier::eraseUnusedInstructionRecursive(llvm::Value* insn)
+{
+	_eraseUnusedInstructionRecursive(insn, nullptr);
+}
+
+void IrModifier::eraseUnusedInstructionsRecursive(
+		std::unordered_set<llvm::Value*>& insns)
+{
+	while (!insns.empty())
+	{
+		auto* v = *insns.begin();
+		_eraseUnusedInstructionRecursive(v, &insns);
+		if (!insns.empty() && *insns.begin() == v)
+		{
+			insns.erase(insns.begin());
 		}
 	}
 }

@@ -123,6 +123,8 @@ bool StackAnalysis::run()
 		}
 	}
 
+	IrModifier::eraseUnusedInstructionsRecursive(_toRemove);
+
 	return false;
 }
 
@@ -237,22 +239,20 @@ void StackAnalysis::handleInstruction(
 				a->getType()->getElementType(),
 				inst);
 		new StoreInst(conv, a, inst);
-		// s->eraseFromParent();
-		IrModifier::eraseUnusedInstructionRecursive(s);
+		_toRemove.insert(s);
 	}
 	else if (l && l->getPointerOperand() == val)
 	{
 		auto* nl = new LoadInst(a, "", l);
 		auto* conv = IrModifier::convertValueToType(nl, l->getType(), l);
 		l->replaceAllUsesWith(conv);
-		// l->eraseFromParent();
-		IrModifier::eraseUnusedInstructionRecursive(l);
+		_toRemove.insert(l);
 	}
 	else
 	{
 		auto* conv = IrModifier::convertValueToType(a, val->getType(), inst);
 		inst->replaceUsesOfWith(val, conv);
-		IrModifier::eraseUnusedInstructionRecursive(val);
+		_toRemove.insert(val);
 	}
 }
 
