@@ -57,6 +57,8 @@ class IrModifier
 				llvm::Type* ret,
 				llvm::ArrayRef<llvm::Value*> args);
 
+		static void eraseUnusedInstructionRecursive(llvm::Value* insn);
+
 	public:
 		IrModifier(llvm::Module* m, Config* c);
 

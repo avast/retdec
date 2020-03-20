@@ -237,19 +237,22 @@ void StackAnalysis::handleInstruction(
 				a->getType()->getElementType(),
 				inst);
 		new StoreInst(conv, a, inst);
-		s->eraseFromParent();
+		// s->eraseFromParent();
+		IrModifier::eraseUnusedInstructionRecursive(s);
 	}
 	else if (l && l->getPointerOperand() == val)
 	{
 		auto* nl = new LoadInst(a, "", l);
 		auto* conv = IrModifier::convertValueToType(nl, l->getType(), l);
 		l->replaceAllUsesWith(conv);
-		l->eraseFromParent();
+		// l->eraseFromParent();
+		IrModifier::eraseUnusedInstructionRecursive(l);
 	}
 	else
 	{
 		auto* conv = IrModifier::convertValueToType(a, val->getType(), inst);
 		inst->replaceUsesOfWith(val, conv);
+		IrModifier::eraseUnusedInstructionRecursive(val);
 	}
 }
 

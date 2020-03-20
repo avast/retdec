@@ -1498,5 +1498,46 @@ llvm::CallInst* IrModifier::modifyCallInst(
 	return _modifyCallInst(call, conv, args);
 }
 
+/**
+ * Erase @a insn if it is an unused instruction, and also all its operands
+ * that are also unused instructions.
+ */
+void IrModifier::eraseUnusedInstructionRecursive(llvm::Value* insn)
+{
+	auto* i = llvm::dyn_cast<llvm::Instruction>(insn);
+	if (i == nullptr)
+	{
+		return;
+	}
+	std::list<llvm::Instruction*> worklist{i};
+
+	bool erased = true;
+	while (!worklist.empty() && erased)
+	{
+		erased = false;
+		for (auto it = worklist.begin(); it != worklist.end(); )
+		{
+			auto* i = *it;
+			if (i->user_empty())
+			{
+				for (auto* op : i->operand_values())
+				{
+					if (auto* opi = llvm::dyn_cast<llvm::Instruction>(op))
+					{
+						worklist.push_back(opi);
+					}
+				}
+				it = worklist.erase(it);
+				i->eraseFromParent();
+				erased = true;
+			}
+			else
+			{
+				++it;
+			}
+		}
+	}
+}
+
 } // namespace bin2llvmir
 } // namespace retdec
