@@ -1498,70 +1498,73 @@ llvm::CallInst* IrModifier::modifyCallInst(
 	return _modifyCallInst(call, conv, args);
 }
 
+void _eraseUnusedInstructionRecursive(
+		const std::unordered_set<llvm::Value*>& workset)
+{
+	std::list<llvm::Instruction*> toEraseList;
+	std::unordered_set<llvm::Value*> toEraseSet;
+	std::list<llvm::Value*> worklist(workset.begin(), workset.end());
+
+	for (auto it = worklist.begin(); it != worklist.end(); ++it)
+	{
+		if (auto* i = dyn_cast<llvm::Instruction>(*it))
+		{
+			// Do not erase instructions with side effects.
+			//
+			if (auto* call = llvm::dyn_cast<CallInst>(i))
+			{
+				auto* cf = call->getCalledFunction();
+				if (!(cf && cf->isIntrinsic()))
+				{
+					continue;
+				}
+			}
+
+			bool erase = i->user_empty();
+			if (!erase)
+			{
+				erase = true;
+				for (auto* u : i->users())
+				{
+					if (toEraseSet.count(u) == 0)
+					{
+						erase = false;
+						break;
+					}
+				}
+			}
+
+			if (erase && toEraseSet.count(i) == 0)
+			{
+				toEraseList.push_back(i);
+				toEraseSet.insert(i);
+				for (auto* op : i->operand_values())
+				{
+					worklist.push_back(op);
+				}
+			}
+		}
+	}
+
+	for (auto* i : toEraseList)
+	{
+		i->eraseFromParent();
+	}
+}
+
 /**
  * Erase @a insn if it is an unused instruction, and also all its operands
  * that are also unused instructions.
  */
-void _eraseUnusedInstructionRecursive(
-		llvm::Value* insn,
-		std::unordered_set<llvm::Value*>* insnsWorklist = nullptr)
-{
-	auto* i = llvm::dyn_cast<llvm::Instruction>(insn);
-	if (i == nullptr)
-	{
-		return;
-	}
-	std::list<llvm::Instruction*> worklist{i};
-
-	bool erased = true;
-	while (!worklist.empty() && erased)
-	{
-		erased = false;
-		for (auto it = worklist.begin(); it != worklist.end(); )
-		{
-			auto* i = *it;
-			if (i->user_empty())
-			{
-				for (auto* op : i->operand_values())
-				{
-					if (auto* opi = llvm::dyn_cast<llvm::Instruction>(op))
-					{
-						worklist.push_back(opi);
-					}
-				}
-				it = worklist.erase(it);
-				if (insnsWorklist)
-				{
-					insnsWorklist->erase(i);
-				}
-				i->eraseFromParent();
-				erased = true;
-			}
-			else
-			{
-				++it;
-			}
-		}
-	}
-}
-
 void IrModifier::eraseUnusedInstructionRecursive(llvm::Value* insn)
 {
-	_eraseUnusedInstructionRecursive(insn, nullptr);
+	_eraseUnusedInstructionRecursive({insn});
 }
 
 void IrModifier::eraseUnusedInstructionsRecursive(
 		std::unordered_set<llvm::Value*>& insns)
 {
-	while (!insns.empty())
-	{
-		auto* v = *insns.begin();
-		_eraseUnusedInstructionRecursive(v, &insns);
-		if (!insns.empty() && *insns.begin() == v)
-		{
-			insns.erase(insns.begin());
-		}
-	}
+	_eraseUnusedInstructionRecursive(insns);
 }
 
 } // namespace bin2llvmir
