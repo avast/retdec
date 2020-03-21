@@ -107,25 +107,6 @@ enum x87_reg_control
 };
 
 /**
- * An FPU tag register addition to @c x86_reg from capstone/x86.h.
- * Translator works with tag registers explicitly, but it looks like they
- * are not modeled in the original @c x86_reg enum.
- * This is intentionally not a strongly typed enum to keep it consistent
- * with @c x86_reg enum.
- */
-enum x87_reg_tag
-{
-	X87_REG_TAG0 = X87_REG_X + 1,
-	X87_REG_TAG1,
-	X87_REG_TAG2,
-	X87_REG_TAG3,
-	X87_REG_TAG4,
-	X87_REG_TAG5,
-	X87_REG_TAG6,
-	X87_REG_TAG7
-};
-
-/**
  * Representation of x86 address spaces.
  *
  * Based on values in X86ISelDAGToDag.cpp.

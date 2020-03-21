@@ -186,9 +186,7 @@ bool X87FpuAnalysis::analyzeBb(
 				auto fIt = topVals.find(callStore->getArgOperand(0));
 				auto tmp = fIt->second;
 
-				auto regBase = _config->isLlvmX87DataStorePseudoFunctionCall(callStore)
-							   ? uint32_t(X86_REG_ST0)
-							   : uint32_t(X87_REG_TAG0);
+				uint32_t regBase = X86_REG_ST0;
 				// Storing value to an empty stack -> suspicious.
 				if (tmp == 8) {
 					tmp = 7;
@@ -207,9 +205,7 @@ bool X87FpuAnalysis::analyzeBb(
 				auto fIt = topVals.find(callLoad->getArgOperand(0));
 				auto tmp = fIt->second;
 
-				auto regBase = _config->isLlvmX87DataLoadPseudoFunctionCall(callLoad)
-							   ? uint32_t(X86_REG_ST0)
-							   : uint32_t(X87_REG_TAG0);
+				uint32_t regBase = X86_REG_ST0;
 				// Loading value from an empty stack -> value may have been placed
 				// there without us knowing, e.g. return value of some other
 				// function.

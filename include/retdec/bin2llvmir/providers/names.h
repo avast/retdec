@@ -39,9 +39,7 @@ const std::string pseudoReturnFunction         = "__pseudo_return";
 const std::string pseudoBranchFunction         = "__pseudo_branch";
 const std::string pseudoCondBranchFunction     = "__pseudo_cond_branch";
 const std::string pseudoX87dataLoadFunction    = "__frontend_reg_load.fpr";
-const std::string pseudoX87tagLoadFunction     = "__frontend_reg_load.fpu_tag";
 const std::string pseudoX87dataStoreFunction   = "__frontend_reg_store.fpr";
-const std::string pseudoX87tagStoreFunction    = "__frontend_reg_store.fpu_tag";
 
 std::string generateFunctionName(common::Address a, bool ida = false);
 std::string generateFunctionNameUnknown(common::Address a, bool ida = false);
