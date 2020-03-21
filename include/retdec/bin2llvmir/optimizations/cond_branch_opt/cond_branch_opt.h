@@ -7,6 +7,8 @@
 #ifndef RETDEC_BIN2LLVMIR_OPTIMIZATIONS_COND_BRANCH_OPT_COND_BRANCH_OPT_H
 #define RETDEC_BIN2LLVMIR_OPTIMIZATIONS_COND_BRANCH_OPT_COND_BRANCH_OPT_H
 
+#include <unordered_set>
+
 #include <llvm/IR/Module.h>
 #include <llvm/Pass.h>
 
@@ -47,6 +49,7 @@ class CondBranchOpt : public llvm::ModulePass
 		llvm::Module* _module = nullptr;
 		Config* _config = nullptr;
 		Abi* _abi = nullptr;
+		std::unordered_set<llvm::Value*> _toRemove;
 };
 
 } // namespace bin2llvmir

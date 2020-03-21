@@ -79,6 +79,7 @@ bool CondBranchOpt::run()
 	}
 
 	SymbolicTree::setToDefaultConfiguration();
+	IrModifier::eraseUnusedInstructionsRecursive(_toRemove);
 
 	return changed;
 }
@@ -261,6 +262,7 @@ bool CondBranchOpt::runOnInstruction(
 		}
 
 		auto* icmp = new ICmpInst(br, ICmpInst::ICMP_ULT, nl, nci);
+		_toRemove.insert(br->getCondition());
 		br->replaceUsesOfWith(br->getCondition(), icmp);
 		return true;
 	}
@@ -305,6 +307,7 @@ bool CondBranchOpt::transformConditionSub(
 
 	LOG << "---" << llvmObjToString(br) << std::endl;
 
+	_toRemove.insert(br->getCondition());
 	br->replaceUsesOfWith(br->getCondition(), newCond);
 
 	LOG << "+++" << llvmObjToString(newCond) << std::endl;
