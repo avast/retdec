@@ -37,6 +37,7 @@ class X87FpuAnalysis : public llvm::ModulePass
 				std::map<llvm::Value*, int>& topVals,
 				llvm::BasicBlock* bb,
 				int topVal);
+		void removeAllFpuTopOperations();
 
 	private:
 		llvm::Module* _module = nullptr;

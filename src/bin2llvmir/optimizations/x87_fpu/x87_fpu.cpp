@@ -87,6 +87,9 @@ bool X87FpuAnalysis::run()
 			changed |= analyzeBb(seenBbs, topVals, &bb, topVal);
 		}
 	}
+
+	removeAllFpuTopOperations();
+
 	return changed;
 }
 
@@ -239,6 +242,25 @@ bool X87FpuAnalysis::analyzeBb(
 		}
 	}
 	return changed;
+}
+
+void X87FpuAnalysis::removeAllFpuTopOperations()
+{
+	std::unordered_set<llvm::Value*> toRemove;
+	for (Function& f : *_module)
+	for (auto it = inst_begin(&f), eIt = inst_end(&f); it != eIt; ++it)
+	{
+		Instruction* i = &*it;
+		if (auto* l = dyn_cast<LoadInst>(i); l && l->getPointerOperand() == top)
+		{
+			toRemove.insert(i);
+		}
+		if (auto* s = dyn_cast<StoreInst>(i); s && s->getPointerOperand() == top)
+		{
+			toRemove.insert(i);
+		}
+	}
+	IrModifier::eraseUnusedInstructionsRecursive(toRemove);
 }
 
 } // namespace bin2llvmir
