@@ -54,6 +54,7 @@ class StackAnalysis : public llvm::ModulePass
 		Config* _config = nullptr;
 		Abi* _abi = nullptr;
 		DebugFormat* _dbgf = nullptr;
+
 		std::unordered_set<llvm::Value*> _toRemove;
 };
 

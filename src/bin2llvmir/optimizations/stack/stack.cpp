@@ -251,8 +251,8 @@ void StackAnalysis::handleInstruction(
 	else
 	{
 		auto* conv = IrModifier::convertValueToType(a, val->getType(), inst);
-		inst->replaceUsesOfWith(val, conv);
 		_toRemove.insert(val);
+		inst->replaceUsesOfWith(val, conv);
 	}
 }
 
