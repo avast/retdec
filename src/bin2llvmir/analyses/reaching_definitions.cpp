@@ -12,7 +12,6 @@
 #include <vector>
 
 #include <llvm/ADT/PostOrderIterator.h>
-#include <llvm/Analysis/OrderedBasicBlock.h>
 #include <llvm/IR/CFG.h>
 #include <llvm/IR/Instruction.h>
 #include <llvm/IR/Instructions.h>
@@ -97,8 +96,10 @@ void ReachingDefinitionsAnalysis::initializeBasicBlocks(llvm::Function& F)
 	{
 		BasicBlockEntry bbe(&B);
 
+		int insnPos = -1;
 		for (Instruction& I : B)
 		{
+			++insnPos;
 			if (auto* l = dyn_cast<LoadInst>(&I))
 			{
 				if (!isa<GlobalVariable>(l->getPointerOperand())
@@ -113,7 +114,7 @@ void ReachingDefinitionsAnalysis::initializeBasicBlocks(llvm::Function& F)
 					continue;
 				}
 
-				bbe.uses.push_back(Use(l, l->getPointerOperand()));
+				bbe.uses.push_back(Use(l, l->getPointerOperand(), insnPos));
 			}
 			else if (auto* s = dyn_cast<StoreInst>(&I))
 			{
@@ -133,11 +134,11 @@ void ReachingDefinitionsAnalysis::initializeBasicBlocks(llvm::Function& F)
 					continue;
 				}
 
-				bbe.defs.push_back(Definition(s, s->getPointerOperand()));
+				bbe.defs.push_back(Definition(s, s->getPointerOperand(), insnPos));
 			}
 			else if (auto* a = dyn_cast<AllocaInst>(&I))
 			{
-				bbe.defs.push_back(Definition(a, a));
+				bbe.defs.push_back(Definition(a, a, insnPos));
 			}
 			else if (auto* call = dyn_cast<CallInst>(&I))
 			{
@@ -155,7 +156,7 @@ void ReachingDefinitionsAnalysis::initializeBasicBlocks(llvm::Function& F)
 
 					if (isa<AllocaInst>(a) || isa<GlobalVariable>(a))
 					{
-						bbe.uses.push_back( Use(&I, a) );
+						bbe.uses.push_back(Use(call, a, insnPos));
 					}
 				}
 
@@ -266,7 +267,6 @@ void ReachingDefinitionsAnalysis::initializeDefsAndUses()
 	for (auto& pair : pair1.second)
 	{
 		BasicBlockEntry &bb = pair.second;
-		OrderedBasicBlock obb(bb.bb);
 
 		for (Use &u : bb.uses)
 		{
@@ -279,7 +279,7 @@ void ReachingDefinitionsAnalysis::initializeDefsAndUses()
 					continue;
 				}
 
-				if (obb.dominates(d.def, u.use))
+				if (d.dominates(&u))
 				{
 					d.uses.insert(&u);
 					u.defs.insert(&d);
@@ -437,13 +437,19 @@ const UseSet& BasicBlockEntry::usesFromDef(const Instruction* I) const
 
 const Definition* BasicBlockEntry::getDef(const Instruction* I) const
 {
-	auto dIt = find(defs.begin(), defs.end(), Definition(const_cast<Instruction*>(I), nullptr));
+	auto dIt = find(
+			defs.begin(),
+			defs.end(),
+			Definition(const_cast<Instruction*>(I), nullptr, 0));
 	return dIt != defs.end() ? &(*dIt) : nullptr;
 }
 
 const Use* BasicBlockEntry::getUse(const Instruction* I) const
 {
-	auto uIt = find(uses.begin(), uses.end(), Use(const_cast<Instruction*>(I), nullptr));
+	auto uIt = find(
+			uses.begin(),
+			uses.end(),
+			Use(const_cast<Instruction*>(I), nullptr, 0));
 	return uIt != uses.end() ? &(*uIt) : nullptr;
 }
 
@@ -485,9 +491,10 @@ std::ostream& operator<<(std::ostream& out, const BasicBlockEntry& bbe)
 //=============================================================================
 //
 
-Definition::Definition(llvm::Instruction* d, llvm::Value* s) :
+Definition::Definition(llvm::Instruction* d, llvm::Value* s, unsigned bbPos) :
 		def(d),
-		src(s)
+		src(s),
+		posInBb(bbPos)
 {
 
 }
@@ -502,15 +509,26 @@ llvm::Value* Definition::getSource()
 	return src;
 }
 
+/**
+ * Convenience method so that we don't have to check integer positions.
+ * However, this does not check that the given @a use is indeed an use of this
+ * definition - users of this method must make sure that it is.
+ */
+bool Definition::dominates(const Use* use) const
+{
+	return def->getParent() == use->use->getParent() && posInBb < use->posInBb;
+}
+
 //
 //=============================================================================
 //  Use
 //=============================================================================
 //
 
-Use::Use(llvm::Instruction* u, llvm::Value* s) :
+Use::Use(llvm::Instruction* u, llvm::Value* s, unsigned bbPos) :
 		use(u),
-		src(s)
+		src(s),
+		posInBb(bbPos)
 {
 
 }
