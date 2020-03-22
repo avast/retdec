@@ -107,8 +107,15 @@ BIN2LLVMIR_PARAMS = [
     '-syscalls',
     '-stack',
     '-constants',
+    
+#    '-dump-module',
     '-param-return',
-    '-local-vars',
+#    '-dump-module',
+    
+    '-inst-opt-rda',
+#    '-local-vars',
+    
+#    '-dump-module',
     '-inst-opt',
     '-simple-types',
     '-generate-dsm',
