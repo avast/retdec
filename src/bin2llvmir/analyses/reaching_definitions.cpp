@@ -116,6 +116,38 @@ void ReachingDefinitionsAnalysis::initializeBasicBlocks(llvm::Function& F)
 
 				bbe.uses.push_back(Use(l, l->getPointerOperand(), insnPos));
 			}
+			else if (auto* p2i = dyn_cast<PtrToIntInst>(&I))
+			{
+				if (!isa<GlobalVariable>(p2i->getPointerOperand())
+						&& !isa<AllocaInst>(p2i->getPointerOperand()))
+				{
+					continue;
+				}
+				if (!_trackFlagRegs
+						&& _abi
+						&& _abi->isFlagRegister(p2i->getPointerOperand()))
+				{
+					continue;
+				}
+
+				bbe.uses.push_back(Use(p2i, p2i->getPointerOperand(), insnPos));
+			}
+			else if (auto* gep = dyn_cast<GetElementPtrInst>(&I))
+			{
+				if (!isa<GlobalVariable>(gep->getPointerOperand())
+						&& !isa<AllocaInst>(gep->getPointerOperand()))
+				{
+					continue;
+				}
+				if (!_trackFlagRegs
+						&& _abi
+						&& _abi->isFlagRegister(gep->getPointerOperand()))
+				{
+					continue;
+				}
+
+				bbe.uses.push_back(Use(gep, gep->getPointerOperand(), insnPos));
+			}
 			else if (auto* s = dyn_cast<StoreInst>(&I))
 			{
 				if (!isa<GlobalVariable>(s->getPointerOperand())
