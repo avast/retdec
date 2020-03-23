@@ -1,15 +1,14 @@
 
 cmake_minimum_required(VERSION 3.6)
 
-project(retdec C CXX)
-
-include(GNUInstallDirs)
+project(retdec
+	LANGUAGES C CXX
+	VERSION 4.0
+)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/utils.cmake)
 
 # Set the default build type to 'Release'.
 if(NOT CMAKE_BUILD_TYPE)
@@ -18,10 +17,24 @@ if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "${default_build_type}" CACHE STRING "Choose the type of build." FORCE)
 endif()
 
+## Includes.
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/utils.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/options.cmake)
 
 # RetDec, and some dependencies (e.g. LLVM, Keystone), require Python 3.
 find_package(PythonInterp 3.4 REQUIRED)
+
+# Variables.
+set(RETDEC_INCLUDE_DIR         "${CMAKE_CURRENT_SOURCE_DIR}/include")
+set(RETDEC_SHARE_DIR           "${CMAKE_CURRENT_SOURCE_DIR}/share")
+set(RETDEC_BINARY_SHARE_DIR    "${CMAKE_CURRENT_BINARY_DIR}/share")
+set(RETDEC_INSTALL_BIN_DIR     "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}")
+set(RETDEC_INSTALL_INCLUDE_DIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}")
+set(RETDEC_INSTALL_LIB_DIR     "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
+set(RETDEC_INSTALL_DATA_DIR    "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATADIR}/retdec")
+set(RETDEC_INSTALL_CMAKE_DIR   "${RETDEC_INSTALL_DATA_DIR}/cmake")
 
 # On Linux and macOS, set RPATH relative to the origin of the installed
 # executables (i.e. relative to the bin directory). This allows us to move the
