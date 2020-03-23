@@ -27,6 +27,7 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/options.cmake)
 find_package(PythonInterp 3.4 REQUIRED)
 
 # Variables.
+set(RETDEC_DEPS_DIR            "${CMAKE_CURRENT_SOURCE_DIR}/deps")
 set(RETDEC_INCLUDE_DIR         "${CMAKE_CURRENT_SOURCE_DIR}/include")
 set(RETDEC_SHARE_DIR           "${CMAKE_CURRENT_SOURCE_DIR}/share")
 set(RETDEC_BINARY_SHARE_DIR    "${CMAKE_CURRENT_BINARY_DIR}/share")

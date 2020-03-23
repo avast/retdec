@@ -21,8 +21,8 @@ add_library(retdec::pelib ALIAS pelib)
 
 target_include_directories(pelib
 	PUBLIC
-		$<INSTALL_INTERFACE:${RETDEC_INSTALL_INCLUDE_DIR}>
 		$<BUILD_INTERFACE:${RETDEC_INCLUDE_DIR}>
+		$<INSTALL_INTERFACE:${RETDEC_INSTALL_INCLUDE_DIR}>
 )
 
 # Disable all warnings from this library.
