@@ -13,7 +13,7 @@
 #ifndef RELOCATIONSDIRECTORY_H
 #define RELOCATIONSDIRECTORY_H
 
-#include "pelib/PeHeader.h"
+#include "retdec/pelib/PeHeader.h"
 
 namespace PeLib
 {

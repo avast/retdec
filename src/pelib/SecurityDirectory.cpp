@@ -4,8 +4,8 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "pelib/PeLibInc.h"
-#include "pelib/SecurityDirectory.h"
+#include "retdec/pelib/PeLibInc.h"
+#include "retdec/pelib/SecurityDirectory.h"
 
 namespace PeLib
 {

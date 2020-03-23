@@ -10,7 +10,7 @@
 * of PeLib.
 */
 
-#include "pelib/OutputBuffer.h"
+#include "retdec/pelib/OutputBuffer.h"
 
 namespace PeLib
 {

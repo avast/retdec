@@ -17,12 +17,12 @@ add_library(pelib STATIC
 	RichHeader.cpp
 	SecurityDirectory.cpp
 )
+add_library(retdec::pelib ALIAS pelib)
 
 target_include_directories(pelib
 	PUBLIC
 		$<INSTALL_INTERFACE:${RETDEC_INSTALL_INCLUDE_DIR}>
 		$<BUILD_INTERFACE:${RETDEC_INCLUDE_DIR}>
-		$<BUILD_INTERFACE:${RETDEC_INCLUDE_DIR}/retdec>
 )
 
 # Disable all warnings from this library.
@@ -34,7 +34,7 @@ endif()
 
 # Create config version file.
 write_basic_package_version_file(
-	"${RETDEC_BINARY_SHARE_DIR}/pelib/pelib-config-version.cmake"
+	"${RETDEC_BINARY_SHARE_DIR}/pelib/retdec-pelib-config-version.cmake"
 	VERSION ${PROJECT_VERSION}
 	COMPATIBILITY AnyNewerVersion
 )
@@ -43,28 +43,31 @@ write_basic_package_version_file(
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/pelib
 	DESTINATION ${RETDEC_INSTALL_INCLUDE_DIR}/retdec
+	COMPONENT pelib
 )
 
 # Install libs.
 install(TARGETS pelib
 	EXPORT pelib-targets
+	COMPONENT pelib
 	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 	LIBRARY DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 )
 
 # Export targets.
 install(EXPORT pelib-targets
-	FILE "pelib-targets.cmake"
-#	NAMESPACE RetDec::
-	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR} #/pelib
+	FILE "retdec-pelib-targets.cmake"
+	NAMESPACE retdec::
+	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
+	COMPONENT pelib
 )
 
 # Install CMake files.
 install(
 	FILES
-		"${RETDEC_SHARE_DIR}/pelib/pelib-config.cmake"
-		"${RETDEC_BINARY_SHARE_DIR}/pelib/pelib-config-version.cmake"
+		"${RETDEC_SHARE_DIR}/pelib/retdec-pelib-config.cmake"
+		"${RETDEC_BINARY_SHARE_DIR}/pelib/retdec-pelib-config-version.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
-#		"${RETDEC_INSTALL_CMAKE_DIR}/pelib"
+	COMPONENT pelib
 )

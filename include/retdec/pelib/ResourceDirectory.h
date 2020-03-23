@@ -15,8 +15,8 @@
 
 #include <set>
 
-#include "pelib/PeLibInc.h"
-#include "pelib/PeHeader.h"
+#include "retdec/pelib/PeLibInc.h"
+#include "retdec/pelib/PeHeader.h"
 
 namespace PeLib
 {

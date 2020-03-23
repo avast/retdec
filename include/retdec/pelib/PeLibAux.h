@@ -22,8 +22,8 @@
 #pragma warning(disable:4244)		// C4244: 'argument': conversion from 'uint64_t' to 'unsigned int', possible loss of data
 #endif
 
-#include "pelib/OutputBuffer.h"
-#include "pelib/InputBuffer.h"
+#include "retdec/pelib/OutputBuffer.h"
+#include "retdec/pelib/InputBuffer.h"
 
 //get rid of duplicate windows.h definitions
 #ifdef ERROR_NONE

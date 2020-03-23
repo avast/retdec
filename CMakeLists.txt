@@ -109,3 +109,25 @@ cond_add_subdirectory(scripts RETDEC_ENABLE_SCRIPTS)
 add_subdirectory(src)
 cond_add_subdirectory(support RETDEC_ENABLE_SUPPORT)
 add_subdirectory(tests)
+
+# Create config version file.
+write_basic_package_version_file(
+	"${RETDEC_BINARY_SHARE_DIR}/retdec-config-version.cmake"
+	VERSION ${PROJECT_VERSION}
+	COMPATIBILITY AnyNewerVersion
+)
+
+# Create main RetDec CMake config file.
+configure_file(share/retdec-config.cmake
+	"${RETDEC_BINARY_SHARE_DIR}/retdec-config.cmake"
+	@ONLY
+)
+
+# Install CMake files.
+install(
+	FILES
+		"${RETDEC_BINARY_SHARE_DIR}/retdec-config.cmake"
+		"${RETDEC_BINARY_SHARE_DIR}/retdec-config-version.cmake"
+	DESTINATION DESTINATION
+		${RETDEC_INSTALL_CMAKE_DIR}
+)

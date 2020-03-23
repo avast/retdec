@@ -16,9 +16,9 @@
   #include <ctype.h>
 #endif
 
-#include "pelib/PeLibInc.h"
-#include "pelib/PeLibAux.h"
-#include "pelib/PeFile.h"
+#include "retdec/pelib/PeLibInc.h"
+#include "retdec/pelib/PeLibAux.h"
+#include "retdec/pelib/PeFile.h"
 
 namespace PeLib
 {

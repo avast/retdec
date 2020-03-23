@@ -21,6 +21,6 @@
 #include <vector>
 #include <functional>
 
-#include "pelib/PeLibAux.h"
+#include "retdec/pelib/PeLibAux.h"
 
 #endif

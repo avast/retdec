@@ -16,8 +16,8 @@
 #include <algorithm>
 #include <string.h>
 
-#include "pelib/PeLibAux.h"
-#include "pelib/MzHeader.h"
+#include "retdec/pelib/PeLibAux.h"
+#include "retdec/pelib/MzHeader.h"
 
 namespace PeLib
 {

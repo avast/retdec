@@ -10,8 +10,8 @@
 * of PeLib.
 */
 
-#include "pelib/PeLibInc.h"
-#include "pelib/RelocationsDirectory.h"
+#include "retdec/pelib/PeLibInc.h"
+#include "retdec/pelib/RelocationsDirectory.h"
 
 namespace PeLib
 {
