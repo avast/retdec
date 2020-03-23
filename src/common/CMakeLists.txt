@@ -1,5 +1,5 @@
 
-add_library(retdec-common STATIC
+add_library(common STATIC
 	address.cpp
 	architecture.cpp
 	basic_block.cpp
@@ -16,7 +16,63 @@ add_library(retdec-common STATIC
 	type.cpp
 	vtable.cpp
 )
-target_link_libraries(retdec-common
-	retdec-utils
+add_library(retdec::common ALIAS common)
+
+target_link_libraries(common
+	PRIVATE retdec::utils
 )
-target_include_directories(retdec-common PUBLIC ${PROJECT_SOURCE_DIR}/include/)
+
+target_include_directories(common
+	PUBLIC
+		$<BUILD_INTERFACE:${RETDEC_INCLUDE_DIR}>
+		$<INSTALL_INTERFACE:${RETDEC_INSTALL_INCLUDE_DIR}>
+)
+
+# Create config version file.
+write_basic_package_version_file(
+	"${RETDEC_BINARY_SHARE_DIR}/common/retdec-common-config-version.cmake"
+	VERSION ${PROJECT_VERSION}
+	COMPATIBILITY AnyNewerVersion
+)
+
+configure_package_config_file(
+	"${RETDEC_SHARE_DIR}/common/retdec-common-config.cmake"
+    "${RETDEC_BINARY_SHARE_DIR}/common/retdec-common-config-version.cmake"
+    INSTALL_DESTINATION "${RETDEC_INSTALL_CMAKE_DIR}"
+)
+
+# Install includes.
+install(
+	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/common
+	DESTINATION ${RETDEC_INSTALL_INCLUDE_DIR}/retdec
+	COMPONENT common
+)
+
+# Install libs.
+install(TARGETS common
+	EXPORT common-targets
+	COMPONENT common
+	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
+	LIBRARY DESTINATION ${RETDEC_INSTALL_LIB_DIR}
+)
+
+# Export targets.
+install(EXPORT common-targets
+	FILE "retdec-common-targets.cmake"
+	NAMESPACE retdec::
+	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
+	COMPONENT common
+)
+
+# Install CMake files.
+install(
+	FILES
+#		"${RETDEC_SHARE_DIR}/common/retdec-common-config.cmake"
+		"${RETDEC_BINARY_SHARE_DIR}/retdec-config.cmake"
+		"${RETDEC_SHARE_DIR}/utils/retdec-utils-config.cmake"
+		"${RETDEC_BINARY_SHARE_DIR}/common/retdec-common-config-version.cmake"
+		"${RETDEC_BINARY_SHARE_DIR}/common/retdec-common-config-version.cmake"
+	DESTINATION
+		"${RETDEC_INSTALL_CMAKE_DIR}"
+	COMPONENT common
+)

@@ -15,7 +15,9 @@ add_executable(retdec-tests-utils
 	time_tests.cpp
 )
 target_link_libraries(retdec-tests-utils
-	retdec-utils
+	retdec::utils
 	gmock_main
 )
-install(TARGETS retdec-tests-utils RUNTIME DESTINATION ${RETDEC_TESTS_DIR})
+install(TARGETS retdec-tests-utils
+	RUNTIME DESTINATION ${RETDEC_TESTS_DIR}
+)

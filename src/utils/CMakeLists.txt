@@ -52,6 +52,7 @@ install(
 # Install libs.
 install(TARGETS utils whereami
 	EXPORT utils-targets
+	EXPORT common-targets
 	COMPONENT utils
 	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 	LIBRARY DESTINATION ${RETDEC_INSTALL_LIB_DIR}
