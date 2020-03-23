@@ -23,6 +23,12 @@ else()
 	set(IS_DEBUG_BUILD "NO")
 endif()
 
+if(RETDEC_MSVC_STATIC_RUNTIME)
+	set(RT_TYPE "MT")
+else()
+	set(RT_TYPE "MD")
+endif()
+
 # Use the ExternalProject module instead of just CMake because we want to build and
 # install only some tools from LLVM, not all the libraries and tools.
 include(ExternalProject)
@@ -38,6 +44,7 @@ if(LLVM_LOCAL_DIR)
 			# This has no effect on Windows with MSVC, but is useful on Linux.
 			-DCMAKE_BUILD_TYPE=Release
 			-DCMAKE_CXX_FLAGS_RELEASE=${CMAKE_CXX_FLAGS_RELEASE}
+			-DLLVM_USE_CRT_RELEASE=${RT_TYPE}
 
 			# Force Python3.
 			-DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
@@ -106,6 +113,7 @@ else()
 			# This has no effect on Windows with MSVC, but is useful on Linux.
 			-DCMAKE_BUILD_TYPE=Release
 			-DCMAKE_CXX_FLAGS_RELEASE=${CMAKE_CXX_FLAGS_RELEASE}
+			-DLLVM_USE_CRT_RELEASE=${RT_TYPE}
 
 			# Force Python3.
 			-DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}

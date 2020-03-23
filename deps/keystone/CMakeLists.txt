@@ -20,7 +20,7 @@ if(KEYSTONE_LOCAL_DIR)
 			# Python is used to generate LLVMBuild.cmake file. Python2 generates this file
 			# with UNIX paths, which do not work. Python3 generates proper Windows paths.
 			-DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
-			-DKEYSTONE_BUILD_STATIC_RUNTIME=OFF
+			-DKEYSTONE_BUILD_STATIC_RUNTIME=${RETDEC_MSVC_STATIC_RUNTIME}
 			# Force the use of the same compiler as used to build the top-level
 			# project. Otherwise, the external project may pick up a different
 			# compiler, which may result in link errors.
@@ -46,7 +46,7 @@ else()
 			# Python is used to generate LLVMBuild.cmake file. Python2 generates this file
 			# with UNIX paths, which do not work. Python3 generates proper Windows paths.
 			-DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
-			-DKEYSTONE_BUILD_STATIC_RUNTIME=OFF
+			-DKEYSTONE_BUILD_STATIC_RUNTIME=${RETDEC_MSVC_STATIC_RUNTIME}
 			# Force the use of the same compiler as used to build the top-level
 			# project. Otherwise, the external project may pick up a different
 			# compiler, which may result in link errors.

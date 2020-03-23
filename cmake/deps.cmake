@@ -38,10 +38,10 @@ set(YARA_URL
 set(YARA_ARCHIVE_SHA256 "8ebec236ede6f20f27ad597452a02dcc54ac3c73f09fea8c93c3a6bf10fbc890")
 
 set(YARAMOD_URL
-    "https://github.com/avast/yaramod/archive/v3.0.1.zip"
+    "https://github.com/avast/yaramod/archive/57f4ee87372aba7735bbcc1ed870f43faaa8127b.zip"
     CACHE STRING "URL of YaraMod archive to use."
 )
-set(YARAMOD_ARCHIVE_SHA256 "f40c168996e9a137cfd4d83181b05bb92d8b1c4615aad923b48ab13f2aca1129")
+set(YARAMOD_ARCHIVE_SHA256 "c7fdfc1a425d5bcab18fd336e284ee3dff0fe64749a46348af289cfed6fe2b92")
 
 set(SUPPORT_PKG_URL
     "https://github.com/avast/retdec-support/releases/download/2019-03-08/retdec-support_2019-03-08.tar.xz"
