@@ -3,9 +3,9 @@ add_library(whereami STATIC
 	whereami.c
 )
 target_include_directories(whereami
-	INTERFACE
+	SYSTEM INTERFACE
 		$<BUILD_INTERFACE:${RETDEC_DEPS_DIR}/whereami/include>
-		$<INSTALL_INTERFACE:${RETDEC_INSTALL_INCLUDE_DIR}>
+		# nothing for install because this does not need to be installed
 	PRIVATE
 		${CMAKE_CURRENT_SOURCE_DIR}/include/whereami
 )
