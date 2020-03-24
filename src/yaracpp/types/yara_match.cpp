@@ -6,8 +6,8 @@
 
 #include "retdec/yaracpp/types/yara_match.h"
 
-namespace yaracpp
-{
+namespace retdec {
+namespace yaracpp {
 
 /**
  * Get offset of detection
@@ -65,3 +65,4 @@ void YaraMatch::addByte(std::uint8_t byte)
 }
 
 } // namespace yaracpp
+} // namespace retdec

@@ -16,7 +16,7 @@
 
 using namespace retdec::fileformat;
 using namespace retdec::utils;
-using namespace yaracpp;
+using namespace retdec::yaracpp;
 
 namespace retdec {
 namespace cpdetect {

@@ -24,7 +24,7 @@ static bool debug_enabled = false;
 using namespace retdec::common;
 using namespace retdec::loader;
 using namespace retdec::utils;
-using namespace yaracpp;
+using namespace retdec::yaracpp;
 
 namespace retdec {
 namespace stacofin {

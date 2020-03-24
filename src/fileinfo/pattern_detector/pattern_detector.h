@@ -13,9 +13,11 @@
 
 #include "fileinfo/file_information/file_information.h"
 
+namespace retdec {
 namespace yaracpp {
 class YaraRule;
 } // namespace yaracpp
+} // namespace retdec
 
 namespace fileinfo {
 

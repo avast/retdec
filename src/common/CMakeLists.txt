@@ -18,14 +18,14 @@ add_library(common STATIC
 )
 add_library(retdec::common ALIAS common)
 
-target_link_libraries(common
-	PRIVATE retdec::utils
-)
-
 target_include_directories(common
 	PUBLIC
 		$<BUILD_INTERFACE:${RETDEC_INCLUDE_DIR}>
 		$<INSTALL_INTERFACE:${RETDEC_INSTALL_INCLUDE_DIR}>
+)
+
+target_link_libraries(common
+	PRIVATE retdec::utils
 )
 
 # Create config version file.

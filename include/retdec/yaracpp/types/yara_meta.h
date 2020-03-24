@@ -8,8 +8,8 @@
 
 #include <string>
 
-namespace yaracpp
-{
+namespace retdec {
+namespace yaracpp {
 
 /**
  * Representation of metadata
@@ -52,3 +52,4 @@ class YaraMeta
 };
 
 } // namespace yaracpp
+} // namespace retdec

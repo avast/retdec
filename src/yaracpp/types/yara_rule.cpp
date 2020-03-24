@@ -8,8 +8,8 @@
 
 #include <ostream>
 
-namespace yaracpp
-{
+namespace retdec {
+namespace yaracpp {
 
 /**
  * Get name related to this rule
@@ -162,3 +162,4 @@ std::ostream& operator<<(std::ostream& o, const YaraRule& rule)
 }
 
 } // namespace yaracpp
+} // namespace retdec
