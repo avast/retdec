@@ -35,12 +35,6 @@ write_basic_package_version_file(
 	COMPATIBILITY AnyNewerVersion
 )
 
-configure_package_config_file(
-	"${RETDEC_SHARE_DIR}/common/retdec-common-config.cmake"
-    "${RETDEC_BINARY_SHARE_DIR}/common/retdec-common-config-version.cmake"
-    INSTALL_DESTINATION "${RETDEC_INSTALL_CMAKE_DIR}"
-)
-
 # Install includes.
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/common
@@ -67,10 +61,7 @@ install(EXPORT common-targets
 # Install CMake files.
 install(
 	FILES
-#		"${RETDEC_SHARE_DIR}/common/retdec-common-config.cmake"
-		"${RETDEC_BINARY_SHARE_DIR}/retdec-config.cmake"
-		"${RETDEC_SHARE_DIR}/utils/retdec-utils-config.cmake"
-		"${RETDEC_BINARY_SHARE_DIR}/common/retdec-common-config-version.cmake"
+		"${RETDEC_SHARE_DIR}/common/retdec-common-config.cmake"
 		"${RETDEC_BINARY_SHARE_DIR}/common/retdec-common-config-version.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"

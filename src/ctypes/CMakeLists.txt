@@ -1,4 +1,5 @@
-set(CTYPES_SOURCES
+
+add_library(ctypes STATIC
 	annotation.cpp
 	annotation_in.cpp
 	annotation_inout.cpp
@@ -30,7 +31,54 @@ set(CTYPES_SOURCES
 	visitor.cpp
 	void_type.cpp
 )
+add_library(retdec::ctypes ALIAS ctypes)
 
-add_library(retdec-ctypes STATIC ${CTYPES_SOURCES})
-target_link_libraries(retdec-ctypes retdec-utils)
-target_include_directories(retdec-ctypes PUBLIC ${PROJECT_SOURCE_DIR}/include/)
+target_link_libraries(ctypes
+	PRIVATE retdec::utils
+)
+
+target_include_directories(ctypes
+	PUBLIC
+		$<BUILD_INTERFACE:${RETDEC_INCLUDE_DIR}>
+		$<INSTALL_INTERFACE:${RETDEC_INSTALL_INCLUDE_DIR}>
+)
+
+# Create config version file.
+write_basic_package_version_file(
+	"${RETDEC_BINARY_SHARE_DIR}/ctypes/retdec-ctypes-config-version.cmake"
+	VERSION ${PROJECT_VERSION}
+	COMPATIBILITY AnyNewerVersion
+)
+
+# Install includes.
+install(
+	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/ctypes
+	DESTINATION ${RETDEC_INSTALL_INCLUDE_DIR}/retdec
+	COMPONENT ctypes
+)
+
+# Install libs.
+install(TARGETS ctypes
+	EXPORT ctypes-targets
+	COMPONENT ctypes
+	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
+	LIBRARY DESTINATION ${RETDEC_INSTALL_LIB_DIR}
+)
+
+# Export targets.
+install(EXPORT ctypes-targets
+	FILE "retdec-ctypes-targets.cmake"
+	NAMESPACE retdec::
+	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
+	COMPONENT ctypes
+)
+
+# Install CMake files.
+install(
+	FILES
+		"${RETDEC_SHARE_DIR}/ctypes/retdec-ctypes-config.cmake"
+		"${RETDEC_BINARY_SHARE_DIR}/ctypes/retdec-ctypes-config-version.cmake"
+	DESTINATION
+		"${RETDEC_INSTALL_CMAKE_DIR}"
+	COMPONENT ctypes
+)
