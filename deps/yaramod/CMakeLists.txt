@@ -86,3 +86,7 @@ target_link_libraries(yaramod
 		${binary_dir}/deps/pog/deps/fmt/fmt/${CMAKE_INSTALL_LIBDIR}/${CMAKE_STATIC_LIBRARY_PREFIX}pog_fmt${CMAKE_STATIC_LIBRARY_SUFFIX}
 		${binary_dir}/deps/pog/deps/re2/re2/${CMAKE_INSTALL_LIBDIR}/${CMAKE_STATIC_LIBRARY_PREFIX}pog_re2${CMAKE_STATIC_LIBRARY_SUFFIX}
 )
+if(WIN32)
+	target_link_libraries(yaramod INTERFACE debug shlwapi)
+	target_link_libraries(yaramod INTERFACE optimized shlwapi)
+endif()
