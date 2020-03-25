@@ -1,8 +1,19 @@
-set(MACHO_EXTRACTOR_SOURCES
+
+add_executable(macho-extractortool
 	macho_extractor.cpp
 )
 
-add_executable(retdec-macho-extractortool ${MACHO_EXTRACTOR_SOURCES})
-set_target_properties(retdec-macho-extractortool PROPERTIES OUTPUT_NAME "retdec-macho-extractor")
-target_link_libraries(retdec-macho-extractortool retdec-macho-extractor retdec-utils rapidjson)
-install(TARGETS retdec-macho-extractortool RUNTIME DESTINATION bin)
+target_link_libraries(macho-extractortool
+	retdec::macho-extractor
+	retdec::utils
+	retdec::rapidjson
+)
+
+set_target_properties(macho-extractortool
+	PROPERTIES
+		OUTPUT_NAME "retdec-macho-extractor"
+)
+
+install(TARGETS macho-extractortool
+	RUNTIME DESTINATION bin
+)
