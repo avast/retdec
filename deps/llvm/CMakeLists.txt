@@ -170,12 +170,6 @@ if(CHANGED)
 	clean_cmake_files(${binary_dir})
 endif()
 
-# Add libraries.
-ExternalProject_Get_Property(llvm-project binary_dir)
-
-add_library(llvm INTERFACE)
-add_dependencies(llvm llvm-project)
-
 set(LLVM_LIB_LIST
 	LLVMDebugInfoDWARF
 	LLVMBitWriter
@@ -205,9 +199,31 @@ if(MSVC)
 	set(RELEASE_DIR "Release/")
 endif()
 
+ExternalProject_Get_Property(llvm-project binary_dir)
+ExternalProject_Get_Property(llvm-project source_dir)
+
+# Create target.
+
+add_library(llvm INTERFACE)
+add_library(retdec::llvm ALIAS llvm)
+add_dependencies(llvm llvm-project)
+
+target_include_directories(llvm
+	SYSTEM INTERFACE
+		$<BUILD_INTERFACE:${source_dir}/include>
+		$<BUILD_INTERFACE:${binary_dir}/include>
+		$<INSTALL_INTERFACE:${RETDEC_INSTALL_INCLUDE_DIR}/retdec/deps>
+)
+
 foreach(LLVM_LIB ${LLVM_LIB_LIST})
-	target_link_libraries(llvm INTERFACE debug     ${binary_dir}/${DEBUG_DIR}lib/${CMAKE_STATIC_LIBRARY_PREFIX}${LLVM_LIB}${CMAKE_STATIC_LIBRARY_SUFFIX})
-	target_link_libraries(llvm INTERFACE optimized ${binary_dir}/${RELEASE_DIR}lib/${CMAKE_STATIC_LIBRARY_PREFIX}${LLVM_LIB}${CMAKE_STATIC_LIBRARY_SUFFIX})
+	target_link_libraries(llvm
+		INTERFACE debug
+			${binary_dir}/${DEBUG_DIR}lib/${CMAKE_STATIC_LIBRARY_PREFIX}${LLVM_LIB}${CMAKE_STATIC_LIBRARY_SUFFIX}
+	)
+	target_link_libraries(llvm
+		INTERFACE optimized
+			${binary_dir}/${RELEASE_DIR}lib/${CMAKE_STATIC_LIBRARY_PREFIX}${LLVM_LIB}${CMAKE_STATIC_LIBRARY_SUFFIX}
+	)
 endforeach(LLVM_LIB)
 
 target_link_libraries(llvm INTERFACE debug     Threads::Threads)
@@ -218,14 +234,58 @@ if(UNIX)
 	if (${CMAKE_SYSTEM_NAME} MATCHES "BSD")
 		set(EXECINFO "execinfo")
 	endif()
-	target_link_libraries(llvm INTERFACE debug     ${ZLIB_LIBRARIES} ${CMAKE_DL_LIBS} ${EXECINFO})
-	target_link_libraries(llvm INTERFACE optimized ${ZLIB_LIBRARIES} ${CMAKE_DL_LIBS} ${EXECINFO})
+	target_link_libraries(llvm
+		INTERFACE debug
+			${ZLIB_LIBRARIES} ${CMAKE_DL_LIBS} ${EXECINFO}
+	)
+	target_link_libraries(llvm
+		INTERFACE optimized
+			${ZLIB_LIBRARIES} ${CMAKE_DL_LIBS} ${EXECINFO}
+	)
 elseif(MINGW)
 	target_link_libraries(llvm INTERFACE debug     ${ZLIB_LIBRARIES})
 	target_link_libraries(llvm INTERFACE optimized ${ZLIB_LIBRARIES})
 endif()
 
-# Set include directories.
-ExternalProject_Get_Property(llvm-project source_dir)
-target_include_directories(llvm SYSTEM INTERFACE ${source_dir}/include)
-target_include_directories(llvm SYSTEM INTERFACE ${binary_dir}/include)
+# Create config version file.
+write_basic_package_version_file(
+	"${RETDEC_BINARY_SHARE_DIR}/retdec-llvm-config-version.cmake"
+	VERSION ${PROJECT_VERSION}
+	COMPATIBILITY AnyNewerVersion
+)
+
+# Install includes.
+install(
+	DIRECTORY
+		${source_dir}/include
+		${binary_dir}/include
+	DESTINATION
+		${RETDEC_INSTALL_INCLUDE_DIR}/retdec/deps
+	COMPONENT llvm
+)
+
+# Install libs.
+install(TARGETS llvm
+	EXPORT llvm-targets
+	COMPONENT llvm
+	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
+	LIBRARY DESTINATION ${RETDEC_INSTALL_LIB_DIR}
+)
+
+# Export targets.
+install(EXPORT llvm-targets
+	FILE "retdec-llvm-targets.cmake"
+	NAMESPACE retdec::
+	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
+	COMPONENT llvm
+)
+
+# Install CMake files.
+install(
+	FILES
+		"${CMAKE_CURRENT_LIST_DIR}/retdec-llvm-config.cmake"
+		"${RETDEC_BINARY_SHARE_DIR}/retdec-llvm-config-version.cmake"
+	DESTINATION
+		"${RETDEC_INSTALL_CMAKE_DIR}"
+	COMPONENT llvm
+)

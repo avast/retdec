@@ -28,7 +28,7 @@ target_include_directories(serdes
 target_link_libraries(serdes
 	PUBLIC
 		retdec::common
-		rapidjson
+		retdec::rapidjson
 )
 
 # Create config version file.
@@ -46,7 +46,7 @@ install(
 )
 
 # Install libs.
-install(TARGETS serdes rapidjson
+install(TARGETS serdes
 	EXPORT serdes-targets
 	COMPONENT serdes
 	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
