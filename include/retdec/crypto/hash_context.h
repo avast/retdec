@@ -11,7 +11,9 @@
 #include <string>
 #include <vector>
 
-#include <openssl/evp.h>
+// Forward declare OpenSSL structures used in this header.
+typedef struct evp_md_ctx_st EVP_MD_CTX;
+typedef struct evp_md_st EVP_MD;
 
 namespace retdec {
 namespace crypto {

@@ -1,13 +1,16 @@
 
-if(NOT RETDEC_FORCE_OPENSSL_BUILD)
-	find_package(OpenSSL 1.0.1)
-	if(OPENSSL_FOUND)
-		add_library(openssl-crypto INTERFACE)
-		target_link_libraries(openssl-crypto INTERFACE OpenSSL::Crypto)
-		return()
-	endif()
-endif()
-message(STATUS "  --> OpenSSL will be built as an external project")
+# Temporarily disabled, the current installation works only with static lib.
+# This will probably find dynamic lib on Linux.
+#
+# if(NOT RETDEC_FORCE_OPENSSL_BUILD)
+# 	find_package(OpenSSL 1.0.1)
+# 	if(OPENSSL_FOUND)
+# 		add_library(openssl-crypto INTERFACE)
+# 		target_link_libraries(openssl-crypto INTERFACE OpenSSL::Crypto)
+# 		return()
+# 	endif()
+# endif()
+# message(STATUS "  --> OpenSSL will be built as an external project")
 
 find_package(Perl REQUIRED)
 find_package(Threads REQUIRED)
@@ -170,12 +173,27 @@ set(OPENSSL_LIBRARIES
 )
 
 add_library(openssl-crypto INTERFACE)
-target_include_directories(openssl-crypto SYSTEM INTERFACE "${OPENSSL_INSTALL_DIR}/include")
-target_link_libraries(openssl-crypto INTERFACE "${OPENSSL_INSTALL_DIR}/lib/libcrypto${CMAKE_STATIC_LIBRARY_SUFFIX}")
-target_link_libraries(openssl-crypto INTERFACE Threads::Threads)
-if(MSVC)
-	target_link_libraries(openssl-crypto INTERFACE ws2_32 gdi32 advapi32 crypt32 user32)
-elseif(UNIX)
-	target_link_libraries(openssl-crypto INTERFACE ${CMAKE_DL_LIBS})
-endif()
 add_dependencies(openssl-crypto openssl)
+target_include_directories(openssl-crypto
+	SYSTEM INTERFACE $<BUILD_INTERFACE:${OPENSSL_INSTALL_DIR}/include>
+)
+target_link_libraries(openssl-crypto
+	INTERFACE
+		"${OPENSSL_INSTALL_DIR}/lib/libcrypto${CMAKE_STATIC_LIBRARY_SUFFIX}"
+		Threads::Threads
+)
+if(MSVC)
+	target_link_libraries(openssl-crypto
+		INTERFACE
+			ws2_32
+			gdi32
+			advapi32
+			crypt32
+			user32
+		)
+elseif(UNIX)
+	target_link_libraries(openssl-crypto
+		INTERFACE
+			${CMAKE_DL_LIBS}
+	)
+endif()
