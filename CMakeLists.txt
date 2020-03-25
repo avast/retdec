@@ -29,7 +29,6 @@ find_package(PythonInterp 3.4 REQUIRED)
 # Variables.
 set(RETDEC_DEPS_DIR            "${CMAKE_CURRENT_SOURCE_DIR}/deps")
 set(RETDEC_INCLUDE_DIR         "${CMAKE_CURRENT_SOURCE_DIR}/include")
-set(RETDEC_SHARE_DIR           "${CMAKE_CURRENT_SOURCE_DIR}/share")
 set(RETDEC_BINARY_SHARE_DIR    "${CMAKE_CURRENT_BINARY_DIR}/share")
 set(RETDEC_INSTALL_BIN_DIR     "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}")
 set(RETDEC_INSTALL_INCLUDE_DIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}")
@@ -119,7 +118,8 @@ write_basic_package_version_file(
 )
 
 # Create main RetDec CMake config file.
-configure_file(share/retdec-config.cmake
+configure_file(
+	"${CMAKE_CURRENT_LIST_DIR}/retdec-config.cmake"
 	"${RETDEC_BINARY_SHARE_DIR}/retdec-config.cmake"
 	@ONLY
 )

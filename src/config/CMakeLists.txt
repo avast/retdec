@@ -16,7 +16,7 @@ target_include_directories(config PUBLIC
 target_link_libraries(config
 	PUBLIC
 		retdec::common
-		rapidjson
+		retdec::rapidjson
 	PRIVATE
 		retdec::serdes
 		retdec::utils
@@ -24,7 +24,7 @@ target_link_libraries(config
 
 # Create config version file.
 write_basic_package_version_file(
-	"${RETDEC_BINARY_SHARE_DIR}/config/retdec-config-config-version.cmake"
+	"${RETDEC_BINARY_SHARE_DIR}/retdec-config-config-version.cmake"
 	VERSION ${PROJECT_VERSION}
 	COMPATIBILITY AnyNewerVersion
 )
@@ -55,8 +55,8 @@ install(EXPORT config-targets
 # Install CMake files.
 install(
 	FILES
-		"${RETDEC_SHARE_DIR}/config/retdec-config-config.cmake"
-		"${RETDEC_BINARY_SHARE_DIR}/config/retdec-config-config-version.cmake"
+		"${CMAKE_CURRENT_LIST_DIR}/retdec-config-config.cmake"
+		"${RETDEC_BINARY_SHARE_DIR}/retdec-config-config-version.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
 	COMPONENT config

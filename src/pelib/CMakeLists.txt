@@ -34,7 +34,7 @@ endif()
 
 # Create config version file.
 write_basic_package_version_file(
-	"${RETDEC_BINARY_SHARE_DIR}/pelib/retdec-pelib-config-version.cmake"
+	"${RETDEC_BINARY_SHARE_DIR}/retdec-pelib-config-version.cmake"
 	VERSION ${PROJECT_VERSION}
 	COMPATIBILITY AnyNewerVersion
 )
@@ -65,8 +65,8 @@ install(EXPORT pelib-targets
 # Install CMake files.
 install(
 	FILES
-		"${RETDEC_SHARE_DIR}/pelib/retdec-pelib-config.cmake"
-		"${RETDEC_BINARY_SHARE_DIR}/pelib/retdec-pelib-config-version.cmake"
+		"${CMAKE_CURRENT_LIST_DIR}/retdec-pelib-config.cmake"
+		"${RETDEC_BINARY_SHARE_DIR}/retdec-pelib-config-version.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
 	COMPONENT pelib

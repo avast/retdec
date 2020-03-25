@@ -20,7 +20,7 @@ target_link_libraries(crypto
 
 # Create config version file.
 write_basic_package_version_file(
-	"${RETDEC_BINARY_SHARE_DIR}/crypto/retdec-crypto-config-version.cmake"
+	"${RETDEC_BINARY_SHARE_DIR}/retdec-crypto-config-version.cmake"
 	VERSION ${PROJECT_VERSION}
 	COMPATIBILITY AnyNewerVersion
 )
@@ -51,8 +51,8 @@ install(EXPORT crypto-targets
 # Install CMake files.
 install(
 	FILES
-		"${RETDEC_SHARE_DIR}/crypto/retdec-crypto-config.cmake"
-		"${RETDEC_BINARY_SHARE_DIR}/crypto/retdec-crypto-config-version.cmake"
+		"${CMAKE_CURRENT_LIST_DIR}/retdec-crypto-config.cmake"
+		"${RETDEC_BINARY_SHARE_DIR}/retdec-crypto-config-version.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
 	COMPONENT crypto

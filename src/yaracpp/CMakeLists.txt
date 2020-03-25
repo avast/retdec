@@ -19,7 +19,7 @@ target_link_libraries(yaracpp
 
 # Create config version file.
 write_basic_package_version_file(
-	"${RETDEC_BINARY_SHARE_DIR}/yaracpp/retdec-yaracpp-config-version.cmake"
+	"${RETDEC_BINARY_SHARE_DIR}/retdec-yaracpp-config-version.cmake"
 	VERSION ${PROJECT_VERSION}
 	COMPATIBILITY AnyNewerVersion
 )
@@ -50,8 +50,8 @@ install(EXPORT yaracpp-targets
 # Install CMake files.
 install(
 	FILES
-		"${RETDEC_SHARE_DIR}/yaracpp/retdec-yaracpp-config.cmake"
-		"${RETDEC_BINARY_SHARE_DIR}/yaracpp/retdec-yaracpp-config-version.cmake"
+		"${CMAKE_CURRENT_LIST_DIR}/retdec-yaracpp-config.cmake"
+		"${RETDEC_BINARY_SHARE_DIR}/retdec-yaracpp-config-version.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
 	COMPONENT yaracpp

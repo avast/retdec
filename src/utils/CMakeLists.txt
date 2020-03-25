@@ -37,7 +37,7 @@ endif()
 
 # Create config version file.
 write_basic_package_version_file(
-	"${RETDEC_BINARY_SHARE_DIR}/utils/retdec-utils-config-version.cmake"
+	"${RETDEC_BINARY_SHARE_DIR}/retdec-utils-config-version.cmake"
 	VERSION ${PROJECT_VERSION}
 	COMPATIBILITY AnyNewerVersion
 )
@@ -68,8 +68,8 @@ install(EXPORT utils-targets
 # Install CMake files.
 install(
 	FILES
-		"${RETDEC_SHARE_DIR}/utils/retdec-utils-config.cmake"
-		"${RETDEC_BINARY_SHARE_DIR}/utils/retdec-utils-config-version.cmake"
+		"${CMAKE_CURRENT_LIST_DIR}/retdec-utils-config.cmake"
+		"${RETDEC_BINARY_SHARE_DIR}/retdec-utils-config-version.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
 	COMPONENT utils

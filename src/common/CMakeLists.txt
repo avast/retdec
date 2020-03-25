@@ -25,12 +25,13 @@ target_include_directories(common
 )
 
 target_link_libraries(common
-	PRIVATE retdec::utils
+	PRIVATE
+		retdec::utils
 )
 
 # Create config version file.
 write_basic_package_version_file(
-	"${RETDEC_BINARY_SHARE_DIR}/common/retdec-common-config-version.cmake"
+	"${RETDEC_BINARY_SHARE_DIR}/retdec-common-config-version.cmake"
 	VERSION ${PROJECT_VERSION}
 	COMPATIBILITY AnyNewerVersion
 )
@@ -61,8 +62,8 @@ install(EXPORT common-targets
 # Install CMake files.
 install(
 	FILES
-		"${RETDEC_SHARE_DIR}/common/retdec-common-config.cmake"
-		"${RETDEC_BINARY_SHARE_DIR}/common/retdec-common-config-version.cmake"
+		"${CMAKE_CURRENT_LIST_DIR}/retdec-common-config.cmake"
+		"${RETDEC_BINARY_SHARE_DIR}/retdec-common-config-version.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
 	COMPONENT common

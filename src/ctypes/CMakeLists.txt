@@ -34,7 +34,8 @@ add_library(ctypes STATIC
 add_library(retdec::ctypes ALIAS ctypes)
 
 target_link_libraries(ctypes
-	PRIVATE retdec::utils
+	PRIVATE
+		retdec::utils
 )
 
 target_include_directories(ctypes
@@ -45,7 +46,7 @@ target_include_directories(ctypes
 
 # Create config version file.
 write_basic_package_version_file(
-	"${RETDEC_BINARY_SHARE_DIR}/ctypes/retdec-ctypes-config-version.cmake"
+	"${RETDEC_BINARY_SHARE_DIR}/retdec-ctypes-config-version.cmake"
 	VERSION ${PROJECT_VERSION}
 	COMPATIBILITY AnyNewerVersion
 )
@@ -76,8 +77,8 @@ install(EXPORT ctypes-targets
 # Install CMake files.
 install(
 	FILES
-		"${RETDEC_SHARE_DIR}/ctypes/retdec-ctypes-config.cmake"
-		"${RETDEC_BINARY_SHARE_DIR}/ctypes/retdec-ctypes-config-version.cmake"
+		"${CMAKE_CURRENT_LIST_DIR}/retdec-ctypes-config.cmake"
+		"${RETDEC_BINARY_SHARE_DIR}/retdec-ctypes-config-version.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
 	COMPONENT ctypes
