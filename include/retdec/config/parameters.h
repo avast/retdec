@@ -48,9 +48,9 @@ class Parameters
 		std::string getOrdinalNumbersDirectory() const;
 		/// @}
 
-template <typename Writer>
-void serialize(Writer& writer) const;
-void deserialize(const rapidjson::Value& val);
+		template <typename Writer>
+		void serialize(Writer& writer) const;
+		void deserialize(const rapidjson::Value& val);
 
 	public:
 		std::set<std::string> userStaticSignaturePaths;
