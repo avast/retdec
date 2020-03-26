@@ -116,8 +116,9 @@ set_target_properties(libyara
         INTERFACE_LINK_LIBRARIES "${LIBRARIES}"
 )
 target_include_directories(libyara
-    SYSTEM INTERFACE $<BUILD_INTERFACE:${YARA_INCLUDE_DIR}>
-    # nothing for install because this does not need to be installed
+    SYSTEM INTERFACE
+        $<BUILD_INTERFACE:${YARA_INCLUDE_DIR}>
+        # nothing for install because this does not need to be installed
 )
 
 # Install yarac application - we may need it to compile YARA files.

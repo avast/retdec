@@ -6,7 +6,7 @@
 
 #include <memory>
 
-#include <tinyxml2.h>
+#include <tinyxml2/tinyxml2.h>
 
 #include "retdec/fileformat/file_format/file_format.h"
 #include "fileinfo/file_detector/file_detector.h"

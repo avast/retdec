@@ -15,7 +15,10 @@ add_library(utils STATIC
 )
 add_library(retdec::utils ALIAS utils)
 
-target_link_libraries(utils PRIVATE whereami)
+target_link_libraries(utils
+	PRIVATE
+		retdec::whereami
+)
 if(WIN32)
 	# shlwapi.dll for PathRemoveFileSpec()
 	target_link_libraries(utils PRIVATE shlwapi)
