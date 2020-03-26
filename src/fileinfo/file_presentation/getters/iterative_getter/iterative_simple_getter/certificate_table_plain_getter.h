@@ -9,6 +9,7 @@
 
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_simple_getter/iterative_simple_getter.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -25,5 +26,6 @@ class CertificateTablePlainGetter : public IterativeSimpleGetter
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

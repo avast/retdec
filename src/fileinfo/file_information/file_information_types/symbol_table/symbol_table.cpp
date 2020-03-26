@@ -7,6 +7,7 @@
 #include "fileinfo/file_information/file_information_types/symbol_table/symbol_table.h"
 #include "fileinfo/file_information/file_information_types/type_conversions.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -255,3 +256,4 @@ void SymbolTable::clearSpecialInformation()
 }
 
 } // namespace fileinfo
+} // namespace retdec

@@ -12,6 +12,7 @@
 using namespace retdec::utils;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -99,3 +100,4 @@ bool RelocationTablesJsonGetter::getFlags(std::size_t structIndex, std::size_t r
 }
 
 } // namespace fileinfo
+} // namespace retdec

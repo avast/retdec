@@ -8,6 +8,7 @@
 #include "fileinfo/file_information/file_information_types/loader_info.h"
 #include "fileinfo/file_information/file_information_types/type_conversions.h"
 
+namespace retdec {
 namespace fileinfo {
 
 LoadedSegment::LoadedSegment(unsigned long long index, std::string name, unsigned long long address, unsigned long long size)
@@ -99,3 +100,4 @@ void LoaderInfo::addLoadedSegment(const LoadedSegment& segment)
 }
 
 } // namespace fileinfo
+} // namespace retdec

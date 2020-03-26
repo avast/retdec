@@ -19,6 +19,7 @@ class YaraRule;
 } // namespace yaracpp
 } // namespace retdec
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -56,5 +57,6 @@ class PatternDetector
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

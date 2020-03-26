@@ -9,6 +9,7 @@
 
 #include "fileinfo/file_information/file_information.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -51,5 +52,6 @@ class IterativeGetter
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

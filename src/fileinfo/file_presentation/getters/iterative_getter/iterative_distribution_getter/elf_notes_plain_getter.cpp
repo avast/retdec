@@ -10,6 +10,7 @@
 using namespace retdec::utils;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 namespace
@@ -136,3 +137,4 @@ bool ElfNotesPlainGetter::getFlagDescriptors(
 }
 
 } // namespace fileinfo
+} // namespace retdec

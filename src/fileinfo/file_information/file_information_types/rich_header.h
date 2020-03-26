@@ -9,6 +9,7 @@
 
 #include "retdec/fileformat/types/rich_header/rich_header.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -45,5 +46,6 @@ class RichHeader
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

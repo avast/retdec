@@ -12,6 +12,7 @@
 using namespace retdec::utils;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -89,3 +90,4 @@ bool RichHeaderJsonGetter::getFlags(std::size_t structIndex, std::size_t recInde
 }
 
 } // namespace fileinfo
+} // namespace retdec

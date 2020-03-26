@@ -9,6 +9,7 @@
 
 #include "retdec/fileformat/types/certificate_table/certificate_table.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -80,5 +81,6 @@ class CertificateTable
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

@@ -9,6 +9,7 @@
 using namespace llvm::MachO;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -68,3 +69,4 @@ std::string MachOWrapper::getTypeOfFile() const
 }
 
 } // namespace fileinfo
+} // namespace retdec

@@ -11,6 +11,7 @@
 
 #include "fileinfo/file_information/file_information_types/relocation_table/relocation.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -66,5 +67,6 @@ class RelocationTable
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

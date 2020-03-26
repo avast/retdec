@@ -9,6 +9,7 @@
 
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_distribution_getter/iterative_distribution_getter.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -37,5 +38,6 @@ class ElfCoreMapPlainGetter : public IterativeDistributionGetter
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

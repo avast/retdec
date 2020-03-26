@@ -9,6 +9,7 @@
 
 #include "retdec/fileformat/types/tls_info/tls_info.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -39,5 +40,6 @@ class TlsInfo
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

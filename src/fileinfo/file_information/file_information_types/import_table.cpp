@@ -7,6 +7,7 @@
 #include "fileinfo/file_information/file_information_types/import_table.h"
 #include "fileinfo/file_information/file_information_types/type_conversions.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -178,3 +179,4 @@ bool ImportTable::hasRecords() const
 }
 
 } // namespace fileinfo
+} // namespace retdec

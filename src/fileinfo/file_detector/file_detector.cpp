@@ -16,6 +16,7 @@ using namespace retdec::utils;
 using namespace retdec::cpdetect;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -361,3 +362,4 @@ const retdec::fileformat::FileFormat* FileDetector::getFileParser() const
 }
 
 } // namespace fileinfo
+} // namespace retdec

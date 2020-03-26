@@ -6,6 +6,7 @@
 
 #include <string>
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -27,3 +28,4 @@ std::string getBinaryRepresentation(unsigned long long number, unsigned long lon
 }
 
 } // namespace fileinfo
+} // namespace retdec

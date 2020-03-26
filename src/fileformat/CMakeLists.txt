@@ -1,7 +1,5 @@
 
-find_package(Threads REQUIRED)
-
-add_library(retdec-fileformat STATIC
+add_library(fileformat STATIC
 	utils/format_detection.cpp
 	utils/byte_array_buffer.cpp
 	utils/conversions.cpp
@@ -77,12 +75,62 @@ add_library(retdec-fileformat STATIC
 	file_format/file_format.cpp
 	file_format/elf/elf_format.cpp
 )
-target_link_libraries(retdec-fileformat
-	retdec-crypto
-	retdec-common
-	retdec-utils
-	pelib
-	elfio
-	llvm Threads::Threads
+add_library(retdec::fileformat ALIAS fileformat)
+
+target_compile_features(fileformat PUBLIC cxx_std_17)
+
+target_include_directories(fileformat
+	PUBLIC
+		$<BUILD_INTERFACE:${RETDEC_INCLUDE_DIR}>
+		$<INSTALL_INTERFACE:${RETDEC_INSTALL_INCLUDE_DIR}>
 )
-target_include_directories(retdec-fileformat PUBLIC ${PROJECT_SOURCE_DIR}/include/)
+
+target_link_libraries(fileformat
+	PUBLIC
+		retdec::crypto
+		retdec::common
+		retdec::utils
+		retdec::pelib
+		retdec::elfio
+		retdec::llvm
+)
+
+# Create config version file.
+write_basic_package_version_file(
+	"${RETDEC_BINARY_SHARE_DIR}/retdec-fileformat-config-version.cmake"
+	VERSION ${PROJECT_VERSION}
+	COMPATIBILITY AnyNewerVersion
+)
+
+# Install includes.
+install(
+	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/fileformat
+	DESTINATION ${RETDEC_INSTALL_INCLUDE_DIR}/retdec
+	COMPONENT fileformat
+)
+
+# Install libs.
+install(TARGETS fileformat
+	EXPORT fileformat-targets
+	COMPONENT fileformat
+	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
+	LIBRARY DESTINATION ${RETDEC_INSTALL_LIB_DIR}
+)
+
+# Export targets.
+install(EXPORT fileformat-targets
+	FILE "retdec-fileformat-targets.cmake"
+	NAMESPACE retdec::
+	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
+	COMPONENT fileformat
+)
+
+# Install CMake files.
+install(
+	FILES
+		"${CMAKE_CURRENT_LIST_DIR}/retdec-fileformat-config.cmake"
+		"${RETDEC_BINARY_SHARE_DIR}/retdec-fileformat-config-version.cmake"
+	DESTINATION
+		"${RETDEC_INSTALL_CMAKE_DIR}"
+	COMPONENT fileformat
+)

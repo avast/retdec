@@ -20,6 +20,7 @@ using namespace retdec::utils;
 using namespace retdec::cpdetect;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 namespace
@@ -1290,3 +1291,4 @@ bool JsonPresentation::present()
 }
 
 } // namespace fileinfo
+} // namespace retdec

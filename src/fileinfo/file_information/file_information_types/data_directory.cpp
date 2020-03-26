@@ -7,6 +7,7 @@
 #include "fileinfo/file_information/file_information_types/data_directory.h"
 #include "fileinfo/file_information/file_information_types/type_conversions.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -65,3 +66,4 @@ void DataDirectory::setSize(unsigned long long dirSize)
 }
 
 } // namespace fileinfo
+} // namespace retdec

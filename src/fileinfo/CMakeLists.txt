@@ -1,4 +1,5 @@
-set(FILEINFO_SOURCES
+
+add_executable(fileinfo
 	file_detector/coff_detector.cpp
 	file_detector/detector_factory.cpp
 	file_detector/elf_detector.cpp
@@ -107,18 +108,31 @@ set(FILEINFO_SOURCES
 	pattern_detector/pattern_detector.cpp
 )
 
-add_executable(retdec-fileinfo ${FILEINFO_SOURCES})
-target_link_libraries(retdec-fileinfo
-	retdec-loader
-	retdec-ar-extractor
-	retdec-fileformat
-	retdec-cpdetect
-	retdec-yaracpp
-	retdec-utils
-	retdec-common
-	retdec-config
-	retdec-serdes
-	rapidjson
-	tinyxml2)
-target_include_directories(retdec-fileinfo PUBLIC ${PROJECT_SOURCE_DIR}/src/)
-install(TARGETS retdec-fileinfo RUNTIME DESTINATION bin)
+target_compile_features(fileinfo PUBLIC cxx_std_17)
+
+target_include_directories(fileinfo PUBLIC
+	${RETDEC_SOURCE_DIR}
+)
+
+target_link_libraries(fileinfo
+	retdec::loader
+	retdec::ar-extractor
+	retdec::fileformat
+	retdec::cpdetect
+	retdec::yaracpp
+	retdec::utils
+	retdec::common
+	retdec::config
+	retdec::serdes
+	retdec::rapidjson
+	retdec::tinyxml2
+)
+
+set_target_properties(fileinfo
+	PROPERTIES
+		OUTPUT_NAME "retdec-fileinfo"
+)
+
+install(TARGETS fileinfo
+	RUNTIME DESTINATION bin
+)
