@@ -1,7 +1,56 @@
-set(LLVMIR_EMUL_SOURCES
+
+add_library(llvmir-emul STATIC
 	llvmir_emul.cpp
 )
+add_library(retdec::llvmir-emul ALIAS llvmir-emul)
 
-add_library(retdec-llvmir-emul STATIC ${LLVMIR_EMUL_SOURCES})
-target_link_libraries(retdec-llvmir-emul llvm)
-target_include_directories(retdec-llvmir-emul PUBLIC ${PROJECT_SOURCE_DIR}/include/)
+target_include_directories(llvmir-emul
+	PUBLIC
+		$<BUILD_INTERFACE:${RETDEC_INCLUDE_DIR}>
+		$<INSTALL_INTERFACE:${RETDEC_INSTALL_INCLUDE_DIR}>
+)
+
+target_link_libraries(llvmir-emul
+	PUBLIC
+		retdec::llvm
+)
+
+# Create config version file.
+write_basic_package_version_file(
+	"${RETDEC_BINARY_SHARE_DIR}/retdec-llvmir-emul-config-version.cmake"
+	VERSION ${PROJECT_VERSION}
+	COMPATIBILITY AnyNewerVersion
+)
+
+# Install includes.
+install(
+	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/llvmir-emul
+	DESTINATION ${RETDEC_INSTALL_INCLUDE_DIR}/retdec
+	COMPONENT llvmir-emul
+)
+
+# Install libs.
+install(TARGETS llvmir-emul
+	EXPORT llvmir-emul-targets
+	COMPONENT llvmir-emul
+	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
+	LIBRARY DESTINATION ${RETDEC_INSTALL_LIB_DIR}
+)
+
+# Export targets.
+install(EXPORT llvmir-emul-targets
+	FILE "retdec-llvmir-emul-targets.cmake"
+	NAMESPACE retdec::
+	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
+	COMPONENT llvmir-emul
+)
+
+# Install CMake files.
+install(
+	FILES
+		"${CMAKE_CURRENT_LIST_DIR}/retdec-llvmir-emul-config.cmake"
+		"${RETDEC_BINARY_SHARE_DIR}/retdec-llvmir-emul-config-version.cmake"
+	DESTINATION
+		"${RETDEC_INSTALL_CMAKE_DIR}"
+	COMPONENT llvmir-emul
+)
