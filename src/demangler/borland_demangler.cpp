@@ -4,9 +4,9 @@
  * @copyright (c) 2018 Avast Software, licensed under the MIT license
  */
 
-#include "retdec/demangler/borland_demangler.h"
+#include "retdec/demangler/borland_ast_ctypes_parser.h"
 #include "retdec/demangler/borland_ast_parser.h"
-#include "retdec/ctypesparser/borland_ast_ctypes_parser.h"
+#include "retdec/demangler/borland_demangler.h"
 
 namespace {
 /**
@@ -77,8 +77,14 @@ std::shared_ptr<ctypes::Function> BorlandDemangler::demangleFunctionToCtypes(
 		return nullptr;
 	}
 
-	ctypesparser::BorlandToCtypesParser ctypesParser{};
-	auto func = ctypesParser.parseAsFunction(mangled, astParser.ast(), module, typeWidths, typeSignedness, defaultBitWidth);
+	BorlandToCtypesParser ctypesParser{};
+	auto func = ctypesParser.parseAsFunction(
+			mangled,
+			astParser.ast(),
+			module,
+			typeWidths,
+			typeSignedness,
+			defaultBitWidth);
 	_status = func ? success : invalid_mangled_name;
 	return func;
 }

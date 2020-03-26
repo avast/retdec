@@ -1,11 +1,15 @@
 
-set(DEMANGLER_LLVM_SOURCES
+add_library(demangler STATIC
+	ast_ctypes_parser.cpp
+	borland_ast_ctypes_parser.cpp
+	borland_ast_parser.cpp
+	borland_demangler.cpp
+	context.cpp
 	demangler_base.cpp
+	itanium_ast_ctypes_parser.cpp
 	itanium_demangler_adapter.cpp
 	microsoft_demangler_adapter.cpp
-	borland_demangler.cpp
-	borland_ast_parser.cpp
-	context.cpp
+	ms_ast_ctypes_parser.cpp
 	borland_ast/array_type.cpp
 	borland_ast/built_in_type.cpp
 	borland_ast/char_type.cpp
@@ -26,7 +30,56 @@ set(DEMANGLER_LLVM_SOURCES
 	borland_ast/template_node.cpp
 	borland_ast/type_node.cpp
 )
+add_library(retdec::demangler ALIAS demangler)
 
-add_library(retdec-demangler STATIC ${DEMANGLER_LLVM_SOURCES})
-target_link_libraries(retdec-demangler retdec-ctypesparser llvm)
-target_include_directories(retdec-demangler PUBLIC ${PROJECT_SOURCE_DIR}/include/)
+target_include_directories(demangler
+	PUBLIC
+		$<BUILD_INTERFACE:${RETDEC_INCLUDE_DIR}>
+		$<INSTALL_INTERFACE:${RETDEC_INSTALL_INCLUDE_DIR}>
+)
+
+target_link_libraries(demangler
+	PUBLIC
+		retdec::ctypesparser
+		retdec::llvm
+)
+
+# Create config version file.
+write_basic_package_version_file(
+	"${RETDEC_BINARY_SHARE_DIR}/retdec-demangler-config-version.cmake"
+	VERSION ${PROJECT_VERSION}
+	COMPATIBILITY AnyNewerVersion
+)
+
+# Install includes.
+install(
+	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/demangler
+	DESTINATION ${RETDEC_INSTALL_INCLUDE_DIR}/retdec
+	COMPONENT demangler
+)
+
+# Install libs.
+install(TARGETS demangler
+	EXPORT demangler-targets
+	COMPONENT demangler
+	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
+	LIBRARY DESTINATION ${RETDEC_INSTALL_LIB_DIR}
+)
+
+# Export targets.
+install(EXPORT demangler-targets
+	FILE "retdec-demangler-targets.cmake"
+	NAMESPACE retdec::
+	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
+	COMPONENT demangler
+)
+
+# Install CMake files.
+install(
+	FILES
+		"${CMAKE_CURRENT_LIST_DIR}/retdec-demangler-config.cmake"
+		"${RETDEC_BINARY_SHARE_DIR}/retdec-demangler-config-version.cmake"
+	DESTINATION
+		"${RETDEC_INSTALL_CMAKE_DIR}"
+	COMPONENT demangler
+)

@@ -1,14 +1,14 @@
 /**
-* @file src/ctypesparser/ast_ctypes_parser.cpp
+* @file src/demangler/ast_ctypes_parser.cpp
 * @brief Base class for all C-types parsers from demangler ASTs.
 * @copyright (c) 2019 Avast Software, licensed under the MIT license
 */
 
 #include "retdec/utils/container.h"
-#include "retdec/ctypesparser/ast_ctypes_parser.h"
+#include "retdec/demangler/ast_ctypes_parser.h"
 
 namespace retdec {
-namespace ctypesparser {
+namespace demangler {
 
 /*
  * @brief Finds bit width of type, based on name.

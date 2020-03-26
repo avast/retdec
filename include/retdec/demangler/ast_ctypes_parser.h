@@ -1,5 +1,5 @@
 /**
-* @file include/retdec/ctypesparser/ast_ctypes_parser.h
+* @file include/retdec/demangler/ast_ctypes_parser.h
 * @brief Base class for all AST to ctypes parsers.
 * @copyright (c) 2019 Avast Software, licensed under the MIT license
 */
@@ -10,12 +10,12 @@
 #include "retdec/ctypesparser/ctypes_parser.h"
 
 namespace retdec {
-namespace ctypesparser {
+namespace demangler {
 
 /*
  * Base class for all AST to ctypes parsers.
  */
-class AstToCtypesParser: public CTypesParser {
+class AstToCtypesParser: public retdec::ctypesparser::CTypesParser {
 public:
 	AstToCtypesParser () = default;
 
@@ -29,7 +29,7 @@ protected:
 	ctypes::FunctionType::VarArgness toVarArgness(bool isVarArg) const;
 };
 
-}
-}
+} // demangler
+} // retdec
 
 #endif //RETDEC_AST_CTYPES_PARSER_H

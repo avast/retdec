@@ -1,8 +1,17 @@
-set(DEMANGLERTOOL_SOURCES
+
+add_executable(demanglertool
 	demangler.cpp
 )
 
-add_executable(retdec-demanglertool ${DEMANGLERTOOL_SOURCES})
-set_target_properties(retdec-demanglertool PROPERTIES OUTPUT_NAME "retdec-demangler")
-target_link_libraries(retdec-demanglertool retdec-demangler)
-install(TARGETS retdec-demanglertool RUNTIME DESTINATION bin)
+target_link_libraries(demanglertool
+	retdec::demangler
+)
+
+set_target_properties(demanglertool
+	PROPERTIES
+		OUTPUT_NAME "retdec-demangler"
+)
+
+install(TARGETS demanglertool
+	RUNTIME DESTINATION bin
+)
