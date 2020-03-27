@@ -1,8 +1,17 @@
-set(GETSIG_SOURCES
+
+add_executable(getsig
 	getsig.cpp
 )
 
-add_executable(retdec-getsig ${GETSIG_SOURCES})
-target_link_libraries(retdec-getsig retdec-fileformat)
-target_include_directories(retdec-getsig PUBLIC ${PROJECT_SOURCE_DIR}/include/)
-install(TARGETS retdec-getsig RUNTIME DESTINATION bin)
+target_link_libraries(getsig
+	retdec::fileformat
+)
+
+set_target_properties(getsig
+	PROPERTIES
+		OUTPUT_NAME "retdec-getsig"
+)
+
+install(TARGETS getsig
+	RUNTIME DESTINATION bin
+)

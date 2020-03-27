@@ -64,14 +64,13 @@ ExternalProject_Get_Property(yaramod-project binary_dir)
 
 # Add libraries.
 add_library(yaramod INTERFACE)
-add_library(retdec::yaramod ALIAS yaramods)
+add_library(retdec::yaramod ALIAS yaramod)
 add_dependencies(yaramod yaramod-project)
 
 target_include_directories(yaramod
 	SYSTEM INTERFACE
 		$<BUILD_INTERFACE:${source_dir}/include>
 		$<INSTALL_INTERFACE:${RETDEC_INSTALL_INCLUDE_DIR}/retdec/deps>
-	SYSTEM PRIVATE
 		$<BUILD_INTERFACE:${source_dir}/deps>
 		$<BUILD_INTERFACE:${source_dir}/deps/pog/include>
 		$<BUILD_INTERFACE:${source_dir}/deps/pog/include/pog>

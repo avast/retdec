@@ -1,7 +1,19 @@
-set(BIN2PAT_SOURCES
+
+add_executable(bin2pat
 	bin2pat.cpp
 )
 
-add_executable(retdec-bin2pat ${BIN2PAT_SOURCES})
-target_link_libraries(retdec-bin2pat retdec-patterngen retdec-utils yaramod)
-install(TARGETS retdec-bin2pat RUNTIME DESTINATION bin)
+target_link_libraries(bin2pat
+	retdec::patterngen
+	retdec::utils
+	retdec::yaramod
+)
+
+set_target_properties(bin2pat
+	PROPERTIES
+		OUTPUT_NAME "retdec-bin2pat"
+)
+
+install(TARGETS bin2pat
+	RUNTIME DESTINATION bin
+)

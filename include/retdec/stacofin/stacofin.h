@@ -15,7 +15,6 @@
 #include <capstone/capstone.h>
 
 #include "retdec/config/config.h"
-#include "retdec/fileformat/fileformat.h"
 #include "retdec/common/address.h"
 
 namespace retdec {
