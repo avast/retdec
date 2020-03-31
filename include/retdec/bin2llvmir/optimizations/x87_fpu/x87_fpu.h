@@ -8,6 +8,7 @@
 #define RETDEC_BIN2LLVMIR_OPTIMIZATIONS_X87_FPU_X87_FPU_H
 
 #include <map>
+#include <unordered_set>
 
 #include <llvm/IR/Module.h>
 #include <llvm/Pass.h>
@@ -44,6 +45,8 @@ class X87FpuAnalysis : public llvm::ModulePass
 		Config* _config = nullptr;
 		Abi* _abi = nullptr;
 		llvm::GlobalVariable* top = nullptr;
+
+		std::unordered_set<llvm::Value*> _toRemove;
 };
 
 } // namespace bin2llvmir

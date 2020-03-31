@@ -198,6 +198,9 @@ bool X87FpuAnalysis::analyzeBb(
 				LOG << "\t\t\t" << "store -- " << reg->getName().str() << std::endl;
 
 				new StoreInst(callStore->getArgOperand(1), reg, callStore);
+				_toRemove.insert(callStore->getArgOperand(0));
+				// We need to remove this righ away.
+				// It does not work if we store it to _toRemove set.
 				callStore->eraseFromParent();
 				changed = true;
 			} else if (callLoad
@@ -222,6 +225,8 @@ bool X87FpuAnalysis::analyzeBb(
 				auto *conv = IrModifier::convertValueToType(lTmp, callLoad->getType(), callLoad);
 
 				callLoad->replaceAllUsesWith(conv);
+				// We need to remove this righ away.
+				// It does not work if we store it to _toRemove set.
 				callLoad->eraseFromParent();
 				changed = true;
 			} else if (callStore || callLoad) {
@@ -242,21 +247,21 @@ bool X87FpuAnalysis::analyzeBb(
 
 void X87FpuAnalysis::removeAllFpuTopOperations()
 {
-	std::unordered_set<llvm::Value*> toRemove;
+	// std::unordered_set<llvm::Value*> toRemove;
 	for (Function& f : *_module)
 	for (auto it = inst_begin(&f), eIt = inst_end(&f); it != eIt; ++it)
 	{
 		Instruction* i = &*it;
 		if (auto* l = dyn_cast<LoadInst>(i); l && l->getPointerOperand() == top)
 		{
-			toRemove.insert(i);
+			_toRemove.insert(i);
 		}
 		if (auto* s = dyn_cast<StoreInst>(i); s && s->getPointerOperand() == top)
 		{
-			toRemove.insert(i);
+			_toRemove.insert(i);
 		}
 	}
-	IrModifier::eraseUnusedInstructionsRecursive(toRemove);
+	IrModifier::eraseUnusedInstructionsRecursive(_toRemove);
 }
 
 } // namespace bin2llvmir
