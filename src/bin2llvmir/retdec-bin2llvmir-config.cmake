@@ -12,7 +12,7 @@ find_dependency(retdec 4.0
         demangler
         capstone2llvmir
         stacofin
-        llvmir-support
+        llvm-support
         common
         utils
         llvm

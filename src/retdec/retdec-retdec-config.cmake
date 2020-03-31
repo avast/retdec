@@ -3,10 +3,10 @@ include(CMakeFindDependencyMacro)
 find_dependency(retdec 4.0
     REQUIRED
     COMPONENTS
+        bin2llvmir
         config
-        utils
-        llvm-support
-        rapidjson
+        common
+        capstone
         llvm
 )
 

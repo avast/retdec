@@ -20,10 +20,11 @@ set_target_properties(pat2yara
 )
 
 target_include_directories(pat2yara
-	${RETDEC_SOURCE_DIR}
+	PRIVATE
+		${RETDEC_SOURCE_DIR}
 )
 
-install(TARGETS retdec-pat2yara
+install(TARGETS pat2yara
 	RUNTIME
 		DESTINATION bin
 )

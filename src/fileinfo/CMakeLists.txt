@@ -110,8 +110,9 @@ add_executable(fileinfo
 
 target_compile_features(fileinfo PUBLIC cxx_std_17)
 
-target_include_directories(fileinfo PUBLIC
-	${RETDEC_SOURCE_DIR}
+target_include_directories(fileinfo
+	PRIVATE
+		${RETDEC_SOURCE_DIR}
 )
 
 target_link_libraries(fileinfo

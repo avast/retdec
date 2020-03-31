@@ -31,7 +31,7 @@ DebugFormat::DebugFormat(
 		retdec::loader::Image* inFile,
 		const std::string& pdbFile,
 		SymbolTable* symtab,
-		retdec::bin2llvmir::Demangler* demangler,
+		retdec::demangler::Demangler* demangler,
 		unsigned long long imageBase)
 		:
 		_symtab(symtab),
@@ -47,11 +47,6 @@ DebugFormat::DebugFormat(
 		_pdbFile->initialize(imageBase);
 		loadPdb();
 	}
-	// else if (_dwarfFile->hasDwarfInfo())
-	// {
-	// 	LOG << "\n*** DebugFormat::DebugFormat(): DWARF" << std::endl;
-	// 	// loadDwarf();
-	// }
 
 	loadDwarf();
 
