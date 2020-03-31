@@ -99,6 +99,7 @@ BIN2LLVMIR_PARAMS = [
     '-provider-init',
     '-decoder',
     '-verify',
+    '-x86-addr-spaces',
     '-x87-fpu',
     '-main-detection',
     '-idioms-libgcc',
@@ -107,15 +108,13 @@ BIN2LLVMIR_PARAMS = [
     '-syscalls',
     '-stack',
     '-constants',
-    
-#    '-dump-module',
     '-param-return',
-#    '-dump-module',
     
+#    '-dump-module',
     '-inst-opt-rda',
 #    '-local-vars',
-    
 #    '-dump-module',
+
     '-inst-opt',
     '-simple-types',
     '-generate-dsm',
@@ -124,7 +123,6 @@ BIN2LLVMIR_PARAMS = [
     '-select-fncs',
     '-unreachable-funcs',
     '-inst-opt',
-    '-x86-addr-spaces',
     '-register-localization',
     '-value-protect',
 ] + BIN2LLVMIR_LLVM_PASSES_ONLY + BIN2LLVMIR_LLVM_PASSES_ONLY + [
