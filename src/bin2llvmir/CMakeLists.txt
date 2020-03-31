@@ -120,5 +120,6 @@ target_link_libraries(retdec-bin2llvmir
 	retdec-common
 	retdec-utils
 	llvm
+	eigen
 )
 target_include_directories(retdec-bin2llvmir PUBLIC ${PROJECT_SOURCE_DIR}/include/)

@@ -49,3 +49,9 @@ set(SUPPORT_PKG_URL
 )
 set(SUPPORT_PKG_SHA256 "629351609bca0f4b8edbd4e53789192305256aeb908e953f5546e121a911d54e")
 set(SUPPORT_PKG_VERSION "2019-03-08")
+
+set(EIGEN_URL
+    "https://gitlab.com/api/v4/projects/libeigen%2Feigen/repository/archive.zip?sha=0dd9643ad547d3dd2e23ded1d3376d0f7bdc8ada"
+    CACHE STRING "URL of Eigen archive to use."
+)
+set(EIGEN_ARCHIVE_SHA256 "f56e0551aed4bdcb39cf6c5e51b1267b1221666e6090bddc1a0eaf89e7c3e2a3")
