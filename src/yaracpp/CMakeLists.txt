@@ -14,7 +14,8 @@ target_include_directories(yaracpp
 )
 
 target_link_libraries(yaracpp
-	PRIVATE libyara
+	PRIVATE
+		retdec::libyara
 )
 
 # Create config version file.
@@ -32,7 +33,7 @@ install(
 )
 
 # Install libs.
-install(TARGETS yaracpp libyara
+install(TARGETS yaracpp
 	EXPORT yaracpp-targets
 	COMPONENT yaracpp
 	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
