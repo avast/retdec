@@ -30,12 +30,14 @@ find_package(PythonInterp 3.4 REQUIRED)
 set(RETDEC_DEPS_DIR            "${CMAKE_CURRENT_SOURCE_DIR}/deps")
 set(RETDEC_INCLUDE_DIR         "${CMAKE_CURRENT_SOURCE_DIR}/include")
 set(RETDEC_SOURCE_DIR          "${CMAKE_CURRENT_SOURCE_DIR}/src")
+set(RETDEC_TESTS_DIR           "${CMAKE_CURRENT_SOURCE_DIR}/tests")
 set(RETDEC_BINARY_SHARE_DIR    "${CMAKE_CURRENT_BINARY_DIR}/share")
 set(RETDEC_INSTALL_BIN_DIR     "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}")
 set(RETDEC_INSTALL_INCLUDE_DIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}")
 set(RETDEC_INSTALL_LIB_DIR     "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
 set(RETDEC_INSTALL_DATA_DIR    "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATADIR}/retdec")
 set(RETDEC_INSTALL_CMAKE_DIR   "${RETDEC_INSTALL_DATA_DIR}/cmake")
+set(RETDEC_INSTALL_TESTS_DIR   "bin")
 
 # On Linux and macOS, set RPATH relative to the origin of the installed
 # executables (i.e. relative to the bin directory). This allows us to move the

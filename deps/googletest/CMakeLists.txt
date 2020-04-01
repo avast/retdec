@@ -83,9 +83,9 @@ if(MSVC)
 	set(DEBUG_LIB_SUFFIX "d")
 endif()
 
-add_library(gtest INTERFACE)
-
 # gtest
+add_library(gtest INTERFACE)
+add_library(retdec::gtest ALIAS gtest)
 target_link_libraries(gtest
 	INTERFACE debug
 		${binary_dir}/lib/${DEBUG_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}gtest${DEBUG_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}
@@ -104,6 +104,7 @@ add_dependencies(gtest googletest)
 
 # gtest_main
 add_library(gtest_main INTERFACE)
+add_library(retdec::gtest_main ALIAS gtest_main)
 target_link_libraries(gtest_main
 	INTERFACE debug
 		${binary_dir}/lib/${DEBUG_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}gtest_main${DEBUG_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}
@@ -123,6 +124,7 @@ add_dependencies(gtest_main googletest)
 
 # gmock
 add_library(gmock INTERFACE)
+add_library(retdec::gmock ALIAS gmock)
 target_link_libraries(gmock
 	INTERFACE debug
 		${binary_dir}/lib/${DEBUG_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}gmock${DEBUG_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}
@@ -144,6 +146,7 @@ add_dependencies(gmock googletest)
 
 # gmock_main
 add_library(gmock_main INTERFACE)
+add_library(retdec::gmock_main ALIAS gmock_main)
 target_link_libraries(gmock_main
 	INTERFACE debug
 		${binary_dir}/lib/${DEBUG_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}gmock_main${DEBUG_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}

@@ -1,22 +1,30 @@
 
-add_executable(retdec-tests-capstone2llvmir
-		arm_tests.cpp
-		arm64_tests.cpp
-		mips_tests.cpp
-		powerpc_tests.cpp
-		x86_tests.cpp
+add_executable(tests-capstone2llvmir
+	arm_tests.cpp
+	arm64_tests.cpp
+	mips_tests.cpp
+	powerpc_tests.cpp
+	x86_tests.cpp
 )
-target_link_libraries(retdec-tests-capstone2llvmir
-		retdec-capstone2llvmir
-		retdec-llvmir-emul
-		retdec-utils
-		keystone
-		gmock_main
+
+target_link_libraries(tests-capstone2llvmir
+	retdec::capstone2llvmir
+	retdec::llvmir-emul
+	retdec::utils
+	retdec::keystone
+	retdec::gmock_main
 )
-target_include_directories(retdec-tests-capstone2llvmir
-	PUBLIC
-		${PROJECT_SOURCE_DIR}/tests/
+
+target_include_directories(tests-capstone2llvmir
+	PRIVATE
+		${RETDEC_TESTS_DIR}
 )
-install(TARGETS retdec-tests-capstone2llvmir
-	RUNTIME DESTINATION ${RETDEC_TESTS_DIR}
+
+set_target_properties(tests-capstone2llvmir
+	PROPERTIES
+		OUTPUT_NAME "retdec-tests-capstone2llvmir"
+)
+
+install(TARGETS tests-capstone2llvmir
+	RUNTIME DESTINATION ${RETDEC_INSTALL_TESTS_DIR}
 )

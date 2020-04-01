@@ -1,4 +1,3 @@
-set(RETDEC_TESTS_DIR "bin")
 
 cond_add_subdirectory(common RETDEC_ENABLE_COMMON_TESTS)
 cond_add_subdirectory(bin2llvmir RETDEC_ENABLE_BIN2LLVMIR_TESTS)
