@@ -209,24 +209,6 @@ TEST_F(X87FpuAnalysisTests, x86_16bit_cdecl_call_of_not_analyzed_function_succes
 	EXPECT_TRUE(b);
 } // x86_16bit_cdecl_call_of_not_analyzed_function_success
 
-TEST_F(X87FpuAnalysisTests, x86_16bit_cdecl_analyze_fail)
-{
-	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
-		define void @foo() {
-		bb:
-			%0 = load i3, i3* @fpu_stat_TOP
-			%1 = sub i3 %0, 3
-			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
-			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
-			store i3 %1, i3* @fpu_stat_TOP
-			ret void
-		})");
-
-	setX86Environment("16", "cdecl");
-	bool b = pass.runOnModuleCustom(*module, &config, abi);
-	EXPECT_FALSE(b);
-} // x86_16bit_cdecl_analyze_fail
-
 // Architecture: 		16bit
 // Calling convention: 	pascal
 // Operation:			Call function with floating-point return value.
@@ -362,25 +344,6 @@ TEST_F(X87FpuAnalysisTests, x86_16bit_pascal_call_of_not_analyzed_function_succe
 	checkModuleAgainstExpectedIr(exp);
 	EXPECT_TRUE(b);
 } // x86_16bit_pascal_call_of_not_analyzed_function_success
-
-TEST_F(X87FpuAnalysisTests, x86_16bit_pascal_analyze_fail)
-{
-	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
-		define void @foo() {
-		bb:
-			%0 = load i3, i3* @fpu_stat_TOP
-			%1 = add i3 %0, 2
-			store i3 %1, i3* @fpu_stat_TOP
-			%2 = load i3, i3* @fpu_stat_TOP
-			call void @__frontend_reg_store.fpu_tag(i3 %2, i2 0)
-			call void @__frontend_reg_store.fpr(i3 %2, x86_fp80 0xK3FFF8000000000000000)
-			ret void
-		})");
-
-	setX86Environment("16", "pascal");
-	bool b = pass.runOnModuleCustom(*module, &config, abi);
-	EXPECT_FALSE(b);
-} // x86_16bit_cdecl_analyze_fail
 
 //
 // Architecture: 		16bit
@@ -543,25 +506,6 @@ TEST_F(X87FpuAnalysisTests, x86_16bit_fastcall_call_of_not_analyzed_function_suc
 	checkModuleAgainstExpectedIr(exp);
 	EXPECT_TRUE(b);
 } // x86_16bit_fastcall_call_of_not_analyzed_function_success
-
-TEST_F(X87FpuAnalysisTests, x86_16bit_fastcall_analyze_fail)
-{
-	parseInput(PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
-		define void @foo() {
-		bb:
-			%0 = load i3, i3* @fpu_stat_TOP
-			%1 = sub i3 %0, 1
-			call void @__frontend_reg_store.fpu_tag(i3 %1, i2 0)
-			call void @__frontend_reg_store.fpr(i3 %1, x86_fp80 0xK3FFF8000000000000000)
-			%2 = sub i3 %1, 3
-			store i3 %2, i3* @fpu_stat_TOP
-			ret void
-		})");
-
-	setX86Environment("16", "fastcall");
-	bool b = pass.runOnModuleCustom(*module, &config, abi);
-	EXPECT_FALSE(b);
-} // x86_16bit_fastcall_analyze_fail
 
 //
 // Architecture: 		32bit
