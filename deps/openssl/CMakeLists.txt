@@ -1,5 +1,6 @@
 
 if(NOT RETDEC_FORCE_OPENSSL_BUILD)
+	set(OPENSSL_MSVC_STATIC_RT ${RETDEC_MSVC_STATIC_RUNTIME})
 	find_package(OpenSSL 1.0.1)
 	if(OPENSSL_FOUND)
 		add_library(openssl-crypto INTERFACE)

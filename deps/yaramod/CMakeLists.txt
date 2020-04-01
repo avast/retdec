@@ -16,6 +16,7 @@ if(YARAMOD_LOCAL_DIR)
 		CMAKE_ARGS
 			# This does not work on MSVC, but may be useful on Linux.
 			-DCMAKE_BUILD_TYPE=Release
+			-DCMAKE_CXX_FLAGS_RELEASE=${CMAKE_CXX_FLAGS_RELEASE}
 			# Force the use of the same compiler as used to build the top-level
 			# project. Otherwise, the external project may pick up a different
 			# compiler, which may result in link errors.
@@ -37,6 +38,7 @@ else()
 		CMAKE_ARGS
 			# This does not work on MSVC, but may be useful on Linux.
 			-DCMAKE_BUILD_TYPE=Release
+			-DCMAKE_CXX_FLAGS_RELEASE=${CMAKE_CXX_FLAGS_RELEASE}
 			# Force the use of the same compiler as used to build the top-level
 			# project. Otherwise, the external project may pick up a different
 			# compiler, which may result in link errors.
@@ -84,3 +86,7 @@ target_link_libraries(yaramod
 		${binary_dir}/deps/pog/deps/fmt/fmt/${CMAKE_INSTALL_LIBDIR}/${CMAKE_STATIC_LIBRARY_PREFIX}pog_fmt${CMAKE_STATIC_LIBRARY_SUFFIX}
 		${binary_dir}/deps/pog/deps/re2/re2/${CMAKE_INSTALL_LIBDIR}/${CMAKE_STATIC_LIBRARY_PREFIX}pog_re2${CMAKE_STATIC_LIBRARY_SUFFIX}
 )
+if(WIN32)
+	target_link_libraries(yaramod INTERFACE debug shlwapi)
+	target_link_libraries(yaramod INTERFACE optimized shlwapi)
+endif()

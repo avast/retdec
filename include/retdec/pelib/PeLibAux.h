@@ -100,6 +100,10 @@ namespace PeLib
 		LDR_ERROR_ENTRY_POINT_OUT_OF_IMAGE,         // The entry point is out of the image
 		LDR_ERROR_ENTRY_POINT_ZEROED,               // The entry point is zeroed
 
+		// Errors from signature parser
+		LDR_ERROR_DIGITAL_SIGNATURE_CUT,            // The file signature is out of the file
+		LDR_ERROR_DIGITAL_SIGNATURE_ZEROED,         // The file signature is zeroed
+
 		LDR_ERROR_MAX
 
 	};

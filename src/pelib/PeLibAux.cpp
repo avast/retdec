@@ -77,6 +77,10 @@ namespace PeLib
 		// Entry point error detection
 		{"LDR_ERROR_ENTRY_POINT_OUT_OF_IMAGE",     "The position of the entry point is out of the image" },
 		{"LDR_ERROR_ENTRY_POINT_ZEROED",           "The entry point is zeroed; probably damaged file" },
+
+		// Signature error detection
+		{"LDR_ERROR_DIGITAL_SIGNATURE_CUT",        "The digital signature is cut or missing; probably damaged file" },
+		{"LDR_ERROR_DIGITAL_SIGNATURE_ZEROED",     "The digital signature is zeroed; probably damaged file" },
 	};
 
 	PELIB_IMAGE_FILE_MACHINE_ITERATOR::PELIB_IMAGE_FILE_MACHINE_ITERATOR()
@@ -191,7 +195,9 @@ namespace PeLib
 		return (ldrError == LDR_ERROR_FILE_IS_CUT_LOADABLE ||
 				ldrError == LDR_ERROR_RSRC_OVER_END_OF_IMAGE ||
 				ldrError == LDR_ERROR_ENTRY_POINT_OUT_OF_IMAGE ||
-				ldrError == LDR_ERROR_ENTRY_POINT_ZEROED);
+				ldrError == LDR_ERROR_ENTRY_POINT_ZEROED ||
+				ldrError == LDR_ERROR_DIGITAL_SIGNATURE_CUT ||
+				ldrError == LDR_ERROR_DIGITAL_SIGNATURE_ZEROED);
 	}
 
 	// Anti-assert feature. Debug version of isprint in MS Visual C++ asserts
