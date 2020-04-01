@@ -58,7 +58,7 @@ include(${PROJECT_SOURCE_DIR}/cmake/deps.cmake)
 
 # Default: ALL build is enabled.
 #
-set(RETDEC_ENABLE_ALL ON)
+option(RETDEC_ENABLE_ALL "" ON)
 
 # Convert target list in RETDEC_ENABLE to RETDEC_ENABLE_<component> flags.
 #
