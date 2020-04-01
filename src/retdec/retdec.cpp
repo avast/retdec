@@ -50,7 +50,6 @@
 #include "retdec/bin2llvmir/providers/config.h"
 
 #include "retdec/config/config.h"
-#include "retdec/llvm-support/diagnostics.h"
 #include "retdec/retdec/retdec.h"
 
 /**
