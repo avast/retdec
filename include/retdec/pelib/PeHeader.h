@@ -1625,7 +1625,6 @@ namespace PeLib
 
 	/**
 	* Overwrites a section's data.
-	* @param wSecnr Number of the section which will be overwritten.
 	* @param strFilename Name of the file where the section will be written to.
 	* @param wSecnr Number of the section that will be written.
 	* @param vBuffer New data of the section.
