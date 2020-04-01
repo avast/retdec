@@ -13,10 +13,9 @@
 #include "retdec/bin2llvmir/providers/asm_instruction.h"
 #include "retdec/bin2llvmir/utils/debug.h"
 #define debug_enabled false
+
 #include "retdec/bin2llvmir/utils/ir_modifier.h"
 #include "retdec/bin2llvmir/utils/llvm.h"
-
-#include "eigen/include/Eigen/Dense"
 
 using namespace llvm;
 using namespace retdec::bin2llvmir::llvm_utils;
@@ -94,47 +93,38 @@ std::list<FunctionAnalyzeMetadata> X87FpuAnalysis::getFunctions2Analyze()
 	return functionsMetadata;
 }
 
-
-int X87FpuAnalysis::matrixRank(Eigen::MatrixXd &mat)
+int X87FpuAnalysis::augmentedRank(Eigen::MatrixXd &A, Eigen::MatrixXd &B)
 {
-	double treshHold = 0.0001;
-	Eigen::BDCSVD<Eigen::MatrixXd> svd(mat);
-	auto singularValues = svd.singularValues();
-	singularValues = singularValues.cwiseAbs();
-	return (singularValues.array() > treshHold).count();
+	A.conservativeResize(Eigen::NoChange, A.cols()+1);
+	A.col(A.cols()-1) = B;
+
+	int rankAugmentedA = A.colPivHouseholderQr().rank();
+
+	A.conservativeResize(Eigen::NoChange, A.cols()-1);
+
+	return rankAugmentedA;
 }
 
-bool X87FpuAnalysis::consistentSystem(Eigen::MatrixXd &A, Eigen::MatrixXd &B)
+void FunctionAnalyzeMetadata::initSystem()
 {
-	int rankA = matrixRank(A);
-
-	Eigen::MatrixXd augmented(A.rows(),  A.cols() + B.cols());
-	augmented << A, B; //horizontal concat
-	int rankAugmentedA = matrixRank(augmented);
-
-	return (rankA == rankAugmentedA);
+	unsigned matrixLen = 1;// + terminatingBasicBlocks.size();
+	for (Function::iterator bbIt=function.begin(), bbEndIt = function.end(); bbIt != bbEndIt; ++bbIt)
+	{
+		BasicBlock* bb = bbIt.operator->();
+		matrixLen += 1 + pred_size(bb);
+	}
+	A.resize(matrixLen, 2*function.size());
+	B.resize(matrixLen, 1);
+	A.setZero();
+	B.setZero();
 }
 
-void FunctionAnalyzeMetadata::addEquation(std::list<std::tuple<llvm::BasicBlock&,int,IndexType >> vars, int result)
+void FunctionAnalyzeMetadata::addEquation(const std::list<std::tuple<llvm::BasicBlock&,int,IndexType >>& vars, int result)
 {
-	if (A.rows() == 0 && B.rows() == 0)
-	{
-		A.resize(1, 2*function.size());
-		B.resize(1, 1);
-	}
-	else
-	{
-		A.conservativeResize(A.rows() + 1, Eigen::NoChange);
-		B.conservativeResize(B.rows() + 1, Eigen::NoChange);
-	}
-
-	A.row(A.rows()-1).setZero();
-	B.row(B.rows()-1).setZero();
-
-	B(B.rows()-1, 0) = result;
+	B(numberOfEquations, 0) = result;
 	for (auto var : vars)
 	{
-		A(A.rows()-1, indexes[&std::get<0>(var)][std::get<2>(var)]) = std::get<1>(var);
+		A(numberOfEquations, indexes[&std::get<0>(var)][std::get<2>(var)]) = std::get<1>(var);
 	}
 
 	numberOfEquations++;
@@ -193,12 +183,7 @@ bool X87FpuAnalysis::run()
 
 	for (auto& funMd: analyzedFunctionsMetadata)
 	{
-		if (funMd.function.size() > MAX_PERFORMANCE_CEIL)
-		{
-			funMd.analyzeSuccess = false;
-			continue; // skip optimization due to unacceptable performance lack
-		}
-
+		funMd.initSystem();
 		BasicBlock& enterBlock = funMd.function.begin().operator*();
 		funMd.addEquation({{enterBlock, 1, funMd.inIndex}}, EMPTY_FPU_STACK);
 
@@ -215,11 +200,11 @@ bool X87FpuAnalysis::run()
 
 			funMd.addEquation({{*bb, -1, funMd.inIndex},{*bb, 1, funMd.outIndex}}, relativeOutBbTop);
 
-			if (_config->getConfig().architecture.isX86_16() || _config->getConfig().architecture.isX86_64()
-				&& std::find(funMd.terminatingBasicBlocks.begin(), funMd.terminatingBasicBlocks.end(), bb) != funMd.terminatingBasicBlocks.end())
-			{
-				funMd.addEquation({{*bb, 1, funMd.outIndex}}, EMPTY_FPU_STACK);
-			}
+			//if (_config->getConfig().architecture.isX86_16() || _config->getConfig().architecture.isX86_64()
+			//	&& std::find(funMd.terminatingBasicBlocks.begin(), funMd.terminatingBasicBlocks.end(), bb) != funMd.terminatingBasicBlocks.end())
+			//{
+			//	funMd.addEquation({{*bb, 1, funMd.outIndex}}, EMPTY_FPU_STACK);
+			//}
 
 			for (auto it = pred_begin(bb), et=pred_end(bb); it != et; ++it)
 			{
@@ -228,13 +213,18 @@ bool X87FpuAnalysis::run()
 			}
 		}
 
-		if (!consistentSystem(funMd.A, funMd.B))
+		const auto& pivHouseholderQr = funMd.A.colPivHouseholderQr();
+		int matRank = pivHouseholderQr.rank();
+		int augmentedMatRank = augmentedRank(funMd.A, funMd.B);
+
+		if (matRank == augmentedMatRank) // there is exactly one solution
+		{
+			funMd.x = pivHouseholderQr.solve(funMd.B);
+		}
+		else
 		{
 			funMd.analyzeSuccess = false;
 		}
-
-		// solve overdetermined linear equation system of BBs by SVD decompisition
-		funMd.x = funMd.A.bdcSvd(Eigen::ComputeFullU | Eigen::ComputeFullV).solve(funMd.B);
 	}
 
 	return optimizeAnalyzedFpuInstruction();

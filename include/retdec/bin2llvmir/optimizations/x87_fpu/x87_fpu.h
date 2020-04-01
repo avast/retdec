@@ -12,7 +12,8 @@
 #include <llvm/IR/Module.h>
 #include <llvm/Pass.h>
 
-#include "eigen/include/Eigen/Dense"
+//eigen lib
+#include "Dense"
 
 #include "retdec/bin2llvmir/analyses/symbolic_tree.h"
 #include "retdec/bin2llvmir/providers/abi/abi.h"
@@ -24,7 +25,6 @@
 #define NOP_FPU_STACK 0
 #define ANALYZE_FAIL false
 #define ANALYZE_SUCCESS true
-#define MAX_PERFORMANCE_CEIL 30
 
 namespace retdec {
 namespace bin2llvmir {
@@ -57,7 +57,8 @@ class FunctionAnalyzeMetadata
 		bool expectedTopAnalyzed = false;
 		std::set<llvm::Function*> calledFunctions;
 
-	void addEquation(std::list<std::tuple<llvm::BasicBlock&,int,IndexType >> vars, int result);
+	void initSystem();
+	void addEquation(const std::list<std::tuple<llvm::BasicBlock&,int,IndexType >>& vars, int result);
 	FunctionAnalyzeMetadata(llvm::Function &function1) : function(function1) {};
 
 };
@@ -91,8 +92,7 @@ class X87FpuAnalysis : public llvm::ModulePass
 	 */
 	bool optimizeAnalyzedFpuInstruction();
 	int expectedTopBasedOnRestOfBlock(llvm::Instruction& analyzedInstr);
-	int matrixRank(Eigen::MatrixXd &mat);
-	bool consistentSystem(Eigen::MatrixXd &A, Eigen::MatrixXd &B);
+	int augmentedRank(Eigen::MatrixXd &A, Eigen::MatrixXd &B);
 	bool checkArchAndCallConvException(llvm::Function* fun);
 	bool isValidRegisterIndex(int index);
 
