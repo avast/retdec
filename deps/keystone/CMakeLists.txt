@@ -83,11 +83,9 @@ target_include_directories(keystone
 		# nothing for install because this does not need to be installed
 )
 
-target_link_libraries(keystone
-	INTERFACE debug
+target_link_libraries(keystone INTERFACE
+	debug
 		${binary_dir}/llvm/lib/${DEBUG_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}keystone${CMAKE_STATIC_LIBRARY_SUFFIX}
-)
-target_link_libraries(keystone
-	INTERFACE optimized
+	optimized
 		${binary_dir}/llvm/lib/${RELEASE_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}keystone${CMAKE_STATIC_LIBRARY_SUFFIX}
 )

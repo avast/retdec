@@ -1,6 +1,7 @@
 if(MSVC)
-	set(DEBUG_DIR "Debug/")
 	set(RELEASE_DIR "Release/")
+	set(DEBUG_DIR "Debug/")
+	set(DEBUG_LIB_SUFFIX "d")
 endif()
 
 cond_add_subdirectory(capstone RETDEC_ENABLE_CAPSTONE)
