@@ -93,8 +93,6 @@ target_link_libraries(fileformat
 		retdec::pelib
 		retdec::elfio
 		retdec::llvm
-	PRIVATE
-		retdec::openssl-crypto
 )
 
 # Create config version file.

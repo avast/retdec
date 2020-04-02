@@ -9,7 +9,6 @@ find_dependency(retdec 4.0
         pelib
         elfio
         llvm
-        openssl-crypto
 )
 
 include(${CMAKE_CURRENT_LIST_DIR}/retdec-fileformat-targets.cmake)
