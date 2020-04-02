@@ -273,8 +273,8 @@ write_basic_package_version_file(
 # Install includes.
 install(
 	DIRECTORY
-		${source_dir}/include/llvm
-		${binary_dir}/include/llvm
+		${source_dir}/include/
+		${binary_dir}/include/
 	DESTINATION
 		${RETDEC_INSTALL_INCLUDE_DIR}/retdec/deps
 	COMPONENT llvm
