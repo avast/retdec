@@ -161,25 +161,22 @@ ExternalProject_Add(openssl
 	LOG_INSTALL 1
 )
 
-set(OPENSSL_INCLUDES
-	"${OPENSSL_INSTALL_DIR}/include"
-	PARENT_SCOPE
-)
-
-set(OPENSSL_LIBRARIES
-	"${OPENSSL_INSTALL_DIR}/lib/libssl${CMAKE_STATIC_LIBRARY_SUFFIX}"
-	"${OPENSSL_INSTALL_DIR}/lib/libcrypto${CMAKE_STATIC_LIBRARY_SUFFIX}"
-	PARENT_SCOPE
-)
+set(OPENSSL_CRYPTO_LIB libcrypto${CMAKE_STATIC_LIBRARY_SUFFIX})
 
 add_library(openssl-crypto INTERFACE)
+add_library(retdec::openssl-crypto ALIAS openssl-crypto)
 add_dependencies(openssl-crypto openssl)
+
 target_include_directories(openssl-crypto
-	SYSTEM INTERFACE $<BUILD_INTERFACE:${OPENSSL_INSTALL_DIR}/include>
+	SYSTEM INTERFACE
+		$<BUILD_INTERFACE:${OPENSSL_INSTALL_DIR}/include>
+		$<INSTALL_INTERFACE:${RETDEC_INSTALL_INCLUDE_DIR}/retdec/deps>
 )
+
 target_link_libraries(openssl-crypto
 	INTERFACE
-		"${OPENSSL_INSTALL_DIR}/lib/libcrypto${CMAKE_STATIC_LIBRARY_SUFFIX}"
+		$<BUILD_INTERFACE:${OPENSSL_INSTALL_DIR}/lib/${OPENSSL_CRYPTO_LIB}>
+		$<INSTALL_INTERFACE:retdec::openssl-crypto-libs>
 		Threads::Threads
 )
 if(MSVC)
@@ -197,3 +194,59 @@ elseif(UNIX)
 			${CMAKE_DL_LIBS}
 	)
 endif()
+
+# Configure config file.
+set(OPENSSL_CRYPTO_LIB_INSTALLED "${CMAKE_INSTALL_PREFIX}/${RETDEC_INSTALL_LIB_DIR}/deps/${OPENSSL_CRYPTO_LIB}")
+configure_package_config_file(
+	"retdec-openssl-crypto-config.cmake"
+	"${RETDEC_BINARY_SHARE_DIR}/retdec-openssl-crypto-config.cmake"
+	INSTALL_DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
+	PATH_VARS
+		OPENSSL_CRYPTO_LIB_INSTALLED
+)
+
+# Create config version file.
+write_basic_package_version_file(
+	"${RETDEC_BINARY_SHARE_DIR}/retdec-openssl-crypto-config-version.cmake"
+	VERSION ${PROJECT_VERSION}
+	COMPATIBILITY AnyNewerVersion
+)
+
+# Install includes.
+install(
+    DIRECTORY
+		${OPENSSL_INSTALL_DIR}/include/openssl
+    DESTINATION
+        ${RETDEC_INSTALL_INCLUDE_DIR}/retdec/deps
+)
+
+# Install libs.
+install(
+    FILES
+		${OPENSSL_INSTALL_DIR}/lib/${OPENSSL_CRYPTO_LIB}
+    DESTINATION
+        ${RETDEC_INSTALL_LIB_DIR}/deps
+)
+
+install(TARGETS openssl-crypto
+	EXPORT openssl-crypto-targets
+	COMPONENT openssl-crypto
+)
+
+# Export targets.
+install(EXPORT openssl-crypto-targets
+	FILE "retdec-openssl-crypto-targets.cmake"
+	NAMESPACE retdec::
+    DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
+    COMPONENT openssl-crypto
+)
+
+# Install CMake files.
+install(
+	FILES
+        "${RETDEC_BINARY_SHARE_DIR}/retdec-openssl-crypto-config.cmake"
+        "${RETDEC_BINARY_SHARE_DIR}/retdec-openssl-crypto-config-version.cmake"
+	DESTINATION
+		"${RETDEC_INSTALL_CMAKE_DIR}"
+	COMPONENT openssl-crypto
+)

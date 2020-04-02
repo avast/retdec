@@ -15,7 +15,7 @@ target_include_directories(crypto
 target_link_libraries(crypto
 	PRIVATE
 		retdec::utils
-		openssl-crypto
+		retdec::openssl-crypto
 )
 
 # Create config version file.
@@ -33,7 +33,7 @@ install(
 )
 
 # Install libs.
-install(TARGETS crypto openssl-crypto
+install(TARGETS crypto
 	EXPORT crypto-targets
 	COMPONENT crypto
 	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}

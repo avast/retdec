@@ -54,7 +54,7 @@ install(
 )
 
 # Install libs.
-install(TARGETS cpdetect tinyxml2
+install(TARGETS cpdetect
 	EXPORT cpdetect-targets
 	COMPONENT cpdetect
 	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
