@@ -132,6 +132,6 @@ install(
 	FILES
 		"${RETDEC_BINARY_SHARE_DIR}/retdec-config.cmake"
 		"${RETDEC_BINARY_SHARE_DIR}/retdec-config-version.cmake"
-	DESTINATION DESTINATION
-		${RETDEC_INSTALL_CMAKE_DIR}
+	DESTINATION
+		"${RETDEC_INSTALL_CMAKE_DIR}"
 )
