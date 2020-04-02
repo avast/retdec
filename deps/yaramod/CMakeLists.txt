@@ -70,24 +70,50 @@ add_dependencies(yaramod yaramod-project)
 target_include_directories(yaramod
 	SYSTEM INTERFACE
 		$<BUILD_INTERFACE:${source_dir}/include>
-		$<INSTALL_INTERFACE:${RETDEC_INSTALL_INCLUDE_DIR}/retdec/deps>
 		$<BUILD_INTERFACE:${source_dir}/deps>
 		$<BUILD_INTERFACE:${source_dir}/deps/pog/include>
 		$<BUILD_INTERFACE:${source_dir}/deps/pog/include/pog>
 		$<BUILD_INTERFACE:${source_dir}/deps/pog/deps/fmt/fmt/include>
 		$<BUILD_INTERFACE:${source_dir}/deps/pog/deps/re2/re2>
 		$<BUILD_INTERFACE:${binary_dir}/src>
+		$<INSTALL_INTERFACE:${RETDEC_INSTALL_INCLUDE_DIR}/retdec/deps>
 )
 
 target_link_libraries(yaramod INTERFACE
+		$<BUILD_INTERFACE:${binary_dir}/deps/pog/deps/fmt/fmt/${CMAKE_INSTALL_LIBDIR}/${CMAKE_STATIC_LIBRARY_PREFIX}pog_fmt${CMAKE_STATIC_LIBRARY_SUFFIX}>
+		$<BUILD_INTERFACE:${binary_dir}/deps/pog/deps/re2/re2/${CMAKE_INSTALL_LIBDIR}/${CMAKE_STATIC_LIBRARY_PREFIX}pog_re2${CMAKE_STATIC_LIBRARY_SUFFIX}>
+		$<INSTALL_INTERFACE:retdec::yaramod-libs>
 	debug
-		${binary_dir}/src/${DEBUG_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}yaramod${CMAKE_STATIC_LIBRARY_SUFFIX}
-		${binary_dir}/deps/pog/deps/fmt/fmt/${CMAKE_INSTALL_LIBDIR}/${CMAKE_STATIC_LIBRARY_PREFIX}pog_fmt${CMAKE_STATIC_LIBRARY_SUFFIX}
-		${binary_dir}/deps/pog/deps/re2/re2/${CMAKE_INSTALL_LIBDIR}/${CMAKE_STATIC_LIBRARY_PREFIX}pog_re2${CMAKE_STATIC_LIBRARY_SUFFIX}
+		$<BUILD_INTERFACE:${binary_dir}/src/${DEBUG_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}yaramod${CMAKE_STATIC_LIBRARY_SUFFIX}>
 	optimized
+		$<BUILD_INTERFACE:${binary_dir}/src/${RELEASE_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}yaramod${CMAKE_STATIC_LIBRARY_SUFFIX}>
+)
+
+# Install libs.
+# Install both Release and Debug variant to the same location.
+# We assume that only one variant will be present at the time.
+install(
+    FILES
+		${binary_dir}/src/${DEBUG_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}yaramod${CMAKE_STATIC_LIBRARY_SUFFIX}
 		${binary_dir}/src/${RELEASE_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}yaramod${CMAKE_STATIC_LIBRARY_SUFFIX}
 		${binary_dir}/deps/pog/deps/fmt/fmt/${CMAKE_INSTALL_LIBDIR}/${CMAKE_STATIC_LIBRARY_PREFIX}pog_fmt${CMAKE_STATIC_LIBRARY_SUFFIX}
 		${binary_dir}/deps/pog/deps/re2/re2/${CMAKE_INSTALL_LIBDIR}/${CMAKE_STATIC_LIBRARY_PREFIX}pog_re2${CMAKE_STATIC_LIBRARY_SUFFIX}
+    DESTINATION
+		${RETDEC_INSTALL_LIB_DIR}
+	OPTIONAL
+)
+
+list(APPEND YARAMOD_LIBS_INSTALLED "${CMAKE_INSTALL_PREFIX}/${RETDEC_INSTALL_LIB_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}yaramod${CMAKE_STATIC_LIBRARY_SUFFIX}")
+list(APPEND YARAMOD_LIBS_INSTALLED "${CMAKE_INSTALL_PREFIX}/${RETDEC_INSTALL_LIB_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}pog_fmt${CMAKE_STATIC_LIBRARY_SUFFIX}")
+list(APPEND YARAMOD_LIBS_INSTALLED "${CMAKE_INSTALL_PREFIX}/${RETDEC_INSTALL_LIB_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}pog_re2${CMAKE_STATIC_LIBRARY_SUFFIX}")
+
+# Configure config file.
+configure_package_config_file(
+	"retdec-yaramod-config.cmake"
+	"${RETDEC_BINARY_SHARE_DIR}/retdec-yaramod-config.cmake"
+	INSTALL_DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
+	PATH_VARS
+		YARAMOD_LIBS_INSTALLED
 )
 
 # Create config version file.
@@ -106,12 +132,9 @@ install(
 	COMPONENT yaramod
 )
 
-# Install libs.
 install(TARGETS yaramod
 	EXPORT yaramod-targets
 	COMPONENT yaramod
-	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
-	LIBRARY DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 )
 
 # Export targets.
@@ -125,7 +148,7 @@ install(EXPORT yaramod-targets
 # Install CMake files.
 install(
 	FILES
-		"${CMAKE_CURRENT_LIST_DIR}/retdec-yaramod-config.cmake"
+		"${RETDEC_BINARY_SHARE_DIR}/retdec-yaramod-config.cmake"
 		"${RETDEC_BINARY_SHARE_DIR}/retdec-yaramod-config-version.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
