@@ -194,11 +194,6 @@ set(LLVM_LIB_LIST
 	LLVMPasses
 )
 
-if(MSVC)
-	set(DEBUG_DIR "Debug/")
-	set(RELEASE_DIR "Release/")
-endif()
-
 ExternalProject_Get_Property(llvm-project binary_dir)
 ExternalProject_Get_Property(llvm-project source_dir)
 
@@ -216,18 +211,33 @@ target_include_directories(llvm
 )
 
 foreach(LLVM_LIB ${LLVM_LIB_LIST})
-	target_link_libraries(llvm
-		INTERFACE debug
+	target_link_libraries(llvm INTERFACE
+		optimized
+			$<BUILD_INTERFACE:${binary_dir}/${RELEASE_DIR}lib/${CMAKE_STATIC_LIBRARY_PREFIX}${LLVM_LIB}${CMAKE_STATIC_LIBRARY_SUFFIX}>
+		debug
+			$<BUILD_INTERFACE:${binary_dir}/${DEBUG_DIR}lib/${CMAKE_STATIC_LIBRARY_PREFIX}${LLVM_LIB}${CMAKE_STATIC_LIBRARY_SUFFIX}>
+	)
+
+	# Install libs.
+	# Install both Release and Debug variant to the same location.
+	# We assume that only one variant will be present at the time.
+	install(
+		FILES
 			${binary_dir}/${DEBUG_DIR}lib/${CMAKE_STATIC_LIBRARY_PREFIX}${LLVM_LIB}${CMAKE_STATIC_LIBRARY_SUFFIX}
-	)
-	target_link_libraries(llvm
-		INTERFACE optimized
 			${binary_dir}/${RELEASE_DIR}lib/${CMAKE_STATIC_LIBRARY_PREFIX}${LLVM_LIB}${CMAKE_STATIC_LIBRARY_SUFFIX}
+		DESTINATION
+			${RETDEC_INSTALL_LIB_DIR}
+		OPTIONAL
 	)
+
+	list(APPEND LLVM_LIBS_PATHS "${CMAKE_INSTALL_PREFIX}/${RETDEC_INSTALL_LIB_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}${LLVM_LIB}${CMAKE_STATIC_LIBRARY_SUFFIX}")
 endforeach(LLVM_LIB)
 
-target_link_libraries(llvm INTERFACE debug     Threads::Threads)
-target_link_libraries(llvm INTERFACE optimized Threads::Threads)
+target_link_libraries(llvm
+	INTERFACE
+		$<INSTALL_INTERFACE:retdec::llvm-libs>
+		Threads::Threads
+)
 
 if(UNIX)
 	set(EXECINFO "")
@@ -235,17 +245,23 @@ if(UNIX)
 		set(EXECINFO "execinfo")
 	endif()
 	target_link_libraries(llvm
-		INTERFACE debug
-			${ZLIB_LIBRARIES} ${CMAKE_DL_LIBS} ${EXECINFO}
-	)
-	target_link_libraries(llvm
-		INTERFACE optimized
-			${ZLIB_LIBRARIES} ${CMAKE_DL_LIBS} ${EXECINFO}
+		INTERFACE
+			${ZLIB_LIBRARIES}
+			${CMAKE_DL_LIBS}
+			${EXECINFO}
 	)
 elseif(MINGW)
-	target_link_libraries(llvm INTERFACE debug     ${ZLIB_LIBRARIES})
-	target_link_libraries(llvm INTERFACE optimized ${ZLIB_LIBRARIES})
+	target_link_libraries(llvm INTERFACE ${ZLIB_LIBRARIES})
 endif()
+
+# Configure config file.
+configure_package_config_file(
+	"retdec-llvm-config.cmake"
+	"${RETDEC_BINARY_SHARE_DIR}/retdec-llvm-config.cmake"
+	INSTALL_DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
+	PATH_VARS
+		LLVM_LIBS_PATHS
+)
 
 # Create config version file.
 write_basic_package_version_file(
@@ -264,12 +280,9 @@ install(
 	COMPONENT llvm
 )
 
-# Install libs.
 install(TARGETS llvm
 	EXPORT llvm-targets
 	COMPONENT llvm
-	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
-	LIBRARY DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 )
 
 # Export targets.
@@ -283,7 +296,7 @@ install(EXPORT llvm-targets
 # Install CMake files.
 install(
 	FILES
-		"${CMAKE_CURRENT_LIST_DIR}/retdec-llvm-config.cmake"
+		"${RETDEC_BINARY_SHARE_DIR}/retdec-llvm-config.cmake"
 		"${RETDEC_BINARY_SHARE_DIR}/retdec-llvm-config-version.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
