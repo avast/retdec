@@ -18,7 +18,6 @@ target_include_directories(rtti-finder
 target_link_libraries(rtti-finder
 	PUBLIC
 		retdec::common
-	PRIVATE
 		retdec::loader
 		retdec::utils
 )
