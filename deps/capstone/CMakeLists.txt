@@ -104,6 +104,8 @@ endif()
 ExternalProject_Get_Property(capstone-project source_dir)
 ExternalProject_Get_Property(capstone-project binary_dir)
 
+set(CAPSTONE_LIB ${CMAKE_STATIC_LIBRARY_PREFIX}capstone${CMAKE_STATIC_LIBRARY_SUFFIX})
+
 # Add libraries.
 add_library(capstone INTERFACE)
 add_library(retdec::capstone ALIAS capstone)
@@ -116,13 +118,22 @@ target_include_directories(capstone
 		$<INSTALL_INTERFACE:${RETDEC_INSTALL_INCLUDE_DIR}/retdec/deps>
 )
 
-target_link_libraries(capstone
-	INTERFACE debug
-		${binary_dir}/${DEBUG_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}capstone${CMAKE_STATIC_LIBRARY_SUFFIX}
+target_link_libraries(capstone INTERFACE
+		$<INSTALL_INTERFACE:retdec::capstone-libs>
+	debug
+		$<BUILD_INTERFACE:${binary_dir}/${DEBUG_DIR}${CAPSTONE_LIB}>
+	optimized
+		$<BUILD_INTERFACE:${binary_dir}/${RELEASE_DIR}${CAPSTONE_LIB}>
 )
-target_link_libraries(capstone
-	INTERFACE optimized
-		${binary_dir}/${RELEASE_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}capstone${CMAKE_STATIC_LIBRARY_SUFFIX}
+
+# Configure config file.
+set(CAPSTONE_LIB_INSTALLED "${CMAKE_INSTALL_PREFIX}/${RETDEC_INSTALL_LIB_DIR}/${CAPSTONE_LIB}")
+configure_package_config_file(
+	"retdec-capstone-config.cmake"
+	"${RETDEC_BINARY_SHARE_DIR}/retdec-capstone-config.cmake"
+	INSTALL_DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
+	PATH_VARS
+		CAPSTONE_LIB_INSTALLED
 )
 
 # Create config version file.
@@ -142,11 +153,20 @@ install(
 )
 
 # Install libs.
+# Install both Release and Debug variant to the same location.
+# We assume that only one variant will be present at the time.
+install(
+    FILES
+		${binary_dir}/${DEBUG_DIR}${CAPSTONE_LIB}
+		${binary_dir}/${RELEASE_DIR}${CAPSTONE_LIB}
+    DESTINATION
+		${RETDEC_INSTALL_LIB_DIR}
+	OPTIONAL
+)
+
 install(TARGETS capstone
 	EXPORT capstone-targets
 	COMPONENT capstone
-	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
-	LIBRARY DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 )
 
 # Export targets.
@@ -160,7 +180,7 @@ install(EXPORT capstone-targets
 # Install CMake files.
 install(
 	FILES
-		"${CMAKE_CURRENT_LIST_DIR}/retdec-capstone-config.cmake"
+		"${RETDEC_BINARY_SHARE_DIR}/retdec-capstone-config.cmake"
 		"${RETDEC_BINARY_SHARE_DIR}/retdec-capstone-config-version.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
