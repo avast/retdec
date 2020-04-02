@@ -126,15 +126,6 @@ target_link_libraries(libyara
         Threads::Threads
 )
 
-install(
-	FILES ${YARA_LIBRARY_PATH}
-	DESTINATION ${RETDEC_INSTALL_LIB_DIR}
-)
-install(
-	DIRECTORY ${YARA_INCLUDE_DIR}/
-	DESTINATION ${RETDEC_INSTALL_INCLUDE_DIR}/retdec/deps
-)
-
 # Configure config file.
 set(LIBYARA_LIBRARY "${CMAKE_INSTALL_PREFIX}/${RETDEC_INSTALL_LIB_DIR}/${YARA_LIBRARY}")
 configure_package_config_file(
@@ -150,6 +141,22 @@ write_basic_package_version_file(
 	"${RETDEC_BINARY_SHARE_DIR}/retdec-libyara-config-version.cmake"
 	VERSION ${PROJECT_VERSION}
 	COMPATIBILITY AnyNewerVersion
+)
+
+# Install includes.
+install(
+    DIRECTORY
+        ${YARA_INCLUDE_DIR}/
+    DESTINATION
+        ${RETDEC_INSTALL_INCLUDE_DIR}/retdec/deps
+)
+
+# Install libs.
+install(
+    FILES
+        ${YARA_LIBRARY_PATH}
+    DESTINATION
+        ${RETDEC_INSTALL_LIB_DIR}
 )
 
 install(TARGETS libyara
