@@ -82,11 +82,12 @@ add_library(gtest INTERFACE)
 add_library(retdec::gtest ALIAS gtest)
 add_dependencies(gtest googletest)
 target_link_libraries(gtest INTERFACE
-		Threads::Threads
 	debug
 		${binary_dir}/lib/${DEBUG_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}gtest${DEBUG_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}
 	optimized
 		${binary_dir}/lib/${RELEASE_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}gtest${CMAKE_STATIC_LIBRARY_SUFFIX}
+	general
+		Threads::Threads
 )
 target_include_directories(gtest
 	SYSTEM INTERFACE
@@ -97,12 +98,13 @@ target_include_directories(gtest
 add_library(gtest_main INTERFACE)
 add_library(retdec::gtest_main ALIAS gtest_main)
 target_link_libraries(gtest_main INTERFACE
-		gtest
-		Threads::Threads
+#		Threads::Threads
 	debug
 		${binary_dir}/lib/${DEBUG_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}gtest_main${DEBUG_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}
 	optimized
 		${binary_dir}/lib/${RELEASE_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}gtest_main${CMAKE_STATIC_LIBRARY_SUFFIX}
+	general
+		gtest
 )
 # target_include_directories(gtest_main
 # 	SYSTEM INTERFACE
@@ -114,12 +116,13 @@ target_link_libraries(gtest_main INTERFACE
 add_library(gmock INTERFACE)
 add_library(retdec::gmock ALIAS gmock)
 target_link_libraries(gmock INTERFACE
-		gtest
-		Threads::Threads
+#		Threads::Threads
 	debug
 		${binary_dir}/lib/${DEBUG_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}gmock${DEBUG_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}
 	optimized
 		${binary_dir}/lib/${RELEASE_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}gmock${CMAKE_STATIC_LIBRARY_SUFFIX}
+	general
+		gtest
 )
 target_include_directories(gmock
 	SYSTEM INTERFACE
@@ -132,12 +135,13 @@ target_include_directories(gmock
 add_library(gmock_main INTERFACE)
 add_library(retdec::gmock_main ALIAS gmock_main)
 target_link_libraries(gmock_main INTERFACE
-		gmock
-		Threads::Threads
+#		Threads::Threads
 	debug
 		${binary_dir}/lib/${DEBUG_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}gmock_main${DEBUG_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}
 	optimized
 		${binary_dir}/lib/${RELEASE_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}gmock_main${CMAKE_STATIC_LIBRARY_SUFFIX}
+	general
+		gmock
 )
 # target_include_directories(gmock_main
 # 	SYSTEM INTERFACE
