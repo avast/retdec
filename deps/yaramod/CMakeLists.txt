@@ -89,7 +89,7 @@ target_link_libraries(yaramod INTERFACE
 	optimized
 		$<BUILD_INTERFACE:${YARAMOD_LIB_OPT}>
 	general
-		$<BUILD_INTERFACE:${RE2_LIB_NAME}>
+		$<BUILD_INTERFACE:${FMT_LIB}>
 		$<BUILD_INTERFACE:${RE2_LIB}>
 		$<INSTALL_INTERFACE:retdec::deps::yaramod-libs>
 )
@@ -112,7 +112,7 @@ install(
     FILES
 		${YARAMOD_LIB_DEBUG}
 		${YARAMOD_LIB_OPT}
-		${RE2_LIB_NAME}
+		${FMT_LIB}
 		${RE2_LIB}
     DESTINATION
 		${RETDEC_INSTALL_DEPS_LIB_DIR}
