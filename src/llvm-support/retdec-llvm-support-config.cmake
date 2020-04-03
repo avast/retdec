@@ -1,5 +1,11 @@
 
-include(CMakeFindDependencyMacro)
-find_dependency(retdec 4.0 REQUIRED COMPONENTS utils llvm)
+find_package(retdec 4.0
+    REQUIRED
+    COMPONENTS
+        utils
+        llvm
+)
 
-include(${CMAKE_CURRENT_LIST_DIR}/retdec-llvm-support-targets.cmake)
+if(NOT TARGET retdec::llvm-support)
+    include(${CMAKE_CURRENT_LIST_DIR}/retdec-llvm-support-targets.cmake)
+endif()

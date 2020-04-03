@@ -10,4 +10,6 @@ if(NOT TARGET yaramod-libs)
     endforeach(YARAMOD_LIB)
 endif()
 
-include(${CMAKE_CURRENT_LIST_DIR}/retdec-yaramod-targets.cmake)
+if(NOT TARGET retdec::yaramod)
+    include(${CMAKE_CURRENT_LIST_DIR}/retdec-yaramod-targets.cmake)
+endif()

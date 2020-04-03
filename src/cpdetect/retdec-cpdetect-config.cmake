@@ -1,13 +1,14 @@
 
-include(CMakeFindDependencyMacro)
-find_dependency(retdec 4.0
+find_package(retdec 4.0
     REQUIRED
     COMPONENTS
         fileformat
-        utils
         yaracpp
-        llvm
+        utils
         tinyxml2
+        llvm
 )
 
-include(${CMAKE_CURRENT_LIST_DIR}/retdec-cpdetect-targets.cmake)
+if(NOT TARGET retdec::cpdetect)
+    include(${CMAKE_CURRENT_LIST_DIR}/retdec-cpdetect-targets.cmake)
+endif()

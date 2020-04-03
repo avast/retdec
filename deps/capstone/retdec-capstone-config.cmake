@@ -7,4 +7,6 @@ if(NOT TARGET retdec::capstone-libs)
     )
 endif()
 
-include(${CMAKE_CURRENT_LIST_DIR}/retdec-capstone-targets.cmake)
+if(NOT TARGET retdec::capstone)
+    include(${CMAKE_CURRENT_LIST_DIR}/retdec-capstone-targets.cmake)
+endif()

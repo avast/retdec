@@ -1,21 +1,22 @@
 
-include(CMakeFindDependencyMacro)
-find_dependency(retdec 4.0
+find_package(retdec 4.0
     REQUIRED
     COMPONENTS
-        ctypesparser
         rtti-finder
+        capstone2llvmir
+        debugformat
+        demangler
+        stacofin
         loader
         fileformat
-        debugformat
         config
-        demangler
-        capstone2llvmir
-        stacofin
-        llvm-support
+        ctypesparser
         common
         utils
+        llvm-support
         llvm
 )
 
-include(${CMAKE_CURRENT_LIST_DIR}/retdec-bin2llvmir-targets.cmake)
+if(NOT TARGET retdec::bin2llvmir)
+    include(${CMAKE_CURRENT_LIST_DIR}/retdec-bin2llvmir-targets.cmake)
+endif()

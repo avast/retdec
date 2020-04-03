@@ -16,9 +16,9 @@ target_include_directories(debugformat
 
 target_link_libraries(debugformat
 	PUBLIC
+		retdec::demangler
 		retdec::loader
 		retdec::fileformat
-		retdec::demangler
 		retdec::common
 		retdec::pdbparser
 		retdec::llvm

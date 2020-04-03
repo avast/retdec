@@ -1,6 +1,5 @@
 
-include(CMakeFindDependencyMacro)
-find_dependency(retdec 4.0
+find_package(retdec 4.0
     REQUIRED
     COMPONENTS
         bin2llvmir
@@ -10,4 +9,6 @@ find_dependency(retdec 4.0
         llvm
 )
 
-include(${CMAKE_CURRENT_LIST_DIR}/retdec-retdec-targets.cmake)
+if(NOT TARGET retdec::retdec)
+    include(${CMAKE_CURRENT_LIST_DIR}/retdec-retdec-targets.cmake)
+endif()

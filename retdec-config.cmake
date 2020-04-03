@@ -1,4 +1,7 @@
 
+
 foreach(component ${retdec_FIND_COMPONENTS})
-    include(${CMAKE_CURRENT_LIST_DIR}/retdec-${component}-config.cmake)
+    if(NOT TARGET retdec::${component})
+        include(${CMAKE_CURRENT_LIST_DIR}/retdec-${component}-config.cmake)
+    endif()
 endforeach()

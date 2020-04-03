@@ -9,4 +9,6 @@ if(NOT TARGET retdec::openssl-crypto-libs)
     )
 endif()
 
-include(${CMAKE_CURRENT_LIST_DIR}/retdec-openssl-crypto-targets.cmake)
+if(NOT TARGET retdec::openssl-crypto)
+    include(${CMAKE_CURRENT_LIST_DIR}/retdec-openssl-crypto-targets.cmake)
+endif()

@@ -15,4 +15,6 @@ if(NOT TARGET llvm-libs)
 	endforeach(LLVM_LIB)
 endif()
 
-include(${CMAKE_CURRENT_LIST_DIR}/retdec-llvm-targets.cmake)
+if(NOT TARGET retdec::llvm)
+    include(${CMAKE_CURRENT_LIST_DIR}/retdec-llvm-targets.cmake)
+endif()

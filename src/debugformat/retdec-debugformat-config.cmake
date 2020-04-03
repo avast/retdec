@@ -1,14 +1,15 @@
 
-include(CMakeFindDependencyMacro)
-find_dependency(retdec 4.0
+find_package(retdec 4.0
     REQUIRED
     COMPONENTS
         demangler
-        pdbparser
-        fileformat
         loader
+        fileformat
         common
+        pdbparser
         llvm
 )
 
-include(${CMAKE_CURRENT_LIST_DIR}/retdec-debugformat-targets.cmake)
+if(NOT TARGET retdec::debugformat)
+    include(${CMAKE_CURRENT_LIST_DIR}/retdec-debugformat-targets.cmake)
+endif()

@@ -1,11 +1,12 @@
 
-include(CMakeFindDependencyMacro)
-find_dependency(Threads REQUIRED)
-find_dependency(retdec 4.0
+find_package(Threads REQUIRED)
+find_package(retdec 4.0
     REQUIRED
     COMPONENTS
         utils
         openssl-crypto
 )
 
-include(${CMAKE_CURRENT_LIST_DIR}/retdec-crypto-targets.cmake)
+if(NOT TARGET retdec::crypto)
+    include(${CMAKE_CURRENT_LIST_DIR}/retdec-crypto-targets.cmake)
+endif()

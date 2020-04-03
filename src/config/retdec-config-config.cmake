@@ -1,5 +1,12 @@
 
-include(CMakeFindDependencyMacro)
-find_dependency(retdec 4.0 REQUIRED COMPONENTS common rapidjson serdes utils)
+find_package(retdec 4.0 REQUIRED
+    COMPONENTS
+        serdes
+        common
+        utils
+        rapidjson
+)
 
-include(${CMAKE_CURRENT_LIST_DIR}/retdec-config-targets.cmake)
+if(NOT TARGET retdec::config)
+    include(${CMAKE_CURRENT_LIST_DIR}/retdec-config-targets.cmake)
+endif()

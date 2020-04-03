@@ -1,6 +1,5 @@
 
-include(CMakeFindDependencyMacro)
-find_dependency(retdec 4.0
+find_package(retdec 4.0
     REQUIRED
     COMPONENTS
         loader
@@ -8,4 +7,6 @@ find_dependency(retdec 4.0
         utils
 )
 
-include(${CMAKE_CURRENT_LIST_DIR}/retdec-rtti-finder-targets.cmake)
+if(NOT TARGET retdec::rtti-finder)
+    include(${CMAKE_CURRENT_LIST_DIR}/retdec-rtti-finder-targets.cmake)
+endif()

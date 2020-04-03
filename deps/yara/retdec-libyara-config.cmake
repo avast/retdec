@@ -9,4 +9,6 @@ if(NOT TARGET retdec::libyara-libs)
     )
 endif()
 
-include(${CMAKE_CURRENT_LIST_DIR}/retdec-libyara-targets.cmake)
+if(NOT TARGET retdec::libyara)
+    include(${CMAKE_CURRENT_LIST_DIR}/retdec-libyara-targets.cmake)
+endif()

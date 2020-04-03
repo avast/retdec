@@ -118,18 +118,18 @@ target_include_directories(bin2llvmir
 
 target_link_libraries(bin2llvmir
 	PUBLIC
-		retdec::ctypesparser
 		retdec::rtti-finder
+		retdec::capstone2llvmir
+		retdec::debugformat
+		retdec::demangler
+		retdec::stacofin
 		retdec::loader
 		retdec::fileformat
-		retdec::debugformat
 		retdec::config
-		retdec::demangler
-		retdec::capstone2llvmir
-		retdec::stacofin
-		retdec::llvm-support
+		retdec::ctypesparser
 		retdec::common
 		retdec::utils
+		retdec::llvm-support
 		retdec::llvm
 )
 
