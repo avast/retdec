@@ -45,9 +45,14 @@ install(EXPORT patterngen-targets
 )
 
 # Install CMake files.
+configure_file(
+	"retdec-patterngen-config.cmake"
+	"${CMAKE_CURRENT_BINARY_DIR}/retdec-patterngen-config.cmake"
+	@ONLY
+)
 install(
 	FILES
-		"${CMAKE_CURRENT_LIST_DIR}/retdec-patterngen-config.cmake"
+		"${CMAKE_CURRENT_BINARY_DIR}/retdec-patterngen-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
 	COMPONENT patterngen

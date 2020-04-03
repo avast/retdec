@@ -44,9 +44,14 @@ install(EXPORT ctypesparser-targets
 )
 
 # Install CMake files.
+configure_file(
+	"retdec-ctypesparser-config.cmake"
+	"${CMAKE_CURRENT_BINARY_DIR}/retdec-ctypesparser-config.cmake"
+	@ONLY
+)
 install(
 	FILES
-		"${CMAKE_CURRENT_LIST_DIR}/retdec-ctypesparser-config.cmake"
+		"${CMAKE_CURRENT_BINARY_DIR}/retdec-ctypesparser-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
 	COMPONENT ctypesparser

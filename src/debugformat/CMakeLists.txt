@@ -48,9 +48,14 @@ install(EXPORT debugformat-targets
 )
 
 # Install CMake files.
+configure_file(
+	"retdec-debugformat-config.cmake"
+	"${CMAKE_CURRENT_BINARY_DIR}/retdec-debugformat-config.cmake"
+	@ONLY
+)
 install(
 	FILES
-		"${CMAKE_CURRENT_LIST_DIR}/retdec-debugformat-config.cmake"
+		"${CMAKE_CURRENT_BINARY_DIR}/retdec-debugformat-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
 	COMPONENT debugformat

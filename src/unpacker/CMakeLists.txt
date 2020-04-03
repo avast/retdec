@@ -54,9 +54,14 @@ install(EXPORT unpacker-targets
 )
 
 # Install CMake files.
+configure_file(
+	"retdec-unpacker-config.cmake"
+	"${CMAKE_CURRENT_BINARY_DIR}/retdec-unpacker-config.cmake"
+	@ONLY
+)
 install(
 	FILES
-		"${CMAKE_CURRENT_LIST_DIR}/retdec-unpacker-config.cmake"
+		"${CMAKE_CURRENT_BINARY_DIR}/retdec-unpacker-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
 	COMPONENT unpacker

@@ -39,9 +39,14 @@ install(EXPORT llvmir-emul-targets
 )
 
 # Install CMake files.
+configure_file(
+	"retdec-llvmir-emul-config.cmake"
+	"${CMAKE_CURRENT_BINARY_DIR}/retdec-llvmir-emul-config.cmake"
+	@ONLY
+)
 install(
 	FILES
-		"${CMAKE_CURRENT_LIST_DIR}/retdec-llvmir-emul-config.cmake"
+		"${CMAKE_CURRENT_BINARY_DIR}/retdec-llvmir-emul-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
 	COMPONENT llvmir-emul

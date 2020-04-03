@@ -119,9 +119,14 @@ install(EXPORT fileformat-targets
 )
 
 # Install CMake files.
+configure_file(
+	"retdec-fileformat-config.cmake"
+	"${CMAKE_CURRENT_BINARY_DIR}/retdec-fileformat-config.cmake"
+	@ONLY
+)
 install(
 	FILES
-		"${CMAKE_CURRENT_LIST_DIR}/retdec-fileformat-config.cmake"
+		"${CMAKE_CURRENT_BINARY_DIR}/retdec-fileformat-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
 	COMPONENT fileformat

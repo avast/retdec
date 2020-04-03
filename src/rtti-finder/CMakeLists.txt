@@ -46,9 +46,14 @@ install(EXPORT rtti-finder-targets
 )
 
 # Install CMake files.
+configure_file(
+	"retdec-rtti-finder-config.cmake"
+	"${CMAKE_CURRENT_BINARY_DIR}/retdec-rtti-finder-config.cmake"
+	@ONLY
+)
 install(
 	FILES
-		"${CMAKE_CURRENT_LIST_DIR}/retdec-rtti-finder-config.cmake"
+		"${CMAKE_CURRENT_BINARY_DIR}/retdec-rtti-finder-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
 	COMPONENT rtti-finder

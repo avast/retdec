@@ -42,9 +42,14 @@ install(EXPORT crypto-targets
 )
 
 # Install CMake files.
+configure_file(
+	"retdec-crypto-config.cmake"
+	"${CMAKE_CURRENT_BINARY_DIR}/retdec-crypto-config.cmake"
+	@ONLY
+)
 install(
 	FILES
-		"${CMAKE_CURRENT_LIST_DIR}/retdec-crypto-config.cmake"
+		"${CMAKE_CURRENT_BINARY_DIR}/retdec-crypto-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
 	COMPONENT crypto

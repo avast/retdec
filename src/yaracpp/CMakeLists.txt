@@ -42,9 +42,14 @@ install(EXPORT yaracpp-targets
 )
 
 # Install CMake files.
+configure_file(
+	"retdec-yaracpp-config.cmake"
+	"${CMAKE_CURRENT_BINARY_DIR}/retdec-yaracpp-config.cmake"
+	@ONLY
+)
 install(
 	FILES
-		"${CMAKE_CURRENT_LIST_DIR}/retdec-yaracpp-config.cmake"
+		"${CMAKE_CURRENT_BINARY_DIR}/retdec-yaracpp-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
 	COMPONENT yaracpp

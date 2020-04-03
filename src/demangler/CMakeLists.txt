@@ -68,9 +68,14 @@ install(EXPORT demangler-targets
 )
 
 # Install CMake files.
+configure_file(
+	"retdec-demangler-config.cmake"
+	"${CMAKE_CURRENT_BINARY_DIR}/retdec-demangler-config.cmake"
+	@ONLY
+)
 install(
 	FILES
-		"${CMAKE_CURRENT_LIST_DIR}/retdec-demangler-config.cmake"
+		"${CMAKE_CURRENT_BINARY_DIR}/retdec-demangler-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
 	COMPONENT demangler

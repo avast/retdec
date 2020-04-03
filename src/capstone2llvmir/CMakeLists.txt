@@ -56,9 +56,14 @@ install(EXPORT capstone2llvmir-targets
 )
 
 # Install CMake files.
+configure_file(
+	"retdec-capstone2llvmir-config.cmake"
+	"${CMAKE_CURRENT_BINARY_DIR}/retdec-capstone2llvmir-config.cmake"
+	@ONLY
+)
 install(
 	FILES
-		"${CMAKE_CURRENT_LIST_DIR}/retdec-capstone2llvmir-config.cmake"
+		"${CMAKE_CURRENT_BINARY_DIR}/retdec-capstone2llvmir-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
 	COMPONENT capstone2llvmir

@@ -46,9 +46,14 @@ install(EXPORT retdec-targets
 )
 
 # Install CMake files.
+configure_file(
+	"retdec-retdec-config.cmake"
+	"${CMAKE_CURRENT_BINARY_DIR}/retdec-retdec-config.cmake"
+	@ONLY
+)
 install(
 	FILES
-		"${CMAKE_CURRENT_LIST_DIR}/retdec-retdec-config.cmake"
+		"${CMAKE_CURRENT_BINARY_DIR}/retdec-retdec-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
 	COMPONENT retdec

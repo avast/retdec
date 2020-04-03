@@ -1,6 +1,6 @@
 
 find_package(Threads REQUIRED)
-find_package(retdec 4.0
+find_package(retdec @PROJECT_VERSION@
     REQUIRED
     COMPONENTS
         utils

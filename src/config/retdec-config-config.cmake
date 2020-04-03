@@ -1,5 +1,6 @@
 
-find_package(retdec 4.0 REQUIRED
+find_package(retdec @PROJECT_VERSION@
+    REQUIRED
     COMPONENTS
         serdes
         common

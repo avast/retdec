@@ -42,9 +42,14 @@ install(EXPORT macho-extractor-targets
 )
 
 # Install CMake files.
+configure_file(
+	"retdec-macho-extractor-config.cmake"
+	"${CMAKE_CURRENT_BINARY_DIR}/retdec-macho-extractor-config.cmake"
+	@ONLY
+)
 install(
 	FILES
-		"${CMAKE_CURRENT_LIST_DIR}/retdec-macho-extractor-config.cmake"
+		"${CMAKE_CURRENT_BINARY_DIR}/retdec-macho-extractor-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
 	COMPONENT macho-extractor

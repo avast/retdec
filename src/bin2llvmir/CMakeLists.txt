@@ -157,9 +157,14 @@ install(EXPORT bin2llvmir-targets
 )
 
 # Install CMake files.
+configure_file(
+	"retdec-bin2llvmir-config.cmake"
+	"${CMAKE_CURRENT_BINARY_DIR}/retdec-bin2llvmir-config.cmake"
+	@ONLY
+)
 install(
 	FILES
-		"${CMAKE_CURRENT_LIST_DIR}/retdec-bin2llvmir-config.cmake"
+		"${CMAKE_CURRENT_BINARY_DIR}/retdec-bin2llvmir-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
 	COMPONENT bin2llvmir

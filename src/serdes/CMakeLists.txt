@@ -55,9 +55,14 @@ install(EXPORT serdes-targets
 )
 
 # Install CMake files.
+configure_file(
+	"retdec-serdes-config.cmake"
+	"${CMAKE_CURRENT_BINARY_DIR}/retdec-serdes-config.cmake"
+	@ONLY
+)
 install(
 	FILES
-		"${CMAKE_CURRENT_LIST_DIR}/retdec-serdes-config.cmake"
+		"${CMAKE_CURRENT_BINARY_DIR}/retdec-serdes-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
 	COMPONENT serdes

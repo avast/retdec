@@ -43,9 +43,14 @@ install(EXPORT ar-extractor-targets
 )
 
 # Install CMake files.
+configure_file(
+	"retdec-ar-extractor-config.cmake"
+	"${CMAKE_CURRENT_BINARY_DIR}/retdec-ar-extractor-config.cmake"
+	@ONLY
+)
 install(
 	FILES
-		"${CMAKE_CURRENT_LIST_DIR}/retdec-ar-extractor-config.cmake"
+		"${CMAKE_CURRENT_BINARY_DIR}/retdec-ar-extractor-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
 	COMPONENT ar-extractor

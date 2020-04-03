@@ -350,9 +350,14 @@ install(EXPORT llvmir2hll-targets
 )
 
 # Install CMake files.
+configure_file(
+	"retdec-llvmir2hll-config.cmake"
+	"${CMAKE_CURRENT_BINARY_DIR}/retdec-llvmir2hll-config.cmake"
+	@ONLY
+)
 install(
 	FILES
-		"${CMAKE_CURRENT_LIST_DIR}/retdec-llvmir2hll-config.cmake"
+		"${CMAKE_CURRENT_BINARY_DIR}/retdec-llvmir2hll-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
 	COMPONENT llvmir2hll

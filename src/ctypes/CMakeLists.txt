@@ -68,9 +68,14 @@ install(EXPORT ctypes-targets
 )
 
 # Install CMake files.
+configure_file(
+	"retdec-ctypes-config.cmake"
+	"${CMAKE_CURRENT_BINARY_DIR}/retdec-ctypes-config.cmake"
+	@ONLY
+)
 install(
 	FILES
-		"${CMAKE_CURRENT_LIST_DIR}/retdec-ctypes-config.cmake"
+		"${CMAKE_CURRENT_BINARY_DIR}/retdec-ctypes-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
 	COMPONENT ctypes
