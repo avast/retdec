@@ -1,3 +1,16 @@
+
+include(ExternalProject)
+
+include(ProcessorCount)
+ProcessorCount(CPUS)
+
+if(CMAKE_C_COMPILER)
+	set(CMAKE_C_COMPILER_OPTION "-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}")
+endif()
+if(CMAKE_CXX_COMPILER)
+	set(CMAKE_CXX_COMPILER_OPTION "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")
+endif()
+
 if(MSVC)
 	set(RELEASE_DIR "Release/")
 	set(DEBUG_DIR "Debug/")

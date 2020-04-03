@@ -4,6 +4,8 @@ add_library(llvm-support STATIC
 )
 add_library(retdec::llvm-support ALIAS llvm-support)
 
+target_compile_features(llvm-support PUBLIC cxx_std_17)
+
 target_include_directories(llvm-support
 	PUBLIC
 		$<BUILD_INTERFACE:${RETDEC_INCLUDE_DIR}>

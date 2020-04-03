@@ -1,11 +1,3 @@
-include(ExternalProject)
-
-if(CMAKE_C_COMPILER)
-	set(CMAKE_C_COMPILER_OPTION "-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}")
-endif()
-if(CMAKE_CXX_COMPILER)
-	set(CMAKE_CXX_COMPILER_OPTION "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")
-endif()
 
 if(YARAMOD_LOCAL_DIR)
 	message(STATUS "YaraMod: using local YaraMod directory.")
@@ -64,7 +56,17 @@ endif()
 ExternalProject_Get_Property(yaramod-project source_dir)
 ExternalProject_Get_Property(yaramod-project binary_dir)
 
-# Add libraries.
+set(YARAMOD_LIB_NAME  ${CMAKE_STATIC_LIBRARY_PREFIX}yaramod${CMAKE_STATIC_LIBRARY_SUFFIX})
+set(YARAMOD_LIB_OPT   ${binary_dir}/src/${RELEASE_DIR}${YARAMOD_LIB_NAME})
+set(YARAMOD_LIB_DEBUG ${binary_dir}/src/${DEBUG_DIR}${YARAMOD_LIB_NAME})
+
+set(FMT_LIB_NAME      ${CMAKE_STATIC_LIBRARY_PREFIX}pog_fmt${CMAKE_STATIC_LIBRARY_SUFFIX})
+set(FMT_LIB           ${binary_dir}/deps/pog/deps/fmt/fmt/${CMAKE_INSTALL_LIBDIR}/${FMT_LIB_NAME})
+
+set(RE2_LIB_NAME      ${CMAKE_STATIC_LIBRARY_PREFIX}pog_re2${CMAKE_STATIC_LIBRARY_SUFFIX})
+set(RE2_LIB           ${binary_dir}/deps/pog/deps/re2/re2/${CMAKE_INSTALL_LIBDIR}/${RE2_LIB_NAME})
+
+# Create target.
 add_library(yaramod INTERFACE)
 add_library(retdec::deps::yaramod ALIAS yaramod)
 add_dependencies(yaramod yaramod-project)
@@ -78,58 +80,46 @@ target_include_directories(yaramod
 		$<BUILD_INTERFACE:${source_dir}/deps/pog/deps/fmt/fmt/include>
 		$<BUILD_INTERFACE:${source_dir}/deps/pog/deps/re2/re2>
 		$<BUILD_INTERFACE:${binary_dir}/src>
-		$<INSTALL_INTERFACE:${RETDEC_INSTALL_INCLUDE_DIR}/retdec/deps>
+		$<INSTALL_INTERFACE:${RETDEC_INSTALL_DEPS_INCLUDE_DIR}>
 )
 
 target_link_libraries(yaramod INTERFACE
 	debug
-		$<BUILD_INTERFACE:${binary_dir}/src/${DEBUG_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}yaramod${CMAKE_STATIC_LIBRARY_SUFFIX}>
+		$<BUILD_INTERFACE:${YARAMOD_LIB_DEBUG}>
 	optimized
-		$<BUILD_INTERFACE:${binary_dir}/src/${RELEASE_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}yaramod${CMAKE_STATIC_LIBRARY_SUFFIX}>
+		$<BUILD_INTERFACE:${YARAMOD_LIB_OPT}>
 	general
-		$<BUILD_INTERFACE:${binary_dir}/deps/pog/deps/fmt/fmt/${CMAKE_INSTALL_LIBDIR}/${CMAKE_STATIC_LIBRARY_PREFIX}pog_fmt${CMAKE_STATIC_LIBRARY_SUFFIX}>
-		$<BUILD_INTERFACE:${binary_dir}/deps/pog/deps/re2/re2/${CMAKE_INSTALL_LIBDIR}/${CMAKE_STATIC_LIBRARY_PREFIX}pog_re2${CMAKE_STATIC_LIBRARY_SUFFIX}>
+		$<BUILD_INTERFACE:${RE2_LIB_NAME}>
+		$<BUILD_INTERFACE:${RE2_LIB}>
 		$<INSTALL_INTERFACE:retdec::deps::yaramod-libs>
 )
 if(WIN32)
 	target_link_libraries(yaramod INTERFACE shlwapi)
 endif()
 
+# Install includes.
+install(
+	DIRECTORY
+		${source_dir}/include/
+	DESTINATION
+		${RETDEC_INSTALL_DEPS_INCLUDE_DIR}
+)
+
 # Install libs.
 # Install both Release and Debug variant to the same location.
 # We assume that only one variant will be present at the time.
 install(
     FILES
-		${binary_dir}/src/${DEBUG_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}yaramod${CMAKE_STATIC_LIBRARY_SUFFIX}
-		${binary_dir}/src/${RELEASE_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}yaramod${CMAKE_STATIC_LIBRARY_SUFFIX}
-		${binary_dir}/deps/pog/deps/fmt/fmt/${CMAKE_INSTALL_LIBDIR}/${CMAKE_STATIC_LIBRARY_PREFIX}pog_fmt${CMAKE_STATIC_LIBRARY_SUFFIX}
-		${binary_dir}/deps/pog/deps/re2/re2/${CMAKE_INSTALL_LIBDIR}/${CMAKE_STATIC_LIBRARY_PREFIX}pog_re2${CMAKE_STATIC_LIBRARY_SUFFIX}
+		${YARAMOD_LIB_DEBUG}
+		${YARAMOD_LIB_OPT}
+		${RE2_LIB_NAME}
+		${RE2_LIB}
     DESTINATION
-		${RETDEC_INSTALL_LIB_DIR}
+		${RETDEC_INSTALL_DEPS_LIB_DIR}
 	OPTIONAL
 )
 
-list(APPEND YARAMOD_LIBS_INSTALLED "${CMAKE_INSTALL_PREFIX}/${RETDEC_INSTALL_LIB_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}yaramod${CMAKE_STATIC_LIBRARY_SUFFIX}")
-list(APPEND YARAMOD_LIBS_INSTALLED "${CMAKE_INSTALL_PREFIX}/${RETDEC_INSTALL_LIB_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}pog_fmt${CMAKE_STATIC_LIBRARY_SUFFIX}")
-list(APPEND YARAMOD_LIBS_INSTALLED "${CMAKE_INSTALL_PREFIX}/${RETDEC_INSTALL_LIB_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}pog_re2${CMAKE_STATIC_LIBRARY_SUFFIX}")
-
-# Configure config file.
-configure_package_config_file(
-	"retdec-yaramod-config.cmake"
-	"${RETDEC_BINARY_SHARE_DIR}/retdec-yaramod-config.cmake"
-	INSTALL_DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
-	PATH_VARS
-		YARAMOD_LIBS_INSTALLED
-)
-
-# Install includes.
-install(
-	DIRECTORY
-		${source_dir}/include/yaramod
-	DESTINATION
-		${RETDEC_INSTALL_INCLUDE_DIR}/retdec/deps
-)
-
+# Install targets.
 install(TARGETS yaramod
 	EXPORT yaramod-targets
 )
@@ -141,10 +131,22 @@ install(EXPORT yaramod-targets
 	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
 )
 
+# Configure config file.
+list(APPEND YARAMOD_LIBS_INSTALLED "${RETDEC_INSTALL_DEPS_LIB_DIR_ABS}/${YARAMOD_LIB_NAME}")
+list(APPEND YARAMOD_LIBS_INSTALLED "${RETDEC_INSTALL_DEPS_LIB_DIR_ABS}/${FMT_LIB_NAME}")
+list(APPEND YARAMOD_LIBS_INSTALLED "${RETDEC_INSTALL_DEPS_LIB_DIR_ABS}/${RE2_LIB_NAME}")
+configure_package_config_file(
+	"retdec-yaramod-config.cmake"
+	"${CMAKE_CURRENT_BINARY_DIR}/retdec-yaramod-config.cmake"
+	INSTALL_DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
+	PATH_VARS
+		YARAMOD_LIBS_INSTALLED
+)
+
 # Install CMake files.
 install(
 	FILES
-		"${RETDEC_BINARY_SHARE_DIR}/retdec-yaramod-config.cmake"
+		"${CMAKE_CURRENT_BINARY_DIR}/retdec-yaramod-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
 )

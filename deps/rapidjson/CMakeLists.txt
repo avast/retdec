@@ -11,20 +11,19 @@ target_compile_definitions(rapidjson
 target_include_directories(rapidjson
 	SYSTEM INTERFACE
 		$<BUILD_INTERFACE:${RETDEC_DEPS_DIR}/rapidjson/include>
-		$<INSTALL_INTERFACE:${RETDEC_INSTALL_INCLUDE_DIR}>/retdec/deps
+		$<INSTALL_INTERFACE:${RETDEC_INSTALL_DEPS_INCLUDE_DIR}>
 )
 
 # Install includes.
 install(
-	DIRECTORY ${RETDEC_DEPS_DIR}/rapidjson/include/rapidjson
-	DESTINATION ${RETDEC_INSTALL_INCLUDE_DIR}/retdec/deps
+	DIRECTORY ${RETDEC_DEPS_DIR}/rapidjson/include/
+	DESTINATION ${RETDEC_INSTALL_DEPS_INCLUDE_DIR}
 )
 
-# Install libs.
+# Install targets.
 install(TARGETS rapidjson
 	EXPORT rapidjson-targets
 	# Header only -> there are no actual libs to install to destination.
-	# But this block is still needed to get proper config.
 )
 
 # Export targets.

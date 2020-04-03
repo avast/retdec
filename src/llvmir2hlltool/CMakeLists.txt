@@ -3,6 +3,8 @@ add_executable(llvmir2hlltool
 	llvmir2hll.cpp
 )
 
+target_compile_features(llvmir2hlltool PUBLIC cxx_std_17)
+
 # Due to the implementation of the plugin system in LLVM, we have to link our
 # libraries into bin2llvmirtool as a whole.
 if(MSVC)
@@ -42,5 +44,5 @@ set_target_properties(llvmir2hlltool
 )
 
 install(TARGETS llvmir2hlltool
-	RUNTIME DESTINATION bin
+	RUNTIME DESTINATION ${RETDEC_INSTALL_BIN_DIR}
 )

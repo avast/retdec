@@ -33,6 +33,8 @@ add_library(ctypes STATIC
 )
 add_library(retdec::ctypes ALIAS ctypes)
 
+target_compile_features(ctypes PUBLIC cxx_std_17)
+
 target_link_libraries(ctypes
 	PRIVATE
 		retdec::utils

@@ -25,15 +25,15 @@ add_executable(tests-bin2llvmir
 	utils/simplifycfg_tests.cpp
 )
 
+target_include_directories(tests-bin2llvmir
+	PRIVATE
+		${RETDEC_TESTS_DIR}
+)
+
 target_link_libraries(tests-bin2llvmir
 	retdec::bin2llvmir
 	retdec::utils
 	retdec::deps::gmock_main
-)
-
-target_include_directories(tests-bin2llvmir
-	PRIVATE
-		${RETDEC_TESTS_DIR}
 )
 
 set_target_properties(tests-bin2llvmir

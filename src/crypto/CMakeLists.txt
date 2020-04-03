@@ -6,6 +6,8 @@ add_library(crypto STATIC
 )
 add_library(retdec::crypto ALIAS crypto)
 
+target_compile_features(crypto PUBLIC cxx_std_17)
+
 target_include_directories(crypto
 	PUBLIC
 		$<BUILD_INTERFACE:${RETDEC_INCLUDE_DIR}>

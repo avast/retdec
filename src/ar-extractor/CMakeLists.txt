@@ -5,6 +5,8 @@ add_library(ar-extractor STATIC
 )
 add_library(retdec::ar-extractor ALIAS ar-extractor)
 
+target_compile_features(ar-extractor PUBLIC cxx_std_17)
+
 target_include_directories(ar-extractor
 	PUBLIC
 		$<BUILD_INTERFACE:${RETDEC_INCLUDE_DIR}>

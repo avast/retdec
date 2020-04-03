@@ -17,6 +17,8 @@ add_library(capstone2llvmir STATIC
 )
 add_library(retdec::capstone2llvmir ALIAS capstone2llvmir)
 
+target_compile_features(capstone2llvmir PUBLIC cxx_std_17)
+
 target_include_directories(capstone2llvmir
 	PUBLIC
 		$<BUILD_INTERFACE:${RETDEC_INCLUDE_DIR}>

@@ -136,7 +136,7 @@ target_link_libraries(bin2llvmir
 # Install includes.
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/bin2llvmir
-	DESTINATION ${RETDEC_INSTALL_INCLUDE_DIR}/bin2llvmir
+	DESTINATION ${RETDEC_INSTALL_INCLUDE_DIR}/retdec
 )
 
 # Install libs.

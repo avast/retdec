@@ -5,10 +5,11 @@ add_executable(unpackertool
 	plugin_mgr.cpp
 )
 
+target_compile_features(unpackertool PUBLIC cxx_std_17)
+
 target_include_directories(unpackertool
-	PUBLIC
-		$<BUILD_INTERFACE:${RETDEC_SOURCE_DIR}>
-		# not installed
+	PRIVATE
+		${RETDEC_SOURCE_DIR}
 )
 
 target_link_libraries(unpackertool
@@ -26,7 +27,7 @@ set_target_properties(unpackertool
 )
 
 install(TARGETS unpackertool
-	RUNTIME DESTINATION bin
+	RUNTIME DESTINATION ${RETDEC_INSTALL_BIN_DIR}
 )
 
 # Plugins.

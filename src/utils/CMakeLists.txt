@@ -15,15 +15,17 @@ add_library(utils STATIC
 )
 add_library(retdec::utils ALIAS utils)
 
-target_link_libraries(utils
-	PRIVATE
-		retdec::deps::whereami
-)
+target_compile_features(utils PUBLIC cxx_std_17)
 
 target_include_directories(utils
 	PUBLIC
 		$<BUILD_INTERFACE:${RETDEC_INCLUDE_DIR}>
 		$<INSTALL_INTERFACE:${RETDEC_INSTALL_INCLUDE_DIR}>
+)
+
+target_link_libraries(utils
+	PRIVATE
+		retdec::deps::whereami
 )
 
 # Disable the min() and max() macros to prevent errors when using e.g.

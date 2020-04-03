@@ -19,6 +19,8 @@ add_library(serdes STATIC
 )
 add_library(retdec::serdes ALIAS serdes)
 
+target_compile_features(serdes PUBLIC cxx_std_17)
+
 target_include_directories(serdes
 	PUBLIC
 		$<BUILD_INTERFACE:${RETDEC_INCLUDE_DIR}>

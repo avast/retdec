@@ -135,5 +135,5 @@ set_target_properties(fileinfo
 )
 
 install(TARGETS fileinfo
-	RUNTIME DESTINATION bin
+	RUNTIME DESTINATION ${RETDEC_INSTALL_BIN_DIR}
 )

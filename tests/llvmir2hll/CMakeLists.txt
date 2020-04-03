@@ -148,15 +148,15 @@ add_executable(tests-llvmir2hll
 	var_renamer/var_renamers/unified_var_renamer_tests.cpp
 )
 
+target_include_directories(tests-llvmir2hll
+	PRIVATE
+		${RETDEC_TESTS_DIR}
+)
+
 target_link_libraries(tests-llvmir2hll
 	retdec::llvmir2hll
 	retdec::utils
 	retdec::deps::gmock_main
-)
-
-target_include_directories(tests-llvmir2hll
-	PRIVATE
-		${RETDEC_TESTS_DIR}
 )
 
 set_target_properties(tests-llvmir2hll

@@ -12,15 +12,15 @@ add_executable(tests-fileformat
 	raw_data_format_tests.cpp
 )
 
+target_include_directories(tests-fileformat
+	PRIVATE
+		${RETDEC_TESTS_DIR}
+)
+
 target_link_libraries(tests-fileformat
 	retdec::fileformat
 	retdec::utils
 	retdec::deps::gmock_main
-)
-
-target_include_directories(tests-fileformat
-	PRIVATE
-		${RETDEC_TESTS_DIR}
 )
 
 set_target_properties(tests-fileformat

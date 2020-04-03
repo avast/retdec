@@ -7,6 +7,8 @@ add_library(pdbparser STATIC
 )
 add_library(retdec::pdbparser ALIAS pdbparser)
 
+target_compile_features(pdbparser PUBLIC cxx_std_17)
+
 target_include_directories(pdbparser
 	PUBLIC
 		$<BUILD_INTERFACE:${RETDEC_INCLUDE_DIR}>

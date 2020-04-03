@@ -1,11 +1,3 @@
-include(ExternalProject)
-
-if(CMAKE_C_COMPILER)
-	set(CMAKE_C_COMPILER_OPTION "-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}")
-endif()
-if(CMAKE_CXX_COMPILER)
-	set(CMAKE_CXX_COMPILER_OPTION "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")
-endif()
 
 if(CAPSTONE_LOCAL_DIR)
 	message(STATUS "Capstone: using local Capstone directory.")
@@ -104,9 +96,11 @@ endif()
 ExternalProject_Get_Property(capstone-project source_dir)
 ExternalProject_Get_Property(capstone-project binary_dir)
 
-set(CAPSTONE_LIB ${CMAKE_STATIC_LIBRARY_PREFIX}capstone${CMAKE_STATIC_LIBRARY_SUFFIX})
+set(CAPSTONE_LIB_NAME  ${CMAKE_STATIC_LIBRARY_PREFIX}capstone${CMAKE_STATIC_LIBRARY_SUFFIX})
+set(CAPSTONE_LIB_DEBUG ${binary_dir}/${DEBUG_DIR}${CAPSTONE_LIB_NAME})
+set(CAPSTONE_LIB_OPT   ${binary_dir}/${RELEASE_DIR}${CAPSTONE_LIB_NAME})
 
-# Add libraries.
+# Create target.
 add_library(capstone INTERFACE)
 add_library(retdec::deps::capstone ALIAS capstone)
 add_dependencies(capstone capstone-project)
@@ -115,33 +109,23 @@ target_include_directories(capstone
 	SYSTEM INTERFACE
 		$<BUILD_INTERFACE:${source_dir}/include>
 		$<BUILD_INTERFACE:${source_dir}/arch>
-		$<INSTALL_INTERFACE:${RETDEC_INSTALL_INCLUDE_DIR}/retdec/deps>
+		$<INSTALL_INTERFACE:${RETDEC_INSTALL_DEPS_INCLUDE_DIR}>
 )
 
 target_link_libraries(capstone INTERFACE
 		$<INSTALL_INTERFACE:retdec::deps::capstone-libs>
 	debug
-		$<BUILD_INTERFACE:${binary_dir}/${DEBUG_DIR}${CAPSTONE_LIB}>
+		$<BUILD_INTERFACE:${CAPSTONE_LIB_DEBUG}>
 	optimized
-		$<BUILD_INTERFACE:${binary_dir}/${RELEASE_DIR}${CAPSTONE_LIB}>
-)
-
-# Configure config file.
-set(CAPSTONE_LIB_INSTALLED "${CMAKE_INSTALL_PREFIX}/${RETDEC_INSTALL_LIB_DIR}/${CAPSTONE_LIB}")
-configure_package_config_file(
-	"retdec-capstone-config.cmake"
-	"${RETDEC_BINARY_SHARE_DIR}/retdec-capstone-config.cmake"
-	INSTALL_DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
-	PATH_VARS
-		CAPSTONE_LIB_INSTALLED
+		$<BUILD_INTERFACE:${CAPSTONE_LIB_OPT}>
 )
 
 # Install includes.
 install(
 	DIRECTORY
-		${source_dir}/include/capstone
+		${source_dir}/include/
 	DESTINATION
-		${RETDEC_INSTALL_INCLUDE_DIR}/retdec/deps
+		${RETDEC_INSTALL_DEPS_INCLUDE_DIR}
 )
 
 # Install libs.
@@ -149,13 +133,14 @@ install(
 # We assume that only one variant will be present at the time.
 install(
     FILES
-		${binary_dir}/${DEBUG_DIR}${CAPSTONE_LIB}
-		${binary_dir}/${RELEASE_DIR}${CAPSTONE_LIB}
+		${CAPSTONE_LIB_DEBUG}
+		${CAPSTONE_LIB_OPT}
     DESTINATION
-		${RETDEC_INSTALL_LIB_DIR}
+		${RETDEC_INSTALL_DEPS_LIB_DIR}
 	OPTIONAL
 )
 
+# Install targets.
 install(TARGETS capstone
 	EXPORT capstone-targets
 )
@@ -167,10 +152,20 @@ install(EXPORT capstone-targets
 	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
 )
 
+# Configure config file.
+set(CAPSTONE_LIB_INSTALLED "${RETDEC_INSTALL_DEPS_LIB_DIR_ABS}/${CAPSTONE_LIB_NAME}")
+configure_package_config_file(
+	"retdec-capstone-config.cmake"
+	"${CMAKE_CURRENT_BINARY_DIR}/retdec-capstone-config.cmake"
+	INSTALL_DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
+	PATH_VARS
+		CAPSTONE_LIB_INSTALLED
+)
+
 # Install CMake files.
 install(
 	FILES
-		"${RETDEC_BINARY_SHARE_DIR}/retdec-capstone-config.cmake"
+		"${CMAKE_CURRENT_BINARY_DIR}/retdec-capstone-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
 )

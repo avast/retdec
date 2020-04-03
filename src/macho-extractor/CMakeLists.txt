@@ -4,6 +4,8 @@ add_library(macho-extractor STATIC
 )
 add_library(retdec::macho-extractor ALIAS macho-extractor)
 
+target_compile_features(macho-extractor PUBLIC cxx_std_17)
+
 target_include_directories(macho-extractor
 	PUBLIC
 		$<BUILD_INTERFACE:${RETDEC_INCLUDE_DIR}>

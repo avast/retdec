@@ -7,9 +7,7 @@ add_library(retdec::deps::tinyxml2 ALIAS tinyxml2)
 target_include_directories(tinyxml2
 	SYSTEM INTERFACE
 		$<BUILD_INTERFACE:${RETDEC_DEPS_DIR}/tinyxml2/include>
-		$<INSTALL_INTERFACE:${RETDEC_INSTALL_INCLUDE_DIR}/retdec/deps>
-	PRIVATE
-		${CMAKE_CURRENT_SOURCE_DIR}/include/tinyxml2
+		$<INSTALL_INTERFACE:${RETDEC_INSTALL_DEPS_INCLUDE_DIR}>
 )
 
 # Disable all warnings from this 3rd party project.
@@ -21,15 +19,15 @@ endif()
 
 # Install includes.
 install(
-	DIRECTORY ${RETDEC_DEPS_DIR}/tinyxml2/include/tinyxml2
-	DESTINATION ${RETDEC_INSTALL_INCLUDE_DIR}/retdec/deps
+	DIRECTORY ${RETDEC_DEPS_DIR}/tinyxml2/include/
+	DESTINATION ${RETDEC_INSTALL_DEPS_INCLUDE_DIR}
 )
 
 # Install libs.
 install(TARGETS tinyxml2
 	EXPORT tinyxml2-targets
-	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
-	LIBRARY DESTINATION ${RETDEC_INSTALL_LIB_DIR}
+	ARCHIVE DESTINATION ${RETDEC_INSTALL_DEPS_LIB_DIR}
+	LIBRARY DESTINATION ${RETDEC_INSTALL_DEPS_LIB_DIR}
 )
 
 # Export targets.

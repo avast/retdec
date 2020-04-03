@@ -1,11 +1,3 @@
-include(ExternalProject)
-
-if(CMAKE_C_COMPILER)
-	set(CMAKE_C_COMPILER_OPTION "-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}")
-endif()
-if(CMAKE_CXX_COMPILER)
-	set(CMAKE_CXX_COMPILER_OPTION "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")
-endif()
 
 if(KEYSTONE_LOCAL_DIR)
 	message(STATUS "Keystone: using local Keystone directory.")
@@ -72,7 +64,7 @@ endif()
 ExternalProject_Get_Property(keystone-project source_dir)
 ExternalProject_Get_Property(keystone-project binary_dir)
 
-# Add libraries.
+# Create target.
 add_library(keystone INTERFACE)
 add_library(retdec::deps::keystone ALIAS keystone)
 add_dependencies(keystone keystone-project)
@@ -80,7 +72,6 @@ add_dependencies(keystone keystone-project)
 target_include_directories(keystone
 	SYSTEM INTERFACE
 		$<BUILD_INTERFACE:${source_dir}/include>
-		# nothing for install because this does not need to be installed
 )
 
 target_link_libraries(keystone INTERFACE

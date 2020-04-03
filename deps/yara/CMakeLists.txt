@@ -1,9 +1,5 @@
-include(ProcessorCount)
-include(ExternalProject)
 
 find_package(Threads REQUIRED)
-
-ProcessorCount(CPUS)
 
 set(YARA_DIR          ${CMAKE_CURRENT_BINARY_DIR}/yara/src/yara)
 set(YARA_INCLUDE_DIR  ${YARA_DIR}/libyara/include)
@@ -107,9 +103,10 @@ if(NOT MSVC)
 	)
 endif()
 
-set(YARA_LIBRARY ${YARA_LIBRARY_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX})
-set(YARA_LIBRARY_PATH ${YARA_LIBRARY_DIR}/${YARA_LIBRARY})
+set(YARA_LIB_NAME ${YARA_LIBRARY_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX})
+set(YARA_LIB      ${YARA_LIBRARY_DIR}/${YARA_LIB_NAME})
 
+# Create target.
 add_library(libyara INTERFACE)
 add_library(retdec::deps::libyara ALIAS libyara)
 add_dependencies(libyara yara)
@@ -117,26 +114,14 @@ add_dependencies(libyara yara)
 target_include_directories(libyara
 	SYSTEM INTERFACE
 		$<BUILD_INTERFACE:${YARA_INCLUDE_DIR}>
-		$<INSTALL_INTERFACE:${RETDEC_INSTALL_INCLUDE_DIR}/retdec/deps>
+		$<INSTALL_INTERFACE:${RETDEC_INSTALL_DEPS_INCLUDE_DIR}>
 )
 
 target_link_libraries(libyara
 	INTERFACE
-		$<BUILD_INTERFACE:${YARA_LIBRARY_PATH}>
-		#$<INSTALL_INTERFACE:$\{CMAKE_CURRENT_LIST_DIR\}/../../../${RETDEC_INSTALL_LIB_DIR}/${YARA_LIBRARY}>
-		#$<INSTALL_INTERFACE:@CMAKE_CURRENT_LIST_DIR@/../../../${RETDEC_INSTALL_LIB_DIR}/${YARA_LIBRARY}>
+		$<BUILD_INTERFACE:${YARA_LIB}>
 		$<INSTALL_INTERFACE:retdec::deps::libyara-libs>
 		Threads::Threads
-)
-
-# Configure config file.
-set(LIBYARA_LIBRARY "${CMAKE_INSTALL_PREFIX}/${RETDEC_INSTALL_LIB_DIR}/${YARA_LIBRARY}")
-configure_package_config_file(
-	"retdec-libyara-config.cmake"
-	"${RETDEC_BINARY_SHARE_DIR}/retdec-libyara-config.cmake"
-	INSTALL_DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
-	PATH_VARS
-		LIBYARA_LIBRARY
 )
 
 # Install includes.
@@ -144,17 +129,18 @@ install(
 	DIRECTORY
 		${YARA_INCLUDE_DIR}/
 	DESTINATION
-		${RETDEC_INSTALL_INCLUDE_DIR}/retdec/deps
+		${RETDEC_INSTALL_DEPS_INCLUDE_DIR}
 )
 
 # Install libs.
 install(
 	FILES
-		${YARA_LIBRARY_PATH}
+		${YARA_LIB}
 	DESTINATION
-		${RETDEC_INSTALL_LIB_DIR}
+		${RETDEC_INSTALL_DEPS_LIB_DIR}
 )
 
+# Install targets.
 install(TARGETS libyara
 	EXPORT libyara-targets
 )
@@ -166,10 +152,20 @@ install(EXPORT libyara-targets
 	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
 )
 
+# Configure config file.
+set(LIBYARA_LIBRARY "${RETDEC_INSTALL_DEPS_LIB_DIR_ABS}/${YARA_LIB_NAME}")
+configure_package_config_file(
+	"retdec-libyara-config.cmake"
+	"${CMAKE_CURRENT_BINARY_DIR}/retdec-libyara-config.cmake"
+	INSTALL_DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
+	PATH_VARS
+		LIBYARA_LIBRARY
+)
+
 # Install CMake files.
 install(
 	FILES
-		"${RETDEC_BINARY_SHARE_DIR}/retdec-libyara-config.cmake"
+		"${CMAKE_CURRENT_BINARY_DIR}/retdec-libyara-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
 )
@@ -177,6 +173,6 @@ install(
 # Install yarac application - we may need it to compile YARA files.
 install(
 	PROGRAMS "${YARAC_PATH}"
-	DESTINATION bin
+	DESTINATION ${RETDEC_INSTALL_BIN_DIR}
 	RENAME "retdec-yarac${CMAKE_EXECUTABLE_SUFFIX}"
 )

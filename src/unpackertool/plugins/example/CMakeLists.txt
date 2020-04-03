@@ -4,7 +4,7 @@ add_library(unpacker-example STATIC
 )
 add_library(retdec::unpacker-example ALIAS unpacker-example)
 
-target_compile_features(loader PUBLIC cxx_std_17)
+target_compile_features(unpacker-example PUBLIC cxx_std_17)
 
 target_include_directories(unpacker-example
 	PUBLIC

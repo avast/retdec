@@ -19,6 +19,8 @@ add_library(pelib STATIC
 )
 add_library(retdec::pelib ALIAS pelib)
 
+target_compile_features(pelib PUBLIC cxx_std_17)
+
 target_include_directories(pelib
 	PUBLIC
 		$<BUILD_INTERFACE:${RETDEC_INCLUDE_DIR}>

@@ -4,6 +4,8 @@ add_library(llvmir-emul STATIC
 )
 add_library(retdec::llvmir-emul ALIAS llvmir-emul)
 
+target_compile_features(llvmir-emul PUBLIC cxx_std_17)
+
 target_include_directories(llvmir-emul
 	PUBLIC
 		$<BUILD_INTERFACE:${RETDEC_INCLUDE_DIR}>

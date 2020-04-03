@@ -7,17 +7,17 @@ add_executable(tests-capstone2llvmir
 	x86_tests.cpp
 )
 
+target_include_directories(tests-capstone2llvmir
+	PRIVATE
+		${RETDEC_TESTS_DIR}
+)
+
 target_link_libraries(tests-capstone2llvmir
 	retdec::capstone2llvmir
 	retdec::llvmir-emul
 	retdec::utils
 	retdec::deps::keystone
 	retdec::deps::gmock_main
-)
-
-target_include_directories(tests-capstone2llvmir
-	PRIVATE
-		${RETDEC_TESTS_DIR}
 )
 
 set_target_properties(tests-capstone2llvmir
