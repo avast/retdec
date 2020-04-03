@@ -8,6 +8,8 @@ target_include_directories(tinyxml2
 	SYSTEM INTERFACE
 		$<BUILD_INTERFACE:${RETDEC_DEPS_DIR}/tinyxml2/include>
 		$<INSTALL_INTERFACE:${RETDEC_INSTALL_DEPS_INCLUDE_DIR}>
+	PRIVATE
+		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/tinyxml2>
 )
 
 # Disable all warnings from this 3rd party project.
