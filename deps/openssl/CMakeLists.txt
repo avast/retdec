@@ -1,17 +1,4 @@
 
-# Temporarily disabled, the current installation works only with static lib.
-# This will probably find dynamic lib on Linux.
-#
-# if(NOT RETDEC_FORCE_OPENSSL_BUILD)
-# 	find_package(OpenSSL 1.0.1)
-# 	if(OPENSSL_FOUND)
-# 		add_library(openssl-crypto INTERFACE)
-# 		target_link_libraries(openssl-crypto INTERFACE OpenSSL::Crypto)
-# 		return()
-# 	endif()
-# endif()
-# message(STATUS "  --> OpenSSL will be built as an external project")
-
 find_package(Perl REQUIRED)
 find_package(Threads REQUIRED)
 
