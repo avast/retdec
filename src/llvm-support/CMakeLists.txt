@@ -21,13 +21,11 @@ target_link_libraries(llvm-support
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/llvm-support
 	DESTINATION ${RETDEC_INSTALL_INCLUDE_DIR}/retdec
-	COMPONENT llvm-support
 )
 
 # Install libs.
 install(TARGETS llvm-support
 	EXPORT llvm-support-targets
-	COMPONENT llvm-support
 	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 	LIBRARY DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 )
@@ -37,7 +35,6 @@ install(EXPORT llvm-support-targets
 	FILE "retdec-llvm-support-targets.cmake"
 	NAMESPACE retdec::
 	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
-	COMPONENT llvm-support
 )
 
 # Install CMake files.
@@ -51,5 +48,4 @@ install(
 		"${CMAKE_CURRENT_BINARY_DIR}/retdec-llvm-support-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
-	COMPONENT llvm-support
 )

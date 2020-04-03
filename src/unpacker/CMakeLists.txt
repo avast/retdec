@@ -34,13 +34,11 @@ endif()
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/unpacker
 	DESTINATION ${RETDEC_INSTALL_INCLUDE_DIR}/retdec
-	COMPONENT unpacker
 )
 
 # Install libs.
 install(TARGETS unpacker
 	EXPORT unpacker-targets
-	COMPONENT unpacker
 	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 	LIBRARY DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 )
@@ -50,7 +48,6 @@ install(EXPORT unpacker-targets
 	FILE "retdec-unpacker-targets.cmake"
 	NAMESPACE retdec::
 	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
-	COMPONENT unpacker
 )
 
 # Install CMake files.
@@ -64,5 +61,4 @@ install(
 		"${CMAKE_CURRENT_BINARY_DIR}/retdec-unpacker-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
-	COMPONENT unpacker
 )

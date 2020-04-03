@@ -24,13 +24,11 @@ target_link_libraries(ctypesparser
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/ctypesparser
 	DESTINATION ${RETDEC_INSTALL_INCLUDE_DIR}/retdec
-	COMPONENT ctypesparser
 )
 
 # Install libs.
 install(TARGETS ctypesparser
 	EXPORT ctypesparser-targets
-	COMPONENT ctypesparser
 	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 	LIBRARY DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 )
@@ -40,7 +38,6 @@ install(EXPORT ctypesparser-targets
 	FILE "retdec-ctypesparser-targets.cmake"
 	NAMESPACE retdec::
 	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
-	COMPONENT ctypesparser
 )
 
 # Install CMake files.
@@ -54,5 +51,4 @@ install(
 		"${CMAKE_CURRENT_BINARY_DIR}/retdec-ctypesparser-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
-	COMPONENT ctypesparser
 )

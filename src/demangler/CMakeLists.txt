@@ -48,13 +48,11 @@ target_link_libraries(demangler
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/demangler
 	DESTINATION ${RETDEC_INSTALL_INCLUDE_DIR}/retdec
-	COMPONENT demangler
 )
 
 # Install libs.
 install(TARGETS demangler
 	EXPORT demangler-targets
-	COMPONENT demangler
 	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 	LIBRARY DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 )
@@ -64,7 +62,6 @@ install(EXPORT demangler-targets
 	FILE "retdec-demangler-targets.cmake"
 	NAMESPACE retdec::
 	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
-	COMPONENT demangler
 )
 
 # Install CMake files.
@@ -78,5 +75,4 @@ install(
 		"${CMAKE_CURRENT_BINARY_DIR}/retdec-demangler-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
-	COMPONENT demangler
 )

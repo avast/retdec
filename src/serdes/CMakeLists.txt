@@ -35,13 +35,11 @@ target_link_libraries(serdes
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/serdes
 	DESTINATION ${RETDEC_INSTALL_INCLUDE_DIR}/retdec
-	COMPONENT serdes
 )
 
 # Install libs.
 install(TARGETS serdes
 	EXPORT serdes-targets
-	COMPONENT serdes
 	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 	LIBRARY DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 )
@@ -51,7 +49,6 @@ install(EXPORT serdes-targets
 	FILE "retdec-serdes-targets.cmake"
 	NAMESPACE retdec::
 	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
-	COMPONENT serdes
 )
 
 # Install CMake files.
@@ -65,5 +62,4 @@ install(
 		"${CMAKE_CURRENT_BINARY_DIR}/retdec-serdes-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
-	COMPONENT serdes
 )

@@ -36,13 +36,11 @@ endif()
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/pelib
 	DESTINATION ${RETDEC_INSTALL_INCLUDE_DIR}/retdec
-	COMPONENT pelib
 )
 
 # Install libs.
 install(TARGETS pelib
 	EXPORT pelib-targets
-	COMPONENT pelib
 	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 	LIBRARY DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 )
@@ -52,7 +50,6 @@ install(EXPORT pelib-targets
 	FILE "retdec-pelib-targets.cmake"
 	NAMESPACE retdec::
 	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
-	COMPONENT pelib
 )
 
 # Install CMake files.
@@ -61,5 +58,4 @@ install(
 		"${CMAKE_CURRENT_LIST_DIR}/retdec-pelib-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
-	COMPONENT pelib
 )

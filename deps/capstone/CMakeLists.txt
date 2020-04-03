@@ -142,7 +142,6 @@ install(
 		${source_dir}/include/capstone
 	DESTINATION
 		${RETDEC_INSTALL_INCLUDE_DIR}/retdec/deps
-	COMPONENT capstone
 )
 
 # Install libs.
@@ -159,7 +158,6 @@ install(
 
 install(TARGETS capstone
 	EXPORT capstone-targets
-	COMPONENT capstone
 )
 
 # Export targets.
@@ -167,7 +165,6 @@ install(EXPORT capstone-targets
 	FILE "retdec-capstone-targets.cmake"
 	NAMESPACE retdec::
 	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
-	COMPONENT capstone
 )
 
 # Install CMake files.
@@ -176,5 +173,4 @@ install(
 		"${RETDEC_BINARY_SHARE_DIR}/retdec-capstone-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
-	COMPONENT capstone
 )

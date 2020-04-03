@@ -22,13 +22,11 @@ target_link_libraries(crypto
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/crypto
 	DESTINATION ${RETDEC_INSTALL_INCLUDE_DIR}/retdec
-	COMPONENT crypto
 )
 
 # Install libs.
 install(TARGETS crypto
 	EXPORT crypto-targets
-	COMPONENT crypto
 	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 	LIBRARY DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 )
@@ -38,7 +36,6 @@ install(EXPORT crypto-targets
 	FILE "retdec-crypto-targets.cmake"
 	NAMESPACE retdec::
 	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
-	COMPONENT crypto
 )
 
 # Install CMake files.
@@ -52,5 +49,4 @@ install(
 		"${CMAKE_CURRENT_BINARY_DIR}/retdec-crypto-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
-	COMPONENT crypto
 )

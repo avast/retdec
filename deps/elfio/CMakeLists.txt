@@ -12,13 +12,11 @@ target_include_directories(elfio
 install(
 	DIRECTORY ${RETDEC_DEPS_DIR}/elfio/include/elfio
 	DESTINATION ${RETDEC_INSTALL_INCLUDE_DIR}/retdec/deps
-	COMPONENT elfio
 )
 
 # Install libs.
 install(TARGETS elfio
 	EXPORT elfio-targets
-	COMPONENT elfio
 	# Header only -> there are no actual libs to install to destination.
 	# But this block is still needed to get proper config.
 )
@@ -28,7 +26,6 @@ install(EXPORT elfio-targets
 	FILE "retdec-elfio-targets.cmake"
 	NAMESPACE retdec::
 	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
-	COMPONENT elfio
 )
 
 # Install CMake files.
@@ -37,5 +34,4 @@ install(
 		"${CMAKE_CURRENT_LIST_DIR}/retdec-elfio-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
-	COMPONENT elfio
 )

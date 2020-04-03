@@ -99,13 +99,11 @@ target_link_libraries(fileformat
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/fileformat
 	DESTINATION ${RETDEC_INSTALL_INCLUDE_DIR}/retdec
-	COMPONENT fileformat
 )
 
 # Install libs.
 install(TARGETS fileformat
 	EXPORT fileformat-targets
-	COMPONENT fileformat
 	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 	LIBRARY DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 )
@@ -115,7 +113,6 @@ install(EXPORT fileformat-targets
 	FILE "retdec-fileformat-targets.cmake"
 	NAMESPACE retdec::
 	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
-	COMPONENT fileformat
 )
 
 # Install CMake files.
@@ -129,5 +126,4 @@ install(
 		"${CMAKE_CURRENT_BINARY_DIR}/retdec-fileformat-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
-	COMPONENT fileformat
 )

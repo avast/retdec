@@ -137,13 +137,11 @@ target_link_libraries(bin2llvmir
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/bin2llvmir
 	DESTINATION ${RETDEC_INSTALL_INCLUDE_DIR}/bin2llvmir
-	COMPONENT bin2llvmir
 )
 
 # Install libs.
 install(TARGETS bin2llvmir
 	EXPORT bin2llvmir-targets
-	COMPONENT bin2llvmir
 	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 	LIBRARY DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 )
@@ -153,7 +151,6 @@ install(EXPORT bin2llvmir-targets
 	FILE "retdec-bin2llvmir-targets.cmake"
 	NAMESPACE retdec::
 	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
-	COMPONENT bin2llvmir
 )
 
 # Install CMake files.
@@ -167,5 +164,4 @@ install(
 		"${CMAKE_CURRENT_BINARY_DIR}/retdec-bin2llvmir-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
-	COMPONENT bin2llvmir
 )

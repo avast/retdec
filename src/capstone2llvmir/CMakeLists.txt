@@ -36,13 +36,11 @@ target_link_libraries(capstone2llvmir
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/capstone2llvmir
 	DESTINATION ${RETDEC_INSTALL_INCLUDE_DIR}/retdec
-	COMPONENT capstone2llvmir
 )
 
 # Install libs.
 install(TARGETS capstone2llvmir
 	EXPORT capstone2llvmir-targets
-	COMPONENT capstone2llvmir
 	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 	LIBRARY DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 )
@@ -52,7 +50,6 @@ install(EXPORT capstone2llvmir-targets
 	FILE "retdec-capstone2llvmir-targets.cmake"
 	NAMESPACE retdec::
 	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
-	COMPONENT capstone2llvmir
 )
 
 # Install CMake files.
@@ -66,5 +63,4 @@ install(
 		"${CMAKE_CURRENT_BINARY_DIR}/retdec-capstone2llvmir-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
-	COMPONENT capstone2llvmir
 )

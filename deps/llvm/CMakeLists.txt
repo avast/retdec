@@ -270,12 +270,10 @@ install(
 		${binary_dir}/include/
 	DESTINATION
 		${RETDEC_INSTALL_INCLUDE_DIR}/retdec/deps
-	COMPONENT llvm
 )
 
 install(TARGETS llvm
 	EXPORT llvm-targets
-	COMPONENT llvm
 )
 
 # Export targets.
@@ -283,7 +281,6 @@ install(EXPORT llvm-targets
 	FILE "retdec-llvm-targets.cmake"
 	NAMESPACE retdec::
 	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
-	COMPONENT llvm
 )
 
 # Install CMake files.
@@ -292,5 +289,4 @@ install(
 		"${RETDEC_BINARY_SHARE_DIR}/retdec-llvm-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
-	COMPONENT llvm
 )

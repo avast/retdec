@@ -25,13 +25,11 @@ target_link_libraries(patterngen
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/patterngen
 	DESTINATION ${RETDEC_INSTALL_INCLUDE_DIR}/retdec
-	COMPONENT patterngen
 )
 
 # Install libs.
 install(TARGETS patterngen
 	EXPORT patterngen-targets
-	COMPONENT patterngen
 	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 	LIBRARY DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 )
@@ -41,7 +39,6 @@ install(EXPORT patterngen-targets
 	FILE "retdec-patterngen-targets.cmake"
 	NAMESPACE retdec::
 	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
-	COMPONENT patterngen
 )
 
 # Install CMake files.
@@ -55,5 +52,4 @@ install(
 		"${CMAKE_CURRENT_BINARY_DIR}/retdec-patterngen-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
-	COMPONENT patterngen
 )

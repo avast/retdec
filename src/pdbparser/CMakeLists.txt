@@ -17,13 +17,11 @@ target_include_directories(pdbparser
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/pdbparser
 	DESTINATION ${RETDEC_INSTALL_INCLUDE_DIR}/retdec
-	COMPONENT pdbparser
 )
 
 # Install libs.
 install(TARGETS pdbparser
 	EXPORT pdbparser-targets
-	COMPONENT pdbparser
 	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 	LIBRARY DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 )
@@ -33,7 +31,6 @@ install(EXPORT pdbparser-targets
 	FILE "retdec-pdbparser-targets.cmake"
 	NAMESPACE retdec::
 	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
-	COMPONENT pdbparser
 )
 
 # Install CMake files.
@@ -42,5 +39,4 @@ install(
 		"${CMAKE_CURRENT_LIST_DIR}/retdec-pdbparser-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
-	COMPONENT pdbparser
 )

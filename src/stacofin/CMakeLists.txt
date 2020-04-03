@@ -27,13 +27,11 @@ target_link_libraries(stacofin
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/stacofin
 	DESTINATION ${RETDEC_INSTALL_INCLUDE_DIR}/retdec
-	COMPONENT stacofin
 )
 
 # Install libs.
 install(TARGETS stacofin
 	EXPORT stacofin-targets
-	COMPONENT stacofin
 	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 	LIBRARY DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 )
@@ -43,7 +41,6 @@ install(EXPORT stacofin-targets
 	FILE "retdec-stacofin-targets.cmake"
 	NAMESPACE retdec::
 	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
-	COMPONENT stacofin
 )
 
 # Install CMake files.
@@ -57,5 +54,4 @@ install(
 		"${CMAKE_CURRENT_BINARY_DIR}/retdec-stacofin-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
-	COMPONENT stacofin
 )

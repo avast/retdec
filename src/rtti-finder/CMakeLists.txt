@@ -26,13 +26,11 @@ target_link_libraries(rtti-finder
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/rtti-finder
 	DESTINATION ${RETDEC_INSTALL_INCLUDE_DIR}/retdec
-	COMPONENT rtti-finder
 )
 
 # Install libs.
 install(TARGETS rtti-finder
 	EXPORT rtti-finder-targets
-	COMPONENT rtti-finder
 	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 	LIBRARY DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 )
@@ -42,7 +40,6 @@ install(EXPORT rtti-finder-targets
 	FILE "retdec-rtti-finder-targets.cmake"
 	NAMESPACE retdec::
 	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
-	COMPONENT rtti-finder
 )
 
 # Install CMake files.
@@ -56,5 +53,4 @@ install(
 		"${CMAKE_CURRENT_BINARY_DIR}/retdec-rtti-finder-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
-	COMPONENT rtti-finder
 )

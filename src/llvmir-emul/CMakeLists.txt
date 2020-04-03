@@ -19,13 +19,11 @@ target_link_libraries(llvmir-emul
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/llvmir-emul
 	DESTINATION ${RETDEC_INSTALL_INCLUDE_DIR}/retdec
-	COMPONENT llvmir-emul
 )
 
 # Install libs.
 install(TARGETS llvmir-emul
 	EXPORT llvmir-emul-targets
-	COMPONENT llvmir-emul
 	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 	LIBRARY DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 )
@@ -35,7 +33,6 @@ install(EXPORT llvmir-emul-targets
 	FILE "retdec-llvmir-emul-targets.cmake"
 	NAMESPACE retdec::
 	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
-	COMPONENT llvmir-emul
 )
 
 # Install CMake files.
@@ -49,5 +46,4 @@ install(
 		"${CMAKE_CURRENT_BINARY_DIR}/retdec-llvmir-emul-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
-	COMPONENT llvmir-emul
 )

@@ -330,13 +330,11 @@ endif()
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/llvmir2hll
 	DESTINATION ${RETDEC_INSTALL_INCLUDE_DIR}/retdec
-	COMPONENT llvmir2hll
 )
 
 # Install libs.
 install(TARGETS llvmir2hll
 	EXPORT llvmir2hll-targets
-	COMPONENT llvmir2hll
 	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 	LIBRARY DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 )
@@ -346,7 +344,6 @@ install(EXPORT llvmir2hll-targets
 	FILE "retdec-llvmir2hll-targets.cmake"
 	NAMESPACE retdec::
 	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
-	COMPONENT llvmir2hll
 )
 
 # Install CMake files.
@@ -360,5 +357,4 @@ install(
 		"${CMAKE_CURRENT_BINARY_DIR}/retdec-llvmir2hll-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
-	COMPONENT llvmir2hll
 )

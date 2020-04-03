@@ -28,13 +28,11 @@ target_link_libraries(debugformat
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/debugformat
 	DESTINATION ${RETDEC_INSTALL_INCLUDE_DIR}/retdec
-	COMPONENT debugformat
 )
 
 # Install libs.
 install(TARGETS debugformat
 	EXPORT debugformat-targets
-	COMPONENT debugformat
 	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 	LIBRARY DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 )
@@ -44,7 +42,6 @@ install(EXPORT debugformat-targets
 	FILE "retdec-debugformat-targets.cmake"
 	NAMESPACE retdec::
 	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
-	COMPONENT debugformat
 )
 
 # Install CMake files.
@@ -58,5 +55,4 @@ install(
 		"${CMAKE_CURRENT_BINARY_DIR}/retdec-debugformat-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
-	COMPONENT debugformat
 )

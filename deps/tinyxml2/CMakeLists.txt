@@ -23,13 +23,11 @@ endif()
 install(
 	DIRECTORY ${RETDEC_DEPS_DIR}/tinyxml2/include/tinyxml2
 	DESTINATION ${RETDEC_INSTALL_INCLUDE_DIR}/retdec/deps
-	COMPONENT tinyxml2
 )
 
 # Install libs.
 install(TARGETS tinyxml2
 	EXPORT tinyxml2-targets
-	COMPONENT tinyxml2
 	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 	LIBRARY DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 )
@@ -39,7 +37,6 @@ install(EXPORT tinyxml2-targets
 	FILE "retdec-tinyxml2-targets.cmake"
 	NAMESPACE retdec::
 	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
-	COMPONENT tinyxml2
 )
 
 # Install CMake files.
@@ -48,5 +45,4 @@ install(
 		"${CMAKE_CURRENT_LIST_DIR}/retdec-tinyxml2-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
-	COMPONENT tinyxml2
 )

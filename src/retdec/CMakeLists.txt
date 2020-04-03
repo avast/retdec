@@ -26,13 +26,11 @@ target_link_libraries(retdec
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/retdec
 	DESTINATION ${RETDEC_INSTALL_INCLUDE_DIR}/retdec
-	COMPONENT retdec
 )
 
 # Install libs.
 install(TARGETS retdec
 	EXPORT retdec-targets
-	COMPONENT retdec
 	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 	LIBRARY DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 )
@@ -42,7 +40,6 @@ install(EXPORT retdec-targets
 	FILE "retdec-retdec-targets.cmake"
 	NAMESPACE retdec::
 	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
-	COMPONENT retdec
 )
 
 # Install CMake files.
@@ -56,5 +53,4 @@ install(
 		"${CMAKE_CURRENT_BINARY_DIR}/retdec-retdec-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
-	COMPONENT retdec
 )

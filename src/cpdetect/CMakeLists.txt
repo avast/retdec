@@ -43,13 +43,11 @@ target_link_libraries(cpdetect
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/cpdetect
 	DESTINATION ${RETDEC_INSTALL_INCLUDE_DIR}/retdec
-	COMPONENT cpdetect
 )
 
 # Install libs.
 install(TARGETS cpdetect
 	EXPORT cpdetect-targets
-	COMPONENT cpdetect
 	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 	LIBRARY DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 )
@@ -59,7 +57,6 @@ install(EXPORT cpdetect-targets
 	FILE "retdec-cpdetect-targets.cmake"
 	NAMESPACE retdec::
 	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
-	COMPONENT cpdetect
 )
 
 # Install CMake files.
@@ -73,5 +70,4 @@ install(
 		"${CMAKE_CURRENT_BINARY_DIR}/retdec-cpdetect-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
-	COMPONENT cpdetect
 )

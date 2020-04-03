@@ -123,12 +123,10 @@ install(
 		${source_dir}/include/yaramod
 	DESTINATION
 		${RETDEC_INSTALL_INCLUDE_DIR}/retdec/deps
-	COMPONENT yaramod
 )
 
 install(TARGETS yaramod
 	EXPORT yaramod-targets
-	COMPONENT yaramod
 )
 
 # Export targets.
@@ -136,7 +134,6 @@ install(EXPORT yaramod-targets
 	FILE "retdec-yaramod-targets.cmake"
 	NAMESPACE retdec::
 	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
-	COMPONENT yaramod
 )
 
 # Install CMake files.
@@ -145,5 +142,4 @@ install(
 		"${RETDEC_BINARY_SHARE_DIR}/retdec-yaramod-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
-	COMPONENT yaramod
 )

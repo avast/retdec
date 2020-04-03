@@ -33,13 +33,11 @@ target_link_libraries(common
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/common
 	DESTINATION ${RETDEC_INSTALL_INCLUDE_DIR}/retdec
-	COMPONENT common
 )
 
 # Install libs.
 install(TARGETS common
 	EXPORT common-targets
-	COMPONENT common
 	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 	LIBRARY DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 )
@@ -49,7 +47,6 @@ install(EXPORT common-targets
 	FILE "retdec-common-targets.cmake"
 	NAMESPACE retdec::
 	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
-	COMPONENT common
 )
 
 # Install CMake files.
@@ -63,5 +60,4 @@ install(
 		"${CMAKE_CURRENT_BINARY_DIR}/retdec-common-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
-	COMPONENT common
 )

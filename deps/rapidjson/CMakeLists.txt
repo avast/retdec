@@ -18,13 +18,11 @@ target_include_directories(rapidjson
 install(
 	DIRECTORY ${RETDEC_DEPS_DIR}/rapidjson/include/rapidjson
 	DESTINATION ${RETDEC_INSTALL_INCLUDE_DIR}/retdec/deps
-	COMPONENT rapidjson
 )
 
 # Install libs.
 install(TARGETS rapidjson
 	EXPORT rapidjson-targets
-	COMPONENT rapidjson
 	# Header only -> there are no actual libs to install to destination.
 	# But this block is still needed to get proper config.
 )
@@ -34,7 +32,6 @@ install(EXPORT rapidjson-targets
 	FILE "retdec-rapidjson-targets.cmake"
 	NAMESPACE retdec::
 	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
-	COMPONENT rapidjson
 )
 
 # Install CMake files.
@@ -43,5 +40,4 @@ install(
 		"${CMAKE_CURRENT_LIST_DIR}/retdec-rapidjson-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
-	COMPONENT rapidjson
 )

@@ -154,15 +154,13 @@ install(
 
 install(TARGETS libyara
 	EXPORT libyara-targets
-	COMPONENT libyara
 )
 
 # Export targets.
 install(EXPORT libyara-targets
-	FILE "retdec-libyara-targets.cmake"
-	NAMESPACE retdec::
+    FILE "retdec-libyara-targets.cmake"
+    NAMESPACE retdec::
     DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
-    COMPONENT libyara
 )
 
 # Install CMake files.
@@ -171,7 +169,6 @@ install(
         "${RETDEC_BINARY_SHARE_DIR}/retdec-libyara-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
-	COMPONENT libyara
 )
 
 # Install yarac application - we may need it to compile YARA files.

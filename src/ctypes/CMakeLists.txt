@@ -48,13 +48,11 @@ target_include_directories(ctypes
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/ctypes
 	DESTINATION ${RETDEC_INSTALL_INCLUDE_DIR}/retdec
-	COMPONENT ctypes
 )
 
 # Install libs.
 install(TARGETS ctypes
 	EXPORT ctypes-targets
-	COMPONENT ctypes
 	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 	LIBRARY DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 )
@@ -64,7 +62,6 @@ install(EXPORT ctypes-targets
 	FILE "retdec-ctypes-targets.cmake"
 	NAMESPACE retdec::
 	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
-	COMPONENT ctypes
 )
 
 # Install CMake files.
@@ -78,5 +75,4 @@ install(
 		"${CMAKE_CURRENT_BINARY_DIR}/retdec-ctypes-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
-	COMPONENT ctypes
 )

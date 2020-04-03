@@ -223,15 +223,13 @@ install(
 
 install(TARGETS openssl-crypto
 	EXPORT openssl-crypto-targets
-	COMPONENT openssl-crypto
 )
 
 # Export targets.
 install(EXPORT openssl-crypto-targets
 	FILE "retdec-openssl-crypto-targets.cmake"
 	NAMESPACE retdec::
-    DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
-    COMPONENT openssl-crypto
+	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
 )
 
 # Install CMake files.
@@ -240,5 +238,4 @@ install(
         "${RETDEC_BINARY_SHARE_DIR}/retdec-openssl-crypto-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
-	COMPONENT openssl-crypto
 )

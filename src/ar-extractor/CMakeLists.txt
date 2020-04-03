@@ -23,13 +23,11 @@ target_link_libraries(ar-extractor
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/ar-extractor
 	DESTINATION ${RETDEC_INSTALL_INCLUDE_DIR}/retdec
-	COMPONENT ar-extractor
 )
 
 # Install libs.
 install(TARGETS ar-extractor
 	EXPORT ar-extractor-targets
-	COMPONENT ar-extractor
 	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 	LIBRARY DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 )
@@ -39,7 +37,6 @@ install(EXPORT ar-extractor-targets
 	FILE "retdec-ar-extractor-targets.cmake"
 	NAMESPACE retdec::
 	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
-	COMPONENT ar-extractor
 )
 
 # Install CMake files.
@@ -53,5 +50,4 @@ install(
 		"${CMAKE_CURRENT_BINARY_DIR}/retdec-ar-extractor-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
-	COMPONENT ar-extractor
 )

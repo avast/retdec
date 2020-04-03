@@ -42,13 +42,11 @@ endif()
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/utils
 	DESTINATION ${RETDEC_INSTALL_INCLUDE_DIR}/retdec
-	COMPONENT utils
 )
 
 # Install libs.
 install(TARGETS utils whereami
 	EXPORT utils-targets
-	COMPONENT utils
 	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 	LIBRARY DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 )
@@ -58,7 +56,6 @@ install(EXPORT utils-targets
 	FILE "retdec-utils-targets.cmake"
 	NAMESPACE retdec::
 	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
-	COMPONENT utils
 )
 
 # Install CMake files.
@@ -67,5 +64,4 @@ install(
 		"${CMAKE_CURRENT_LIST_DIR}/retdec-utils-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
-	COMPONENT utils
 )
