@@ -1,7 +1,5 @@
 @PACKAGE_INIT@
 
-find_package(Threads REQUIRED)
-
 if(NOT TARGET retdec::openssl-crypto-libs)
     add_library(retdec::openssl-crypto-libs STATIC IMPORTED)
     set_target_properties(retdec::openssl-crypto-libs PROPERTIES
@@ -10,5 +8,6 @@ if(NOT TARGET retdec::openssl-crypto-libs)
 endif()
 
 if(NOT TARGET retdec::openssl-crypto)
+    find_package(Threads REQUIRED)
     include(${CMAKE_CURRENT_LIST_DIR}/retdec-openssl-crypto-targets.cmake)
 endif()

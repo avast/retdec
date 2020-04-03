@@ -1,10 +1,5 @@
 @PACKAGE_INIT@
 
-find_package(Threads REQUIRED)
-if(UNIX OR MINGW)
-	find_package(ZLIB REQUIRED)
-endif()
-
 if(NOT TARGET llvm-libs)
 	add_library(llvm-libs INTERFACE)
 	add_library(retdec::llvm-libs ALIAS llvm-libs)
@@ -16,5 +11,10 @@ if(NOT TARGET llvm-libs)
 endif()
 
 if(NOT TARGET retdec::llvm)
+	find_package(Threads REQUIRED)
+	if(UNIX OR MINGW)
+		find_package(ZLIB REQUIRED)
+	endif()
+
     include(${CMAKE_CURRENT_LIST_DIR}/retdec-llvm-targets.cmake)
 endif()
