@@ -23,13 +23,6 @@ target_link_libraries(stacofin
 		retdec::utils
 )
 
-# Create config version file.
-write_basic_package_version_file(
-	"${RETDEC_BINARY_SHARE_DIR}/retdec-stacofin-config-version.cmake"
-	VERSION ${PROJECT_VERSION}
-	COMPATIBILITY AnyNewerVersion
-)
-
 # Install includes.
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/stacofin
@@ -57,7 +50,6 @@ install(EXPORT stacofin-targets
 install(
 	FILES
 		"${CMAKE_CURRENT_LIST_DIR}/retdec-stacofin-config.cmake"
-		"${RETDEC_BINARY_SHARE_DIR}/retdec-stacofin-config-version.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
 	COMPONENT stacofin

@@ -136,13 +136,6 @@ configure_package_config_file(
 		CAPSTONE_LIB_INSTALLED
 )
 
-# Create config version file.
-write_basic_package_version_file(
-	"${RETDEC_BINARY_SHARE_DIR}/retdec-capstone-config-version.cmake"
-	VERSION ${PROJECT_VERSION}
-	COMPATIBILITY AnyNewerVersion
-)
-
 # Install includes.
 install(
 	DIRECTORY
@@ -181,7 +174,6 @@ install(EXPORT capstone-targets
 install(
 	FILES
 		"${RETDEC_BINARY_SHARE_DIR}/retdec-capstone-config.cmake"
-		"${RETDEC_BINARY_SHARE_DIR}/retdec-capstone-config-version.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
 	COMPONENT capstone

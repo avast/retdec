@@ -14,13 +14,6 @@ target_include_directories(rapidjson
 		$<INSTALL_INTERFACE:${RETDEC_INSTALL_INCLUDE_DIR}>/retdec/deps
 )
 
-# Create config version file.
-write_basic_package_version_file(
-	"${RETDEC_BINARY_SHARE_DIR}/retdec-rapidjson-config-version.cmake"
-	VERSION ${PROJECT_VERSION}
-	COMPATIBILITY AnyNewerVersion
-)
-
 # Install includes.
 install(
 	DIRECTORY ${RETDEC_DEPS_DIR}/rapidjson/include/rapidjson
@@ -48,7 +41,6 @@ install(EXPORT rapidjson-targets
 install(
 	FILES
 		"${CMAKE_CURRENT_LIST_DIR}/retdec-rapidjson-config.cmake"
-		"${RETDEC_BINARY_SHARE_DIR}/retdec-rapidjson-config-version.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
 	COMPONENT rapidjson

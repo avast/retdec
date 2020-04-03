@@ -31,13 +31,6 @@ target_link_libraries(serdes
 		retdec::rapidjson
 )
 
-# Create config version file.
-write_basic_package_version_file(
-	"${RETDEC_BINARY_SHARE_DIR}/retdec-serdes-config-version.cmake"
-	VERSION ${PROJECT_VERSION}
-	COMPATIBILITY AnyNewerVersion
-)
-
 # Install includes.
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/serdes
@@ -65,7 +58,6 @@ install(EXPORT serdes-targets
 install(
 	FILES
 		"${CMAKE_CURRENT_LIST_DIR}/retdec-serdes-config.cmake"
-		"${RETDEC_BINARY_SHARE_DIR}/retdec-serdes-config-version.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
 	COMPONENT serdes

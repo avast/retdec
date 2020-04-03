@@ -18,13 +18,6 @@ target_link_libraries(macho-extractor
 		retdec::rapidjson
 )
 
-# Create config version file.
-write_basic_package_version_file(
-	"${RETDEC_BINARY_SHARE_DIR}/retdec-macho-extractor-config-version.cmake"
-	VERSION ${PROJECT_VERSION}
-	COMPATIBILITY AnyNewerVersion
-)
-
 # Install includes.
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/macho-extractor
@@ -52,7 +45,6 @@ install(EXPORT macho-extractor-targets
 install(
 	FILES
 		"${CMAKE_CURRENT_LIST_DIR}/retdec-macho-extractor-config.cmake"
-		"${RETDEC_BINARY_SHARE_DIR}/retdec-macho-extractor-config-version.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
 	COMPONENT macho-extractor

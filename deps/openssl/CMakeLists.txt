@@ -205,13 +205,6 @@ configure_package_config_file(
 		OPENSSL_CRYPTO_LIB_INSTALLED
 )
 
-# Create config version file.
-write_basic_package_version_file(
-	"${RETDEC_BINARY_SHARE_DIR}/retdec-openssl-crypto-config-version.cmake"
-	VERSION ${PROJECT_VERSION}
-	COMPATIBILITY AnyNewerVersion
-)
-
 # Install includes.
 install(
     DIRECTORY
@@ -245,7 +238,6 @@ install(EXPORT openssl-crypto-targets
 install(
 	FILES
         "${RETDEC_BINARY_SHARE_DIR}/retdec-openssl-crypto-config.cmake"
-        "${RETDEC_BINARY_SHARE_DIR}/retdec-openssl-crypto-config-version.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
 	COMPONENT openssl-crypto

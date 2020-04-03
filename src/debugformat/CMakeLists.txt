@@ -24,13 +24,6 @@ target_link_libraries(debugformat
 		retdec::llvm
 )
 
-# Create config version file.
-write_basic_package_version_file(
-	"${RETDEC_BINARY_SHARE_DIR}/retdec-debugformat-config-version.cmake"
-	VERSION ${PROJECT_VERSION}
-	COMPATIBILITY AnyNewerVersion
-)
-
 # Install includes.
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/debugformat
@@ -58,7 +51,6 @@ install(EXPORT debugformat-targets
 install(
 	FILES
 		"${CMAKE_CURRENT_LIST_DIR}/retdec-debugformat-config.cmake"
-		"${RETDEC_BINARY_SHARE_DIR}/retdec-debugformat-config-version.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
 	COMPONENT debugformat

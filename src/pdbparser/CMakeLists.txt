@@ -13,13 +13,6 @@ target_include_directories(pdbparser
 		$<INSTALL_INTERFACE:${RETDEC_INSTALL_INCLUDE_DIR}>
 )
 
-# Create config version file.
-write_basic_package_version_file(
-	"${RETDEC_BINARY_SHARE_DIR}/retdec-pdbparser-config-version.cmake"
-	VERSION ${PROJECT_VERSION}
-	COMPATIBILITY AnyNewerVersion
-)
-
 # Install includes.
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/pdbparser
@@ -47,7 +40,6 @@ install(EXPORT pdbparser-targets
 install(
 	FILES
 		"${CMAKE_CURRENT_LIST_DIR}/retdec-pdbparser-config.cmake"
-		"${RETDEC_BINARY_SHARE_DIR}/retdec-pdbparser-config-version.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
 	COMPONENT pdbparser

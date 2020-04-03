@@ -15,13 +15,6 @@ target_link_libraries(llvmir-emul
 		retdec::llvm
 )
 
-# Create config version file.
-write_basic_package_version_file(
-	"${RETDEC_BINARY_SHARE_DIR}/retdec-llvmir-emul-config-version.cmake"
-	VERSION ${PROJECT_VERSION}
-	COMPATIBILITY AnyNewerVersion
-)
-
 # Install includes.
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/llvmir-emul
@@ -49,7 +42,6 @@ install(EXPORT llvmir-emul-targets
 install(
 	FILES
 		"${CMAKE_CURRENT_LIST_DIR}/retdec-llvmir-emul-config.cmake"
-		"${RETDEC_BINARY_SHARE_DIR}/retdec-llvmir-emul-config-version.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
 	COMPONENT llvmir-emul

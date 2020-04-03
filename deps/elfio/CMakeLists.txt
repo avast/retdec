@@ -8,13 +8,6 @@ target_include_directories(elfio
         $<INSTALL_INTERFACE:${RETDEC_INSTALL_INCLUDE_DIR}>/retdec/deps
 )
 
-# Create config version file.
-write_basic_package_version_file(
-	"${RETDEC_BINARY_SHARE_DIR}/retdec-elfio-config-version.cmake"
-	VERSION ${PROJECT_VERSION}
-	COMPATIBILITY AnyNewerVersion
-)
-
 # Install includes.
 install(
 	DIRECTORY ${RETDEC_DEPS_DIR}/elfio/include/elfio
@@ -42,7 +35,6 @@ install(EXPORT elfio-targets
 install(
 	FILES
 		"${CMAKE_CURRENT_LIST_DIR}/retdec-elfio-config.cmake"
-		"${RETDEC_BINARY_SHARE_DIR}/retdec-elfio-config-version.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
 	COMPONENT elfio

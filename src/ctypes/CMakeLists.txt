@@ -44,13 +44,6 @@ target_include_directories(ctypes
 		$<INSTALL_INTERFACE:${RETDEC_INSTALL_INCLUDE_DIR}>
 )
 
-# Create config version file.
-write_basic_package_version_file(
-	"${RETDEC_BINARY_SHARE_DIR}/retdec-ctypes-config-version.cmake"
-	VERSION ${PROJECT_VERSION}
-	COMPATIBILITY AnyNewerVersion
-)
-
 # Install includes.
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/ctypes
@@ -78,7 +71,6 @@ install(EXPORT ctypes-targets
 install(
 	FILES
 		"${CMAKE_CURRENT_LIST_DIR}/retdec-ctypes-config.cmake"
-		"${RETDEC_BINARY_SHARE_DIR}/retdec-ctypes-config-version.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
 	COMPONENT ctypes

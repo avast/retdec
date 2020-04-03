@@ -22,13 +22,6 @@ target_link_libraries(config
 		retdec::utils
 )
 
-# Create config version file.
-write_basic_package_version_file(
-	"${RETDEC_BINARY_SHARE_DIR}/retdec-config-config-version.cmake"
-	VERSION ${PROJECT_VERSION}
-	COMPATIBILITY AnyNewerVersion
-)
-
 # Install includes.
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/config
@@ -56,7 +49,6 @@ install(EXPORT config-targets
 install(
 	FILES
 		"${CMAKE_CURRENT_LIST_DIR}/retdec-config-config.cmake"
-		"${RETDEC_BINARY_SHARE_DIR}/retdec-config-config-version.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
 	COMPONENT config

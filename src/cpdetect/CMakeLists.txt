@@ -39,13 +39,6 @@ target_link_libraries(cpdetect
 		retdec::llvm
 )
 
-# Create config version file.
-write_basic_package_version_file(
-	"${RETDEC_BINARY_SHARE_DIR}/retdec-cpdetect-config-version.cmake"
-	VERSION ${PROJECT_VERSION}
-	COMPATIBILITY AnyNewerVersion
-)
-
 # Install includes.
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/cpdetect
@@ -73,7 +66,6 @@ install(EXPORT cpdetect-targets
 install(
 	FILES
 		"${CMAKE_CURRENT_LIST_DIR}/retdec-cpdetect-config.cmake"
-		"${RETDEC_BINARY_SHARE_DIR}/retdec-cpdetect-config-version.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
 	COMPONENT cpdetect
