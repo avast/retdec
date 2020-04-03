@@ -79,7 +79,7 @@ ExternalProject_Get_Property(googletest binary_dir)
 
 # gtest
 add_library(gtest INTERFACE)
-add_library(retdec::gtest ALIAS gtest)
+add_library(retdec::deps::gtest ALIAS gtest)
 add_dependencies(gtest googletest)
 target_link_libraries(gtest INTERFACE
 	debug
@@ -96,7 +96,7 @@ target_include_directories(gtest
 
 # gtest_main
 add_library(gtest_main INTERFACE)
-add_library(retdec::gtest_main ALIAS gtest_main)
+add_library(retdec::deps::gtest_main ALIAS gtest_main)
 target_link_libraries(gtest_main INTERFACE
 #		Threads::Threads
 	debug
@@ -114,7 +114,7 @@ target_link_libraries(gtest_main INTERFACE
 
 # gmock
 add_library(gmock INTERFACE)
-add_library(retdec::gmock ALIAS gmock)
+add_library(retdec::deps::gmock ALIAS gmock)
 target_link_libraries(gmock INTERFACE
 #		Threads::Threads
 	debug
@@ -133,7 +133,7 @@ target_include_directories(gmock
 
 # gmock_main
 add_library(gmock_main INTERFACE)
-add_library(retdec::gmock_main ALIAS gmock_main)
+add_library(retdec::deps::gmock_main ALIAS gmock_main)
 target_link_libraries(gmock_main INTERFACE
 #		Threads::Threads
 	debug

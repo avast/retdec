@@ -15,7 +15,7 @@ target_include_directories(patterngen
 
 target_link_libraries(patterngen
 	PUBLIC
-		retdec::yaramod
+		retdec::deps::yaramod
 	PRIVATE
 		retdec::fileformat
 		retdec::utils

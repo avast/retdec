@@ -125,8 +125,8 @@ target_link_libraries(fileinfo
 	retdec::common
 	retdec::config
 	retdec::serdes
-	retdec::rapidjson
-	retdec::tinyxml2
+	retdec::deps::rapidjson
+	retdec::deps::tinyxml2
 )
 
 set_target_properties(fileinfo

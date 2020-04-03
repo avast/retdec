@@ -11,7 +11,7 @@ add_executable(tests-demangler
 
 target_link_libraries(tests-demangler
 	retdec::demangler
-	retdec::gmock_main
+	retdec::deps::gmock_main
 )
 
 set_target_properties(tests-demangler

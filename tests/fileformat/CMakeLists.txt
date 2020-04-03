@@ -15,7 +15,7 @@ add_executable(tests-fileformat
 target_link_libraries(tests-fileformat
 	retdec::fileformat
 	retdec::utils
-	retdec::gmock_main
+	retdec::deps::gmock_main
 )
 
 target_include_directories(tests-fileformat

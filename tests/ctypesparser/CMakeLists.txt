@@ -5,7 +5,7 @@ add_executable(tests-ctypesparser
 
 target_link_libraries(tests-ctypesparser
 	retdec::ctypesparser
-	retdec::gmock_main
+	retdec::deps::gmock_main
 )
 
 set_target_properties(tests-ctypesparser

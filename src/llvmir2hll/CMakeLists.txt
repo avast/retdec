@@ -311,8 +311,8 @@ target_link_libraries(llvmir2hll
 		retdec::config
 		retdec::utils
 		retdec::llvm-support
-		retdec::rapidjson
-		retdec::llvm
+		retdec::deps::rapidjson
+		retdec::deps::llvm
 )
 
 # We need to compile source files with /bigobj to prevent the following

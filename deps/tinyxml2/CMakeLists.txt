@@ -2,7 +2,7 @@
 add_library(tinyxml2 STATIC
 	tinyxml2.cpp
 )
-add_library(retdec::tinyxml2 ALIAS tinyxml2)
+add_library(retdec::deps::tinyxml2 ALIAS tinyxml2)
 
 target_include_directories(tinyxml2
 	SYSTEM INTERFACE
@@ -35,7 +35,7 @@ install(TARGETS tinyxml2
 # Export targets.
 install(EXPORT tinyxml2-targets
 	FILE "retdec-tinyxml2-targets.cmake"
-	NAMESPACE retdec::
+	NAMESPACE retdec::deps::
 	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
 )
 

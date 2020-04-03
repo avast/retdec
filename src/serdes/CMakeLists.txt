@@ -28,7 +28,7 @@ target_include_directories(serdes
 target_link_libraries(serdes
 	PUBLIC
 		retdec::common
-		retdec::rapidjson
+		retdec::deps::rapidjson
 )
 
 # Install includes.

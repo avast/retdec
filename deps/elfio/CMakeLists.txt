@@ -1,6 +1,6 @@
 
 add_library(elfio INTERFACE)
-add_library(retdec::elfio ALIAS elfio)
+add_library(retdec::deps::elfio ALIAS elfio)
 
 target_include_directories(elfio
     SYSTEM INTERFACE
@@ -24,7 +24,7 @@ install(TARGETS elfio
 # Export targets.
 install(EXPORT elfio-targets
 	FILE "retdec-elfio-targets.cmake"
-	NAMESPACE retdec::
+	NAMESPACE retdec::deps::
 	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
 )
 

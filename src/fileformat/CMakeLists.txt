@@ -91,8 +91,8 @@ target_link_libraries(fileformat
 		retdec::common
 		retdec::utils
 		retdec::pelib
-		retdec::elfio
-		retdec::llvm
+		retdec::deps::elfio
+		retdec::deps::llvm
 )
 
 # Install includes.

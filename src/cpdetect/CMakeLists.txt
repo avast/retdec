@@ -35,8 +35,8 @@ target_link_libraries(cpdetect
 		retdec::utils
 	PRIVATE
 		retdec::yaracpp
-		retdec::tinyxml2
-		retdec::llvm
+		retdec::deps::tinyxml2
+		retdec::deps::llvm
 )
 
 # Install includes.

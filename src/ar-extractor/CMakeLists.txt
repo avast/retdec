@@ -14,9 +14,9 @@ target_include_directories(ar-extractor
 target_link_libraries(ar-extractor
 	PUBLIC
 		retdec::utils
-		retdec::llvm
+		retdec::deps::llvm
 	PRIVATE
-		retdec::rapidjson
+		retdec::deps::rapidjson
 )
 
 # Install includes.

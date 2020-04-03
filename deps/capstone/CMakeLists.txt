@@ -108,7 +108,7 @@ set(CAPSTONE_LIB ${CMAKE_STATIC_LIBRARY_PREFIX}capstone${CMAKE_STATIC_LIBRARY_SU
 
 # Add libraries.
 add_library(capstone INTERFACE)
-add_library(retdec::capstone ALIAS capstone)
+add_library(retdec::deps::capstone ALIAS capstone)
 add_dependencies(capstone capstone-project)
 
 target_include_directories(capstone
@@ -119,7 +119,7 @@ target_include_directories(capstone
 )
 
 target_link_libraries(capstone INTERFACE
-		$<INSTALL_INTERFACE:retdec::capstone-libs>
+		$<INSTALL_INTERFACE:retdec::deps::capstone-libs>
 	debug
 		$<BUILD_INTERFACE:${binary_dir}/${DEBUG_DIR}${CAPSTONE_LIB}>
 	optimized
@@ -163,7 +163,7 @@ install(TARGETS capstone
 # Export targets.
 install(EXPORT capstone-targets
 	FILE "retdec-capstone-targets.cmake"
-	NAMESPACE retdec::
+	NAMESPACE retdec::deps::
 	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
 )
 

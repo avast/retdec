@@ -11,8 +11,8 @@ target_link_libraries(tests-capstone2llvmir
 	retdec::capstone2llvmir
 	retdec::llvmir-emul
 	retdec::utils
-	retdec::keystone
-	retdec::gmock_main
+	retdec::deps::keystone
+	retdec::deps::gmock_main
 )
 
 target_include_directories(tests-capstone2llvmir

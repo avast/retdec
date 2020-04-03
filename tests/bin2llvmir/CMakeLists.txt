@@ -28,7 +28,7 @@ add_executable(tests-bin2llvmir
 target_link_libraries(tests-bin2llvmir
 	retdec::bin2llvmir
 	retdec::utils
-	retdec::gmock_main
+	retdec::deps::gmock_main
 )
 
 target_include_directories(tests-bin2llvmir

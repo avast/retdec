@@ -15,7 +15,7 @@ target_include_directories(ctypesparser
 target_link_libraries(ctypesparser
 	PUBLIC
 		retdec::ctypes
-		retdec::rapidjson
+		retdec::deps::rapidjson
 	PRIVATE
 		retdec::utils
 )

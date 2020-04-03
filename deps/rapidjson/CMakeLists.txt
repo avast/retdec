@@ -1,6 +1,6 @@
 
 add_library(rapidjson INTERFACE)
-add_library(retdec::rapidjson ALIAS rapidjson)
+add_library(retdec::deps::rapidjson ALIAS rapidjson)
 
 target_compile_definitions(rapidjson
 	INTERFACE
@@ -30,7 +30,7 @@ install(TARGETS rapidjson
 # Export targets.
 install(EXPORT rapidjson-targets
 	FILE "retdec-rapidjson-targets.cmake"
-	NAMESPACE retdec::
+	NAMESPACE retdec::deps::
 	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
 )
 

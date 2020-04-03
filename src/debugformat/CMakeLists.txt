@@ -21,7 +21,7 @@ target_link_libraries(debugformat
 		retdec::fileformat
 		retdec::common
 		retdec::pdbparser
-		retdec::llvm
+		retdec::deps::llvm
 )
 
 # Install includes.

@@ -74,7 +74,7 @@ ExternalProject_Get_Property(keystone-project binary_dir)
 
 # Add libraries.
 add_library(keystone INTERFACE)
-add_library(retdec::keystone ALIAS keystone)
+add_library(retdec::deps::keystone ALIAS keystone)
 add_dependencies(keystone keystone-project)
 
 target_include_directories(keystone

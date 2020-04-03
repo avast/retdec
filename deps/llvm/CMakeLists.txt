@@ -200,7 +200,7 @@ ExternalProject_Get_Property(llvm-project source_dir)
 # Create target.
 
 add_library(llvm INTERFACE)
-add_library(retdec::llvm ALIAS llvm)
+add_library(retdec::deps::llvm ALIAS llvm)
 add_dependencies(llvm llvm-project)
 
 target_include_directories(llvm
@@ -235,7 +235,7 @@ endforeach(LLVM_LIB)
 
 target_link_libraries(llvm
 	INTERFACE
-		$<INSTALL_INTERFACE:retdec::llvm-libs>
+		$<INSTALL_INTERFACE:retdec::deps::llvm-libs>
 		Threads::Threads
 )
 
@@ -279,7 +279,7 @@ install(TARGETS llvm
 # Export targets.
 install(EXPORT llvm-targets
 	FILE "retdec-llvm-targets.cmake"
-	NAMESPACE retdec::
+	NAMESPACE retdec::deps::
 	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
 )
 

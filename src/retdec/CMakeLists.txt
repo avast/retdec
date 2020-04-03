@@ -15,8 +15,8 @@ target_include_directories(retdec
 target_link_libraries(retdec
 	PUBLIC
 		retdec::common
-		retdec::capstone
-		retdec::llvm
+		retdec::deps::capstone
+		retdec::deps::llvm
 	PRIVATE
 		retdec::bin2llvmir
 		retdec::config

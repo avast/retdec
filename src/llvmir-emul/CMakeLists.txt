@@ -12,7 +12,7 @@ target_include_directories(llvmir-emul
 
 target_link_libraries(llvmir-emul
 	PUBLIC
-		retdec::llvm
+		retdec::deps::llvm
 )
 
 # Install includes.

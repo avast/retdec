@@ -12,7 +12,7 @@ target_include_directories(llvm-support
 
 target_link_libraries(llvm-support
 	PUBLIC
-		retdec::llvm
+		retdec::deps::llvm
 	PRIVATE
 		retdec::utils
 )

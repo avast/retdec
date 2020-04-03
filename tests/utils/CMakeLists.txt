@@ -17,7 +17,7 @@ add_executable(tests-utils
 
 target_link_libraries(tests-utils
 	retdec::utils
-	retdec::gmock_main
+	retdec::deps::gmock_main
 )
 
 set_target_properties(tests-utils

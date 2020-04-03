@@ -16,7 +16,7 @@ target_include_directories(config PUBLIC
 target_link_libraries(config
 	PUBLIC
 		retdec::common
-		retdec::rapidjson
+		retdec::deps::rapidjson
 	PRIVATE
 		retdec::serdes
 		retdec::utils

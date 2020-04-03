@@ -10,7 +10,7 @@ target_link_libraries(tests-loader
 	retdec::common
 	retdec::loader
 	retdec::utils
-	retdec::gmock_main
+	retdec::deps::gmock_main
 )
 
 set_target_properties(tests-loader

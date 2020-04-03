@@ -6,7 +6,7 @@ add_executable(ar-extractortool
 target_link_libraries(ar-extractortool
 	retdec::ar-extractor
 	retdec::utils
-	retdec::rapidjson
+	retdec::deps::rapidjson
 )
 
 set_target_properties(ar-extractortool

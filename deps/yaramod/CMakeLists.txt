@@ -64,7 +64,7 @@ ExternalProject_Get_Property(yaramod-project binary_dir)
 
 # Add libraries.
 add_library(yaramod INTERFACE)
-add_library(retdec::yaramod ALIAS yaramod)
+add_library(retdec::deps::yaramod ALIAS yaramod)
 add_dependencies(yaramod yaramod-project)
 
 target_include_directories(yaramod
@@ -87,7 +87,7 @@ target_link_libraries(yaramod INTERFACE
 	general
 		$<BUILD_INTERFACE:${binary_dir}/deps/pog/deps/fmt/fmt/${CMAKE_INSTALL_LIBDIR}/${CMAKE_STATIC_LIBRARY_PREFIX}pog_fmt${CMAKE_STATIC_LIBRARY_SUFFIX}>
 		$<BUILD_INTERFACE:${binary_dir}/deps/pog/deps/re2/re2/${CMAKE_INSTALL_LIBDIR}/${CMAKE_STATIC_LIBRARY_PREFIX}pog_re2${CMAKE_STATIC_LIBRARY_SUFFIX}>
-		$<INSTALL_INTERFACE:retdec::yaramod-libs>
+		$<INSTALL_INTERFACE:retdec::deps::yaramod-libs>
 )
 
 # Install libs.
@@ -132,7 +132,7 @@ install(TARGETS yaramod
 # Export targets.
 install(EXPORT yaramod-targets
 	FILE "retdec-yaramod-targets.cmake"
-	NAMESPACE retdec::
+	NAMESPACE retdec::deps::
 	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
 )
 

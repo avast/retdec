@@ -6,7 +6,7 @@ add_executable(macho-extractortool
 target_link_libraries(macho-extractortool
 	retdec::macho-extractor
 	retdec::utils
-	retdec::rapidjson
+	retdec::deps::rapidjson
 )
 
 set_target_properties(macho-extractortool

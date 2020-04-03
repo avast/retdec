@@ -29,7 +29,7 @@ add_executable(tests-ctypes
 
 target_link_libraries(tests-ctypes
 	retdec::ctypes
-	retdec::gmock_main
+	retdec::deps::gmock_main
 )
 
 set_target_properties(tests-ctypes

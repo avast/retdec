@@ -6,7 +6,7 @@ add_executable(tests-llvm-emul
 target_link_libraries(tests-llvm-emul
 	retdec::utils
 	retdec::llvmir-emul
-	retdec::gmock_main
+	retdec::deps::gmock_main
 )
 
 target_include_directories(tests-llvm-emul

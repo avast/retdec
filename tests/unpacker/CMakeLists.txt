@@ -6,7 +6,7 @@ add_executable(tests-unpacker
 
 target_link_libraries(tests-unpacker
 	retdec::unpacker
-	retdec::gmock_main
+	retdec::deps::gmock_main
 )
 
 set_target_properties(tests-unpacker

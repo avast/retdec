@@ -15,7 +15,7 @@ target_include_directories(yaracpp
 
 target_link_libraries(yaracpp
 	PRIVATE
-		retdec::libyara
+		retdec::deps::libyara
 )
 
 # Install includes.

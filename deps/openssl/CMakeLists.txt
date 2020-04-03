@@ -164,7 +164,7 @@ ExternalProject_Add(openssl
 set(OPENSSL_CRYPTO_LIB libcrypto${CMAKE_STATIC_LIBRARY_SUFFIX})
 
 add_library(openssl-crypto INTERFACE)
-add_library(retdec::openssl-crypto ALIAS openssl-crypto)
+add_library(retdec::deps::openssl-crypto ALIAS openssl-crypto)
 add_dependencies(openssl-crypto openssl)
 
 target_include_directories(openssl-crypto
@@ -176,7 +176,7 @@ target_include_directories(openssl-crypto
 target_link_libraries(openssl-crypto
 	INTERFACE
 		$<BUILD_INTERFACE:${OPENSSL_INSTALL_DIR}/lib/${OPENSSL_CRYPTO_LIB}>
-		$<INSTALL_INTERFACE:retdec::openssl-crypto-libs>
+		$<INSTALL_INTERFACE:retdec::deps::openssl-crypto-libs>
 		Threads::Threads
 )
 if(MSVC)
@@ -228,7 +228,7 @@ install(TARGETS openssl-crypto
 # Export targets.
 install(EXPORT openssl-crypto-targets
 	FILE "retdec-openssl-crypto-targets.cmake"
-	NAMESPACE retdec::
+	NAMESPACE retdec::deps::
 	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
 )
 

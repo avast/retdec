@@ -12,10 +12,10 @@ target_include_directories(macho-extractor
 
 target_link_libraries(macho-extractor
 	PUBLIC
-		retdec::llvm
+		retdec::deps::llvm
 	PRIVATE
 		retdec::utils
-		retdec::rapidjson
+		retdec::deps::rapidjson
 )
 
 # Install includes.

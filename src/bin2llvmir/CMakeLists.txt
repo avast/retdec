@@ -130,7 +130,7 @@ target_link_libraries(bin2llvmir
 		retdec::common
 		retdec::utils
 		retdec::llvm-support
-		retdec::llvm
+		retdec::deps::llvm
 )
 
 # Install includes.

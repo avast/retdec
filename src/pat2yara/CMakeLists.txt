@@ -11,7 +11,7 @@ add_executable(pat2yara
 target_link_libraries(pat2yara
 	retdec::patterngen
 	retdec::utils
-	retdec::yaramod
+	retdec::deps::yaramod
 )
 
 set_target_properties(pat2yara

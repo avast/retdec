@@ -16,7 +16,7 @@ add_executable(tests-common
 
 target_link_libraries(tests-common
 	retdec::common
-	retdec::gmock_main
+	retdec::deps::gmock_main
 )
 
 set_target_properties(tests-common

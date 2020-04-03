@@ -2,7 +2,7 @@
 add_library(whereami STATIC
 	whereami.c
 )
-add_library(retdec::whereami ALIAS whereami)
+add_library(retdec::deps::whereami ALIAS whereami)
 
 target_include_directories(whereami
 	SYSTEM INTERFACE

@@ -41,7 +41,7 @@ target_include_directories(demangler
 target_link_libraries(demangler
 	PUBLIC
 		retdec::ctypesparser
-		retdec::llvm
+		retdec::deps::llvm
 )
 
 # Install includes.

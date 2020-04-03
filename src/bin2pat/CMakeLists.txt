@@ -6,7 +6,7 @@ add_executable(bin2pat
 target_link_libraries(bin2pat
 	retdec::patterngen
 	retdec::utils
-	retdec::yaramod
+	retdec::deps::yaramod
 )
 
 set_target_properties(bin2pat

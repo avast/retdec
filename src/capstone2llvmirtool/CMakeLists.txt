@@ -6,7 +6,7 @@ add_executable(capstone2llvmirtool
 target_link_libraries(capstone2llvmirtool
 	retdec::utils
 	retdec::capstone2llvmir
-	retdec::keystone
+	retdec::deps::keystone
 )
 
 set_target_properties(capstone2llvmirtool

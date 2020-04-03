@@ -7,7 +7,7 @@ add_executable(tests-serdes
 
 target_link_libraries(tests-serdes
 	retdec::serdes
-	retdec::gmock_main
+	retdec::deps::gmock_main
 )
 
 set_target_properties(tests-serdes
