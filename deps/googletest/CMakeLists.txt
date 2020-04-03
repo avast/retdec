@@ -9,6 +9,12 @@ if(CMAKE_CXX_COMPILER)
 	set(CMAKE_CXX_COMPILER_OPTION "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")
 endif()
 
+if(RETDEC_MSVC_STATIC_RUNTIME)
+	set(FORCE_SHARED_RUNTIME OFF)
+else()
+	set(FORCE_SHARED_RUNTIME ON)
+endif()
+
 if(GOOGLETEST_LOCAL_DIR)
 	message(STATUS "Googletest: using local Googletest directory.")
 
@@ -21,7 +27,7 @@ if(GOOGLETEST_LOCAL_DIR)
 			# Without this, googletest's CMakeLists.txt replaces "/MD" (dynamic run-time) with "-MT" (static runtime).
 			# Default config for most applications is "/MD", so this will cause problems if linked with "-MT" googletest.
 			# https://msdn.microsoft.com/en-us/library/2kzt1wy3.aspx
-			-Dgtest_force_shared_crt=ON
+			-Dgtest_force_shared_crt=${FORCE_SHARED_RUNTIME}
 			# Force the use of the same compiler as used to build the top-level
 			# project. Otherwise, the external project may pick up a different
 			# compiler, which may result in link errors.
@@ -46,7 +52,7 @@ else()
 			# Without this, googletest's CMakeLists.txt replaces "/MD" (dynamic run-time) with "-MT" (static runtime).
 			# Default config for most applications is "/MD", so this will cause problems if linked with "-MT" googletest.
 			# https://msdn.microsoft.com/en-us/library/2kzt1wy3.aspx
-			-Dgtest_force_shared_crt=ON
+			-Dgtest_force_shared_crt=${FORCE_SHARED_RUNTIME}
 			# Force the use of the same compiler as used to build the top-level
 			# project. Otherwise, the external project may pick up a different
 			# compiler, which may result in link errors.

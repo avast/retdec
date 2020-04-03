@@ -19,10 +19,6 @@ target_link_libraries(utils
 	PRIVATE
 		retdec::deps::whereami
 )
-if(WIN32)
-	# shlwapi.dll for PathRemoveFileSpec()
-	target_link_libraries(utils PRIVATE shlwapi)
-endif()
 
 target_include_directories(utils
 	PUBLIC

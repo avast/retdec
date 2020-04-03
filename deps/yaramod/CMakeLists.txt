@@ -16,6 +16,7 @@ if(YARAMOD_LOCAL_DIR)
 		CMAKE_ARGS
 			# This does not work on MSVC, but may be useful on Linux.
 			-DCMAKE_BUILD_TYPE=Release
+			-DCMAKE_CXX_FLAGS_RELEASE=${CMAKE_CXX_FLAGS_RELEASE}
 			# Force the use of the same compiler as used to build the top-level
 			# project. Otherwise, the external project may pick up a different
 			# compiler, which may result in link errors.
@@ -37,6 +38,7 @@ else()
 		CMAKE_ARGS
 			# This does not work on MSVC, but may be useful on Linux.
 			-DCMAKE_BUILD_TYPE=Release
+			-DCMAKE_CXX_FLAGS_RELEASE=${CMAKE_CXX_FLAGS_RELEASE}
 			# Force the use of the same compiler as used to build the top-level
 			# project. Otherwise, the external project may pick up a different
 			# compiler, which may result in link errors.
@@ -89,6 +91,9 @@ target_link_libraries(yaramod INTERFACE
 		$<BUILD_INTERFACE:${binary_dir}/deps/pog/deps/re2/re2/${CMAKE_INSTALL_LIBDIR}/${CMAKE_STATIC_LIBRARY_PREFIX}pog_re2${CMAKE_STATIC_LIBRARY_SUFFIX}>
 		$<INSTALL_INTERFACE:retdec::deps::yaramod-libs>
 )
+if(WIN32)
+	target_link_libraries(yaramod INTERFACE shlwapi)
+endif()
 
 # Install libs.
 # Install both Release and Debug variant to the same location.
