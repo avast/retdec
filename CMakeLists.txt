@@ -117,7 +117,7 @@ add_subdirectory(tests)
 write_basic_package_version_file(
 	"${RETDEC_BINARY_SHARE_DIR}/retdec-config-version.cmake"
 	VERSION ${PROJECT_VERSION}
-	COMPATIBILITY AnyNewerVersion
+	COMPATIBILITY ExactVersion
 )
 
 # Create main RetDec CMake config file.
