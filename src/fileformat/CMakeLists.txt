@@ -93,7 +93,6 @@ target_link_libraries(fileformat
 		retdec::pelib
 		retdec::deps::elfio
 		retdec::deps::llvm
-		retdec::deps::openssl-crypto
 )
 
 # Install includes.
