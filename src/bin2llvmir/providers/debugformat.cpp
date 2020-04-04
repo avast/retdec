@@ -50,7 +50,7 @@ DebugFormat* DebugFormatProvider::addDebugFormat(
 					objf,
 					pdbFile,
 					nullptr, // symbol table -- not needed.
-					demangler->getDemangler(),
+					demangler ? demangler->getDemangler() : nullptr,
 					imageBase));
 	return &p.first->second;
 }
