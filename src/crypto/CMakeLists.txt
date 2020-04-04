@@ -15,9 +15,10 @@ target_include_directories(crypto
 )
 
 target_link_libraries(crypto
+	PUBLIC
+		retdec::deps::openssl-crypto
 	PRIVATE
 		retdec::utils
-		retdec::deps::openssl-crypto
 )
 
 # Install includes.
