@@ -43,7 +43,7 @@ install(
 )
 
 # Install libs.
-install(TARGETS utils whereami
+install(TARGETS utils
 	EXPORT utils-targets
 	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 	LIBRARY DESTINATION ${RETDEC_INSTALL_LIB_DIR}
@@ -57,9 +57,14 @@ install(EXPORT utils-targets
 )
 
 # Install CMake files.
+configure_file(
+	"retdec-utils-config.cmake"
+	"${CMAKE_CURRENT_BINARY_DIR}/retdec-utils-config.cmake"
+	@ONLY
+)
 install(
 	FILES
-		"${CMAKE_CURRENT_LIST_DIR}/retdec-utils-config.cmake"
+		"${CMAKE_CURRENT_BINARY_DIR}/retdec-utils-config.cmake"
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
 )
