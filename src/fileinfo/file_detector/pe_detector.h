@@ -10,6 +10,7 @@
 #include "fileinfo/file_detector/file_detector.h"
 #include "fileinfo/file_wrapper/pe/pe_wrapper.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -51,5 +52,6 @@ class PeDetector : public FileDetector
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

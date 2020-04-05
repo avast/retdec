@@ -12,6 +12,7 @@
 using namespace retdec::utils;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -86,3 +87,4 @@ bool DynamicSectionsJsonGetter::getFlags(std::size_t structIndex, std::size_t re
 }
 
 } // namespace fileinfo
+} // namespace retdec

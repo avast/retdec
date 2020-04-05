@@ -12,6 +12,7 @@
 #include "retdec/cpdetect/cpdetect.h"
 #include "fileinfo/file_information/file_information_types/file_information_types.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -656,5 +657,6 @@ class FileInformation
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

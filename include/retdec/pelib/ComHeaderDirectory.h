@@ -13,7 +13,7 @@
 #ifndef COMHEADERDIRECTORY_H
 #define COMHEADERDIRECTORY_H
 
-#include "pelib/PeHeader.h"
+#include "retdec/pelib/PeHeader.h"
 
 namespace PeLib
 {

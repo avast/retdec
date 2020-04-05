@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 
+namespace retdec {
 namespace fileinfo {
 
 const std::size_t MAX_NAME_LENGTH = 100;
@@ -19,5 +20,6 @@ void shrinkAndReplaceNonprintable(std::string &str, std::size_t maxLength);
 void addUniqueValues(std::vector<std::string> &currentVal, const std::vector<std::string> &newVal);
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

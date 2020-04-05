@@ -14,6 +14,7 @@
 using namespace retdec::cpdetect;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -59,3 +60,4 @@ FileDetector* createFileDetector(
 }
 
 } // namespace fileinfo
+} // namespace retdec

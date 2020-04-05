@@ -13,6 +13,6 @@
 #ifndef PELIB_H
 #define PELIB_H
 
-#include "pelib/PeFile.h"
+#include "retdec/pelib/PeFile.h"
 
 #endif

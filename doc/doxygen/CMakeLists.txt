@@ -36,7 +36,15 @@ add_custom_command(TARGET doc
 )
 
 # Cleanup.
-set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${DOXYGEN_OUTPUT_DIR}")
+set_directory_properties(
+	PROPERTIES
+	ADDITIONAL_MAKE_CLEAN_FILES "${DOXYGEN_OUTPUT_DIR}"
+)
 
 # Install.
-install(DIRECTORY "${DOXYGEN_OUTPUT_DIR}" DESTINATION share/retdec/doc)
+install(
+	DIRECTORY
+		${DOXYGEN_OUTPUT_DIR}
+	DESTINATION
+		${RETDEC_INSTALL_DOC_DIR}
+)

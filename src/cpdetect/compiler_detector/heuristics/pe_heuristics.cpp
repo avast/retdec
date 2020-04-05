@@ -9,7 +9,7 @@
 #include <map>
 #include <regex>
 
-#include <tinyxml2.h>
+#include <tinyxml2/tinyxml2.h>
 
 #include "retdec/utils/conversion.h"
 #include "retdec/utils/string.h"

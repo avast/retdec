@@ -1,15 +1,14 @@
 
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.8)
 
-project(retdec C CXX)
-
-include(GNUInstallDirs)
+project(retdec
+	LANGUAGES C CXX
+	VERSION 4.0
+)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/utils.cmake)
 
 # Set the default build type to 'Release'.
 if(NOT CMAKE_BUILD_TYPE)
@@ -18,10 +17,45 @@ if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "${default_build_type}" CACHE STRING "Choose the type of build." FORCE)
 endif()
 
+## Includes.
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/utils.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/options.cmake)
 
 # RetDec, and some dependencies (e.g. LLVM, Keystone), require Python 3.
 find_package(PythonInterp 3.4 REQUIRED)
+
+### Variables.
+
+## Repository directories.
+set(RETDEC_CMAKE_DIR                "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+set(RETDEC_DEPS_DIR                 "${CMAKE_CURRENT_SOURCE_DIR}/deps")
+set(RETDEC_DOC_DIR                  "${CMAKE_CURRENT_SOURCE_DIR}/doc")
+set(RETDEC_INCLUDE_DIR              "${CMAKE_CURRENT_SOURCE_DIR}/include")
+set(RETDEC_SCRIPTS_DIR              "${CMAKE_CURRENT_SOURCE_DIR}/scripts")
+set(RETDEC_SOURCE_DIR               "${CMAKE_CURRENT_SOURCE_DIR}/src")
+set(RETDEC_SUPPORT_DIR              "${CMAKE_CURRENT_SOURCE_DIR}/support")
+set(RETDEC_TESTS_DIR                "${CMAKE_CURRENT_SOURCE_DIR}/tests")
+## Installation directories.
+# Bins.
+set(RETDEC_INSTALL_BIN_DIR          "${CMAKE_INSTALL_BINDIR}")
+set(RETDEC_INSTALL_BIN_DIR_ABS      "${CMAKE_INSTALL_PREFIX}/${RETDEC_INSTALL_BIN_DIR}")
+set(RETDEC_INSTALL_TESTS_DIR        "${RETDEC_INSTALL_BIN_DIR}")
+# Includes.
+set(RETDEC_INSTALL_INCLUDE_DIR      "${CMAKE_INSTALL_INCLUDEDIR}")
+set(RETDEC_INSTALL_DEPS_INCLUDE_DIR "${RETDEC_INSTALL_INCLUDE_DIR}/retdec/deps")
+# Libs.
+set(RETDEC_INSTALL_LIB_DIR          "${CMAKE_INSTALL_LIBDIR}")
+set(RETDEC_INSTALL_LIB_DIR_ABS      "${CMAKE_INSTALL_PREFIX}/${RETDEC_INSTALL_LIB_DIR}")
+set(RETDEC_INSTALL_DEPS_LIB_DIR     "${RETDEC_INSTALL_LIB_DIR}/deps")
+set(RETDEC_INSTALL_DEPS_LIB_DIR_ABS "${CMAKE_INSTALL_PREFIX}/${RETDEC_INSTALL_DEPS_LIB_DIR}")
+# Data.
+set(RETDEC_INSTALL_DATA_DIR         "${CMAKE_INSTALL_DATADIR}/retdec")
+set(RETDEC_INSTALL_CMAKE_DIR        "${RETDEC_INSTALL_DATA_DIR}/cmake")
+set(RETDEC_INSTALL_DOC_DIR          "${RETDEC_INSTALL_DATA_DIR}/doc")
+set(RETDEC_INSTALL_SUPPORT_DIR      "${RETDEC_INSTALL_DATA_DIR}/support")
+set(RETDEC_INSTALL_SUPPORT_DIR_ABS  "${CMAKE_INSTALL_PREFIX}/${RETDEC_INSTALL_SUPPORT_DIR}")
 
 # On Linux and macOS, set RPATH relative to the origin of the installed
 # executables (i.e. relative to the bin directory). This allows us to move the
@@ -111,3 +145,26 @@ cond_add_subdirectory(scripts RETDEC_ENABLE_SCRIPTS)
 add_subdirectory(src)
 cond_add_subdirectory(support RETDEC_ENABLE_SUPPORT)
 add_subdirectory(tests)
+
+# Create config version file.
+write_basic_package_version_file(
+	"${CMAKE_CURRENT_BINARY_DIR}/retdec-config-version.cmake"
+	VERSION ${PROJECT_VERSION}
+	COMPATIBILITY ExactVersion
+)
+
+# Create main RetDec CMake config file.
+configure_file(
+	"${CMAKE_CURRENT_LIST_DIR}/retdec-config.cmake"
+	"${CMAKE_CURRENT_BINARY_DIR}/retdec-config.cmake"
+	@ONLY
+)
+
+# Install CMake files.
+install(
+	FILES
+		"${CMAKE_CURRENT_BINARY_DIR}/retdec-config.cmake"
+		"${CMAKE_CURRENT_BINARY_DIR}/retdec-config-version.cmake"
+	DESTINATION
+		"${RETDEC_INSTALL_CMAKE_DIR}"
+)

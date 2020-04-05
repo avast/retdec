@@ -12,6 +12,7 @@
 using namespace retdec::utils;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 namespace
@@ -83,3 +84,4 @@ bool VersionInfoLanguageTablePlainGetter::getFlagDescriptors(std::size_t structI
 }
 
 } // namespace fileinfo
+} // namespace retdec

@@ -1,33 +1,56 @@
 
-add_library(retdec-retdec STATIC
+add_library(retdec STATIC
     retdec.cpp
 )
+add_library(retdec::retdec ALIAS retdec)
 
-# Due to the implementation of the plugin system in LLVM, we have to link our
-# libraries into retdec as a whole.
-if(MSVC)
-	# -WHOLEARCHIVE needs path to the target, but when we use the target like that,
-	# its properties (associated includes, etc.) are not propagated. Therefore, we
-	# state 'bin2llvmir' twice in target_link_libraries(), first as a target to get
-	# its properties, second as path to library to link it as a whole.
-	target_link_libraries(retdec-retdec
-		retdec-bin2llvmir -WHOLEARCHIVE:$<TARGET_FILE_NAME:retdec-bin2llvmir>
-	)
-	set_property(TARGET retdec-retdec APPEND_STRING PROPERTY LINK_FLAGS " /FORCE:MULTIPLE")
-elseif(APPLE)
-	target_link_libraries(retdec-retdec
-		-Wl,-force_load retdec-bin2llvmir
-	)
-else() # Linux
-	target_link_libraries(retdec-retdec
-		-Wl,--whole-archive retdec-bin2llvmir -Wl,--no-whole-archive
-	)
-endif()
+target_compile_features(retdec PUBLIC cxx_std_17)
 
-# Allow the 32b version of bin2llvmir on Windows handle addresses larger than 2
-# GB (up to 4 GB).
-if(MSVC AND CMAKE_SIZEOF_VOID_P MATCHES "4")
-	set_property(TARGET retdec-retdec APPEND_STRING PROPERTY LINK_FLAGS " /LARGEADDRESSAWARE")
-endif()
+target_include_directories(retdec
+	PUBLIC
+		$<BUILD_INTERFACE:${RETDEC_INCLUDE_DIR}>
+		$<INSTALL_INTERFACE:${RETDEC_INSTALL_INCLUDE_DIR}>
+)
 
-target_include_directories(retdec-retdec PUBLIC ${PROJECT_SOURCE_DIR}/include/)
+target_link_libraries(retdec
+	PUBLIC
+		retdec::common
+		retdec::deps::capstone
+		retdec::deps::llvm
+	PRIVATE
+		retdec::bin2llvmir
+		retdec::config
+)
+
+# Install includes.
+install(
+	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/retdec
+	DESTINATION ${RETDEC_INSTALL_INCLUDE_DIR}/retdec
+)
+
+# Install libs.
+install(TARGETS retdec
+	EXPORT retdec-targets
+	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
+	LIBRARY DESTINATION ${RETDEC_INSTALL_LIB_DIR}
+)
+
+# Export targets.
+install(EXPORT retdec-targets
+	FILE "retdec-retdec-targets.cmake"
+	NAMESPACE retdec::
+	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
+)
+
+# Install CMake files.
+configure_file(
+	"retdec-retdec-config.cmake"
+	"${CMAKE_CURRENT_BINARY_DIR}/retdec-retdec-config.cmake"
+	@ONLY
+)
+install(
+	FILES
+		"${CMAKE_CURRENT_BINARY_DIR}/retdec-retdec-config.cmake"
+	DESTINATION
+		"${RETDEC_INSTALL_CMAKE_DIR}"
+)

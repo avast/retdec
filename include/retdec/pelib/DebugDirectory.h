@@ -13,7 +13,7 @@
 #ifndef DEBUGDIRECTORY_H
 #define DEBUGDIRECTORY_H
 
-#include "pelib/PeHeader.h"
+#include "retdec/pelib/PeHeader.h"
 
 namespace PeLib
 {

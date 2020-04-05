@@ -1,4 +1,5 @@
-set(UNPACKER_SOURCES
+
+add_library(unpacker STATIC
 	decompression/lzma/lzma_data.cpp
 	decompression/nrv/nrv2d_data.cpp
 	decompression/nrv/nrv2b_data.cpp
@@ -6,15 +7,50 @@ set(UNPACKER_SOURCES
 	decompression/lzmat/lzmat_data.cpp
 	signature.cpp
 )
+add_library(retdec::unpacker ALIAS unpacker)
 
-add_library(retdec-unpacker STATIC ${UNPACKER_SOURCES})
-target_link_libraries(retdec-unpacker retdec-loader)
-target_include_directories(retdec-unpacker PUBLIC ${PROJECT_SOURCE_DIR}/include/)
+target_compile_features(unpacker PUBLIC cxx_std_17)
 
-# Disable the min() and max() macros to prevent errors when using e.g.
-# std::numeric_limits<...>::max()
-# (http://stackoverflow.com/questions/1904635/warning-c4003-and-errors-c2589-and-c2059-on-x-stdnumeric-limitsintmax).
-# Any target that includes "windows.h" needs to define this.
-if(MSVC)
-	target_compile_definitions(retdec-unpacker PUBLIC NOMINMAX)
-endif()
+target_include_directories(unpacker
+	PUBLIC
+		$<BUILD_INTERFACE:${RETDEC_INCLUDE_DIR}>
+		$<INSTALL_INTERFACE:${RETDEC_INSTALL_INCLUDE_DIR}>
+)
+
+target_link_libraries(unpacker
+	PUBLIC
+		retdec::loader
+)
+
+# Install includes.
+install(
+	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/unpacker
+	DESTINATION ${RETDEC_INSTALL_INCLUDE_DIR}/retdec
+)
+
+# Install libs.
+install(TARGETS unpacker
+	EXPORT unpacker-targets
+	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
+	LIBRARY DESTINATION ${RETDEC_INSTALL_LIB_DIR}
+)
+
+# Export targets.
+install(EXPORT unpacker-targets
+	FILE "retdec-unpacker-targets.cmake"
+	NAMESPACE retdec::
+	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
+)
+
+# Install CMake files.
+configure_file(
+	"retdec-unpacker-config.cmake"
+	"${CMAKE_CURRENT_BINARY_DIR}/retdec-unpacker-config.cmake"
+	@ONLY
+)
+install(
+	FILES
+		"${CMAKE_CURRENT_BINARY_DIR}/retdec-unpacker-config.cmake"
+	DESTINATION
+		"${RETDEC_INSTALL_CMAKE_DIR}"
+)

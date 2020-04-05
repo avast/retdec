@@ -6,6 +6,7 @@
 
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_simple_getter/iterative_simple_getter.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -46,3 +47,4 @@ void IterativeSimpleGetter::getElementHeader(std::string &elemHeader) const
  */
 
 } // namespace fileinfo
+} // namespace retdec

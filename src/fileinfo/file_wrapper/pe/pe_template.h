@@ -10,6 +10,7 @@
 #include "retdec/fileformat/file_format/pe/pe_template_aux.h"
 #include "fileinfo/file_information/file_information_types/file_section.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -68,5 +69,6 @@ template<int bits> bool peSectionWithIndex(const PeLib::PeHeaderT<bits> &peHeade
 }
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

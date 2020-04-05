@@ -1,5 +1,5 @@
 /**
-* @file src/ctypesparser/itanium_ast_ctypes_parser.cpp
+* @file src/demangler/itanium_ast_ctypes_parser.cpp
 * @brief Parser from AST created by Itanium demangler to C-types.
 * @copyright (c) 2019 Avast Software, licensed under the MIT license
 */
@@ -10,10 +10,10 @@
 #include <llvm/Demangle/MicrosoftDemangleNodes.h>
 #include <llvm/Demangle/MicrosoftDemangle.h>
 
-#include "retdec/ctypesparser/ms_ast_ctypes_parser.h"
+#include "retdec/demangler/ms_ast_ctypes_parser.h"
 
 namespace retdec {
-namespace ctypesparser {
+namespace demangler {
 
 namespace {
 
@@ -362,5 +362,5 @@ ctypes::FunctionType::Parameters MsToCtypesParser::parseFuncTypeParameters(
 	return params;
 }
 
-}    // namespace ctypesparser
-}    // namespace retdec
+} // namespace demangler
+} // namespace retdec

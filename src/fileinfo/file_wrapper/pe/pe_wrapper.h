@@ -11,6 +11,7 @@
 #include "fileinfo/file_information/file_information_types/symbol_table/symbol.h"
 #include "fileinfo/file_wrapper/pe/pe_wrapper_parser/pe_wrapper_parser.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -35,5 +36,6 @@ class PeWrapper : public retdec::fileformat::PeFormat
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

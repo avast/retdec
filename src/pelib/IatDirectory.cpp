@@ -10,7 +10,7 @@
 * of PeLib.
 */
 
-#include "pelib/IatDirectory.h"
+#include "retdec/pelib/IatDirectory.h"
 
 namespace PeLib
 {

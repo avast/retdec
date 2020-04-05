@@ -1,4 +1,5 @@
-set(LLVMIR2HLL_SOURCES
+
+add_library(llvmir2hll STATIC
 	analysis/alias_analysis/alias_analyses/basic_alias_analysis.cpp
 	analysis/alias_analysis/alias_analyses/simple_alias_analysis.cpp
 	analysis/alias_analysis/alias_analysis.cpp
@@ -295,15 +296,24 @@ set(LLVMIR2HLL_SOURCES
 	var_renamer/var_renamers/simple_var_renamer.cpp
 	var_renamer/var_renamers/unified_var_renamer.cpp
 )
+add_library(retdec::llvmir2hll ALIAS llvmir2hll)
 
-add_library(retdec-llvmir2hll STATIC ${LLVMIR2HLL_SOURCES})
-target_link_libraries(retdec-llvmir2hll
-	retdec-config
-	retdec-utils
-	retdec-llvm-support
-	rapidjson
-	llvm)
-target_include_directories(retdec-llvmir2hll PUBLIC ${PROJECT_SOURCE_DIR}/include/)
+target_compile_features(llvmir2hll PUBLIC cxx_std_17)
+
+target_include_directories(llvmir2hll
+	PUBLIC
+		$<BUILD_INTERFACE:${RETDEC_INCLUDE_DIR}>
+		$<INSTALL_INTERFACE:${RETDEC_INSTALL_INCLUDE_DIR}>
+)
+
+target_link_libraries(llvmir2hll
+	PUBLIC
+		retdec::config
+		retdec::utils
+		retdec::llvm-support
+		retdec::deps::rapidjson
+		retdec::deps::llvm
+)
 
 # We need to compile source files with /bigobj to prevent the following
 # kind of an error:
@@ -311,5 +321,40 @@ target_include_directories(retdec-llvmir2hll PUBLIC ${PROJECT_SOURCE_DIR}/includ
 #   fatal error C1128: number of sections exceeded object file format
 #                      limit: compile with /bigobj
 if(MSVC)
-	set_property(TARGET retdec-llvmir2hll APPEND_STRING PROPERTY COMPILE_FLAGS " /bigobj")
+	set_property(TARGET llvmir2hll
+		APPEND_STRING PROPERTY COMPILE_FLAGS " /bigobj"
+	)
 endif()
+
+# Install includes.
+install(
+	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/llvmir2hll
+	DESTINATION ${RETDEC_INSTALL_INCLUDE_DIR}/retdec
+)
+
+# Install libs.
+install(TARGETS llvmir2hll
+	EXPORT llvmir2hll-targets
+	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
+	LIBRARY DESTINATION ${RETDEC_INSTALL_LIB_DIR}
+)
+
+# Export targets.
+install(EXPORT llvmir2hll-targets
+	FILE "retdec-llvmir2hll-targets.cmake"
+	NAMESPACE retdec::
+	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
+)
+
+# Install CMake files.
+configure_file(
+	"retdec-llvmir2hll-config.cmake"
+	"${CMAKE_CURRENT_BINARY_DIR}/retdec-llvmir2hll-config.cmake"
+	@ONLY
+)
+install(
+	FILES
+		"${CMAKE_CURRENT_BINARY_DIR}/retdec-llvmir2hll-config.cmake"
+	DESTINATION
+		"${RETDEC_INSTALL_CMAKE_DIR}"
+)

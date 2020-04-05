@@ -9,6 +9,7 @@
 
 #include <string>
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -42,5 +43,6 @@ class DataDirectory
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

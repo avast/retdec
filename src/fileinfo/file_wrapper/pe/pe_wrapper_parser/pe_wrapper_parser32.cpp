@@ -7,6 +7,7 @@
 #include "fileinfo/file_wrapper/pe/pe_template.h"
 #include "fileinfo/file_wrapper/pe/pe_wrapper_parser/pe_wrapper_parser32.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -28,3 +29,4 @@ bool PeWrapperParser32::getSection(const unsigned long long secIndex, FileSectio
 }
 
 } // namespace fileinfo
+} // namespace retdec

@@ -13,8 +13,8 @@
 #ifndef IMPORTDIRECTORY_H
 #define IMPORTDIRECTORY_H
 
-#include "pelib/PeLibAux.h"
-#include "pelib/PeHeader.h"
+#include "retdec/pelib/PeLibAux.h"
+#include "retdec/pelib/PeHeader.h"
 
 namespace PeLib
 {

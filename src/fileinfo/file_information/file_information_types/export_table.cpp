@@ -7,6 +7,7 @@
 #include "fileinfo/file_information/file_information_types/export_table.h"
 #include "fileinfo/file_information/file_information_types/type_conversions.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -100,3 +101,4 @@ bool ExportTable::hasRecords() const
 }
 
 } // namespace fileinfo
+} // namespace retdec

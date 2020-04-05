@@ -11,6 +11,7 @@
 using namespace retdec::utils;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -108,3 +109,4 @@ bool SymbolTablesJsonGetter::getFlags(std::size_t structIndex, std::size_t recIn
 }
 
 } // namespace fileinfo
+} // namespace retdec

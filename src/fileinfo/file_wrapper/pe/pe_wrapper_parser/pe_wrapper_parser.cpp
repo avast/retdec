@@ -6,6 +6,7 @@
 
 #include "fileinfo/file_wrapper/pe/pe_wrapper_parser/pe_wrapper_parser.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -31,3 +32,4 @@ PeWrapperParser::PeWrapperParser()
  */
 
 } // namespace fileinfo
+} // namespace retdec

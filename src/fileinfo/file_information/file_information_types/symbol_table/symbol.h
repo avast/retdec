@@ -9,6 +9,7 @@
 
 #include <string>
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -57,5 +58,6 @@ class Symbol
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

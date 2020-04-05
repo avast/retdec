@@ -7,6 +7,7 @@
 #include "fileinfo/file_information/file_information_types/file_segment.h"
 #include "fileinfo/file_information/file_information_types/type_conversions.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -296,3 +297,4 @@ void FileSegment::clearFlagsDescriptors()
 }
 
 } // namespace fileinfo
+} // namespace retdec

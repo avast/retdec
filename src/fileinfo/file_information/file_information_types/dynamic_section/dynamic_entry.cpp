@@ -7,6 +7,7 @@
 #include "fileinfo/file_information/file_information_types/dynamic_section/dynamic_entry.h"
 #include "fileinfo/file_information/file_information_types/type_conversions.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -149,3 +150,4 @@ void DynamicEntry::clearFlagsDescriptors()
 }
 
 } // namespace fileinfo
+} // namespace retdec

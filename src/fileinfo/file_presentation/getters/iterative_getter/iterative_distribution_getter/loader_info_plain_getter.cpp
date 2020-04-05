@@ -12,6 +12,7 @@
 
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 namespace
@@ -79,3 +80,4 @@ bool LoaderInfoPlainGetter::getFlagDescriptors(std::size_t structIndex, std::vec
 }
 
 } // namespace fileinfo
+} // namespace retdec

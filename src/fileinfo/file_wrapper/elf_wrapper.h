@@ -9,6 +9,7 @@
 
 #include "retdec/fileformat/file_format/elf/elf_format.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -29,5 +30,6 @@ class ElfWrapper : public retdec::fileformat::ElfFormat
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

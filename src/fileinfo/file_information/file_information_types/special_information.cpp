@@ -6,6 +6,7 @@
 
 #include "fileinfo/file_information/file_information_types/special_information.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -64,3 +65,4 @@ void SpecialInformation::addValue(std::string value)
 }
 
 } // namespace fileinfo
+} // namespace retdec

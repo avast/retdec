@@ -1,4 +1,5 @@
-set(RETDEC_TESTS_BIN2LLVMIR_SOURCES
+
+add_executable(tests-bin2llvmir
 	analyses/reaching_definitions_tests.cpp
 	optimizations/asm_inst_remover/asm_inst_remover_tests.cpp
 	optimizations/dsm_generator/dsm_generator_tests.cpp
@@ -24,7 +25,22 @@ set(RETDEC_TESTS_BIN2LLVMIR_SOURCES
 	utils/simplifycfg_tests.cpp
 )
 
-add_executable(retdec-tests-bin2llvmir ${RETDEC_TESTS_BIN2LLVMIR_SOURCES})
-target_link_libraries(retdec-tests-bin2llvmir retdec-bin2llvmir retdec-utils gmock_main)
-target_include_directories(retdec-tests-bin2llvmir PUBLIC ${PROJECT_SOURCE_DIR}/tests/)
-install(TARGETS retdec-tests-bin2llvmir RUNTIME DESTINATION ${RETDEC_TESTS_DIR})
+target_include_directories(tests-bin2llvmir
+	PRIVATE
+		${RETDEC_TESTS_DIR}
+)
+
+target_link_libraries(tests-bin2llvmir
+	retdec::bin2llvmir
+	retdec::utils
+	retdec::deps::gmock_main
+)
+
+set_target_properties(tests-bin2llvmir
+	PROPERTIES
+		OUTPUT_NAME "retdec-tests-bin2llvmir"
+)
+
+install(TARGETS tests-bin2llvmir
+	RUNTIME DESTINATION ${RETDEC_INSTALL_TESTS_DIR}
+)

@@ -1,11 +1,3 @@
-include(ExternalProject)
-
-if(CMAKE_C_COMPILER)
-	set(CMAKE_C_COMPILER_OPTION "-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}")
-endif()
-if(CMAKE_CXX_COMPILER)
-	set(CMAKE_CXX_COMPILER_OPTION "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")
-endif()
 
 if(KEYSTONE_LOCAL_DIR)
 	message(STATUS "Keystone: using local Keystone directory.")
@@ -72,9 +64,19 @@ endif()
 ExternalProject_Get_Property(keystone-project source_dir)
 ExternalProject_Get_Property(keystone-project binary_dir)
 
-# Add libraries.
+# Create target.
 add_library(keystone INTERFACE)
+add_library(retdec::deps::keystone ALIAS keystone)
 add_dependencies(keystone keystone-project)
-target_include_directories(keystone SYSTEM INTERFACE ${source_dir}/include)
-target_link_libraries(keystone INTERFACE debug ${binary_dir}/llvm/lib/${DEBUG_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}keystone${CMAKE_STATIC_LIBRARY_SUFFIX})
-target_link_libraries(keystone INTERFACE optimized ${binary_dir}/llvm/lib/${RELEASE_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}keystone${CMAKE_STATIC_LIBRARY_SUFFIX})
+
+target_include_directories(keystone
+	SYSTEM INTERFACE
+		$<BUILD_INTERFACE:${source_dir}/include>
+)
+
+target_link_libraries(keystone INTERFACE
+	debug
+		${binary_dir}/llvm/lib/${DEBUG_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}keystone${CMAKE_STATIC_LIBRARY_SUFFIX}
+	optimized
+		${binary_dir}/llvm/lib/${RELEASE_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}keystone${CMAKE_STATIC_LIBRARY_SUFFIX}
+)

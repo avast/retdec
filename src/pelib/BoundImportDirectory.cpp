@@ -14,8 +14,8 @@
 #include <set>
 #include <map>
 
-#include "pelib/PeLibInc.h"
-#include "pelib/BoundImportDirectory.h"
+#include "retdec/pelib/PeLibInc.h"
+#include "retdec/pelib/BoundImportDirectory.h"
 
 namespace PeLib
 {

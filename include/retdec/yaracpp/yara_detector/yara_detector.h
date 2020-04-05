@@ -10,13 +10,13 @@
 #include <unordered_map>
 #include <vector>
 
-#include <yara/compiler.h>
-#include <yara/types.h>
-
 #include "retdec/yaracpp/types/yara_rule.h"
 
-namespace yaracpp
-{
+typedef struct _YR_COMPILER YR_COMPILER;
+typedef struct YR_RULES YR_RULES;
+
+namespace retdec {
+namespace yaracpp {
 
 /**
  * Interpret of YARA rules
@@ -96,3 +96,4 @@ class YaraDetector
 };
 
 } // namespace yaracpp
+} // namespace retdec

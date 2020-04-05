@@ -18,6 +18,7 @@ using namespace llvm::object;
 using namespace retdec::cpdetect;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -345,3 +346,4 @@ bool MachODetector::isMachoUniversalArchive()
 }
 
 } // namespace fileinfo
+} // namespace retdec

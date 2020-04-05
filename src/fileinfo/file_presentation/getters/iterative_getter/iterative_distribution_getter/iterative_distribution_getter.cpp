@@ -6,6 +6,7 @@
 
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_distribution_getter/iterative_distribution_getter.h"
 
+namespace retdec {
 namespace fileinfo {
 
 namespace
@@ -356,3 +357,4 @@ bool IterativeDistributionGetter::getRecord(std::size_t structIndex, std::size_t
  */
 
 } // namespace fileinfo
+} // namespace retdec

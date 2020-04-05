@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 
+namespace retdec {
 namespace fileinfo {
 
 class LoadedSegment
@@ -63,5 +64,6 @@ class LoaderInfo
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

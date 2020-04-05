@@ -1,5 +1,5 @@
 /**
-* @file include/retdec/ctypesparser/itanium_ast_ctypes_parser.h
+* @file include/retdec/demangler/itanium_ast_ctypes_parser.h
 * @brief Parser for AST created in Microsoft demangler to ctypes parsers.
 * @copyright (c) 2019 Avast Software, licensed under the MIT license
 */
@@ -7,12 +7,12 @@
 #ifndef RETDEC_MS_AST_CTYPES_PARSER_H
 #define RETDEC_MS_AST_CTYPES_PARSER_H
 
-#include "llvm/Demangle/MicrosoftDemangleNodes.h"
+#include <llvm/Demangle/MicrosoftDemangleNodes.h>
 
-#include "retdec/ctypesparser/ast_ctypes_parser.h"
+#include "retdec/demangler/ast_ctypes_parser.h"
 
 namespace retdec {
-namespace ctypesparser {
+namespace demangler {
 
 /*
  * @brief Parser for AST created in Microsoft demangler to ctypes parsers.
@@ -71,7 +71,7 @@ private:
 	std::string getTypeName(llvm::ms_demangle::PrimitiveKind type) const;
 };
 
-}    // namespace ctypesparser
-}    // namespace retdec
+} // namespace demangler
+} // namespace retdec
 
 #endif //RETDEC_MS_AST_CTYPES_PARSER_H

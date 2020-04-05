@@ -19,6 +19,9 @@
 #include "retdec/fileformat/types/visual_basic/visual_basic_info.h"
 #include "retdec/pelib/PeLib.h"
 
+// Forward declare OpenSSL structures used in this header.
+typedef struct pkcs7_st PKCS7;
+
 namespace retdec {
 namespace fileformat {
 

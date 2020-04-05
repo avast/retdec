@@ -9,6 +9,7 @@
 
 #include <string>
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -49,5 +50,6 @@ class Relocation
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

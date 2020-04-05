@@ -10,6 +10,7 @@
 using namespace retdec::cpdetect;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -139,3 +140,4 @@ retdec::cpdetect::CompilerDetector* RawDataDetector::createCompilerDetector() co
 }
 
 } // namespace fileinfo
+} // namespace retdec

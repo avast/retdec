@@ -1,5 +1,5 @@
 
-add_library(retdec-bin2llvmir STATIC
+add_library(bin2llvmir STATIC
 	analyses/ctor_dtor.cpp
 	analyses/indirectly_called_funcs_analysis.cpp
 	analyses/reachable_funcs_analysis.cpp
@@ -106,19 +106,62 @@ add_library(retdec-bin2llvmir STATIC
 	utils/ir_modifier.cpp
 	utils/llvm.cpp
 )
-target_link_libraries(retdec-bin2llvmir
-	retdec-ctypesparser
-	retdec-rtti-finder
-	retdec-loader
-	retdec-fileformat
-	retdec-debugformat
-	retdec-config
-	retdec-demangler
-	retdec-capstone2llvmir
-	retdec-stacofin
-	retdec-llvm-support
-	retdec-common
-	retdec-utils
-	llvm
+add_library(retdec::bin2llvmir ALIAS bin2llvmir)
+
+target_compile_features(bin2llvmir PUBLIC cxx_std_17)
+
+target_include_directories(bin2llvmir
+	PUBLIC
+		$<BUILD_INTERFACE:${RETDEC_INCLUDE_DIR}>
+		$<INSTALL_INTERFACE:${RETDEC_INSTALL_INCLUDE_DIR}>
 )
-target_include_directories(retdec-bin2llvmir PUBLIC ${PROJECT_SOURCE_DIR}/include/)
+
+target_link_libraries(bin2llvmir
+	PUBLIC
+		retdec::rtti-finder
+		retdec::capstone2llvmir
+		retdec::debugformat
+		retdec::demangler
+		retdec::stacofin
+		retdec::loader
+		retdec::fileformat
+		retdec::config
+		retdec::ctypesparser
+		retdec::common
+		retdec::utils
+		retdec::llvm-support
+		retdec::deps::llvm
+)
+
+# Install includes.
+install(
+	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/bin2llvmir
+	DESTINATION ${RETDEC_INSTALL_INCLUDE_DIR}/retdec
+)
+
+# Install libs.
+install(TARGETS bin2llvmir
+	EXPORT bin2llvmir-targets
+	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
+	LIBRARY DESTINATION ${RETDEC_INSTALL_LIB_DIR}
+)
+
+# Export targets.
+install(EXPORT bin2llvmir-targets
+	FILE "retdec-bin2llvmir-targets.cmake"
+	NAMESPACE retdec::
+	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
+)
+
+# Install CMake files.
+configure_file(
+	"retdec-bin2llvmir-config.cmake"
+	"${CMAKE_CURRENT_BINARY_DIR}/retdec-bin2llvmir-config.cmake"
+	@ONLY
+)
+install(
+	FILES
+		"${CMAKE_CURRENT_BINARY_DIR}/retdec-bin2llvmir-config.cmake"
+	DESTINATION
+		"${RETDEC_INSTALL_CMAKE_DIR}"
+)

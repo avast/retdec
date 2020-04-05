@@ -1,16 +1,34 @@
-set(UNPACKERTOOL_SOURCES
+
+add_executable(unpackertool
 	arg_handler.cpp
 	unpacker.cpp
 	plugin_mgr.cpp
 )
 
-add_executable(retdec-unpackertool ${UNPACKERTOOL_SOURCES})
-set_target_properties(retdec-unpackertool PROPERTIES OUTPUT_NAME "retdec-unpacker")
+target_compile_features(unpackertool PUBLIC cxx_std_17)
 
-target_link_libraries(retdec-unpackertool retdec-unpacker retdec-loader retdec-cpdetect retdec-utils pelib)
-target_link_libraries(retdec-unpackertool retdec-unpacker-upx retdec-unpacker-mpress)
+target_include_directories(unpackertool
+	PRIVATE
+		${RETDEC_SOURCE_DIR}
+)
 
-install(TARGETS retdec-unpackertool RUNTIME DESTINATION bin)
+target_link_libraries(unpackertool
+	retdec::unpacker
+	retdec::unpacker-upx
+	retdec::unpacker-mpress
+	retdec::loader
+	retdec::cpdetect
+	retdec::utils
+	retdec::pelib)
+
+set_target_properties(unpackertool
+	PROPERTIES
+		OUTPUT_NAME "retdec-unpacker"
+)
+
+install(TARGETS unpackertool
+	RUNTIME DESTINATION ${RETDEC_INSTALL_BIN_DIR}
+)
 
 # Plugins.
 add_subdirectory(plugins)

@@ -9,6 +9,7 @@
 
 #include "fileinfo/file_presentation/getters/simple_getter/simple_getter.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -25,5 +26,6 @@ class HeaderPlainGetter : public SimpleGetter
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

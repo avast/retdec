@@ -13,6 +13,7 @@
 using namespace retdec::utils;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 namespace
@@ -123,3 +124,4 @@ bool ResourcePlainGetter::getFlagDescriptors(std::size_t structIndex, std::vecto
 }
 
 } // namespace fileinfo
+} // namespace retdec

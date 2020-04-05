@@ -28,7 +28,7 @@ using namespace retdec::utils;
 using namespace retdec::ar_extractor;
 using namespace retdec::cpdetect;
 using namespace retdec::fileformat;
-using namespace fileinfo;
+using namespace retdec::fileinfo;
 
 namespace
 {

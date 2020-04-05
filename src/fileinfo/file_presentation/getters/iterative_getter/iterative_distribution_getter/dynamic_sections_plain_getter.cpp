@@ -13,6 +13,7 @@
 using namespace retdec::utils;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 namespace
@@ -104,3 +105,4 @@ bool DynamicSectionsPlainGetter::getFlagDescriptors(std::size_t structIndex, std
 }
 
 } // namespace fileinfo
+} // namespace retdec

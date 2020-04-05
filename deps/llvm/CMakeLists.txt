@@ -1,13 +1,7 @@
+
 find_package(Threads REQUIRED)
 if(UNIX OR MINGW)
 	find_package(ZLIB REQUIRED)
-endif()
-
-if(CMAKE_C_COMPILER)
-	set(CMAKE_C_COMPILER_OPTION "-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}")
-endif()
-if(CMAKE_CXX_COMPILER)
-	set(CMAKE_CXX_COMPILER_OPTION "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")
 endif()
 
 # Set the default build type to 'Release'
@@ -28,10 +22,6 @@ if(RETDEC_MSVC_STATIC_RUNTIME)
 else()
 	set(RT_TYPE "MD")
 endif()
-
-# Use the ExternalProject module instead of just CMake because we want to build and
-# install only some tools from LLVM, not all the libraries and tools.
-include(ExternalProject)
 
 if(LLVM_LOCAL_DIR)
 	message(STATUS "LLVM: using local LLVM directory.")
@@ -178,12 +168,6 @@ if(CHANGED)
 	clean_cmake_files(${binary_dir})
 endif()
 
-# Add libraries.
-ExternalProject_Get_Property(llvm-project binary_dir)
-
-add_library(llvm INTERFACE)
-add_dependencies(llvm llvm-project)
-
 set(LLVM_LIB_LIST
 	LLVMDebugInfoDWARF
 	LLVMBitWriter
@@ -208,32 +192,104 @@ set(LLVM_LIB_LIST
 	LLVMPasses
 )
 
-if(MSVC)
-	set(DEBUG_DIR "Debug/")
-	set(RELEASE_DIR "Release/")
-endif()
+ExternalProject_Get_Property(llvm-project binary_dir)
+ExternalProject_Get_Property(llvm-project source_dir)
+
+# Create target.
+
+add_library(llvm INTERFACE)
+add_library(retdec::deps::llvm ALIAS llvm)
+add_dependencies(llvm llvm-project)
+
+target_include_directories(llvm
+	SYSTEM INTERFACE
+		$<BUILD_INTERFACE:${source_dir}/include>
+		$<BUILD_INTERFACE:${binary_dir}/include>
+		$<INSTALL_INTERFACE:${RETDEC_INSTALL_DEPS_INCLUDE_DIR}>
+)
 
 foreach(LLVM_LIB ${LLVM_LIB_LIST})
-	target_link_libraries(llvm INTERFACE debug     ${binary_dir}/${DEBUG_DIR}lib/${CMAKE_STATIC_LIBRARY_PREFIX}${LLVM_LIB}${CMAKE_STATIC_LIBRARY_SUFFIX})
-	target_link_libraries(llvm INTERFACE optimized ${binary_dir}/${RELEASE_DIR}lib/${CMAKE_STATIC_LIBRARY_PREFIX}${LLVM_LIB}${CMAKE_STATIC_LIBRARY_SUFFIX})
+	set(LLVM_LIB_NAME  ${CMAKE_STATIC_LIBRARY_PREFIX}${LLVM_LIB}${CMAKE_STATIC_LIBRARY_SUFFIX})
+	set(LLVM_LIB_OPT   ${binary_dir}/${RELEASE_DIR}lib/${LLVM_LIB_NAME})
+	set(LLVM_LIB_DEBUG ${binary_dir}/${DEBUG_DIR}lib/${LLVM_LIB_NAME})
+
+	target_link_libraries(llvm INTERFACE
+		optimized
+			$<BUILD_INTERFACE:${LLVM_LIB_OPT}>
+		debug
+			$<BUILD_INTERFACE:${LLVM_LIB_DEBUG}>
+	)
+
+	# Install libs.
+	# Install both Release and Debug variant to the same location.
+	# We assume that only one variant will be present at the time.
+	install(
+		FILES
+			${LLVM_LIB_DEBUG}
+			${LLVM_LIB_OPT}
+		DESTINATION
+			${RETDEC_INSTALL_DEPS_LIB_DIR}
+		OPTIONAL
+	)
+
+	list(APPEND LLVM_LIBS_PATHS "${RETDEC_INSTALL_DEPS_LIB_DIR_ABS}/${LLVM_LIB_NAME}")
 endforeach(LLVM_LIB)
 
-target_link_libraries(llvm INTERFACE debug     Threads::Threads)
-target_link_libraries(llvm INTERFACE optimized Threads::Threads)
+target_link_libraries(llvm
+	INTERFACE
+		$<INSTALL_INTERFACE:retdec::deps::llvm-libs>
+		Threads::Threads
+)
 
 if(UNIX)
 	set(EXECINFO "")
 	if (${CMAKE_SYSTEM_NAME} MATCHES "BSD")
 		set(EXECINFO "execinfo")
 	endif()
-	target_link_libraries(llvm INTERFACE debug     ${ZLIB_LIBRARIES} ${CMAKE_DL_LIBS} ${EXECINFO})
-	target_link_libraries(llvm INTERFACE optimized ${ZLIB_LIBRARIES} ${CMAKE_DL_LIBS} ${EXECINFO})
+	target_link_libraries(llvm
+		INTERFACE
+			${ZLIB_LIBRARIES}
+			${CMAKE_DL_LIBS}
+			${EXECINFO}
+	)
 elseif(MINGW)
-	target_link_libraries(llvm INTERFACE debug     ${ZLIB_LIBRARIES})
-	target_link_libraries(llvm INTERFACE optimized ${ZLIB_LIBRARIES})
+	target_link_libraries(llvm INTERFACE ${ZLIB_LIBRARIES})
 endif()
 
-# Set include directories.
-ExternalProject_Get_Property(llvm-project source_dir)
-target_include_directories(llvm SYSTEM INTERFACE ${source_dir}/include)
-target_include_directories(llvm SYSTEM INTERFACE ${binary_dir}/include)
+# Install includes.
+install(
+	DIRECTORY
+		${source_dir}/include/
+		${binary_dir}/include/
+	DESTINATION
+		${RETDEC_INSTALL_DEPS_INCLUDE_DIR}
+)
+
+# Install targets.
+install(TARGETS llvm
+	EXPORT llvm-targets
+)
+
+# Export targets.
+install(EXPORT llvm-targets
+	FILE "retdec-llvm-targets.cmake"
+	NAMESPACE retdec::deps::
+	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
+)
+
+# Configure config file.
+configure_package_config_file(
+	"retdec-llvm-config.cmake"
+	"${CMAKE_CURRENT_BINARY_DIR}/retdec-llvm-config.cmake"
+	INSTALL_DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
+	PATH_VARS
+		LLVM_LIBS_PATHS
+)
+
+# Install CMake files.
+install(
+	FILES
+		"${CMAKE_CURRENT_BINARY_DIR}/retdec-llvm-config.cmake"
+	DESTINATION
+		"${RETDEC_INSTALL_CMAKE_DIR}"
+)

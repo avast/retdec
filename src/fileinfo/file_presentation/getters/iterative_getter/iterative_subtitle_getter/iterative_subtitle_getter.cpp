@@ -6,6 +6,7 @@
 
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_subtitle_getter/iterative_subtitle_getter.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -55,3 +56,4 @@ void IterativeSubtitleGetter::getSubtitle(std::string &subTitle) const
  */
 
 } // namespace fileinfo
+} // namespace retdec
