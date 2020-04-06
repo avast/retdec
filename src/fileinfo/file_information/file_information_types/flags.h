@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -46,5 +47,6 @@ class Flags
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

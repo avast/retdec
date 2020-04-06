@@ -11,6 +11,7 @@
 using namespace retdec::utils;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -397,3 +398,4 @@ bool VisualBasicInfo::isPcode() const
 }
 
 } // namespace fileinfo
+} // namespace retdec

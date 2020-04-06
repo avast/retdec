@@ -14,6 +14,7 @@ using namespace retdec::common;
 using namespace retdec::cpdetect;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 namespace
@@ -4671,3 +4672,4 @@ void FileInformation::addLoadedSegment(const LoadedSegment& segment)
 }
 
 } // namespace fileinfo
+} // namespace retdec

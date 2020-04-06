@@ -9,6 +9,7 @@
 
 #include "fileinfo/file_presentation/file_presentation.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -41,5 +42,6 @@ class PlainPresentation : public FilePresentation
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

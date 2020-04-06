@@ -12,7 +12,7 @@
 
 #include <iostream>
 
-#include "pelib/MzHeader.h"
+#include "retdec/pelib/MzHeader.h"
 
 namespace PeLib
 {

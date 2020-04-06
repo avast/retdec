@@ -25,7 +25,9 @@ namespace cpdetect {
  * If format of input file is not supported, function will return @c nullptr.
  */
 std::unique_ptr<CompilerDetector> createCompilerDetector(
-		retdec::fileformat::FileFormat &parser, DetectParams &params, ToolInformation &toolInfo)
+		retdec::fileformat::FileFormat &parser,
+		DetectParams &params,
+		ToolInformation &toolInfo)
 {
 	CoffFormat *coff = dynamic_cast<CoffFormat*>(&parser);
 	ElfFormat *elf = dynamic_cast<ElfFormat*>(&parser);

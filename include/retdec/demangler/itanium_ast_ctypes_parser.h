@@ -1,5 +1,5 @@
 /**
-* @file include/retdec/ctypesparser/itanium_ast_ctypes_parser.h
+* @file include/retdec/demangler/itanium_ast_ctypes_parser.h
 * @brief Parser for AST created in Itanium demangler to ctypes parsers.
 * @copyright (c) 2019 Avast Software, licensed under the MIT license
 */
@@ -7,7 +7,7 @@
 #ifndef RETDEC_ITANIUM_AST_CTYPES_PARSER_H
 #define RETDEC_ITANIUM_AST_CTYPES_PARSER_H
 
-#include "retdec/ctypesparser/ast_ctypes_parser.h"
+#include "retdec/demangler/ast_ctypes_parser.h"
 
 namespace llvm {
 namespace itanium_demangle {
@@ -24,7 +24,7 @@ class NodeOrString;
 }
 
 namespace retdec {
-namespace ctypesparser {
+namespace demangler {
 
 /*
  * @brief Parser for AST created in Itanium demangler to ctypes parsers.
@@ -81,7 +81,7 @@ private:
 		bool &isVarArg);
 };
 
-}
-}
+} // demangler
+} // retdec
 
 #endif //RETDEC_ITANIUM_AST_CTYPES_PARSER_H

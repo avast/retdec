@@ -16,7 +16,7 @@
 
 using namespace retdec::fileformat;
 using namespace retdec::utils;
-using namespace yaracpp;
+using namespace retdec::yaracpp;
 
 namespace retdec {
 namespace cpdetect {
@@ -437,7 +437,8 @@ ReturnCode CompilerDetector::getAllSignatures()
 			const auto *absoluteStartMeta = rule.getMeta("absoluteStart");
 			if (absoluteStartMeta)
 			{
-				if (!strToNum(absoluteStartMeta->getStringValue(), base))
+				if (absoluteStartMeta->getType() == yaracpp::YaraMeta::Type::String
+					&& !strToNum(absoluteStartMeta->getStringValue(), base))
 				{
 					continue;
 				}

@@ -1,21 +1,6 @@
 
-if(NOT RETDEC_FORCE_OPENSSL_BUILD)
-	find_package(OpenSSL 1.0.1)
-	if(OPENSSL_FOUND)
-		add_library(openssl-crypto INTERFACE)
-		target_link_libraries(openssl-crypto INTERFACE OpenSSL::Crypto)
-		return()
-	endif()
-endif()
-message(STATUS "  --> OpenSSL will be built as an external project")
-
 find_package(Perl REQUIRED)
 find_package(Threads REQUIRED)
-
-include(ExternalProject)
-include(ProcessorCount)
-
-ProcessorCount(CPUS)
 
 # Detect architecture.
 if("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "x86_64" OR "${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "AMD64")
@@ -158,24 +143,82 @@ ExternalProject_Add(openssl
 	LOG_INSTALL 1
 )
 
-set(OPENSSL_INCLUDES
-	"${OPENSSL_INSTALL_DIR}/include"
-	PARENT_SCOPE
-)
+set(OPENSSL_CRYPTO_LIB_NAME  libcrypto${CMAKE_STATIC_LIBRARY_SUFFIX})
+set(OPENSSL_CRYPTO_LIB_PNAME libretdec-openssl-crypto${CMAKE_STATIC_LIBRARY_SUFFIX})
+set(OPENSSL_CRYPTO_LIB       ${OPENSSL_INSTALL_DIR}/lib/${OPENSSL_CRYPTO_LIB_NAME})
 
-set(OPENSSL_LIBRARIES
-	"${OPENSSL_INSTALL_DIR}/lib/libssl${CMAKE_STATIC_LIBRARY_SUFFIX}"
-	"${OPENSSL_INSTALL_DIR}/lib/libcrypto${CMAKE_STATIC_LIBRARY_SUFFIX}"
-	PARENT_SCOPE
-)
-
+# Create target.
 add_library(openssl-crypto INTERFACE)
-target_include_directories(openssl-crypto SYSTEM INTERFACE "${OPENSSL_INSTALL_DIR}/include")
-target_link_libraries(openssl-crypto INTERFACE "${OPENSSL_INSTALL_DIR}/lib/libcrypto${CMAKE_STATIC_LIBRARY_SUFFIX}")
-target_link_libraries(openssl-crypto INTERFACE Threads::Threads)
-if(MSVC)
-	target_link_libraries(openssl-crypto INTERFACE ws2_32 gdi32 advapi32 crypt32 user32)
-elseif(UNIX)
-	target_link_libraries(openssl-crypto INTERFACE ${CMAKE_DL_LIBS})
-endif()
+add_library(retdec::deps::openssl-crypto ALIAS openssl-crypto)
 add_dependencies(openssl-crypto openssl)
+
+target_include_directories(openssl-crypto
+	SYSTEM INTERFACE
+		$<BUILD_INTERFACE:${OPENSSL_INSTALL_DIR}/include>
+		$<INSTALL_INTERFACE:${RETDEC_INSTALL_DEPS_INCLUDE_DIR}>
+)
+
+target_link_libraries(openssl-crypto
+	INTERFACE
+		$<BUILD_INTERFACE:${OPENSSL_CRYPTO_LIB}>
+		$<INSTALL_INTERFACE:retdec::deps::openssl-crypto-libs>
+		Threads::Threads
+)
+if(MSVC)
+	target_link_libraries(openssl-crypto
+		INTERFACE
+			ws2_32
+			gdi32
+			advapi32
+			crypt32
+			user32
+		)
+elseif(UNIX)
+	target_link_libraries(openssl-crypto
+		INTERFACE
+			${CMAKE_DL_LIBS}
+	)
+endif()
+
+# Install includes.
+install(
+    DIRECTORY   ${OPENSSL_INSTALL_DIR}/include/
+    DESTINATION ${RETDEC_INSTALL_DEPS_INCLUDE_DIR}
+)
+
+# Install libs.
+install(
+    FILES       ${OPENSSL_CRYPTO_LIB}
+	DESTINATION ${RETDEC_INSTALL_LIB_DIR}
+	RENAME      ${OPENSSL_CRYPTO_LIB_PNAME}
+)
+
+# Install targets.
+install(TARGETS openssl-crypto
+	EXPORT openssl-crypto-targets
+)
+
+# Export targets.
+install(EXPORT openssl-crypto-targets
+	FILE "retdec-openssl-crypto-targets.cmake"
+	NAMESPACE retdec::deps::
+	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
+)
+
+# Configure config file.
+set(OPENSSL_CRYPTO_LIB_INSTALLED "${RETDEC_INSTALL_LIB_DIR_ABS}/${OPENSSL_CRYPTO_LIB_PNAME}")
+configure_package_config_file(
+	"retdec-openssl-crypto-config.cmake"
+	"${CMAKE_CURRENT_BINARY_DIR}/retdec-openssl-crypto-config.cmake"
+	INSTALL_DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
+	PATH_VARS
+		OPENSSL_CRYPTO_LIB_INSTALLED
+)
+
+# Install CMake files.
+install(
+	FILES
+        "${CMAKE_CURRENT_BINARY_DIR}/retdec-openssl-crypto-config.cmake"
+	DESTINATION
+		"${RETDEC_INSTALL_CMAKE_DIR}"
+)

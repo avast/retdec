@@ -9,8 +9,8 @@
 #include <llvm/Demangle/Allocator.h>
 #include <llvm/Demangle/Utility.h>
 
+#include "retdec/demangler/itanium_ast_ctypes_parser.h"
 #include "retdec/demangler/itanium_demangler.h"
-#include "retdec/ctypesparser/itanium_ast_ctypes_parser.h"
 
 namespace retdec {
 namespace demangler {
@@ -72,8 +72,14 @@ std::shared_ptr<ctypes::Function> ItaniumDemangler::demangleFunctionToCtypes(
 		return nullptr;
 	}
 
-	ctypesparser::ItaniumAstCtypesParser ctypesParser;
-	auto func = ctypesParser.parseAsFunction(mangled, AST, module, typeWidths, typeSignedness, defaultBitWidth);
+	ItaniumAstCtypesParser ctypesParser;
+	auto func = ctypesParser.parseAsFunction(
+			mangled,
+			AST,
+			module,
+			typeWidths,
+			typeSignedness,
+			defaultBitWidth);
 	if (func) {
 		_status = success;
 	}

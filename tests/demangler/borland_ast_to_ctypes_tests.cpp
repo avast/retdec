@@ -1,6 +1,6 @@
 /**
- * @file tests/demangler/borland_demangler_tests.cpp
- * @brief Tests for the borland demangler.
+ * @file tests/demangler/borland_ast_to_ctypes_tests.cpp
+ * @brief Tests for the Borland demangler.
  * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
 
@@ -23,7 +23,7 @@
 using namespace ::testing;
 
 namespace retdec {
-namespace ctypesparser {
+namespace demangler {
 namespace tests {
 
 class BorlandCtypesTests : public Test
@@ -415,5 +415,5 @@ TEST_F(BorlandCtypesTests, VoidParameter)
 }
 
 }	// namespace tests
-}	// namespace ctypesparser
+}	// namespace demangler
 }	// namespace retdec

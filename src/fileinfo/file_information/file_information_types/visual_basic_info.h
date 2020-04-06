@@ -11,6 +11,7 @@
 #include "retdec/fileformat/types/visual_basic/visual_basic_object.h"
 #include "retdec/fileformat/types/visual_basic/visual_basic_extern.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -74,5 +75,6 @@ class VisualBasicInfo
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

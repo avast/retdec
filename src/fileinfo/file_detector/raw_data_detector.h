@@ -9,6 +9,7 @@
 
 #include "fileinfo/file_detector/file_detector.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -42,5 +43,6 @@ class RawDataDetector : public FileDetector
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

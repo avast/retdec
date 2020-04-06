@@ -1,8 +1,21 @@
-set(AR_EXTRACTOR_SOURCES
+
+add_executable(ar-extractortool
 	ar_extractor.cpp
 )
 
-add_executable(retdec-ar-extractortool ${AR_EXTRACTOR_SOURCES})
-set_target_properties(retdec-ar-extractortool PROPERTIES OUTPUT_NAME "retdec-ar-extractor")
-target_link_libraries(retdec-ar-extractortool retdec-ar-extractor retdec-utils rapidjson)
-install(TARGETS retdec-ar-extractortool RUNTIME DESTINATION bin)
+target_compile_features(ar-extractortool PUBLIC cxx_std_17)
+
+target_link_libraries(ar-extractortool
+	retdec::ar-extractor
+	retdec::utils
+	retdec::deps::rapidjson
+)
+
+set_target_properties(ar-extractortool
+	PROPERTIES
+		OUTPUT_NAME "retdec-ar-extractor"
+)
+
+install(TARGETS ar-extractortool
+	RUNTIME DESTINATION ${RETDEC_INSTALL_BIN_DIR}
+)

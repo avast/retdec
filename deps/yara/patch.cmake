@@ -71,6 +71,15 @@ function(patch_vcxproj file)
         "${new_content}"
     )
 
+	if(RETDEC_MSVC_STATIC_RUNTIME)
+		string(REPLACE
+			"MultiThreadedDLL"
+			"MultiThreaded"
+			new_content
+			"${new_content}"
+		)
+	endif()
+
     if("${new_content}" STREQUAL "${content}")
         message("-- Patching: ${file} skipped")
     else()

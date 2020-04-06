@@ -11,6 +11,7 @@
 using namespace retdec::utils;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -43,3 +44,4 @@ std::size_t EntryPointJsonGetter::loadInformation(std::vector<std::string> &desc
 }
 
 } // namespace fileinfo
+} // namespace retdec

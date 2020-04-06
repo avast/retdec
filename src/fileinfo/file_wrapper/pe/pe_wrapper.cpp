@@ -14,6 +14,7 @@ using namespace retdec::utils;
 using namespace PeLib;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 namespace
@@ -214,3 +215,4 @@ bool PeWrapper::getCoffSymbol(unsigned long long index, Symbol &symbol) const
 }
 
 } // namespace fileinfo
+} // namespace retdec

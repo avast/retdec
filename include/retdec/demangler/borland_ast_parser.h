@@ -7,7 +7,7 @@
 #ifndef RETDEC_BORLAND_AST_PARSER_H
 #define RETDEC_BORLAND_AST_PARSER_H
 
-#include "llvm/Demangle/StringView.h"
+#include <llvm/Demangle/StringView.h>
 
 #include "retdec/demangler/context.h"
 #include "retdec/demangler/borland_ast/node.h"

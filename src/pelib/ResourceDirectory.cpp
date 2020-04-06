@@ -10,7 +10,7 @@
 * of PeLib.
 */
 
-#include "pelib/ResourceDirectory.h"
+#include "retdec/pelib/ResourceDirectory.h"
 
 namespace PeLib
 {

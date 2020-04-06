@@ -6,6 +6,7 @@
 
 #include "fileinfo/file_presentation/file_presentation.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -23,3 +24,4 @@ FilePresentation::FilePresentation(FileInformation &fileinfo_) : fileinfo(filein
  */
 
 } // namespace fileinfo
+} // namespace retdec

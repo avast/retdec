@@ -13,17 +13,9 @@
 
 #include "retdec/common/storage.h"
 #include "retdec/common/type.h"
-#include "retdec/utils/test.h"
 
 namespace retdec {
 namespace common {
-
-GTEST_FORWARD_TEST(
-		GlobalVarContainerTests,
-		ElementWithTheSameAddressGetsReplaced)
-GTEST_FORWARD_TEST(
-		GlobalVarContainerTests,
-		OperationsOnUnderlyingContainerAreReflectedInaddr2global)
 
 /**
  * Represents object (i.e. register, stack, global, parameter).
@@ -148,16 +140,9 @@ class GlobalVarContainer : public ObjectSetContainer
 		size_t erase(const Object& val);
 		/// @}
 
-	private:
+	public:
 		/// Map allows fast global variables search by address.
 		std::map<retdec::common::Address, const Object*> _addr2global;
-
-		GTEST_FRIEND_TEST(
-				GlobalVarContainerTests,
-				ElementWithTheSameAddressGetsReplaced);
-		GTEST_FRIEND_TEST(
-				GlobalVarContainerTests,
-				OperationsOnUnderlyingContainerAreReflectedInaddr2global);
 };
 
 } // namespace common

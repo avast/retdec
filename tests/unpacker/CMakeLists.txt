@@ -1,8 +1,19 @@
-set(RETDEC_TESTS_UNPACKER_SOURCES
+
+add_executable(tests-unpacker
 	dynamic_buffer_tests.cpp
 	signature_tests.cpp
 )
 
-add_executable(retdec-tests-unpacker ${RETDEC_TESTS_UNPACKER_SOURCES})
-target_link_libraries(retdec-tests-unpacker retdec-unpacker gmock_main)
-install(TARGETS retdec-tests-unpacker RUNTIME DESTINATION ${RETDEC_TESTS_DIR})
+target_link_libraries(tests-unpacker
+	retdec::unpacker
+	retdec::deps::gmock_main
+)
+
+set_target_properties(tests-unpacker
+	PROPERTIES
+		OUTPUT_NAME "retdec-tests-unpacker"
+)
+
+install(TARGETS tests-unpacker
+	RUNTIME DESTINATION ${RETDEC_INSTALL_TESTS_DIR}
+)

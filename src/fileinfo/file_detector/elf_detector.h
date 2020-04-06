@@ -10,6 +10,7 @@
 #include "fileinfo/file_detector/file_detector.h"
 #include "fileinfo/file_wrapper/elf_wrapper.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -53,5 +54,6 @@ class ElfDetector : public FileDetector
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

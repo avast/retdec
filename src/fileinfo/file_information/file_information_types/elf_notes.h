@@ -11,6 +11,7 @@
 
 #include "retdec/fileformat/types/note_section/elf_notes.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -66,5 +67,6 @@ class ElfNotes
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

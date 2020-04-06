@@ -10,6 +10,7 @@
 #include "fileinfo/file_detector/file_detector.h"
 #include "fileinfo/file_wrapper/coff_wrapper.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -46,5 +47,6 @@ class CoffDetector : public FileDetector
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

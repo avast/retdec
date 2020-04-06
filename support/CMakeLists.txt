@@ -5,8 +5,8 @@
 #      developers.
 
 set(CMAKE_INSTALL_MESSAGE LAZY)
-set(SUPPORT_TARGET_DIR "${CMAKE_INSTALL_PREFIX}/share/retdec/support")
-set(YARAC_PATH "${CMAKE_INSTALL_PREFIX}/bin/retdec-yarac${CMAKE_EXECUTABLE_SUFFIX}")
+set(SUPPORT_TARGET_DIR "${RETDEC_INSTALL_SUPPORT_DIR_ABS}")
+set(YARAC_PATH         "${RETDEC_INSTALL_BIN_DIR_ABS}/retdec-yarac${CMAKE_EXECUTABLE_SUFFIX}")
 set(YARAC_VERSION_PATH "${SUPPORT_TARGET_DIR}/version-yarac.txt")
 
 # Clean the support target directory if YARA compilation flag changed.
@@ -76,8 +76,14 @@ written to '${YARAC_VERSION_PATH}'\")
 
 # Install ordinal number databases.
 #
-install(DIRECTORY ordinals/arm/ DESTINATION "${SUPPORT_TARGET_DIR}/arm/ords")
-install(DIRECTORY ordinals/x86/ DESTINATION "${SUPPORT_TARGET_DIR}/x86/ords")
+install(
+	DIRECTORY ordinals/arm/
+	DESTINATION ${SUPPORT_TARGET_DIR}/arm/ords
+)
+install(
+	DIRECTORY ordinals/x86/
+	DESTINATION ${SUPPORT_TARGET_DIR}/x86/ords
+)
 
 # Install yara patterns.
 #

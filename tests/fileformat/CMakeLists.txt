@@ -1,4 +1,5 @@
-set(RETDEC_TESTS_FILEFORMAT_SOURCES
+
+add_executable(tests-fileformat
 	coff_format_tests.cpp
 	elf_format_tests.cpp
 	format_detection_tests.cpp
@@ -11,7 +12,22 @@ set(RETDEC_TESTS_FILEFORMAT_SOURCES
 	raw_data_format_tests.cpp
 )
 
-add_executable(retdec-tests-fileformat ${RETDEC_TESTS_FILEFORMAT_SOURCES})
-target_link_libraries(retdec-tests-fileformat retdec-fileformat retdec-utils gmock_main)
-target_include_directories(retdec-tests-fileformat PUBLIC ${PROJECT_SOURCE_DIR}/tests/)
-install(TARGETS retdec-tests-fileformat RUNTIME DESTINATION ${RETDEC_TESTS_DIR})
+target_include_directories(tests-fileformat
+	PRIVATE
+		${RETDEC_TESTS_DIR}
+)
+
+target_link_libraries(tests-fileformat
+	retdec::fileformat
+	retdec::utils
+	retdec::deps::gmock_main
+)
+
+set_target_properties(tests-fileformat
+	PROPERTIES
+		OUTPUT_NAME "retdec-tests-fileformat"
+)
+
+install(TARGETS tests-fileformat
+	RUNTIME DESTINATION ${RETDEC_INSTALL_TESTS_DIR}
+)

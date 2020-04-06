@@ -11,6 +11,7 @@
 
 #include "retdec/fileformat/types/strings/string.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -42,5 +43,6 @@ class Strings
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

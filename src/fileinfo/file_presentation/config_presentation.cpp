@@ -14,6 +14,7 @@ using namespace retdec::utils;
 using namespace retdec::cpdetect;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -254,3 +255,4 @@ std::string ConfigPresentation::getErrorMessage() const
 }
 
 } // namespace fileinfo
+} // namespace retdec

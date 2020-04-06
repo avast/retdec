@@ -12,6 +12,7 @@
 using namespace retdec::utils;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -113,3 +114,4 @@ bool CertificateTablePlainGetter::getFlags(std::size_t structIndex, std::size_t 
 }
 
 } // namespace fileinfo
+} // namespace retdec

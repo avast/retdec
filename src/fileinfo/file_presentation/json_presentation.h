@@ -14,6 +14,7 @@
 #include "fileinfo/file_presentation/file_presentation.h"
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_subtitle_getter/iterative_subtitle_getter.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -67,5 +68,6 @@ class JsonPresentation : public FilePresentation
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif
