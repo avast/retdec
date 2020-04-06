@@ -233,8 +233,10 @@ set_if_at_least_one_set(RETDEC_ENABLE_MACHO_EXTRACTORTOOL
 set_if_at_least_one_set(RETDEC_ENABLE_PAT2YARA
 		RETDEC_ENABLE_ALL)
 
-set_if_at_least_one_set(RETDEC_ENABLE_RETDECTOOL
-		RETDEC_ENABLE_ALL)
+if(RETDEC_DEV_TOOLS)
+	set_if_at_least_one_set(RETDEC_ENABLE_RETDECTOOL
+			RETDEC_ENABLE_ALL)
+endif()
 
 set_if_at_least_one_set(RETDEC_ENABLE_STACOFINTOOL
 		RETDEC_ENABLE_ALL)
