@@ -48,15 +48,9 @@ class Capstone2LlvmIrTranslatorX86_impl :
 		virtual bool isX87DataStoreFunction(llvm::Function* f) const override;
 		virtual bool isX87DataStoreFunctionCall(llvm::CallInst* c) const override;
 		virtual llvm::Function* getX87DataStoreFunction() const override;
-		virtual bool isX87TagStoreFunction(llvm::Function* f) const override;
-		virtual bool isX87TagStoreFunctionCall(llvm::CallInst* c) const override;
-		virtual llvm::Function* getX87TagStoreFunction() const override;
 		virtual bool isX87DataLoadFunction(llvm::Function* f) const override;
 		virtual bool isX87DataLoadFunctionCall(llvm::CallInst* c) const override;
 		virtual llvm::Function* getX87DataLoadFunction() const override;
-		virtual bool isX87TagLoadFunction(llvm::Function* f) const override;
-		virtual bool isX87TagLoadFunctionCall(llvm::CallInst* c) const override;
-		virtual llvm::Function* getX87TagLoadFunction() const override;
 
 		virtual uint32_t getParentRegister(uint32_t r) const override;
 //
@@ -150,17 +144,7 @@ class Capstone2LlvmIrTranslatorX86_impl :
 				llvm::IRBuilder<>& irb,
 				llvm::Value* rNum,
 				llvm::Value* val);
-		llvm::CallInst* storeX87TagReg(
-				llvm::IRBuilder<>& irb,
-				llvm::Value* rNum,
-				llvm::Value* val);
-		llvm::CallInst* clearX87TagReg(
-				llvm::IRBuilder<>& irb,
-				llvm::Value* rNum);
 		llvm::CallInst* loadX87DataReg(
-				llvm::IRBuilder<>& irb,
-				llvm::Value* rNum);
-		llvm::CallInst* loadX87TagReg(
 				llvm::IRBuilder<>& irb,
 				llvm::Value* rNum);
 
@@ -236,9 +220,7 @@ class Capstone2LlvmIrTranslatorX86_impl :
 		llvm::Value* idx = nullptr;
 
 		llvm::Function* _x87DataStoreFunction = nullptr; // void (i3, fp80)
-		llvm::Function* _x87TagStoreFunction = nullptr; // void (i3, i2)
 		llvm::Function* _x87DataLoadFunction = nullptr; // fp80 (i3)
-		llvm::Function* _x87TagLoadFunction = nullptr; // i2 (i3)
 //
 //==============================================================================
 // x86 instruction translation methods.

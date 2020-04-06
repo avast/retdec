@@ -149,17 +149,9 @@ void Decoder::initEnvironmentPseudoFunctions()
 		dl->setName(names::pseudoX87dataLoadFunction);
 		_config->setLlvmX87DataLoadPseudoFunction(dl);
 
-		auto* tl = c2lX86->getX87TagLoadFunction();
-		tl->setName(names::pseudoX87tagLoadFunction);
-		_config->setLlvmX87TagLoadPseudoFunction(tl);
-
 		auto* ds = c2lX86->getX87DataStoreFunction();
 		ds->setName(names::pseudoX87dataStoreFunction);
 		_config->setLlvmX87DataStorePseudoFunction(ds);
-
-		auto* ts = c2lX86->getX87TagStoreFunction();
-		ts->setName(names::pseudoX87tagStoreFunction);
-		_config->setLlvmX87TagStorePseudoFunction(ts);
 	}
 }
 

@@ -111,6 +111,8 @@ bool ConstantsAnalysis::run()
 		}
 	}
 
+	IrModifier::eraseUnusedInstructionsRecursive(_toRemove);
+
 	return false;
 }
 
@@ -147,6 +149,7 @@ void ConstantsAnalysis::checkForGlobalInInstruction(
 			if (max == &root)
 			{
 				auto* conv = IrModifier::convertConstantToType(ngv, val->getType());
+				_toRemove.insert(val);
 				inst->replaceUsesOfWith(val, conv);
 				return;
 			}
@@ -163,6 +166,7 @@ void ConstantsAnalysis::checkForGlobalInInstruction(
 	if (isa<LoadInst>(inst) && gv && root.ops.size() <= 1)
 	{
 		auto* conv = IrModifier::convertConstantToType(gv, val->getType());
+		_toRemove.insert(val);
 		inst->replaceUsesOfWith(val, conv);
 		return;
 	}

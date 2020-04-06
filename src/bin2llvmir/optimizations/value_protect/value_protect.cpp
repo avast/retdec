@@ -400,9 +400,14 @@ bool ValueProtect::protectRegisters(bool skipCalledFunctions)
 		}
 	}
 
-	const auto& regs = _abi->getRegisters();
-	for (GlobalVariable* reg : regs)
+	for (auto& glob : _module->globals())
 	{
+		if (!_abi->isRegister(&glob))
+		{
+			continue;
+		}
+		GlobalVariable* reg = &glob;
+
 		std::set<Function*> regUsedInFunctions;
 
 		// Collect all functions where register is used.

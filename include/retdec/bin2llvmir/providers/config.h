@@ -153,20 +153,10 @@ class Config
 		bool isLlvmX87DataStorePseudoFunction(llvm::Value* f);
 		llvm::CallInst* isLlvmX87DataStorePseudoFunctionCall(llvm::Value* c);
 
-		void setLlvmX87TagStorePseudoFunction(llvm::Function* f);
-		llvm::Function* getLlvmX87TagStorePseudoFunction() const;
-		bool isLlvmX87TagStorePseudoFunction(llvm::Value* f);
-		llvm::CallInst* isLlvmX87TagStorePseudoFunctionCall(llvm::Value* c);
-
 		void setLlvmX87DataLoadPseudoFunction(llvm::Function* f);
 		llvm::Function* getLlvmX87DataLoadPseudoFunction() const;
 		bool isLlvmX87DataLoadPseudoFunction(llvm::Value* f);
 		llvm::CallInst* isLlvmX87DataLoadPseudoFunctionCall(llvm::Value* c);
-
-		void setLlvmX87TagLoadPseudoFunction(llvm::Function* f);
-		llvm::Function* getLlvmX87TagLoadPseudoFunction() const;
-		bool isLlvmX87TagLoadPseudoFunction(llvm::Value* f);
-		llvm::CallInst* isLlvmX87TagLoadPseudoFunctionCall(llvm::Value* c);
 
 		llvm::CallInst* isLlvmX87StorePseudoFunctionCall(llvm::Value* c);
 		llvm::CallInst* isLlvmX87LoadPseudoFunctionCall(llvm::Value* c);
@@ -204,9 +194,7 @@ class Config
 		llvm::Function* _condBranchFunction = nullptr;
 
 		llvm::Function* _x87DataStoreFunction = nullptr; // void (i3, fp80)
-		llvm::Function* _x87TagStoreFunction = nullptr; // void (i3, i2)
 		llvm::Function* _x87DataLoadFunction = nullptr; // fp80 (i3)
-		llvm::Function* _x87TagLoadFunction = nullptr; // i2 (i3)
 
 		std::map<IntrinsicFunctionCreatorPtr, llvm::Function*> _intrinsicFunctions;
 		std::set<llvm::Function*> _pseudoAsmFunctions;

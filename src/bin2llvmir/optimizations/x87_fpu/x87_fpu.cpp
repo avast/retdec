@@ -87,6 +87,9 @@ bool X87FpuAnalysis::run()
 			changed |= analyzeBb(seenBbs, topVals, &bb, topVal);
 		}
 	}
+
+	removeAllFpuTopOperations();
+
 	return changed;
 }
 
@@ -183,9 +186,7 @@ bool X87FpuAnalysis::analyzeBb(
 				auto fIt = topVals.find(callStore->getArgOperand(0));
 				auto tmp = fIt->second;
 
-				auto regBase = _config->isLlvmX87DataStorePseudoFunctionCall(callStore)
-							   ? uint32_t(X86_REG_ST0)
-							   : uint32_t(X87_REG_TAG0);
+				uint32_t regBase = X86_REG_ST0;
 				// Storing value to an empty stack -> suspicious.
 				if (tmp == 8) {
 					tmp = 7;
@@ -197,6 +198,9 @@ bool X87FpuAnalysis::analyzeBb(
 				LOG << "\t\t\t" << "store -- " << reg->getName().str() << std::endl;
 
 				new StoreInst(callStore->getArgOperand(1), reg, callStore);
+				_toRemove.insert(callStore->getArgOperand(0));
+				// We need to remove this righ away.
+				// It does not work if we store it to _toRemove set.
 				callStore->eraseFromParent();
 				changed = true;
 			} else if (callLoad
@@ -204,9 +208,7 @@ bool X87FpuAnalysis::analyzeBb(
 				auto fIt = topVals.find(callLoad->getArgOperand(0));
 				auto tmp = fIt->second;
 
-				auto regBase = _config->isLlvmX87DataLoadPseudoFunctionCall(callLoad)
-							   ? uint32_t(X86_REG_ST0)
-							   : uint32_t(X87_REG_TAG0);
+				uint32_t regBase = X86_REG_ST0;
 				// Loading value from an empty stack -> value may have been placed
 				// there without us knowing, e.g. return value of some other
 				// function.
@@ -223,6 +225,8 @@ bool X87FpuAnalysis::analyzeBb(
 				auto *conv = IrModifier::convertValueToType(lTmp, callLoad->getType(), callLoad);
 
 				callLoad->replaceAllUsesWith(conv);
+				// We need to remove this righ away.
+				// It does not work if we store it to _toRemove set.
 				callLoad->eraseFromParent();
 				changed = true;
 			} else if (callStore || callLoad) {
@@ -239,6 +243,25 @@ bool X87FpuAnalysis::analyzeBb(
 		}
 	}
 	return changed;
+}
+
+void X87FpuAnalysis::removeAllFpuTopOperations()
+{
+	// std::unordered_set<llvm::Value*> toRemove;
+	for (Function& f : *_module)
+	for (auto it = inst_begin(&f), eIt = inst_end(&f); it != eIt; ++it)
+	{
+		Instruction* i = &*it;
+		if (auto* l = dyn_cast<LoadInst>(i); l && l->getPointerOperand() == top)
+		{
+			_toRemove.insert(i);
+		}
+		if (auto* s = dyn_cast<StoreInst>(i); s && s->getPointerOperand() == top)
+		{
+			_toRemove.insert(i);
+		}
+	}
+	IrModifier::eraseUnusedInstructionsRecursive(_toRemove);
 }
 
 } // namespace bin2llvmir
