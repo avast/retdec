@@ -168,3 +168,15 @@ install(
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
 )
+
+# Install licenses, readme, changelog, etc.
+install(
+	FILES
+		CHANGELOG.md
+		LICENSE
+		LICENSE-PELIB
+		LICENSE-THIRD-PARTY
+		README.md
+	DESTINATION
+		"${RETDEC_INSTALL_DATA_DIR}"
+)
