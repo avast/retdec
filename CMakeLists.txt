@@ -180,3 +180,18 @@ install(
 	DESTINATION
 		"${RETDEC_INSTALL_DATA_DIR}"
 )
+
+# Install commit id file.
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/GetGitRevisionDescription.cmake)
+get_git_head_revision(GIT_REFSPEC GIT_COMMIT)
+string(TIMESTAMP DATE UTC)
+file(WRITE
+	"${CMAKE_CURRENT_BINARY_DIR}/BUILD-ID"
+	"This build was generated from commit ${GIT_COMMIT} on ${DATE} (UTC)."
+)
+install(
+	FILES
+		"${CMAKE_CURRENT_BINARY_DIR}/BUILD-ID"
+	DESTINATION
+		"${RETDEC_INSTALL_DATA_DIR}"
+)
