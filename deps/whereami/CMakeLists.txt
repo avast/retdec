@@ -12,6 +12,11 @@ target_include_directories(whereami
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/whereami>
 )
 
+set_target_properties(whereami
+	PROPERTIES
+		OUTPUT_NAME "retdec-whereami"
+)
+
 # Install includes.
 install(
 	DIRECTORY ${RETDEC_DEPS_DIR}/whereami/include/
@@ -21,8 +26,8 @@ install(
 # Install libs.
 install(TARGETS whereami
 	EXPORT whereami-targets
-	ARCHIVE DESTINATION ${RETDEC_INSTALL_DEPS_LIB_DIR}
-	LIBRARY DESTINATION ${RETDEC_INSTALL_DEPS_LIB_DIR}
+	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
+	LIBRARY DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 )
 
 # Export targets.

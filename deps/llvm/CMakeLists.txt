@@ -210,6 +210,7 @@ target_include_directories(llvm
 
 foreach(LLVM_LIB ${LLVM_LIB_LIST})
 	set(LLVM_LIB_NAME  ${CMAKE_STATIC_LIBRARY_PREFIX}${LLVM_LIB}${CMAKE_STATIC_LIBRARY_SUFFIX})
+	set(LLVM_LIB_PNAME ${CMAKE_STATIC_LIBRARY_PREFIX}retdec-${LLVM_LIB}${CMAKE_STATIC_LIBRARY_SUFFIX})
 	set(LLVM_LIB_OPT   ${binary_dir}/${RELEASE_DIR}lib/${LLVM_LIB_NAME})
 	set(LLVM_LIB_DEBUG ${binary_dir}/${DEBUG_DIR}lib/${LLVM_LIB_NAME})
 
@@ -224,15 +225,19 @@ foreach(LLVM_LIB ${LLVM_LIB_LIST})
 	# Install both Release and Debug variant to the same location.
 	# We assume that only one variant will be present at the time.
 	install(
-		FILES
-			${LLVM_LIB_DEBUG}
-			${LLVM_LIB_OPT}
-		DESTINATION
-			${RETDEC_INSTALL_DEPS_LIB_DIR}
+		FILES       ${LLVM_LIB_DEBUG}
+		DESTINATION ${RETDEC_INSTALL_LIB_DIR}
+		RENAME      ${LLVM_LIB_PNAME}
+		OPTIONAL
+	)
+	install(
+		FILES       ${LLVM_LIB_OPT}
+		DESTINATION ${RETDEC_INSTALL_LIB_DIR}
+		RENAME      ${LLVM_LIB_PNAME}
 		OPTIONAL
 	)
 
-	list(APPEND LLVM_LIBS_PATHS "${RETDEC_INSTALL_DEPS_LIB_DIR_ABS}/${LLVM_LIB_NAME}")
+	list(APPEND LLVM_LIBS_PATHS "${RETDEC_INSTALL_LIB_DIR_ABS}/${LLVM_LIB_PNAME}")
 endforeach(LLVM_LIB)
 
 target_link_libraries(llvm

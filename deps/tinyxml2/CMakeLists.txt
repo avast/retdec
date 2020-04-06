@@ -12,6 +12,11 @@ target_include_directories(tinyxml2
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/tinyxml2>
 )
 
+set_target_properties(tinyxml2
+	PROPERTIES
+		OUTPUT_NAME "retdec-tinyxml2"
+)
+
 # Disable all warnings from this 3rd party project.
 if(MSVC)
 	target_compile_options(tinyxml2 PRIVATE "/w")
@@ -28,8 +33,8 @@ install(
 # Install libs.
 install(TARGETS tinyxml2
 	EXPORT tinyxml2-targets
-	ARCHIVE DESTINATION ${RETDEC_INSTALL_DEPS_LIB_DIR}
-	LIBRARY DESTINATION ${RETDEC_INSTALL_DEPS_LIB_DIR}
+	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
+	LIBRARY DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 )
 
 # Export targets.

@@ -57,13 +57,16 @@ ExternalProject_Get_Property(yaramod-project source_dir)
 ExternalProject_Get_Property(yaramod-project binary_dir)
 
 set(YARAMOD_LIB_NAME  ${CMAKE_STATIC_LIBRARY_PREFIX}yaramod${CMAKE_STATIC_LIBRARY_SUFFIX})
+set(YARAMOD_LIB_PNAME ${CMAKE_STATIC_LIBRARY_PREFIX}retdec-yaramod${CMAKE_STATIC_LIBRARY_SUFFIX})
 set(YARAMOD_LIB_OPT   ${binary_dir}/src/${RELEASE_DIR}${YARAMOD_LIB_NAME})
 set(YARAMOD_LIB_DEBUG ${binary_dir}/src/${DEBUG_DIR}${YARAMOD_LIB_NAME})
 
 set(FMT_LIB_NAME      ${CMAKE_STATIC_LIBRARY_PREFIX}pog_fmt${CMAKE_STATIC_LIBRARY_SUFFIX})
+set(FMT_LIB_PNAME     ${CMAKE_STATIC_LIBRARY_PREFIX}retdec-pog_fmt${CMAKE_STATIC_LIBRARY_SUFFIX})
 set(FMT_LIB           ${binary_dir}/deps/pog/deps/fmt/fmt/${CMAKE_INSTALL_LIBDIR}/${FMT_LIB_NAME})
 
 set(RE2_LIB_NAME      ${CMAKE_STATIC_LIBRARY_PREFIX}pog_re2${CMAKE_STATIC_LIBRARY_SUFFIX})
+set(RE2_LIB_PNAME     ${CMAKE_STATIC_LIBRARY_PREFIX}retdec-pog_re2${CMAKE_STATIC_LIBRARY_SUFFIX})
 set(RE2_LIB           ${binary_dir}/deps/pog/deps/re2/re2/${CMAKE_INSTALL_LIBDIR}/${RE2_LIB_NAME})
 
 # Create target.
@@ -99,25 +102,38 @@ endif()
 
 # Install includes.
 install(
-	DIRECTORY
-		${source_dir}/include/
-	DESTINATION
-		${RETDEC_INSTALL_DEPS_INCLUDE_DIR}
+	DIRECTORY   ${source_dir}/include/
+	DESTINATION ${RETDEC_INSTALL_DEPS_INCLUDE_DIR}
 )
 
 # Install libs.
 # Install both Release and Debug variant to the same location.
 # We assume that only one variant will be present at the time.
 install(
-    FILES
-		${YARAMOD_LIB_DEBUG}
-		${YARAMOD_LIB_OPT}
-		${FMT_LIB}
-		${RE2_LIB}
-    DESTINATION
-		${RETDEC_INSTALL_DEPS_LIB_DIR}
+    FILES       ${YARAMOD_LIB_DEBUG}
+    DESTINATION ${RETDEC_INSTALL_LIB_DIR}
+	RENAME      ${YARAMOD_LIB_PNAME}
 	OPTIONAL
 )
+install(
+    FILES       ${YARAMOD_LIB_OPT}
+	DESTINATION ${RETDEC_INSTALL_LIB_DIR}
+	RENAME      ${YARAMOD_LIB_PNAME}
+	OPTIONAL
+)
+install(
+    FILES       ${FMT_LIB}
+    DESTINATION ${RETDEC_INSTALL_LIB_DIR}
+	RENAME      ${FMT_LIB_PNAME}
+	OPTIONAL
+)
+install(
+    FILES       ${RE2_LIB}
+	DESTINATION ${RETDEC_INSTALL_LIB_DIR}
+	RENAME      ${RE2_LIB_PNAME}
+	OPTIONAL
+)
+
 
 # Install targets.
 install(TARGETS yaramod
@@ -132,9 +148,9 @@ install(EXPORT yaramod-targets
 )
 
 # Configure config file.
-list(APPEND YARAMOD_LIBS_INSTALLED "${RETDEC_INSTALL_DEPS_LIB_DIR_ABS}/${YARAMOD_LIB_NAME}")
-list(APPEND YARAMOD_LIBS_INSTALLED "${RETDEC_INSTALL_DEPS_LIB_DIR_ABS}/${FMT_LIB_NAME}")
-list(APPEND YARAMOD_LIBS_INSTALLED "${RETDEC_INSTALL_DEPS_LIB_DIR_ABS}/${RE2_LIB_NAME}")
+list(APPEND YARAMOD_LIBS_INSTALLED "${RETDEC_INSTALL_LIB_DIR_ABS}/${YARAMOD_LIB_PNAME}")
+list(APPEND YARAMOD_LIBS_INSTALLED "${RETDEC_INSTALL_LIB_DIR_ABS}/${FMT_LIB_PNAME}")
+list(APPEND YARAMOD_LIBS_INSTALLED "${RETDEC_INSTALL_LIB_DIR_ABS}/${RE2_LIB_PNAME}")
 configure_package_config_file(
 	"retdec-yaramod-config.cmake"
 	"${CMAKE_CURRENT_BINARY_DIR}/retdec-yaramod-config.cmake"

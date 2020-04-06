@@ -103,8 +103,9 @@ if(NOT MSVC)
 	)
 endif()
 
-set(YARA_LIB_NAME ${YARA_LIBRARY_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX})
-set(YARA_LIB      ${YARA_LIBRARY_DIR}/${YARA_LIB_NAME})
+set(YARA_LIB_NAME  ${YARA_LIBRARY_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX})
+set(YARA_LIB_NAMEP libretdec-yara${CMAKE_STATIC_LIBRARY_SUFFIX})
+set(YARA_LIB       ${YARA_LIBRARY_DIR}/${YARA_LIB_NAME})
 
 # Create target.
 add_library(libyara INTERFACE)
@@ -126,18 +127,15 @@ target_link_libraries(libyara
 
 # Install includes.
 install(
-	DIRECTORY
-		${YARA_INCLUDE_DIR}/
-	DESTINATION
-		${RETDEC_INSTALL_DEPS_INCLUDE_DIR}
+	DIRECTORY   ${YARA_INCLUDE_DIR}/
+	DESTINATION ${RETDEC_INSTALL_DEPS_INCLUDE_DIR}
 )
 
 # Install libs.
 install(
-	FILES
-		${YARA_LIB}
-	DESTINATION
-		${RETDEC_INSTALL_DEPS_LIB_DIR}
+	FILES       ${YARA_LIB}
+	DESTINATION ${RETDEC_INSTALL_LIB_DIR}
+	RENAME      ${YARA_LIB_NAMEP}
 )
 
 # Install targets.
@@ -153,7 +151,7 @@ install(EXPORT libyara-targets
 )
 
 # Configure config file.
-set(LIBYARA_LIBRARY "${RETDEC_INSTALL_DEPS_LIB_DIR_ABS}/${YARA_LIB_NAME}")
+set(LIBYARA_LIBRARY "${RETDEC_INSTALL_LIB_DIR_ABS}/${YARA_LIB_NAMEP}")
 configure_package_config_file(
 	"retdec-libyara-config.cmake"
 	"${CMAKE_CURRENT_BINARY_DIR}/retdec-libyara-config.cmake"

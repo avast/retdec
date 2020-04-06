@@ -143,8 +143,9 @@ ExternalProject_Add(openssl
 	LOG_INSTALL 1
 )
 
-set(OPENSSL_CRYPTO_LIB_NAME libcrypto${CMAKE_STATIC_LIBRARY_SUFFIX})
-set(OPENSSL_CRYPTO_LIB      ${OPENSSL_INSTALL_DIR}/lib/${OPENSSL_CRYPTO_LIB_NAME})
+set(OPENSSL_CRYPTO_LIB_NAME  libcrypto${CMAKE_STATIC_LIBRARY_SUFFIX})
+set(OPENSSL_CRYPTO_LIB_PNAME libretdec-openssl-crypto${CMAKE_STATIC_LIBRARY_SUFFIX})
+set(OPENSSL_CRYPTO_LIB       ${OPENSSL_INSTALL_DIR}/lib/${OPENSSL_CRYPTO_LIB_NAME})
 
 # Create target.
 add_library(openssl-crypto INTERFACE)
@@ -181,18 +182,15 @@ endif()
 
 # Install includes.
 install(
-    DIRECTORY
-		${OPENSSL_INSTALL_DIR}/include/
-    DESTINATION
-        ${RETDEC_INSTALL_DEPS_INCLUDE_DIR}
+    DIRECTORY   ${OPENSSL_INSTALL_DIR}/include/
+    DESTINATION ${RETDEC_INSTALL_DEPS_INCLUDE_DIR}
 )
 
 # Install libs.
 install(
-    FILES
-		${OPENSSL_CRYPTO_LIB}
-    DESTINATION
-        ${RETDEC_INSTALL_DEPS_LIB_DIR}
+    FILES       ${OPENSSL_CRYPTO_LIB}
+	DESTINATION ${RETDEC_INSTALL_LIB_DIR}
+	RENAME      ${OPENSSL_CRYPTO_LIB_PNAME}
 )
 
 # Install targets.
@@ -208,7 +206,7 @@ install(EXPORT openssl-crypto-targets
 )
 
 # Configure config file.
-set(OPENSSL_CRYPTO_LIB_INSTALLED "${RETDEC_INSTALL_DEPS_LIB_DIR_ABS}/${OPENSSL_CRYPTO_LIB_NAME}")
+set(OPENSSL_CRYPTO_LIB_INSTALLED "${RETDEC_INSTALL_LIB_DIR_ABS}/${OPENSSL_CRYPTO_LIB_PNAME}")
 configure_package_config_file(
 	"retdec-openssl-crypto-config.cmake"
 	"${CMAKE_CURRENT_BINARY_DIR}/retdec-openssl-crypto-config.cmake"
