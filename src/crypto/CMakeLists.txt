@@ -21,6 +21,11 @@ target_link_libraries(crypto
 		retdec::utils
 )
 
+set_target_properties(crypto
+	PROPERTIES
+		OUTPUT_NAME "retdec-crypto"
+)
+
 # Install includes.
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/crypto

@@ -31,3 +31,8 @@ target_link_libraries(unpacker-upx
 		retdec::fileformat
 		retdec::utils
 )
+
+set_target_properties(unpacker-upx
+	PROPERTIES
+		OUTPUT_NAME "retdec-unpacker-upx"
+)

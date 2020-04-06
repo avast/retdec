@@ -326,6 +326,11 @@ if(MSVC)
 	)
 endif()
 
+set_target_properties(llvmir2hll
+	PROPERTIES
+		OUTPUT_NAME "retdec-llvmir2hll"
+)
+
 # Install includes.
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/llvmir2hll

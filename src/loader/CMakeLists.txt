@@ -31,6 +31,11 @@ target_link_libraries(loader
 		retdec::utils
 )
 
+set_target_properties(loader
+	PROPERTIES
+		OUTPUT_NAME "retdec-loader"
+)
+
 # Install includes.
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/loader

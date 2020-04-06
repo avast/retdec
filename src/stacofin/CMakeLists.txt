@@ -23,6 +23,11 @@ target_link_libraries(stacofin
 		retdec::utils
 )
 
+set_target_properties(stacofin
+	PROPERTIES
+		OUTPUT_NAME "retdec-stacofin"
+)
+
 # Install includes.
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/stacofin

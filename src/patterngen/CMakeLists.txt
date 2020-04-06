@@ -21,6 +21,11 @@ target_link_libraries(patterngen
 		retdec::utils
 )
 
+set_target_properties(patterngen
+	PROPERTIES
+		OUTPUT_NAME "retdec-patterngen"
+)
+
 # Install includes.
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/patterngen

@@ -18,3 +18,8 @@ target_link_libraries(unpacker-mpress
 		retdec::unpacker
 		retdec::fileformat
 )
+
+set_target_properties(unpacker-mpress
+	PROPERTIES
+		OUTPUT_NAME "retdec-unpacker-mpress"
+)

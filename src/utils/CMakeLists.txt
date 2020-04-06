@@ -36,6 +36,11 @@ if(MSVC)
 	target_compile_definitions(utils PUBLIC NOMINMAX)
 endif()
 
+set_target_properties(utils
+	PROPERTIES
+		OUTPUT_NAME "retdec-utils"
+)
+
 # Install includes.
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/utils

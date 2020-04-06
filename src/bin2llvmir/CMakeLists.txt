@@ -133,6 +133,11 @@ target_link_libraries(bin2llvmir
 		retdec::deps::llvm
 )
 
+set_target_properties(bin2llvmir
+	PROPERTIES
+		OUTPUT_NAME "retdec-bin2llvmir"
+)
+
 # Install includes.
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/bin2llvmir

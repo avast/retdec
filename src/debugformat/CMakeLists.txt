@@ -24,6 +24,11 @@ target_link_libraries(debugformat
 		retdec::deps::llvm
 )
 
+set_target_properties(debugformat
+	PROPERTIES
+		OUTPUT_NAME "retdec-debugformat"
+)
+
 # Install includes.
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/debugformat

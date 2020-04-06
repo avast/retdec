@@ -22,6 +22,11 @@ target_link_libraries(config
 		retdec::utils
 )
 
+set_target_properties(config
+	PROPERTIES
+		OUTPUT_NAME "retdec-config"
+)
+
 # Install includes.
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/config

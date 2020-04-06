@@ -46,6 +46,11 @@ target_include_directories(ctypes
 		$<INSTALL_INTERFACE:${RETDEC_INSTALL_INCLUDE_DIR}>
 )
 
+set_target_properties(ctypes
+	PROPERTIES
+		OUTPUT_NAME "retdec-ctypes"
+)
+
 # Install includes.
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/ctypes

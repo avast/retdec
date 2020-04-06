@@ -34,6 +34,11 @@ else()
 	target_compile_options(pelib PUBLIC "-w")
 endif()
 
+set_target_properties(pelib
+	PROPERTIES
+		OUTPUT_NAME "retdec-pelib"
+)
+
 # Install includes.
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/pelib

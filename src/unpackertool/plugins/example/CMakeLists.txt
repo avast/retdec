@@ -18,3 +18,8 @@ target_link_libraries(unpacker-example
 		retdec::unpacker
 		retdec::fileformat
 )
+
+set_target_properties(unpacker-example
+	PROPERTIES
+		OUTPUT_NAME "retdec-unpacker-example"
+)

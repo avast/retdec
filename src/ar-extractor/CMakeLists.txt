@@ -21,6 +21,11 @@ target_link_libraries(ar-extractor
 		retdec::deps::rapidjson
 )
 
+set_target_properties(ar-extractor
+	PROPERTIES
+		OUTPUT_NAME "retdec-ar-extractor"
+)
+
 # Install includes.
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/ar-extractor

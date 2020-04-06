@@ -22,6 +22,11 @@ target_link_libraries(ctypesparser
 		retdec::utils
 )
 
+set_target_properties(ctypesparser
+	PROPERTIES
+		OUTPUT_NAME "retdec-ctypesparser"
+)
+
 # Install includes.
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/ctypesparser

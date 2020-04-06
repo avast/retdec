@@ -22,6 +22,11 @@ target_link_libraries(unpacker
 		retdec::loader
 )
 
+set_target_properties(unpacker
+	PROPERTIES
+		OUTPUT_NAME "retdec-unpacker"
+)
+
 # Install includes.
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/unpacker

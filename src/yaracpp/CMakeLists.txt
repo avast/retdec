@@ -20,6 +20,11 @@ target_link_libraries(yaracpp
 		retdec::deps::libyara
 )
 
+set_target_properties(yaracpp
+	PROPERTIES
+		OUTPUT_NAME "retdec-yaracpp"
+)
+
 # Install includes.
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/yaracpp

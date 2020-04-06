@@ -31,6 +31,11 @@ target_link_libraries(common
 		retdec::utils
 )
 
+set_target_properties(common
+	PROPERTIES
+		OUTPUT_NAME "retdec-common"
+)
+
 # Install includes.
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/common

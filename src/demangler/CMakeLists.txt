@@ -46,6 +46,11 @@ target_link_libraries(demangler
 		retdec::deps::llvm
 )
 
+set_target_properties(demangler
+	PROPERTIES
+		OUTPUT_NAME "retdec-demangler"
+)
+
 # Install includes.
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/demangler

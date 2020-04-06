@@ -33,6 +33,11 @@ target_link_libraries(serdes
 		retdec::deps::rapidjson
 )
 
+set_target_properties(serdes
+	PROPERTIES
+		OUTPUT_NAME "retdec-serdes"
+)
+
 # Install includes.
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/serdes

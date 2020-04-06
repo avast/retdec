@@ -15,6 +15,11 @@ target_include_directories(pdbparser
 		$<INSTALL_INTERFACE:${RETDEC_INSTALL_INCLUDE_DIR}>
 )
 
+set_target_properties(pdbparser
+	PROPERTIES
+		OUTPUT_NAME "retdec-pdbparser"
+)
+
 # Install includes.
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/pdbparser

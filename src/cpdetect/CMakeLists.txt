@@ -39,6 +39,11 @@ target_link_libraries(cpdetect
 		retdec::deps::llvm
 )
 
+set_target_properties(cpdetect
+	PROPERTIES
+		OUTPUT_NAME "retdec-cpdetect"
+)
+
 # Install includes.
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/cpdetect

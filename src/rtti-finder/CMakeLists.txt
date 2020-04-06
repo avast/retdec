@@ -22,6 +22,11 @@ target_link_libraries(rtti-finder
 		retdec::utils
 )
 
+set_target_properties(rtti-finder
+	PROPERTIES
+		OUTPUT_NAME "retdec-rtti-finder"
+)
+
 # Install includes.
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/rtti-finder

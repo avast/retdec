@@ -20,6 +20,11 @@ target_link_libraries(macho-extractor
 		retdec::deps::rapidjson
 )
 
+set_target_properties(macho-extractor
+	PROPERTIES
+		OUTPUT_NAME "retdec-macho-extractor"
+)
+
 # Install includes.
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/macho-extractor

@@ -17,6 +17,11 @@ target_link_libraries(llvmir-emul
 		retdec::deps::llvm
 )
 
+set_target_properties(llvmir-emul
+	PROPERTIES
+		OUTPUT_NAME "retdec-llvmir-emul"
+)
+
 # Install includes.
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/llvmir-emul

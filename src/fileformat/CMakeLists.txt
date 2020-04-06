@@ -95,6 +95,11 @@ target_link_libraries(fileformat
 		retdec::deps::llvm
 )
 
+set_target_properties(fileformat
+	PROPERTIES
+		OUTPUT_NAME "retdec-fileformat"
+)
+
 # Install includes.
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/fileformat

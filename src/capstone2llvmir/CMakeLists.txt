@@ -34,6 +34,11 @@ target_link_libraries(capstone2llvmir
 		retdec::deps::llvm
 )
 
+set_target_properties(capstone2llvmir
+	PROPERTIES
+		OUTPUT_NAME "retdec-capstone2llvmir"
+)
+
 # Install includes.
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/capstone2llvmir

@@ -19,6 +19,11 @@ target_link_libraries(llvm-support
 		retdec::utils
 )
 
+set_target_properties(llvm-support
+	PROPERTIES
+		OUTPUT_NAME "retdec-llvm-support"
+)
+
 # Install includes.
 install(
 	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/llvm-support
