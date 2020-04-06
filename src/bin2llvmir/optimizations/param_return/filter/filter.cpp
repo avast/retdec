@@ -592,8 +592,13 @@ size_t Filter::fetchRegsForType(
 	{
 		return  getNumberOfStacksForType(type);
 	}
+	auto* reg = _abi->getRegister(regs.front());
+	if (reg == nullptr)
+	{
+		return  getNumberOfStacksForType(type);
+	}
 
-	Type* registerType = _abi->getRegister(regs.front())->getType();
+	Type* registerType = reg->getType();
 	std::size_t registerSize = _abi->getTypeByteSize(registerType);
 	std::size_t typeSize = type->isVoidTy() ?
 					_abi->getWordSize() : _abi->getTypeByteSize(type);
