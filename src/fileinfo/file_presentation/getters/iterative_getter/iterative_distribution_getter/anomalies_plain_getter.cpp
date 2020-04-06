@@ -12,6 +12,7 @@
 using namespace retdec::utils;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 namespace
@@ -84,3 +85,4 @@ bool AnomaliesPlainGetter::getFlagDescriptors(std::size_t structIndex, std::vect
 }
 
 } // namespace fileinfo
+} // namespace retdec

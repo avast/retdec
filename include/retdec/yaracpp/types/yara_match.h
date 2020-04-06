@@ -1,5 +1,5 @@
 /**
- * @file include/yaracpp/types/yara_match.h
+ * @file include/retdec/yaracpp/types/yara_match.h
  * @brief Library representation of one YARA match.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
@@ -9,8 +9,8 @@
 #include <cstdint>
 #include <vector>
 
-namespace yaracpp
-{
+namespace retdec {
+namespace yaracpp {
 
 /**
  * Representation of one match
@@ -41,3 +41,4 @@ class YaraMatch
 };
 
 } // namespace yaracpp
+} // namespace retdec

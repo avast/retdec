@@ -80,7 +80,7 @@ void serialize(Writer& writer, const common::Pattern::Match& pm)
 
 	writer.EndObject();
 }
-SERIALIZE_EXPLICIT_INSTANTIATION(common::Pattern::Match);
+SERIALIZE_EXPLICIT_INSTANTIATION(common::Pattern::Match)
 
 void deserialize(const rapidjson::Value& val, common::Pattern::Match& pm)
 {
@@ -160,7 +160,7 @@ void serialize(Writer& writer, const common::Pattern& p)
 
 	writer.EndObject();
 }
-SERIALIZE_EXPLICIT_INSTANTIATION(common::Pattern);
+SERIALIZE_EXPLICIT_INSTANTIATION(common::Pattern)
 
 void deserialize(const rapidjson::Value& val, common::Pattern& p)
 {

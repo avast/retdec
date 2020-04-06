@@ -11,6 +11,7 @@
 
 using namespace retdec::utils;
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -51,3 +52,4 @@ std::size_t PdbPlainGetter::loadInformation(std::vector<std::string> &desc, std:
 }
 
 } // namespace fileinfo
+} // namespace retdec

@@ -9,6 +9,7 @@
 
 #include "retdec/fileformat/types/import_table/import_table.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -49,5 +50,6 @@ class ImportTable
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

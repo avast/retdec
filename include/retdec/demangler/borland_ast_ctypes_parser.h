@@ -1,5 +1,5 @@
 /**
-* @file include/retdec/ctypesparser/ast_ctypes_parser.h
+* @file include/retdec/demangler/ast_ctypes_parser.h
 * @brief Parser for AST created in Borland demangler to ctypes parsers.
 * @copyright (c) 2019 Avast Software, licensed under the MIT license
 */
@@ -7,11 +7,11 @@
 #ifndef RETDEC_BORLAND_AST_CTYPES_PARSER_H
 #define RETDEC_BORLAND_AST_CTYPES_PARSER_H
 
+#include "retdec/demangler/ast_ctypes_parser.h"
 #include "retdec/demangler/borland_ast/borland_ast.h"
-#include "retdec/ctypesparser/ast_ctypes_parser.h"
 
 namespace retdec {
-namespace ctypesparser {
+namespace demangler {
 
 /*
  * @brief Parser for AST created in Borland demangler to ctypes parsers.
@@ -76,7 +76,7 @@ private:
 		std::shared_ptr<demangler::borland::ArrayNode> ArrayTypeNode);
 };
 
-}    // ctypesparser
-}    // retdec
+} // demangler
+} // retdec
 
 #endif //RETDEC_BORLAND_AST_CTYPES_PARSER_H

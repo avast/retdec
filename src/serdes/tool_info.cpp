@@ -46,7 +46,7 @@ void serialize(Writer& writer, const common::ToolInfo& ti)
 
 	writer.EndObject();
 }
-SERIALIZE_EXPLICIT_INSTANTIATION(common::ToolInfo);
+SERIALIZE_EXPLICIT_INSTANTIATION(common::ToolInfo)
 
 void deserialize(const rapidjson::Value& val, common::ToolInfo& ti)
 {

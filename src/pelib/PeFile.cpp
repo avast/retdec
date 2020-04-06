@@ -10,7 +10,7 @@
 * of PeLib.
 */
 
-#include "pelib/PeFile.h"
+#include "retdec/pelib/PeFile.h"
 
 namespace PeLib
 {

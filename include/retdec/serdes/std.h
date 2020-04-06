@@ -18,8 +18,10 @@ namespace serdes {
 
 /**
  * Explicitly instantiate all the needed serialization functions of form:
+ * @code
  *     template <typename Writer>
  *     void serialize(Writer&, const T&)
+ * @endcode
  */
 #define SERIALIZE_EXPLICIT_INSTANTIATION(T)                                    \
 	template void serialize(                                                   \

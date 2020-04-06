@@ -8,6 +8,7 @@
 
 #include "fileinfo/file_information/file_information_types/pattern/pattern_match.h"
 
+namespace retdec {
 namespace fileinfo {
 
 bool PatternMatch::isInteger() const
@@ -97,3 +98,4 @@ void PatternMatch::setFloatingPoint()
 }
 
 } // namespace fileinfo
+} // namespace retdec

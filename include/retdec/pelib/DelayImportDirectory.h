@@ -7,8 +7,8 @@
 #ifndef DELAY_IMPORT_DIRECTORY_H
 #define DELAY_IMPORT_DIRECTORY_H
 
-#include "pelib/PeLibInc.h"
-#include "pelib/PeHeader.h"
+#include "retdec/pelib/PeLibInc.h"
+#include "retdec/pelib/PeHeader.h"
 
 namespace PeLib
 {

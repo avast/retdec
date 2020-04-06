@@ -10,7 +10,7 @@
 * of PeLib.
 */
 
-#include "pelib/IatDirectory.h"
+#include "retdec/pelib/IatDirectory.h"
 
 namespace PeLib
 {
@@ -55,7 +55,7 @@ namespace PeLib
 
 	/**
 	* Returns the dwValue of a field in the IAT.
-	* @param dwAddrnr Number identifying the field.
+	* @param index Number identifying the field.
 	* @return dwValue of the field.
 	**/
 	dword IatDirectory::getAddress(unsigned int index) const
@@ -84,7 +84,7 @@ namespace PeLib
 
 	/**
 	* Removes an address from the IAT.
-	* @param dwAddrnr Number identifying the field.
+	* @param index Number identifying the field.
 	**/
 	void IatDirectory::removeAddress(unsigned int index)
 	{

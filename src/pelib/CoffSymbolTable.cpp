@@ -6,8 +6,8 @@
 
 #include <algorithm>
 
-#include "pelib/PeLibInc.h"
-#include "pelib/CoffSymbolTable.h"
+#include "retdec/pelib/PeLibInc.h"
+#include "retdec/pelib/CoffSymbolTable.h"
 
 namespace PeLib
 {

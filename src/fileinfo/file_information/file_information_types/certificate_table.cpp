@@ -6,6 +6,7 @@
 
 #include "fileinfo/file_information/file_information_types/certificate_table.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -513,3 +514,4 @@ bool CertificateTable::hasCounterSignerCertificate() const
 }
 
 } // namespace fileinfo
+} // namespace retdec

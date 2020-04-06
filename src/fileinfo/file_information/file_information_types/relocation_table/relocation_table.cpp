@@ -7,6 +7,7 @@
 #include "fileinfo/file_information/file_information_types/relocation_table/relocation_table.h"
 #include "fileinfo/file_information/file_information_types/type_conversions.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -220,3 +221,4 @@ void RelocationTable::clearRelocations()
 }
 
 } // namespace fileinfo
+} // namespace retdec

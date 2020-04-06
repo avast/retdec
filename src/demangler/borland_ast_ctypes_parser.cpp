@@ -1,18 +1,18 @@
 /**
-* @file src/ctypesparser/borland_ast_ctypes_parser.cpp
+* @file src/demangler/borland_ast_ctypes_parser.cpp
 * @brief Parser from AST created by Borland demangler to C-types.
 * @copyright (c) 2019 Avast Software, licensed under the MIT license
 */
 
 #include <cassert>
 
-#include "retdec/ctypesparser/borland_ast_ctypes_parser.h"
 #include "retdec/ctypes/ctypes.h"
+#include "retdec/demangler/borland_ast_ctypes_parser.h"
 
 using Kind = retdec::demangler::borland::Node::Kind;
 
 namespace retdec {
-namespace ctypesparser {
+namespace demangler {
 
 /*
  * @brief Entry point for parsing AST representation of functions into ctypes functions.
@@ -337,5 +337,5 @@ std::shared_ptr<ctypes::ArrayType> BorlandToCtypesParser::parseArrayType(
 	return ctypes::ArrayType::create(context, type, dimensions);
 }
 
-}    // ctypesparser
-}    // retdec
+} // demangler
+} // retdec

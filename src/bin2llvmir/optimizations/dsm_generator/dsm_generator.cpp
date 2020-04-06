@@ -225,7 +225,7 @@ void DsmGenerator::generateFunction(
 			<< fnc->getStart().toHexPrefixString()
 			<< " -- " << fnc->getEnd().toHexPrefixString() << "\n";
 
-	if (!fnc->isUserDefined())
+	if (!fnc->isDecompilerDefined() && !fnc->isUserDefined())
 	{
 		return;
 	}

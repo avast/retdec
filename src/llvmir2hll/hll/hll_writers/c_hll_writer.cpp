@@ -1174,10 +1174,7 @@ void CHLLWriter::visit(ShPtr<PointerType> type) {
 	}
 	// If type is a pointer get the contained type.
 	pointedType->getContainedType()->accept(this);
-	// If type is followed by "*"s, emit a space.
-	if (numOfStars > 0) {
-		out->space();
-	}
+	out->space();
 	// Emit "*"s.
 	for (int star = 0; star < numOfStars; ++star) {
 		out->operatorX("*");
@@ -1258,17 +1255,19 @@ bool CHLLWriter::emitStandardFunctionPrototypes() {
 	//
 	//   - All functions with bodies.
 	//   - All functions marked as "user-defined".
+	//   - All functions marked as "decompiler-defined".
 	//
 	// Notes:
 	//
-	//   - We cannot consider just user-defined functions because there may be
-	//     no config file from which this information is taken (in such case, we
-	//     would emit no function prototypes at all).
+	//   - We cannot consider just user-defined and decompiler-defined functions
+	//     because there may be no config file from which this information is
+	//     taken (in such case, we would emit no function prototypes at all).
 	FuncSet funcsToEmit(
 		module->func_definition_begin(),
 		module->func_definition_end()
 	);
 	addToSet(module->getUserDefinedFuncs(), funcsToEmit);
+	addToSet(module->getDecompilerDefinedFuncs(), funcsToEmit);
 	return emitFunctionPrototypes(funcsToEmit);
 }
 

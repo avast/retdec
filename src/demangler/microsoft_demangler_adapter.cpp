@@ -8,7 +8,7 @@
 #include <llvm/Demangle/MicrosoftDemangle.h>
 
 #include "retdec/demangler/microsoft_demangler.h"
-#include "retdec/ctypesparser/ms_ast_ctypes_parser.h"
+#include "retdec/demangler/ms_ast_ctypes_parser.h"
 
 namespace retdec {
 namespace demangler {
@@ -71,13 +71,19 @@ std::shared_ptr<ctypes::Function> MicrosoftDemangler::demangleFunctionToCtypes(
 	}
 
 	std::shared_ptr<ctypes::Function> func;
-	ctypesparser::MsToCtypesParser parser;
-	func = parser.parseAsFunction(mangled, AST, module, typeWidths, typeSignedness, defaultBitWidth);
+	MsToCtypesParser parser;
+	func = parser.parseAsFunction(
+			mangled,
+			AST,
+			module,
+			typeWidths,
+			typeSignedness,
+			defaultBitWidth);
 	if (func) {
 		_status = success;
 	}
 	return func;
 }
 
-}
-}
+} // demangler
+} // retdec

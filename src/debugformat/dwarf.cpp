@@ -499,7 +499,11 @@ retdec::common::Object DebugFormat::loadDwarf_formal_parameter(
 	if (auto n = llvm::dwarf::toString(die.find(
 			llvm::dwarf::DW_AT_name)))
 	{
-		name = n.getValue();
+		const char* nVal = n.getValue();
+		if (nVal && std::strlen(nVal) != 0)
+		{
+			name = nVal;
+		}
 	}
 
 	retdec::common::Object arg(name, retdec::common::Storage::undefined());

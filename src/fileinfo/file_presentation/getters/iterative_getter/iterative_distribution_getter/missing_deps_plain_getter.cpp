@@ -13,6 +13,7 @@
 
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 namespace
@@ -75,3 +76,4 @@ bool MissingDepsPlainGetter::getFlagDescriptors(std::size_t structIndex, std::ve
 }
 
 } // namespace fileinfo
+} // namespace retdec

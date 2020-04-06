@@ -1,5 +1,5 @@
 /**
- * @file include/yaracpp/types/yara_rule.h
+ * @file include/retdec/yaracpp/types/yara_rule.h
  * @brief Library representation of one YARA rule.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
@@ -12,8 +12,8 @@
 #include "retdec/yaracpp/types/yara_match.h"
 #include "retdec/yaracpp/types/yara_meta.h"
 
-namespace yaracpp
-{
+namespace retdec {
+namespace yaracpp {
 
 /**
  * Representation of one YARA rule
@@ -62,3 +62,4 @@ class YaraRule
 };
 
 } // namespace yaracpp
+} // namespace retdec

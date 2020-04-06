@@ -32,7 +32,6 @@ int64_t deserializeInt64(
 			: defaultValue;
 }
 
-
 uint64_t deserializeUint64(
 	const rapidjson::Value& val,
 	const std::string& key,

@@ -51,6 +51,7 @@ const std::string JSON_basicBlocks   = "basicBlocks";
 
 std::vector<std::string> fncTypes =
 {
+	"decompilerDefined",
 	"userDefined",
 	"staticallyLinked",
 	"dynamicallyLinked",
@@ -106,7 +107,7 @@ void serialize(Writer& writer, const common::Function& f)
 
 	writer.EndObject();
 }
-SERIALIZE_EXPLICIT_INSTANTIATION(common::Function);
+SERIALIZE_EXPLICIT_INSTANTIATION(common::Function)
 
 void deserialize(const rapidjson::Value& val, common::Function& f)
 {

@@ -7,6 +7,7 @@
 #include "fileinfo/file_information/file_information_types/pdb_info.h"
 #include "fileinfo/file_information/file_information_types/type_conversions.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -102,3 +103,4 @@ void PdbInfo::setTimeStamp(std::size_t sTimeStamp)
 }
 
 } // namespace fileinfo
+} // namespace retdec

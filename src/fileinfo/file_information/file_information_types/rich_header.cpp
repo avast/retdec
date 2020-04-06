@@ -9,6 +9,7 @@
 
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -104,7 +105,6 @@ std::string RichHeader::getRecordVisualStudioNameStr(std::size_t position) const
 	return record ? record->getVisualStudioName() : "";
 }
 
-
 /**
  * Get raw bytes
  * @return Raw bytes of rich header.
@@ -133,3 +133,4 @@ bool RichHeader::hasRecords() const
 }
 
 } // namespace fileinfo
+} // namespace retdec

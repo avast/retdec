@@ -426,10 +426,6 @@ int _main(int argc, char **argv)
 		{
 			P = PassInf->getNormalCtor()();
 		}
-		else if (PassInf->getNormalCtor())
-		{
-			P = PassInf->getNormalCtor()();
-		}
 		else
 		{
 			throw std::runtime_error(std::string("cannot create pass: ")

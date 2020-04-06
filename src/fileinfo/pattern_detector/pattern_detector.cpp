@@ -13,8 +13,9 @@
 #include "retdec/yaracpp/yara_detector/yara_detector.h"
 
 using namespace retdec::utils;
-using namespace yaracpp;
+using namespace retdec::yaracpp;
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -368,3 +369,4 @@ void PatternDetector::analyze()
 }
 
 } // namespace fileinfo
+} // namespace retdec

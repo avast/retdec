@@ -6,6 +6,7 @@
 
 #include "fileinfo/file_information/file_information_types/pattern/pattern.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -168,3 +169,4 @@ void Pattern::addMatch(PatternMatch &match)
 }
 
 } // namespace fileinfo
+} // namespace retdec

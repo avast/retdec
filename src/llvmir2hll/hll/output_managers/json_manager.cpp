@@ -55,8 +55,6 @@ const std::string JSON_TOKEN_COMMENT       = "cmnt";
 
 } // anonymous namespace
 
-
-
 template <typename Writer>
 JsonOutputManager<Writer>::JsonOutputManager(llvm::raw_ostream& out) :
 		_out(out),

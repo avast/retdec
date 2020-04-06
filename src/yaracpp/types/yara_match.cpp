@@ -1,13 +1,13 @@
 /**
- * @file src/types/yara_match.cpp
+ * @file src/yaracpp/types/yara_match.cpp
  * @brief Library representation of one YARA match.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
 #include "retdec/yaracpp/types/yara_match.h"
 
-namespace yaracpp
-{
+namespace retdec {
+namespace yaracpp {
 
 /**
  * Get offset of detection
@@ -65,3 +65,4 @@ void YaraMatch::addByte(std::uint8_t byte)
 }
 
 } // namespace yaracpp
+} // namespace retdec

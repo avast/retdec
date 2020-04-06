@@ -482,7 +482,10 @@ std::vector<Type*> Filter::expandTypes(const std::vector<Type*>& types) const
 			auto t = toExpand.front();
 			toExpand.pop_front();
 
-			if (auto* st = dyn_cast<StructType>(t))
+			if (t == nullptr) {
+				expanded.push_back(_abi->getDefaultType());
+			}
+			else if (auto* st = dyn_cast<StructType>(t))
 			{
 				for (auto& e : st->elements())
 				{
@@ -589,8 +592,13 @@ size_t Filter::fetchRegsForType(
 	{
 		return  getNumberOfStacksForType(type);
 	}
+	auto* reg = _abi->getRegister(regs.front());
+	if (reg == nullptr)
+	{
+		return  getNumberOfStacksForType(type);
+	}
 
-	Type* registerType = _abi->getRegister(regs.front())->getType();
+	Type* registerType = reg->getType();
 	std::size_t registerSize = _abi->getTypeByteSize(registerType);
 	std::size_t typeSize = type->isVoidTy() ?
 					_abi->getWordSize() : _abi->getTypeByteSize(type);
@@ -741,22 +749,29 @@ void Filter::filterRetsByKnownTypes(FilterableLayout& lay) const
 	else if (!retType->isVoidTy())
 	{
 		assert(!gpRegs.empty());
-
-		std::size_t typeSize = _abi->getTypeByteSize(retType);
-		Type* registerType = _abi->getRegister(gpRegs.front())->getType();
-		std::size_t registerSize = _abi->getTypeByteSize(registerType);
-
-		if (typeSize <= registerSize ||
-				(typeSize > registerSize*gpRegs.size()))
+		if (auto* defaultReg = _abi->getRegister(gpRegs.front()))
 		{
-			regGPValues.push_back(gpRegs.front());
+			std::size_t typeSize = _abi->getTypeByteSize(retType);
+			Type* registerType = defaultReg->getType();
+			std::size_t registerSize = _abi->getTypeByteSize(registerType);
+
+			if (typeSize <= registerSize ||
+					(typeSize > registerSize*gpRegs.size()))
+			{
+				regGPValues.push_back(gpRegs.front());
+			}
+
+			std::size_t numOfRegs = typeSize/registerSize;
+			for (std::size_t i = 0; i < numOfRegs && i < gpRegs.size(); i++)
+			{
+				regGPValues.push_back(gpRegs[i]);
+			}
+		}
+		else
+		{
+			retType = nullptr;
 		}
 
-		std::size_t numOfRegs = typeSize/registerSize;
-		for (std::size_t i = 0; i < numOfRegs && i < gpRegs.size(); i++)
-		{
-			regGPValues.push_back(gpRegs[i]);
-		}
 	}
 
 	lay.gpRegisters = std::move(regGPValues);

@@ -35,7 +35,7 @@ void serialize(Writer& writer, const common::BasicBlock::CallEntry& ce)
 	serialize(writer, JSON_targetAddr, ce.targetAddr);
 	writer.EndObject();
 }
-SERIALIZE_EXPLICIT_INSTANTIATION(common::BasicBlock::CallEntry);
+SERIALIZE_EXPLICIT_INSTANTIATION(common::BasicBlock::CallEntry)
 
 void deserialize(const rapidjson::Value& val, common::BasicBlock::CallEntry& ce)
 {
@@ -62,7 +62,7 @@ void serialize(Writer& writer, const common::BasicBlock& bb)
 
 	writer.EndObject();
 }
-SERIALIZE_EXPLICIT_INSTANTIATION(common::BasicBlock);
+SERIALIZE_EXPLICIT_INSTANTIATION(common::BasicBlock)
 
 void deserialize(const rapidjson::Value& val, common::BasicBlock& bb)
 {

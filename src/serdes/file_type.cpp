@@ -44,7 +44,7 @@ void serialize(Writer& writer, const common::FileType& ft)
 			common::FileType::eFileType::FT_UNKNOWN)]);
 	}
 }
-SERIALIZE_EXPLICIT_INSTANTIATION(common::FileType);
+SERIALIZE_EXPLICIT_INSTANTIATION(common::FileType)
 
 void deserialize(const rapidjson::Value& val, common::FileType& ft)
 {

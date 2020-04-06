@@ -15,8 +15,8 @@
 
 #include <set>
 
-#include "pelib/PeLibInc.h"
-#include "pelib/PeHeader.h"
+#include "retdec/pelib/PeLibInc.h"
+#include "retdec/pelib/PeHeader.h"
 
 namespace PeLib
 {
@@ -568,17 +568,11 @@ namespace PeLib
 		}
 
 		ResourceNode* currNode = static_cast<ResourceNode*>(Iter->child);
-		auto ResIter = std::find_if(
+		return std::find_if(
 				currNode->children.begin(),
 				currNode->children.end(),
 				[&](const auto& res) { return res.hasEqual(resid); }
 		);
-		if (ResIter == currNode->children.end())
-		{
-			return ResIter;
-		}
-
-		return ResIter;
 	}
 
 	/**
@@ -602,17 +596,11 @@ namespace PeLib
 		}
 
 		ResourceNode* currNode = static_cast<ResourceNode*>(Iter->child);
-		auto ResIter = std::find_if(
+		return std::find_if(
 				currNode->children.begin(),
 				currNode->children.end(),
 				[&](const auto& res) { return res.hasEqual(resid); }
 		);
-		if (ResIter == currNode->children.end())
-		{
-			return ResIter;
-		}
-
-		return ResIter;
 	}
 
 	/**

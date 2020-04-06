@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 
+namespace retdec {
 namespace fileinfo {
 
 using AuxVectorEntry = std::pair<std::string, std::uint64_t>;
@@ -58,5 +59,6 @@ class ElfCore
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

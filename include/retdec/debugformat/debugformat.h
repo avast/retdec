@@ -19,7 +19,7 @@
 #include "retdec/common/type.h"
 #include "retdec/pdbparser/pdb_file.h"
 
-#include "retdec/bin2llvmir/providers/demangler.h"
+#include "retdec/demangler/demangler.h"
 #include "retdec/fileformat/fileformat.h"
 #include "retdec/loader/loader.h"
 
@@ -40,7 +40,7 @@ class DebugFormat
 				retdec::loader::Image* inFile,
 				const std::string& pdbFile,
 				SymbolTable* symtab,
-				retdec::bin2llvmir::Demangler* demangler,
+				retdec::demangler::Demangler* demangler,
 				unsigned long long imageBase = 0);
 
 		retdec::common::Function* getFunction(retdec::common::Address a);
@@ -77,7 +77,7 @@ class DebugFormat
 		/// Underlying PDB representation.
 		retdec::pdbparser::PDBFile* _pdbFile = nullptr;
 		/// Demangler.
-		retdec::bin2llvmir::Demangler* _demangler = nullptr;
+		retdec::demangler::Demangler* _demangler = nullptr;
 
 		/// Dwarf named types cache.
 		std::map<std::pair<llvm::DWARFUnit*, uint32_t>, std::string> dieOff2type;

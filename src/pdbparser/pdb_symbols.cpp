@@ -134,7 +134,6 @@ bool PDBFunction::parse_symbol(PDBGeneralSymbol *symbol, PDBTypes *types, PDBSym
 
 			if (type_def != nullptr)
 			{
-				assert(type_def->type_class == PDBTYPE_FUNCTION);
 				args_remain = type_def->func_args_count;
 				if (type_def->func_thistype_index)
 					args_remain++;  // This-parameter

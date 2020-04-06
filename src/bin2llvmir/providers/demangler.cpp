@@ -67,6 +67,11 @@ llvm::Type *Demangler::getLlvmType(std::shared_ptr<retdec::ctypes::Type> type)
 	return visitor.getLlvmType();
 }
 
+demangler::Demangler* Demangler::getDemangler()
+{
+	return _demangler.get();
+}
+
 /******************************************************************/
 /********************** Demangler Factory *************************/
 /******************************************************************/

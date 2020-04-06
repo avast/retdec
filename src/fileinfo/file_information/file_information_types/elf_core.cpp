@@ -6,6 +6,7 @@
 
 #include "fileinfo/file_information/file_information_types/elf_core.h"
 
+namespace retdec {
 namespace fileinfo {
 
 bool ElfCore::hasAuxVector() const
@@ -41,3 +42,4 @@ void ElfCore::addAuxVectorEntry(
 }
 
 } // namespace fileinfo
+} // namespace retdec

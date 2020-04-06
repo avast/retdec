@@ -9,6 +9,7 @@
 
 #include <string>
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -45,5 +46,6 @@ class PdbInfo
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

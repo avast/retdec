@@ -10,6 +10,7 @@
 using namespace retdec::utils;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 namespace
@@ -86,3 +87,4 @@ bool RichHeaderPlainGetter::getFlagDescriptors(std::size_t structIndex, std::vec
 }
 
 } // namespace fileinfo
+} // namespace retdec

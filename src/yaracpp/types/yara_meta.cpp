@@ -1,5 +1,5 @@
 /**
- * @file src/types/yara_meta.cpp
+ * @file src/yaracpp/types/yara_meta.cpp
  * @brief Library representation of one YARA meta.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
@@ -8,8 +8,8 @@
 
 #include "retdec/yaracpp/types/yara_meta.h"
 
-namespace yaracpp
-{
+namespace retdec {
+namespace yaracpp {
 
 /**
  * Get name of meta
@@ -108,3 +108,4 @@ void YaraMeta::setIntValue(std::uint64_t metaValue)
 }
 
 } // namespace yaracpp
+} // namespace retdec

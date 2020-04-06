@@ -60,7 +60,7 @@ void serialize(Writer& writer, const common::CallingConvention& cc)
 				common::CallingConvention::eCC::CC_UNKNOWN)]);
 	}
 }
-SERIALIZE_EXPLICIT_INSTANTIATION(common::CallingConvention);
+SERIALIZE_EXPLICIT_INSTANTIATION(common::CallingConvention)
 
 void deserialize(const rapidjson::Value& val, common::CallingConvention& cc)
 {

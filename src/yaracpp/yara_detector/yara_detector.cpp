@@ -1,15 +1,17 @@
 /**
- * @file src/yara_detector/yara_detector.cpp
+ * @file src/yaracpp/yara_detector/yara_detector.cpp
  * @brief Interpret of YARA rules.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
 #include <yara.h>
+#include <yara/compiler.h>
+#include <yara/types.h>
 
 #include "retdec/yaracpp/yara_detector/yara_detector.h"
 
-namespace yaracpp
-{
+namespace retdec {
+namespace yaracpp {
 
 namespace
 {
@@ -392,3 +394,4 @@ YR_RULES* YaraDetector::getCompiledRules()
 }
 
 } // namespace yaracpp
+} // namespace retdec

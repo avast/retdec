@@ -25,7 +25,7 @@ void serialize(Writer& writer, const common::Address& a)
 {
 	writer.String(a.isDefined() ? a.toHexPrefixString() : std::string());
 }
-SERIALIZE_EXPLICIT_INSTANTIATION(common::Address);
+SERIALIZE_EXPLICIT_INSTANTIATION(common::Address)
 
 void deserialize(const rapidjson::Value& val, common::Address& a)
 {
@@ -48,7 +48,7 @@ void serialize(Writer& writer, const common::AddressRange& r)
 	}
 	writer.EndObject();
 }
-SERIALIZE_EXPLICIT_INSTANTIATION(common::AddressRange);
+SERIALIZE_EXPLICIT_INSTANTIATION(common::AddressRange)
 
 void deserialize(const rapidjson::Value& val, common::AddressRange& r)
 {

@@ -191,27 +191,6 @@ void ParamReturn::collectExtraData(DataFlowEntry* dataflow) const
 		return;
 	}
 
-	// Main
-	//
-	if (fnc->getName() == "main")
-	{
-		auto charPointer = PointerType::get(
-			Type::getInt8Ty(_module->getContext()), 0);
-
-		dataflow->setArgTypes(
-		{
-			_abi->getDefaultType(),
-			PointerType::get(charPointer, 0)
-		},
-		{
-			"argc",
-			"argv"
-		});
-
-		dataflow->setRetType(_abi->getDefaultType());
-		return;
-	}
-
 	// LTI info.
 	//
 	auto* cf = _config->getConfigFunction(fnc);
@@ -286,27 +265,29 @@ void ParamReturn::collectExtraData(DataFlowEntry* dataflow) const
 		{
 			dataflow->setVariadic();
 		}
-		dataflow->setRetType(
+		if (dbgFnc->returnType.isDefined())
+		{
+			dataflow->setRetType(
 			llvm_utils::stringToLlvmTypeDefault(
 				_module,
 				dbgFnc->returnType.getLlvmIr()));
+		}
+		dataflow->setCallingConvention(dbgFnc->callingConvention.getID());
 
 		// TODO: Maybe use demangled function name?
 		// Would it be useful for names from debug info?
-
 		return;
 	}
 
 	auto configFnc = _config->getConfigFunction(fnc);
-	if (_config->getConfig().isIda() && configFnc)
+	if (configFnc && configFnc->isUserDefined())
 	{
 		std::vector<Type*> argTypes;
 		std::vector<std::string> argNames;
 		for (auto& a : configFnc->parameters)
 		{
 			auto* t = llvm_utils::stringToLlvmTypeDefault(
-					_module,
-					a.type.getLlvmIr());
+					_module, a.type.getLlvmIr());
 			if (!t->isSized())
 			{
 				continue;
@@ -314,7 +295,10 @@ void ParamReturn::collectExtraData(DataFlowEntry* dataflow) const
 			argTypes.push_back(t);
 			argNames.push_back(a.getName());
 		}
-		dataflow->setArgTypes(
+		// If no parameters are found do not call setArgType method
+		// as it will consider function to be without paprameters.
+		if (configFnc->parameters.size())
+			dataflow->setArgTypes(
 				std::move(argTypes),
 				std::move(argNames));
 
@@ -322,21 +306,61 @@ void ParamReturn::collectExtraData(DataFlowEntry* dataflow) const
 		{
 			dataflow->setVariadic();
 		}
-		dataflow->setRetType(
-			llvm_utils::stringToLlvmTypeDefault(
-				_module,
-				configFnc->returnType.getLlvmIr()));
+		if (configFnc->returnType.isDefined())
+		{
+			dataflow->setRetType(
+				llvm_utils::stringToLlvmTypeDefault(
+					_module,
+					configFnc->returnType.getLlvmIr()));
+		}
+		dataflow->setCallingConvention(configFnc->callingConvention.getID());
 
 		// TODO: Maybe use demangled function name?
-		// Is it desired for names from IDA?
+		// Would it be useful for names from debug info?
+	}
+	else if (configFnc && configFnc->isDecompilerDefined())
+	{
+		// As decompiler is not good source of information,
+		// we should use only names and other parameters that
+		// we cannot guess by any heuristic.
+		std::vector<Type*> argTypes;
+		std::vector<std::string> argNames;
+		for (auto& a : configFnc->parameters)
+		{
+			argTypes.push_back(nullptr);
+			argNames.push_back(a.getName());
+		}
+		if (configFnc->parameters.size())
+			dataflow->setArgTypes(
+				std::move(argTypes),
+				std::move(argNames));
 
-		return;
+		if (configFnc->isVariadic())
+		{
+			dataflow->setVariadic();
+		}
+		dataflow->setCallingConvention(configFnc->callingConvention.getID());
 	}
 
-	// Calling convention.
-	if (configFnc)
+	// Main
+	//
+	if (!dataflow->argNames().size() && fnc->getName().str() == "main")
 	{
-		dataflow->setCallingConvention(configFnc->callingConvention.getID());
+		auto charPointer = PointerType::get(
+			Type::getInt8Ty(_module->getContext()), 0);
+
+		dataflow->setArgTypes(
+		{
+			_abi->getDefaultType(),
+			PointerType::get(charPointer, 0)
+		},
+		{
+			"argc",
+			"argv"
+		});
+
+		dataflow->setRetType(_abi->getDefaultType());
+		return;
 	}
 
 	// Wrappers.
@@ -960,6 +984,11 @@ void ParamReturn::applyToIr(DataFlowEntry& de)
 			definitionArgs.push_back(a);
 		}
 	}
+	std::vector<llvm::Type*> definitionArgTypes;
+	for (auto& t : de.argTypes())
+	{
+		definitionArgTypes.push_back(t != nullptr ? t : _abi->getDefaultType());
+	}
 
 	// Set used calling convention to config
 	auto* cf = _config->getConfigFunction(fnc);
@@ -972,7 +1001,7 @@ void ParamReturn::applyToIr(DataFlowEntry& de)
 	auto* newFnc = irm.modifyFunction(
 			fnc,
 			de.getRetType(),
-			de.argTypes(),
+			definitionArgTypes,
 			de.isVariadic(),
 			rets2vals,
 			loadsOfCalls,
@@ -1105,7 +1134,8 @@ std::map<CallInst*, std::vector<Value*>> ParamReturn::fetchLoadsOfCalls(
 
 			if (tIt != types.end())
 			{
-				l = IrModifier::convertValueToType(l, *tIt, call);
+				auto t = *tIt != nullptr ? *tIt : _abi->getDefaultType();
+				l = IrModifier::convertValueToType(l, t, call);
 				tIt++;
 			}
 			else

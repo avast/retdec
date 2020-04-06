@@ -1,5 +1,5 @@
 /**
- * @file src/types/yara_rule.cpp
+ * @file src/yaracpp/types/yara_rule.cpp
  * @brief Library representation of one YARA rule.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
@@ -8,8 +8,8 @@
 
 #include <ostream>
 
-namespace yaracpp
-{
+namespace retdec {
+namespace yaracpp {
 
 /**
  * Get name related to this rule
@@ -162,3 +162,4 @@ std::ostream& operator<<(std::ostream& o, const YaraRule& rule)
 }
 
 } // namespace yaracpp
+} // namespace retdec

@@ -205,7 +205,6 @@ TEST_F(PlainOutputManagerTests, address_push_and_pop_do_nothing)
 	EXPECT_EQ("hello = 1234;", emitCode());
 }
 
-
 } // namespace tests
 } // namespace llvmir2hll
 } // namespace retdec

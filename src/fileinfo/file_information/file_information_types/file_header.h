@@ -9,6 +9,7 @@
 
 #include "fileinfo/file_information/file_information_types/flags.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -142,5 +143,6 @@ class FileHeader
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

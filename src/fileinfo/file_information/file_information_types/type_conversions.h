@@ -12,6 +12,7 @@
 
 #include "retdec/utils/conversion.h"
 
+namespace retdec {
 namespace fileinfo {
 
 std::string getBinaryRepresentation(unsigned long long number, unsigned long long numberOfBits);
@@ -51,5 +52,6 @@ template<typename N> inline bool indexIsValid(const std::vector<N> &list, std::s
 }
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

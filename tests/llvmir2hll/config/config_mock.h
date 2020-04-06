@@ -30,6 +30,7 @@ public:
 	MOCK_CONST_METHOD1(getAddressRangeForFunc, AddressRange (const std::string &));
 	MOCK_CONST_METHOD1(getLineRangeForFunc, LineRange (const std::string &));
 	MOCK_CONST_METHOD1(isUserDefinedFunc, bool (const std::string &));
+	MOCK_CONST_METHOD1(isDecompilerDefinedFunc, bool (const std::string &));
 	MOCK_CONST_METHOD1(isStaticallyLinkedFunc, bool (const std::string &));
 	MOCK_CONST_METHOD1(isDynamicallyLinkedFunc, bool (const std::string &));
 	MOCK_CONST_METHOD1(isSyscallFunc, bool (const std::string &));

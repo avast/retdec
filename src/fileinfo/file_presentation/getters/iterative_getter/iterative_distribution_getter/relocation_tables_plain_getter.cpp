@@ -12,6 +12,7 @@
 using namespace retdec::utils;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 namespace
@@ -104,3 +105,4 @@ bool RelocationTablesPlainGetter::getFlagDescriptors(std::size_t structIndex, st
 }
 
 } // namespace fileinfo
+} // namespace retdec

@@ -92,6 +92,9 @@ public:
 	std::size_t getNumOfFuncDefinitions() const;
 	bool hasFuncDefinitions() const;
 
+	bool hasDecompilerDefinedFuncs() const;
+	FuncSet getDecompilerDefinedFuncs() const;
+
 	bool hasUserDefinedFuncs() const;
 	FuncSet getUserDefinedFuncs() const;
 

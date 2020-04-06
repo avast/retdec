@@ -10,6 +10,7 @@
 
 using namespace retdec::config;
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -132,3 +133,4 @@ retdec::common::PatternContainer& PatternConfigGetter::getPatterns()
 }
 
 } // namespace fileinfo
+} // namespace retdec

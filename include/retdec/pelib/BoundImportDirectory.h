@@ -13,8 +13,8 @@
 #ifndef BOUNDIMPORTDIRECTORY_H
 #define BOUNDIMPORTDIRECTORY_H
 
-#include "pelib/PeHeader.h"
-#include "pelib/PeLibAux.h"
+#include "retdec/pelib/PeHeader.h"
+#include "retdec/pelib/PeLibAux.h"
 
 namespace PeLib
 {

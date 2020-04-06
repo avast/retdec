@@ -9,6 +9,7 @@
 
 #include "fileinfo/file_information/file_information_types/dynamic_section/dynamic_entry.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -54,5 +55,6 @@ class DynamicSection
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif
