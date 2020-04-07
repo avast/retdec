@@ -1,5 +1,5 @@
 /**
- * @file include/retdec/bin2llvmir/optimizations/inst_opt)rda/inst_opt_rda_pass.h
+ * @file include/retdec/bin2llvmir/optimizations/inst_opt_rda/inst_opt_rda_pass.h
  * @brief LLVM instruction optimization pass using RDA.
  * @copyright (c) 2020 Avast Software, licensed under the MIT license
  */

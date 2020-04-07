@@ -1,5 +1,5 @@
 /**
-* @file src/bin2llvmir/optimizations/types_propagator/types_propagator.h
+* @file src/bin2llvmir/optimizations/types_propagator/types_propagator.cpp
 * @brief Data type propagation.
 * @copyright (c) 2020 Avast Software, licensed under the MIT license
 */

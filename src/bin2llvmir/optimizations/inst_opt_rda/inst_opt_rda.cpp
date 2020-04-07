@@ -58,18 +58,18 @@ bool unusedStores(llvm::Instruction* insn, ReachingDefinitionsAnalysis& RDA)
 
 /**
  * bb:
- *     store i32 %a, i32* @reg
+ *     store i32 a, i32* reg
  *     ...
- *     ; There is a single definition for this @reg use in the same BB
+ *     ; There is a single definition for this reg use in the same BB
  *     ; before/above this use.
- *     %b = load i32, i32* @reg
+ *     b = load i32, i32* reg
  * ==>
  * bb:
  *     ; Even this is removed, if this definition has no other use than the
  *     ; load we just eliminated.
- *     store i32 %a, i32* @reg
+ *     store i32 a, i32* reg
  *     ...
- *     ; replace uses of %b with %a
+ *     ; replace uses of b with a
  */
 bool usesWithOneDefInSameBb(
 		llvm::Instruction* insn,
