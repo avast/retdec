@@ -119,14 +119,14 @@ As of RetDec version 4.0 you can easily use various RetDec libraries in your pro
 If you installed RetDec into a standard installation location of your system (e.g. `/usr`, `/usr/local`), all you need to do in order to use its components is:
 
 ```cmake
-find_package(retdec 4.0 REQUIRED 
-   COMPONENTS 
-      <component> 
+find_package(retdec 4.0 REQUIRED
+   COMPONENTS
+      <component>
       [...]
 )
-target_link_libraries(your-project 
-   PUBLIC 
-      retdec::<component> 
+target_link_libraries(your-project
+   PUBLIC
+      retdec::<component>
       [...]
 )
 ```
@@ -137,7 +137,7 @@ If you did not install RetDec somewhere where it can be automatically discovered
     ```cmake
     list(APPEND CMAKE_PREFIX_PATH ${RETDEC_INSTALL_DIR})
     ```
-    
+
 2. Set the path to installed RetDec CMake scripts to `retdec_DIR`:
     ```cmake
     set(retdec_DIR ${RETDEC_INSTALL_DIR}/share/retdec/cmake)
