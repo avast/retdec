@@ -2,6 +2,8 @@
 
 # dev
 
+# v4.0 (2020-04-07)
+
 * New Feature: Added support for decompilation of 64-bit ARM binaries ([#268](https://github.com/avast/retdec/issues/268), [#533](https://github.com/avast/retdec/pull/533), [#550](https://github.com/avast/retdec/pull/550)).
 * New Feature: Added presentation of section and overlay entropy in `retdec-fileinfo` ([#502](https://github.com/avast/retdec/issues/502), [#507](https://github.com/avast/retdec/pull/507)).
 * New Feature: Added presentation of version info from PE file in `retdec-fileinfo` ([#408](https://github.com/avast/retdec/issues/408), [#519](https://github.com/avast/retdec/pull/519)).
@@ -10,6 +12,8 @@
 * New Feature: Added presentation of anomalies of PE files in `retdec-fileinfo` ([#415](https://github.com/avast/retdec/issues/415), [#570](https://github.com/avast/retdec/pull/570)).
 * New Feature: Added heuristic detection of StarForce, SecuROM, SafeDisc, MPRMMGVA, ActiveMark, Petite, and RLPack ([#600](https://github.com/avast/retdec/pull/600), [#607](https://github.com/avast/retdec/pull/607), [#615](https://github.com/avast/retdec/pull/615)).
 * New Feature: Added control flow related information to RetDec config ([#646](https://github.com/avast/retdec/issues/646)).
+* New Feature: Added option to generate the decompilation results as JSON ([JSON output file format](https://github.com/avast/retdec/wiki/Decompiler-outputs#json-output-file-format)). This output contains additional meta-information and can be conveniently consumed by 3rd-party tools.
+* New Feature: Added a new library called `retdec` that lets you decompile the input into both LLVM IR module and structured (i.e. functions and basic blocks) Capstone disassembly. See the `retdectool` demo application.
 * Enhancement: Improved handling of ELF object files and ELF thunks (implemented in PR [#577](https://github.com/avast/retdec/pull/577), solved issues [#184](https://github.com/avast/retdec/issues/184), [#480](https://github.com/avast/retdec/issues/480), and partially solved [#201](https://github.com/avast/retdec/issues/201)).
 * Enhancement: Demangler rewritten ([#95](https://github.com/avast/retdec/issues/95)).
 * Enhancement: Added macOS and Linux (Ubuntu, Debian, Fedora) release builds ([#526](https://github.com/avast/retdec/issues/526)).
@@ -33,6 +37,8 @@
    * The sources of the following Avast projects were moved from their own repositories directly to the main RetDec repository (to `/src/`): Yaracpp, PeLib.
    * The following 3rd-party dependencies use upstream project repositories, not modified Avast forks as before: Capstone, Yara.
    * The following dependencies are no longer needed: JsonCpp, Libdwarf, Libelf.
+* Enhancement: Implemented proper RetDec installation ([#648](https://github.com/avast/retdec/issues/648)). It is now possible to easily use RetDec components in other CMake projects.
+* Enhancement: Some optimizations in critical RetDec components. It is however still often very slow on big inputs.
 * Fix: Increased the limit for the number of entries in import directory when deciding whether a PE file is corrupted or not ([avast/pelib#13](https://github.com/avast/pelib/pull/13)).
 * Fix: Fixed build on BSD systems ([#598](https://github.com/avast/retdec/pull/598)).
 * Fix: Resources which are located in the different section than resource tree are now properly parsed ([#596](https://github.com/avast/retdec/pull/596)).
