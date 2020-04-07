@@ -38,7 +38,7 @@
    * The following 3rd-party dependencies use upstream project repositories, not modified Avast forks as before: Capstone, Yara.
    * The following dependencies are no longer needed: JsonCpp, Libdwarf, Libelf.
 * Enhancement: Implemented proper RetDec installation ([#648](https://github.com/avast/retdec/issues/648)). It is now possible to easily use RetDec components in other CMake projects.
-* Enhancement: Some optimizations in critical RetDec components. It is however still often very slow on big inputs.
+* Enhancement: Some optimizations in critical RetDec components ([#731](https://github.com/avast/retdec/pull/731)). It is however still often very slow on big inputs.
 * Fix: Increased the limit for the number of entries in import directory when deciding whether a PE file is corrupted or not ([avast/pelib#13](https://github.com/avast/pelib/pull/13)).
 * Fix: Fixed build on BSD systems ([#598](https://github.com/avast/retdec/pull/598)).
 * Fix: Resources which are located in the different section than resource tree are now properly parsed ([#596](https://github.com/avast/retdec/pull/596)).
