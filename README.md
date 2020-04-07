@@ -316,9 +316,9 @@ Our TeamCity servers are continuously generating up-to-date RetDec packages from
 
 You can use these as you wish, but keep in mind that there are no guarantees they will work on your system (especially the Linux version), and that regressions are a possibility. To get a stable RetDec version, either download the latest official pre-built package or build the latest RetDec version tag.
 
-* [Windows Server 2016, version 10.0](https://retdec-tc.avast.com/repository/download/Retdec_WinBuild/.lastSuccessful/package/retdec-master-windows-64b.zip?guest=1)
-* [Ubuntu Bionic Linux, version 18.04](https://retdec-tc.avast.com/repository/download/RetDec_LinuxBuild/.lastSuccessful/package/retdec-master-linux-64b.zip?guest=1)
-* [Mac OS X, version 10.14.6](https://retdec-tc.avast.com/repository/download/Retdec_MacBuild/.lastSuccessful/package/retdec-master-macos-64b.zip?guest=1)
+* [Windows Server 2016, version 10.0](https://retdec-tc.avast.com/repository/download/Retdec_WinBuild/.lastSuccessful/package/retdec-master-windows-64b.7z?guest=1)
+* [Ubuntu Bionic Linux, version 18.04](https://retdec-tc.avast.com/repository/download/RetDec_LinuxBuild/.lastSuccessful/package/retdec-master-linux-64b.tar.xz?guest=1)
+* [Mac OS X, version 10.14.6](https://retdec-tc.avast.com/repository/download/Retdec_MacBuild/.lastSuccessful/package/retdec-master-macos-64b.tar.xz?guest=1)
 
 ## Project Documentation
 
