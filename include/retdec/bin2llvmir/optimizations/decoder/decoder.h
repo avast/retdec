@@ -20,7 +20,6 @@
 #include <llvm/Transforms/Utils/BasicBlockUtils.h>
 
 #include "retdec/common/address.h"
-#include "retdec/bin2llvmir/analyses/reaching_definitions.h"
 #include "retdec/bin2llvmir/analyses/symbolic_tree.h"
 #include "retdec/bin2llvmir/providers/abi/abi.h"
 #include "retdec/bin2llvmir/providers/asm_instruction.h"
@@ -297,8 +296,6 @@ class Decoder : public llvm::ModulePass
 		NameContainer* _names = nullptr;
 		Llvm2CapstoneInsnMap* _llvm2capstone = nullptr;
 		Abi* _abi = nullptr;
-
-		ReachingDefinitionsAnalysis _RDA;
 
 		std::unique_ptr<capstone2llvmir::Capstone2LlvmIrTranslator> _c2l;
 		cs_insn* _dryCsInsn = nullptr;

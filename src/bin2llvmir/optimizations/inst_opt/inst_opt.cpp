@@ -355,11 +355,15 @@ bool addSequence(llvm::Instruction* insn)
 }
 
 /**
- * cast1 int/fp/ptr to ...
+ * cast1 fp/ptr to ...
  * ...
- * cast2 ... to int/fp/ptr
+ * cast2 ... to fp/ptr
  *   =>
- * cast int/fp/ptr to int/fp/ptr
+ * cast fp/ptr to fp/ptr
+ *
+ * Do not do this for integers. It is not always safe.
+ * E.g. i32 -> i1 -> i32 is not the same as i32 -> i32.
+ * It may not be safe for pointers and floats as well, but we leave it for now.
  */
 llvm::Value* castSequence(llvm::CastInst* cast1, llvm::CastInst* cast2)
 {
@@ -369,17 +373,7 @@ llvm::Value* castSequence(llvm::CastInst* cast1, llvm::CastInst* cast2)
 
 	Value* v = nullptr;
 
-	// int -> cast -> cast -> int
-	if (srcTy->isIntegerTy() && dstTy->isIntegerTy())
-	{
-		bool sign = cast1->getOpcode() == Instruction::SIToFP
-				|| cast2->getOpcode() == Instruction::FPToSI;
-		v = srcTy != dstTy
-				? CastInst::CreateIntegerCast(src, dstTy, sign, "", cast2)
-				: src;
-	}
-	// ptr -> cast -> cast -> ptr
-	else if (srcTy->isPointerTy() && dstTy->isPointerTy())
+	if (srcTy->isPointerTy() && dstTy->isPointerTy())
 	{
 		v = srcTy != dstTy
 				? CastInst::CreatePointerCast(src, dstTy, "", cast2)

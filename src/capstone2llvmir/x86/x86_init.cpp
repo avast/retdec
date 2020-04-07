@@ -73,17 +73,6 @@ void Capstone2LlvmIrTranslatorX86_impl::initializeRegNameMap()
 			{X87_REG_RC, "fpu_control_RC"},
 			{X87_REG_X, "fpu_control_X"},
 
-			// x87_reg_tag
-			//
-			{X87_REG_TAG0, "fpu_tag_0"},
-			{X87_REG_TAG1, "fpu_tag_1"},
-			{X87_REG_TAG2, "fpu_tag_2"},
-			{X87_REG_TAG3, "fpu_tag_3"},
-			{X87_REG_TAG4, "fpu_tag_4"},
-			{X87_REG_TAG5, "fpu_tag_5"},
-			{X87_REG_TAG6, "fpu_tag_6"},
-			{X87_REG_TAG7, "fpu_tag_7"},
-
 			// FPU data registers
 			// They are named as ST(X) in Capstone, which is not good for us.
 			//
@@ -429,17 +418,6 @@ void Capstone2LlvmIrTranslatorX86_impl::initializeRegTypeMap()
 			{X87_REG_PC, i2},
 			{X87_REG_RC, i2},
 			{X87_REG_X, i1},
-
-			// x87_reg_tag
-			//
-			{X87_REG_TAG0, i2},
-			{X87_REG_TAG1, i2},
-			{X87_REG_TAG2, i2},
-			{X87_REG_TAG3, i2},
-			{X87_REG_TAG4, i2},
-			{X87_REG_TAG5, i2},
-			{X87_REG_TAG6, i2},
-			{X87_REG_TAG7, i2},
 	};
 
 	_reg2type = std::move(r2t);

@@ -27,12 +27,6 @@ class IrModifier
 	// Can be used simply like this: \c IrModifier::method().
 	//
 	public:
-		template<typename Container>
-		static bool localize(
-				llvm::Instruction* storeDefinition,
-				const Container& uses,
-				bool eraseDefinition = true);
-
 		static llvm::AllocaInst* createAlloca(
 				llvm::Function* fnc,
 				llvm::Type* ty,
@@ -56,6 +50,10 @@ class IrModifier
 				llvm::CallInst* call,
 				llvm::Type* ret,
 				llvm::ArrayRef<llvm::Value*> args);
+
+		static void eraseUnusedInstructionRecursive(llvm::Value* insn);
+		static void eraseUnusedInstructionsRecursive(
+				std::unordered_set<llvm::Value*>& insns);
 
 	public:
 		IrModifier(llvm::Module* m, Config* c);
@@ -121,40 +119,6 @@ class IrModifier
 		llvm::Module* _module = nullptr;
 		Config* _config = nullptr;
 };
-
-template<typename Container>
-bool IrModifier::localize(
-		llvm::Instruction* storeDefinition,
-		const Container& uses,
-		bool eraseDefinition)
-{
-	llvm::StoreInst* definition = llvm::dyn_cast_or_null<llvm::StoreInst>(
-			storeDefinition);
-	if (definition == nullptr)
-	{
-		return false;
-	}
-	auto* ptr = definition->getPointerOperand();
-	auto* f = definition->getFunction();
-
-	auto* local = new llvm::AllocaInst(
-			ptr->getType()->getPointerElementType(),
-			Abi::DEFAULT_ADDR_SPACE);
-	local->insertBefore(&f->getEntryBlock().front());
-
-	new llvm::StoreInst(definition->getValueOperand(), local, definition);
-	if (eraseDefinition)
-	{
-		definition->eraseFromParent();
-	}
-
-	for (auto* u : uses)
-	{
-		reinterpret_cast<llvm::Instruction*>(u)->replaceUsesOfWith(ptr, local);
-	}
-
-	return true;
-}
 
 } // namespace bin2llvmir
 } // namespace retdec

@@ -39,7 +39,8 @@ add_library(bin2llvmir STATIC
 	optimizations/idioms_libgcc/idioms_libgcc.cpp
 	optimizations/inst_opt/inst_opt_pass.cpp
 	optimizations/inst_opt/inst_opt.cpp
-	optimizations/local_vars/local_vars.cpp
+	optimizations/inst_opt_rda/inst_opt_rda_pass.cpp
+	optimizations/inst_opt_rda/inst_opt_rda.cpp
 	optimizations/main_detection/main_detection.cpp
 	optimizations/param_return/collector/collector.cpp
 	optimizations/param_return/collector/pic32.cpp
