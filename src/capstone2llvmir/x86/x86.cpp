@@ -261,14 +261,6 @@ void Capstone2LlvmIrTranslatorX86_impl::generateX87RegLoadStoreFunctions()
 			"",
 			_module);
 
-	std::vector<llvm::Type*> tsp = {
-			llvm::Type::getIntNTy(_module->getContext(), 3),
-			llvm::Type::getIntNTy(_module->getContext(), 2)};
-	auto* tsft = llvm::FunctionType::get(
-			llvm::Type::getVoidTy(_module->getContext()),
-			tsp,
-			false);
-
 	auto* dlft = llvm::FunctionType::get(
 			llvm::Type::getX86_FP80Ty(_module->getContext()),
 			{llvm::Type::getIntNTy(_module->getContext(), 3)},
@@ -278,11 +270,6 @@ void Capstone2LlvmIrTranslatorX86_impl::generateX87RegLoadStoreFunctions()
 			llvm::GlobalValue::LinkageTypes::ExternalLinkage,
 			"",
 			_module);
-
-	auto* tlft = llvm::FunctionType::get(
-			llvm::Type::getIntNTy(_module->getContext(), 2),
-			{llvm::Type::getIntNTy(_module->getContext(), 3)},
-			false);
 }
 
 uint32_t Capstone2LlvmIrTranslatorX86_impl::getAccumulatorRegister(std::size_t size)
