@@ -327,6 +327,7 @@ See the [project documentation](https://retdec-tc.avast.com/repository/download/
 ## Related Repositories
 
 * [retdec-idaplugin](https://github.com/avast/retdec-idaplugin) -- Embeds RetDec into IDA (Interactive Disassembler) and makes its use much easier.
+* [retdec-r2plugin](https://github.com/avast/retdec-r2plugin) -- Embeds RetDec into Radare2 and makes its use much easier.
 * [retdec-regression-tests-framework](https://github.com/avast/retdec-regression-tests-framework) -- A framework for writing and running regression tests for RetDec and related tools. This is a must if you plan to contribute to the RetDec project.
 * [retdec-regression-tests](https://github.com/avast/retdec-regression-tests) -- A suite of regression tests for RetDec and related tools.
 * [retdec-build-system-tests](https://github.com/avast/retdec-build-system-tests) -- A suite of tests for RetDec's build system. This can also serve as a collection of demos on how to use RetDec libraries.
