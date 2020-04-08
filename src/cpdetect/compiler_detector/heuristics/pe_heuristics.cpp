@@ -1265,25 +1265,16 @@ void PeHeuristics::getMsvcIntelHeuristics()
  */
 void PeHeuristics::getArmadilloHeuristic()
 {
-	auto source = DetectionMethod::COMBINED;
-	auto strength = DetectionStrength::LOW;
-
 	auto majorVersion = peParser.getMajorLinkerVersion();
 	auto minorVersion = peParser.getMinorLinkerVersion();
 
 	if (majorVersion == 'S' && minorVersion == 'R')
 	{
-		for (const Section* section : peParser.getSections())
-		{
-			std::string bytes;
-			if (section->getString(bytes, 0, 8) && startsWith(bytes, "PDATA000"))
-			{
-				strength = DetectionStrength::HIGH;
-				break;
-			}
-		}
+		// Note: do NOT perform any extra checks here (like sections named "PDATA000").
+		// They are often not present in the image at all. Not even Windows 10's ntdll.dll
+		// (LdrpIsImageArmadilloProtected) checks for them.
 
-		addPacker(source, strength, "Armadillo");
+		addPacker(DetectionMethod::LINKER_VERSION_H, DetectionStrength::HIGH, "Armadillo");
 	}
 }
 
