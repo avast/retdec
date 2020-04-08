@@ -1142,12 +1142,36 @@ void PeHeuristics::getExcelsiorHeuristics()
  */
 void PeHeuristics::getVmProtectHeuristics()
 {
+	static const std::size_t BLOCK_COUNT = 64;
+	static const std::size_t BLOCK_SIZE = BLOCK_COUNT * sizeof(std::uint32_t);
 	auto source = DetectionMethod::COMBINED;
 	auto strength = DetectionStrength::HIGH;
 
 	if (noOfSections < 3 || (noOfSections == 3 && !sections[0]->getSizeInFile()))
 	{
 		return;
+	}
+
+	for (std::size_t i = 0; i < noOfSections; ++i) {
+		auto& section = sections[i];
+		if (section->isCode() && section->getSizeInFile() > BLOCK_SIZE)
+		{
+			auto bytes = section->getBytes();
+			auto data = bytes.data();
+			std::uint32_t checksum = 0;
+			// Compute the sum of first 64 DWORDs of the executable section.
+			for (std::size_t i = 0; i < BLOCK_COUNT; ++i)
+			{
+				checksum += *reinterpret_cast<const std::uint32_t*>(&data[i * 4]);
+			}
+			// If the checksum is correct, the sample is 100% packed with
+			// VMProtect 2.04+.
+			if (checksum == 0xB7896EB5)
+			{
+				addPacker(source, strength, "VMProtect", "2.04+");
+				return;
+			}
+		}
 	}
 
 	if (toolInfo.entryPointOffset && canSearch)
