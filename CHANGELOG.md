@@ -2,6 +2,8 @@
 
 # dev
 
+* Enhancement: Improved detection of many packers, including Armadillo ([#733](https://github.com/avast/retdec/pull/733)).
+
 # v4.0 (2020-04-07)
 
 * New Feature: Added support for decompilation of 64-bit ARM binaries ([#268](https://github.com/avast/retdec/issues/268), [#533](https://github.com/avast/retdec/pull/533), [#550](https://github.com/avast/retdec/pull/550)).
