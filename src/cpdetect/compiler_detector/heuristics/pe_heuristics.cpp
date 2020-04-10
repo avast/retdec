@@ -1156,13 +1156,13 @@ void PeHeuristics::getVmProtectHeuristics()
 		auto& section = sections[i];
 		if (section->isCode() && section->getSizeInFile() > BLOCK_SIZE)
 		{
-			auto bytes = section->getBytes();
-			auto data = bytes.data();
 			std::uint32_t checksum = 0;
 			// Compute the sum of first 64 DWORDs of the executable section.
 			for (std::size_t i = 0; i < BLOCK_COUNT; ++i)
 			{
-				checksum += *reinterpret_cast<const std::uint32_t*>(&data[i * 4]);
+				checksum += section->getBytesAtOffsetAsNumber<std::uint32_t>(
+					i * sizeof(std::uint32_t)
+				);
 			}
 			// If the checksum is correct, the sample is 100% packed with
 			// VMProtect 2.04+.
