@@ -1,9 +1,6 @@
 
 include(ExternalProject)
 
-include(ProcessorCount)
-ProcessorCount(CPUS)
-
 if(CMAKE_C_COMPILER)
 	set(CMAKE_C_COMPILER_OPTION "-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}")
 endif()

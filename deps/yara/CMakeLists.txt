@@ -20,7 +20,6 @@ if(MSVC)
 	set(YARA_SOLUTION      ${YARA_WIN_DIR}/yara.sln)
 	set(YARA_LIBRARY_DIR   ${YARA_WIN_DIR}/libyara/$<CONFIGURATION>)
 	set(YARA_BUILD_COMMAND "${CMAKE_VS_MSBUILD_COMMAND}"
-		/m:${CPUS}
 		/p:Platform=${PLATFORM}
 		/p:Configuration=$<CONFIGURATION>
 		/p:PlatformToolset=${CMAKE_VS_PLATFORM_TOOLSET}
@@ -29,7 +28,7 @@ if(MSVC)
 	set(YARAC_PATH         ${YARA_WIN_DIR}/\${CMAKE_INSTALL_CONFIG_NAME}/${YARAC_NAME})
 else()
 	set(YARA_LIBRARY_DIR ${YARA_DIR}/libyara/.libs)
-	set(YARA_BUILD_COMMAND make -j${CPUS})
+	set(YARA_BUILD_COMMAND make)
 	set(YARAC_PATH         ${YARA_DIR}/yarac)
 endif()
 
