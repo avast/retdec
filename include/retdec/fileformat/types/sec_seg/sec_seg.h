@@ -99,6 +99,25 @@ class SecSeg
 		bool getSizeOfOneEntry(unsigned long long &sEntrySize) const;
 		bool getMemory() const;
 		bool getEntropy(double &res) const;
+
+		/**
+		 * Read bytes from the given offset as a number of the given type.
+		 * @param sOffset Index from which the number should be read.
+		 * @return The read number. Returns zero if the offset is out-of-bounds or
+		 *         if there are not enough bytes to read.
+		 * @tparam NumberType Type of the number to read and return.
+		 */
+		template<typename NumberType>
+		NumberType getBytesAtOffsetAsNumber(unsigned long long sOffset) const
+		{
+			if(bytes.size() < sizeof(NumberType) || sOffset > bytes.size() - sizeof(NumberType))
+			{
+				return {};
+			}
+
+			auto rawBytes = bytes.data();
+			return *reinterpret_cast<const NumberType *>(&rawBytes[sOffset]);
+		}
 		/// @}
 
 		/// @name Getters of section or segment content
