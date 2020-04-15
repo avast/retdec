@@ -2,7 +2,7 @@
 
 # dev
 
-* Enhancement: Improved detection of many packers, including Armadillo ([#733](https://github.com/avast/retdec/pull/733)), VMProtect ([#734](https://github.com/avast/retdec/pull/734)), Petite ([#735](https://github.com/avast/retdec/pull/735)).
+* Enhancement: Improved detection of many packers, including Armadillo ([#733](https://github.com/avast/retdec/pull/733)), VMProtect ([#734](https://github.com/avast/retdec/pull/734)), Petite ([#735](https://github.com/avast/retdec/pull/735)), Enigma ([#741](https://github.com/avast/retdec/pull/741)).
 
 # v4.0 (2020-04-07)
 
