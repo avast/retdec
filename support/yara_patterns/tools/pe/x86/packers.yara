@@ -4786,16 +4786,28 @@ rule encryptpe_22008618_02 {
 		$1 at pe.entry_point
 }
 
-rule enigma_protector_102 {
+rule enigma_0x {
 	meta:
 		tool = "P"
-		name = "Enigma protector"
+		name = "Enigma"
+		version = "0.x beta"
+		pattern = "60E824000000??????EB02????8B44240C8380B80000000331C0C383C008EB02????89C461EB2E??????83042403EB01??31C0EB01??64FF30EB01??648920EB02????8900"
+	strings:
+		$1 = { 60 E8 24 00 00 00 ?? ?? ?? EB 02 ?? ?? 8B 44 24 0C 83 80 B8 00 00 00 03 31 C0 C3 83 C0 08 EB 02 ?? ?? 89 C4 61 EB 2E ?? ?? ?? 83 04 24 03 EB 01 ?? 31 C0 EB 01 ?? 64 FF 30 EB 01 ?? 64 89 20 EB 02 ?? ?? 89 00 }
+	condition:
+		@1 < pe.overlay.offset or $1
+}
+
+rule enigma_102 {
+	meta:
+		tool = "P"
+		name = "Enigma"
 		version = "1.02"
 		pattern = "60E8000000005D83ED0681ED??????????????????????????????????????????????????????????????????????E8010000009A83C404EB02FF3560E8240000000000FFEB02CD208B44240C8380B80000000331C0C383C008EB02FF1589C461EB2EEAEB2B83042403EB010031C0EB018564FF30EB0183648920EB02CD2089009A648F0500000000EB02C1905861EB013EBE01000000C1E60283EC0487DE891C24"
 	strings:
 		$1 = { 60 E8 00 00 00 00 5D 83 ED 06 81 ED ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? E8 01 00 00 00 9A 83 C4 04 EB 02 FF 35 60 E8 24 00 00 00 00 00 FF EB 02 CD 20 8B 44 24 0C 83 80 B8 00 00 00 03 31 C0 C3 83 C0 08 EB 02 FF 15 89 C4 61 EB 2E EA EB 2B 83 04 24 03 EB 01 00 31 C0 EB 01 85 64 FF 30 EB 01 83 64 89 20 EB 02 CD 20 89 00 9A 64 8F 05 00 00 00 00 EB 02 C1 90 58 61 EB 01 3E BE 01 00 00 00 C1 E6 02 83 EC 04 87 DE 89 1C 24 }
 	condition:
-		$1 at pe.entry_point
+		@1 < pe.overlay.offset or $1
 }
 
 rule enigma_11x {
@@ -4868,6 +4880,18 @@ rule enigma_1x_02 {
 		$1 = { 00 00 00 56 69 72 74 75 61 6C 41 6C 6C 6F 63 00 00 00 56 69 72 74 75 61 6C 46 72 65 65 00 00 00 47 65 74 4D 6F 64 75 6C 65 48 61 6E 64 6C 65 41 00 00 00 47 65 74 50 72 6F 63 41 64 64 72 65 73 73 00 00 00 45 78 69 74 50 72 6F 63 65 73 73 00 00 00 4C 6F 61 64 4C 69 62 72 61 72 79 41 00 00 00 4D 65 73 73 61 67 65 42 6F 78 41 00 00 00 52 65 67 43 6C 6F 73 65 4B 65 79 00 00 00 53 79 73 46 72 65 65 53 74 72 69 6E 67 00 00 00 43 72 65 61 74 65 46 6F 6E 74 41 00 00 00 53 68 65 6C 6C 45 78 65 63 75 74 65 41 00 00 }
 	condition:
 		$1 at pe.entry_point
+}
+
+rule enigma_1x_03 {
+	meta:
+		tool = "P"
+		name = "Enigma"
+		version = "1.x+"
+		pattern = "60E8000000005D81ED0600000081ED????????E9??000000454E49474D41"
+	strings:
+		$1 = { 60 E8 00 00 00 00 5D 81 ED 06 00 00 00 81 ED ?? ?? ?? ?? E9 ?? 00 00 00 45 4E 49 47 4D 41 }
+	condition:
+		@1 < pe.overlay.offset or $1
 }
 
 rule enigma_131 {
