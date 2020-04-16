@@ -82,7 +82,7 @@ void MpressPlugin::prepare()
 		throw UnsupportedFileException();
 
 	// We currently don't support PE32+ as the decompiler doesn't support them anyways
-	if (static_cast<retdec::fileformat::PeFormat*>(_file->getFileFormat())->getPeClass() != PeLib::PEFILE32)
+	if (!static_cast<retdec::fileformat::PeFormat*>(_file->getFileFormat())->isPe32())
 		throw UnsupportedFileException();
 
 	if (!_file->getEpSegment())
