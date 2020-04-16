@@ -580,7 +580,7 @@ void PeFormat::initStructures(const std::string & dllListFile)
 	initDllList(dllListFile);
 
 	file = openPeFile(fileStream);
-	if(file)
+	if (file)
 	{
 		stateIsValid = true;
 		try
@@ -603,36 +603,26 @@ void PeFormat::initStructures(const std::string & dllListFile)
 			initLoaderErrorInfo();
 
 			mzHeader = file->mzHeader();
-			switch((peClass = getFileType(fileStream)))
+
+			if (auto *f32 = dynamic_cast<PeFileT<32>*>(file))
 			{
-				case PEFILE32:
-				{
-					auto *f32 = dynamic_cast<PeFileT<32>*>(file);
-					if(f32)
-					{
-						peHeader32 = &(f32->peHeader());
-						formatParser = new PeFormatParser32(this, static_cast<PeFileT<32>*>(file));
-					}
-					stateIsValid = f32 && peHeader32;
-					break;
-				}
-				case PEFILE64:
-				{
-					auto *f64 = dynamic_cast<PeFileT<64>*>(file);
-					if(f64)
-					{
-						peHeader64 = &(f64->peHeader());
-						formatParser = new PeFormatParser64(this, static_cast<PeFileT<64>*>(file));
-					}
-					stateIsValid = f64 && peHeader64;
-					break;
-				}
-				default:
-				{
-					stateIsValid = false;
-				}
+				peHeader32 = &(f32->peHeader());
+				formatParser = new PeFormatParser32(this, static_cast<PeFileT<32>*>(file));
+				peClass = PEFILE32;
 			}
-		} catch(...)
+			else if (auto *f64 = dynamic_cast<PeFileT<64>*>(file))
+			{
+				peHeader64 = &(f64->peHeader());
+				formatParser = new PeFormatParser64(this, static_cast<PeFileT<64>*>(file));
+				peClass = PEFILE64;
+			}
+			else
+			{
+				peClass = PEFILE_UNKNOWN;
+				stateIsValid = false;
+			}
+		}
+		catch(...)
 		{
 			stateIsValid = false;
 		}
