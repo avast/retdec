@@ -705,7 +705,8 @@ namespace PeLib
 	{
 		unsigned int uiEntryPointRva = peHeader().getAddressOfEntryPoint();
 		std::uint64_t uiOffset = peHeader().rvaToOffset(uiEntryPointRva);
-		std::uint64_t entryPointCode[2];
+		// Initialize to anything not zero, because later we check if zero.
+		std::uint64_t entryPointCode[2] = {1, 1};
 
 		// No point of reading entry point that is beyond the file size
 		std::uint64_t ulFileSize = fileSize(m_iStream);
