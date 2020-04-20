@@ -7,6 +7,8 @@
 #ifndef FILEINFO_FILE_INFORMATION_FILE_INFORMATION_TYPES_FILE_HEADER_H
 #define FILEINFO_FILE_INFORMATION_FILE_INFORMATION_TYPES_FILE_HEADER_H
 
+#include <limits>
+
 #include "fileinfo/file_information/file_information_types/flags.h"
 
 namespace retdec {
