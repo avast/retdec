@@ -170,16 +170,16 @@ retdec::cpdetect::DetectionStrength metaToStrength(const retdec::yaracpp::YaraMe
 	{
 		const auto & toolStrength = strengthMeta->getStringValue();
 
-		if (!stricmp(toolStrength.c_str(), "low"))
+		if (areEqualCaseInsensitive(toolStrength, "low"))
 			return DetectionStrength::LOW;
 
-		if (!stricmp(toolStrength.c_str(), "medium"))
+		if (areEqualCaseInsensitive(toolStrength, "medium"))
 			return DetectionStrength::MEDIUM;
 
-		if (!stricmp(toolStrength.c_str(), "high"))
+		if (areEqualCaseInsensitive(toolStrength, "high"))
 			return DetectionStrength::HIGH;
 
-		if (!stricmp(toolStrength.c_str(), "sure"))
+		if (areEqualCaseInsensitive(toolStrength, "sure"))
 			return DetectionStrength::SURE;
 	}
 

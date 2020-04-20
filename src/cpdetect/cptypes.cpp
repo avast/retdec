@@ -300,7 +300,7 @@ std::string detectionMetodToString(DetectionMethod method)
 			return "heuristic";
 
 		case DetectionMethod::YARA_RULE:
-			return "yara rule";
+			return "YARA rule";
 
 		case DetectionMethod::UNKNOWN:
 			/* fall-thru */
