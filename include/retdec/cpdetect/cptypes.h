@@ -64,6 +64,7 @@ enum class DetectionMethod
 	NOTE_H,              ///< .note section
 	MANIFEST_H,          ///< manifest resource
 	HEADER_H,            ///< MZ header
+	YARA_RULE,           ///< Heiristic detection by a YARA rule
 	OTHER_H              ///< other heuristic
 };
 

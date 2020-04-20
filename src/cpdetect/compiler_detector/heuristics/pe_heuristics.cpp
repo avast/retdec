@@ -719,18 +719,9 @@ void PeHeuristics::getEzirizReactorHeuristics()
 {
 	auto source = DetectionMethod::COMBINED;
 	auto strength = DetectionStrength::HIGH;
-
 	std::string version;
-	if (noOfSections > 3
-			&& fileParser.getSection("reacto")
-			&& !sections[1]->getSizeInFile()
-			&& !sections[2]->getSizeInFile()
-			&& !sections[3]->getSizeInFile())
-	{
-		version = "2.0 - 2.1";
-		source = DetectionMethod::SECTION_TABLE_H;
-	}
-	else if (canSearch)
+
+	if (canSearch)
 	{
 		const auto *sec0 = peParser.getPeSection(0);
 		const auto *sec1 = peParser.getPeSection(1);
@@ -745,7 +736,7 @@ void PeHeuristics::getEzirizReactorHeuristics()
 				&& search.findUnslashedSignature("5266686E204D182276B5331112330C6D0A204D18229EA129611C76B505190158;",
 					sec1->getOffset(), sec1->getOffset() + sec1->getLoadedSize() - 1))
 		{
-			version = "4.8 - 5.0";
+			version = "4.0.0.0 - 6.0.0.0";
 		}
 		else if (noOfSections >= 4
 				&& toolInfo.entryPointOffset
@@ -761,13 +752,11 @@ void PeHeuristics::getEzirizReactorHeuristics()
 				{
 					if (search.exactComparison("E8--------E9--------6A0C68;", toolInfo.epOffset))
 					{
-						version = "4.2";
+						version = "4.0.0.0 - 4.4.7.5";
 					}
-					else if (search.exactComparison(
-								"E8--------E9--------8BFF558BEC83EC208B45085657;",
-								toolInfo.epOffset))
+					else if (search.exactComparison("E8--------E9--------8BFF558BEC83EC208B45085657;", toolInfo.epOffset))
 					{
-						version = "4.5 - 4.7";
+						version = "4.5.0.0 - 6.2.9.2";
 					}
 				}
 			}

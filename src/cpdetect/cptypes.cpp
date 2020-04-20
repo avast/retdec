@@ -299,6 +299,9 @@ std::string detectionMetodToString(DetectionMethod method)
 		case DetectionMethod::OTHER_H:
 			return "heuristic";
 
+		case DetectionMethod::YARA_RULE:
+			return "yara rule";
+
 		case DetectionMethod::UNKNOWN:
 			/* fall-thru */
 

@@ -70,6 +70,72 @@ rule ep_exepack_360_406 {
 		$1 at pe.entry_point
 }
 
+rule eziriz_dotnet_reactor_2x {
+	meta:
+		tool = "P"
+		name = "Eziriz .NET Reactor"
+		version = "2.0 - 2.1"
+	condition:
+		pe.number_of_sections > 3 and
+		pe.sections[1].raw_data_size == 0 and
+		pe.sections[2].raw_data_size == 0 and
+		pe.sections[3].raw_data_size == 0 and
+		(
+			pe.sections[0].name == "reacto" or
+			pe.sections[1].name == "reacto" or
+			pe.sections[2].name == "reacto" or
+			pe.sections[3].name == "reacto"
+		)
+}
+
+rule eziriz_dotnet_reactor_40_60 {
+	meta:
+		tool = "P"
+		name = "Eziriz .NET Reactor"
+		version = "4.0.0.0 - 6.0.0.0"
+		extra = ".NET protection"
+		strength = "high"
+	condition:
+		pe.number_of_sections == 4 and
+		pe.sections[1].name == ".sdata" and
+		pe.sections[1].characteristics == 0xC0000040 and
+		pe.imports("mscoree.dll")
+}
+
+rule eziriz_dotnet_reactor_62_or_newer {
+	meta:
+		tool = "P"
+		name = "Eziriz .NET Reactor"
+		version = "6.2.0.0 or newer"
+		extra = ".NET protection"
+	strings:
+		$s01 = "{11111-22222-20001-00001}" wide
+		$s02 = "{11111-22222-30001-00001}" wide
+		$s03 = "{11111-22222-40001-00001}" wide
+		$s04 = "{11111-22222-50001-00001}" wide
+	condition:
+		pe.number_of_sections == 3 and
+		pe.imports("mscoree.dll") and
+		all of them
+}
+
+// TODO: When retdec's YARAC will be of a newer version
+//rule eziriz_dotnet_reactor_62_or_newer {
+//	meta:
+//		tool = "P"
+//		name = "Eziriz .NET Reactor"
+//		version = "6.2.0.0 or newer"
+//		extra = ".NET protection"
+//	condition:
+//		pe.number_of_sections == 3 and
+//		pe.imports("mscoree.dll") and
+//		dotnet.number_of_user_strings > 8 and
+//		dotnet.user_strings[dotnet.number_of_user_strings - 8] == "{\x001\x001\x001\x001\x001\x00-\x002\x002\x002\x002\x002\x00-\x002\x000\x000\x000\x001\x00-\x000\x000\x000\x000\x001\x00}\x00\x00" and
+//		dotnet.user_strings[dotnet.number_of_user_strings - 6] == "{\x001\x001\x001\x001\x001\x00-\x002\x002\x002\x002\x002\x00-\x003\x000\x000\x000\x001\x00-\x000\x000\x000\x000\x001\x00}\x00\x00" and
+//		dotnet.user_strings[dotnet.number_of_user_strings - 4] == "{\x001\x001\x001\x001\x001\x00-\x002\x002\x002\x002\x002\x00-\x004\x000\x000\x000\x001\x00-\x000\x000\x000\x000\x001\x00}\x00\x00" and
+//		dotnet.user_strings[dotnet.number_of_user_strings - 2] == "{\x001\x001\x001\x001\x001\x00-\x002\x002\x002\x002\x002\x00-\x005\x000\x000\x000\x001\x00-\x000\x000\x000\x000\x001\x00}\x00\x00"
+//}
+
 rule spirit_15_01 {
 	meta:
 		tool = "P"

@@ -161,6 +161,31 @@ ToolType metaToTool(const std::string &toolMeta)
 	return ToolType::UNKNOWN;
 }
 
+/**
+* Convert meta to type of tool.
+*/
+retdec::cpdetect::DetectionStrength metaToStrength(const retdec::yaracpp::YaraMeta * strengthMeta)
+{
+	if(strengthMeta)
+	{
+		const auto & toolStrength = strengthMeta->getStringValue();
+
+		if (!stricmp(toolStrength.c_str(), "low"))
+			return DetectionStrength::LOW;
+
+		if (!stricmp(toolStrength.c_str(), "medium"))
+			return DetectionStrength::MEDIUM;
+
+		if (!stricmp(toolStrength.c_str(), "high"))
+			return DetectionStrength::HIGH;
+
+		if (!stricmp(toolStrength.c_str(), "sure"))
+			return DetectionStrength::SURE;
+	}
+
+	return DetectionStrength::MEDIUM;
+}
+
 } // anonymous namespace
 
 /**
@@ -368,28 +393,53 @@ ReturnCode CompilerDetector::getAllSignatures()
 	{
 		for (const auto &rule : detected)
 		{
-			const auto *match = rule.getFirstMatch();
-			const auto *nameMeta = rule.getMeta("name");
-			const auto *patternMeta = rule.getMeta("pattern");
-			if (!match || !nameMeta || !patternMeta)
+			// In order to include result from this rule, there must have been a match
+			if(rule.getFirstMatch())
 			{
-				continue;
-			}
-			const auto nibbles = search->countImpNibbles(patternMeta->getStringValue());
-			if (nibbles)
-			{
-				result = true;
-				const auto *toolMeta = rule.getMeta("tool");
-				const auto *versionMeta = rule.getMeta("version");
-				const auto *commentMeta = rule.getMeta("comment");
-				const auto *languageMeta = rule.getMeta("language");
-				const auto *bytecodeMeta = rule.getMeta("bytecode");
-				commentMeta = commentMeta ? commentMeta : rule.getMeta("extra");
-				toolInfo.addTool(nibbles, nibbles, toolMeta ? metaToTool(toolMeta->getStringValue()) : ToolType::UNKNOWN,
-					nameMeta->getStringValue(), versionMeta ? versionMeta->getStringValue() : "", commentMeta ? commentMeta->getStringValue() : "");
-				if (languageMeta)
+				// The rule requires to have "name" meta tag
+				const auto *nameMeta = rule.getMeta("name");
+				if(nameMeta)
 				{
-					toolInfo.addLanguage(languageMeta->getStringValue(), "", bytecodeMeta ? true : false);
+					const auto *toolMeta = rule.getMeta("tool");
+					const auto *versionMeta = rule.getMeta("version");
+					const auto *commentMeta = rule.getMeta("comment");
+					const auto & version = versionMeta ? versionMeta->getStringValue() : "";
+					auto toolType = toolMeta ? metaToTool(toolMeta->getStringValue()) : ToolType::UNKNOWN;
+
+					// Use "extra" meta-tag for extra value, if comment is not available
+					if(!commentMeta)
+						commentMeta = rule.getMeta("extra");
+					const auto & extra = commentMeta ? commentMeta->getStringValue() : "";
+
+					// If the rule has the "pattern" meta tag, it means that it's a nibble detection
+					const auto *patternMeta = rule.getMeta("pattern");
+					if(patternMeta)
+					{
+						const auto nibbles = search->countImpNibbles(patternMeta->getStringValue());
+						if (nibbles)
+						{
+							result = true;
+							const auto *languageMeta = rule.getMeta("language");
+							const auto *bytecodeMeta = rule.getMeta("bytecode");
+							commentMeta = commentMeta ? commentMeta : rule.getMeta("extra");
+							toolInfo.addTool(nibbles, nibbles, toolType, nameMeta->getStringValue(), version, extra);
+							if (languageMeta)
+							{
+								toolInfo.addLanguage(languageMeta->getStringValue(), "", bytecodeMeta ? true : false);
+							}
+						}
+					}
+
+					// If there is no "pattern" meta-tag, we consider the rule to be a heuristic detection
+					else
+					{
+						toolInfo.addTool(DetectionMethod::YARA_RULE,
+										 metaToStrength(rule.getMeta("language")),
+										 toolType,
+										 nameMeta->getStringValue(),
+										 version,
+										 extra);
+					}
 				}
 			}
 		}
