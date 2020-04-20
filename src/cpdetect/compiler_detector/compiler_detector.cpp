@@ -393,10 +393,10 @@ ReturnCode CompilerDetector::getAllSignatures()
 	{
 		for (const auto &rule : detected)
 		{
-			// In order to include result from this rule, there must have been a match
+			// In order to include result from a rule, there must have been a match
 			if(rule.getFirstMatch())
 			{
-				// The rule requires to have "name" meta tag
+				// The rule requires to have the "name" meta-tag
 				const auto *nameMeta = rule.getMeta("name");
 				if(nameMeta)
 				{
@@ -411,7 +411,7 @@ ReturnCode CompilerDetector::getAllSignatures()
 						commentMeta = rule.getMeta("extra");
 					const auto & extra = commentMeta ? commentMeta->getStringValue() : "";
 
-					// If the rule has the "pattern" meta tag, it means that it's a nibble detection
+					// If the rule has the "pattern" meta-tag, it means that it's a nibble detection
 					const auto *patternMeta = rule.getMeta("pattern");
 					if(patternMeta)
 					{
