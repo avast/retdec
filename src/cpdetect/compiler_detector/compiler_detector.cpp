@@ -166,7 +166,7 @@ ToolType metaToTool(const std::string &toolMeta)
 */
 retdec::cpdetect::DetectionStrength metaToStrength(const retdec::yaracpp::YaraMeta * strengthMeta)
 {
-	if(strengthMeta)
+	if (strengthMeta)
 	{
 		const auto & toolStrength = strengthMeta->getStringValue();
 
@@ -394,11 +394,11 @@ ReturnCode CompilerDetector::getAllSignatures()
 		for (const auto &rule : detected)
 		{
 			// In order to include result from a rule, there must have been a match
-			if(rule.getFirstMatch())
+			if (rule.getFirstMatch())
 			{
 				// The rule requires to have the "name" meta-tag
 				const auto *nameMeta = rule.getMeta("name");
-				if(nameMeta)
+				if (nameMeta)
 				{
 					const auto *toolMeta = rule.getMeta("tool");
 					const auto *versionMeta = rule.getMeta("version");
@@ -407,13 +407,13 @@ ReturnCode CompilerDetector::getAllSignatures()
 					auto toolType = toolMeta ? metaToTool(toolMeta->getStringValue()) : ToolType::UNKNOWN;
 
 					// Use "extra" meta-tag for extra value, if comment is not available
-					if(!commentMeta)
+					if (!commentMeta)
 						commentMeta = rule.getMeta("extra");
 					const auto & extra = commentMeta ? commentMeta->getStringValue() : "";
 
 					// If the rule has the "pattern" meta-tag, it means that it's a nibble detection
 					const auto *patternMeta = rule.getMeta("pattern");
-					if(patternMeta)
+					if (patternMeta)
 					{
 						const auto nibbles = search->countImpNibbles(patternMeta->getStringValue());
 						if (nibbles)
@@ -429,16 +429,17 @@ ReturnCode CompilerDetector::getAllSignatures()
 							}
 						}
 					}
-
 					// If there is no "pattern" meta-tag, we consider the rule to be a heuristic detection
 					else
 					{
-						toolInfo.addTool(DetectionMethod::YARA_RULE,
-										 metaToStrength(rule.getMeta("language")),
-										 toolType,
-										 nameMeta->getStringValue(),
-										 version,
-										 extra);
+						toolInfo.addTool(
+							DetectionMethod::YARA_RULE,
+							metaToStrength(rule.getMeta("language")),
+							toolType,
+							nameMeta->getStringValue(),
+							version,
+							extra
+						);
 					}
 				}
 			}
@@ -584,7 +585,7 @@ ReturnCode CompilerDetector::getAllInformation()
 	toolInfo.entryPointAddress = fileParser.getEpAddress(toolInfo.epAddress);
 	toolInfo.entryPointOffset = fileParser.getEpOffset(toolInfo.epOffset);
 
-	if((toolInfo.overlaySize = fileParser.getOverlaySize()) != 0)
+	if ((toolInfo.overlaySize = fileParser.getOverlaySize()) != 0)
 	{
 		toolInfo.overlayOffset = fileParser.getDeclaredFileLength();
 	}

@@ -344,7 +344,7 @@ std::int32_t PeHeuristics::getInt32Unaligned(const std::uint8_t * codePtr)
  */
 const std::uint8_t * PeHeuristics::skip_NOP_JMP8_JMP32(const std::uint8_t * codeBegin, const std::uint8_t * codePtr, const std::uint8_t * codeEnd, std::size_t maxCount)
 {
-	while(codeBegin <= codePtr && codePtr < codeEnd && maxCount > 0)
+	while (codeBegin <= codePtr && codePtr < codeEnd && maxCount > 0)
 	{
 		ssize_t movePtrBy = 0;
 

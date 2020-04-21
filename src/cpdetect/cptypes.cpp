@@ -154,13 +154,13 @@ void ToolInformation::addTool(
 void ToolInformation::addLanguage(const std::string &name, const std::string &extra, bool bytecode)
 {
 	// Prevent duplicates.
-	for(auto &item : detectedLanguages)
+	for (auto &item : detectedLanguages)
 	{
-		if(item.name == name)
+		if (item.name == name)
 		{
-			if(item.additionalInfo.empty() || item.additionalInfo == extra)
+			if (item.additionalInfo.empty() || item.additionalInfo == extra)
 			{
-				if(!item.bytecode)
+				if (!item.bytecode)
 				{
 					item.bytecode = bytecode;
 				}
@@ -193,9 +193,9 @@ bool ToolInformation::isReliableResult(std::size_t resultIndex) const
  */
 bool ToolInformation::hasReliableResult() const
 {
-	for(std::size_t i = 0, e = detectedTools.size(); i < e; ++i)
+	for (std::size_t i = 0, e = detectedTools.size(); i < e; ++i)
 	{
-		if(isReliableResult(i))
+		if (isReliableResult(i))
 		{
 			return true;
 		}
