@@ -434,7 +434,7 @@ ReturnCode CompilerDetector::getAllSignatures()
 					{
 						toolInfo.addTool(
 							DetectionMethod::YARA_RULE,
-							metaToStrength(rule.getMeta("language")),
+							metaToStrength(rule.getMeta("strength")),
 							toolType,
 							nameMeta->getStringValue(),
 							version,
