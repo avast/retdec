@@ -252,19 +252,11 @@ Note: Although RetDec now supports a system-wide installation ([#94](https://git
     # FreeBSD (and other BSDs) do need cmake, python3, git, autotools. Perl is pre-installed in the OS but check its version.
     # Later versions may be available for each of the packages.
     # See what is installed:
-<<<<<<< HEAD
     sudo pkg info cmake python autotools
     # Install/upgrade them:
     sudo pkg install cmake python37 autotools
     ```
   * `cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local # /usr/local is consistent with all FreeBSD RELEASE unrelated Software`
-=======
-    sudo pkg info cmake python37 autotools
-    # Install/upgrade them:
-    sudo pkg install cmake python37 autotools
-    ```
-  * `cmake .. -DCMAKE_INSTALL_PREFIX=<path>`
->>>>>>> 8bcd65017faf195467a219f33ebc581623ae4652
   * `make -jN` (`N` is the number of processes to use for parallel build, typically number of cores + 1 gives fastest compilation time)
   * `make install`
 

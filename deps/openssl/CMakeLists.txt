@@ -171,21 +171,12 @@ ExternalProject_Add(openssl
 set(OPENSSL_CRYPTO_LIB_NAME  libcrypto${CMAKE_STATIC_LIBRARY_SUFFIX})
 set(OPENSSL_CRYPTO_LIB_PNAME libretdec-openssl-crypto${CMAKE_STATIC_LIBRARY_SUFFIX})
 set(OPENSSL_CRYPTO_LIB       ${OPENSSL_INSTALL_DIR}/lib/${OPENSSL_CRYPTO_LIB_NAME})
-<<<<<<< HEAD
 
 # Create target.
 add_library(openssl-crypto INTERFACE)
 add_library(retdec::deps::openssl-crypto ALIAS openssl-crypto)
 add_dependencies(openssl-crypto openssl)
 
-=======
-
-# Create target.
-add_library(openssl-crypto INTERFACE)
-add_library(retdec::deps::openssl-crypto ALIAS openssl-crypto)
-add_dependencies(openssl-crypto openssl)
-
->>>>>>> 8bcd65017faf195467a219f33ebc581623ae4652
 target_include_directories(openssl-crypto
 	SYSTEM INTERFACE
 		$<BUILD_INTERFACE:${OPENSSL_INSTALL_DIR}/include>
