@@ -95,6 +95,7 @@ if(NOT MSVC)
 		COMMAND ./bootstrap.sh
 		COMMAND ./configure
 			--prefix=${YARA_INSTALL_DIR}
+			--enable-dotnet
 			--enable-macho
 			--disable-shared
 			--without-crypto

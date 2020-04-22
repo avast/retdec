@@ -4,6 +4,7 @@
 
 * Enhancement: Improved detection of many packers in `retdec-fileinfo`, including Armadillo ([#733](https://github.com/avast/retdec/pull/733)), VMProtect ([#734](https://github.com/avast/retdec/pull/734)), Petite ([#735](https://github.com/avast/retdec/pull/735)), Enigma ([#741](https://github.com/avast/retdec/pull/741)), ASPack ([#743](https://github.com/avast/retdec/pull/743)), Eziriz ([#746](https://github.com/avast/retdec/pull/746)).
 * Enhancement: Added a detection of PyInstaller to `retdec-fileinfo` ([#748](https://github.com/avast/retdec/pull/748)).
+* Enhancement: Enable .NET module in RetDec's YARA ([#747](https://github.com/avast/retdec/issues/747)).
 * Fix: Fixed build on some systems by adding missing includes of `<limits>` into `retdec-fileinfo` ([#745](https://github.com/avast/retdec/pull/745)).
 
 # v4.0 (2020-04-07)
