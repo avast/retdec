@@ -17,8 +17,10 @@ namespace cpdetect {
  * Constructor
  */
 ElfCompiler::ElfCompiler(
-		fileformat::ElfFormat &parser, DetectParams &params, ToolInformation &tools)
-	: CompilerDetector(parser, params, tools)
+		fileformat::ElfFormat &parser,
+		DetectParams &params,
+		ToolInformation &tools)
+		: CompilerDetector(parser, params, tools)
 {
 	heuristics = new ElfHeuristics(parser, *search, toolInfo);
 	externalSuffixes = EXTERNAL_DATABASE_SUFFIXES;

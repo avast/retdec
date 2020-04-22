@@ -19,7 +19,10 @@ namespace cpdetect {
 class ElfCompiler : public CompilerDetector
 {
 	public:
-		ElfCompiler(retdec::fileformat::ElfFormat &parser, DetectParams &params, ToolInformation &tools);
+		ElfCompiler(
+				retdec::fileformat::ElfFormat &parser,
+				DetectParams &params,
+				ToolInformation &tools);
 };
 
 } // namespace cpdetect

@@ -20,7 +20,8 @@ namespace cpdetect {
  * @param parser Parser of input file
  * @param params Parameters for compiler detection
  * @param toolInfo Into this parameter are stored detected tools
- * @return Pointer to instance of CompilerDetector class or @c nullptr if any error
+ * @return Pointer to instance of CompilerDetector class or @c nullptr
+ * if any error
  *
  * If format of input file is not supported, function will return @c nullptr.
  */

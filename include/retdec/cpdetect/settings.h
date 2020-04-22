@@ -28,7 +28,8 @@ const std::set<std::string> EXTERNAL_DATABASE_SUFFIXES =
 	".yarac"
 };
 
-const std::string YARA_RULES_PATH = "../share/retdec/support/generic/yara_patterns/tools/";
+const std::string YARA_RULES_PATH =
+		"../share/retdec/support/generic/yara_patterns/tools/";
 
 } // namespace cpdetect
 } // namespace retdec

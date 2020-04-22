@@ -17,8 +17,10 @@ namespace cpdetect {
  * Constructor
  */
 PeCompiler::PeCompiler(
-		fileformat::PeFormat &parser, DetectParams &params, ToolInformation &tools)
-	: CompilerDetector(parser, params, tools)
+		fileformat::PeFormat &parser,
+		DetectParams &params,
+		ToolInformation &tools)
+		: CompilerDetector(parser, params, tools)
 {
 	heuristics = new PeHeuristics(parser, *search, toolInfo);
 	externalSuffixes = EXTERNAL_DATABASE_SUFFIXES;

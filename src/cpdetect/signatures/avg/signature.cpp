@@ -20,10 +20,18 @@ namespace cpdetect {
  * @param sEnd End offset of pattern
  */
 Signature::Signature(
-		std::string sName, std::string sVersion, std::string sPattern, std::string sAdditional,
-		unsigned sStart, unsigned sEnd)
-	: name(sName), version(sVersion), pattern(sPattern), additional(sAdditional),
-		startOffset(sStart), endOffset(sEnd)
+		std::string sName,
+		std::string sVersion,
+		std::string sPattern,
+		std::string sAdditional,
+		unsigned sStart,
+		unsigned sEnd)
+		: name(sName)
+		, version(sVersion)
+		, pattern(sPattern)
+		, additional(sAdditional)
+		, startOffset(sStart)
+		, endOffset(sEnd)
 {
 
 }

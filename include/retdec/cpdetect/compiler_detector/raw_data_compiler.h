@@ -19,7 +19,10 @@ namespace cpdetect {
 class RawDataCompiler : public CompilerDetector
 {
 	public:
-		RawDataCompiler(retdec::fileformat::RawDataFormat &parser, DetectParams &params, ToolInformation &tools);
+		RawDataCompiler(
+				retdec::fileformat::RawDataFormat &parser,
+				DetectParams &params,
+				ToolInformation &tools);
 };
 
 } // namespace cpdetect

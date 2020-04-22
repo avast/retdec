@@ -59,14 +59,21 @@ class Heuristics
 		/// @}
 
 	protected:
-		retdec::fileformat::FileFormat &fileParser; ///< input file parser
-		Search &search;                             ///< signature search engine
-		bool canSearch;                             ///< @c true if we can use search engine
-		ToolInformation &toolInfo;                  ///< results - detected tools
+		/// input file parser
+		retdec::fileformat::FileFormat &fileParser;
+		/// signature search engine
+		Search &search;
+		/// @c true if we can use search engine
+		bool canSearch;
+		/// results - detected tools
+		ToolInformation &toolInfo;
 
-		std::vector<const retdec::fileformat::Section*> sections; ///< section information
-		std::map<std::string, std::size_t> sectionNameMap;        ///< section name counts
-		std::size_t noOfSections;                                 ///< section count
+		/// section information
+		std::vector<const retdec::fileformat::Section*> sections;
+		/// section name counts
+		std::map<std::string, std::size_t> sectionNameMap;
+		/// section count
+		std::size_t noOfSections;
 
 		/**
 		 * If @c true original language is detected with high reliability.
@@ -91,36 +98,56 @@ class Heuristics
 		/// @name Add heuristic detection methods
 		/// @{
 		void addCompiler(
-				DetectionMethod source, DetectionStrength strength, const std::string &name,
-				const std::string &version = "", const std::string &extra = "");
+				DetectionMethod source,
+				DetectionStrength strength,
+				const std::string &name,
+				const std::string &version = "",
+				const std::string &extra = "");
 		void addLinker(
-				DetectionMethod source, DetectionStrength strength, const std::string &name,
-				const std::string &version = "", const std::string &extra = "");
+				DetectionMethod source,
+				DetectionStrength strength,
+				const std::string &name,
+				const std::string &version = "",
+				const std::string &extra = "");
 		void addInstaller(
-				DetectionMethod source, DetectionStrength strength, const std::string &name,
-				const std::string &version = "", const std::string &extra = "");
+				DetectionMethod source,
+				DetectionStrength strength,
+				const std::string &name,
+				const std::string &version = "",
+				const std::string &extra = "");
 		void addPacker(
-				DetectionMethod source, DetectionStrength strength, const std::string &name,
-				const std::string &version = "", const std::string &extra = "");
+				DetectionMethod source,
+				DetectionStrength strength,
+				const std::string &name,
+				const std::string &version = "",
+				const std::string &extra = "");
 		/// @}
 
 		/// @name Add signature detection methods
 		/// @{
 		void addCompiler(
-				std::size_t matchNibbles, std::size_t totalNibbles, const std::string &name,
-				const std::string &version = "", const std::string &extra = "");
+				std::size_t matchNibbles,
+				std::size_t totalNibbles,
+				const std::string &name,
+				const std::string &version = "",
+				const std::string &extra = "");
 		void addPacker(
-				std::size_t matchNibbles, std::size_t totalNibbles, const std::string &name,
-				const std::string &version = "", const std::string &extra = "");
+				std::size_t matchNibbles,
+				std::size_t totalNibbles,
+				const std::string &name,
+				const std::string &version = "",
+				const std::string &extra = "");
 		/// @}
 
 		/// @name Add language methods
 		/// @{
 		void addLanguage(
-				const std::string &name, const std::string &extraInfo = "",
+				const std::string &name,
+				const std::string &extraInfo = "",
 				bool isBytecode = false);
 		void addPriorityLanguage(
-				const std::string &name, const std::string &extraInfo = "",
+				const std::string &name,
+				const std::string &extraInfo = "",
 				bool isBytecode = false);
 		/// @}
 

@@ -15,7 +15,8 @@ namespace cpdetect {
 /**
  * Check if signature pattern contains slash
  * @param pattern Signature pattern
- * @return @c true if @a pattern contains at least one slash, @c false otherwise
+ * @return @c true if @a pattern contains at least one slash,
+ *         @c false otherwise
  */
 bool isSlashed(const std::string &pattern)
 {
@@ -25,7 +26,8 @@ bool isSlashed(const std::string &pattern)
 /**
  * Check if @a pattern is valid signature pattern in our format
  * @param pattern Signature pattern
- * @return @c true if @a pattern is valid signature pattern, @c false otherwise
+ * @return @c true if @a pattern is valid signature pattern,
+ *         @c false otherwise
  */
 bool isValidSignaturePattern(const std::string &pattern)
 {
@@ -39,7 +41,8 @@ bool isValidSignaturePattern(const std::string &pattern)
 /**
  * Check if @a pattern is valid unslashed signature pattern in our format
  * @param pattern Signature pattern
- * @return @c true if @a pattern is valid unslashed signature pattern, @c false otherwise
+ * @return @c true if @a pattern is valid unslashed signature pattern,
+ *         @c false otherwise
  */
 bool isValidUnslashedPattern(const std::string &pattern)
 {

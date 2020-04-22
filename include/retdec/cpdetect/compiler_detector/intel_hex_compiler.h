@@ -19,7 +19,10 @@ namespace cpdetect {
 class IntelHexCompiler : public CompilerDetector
 {
 	public:
-		IntelHexCompiler(retdec::fileformat::IntelHexFormat &parser, DetectParams &params, ToolInformation &tools);
+		IntelHexCompiler(
+				retdec::fileformat::IntelHexFormat &parser,
+				DetectParams &params,
+				ToolInformation &tools);
 };
 
 } // namespace cpdetect

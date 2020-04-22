@@ -28,7 +28,10 @@ const std::string defaultError = "Error: Unknown error.";
 /**
  * Error messages of library
  */
-const std::unordered_map<ReturnCode, std::string, retdec::utils::EnumClassKeyHash> errorMessages =
+const std::unordered_map<
+		ReturnCode,
+		std::string,
+		retdec::utils::EnumClassKeyHash> errorMessages =
 {
 	{
 		ReturnCode::OK,
@@ -80,15 +83,19 @@ const std::unordered_map<ReturnCode, std::string, retdec::utils::EnumClassKeyHas
  * @param format Detected format (optional)
  * @return Error message
  */
-std::string getErrorMessage(ReturnCode errorCode, retdec::fileformat::Format format)
+std::string getErrorMessage(
+		ReturnCode errorCode,
+		retdec::fileformat::Format format)
 {
 	auto str = mapGetValueOrDefault(errorMessages, errorCode, defaultError);
 	switch(errorCode)
 	{
 		case ReturnCode::UNKNOWN_FORMAT:
-			return str + " Supported formats: " + joinStrings(getSupportedFileFormats()) + ".";
+			return str + " Supported formats: "
+					+ joinStrings(getSupportedFileFormats()) + ".";
 		case ReturnCode::FORMAT_PARSER_PROBLEM:
-			return str + " Detected format is: " + getFileFormatNameFromEnum(format) + ".";
+			return str + " Detected format is: "
+					+ getFileFormatNameFromEnum(format) + ".";
 		default:
 			return str;
 	}

@@ -234,8 +234,12 @@ std::string commentSectionNameByFormat(Format format)
  * @param toolInfo Structure for information about detected tools
  */
 Heuristics::Heuristics(
-		retdec::fileformat::FileFormat &parser, Search &searcher, ToolInformation &toolInfo)
-	: fileParser(parser), search(searcher), toolInfo(toolInfo)
+		retdec::fileformat::FileFormat &parser,
+		Search &searcher,
+		ToolInformation &toolInfo)
+		: fileParser(parser)
+		, search(searcher)
+		, toolInfo(toolInfo)
 {
 	canSearch = search.isFileLoaded() && search.isFileSupported();
 
@@ -268,8 +272,11 @@ Heuristics::Heuristics(
  * @param extra Extra information about compiler
  */
 void Heuristics::addCompiler(
-		DetectionMethod source, DetectionStrength strength, const std::string &name,
-		const std::string &version, const std::string &extra)
+		DetectionMethod source,
+		DetectionStrength strength,
+		const std::string &name,
+		const std::string &version,
+		const std::string &extra)
 {
 	toolInfo.addTool(source, strength, ToolType::COMPILER, name, version, extra);
 }
@@ -283,8 +290,11 @@ void Heuristics::addCompiler(
  * @param extra Extra information about linker
  */
 void Heuristics::addLinker(
-		DetectionMethod source, DetectionStrength strength, const std::string &name,
-		const std::string &version, const std::string &extra)
+		DetectionMethod source,
+		DetectionStrength strength,
+		const std::string &name,
+		const std::string &version,
+		const std::string &extra)
 {
 	toolInfo.addTool(source, strength, ToolType::LINKER, name, version, extra);
 }
@@ -298,8 +308,11 @@ void Heuristics::addLinker(
  * @param extra Extra information about installer
  */
 void Heuristics::addInstaller(
-		DetectionMethod source, DetectionStrength strength, const std::string &name,
-		const std::string &version, const std::string &extra)
+		DetectionMethod source,
+		DetectionStrength strength,
+		const std::string &name,
+		const std::string &version,
+		const std::string &extra)
 {
 	toolInfo.addTool(source, strength, ToolType::INSTALLER, name, version, extra);
 }
@@ -313,8 +326,11 @@ void Heuristics::addInstaller(
  * @param extra Extra information about packer
  */
 void Heuristics::addPacker(
-		DetectionMethod source, DetectionStrength strength, const std::string &name,
-		const std::string& version, const std::string& extra)
+		DetectionMethod source,
+		DetectionStrength strength,
+		const std::string &name,
+		const std::string& version,
+		const std::string& extra)
 {
 	toolInfo.addTool(source, strength, ToolType::PACKER, name, version, extra);
 }
@@ -330,8 +346,11 @@ void Heuristics::addPacker(
  * This method implies DetectResultSource::SIGNATURE. Strength is computed.
  */
 void Heuristics::addCompiler(
-		std::size_t matchNibbles, std::size_t totalNibbles, const std::string &name,
-		const std::string &version, const std::string &extra)
+		std::size_t matchNibbles,
+		std::size_t totalNibbles,
+		const std::string &name,
+		const std::string &version,
+		const std::string &extra)
 {
 	toolInfo.addTool(matchNibbles, totalNibbles, ToolType::COMPILER, name, version, extra);
 }
@@ -347,8 +366,11 @@ void Heuristics::addCompiler(
  * This method implies DetectResultSource::SIGNATURE. Strength is computed.
  */
 void Heuristics::addPacker(
-		std::size_t matchNibbles, std::size_t totalNibbles, const std::string &name,
-		const std::string &version, const std::string &extra)
+		std::size_t matchNibbles,
+		std::size_t totalNibbles,
+		const std::string &name,
+		const std::string &version,
+		const std::string &extra)
 {
 	toolInfo.addTool(matchNibbles, totalNibbles, ToolType::PACKER, name, version, extra);
 }
@@ -357,7 +379,8 @@ void Heuristics::addPacker(
  * Add information about detected programming language
  * @param name Name of detected programming language
  * @param extraInfo Additional information about language
- * @param isBytecode @c true if detected language is bytecode, @c false otherwise
+ * @param isBytecode @c true if detected language is bytecode,
+ *                   @c false otherwise
  */
 void Heuristics::addLanguage(
 		const std::string &name, const std::string &extraInfo, bool isBytecode)
@@ -374,7 +397,8 @@ void Heuristics::addLanguage(
  * Add information about detected programming language
  * @param name Name of detected programming language
  * @param extraInfo Additional information about language
- * @param isBytecode @c true if detected language is bytecode, @c false otherwise
+ * @param isBytecode @c true if detected language is bytecode,
+ *                   @c false otherwise
  *
  * This removes previously detected languages and prevents further detections
  */
@@ -406,7 +430,8 @@ std::size_t Heuristics::findSectionName(const std::string &sectionName) const
  * @param sectionName Required section name
  * @return Number of sections which have name equal to @a sectionName
  */
-std::size_t Heuristics::findSectionNameStart(const std::string &sectionName) const
+std::size_t Heuristics::findSectionNameStart(
+		const std::string &sectionName) const
 {
 	std::size_t result = 0;
 	for (const Section* section : sections)
@@ -478,7 +503,11 @@ bool Heuristics::parseGccComment(const std::string &record)
 	}
 
 	std::string version;
-	if (getVersion(std::regex_replace(record, std::regex("\\([^\\)]+\\)"), ""), version))
+	if (getVersion(
+			std::regex_replace(
+				record,
+				std::regex("\\([^\\)]+\\)"), ""),
+			version))
 	{
 		addCompiler(source, strength, "GCC", version);
 		return true;
@@ -497,13 +526,16 @@ bool Heuristics::parseGhcComment(const std::string &record)
 	auto source = DetectionMethod::COMMENT_H;
 	auto strength = DetectionStrength::LOW;
 
-	if (record.size() < MINIMUM_GHC_RECORD_SIZE || !startsWith(record, "GHC"))
+	if (record.size() < MINIMUM_GHC_RECORD_SIZE
+			|| !startsWith(record, "GHC"))
 	{
 		return false;
 	}
 
 	const std::string version = record.substr(4);
-	if (std::regex_match(version, std::regex("[[:digit:]]+.[[:digit:]]+.[[:digit:]]+")))
+	if (std::regex_match(
+			version,
+			std::regex("[[:digit:]]+.[[:digit:]]+.[[:digit:]]+")))
 	{
 		// Check for prior methods results
 		if (isDetected("GHC"))
@@ -557,7 +589,8 @@ bool Heuristics::parseOpen64Comment(const std::string &record)
 
 /**
  * Try to detect used compiler based on content of comment sections
- * @return @c true if used compiler was successfully detected, @c false otherwise
+ * @return @c true if used compiler was successfully detected,
+ *         @c false otherwise
  */
 void Heuristics::getCommentSectionsHeuristics()
 {
@@ -574,7 +607,9 @@ void Heuristics::getCommentSectionsHeuristics()
 
 		for (const auto &item : records)
 		{
-			parseGccComment(item) || parseGhcComment(item) || parseOpen64Comment(item);
+			parseGccComment(item)
+					|| parseGhcComment(item)
+					|| parseOpen64Comment(item);
 		}
 	}
 }
@@ -643,7 +678,12 @@ bool Heuristics::parseTmsProducer(const std::string &producer)
 
 	std::string version;
 	getVersion(producer, version);
-	addCompiler(source, strength, "Texas Instruments C/C++", version, "for TMS470");
+	addCompiler(
+			source,
+			strength,
+			"Texas Instruments C/C++",
+			version,
+			"for TMS470");
 	return true;
 }
 
@@ -688,7 +728,7 @@ void Heuristics::getDwarfInfo()
 		// These are unhandled at the moment.
 		return;
 	}
-	std::unique_ptr<llvm::DWARFContext> DICtx = llvm::DWARFContext::create(*obj);
+	auto DICtx = llvm::DWARFContext::create(*obj);
 
 	// Inspect compilation unit DIEs.
 	//
@@ -773,7 +813,9 @@ std::string Heuristics::getEmbarcaderoVersion()
 			if (offset != std::string::npos)
 			{
 				auto version = content.substr(startOffset + offset, 4);
-				if (std::regex_match(version, std::regex("[[:digit:]]+.[[:digit:]]")))
+				if (std::regex_match(
+						version,
+						std::regex("[[:digit:]]+.[[:digit:]]")))
 				{
 					return version;
 				}
@@ -895,7 +937,8 @@ const DetectResult* Heuristics::isDetected(
 {
 	for (const auto &detection : toolInfo.detectedTools)
 	{
-		if (startsWith(detection.name, name) && detection.strength >= minStrength)
+		if (startsWith(detection.name, name)
+				&& detection.strength >= minStrength)
 		{
 			return &detection;
 		}

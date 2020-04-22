@@ -19,7 +19,10 @@ namespace cpdetect {
 class MachOCompiler : public CompilerDetector
 {
 	public:
-		MachOCompiler(retdec::fileformat::MachOFormat &parser, DetectParams &params, ToolInformation &tools);
+		MachOCompiler(
+				retdec::fileformat::MachOFormat &parser,
+				DetectParams &params,
+				ToolInformation &tools);
 };
 
 } // namespace cpdetect

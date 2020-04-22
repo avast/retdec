@@ -17,8 +17,10 @@ namespace cpdetect {
  * Constructor
  */
 MachOCompiler::MachOCompiler(
-		fileformat::MachOFormat &parser, DetectParams &params, ToolInformation &tools)
-	: CompilerDetector(parser, params, tools)
+		fileformat::MachOFormat &parser,
+		DetectParams &params,
+		ToolInformation &tools)
+		: CompilerDetector(parser, params, tools)
 {
 	heuristics = new MachOHeuristics(parser, *search, toolInfo);
 	externalSuffixes = EXTERNAL_DATABASE_SUFFIXES;

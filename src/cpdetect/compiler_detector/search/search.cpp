@@ -27,8 +27,14 @@ namespace
 
 const std::map<Architecture, std::vector<Search::RelativeJump>> jumpMap =
 {
-	{Architecture::X86, {Search::RelativeJump("EB", 1), Search::RelativeJump("E9", 4)}},
-	{Architecture::X86_64, {Search::RelativeJump("EB", 1), Search::RelativeJump("E9", 4)}}
+	{
+		Architecture::X86,
+		{Search::RelativeJump("EB", 1), Search::RelativeJump("E9", 4)}
+	},
+	{
+		Architecture::X86_64,
+		{Search::RelativeJump("EB", 1), Search::RelativeJump("E9", 4)}
+	},
 };
 
 } // anonymous namespace
@@ -37,14 +43,21 @@ const std::map<Architecture, std::vector<Search::RelativeJump>> jumpMap =
  * Constructor
  * @param fileParser Parser of input file
  */
-Search::Search(retdec::fileformat::FileFormat &fileParser) : parser(fileParser), averageSlashLen(0)
+Search::Search(retdec::fileformat::FileFormat &fileParser)
+		: parser(fileParser)
+		, averageSlashLen(0)
 {
 	const auto &bytes = parser.getLoadedBytes();
 	bytesToHexString(bytes, nibbles);
 	bytesToString(bytes, plain);
 	fileLoaded = !bytes.empty();
-	fileSupported = parser.hexToLittle(nibbles) && parser.getNumberOfNibblesInByte();
-	jumps = mapGetValueOrDefault(jumpMap, parser.getTargetArchitecture(), std::vector<RelativeJump>());
+	fileSupported = parser.hexToLittle(nibbles)
+			&& parser.getNumberOfNibblesInByte();
+	jumps = mapGetValueOrDefault(
+			jumpMap,
+			parser.getTargetArchitecture(),
+			std::vector<RelativeJump>()
+	);
 
 	for (std::size_t i = 0, e = jumps.size(); i < e; ++i)
 	{
@@ -67,7 +80,11 @@ Search::Search(retdec::fileformat::FileFormat &fileParser) : parser(fileParser),
 /**
  * Constructor of RelativeJump
  */
-Search::RelativeJump::RelativeJump(std::string sSlash, std::size_t sBytesAfter) : slash(sSlash), bytesAfter(sBytesAfter)
+Search::RelativeJump::RelativeJump(
+		std::string sSlash,
+		std::size_t sBytesAfter)
+		: slash(sSlash)
+		, bytesAfter(sBytesAfter)
 {
 
 }
@@ -100,8 +117,8 @@ std::size_t Search::RelativeJump::getBytesAfter() const
 
 /**
  * Check is some slashes are defined for target architecture of input file
- * @return @c true if at least one slash pattern is defined for target architecture
- *    of input file, @c false otherwise
+ * @return @c true if at least one slash pattern is defined for target
+ *    architecture of input file, @c false otherwise
  */
 bool Search::haveSlashes() const
 {
@@ -168,11 +185,15 @@ const std::string& Search::getPlainString() const
  * Check if relative jump is present on offset @a fileOffset
  * @param fileOffset Byte offset in file
  * @param shift Relative shift in nibbles from @a fileOffset
- * @param moveSize Into this parameter is stored number of nibbles of which will jump or zero
- *    if @c nullptr is returned
- * @return Pointer to the description of detected jump of @c nullptr if jump is not detected
+ * @param moveSize Into this parameter is stored number of nibbles of which
+ *    will jump or zero if @c nullptr is returned
+ * @return Pointer to the description of detected jump of @c nullptr if jump
+ *    is not detected
  */
-const Search::RelativeJump* Search::getRelativeJump(std::size_t fileOffset, std::size_t shift, std::int64_t &moveSize) const
+const Search::RelativeJump* Search::getRelativeJump(
+		std::size_t fileOffset,
+		std::size_t shift,
+		std::int64_t &moveSize) const
 {
 	const auto nibbleOffset = nibblesFromBytes(fileOffset) + shift;
 	moveSize = 0;
@@ -180,14 +201,19 @@ const Search::RelativeJump* Search::getRelativeJump(std::size_t fileOffset, std:
 	for (const auto &jump : jumps)
 	{
 		const auto nibblesAfter = nibblesFromBytes(jump.getBytesAfter());
-		if (!hasSubstringOnPosition(nibbles, jump.getSlash(), nibbleOffset) ||
-			(nibbleOffset + jump.getSlashNibbleSize() + nibblesAfter - 1 >= nibbles.length()))
+		if (!hasSubstringOnPosition(nibbles, jump.getSlash(), nibbleOffset)
+				|| (nibbleOffset + jump.getSlashNibbleSize() + nibblesAfter - 1
+						>= nibbles.length()))
 		{
 			continue;
 		}
 
 		std::uint64_t jumpedBytes = 0;
-		if (!parser.getXByteOffset(fileOffset + bytesFromNibbles(jump.getSlashNibbleSize()), jump.getBytesAfter(), jumpedBytes, Endianness::LITTLE))
+		if (!parser.getXByteOffset(
+				fileOffset + bytesFromNibbles(jump.getSlashNibbleSize()),
+				jump.getBytesAfter(),
+				jumpedBytes,
+				Endianness::LITTLE))
 		{
 			continue;
 		}
@@ -243,13 +269,18 @@ unsigned long long Search::countImpNibbles(const std::string &signPattern) const
 }
 
 /**
- * Method tells if there is the pattern in selected area of file. Unable for slashed signatures
+ * Method tells if there is the pattern in selected area of file.
+ * Unable for slashed signatures
  * @param signPattern Signature pattern
  * @param startOffset Start offset in file (in bytes)
  * @param stopOffset Stop offset in file (in bytes)
- * @return If pattern is present in area return number of patterns significant nibbles, else return 0
+ * @return If pattern is present in area return number of patterns significant
+ *         nibbles, else return 0
  */
-unsigned long long Search::findUnslashedSignature(const std::string &signPattern, std::size_t startOffset, std::size_t stopOffset) const
+unsigned long long Search::findUnslashedSignature(
+		const std::string &signPattern,
+		std::size_t startOffset,
+		std::size_t stopOffset) const
 {
 	if (startOffset > stopOffset)
 	{
@@ -258,12 +289,21 @@ unsigned long long Search::findUnslashedSignature(const std::string &signPattern
 
 	const auto startIterator = nibbles.begin() + nibblesFromBytes(startOffset);
 	const auto stopIndex = nibblesFromBytes(stopOffset) + 1;
-	const auto stopIterator = stopIndex < nibbles.size() ? nibbles.begin() + stopIndex : nibbles.end();
-	const auto it = std::search(startIterator, stopIterator, signPattern.begin(), signPattern.end(),
-		[] (const char fileNibble, const char signatureNibble)
-		{
-			return fileNibble == signatureNibble || signatureNibble == '-' || signatureNibble == '?' || signatureNibble == ';';
-		}
+	const auto stopIterator = stopIndex < nibbles.size()
+			? nibbles.begin() + stopIndex
+			: nibbles.end();
+	const auto it = std::search(
+			startIterator,
+			stopIterator,
+			signPattern.begin(),
+			signPattern.end(),
+			[] (const char fileNibble, const char signatureNibble)
+			{
+				return fileNibble == signatureNibble
+						|| signatureNibble == '-'
+						|| signatureNibble == '?'
+						|| signatureNibble == ';';
+			}
 	);
 
 	return (it != stopIterator) ? countImpNibbles(signPattern) : 0;
@@ -274,9 +314,13 @@ unsigned long long Search::findUnslashedSignature(const std::string &signPattern
  * @param signPattern Signature pattern
  * @param startOffset Start offset in file (in bytes)
  * @param stopOffset Stop offset in file (in bytes)
- * @return If pattern is not present in area return 0, else return number of patterns significant nibbles
+ * @return If pattern is not present in area return 0, else return number
+ *         of patterns significant nibbles
  */
-unsigned long long Search::findSlashedSignature(const std::string &signPattern, std::size_t startOffset, std::size_t stopOffset) const
+unsigned long long Search::findSlashedSignature(
+		const std::string &signPattern,
+		std::size_t startOffset,
+		std::size_t stopOffset) const
 {
 	if (startOffset > stopOffset)
 	{
@@ -284,12 +328,13 @@ unsigned long long Search::findSlashedSignature(const std::string &signPattern, 
 	}
 
 	const auto areaSize = nibblesFromBytes(stopOffset - startOffset + 1);
-	const auto signSize = signPattern.length() - std::count(signPattern.begin(), signPattern.end(), ';');
+	const auto signSize = signPattern.length()
+			- std::count(signPattern.begin(), signPattern.end(), ';');
 	if (areaSize < signSize)
 	{
 		return false;
 	}
-	const auto iters = (startOffset == stopOffset) ? 1 : areaSize - signSize + 1;
+	const auto iters = startOffset == stopOffset ? 1 : areaSize - signSize + 1;
 
 	for (std::size_t i = 0; i < iters; ++i)
 	{
@@ -308,12 +353,21 @@ unsigned long long Search::findSlashedSignature(const std::string &signPattern, 
  * @param signPattern Signature pattern
  * @param fileOffset Offset in file
  * @param shift Relative shift in nibbles from @a fileOffset
- * @return Number of significant nibbles of signature or 0 if content of file and signature are different
+ * @return Number of significant nibbles of signature or 0 if content of file
+ *         and signature are different
  */
-unsigned long long Search::exactComparison(const std::string &signPattern, std::size_t fileOffset, std::size_t shift) const
+unsigned long long Search::exactComparison(
+		const std::string &signPattern,
+		std::size_t fileOffset,
+		std::size_t shift) const
 {
-	for (std::size_t sigIndex = 0, fileIndex = nibblesFromBytes(fileOffset) + shift, fileLen = nibbles.length();
-		fileIndex < fileLen; ++sigIndex, ++fileIndex)
+	for (std::size_t sigIndex = 0,
+			fileIndex = nibblesFromBytes(fileOffset) + shift,
+			fileLen = nibbles.length()
+			;
+			fileIndex < fileLen
+			;
+			++sigIndex, ++fileIndex)
 	{
 		if (sigIndex == signPattern.length() || signPattern[sigIndex] == ';')
 		{
@@ -322,8 +376,11 @@ unsigned long long Search::exactComparison(const std::string &signPattern, std::
 		else if (signPattern[sigIndex] == '/')
 		{
 			std::int64_t moveSize = 0;
-			const auto actShift = (parser.getNumberOfNibblesInByte() ? fileIndex % parser.getNumberOfNibblesInByte() : 0);
-			const auto *jump = getRelativeJump(bytesFromNibbles(fileIndex), actShift, moveSize);
+			const auto actShift = parser.getNumberOfNibblesInByte()
+					? fileIndex % parser.getNumberOfNibblesInByte()
+					: 0;
+			const auto *jump = getRelativeJump(
+					bytesFromNibbles(fileIndex), actShift, moveSize);
 			if (!jump)
 			{
 				if (!haveSlashes())
@@ -336,9 +393,14 @@ unsigned long long Search::exactComparison(const std::string &signPattern, std::
 			}
 
 			// move after one nibble is in header of cycle
-			fileIndex += jump->getSlashNibbleSize() + nibblesFromBytes(jump->getBytesAfter()) + moveSize - 1;
+			fileIndex += jump->getSlashNibbleSize()
+					+ nibblesFromBytes(jump->getBytesAfter())
+					+ moveSize
+					- 1;
 		}
-		else if (signPattern[sigIndex] != nibbles[fileIndex] && signPattern[sigIndex] != '-' && signPattern[sigIndex] != '?')
+		else if (signPattern[sigIndex] != nibbles[fileIndex]
+				&& signPattern[sigIndex] != '-'
+				&& signPattern[sigIndex] != '?')
 		{
 			return 0;
 		}
@@ -348,7 +410,8 @@ unsigned long long Search::exactComparison(const std::string &signPattern, std::
 }
 
 /**
- * Count similarity as count of agree nibbles and count of valuable nibbles in signature
+ * Count similarity as count of agree nibbles and count of valuable
+ * nibbles in signature
  * @param signPattern Signature pattern
  * @param sim Structure for save similarity
  * @param fileOffset Offset in file
@@ -357,11 +420,21 @@ unsigned long long Search::exactComparison(const std::string &signPattern, std::
  *
  * If function return @c false, @a sim is left unchanged
  */
-bool Search::countSimilarity(const std::string &signPattern, Similarity &sim, std::size_t fileOffset, std::size_t shift) const
+bool Search::countSimilarity(
+		const std::string &signPattern,
+		Similarity &sim,
+		std::size_t fileOffset,
+		std::size_t shift) const
 {
 	Similarity result;
 
-	for (std::size_t sigIndex = 0, fileIndex = nibblesFromBytes(fileOffset) + shift, fileLen = nibbles.length(); fileIndex < fileLen; ++sigIndex, ++fileIndex)
+	for (std::size_t sigIndex = 0,
+			fileIndex = nibblesFromBytes(fileOffset) + shift,
+			fileLen = nibbles.length()
+			;
+			fileIndex < fileLen
+			;
+			++sigIndex, ++fileIndex)
 	{
 		if (sigIndex == signPattern.length() || signPattern[sigIndex] == ';')
 		{
@@ -377,8 +450,11 @@ bool Search::countSimilarity(const std::string &signPattern, Similarity &sim, st
 		else if (signPattern[sigIndex] == '/')
 		{
 			std::int64_t moveSize = 0;
-			const auto actShift = (parser.getNumberOfNibblesInByte() ? fileIndex % parser.getNumberOfNibblesInByte() : 0);
-			const auto *jump = getRelativeJump(bytesFromNibbles(fileIndex), actShift, moveSize);
+			const auto actShift = parser.getNumberOfNibblesInByte()
+					? fileIndex % parser.getNumberOfNibblesInByte()
+					: 0;
+			const auto *jump = getRelativeJump(
+					bytesFromNibbles(fileIndex), actShift, moveSize);
 			if (!jump)
 			{
 				if (!haveSlashes())
@@ -393,7 +469,9 @@ bool Search::countSimilarity(const std::string &signPattern, Similarity &sim, st
 			{
 				result.total += jump->getSlashNibbleSize();
 				result.same += jump->getSlashNibbleSize();
-				fileIndex += jump->getSlashNibbleSize() + nibblesFromBytes(jump->getBytesAfter()) + moveSize - 1;
+				fileIndex += jump->getSlashNibbleSize()
+						+ nibblesFromBytes(jump->getBytesAfter())
+						+ moveSize - 1;
 			}
 			continue;
 		}
@@ -418,7 +496,11 @@ bool Search::countSimilarity(const std::string &signPattern, Similarity &sim, st
  *
  * If function return @c false, @a sim is left unchanged
  */
-bool Search::areaSimilarity(const std::string &signPattern, Similarity &sim, std::size_t startOffset, std::size_t stopOffset) const
+bool Search::areaSimilarity(
+		const std::string &signPattern,
+		Similarity &sim,
+		std::size_t startOffset,
+		std::size_t stopOffset) const
 {
 	if (startOffset > stopOffset)
 	{
@@ -426,19 +508,24 @@ bool Search::areaSimilarity(const std::string &signPattern, Similarity &sim, std
 	}
 
 	const auto areaSize = nibblesFromBytes(stopOffset - startOffset + 1);
-	const auto signSize = signPattern.length() - std::count(signPattern.begin(), signPattern.end(), ';');
+	const auto signSize = signPattern.length()
+			- std::count(signPattern.begin(), signPattern.end(), ';');
 	if (areaSize < signSize)
 	{
 		return false;
 	}
-	const auto iters = (startOffset == stopOffset) ? 1 : areaSize - signSize + 1;
+	const auto iters = startOffset == stopOffset
+			? 1
+			: areaSize - signSize + 1;
 	auto result = false;
 	Similarity act, max;
 
 	for (std::size_t i = 0; i < iters; ++i)
 	{
-		if (countSimilarity(signPattern, act, startOffset, i) &&
-			(act.ratio > max.ratio || (areEqual(act.ratio, max.ratio) && act.total > max.total)))
+		if (countSimilarity(signPattern, act, startOffset, i)
+				&& (act.ratio > max.ratio
+						|| (areEqual(act.ratio, max.ratio)
+								&& act.total > max.total)))
 		{
 			max.same = act.same;
 			max.total = act.total;
@@ -471,7 +558,8 @@ bool Search::hasString(const std::string &str) const
  * Check if file has substring @a str on specified offset
  * @param str Coveted substring
  * @param fileOffset Offset in file
- * @return @c true if file has @a str on offset @a fileOffset, @c false otherwise
+ * @return @c true if file has @a str on offset @a fileOffset,
+ *         @c false otherwise
  */
 bool Search::hasString(const std::string &str, std::size_t fileOffset) const
 {
@@ -483,9 +571,13 @@ bool Search::hasString(const std::string &str, std::size_t fileOffset) const
  * @param str Coveted string
  * @param startOffset Start offset in file (in bytes)
  * @param stopOffset Stop offset in file (in bytes)
- * @return @c true if string is present in selected area of file, @c false otherwise
+ * @return @c true if string is present in selected area of file,
+ *         @c false otherwise
  */
-bool Search::hasString(const std::string &str, std::size_t startOffset, std::size_t stopOffset) const
+bool Search::hasString(
+		const std::string &str,
+		std::size_t startOffset,
+		std::size_t stopOffset) const
 {
 	return hasSubstringInArea(plain, str, startOffset, stopOffset);
 }
@@ -496,9 +588,14 @@ bool Search::hasString(const std::string &str, std::size_t startOffset, std::siz
  * @param section Selected section
  * @return @c true if string is present in selected section, @c false otherwise
  */
-bool Search::hasStringInSection(const std::string &str, const retdec::fileformat::Section *section) const
+bool Search::hasStringInSection(
+		const std::string &str,
+		const retdec::fileformat::Section *section) const
 {
-	return section && hasString(str, section->getOffset(), section->getOffset() + section->getLoadedSize() - 1);
+	return section && hasString(
+			str,
+			section->getOffset(),
+			section->getOffset() + section->getLoadedSize() - 1);
 }
 
 /**
@@ -507,7 +604,9 @@ bool Search::hasStringInSection(const std::string &str, const retdec::fileformat
  * @param sectionIndex Index of selected section (indexed from 0)
  * @return @c true if string is present in selected section, @c false otherwise
  */
-bool Search::hasStringInSection(const std::string &str, std::size_t sectionIndex) const
+bool Search::hasStringInSection(
+		const std::string &str,
+		std::size_t sectionIndex) const
 {
 	return hasStringInSection(str, parser.getSection(sectionIndex));
 }
@@ -518,7 +617,9 @@ bool Search::hasStringInSection(const std::string &str, std::size_t sectionIndex
  * @param sectionName Name of selected section
  * @return @c true if string is present in selected section, @c false otherwise
  */
-bool Search::hasStringInSection(const std::string &str, const std::string &sectionName) const
+bool Search::hasStringInSection(
+		const std::string &str,
+		const std::string &sectionName) const
 {
 	return hasStringInSection(str, parser.getSection(sectionName));
 }
@@ -527,24 +628,39 @@ bool Search::hasStringInSection(const std::string &str, const std::string &secti
  * Create signature from specified offset
  * @param pattern Into this parameter is stored resulted signature
  * @param fileOffset Start offset in file (in bytes)
- * @param size Desired length of signature (in bytes, slashes are also considered
- *    as one byte during creation of signature)
+ * @param size Desired length of signature (in bytes, slashes are also
+ *    considered as one byte during creation of signature)
  * @return @c true if signature was successfully created, @c false otherwise
  */
-bool Search::createSignature(std::string &pattern, std::size_t fileOffset, std::size_t size) const
+bool Search::createSignature(
+		std::string &pattern,
+		std::size_t fileOffset,
+		std::size_t size) const
 {
 	pattern.clear();
 
-	for (std::size_t i = 0, fileIndex = nibblesFromBytes(fileOffset), fileLen = nibbles.length(), nibbleSize = nibblesFromBytes(size);
-		fileIndex < fileLen && i < nibbleSize; ++i, ++fileIndex)
+	for (std::size_t i = 0,
+			fileIndex = nibblesFromBytes(fileOffset),
+			fileLen = nibbles.length(),
+			nibbleSize = nibblesFromBytes(size)
+			;
+			fileIndex < fileLen && i < nibbleSize
+			;
+			++i, ++fileIndex)
 	{
 		std::int64_t moveSize = 0;
-		const auto actShift = (parser.getNumberOfNibblesInByte() ? fileIndex % parser.getNumberOfNibblesInByte() : 0);
-		const auto *jump = getRelativeJump(bytesFromNibbles(fileIndex), actShift, moveSize);
+		const auto actShift = parser.getNumberOfNibblesInByte()
+				? fileIndex % parser.getNumberOfNibblesInByte()
+				: 0;
+		const auto *jump = getRelativeJump(
+				bytesFromNibbles(fileIndex), actShift, moveSize);
 		if (jump)
 		{
 			pattern += '/';
-			fileIndex += jump->getSlashNibbleSize() + nibblesFromBytes(jump->getBytesAfter()) + moveSize - 1;
+			fileIndex += jump->getSlashNibbleSize()
+					+ nibblesFromBytes(jump->getBytesAfter())
+					+ moveSize
+					- 1;
 		}
 		else
 		{

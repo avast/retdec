@@ -19,7 +19,10 @@ namespace cpdetect {
 class CoffCompiler : public CompilerDetector
 {
 	public:
-		CoffCompiler(retdec::fileformat::CoffFormat &parser, DetectParams &params, ToolInformation &tools);
+		CoffCompiler(
+				retdec::fileformat::CoffFormat &parser,
+				DetectParams &params,
+				ToolInformation &tools);
 };
 
 } // namespace cpdetect

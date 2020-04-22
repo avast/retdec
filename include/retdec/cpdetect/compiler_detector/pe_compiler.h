@@ -19,7 +19,10 @@ namespace cpdetect {
 class PeCompiler : public CompilerDetector
 {
 	public:
-		PeCompiler(retdec::fileformat::PeFormat &parser, DetectParams &params, ToolInformation &tools);
+		PeCompiler(
+				retdec::fileformat::PeFormat &parser,
+				DetectParams &params,
+				ToolInformation &tools);
 };
 
 } // namespace cpdetect

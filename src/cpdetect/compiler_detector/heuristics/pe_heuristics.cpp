@@ -123,7 +123,8 @@ bool findAutoIt(const std::string &content)
 	const std::string prefix = "AU3!EA";
 	const std::regex regExp(prefix + "[0-9]{2}");
 	const auto offset = content.find(prefix);
-	return offset != std::string::npos && regex_match(content.substr(offset, 8), regExp);
+	return offset != std::string::npos
+			&& regex_match(content.substr(offset, 8), regExp);
 }
 
 /**
@@ -159,10 +160,13 @@ std::string getNullsoftManifestVersion(const std::string &manifest)
  * Constructor
  */
 PeHeuristics::PeHeuristics(
-		retdec::fileformat::PeFormat &parser, Search &searcher, ToolInformation &toolInfo)
-	: Heuristics(parser, searcher, toolInfo), peParser(parser),
-		declaredLength(parser.getDeclaredFileLength()),
-		loadedLength(parser.getLoadedFileLength())
+		retdec::fileformat::PeFormat &parser,
+		Search &searcher,
+		ToolInformation &toolInfo)
+		: Heuristics(parser, searcher, toolInfo)
+		, peParser(parser)
+		, declaredLength(parser.getDeclaredFileLength())
+		, loadedLength(parser.getLoadedFileLength())
 {
 }
 
@@ -189,7 +193,9 @@ std::string PeHeuristics::getEnigmaVersion()
 	{
 		std::uint64_t result1, result2;
 		if (fileParser.get1ByteOffset(pos + pattern.length(), result1)
-				&& fileParser.get1ByteOffset(pos + pattern.length() + 1, result2))
+				&& fileParser.get1ByteOffset(
+						pos + pattern.length() + 1,
+						result2))
 		{
 			return numToStr(result1) + "." + numToStr(result2);
 		}
@@ -334,7 +340,9 @@ void PeHeuristics::getVisualBasicHeuristics()
 
 std::int32_t PeHeuristics::getInt32Unaligned(const std::uint8_t * codePtr)
 {
-	const std::int32_t * codePtrInt32 = reinterpret_cast<const std::int32_t *>(codePtr);
+	const std::int32_t* codePtrInt32 = reinterpret_cast<const std::int32_t*>(
+		codePtr
+	);
 
 	return codePtrInt32[0];
 }
@@ -342,7 +350,11 @@ std::int32_t PeHeuristics::getInt32Unaligned(const std::uint8_t * codePtr)
 /**
  * Parses the code, follows NOPs or JMPs
  */
-const std::uint8_t * PeHeuristics::skip_NOP_JMP8_JMP32(const std::uint8_t * codeBegin, const std::uint8_t * codePtr, const std::uint8_t * codeEnd, std::size_t maxCount)
+const std::uint8_t * PeHeuristics::skip_NOP_JMP8_JMP32(
+		const std::uint8_t * codeBegin,
+		const std::uint8_t * codePtr,
+		const std::uint8_t * codeEnd,
+		std::size_t maxCount)
 {
 	while (codeBegin <= codePtr && codePtr < codeEnd && maxCount > 0)
 	{
@@ -361,7 +373,9 @@ const std::uint8_t * PeHeuristics::skip_NOP_JMP8_JMP32(const std::uint8_t * code
 				break;
 
 			case 0xE9:
-				if ((codePtr + 5) > codeEnd || getInt32Unaligned(codePtr+1) == std::numeric_limits<std::int32_t>::min())
+				if ((codePtr + 5) > codeEnd
+						|| getInt32Unaligned(codePtr+1)
+								== std::numeric_limits<std::int32_t>::min())
 					return nullptr;
 				movePtrBy = getInt32Unaligned(codePtr + 1);
 				break;
@@ -395,9 +409,15 @@ void PeHeuristics::getHeaderStyleHeuristics()
 
 		for (size_t i = 0; i < headerStyles.size(); i++)
 		{
-			if (!std::memcmp(e_cblp, headerStyles[i].headerWords, sizeof(headerStyles[i].headerWords)))
+			if (!std::memcmp(
+					e_cblp,
+					headerStyles[i].headerWords,
+					sizeof(headerStyles[i].headerWords)))
 			{
-				addLinker(DetectionMethod::HEADER_H, DetectionStrength::MEDIUM, headerStyles[i].headerStyle);
+				addLinker(
+						DetectionMethod::HEADER_H,
+						DetectionStrength::MEDIUM,
+						headerStyles[i].headerStyle);
 			}
 		}
 
@@ -426,9 +446,13 @@ void PeHeuristics::getSlashedSignatures()
 		auto end = stopOffset;
 		if (sig.endOffset != std::numeric_limits<unsigned>::max())
 		{
-			end = std::min(stopOffset,
-				toolInfo.epOffset + sig.endOffset
-					+ fileParser.bytesFromNibblesRounded(sig.pattern.length() - 1) - 1);
+			end = std::min(
+					stopOffset,
+					toolInfo.epOffset
+						+ sig.endOffset
+						+ fileParser.bytesFromNibblesRounded(sig.pattern.length()-1)
+						- 1
+			);
 		}
 
 		const auto nibbles = search.findSlashedSignature(sig.pattern, start, end);
@@ -488,39 +512,71 @@ void PeHeuristics::getStarForceHeuristics()
 
 	if (noOfSections >= 4)
 	{
-		if (search.exactComparison("68--------FF25", toolInfo.epOffset) || search.exactComparison("FF25", toolInfo.epOffset) || search.exactComparison("E8--------68ADDE0080FF15", toolInfo.epOffset))
+		if (search.exactComparison("68--------FF25", toolInfo.epOffset)
+				|| search.exactComparison("FF25", toolInfo.epOffset)
+				|| search.exactComparison(
+						"E8--------68ADDE0080FF15",
+						toolInfo.epOffset))
 		{
 			// Version A
-			if (!strncmp(sections[0]->getName().c_str(), ".sforce", 7) && !strncmp(sections[epSection]->getName().c_str(), ".start", 6) && (e_cblp == static_cast<uint16_t>(e_lfanew)) && (e_cp == 1))
+			if (!strncmp(sections[0]->getName().c_str(), ".sforce", 7)
+					&& !strncmp(
+							sections[epSection]->getName().c_str(),
+							".start",
+							6)
+					&& (e_cblp == static_cast<uint16_t>(e_lfanew))
+					&& (e_cp == 1))
 			{
-				addPacker(DetectionMethod::COMBINED, DetectionStrength::MEDIUM, "StarForce.A");
+				addPacker(
+						DetectionMethod::COMBINED,
+						DetectionStrength::MEDIUM,
+						"StarForce.A"
+				);
 				return;
 			}
 
 			// Version B
-			if (sections[noOfSections-1]->getName() == ".ps4" && sections[noOfSections - 1]->getOffset() == loadedLength)
+			if (sections[noOfSections-1]->getName() == ".ps4"
+					&& sections[noOfSections - 1]->getOffset() == loadedLength)
 			{
-				addPacker(DetectionMethod::COMBINED, DetectionStrength::MEDIUM, "StarForce.B");
+				addPacker(
+						DetectionMethod::COMBINED,
+						DetectionStrength::MEDIUM,
+						"StarForce.B"
+				);
 				return;
 			}
 		}
 
-		if (sections[noOfSections - 1]->getName() == ".ps4" && sections[noOfSections - 2]->getName() == ".discard" && sections[noOfSections - 3]->getName() == ".rsrc")
+		if (sections[noOfSections - 1]->getName() == ".ps4"
+				&& sections[noOfSections - 2]->getName() == ".discard"
+				&& sections[noOfSections - 3]->getName() == ".rsrc")
 		{
-			addPacker(DetectionMethod::SECTION_TABLE_H, DetectionStrength::MEDIUM, "StarForce.C");
+			addPacker(
+					DetectionMethod::SECTION_TABLE_H,
+					DetectionStrength::MEDIUM,
+					"StarForce.C");
 			return;
 		}
 	}
 
 	if (13 <= noOfSections && noOfSections <= 15)
 	{
-		if (search.exactComparison("FF25--------FF25--------FF25", toolInfo.epOffset))
+		if (search.exactComparison(
+				"FF25--------FF25--------FF25",
+				toolInfo.epOffset))
 		{
 			if (sections[noOfSections - 1]->getName() == ".ps4")
 			{
-				if (sections[0]->getName() == ".text" && sections[1]->getName() == ".data" && sections[2]->getName() == ".data" && sections[3]->getName() == ".share")
+				if (sections[0]->getName() == ".text"
+						&& sections[1]->getName() == ".data"
+						&& sections[2]->getName() == ".data"
+						&& sections[3]->getName() == ".share")
 				{
-					addPacker(DetectionMethod::COMBINED, DetectionStrength::MEDIUM, "StarForce.C");
+					addPacker(
+							DetectionMethod::COMBINED,
+							DetectionStrength::MEDIUM,
+							"StarForce.C");
 					return;
 				}
 			}
@@ -540,7 +596,10 @@ void PeHeuristics::getSafeDiscHeuristics()
 
 	if (pos == peParser.getSizeOfHeaders() - 0x2C)
 	{
-		addPacker(DetectionMethod::SIGNATURE, DetectionStrength::MEDIUM, "SafeDisc");
+		addPacker(
+				DetectionMethod::SIGNATURE,
+				DetectionStrength::MEDIUM,
+				"SafeDisc");
 	}
 	else
 	{
@@ -550,22 +609,33 @@ void PeHeuristics::getSafeDiscHeuristics()
 			// if (!strncmp((char *)pSection->Name, "stxt371\0", sizeof("stxt371\0")))
 			if (sections[i]->getName() == "stxt371")
 			{
-				addPacker(DetectionMethod::SECTION_TABLE_H, DetectionStrength::MEDIUM, "SafeDisc");
+				addPacker(
+						DetectionMethod::SECTION_TABLE_H,
+						DetectionStrength::MEDIUM,
+						"SafeDisc");
 				break;
 			}
 
 			// Note that original code does:
-			// if (!strncmp((char *)pSection->Name, ".txt\0", sizeof(".txt\0")) || !strncmp((char *)pSection->Name, ".txt2\0", sizeof(".txt2\0")))
-			if (sections[i]->getName() == ".txt" || sections[i]->getName() == ".txt2")
+			// if (!strncmp((char *)pSection->Name, ".txt\0", sizeof(".txt\0"))
+			// || !strncmp((char *)pSection->Name, ".txt2\0", sizeof(".txt2\0")))
+			if (sections[i]->getName() == ".txt"
+					|| sections[i]->getName() == ".txt2")
 			{
-				addPacker(DetectionMethod::SECTION_TABLE_H, DetectionStrength::LOW, "SafeDisc");
+				addPacker(
+						DetectionMethod::SECTION_TABLE_H,
+						DetectionStrength::LOW,
+						"SafeDisc");
 				break;
 			}
 		}
 	}
 }
 
-bool PeHeuristics::checkSecuROMSignature(const char * fileData, const char * fileDataEnd, uint32_t fileOffset)
+bool PeHeuristics::checkSecuROMSignature(
+		const char * fileData,
+		const char * fileDataEnd,
+		uint32_t fileOffset)
 {
 	const uint32_t SecuRomMagic = 0x44646441;	// 'DddA'
 	const char * header = fileData + fileOffset;
@@ -573,7 +643,7 @@ bool PeHeuristics::checkSecuROMSignature(const char * fileData, const char * fil
 
 	if (fileData <= header && (header + 0x08) <= fileDataEnd)
 	{
-		const uint32_t * secuRomHeader = reinterpret_cast<const uint32_t *>(header);
+		auto* secuRomHeader = reinterpret_cast<const uint32_t *>(header);
 
 		if (secuRomHeader[1] == SecuRomMagic)
 		{
@@ -611,17 +681,34 @@ void PeHeuristics::getSecuROMHeuristics()
 		{
 			// Retrieve the offset of the securom header
 			fileData = search.getPlainString().c_str();
-			memcpy(&SecuromOffs, fileData + loadedLength - sizeof(uint32_t), sizeof(uint32_t));
+			memcpy(
+					&SecuromOffs,
+					fileData + loadedLength - sizeof(uint32_t),
+					sizeof(uint32_t));
 
 			// Verify it
-			if (checkSecuROMSignature(fileData, fileData + loadedLength, SecuromOffs - sizeof(uint32_t)))
+			if (checkSecuROMSignature(
+					fileData,
+					fileData + loadedLength,
+					SecuromOffs - sizeof(uint32_t)))
+			{
 				foundSecuROM = true;
-			if (checkSecuROMSignature(fileData, fileData + loadedLength, loadedLength - (SecuromOffs - 0x0C)))
+			}
+			if (checkSecuROMSignature(
+					fileData,
+					fileData + loadedLength,
+					loadedLength - (SecuromOffs - 0x0C)))
+			{
 				foundSecuROM = true;
+			}
 
 			if (foundSecuROM)
 			{
-				addPacker(DetectionMethod::STRING_SEARCH_H, DetectionStrength::HIGH, "SecuROM");
+				addPacker(
+						DetectionMethod::STRING_SEARCH_H,
+						DetectionStrength::HIGH,
+						"SecuROM"
+				);
 			}
 		}
 	}
@@ -633,7 +720,8 @@ void PeHeuristics::getSecuROMHeuristics()
 void PeHeuristics::getMPRMMGVAHeuristics()
 {
 	const auto &content = search.getPlainString();
-	const uint8_t * fileData = reinterpret_cast<const uint8_t *>(content.c_str());
+	const uint8_t * fileData = reinterpret_cast<const uint8_t *>(
+			content.c_str());
 	const uint8_t * filePtr = fileData + toolInfo.epOffset;
 	const uint8_t * fileEnd = fileData + content.length();
 	unsigned long long offset1;
@@ -644,12 +732,21 @@ void PeHeuristics::getMPRMMGVAHeuristics()
 	{
 		if (search.exactComparison("892504----00", toolInfo.epOffset))
 		{
-			offset1 = search.findUnslashedSignature("64FF3500000000", toolInfo.epOffset, toolInfo.epOffset + 0x80);
+			offset1 = search.findUnslashedSignature(
+					"64FF3500000000",
+					toolInfo.epOffset,
+					toolInfo.epOffset + 0x80);
 			if (offset1 != 0)
 			{
-				if (search.findUnslashedSignature("64892500000000", toolInfo.epOffset + offset1, toolInfo.epOffset + offset1 + 0x40))
+				if (search.findUnslashedSignature(
+						"64892500000000",
+						toolInfo.epOffset + offset1,
+						toolInfo.epOffset + offset1 + 0x40))
 				{
-					addPacker(DetectionMethod::STRING_SEARCH_H, DetectionStrength::HIGH, "MPRMMGVA");
+					addPacker(
+							DetectionMethod::STRING_SEARCH_H,
+							DetectionStrength::HIGH,
+							"MPRMMGVA");
 				}
 			}
 		}
@@ -661,9 +758,15 @@ void PeHeuristics::getMPRMMGVAHeuristics()
  */
 void PeHeuristics::getActiveMarkHeuristics()
 {
-	if (search.exactComparison("00544D53414D564F48A49BFDFF2624E9D7F1D6F0D6AEBEFCD6DFB5C1D01F07CE", toolInfo.overlayOffset))
+	if (search.exactComparison(
+			"00544D53414D564F48A49BFDFF2624E9D7F1D6F0D6AEBEFCD6DFB5C1D01F07CE",
+			toolInfo.overlayOffset))
 	{
-		addPacker(DetectionMethod::STRING_SEARCH_H, DetectionStrength::HIGH, "ActiveMark");
+		addPacker(
+				DetectionMethod::STRING_SEARCH_H,
+				DetectionStrength::HIGH,
+				"ActiveMark"
+		);
 	}
 }
 
@@ -672,10 +775,17 @@ void PeHeuristics::getActiveMarkHeuristics()
  */
 void PeHeuristics::getRLPackHeuristics()
 {
-	if (search.exactComparison("B800000000600BC07458E8000000005805430000008038E9750361EB35E800000000582500F0FFFF33FF66BB195A6683C33466391875120FB7503C03D0BBE944", toolInfo.epOffset) ||
-		search.exactComparison("57C7C772AFB4DF8D3D5FBA581AFFCF0FACF7F20FBDFEF7C75CDC30270FBAF7330FBBF70FCFBF64A909DB85F681DFAC194648F7DF0FA3F7C7C741BC79A085F7D1", toolInfo.epOffset))
+	if (search.exactComparison(
+			"B800000000600BC07458E8000000005805430000008038E9750361EB35E800000000582500F0FFFF33FF66BB195A6683C33466391875120FB7503C03D0BBE944",
+			toolInfo.epOffset)
+		|| search.exactComparison(
+			"57C7C772AFB4DF8D3D5FBA581AFFCF0FACF7F20FBDFEF7C75CDC30270FBAF7330FBBF70FCFBF64A909DB85F681DFAC194648F7DF0FA3F7C7C741BC79A085F7D1",
+			toolInfo.epOffset))
 	{
-		addPacker(DetectionMethod::STRING_SEARCH_H, DetectionStrength::HIGH, "RLPack");
+		addPacker(
+				DetectionMethod::STRING_SEARCH_H,
+				DetectionStrength::HIGH, "RLPack"
+		);
 	}
 }
 
@@ -693,7 +803,11 @@ void PeHeuristics::getPetiteHeuristics()
 		search.exactComparison("B8--------68--------64FF350000000064892500000000669C6050", toolInfo.epOffset) ||
 		search.exactComparison("B8--------6A--68--------64FF350000000064892500000000669C60508BD8030068--------6A00FF50", toolInfo.epOffset))
 	{
-		addPacker(DetectionMethod::STRING_SEARCH_H, DetectionStrength::HIGH, "Petite");
+		addPacker(
+				DetectionMethod::STRING_SEARCH_H,
+				DetectionStrength::HIGH,
+				"Petite"
+		);
 	}
 }
 
@@ -708,7 +822,12 @@ void PeHeuristics::getPelockHeuristics()
 			&& peParser.getDataDirectoryRelative(15, rva, size)
 			&& size == 0x1000)
 	{
-		addPacker(DetectionMethod::OTHER_H, DetectionStrength::MEDIUM, "PELock", "1.x");
+		addPacker(
+				DetectionMethod::OTHER_H,
+				DetectionStrength::MEDIUM,
+				"PELock",
+				"1.x"
+		);
 	}
 }
 
@@ -726,15 +845,20 @@ void PeHeuristics::getEzirizReactorHeuristics()
 		const auto *sec0 = peParser.getPeSection(0);
 		const auto *sec1 = peParser.getPeSection(1);
 
-		if (sec0 && search.findUnslashedSignature("558BECB90F0000006A006A004975F951535657B8--------E8;",
-			sec0->getOffset(), sec0->getOffset() + sec0->getLoadedSize() - 1))
+		if (sec0
+				&& search.findUnslashedSignature(
+						"558BECB90F0000006A006A004975F951535657B8--------E8;",
+						sec0->getOffset(),
+						sec0->getOffset() + sec0->getLoadedSize() - 1))
 		{
 			version = "3.X";
 		}
 		else if (sec1
 				&& sec1->getPeCoffFlags() == 0xC0000040
-				&& search.findUnslashedSignature("5266686E204D182276B5331112330C6D0A204D18229EA129611C76B505190158;",
-					sec1->getOffset(), sec1->getOffset() + sec1->getLoadedSize() - 1))
+				&& search.findUnslashedSignature(
+						"5266686E204D182276B5331112330C6D0A204D18229EA129611C76B505190158;",
+						sec1->getOffset(),
+						sec1->getOffset() + sec1->getLoadedSize() - 1))
 		{
 			version = "4.0.0.0 - 6.0.0.0";
 		}
@@ -750,11 +874,15 @@ void PeHeuristics::getEzirizReactorHeuristics()
 				std::size_t lId;
 				if (resVer->getLanguageId(lId) && !lId)
 				{
-					if (search.exactComparison("E8--------E9--------6A0C68;", toolInfo.epOffset))
+					if (search.exactComparison(
+							"E8--------E9--------6A0C68;",
+							toolInfo.epOffset))
 					{
 						version = "4.0.0.0 - 4.4.7.5";
 					}
-					else if (search.exactComparison("E8--------E9--------8BFF558BEC83EC208B45085657;", toolInfo.epOffset))
+					else if (search.exactComparison(
+							"E8--------E9--------8BFF558BEC83EC208B45085657;",
+							toolInfo.epOffset))
 					{
 						version = "4.5.0.0 - 6.2.9.2";
 					}
@@ -797,7 +925,12 @@ void PeHeuristics::getUpxHeuristics()
 		else
 		{
 			const std::string versionPrefix = "1.0";
-			addPacker(source, strength, "UPX", versionPrefix + content[pos + upxVer.length()]);
+			addPacker(
+					source,
+					strength,
+					"UPX",
+					versionPrefix + content[pos + upxVer.length()]
+			);
 		}
 
 		return;
@@ -837,7 +970,10 @@ void PeHeuristics::getFsgHeuristics()
 	auto source = DetectionMethod::STRING_SEARCH_H;
 	auto strength = DetectionStrength::MEDIUM;
 
-	if (search.hasString("FSG!", peParser.getPeHeaderOffset(), peParser.getMzHeaderSize()))
+	if (search.hasString(
+			"FSG!",
+			peParser.getPeHeaderOffset(),
+			peParser.getMzHeaderSize()))
 	{
 		addPacker(source, strength, "FSG");
 	}
@@ -907,7 +1043,9 @@ void PeHeuristics::getEnigmaHeuristics()
 	auto strength = DetectionStrength::MEDIUM;
 
 	if (canSearch && toolInfo.entryPointOffset
-			&& search.exactComparison("60E8000000005D83----81ED;", toolInfo.epOffset))
+			&& search.exactComparison(
+					"60E8000000005D83----81ED;",
+					toolInfo.epOffset))
 	{
 		const auto *sec = fileParser.getSection(".data");
 		if (sec)
@@ -915,9 +1053,15 @@ void PeHeuristics::getEnigmaHeuristics()
 			const std::string pattern = "Enigma protector v";
 			const auto &content = search.getPlainString();
 			const auto pos = content.find(pattern, sec->getOffset());
-			if (pos < sec->getOffset() + sec->getSizeInFile() && pos <= content.length() - 4)
+			if (pos < sec->getOffset() + sec->getSizeInFile()
+					&& pos <= content.length() - 4)
 			{
-				addPacker(source, strength, "Enigma", content.substr(pos + pattern.length(), 4));
+				addPacker(
+						source,
+						strength,
+						"Enigma",
+						content.substr(pos + pattern.length(), 4)
+				);
 				return;
 			}
 		}
@@ -943,12 +1087,17 @@ void PeHeuristics::getEnigmaHeuristics()
 		if (canSearch && toolInfo.entryPointOffset
 				&& search.exactComparison(sign, toolInfo.epOffset))
 		{
-			addPacker(DetectionMethod::SIGNATURE, strength, "Enigma", getEnigmaVersion());
+			addPacker(
+					DetectionMethod::SIGNATURE,
+					strength,
+					"Enigma",
+					getEnigmaVersion());
 			return;
 		}
 	}
 
-	if (peParser.isDotNet() && search.hasStringInSection("\0\0\0ENIGMA"s, std::size_t(0)))
+	if (peParser.isDotNet()
+			&& search.hasStringInSection("\0\0\0ENIGMA"s, std::size_t(0)))
 	{
 		addPacker(DetectionMethod::SIGNATURE, strength, "Enigma");
 		return;
@@ -1049,11 +1198,15 @@ void PeHeuristics::getNetHeuristic()
 
 	// normal string search
 	std::size_t idx = 0;
-	if (search.hasStringInSection("Protected_By_Attribute\0NETSpider.Attribute"s, idx))
+	if (search.hasStringInSection(
+			"Protected_By_Attribute\0NETSpider.Attribute"s,
+			idx))
 	{
 		addPacker(source, strength, ".NET Spider", "0.5 - 1.3");
 	}
-	if (search.hasStringInSection("Protected/Packed with ReNET-Pack by stx", idx))
+	if (search.hasStringInSection(
+			"Protected/Packed with ReNET-Pack by stx",
+			idx))
 	{
 		addPacker(source, strength, "ReNET-pack");
 	}
@@ -1085,12 +1238,18 @@ void PeHeuristics::getNetHeuristic()
 			addPacker(source, strength, "Phoenix", version);
 		}
 
-		if (search.findUnslashedSignature("282D00000A6F2E00000A14146F2F00000A;", start, end))
+		if (search.findUnslashedSignature(
+				"282D00000A6F2E00000A14146F2F00000A;",
+				start,
+				end))
 		{
 			addPacker(source, strength, "AssemblyInvoke");
 		}
 
-		if (search.findUnslashedSignature("436C69005300650063007500720065;", start, end))
+		if (search.findUnslashedSignature(
+				"436C69005300650063007500720065;",
+				start,
+				end))
 		{
 			addPacker(source, strength, "CliSecure");
 		}
@@ -1283,11 +1442,15 @@ void PeHeuristics::getArmadilloHeuristic()
 
 	if (majorVersion == 'S' && minorVersion == 'R')
 	{
-		// Note: do NOT perform any extra checks here (like sections named "PDATA000").
-		// They are often not present in the image at all. Not even Windows 10's ntdll.dll
-		// (LdrpIsImageArmadilloProtected) checks for them.
-
-		addPacker(DetectionMethod::LINKER_VERSION_H, DetectionStrength::HIGH, "Armadillo");
+		// Note: do NOT perform any extra checks here (like sections named
+		// "PDATA000"). They are often not present in the image at all.
+		// Not even Windows 10's ntdll.dll (LdrpIsImageArmadilloProtected)
+		// checks for them.
+		addPacker(
+				DetectionMethod::LINKER_VERSION_H,
+				DetectionStrength::HIGH,
+				"Armadillo"
+		);
 	}
 }
 
@@ -1532,7 +1695,9 @@ void PeHeuristics::getManifestHeuristic()
 	}
 
 	tinyxml2::XMLDocument parsedManifest;
-	if (parsedManifest.Parse(manifest.c_str(), manifest.length()) != tinyxml2::XML_SUCCESS)
+	if (parsedManifest.Parse(
+			manifest.c_str(),
+			manifest.length()) != tinyxml2::XML_SUCCESS)
 	{
 		return;
 	}
@@ -1557,7 +1722,12 @@ void PeHeuristics::getManifestHeuristic()
 						|| endsWith(identity->Attribute("name"), "WZSEPE32"))
 				{
 					std::string version = identity->Attribute("version");
-					addInstaller(source, strength, "WinZip SFX", version.substr(0, 3));
+					addInstaller(
+							source,
+							strength,
+							"WinZip SFX",
+							version.substr(0, 3)
+					);
 					return;
 				}
 			}
@@ -1577,7 +1747,13 @@ void PeHeuristics::getManifestHeuristic()
 
 			if (startsWith(magic, "PK"))
 			{
-				addInstaller(source, strength, "WinRAR SFX", "", "with ZIP payload");
+				addInstaller(
+						source,
+						strength,
+						"WinRAR SFX",
+						"",
+						"with ZIP payload"
+				);
 				return;
 			}
 		}
@@ -1590,7 +1766,13 @@ void PeHeuristics::getManifestHeuristic()
 		{
 			if (magic == "Rar!")
 			{
-				addInstaller(source, strength, "WinRAR SFX", "", "console version");
+				addInstaller(
+						source,
+						strength,
+						"WinRAR SFX",
+						"",
+						"console version"
+				);
 				return;
 			}
 		}
@@ -1650,7 +1832,8 @@ void PeHeuristics::getSevenZipHeuristics()
 					peParser.get2ByteOffset(offset, majV, Endianness::LITTLE);
 
 					std::stringstream version;
-					version << majV << "." << std::setfill('0') << std::setw(2) << minV;
+					version << majV << "." << std::setfill('0') << std::setw(2)
+							<< minV;
 					addInstaller(source, strength, "7-Zip SFX", version.str());
 				}
 			} // resource
@@ -1740,8 +1923,12 @@ void PeHeuristics::getPeSectionHeuristics()
 
 	// Get often used conditional names
 	const auto secondName = noOfSections > 1 ? sections[1]->getName() : "";
-	const auto secondLastName = noOfSections > 2 ? sections[noOfSections - 2]->getName() : "";
-	const auto epName =  toolInfo.entryPointSection ? toolInfo.epSection.getName() : "";
+	const auto secondLastName = noOfSections > 2
+			? sections[noOfSections - 2]->getName()
+			: "";
+	const auto epName =  toolInfo.entryPointSection
+			? toolInfo.epSection.getName()
+			: "";
 
 	// Installer detections
 	if (lastName == "_winzip_")
@@ -1752,11 +1939,21 @@ void PeHeuristics::getPeSectionHeuristics()
 	// Other tools
 	if (findSectionName(".mackt") >= 1)
 	{
-		toolInfo.addTool(source, strength, ToolType::OTHER, "ImpREC reconstructed");
+		toolInfo.addTool(
+				source,
+				strength,
+				ToolType::OTHER,
+				"ImpREC reconstructed"
+		);
 	}
 	if (findSectionName(".winapi") >= 1)
 	{
-		toolInfo.addTool(source, strength, ToolType::OTHER, "API Override tool");
+		toolInfo.addTool(
+				source,
+				strength,
+				ToolType::OTHER,
+				"API Override tool"
+		);
 	}
 
 	// Packer detections
@@ -1929,7 +2126,9 @@ void PeHeuristics::getPeSectionHeuristics()
 			addPacker(source, strength, "Gentee");
 		}
 	}
-	if (firstName == "pec1" && epName == "pec2" && toolInfo.epSection.getIndex() == 1)
+	if (firstName == "pec1"
+			&& epName == "pec2"
+			&& toolInfo.epSection.getIndex() == 1)
 	{
 		addPacker(source, strength, "PECompact", "1.xx");
 	}

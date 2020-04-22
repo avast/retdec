@@ -13,7 +13,10 @@ namespace retdec {
 namespace cpdetect {
 
 bool getVersion(const std::string &input, std::string &result);
-bool compareVersions(const std::string &aVer, const std::string &bVer, int &result);
+bool compareVersions(
+		const std::string &aVer,
+		const std::string &bVer,
+		int &result);
 
 } // namespace cpdetect
 } // namespace retdec

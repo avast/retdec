@@ -21,9 +21,9 @@ namespace cpdetect {
 class CompilerDetector : private retdec::utils::NonCopyable
 {
 	private:
-		retdec::fileformat::FileFormat &fileParser; ///< parser of input file
-		DetectParams &cpParams;                     ///< parameters for detection
-		std::vector<std::string> externalDatabase;  ///< name of external files with rules
+		retdec::fileformat::FileFormat &fileParser;
+		DetectParams &cpParams;
+		std::vector<std::string> externalDatabase;
 
 		/// @name External databases parsing
 		/// @{
@@ -49,13 +49,19 @@ class CompilerDetector : private retdec::utils::NonCopyable
 				bool recursive = false);
 
 	protected:
-		ToolInformation &toolInfo;                           ///< results - detected tools
-		retdec::fileformat::Architecture targetArchitecture; ///< target architecture of input file
-		Search *search;                                      ///< class for signature search
-		Heuristics *heuristics;                              ///< class for heuristics detections
-		std::vector<std::string> internalPaths;              ///< internal rule database files
-		retdec::utils::FilesystemPath pathToShared;          ///< path to shared folder
-		std::set<std::string> externalSuffixes;              ///< external database file suffixes
+		/// results - detected tools
+		ToolInformation &toolInfo;
+		retdec::fileformat::Architecture targetArchitecture;
+		/// class for signature search
+		Search *search;
+		/// class for heuristics detections
+		Heuristics *heuristics;
+		/// internal rule database files
+		std::vector<std::string> internalPaths;
+		/// path to shared folder
+		retdec::utils::FilesystemPath pathToShared;
+		/// external database file suffixes
+		std::set<std::string> externalSuffixes;
 
 	public:
 		CompilerDetector(

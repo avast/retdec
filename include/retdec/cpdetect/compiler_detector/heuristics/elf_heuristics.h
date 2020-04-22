@@ -19,7 +19,8 @@ namespace cpdetect {
 class ElfHeuristics : public Heuristics
 {
 	private:
-		retdec::fileformat::ElfFormat &elfParser; ///< parser of input ELF file
+		/// parser of input ELF file
+		retdec::fileformat::ElfFormat &elfParser;
 
 		/// @name Detection methods
 		/// @{
@@ -37,7 +38,8 @@ class ElfHeuristics : public Heuristics
 
 	public:
 		ElfHeuristics(
-				retdec::fileformat::ElfFormat &parser, Search &searcher,
+				retdec::fileformat::ElfFormat &parser,
+				Search &searcher,
 				ToolInformation &toolInfo);
 };
 

@@ -17,8 +17,10 @@ namespace cpdetect {
  * Constructor
  */
 RawDataCompiler::RawDataCompiler(
-		fileformat::RawDataFormat &parser, DetectParams &params, ToolInformation &tools)
-	: CompilerDetector(parser, params, tools)
+		fileformat::RawDataFormat &parser
+		, DetectParams &params
+		, ToolInformation &tools)
+		: CompilerDetector(parser, params, tools)
 {
 	heuristics = new Heuristics(parser, *search, toolInfo);
 	externalSuffixes = EXTERNAL_DATABASE_SUFFIXES;

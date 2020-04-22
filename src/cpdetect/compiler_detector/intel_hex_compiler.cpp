@@ -15,8 +15,10 @@ namespace cpdetect {
  * Constructor
  */
 IntelHexCompiler::IntelHexCompiler(
-		fileformat::IntelHexFormat &parser, DetectParams &params, ToolInformation &tools)
-	: CompilerDetector(parser, params, tools)
+		fileformat::IntelHexFormat &parser,
+		DetectParams &params,
+		ToolInformation &tools)
+		: CompilerDetector(parser, params, tools)
 {
 	heuristics = new Heuristics(parser, *search, toolInfo);
 	externalSuffixes = EXTERNAL_DATABASE_SUFFIXES;

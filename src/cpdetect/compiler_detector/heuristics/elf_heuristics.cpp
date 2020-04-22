@@ -41,8 +41,11 @@ namespace cpdetect {
  * @param toolInfo Structure for information about detected tools
  */
 ElfHeuristics::ElfHeuristics(
-		ElfFormat &parser, Search &searcher, ToolInformation &toolInfo)
-	: Heuristics(parser, searcher, toolInfo), elfParser(parser)
+		ElfFormat &parser,
+		Search &searcher,
+		ToolInformation &toolInfo)
+		: Heuristics(parser, searcher, toolInfo)
+		, elfParser(parser)
 {
 
 }

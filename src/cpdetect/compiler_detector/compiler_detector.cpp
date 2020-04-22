@@ -34,7 +34,10 @@ namespace
  *
  * Warning: sort function requires strict weak ordering!
  */
-bool compareExtraInfo(const DetectResult &a, const DetectResult &b, bool &result)
+bool compareExtraInfo(
+		const DetectResult &a,
+		const DetectResult &b,
+		bool &result)
 {
 	// Check by version
 	if (!a.versionInfo.empty() && b.versionInfo.empty())
@@ -108,11 +111,13 @@ bool compareForSort(const DetectResult &a, const DetectResult &b)
 		}
 
 		// Everything is better than incomplete signature detection
-		if (b.source == DetectionMethod::SIGNATURE && b.agreeCount != b.impCount)
+		if (b.source == DetectionMethod::SIGNATURE
+				&& b.agreeCount != b.impCount)
 		{
 			return true;
 		}
-		else if (a.source == DetectionMethod::SIGNATURE && a.agreeCount != a.impCount)
+		else if (a.source == DetectionMethod::SIGNATURE
+				&& a.agreeCount != a.impCount)
 		{
 			return false;
 		}
@@ -164,7 +169,8 @@ ToolType metaToTool(const std::string &toolMeta)
 /**
 * Convert meta to type of tool.
 */
-retdec::cpdetect::DetectionStrength metaToStrength(const retdec::yaracpp::YaraMeta * strengthMeta)
+retdec::cpdetect::DetectionStrength metaToStrength(
+		const retdec::yaracpp::YaraMeta * strengthMeta)
 {
 	if (strengthMeta)
 	{
@@ -191,13 +197,20 @@ retdec::cpdetect::DetectionStrength metaToStrength(const retdec::yaracpp::YaraMe
 /**
  * Constructor
  *
- * Constructor in subclass must create members @a heuristics, @a internalDatabase and @a externalSuffixes
+ * Constructor in subclass must create members @a heuristics,
+ * @a internalDatabase and @a externalSuffixes
  */
 CompilerDetector::CompilerDetector(
-		retdec::fileformat::FileFormat &parser, DetectParams &params, ToolInformation &toolInfo)
-	: fileParser(parser), cpParams(params), toolInfo(toolInfo),
-		targetArchitecture(fileParser.getTargetArchitecture()), search(new Search(fileParser)),
-		heuristics(nullptr), pathToShared(getThisBinaryDirectoryPath())
+		retdec::fileformat::FileFormat &parser,
+		DetectParams &params,
+		ToolInformation &toolInfo)
+		: fileParser(parser)
+		, cpParams(params)
+		, toolInfo(toolInfo)
+		, targetArchitecture(fileParser.getTargetArchitecture())
+		, search(new Search(fileParser))
+		, heuristics(nullptr)
+		, pathToShared(getThisBinaryDirectoryPath())
 {
 
 }
@@ -213,7 +226,8 @@ CompilerDetector::~CompilerDetector()
 
 /**
  * External databases parsing
- * @return @c true if at least one external database was detected, @c false otherwise
+ * @return @c true if at least one external database was detected,
+ * @c false otherwise
  */
 bool CompilerDetector::getExternalDatabases()
 {
@@ -223,7 +237,8 @@ bool CompilerDetector::getExternalDatabases()
 	// iterating over all files in directory
 	for (const auto *subpath : thisDir)
 	{
-		if (subpath->isFile() && std::any_of(externalSuffixes.begin(), externalSuffixes.end(),
+		if (subpath->isFile()
+				&& std::any_of(externalSuffixes.begin(), externalSuffixes.end(),
 			[&] (const auto &suffix)
 			{
 				return endsWith(subpath->getPath(), suffix);
@@ -254,7 +269,9 @@ void CompilerDetector::removeCompilersWithLessSimilarity(double refRatio)
 		{
 			actRatio = static_cast<double>(toolInfo.detectedTools[i].agreeCount)
 					/ toolInfo.detectedTools[i].impCount;
-			if (actRatio + std::numeric_limits<double>::epsilon() * std::abs(actRatio) < refRatio)
+			auto ratio = actRatio + std::numeric_limits<double>::epsilon()
+					 * std::abs(actRatio);
+			if (ratio < refRatio)
 			{
 				toolInfo.detectedTools.erase(toolInfo.detectedTools.begin() + i);
 				--i;
@@ -384,16 +401,21 @@ ReturnCode CompilerDetector::getAllSignatures()
 		}
 	}
 
-	yara.analyze(fileParser.getPathToFile(), cpParams.searchType != SearchType::EXACT_MATCH);
+	yara.analyze(
+			fileParser.getPathToFile(),
+			cpParams.searchType != SearchType::EXACT_MATCH
+	);
 	const auto &detected = yara.getDetectedRules();
 	const auto &undetected = yara.getUndetectedRules();
 	auto result = false;
 	if (cpParams.searchType == SearchType::EXACT_MATCH
-			|| (cpParams.searchType == SearchType::MOST_SIMILAR && !detected.empty()))
+			|| (cpParams.searchType == SearchType::MOST_SIMILAR
+					&& !detected.empty()))
 	{
 		for (const auto &rule : detected)
 		{
-			// In order to include result from a rule, there must have been a match
+			// In order to include result from a rule,
+			// there must have been a match
 			if (rule.getFirstMatch())
 			{
 				// The rule requires to have the "name" meta-tag
@@ -403,33 +425,54 @@ ReturnCode CompilerDetector::getAllSignatures()
 					const auto *toolMeta = rule.getMeta("tool");
 					const auto *versionMeta = rule.getMeta("version");
 					const auto *commentMeta = rule.getMeta("comment");
-					const auto & version = versionMeta ? versionMeta->getStringValue() : "";
-					auto toolType = toolMeta ? metaToTool(toolMeta->getStringValue()) : ToolType::UNKNOWN;
+					const auto & version = versionMeta
+							? versionMeta->getStringValue()
+							: "";
+					auto toolType = toolMeta
+							? metaToTool(toolMeta->getStringValue())
+							: ToolType::UNKNOWN;
 
-					// Use "extra" meta-tag for extra value, if comment is not available
+					// Use "extra" meta-tag for extra value if comment is
+					// not available
 					if (!commentMeta)
 						commentMeta = rule.getMeta("extra");
-					const auto & extra = commentMeta ? commentMeta->getStringValue() : "";
+					const auto & extra = commentMeta
+							? commentMeta->getStringValue()
+							: "";
 
-					// If the rule has the "pattern" meta-tag, it means that it's a nibble detection
+					// If the rule has the "pattern" meta-tag, it means
+					// that it's a nibble detection
 					const auto *patternMeta = rule.getMeta("pattern");
 					if (patternMeta)
 					{
-						const auto nibbles = search->countImpNibbles(patternMeta->getStringValue());
+						const auto nibbles = search->countImpNibbles(
+								patternMeta->getStringValue());
 						if (nibbles)
 						{
 							result = true;
 							const auto *languageMeta = rule.getMeta("language");
 							const auto *bytecodeMeta = rule.getMeta("bytecode");
-							commentMeta = commentMeta ? commentMeta : rule.getMeta("extra");
-							toolInfo.addTool(nibbles, nibbles, toolType, nameMeta->getStringValue(), version, extra);
+							commentMeta = commentMeta
+									? commentMeta
+									: rule.getMeta("extra");
+							toolInfo.addTool(
+									nibbles,
+									nibbles,
+									toolType,
+									nameMeta->getStringValue(),
+									version,
+									extra);
 							if (languageMeta)
 							{
-								toolInfo.addLanguage(languageMeta->getStringValue(), "", bytecodeMeta ? true : false);
+								toolInfo.addLanguage(
+										languageMeta->getStringValue(),
+										"",
+										bytecodeMeta ? true : false);
 							}
 						}
 					}
-					// If there is no "pattern" meta-tag, we consider the rule to be a heuristic detection
+					// If there is no "pattern" meta-tag, we consider
+					// the rule to be a heuristic detection
 					else
 					{
 						toolInfo.addTool(
@@ -478,8 +521,16 @@ ReturnCode CompilerDetector::getAllSignatures()
 				{
 					result = true;
 					maxRatio = 1.0;
-					toolInfo.addTool(nibbles, nibbles, toolMeta ? metaToTool(toolMeta->getStringValue()) : ToolType::UNKNOWN,
-						nameMeta->getStringValue(), versionMeta ? versionMeta->getStringValue() : "", commentMeta ? commentMeta->getStringValue() : "");
+					toolInfo.addTool(
+							nibbles,
+							nibbles,
+							toolMeta
+									? metaToTool(toolMeta->getStringValue())
+									: ToolType::UNKNOWN,
+							nameMeta->getStringValue(),
+							versionMeta ? versionMeta->getStringValue() : "",
+							commentMeta ? commentMeta->getStringValue() : ""
+					);
 				}
 				continue;
 			}
@@ -515,7 +566,9 @@ ReturnCode CompilerDetector::getAllSignatures()
 				endShift = endMeta->getIntValue();
 			}
 			const auto start = base + startShift;
-			const auto end = base + endShift + fileParser.bytesFromNibblesRounded(pattern.length()) - 1;
+			const auto end = base
+					+ endShift
+					+ fileParser.bytesFromNibblesRounded(pattern.length()) - 1;
 			if (search->areaSimilarity(pattern, sim, start, end)
 					&& (cpParams.searchType == SearchType::SIM_LIST
 						|| (cpParams.searchType == SearchType::MOST_SIMILAR
@@ -523,8 +576,20 @@ ReturnCode CompilerDetector::getAllSignatures()
 			{
 				result = true;
 				maxRatio = sim.ratio;
-				toolInfo.addTool(sim.same, sim.total, toolMeta ? metaToTool(toolMeta->getStringValue()) : ToolType::UNKNOWN,
-					nameMeta->getStringValue(), versionMeta ? versionMeta->getStringValue() : "", commentMeta ? commentMeta->getStringValue() : "");
+				toolInfo.addTool(
+						sim.same,
+						sim.total,
+						toolMeta
+								? metaToTool(toolMeta->getStringValue())
+								: ToolType::UNKNOWN,
+						nameMeta->getStringValue(),
+						versionMeta
+								? versionMeta->getStringValue()
+								: "",
+						commentMeta
+								? commentMeta->getStringValue() :
+								""
+				);
 			}
 		}
 	}
@@ -545,7 +610,10 @@ ReturnCode CompilerDetector::getAllCompilers()
 {
 	const auto status = getAllSignatures();
 	getAllHeuristics();
-	std::stable_sort(toolInfo.detectedTools.begin(), toolInfo.detectedTools.end(), compareForSort);
+	std::stable_sort(
+			toolInfo.detectedTools.begin(),
+			toolInfo.detectedTools.end(),
+			compareForSort);
 	removeUnusedCompilers();
 	if (toolInfo.detectedLanguages.empty())
 	{
@@ -564,15 +632,19 @@ ReturnCode CompilerDetector::getAllCompilers()
 		}
 	}
 
-	const bool isDetecteion = toolInfo.detectedTools.size() || toolInfo.detectedLanguages.size();
-	return (status == ReturnCode::UNKNOWN_CP && isDetecteion) ? ReturnCode::OK : status;
+	const bool isDetecteion = toolInfo.detectedTools.size()
+			|| toolInfo.detectedLanguages.size();
+	return status == ReturnCode::UNKNOWN_CP && isDetecteion
+			? ReturnCode::OK
+			: status;
 }
 
 /**
  * Detect all supported information about used compiler or packer
  * @return Status of detection (ReturnCode::OK if all is OK)
  *
- * Compiler can be successfully detected even if is returned a value other than ReturnCode::OK
+ * Compiler can be successfully detected even if is returned a value other
+ * than ReturnCode::OK
  */
 ReturnCode CompilerDetector::getAllInformation()
 {
@@ -590,9 +662,11 @@ ReturnCode CompilerDetector::getAllInformation()
 		toolInfo.overlayOffset = fileParser.getDeclaredFileLength();
 	}
 
-	const bool invalidEntryPoint = !toolInfo.entryPointAddress || !toolInfo.entryPointOffset;
+	const bool invalidEntryPoint = !toolInfo.entryPointAddress
+			|| !toolInfo.entryPointOffset;
 	if (!fileParser.getHexEpBytes(toolInfo.epBytes, cpParams.epBytesCount)
-			&& !invalidEntryPoint && !fileParser.isInValidState())
+			&& !invalidEntryPoint
+			&& !fileParser.isInValidState())
 	{
 		return ReturnCode::FILE_PROBLEM;
 	}
@@ -607,7 +681,9 @@ ReturnCode CompilerDetector::getAllInformation()
 	auto status = getAllCompilers();
 	if (invalidEntryPoint)
 	{
-		if (fileParser.isExecutable() || toolInfo.entryPointAddress || toolInfo.entryPointSection)
+		if (fileParser.isExecutable()
+				|| toolInfo.entryPointAddress
+				|| toolInfo.entryPointSection)
 		{
 			status = ReturnCode::ENTRY_POINT_DETECTION;
 		}

@@ -26,7 +26,9 @@ namespace
  *
  * Before loading subversions, everything from vector @a res is deleted.
  */
-std::size_t separateVersions(const std::string &version, std::vector<std::string> &res)
+std::size_t separateVersions(
+		const std::string &version,
+		std::vector<std::string> &res)
 {
 	res.clear();
 	std::size_t actPos, lastPos = 0;
@@ -49,8 +51,9 @@ std::size_t separateVersions(const std::string &version, std::vector<std::string
  * @param result Into this parameter the resulting version is stored
  * @return @c true if version was detected, @c false otherwise
  *
- * A version is considered to be a substring which consisting of numbers (and dots).
- * If input string contains more versions, result contains only the first one.
+ * A version is considered to be a substring which consisting of numbers
+ * (and dots). If input string contains more versions, result contains only
+ * the first one.
  *
  * If version is not found, @a result is left unchanged.
  */
@@ -71,16 +74,24 @@ bool getVersion(const std::string &input, std::string &result)
  * @param aVer First version
  * @param bVer Second version
  * @param result Into this parameter the result is stored.
- * @return @c true if @a aVer and @a bVer parameters represents valid version, @c false otherwise
+ * @return @c true if @a aVer and @a bVer parameters represents valid version,
+ * @c false otherwise
  *
- * If function return @c false, @a result is left unchanged. Otherwise, @a result contains number
- * smaller than 0 if first version is smaller than second version, 0 if both versions are equal,
- * or number greater than 0 if first version is greater than second version.
+ * If function return @c false, @a result is left unchanged. Otherwise,
+ * @a result contains number smaller than 0 if first version is smaller than
+ * second version, 0 if both versions are equal, or number greater than 0 if
+ * first version is greater than second version.
  */
-bool compareVersions(const std::string &aVer, const std::string &bVer, int &result)
+bool compareVersions(
+		const std::string &aVer,
+		const std::string &bVer,
+		int &result)
 {
 	std::string tmp;
-	if (!getVersion(aVer, tmp) || tmp != aVer || !getVersion(bVer, tmp) || tmp != bVer)
+	if (!getVersion(aVer, tmp)
+			|| tmp != aVer
+			|| !getVersion(bVer, tmp)
+			|| tmp != bVer)
 	{
 		return false;
 	}
