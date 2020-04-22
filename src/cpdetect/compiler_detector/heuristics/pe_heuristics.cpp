@@ -15,7 +15,7 @@
 #include "retdec/utils/string.h"
 #include "retdec/cpdetect/compiler_detector/heuristics/pe_heuristics.h"
 #include "retdec/cpdetect/settings.h"
-#include "retdec/cpdetect/signatures/avg/signature.h"
+#include "retdec/cpdetect/signatures/signature.h"
 #include "retdec/fileformat/utils/conversions.h"
 #include "retdec/fileformat/utils/file_io.h"
 #include "retdec/fileformat/utils/other.h"

@@ -12,7 +12,7 @@
 #include "retdec/utils/equality.h"
 #include "retdec/utils/string.h"
 #include "retdec/cpdetect/compiler_detector/search/search.h"
-#include "retdec/cpdetect/signatures/avg/signature_checker.h"
+#include "retdec/cpdetect/signatures/signature.h"
 #include "retdec/fileformat/utils/conversions.h"
 #include "retdec/fileformat/utils/file_io.h"
 
@@ -669,7 +669,7 @@ bool Search::createSignature(
 	}
 
 	pattern += ';';
-	return isValidSignaturePattern(pattern);
+	return Signature::isValidSignaturePattern(pattern);
 }
 
 } // namespace cpdetect

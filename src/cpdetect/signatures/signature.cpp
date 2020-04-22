@@ -1,11 +1,11 @@
 /**
- * @file src/cpdetect/signatures/avg/signature.cpp
+ * @file src/cpdetect/signatures/signature.cpp
  * @brief Definiton of compiler or packer signature.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "retdec/cpdetect/signatures/avg/signature.h"
-#include "retdec/cpdetect/signatures/avg/signature_checker.h"
+#include "retdec/utils/string.h"
+#include "retdec/cpdetect/signatures/signature.h"
 
 namespace retdec {
 namespace cpdetect {
@@ -36,13 +36,13 @@ Signature::Signature(
 
 }
 
-/**
- * Check if signature have pattern in valid format
- * @return @c true if signature have pattern in valid format, @c false otherwise
- */
-bool Signature::haveValidPattern() const
+bool Signature::isValidSignaturePattern(const std::string& pattern)
 {
-	return isValidSignaturePattern(pattern);
+	const std::string bodyChars = "0123456789ABCDEF-\?/";
+	const std::string allChars = bodyChars + ';';
+	return retdec::utils::isComposedOnlyOfChars(pattern, allChars)
+			&& retdec::utils::containsAnyOfChars(pattern, bodyChars)
+			&& pattern.find(';') >= pattern.length() - 1;
 }
 
 } // namespace cpdetect

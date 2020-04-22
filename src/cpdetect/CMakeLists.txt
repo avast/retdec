@@ -15,8 +15,7 @@ add_library(cpdetect STATIC
 	compiler_factory.cpp
 	cptypes.cpp
 	errors.cpp
-	signatures/avg/signature.cpp
-	signatures/avg/signature_checker.cpp
+	signatures/signature.cpp
 	utils/version_solver.cpp
 )
 add_library(retdec::cpdetect ALIAS cpdetect)
