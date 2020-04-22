@@ -37,7 +37,7 @@ RawDataCompiler::RawDataCompiler(
 	{
 		case Architecture::X86:
 			pathPe.append("x86");
-			pathElf.append("x86c");
+			pathElf.append("x86");
 			pathMacho.append("x86");
 			break;
 
