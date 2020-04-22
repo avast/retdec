@@ -7,9 +7,14 @@
 #ifndef FILEINFO_FILE_PRESENTATION_JSON_PRESENTATION_H
 #define FILEINFO_FILE_PRESENTATION_JSON_PRESENTATION_H
 
+#include <rapidjson/prettywriter.h>
+#include <rapidjson/stringbuffer.h>
+#include <rapidjson/encodings.h>
+
 #include "fileinfo/file_presentation/file_presentation.h"
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_subtitle_getter/iterative_subtitle_getter.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -17,34 +22,52 @@ namespace fileinfo {
  */
 class JsonPresentation : public FilePresentation
 {
+	public:
+		using Writer = rapidjson::PrettyWriter<
+				rapidjson::StringBuffer,
+				rapidjson::ASCII<>>;
+
 	private:
 		bool verbose; ///< @c true - print all information about file
 
 		/// @name Auxiliary presentation methods
 		/// @{
-		void presentErrors(Json::Value &root) const;
-		void presentLoaderError(Json::Value &root) const;
-		void presentCompiler(Json::Value &root) const;
-		void presentLanguages(Json::Value &root) const;
-		void presentRichHeader(Json::Value &root) const;
-		void presentPackingInfo(Json::Value &root) const;
-		void presentOverlay(Json::Value &root) const;
-		void presentPatterns(Json::Value &root) const;
-		void presentLoaderInfo(Json::Value &root) const;
-		void presentCertificateAttributes(Json::Value &root) const;
-		void presentDotnetInfo(Json::Value &root) const;
-		void presentElfNotes(Json::Value &root) const;
-		void presentFlags(Json::Value &root, const std::string &title, const std::string &flags, const std::vector<std::string> &desc) const;
-		void presentIterativeSubtitleStructure(Json::Value &root, const IterativeSubtitleGetter &getter, std::size_t structIndex) const;
-		void presentIterativeSubtitle(Json::Value &root, const IterativeSubtitleGetter &getter) const;
+		void presentErrors(Writer& writer) const;
+		void presentLoaderError(Writer& writer) const;
+		void presentCompiler(Writer& writer) const;
+		void presentLanguages(Writer& writer) const;
+		void presentRichHeader(Writer& writer) const;
+		void presentPackingInfo(Writer& writer) const;
+		void presentOverlay(Writer& writer) const;
+		void presentPatterns(Writer& writer) const;
+		void presentMissingDepsInfo(Writer& writer) const;
+		void presentLoaderInfo(Writer& writer) const;
+		void presentCertificates(Writer& writer) const;
+		void presentTlsInfo(Writer& writer) const;
+		void presentDotnetInfo(Writer& writer) const;
+		void presentVersionInfo(Writer& writer) const;
+		void presentVisualBasicInfo(Writer& writer) const;
+		void presentElfNotes(Writer& writer) const;
+		void presentFlags(
+				Writer& writer,
+				const std::string &title,
+				const std::string &flags,
+				const std::vector<std::string> &desc) const;
+		void presentIterativeSubtitleStructure(
+				Writer& writer,
+				const IterativeSubtitleGetter &getter,
+				std::size_t structIndex) const;
+		void presentIterativeSubtitle(
+				Writer& writer,
+				const IterativeSubtitleGetter &getter) const;
 		/// @}
 	public:
 		JsonPresentation(FileInformation &fileinfo_, bool verbose_);
-		virtual ~JsonPresentation() override;
 
 		virtual bool present() override;
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

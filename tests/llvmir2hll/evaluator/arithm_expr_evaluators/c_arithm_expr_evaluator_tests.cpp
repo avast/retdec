@@ -832,11 +832,11 @@ TEST_F(CArithmExprEvaluatorTests,
 SimpleAddDiffAPFloatSemanticsTest) {
 	SCOPED_TRACE("2.0(IEEEhalf) + 4.0(IEEEdouble)   ->   6.0(IEEEdouble)");
 	ShPtr<AddOpExpr> inputExpr(AddOpExpr::create(
-		ConstFloat::create(llvm::APFloat(llvm::APFloat::IEEEhalf, "2.0")),
-		ConstFloat::create(llvm::APFloat(llvm::APFloat::IEEEdouble, "4.0"))
+		ConstFloat::create(llvm::APFloat(llvm::APFloat::IEEEhalf(), "2.0")),
+		ConstFloat::create(llvm::APFloat(llvm::APFloat::IEEEdouble(), "4.0"))
 	));
 	ShPtr<ConstFloat> refResult(ConstFloat::create(llvm::APFloat(
-		llvm::APFloat::IEEEdouble, "6.0")));
+		llvm::APFloat::IEEEdouble(), "6.0")));
 
 	evaluateAndCheckResult(inputExpr, refResult);
 }

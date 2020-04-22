@@ -10,6 +10,7 @@
 #include "fileinfo/file_information/file_information_types/special_information.h"
 #include "fileinfo/file_information/file_information_types/symbol_table/symbol.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -25,14 +26,11 @@ class SymbolTable
 {
 	private:
 		std::string name;                          ///< name of symbol table
-		unsigned long long offset;                 ///< offset of symbol table in file
-		unsigned long long declaredSymbols;        ///< declared number of symbols in table
+		unsigned long long offset = std::numeric_limits<unsigned long long>::max();                 ///< offset of symbol table in file
+		unsigned long long declaredSymbols = std::numeric_limits<unsigned long long>::max();        ///< declared number of symbols in table
 		std::vector<Symbol> table;                 ///< vector of symbols in table
 		std::vector<SpecialInformation> extraInfo; ///< vector of special information (e.g. processor-specific information)
 	public:
-		SymbolTable();
-		~SymbolTable();
-
 		/// @name Getters
 		/// @{
 		std::size_t getNumberOfStoredSymbols() const;
@@ -72,5 +70,6 @@ class SymbolTable
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

@@ -6,6 +6,7 @@
 
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_subtitle_getter/iterative_subtitle_getter.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -16,14 +17,6 @@ namespace fileinfo {
  * are descripted in constructor of superclass. Member @a header is optional.
  */
 IterativeSubtitleGetter::IterativeSubtitleGetter(FileInformation &fileInfo) : IterativeGetter(fileInfo)
-{
-
-}
-
-/**
- * Destructor
- */
-IterativeSubtitleGetter::~IterativeSubtitleGetter()
 {
 
 }
@@ -63,3 +56,4 @@ void IterativeSubtitleGetter::getSubtitle(std::string &subTitle) const
  */
 
 } // namespace fileinfo
+} // namespace retdec

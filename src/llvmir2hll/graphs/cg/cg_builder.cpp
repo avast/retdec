@@ -23,11 +23,6 @@ CGBuilder::CGBuilder(ShPtr<Module> module):
 	OrderedAllVisitor(), cg(new CG(module)) {}
 
 /**
-* @brief Destructs the builder.
-*/
-CGBuilder::~CGBuilder() {}
-
-/**
 * @brief Returns a CG of the given @a module.
 *
 * @par Preconditions

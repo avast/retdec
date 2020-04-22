@@ -45,11 +45,6 @@ UsedTypes::UsedTypes(): intTypes(), floatTypes(), structTypes(),
 UsedTypes::UsedTypes(const UsedTypes &other) = default;
 
 /**
-* @brief Destructs the object.
-*/
-UsedTypes::~UsedTypes() {}
-
-/**
 * @brief Assigns @a other to the current object.
 */
 UsedTypes &UsedTypes::operator=(const UsedTypes &other) = default;
@@ -264,11 +259,6 @@ UsedTypes::type_iterator UsedTypes::all_end() const {
 */
 UsedTypesVisitor::UsedTypesVisitor():
 	OrderedAllVisitor(), usedTypes(new UsedTypes()) {}
-
-/**
-* @brief Destructs the visitor.
-*/
-UsedTypesVisitor::~UsedTypesVisitor() {}
 
 /**
 * @brief Returns the set of used types in the given module.

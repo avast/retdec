@@ -9,6 +9,7 @@
 
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -16,14 +17,6 @@ namespace fileinfo {
  * @param fileInfo Information about file
  */
 HeaderPlainGetter::HeaderPlainGetter(FileInformation &fileInfo) : SimpleGetter(fileInfo)
-{
-
-}
-
-/**
- * Destructor
- */
-HeaderPlainGetter::~HeaderPlainGetter()
 {
 
 }
@@ -127,3 +120,4 @@ void HeaderPlainGetter::getDllFlags(std::string &title, std::string &flags, std:
 }
 
 } // namespace fileinfo
+} // namespace retdec

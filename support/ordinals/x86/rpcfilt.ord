@@ -1,0 +1,4 @@
+1 GetExtensionVersion
+2 GetFilterVersion
+3 HttpExtensionProc
+4 HttpFilterProc

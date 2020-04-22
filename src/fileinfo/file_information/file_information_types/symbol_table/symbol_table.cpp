@@ -7,24 +7,8 @@
 #include "fileinfo/file_information/file_information_types/symbol_table/symbol_table.h"
 #include "fileinfo/file_information/file_information_types/type_conversions.h"
 
+namespace retdec {
 namespace fileinfo {
-
-/**
- * Constructor
- */
-SymbolTable::SymbolTable() : offset(std::numeric_limits<unsigned long long>::max()),
-								declaredSymbols(std::numeric_limits<unsigned long long>::max())
-{
-
-}
-
-/**
- * Destructor
- */
-SymbolTable::~SymbolTable()
-{
-
-}
 
 /**
  * Get number of symbols in table
@@ -272,3 +256,4 @@ void SymbolTable::clearSpecialInformation()
 }
 
 } // namespace fileinfo
+} // namespace retdec

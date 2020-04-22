@@ -41,8 +41,6 @@ public:
 	static ShPtr<ConstString> create(const UnderlyingStringType &value, std::size_t charSize);
 	static ShPtr<ConstString> create(const std::string &str);
 
-	virtual ~ConstString() override;
-
 	virtual ShPtr<Value> clone() override;
 
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;

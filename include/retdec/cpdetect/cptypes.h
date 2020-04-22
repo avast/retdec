@@ -63,6 +63,8 @@ enum class DetectionMethod
 	COMMENT_H,           ///< .comment section
 	NOTE_H,              ///< .note section
 	MANIFEST_H,          ///< manifest resource
+	HEADER_H,            ///< MZ header
+	YARA_RULE,           ///< Heuristic detection by a YARA rule
 	OTHER_H              ///< other heuristic
 };
 
@@ -114,7 +116,6 @@ struct DetectParams
 	std::size_t epBytesCount;
 
 	DetectParams(SearchType searchType_, bool internal_, bool external_, std::size_t epBytesCount_ = EP_BYTES_SIZE);
-	~DetectParams();
 };
 
 /**
@@ -133,9 +134,6 @@ struct DetectResult
 	DetectionMethod source = DetectionMethod::UNKNOWN;    ///< detection type
 	DetectionStrength strength = DetectionStrength::LOW;  ///< detection strength
 
-	DetectResult();
-	~DetectResult();
-
 	bool isReliable() const;
 	bool isCompiler() const;
 	bool isLinker() const;
@@ -150,13 +148,10 @@ struct DetectResult
  */
 struct DetectLanguage
 {
-	bool bytecode;  /// < @c true if bytecode is detected
+	bool bytecode = false;  /// < @c true if bytecode is detected
 
 	std::string name;            ///< name of programming language
 	std::string additionalInfo;  ///< some additional information
-
-	DetectLanguage();
-	~DetectLanguage();
 };
 
 /**
@@ -175,19 +170,23 @@ struct ToolInformation
 	std::vector<DetectResult> detectedTools;        ///< detected tools (compilers, packers...)
 	std::vector<DetectLanguage> detectedLanguages;  ///< detected programming language(s)
 
-	bool entryPointOffset = false;   ///< @c false if file has no has no or invalid EP offset
-	unsigned long long epOffset;     ///< entry point offset
+	bool entryPointOffset = false;                  ///< @c false if file has no has no or invalid EP offset
+	/// entry point offset
+	unsigned long long epOffset = std::numeric_limits<unsigned long long>::max();
 
-	bool entryPointAddress = false;  ///< @c false if file has no has no or invalid EP address
-	unsigned long long epAddress;    ///< entry point address
-	unsigned long long imageBase;    ///< image base address
+	bool entryPointAddress = false;                 ///< @c false if file has no has no or invalid EP address
+	/// entry point address
+	unsigned long long epAddress = std::numeric_limits<unsigned long long>::max();
+	/// image base address
+	unsigned long long imageBase = std::numeric_limits<unsigned long long>::max();
 
-	bool entryPointSection = false;         ///< @c false if file has no or invalid EP section
-	retdec::fileformat::Section epSection;  ///< entry point section
-	std::string epBytes;                    ///< hexadecimal representation of entry point bytes
+	/// offset of the file overlay. 0 if no overlay
+	unsigned long long overlayOffset = 0;
+	size_t overlaySize = 0;                         ///< length of the file overlay. 0 if no overlay
 
-	ToolInformation();
-	~ToolInformation();
+	bool entryPointSection = false;                 ///< @c false if file has no or invalid EP section
+	retdec::fileformat::Section epSection;          ///< entry point section
+	std::string epBytes;                            ///< hexadecimal representation of entry point bytes
 
 	/// @name Adding result methods
 	/// @{
@@ -211,12 +210,9 @@ struct ToolInformation
  */
 struct Similarity
 {
-	unsigned long long same;   ///< matched number of significant nibbles
-	unsigned long long total;  ///< total number of significant nibbles
-	double ratio;              ///< @a same divided by @a total
-
-	Similarity();
-	~Similarity();
+	unsigned long long same = 0;   ///< matched number of significant nibbles
+	unsigned long long total = 0;  ///< total number of significant nibbles
+	double ratio = 0.0;              ///< @a same divided by @a total
 };
 
 std::string detectionMetodToString(DetectionMethod method);

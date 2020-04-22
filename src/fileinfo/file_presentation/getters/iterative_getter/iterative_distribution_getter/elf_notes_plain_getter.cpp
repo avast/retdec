@@ -10,6 +10,7 @@
 using namespace retdec::utils;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 namespace
@@ -59,13 +60,6 @@ ElfNotesPlainGetter::ElfNotesPlainGetter(
 				std::begin(headerDescArr),
 				std::end(headerDescArr));
 	loadRecords();
-}
-
-/**
- * Destructor
- */
-ElfNotesPlainGetter::~ElfNotesPlainGetter()
-{
 }
 
 std::size_t ElfNotesPlainGetter::getBasicInfo(
@@ -143,3 +137,4 @@ bool ElfNotesPlainGetter::getFlagDescriptors(
 }
 
 } // namespace fileinfo
+} // namespace retdec

@@ -22,14 +22,13 @@ class Signature
 		std::string version;    ///< version of used tool
 		std::string pattern;    ///< signature pattern
 		std::string additional; ///< additional information about tool
-		unsigned startOffset;   ///< start offset of pattern
-		unsigned endOffset;     ///< end offset of pattern
+		unsigned startOffset = 0;   ///< start offset of pattern
+		unsigned endOffset = 0;     ///< end offset of pattern
 
-		Signature();
+		Signature() = default;
 		Signature(
 				std::string sName, std::string sVersion, std::string sPattern,
 				std::string sAdditional = "", unsigned sStart = 0, unsigned sEnd = 0);
-		~Signature();
 
 		bool haveValidPattern() const;
 };

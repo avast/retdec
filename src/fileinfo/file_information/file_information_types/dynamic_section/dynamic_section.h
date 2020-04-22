@@ -9,6 +9,7 @@
 
 #include "fileinfo/file_information/file_information_types/dynamic_section/dynamic_entry.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -20,13 +21,11 @@ namespace fileinfo {
 class DynamicSection
 {
 	private:
-		unsigned long long declaredEntries; ///< declared number of entries in section
-		std::string name;                   ///< name of dynamic section
-		std::vector<DynamicEntry> table;    ///< vector of dynamic entries in section
+	 	/// declared number of entries in section
+		unsigned long long declaredEntries = std::numeric_limits<unsigned long long>::max();
+		std::string name;
+		std::vector<DynamicEntry> table;
 	public:
-		DynamicSection();
-		~DynamicSection();
-
 		/// @name Getters
 		/// @{
 		std::size_t getNumberOfStoredEntries() const;
@@ -56,5 +55,6 @@ class DynamicSection
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

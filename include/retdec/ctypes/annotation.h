@@ -23,7 +23,7 @@ class Context;
 class Annotation
 {
 	public:
-		virtual ~Annotation();
+		virtual ~Annotation() = default;
 
 		virtual bool isIn() const;
 		virtual bool isOut() const;

@@ -18,6 +18,7 @@ using namespace llvm::object;
 using namespace retdec::cpdetect;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -27,19 +28,15 @@ namespace fileinfo {
  * @param searchPar Parameters for detection of used compiler (or packer)
  * @param loadFlags Load flags
  */
-MachODetector::MachODetector(std::string pathToInputFile, FileInformation &finfo, retdec::cpdetect::DetectParams &searchPar, retdec::fileformat::LoadFlags loadFlags) :
-	FileDetector(pathToInputFile, finfo, searchPar, loadFlags)
+MachODetector::MachODetector(
+		std::string pathToInputFile,
+		FileInformation &finfo,
+		retdec::cpdetect::DetectParams &searchPar,
+		retdec::fileformat::LoadFlags loadFlags)
+		: FileDetector(pathToInputFile, finfo, searchPar, loadFlags)
 {
 	fileParser = machoParser = std::make_shared<MachOWrapper>(fileInfo.getPathToFile(), loadFlags);
 	loaded = machoParser->isInValidState();
-}
-
-/**
- * Destructor
- */
-MachODetector::~MachODetector()
-{
-
 }
 
 /**
@@ -118,6 +115,11 @@ void MachODetector::getSections()
 		fsec.setMemoryAlignment(pow(2, mSec->getAlignment()));
 		fsec.setRelocationsOffset(mSec->getRelocationOffset());
 		fsec.setNumberOfRelocations(mSec->getNumberOfRelocations());
+		double entropy;
+		if(sec->getEntropy(entropy))
+		{
+			fsec.setEntropy(entropy);
+		}
 		fileInfo.addSection(fsec);
 	}
 }
@@ -344,3 +346,4 @@ bool MachODetector::isMachoUniversalArchive()
 }
 
 } // namespace fileinfo
+} // namespace retdec

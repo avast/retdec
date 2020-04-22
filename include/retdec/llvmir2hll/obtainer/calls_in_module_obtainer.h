@@ -46,9 +46,6 @@ public:
 	using Calls = std::vector<CallInfo>;
 
 public:
-	// It needs to be public so it can be called in ShPtr's destructor.
-	virtual ~CallsInModuleObtainer() override;
-
 	static Calls getCalls(ShPtr<Module> module);
 
 private:

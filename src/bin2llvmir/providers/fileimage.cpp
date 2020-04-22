@@ -28,7 +28,9 @@ FileImage::FileImage(
 		:
 		FileImage(
 				m,
-				retdec::loader::createImage(path, &config->getConfig()),
+				retdec::loader::createImage(
+						path,
+						config->getConfig().fileFormat.isRaw()),
 				config)
 {
 
@@ -61,7 +63,27 @@ FileImage::FileImage(
 		throw std::runtime_error("Failed to load input file");
 	}
 
-	_image->getFileFormat()->initFromConfig(config->getConfig());
+	auto& c = config->getConfig();
+	auto& ca = c.architecture;
+	auto endian = ca.isEndianUnknown()
+			? _image->getEndianness()
+			: (ca.isEndianLittle()
+					? retdec::utils::Endianness::LITTLE
+					: retdec::utils::Endianness::BIG);
+	auto arch = retdec::fileformat::Architecture::UNKNOWN;
+	if (ca.isX86()) arch = retdec::fileformat::Architecture::X86;
+	if (ca.isX86_64()) arch = retdec::fileformat::Architecture::X86_64;
+	if (ca.isArm32OrThumb()) arch = retdec::fileformat::Architecture::ARM;
+	if (ca.isPpc()) arch = retdec::fileformat::Architecture::POWERPC;
+	if (ca.isMipsOrPic32()) arch = retdec::fileformat::Architecture::MIPS;
+
+	_image->getFileFormat()->initArchitecture(
+			arch,
+			endian,
+			c.architecture.getByteSize(),
+			c.getEntryPoint(),
+			c.getSectionVMA());
+
 	if (auto* imgRaw = dynamic_cast<retdec::loader::RawDataImage*>(
 			_image.get()))
 	{
@@ -104,7 +126,7 @@ const retdec::rtti_finder::RttiFinder& FileImage::getRtti() const
 
 ConstantInt* FileImage::getConstantInt(
 		IntegerType* t,
-		retdec::utils::Address addr)
+		retdec::common::Address addr)
 {
 	if (addr.isUndefined())
 	{
@@ -116,17 +138,17 @@ ConstantInt* FileImage::getConstantInt(
 	return _image->getXByte(addr, s, v) ? ConstantInt::get(t, v) : nullptr;
 }
 
-llvm::ConstantInt* FileImage::getConstantDefault(retdec::utils::Address addr)
+llvm::ConstantInt* FileImage::getConstantDefault(retdec::common::Address addr)
 {
 	return getConstantInt(Abi::getDefaultType(_module), addr);
 }
 
-llvm::Constant* FileImage::getConstantHalf(retdec::utils::Address addr)
+llvm::Constant* FileImage::getConstantHalf(retdec::common::Address addr)
 {
 	return getConstantFloat(addr);
 }
 
-llvm::Constant* FileImage::getConstantFloat(retdec::utils::Address addr)
+llvm::Constant* FileImage::getConstantFloat(retdec::common::Address addr)
 {
 	if (addr.isUndefined())
 	{
@@ -138,7 +160,7 @@ llvm::Constant* FileImage::getConstantFloat(retdec::utils::Address addr)
 	return _image->getFloat(addr, v) ? ConstantFP::get(t, v) : nullptr;
 }
 
-llvm::Constant* FileImage::getConstantDouble(retdec::utils::Address addr)
+llvm::Constant* FileImage::getConstantDouble(retdec::common::Address addr)
 {
 	if (addr.isUndefined())
 	{
@@ -150,7 +172,7 @@ llvm::Constant* FileImage::getConstantDouble(retdec::utils::Address addr)
 	return _image->getDouble(addr, v) ? ConstantFP::get(t, v) : nullptr;
 }
 
-llvm::Constant* FileImage::getConstantLongDouble(retdec::utils::Address addr)
+llvm::Constant* FileImage::getConstantLongDouble(retdec::common::Address addr)
 {
 	if (addr.isUndefined())
 	{
@@ -165,7 +187,7 @@ llvm::Constant* FileImage::getConstantLongDouble(retdec::utils::Address addr)
 	return b ? ConstantFP::get(t, StringRef(ss.str().c_str())) : nullptr;
 }
 
-llvm::Constant* FileImage::getConstantCharPointer(retdec::utils::Address addr)
+llvm::Constant* FileImage::getConstantCharPointer(retdec::common::Address addr)
 {
 	if (addr.isUndefined())
 	{
@@ -202,7 +224,7 @@ llvm::Constant* FileImage::getConstantCharPointer(retdec::utils::Address addr)
 }
 
 llvm::Constant* FileImage::getConstantCharArrayNice(
-		retdec::utils::Address addr)
+		retdec::common::Address addr)
 {
 	if (addr.isUndefined())
 	{
@@ -222,7 +244,7 @@ llvm::Constant* FileImage::getConstantCharArrayNice(
 
 llvm::Constant* FileImage::getConstantPointer(
 		llvm::PointerType* type,
-		retdec::utils::Address addr)
+		retdec::common::Address addr)
 {
 	if (addr.isUndefined())
 	{
@@ -244,7 +266,7 @@ llvm::Constant* FileImage::getConstantPointer(
 
 llvm::Constant* FileImage::getConstantStruct(
 		llvm::StructType* type,
-		retdec::utils::Address addr)
+		retdec::common::Address addr)
 {
 	size_t offset = 0;
 	std::vector<Constant*> vc;
@@ -266,7 +288,7 @@ llvm::Constant* FileImage::getConstantStruct(
 
 llvm::Constant* FileImage::getConstantArray(
 		llvm::ArrayType* type,
-		retdec::utils::Address addr)
+		retdec::common::Address addr)
 {
 	std::vector<Constant*> vc;
 	size_t offset = 0;
@@ -311,7 +333,7 @@ llvm::Constant* FileImage::getConstantArray(
  */
 llvm::Constant* FileImage::getConstant(
 		llvm::Type* type,
-		retdec::utils::Address addr,
+		retdec::common::Address addr,
 		bool wideString)
 {
 	if (addr.isUndefined())
@@ -420,7 +442,7 @@ llvm::Constant* FileImage::getConstant(
 llvm::Constant* FileImage::getConstant(
 		Config* config,
 		DebugFormat* dbgf,
-		retdec::utils::Address addr)
+		retdec::common::Address addr)
 {
 	if (addr.isUndefined())
 	{

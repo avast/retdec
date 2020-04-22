@@ -20,11 +20,6 @@ namespace llvmir2hll {
 ConstBool::ConstBool(Type value):
 	Constant(), value(value), type(IntType::create(1, false)) {}
 
-/**
-* @brief Destructs the constant.
-*/
-ConstBool::~ConstBool() {}
-
 ShPtr<Value> ConstBool::clone() {
 	ShPtr<ConstBool> constBool(ConstBool::create(value));
 	constBool->setMetadata(getMetadata());

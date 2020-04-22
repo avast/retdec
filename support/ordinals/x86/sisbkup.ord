@@ -1,0 +1,8 @@
+1 SisCSFilesToBackupForLink
+2 SisCreateBackupStructure
+3 SisCreateRestoreStructure
+4 SisFreeAllocatedMemory
+5 SisFreeBackupStructure
+6 SisFreeRestoreStructure
+7 SisRestoredCommonStoreFile
+8 SisRestoredLink

@@ -1,0 +1,14 @@
+1 CheckFullscreen
+2 Direct3DShaderValidatorCreate9
+3 PSGPError
+4 PSGPSampleTexture
+5 D3DPERF_BeginEvent
+6 D3DPERF_EndEvent
+7 D3DPERF_GetStatus
+8 D3DPERF_QueryRepeatFrame
+9 D3DPERF_SetMarker
+10 D3DPERF_SetOptions
+11 D3DPERF_SetRegion
+12 DebugSetLevel
+13 DebugSetMute
+14 Direct3DCreate9

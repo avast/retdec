@@ -32,17 +32,17 @@ ShPtr<FloatType> getTypeOfValue(const ConstFloat::Type &value) {
 	// The sizes are based on http://llvm.org/docs/LangRef.html#floating-point-types.
 	unsigned size = 0;
 	const auto &semantics = value.getSemantics();
-	if (&semantics == &llvm::APFloat::IEEEhalf) {
+	if (&semantics == &llvm::APFloat::IEEEhalf()) {
 		size = 16;
-	} else if (&semantics == &llvm::APFloat::IEEEsingle) {
+	} else if (&semantics == &llvm::APFloat::IEEEsingle()) {
 		size = 32;
-	} else if (&semantics == &llvm::APFloat::IEEEdouble) {
+	} else if (&semantics == &llvm::APFloat::IEEEdouble()) {
 		size = 64;
-	} else if (&semantics == &llvm::APFloat::IEEEquad) { // fp128
+	} else if (&semantics == &llvm::APFloat::IEEEquad()) { // fp128
 		size = 128;
-	} else if (&semantics == &llvm::APFloat::x87DoubleExtended) { // x86_fp80
+	} else if (&semantics == &llvm::APFloat::x87DoubleExtended()) { // x86_fp80
 		size = 80;
-	} else if (&semantics == &llvm::APFloat::PPCDoubleDouble) { // ppc_fp128
+	} else if (&semantics == &llvm::APFloat::PPCDoubleDouble()) { // ppc_fp128
 		size = 128;
 	} else {
 		FAIL("unsupported semantics of llvm::APFloat");
@@ -59,11 +59,6 @@ ShPtr<FloatType> getTypeOfValue(const ConstFloat::Type &value) {
 */
 ConstFloat::ConstFloat(Type value):
 	Constant(), value(value), type(getTypeOfValue(value)) {}
-
-/**
-* @brief Destructs the constant.
-*/
-ConstFloat::~ConstFloat() {}
 
 ShPtr<Value> ConstFloat::clone() {
 	ShPtr<ConstFloat> constFloat(ConstFloat::create(value));

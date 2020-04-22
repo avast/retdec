@@ -1,10 +1,23 @@
-set(RETDEC_TESTS_LOADER_SOURCES
+
+add_executable(tests-loader
 	name_generator_tests.cpp
 	overlap_resolver_tests.cpp
 	segment_data_source_tests.cpp
 	segment_tests.cpp
 )
 
-add_executable(retdec-tests-loader ${RETDEC_TESTS_LOADER_SOURCES})
-target_link_libraries(retdec-tests-loader retdec-loader retdec-utils gmock_main)
-install(TARGETS retdec-tests-loader RUNTIME DESTINATION ${RETDEC_TESTS_DIR})
+target_link_libraries(tests-loader
+	retdec::common
+	retdec::loader
+	retdec::utils
+	retdec::deps::gmock_main
+)
+
+set_target_properties(tests-loader
+	PROPERTIES
+		OUTPUT_NAME "retdec-tests-loader"
+)
+
+install(TARGETS tests-loader
+	RUNTIME DESTINATION ${RETDEC_INSTALL_TESTS_DIR}
+)

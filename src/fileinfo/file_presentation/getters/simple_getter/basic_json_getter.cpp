@@ -9,6 +9,7 @@
 
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -16,14 +17,6 @@ namespace fileinfo {
  * @param fileInfo Information about file
  */
 BasicJsonGetter::BasicJsonGetter(FileInformation &fileInfo) : SimpleGetter(fileInfo)
-{
-
-}
-
-/**
- * Destructor
- */
-BasicJsonGetter::~BasicJsonGetter()
 {
 
 }
@@ -57,3 +50,4 @@ std::size_t BasicJsonGetter::loadInformation(std::vector<std::string> &desc, std
 }
 
 } // namespace fileinfo
+} // namespace retdec

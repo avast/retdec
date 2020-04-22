@@ -1,4 +1,5 @@
-set(PAT2YARA_SOURCES
+
+add_executable(pat2yara
 	compare.cpp
 	logic.cpp
 	modifications.cpp
@@ -7,7 +8,25 @@ set(PAT2YARA_SOURCES
 	utils.cpp
 )
 
-add_executable(retdec-pat2yara ${PAT2YARA_SOURCES})
-target_link_libraries(retdec-pat2yara retdec-patterngen retdec-utils yaramod)
-target_include_directories(retdec-pat2yara PUBLIC ${PROJECT_SOURCE_DIR}/src/)
-install(TARGETS retdec-pat2yara RUNTIME DESTINATION bin)
+target_compile_features(pat2yara PUBLIC cxx_std_17)
+
+target_include_directories(pat2yara
+	PRIVATE
+		${RETDEC_SOURCE_DIR}
+)
+
+target_link_libraries(pat2yara
+	retdec::patterngen
+	retdec::utils
+	retdec::deps::yaramod
+)
+
+set_target_properties(pat2yara
+	PROPERTIES
+		OUTPUT_NAME "retdec-pat2yara"
+)
+
+install(TARGETS pat2yara
+	RUNTIME
+		DESTINATION bin
+)

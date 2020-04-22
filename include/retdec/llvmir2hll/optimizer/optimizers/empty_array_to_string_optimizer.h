@@ -71,8 +71,6 @@ class EmptyArrayToStringOptimizer final: public Optimizer {
 public:
 	EmptyArrayToStringOptimizer(ShPtr<Module> module);
 
-	virtual ~EmptyArrayToStringOptimizer() override;
-
 	virtual std::string getId() const override { return "EmptyArrayToString"; }
 
 private:

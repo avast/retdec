@@ -37,7 +37,6 @@ class MachOHeuristics : public Heuristics
 		MachOHeuristics(
 				retdec::fileformat::MachOFormat &parser, Search &searcher,
 				ToolInformation &toolInfo);
-		virtual ~MachOHeuristics() override;
 };
 
 } // namespace cpdetect

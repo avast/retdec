@@ -10,14 +10,15 @@
 using namespace retdec::utils;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 namespace
 {
 
-const std::size_t distributionArray[] = {6, 20, 20};
-const std::string headerArray[] = {"i", "version", "count"};
-const std::string headerDesc[] = {"index", "used version", "number of uses"};
+const std::size_t distributionArray[] = {6, 20, 20, 20, 20};
+const std::string headerArray[] = {"i", "product_id", "count", "product_name", "vs_version"};
+const std::string headerDesc[] = {"index", "product id", "number of uses", "product name", "vs_version"};
 
 } // anonymous namespace
 
@@ -35,14 +36,6 @@ RichHeaderPlainGetter::RichHeaderPlainGetter(FileInformation &fileInfo) : Iterat
 	commonHeaderElements.insert(commonHeaderElements.begin(), std::begin(headerArray), std::end(headerArray));
 	commonHeaderDesc.insert(commonHeaderDesc.begin(), std::begin(headerDesc), std::end(headerDesc));
 	loadRecords();
-}
-
-/**
- * Destructor
- */
-RichHeaderPlainGetter::~RichHeaderPlainGetter()
-{
-
 }
 
 std::size_t RichHeaderPlainGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const
@@ -70,10 +63,12 @@ bool RichHeaderPlainGetter::loadRecord(std::size_t structIndex, std::size_t recI
 
 	record.clear();
 	record.push_back(numToStr(recIndex));
-	const auto major = fileinfo.getRichHeaderRecordMajorVersionStr(recIndex);
-	const auto build = fileinfo.getRichHeaderRecordBuildVersionStr(recIndex);
-	record.push_back(!major.empty() && !build.empty() ? major + "." + build : "");
+	const auto productId = fileinfo.getRichHeaderRecordProductIdStr(recIndex);
+	const auto productBuild = fileinfo.getRichHeaderRecordProductBuildStr(recIndex);
+	record.push_back(!productId.empty() && !productBuild.empty() ? productId + "." + productBuild : "");
 	record.push_back(fileinfo.getRichHeaderRecordNumberOfUsesStr(recIndex));
+	record.push_back(fileinfo.getRichHeaderRecordProductNameStr(recIndex));
+	record.push_back(fileinfo.getRichHeaderRecordVisualStudioNameStr(recIndex));
 
 	return true;
 }
@@ -92,3 +87,4 @@ bool RichHeaderPlainGetter::getFlagDescriptors(std::size_t structIndex, std::vec
 }
 
 } // namespace fileinfo
+} // namespace retdec

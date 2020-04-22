@@ -42,11 +42,6 @@ ExprTypesFixer::ExprTypesFixer():
 	OrderedAllVisitor() {}
 
 /**
-* @brief Destructs the visitor.
-*/
-ExprTypesFixer::~ExprTypesFixer() {}
-
-/**
 * @brief Sets the probably types based on statistics. Statistics are from
 *        @c ExprTypesAnalysis.
 *

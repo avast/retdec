@@ -36,8 +36,8 @@ DebugFormat* DebugFormatProvider::addDebugFormat(
 				llvm::Module* m,
 				retdec::loader::Image* objf,
 				const std::string& pdbFile,
-				const retdec::utils::Address& imageBase,
-				retdec::demangler::CDemangler* demangler)
+				const retdec::common::Address& imageBase,
+				Demangler* demangler)
 {
 	if (objf == nullptr)
 	{
@@ -50,7 +50,7 @@ DebugFormat* DebugFormatProvider::addDebugFormat(
 					objf,
 					pdbFile,
 					nullptr, // symbol table -- not needed.
-					demangler,
+					demangler ? demangler->getDemangler() : nullptr,
 					imageBase));
 	return &p.first->second;
 }

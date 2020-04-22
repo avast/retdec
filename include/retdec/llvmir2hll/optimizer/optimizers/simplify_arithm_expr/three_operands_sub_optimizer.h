@@ -8,12 +8,12 @@
 #ifndef RETDEC_LLVMIR2HLL_OPTIMIZER_OPTIMIZERS_SIMPLIFY_ARITHM_EXPR_THREE_OPERANDS_SUB_OPTIMIZER_H
 #define RETDEC_LLVMIR2HLL_OPTIMIZER_OPTIMIZERS_SIMPLIFY_ARITHM_EXPR_THREE_OPERANDS_SUB_OPTIMIZER_H
 
+#include <optional>
 #include <string>
 
 #include "retdec/llvmir2hll/ir/binary_op_expr.h"
 #include "retdec/llvmir2hll/ir/expression.h"
 #include "retdec/llvmir2hll/optimizer/optimizers/simplify_arithm_expr/sub_optimizer.h"
-#include "retdec/llvmir2hll/support/maybe.h"
 #include "retdec/llvmir2hll/support/types.h"
 
 namespace retdec {
@@ -140,7 +140,6 @@ namespace llvmir2hll {
 class ThreeOperandsSubOptimizer final: public SubOptimizer {
 public:
 	ThreeOperandsSubOptimizer(ShPtr<ArithmExprEvaluator> arithmExprEvaluator);
-	virtual ~ThreeOperandsSubOptimizer() override;
 
 	static ShPtr<SubOptimizer> create(ShPtr<ArithmExprEvaluator>
 		arithmExprEvaluator);
@@ -170,7 +169,7 @@ private:
 		ShPtr<BinaryOpExpr> exprToAnalyze) const;
 	ShPtr<Expression> getResult(ShPtr<Expression> expr) const;
 	void tryOptimizeBitXorOpWithRelationalOperator(ShPtr<BitXorOpExpr> expr);
-	Maybe<ExprPair> tryOptimizeExpressionWithRelationalOperator(
+	std::optional<ExprPair> tryOptimizeExpressionWithRelationalOperator(
 		ShPtr<BinaryOpExpr> expr);
 	void tryOptimizeOrOpExprWithRelOperators(ShPtr<OrOpExpr>);
 };

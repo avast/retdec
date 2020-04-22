@@ -29,11 +29,6 @@ RemoveUselessCastsOptimizer::RemoveUselessCastsOptimizer(ShPtr<Module> module):
 		PRECONDITION_NON_NULL(module);
 	}
 
-/**
-* @brief Destructs the optimizer.
-*/
-RemoveUselessCastsOptimizer::~RemoveUselessCastsOptimizer() {}
-
 void RemoveUselessCastsOptimizer::visit(ShPtr<AssignStmt> stmt) {
 	if (tryOptimizationCase1(stmt)) {
 		return;

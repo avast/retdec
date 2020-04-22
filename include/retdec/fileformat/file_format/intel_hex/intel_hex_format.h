@@ -7,7 +7,7 @@
 #ifndef RETDEC_FILEFORMAT_FILE_FORMAT_INTEL_HEX_INTEL_HEX_FORMAT_H
 #define RETDEC_FILEFORMAT_FILE_FORMAT_INTEL_HEX_INTEL_HEX_FORMAT_H
 
-#include "retdec/utils/address.h"
+#include "retdec/common/address.h"
 #include "retdec/fileformat/file_format/file_format.h"
 #include "retdec/fileformat/file_format/intel_hex/intel_hex_parser/intel_hex_parser.h"
 
@@ -24,7 +24,7 @@ class IntelHexFormat : public FileFormat
 		Architecture architecture = Architecture::UNKNOWN;                           ///< Intel HEX provides no information about architecture
 		retdec::utils::Endianness endianness = retdec::utils::Endianness::UNKNOWN; ///< Intel HEX provides no information about endianness
 		std::size_t bytesPerWord = 0;                                                ///< Intel HEX provides no information about word size
-		retdec::utils::Address epOffset = 0;                                        ///< offset of entry point
+		retdec::common::Address epOffset = 0;                                        ///< offset of entry point
 		std::vector<unsigned char> serialized;                                       ///< serialized binary data
 
 		/// @name Initialization methods
@@ -40,7 +40,7 @@ class IntelHexFormat : public FileFormat
 	public:
 		IntelHexFormat(std::string pathToFile, LoadFlags loadFlags = LoadFlags::NONE);
 		IntelHexFormat(std::istream &inputStream, LoadFlags loadFlags = LoadFlags::NONE);
-		virtual ~IntelHexFormat() override;
+		IntelHexFormat(const std::uint8_t *data, std::size_t size, LoadFlags loadFlags = LoadFlags::NONE);
 
 		/// @name Byte value storage methods
 		/// @{

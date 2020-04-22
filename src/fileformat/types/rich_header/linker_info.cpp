@@ -10,91 +10,85 @@ namespace retdec {
 namespace fileformat {
 
 /**
- * Constructor
- */
-LinkerInfo::LinkerInfo() : majorVersion(0), minorVersion(0), buildVersion(0), count(0)
-{
-
-}
-
-/**
- * Destructor
- */
-LinkerInfo::~LinkerInfo()
-{
-
-}
-
-/**
  * Get major version
  * @return Major version of linker
  */
-unsigned long long LinkerInfo::getMajorVersion() const
+uint32_t LinkerInfo::getProductId() const
 {
-	return majorVersion;
-}
-
-/**
- * Get minor version
- * @return Minor version of linker
- */
-unsigned long long LinkerInfo::getMinorVersion() const
-{
-	return minorVersion;
+	return productId;
 }
 
 /**
  * Get build version
  * @return Build version of linker
  */
-unsigned long long LinkerInfo::getBuildVersion() const
+uint32_t LinkerInfo::getProductBuild() const
 {
-	return buildVersion;
+	return productBuild;
 }
 
 /**
  * Get number of uses
  * @return Number of uses
  */
-unsigned long long LinkerInfo::getNumberOfUses() const
+uint32_t LinkerInfo::getNumberOfUses() const
 {
 	return count;
 }
 
 /**
- * Set major version of linker
- * @param linkerMajorVersion Major version of linker
+ * Get product name as string
+ * @return Product Name as std::string
  */
-void LinkerInfo::setMajorVersion(unsigned long long linkerMajorVersion)
+std::string LinkerInfo::getProductName() const
 {
-	majorVersion = linkerMajorVersion;
+	return productName;
 }
 
 /**
- * Set minor version of linker
- * @param linkerMinorVersion Minor version of linker
+ * Get aproximate name of Visual Studio
+ * @return Visual Studio version as std::string
  */
-void LinkerInfo::setMinorVersion(unsigned long long linkerMinorVersion)
+std::string LinkerInfo::getVisualStudioName() const
 {
-	minorVersion = linkerMinorVersion;
+	return visualStudioName;
+}
+
+/**
+ * Set major version of linker
+ * @param richProductId Major version of linker
+ */
+void LinkerInfo::setProductId(uint32_t richProductId)
+{
+	productId = richProductId;
 }
 
 /**
  * Set build version
- * @param linkerBuildVersion Build version
+ * @param richProductBuild Build version
  */
-void LinkerInfo::setBuildVersion(unsigned long long linkerBuildVersion)
+void LinkerInfo::setProductBuild(uint32_t richProductBuild)
 {
-	buildVersion = linkerBuildVersion;
+	productBuild = richProductBuild;
 }
 
 /**
  * Set number of uses
- * @param linkerCount Number of uses
+ * @param richProductCount Number of uses
  */
-void LinkerInfo::setNumberOfUses(unsigned long long linkerCount)
+void LinkerInfo::setNumberOfUses(uint32_t richProductCount)
 {
-	count = linkerCount;
+	count = richProductCount;
+}
+
+void LinkerInfo::setProductName(const std::string & richProductName)
+{
+	productName = richProductName;
+}
+
+void LinkerInfo::setVisualStudioName(const std::string & richVisualStudioName)
+{
+	visualStudioName = richVisualStudioName;
 }
 
 } // namespace fileformat

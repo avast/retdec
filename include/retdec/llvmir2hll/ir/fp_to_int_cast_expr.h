@@ -27,8 +27,6 @@ class FPToIntCastExpr final: public CastExpr {
 public:
 	static ShPtr<FPToIntCastExpr> create(ShPtr<Expression> op, ShPtr<Type> dstType);
 
-	virtual ~FPToIntCastExpr() override;
-
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
 	virtual ShPtr<Value> clone() override;
 

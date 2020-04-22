@@ -20,11 +20,6 @@ namespace llvmir2hll {
 ConstNullPointer::ConstNullPointer(ShPtr<PointerType> type):
 	Constant(), type(type) {}
 
-/**
-* @brief Destructs the constant.
-*/
-ConstNullPointer::~ConstNullPointer() {}
-
 ShPtr<Value> ConstNullPointer::clone() {
 	ShPtr<ConstNullPointer> constPointer(ConstNullPointer::create(type));
 	constPointer->setMetadata(getMetadata());

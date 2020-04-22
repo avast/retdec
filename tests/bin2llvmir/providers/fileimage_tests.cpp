@@ -4,7 +4,7 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include "retdec/config/tool_info.h"
+#include "retdec/common/tool_info.h"
 #include "retdec/utils/system.h"
 #include "retdec/bin2llvmir/providers/fileimage.h"
 #include "bin2llvmir/utils/llvmir_tests.h"
@@ -38,7 +38,7 @@ class FileImageTests: public LlvmIrTests
 //
 //llvm::Constant* getConstant(
 //		llvm::Type* type,
-//		retdec::utils::Address addr)
+//		retdec::common::Address addr)
 //
 
 TEST_F(FileImageTests, getConstantReadsCorrectValuesForI1)
@@ -334,7 +334,7 @@ TEST_F(FileImageTests, getConstantReadsCorrectValuesForStructureType)
 //		llvm::Module* module,
 //		retdec::loader::Image* objf,
 //		DebugFormat* dbgf,
-//		retdec::utils::Address addr)
+//		retdec::common::Address addr)
 //
 
 TEST_F(FileImageTests, getConstantReadsDetectsAndReads32BitInteger)

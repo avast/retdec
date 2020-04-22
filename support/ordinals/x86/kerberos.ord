@@ -1,0 +1,10 @@
+1 SpInitialize
+2 KerbDomainChangeCallback
+3 SpLsaModeInitialize
+4 SpUserModeInitialize
+5 KerbCreateTokenFromTicket
+6 KerbFree
+7 KerbIsInitialized
+8 KerbKdcCallBack
+9 KerbMakeKdcCall
+32 SpInstanceInit

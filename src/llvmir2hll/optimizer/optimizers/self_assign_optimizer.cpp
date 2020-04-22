@@ -25,11 +25,6 @@ SelfAssignOptimizer::SelfAssignOptimizer(ShPtr<Module> module):
 		PRECONDITION_NON_NULL(module);
 	}
 
-/**
-* @brief Destructs the optimizer.
-*/
-SelfAssignOptimizer::~SelfAssignOptimizer() {}
-
 void SelfAssignOptimizer::visit(ShPtr<AssignStmt> stmt) {
 	// First, visit the successor so that when there is a list of self
 	// assignments, they are all properly removed.

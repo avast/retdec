@@ -7,10 +7,9 @@
 #ifndef RETDEC_FILEFORMAT_FILE_FORMAT_PE_PE_FORMAT_PARSER_PE_FORMAT_PARSER_H
 #define RETDEC_FILEFORMAT_FILE_FORMAT_PE_PE_FORMAT_PARSER_PE_FORMAT_PARSER_H
 
-#include <pelib/PeLib.h>
-
-#include "retdec/utils/range.h"
+#include "retdec/common/range.h"
 #include "retdec/fileformat/fftypes.h"
+#include "retdec/pelib/PeLib.h"
 
 namespace retdec {
 namespace fileformat {
@@ -23,7 +22,7 @@ class PeFormatParser
 		const FileFormat *inputFile; ///< pointer to input file
 	public:
 		PeFormatParser(const FileFormat *fInputFile);
-		virtual ~PeFormatParser();
+		virtual ~PeFormatParser() = default;
 
 		/// @name Detection methods
 		/// @{
@@ -38,8 +37,10 @@ class PeFormatParser
 		virtual unsigned long long getFileFlags() const = 0;
 		virtual unsigned long long getTimeStamp() const = 0;
 		virtual unsigned long long getOptionalHeaderSize() const = 0;
+		virtual bool isSizeOfHeaderMultipleOfFileAlignment() const = 0;
 		virtual unsigned long long getFileAlignment() const = 0;
 		virtual unsigned long long getSectionAlignment() const = 0;
+		virtual unsigned long long getSizeOfHeaders() const = 0;
 		virtual unsigned long long getSizeOfImage() const = 0;
 		virtual unsigned long long getChecksum() const = 0;
 		virtual unsigned long long getSizeOfStackReserve() const = 0;
@@ -72,6 +73,12 @@ class PeFormatParser
 		virtual bool getDebugEntryPointerToRawData(unsigned long long index, unsigned long long& pointerToRawData) const = 0;
 		virtual unsigned long long getResourceDirectoryOffset() const = 0;
 		virtual const PeLib::ResourceNode* getResourceTreeRoot() const = 0;
+		virtual unsigned long long getTlsStartAddressOfRawData() const = 0;
+		virtual unsigned long long getTlsEndAddressOfRawData() const = 0;
+		virtual unsigned long long getTlsAddressOfIndex() const = 0;
+		virtual unsigned long long getTlsAddressOfCallBacks() const = 0;
+		virtual unsigned long long getTlsSizeOfZeroFill() const = 0;
+		virtual unsigned long long getTlsCharacteristics() const = 0;
 		virtual std::unique_ptr<CLRHeader> getClrHeader() const = 0;
 		virtual unsigned long long getNumberOfRelocations() const = 0;
 		virtual unsigned long long getNumberOfRelocationData(unsigned long long index) const = 0;
@@ -79,10 +86,10 @@ class PeFormatParser
 		virtual unsigned long long getSecurityDirFileOffset() const = 0;
 		virtual unsigned long long getSecurityDirRva() const = 0;
 		virtual unsigned long long getSecurityDirSize() const = 0;
-		virtual retdec::utils::RangeContainer<std::uint64_t> getImportDirectoryOccupiedAddresses() const = 0;
-		virtual retdec::utils::RangeContainer<std::uint64_t> getExportDirectoryOccupiedAddresses() const = 0;
-		virtual retdec::utils::RangeContainer<std::uint64_t> getDebugDirectoryOccupiedAddresses() const = 0;
-		virtual retdec::utils::RangeContainer<std::uint64_t> getResourceDirectoryOccupiedAddresses() const = 0;
+		virtual retdec::common::RangeContainer<std::uint64_t> getImportDirectoryOccupiedAddresses() const = 0;
+		virtual retdec::common::RangeContainer<std::uint64_t> getExportDirectoryOccupiedAddresses() const = 0;
+		virtual retdec::common::RangeContainer<std::uint64_t> getDebugDirectoryOccupiedAddresses() const = 0;
+		virtual retdec::common::RangeContainer<std::uint64_t> getResourceDirectoryOccupiedAddresses() const = 0;
 		/// @}
 };
 

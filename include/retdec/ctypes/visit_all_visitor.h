@@ -22,8 +22,6 @@ class Type;
 class VisitAllVisitor: public Visitor
 {
 	public:
-		virtual ~VisitAllVisitor() override;
-
 		/// @name Visitor interface.
 		/// @{
 		virtual void visit(const std::shared_ptr<ArrayType> &type) override;
@@ -31,7 +29,9 @@ class VisitAllVisitor: public Visitor
 		virtual void visit(const std::shared_ptr<FloatingPointType> &type) override;
 		virtual void visit(const std::shared_ptr<FunctionType> &type) override;
 		virtual void visit(const std::shared_ptr<IntegralType> &type) override;
+		virtual void visit(const std::shared_ptr<NamedType> &type) override;
 		virtual void visit(const std::shared_ptr<PointerType> &type) override;
+		virtual void visit(const std::shared_ptr<ReferenceType> &type) override;
 		virtual void visit(const std::shared_ptr<StructType> &type) override;
 		virtual void visit(const std::shared_ptr<TypedefedType> &type) override;
 		virtual void visit(const std::shared_ptr<UnionType> &type) override;
@@ -43,7 +43,7 @@ class VisitAllVisitor: public Visitor
 		using AccessedTypes = std::unordered_set<std::shared_ptr<Type>>;
 
 	protected:
-		VisitAllVisitor();
+		VisitAllVisitor() = default;
 
 		bool makeAccessedAndCheckIfAccessed(const std::shared_ptr<Type> &type);
 

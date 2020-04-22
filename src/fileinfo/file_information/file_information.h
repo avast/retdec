@@ -7,9 +7,12 @@
 #ifndef FILEINFO_FILE_INFORMATION_FILE_INFORMATION_H
 #define FILEINFO_FILE_INFORMATION_FILE_INFORMATION_H
 
+#include <optional>
+
 #include "retdec/cpdetect/cpdetect.h"
 #include "fileinfo/file_information/file_information_types/file_information_types.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -21,7 +24,7 @@ namespace fileinfo {
 class FileInformation
 {
 	private:
-		retdec::cpdetect::ReturnCode status;           ///< return code
+		retdec::cpdetect::ReturnCode status = retdec::cpdetect::ReturnCode::OK;
 		std::string filePath;                          ///< path to input file
 		std::string crc32;                             ///< CRC32 of input file
 		std::string md5;                               ///< MD5 of input file
@@ -29,7 +32,8 @@ class FileInformation
 		std::string secCrc32;                          ///< CRC32 of section table
 		std::string secMd5;                            ///< MD5 of section table
 		std::string secSha256;                         ///< SHA256 of section table
-		retdec::fileformat::Format fileFormatEnum;     ///< format of input file in enumeration representation
+		/// format of input file in enumeration representation
+		retdec::fileformat::Format fileFormatEnum = retdec::fileformat::Format::UNKNOWN;
 		std::string fileFormat;                        ///< format of input file in string representation
 		std::string fileClass;                         ///< class of file
 		std::string fileType;                          ///< type of file (e.g. executable file)
@@ -39,11 +43,13 @@ class FileInformation
 		std::string compactManifest;                   ///< compact version of XML manifest
 		FileHeader header;                             ///< file header
 		RichHeader richHeader;                         ///< rich header
+		VisualBasicInfo visualBasicInfo;               ///< visual basic information
 		PdbInfo pdbInfo;                               ///< information about related PDB file
 		ImportTable importTable;                       ///< information about imports
 		ExportTable exportTable;                       ///< information about exports
 		ResourceTable resourceTable;                   ///< information about resources in input file
 		CertificateTable certificateTable;             ///< information about certificates
+		TlsInfo tlsInfo;                               ///< information about thread-local storage
 		ElfCore elfCoreInfo;                           ///< information about ELF core files
 		LoaderInfo loaderInfo;                         ///< information about loaded image
 		std::vector<DataDirectory> directories;        ///< information about data directories
@@ -57,14 +63,14 @@ class FileInformation
 		std::vector<Pattern> malwarePatterns;          ///< detected malware patterns
 		std::vector<Pattern> otherPatterns;            ///< other detected patterns
 		Strings strings;                               ///< detected strings
-		retdec::utils::Maybe<bool> signatureVerified;  ///< indicates whether the signature is present and if it is verified
+		std::optional<bool> signatureVerified;         ///< indicates whether the signature is present and if it is verified
 		DotnetInfo dotnetInfo;                         ///< .NET information
+		std::string failedDepsList;                    /// If non-empty, trhis contains the name of the dependency list that failed to load
+		std::vector<std::pair<std::string,std::string>> anomalies;     ///< detected anomalies
+
 	public:
 		retdec::cpdetect::ToolInformation toolInfo; ///< detected tools
 		std::vector<std::string> messages;   ///< error, warning and other messages
-
-		FileInformation();
-		~FileInformation();
 
 		/// @name Getters of own members
 		/// @{
@@ -136,6 +142,7 @@ class FileInformation
 		std::string getNumberOfDeclaredSymbolTablesStr() const;
 		std::string getOverlayOffsetStr(std::ios_base &(* format)(std::ios_base &)) const;
 		std::string getOverlaySizeStr(std::ios_base &(* format)(std::ios_base &)) const;
+		std::string getOverlayEntropyStr(std::ios_base &(* format)(std::ios_base &)) const;
 		/// @}
 
 		/// @name Getters of @a richHeader
@@ -144,12 +151,53 @@ class FileInformation
 		std::string getRichHeaderSignature() const;
 		std::string getRichHeaderOffsetStr(std::ios_base &(* format)(std::ios_base &)) const;
 		std::string getRichHeaderKeyStr(std::ios_base &(* format)(std::ios_base &)) const;
-		std::string getRichHeaderRecordMajorVersionStr(std::size_t position) const;
-		std::string getRichHeaderRecordMinorVersionStr(std::size_t position) const;
-		std::string getRichHeaderRecordBuildVersionStr(std::size_t position) const;
+		std::string getRichHeaderRecordProductIdStr(std::size_t position) const;
+		std::string getRichHeaderRecordProductBuildStr(std::size_t position) const;
 		std::string getRichHeaderRecordNumberOfUsesStr(std::size_t position) const;
+		std::string getRichHeaderRecordProductNameStr(std::size_t position) const;
+		std::string getRichHeaderRecordVisualStudioNameStr(std::size_t position) const;
 		std::string getRichHeaderRawBytesStr() const;
 		bool hasRichHeaderRecords() const;
+		/// @}
+
+		/// @name Getters of @a visualBasicInfo
+		/// @{
+		bool isVisualBasicUsed() const;
+		bool getVisualBasicIsPcode() const;
+		std::string getVisualBasicLanguageDLL() const;
+		std::string getVisualBasicBackupLanguageDLL() const;
+		std::string getVisualBasicProjectExeName() const;
+		std::string getVisualBasicProjectDescription() const;
+		std::string getVisualBasicProjectHelpFile() const;
+		std::string getVisualBasicProjectName() const;
+		std::string getVisualBasicLanguageDLLPrimaryLCIDStr() const;
+		std::string getVisualBasicLanguageDLLSecondaryLCIDStr() const;
+		std::string getVisualBasicProjectPath() const;
+		std::string getVisualBasicProjectPrimaryLCIDStr() const;
+		std::string getVisualBasicProjectSecondaryLCIDStr() const;
+		const retdec::fileformat::VisualBasicObject *getVisualBasicObject(std::size_t position) const;
+		const retdec::fileformat::VisualBasicExtern *getVisualBasicExtern(std::size_t position) const;
+		std::size_t getVisualBasicNumberOfObjects() const;
+		std::size_t getVisualBasicNumberOfExterns() const;
+		std::string getVisualBasicExternModuleName(std::size_t position) const;
+		std::string getVisualBasicExternApiName(std::size_t position) const;
+		std::string getVisualBasicObjectTableGUID() const;
+		std::string getVisualBasicTypeLibCLSID() const;
+		std::string getVisualBasicTypeLibMajorVersionStr() const;
+		std::string getVisualBasicTypeLibMinorVersionStr() const;
+		std::string getVisualBasicTypeLibLCIDStr() const;
+		std::string getVisualBasicCOMObjectName() const;
+		std::string getVisualBasicCOMObjectDescription() const;
+		std::string getVisualBasicCOMObjectCLSID() const;
+		std::string getVisualBasicCOMObjectInterfaceCLSID() const;
+		std::string getVisualBasicCOMObjectEventsCLSID() const;
+		std::string getVisualBasicCOMObjectType() const;
+		std::string getVisualBasicExternTableHashCrc32() const;
+		std::string getVisualBasicExternTableHashMd5() const;
+		std::string getVisualBasicExternTableHashSha256() const;
+		std::string getVisualBasicObjectTableHashCrc32() const;
+		std::string getVisualBasicObjectTableHashMd5() const;
+		std::string getVisualBasicObjectTableHashSha256() const;
 		/// @}
 
 		/// @name Getters of @a pdbInfo
@@ -177,6 +225,14 @@ class FileInformation
 		bool hasImportTableRecords() const;
 		/// @}
 
+		/// @name Getters of the missing dependency info
+		/// @{
+		std::size_t getNumberOfMissingDeps() const;
+		std::string getMissingDepName(std::size_t position) const;
+		std::string getDepsListFailedToLoad() const;
+		void setDepsListFailedToLoad(const std::string & );
+		/// @}
+
 		/// @name Getters of @a exportTable
 		/// @{
 		std::size_t getNumberOfStoredExports() const;
@@ -192,6 +248,8 @@ class FileInformation
 		/// @name Getters of @a resourceTable
 		/// @{
 		std::size_t getNumberOfStoredResources() const;
+		std::size_t getNumberOfVersionInfoLanguages() const;
+		std::size_t getNumberOfVersionInfoStrings() const;
 		std::string getResourceCrc32(std::size_t index) const;
 		std::string getResourceMd5(std::size_t index) const;
 		std::string getResourceSha256(std::size_t index) const;
@@ -202,6 +260,10 @@ class FileInformation
 		std::string getResourceName(std::size_t index) const;
 		std::string getResourceType(std::size_t index) const;
 		std::string getResourceLanguage(std::size_t index) const;
+		std::string getVersionInfoLanguageLcid(std::size_t index) const;
+		std::string getVersionInfoLanguageCodePage(std::size_t index) const;
+		std::string getVersionInfoStringName(std::size_t index) const;
+		std::string getVersionInfoStringValue(std::size_t index) const;
 		std::string getResourceNameIdStr(std::size_t index, std::ios_base &(* format)(std::ios_base &)) const;
 		std::string getResourceTypeIdStr(std::size_t index, std::ios_base &(* format)(std::ios_base &)) const;
 		std::string getResourceLanguageIdStr(std::size_t index, std::ios_base &(* format)(std::ios_base &)) const;
@@ -261,6 +323,19 @@ class FileInformation
 		bool hasCertificateTableCounterSignerCertificate() const;
 		/// @}
 
+		/// @name Getters of @a TLS information
+		/// @{
+		std::string getTlsRawDataStartAddrStr(std::ios_base &(* format)(std::ios_base &)) const;
+		std::string getTlsRawDataEndAddrStr(std::ios_base &(* format)(std::ios_base &)) const;
+		std::string getTlsIndexAddrStr(std::ios_base &(* format)(std::ios_base &)) const;
+		std::string getTlsCallBacksAddrStr(std::ios_base &(* format)(std::ios_base &)) const;
+		std::string getTlsZeroFillSizeStr(std::ios_base &(* format)(std::ios_base &)) const;
+		std::string getTlsCharacteristicsStr() const;
+		std::size_t getTlsNumberOfCallBacks() const;
+		std::string getTlsCallBackAddrStr(std::size_t position, std::ios_base &(* format)(std::ios_base &)) const;
+		bool isTlsUsed() const;
+		/// @}
+
 		/// @name Getters of @a directories
 		/// @{
 		std::string getDataDirectoryType(std::size_t position) const;
@@ -310,6 +385,7 @@ class FileInformation
 		std::string getSectionExtraInfoStr(std::size_t position) const;
 		std::string getSectionLineOffsetStr(std::size_t position, std::ios_base &(* format)(std::ios_base &)) const;
 		std::string getSectionRelocationsLineOffsetStr(std::size_t position, std::ios_base &(* format)(std::ios_base &)) const;
+		std::string getSectionEntropy(std::size_t position, std::ios_base &(* format)(std::ios_base &)) const;
 		unsigned long long getSectionFlagsSize(std::size_t position) const;
 		unsigned long long getSectionFlags(std::size_t position) const;
 		std::string getSectionFlagsStr(std::size_t position) const;
@@ -340,7 +416,7 @@ class FileInformation
 		/// @}
 
 		/// @name Getters of @a relocationTables
-		/// {
+		/// @{
 		std::size_t getNumberOfStoredRelocationsInTable(std::size_t position) const;
 		std::string getNumberOfStoredRelocationsInTableStr(std::size_t position) const;
 		std::string getNumberOfDeclaredRelocationsInTableStr(std::size_t position) const;
@@ -459,6 +535,13 @@ class FileInformation
 		bool hasDotnetTypeRefTableRecords() const;
 		/// @}
 
+		/// @name Getters of @a anomalies
+		/// @{
+		std::size_t getNumberOfAnomalies() const;
+		std::string getAnomalyIdentifier(std::size_t position) const;
+		std::string getAnomalyDescription(std::size_t position) const;
+		/// @}
+
 		/// @name Setters
 		/// @{
 		void setStatus(retdec::cpdetect::ReturnCode state);
@@ -509,7 +592,10 @@ class FileInformation
 		void setNumberOfDeclaredSymbolTables(unsigned long long noOfTables);
 		void setOverlayOffset(unsigned long long offset);
 		void setOverlaySize(unsigned long long size);
+		void setOverlayEntropy(double entropy);
 		void setRichHeader(const retdec::fileformat::RichHeader *rHeader);
+		void setVisualBasicInfo(const retdec::fileformat::VisualBasicInfo *vbInfo);
+		void setVisualBasicUsed(bool set);
 		void setPdbType(const std::string &sType);
 		void setPdbPath(const std::string &sPath);
 		void setPdbGuid(const std::string &sGuid);
@@ -520,6 +606,7 @@ class FileInformation
 		void setResourceTable(const retdec::fileformat::ResourceTable *sTable);
 		void setStrings(const std::vector<retdec::fileformat::String> *sStrings);
 		void setCertificateTable(const retdec::fileformat::CertificateTable *sTable);
+		void setTlsInfo(const retdec::fileformat::TlsInfo *info);
 		void setSignatureVerified(bool verified);
 		void setLoadedBaseAddress(unsigned long long baseAddress);
 		void setLoaderStatusMessage(const std::string& statusMessage);
@@ -539,6 +626,7 @@ class FileInformation
 		void setDotnetTypeRefhashCrc32(const std::string& crc32);
 		void setDotnetTypeRefhashMd5(const std::string& md5);
 		void setDotnetTypeRefhashSha256(const std::string& sha256);
+		void setAnomalies(const std::vector<std::pair<std::string,std::string>> &anom);
 		/// @}
 
 		/// @name Other methods
@@ -569,5 +657,6 @@ class FileInformation
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

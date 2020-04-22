@@ -11,6 +11,7 @@
 
 using namespace retdec::utils;
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -18,14 +19,6 @@ namespace fileinfo {
  * @param fileInfo Information about file
  */
 PdbPlainGetter::PdbPlainGetter(FileInformation &fileInfo) : SimpleGetter(fileInfo)
-{
-
-}
-
-/**
- * Destructor
- */
-PdbPlainGetter::~PdbPlainGetter()
 {
 
 }
@@ -59,3 +52,4 @@ std::size_t PdbPlainGetter::loadInformation(std::vector<std::string> &desc, std:
 }
 
 } // namespace fileinfo
+} // namespace retdec

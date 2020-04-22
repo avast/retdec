@@ -79,6 +79,7 @@ bool CondBranchOpt::run()
 	}
 
 	SymbolicTree::setToDefaultConfiguration();
+	IrModifier::eraseUnusedInstructionsRecursive(_toRemove);
 
 	return changed;
 }
@@ -96,7 +97,7 @@ bool CondBranchOpt::runOnInstruction(
 
 	LOG << llvmObjToString(br) << std::endl;
 
-	SymbolicTree root(RDA, cond);
+	auto root = SymbolicTree::PrecomputedRda(RDA, cond);
 	LOG << root << std::endl;
 
 	root.simplifyNode();
@@ -104,7 +105,7 @@ bool CondBranchOpt::runOnInstruction(
 
 	Value* testedVal = nullptr;
 	Value* subVal = nullptr;
-	Instruction* binOp = nullptr;
+	BinaryOperator* binOp = nullptr;
 	ICmpInst* icmp = nullptr;
 
 	// ZF SF OF xor or
@@ -261,6 +262,7 @@ bool CondBranchOpt::runOnInstruction(
 		}
 
 		auto* icmp = new ICmpInst(br, ICmpInst::ICMP_ULT, nl, nci);
+		_toRemove.insert(br->getCondition());
 		br->replaceUsesOfWith(br->getCondition(), icmp);
 		return true;
 	}
@@ -305,6 +307,7 @@ bool CondBranchOpt::transformConditionSub(
 
 	LOG << "---" << llvmObjToString(br) << std::endl;
 
+	_toRemove.insert(br->getCondition());
 	br->replaceUsesOfWith(br->getCondition(), newCond);
 
 	LOG << "+++" << llvmObjToString(newCond) << std::endl;

@@ -12,6 +12,7 @@
 using namespace retdec::utils;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 namespace
@@ -37,14 +38,6 @@ ExportTablePlainGetter::ExportTablePlainGetter(FileInformation &fileInfo) : Iter
 	commonHeaderElements.insert(commonHeaderElements.begin(), std::begin(headerArray), std::end(headerArray));
 	commonHeaderDesc.insert(commonHeaderDesc.begin(), std::begin(headerDesc), std::end(headerDesc));
 	loadRecords();
-}
-
-/**
- * Destructor
- */
-ExportTablePlainGetter::~ExportTablePlainGetter()
-{
-
 }
 
 std::size_t ExportTablePlainGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const
@@ -98,3 +91,4 @@ bool ExportTablePlainGetter::getFlagDescriptors(std::size_t structIndex, std::ve
 }
 
 } // namespace fileinfo
+} // namespace retdec

@@ -89,7 +89,7 @@ struct PrintCapstoneModeToString_Arm
 // If some test case is not meant for all modes, use some of the ONLY_MODE_*,
 // SKIP_MODE_* macros.
 //
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
 		InstantiateArmWithAllModes,
 		Capstone2LlvmIrTranslatorArmTests,
 		::testing::Values(CS_MODE_ARM, CS_MODE_THUMB),
@@ -108,6 +108,24 @@ TEST_P(Capstone2LlvmIrTranslatorArmTests, ARM_INS_ADD_r_r_i)
 	});
 
 	emulate("add r0, r1, #4");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM_REG_R1});
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM_REG_R0, 0x1234},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorArmTests, ARM_INS_ADD_r_r_i_bin)
+{
+	ONLY_MODE_ARM;
+
+	setRegisters({
+		{ARM_REG_R1, 0x1230},
+	});
+
+	emulate_bin("04 00 81 e2");
 
 	EXPECT_JUST_REGISTERS_LOADED({ARM_REG_R1});
 	EXPECT_JUST_REGISTERS_STORED({
@@ -2908,8 +2926,54 @@ TEST_P(Capstone2LlvmIrTranslatorArmTests, ARM_INS_STRD)
 	EXPECT_NO_REGISTERS_STORED();
 	EXPECT_NO_MEMORY_LOADED();
 	EXPECT_JUST_MEMORY_STORED({
-//		{0x1000, 0x1234567890abcdef_qw}
-		{0x1000, 0x12345678_dw}
+		{0x1000, 0x12345678_dw},
+		{0x1004, 0x90abcdef_dw}
+	});
+	EXPECT_NO_VALUE_CALLED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorArmTests, ARM_INS_STRD_sp_imm)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{ARM_REG_R0, 0x12345678},
+		{ARM_REG_R1, 0x90abcdef},
+		{ARM_REG_SP, 0x1000},
+	});
+
+	emulate("strd r0, r1, [sp, #0x18]");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM_REG_R0, ARM_REG_R1, ARM_REG_SP});
+	EXPECT_NO_REGISTERS_STORED();
+	EXPECT_NO_MEMORY_LOADED();
+	EXPECT_JUST_MEMORY_STORED({
+		{0x1018, 0x12345678_dw},
+		{0x101c, 0x90abcdef_dw}
+	});
+	EXPECT_NO_VALUE_CALLED();
+}
+
+TEST_P(Capstone2LlvmIrTranslatorArmTests, ARM_INS_STRD_sp_post_imm)
+{
+	ALL_MODES;
+
+	setRegisters({
+		{ARM_REG_R0, 0x12345678},
+		{ARM_REG_R1, 0x90abcdef},
+		{ARM_REG_SP, 0x1000},
+	});
+
+	emulate("strd r0, r1, [sp], #0x18");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM_REG_R0, ARM_REG_R1, ARM_REG_SP});
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM_REG_SP, ANY}, // Not an exact value because some strange behaviour.
+	});
+	EXPECT_NO_MEMORY_LOADED();
+	EXPECT_JUST_MEMORY_STORED({
+		{0x1000, 0x12345678_dw},
+		{0x1004, 0x90abcdef_dw}
 	});
 	EXPECT_NO_VALUE_CALLED();
 }

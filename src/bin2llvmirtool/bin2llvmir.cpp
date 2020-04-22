@@ -23,7 +23,7 @@
 #include <llvm/Analysis/TargetLibraryInfo.h>
 #include <llvm/Analysis/TargetTransformInfo.h>
 #include <llvm/Bitcode/BitcodeWriterPass.h>
-#include <llvm/CodeGen/CommandFlags.h>
+#include <llvm/CodeGen/CommandFlags.inc>
 #include <llvm/IR/DataLayout.h>
 #include <llvm/IR/DebugInfo.h>
 #include <llvm/IR/IRPrintingPasses.h>
@@ -83,34 +83,6 @@ static cl::opt<bool>
 MaxMemoryLimitHalfRAM("max-memory-half-ram",
 		cl::desc("Limit maximal memory to half of system RAM."),
 		cl::init(false));
-
-static cl::opt<bool>
-NoVerify("disable-verify", cl::desc("Do not run the verifier"), cl::Hidden);
-
-static cl::opt<bool>
-VerifyEach("verify-each", cl::desc("Verify after each transform"));
-
-static cl::opt<bool>
-DisableInline("disable-inlining", cl::desc("Do not run the inliner pass"));
-
-static cl::opt<bool>
-DisableLoopUnrolling("disable-loop-unrolling",
-		cl::desc("Disable loop unrolling in all relevant passes"),
-		cl::init(false));
-
-static cl::opt<bool>
-DisableLoopVectorization("disable-loop-vectorization",
-		cl::desc("Disable the loop vectorization pass"),
-		cl::init(false));
-
-static cl::opt<bool>
-DisableSLPVectorization("disable-slp-vectorization",
-		cl::desc("Disable the slp vectorization pass"),
-		cl::init(false));
-
-static cl::opt<bool>
-DisableSimplifyLibCalls("disable-simplify-libcalls",
-		cl::desc("Disable simplify-libcalls"));
 
 /**
  * These passes are considered to be from LLVM, not from RetDec.
@@ -233,7 +205,7 @@ class ModulePassPrinter : public ModulePass
 			return false;
 		}
 
-		const char *getPassName() const override
+		llvm::StringRef getPassName() const override
 		{
 			return PassName.c_str();
 		}
@@ -255,16 +227,10 @@ static inline void addPassWithPossibleVerification(
 		Pass *P,
 		const std::string& phaseName = std::string())
 {
-	std::string pn = phaseName.empty() ? P->getPassName() : phaseName;
+	std::string pn = phaseName.empty() ? P->getPassName().str() : phaseName;
 
 	PM.add(new ModulePassPrinter(pn));
 	PM.add(P);
-
-	// If we are verifying all of the intermediate steps, add the verifier...
-	if (VerifyEach)
-	{
-		PM.add(createVerifierPass());
-	}
 }
 
 /**
@@ -275,7 +241,7 @@ static inline void addPassWithoutVerification(
 		Pass *P,
 		const std::string& phaseName = std::string())
 {
-	std::string pn = phaseName.empty() ? P->getPassName() : phaseName;
+	std::string pn = phaseName.empty() ? P->getPassName().str() : phaseName;
 
 	PM.add(new ModulePassPrinter(pn));
 	PM.add(P);
@@ -344,7 +310,7 @@ std::unique_ptr<Module> createLlvmModule(LLVMContext& Context)
 	// Immediately run the verifier to catch any problems before starting up the
 	// pass pipelines. Otherwise we can crash on broken code during
 	// doInitialization().
-	if (!NoVerify && verifyModule(*M, &errs()))
+	if (verifyModule(*M, &errs()))
 	{
 		throw std::runtime_error("created llvm::Module is broken");
 	}
@@ -355,9 +321,9 @@ std::unique_ptr<Module> createLlvmModule(LLVMContext& Context)
 /**
  * Create bitcode output file object.
  */
-std::unique_ptr<tool_output_file> createBitcodeOutputFile()
+std::unique_ptr<ToolOutputFile> createBitcodeOutputFile()
 {
-	std::unique_ptr<tool_output_file> Out;
+	std::unique_ptr<ToolOutputFile> Out;
 
 	if (OutputFilename.empty())
 	{
@@ -365,11 +331,11 @@ std::unique_ptr<tool_output_file> createBitcodeOutputFile()
 	}
 
 	std::error_code EC;
-	Out.reset(new tool_output_file(OutputFilename, EC, sys::fs::F_None));
+	Out.reset(new ToolOutputFile(OutputFilename, EC, sys::fs::F_None));
 	if (EC)
 	{
 		throw std::runtime_error(
-			"failed to create llvm::tool_output_file for .bc: " + EC.message()
+			"failed to create llvm::ToolOutputFile for .bc: " + EC.message()
 		);
 	}
 
@@ -379,9 +345,9 @@ std::unique_ptr<tool_output_file> createBitcodeOutputFile()
 /**
  * Create assembly output file object.
  */
-std::unique_ptr<tool_output_file> createAssemblyOutputFile()
+std::unique_ptr<ToolOutputFile> createAssemblyOutputFile()
 {
-	std::unique_ptr<tool_output_file> Out;
+	std::unique_ptr<ToolOutputFile> Out;
 
 	std::string out = OutputFilename;
 	if (out.empty())
@@ -390,17 +356,18 @@ std::unique_ptr<tool_output_file> createAssemblyOutputFile()
 	}
 
 	std::string asmOut = out + ".ll";
-	if (out.find_last_of('.') != std::string::npos)
+	auto lastDot = out.find_last_of('.');
+	if (lastDot != std::string::npos)
 	{
-		asmOut = out.substr(0, out.find_last_of('.')) + ".ll";
+		asmOut = out.substr(0, lastDot) + ".ll";
 	}
 
 	std::error_code EC;
-	Out.reset(new tool_output_file(asmOut, EC, sys::fs::F_None));
+	Out.reset(new ToolOutputFile(asmOut, EC, sys::fs::F_None));
 	if (EC)
 	{
 		throw std::runtime_error(
-			"failed to create llvm::tool_output_file for .dsm: " + EC.message()
+			"failed to create llvm::ToolOutputFile for .dsm: " + EC.message()
 		);
 	}
 
@@ -441,10 +408,8 @@ int _main(int argc, char **argv)
 	legacy::PassManager Passes;
 
 	// The -disable-simplify-libcalls flag actually disables all builtin optzns.
-	if (DisableSimplifyLibCalls)
-	{
-		TLII.disableAllFunctions();
-	}
+	TLII.disableAllFunctions();
+
 	addPassWithoutVerification(Passes, new TargetLibraryInfoWrapperPass(TLII));
 
 	// Add internal analysis passes from the target machine.
@@ -457,18 +422,14 @@ int _main(int argc, char **argv)
 	{
 		const PassInfo *PassInf = PassList[i];
 		Pass *P = nullptr;
-		if (PassInf->getTargetMachineCtor())
-		{
-			P = PassInf->getTargetMachineCtor()(nullptr);
-		}
-		else if (PassInf->getNormalCtor())
+		if (PassInf->getNormalCtor())
 		{
 			P = PassInf->getNormalCtor()();
 		}
 		else
 		{
 			throw std::runtime_error(std::string("cannot create pass: ")
-					+ PassInf->getPassName());
+					+ PassInf->getPassName().str());
 		}
 
 		if (P)
@@ -478,23 +439,20 @@ int _main(int argc, char **argv)
 	}
 
 	// Check that the module is well formed on completion of optimization
-	if (!NoVerify && !VerifyEach)
-	{
-		addPassWithoutVerification(Passes, createVerifierPass());
-	}
+	addPassWithoutVerification(Passes, createVerifierPass());
 
 	// Write bitcode to the output as the last step.
-	std::unique_ptr<tool_output_file> bcOut = createBitcodeOutputFile();
+	std::unique_ptr<ToolOutputFile> bcOut = createBitcodeOutputFile();
 	raw_ostream *bcOs = &bcOut->os();
-	bool PreserveBitcodeUseListOrder = true;
+	bool PreserveBitcodeUseListOrder = false;
 	addPassWithoutVerification(
 			Passes,
 			createBitcodeWriterPass(*bcOs, PreserveBitcodeUseListOrder));
 
 	// Write assembly to the output as the last step.
-	std::unique_ptr<tool_output_file> llOut = createAssemblyOutputFile();
+	std::unique_ptr<ToolOutputFile> llOut = createAssemblyOutputFile();
 	raw_ostream *llOs = &llOut->os();
-	bool PreserveAssemblyUseListOrder = true;
+	bool PreserveAssemblyUseListOrder = false;
 	addPassWithoutVerification(
 			Passes,
 			createPrintModulePass(*llOs, "", PreserveAssemblyUseListOrder),

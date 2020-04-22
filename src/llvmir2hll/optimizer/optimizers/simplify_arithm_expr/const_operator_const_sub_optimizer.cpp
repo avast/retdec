@@ -44,11 +44,6 @@ ConstOperatorConstSubOptimizer::ConstOperatorConstSubOptimizer(
 			SubOptimizer(arithmExprEvaluator) {}
 
 /**
-* @brief Destructor.
-*/
-ConstOperatorConstSubOptimizer::~ConstOperatorConstSubOptimizer() {}
-
-/**
 * @brief Creates a new ConstOperatorConstSubOptimizer.
 *
 * @param[in] arithmExprEvaluator @a The used evaluator of arithmetical

@@ -25,14 +25,6 @@ MachOHeuristics::MachOHeuristics(
 }
 
 /**
- * Destructor
- */
-MachOHeuristics::~MachOHeuristics()
-{
-
-}
-
-/**
  * Try to detect UPX
  */
 void MachOHeuristics::getUpxHeuristic()

@@ -9,6 +9,7 @@
 
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -16,14 +17,6 @@ namespace fileinfo {
  * @param fileInfo Information about file
  */
 DotnetPlainGetter::DotnetPlainGetter(FileInformation &fileInfo) : SimpleGetter(fileInfo)
-{
-
-}
-
-/**
- * Destructor
- */
-DotnetPlainGetter::~DotnetPlainGetter()
 {
 
 }
@@ -91,3 +84,4 @@ std::size_t DotnetPlainGetter::loadInformation(std::vector<std::string> &desc, s
 }
 
 } // namespace fileinfo
+} // namespace retdec

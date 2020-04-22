@@ -1,0 +1,11 @@
+1 IsapiFilterInitialize
+2 IsapiFilterTerminate
+3 StreamFilterClientInitialize
+4 StreamFilterClientStart
+5 StreamFilterClientStop
+6 StreamFilterClientTerminate
+7 StreamFilterInitialize
+8 StreamFilterStart
+9 StreamFilterStop
+10 StreamFilterTerminate
+11 DllMain

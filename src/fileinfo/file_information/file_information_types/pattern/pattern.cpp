@@ -6,23 +6,8 @@
 
 #include "fileinfo/file_information/file_information_types/pattern/pattern.h"
 
+namespace retdec {
 namespace fileinfo {
-
-/**
- * Constructor
- */
-Pattern::Pattern() : little(false), big(false)
-{
-
-}
-
-/**
- * Destructor
- */
-Pattern::~Pattern()
-{
-
-}
 
 /**
  * Check if detected pattern is in little endian
@@ -184,3 +169,4 @@ void Pattern::addMatch(PatternMatch &match)
 }
 
 } // namespace fileinfo
+} // namespace retdec

@@ -43,8 +43,6 @@ class RemoveUselessCastsOptimizer final: public FuncOptimizer {
 public:
 	RemoveUselessCastsOptimizer(ShPtr<Module> module);
 
-	virtual ~RemoveUselessCastsOptimizer() override;
-
 	virtual std::string getId() const override { return "RemoveUselessCasts"; }
 
 private:

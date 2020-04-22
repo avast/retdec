@@ -1,0 +1,7 @@
+1 DirectInputCreateA
+2 DirectInputCreateEx
+3 DirectInputCreateW
+4 DllCanUnloadNow
+5 DllGetClassObject
+6 DllRegisterServer
+7 DllUnregisterServer

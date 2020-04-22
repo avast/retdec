@@ -5,6 +5,42 @@
 
 import "pe"
 
+rule pyinstaller_27
+{
+	meta:
+		tool = "I"
+		name = "PyInstaller"
+		version = "2.7"
+		strength = "high"
+	strings:
+		$s00 = "Cannot GetProcAddress for PySys_SetObject"
+		$s01 = "Error coping %s"
+		$s02 = "Error loading Python DLL: %s (error code %d)"
+		$s03 = "PYTHONHOME"
+	condition:
+		pe.number_of_resources > 0 and
+		@s00 < pe.sections[2].raw_data_offset and
+		all of them
+}
+
+rule pyinstaller_3x
+{
+	meta:
+		tool = "I"
+		name = "PyInstaller"
+		version = "3.x"
+		strength = "high"
+	strings:
+		$s00 = "Failed to get address for PySys_SetObject"
+		$s01 = "Error copying %s"
+		$s02 = "Error loading Python DLL '%s'"
+		$s03 = "pyi-windows-manifest-filename"
+	condition:
+		pe.number_of_resources > 0 and
+		@s00 < pe.sections[2].raw_data_offset and
+		all of them
+}
+
 rule winrar_sfx_392b1
 {
 	meta:

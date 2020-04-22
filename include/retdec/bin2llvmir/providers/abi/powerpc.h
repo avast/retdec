@@ -18,12 +18,11 @@ class AbiPowerpc : public Abi
 	//
 	public:
 		AbiPowerpc(llvm::Module* m, Config* c);
-		virtual ~AbiPowerpc();
 
 	// Registers.
 	//
 	public:
-		virtual bool isGeneralPurposeRegister(const llvm::Value* val) override;
+		virtual bool isGeneralPurposeRegister(const llvm::Value* val) const override;
 
 	// Instructions.
 	//

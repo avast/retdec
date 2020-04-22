@@ -12,14 +12,6 @@ namespace cpdetect {
 
 /**
  * Constructor
- */
-Signature::Signature() : startOffset(0), endOffset(0)
-{
-
-}
-
-/**
- * Constructor
  * @param sName Name of compiler or packer
  * @param sVersion Version of used compiler or packer
  * @param sPattern Signature pattern
@@ -32,14 +24,6 @@ Signature::Signature(
 		unsigned sStart, unsigned sEnd)
 	: name(sName), version(sVersion), pattern(sPattern), additional(sAdditional),
 		startOffset(sStart), endOffset(sEnd)
-{
-
-}
-
-/**
- * Destructor
- */
-Signature::~Signature()
 {
 
 }

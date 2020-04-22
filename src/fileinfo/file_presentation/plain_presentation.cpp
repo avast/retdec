@@ -16,6 +16,7 @@ using namespace retdec::utils;
 using namespace retdec::cpdetect;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 namespace
@@ -349,14 +350,6 @@ PlainPresentation::PlainPresentation(FileInformation &fileinfo_, bool verbose_, 
 }
 
 /**
- * Destructor
- */
-PlainPresentation::~PlainPresentation()
-{
-
-}
-
-/**
  * Present information about used compiler (or packer)
  */
 void PlainPresentation::presentCompiler() const
@@ -460,6 +453,7 @@ void PlainPresentation::presentOverlay() const
 {
 	const auto offset = fileinfo.getOverlayOffsetStr(hexWithPrefix);
 	const auto size = fileinfo.getOverlaySizeStr(hexWithPrefix);
+	const auto entropy = fileinfo.getOverlayEntropyStr(truncFloat);
 	if(!offset.empty())
 	{
 		std::cout << "Overlay offset           : " << offset << "\n";
@@ -467,6 +461,10 @@ void PlainPresentation::presentOverlay() const
 	if(!size.empty())
 	{
 		std::cout << "Overlay size             : " << size << "\n";
+	}
+	if(!entropy.empty())
+	{
+		std::cout << "Overlay entropy          : " << entropy << "\n";
 	}
 }
 
@@ -627,6 +625,46 @@ void PlainPresentation::presentDotnetClasses() const
 	}
 }
 
+void PlainPresentation::presentVisualBasicObjects() const
+{
+	auto nObjs = fileinfo.getVisualBasicNumberOfObjects();
+	auto guid = fileinfo.getVisualBasicObjectTableGUID();
+	if (!fileinfo.isVisualBasicUsed() || (nObjs == 0 && guid.empty()))
+	{
+		return;
+	}
+
+	std::cout << "\n";
+	std::cout << "Visual Basic Object table" << "\n";
+	std::cout << "-------------------------" << "\n";
+	std::cout << "CRC32            : " << fileinfo.getVisualBasicObjectTableHashCrc32() << "\n";
+	std::cout << "MD5              : " << fileinfo.getVisualBasicObjectTableHashMd5() << "\n";
+	std::cout << "SHA256           : " << fileinfo.getVisualBasicObjectTableHashSha256() << "\n";
+	std::cout << "GUID             : " << guid << "\n";
+	std::cout << "\n";
+
+	std::size_t cnt = 0;
+	for (std::size_t i = 0; i < nObjs; i++)
+	{
+		auto obj = fileinfo.getVisualBasicObject(i);
+		if (!obj)
+		{
+			continue;
+		}
+		auto objName = obj->getName();
+		if (objName.empty())
+		{
+			continue;
+		}
+		std::cout << cnt << ". " << "object name: " << objName << "\n";
+		for (const auto &m : obj->getMethods())
+		{
+			std::cout << "    method name: " << m << "\n";
+		}
+		cnt++;
+	}
+}
+
 /**
  * Present ELF notes
  */
@@ -678,9 +716,18 @@ bool PlainPresentation::present()
 
 	if(verbose)
 	{
-		if(!fileinfo.getLoaderStatusMessage().empty())
+		std::string errorMessage;
+
+		errorMessage = fileinfo.getLoaderStatusMessage();
+		if(!errorMessage.empty())
 		{
-			std::cerr << "Warning: " << fileinfo.getLoaderStatusMessage() << "\n";
+			std::cerr << "Warning: " << errorMessage << "\n";
+		}
+
+		errorMessage = fileinfo.getDepsListFailedToLoad();
+		if (!errorMessage.empty())
+		{
+			std::cerr << "Warning: Failed to load the dependency list (\"" << errorMessage << "\")\n";
 		}
 
 		std::string flags, title;
@@ -704,9 +751,14 @@ bool PlainPresentation::present()
 		presentIterativeDistribution(ImportTablePlainGetter(fileinfo), explanatory);
 		presentIterativeDistribution(ExportTablePlainGetter(fileinfo), explanatory);
 		presentIterativeDistribution(TypeRefTablePlainGetter(fileinfo), explanatory);
+		presentIterativeDistribution(VisualBasicExternTablePlainGetter(fileinfo), explanatory);
 		presentIterativeDistribution(RelocationTablesPlainGetter(fileinfo), explanatory);
 		presentIterativeDistribution(DynamicSectionsPlainGetter(fileinfo), explanatory);
 		presentIterativeDistribution(ResourcePlainGetter(fileinfo), explanatory);
+		presentIterativeDistribution(VersionInfoStringTablePlainGetter(fileinfo), explanatory);
+		presentIterativeDistribution(VersionInfoLanguageTablePlainGetter(fileinfo), explanatory);
+		presentIterativeDistribution(TlsInfoPlainGetter(fileinfo), explanatory);
+		presentIterativeDistribution(AnomaliesPlainGetter(fileinfo), explanatory);
 
 		presentNotes();
 
@@ -728,9 +780,12 @@ bool PlainPresentation::present()
 		presentIterativeSimple(CertificateTablePlainGetter(fileinfo));
 		presentSimple(DotnetPlainGetter(fileinfo), false, ".NET Information");
 		presentDotnetClasses();
+		presentSimple(VisualBasicPlainGetter(fileinfo), false, "Visual Basic Information");
+		presentVisualBasicObjects();
 
 		if(returnCode != ReturnCode::FILE_NOT_EXIST && returnCode != ReturnCode::UNKNOWN_FORMAT)
 		{
+			presentIterativeDistribution(MissingDepsPlainGetter(fileinfo), explanatory);
 			presentIterativeDistribution(LoaderInfoPlainGetter(fileinfo), explanatory);
 		}
 
@@ -744,3 +799,4 @@ bool PlainPresentation::present()
 }
 
 } // namespace fileinfo
+} // namespace retdec

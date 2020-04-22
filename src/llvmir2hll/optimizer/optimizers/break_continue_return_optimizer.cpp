@@ -27,11 +27,6 @@ BreakContinueReturnOptimizer::BreakContinueReturnOptimizer(ShPtr<Module> module)
 	}
 
 /**
-* @brief Destructs the optimizer.
-*/
-BreakContinueReturnOptimizer::~BreakContinueReturnOptimizer() {}
-
-/**
 * @brief Removes the successor of the given statement (when appropriate).
 *
 * @param[in] stmt Break, continue, or return statement.

@@ -10,23 +10,8 @@
 #include "fileinfo/file_information/file_information_types/flags.h"
 #include "fileinfo/file_information/file_information_types/type_conversions.h"
 
+namespace retdec {
 namespace fileinfo {
-
-/**
- * Constructor
- */
-Flags::Flags() : size(0), flagsArray(0)
-{
-
-}
-
-/**
- * Destructor
- */
-Flags::~Flags()
-{
-
-}
 
 /**
  * Get number of flags
@@ -130,3 +115,4 @@ void Flags::clearDescriptors()
 }
 
 } // namespace fileinfo
+} // namespace retdec

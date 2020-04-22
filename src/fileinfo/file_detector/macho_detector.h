@@ -10,6 +10,7 @@
 #include "fileinfo/file_detector/file_detector.h"
 #include "fileinfo/file_wrapper/macho_wrapper.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -40,11 +41,15 @@ class MachODetector : public FileDetector
 		virtual retdec::cpdetect::CompilerDetector* createCompilerDetector() const override;
 		/// @}
 	public:
-		MachODetector(std::string pathToInputFile, FileInformation &finfo, retdec::cpdetect::DetectParams &searchPar, retdec::fileformat::LoadFlags loadFlags);
-		virtual ~MachODetector() override;
+		MachODetector(
+				std::string pathToInputFile,
+				FileInformation &finfo,
+				retdec::cpdetect::DetectParams &searchPar,
+				retdec::fileformat::LoadFlags loadFlags);
 		bool isMachoUniversalArchive();
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

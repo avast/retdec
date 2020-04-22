@@ -29,11 +29,6 @@ NegativeOperandSubOptimizer::NegativeOperandSubOptimizer(
 			SubOptimizer(arithmExprEvaluator) {}
 
 /**
-* @brief Destructor.
-*/
-NegativeOperandSubOptimizer::~NegativeOperandSubOptimizer() {}
-
-/**
 * @brief Creates a new NegativeOperandSubOptimizer.
 *
 * @param[in] arithmExprEvaluator @a The used evaluator of arithmetical

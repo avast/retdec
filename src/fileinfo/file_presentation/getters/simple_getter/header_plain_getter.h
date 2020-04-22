@@ -9,6 +9,7 @@
 
 #include "fileinfo/file_presentation/getters/simple_getter/simple_getter.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -18,7 +19,6 @@ class HeaderPlainGetter : public SimpleGetter
 {
 	public:
 		HeaderPlainGetter(FileInformation &fileInfo);
-		virtual ~HeaderPlainGetter() override;
 
 		virtual std::size_t loadInformation(std::vector<std::string> &desc, std::vector<std::string> &info) const override;
 		void getFileFlags(std::string &title, std::string &flags, std::vector<std::string> &desc, std::vector<std::string> &abbv) const;
@@ -26,5 +26,6 @@ class HeaderPlainGetter : public SimpleGetter
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

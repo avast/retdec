@@ -25,7 +25,7 @@ const std::string BUILD_ALREADY_CALLED_ERROR_MSG(
 *        for more details).
 */
 ShPtr<Function> createDefaultFunction(const std::string &funcName) {
-	return Function::create(VoidType::create(), funcName, VarVector());
+	return Function::create(nullptr, VoidType::create(), funcName, VarVector());
 }
 
 } // anonymous namespace

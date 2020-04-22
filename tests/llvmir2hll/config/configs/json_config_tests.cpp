@@ -425,6 +425,45 @@ IsUserDefinedFuncReturnsTrueWhenFuncIsUserDefined) {
 }
 
 //
+// isDecompilerDefinedFunc()
+//
+
+TEST_F(JSONConfigTests,
+IsDecompilerDefinedFuncReturnsFalseWhenThereIsNoInfoForFunc) {
+	auto config = JSONConfig::empty();
+
+	ASSERT_FALSE(config->isDecompilerDefinedFunc("my_func"));
+}
+
+TEST_F(JSONConfigTests,
+IsDecompilerDefinedFuncReturnsFalseWhenFuncIsDynamicallyLinked) {
+	auto config = JSONConfig::fromString(R"({
+		"functions": [
+			{
+				"name": "my_func",
+				"fncType": "dynamicallyLinked"
+			}
+		]
+	})");
+
+	ASSERT_FALSE(config->isDecompilerDefinedFunc("my_func"));
+}
+
+TEST_F(JSONConfigTests,
+IsDecompilerDefinedFuncReturnsTrueWhenFuncIsDecompilerDefined) {
+	auto config = JSONConfig::fromString(R"({
+		"functions": [
+			{
+				"name": "my_func",
+				"fncType": "decompilerDefined"
+			}
+		]
+	})");
+
+	ASSERT_TRUE(config->isDecompilerDefinedFunc("my_func"));
+}
+
+//
 // isStaticallyLinkedFunc()
 //
 
@@ -921,38 +960,6 @@ GetDemangledNameOfFuncReturnsCorrectValueWhenFuncHasDemangledName) {
 }
 
 //
-// getFuncsFixedWithLLVMIRFixer()
-//
-
-TEST_F(JSONConfigTests,
-GetFuncsFixedWithLLVMIRFixerReturnsEmptySetWhenThereAreNoFuncs) {
-	auto config = JSONConfig::empty();
-
-	ASSERT_EQ(StringSet(), config->getFuncsFixedWithLLVMIRFixer());
-}
-
-TEST_F(JSONConfigTests,
-GetFuncsFixedWithLLVMIRFixerReturnsCorrectValueWhenThereAreFixedFuncs) {
-	auto config = JSONConfig::fromString(R"({
-		"functions": [
-			{
-				"name": "my_func1",
-				"wasFixed": false
-			},
-			{
-				"name": "my_func2",
-				"wasFixed": true
-			}
-		]
-	})");
-
-	ASSERT_EQ(
-		StringSet({"my_func2"}),
-		config->getFuncsFixedWithLLVMIRFixer()
-	);
-}
-
-//
 // getClassNames()
 //
 
@@ -1393,11 +1400,13 @@ GetDebugModuleNamesReturnsCorrectSetWhenDebugInfoIsAvailable) {
 		"functions": [
 			{
 				"name": "my_func1",
-				"srcFileName": "module1.c"
+				"srcFileName": "module1.c",
+				"startAddr": "0x1234"
 			},
 			{
 				"name": "my_func2",
-				"srcFileName": "module2.c"
+				"srcFileName": "module2.c",
+				"startAddr": "0x5678"
 			}
 		]
 	})");

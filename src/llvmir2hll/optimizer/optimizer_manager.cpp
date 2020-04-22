@@ -11,7 +11,6 @@
 #include "retdec/llvmir2hll/optimizer/optimizer_manager.h"
 #include "retdec/llvmir2hll/optimizer/optimizers/aggressive_deref_optimizer.h"
 #include "retdec/llvmir2hll/optimizer/optimizers/aggressive_global_to_local_optimizer.h"
-#include "retdec/llvmir2hll/optimizer/optimizers/auxiliary_variables_optimizer.h"
 #include "retdec/llvmir2hll/optimizer/optimizers/bit_op_to_log_op_optimizer.h"
 #include "retdec/llvmir2hll/optimizer/optimizers/bit_shift_optimizer.h"
 #include "retdec/llvmir2hll/optimizer/optimizers/break_continue_return_optimizer.h"
@@ -24,6 +23,7 @@
 #include "retdec/llvmir2hll/optimizer/optimizers/deref_to_array_index_optimizer.h"
 #include "retdec/llvmir2hll/optimizer/optimizers/empty_array_to_string_optimizer.h"
 #include "retdec/llvmir2hll/optimizer/optimizers/empty_stmt_optimizer.h"
+#include "retdec/llvmir2hll/optimizer/optimizers/goto_stmt_optimizer.h"
 #include "retdec/llvmir2hll/optimizer/optimizers/if_before_loop_optimizer.h"
 #include "retdec/llvmir2hll/optimizer/optimizers/if_structure_optimizer.h"
 #include "retdec/llvmir2hll/optimizer/optimizers/if_to_switch_optimizer.h"
@@ -137,11 +137,6 @@ OptimizerManager::OptimizerManager(const StringSet &enabledOpts,
 		}
 
 /**
-* @brief Destructs the manager.
-*/
-OptimizerManager::~OptimizerManager() {}
-
-/**
 * @brief Runs the optimizations over @a m.
 */
 void OptimizerManager::optimize(ShPtr<Module> m) {
@@ -169,6 +164,7 @@ void OptimizerManager::optimize(ShPtr<Module> m) {
 		run<EmptyStmtOptimizer>(m);
 	}
 
+	run<GotoStmtOptimizer>(m);
 	run<RemoveUselessCastsOptimizer>(m);
 
 	// The first part of removal of non-compound statements. The other part
@@ -184,8 +180,6 @@ void OptimizerManager::optimize(ShPtr<Module> m) {
 	run<DeadLocalAssignOptimizer>(m, va);
 	run<SimpleCopyPropagationOptimizer>(m, va, cio);
 	run<CopyPropagationOptimizer>(m, va, cio);
-	// AuxiliaryVariablesOptimizer should be run after CopyPropagationOptimizer.
-	run<AuxiliaryVariablesOptimizer>(m, va, cio);
 
 	// SimplifyArithmExprOptimizer should be run before loop optimizations.
 	run<SimplifyArithmExprOptimizer>(m, arithmExprEvaluator);
@@ -254,6 +248,9 @@ void OptimizerManager::optimize(ShPtr<Module> m) {
 	// wouldn't be initializers.
 	run<VarDefForLoopOptimizer>(m);
 	run<VarDefStmtOptimizer>(m, va);
+
+	run<EmptyStmtOptimizer>(m);
+	run<GotoStmtOptimizer>(m);
 
 	// SimplifyArithmExprOptimizer should be run at the end to produce the most
 	// readable output.

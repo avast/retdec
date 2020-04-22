@@ -6,6 +6,7 @@
 
 #include "fileinfo/file_presentation/getters/simple_getter/simple_getter.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -13,14 +14,6 @@ namespace fileinfo {
  * @param fileInfo Information about file
  */
 SimpleGetter::SimpleGetter(FileInformation &fileInfo) : fileinfo(fileInfo)
-{
-
-}
-
-/**
- * Destructor
- */
-SimpleGetter::~SimpleGetter()
 {
 
 }
@@ -36,3 +29,4 @@ SimpleGetter::~SimpleGetter()
  */
 
 } // namespace fileinfo
+} // namespace retdec

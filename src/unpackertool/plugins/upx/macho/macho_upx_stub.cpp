@@ -14,8 +14,9 @@
 #include "unpackertool/plugins/upx/unfilter.h"
 #include "unpackertool/plugins/upx/upx.h"
 #include "unpackertool/plugins/upx/upx_exceptions.h"
-#include "retdec/unpacker/dynamic_buffer.h"
+#include "retdec/utils/dynamic_buffer.h"
 
+using namespace retdec::utils;
 using namespace retdec::unpacker;
 
 namespace retdec {
@@ -66,15 +67,6 @@ namespace {
 template <int bits> MachOUpxStub<bits>::MachOUpxStub(retdec::loader::Image* inputFile, const UpxStubData* stubData,
 		const DynamicBuffer& stubCapturedData, std::unique_ptr<Decompressor> decompressor, const UpxMetadata& metadata)
 	: UpxStub(inputFile, stubData, stubCapturedData, std::move(decompressor), metadata), _bitParser(nullptr)
-{
-}
-
-/**
- * Destructor.
- *
- * @tparam bits Number of bits of the architecture.
- */
-template <int bits> MachOUpxStub<bits>::~MachOUpxStub()
 {
 }
 
@@ -170,7 +162,7 @@ template <int bits> void MachOUpxStub<bits>::setupPackingMethod(std::uint8_t pac
 	_decompressor->setupPackingMethod(this, packingMethod);
 }
 
-template <int bits> void MachOUpxStub<bits>::decompress(retdec::unpacker::DynamicBuffer& packedData, retdec::unpacker::DynamicBuffer& unpackedData)
+template <int bits> void MachOUpxStub<bits>::decompress(DynamicBuffer& packedData, DynamicBuffer& unpackedData)
 {
 	_decompressor->decompress(this, packedData, unpackedData);
 }

@@ -12,7 +12,7 @@ namespace ctypes {
 /**
 * @brief Constructs a new type.
 */
-Type::Type(const std::string &name, unsigned bitWidth):
+Type::Type(const std::string &name, unsigned bitWidth) :
 	name(name), bitWidth(bitWidth) {}
 
 const std::string &Type::getName() const
@@ -50,7 +50,17 @@ bool Type::isIntegral() const
 	return false;
 }
 
+bool Type::isNamed() const
+{
+	return false;
+}
+
 bool Type::isPointer() const
+{
+	return false;
+}
+
+bool Type::isReference() const
 {
 	return false;
 }

@@ -34,8 +34,6 @@ public:
 	static ShPtr<StructType> create(ElementTypes elementTypes,
 		const std::string &name = "");
 
-	virtual ~StructType() override;
-
 	virtual ShPtr<Value> clone() override;
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
 

@@ -20,8 +20,6 @@ namespace llvmir2hll {
 */
 class UnaryOpExpr: public Expression {
 public:
-	virtual ~UnaryOpExpr() override = 0;
-
 	virtual ShPtr<Type> getType() const override;
 	virtual void replace(ShPtr<Expression> oldExpr,
 		ShPtr<Expression> newExpr) override;

@@ -17,12 +17,8 @@ namespace llvmir2hll {
 *
 * See create() for more information.
 */
-CallStmt::CallStmt(ShPtr<CallExpr> call): call(call) {}
-
-/**
-* @brief Destructs the statement.
-*/
-CallStmt::~CallStmt() {}
+CallStmt::CallStmt(ShPtr<CallExpr> call, Address a):
+	Statement(a), call(call) {}
 
 bool CallStmt::isEqualTo(ShPtr<Value> otherValue) const {
 	// Both types and values have to be equal.
@@ -33,7 +29,8 @@ bool CallStmt::isEqualTo(ShPtr<Value> otherValue) const {
 }
 
 ShPtr<Value> CallStmt::clone() {
-	ShPtr<CallStmt> callStmt(CallStmt::create(ucast<CallExpr>(call->clone())));
+	ShPtr<CallStmt> callStmt(
+		CallStmt::create(ucast<CallExpr>(call->clone()), nullptr, getAddress()));
 	callStmt->setMetadata(getMetadata());
 	return callStmt;
 }
@@ -76,14 +73,16 @@ void CallStmt::setCall(ShPtr<CallExpr> newCall) {
 *
 * @param[in] call Call to be wrapped.
 * @param[in] succ Follower of the statement in the program flow.
+* @param[in] a Address.
 *
 * @par Preconditions
 *  - @a call is non-null
 */
-ShPtr<CallStmt> CallStmt::create(ShPtr<CallExpr> call, ShPtr<Statement> succ) {
+ShPtr<CallStmt> CallStmt::create(ShPtr<CallExpr> call, ShPtr<Statement> succ,
+		Address a) {
 	PRECONDITION_NON_NULL(call);
 
-	ShPtr<CallStmt> callStmt(new CallStmt(call));
+	ShPtr<CallStmt> callStmt(new CallStmt(call, a));
 	callStmt->setSuccessor(succ);
 
 	// Initialization (recall that shared_from_this() cannot be called in a

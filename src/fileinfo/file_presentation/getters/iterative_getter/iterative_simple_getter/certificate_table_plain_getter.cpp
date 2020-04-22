@@ -12,6 +12,7 @@
 using namespace retdec::utils;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -38,14 +39,6 @@ CertificateTablePlainGetter::CertificateTablePlainGetter(FileInformation &fileIn
 	commonHeaderElements.push_back("Valid until         : ");
 	commonHeaderElements.push_back("SHA1                : ");
 	commonHeaderElements.push_back("SHA256              : ");
-}
-
-/**
- * Destructor
- */
-CertificateTablePlainGetter::~CertificateTablePlainGetter()
-{
-
 }
 
 std::size_t CertificateTablePlainGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const
@@ -121,3 +114,4 @@ bool CertificateTablePlainGetter::getFlags(std::size_t structIndex, std::size_t 
 }
 
 } // namespace fileinfo
+} // namespace retdec

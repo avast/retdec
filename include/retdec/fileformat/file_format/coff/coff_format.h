@@ -7,9 +7,20 @@
 #ifndef RETDEC_FILEFORMAT_FILE_FORMAT_COFF_COFF_FORMAT_H
 #define RETDEC_FILEFORMAT_FILE_FORMAT_COFF_COFF_FORMAT_H
 
-#include <llvm/Object/COFF.h>
+// Do not include <llvm/Object/COFF.h> in this header.
+// It defines many symbols that are also defined in winnt.h.
+// Including it here may cause name collisions later if this header
+// is included somewhere where winnt.h is also included.
 
 #include "retdec/fileformat/file_format/file_format.h"
+
+namespace llvm {
+namespace object {
+
+class COFFObjectFile;
+
+} // namespace object
+} // namespace llvm
 
 namespace retdec {
 namespace fileformat {
@@ -43,6 +54,8 @@ class CoffFormat : public FileFormat
 		llvm::object::COFFObjectFile *file; ///< parser of input COFF file
 	public:
 		CoffFormat(std::string pathToFile, LoadFlags loadFlags = LoadFlags::NONE);
+		CoffFormat(std::istream &inputStream, LoadFlags loadFlags = LoadFlags::NONE);
+		CoffFormat(const std::uint8_t *data, std::size_t size, LoadFlags loadFlags = LoadFlags::NONE);
 		virtual ~CoffFormat() override;
 
 		/// @name Byte value storage methods

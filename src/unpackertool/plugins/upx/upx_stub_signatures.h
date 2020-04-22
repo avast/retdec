@@ -12,6 +12,8 @@
 #include "unpackertool/plugins/upx/upx_stub.h"
 #include "retdec/unpacker/signature.h"
 
+using namespace retdec::utils;
+
 namespace retdec {
 namespace unpackertool {
 namespace upx {
@@ -52,10 +54,9 @@ class UpxStubSignatures
 public:
 	UpxStubSignatures() = delete;
 	UpxStubSignatures(const UpxStubSignatures&) = delete;
-	~UpxStubSignatures();
 
-	static const UpxStubData* matchSignatures(retdec::loader::Image* file, retdec::unpacker::DynamicBuffer& captureData);
-	static const UpxStubData* matchSignatures(const retdec::unpacker::DynamicBuffer& data, retdec::unpacker::DynamicBuffer& captureData,
+	static const UpxStubData* matchSignatures(retdec::loader::Image* file, DynamicBuffer& captureData);
+	static const UpxStubData* matchSignatures(const DynamicBuffer& data, DynamicBuffer& captureData,
 			retdec::fileformat::Architecture architecture = retdec::fileformat::Architecture::UNKNOWN, retdec::fileformat::Format format = retdec::fileformat::Format::UNKNOWN);
 
 private:

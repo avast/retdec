@@ -42,18 +42,12 @@ OptimFuncInfoCFGTraversal::OptimFuncInfoCFGTraversal(ShPtr<Module> module,
 	funcInfo(new OptimFuncInfo(cfg->getCorrespondingFunction())) {}
 
 /**
-* @brief Destructs the traverser.
-*/
-OptimFuncInfoCFGTraversal::~OptimFuncInfoCFGTraversal() {}
-
-/**
 * @brief Computes OptimFuncInfo for the function specified by its CFG.
 *
 * @param[in] module Module which contains the function specified by its CFG.
 * @param[in] cio The used call info obtainer.
 * @param[in] va The used analysis of values.
 * @param[in] cfg CFG that should be traversed.
-* @param[in] va Analysis of values.
 *
 * @par Preconditions
 *  - @a module, @a cio, @a va, and @a cfg are non-null

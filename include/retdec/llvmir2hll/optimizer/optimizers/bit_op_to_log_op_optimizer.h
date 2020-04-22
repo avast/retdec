@@ -103,8 +103,6 @@ class BitOpToLogOpOptimizer final: public FuncOptimizer {
 public:
 	BitOpToLogOpOptimizer(ShPtr<Module> module, ShPtr<ValueAnalysis> va);
 
-	virtual ~BitOpToLogOpOptimizer() override;
-
 	virtual std::string getId() const override { return "BitOpToLogOp"; }
 
 private:

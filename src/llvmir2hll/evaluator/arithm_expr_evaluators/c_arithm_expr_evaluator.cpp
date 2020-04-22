@@ -4,6 +4,8 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
+#include <optional>
+
 #include "retdec/llvmir2hll/evaluator/arithm_expr_evaluator_factory.h"
 #include "retdec/llvmir2hll/evaluator/arithm_expr_evaluators/c_arithm_expr_evaluator.h"
 #include "retdec/llvmir2hll/ir/binary_op_expr.h"
@@ -119,7 +121,7 @@ bool hasOperandsSameBitWidth(const ArithmExprEvaluator::APSIntPair &apsIntPair) 
 * @param[in, out] constPair Pair of constants.
 */
 void tryConvertBoolBoolToInt(ArithmExprEvaluator::ConstPair &constPair) {
-	if (Maybe<ArithmExprEvaluator::ConstBoolPair> constBoolPair =
+	if (std::optional<ArithmExprEvaluator::ConstBoolPair> constBoolPair =
 			ArithmExprEvaluator::castConstPair<ConstBool>(constPair)) {
 		constPair.first = ConstInt::create(constBoolPair->first->getValue(),
 			DEFAULT_INT_BIT_WIDTH);
@@ -181,16 +183,6 @@ REGISTER_AT_FACTORY("c", C_ARITHM_EXPR_EVALUATOR_ID,
 	ArithmExprEvaluatorFactory, CArithmExprEvaluator::create);
 
 /**
-* @brief Constructs the CArithmExprEvaluator.
-*/
-CArithmExprEvaluator::CArithmExprEvaluator() {}
-
-/**
-* @brief Destructor.
-*/
-CArithmExprEvaluator::~CArithmExprEvaluator() {}
-
-/**
 * @brief Creates a new CArithmExprEvaluator.
 */
 ShPtr<ArithmExprEvaluator> CArithmExprEvaluator::create() {
@@ -227,7 +219,7 @@ void CArithmExprEvaluator::resolveTypesBinaryOp(ConstPair &constPair) {
 	}
 
 	// Problems with integer bit width and signed/unsigned types.
-	if (Maybe<ConstIntPair> constIntPair = castConstPair<ConstInt>(constPair)) {
+	if (std::optional<ConstIntPair> constIntPair = castConstPair<ConstInt>(constPair)) {
 		APSIntPair apsIntPair(getAPSIntsFromConstants(constIntPair));
 		if (isSignedOrUnsignedOperands(apsIntPair) &&
 				!hasOperandsSameBitWidth(apsIntPair)) {
@@ -269,7 +261,7 @@ void CArithmExprEvaluator::resolveTypesBinaryOp(ConstPair &constPair) {
 	}
 
 	// Conversion to same float semantics (same size).
-	if (Maybe<ConstFloatPair> constFloatPair = castConstPair<ConstFloat>(
+	if (std::optional<ConstFloatPair> constFloatPair = castConstPair<ConstFloat>(
 			constPair)) {
 		APFloatPair apFloatPair = getAPFloatsFromConstants(constFloatPair);
 		convertOperandsToSameSemantics(apFloatPair);

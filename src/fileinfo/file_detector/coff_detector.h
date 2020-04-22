@@ -10,6 +10,7 @@
 #include "fileinfo/file_detector/file_detector.h"
 #include "fileinfo/file_wrapper/coff_wrapper.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -38,10 +39,14 @@ class CoffDetector : public FileDetector
 		virtual retdec::cpdetect::CompilerDetector* createCompilerDetector() const override;
 		/// @}
 	public:
-		CoffDetector(std::string pathToInputFile, FileInformation &finfo, retdec::cpdetect::DetectParams &searchPar, retdec::fileformat::LoadFlags loadFlags);
-		virtual ~CoffDetector() override;
+		CoffDetector(
+				std::string pathToInputFile,
+				FileInformation &finfo,
+				retdec::cpdetect::DetectParams &searchPar,
+				retdec::fileformat::LoadFlags loadFlags);
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

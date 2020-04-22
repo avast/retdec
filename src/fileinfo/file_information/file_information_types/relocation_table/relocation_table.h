@@ -11,6 +11,7 @@
 
 #include "fileinfo/file_information/file_information_types/relocation_table/relocation.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -25,14 +26,11 @@ class RelocationTable
 		std::string name;                              ///< name of relocation table
 		std::string associatedSymbolTableName;         ///< name of symbol table associated with relocation table
 		std::string appliesSectionName;                ///< name of section to which the relocation applies
-		unsigned long long associatedSymbolTableIndex; ///< index of symbol table associated with relocation table
-		unsigned long long appliesSectionIndex;        ///< index of section to which the relocation applies
-		unsigned long long declaredRelocations;        ///< declared number of relocations in table
+		unsigned long long associatedSymbolTableIndex = std::numeric_limits<unsigned long long>::max(); ///< index of symbol table associated with relocation table
+		unsigned long long appliesSectionIndex = std::numeric_limits<unsigned long long>::max();        ///< index of section to which the relocation applies
+		unsigned long long declaredRelocations = std::numeric_limits<unsigned long long>::max();        ///< declared number of relocations in table
 		std::vector<Relocation> table;                 ///< relocation entries
 	public:
-		RelocationTable();
-		~RelocationTable();
-
 		/// @name Getters
 		/// @{
 		std::size_t getNumberOfStoredRelocations() const;
@@ -69,5 +67,6 @@ class RelocationTable
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

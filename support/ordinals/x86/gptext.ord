@@ -1,0 +1,13 @@
+1 GenerateIPSECPolicy
+2 GenerateScriptsGroupPolicy
+3 GenerateWIRELESSPolicy
+4 ProcessIPSECPolicyEx
+5 ProcessPSCHEDPolicy
+6 ProcessScriptsGroupPolicy
+7 ProcessScriptsGroupPolicyEx
+8 ProcessWIRELESSPolicyEx
+9 DllCanUnloadNow
+10 DllGetClassObject
+11 DllRegisterServer
+12 DllUnregisterServer
+13 ScrRegGPOListToWbem

@@ -11,6 +11,7 @@
 using namespace retdec::utils;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -28,14 +29,6 @@ DataDirectoryJsonGetter::DataDirectoryJsonGetter(FileInformation &fileInfo) : It
 	commonHeaderElements.push_back("type");
 	commonHeaderElements.push_back("address");
 	commonHeaderElements.push_back("size");
-}
-
-/**
- * Destructor
- */
-DataDirectoryJsonGetter::~DataDirectoryJsonGetter()
-{
-
 }
 
 std::size_t DataDirectoryJsonGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const
@@ -84,3 +77,4 @@ bool DataDirectoryJsonGetter::getFlags(std::size_t structIndex, std::size_t recI
 }
 
 } // namespace fileinfo
+} // namespace retdec

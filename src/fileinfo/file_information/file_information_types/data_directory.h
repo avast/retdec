@@ -7,8 +7,10 @@
 #ifndef FILEINFO_FILE_INFORMATION_FILE_INFORMATION_TYPES_DATA_DIRECTORY_H
 #define FILEINFO_FILE_INFORMATION_FILE_INFORMATION_TYPES_DATA_DIRECTORY_H
 
+#include <limits>
 #include <string>
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -19,13 +21,13 @@ namespace fileinfo {
 class DataDirectory
 {
 	private:
-		std::string type;           ///< type of directory
-		unsigned long long address; ///< address in memory
-		unsigned long long size;    ///< size of directory
+		/// type of directory
+		std::string type;
+		/// address in memory
+		unsigned long long address = std::numeric_limits<unsigned long long>::max();
+		/// size of directory
+		unsigned long long size = std::numeric_limits<unsigned long long>::max();
 	public:
-		DataDirectory();
-		~DataDirectory();
-
 		/// @name Getters
 		/// @{
 		std::string getType() const;
@@ -42,5 +44,6 @@ class DataDirectory
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

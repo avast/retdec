@@ -18,8 +18,9 @@
 #include "unpackertool/plugins/upx/upx.h"
 #include "unpackertool/plugins/upx/upx_exceptions.h"
 #include "unpackertool/plugins/upx/upx_stub_signatures.h"
-#include "retdec/unpacker/dynamic_buffer.h"
+#include "retdec/utils/dynamic_buffer.h"
 
+using namespace retdec::utils;
 using namespace retdec::unpacker;
 
 namespace retdec {
@@ -44,15 +45,6 @@ namespace {
 template <int bits> ElfUpxStub<bits>::ElfUpxStub(retdec::loader::Image* inputFile, const UpxStubData* stubData,
 		const DynamicBuffer& stubCapturedData, std::unique_ptr<Decompressor> decompressor, const UpxMetadata& metadata)
 	: UpxStub(inputFile, stubData, stubCapturedData, std::move(decompressor), metadata)
-{
-}
-
-/**
- * Destructor.
- *
- * @tparam bits Number of bits of the architecture.
- */
-template <int bits> ElfUpxStub<bits>::~ElfUpxStub()
 {
 }
 
@@ -176,7 +168,11 @@ template <int bits> void ElfUpxStub<bits>::unpack(const std::string& outputFile)
 		additionalDataPos = retdec::utils::alignUp(_file->getEpSegment()->getSize(), 4);
 
 		// These data goes up to the end of the file
-		additionalDataSize = static_cast<AddressType>(_file->getFileFormat()->getLoadedFileLength() - additionalDataPos);
+		auto end = _file->getFileFormat()->getLoadedFileLength();
+		if (end >= additionalDataPos)
+		{
+			additionalDataSize = static_cast<AddressType>(end - additionalDataPos);
+		}
 	}
 	else
 	{
@@ -186,7 +182,10 @@ template <int bits> void ElfUpxStub<bits>::unpack(const std::string& outputFile)
 		additionalDataPos = readPos + firstBlockOffset;
 
 		// These data goes max. up to the EP
-		additionalDataSize = ep - additionalDataPos;
+		if (ep >= additionalDataPos)
+		{
+			additionalDataSize = ep - additionalDataPos;
+		}
 	}
 
 	upx_plugin->log("Additional data are at file offset 0x", std::hex, additionalDataPos,
@@ -256,7 +255,7 @@ template <int bits> void ElfUpxStub<bits>::setupPackingMethod(std::uint8_t packi
  * @param packedData The packed data.
  * @param unpackedData Buffer where to unpack the data.
  */
-template <int bits> void ElfUpxStub<bits>::decompress(retdec::unpacker::DynamicBuffer& packedData, retdec::unpacker::DynamicBuffer& unpackedData)
+template <int bits> void ElfUpxStub<bits>::decompress(DynamicBuffer& packedData, DynamicBuffer& unpackedData)
 {
 	_decompressor->decompress(this, packedData, unpackedData);
 }
@@ -370,7 +369,7 @@ template <int bits> void ElfUpxStub<bits>::unpackBlock(DynamicBuffer& unpackedDa
 }
 
 /**
- * Unpacks the packed block that is stored in the @ref retdec::unpacker::DynamicBuffer.
+ * Unpacks the packed block that is stored in the @ref retdec::utils::DynamicBuffer.
  *
  * @tparam bits Number of bits of the architecture.
  *

@@ -9,6 +9,7 @@
 
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_distribution_getter/iterative_distribution_getter.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -23,7 +24,6 @@ class ElfAuxVPlainGetter : public IterativeDistributionGetter
 
 	public:
 		ElfAuxVPlainGetter(FileInformation &fileInfo);
-		virtual ~ElfAuxVPlainGetter() override;
 
 		virtual std::size_t getBasicInfo(
 				std::size_t structIndex,
@@ -37,5 +37,6 @@ class ElfAuxVPlainGetter : public IterativeDistributionGetter
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

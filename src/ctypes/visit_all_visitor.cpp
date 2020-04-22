@@ -9,8 +9,10 @@
 #include "retdec/ctypes/floating_point_type.h"
 #include "retdec/ctypes/function_type.h"
 #include "retdec/ctypes/integral_type.h"
+#include "retdec/ctypes/named_type.h"
 #include "retdec/ctypes/member.h"
 #include "retdec/ctypes/pointer_type.h"
+#include "retdec/ctypes/reference_type.h"
 #include "retdec/ctypes/struct_type.h"
 #include "retdec/ctypes/type.h"
 #include "retdec/ctypes/typedefed_type.h"
@@ -21,16 +23,6 @@
 
 namespace retdec {
 namespace ctypes {
-
-/**
-* @brief Constructs a new visitor.
-*/
-VisitAllVisitor::VisitAllVisitor() = default;
-
-/**
-* @brief Destructs the visitor.
-*/
-VisitAllVisitor::~VisitAllVisitor() = default;
 
 void VisitAllVisitor::visit(const std::shared_ptr<ArrayType> &type)
 {
@@ -80,6 +72,14 @@ void VisitAllVisitor::visit(const std::shared_ptr<IntegralType> &type)
 	}
 }
 
+void VisitAllVisitor::visit(const std::shared_ptr<NamedType> &type)
+{
+	if (makeAccessedAndCheckIfAccessed(type))
+	{
+		return;
+	}
+}
+
 void VisitAllVisitor::visit(const std::shared_ptr<PointerType> &type)
 {
 	if (makeAccessedAndCheckIfAccessed(type))
@@ -88,6 +88,16 @@ void VisitAllVisitor::visit(const std::shared_ptr<PointerType> &type)
 	}
 
 	type->getPointedType()->accept(this);
+}
+
+void VisitAllVisitor::visit(const std::shared_ptr<ReferenceType> &type)
+{
+	if (makeAccessedAndCheckIfAccessed(type))
+	{
+		return;
+	}
+
+	type->getReferencedType()->accept(this);
 }
 
 void VisitAllVisitor::visit(const std::shared_ptr<StructType> &type)

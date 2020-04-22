@@ -9,53 +9,13 @@
 
 #include <llvm/IR/Module.h>
 
-#include "retdec/ctypes/context.h"
-#include "retdec/ctypes/module.h"
-#include "retdec/ctypes/type.h"
-#include "retdec/ctypes/visitor.h"
 #include "retdec/ctypesparser/json_ctypes_parser.h"
 #include "retdec/bin2llvmir/providers/config.h"
 #include "retdec/bin2llvmir/providers/fileimage.h"
+#include "retdec/ctypesparser/type_config.h"
 
 namespace retdec {
 namespace bin2llvmir {
-
-class ToLlvmTypeVisitor: public retdec::ctypes::Visitor
-{
-	public:
-		ToLlvmTypeVisitor(llvm::Module* m, Config* c);
-		virtual ~ToLlvmTypeVisitor() override;
-
-		virtual void visit(
-				const std::shared_ptr<retdec::ctypes::ArrayType>&) override;
-		virtual void visit(
-				const std::shared_ptr<retdec::ctypes::EnumType>&) override;
-		virtual void visit(
-				const std::shared_ptr<retdec::ctypes::FloatingPointType>&) override;
-		virtual void visit(
-				const std::shared_ptr<retdec::ctypes::FunctionType>&) override;
-		virtual void visit(
-				const std::shared_ptr<retdec::ctypes::IntegralType>&) override;
-		virtual void visit(
-				const std::shared_ptr<retdec::ctypes::PointerType>&) override;
-		virtual void visit(
-				const std::shared_ptr<retdec::ctypes::StructType>&) override;
-		virtual void visit(
-				const std::shared_ptr<retdec::ctypes::TypedefedType>&) override;
-		virtual void visit(
-				const std::shared_ptr<retdec::ctypes::UnionType>&) override;
-		virtual void visit(
-				const std::shared_ptr<retdec::ctypes::UnknownType>&) override;
-		virtual void visit(
-				const std::shared_ptr<retdec::ctypes::VoidType>&) override;
-
-		llvm::Type* getLlvmType() const;
-
-	private:
-		llvm::Module* _module = nullptr;
-		Config* _config = nullptr;
-		llvm::Type* _type = nullptr;
-};
 
 class Lti
 {
@@ -66,9 +26,10 @@ class Lti
 
 	public:
 		Lti(
-				llvm::Module* m,
-				Config* c,
-				retdec::loader::Image* objf);
+			llvm::Module* m,
+			Config* c,
+			const std::shared_ptr<ctypesparser::TypeConfig>& typeConfig,
+			retdec::loader::Image* objf);
 
 		bool hasLtiFunction(const std::string& name);
 		std::shared_ptr<retdec::ctypes::Function> getLtiFunction(
@@ -86,6 +47,7 @@ class Lti
 	private:
 		llvm::Module* _module = nullptr;
 		Config* _config = nullptr;
+		std::shared_ptr<ctypesparser::TypeConfig> _typeConfig;
 		retdec::loader::Image* _image = nullptr;
 		std::unique_ptr<retdec::ctypes::Module> _ltiModule;
 		ctypesparser::JSONCTypesParser _ltiParser;
@@ -95,9 +57,10 @@ class LtiProvider
 {
 	public:
 		static Lti* addLti(
-				llvm::Module* m,
-				Config* c,
-				retdec::loader::Image* objf);
+			llvm::Module* m,
+			Config* c,
+			const std::shared_ptr<ctypesparser::TypeConfig>& typeConfig,
+			retdec::loader::Image* objf);
 		static Lti* getLti(llvm::Module* m);
 		static bool getLti(llvm::Module* m, Lti*& lti);
 		static void clear();

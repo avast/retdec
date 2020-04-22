@@ -4,9 +4,11 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
+#include <llvm/IR/Module.h>
 #include <llvm/IR/PatternMatch.h>
 
 #include "retdec/bin2llvmir/optimizations/inst_opt/inst_opt.h"
+#include "retdec/bin2llvmir/utils/debug.h"
 
 using namespace llvm;
 using namespace PatternMatch;
@@ -353,11 +355,15 @@ bool addSequence(llvm::Instruction* insn)
 }
 
 /**
- * cast1 int/fp/ptr to ...
+ * cast1 fp/ptr to ...
  * ...
- * cast2 ... to int/fp/ptr
+ * cast2 ... to fp/ptr
  *   =>
- * cast int/fp/ptr to int/fp/ptr
+ * cast fp/ptr to fp/ptr
+ *
+ * Do not do this for integers. It is not always safe.
+ * E.g. i32 -> i1 -> i32 is not the same as i32 -> i32.
+ * It may not be safe for pointers and floats as well, but we leave it for now.
  */
 llvm::Value* castSequence(llvm::CastInst* cast1, llvm::CastInst* cast2)
 {
@@ -367,17 +373,7 @@ llvm::Value* castSequence(llvm::CastInst* cast1, llvm::CastInst* cast2)
 
 	Value* v = nullptr;
 
-	// int -> cast -> cast -> int
-	if (srcTy->isIntegerTy() && dstTy->isIntegerTy())
-	{
-		bool sign = cast1->getOpcode() == Instruction::SIToFP
-				|| cast2->getOpcode() == Instruction::FPToSI;
-		v = srcTy != dstTy
-				? CastInst::CreateIntegerCast(src, dstTy, sign, "", cast2)
-				: src;
-	}
-	// ptr -> cast -> cast -> ptr
-	else if (srcTy->isPointerTy() && dstTy->isPointerTy())
+	if (srcTy->isPointerTy() && dstTy->isPointerTy())
 	{
 		v = srcTy != dstTy
 				? CastInst::CreatePointerCast(src, dstTy, "", cast2)
@@ -440,6 +436,110 @@ bool castSequenceWrapper(llvm::Instruction* insn)
 }
 
 /**
+ * \code{.ll}
+ * store float %val, float* bitcast (i32* @gv to float*)
+ *   ==>
+ * %conv = bitcast float %val to i32
+ * store i32 %conv, i32* @gv
+ * \endcode
+ *
+ * This is countering an undesirable LLVM instrcombine optimization
+ * that is going the other way.
+ */
+bool storeToBitcastPointer(llvm::Instruction* insn)
+{
+	Value* val;
+	Value* op;
+	if (!match(insn, m_Store(m_Value(val), m_BitCast(m_Value(op))))
+			|| !op->getType()->getPointerElementType()->isFirstClassType()
+			|| op->getType()->getPointerElementType()->isAggregateType()
+			|| op->getType()->getPointerElementType()->isPointerTy())
+	{
+		return false;
+	}
+
+	if (!BitCastInst::isBitCastable(
+			val->getType(),
+			op->getType()->getPointerElementType()))
+	{
+		return false;
+	}
+
+	auto* conv = CastInst::CreateBitOrPointerCast(
+			val,
+			op->getType()->getPointerElementType(),
+			"",
+			insn);
+	new StoreInst(conv, op, insn);
+
+	auto* bitcastI = dyn_cast<BitCastInst>(insn->getOperand(1));
+	auto* bitcastCE = dyn_cast<ConstantExpr>(insn->getOperand(1));
+	insn->eraseFromParent();
+	if (bitcastI && bitcastI->use_empty())
+	{
+		bitcastI->eraseFromParent();
+	}
+	if (bitcastCE && bitcastCE->use_empty())
+	{
+		bitcastCE->destroyConstant();
+	}
+
+	return true;
+}
+
+/**
+ * \code{.ll}
+ * %1 = load float, float* bitcast (i32* @g to float*)
+ *   ==>
+ * %1 = load i32, i32* @g
+ * %2 = bitcast i32 %1 to float
+ *
+ * %1 = load i8*, i8** bitcast (i32* @g to i8**)
+ *   ==>
+ * %1 = load i32, i32* @g
+ * %2 = inttoptr i32 %1 to i8*
+ * \endcode
+ */
+bool loadFromBitcastPointer(llvm::Instruction* insn)
+{
+	Value* op;
+	if (!match(insn, m_Load(m_BitCast(m_Value(op))))
+			|| !op->getType()->getPointerElementType()->isFirstClassType()
+			|| op->getType()->getPointerElementType()->isAggregateType())
+	{
+		return false;
+	}
+
+	if (!BitCastInst::isBitOrNoopPointerCastable(
+			op->getType()->getPointerElementType(),
+			insn->getType(),
+			insn->getModule()->getDataLayout()))
+	{
+		return false;
+	}
+
+	auto* l = new LoadInst(op, "", insn);
+	l->setAlignment(cast<LoadInst>(insn)->getAlignment());
+	auto* conv = CastInst::CreateBitOrPointerCast(l, insn->getType(), "", insn);
+	insn->replaceAllUsesWith(conv);
+
+	auto* bitcastI = dyn_cast<BitCastInst>(insn->getOperand(0));
+	auto* bitcastCE = dyn_cast<ConstantExpr>(insn->getOperand(0));
+
+	insn->eraseFromParent();
+	if (bitcastI && bitcastI->use_empty())
+	{
+		bitcastI->eraseFromParent();
+	}
+	if (bitcastCE && bitcastCE->use_empty())
+	{
+		bitcastCE->destroyConstant();
+	}
+
+	return true;
+}
+
+/**
  * Order here is important.
  * More specific patterns must go first, more general later.
  */
@@ -456,6 +556,8 @@ std::vector<bool (*)(llvm::Instruction*)> optimizations =
 		&orAndXX,
 		&addSequence,
 		&castSequenceWrapper,
+		&storeToBitcastPointer,
+		&loadFromBitcastPointer,
 };
 
 bool optimize(llvm::Instruction* insn)

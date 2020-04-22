@@ -11,7 +11,9 @@
 
 #include "unpackertool/plugins/upx/upx_stub.h"
 #include "retdec/unpacker/decompression/nrv/bit_parsers.h"
-#include "retdec/unpacker/dynamic_buffer.h"
+#include "retdec/utils/dynamic_buffer.h"
+
+using namespace retdec::utils;
 
 namespace retdec {
 namespace unpackertool {
@@ -67,24 +69,22 @@ public:
 	using MachOHeaderType = typename MachOUpxStubTraits<bits>::MachOHeaderType;
 	using MachOSegmentCommandType = typename MachOUpxStubTraits<bits>::MachOSegmentCommandType;
 
-	MachOUpxStub(retdec::loader::Image* inputFile, const UpxStubData* stubData, const retdec::unpacker::DynamicBuffer& stubCapturedData,
+	MachOUpxStub(retdec::loader::Image* inputFile, const UpxStubData* stubData, const DynamicBuffer& stubCapturedData,
 			std::unique_ptr<Decompressor> decompressor, const UpxMetadata& metadata);
-
-	virtual ~MachOUpxStub() override;
 
 	virtual void unpack(const std::string& outputFile) override;
 	virtual void cleanup() override;
 
 	void setupPackingMethod(std::uint8_t packingMethod);
-	void decompress(retdec::unpacker::DynamicBuffer& packedData, retdec::unpacker::DynamicBuffer& unpackedData);
+	void decompress(DynamicBuffer& packedData, DynamicBuffer& unpackedData);
 
 	void unpack(std::ifstream& inputFile, std::ofstream& outputFile, std::uint64_t baseInputOffset, std::uint64_t baseOutputOffset);
 
 protected:
 	std::uint32_t getFirstBlockOffset(std::ifstream& inputFile) const;
-	retdec::unpacker::DynamicBuffer readNextBlock(std::ifstream& inputFile);
-	retdec::unpacker::DynamicBuffer unpackBlock(retdec::unpacker::DynamicBuffer& packedBlock);
-	void unfilterBlock(const retdec::unpacker::DynamicBuffer& packedBlock, retdec::unpacker::DynamicBuffer& unpackedData);
+	DynamicBuffer readNextBlock(std::ifstream& inputFile);
+	DynamicBuffer unpackBlock(DynamicBuffer& packedBlock);
+	void unfilterBlock(const DynamicBuffer& packedBlock, DynamicBuffer& unpackedData);
 
 private:
 	std::uint64_t _readPos;

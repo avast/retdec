@@ -14,25 +14,12 @@
 #include "unpackertool/plugins/upx/upx_stub.h"
 #include "retdec/unpacker/decompression/lzma/lzma_data.h"
 
+using namespace retdec::utils;
 using namespace retdec::unpacker;
 
 namespace retdec {
 namespace unpackertool {
 namespace upx {
-
-/**
- * Constructor.
- */
-DecompressorLzma::DecompressorLzma()
-{
-}
-
-/**
- * Destructor.
- */
-DecompressorLzma::~DecompressorLzma()
-{
-}
 
 /**
  * Checks whether the provided packing method is valid.

@@ -24,9 +24,6 @@ class RelocationTable
 		std::vector<Relocation> table; ///< stored relocations
 		unsigned long long linkToSymbolTable; ///< link to associated symbol table
 	public:
-		RelocationTable();
-		~RelocationTable();
-
 		/// @name Getters
 		/// @{
 		std::size_t getNumberOfRelocations() const;
@@ -37,6 +34,7 @@ class RelocationTable
 		/// @}
 
 		/// @name Setters
+		/// @{
 		void setLinkToSymbolTable(std::uint64_t symbolTableIndex);
 		/// @}
 

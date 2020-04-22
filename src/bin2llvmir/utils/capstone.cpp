@@ -4,13 +4,15 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
+#include <cassert>
+
 #include "retdec/bin2llvmir/utils/capstone.h"
 
 namespace retdec {
 namespace bin2llvmir {
 namespace capstone_utils {
 
-std::string mode2string(const config::Architecture& arch, cs_mode m)
+std::string mode2string(const common::Architecture& arch, cs_mode m)
 {
 	std::string ret;
 
@@ -33,7 +35,12 @@ std::string mode2string(const config::Architecture& arch, cs_mode m)
 		ret += m & CS_MODE_MIPS32R6 ? ", CS_MODE_MIPS32R6" : "";
 		ret += m & CS_MODE_MIPS2 ? ", CS_MODE_MIPS2" : "";
 	}
-	else if (arch.isArmOrThumb())
+	else if (arch.isArm64())
+	{
+		ret += m & CS_MODE_V8 ? ", CS_MODE_V8" : ", CS_MODE_ARM";
+		ret += m & CS_MODE_MCLASS ? ", CS_MODE_MCLASS" : "";
+	}
+	else if (arch.isArm32OrThumb())
 	{
 		ret += m & CS_MODE_THUMB ? ", CS_MODE_THUMB" : ", CS_MODE_ARM";
 		ret += m & CS_MODE_MCLASS ? ", CS_MODE_MCLASS" : "";

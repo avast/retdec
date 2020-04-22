@@ -14,26 +14,36 @@
 using namespace retdec::cpdetect;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 /**
  * Create file detector
  * @param pathToInputFile Path to input file
+ * @param dllListFile Path to text file containing list of OS DLLs
  * @param fileFormat Format of input file
  * @param finfo Instance of class for storing information about input file
  * @param searchPar Parameters for detection of used compiler or packer
  * @param loadFlags Load flags
  * @return Pointer to instance of detector or @c nullptr if any error
  *
- * Pointer to detector is dynamically allocated and must be released (otherwise there is a memory leak).
- * If format of input file is not supported, function will return @c nullptr.
+ * Pointer to detector is dynamically allocated and must be released (otherwise
+ * there is a memory leak). If format of input file is not supported, function
+ * will return @c nullptr.
  */
-FileDetector* createFileDetector(std::string pathToInputFile, retdec::fileformat::Format fileFormat, FileInformation &finfo, retdec::cpdetect::DetectParams &searchPar, retdec::fileformat::LoadFlags loadFlags)
+FileDetector* createFileDetector(
+		const std::string & pathToInputFile,
+		const std::string & dllListFile,
+		retdec::fileformat::Format fileFormat,
+		FileInformation &finfo,
+		retdec::cpdetect::DetectParams &searchPar,
+		retdec::fileformat::LoadFlags loadFlags
+	)
 {
 	switch(fileFormat)
 	{
 		case Format::PE:
-			return new PeDetector(pathToInputFile, finfo, searchPar, loadFlags);
+			return new PeDetector(pathToInputFile, dllListFile, finfo, searchPar, loadFlags);
 		case Format::ELF:
 			return new ElfDetector(pathToInputFile, finfo, searchPar, loadFlags);
 		case Format::COFF:
@@ -50,3 +60,4 @@ FileDetector* createFileDetector(std::string pathToInputFile, retdec::fileformat
 }
 
 } // namespace fileinfo
+} // namespace retdec

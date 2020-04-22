@@ -30,37 +30,37 @@ ElfCompiler::ElfCompiler(
 	switch(targetArchitecture)
 	{
 		case Architecture::X86:
-			path.append("x86.yarac");
+			path.append("x86");
 			break;
 
 		case Architecture::X86_64:
-			path.append("x64.yarac");
+			path.append("x64");
 			break;
 
 		case Architecture::ARM:
 			if (bitWidth == 32) {
-				path.append("arm.yarac");
+				path.append("arm");
 			}
 			else {
-				path.append("arm64.yarac");
+				path.append("arm64");
 			}
 			break;
 
 		case Architecture::MIPS:
 			if (bitWidth == 32) {
-				path.append("mips.yarac");
+				path.append("mips");
 			}
 			else {
-				path.append("mips64.yarac");
+				path.append("mips64");
 			}
 			break;
 
 		case Architecture::POWERPC:
 			if (bitWidth == 32) {
-				path.append("ppc.yarac");
+				path.append("ppc");
 			}
 			else {
-				path.append("ppc64.yarac");
+				path.append("ppc64");
 			}
 			break;
 
@@ -68,11 +68,8 @@ ElfCompiler::ElfCompiler(
 			break;
 	}
 
-	if (path.isFile()) {
-		internalPaths.emplace_back(path.getPath());
-	}
+	populateInternalPaths(path);
 }
 
 } // namespace cpdetect
 } // namespace retdec
-

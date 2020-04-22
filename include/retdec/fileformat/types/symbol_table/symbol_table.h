@@ -26,9 +26,6 @@ class SymbolTable
 		std::vector<std::shared_ptr<Symbol>> table; ///< stored symbols
 		std::string name;                           ///< name of symbol table
 	public:
-		SymbolTable();
-		~SymbolTable();
-
 		/// @name Const getters
 		/// @{
 		std::size_t getNumberOfSymbols() const;

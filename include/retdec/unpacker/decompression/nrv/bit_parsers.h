@@ -8,7 +8,9 @@
 #define RETDEC_UNPACKER_DECOMPRESSION_NRV_BIT_PARSERS_H
 
 #include "retdec/fileformat/fftypes.h"
-#include "retdec/unpacker/dynamic_buffer.h"
+#include "retdec/utils/dynamic_buffer.h"
+
+using namespace retdec::utils;
 
 namespace retdec {
 namespace unpacker {
@@ -18,7 +20,7 @@ class BitParser
 public:
 	BitParser() {}
 	BitParser(const BitParser&) = delete;
-	virtual ~BitParser() {}
+	virtual ~BitParser() = default;
 
 	virtual bool getBit(uint8_t& bit, const DynamicBuffer& data, uint32_t& pos) = 0;
 
@@ -35,7 +37,6 @@ public:
 	}
 
 	BitParserN(const BitParser&) = delete;
-	virtual ~BitParserN() override {}
 
 protected:
 	T _value;
@@ -47,9 +48,8 @@ private:
 class BitParser8 : public BitParserN<uint32_t>
 {
 public:
-	BitParser8() {}
+	BitParser8() = default;
 	BitParser8(const BitParser8&) = delete;
-	virtual ~BitParser8() override {}
 
 	virtual bool getBit(uint8_t& bit, const DynamicBuffer& data, uint32_t& pos) override
 	{
@@ -74,9 +74,8 @@ public:
 class BitParserLe32 : public BitParserN<uint32_t>
 {
 public:
-	BitParserLe32() {}
+	BitParserLe32() = default;
 	BitParserLe32(const BitParserLe32&) = delete;
-	virtual ~BitParserLe32() {}
 
 	virtual bool getBit(uint8_t& bit, const DynamicBuffer& data, uint32_t& pos) override
 	{

@@ -27,13 +27,6 @@ ElfNoteSecSeg::ElfNoteSecSeg(const SecSeg* assocSecSeg) : secSeg(assocSecSeg)
 }
 
 /**
- * Destructor
- */
-ElfNoteSecSeg::~ElfNoteSecSeg()
-{
-}
-
-/**
  * Set malformed bit for notes
  * @param message optional error message
  */

@@ -1,0 +1,8 @@
+1 CORLockDownProvider
+2 CORPolicyEE
+3 CORPolicyProvider
+4 DllCanUnloadNow
+5 DllRegisterServer
+6 DllUnregisterServer
+7 GetPublisher
+8 GetUnsignedPermissions

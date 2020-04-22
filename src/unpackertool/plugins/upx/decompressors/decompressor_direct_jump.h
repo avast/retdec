@@ -18,12 +18,8 @@ namespace upx {
 class DecompressorDirectJump : public DecompressorScrambler
 {
 public:
-	DecompressorDirectJump();
-	virtual ~DecompressorDirectJump();
-
-	virtual void readUnpackingStub(PeUpxStub<32>* stub, retdec::unpacker::DynamicBuffer& unpackingStub) override;
-
-	virtual void readUnpackingStub(PeUpxStub<64>* stub, retdec::unpacker::DynamicBuffer& unpackingStub) override;
+	virtual void readUnpackingStub(PeUpxStub<32>* stub, retdec::utils::DynamicBuffer& unpackingStub) override;
+	virtual void readUnpackingStub(PeUpxStub<64>* stub, retdec::utils::DynamicBuffer& unpackingStub) override;
 };
 
 } // namespace upx

@@ -38,11 +38,6 @@ DeadLocalAssignOptimizer::DeadLocalAssignOptimizer(ShPtr<Module> module,
 		PRECONDITION_NON_NULL(va);
 	}
 
-/**
-* @brief Destructs the optimizer.
-*/
-DeadLocalAssignOptimizer::~DeadLocalAssignOptimizer() {}
-
 void DeadLocalAssignOptimizer::doOptimization() {
 	// Initialization.
 	if (!va->isInValidState()) {
@@ -68,6 +63,12 @@ void DeadLocalAssignOptimizer::runOnFunction(ShPtr<Function> func) {
 */
 bool DeadLocalAssignOptimizer::canBeOptimized(ShPtr<Variable> var,
 		ShPtr<VarUses> varUses) {
+
+	// We do not want to optimize external variables (used in a volatile
+	// load/store).
+	if (var->isExternal()) {
+		return false;
+	}
 	// For every direct use of the variable...
 	for (const auto &use : varUses->dirUses) {
 		// The use has to be a variable-defining/assign statement.
@@ -83,12 +84,6 @@ bool DeadLocalAssignOptimizer::canBeOptimized(ShPtr<Variable> var,
 		// The variable is not read in the use.
 		ShPtr<ValueData> useData(va->getValueData(use));
 		if (hasItem(useData->getDirReadVars(), var)) {
-			return false;
-		}
-
-		// We do not want to optimize external variables (used in a volatile
-		// load/store).
-		if (var->isExternal()) {
 			return false;
 		}
 

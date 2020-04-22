@@ -1,0 +1,14 @@
+1 DllCanUnloadNow
+2 DllGetClassObject
+3 DllRegisterServer
+4 DllUnregisterServer
+5 RasCpEnumProtocolIds
+6 RasCpGetInfo
+7 RasEapCreateConnectionProperties
+8 RasEapCreateUserProperties
+9 RasEapFreeMemory
+10 RasEapGetCredentials
+11 RasEapGetIdentity
+12 RasEapGetInfo
+13 RasEapInvokeConfigUI
+14 RasEapInvokeInteractiveUI

@@ -5,6 +5,18 @@
 
 import "pe"
 
+rule enigma_1x {
+	meta:
+		tool = "P"
+		name = "Enigma"
+		version = "1.x+ (64-bit)"
+		pattern = "5051525355565741504151415241534154415541564157489C4881EC080000000FAE1C24E8000000005D4881ED??0000004881ED"
+	strings:
+		$1 = { 50 51 52 53 55 56 57 41 50 41 51 41 52 41 53 41 54 41 55 41 56 41 57 48 9C 48 81 EC 08 00 00 00 0F AE 1C 24 E8 00 00 00 00 5D 48 81 ED ?? 00 00 00 48 81 ED }
+	condition:
+		@1 < pe.overlay.offset or $1
+}
+
 rule upx_39x_lzma {
 	meta:
 		tool = "P"

@@ -60,8 +60,6 @@ class BitShiftOptimizer final: public Optimizer {
 public:
 	BitShiftOptimizer(ShPtr<Module> module);
 
-	virtual ~BitShiftOptimizer() override;
-
 	virtual std::string getId() const override { return "BitShift"; }
 
 private:

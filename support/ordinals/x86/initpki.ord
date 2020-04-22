@@ -1,0 +1,4 @@
+1 DllInstall
+2 DllRegisterServer
+3 DllUnregisterServer
+4 InitializePKI

@@ -9,6 +9,7 @@
 
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_distribution_getter/iterative_distribution_getter.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -20,12 +21,12 @@ class SectionPlainGetter : public IterativeDistributionGetter
 		virtual bool loadRecord(std::size_t structIndex, std::size_t recIndex, std::vector<std::string> &record) override;
 	public:
 		SectionPlainGetter(FileInformation &fileInfo);
-		virtual ~SectionPlainGetter() override;
 
 		virtual std::size_t getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const override;
 		virtual bool getFlagDescriptors(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &abbv) const override;
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

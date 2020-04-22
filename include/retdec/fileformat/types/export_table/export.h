@@ -18,13 +18,12 @@ namespace fileformat {
 class Export
 {
 	private:
-		std::string name;                 ///< export name
-		unsigned long long address;       ///< address of export
-		unsigned long long ordinalNumber; ///< ordinal number
-		bool ordinalNumberIsValid;        ///< @c true if ordinal number is valid
+		std::string name;
+		unsigned long long address = 0;
+		unsigned long long ordinalNumber = 0;
+		bool ordinalNumberIsValid = false;
 	public:
-		Export();
-		virtual ~Export();
+		virtual ~Export() = default;
 
 		/// @name Getters
 		/// @{

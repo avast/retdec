@@ -23,14 +23,12 @@ namespace llvmir2hll {
 */
 class StrictArithmExprEvaluator final: public ArithmExprEvaluator {
 public:
-	virtual ~StrictArithmExprEvaluator() override;
-
 	static ShPtr<ArithmExprEvaluator> create();
 
 	virtual std::string getId() const override;
 
 private:
-	StrictArithmExprEvaluator();
+	StrictArithmExprEvaluator() = default;
 
 	// Resolve types.
 	virtual void resolveTypesBinaryOp(ConstPair &constPair) override;

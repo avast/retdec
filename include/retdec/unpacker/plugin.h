@@ -85,7 +85,7 @@ public:
 		bool brute; ///< Brute mode of the unpacking was chosen.
 	};
 
-	virtual ~Plugin() {} ///< Destructor.
+	virtual ~Plugin() = default;
 
 	/**
 	 * Returns the static info of the plugin.

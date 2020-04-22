@@ -24,8 +24,6 @@ class Visitor;
 */
 class CastExpr: public Expression {
 public:
-	virtual ~CastExpr() override;
-
 	virtual ShPtr<Type> getType() const override;
 	virtual void replace(ShPtr<Expression> oldExpr,
 		ShPtr<Expression> newExpr) override;

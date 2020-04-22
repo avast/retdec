@@ -1,0 +1,12 @@
+1 GetAUOptionsEx
+2 wuaueng_2
+3 wuaueng_3
+4 WUCheckForUpdatesAtShutdown
+5 WUAutoUpdateAtShutdown
+6 GetEngineStatusInfo
+7 RegisterServiceVersion
+8 ServiceHandler
+9 ServiceMain
+10 DllMain
+11 DllRegisterServer
+12 DllUnregisterServer

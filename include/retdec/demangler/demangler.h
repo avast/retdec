@@ -1,47 +1,15 @@
 /**
  * @file include/retdec/demangler/demangler.h
- * @brief Demangler library.
- * @copyright (c) 2017 Avast Software, licensed under the MIT license
+ * @brief File to include for demangling work.
+ * @copyright (c) 2018 Avast Software, licensed under the MIT license
  */
 
-#ifndef RETDEC_DEMANGLER_DEMANGLERL_H
-#define RETDEC_DEMANGLER_DEMANGLERL_H
+#ifndef RETDEC_DEMANGLER_H
+#define RETDEC_DEMANGLER_H
 
-#include <memory>
-#include <string>
+#include "retdec/demangler/demangler_base.h"
+#include "retdec/demangler/itanium_demangler.h"
+#include "retdec/demangler/microsoft_demangler.h"
+#include "retdec/demangler/borland_demangler.h"
 
-#include "retdec/demangler/gparser.h"
-
-namespace retdec {
-namespace demangler {
-
-/**
- * The grammar parser class - the core of the demangler.
- */
-class CDemangler {
-	cGram *pGram;
-	cName *pName;
-	std::string compiler = "gcc";
-	cGram::errcode errState; /// error state; 0 = everyting is ok
-
-public:
-	CDemangler(std::string gname, bool i = true);
-	static std::unique_ptr<CDemangler> createGcc(bool i = true);
-	static std::unique_ptr<CDemangler> createMs(bool i = true);
-	static std::unique_ptr<CDemangler> createBorland(bool i = true);
-	virtual ~CDemangler();
-
-	bool isOk();
-	std::string printError();
-	void resetError();
-
-	void createGrammar(std::string inputfilename, std::string outputname);
-	cName *demangleToClass(std::string inputName);
-	std::string demangleToString(std::string inputName);
-	void setSubAnalyze(bool x);
-};
-
-} // namespace demangler
-} // namespace retdec
-
-#endif
+#endif //RETDEC_DEMANGLER_H

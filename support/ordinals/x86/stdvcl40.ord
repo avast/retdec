@@ -1,0 +1,4 @@
+1 DllUnregisterServer
+2 DllRegisterServer
+3 DllCanUnloadNow
+4 DllGetClassObject

@@ -34,10 +34,9 @@ public:
 		ShPtr<Expression> cond,
 		ShPtr<Expression> step,
 		ShPtr<Statement> body,
-		ShPtr<Statement> succ = nullptr
+		ShPtr<Statement> succ = nullptr,
+		Address a = Address::Undefined
 	);
-
-	virtual ~UForLoopStmt() override;
 
 	virtual ShPtr<Value> clone() override;
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
@@ -75,7 +74,8 @@ private:
 		ShPtr<Expression> init,
 		ShPtr<Expression> cond,
 		ShPtr<Expression> step,
-		ShPtr<Statement> body
+		ShPtr<Statement> body,
+		Address a = Address::Undefined
 	);
 
 	/// Initialization part.

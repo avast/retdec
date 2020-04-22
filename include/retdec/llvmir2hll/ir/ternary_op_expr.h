@@ -26,8 +26,6 @@ public:
 	static ShPtr<TernaryOpExpr> create(ShPtr<Expression> cond,
 		ShPtr<Expression> trueValue, ShPtr<Expression> falseValue);
 
-	virtual ~TernaryOpExpr() override;
-
 	virtual ShPtr<Value> clone() override;
 
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;

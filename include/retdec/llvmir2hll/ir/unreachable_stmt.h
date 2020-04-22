@@ -21,9 +21,7 @@ class Visitor;
 */
 class UnreachableStmt: public Statement {
 public:
-	static ShPtr<UnreachableStmt> create();
-
-	virtual ~UnreachableStmt() override;
+	static ShPtr<UnreachableStmt> create(Address a = Address::Undefined);
 
 	virtual ShPtr<Value> clone() override;
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
@@ -37,7 +35,7 @@ public:
 	/// @}
 
 private:
-	UnreachableStmt();
+	UnreachableStmt(Address a = Address::Undefined);
 };
 
 } // namespace llvmir2hll

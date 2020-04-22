@@ -7,24 +7,8 @@
 #include "fileinfo/file_information/file_information_types/data_directory.h"
 #include "fileinfo/file_information/file_information_types/type_conversions.h"
 
+namespace retdec {
 namespace fileinfo {
-
-/**
- * Constructor
- */
-DataDirectory::DataDirectory() : address(std::numeric_limits<unsigned long long>::max()),
-									size(std::numeric_limits<unsigned long long>::max())
-{
-
-}
-
-/**
- * Destructor
- */
-DataDirectory::~DataDirectory()
-{
-
-}
 
 /**
  * Get type (description) of directory
@@ -82,3 +66,4 @@ void DataDirectory::setSize(unsigned long long dirSize)
 }
 
 } // namespace fileinfo
+} // namespace retdec

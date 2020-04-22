@@ -12,10 +12,11 @@
 #include "retdec/cpdetect/compiler_detector/compiler_detector.h"
 #include "retdec/cpdetect/settings.h"
 #include "retdec/cpdetect/utils/version_solver.h"
+#include "retdec/yaracpp/yara_detector/yara_detector.h"
 
 using namespace retdec::fileformat;
 using namespace retdec::utils;
-using namespace yaracpp;
+using namespace retdec::yaracpp;
 
 namespace retdec {
 namespace cpdetect {
@@ -160,6 +161,31 @@ ToolType metaToTool(const std::string &toolMeta)
 	return ToolType::UNKNOWN;
 }
 
+/**
+* Convert meta to type of tool.
+*/
+retdec::cpdetect::DetectionStrength metaToStrength(const retdec::yaracpp::YaraMeta * strengthMeta)
+{
+	if (strengthMeta)
+	{
+		const auto & toolStrength = strengthMeta->getStringValue();
+
+		if (areEqualCaseInsensitive(toolStrength, "low"))
+			return DetectionStrength::LOW;
+
+		if (areEqualCaseInsensitive(toolStrength, "medium"))
+			return DetectionStrength::MEDIUM;
+
+		if (areEqualCaseInsensitive(toolStrength, "high"))
+			return DetectionStrength::HIGH;
+
+		if (areEqualCaseInsensitive(toolStrength, "sure"))
+			return DetectionStrength::SURE;
+	}
+
+	return DetectionStrength::MEDIUM;
+}
+
 } // anonymous namespace
 
 /**
@@ -291,6 +317,37 @@ void CompilerDetector::removeUnusedCompilers()
 }
 
 /**
+ * Add all YARA files from the given @p dir to internal paths member.
+ */
+void CompilerDetector::populateInternalPaths(
+		const retdec::utils::FilesystemPath& dir,
+		bool recursive)
+{
+	if (!dir.isDirectory())
+	{
+		return;
+	}
+
+	for (const auto *subpath : dir)
+	{
+		if (subpath->isFile()
+				&& std::any_of(externalSuffixes.begin(), externalSuffixes.end(),
+				[&] (const auto &suffix)
+			{
+				return endsWith(subpath->getPath(), suffix);
+			}
+		))
+		{
+			internalPaths.push_back(subpath->getPath());
+		}
+		else if (recursive && subpath->isDirectory())
+		{
+			populateInternalPaths(*subpath);
+		}
+	}
+}
+
+/**
  * Try detect used compiler (or packer) based on heuristics
  */
 void CompilerDetector::getAllHeuristics()
@@ -310,16 +367,20 @@ ReturnCode CompilerDetector::getAllSignatures()
 	YaraDetector yara;
 
 	// Add internal paths.
+	unsigned iCntr = 0;
 	for (const auto &ruleFile : internalPaths)
 	{
-		yara.addRuleFile(ruleFile);
+		std::string nameSpace = "internal_" + std::to_string(iCntr++);
+		yara.addRuleFile(ruleFile, nameSpace);
 	}
 
+	unsigned eCntr = 0;
 	if (cpParams.external && getExternalDatabases())
 	{
 		for (const auto &item : externalDatabase)
 		{
-			yara.addRuleFile(item);
+			std::string nameSpace = "external_" + std::to_string(eCntr++);
+			yara.addRuleFile(item, nameSpace);
 		}
 	}
 
@@ -332,28 +393,54 @@ ReturnCode CompilerDetector::getAllSignatures()
 	{
 		for (const auto &rule : detected)
 		{
-			const auto *match = rule.getFirstMatch();
-			const auto *nameMeta = rule.getMeta("name");
-			const auto *patternMeta = rule.getMeta("pattern");
-			if (!match || !nameMeta || !patternMeta)
+			// In order to include result from a rule, there must have been a match
+			if (rule.getFirstMatch())
 			{
-				continue;
-			}
-			const auto nibbles = search->countImpNibbles(patternMeta->getStringValue());
-			if (nibbles)
-			{
-				result = true;
-				const auto *toolMeta = rule.getMeta("tool");
-				const auto *versionMeta = rule.getMeta("version");
-				const auto *commentMeta = rule.getMeta("comment");
-				const auto *languageMeta = rule.getMeta("language");
-				const auto *bytecodeMeta = rule.getMeta("bytecode");
-				commentMeta = commentMeta ? commentMeta : rule.getMeta("extra");
-				toolInfo.addTool(nibbles, nibbles, toolMeta ? metaToTool(toolMeta->getStringValue()) : ToolType::UNKNOWN,
-					nameMeta->getStringValue(), versionMeta ? versionMeta->getStringValue() : "", commentMeta ? commentMeta->getStringValue() : "");
-				if (languageMeta)
+				// The rule requires to have the "name" meta-tag
+				const auto *nameMeta = rule.getMeta("name");
+				if (nameMeta)
 				{
-					toolInfo.addLanguage(languageMeta->getStringValue(), "", bytecodeMeta ? true : false);
+					const auto *toolMeta = rule.getMeta("tool");
+					const auto *versionMeta = rule.getMeta("version");
+					const auto *commentMeta = rule.getMeta("comment");
+					const auto & version = versionMeta ? versionMeta->getStringValue() : "";
+					auto toolType = toolMeta ? metaToTool(toolMeta->getStringValue()) : ToolType::UNKNOWN;
+
+					// Use "extra" meta-tag for extra value, if comment is not available
+					if (!commentMeta)
+						commentMeta = rule.getMeta("extra");
+					const auto & extra = commentMeta ? commentMeta->getStringValue() : "";
+
+					// If the rule has the "pattern" meta-tag, it means that it's a nibble detection
+					const auto *patternMeta = rule.getMeta("pattern");
+					if (patternMeta)
+					{
+						const auto nibbles = search->countImpNibbles(patternMeta->getStringValue());
+						if (nibbles)
+						{
+							result = true;
+							const auto *languageMeta = rule.getMeta("language");
+							const auto *bytecodeMeta = rule.getMeta("bytecode");
+							commentMeta = commentMeta ? commentMeta : rule.getMeta("extra");
+							toolInfo.addTool(nibbles, nibbles, toolType, nameMeta->getStringValue(), version, extra);
+							if (languageMeta)
+							{
+								toolInfo.addLanguage(languageMeta->getStringValue(), "", bytecodeMeta ? true : false);
+							}
+						}
+					}
+					// If there is no "pattern" meta-tag, we consider the rule to be a heuristic detection
+					else
+					{
+						toolInfo.addTool(
+							DetectionMethod::YARA_RULE,
+							metaToStrength(rule.getMeta("strength")),
+							toolType,
+							nameMeta->getStringValue(),
+							version,
+							extra
+						);
+					}
 				}
 			}
 		}
@@ -401,7 +488,8 @@ ReturnCode CompilerDetector::getAllSignatures()
 			const auto *absoluteStartMeta = rule.getMeta("absoluteStart");
 			if (absoluteStartMeta)
 			{
-				if (!strToNum(absoluteStartMeta->getStringValue(), base))
+				if (absoluteStartMeta->getType() == yaracpp::YaraMeta::Type::String
+					&& !strToNum(absoluteStartMeta->getStringValue(), base))
 				{
 					continue;
 				}
@@ -496,6 +584,12 @@ ReturnCode CompilerDetector::getAllInformation()
 	fileParser.getImageBaseAddress(toolInfo.imageBase);
 	toolInfo.entryPointAddress = fileParser.getEpAddress(toolInfo.epAddress);
 	toolInfo.entryPointOffset = fileParser.getEpOffset(toolInfo.epOffset);
+
+	if ((toolInfo.overlaySize = fileParser.getOverlaySize()) != 0)
+	{
+		toolInfo.overlayOffset = fileParser.getDeclaredFileLength();
+	}
+
 	const bool invalidEntryPoint = !toolInfo.entryPointAddress || !toolInfo.entryPointOffset;
 	if (!fileParser.getHexEpBytes(toolInfo.epBytes, cpParams.epBytesCount)
 			&& !invalidEntryPoint && !fileParser.isInValidState())

@@ -6,6 +6,7 @@
 
 #include "fileinfo/file_presentation/file_presentation.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -17,17 +18,10 @@ FilePresentation::FilePresentation(FileInformation &fileinfo_) : fileinfo(filein
 }
 
 /**
- * Destructor
- */
-FilePresentation::~FilePresentation()
-{
-
-}
-
-/**
  * @fn bool FilePresentation::present()
  * Present information about file
  * @return @c true if presentation went OK, @c false otherwise
  */
 
 } // namespace fileinfo
+} // namespace retdec

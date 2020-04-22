@@ -19,14 +19,6 @@ PeFormatParser::PeFormatParser(const FileFormat *fInputFile) : inputFile(fInputF
 }
 
 /**
- * Destructor
- */
-PeFormatParser::~PeFormatParser()
-{
-
-}
-
-/**
  * @fn unsigned long long PeFormatParser::getDeclaredNumberOfSections() const
  * Get declared number of sections in file
  * @return Declared number of sections in file

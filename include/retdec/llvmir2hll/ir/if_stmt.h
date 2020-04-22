@@ -43,9 +43,7 @@ public:
 
 public:
 	static ShPtr<IfStmt> create(ShPtr<Expression> cond, ShPtr<Statement> body,
-		ShPtr<Statement> succ = nullptr);
-
-	virtual ~IfStmt() override;
+		ShPtr<Statement> succ = nullptr, Address a = Address::Undefined);
 
 	virtual ShPtr<Value> clone() override;
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
@@ -86,7 +84,8 @@ public:
 private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
-	IfStmt(ShPtr<Expression> cond, ShPtr<Statement> body);
+	IfStmt(ShPtr<Expression> cond, ShPtr<Statement> body,
+		Address a = Address::Undefined);
 
 private:
 	/// A list of `if` clauses.

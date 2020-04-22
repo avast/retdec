@@ -11,6 +11,7 @@
 using namespace retdec::utils;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 namespace
@@ -60,14 +61,6 @@ SymbolTablesPlainGetter::SymbolTablesPlainGetter(FileInformation &fileInfo) : It
 	commonHeaderElements.insert(commonHeaderElements.begin(), std::begin(headerAbbvArray), std::end(headerAbbvArray));
 	commonHeaderDesc.insert(commonHeaderDesc.begin(), std::begin(headerDescArray), std::end(headerDescArray));
 	loadRecords();
-}
-
-/**
- * Destructor
- */
-SymbolTablesPlainGetter::~SymbolTablesPlainGetter()
-{
-
 }
 
 std::size_t SymbolTablesPlainGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const
@@ -130,3 +123,4 @@ bool SymbolTablesPlainGetter::getFlagDescriptors(std::size_t structIndex, std::v
 }
 
 } // namespace fileinfo
+} // namespace retdec

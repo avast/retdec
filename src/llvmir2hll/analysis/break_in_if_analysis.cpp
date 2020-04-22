@@ -21,11 +21,6 @@ BreakInIfAnalysis::BreakInIfAnalysis():
 	OrderedAllVisitor(), foundBreakStmt(false) {}
 
 /**
-* @brief Destructs the analysis.
-*/
-BreakInIfAnalysis::~BreakInIfAnalysis() {}
-
-/**
 * @brief Returns @c true if there is at least one break statement in the given
 *        if statement, @c false otherwise.
 *

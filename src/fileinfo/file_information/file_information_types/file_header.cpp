@@ -7,44 +7,8 @@
 #include "fileinfo/file_information/file_information_types/file_header.h"
 #include "fileinfo/file_information/file_information_types/type_conversions.h"
 
+namespace retdec {
 namespace fileinfo {
-
-/**
- * Constructor
- */
-FileHeader::FileHeader() : numberOfBitsInByte(std::numeric_limits<unsigned long long>::max()),
-							numberOfBitsInWord(std::numeric_limits<unsigned long long>::max()),
-							fileHeaderSize(std::numeric_limits<unsigned long long>::max()),
-							segmentTableOffset(std::numeric_limits<unsigned long long>::max()),
-							segmentTableEntrySize(std::numeric_limits<unsigned long long>::max()),
-							segmentTableSize(std::numeric_limits<unsigned long long>::max()),
-							numberOfSegments(std::numeric_limits<unsigned long long>::max()),
-							sectionTableOffset(std::numeric_limits<unsigned long long>::max()),
-							sectionTableEntrySize(std::numeric_limits<unsigned long long>::max()),
-							sectionTableSize(std::numeric_limits<unsigned long long>::max()),
-							declNumberOfSections(std::numeric_limits<unsigned long long>::max()),
-							coffFileHeaderSize(std::numeric_limits<unsigned long long>::max()),
-							optionalHeaderSize(std::numeric_limits<unsigned long long>::max()),
-							checksum(std::numeric_limits<unsigned long long>::max()),
-							stackReserveSize(std::numeric_limits<unsigned long long>::max()),
-							stackCommitSize(std::numeric_limits<unsigned long long>::max()),
-							heapReserveSize(std::numeric_limits<unsigned long long>::max()),
-							heapCommitSize(std::numeric_limits<unsigned long long>::max()),
-							numberOfDataDirectories(std::numeric_limits<unsigned long long>::max()),
-							numberOfSymbolTables(std::numeric_limits<unsigned long long>::max()),
-							overlayOffset(std::numeric_limits<unsigned long long>::max()),
-							overlaySize(std::numeric_limits<unsigned long long>::max())
-{
-
-}
-
-/**
- * Destructor
- */
-FileHeader::~FileHeader()
-{
-
-}
 
 /**
  * Get time stamp
@@ -397,6 +361,15 @@ std::string FileHeader::getOverlaySizeStr(std::ios_base &(* format)(std::ios_bas
 }
 
 /**
+ * Get overlay entropy
+ * @return Entropy of overlay
+ */
+std::string FileHeader::getOverlayEntropyStr(std::ios_base &(* format)(std::ios_base &)) const
+{
+	return getNumberAsString(overlayEntropy, format);
+}
+
+/**
  * Set time stamp
  * @param timestamp Time stamp
  */
@@ -685,6 +658,15 @@ void FileHeader::setOverlaySize(unsigned long long size)
 }
 
 /**
+ * Set entropy of overlay
+ * @param entr Entropy of overlay
+ */
+void FileHeader::setOverlayEntropy(double entr)
+{
+	overlayEntropy = entr;
+}
+
+/**
  * Add file flag descriptor
  * @param descriptor Descriptor (full description of flag)
  * @param abbreviation Abbreviation (short description of flag)
@@ -721,3 +703,4 @@ void FileHeader::clearDllFlagsDescriptors()
 }
 
 } // namespace fileinfo
+} // namespace retdec

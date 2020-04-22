@@ -9,7 +9,8 @@
 
 #include <string>
 
-#include <openssl/x509.h>
+// Forward declare OpenSSL structures used in this header.
+typedef struct x509_st X509;
 
 namespace retdec {
 namespace fileformat {
@@ -62,7 +63,6 @@ class Certificate
 		void calculateHashes();
 	public:
 		Certificate(X509 *cert);
-		~Certificate();
 
 		/// @name Getters
 		/// @{

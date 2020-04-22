@@ -8,6 +8,7 @@
 
 using namespace ELFIO;
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -16,14 +17,6 @@ namespace fileinfo {
  * @param loadFlags Load flags
  */
 ElfWrapper::ElfWrapper(std::string pathToFile, retdec::fileformat::LoadFlags loadFlags) : ElfFormat(pathToFile, loadFlags)
-{
-
-}
-
-/**
- * Destructor
- */
-ElfWrapper::~ElfWrapper()
 {
 
 }
@@ -99,3 +92,4 @@ ELFIO::relocation_section_accessor* ElfWrapper::getRelocationTable(unsigned long
 }
 
 } // namespace fileinfo
+} // namespace retdec

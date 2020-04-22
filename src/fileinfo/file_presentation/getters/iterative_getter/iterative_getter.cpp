@@ -6,6 +6,7 @@
 
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_getter.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -24,14 +25,6 @@ namespace fileinfo {
  * index of @a extraHeaderElements and @a numberOfExtraElements.
  */
 IterativeGetter::IterativeGetter(FileInformation &fileInfo) : fileinfo(fileInfo)
-{
-
-}
-
-/**
- * Destructor
- */
-IterativeGetter::~IterativeGetter()
 {
 
 }
@@ -139,3 +132,4 @@ bool IterativeGetter::hasBasicInfo(std::size_t structIndex) const
  */
 
 } // namespace fileinfo
+} // namespace retdec

@@ -13,6 +13,7 @@
 using namespace retdec::utils;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -39,14 +40,6 @@ ResourceJsonGetter::ResourceJsonGetter(FileInformation &fileInfo) : IterativeSub
 	commonHeaderElements.push_back("crc32");
 	commonHeaderElements.push_back("md5");
 	commonHeaderElements.push_back("sha256");
-}
-
-/**
- * Destructor
- */
-ResourceJsonGetter::~ResourceJsonGetter()
-{
-
 }
 
 std::size_t ResourceJsonGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const
@@ -132,3 +125,4 @@ bool ResourceJsonGetter::getFlags(std::size_t structIndex, std::size_t recIndex,
 }
 
 } // namespace fileinfo
+} // namespace retdec

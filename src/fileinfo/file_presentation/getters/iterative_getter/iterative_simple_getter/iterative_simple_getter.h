@@ -9,6 +9,7 @@
 
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_getter.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -23,7 +24,6 @@ class IterativeSimpleGetter : public IterativeGetter
 		std::string elementHeader; ///< header for every presented structure
 	public:
 		IterativeSimpleGetter(FileInformation &fileInfo);
-		virtual ~IterativeSimpleGetter() override;
 
 		/// @name Getters
 		/// @{
@@ -37,5 +37,6 @@ class IterativeSimpleGetter : public IterativeGetter
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

@@ -8,28 +8,8 @@
 
 #include "fileinfo/file_information/file_information_types/pattern/pattern_match.h"
 
+namespace retdec {
 namespace fileinfo {
-
-/**
- * Constructor
- */
-PatternMatch::PatternMatch() : offset(std::numeric_limits<unsigned long long>::max()),
-	address(std::numeric_limits<unsigned long long>::max()),
-	dataSize(std::numeric_limits<unsigned long long>::max()),
-	entrySize(std::numeric_limits<unsigned long long>::max()),
-	integer(false),
-	floatingPoint(false)
-{
-
-}
-
-/**
- * Destructor
- */
-PatternMatch::~PatternMatch()
-{
-
-}
 
 bool PatternMatch::isInteger() const
 {
@@ -118,3 +98,4 @@ void PatternMatch::setFloatingPoint()
 }
 
 } // namespace fileinfo
+} // namespace retdec

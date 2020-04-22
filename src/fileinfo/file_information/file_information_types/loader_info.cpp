@@ -8,6 +8,7 @@
 #include "fileinfo/file_information/file_information_types/loader_info.h"
 #include "fileinfo/file_information/file_information_types/type_conversions.h"
 
+namespace retdec {
 namespace fileinfo {
 
 LoadedSegment::LoadedSegment(unsigned long long index, std::string name, unsigned long long address, unsigned long long size)
@@ -24,11 +25,6 @@ LoadedSegment::LoadedSegment(const LoadedSegment& segment)
 
 LoadedSegment::LoadedSegment(LoadedSegment&& segment)
 	: _index(segment._index), _name(std::move(segment._name)), _address(segment._address), _size(segment._size)
-{
-
-}
-
-LoadedSegment::~LoadedSegment()
 {
 
 }
@@ -51,14 +47,6 @@ std::string LoadedSegment::getAddressStr(std::ios_base &(* format)(std::ios_base
 std::string LoadedSegment::getSizeStr(std::ios_base &(* format)(std::ios_base &)) const
 {
 	return getNumberAsString(_size, format);
-}
-
-LoaderInfo::LoaderInfo() : _baseAddress(0), _loadedSegments(), _statusMessage()
-{
-}
-
-LoaderInfo::~LoaderInfo()
-{
 }
 
 std::string LoaderInfo::getBaseAddressStr(std::ios_base &(* format)(std::ios_base &)) const
@@ -112,3 +100,4 @@ void LoaderInfo::addLoadedSegment(const LoadedSegment& segment)
 }
 
 } // namespace fileinfo
+} // namespace retdec

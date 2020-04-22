@@ -28,9 +28,6 @@ class Statement;
 */
 class NonRecursiveCFGBuilder: public CFGBuilder, private VisitorAdapter {
 public:
-	// It needs to be public so it can be called in ShPtr's destructor.
-	virtual ~NonRecursiveCFGBuilder() override;
-
 	virtual void buildCFG() override;
 
 	static ShPtr<NonRecursiveCFGBuilder> create();

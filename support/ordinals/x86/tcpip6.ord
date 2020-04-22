@@ -1,0 +1,10 @@
+1 AdjustPacketBuffer
+2 CreateInterface
+3 DestroyInterface
+4 IPv6Receive
+5 IPv6ReceiveComplete
+6 IPv6SendComplete
+7 ReleaseInterface
+8 RestartLinkLayerMulticast
+9 SetInterfaceLinkStatus
+10 UndoAdjustPacketBuffer

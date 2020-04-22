@@ -28,11 +28,6 @@ bool isConstIntOne(ShPtr<Expression> operand) {
 */
 CCompoundOpManager::CCompoundOpManager(): CompoundOpManager() {}
 
-/**
-* @brief Destructor.
-*/
-CCompoundOpManager::~CCompoundOpManager() {}
-
 std::string CCompoundOpManager::getId() const {
 	return "CCompoundOpManager";
 }

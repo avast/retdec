@@ -20,7 +20,7 @@ class ResourceIconGroup : public Resource
 {
 	private:
 		std::vector<ResourceIcon *> icons;  ///< stored icons
-		size_t iconGroupID;                 ///< icon group id
+		size_t iconGroupID = 0;             ///< icon group id
 
 		/// @name Auxiliary methods
 		/// @{
@@ -28,9 +28,6 @@ class ResourceIconGroup : public Resource
 		/// @}
 
 	public:
-		ResourceIconGroup();
-		~ResourceIconGroup();
-
 		/// @name Getters
 		/// @{
 		std::size_t getNumberOfIcons() const;

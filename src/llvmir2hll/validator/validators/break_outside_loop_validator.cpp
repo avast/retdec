@@ -20,16 +20,6 @@ REGISTER_AT_FACTORY("BreakOutsideLoop", BREAK_OUTSIDE_LOOP_VALIDATOR_ID, Validat
 	BreakOutsideLoopValidator::create);
 
 /**
-* @brief Constructs a new validator.
-*/
-BreakOutsideLoopValidator::BreakOutsideLoopValidator(): Validator() {}
-
-/**
-* @brief Destructs the validator.
-*/
-BreakOutsideLoopValidator::~BreakOutsideLoopValidator() {}
-
-/**
 * @brief Creates a new validator.
 */
 ShPtr<Validator> BreakOutsideLoopValidator::create() {

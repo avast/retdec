@@ -61,6 +61,7 @@ public:
 	virtual std::string comesFromGlobalVar(const std::string &func,
 		const std::string &var) const override;
 	virtual std::string getRegisterForGlobalVar(const std::string &var) const override;
+	virtual Address getAddressForGlobalVar(const std::string &var) const override;
 	virtual std::string getDetectedCryptoPatternForGlobalVar(const std::string &var) const override;
 	/// @}
 
@@ -69,6 +70,7 @@ public:
 	virtual std::string getRealNameForFunc(const std::string &func) const override;
 	virtual AddressRange getAddressRangeForFunc(const std::string &func) const override;
 	virtual LineRange getLineRangeForFunc(const std::string &func) const override;
+	virtual bool isDecompilerDefinedFunc(const std::string &func) const override;
 	virtual bool isUserDefinedFunc(const std::string &func) const override;
 	virtual bool isStaticallyLinkedFunc(const std::string &func) const override;
 	virtual bool isDynamicallyLinkedFunc(const std::string &func) const override;
@@ -81,7 +83,6 @@ public:
 	virtual StringSet getDetectedCryptoPatternsForFunc(const std::string &func) const override;
 	virtual std::string getWrappedFunc(const std::string &func) const override;
 	virtual std::string getDemangledNameOfFunc(const std::string &func) const override;
-	virtual StringSet getFuncsFixedWithLLVMIRFixer() const override;
 	/// @}
 
 	/// @name Classes

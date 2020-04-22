@@ -1,4 +1,5 @@
-set(FILEINFO_SOURCES
+
+add_executable(fileinfo
 	file_detector/coff_detector.cpp
 	file_detector/detector_factory.cpp
 	file_detector/elf_detector.cpp
@@ -34,10 +35,13 @@ set(FILEINFO_SOURCES
 	file_information/file_information_types/strings.cpp
 	file_information/file_information_types/symbol_table/symbol.cpp
 	file_information/file_information_types/symbol_table/symbol_table.cpp
+	file_information/file_information_types/tls_info.cpp
 	file_information/file_information_types/type_conversions.cpp
+	file_information/file_information_types/visual_basic_info.cpp
 	file_presentation/config_presentation.cpp
 	file_presentation/file_presentation.cpp
 	file_presentation/getters/format.cpp
+	file_presentation/getters/iterative_getter/iterative_distribution_getter/anomalies_plain_getter.cpp
 	file_presentation/getters/iterative_getter/iterative_distribution_getter/data_directory_plain_getter.cpp
 	file_presentation/getters/iterative_getter/iterative_distribution_getter/dynamic_sections_plain_getter.cpp
 	file_presentation/getters/iterative_getter/iterative_distribution_getter/export_table_plain_getter.cpp
@@ -46,6 +50,7 @@ set(FILEINFO_SOURCES
 	file_presentation/getters/iterative_getter/iterative_distribution_getter/elf_notes_plain_getter.cpp
 	file_presentation/getters/iterative_getter/iterative_distribution_getter/import_table_plain_getter.cpp
 	file_presentation/getters/iterative_getter/iterative_distribution_getter/iterative_distribution_getter.cpp
+	file_presentation/getters/iterative_getter/iterative_distribution_getter/missing_deps_plain_getter.cpp
 	file_presentation/getters/iterative_getter/iterative_distribution_getter/loader_info_plain_getter.cpp
 	file_presentation/getters/iterative_getter/iterative_distribution_getter/pattern_matches_plain_getter.cpp
 	file_presentation/getters/iterative_getter/iterative_distribution_getter/relocation_tables_plain_getter.cpp
@@ -55,16 +60,21 @@ set(FILEINFO_SOURCES
 	file_presentation/getters/iterative_getter/iterative_distribution_getter/segment_plain_getter.cpp
 	file_presentation/getters/iterative_getter/iterative_distribution_getter/strings_plain_getter.cpp
 	file_presentation/getters/iterative_getter/iterative_distribution_getter/symbol_tables_plain_getter.cpp
+	file_presentation/getters/iterative_getter/iterative_distribution_getter/tls_info_plain_getter.cpp
 	file_presentation/getters/iterative_getter/iterative_distribution_getter/typeref_table_plain_getter.cpp
+	file_presentation/getters/iterative_getter/iterative_distribution_getter/version_info_language_table_plain_getter.cpp
+	file_presentation/getters/iterative_getter/iterative_distribution_getter/version_info_string_table_plain_getter.cpp
+	file_presentation/getters/iterative_getter/iterative_distribution_getter/visual_basic_extern_table_plain_getter.cpp
 	file_presentation/getters/iterative_getter/iterative_getter.cpp
 	file_presentation/getters/iterative_getter/iterative_simple_getter/certificate_table_plain_getter.cpp
 	file_presentation/getters/iterative_getter/iterative_simple_getter/iterative_simple_getter.cpp
-	file_presentation/getters/iterative_getter/iterative_subtitle_getter/certificate_table_json_getter.cpp
+	file_presentation/getters/iterative_getter/iterative_subtitle_getter/anomalies_json_getter.cpp
 	file_presentation/getters/iterative_getter/iterative_subtitle_getter/data_directory_json_getter.cpp
 	file_presentation/getters/iterative_getter/iterative_subtitle_getter/dynamic_sections_json_getter.cpp
 	file_presentation/getters/iterative_getter/iterative_subtitle_getter/export_table_json_getter.cpp
 	file_presentation/getters/iterative_getter/iterative_subtitle_getter/import_table_json_getter.cpp
 	file_presentation/getters/iterative_getter/iterative_subtitle_getter/iterative_subtitle_getter.cpp
+	file_presentation/getters/iterative_getter/iterative_subtitle_getter/missing_deps_json_getter.cpp
 	file_presentation/getters/iterative_getter/iterative_subtitle_getter/loader_info_json_getter.cpp
 	file_presentation/getters/iterative_getter/iterative_subtitle_getter/relocation_tables_json_getter.cpp
 	file_presentation/getters/iterative_getter/iterative_subtitle_getter/resource_json_getter.cpp
@@ -77,8 +87,8 @@ set(FILEINFO_SOURCES
 	file_presentation/getters/pattern_config_getter/pattern_config_getter.cpp
 	file_presentation/getters/simple_getter/basic_json_getter.cpp
 	file_presentation/getters/simple_getter/basic_plain_getter.cpp
-	file_presentation/getters/simple_getter/dotnet_json_getter.cpp
 	file_presentation/getters/simple_getter/dotnet_plain_getter.cpp
+	file_presentation/getters/simple_getter/visual_basic_plain_getter.cpp
 	file_presentation/getters/simple_getter/entry_point_json_getter.cpp
 	file_presentation/getters/simple_getter/header_json_getter.cpp
 	file_presentation/getters/simple_getter/header_plain_getter.cpp
@@ -98,7 +108,32 @@ set(FILEINFO_SOURCES
 	pattern_detector/pattern_detector.cpp
 )
 
-add_executable(retdec-fileinfo ${FILEINFO_SOURCES})
-target_link_libraries(retdec-fileinfo retdec-loader retdec-ar-extractor retdec-fileformat retdec-cpdetect yaracpp retdec-utils retdec-config jsoncpp tinyxml2)
-target_include_directories(retdec-fileinfo PUBLIC ${PROJECT_SOURCE_DIR}/src/)
-install(TARGETS retdec-fileinfo RUNTIME DESTINATION bin)
+target_compile_features(fileinfo PUBLIC cxx_std_17)
+
+target_include_directories(fileinfo
+	PRIVATE
+		${RETDEC_SOURCE_DIR}
+)
+
+target_link_libraries(fileinfo
+	retdec::loader
+	retdec::ar-extractor
+	retdec::fileformat
+	retdec::cpdetect
+	retdec::yaracpp
+	retdec::utils
+	retdec::common
+	retdec::config
+	retdec::serdes
+	retdec::deps::rapidjson
+	retdec::deps::tinyxml2
+)
+
+set_target_properties(fileinfo
+	PROPERTIES
+		OUTPUT_NAME "retdec-fileinfo"
+)
+
+install(TARGETS fileinfo
+	RUNTIME DESTINATION ${RETDEC_INSTALL_BIN_DIR}
+)

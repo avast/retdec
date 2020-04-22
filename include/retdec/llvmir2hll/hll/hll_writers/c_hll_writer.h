@@ -20,6 +20,7 @@ namespace llvmir2hll {
 class BracketManager;
 class CastExpr;
 class CompoundOpManager;
+class OutputManager;
 class StructType;
 
 /**
@@ -30,7 +31,9 @@ class StructType;
 */
 class CHLLWriter: public HLLWriter {
 public:
-	static ShPtr<HLLWriter> create(llvm::raw_ostream &out);
+	static ShPtr<HLLWriter> create(
+		llvm::raw_ostream &out,
+		const std::string& outputFormat = "");
 
 	virtual std::string getId() const override;
 
@@ -44,7 +47,9 @@ private:
 	using StructTypeNameMap = std::map<ShPtr<StructType>, std::string>;
 
 private:
-	CHLLWriter(llvm::raw_ostream &out);
+	CHLLWriter(
+		llvm::raw_ostream &out,
+		const std::string& outputFormat = "");
 
 	virtual std::string getCommentPrefix() override;
 	virtual bool emitFileHeader() override;
@@ -167,7 +172,8 @@ private:
 	void emitGlobalDirectives(ShPtr<Function> func);
 	void emitDebugComment(std::string comment, bool indent = true);
 	void emitGotoLabelIfNeeded(ShPtr<Statement> stmt);
-	void emitConstFloatSuffixIfNeeded(ShPtr<ConstFloat> constant);
+
+	std::string getConstFloatSuffixIfNeeded(ShPtr<ConstFloat> constant);
 	std::string genNameForUnnamedStruct(const StructTypeVector &usedStructTypes);
 
 private:

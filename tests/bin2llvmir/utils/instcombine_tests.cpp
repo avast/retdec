@@ -10,6 +10,7 @@
 
 #include <llvm/Transforms/InstCombine/InstCombine.h>
 
+#include "retdec/bin2llvmir/optimizations/inst_opt/inst_opt_pass.h"
 #include "retdec/bin2llvmir/optimizations/unreachable_funcs/unreachable_funcs.h"
 #include "bin2llvmir/utils/llvmir_tests.h"
 
@@ -29,6 +30,8 @@ class InstCombinePassTests: public LlvmIrTests
 		void runOnModule()
 		{
 			LlvmIrTests::runOnModule<InstructionCombiningPass>();
+			// This pass counters some undesirable LLVM optimizations.
+			LlvmIrTests::runOnModule<InstructionOptimizer>();
 		}
 };
 
@@ -226,6 +229,94 @@ TEST_F(InstCombinePassTests, unreachableBasicBlocksRemove)
 		}
 
 		!0 = !{!"name", i64 123, i64 10, !"asm", !"annotation"}
+	)";
+	checkModuleAgainstExpectedIr(exp);
+}
+
+TEST_F(InstCombinePassTests, undesirableStoreOptimizatonIsNotPerformed)
+{
+	parseInput(R"(
+		@g = global i32 0
+
+		declare double @func()
+
+		define i32 @main(i32 %argc, i8** %argv) {
+			%func_res = call double @func()
+			%1 = fptrunc double %func_res to float
+			%2 = bitcast float %1 to i32
+			store i32 %2, i32* @g
+			ret i32 0
+		}
+	)");
+
+	runOnModule();
+
+	std::string exp = R"(
+		@g = global i32 0
+
+		declare double @func()
+
+		define i32 @main(i32 %argc, i8** %argv) {
+			%func_res = call double @func()
+			%1 = fptrunc double %func_res to float
+			%2 = bitcast float %1 to i32
+			store i32 %2, i32* @g
+			ret i32 0
+		}
+	)";
+	checkModuleAgainstExpectedIr(exp);
+}
+
+TEST_F(InstCombinePassTests, undesirableLoadOptimizatonIsNotPerformed_1)
+{
+	parseInput(R"(
+		@g = global i32 0
+
+		define float @func() {
+			%1 = load i32, i32* @g, align 4
+			%2 = bitcast i32 %1 to float
+			ret float %2
+		}
+	)");
+
+	runOnModule();
+
+	std::string exp = R"(
+		@g = global i32 0
+
+		define float @func() {
+			%1 = load i32, i32* @g, align 4
+			%2 = bitcast i32 %1 to float
+			ret float %2
+		}
+	)";
+	checkModuleAgainstExpectedIr(exp);
+}
+
+TEST_F(InstCombinePassTests, undesirableLoadOptimizatonIsNotPerformed_2)
+{
+	parseInput(R"(
+		@g = global i32 0
+
+		define i8 @func() {
+			%1 = load i32, i32* @g, align 4
+			%2 = inttoptr i32 %1 to i8*
+			%3 = load i8, i8* %2, align 1
+			ret i8 %3
+		}
+	)");
+
+	runOnModule();
+
+	std::string exp = R"(
+		@g = global i32 0
+
+		define i8 @func() {
+			%1 = load i32, i32* @g, align 4
+			%2 = inttoptr i32 %1 to i8*
+			%3 = load i8, i8* %2, align 1
+			ret i8 %3
+		}
 	)";
 	checkModuleAgainstExpectedIr(exp);
 }

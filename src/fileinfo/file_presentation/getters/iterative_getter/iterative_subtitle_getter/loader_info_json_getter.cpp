@@ -12,6 +12,7 @@
 
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -28,14 +29,6 @@ LoaderInfoJsonGetter::LoaderInfoJsonGetter(FileInformation &fileInfo) : Iterativ
 	commonHeaderElements.push_back("name");
 	commonHeaderElements.push_back("address");
 	commonHeaderElements.push_back("size");
-}
-
-/**
- * Destructor
- */
-LoaderInfoJsonGetter::~LoaderInfoJsonGetter()
-{
-
 }
 
 std::size_t LoaderInfoJsonGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const
@@ -82,3 +75,4 @@ bool LoaderInfoJsonGetter::getFlags(std::size_t structIndex, std::size_t recInde
 }
 
 } // namespace fileinfo
+} // namespace retdec

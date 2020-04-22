@@ -8,9 +8,10 @@
 #include "retdec/bin2llvmir/utils/capstone.h"
 #include "retdec/utils/string.h"
 
-using namespace retdec::utils;
-using namespace retdec::capstone2llvmir;
 using namespace llvm;
+using namespace retdec::bin2llvmir::st_match;
+using namespace retdec::capstone2llvmir;
+using namespace retdec::common;
 
 namespace retdec {
 namespace bin2llvmir {
@@ -151,7 +152,7 @@ void Decoder::initializeGpReg_mips()
 		return;
 	}
 
-	if (auto* gp = _module->getNamedGlobal("gp"))
+	if (auto* gp = _abi->getRegister(MIPS_REG_GP))
 	{
 		Address lastAddr;
 		StoreInst* lastStore = nullptr;
@@ -171,9 +172,11 @@ void Decoder::initializeGpReg_mips()
 
 		if (lastStore)
 		{
-			SymbolicTree root(_RDA, lastStore->getValueOperand());
+			auto root = SymbolicTree::OnDemandRda(lastStore->getValueOperand());
 			root.simplifyNode();
-			if (auto* ci = dyn_cast_or_null<ConstantInt>(root.value))
+
+			ConstantInt* ci = nullptr;
+			if (match(root, m_ConstantInt(ci)))
 			{
 				gp->setInitializer(ci);
 			}

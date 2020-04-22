@@ -1,0 +1,6 @@
+1 UPSCancelWait
+2 UPSGetState
+3 UPSInit
+4 UPSStop
+5 UPSTurnOff
+6 UPSWaitForStateChange

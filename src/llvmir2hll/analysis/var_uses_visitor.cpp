@@ -46,11 +46,6 @@ VarUsesVisitor::VarUsesVisitor(ShPtr<ValueAnalysis> va,
 	precomputingHasBeenDone(false), cachingEnabled(enableCaching), cache() {}
 
 /**
-* @brief Destructs the provider.
-*/
-VarUsesVisitor::~VarUsesVisitor() {}
-
-/**
 * @brief Returns @c true if @a var is used in @a func, @c false otherwise.
 *
 * @param[in] var Variable whose uses are obtained.

@@ -12,22 +12,6 @@ namespace retdec {
 namespace fileformat {
 
 /**
- * Constructor
- */
-PdbInfo::PdbInfo() : age(0), timeStamp(0)
-{
-
-}
-
-/**
- * Destructor
- */
-PdbInfo::~PdbInfo()
-{
-
-}
-
-/**
  * Get type of PDB file
  * @return Type of PDB file
  */

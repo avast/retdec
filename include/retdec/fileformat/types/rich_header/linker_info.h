@@ -7,6 +7,8 @@
 #ifndef RETDEC_FILEFORMAT_TYPES_RICH_HEADER_LINKER_INFO_H
 #define RETDEC_FILEFORMAT_TYPES_RICH_HEADER_LINKER_INFO_H
 
+#include <string>
+
 namespace retdec {
 namespace fileformat {
 
@@ -16,28 +18,28 @@ namespace fileformat {
 class LinkerInfo
 {
 	private:
-		unsigned long long majorVersion; ///< major version of linker
-		unsigned long long minorVersion; ///< minor version of linker
-		unsigned long long buildVersion; ///< build version
-		unsigned long long count;        ///< number of uses
+		uint32_t productId = 0;    ///< Product ID from the RichHeader
+		uint32_t productBuild = 0; ///< Product Build from the RichHeader
+		uint32_t count = 0;        ///< number of uses
+		std::string productName;        ///< Product codename
+		std::string visualStudioName;   ///< Product codename
 	public:
-		LinkerInfo();
-		~LinkerInfo();
-
 		/// @name Getters
 		/// @{
-		unsigned long long getMajorVersion() const;
-		unsigned long long getMinorVersion() const;
-		unsigned long long getBuildVersion() const;
-		unsigned long long getNumberOfUses() const;
+		uint32_t getProductId() const;
+		uint32_t getProductBuild() const;
+		uint32_t getNumberOfUses() const;
+		std::string getProductName() const;
+		std::string getVisualStudioName() const;
 		/// @}
 
 		/// @name Setters
 		/// @{
-		void setMajorVersion(unsigned long long linkerMajorVersion);
-		void setMinorVersion(unsigned long long linkerMinorVersion);
-		void setBuildVersion(unsigned long long linkerBuildVersion);
-		void setNumberOfUses(unsigned long long linkerCount);
+		void setProductId(uint32_t richProductId);
+		void setProductBuild(uint32_t richProductBuild);
+		void setNumberOfUses(uint32_t richProductCount);
+		void setProductName(const std::string & richProductName);
+		void setVisualStudioName(const std::string & richVisualStudioName);
 		/// @}
 };
 

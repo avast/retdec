@@ -23,8 +23,6 @@ public:
 	Nrv2bData(const DynamicBuffer& buffer, BitParser* bitParser);
 	Nrv2bData(const Nrv2bData&) = delete;
 
-	virtual ~Nrv2bData() override;
-
 	virtual bool decompress(DynamicBuffer& outputBuffer) override;
 
 private:

@@ -9,15 +9,5 @@
 namespace retdec {
 namespace ctypes {
 
-/**
-* @brief Constructs a new visitor.
-*/
-Visitor::Visitor() = default;
-
-/**
-* @brief Destructs the visitor.
-*/
-Visitor::~Visitor() = default;
-
 } // namespace ctypes
 } // namespace retdec

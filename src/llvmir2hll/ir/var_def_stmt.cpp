@@ -18,16 +18,12 @@ namespace llvmir2hll {
 *
 * See create() for more information.
 */
-VarDefStmt::VarDefStmt(ShPtr<Variable> var, ShPtr<Expression> init):
-	var(var), init(init) {}
-
-/**
-* @brief Destructs the statement.
-*/
-VarDefStmt::~VarDefStmt() {}
+VarDefStmt::VarDefStmt(ShPtr<Variable> var, ShPtr<Expression> init, Address a):
+	Statement(a), var(var), init(init) {}
 
 ShPtr<Value> VarDefStmt::clone() {
-	ShPtr<VarDefStmt> varDefStmt(VarDefStmt::create(ucast<Variable>(var->clone())));
+	ShPtr<VarDefStmt> varDefStmt(VarDefStmt::create(ucast<Variable>(var->clone()),
+		nullptr, nullptr, getAddress()));
 	varDefStmt->setMetadata(getMetadata());
 	if (init) {
 		varDefStmt->setInitializer(ucast<Expression>(init->clone()));
@@ -128,15 +124,16 @@ void VarDefStmt::removeInitializer() {
 * @param[in] var Variable to be defined.
 * @param[in] init Initializer of @a var.
 * @param[in] succ Follower of the statement in the program flow.
+* @param[in] a Address.
 *
 * @par Preconditions
 *  - @a var is non-null
 */
-ShPtr<VarDefStmt> VarDefStmt::create(ShPtr<Variable> var, ShPtr<Expression> init,
-		ShPtr<Statement> succ) {
+ShPtr<VarDefStmt> VarDefStmt::create(ShPtr<Variable> var,
+		ShPtr<Expression> init, ShPtr<Statement> succ, Address a) {
 	PRECONDITION_NON_NULL(var);
 
-	ShPtr<VarDefStmt> stmt(new VarDefStmt(var, init));
+	ShPtr<VarDefStmt> stmt(new VarDefStmt(var, init, a));
 	stmt->setSuccessor(succ);
 
 	// Initialization (recall that shared_from_this() cannot be called in a

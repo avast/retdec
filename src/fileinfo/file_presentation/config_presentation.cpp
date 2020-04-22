@@ -14,6 +14,7 @@ using namespace retdec::utils;
 using namespace retdec::cpdetect;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -86,7 +87,7 @@ void ConfigPresentation::presentCompiler()
 			heuristics = true;
 		}
 
-		ToolInfo ci;
+		retdec::common::ToolInfo ci;
 		ci.setName(toLower(detectedTool.name));
 		ci.setType(toLower(toolTypeToString(detectedTool.type)));
 		ci.setVersion(toLower(detectedTool.versionInfo));
@@ -105,7 +106,7 @@ void ConfigPresentation::presentCompiler()
 		ci.setTotalSignificantNibbles(detectedTool.impCount);
 		ci.setIsFromHeuristics(heuristics);
 
-		outDoc.tools.insert(ci);
+		outDoc.tools.push_back(ci);
 	}
 }
 
@@ -123,7 +124,7 @@ void ConfigPresentation::presentLanguages()
 
 	for(std::size_t i = 0; i < noOfLanguages; ++i)
 	{
-		Language l(fileinfo.toolInfo.detectedLanguages[i].name);
+		retdec::common::Language l(fileinfo.toolInfo.detectedLanguages[i].name);
 		l.setIsBytecode(fileinfo.toolInfo.detectedLanguages[i].bytecode);
 
 		outDoc.languages.insert(l);
@@ -254,3 +255,4 @@ std::string ConfigPresentation::getErrorMessage() const
 }
 
 } // namespace fileinfo
+} // namespace retdec

@@ -36,7 +36,7 @@ class CallInfo: private retdec::utils::NonCopyable {
 
 public:
 	// It needs to be public so it can be called in ShPtr's destructor.
-	virtual ~CallInfo() = 0;
+	virtual ~CallInfo() = default;
 
 	ShPtr<CallExpr> getCall() const;
 
@@ -121,7 +121,7 @@ class FuncInfo: private retdec::utils::NonCopyable {
 
 public:
 	// It needs to be public so it can be called in ShPtr's destructor.
-	virtual ~FuncInfo() = 0;
+	virtual ~FuncInfo() = default;
 
 	ShPtr<Function> getFunc() const;
 
@@ -217,7 +217,7 @@ protected:
 class CallInfoObtainer: public SharableFromThis<CallInfoObtainer>,
 	private retdec::utils::NonCopyable {
 public:
-	virtual ~CallInfoObtainer() = 0;
+	virtual ~CallInfoObtainer() = default;
 
 	ShPtr<CG> getCG() const;
 	ShPtr<CFG> getCFGForFunc(ShPtr<Function> func) const;
@@ -251,8 +251,8 @@ public:
 	virtual ShPtr<FuncInfo> getFuncInfo(ShPtr<Function> func) = 0;
 
 protected:
-	/// Set of sets of functions.
-	using FuncSetSet = std::set<FuncSet>;
+	/// Vector of sets of functions.
+	using FuncVectorSet = std::vector<FuncSet>;
 
 	/**
 	* @brief Represents an order in which FuncInfos should be computed.
@@ -277,10 +277,10 @@ protected:
 	*
 	* It means that the concrete obtainer should first compute the FuncInfo for
 	* 5, then for 4, then for the strongly connected component (SCC, see
-	* http://en.wikipedia.org/wiki/Strongly_connected_component) which contain
-	* 3, and then for 6. Note that in @c order, instead of 3, there may be 2 or
-	* 1 (since all of them form an SCC, it doesn't matter which of them appears
-	* in @c order).
+	* http://en.wikipedia.org/wiki/Strongly_connected_component) which contains
+	* 1, 2, and 3, and then for 6. Note that in @c order, instead of 3, there
+	* may be 2 or 1 (since all of them form an SCC, it doesn't matter which of
+	* them appears in @c order).
 	*
 	* A single function is not considered to be an SCC unless it contains a
 	* call to itself.
@@ -297,7 +297,7 @@ protected:
 		FuncVector order;
 
 		/// SCCs in the call graph.
-		FuncSetSet sccs;
+		FuncVectorSet sccs;
 	};
 
 	/// Mapping of a function into its CFG.
@@ -340,9 +340,23 @@ private:
 	*/
 	class SCCComputer: private retdec::utils::NonCopyable {
 	public:
-		~SCCComputer();
-
-		static FuncSetSet computeSCCs(ShPtr<CG> cg);
+		// We use a vector of function sets because:
+		//
+		// 1. Tarjan's algorithm outputs SCCs in a topological order
+		// that we want to maintain.  That is trivial to do if we
+		// add them to the vector in that order.
+		//
+		// 2. It also only creates each SCC once so we don't have to
+		// worry about duplicates.
+		//
+		// 3. Using sets of sets causes non-determinism because it is
+		// comparing sets of pointers against sets of pointers.
+		//
+		// 4. Each insertion of an function set (SCC) into the SCC set
+		// requires Log N comparisons each possibly taking O(N) time due
+		// to how operator < is defined on std::set (lexicographic
+		// compare).
+		static FuncVectorSet computeSCCs(ShPtr<CG> cg);
 
 	private:
 		/// Stack of CalledFuncs.
@@ -366,7 +380,7 @@ private:
 		SCCComputer(ShPtr<CG> cg);
 		void visit(ShPtr<CG::CalledFuncs> calledFunc,
 			CalledFuncInfo &calledFuncInfo);
-		FuncSetSet findSCCs();
+		FuncVectorSet findSCCs();
 
 	private:
 		/// Call graph of the current module.
@@ -376,7 +390,7 @@ private:
 		int index;
 
 		/// The set of computed SCCs.
-		FuncSetSet sccs;
+		FuncVectorSet sccs;
 
 		/// The currently computed SCC.
 		FuncSet currentSCC;
@@ -400,10 +414,10 @@ private:
 	};
 
 private:
-	FuncSetSet computeSCCs();
+	FuncVectorSet computeSCCs();
 	bool callsJustComputedFuncs(ShPtr<Function> func,
 		const FuncSet &computedFuncs) const;
-	SCCWithRepresent findNextSCC(const FuncSetSet &sccs,
+	SCCWithRepresent findNextSCC(const FuncVectorSet &sccs,
 		const FuncSet &computedFuncs, const FuncSet &remainingFuncs) const;
 };
 

@@ -36,11 +36,6 @@ IfBeforeLoopOptimizer::IfBeforeLoopOptimizer(ShPtr<Module> module,
 		PRECONDITION_NON_NULL(va);
 	}
 
-/**
-* @brief Destructs the optimizer.
-*/
-IfBeforeLoopOptimizer::~IfBeforeLoopOptimizer() {}
-
 void IfBeforeLoopOptimizer::doOptimization() {
 	if (!va->isInValidState()) {
 		va->clearCache();
@@ -161,7 +156,8 @@ bool IfBeforeLoopOptimizer::tryOptimizationCase1(ShPtr<IfStmt> stmt) {
 	// Attach the if's metadata to forLoop (if any). However, put them in an
 	// empty statement because there could already be some existing metadata.
 	if (!ifStmtMetadata.empty()) {
-		ShPtr<EmptyStmt> emptyStmt(EmptyStmt::create());
+		ShPtr<EmptyStmt> emptyStmt(
+			EmptyStmt::create(nullptr, ifStmtReplacement->getAddress()));
 		emptyStmt->setMetadata(ifStmtMetadata);
 		ifStmtReplacement->prependStatement(emptyStmt);
 	}

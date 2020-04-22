@@ -6,23 +6,8 @@
 
 #include "fileinfo/file_information/file_information_types/certificate_table.h"
 
+namespace retdec {
 namespace fileinfo {
-
-/**
- * Constructor
- */
-CertificateTable::CertificateTable() : table(nullptr)
-{
-
-}
-
-/**
- * Destructor
- */
-CertificateTable::~CertificateTable()
-{
-
-}
 
 /**
  * Get number of certificates in table
@@ -529,3 +514,4 @@ bool CertificateTable::hasCounterSignerCertificate() const
 }
 
 } // namespace fileinfo
+} // namespace retdec

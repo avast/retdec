@@ -23,11 +23,6 @@ VariableReplacer::VariableReplacer(ShPtr<Variable> oldVar, ShPtr<Variable> newVa
 	OrderedAllVisitor(), oldVar(oldVar), newVar(newVar) {}
 
 /**
-* @brief Destructs the replacer.
-*/
-VariableReplacer::~VariableReplacer() {}
-
-/**
 * @brief Replaces @a oldVar with @a newVar in @a func.
 */
 void VariableReplacer::replaceVariable(ShPtr<Variable> oldVar,

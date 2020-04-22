@@ -7,6 +7,7 @@
 #include "fileinfo/file_information/file_information_types/dotnet_info.h"
 #include "fileinfo/file_information/file_information_types/type_conversions.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -496,3 +497,4 @@ bool DotnetInfo::hasImportedClassListRecords() const
 }
 
 } // namespace fileinfo
+} // namespace retdec

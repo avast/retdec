@@ -27,11 +27,6 @@ EmptyArrayToStringOptimizer::EmptyArrayToStringOptimizer(ShPtr<Module> module):
 		PRECONDITION_NON_NULL(module);
 	}
 
-/**
-* @brief Destructs the optimizer.
-*/
-EmptyArrayToStringOptimizer::~EmptyArrayToStringOptimizer() {}
-
 void EmptyArrayToStringOptimizer::doOptimization() {
 	// For each global variable in the module...
 	for (auto i = module->global_var_begin(), e = module->global_var_end();

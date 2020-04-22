@@ -121,7 +121,6 @@ private:
 
 public:
 	BracketManager(ShPtr<Module> module);
-	virtual ~BracketManager() override;
 
 	void init();
 

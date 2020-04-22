@@ -6,6 +6,7 @@
 
 #include <cstdlib>
 #include <ctime>
+#include <regex>
 #include <string>
 
 #include <gtest/gtest.h>
@@ -81,7 +82,9 @@ private:
 
 TEST_F(TimeTests,
 CorrectTimestampToDateConversion) {
-	EXPECT_EQ("2015-08-05 14:25:19", timestampToDate(std::time_t(1438784719)));
+	EXPECT_TRUE(std::regex_match(
+			timestampToDate(std::time_t(1438784719)),
+			std::regex("2015-08-05T14:25:19[-+][0-9]{4}")));
 }
 
 } // namespace tests

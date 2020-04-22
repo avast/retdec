@@ -9,6 +9,7 @@
 
 #include "retdec/fileformat/types/certificate_table/certificate_table.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -17,11 +18,8 @@ namespace fileinfo {
 class CertificateTable
 {
 	private:
-		const retdec::fileformat::CertificateTable *table;
+		const retdec::fileformat::CertificateTable *table = nullptr;
 	public:
-		CertificateTable();
-		~CertificateTable();
-
 		/// @name Getters
 		/// @{
 		std::size_t getNumberOfCertificates() const;
@@ -83,5 +81,6 @@ class CertificateTable
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

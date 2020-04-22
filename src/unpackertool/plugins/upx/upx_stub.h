@@ -11,8 +11,10 @@
 
 #include "retdec/loader/loader.h"
 #include "retdec/unpacker/plugin.h"
-#include "retdec/unpacker/dynamic_buffer.h"
+#include "retdec/utils/dynamic_buffer.h"
 #include "retdec/unpacker/unpacking_stub.h"
+
+using namespace retdec::utils;
 
 namespace retdec {
 
@@ -64,7 +66,7 @@ public:
 	UpxMetadata(const UpxMetadata& metadata);
 
 	static UpxMetadata read(retdec::loader::Image* file);
-	static std::uint8_t calcChecksum(const retdec::unpacker::DynamicBuffer& data);
+	static std::uint8_t calcChecksum(const DynamicBuffer& data);
 	static std::uint32_t getSizeOfVersion(std::uint8_t version);
 
 	UpxStubVersion getStubVersion() const;
@@ -108,34 +110,32 @@ private:
 class UpxStub : public retdec::unpacker::UnpackingStub
 {
 public:
-	UpxStub(retdec::loader::Image* inputFile, const UpxStubData* stubData, const retdec::unpacker::DynamicBuffer& stubCapturedData,
+	UpxStub(retdec::loader::Image* inputFile, const UpxStubData* stubData, const DynamicBuffer& stubCapturedData,
 			std::unique_ptr<Decompressor> decompressor, const UpxMetadata& metadata);
 
-	virtual ~UpxStub() override;
-
 	static std::shared_ptr<UpxStub> createStub(retdec::loader::Image* file);
-	static std::shared_ptr<UpxStub> createStub(retdec::loader::Image* file, const retdec::unpacker::DynamicBuffer& stubBytes);
+	static std::shared_ptr<UpxStub> createStub(retdec::loader::Image* file, const DynamicBuffer& stubBytes);
 
 	UpxStubVersion getVersion() const;
 	const UpxStubData* getStubData() const;
-	const retdec::unpacker::DynamicBuffer* getStubCapturedData() const;
+	const DynamicBuffer* getStubCapturedData() const;
 	Decompressor* getDecompressor() const;
 	const UpxMetadata* getUpxMetadata() const;
 	virtual std::uint32_t getRealEpAddress() const;
 
 	void setStubData(const UpxStubData* stubData);
-	void setStubCapturedData(const retdec::unpacker::DynamicBuffer& stubCapturedData);
+	void setStubCapturedData(const DynamicBuffer& stubCapturedData);
 
 protected:
 	std::unique_ptr<Decompressor> decodePackingMethod(std::uint8_t packingMethod) const;
 
 	const UpxStubData* _stubData;                ///< Additional stub information.
-	retdec::unpacker::DynamicBuffer _stubCapturedData;  ///< Data captured while matching signature of this stub.
+	DynamicBuffer _stubCapturedData;  ///< Data captured while matching signature of this stub.
 	std::unique_ptr<Decompressor> _decompressor; ///< Decompressor associated with stub.
 	UpxMetadata _metadata;                       ///< UPX metadata aka packheader.
 
 private:
-	static std::shared_ptr<UpxStub> _createStubImpl(retdec::loader::Image* file, const retdec::unpacker::DynamicBuffer* stubBytes);
+	static std::shared_ptr<UpxStub> _createStubImpl(retdec::loader::Image* file, const DynamicBuffer* stubBytes);
 };
 
 } // namespace upx

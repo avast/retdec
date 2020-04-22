@@ -43,20 +43,32 @@ class ElfImage : public Image
 
 public:
 	ElfImage(const std::shared_ptr<retdec::fileformat::FileFormat>& fileFormat);
-	virtual ~ElfImage();
 
 	virtual bool load() override;
+
+	const std::unordered_map<std::string, std::uint64_t>& getExternFncTable() const
+	{
+		return _externFncTable;
+	}
 
 protected:
 	bool loadExecutableFile();
 	bool loadRelocatableFile();
 	bool canLoadSections(const std::vector<retdec::fileformat::Section*>& sections) const;
 	void fixBssSegments();
+	void createExternSegment();
 	void applyRelocations();
 	void resolveRelocation(const retdec::fileformat::Relocation& rel, const retdec::fileformat::Symbol& sym);
 
 	SegmentToSectionsTable createSegmentToSectionsTable();
 	const Segment* addSegment(const retdec::fileformat::SecSeg* secSeg, std::uint64_t address, std::uint64_t memSize);
+
+private:
+
+	retdec::fileformat::ElfSegment _extern_segment;
+	std::vector<std::uint8_t> _externFncData {};
+	// Mapping between extern symbols and their address in extern segment
+	std::unordered_map<std::string, std::uint64_t> _externFncTable {};
 };
 
 } // namespace loader

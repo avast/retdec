@@ -19,11 +19,6 @@ namespace llvmir2hll {
 IntType::IntType(unsigned size, bool isSigned):
 	Type(), size(size), signedInt(isSigned) {}
 
-/**
-* @brief Destructs the type.
-*/
-IntType::~IntType() {}
-
 ShPtr<Value> IntType::clone() {
 	return IntType::create(size);
 }

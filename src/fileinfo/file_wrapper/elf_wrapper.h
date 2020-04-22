@@ -9,6 +9,7 @@
 
 #include "retdec/fileformat/file_format/elf/elf_format.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -18,7 +19,6 @@ class ElfWrapper : public retdec::fileformat::ElfFormat
 {
 	public:
 		ElfWrapper(std::string pathToFile, retdec::fileformat::LoadFlags loadFlags);
-		virtual ~ElfWrapper() override;
 
 		/// @name Detection methods
 		/// @{
@@ -30,5 +30,6 @@ class ElfWrapper : public retdec::fileformat::ElfFormat
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

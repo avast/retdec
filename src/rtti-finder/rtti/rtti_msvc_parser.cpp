@@ -15,6 +15,7 @@
 	else std::cout << std::showbase
 const bool debug_enabled = false;
 
+using namespace retdec::common;
 using namespace retdec::utils;
 
 namespace retdec {
@@ -23,7 +24,7 @@ namespace rtti_finder {
 RTTITypeDescriptor* parseMsvcTypeDescriptor(
 		const retdec::loader::Image* img,
 		RttiMsvc& rttis,
-		retdec::utils::Address typeDescriptorAddr)
+		retdec::common::Address typeDescriptorAddr)
 {
 	auto findTd = rttis.typeDescriptors.find(typeDescriptorAddr);
 	if (findTd != rttis.typeDescriptors.end())
@@ -77,7 +78,7 @@ RTTITypeDescriptor* parseMsvcTypeDescriptor(
 RTTIBaseClassDescriptor* parseMsvcBaseClassDescriptor(
 		const retdec::loader::Image* img,
 		RttiMsvc& rttis,
-		retdec::utils::Address baseDescriptorAddr)
+		retdec::common::Address baseDescriptorAddr)
 {
 	auto findBcd = rttis.baseClassDescriptors.find(baseDescriptorAddr);
 	if (findBcd != rttis.baseClassDescriptors.end())
@@ -153,7 +154,7 @@ RTTIBaseClassDescriptor* parseMsvcBaseClassDescriptor(
 RTTIClassHierarchyDescriptor* parseMsvcClassDescriptor(
 		const retdec::loader::Image* img,
 		RttiMsvc& rttis,
-		retdec::utils::Address classDescriptorAddr)
+		retdec::common::Address classDescriptorAddr)
 {
 	auto findCd = rttis.classDescriptors.find(classDescriptorAddr);
 	if (findCd != rttis.classDescriptors.end())
@@ -231,7 +232,7 @@ RTTIClassHierarchyDescriptor* parseMsvcClassDescriptor(
 RTTICompleteObjectLocator* parseMsvcObjectLocator(
 		const retdec::loader::Image* img,
 		RttiMsvc& rttis,
-		retdec::utils::Address rttiAddr)
+		retdec::common::Address rttiAddr)
 {
 	auto findRtti = rttis.objLocators.find(rttiAddr);
 	if (findRtti != rttis.objLocators.end())
@@ -312,7 +313,7 @@ RTTICompleteObjectLocator* parseMsvcObjectLocator(
 RTTICompleteObjectLocator* parseMsvcRtti(
 		const retdec::loader::Image* img,
 		RttiMsvc& rttis,
-		retdec::utils::Address rttiAddr)
+		retdec::common::Address rttiAddr)
 {
 	return parseMsvcObjectLocator(img, rttis, rttiAddr);
 }

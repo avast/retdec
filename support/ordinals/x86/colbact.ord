@@ -1,0 +1,7 @@
+1 DllGetClassObject
+2 DllRegisterServer
+3 DllUnregisterServer
+4 GetClassInfoForCurrentUser
+5 GetDefaultPartitionForCurrentUser
+6 GetDefaultPartitionForSid
+7 PartitionAccessCheck

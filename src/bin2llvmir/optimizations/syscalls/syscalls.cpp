@@ -64,9 +64,13 @@ bool SyscallFixer::run()
 	{
 		return runMips();
 	}
-	else if (_config->getConfig().architecture.isArmOrThumb())
+	else if (_config->getConfig().architecture.isArm32OrThumb())
 	{
 		return runArm();
+	}
+	else if (_config->getConfig().architecture.isArm64())
+	{
+		return runArm64();
 	}
 	else if (_config->getConfig().architecture.isX86_32())
 	{

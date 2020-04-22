@@ -12,6 +12,7 @@
 using namespace retdec::utils;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -29,14 +30,6 @@ TypeRefTableJsonGetter::TypeRefTableJsonGetter(FileInformation &fileInfo) : Iter
 	commonHeaderElements.push_back("name");
 	commonHeaderElements.push_back("nameSpace");
 	commonHeaderElements.push_back("libraryName");
-}
-
-/**
- * Destructor
- */
-TypeRefTableJsonGetter::~TypeRefTableJsonGetter()
-{
-
 }
 
 std::size_t TypeRefTableJsonGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const
@@ -91,3 +84,4 @@ bool TypeRefTableJsonGetter::getFlags(std::size_t structIndex, std::size_t recIn
 }
 
 } // namespace fileinfo
+} // namespace retdec

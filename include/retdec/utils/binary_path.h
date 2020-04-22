@@ -7,8 +7,6 @@
 #ifndef RETDEC_UTILS_BINARY_PATH_H
 #define RETDEC_UTILS_BINARY_PATH_H
 
-#include <whereami/whereami.h>
-
 #include "retdec/utils/filesystem_path.h"
 
 namespace retdec {

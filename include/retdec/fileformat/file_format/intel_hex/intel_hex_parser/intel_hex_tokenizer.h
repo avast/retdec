@@ -43,9 +43,6 @@ class IntelHexToken
 		std::string errorDesc;      ///< Error description in case of REC_TYPE::RT_ERROR
 		bool checksumValid = false; ///< True if checksum is valid. False by default
 
-		IntelHexToken();
-		~IntelHexToken();
-
 		/// @name Auxiliary methods
 		/// @{
 		int addStringByTwo(const std::string &str);
@@ -68,9 +65,6 @@ class IntelHexTokenizer
 		IntelHexToken makeErrorToken(const std::string &errorMessage);
 		/// @}
 	public:
-		IntelHexTokenizer();
-		~IntelHexTokenizer();
-
 		/// @name Getters
 		/// @{
 		IntelHexToken getToken();

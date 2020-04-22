@@ -41,10 +41,9 @@ public:
 	using call_iterator = CallVector::const_iterator;
 
 public:
-	ValueData(const ValueData &other);
-	~ValueData();
+	ValueData(const ValueData &other) = default;
 
-	ValueData &operator=(const ValueData &other);
+	ValueData &operator=(const ValueData &other) = default;
 	bool operator==(const ValueData &other) const;
 	bool operator!=(const ValueData &other) const;
 
@@ -179,7 +178,7 @@ private:
 	/// Set of variables which must be accessed.
 	VarSet mustBeAccessedVars;
 
-	/// List of function calls;
+	/// List of function calls.
 	CallVector calls;
 
 	/// Set of variables whose address is taken.
@@ -214,9 +213,6 @@ class ValueAnalysis: private OrderedAllVisitor,
 	public Caching<ShPtr<Value>, ShPtr<ValueData>> {
 
 public:
-	// It needs to be public so it can be called in ShPtr's destructor.
-	virtual ~ValueAnalysis() override;
-
 	ShPtr<ValueData> getValueData(ShPtr<Value> value);
 
 	/// @name Caching

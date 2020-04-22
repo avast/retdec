@@ -37,8 +37,6 @@ public:
 	static ShPtr<DivOpExpr> create(ShPtr<Expression> op1,
 		ShPtr<Expression> op2, Variant variant = Variant::UDiv);
 
-	virtual ~DivOpExpr() override;
-
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
 	virtual ShPtr<Value> clone() override;
 

@@ -25,9 +25,7 @@ class Visitor;
 class WhileLoopStmt final: public Statement {
 public:
 	static ShPtr<WhileLoopStmt> create(ShPtr<Expression> cond, ShPtr<Statement> body,
-		ShPtr<Statement> succ = nullptr);
-
-	virtual ~WhileLoopStmt() override;
+		ShPtr<Statement> succ = nullptr, Address a = Address::Undefined);
 
 	virtual ShPtr<Value> clone() override;
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
@@ -54,7 +52,8 @@ public:
 private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
-	WhileLoopStmt(ShPtr<Expression> cond, ShPtr<Statement> body);
+	WhileLoopStmt(ShPtr<Expression> cond, ShPtr<Statement> body,
+		Address a = Address::Undefined);
 
 private:
 	/// Loop condition.

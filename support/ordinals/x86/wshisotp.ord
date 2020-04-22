@@ -1,0 +1,8 @@
+1 WSHEnumProtocols
+2 WSHGetSockaddrType
+3 WSHGetSocketInformation
+4 WSHGetWildcardSockaddr
+5 WSHGetWinsockMapping
+6 WSHNotify
+7 WSHOpenSocket
+8 WSHSetSocketInformation

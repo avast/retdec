@@ -9,7 +9,7 @@
 
 #include <cassert>
 
-#include "retdec/utils/address.h"
+#include "retdec/common/address.h"
 #include "retdec/fileformat/file_format/file_format.h"
 
 namespace retdec {
@@ -63,7 +63,7 @@ class RawDataFormat : public FileFormat
 	public:
 		RawDataFormat(std::istream &inputStream, LoadFlags loadFlags = LoadFlags::NONE);
 		RawDataFormat(const std::string &filePath, LoadFlags loadFlags = LoadFlags::NONE);
-		virtual ~RawDataFormat() override;
+		RawDataFormat(const std::uint8_t *data, std::size_t size, LoadFlags loadFlags = LoadFlags::NONE);
 
 		/// @name Byte value storage methods
 		/// @{
@@ -103,8 +103,8 @@ class RawDataFormat : public FileFormat
 		void setEndianness(retdec::utils::Endianness e);
 		void setBytesPerWord(std::size_t b);
 		void setBytesLength(std::size_t l);
-		void setEntryPoint(retdec::utils::Address entryPoint);
-		void setBaseAddress(retdec::utils::Address baseAddress);
+		void setEntryPoint(retdec::common::Address entryPoint);
+		void setBaseAddress(retdec::common::Address baseAddress);
 		/// @}
 
 		/**

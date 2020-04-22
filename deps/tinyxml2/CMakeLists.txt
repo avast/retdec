@@ -1,53 +1,53 @@
-include(ExternalProject)
 
-if(CMAKE_C_COMPILER)
-	set(CMAKE_C_COMPILER_OPTION "-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}")
-endif()
-if(CMAKE_CXX_COMPILER)
-	set(CMAKE_CXX_COMPILER_OPTION "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")
-endif()
+add_library(tinyxml2 STATIC
+	tinyxml2.cpp
+)
+add_library(retdec::deps::tinyxml2 ALIAS tinyxml2)
 
-ExternalProject_Add(tinyxml2-project
-	URL https://github.com/leethomason/tinyxml2/archive/cc1745b552dd12bb1297a99f82044f83b06729e0.zip
-	URL_HASH SHA256=de255ce39ba1efe20cbffdebd3eea2d08f1269d03440a4fd60e142b0481c3f00
-	DOWNLOAD_NAME tinyxml2.zip
-	CMAKE_ARGS
-		# This does not work on MSVC, but may be useful on Linux.
-		-DCMAKE_BUILD_TYPE=Release
-		# Build only static library.
-		-DBUILD_STATIC_LIBS:BOOL=ON
-		-DBUILD_SHARED_LIBS:BOOL=OFF
-		# Do not build tests.
-		-DBUILD_TESTS:BOOL=OFF
-		# Force the use of the same compiler as used to build the top-level
-		# project. Otherwise, the external project may pick up a different
-		# compiler, which may result in link errors.
-		"${CMAKE_C_COMPILER_OPTION}"
-		"${CMAKE_CXX_COMPILER_OPTION}"
-	# Disable the update step.
-	UPDATE_COMMAND ""
-	# Disable the install step.
-	INSTALL_COMMAND ""
-	LOG_DOWNLOAD ON
-	LOG_CONFIGURE ON
-	LOG_BUILD ON
+target_include_directories(tinyxml2
+	SYSTEM INTERFACE
+		$<BUILD_INTERFACE:${RETDEC_DEPS_DIR}/tinyxml2/include>
+		$<INSTALL_INTERFACE:${RETDEC_INSTALL_DEPS_INCLUDE_DIR}>
+	PRIVATE
+		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/tinyxml2>
 )
 
-# Set include directories.
-ExternalProject_Get_Property(tinyxml2-project source_dir)
-set(TINYXML2_INCLUDE_DIR ${source_dir})
+set_target_properties(tinyxml2
+	PROPERTIES
+		OUTPUT_NAME "retdec-tinyxml2"
+)
 
-# Add libraries.
-ExternalProject_Get_Property(tinyxml2-project binary_dir)
-
+# Disable all warnings from this 3rd party project.
 if(MSVC)
-	set(DEBUG_DIR "Debug/")
-	set(RELEASE_DIR "Release/")
-	set(DEBUG_LIB_SUFFIX "d")
+	target_compile_options(tinyxml2 PRIVATE "/w")
+else()
+	target_compile_options(tinyxml2 PRIVATE "-w")
 endif()
 
-add_library(tinyxml2 INTERFACE)
-target_link_libraries(tinyxml2 INTERFACE debug ${binary_dir}/${DEBUG_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}tinyxml2${DEBUG_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX})
-target_link_libraries(tinyxml2 INTERFACE optimized ${binary_dir}/${RELEASE_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}tinyxml2${CMAKE_STATIC_LIBRARY_SUFFIX})
-target_include_directories(tinyxml2 SYSTEM INTERFACE ${TINYXML2_INCLUDE_DIR})
-add_dependencies(tinyxml2 tinyxml2-project)
+# Install includes.
+install(
+	DIRECTORY ${RETDEC_DEPS_DIR}/tinyxml2/include/
+	DESTINATION ${RETDEC_INSTALL_DEPS_INCLUDE_DIR}
+)
+
+# Install libs.
+install(TARGETS tinyxml2
+	EXPORT tinyxml2-targets
+	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
+	LIBRARY DESTINATION ${RETDEC_INSTALL_LIB_DIR}
+)
+
+# Export targets.
+install(EXPORT tinyxml2-targets
+	FILE "retdec-tinyxml2-targets.cmake"
+	NAMESPACE retdec::deps::
+	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
+)
+
+# Install CMake files.
+install(
+	FILES
+		"${CMAKE_CURRENT_LIST_DIR}/retdec-tinyxml2-config.cmake"
+	DESTINATION
+		"${RETDEC_INSTALL_CMAKE_DIR}"
+)

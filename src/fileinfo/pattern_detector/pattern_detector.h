@@ -11,9 +11,15 @@
 #include <string>
 #include <vector>
 
-#include "yaracpp/yara_detector/yara_detector.h"
 #include "fileinfo/file_information/file_information.h"
 
+namespace retdec {
+namespace yaracpp {
+class YaraRule;
+} // namespace yaracpp
+} // namespace retdec
+
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -42,7 +48,6 @@ class PatternDetector
 		/// @}
 	public:
 		PatternDetector(const retdec::fileformat::FileFormat *fparser, FileInformation &finfo);
-		~PatternDetector();
 
 		/// @name Detection methods
 		/// @{
@@ -52,5 +57,6 @@ class PatternDetector
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

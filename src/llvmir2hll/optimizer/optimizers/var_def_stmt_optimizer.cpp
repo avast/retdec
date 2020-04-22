@@ -48,11 +48,6 @@ VarDefStmtOptimizer::VarDefStmtOptimizer(ShPtr<Module> module,
 	PRECONDITION_NON_NULL(va);
 }
 
-/**
-* @brief Destructs the optimizer.
-*/
-VarDefStmtOptimizer::~VarDefStmtOptimizer() {}
-
 void VarDefStmtOptimizer::doOptimization() {
 	// Clear the cache of va because other optimizations may have left it in an
 	// invalid state.
@@ -687,7 +682,8 @@ void VarDefStmtOptimizer::optimizeAssignStmts(StmtSet &toRemoveStmts) const {
 			ShPtr<AssignStmt> assignStmt(cast<AssignStmt>(it->second.stmt));
 			assert(assignStmt);
 			ShPtr<VarDefStmt> optimizedVarDefStmt(VarDefStmt::create(
-				varDefStmt->getVar(), assignStmt->getRhs()));
+				varDefStmt->getVar(), assignStmt->getRhs(), nullptr,
+				assignStmt->getAddress()));
 			Statement::replaceStatement(assignStmt, optimizedVarDefStmt);
 			toRemoveStmts.insert(varDefStmt);
 		}

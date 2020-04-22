@@ -19,20 +19,17 @@ namespace fileformat {
 class Relocation
 {
 	private:
-		std::string name;                   ///< relocation name
-		unsigned long long address;         ///< address at which to apply the relocation
-		unsigned long long offsetInSection; ///< offset of relocation in section at which to apply the relocation
-		unsigned long long linkToSection;   ///< link to section at which relocation is applied
-		unsigned long long linkToSymbol;    ///< link to symbol which is used for calculating relocations
-		unsigned long long addend;          ///< addend of relocation
-		unsigned long long type;            ///< type of relocation
-		bool linkToSectionIsValid;          ///< @c true if link to section is valid
-		bool linkToSymbolIsValid;           ///< @c true if link to symbol is valid
-		std::vector<std::uint8_t> mask;     ///< relocation mask
+		std::string name;                       ///< relocation name
+		unsigned long long address = 0;         ///< address at which to apply the relocation
+		unsigned long long offsetInSection = 0; ///< offset of relocation in section at which to apply the relocation
+		unsigned long long linkToSection = 0;   ///< link to section at which relocation is applied
+		unsigned long long linkToSymbol = 0;    ///< link to symbol which is used for calculating relocations
+		unsigned long long addend = 0;          ///< addend of relocation
+		unsigned long long type = 0;            ///< type of relocation
+		bool linkToSectionIsValid = false;      ///< @c true if link to section is valid
+		bool linkToSymbolIsValid = false;       ///< @c true if link to symbol is valid
+		std::vector<std::uint8_t> mask;         ///< relocation mask
 	public:
-		Relocation();
-		~Relocation();
-
 		/// @name Getters
 		/// @{
 		std::string getName() const;

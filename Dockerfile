@@ -14,8 +14,8 @@ RUN apt-get -y update && \
 	doxygen                                             \
 	graphviz                                            \
 	upx                                                 \
-	flex                                                \
-	bison                                               \
+	openssl                                             \
+	libssl-dev                                          \
 	zlib1g-dev                                          \
 	autoconf                                            \
 	automake                                            \
@@ -24,7 +24,7 @@ RUN apt-get -y update && \
 	libtool
 
 USER retdec
-RUN git clone https://github.com/avast-tl/retdec && \
+RUN git clone https://github.com/avast/retdec && \
 	cd retdec && \
 	mkdir build && \
 	cd build && \

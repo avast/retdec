@@ -7,10 +7,10 @@
 #ifndef FILEINFO_FILE_WRAPPER_PE_PE_WRAPPER_PARSER_PE_WRAPPER_PARSER64_H
 #define FILEINFO_FILE_WRAPPER_PE_PE_WRAPPER_PARSER_PE_WRAPPER_PARSER64_H
 
-#include <pelib/PeLib.h>
-
 #include "fileinfo/file_wrapper/pe/pe_wrapper_parser/pe_wrapper_parser.h"
+#include "retdec/pelib/PeLib.h"
 
+namespace retdec {
 namespace fileinfo {
 
 class PeWrapperParser64 : public PeWrapperParser
@@ -19,7 +19,6 @@ class PeWrapperParser64 : public PeWrapperParser
 		PeLib::PeHeaderT<64> peHeader; ///< header of 64-bit PE file
 	public:
 		PeWrapperParser64(PeLib::PeHeaderT<64> peHeader64);
-		virtual ~PeWrapperParser64() override;
 
 		/// @name Detection methods
 		/// @{
@@ -29,5 +28,6 @@ class PeWrapperParser64 : public PeWrapperParser
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

@@ -4,10 +4,13 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
+#include "retdec/serdes/pattern.h"
+#include "retdec/serdes/std.h"
 #include "fileinfo/file_presentation/getters/pattern_config_getter/pattern_config_getter.h"
 
 using namespace retdec::config;
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -50,7 +53,7 @@ void PatternConfigGetter::process()
 		for(const auto &pattern : patterns)
 		{
 			empty = false;
-			auto conPattern = retdec::config::Pattern();
+			auto conPattern = retdec::common::Pattern();
 			conPattern.matches.clear();
 			conPattern.setName(pattern.getName());
 			conPattern.setDescription(pattern.getDescription());
@@ -79,7 +82,7 @@ void PatternConfigGetter::process()
 
 			for(const auto &match : pattern.getMatches())
 			{
-				auto cm = retdec::config::Pattern::Match();
+				auto cm = retdec::common::Pattern::Match();
 				unsigned long long res;
 				if(match.getOffset(res))
 				{
@@ -105,10 +108,10 @@ void PatternConfigGetter::process()
 				{
 					cm.setIsTypeFloatingPoint();
 				}
-				conPattern.matches.insert(cm);
+				conPattern.matches.push_back(cm);
 			}
 
-			outDoc->patterns.insert(conPattern);
+			outDoc->patterns.push_back(conPattern);
 		}
 
 		++i;
@@ -124,13 +127,10 @@ bool PatternConfigGetter::isEmpty() const
 	return empty;
 }
 
-/**
- * Get JSON value of detected patterns
- * @return JSON value of detected patterns
- */
-Json::Value PatternConfigGetter::getJsonValue() const
+retdec::common::PatternContainer& PatternConfigGetter::getPatterns()
 {
-	return outDoc->patterns.getJsonValue();
+	return outDoc->patterns;
 }
 
 } // namespace fileinfo
+} // namespace retdec

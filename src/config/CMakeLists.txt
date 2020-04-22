@@ -1,23 +1,61 @@
-set(RETDEC_CONFIG_SOURCES
-	architecture.cpp
-	base.cpp
-	calling_convention.cpp
-	classes.cpp
+
+add_library(config STATIC
 	config.cpp
-	file_format.cpp
-	file_type.cpp
-	functions.cpp
-	language.cpp
-	objects.cpp
 	parameters.cpp
-	patterns.cpp
-	segments.cpp
-	storage.cpp
-	tool_info.cpp
-	types.cpp
-	vtables.cpp
+)
+add_library(retdec::config ALIAS config)
+
+target_compile_features(config PUBLIC cxx_std_17)
+
+target_include_directories(config PUBLIC
+	PUBLIC
+		$<BUILD_INTERFACE:${RETDEC_INCLUDE_DIR}>
+		$<INSTALL_INTERFACE:${RETDEC_INSTALL_INCLUDE_DIR}>
 )
 
-add_library(retdec-config STATIC ${RETDEC_CONFIG_SOURCES})
-target_link_libraries(retdec-config retdec-utils jsoncpp)
-target_include_directories(retdec-config PUBLIC ${PROJECT_SOURCE_DIR}/include/)
+target_link_libraries(config
+	PUBLIC
+		retdec::common
+		retdec::deps::rapidjson
+	PRIVATE
+		retdec::serdes
+		retdec::utils
+)
+
+set_target_properties(config
+	PROPERTIES
+		OUTPUT_NAME "retdec-config"
+)
+
+# Install includes.
+install(
+	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/config
+	DESTINATION ${RETDEC_INSTALL_INCLUDE_DIR}/retdec
+)
+
+# Install libs.
+install(TARGETS config
+	EXPORT config-targets
+	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
+	LIBRARY DESTINATION ${RETDEC_INSTALL_LIB_DIR}
+)
+
+# Export targets.
+install(EXPORT config-targets
+	FILE "retdec-config-targets.cmake"
+	NAMESPACE retdec::
+	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
+)
+
+# Install CMake files.
+configure_file(
+	"retdec-config-config.cmake"
+	"${CMAKE_CURRENT_BINARY_DIR}/retdec-config-config.cmake"
+	@ONLY
+)
+install(
+	FILES
+		"${CMAKE_CURRENT_BINARY_DIR}/retdec-config-config.cmake"
+	DESTINATION
+		"${RETDEC_INSTALL_CMAKE_DIR}"
+)

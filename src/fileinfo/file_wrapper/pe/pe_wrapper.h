@@ -11,6 +11,7 @@
 #include "fileinfo/file_information/file_information_types/symbol_table/symbol.h"
 #include "fileinfo/file_wrapper/pe/pe_wrapper_parser/pe_wrapper_parser.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -19,9 +20,9 @@ namespace fileinfo {
 class PeWrapper : public retdec::fileformat::PeFormat
 {
 	private:
-		PeWrapperParser *wrapperParser; ///< parser of PE file
+		PeWrapperParser *wrapperParser = nullptr; ///< parser of PE file
 	public:
-		PeWrapper(std::string pathToFile, retdec::fileformat::LoadFlags loadFlags);
+		PeWrapper(const std::string & pathToFile, const std::string & dllListFile, retdec::fileformat::LoadFlags loadFlags);
 		virtual ~PeWrapper() override;
 
 		/// @name Detection methods
@@ -35,5 +36,6 @@ class PeWrapper : public retdec::fileformat::PeFormat
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

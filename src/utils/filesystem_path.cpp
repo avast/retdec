@@ -11,11 +11,9 @@
 #include "retdec/utils/os.h"
 #include "retdec/utils/scope_exit.h"
 #include "retdec/utils/string.h"
-#include "retdec/utils/value.h"
 
 #ifdef OS_WINDOWS
-	#include <windows.h>
-	#include <shlwapi.h>
+	#include <filesystem>
 #else
 	#include <sys/types.h>
 	#include <dirent.h>
@@ -76,86 +74,59 @@ protected:
 
 #ifdef OS_WINDOWS
 char FilesystemPathImpl::pathSeparator = '\\';
+namespace fs = std::filesystem;
 
 class FilesystemPathImplWindows : public FilesystemPathImpl
 {
 public:
 	FilesystemPathImplWindows(const std::string& path) : FilesystemPathImpl(path) {}
-	FilesystemPathImplWindows(const FilesystemPathImplWindows& rhs) : FilesystemPathImpl(rhs) {}
+	FilesystemPathImplWindows(const FilesystemPathImplWindows& rhs): FilesystemPathImpl(rhs) {}
 
 	virtual std::string getAbsolutePath() override
 	{
-		char absolutePath[MAX_PATH] = { '\0' };
-		if (GetFullPathName(_path.c_str(), MAX_PATH, absolutePath, nullptr) == 0)
-			return {};
-
-		return absolutePath;
+		return fs::absolute(_path).string();
 	}
 
 	virtual std::string getParentPath() override
 	{
-		// PathRemoveFileSpec() supports only MAX_PATH long paths and modify its parameter
-		char parentPathStr[MAX_PATH] = { '\0' };
-		strncpy(parentPathStr, _path.c_str(), MAX_PATH - 1);
-
-		PathRemoveFileSpec(parentPathStr);
-		return parentPathStr;
+		return fs::path(_path).parent_path().string();
 	}
 
 	virtual bool subpathsInDirectory(std::vector<std::string>& subpaths) override
 	{
-		using namespace std::string_literals;
-
-		WIN32_FIND_DATA ffd;
-
-		// We need to add wildcard to examine the content of the directory
-		std::string examineDir = _path;
-		examineDir.append(pathSeparator + "*"s);
-
 		subpaths.clear();
-		HANDLE hFnd = FindFirstFile(examineDir.c_str(), &ffd);
-		if (hFnd == reinterpret_cast<HANDLE>(-1))
-			return false;
 
-		do
+		if (!isDirectory())
 		{
-			// skip these 2 special links
-			// "." is just link to the current directory
-			// ".." is link to the parent directory
-			if (strcmp(ffd.cFileName, ".") == 0 || strcmp(ffd.cFileName, "..") == 0)
-				continue;
+			return false;
+		}
 
-			std::string newPath(_path);
-			newPath += pathSeparator;
-			newPath.append(ffd.cFileName);
-			subpaths.emplace_back(newPath);
-		} while (FindNextFile(hFnd, &ffd));
-
+		// Special paths '.' and '..' are skipped.
+		for(auto& p: std::filesystem::directory_iterator(_path))
+		{
+			subpaths.emplace_back(p.path().string());
+		}
 		return true;
 	}
 
 	virtual bool exists() override
 	{
-		return PathFileExists(_path.c_str());
+		return std::filesystem::exists(_path);
 	}
 
 	virtual bool isFile() override
 	{
-		return !isDirectory();
+		return std::filesystem::is_regular_file(_path);
 	}
 
 	virtual bool isDirectory() override
 	{
-		WIN32_FIND_DATA ffd;
-		if (FindFirstFile(_path.c_str(), &ffd) == reinterpret_cast<HANDLE>(-1))
-			return false;
-
-		return ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
+		return std::filesystem::is_directory(_path);
 	}
 
 	virtual bool isAbsolute() override
 	{
-		return !PathIsRelative(_path.c_str());
+		return fs::path(_path).is_absolute();
 	}
 };
 #else
@@ -231,7 +202,11 @@ public:
 
 	virtual bool isFile() override
 	{
-		return !isDirectory();
+		struct stat st;
+		if (stat(_path.c_str(), &st) != 0)
+			return false;
+
+		return S_ISREG(st.st_mode);
 	}
 
 	virtual bool isDirectory() override
@@ -276,9 +251,7 @@ FilesystemPath::FilesystemPath(const FilesystemPath& fspath) : FilesystemPath(fs
 /**
  * Destructor.
  */
-FilesystemPath::~FilesystemPath()
-{
-}
+FilesystemPath::~FilesystemPath() = default;
 
 /**
  * Returns the path in the normalized textual representation

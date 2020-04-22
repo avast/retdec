@@ -568,22 +568,6 @@ namespace retdec {
 namespace fileformat {
 
 /**
- * Constructor
- */
-ImportTable::ImportTable()
-{
-
-}
-
-/**
- * Destructor
- */
-ImportTable::~ImportTable()
-{
-
-}
-
-/**
  * Get number of libraries which are imported
  * @return Number of libraries which are imported
  */
@@ -688,6 +672,15 @@ const std::string& ImportTable::getImphashMd5() const
 const std::string& ImportTable::getImphashSha256() const
 {
 	return impHashSha256;
+}
+
+/**
+ * Get list of missing dependencies
+ * @return Vector of missing dependencies
+ */
+const std::vector<std::string> & ImportTable::getMissingDependencies() const
+{
+	return missingDeps;
 }
 
 /**
@@ -815,6 +808,11 @@ void ImportTable::computeHashes()
 		}
 	}
 
+	if (impHashBytes.size() == 0)
+	{
+		return;
+	}
+
 	impHashCrc32 = retdec::crypto::getCrc32(impHashBytes.data(), impHashBytes.size());
 	impHashMd5 = retdec::crypto::getMd5(impHashBytes.data(), impHashBytes.size());
 	impHashSha256 = retdec::crypto::getSha256(impHashBytes.data(), impHashBytes.size());
@@ -835,11 +833,14 @@ void ImportTable::clear()
 /**
  * Add name of imported library
  * @param name Name of imported library
+ * @param isMissingDependency If true, then it means that the library name might be a missing dependency (aka not normally present on the OS)
  *
  * Order in which are libraries added must be same as order of libraries import in input file
  */
-void ImportTable::addLibrary(std::string name)
+void ImportTable::addLibrary(std::string name, bool isMissingDependency)
 {
+	if(isMissingDependency)
+		missingDeps.push_back(name);
 	libraries.push_back(name);
 }
 
@@ -916,6 +917,16 @@ bool ImportTable::hasImport(const std::string &name) const
 bool ImportTable::hasImport(unsigned long long address) const
 {
 	return getImportOnAddress(address);
+}
+
+/**
+ * @return @c True if import hashes are invalid, @c False otherwise.
+ */
+bool ImportTable::invalidImpHash() const
+{
+	return getImphashCrc32().empty()
+			|| getImphashMd5().empty()
+			|| getImphashSha256().empty();
 }
 
 /**

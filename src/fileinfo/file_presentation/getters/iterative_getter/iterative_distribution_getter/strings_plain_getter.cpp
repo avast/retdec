@@ -12,6 +12,7 @@
 using namespace retdec::utils;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 namespace
@@ -37,14 +38,6 @@ StringsPlainGetter::StringsPlainGetter(FileInformation &fileInfo) : IterativeDis
 	commonHeaderElements.insert(commonHeaderElements.begin(), std::begin(headerArray), std::end(headerArray));
 	commonHeaderDesc.insert(commonHeaderDesc.begin(), std::begin(headerDesc), std::end(headerDesc));
 	loadRecords();
-}
-
-/**
- * Destructor
- */
-StringsPlainGetter::~StringsPlainGetter()
-{
-
 }
 
 std::size_t StringsPlainGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const
@@ -96,3 +89,4 @@ bool StringsPlainGetter::getFlagDescriptors(std::size_t structIndex, std::vector
 }
 
 } // namespace fileinfo
+} // namespace retdec

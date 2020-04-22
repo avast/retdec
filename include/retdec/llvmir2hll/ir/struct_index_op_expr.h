@@ -31,8 +31,6 @@ public:
 	static ShPtr<StructIndexOpExpr> create(ShPtr<Expression> base,
 		ShPtr<ConstInt> fieldNumber);
 
-	virtual ~StructIndexOpExpr() override;
-
 	virtual ShPtr<Type> getType() const override;
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
 	virtual ShPtr<Value> clone() override;

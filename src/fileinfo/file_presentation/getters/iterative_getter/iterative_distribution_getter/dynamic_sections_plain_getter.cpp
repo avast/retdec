@@ -13,6 +13,7 @@
 using namespace retdec::utils;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 namespace
@@ -43,14 +44,6 @@ DynamicSectionsPlainGetter::DynamicSectionsPlainGetter(FileInformation &fileInfo
 	commonHeaderElements.insert(commonHeaderElements.begin(), std::begin(dynHeaderArray), std::end(dynHeaderArray));
 	commonHeaderDesc.insert(commonHeaderDesc.begin(), std::begin(dynHeaderDesc), std::end(dynHeaderDesc));
 	loadRecords();
-}
-
-/**
- * Destructor
- */
-DynamicSectionsPlainGetter::~DynamicSectionsPlainGetter()
-{
-
 }
 
 std::size_t DynamicSectionsPlainGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const
@@ -112,3 +105,4 @@ bool DynamicSectionsPlainGetter::getFlagDescriptors(std::size_t structIndex, std
 }
 
 } // namespace fileinfo
+} // namespace retdec

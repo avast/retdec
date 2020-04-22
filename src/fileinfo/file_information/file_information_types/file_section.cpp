@@ -7,37 +7,8 @@
 #include "fileinfo/file_information/file_information_types/file_section.h"
 #include "fileinfo/file_information/file_information_types/type_conversions.h"
 
+namespace retdec {
 namespace fileinfo {
-
-/**
- * Constructor
- */
-FileSection::FileSection() : index(std::numeric_limits<unsigned long long>::max()),
-								offset(std::numeric_limits<unsigned long long>::max()),
-								sizeInFile(std::numeric_limits<unsigned long long>::max()),
-								entrySize(std::numeric_limits<unsigned long long>::max()),
-								startAddress(std::numeric_limits<unsigned long long>::max()),
-								sizeInMemory(std::numeric_limits<unsigned long long>::max()),
-								relocationsOffset(std::numeric_limits<unsigned long long>::max()),
-								numberOfRelocations(std::numeric_limits<unsigned long long>::max()),
-								lineNumbersOffset(std::numeric_limits<unsigned long long>::max()),
-								numberOfLineNumbers(std::numeric_limits<unsigned long long>::max()),
-								memoryAlignment(std::numeric_limits<unsigned long long>::max()),
-								linkToSection(std::numeric_limits<unsigned long long>::max()),
-								extraInfo(std::numeric_limits<unsigned long long>::max()),
-								lineOffset(std::numeric_limits<unsigned long long>::max()),
-								relocationsLineOffset(std::numeric_limits<unsigned long long>::max())
-{
-
-}
-
-/**
- * Destructor
- */
-FileSection::~FileSection()
-{
-
-}
 
 /**
  * Get section name
@@ -224,6 +195,15 @@ std::string FileSection::getLineOffsetStr(std::ios_base &(* format)(std::ios_bas
 std::string FileSection::getRelocationsLineOffsetStr(std::ios_base &(* format)(std::ios_base &)) const
 {
 	return getNumberAsString(relocationsLineOffset, format);
+}
+
+/**
+ * Get entropy of section data
+ * @return Start line of relocations for this section
+ */
+std::string FileSection::getEntropyStr(std::ios_base &(* format)(std::ios_base &)) const
+{
+	return getNumberAsString(entropy, format);
 }
 
 /**
@@ -455,6 +435,15 @@ void FileSection::setRelocationsLineOffset(unsigned long long relocOffset)
 }
 
 /**
+ * Set section data entropy
+ * @param entr Data entropy of section
+ */
+void FileSection::setEntropy(double entr)
+{
+	entropy = entr;
+}
+
+/**
  * Set number of section flags
  * @param flagsSize Number of section flags
  */
@@ -491,3 +480,4 @@ void FileSection::clearFlagsDescriptors()
 }
 
 } // namespace fileinfo
+} // namespace retdec

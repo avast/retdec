@@ -5,7 +5,8 @@
 */
 
 #include "retdec/bin2llvmir/optimizations/stack_pointer_ops/stack_pointer_ops.h"
-#include "retdec/bin2llvmir/providers/config.h"
+#include "retdec/bin2llvmir/providers/abi/abi.h"
+#include "retdec/bin2llvmir/providers/abi/x86.h"
 #include "bin2llvmir/utils/llvmir_tests.h"
 
 using namespace ::testing;
@@ -53,12 +54,12 @@ TEST_F(StackPointerOpsRemoveTests, passRemovesAllStoresToStackRegistersEvenIfThe
 			ret void
 		}
 	)");
-	auto s = retdec::config::Storage::inRegister("esp");
-	auto r = retdec::config::Object("esp", s);
+	auto* esp = getGlobalByName("esp");
 	auto c = Config::empty(module.get());
-	c.getConfig().registers.insert(r);
+	AbiX86 abi(module.get(), &c);
+	abi.addRegister(X86_REG_ESP, esp);
 
-	bool b = pass.runOnModuleCustom(*module, &c);
+	bool b = pass.runOnModuleCustom(*module, &abi);
 
 	std::string exp = R"(
 		@esp = global i32 0
@@ -84,12 +85,12 @@ TEST_F(StackPointerOpsRemoveTests, passKeepsAllStoresToNonStackPointerRegisters)
 			ret void
 		}
 	)");
-	auto s = retdec::config::Storage::inRegister("eax");
-	auto r = retdec::config::Object("eax", s);
+	auto* eax = getGlobalByName("eax");
 	auto c = Config::empty(module.get());
-	c.getConfig().registers.insert(r);
+	AbiX86 abi(module.get(), &c);
+	abi.addRegister(X86_REG_EAX, eax);
 
-	bool b = pass.runOnModuleCustom(*module, &c);
+	bool b = pass.runOnModuleCustom(*module, &abi);
 
 	std::string exp = R"(
 		@eax = global i32 0

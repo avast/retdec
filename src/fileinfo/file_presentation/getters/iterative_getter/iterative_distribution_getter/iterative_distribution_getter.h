@@ -9,6 +9,7 @@
 
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_getter.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -40,7 +41,6 @@ class IterativeDistributionGetter : public IterativeGetter
 		/// @}
 	public:
 		IterativeDistributionGetter(FileInformation &fileInfo);
-		virtual ~IterativeDistributionGetter() override;
 
 		/// @name Getters
 		/// @{
@@ -62,5 +62,6 @@ class IterativeDistributionGetter : public IterativeGetter
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

@@ -15,8 +15,9 @@
 #include "retdec/bin2llvmir/providers/asm_instruction.h"
 #include "retdec/bin2llvmir/providers/names.h"
 #include "retdec/bin2llvmir/utils/debug.h"
-#include "retdec/utils/address.h"
+#include "retdec/common/address.h"
 
+using namespace retdec::common;
 using namespace retdec::utils;
 
 namespace retdec {
@@ -91,86 +92,6 @@ std::string genJsonLine(const std::string& name, const std::string& val)
 	return "\"" + name + "\": " + "\"" + val + "\",";
 }
 
-retdec::utils::Address getFunctionAddress(llvm::Function* f)
-{
-	if (f == nullptr)
-	{
-		return Address();
-	}
-
-	AsmInstruction ai(f);
-	return ai.isValid() ? ai.getAddress() : Address();
-}
-
-retdec::utils::Address getFunctionEndAddress(llvm::Function* f)
-{
-	if (f == nullptr)
-	{
-		return Address();
-	}
-
-	if (f->empty() || f->back().empty())
-	{
-		return getFunctionAddress(f);
-	}
-
-	AsmInstruction ai(&f->back().back());
-	return ai.isValid() ? ai.getEndAddress() : getFunctionAddress(f);
-}
-
-retdec::utils::Address getBasicBlockAddressFromName(llvm::BasicBlock* b)
-{
-	if (b == nullptr)
-	{
-		return Address();
-	}
-
-	std::string n = b->getName();
-
-	unsigned long long a = 0;
-	std::string pattern = names::generatedBasicBlockPrefix+"%llx";
-	int ret = std::sscanf(n.c_str(), pattern.c_str(), &a);
-	return ret == 1 ? Address(a) : Address();
-}
-
-retdec::utils::Address getBasicBlockAddress(llvm::BasicBlock* b)
-{
-	if (b == nullptr)
-	{
-		return Address();
-	}
-
-	std::string n = b->getName();
-	if (!retdec::utils::startsWith(n, names::generatedBasicBlockPrefix))
-	{
-		return Address();
-	}
-
-	if (b->empty())
-	{
-		return getBasicBlockAddressFromName(b);
-	}
-
-	AsmInstruction ai(&b->front());
-	return ai.isValid() ? ai.getAddress() : getBasicBlockAddressFromName(b);
-}
-
-retdec::utils::Address getBasicBlockEndAddress(llvm::BasicBlock* b)
-{
-	if (b == nullptr)
-	{
-		return Address();
-	}
-
-	if (b->empty())
-	{
-		return getBasicBlockAddress(b);
-	}
-
-	AsmInstruction ai(&b->back());
-	return ai.isValid() ? ai.getEndAddress() : getBasicBlockAddress(b);
-}
-
 void dumpControFlowToJsonBasicBlock(
 		llvm::BasicBlock& bb,
 		llvm::BasicBlock& bbEnd,
@@ -178,8 +99,8 @@ void dumpControFlowToJsonBasicBlock(
 {
 	static auto* config = ConfigProvider::getConfig(bb.getModule());
 
-	auto start = getBasicBlockAddress(&bb);
-	auto end = getBasicBlockEndAddress(&bbEnd);
+	auto start = AsmInstruction::getTrueBasicBlockAddress(&bb);
+	auto end = AsmInstruction::getBasicBlockEndAddress(&bbEnd);
 
 	out << genIndent(3) << "{" << "\n";
 	out << genIndent(4) << genJsonLine("address", start.toHexPrefixString()) << "\n";
@@ -192,12 +113,12 @@ void dumpControFlowToJsonBasicBlock(
 		// Some BBs may not have addresses - e.g. those inside
 		// if-then-else instruction models.
 		auto* pred = *pit;
-		auto start = getBasicBlockAddress(pred);
+		auto start = AsmInstruction::getTrueBasicBlockAddress(pred);
 		while (start.isUndefined())
 		{
 			pred = pred->getPrevNode();
 			assert(pred);
-			start = getBasicBlockAddress(pred);
+			start = AsmInstruction::getTrueBasicBlockAddress(pred);
 		}
 		predsAddrs.insert(start);
 	}
@@ -233,12 +154,12 @@ void dumpControFlowToJsonBasicBlock(
 		// Some BBs may not have addresses - e.g. those inside
 		// if-then-else instruction models.
 		auto* succ = *sit;
-		auto start = getBasicBlockAddress(succ);
+		auto start = AsmInstruction::getTrueBasicBlockAddress(succ);
 		while (start.isUndefined())
 		{
 			succ = succ->getPrevNode();
 			assert(succ);
-			start = getBasicBlockAddress(succ);
+			start = AsmInstruction::getTrueBasicBlockAddress(succ);
 		}
 		succsAddrs.insert(start);
 	}
@@ -246,7 +167,7 @@ void dumpControFlowToJsonBasicBlock(
 	// find all sucessors.
 	// Also applicable to ARM cond call/return patterns, and other cases.
 	if (config
-			&& getBasicBlockAddress(&bbEnd).isUndefined() // no addr
+			&& AsmInstruction::getTrueBasicBlockAddress(&bbEnd).isUndefined() // no addr
 			&& (++pred_begin(&bbEnd)) == pred_end(&bbEnd) // single pred
 			&& bbEnd.getPrevNode() == *pred_begin(&bbEnd)) // pred right before
 	{
@@ -254,9 +175,9 @@ void dumpControFlowToJsonBasicBlock(
 		if (br
 				&& br->isConditional()
 				&& br->getSuccessor(0) == &bbEnd
-				&& getBasicBlockAddress(br->getSuccessor(1)))
+				&& AsmInstruction::getTrueBasicBlockAddress(br->getSuccessor(1)))
 		{
-			succsAddrs.insert(getBasicBlockAddress(br->getSuccessor(1)));
+			succsAddrs.insert(AsmInstruction::getTrueBasicBlockAddress(br->getSuccessor(1)));
 		}
 	}
 
@@ -293,8 +214,8 @@ void dumpControFlowToJsonFunction(
 {
 	static auto* config = ConfigProvider::getConfig(f.getParent());
 
-	auto start = getFunctionAddress(&f);
-	auto end = getFunctionEndAddress(&f);
+	auto start = AsmInstruction::getFunctionAddress(&f);
+	auto end = AsmInstruction::getFunctionEndAddress(&f);
 
 	out << genIndent(1) << "{\n";
 	out << genIndent(2) << genJsonLine("address", start.toHexPrefixString()) << "\n";
@@ -313,7 +234,7 @@ void dumpControFlowToJsonFunction(
 			// There are more BBs in LLVM IR than we created in control-flow
 			// decoding - e.g. BBs inside instructions that behave like
 			// if-then-else created by capstone2llvmir.
-			if (getBasicBlockAddress(&bb).isUndefined())
+			if (AsmInstruction::getTrueBasicBlockAddress(&bb).isUndefined())
 			{
 				continue;
 			}
@@ -332,7 +253,7 @@ void dumpControFlowToJsonFunction(
 			{
 				// Next has address -- is a proper BB.
 				//
-				if (getBasicBlockAddress(bbEnd->getNextNode()).isDefined())
+				if (AsmInstruction::getTrueBasicBlockAddress(bbEnd->getNextNode()).isDefined())
 				{
 					break;
 				}
@@ -428,7 +349,7 @@ void dumpControFlowToJson(
 		}
 
 		// There are some temp and utility fncs that do not have addresses.
-		if (getFunctionAddress(&f).isUndefined())
+		if (AsmInstruction::getFunctionAddress(&f).isUndefined())
 		{
 			continue;
 		}

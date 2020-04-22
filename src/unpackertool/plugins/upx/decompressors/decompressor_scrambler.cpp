@@ -17,20 +17,6 @@ namespace unpackertool {
 namespace upx {
 
 /**
- * Constructor.
- */
-DecompressorScrambler::DecompressorScrambler() : _scrambledStub(nullptr)
-{
-}
-
-/**
- * Destructor.
- */
-DecompressorScrambler::~DecompressorScrambler()
-{
-}
-
-/**
  * Checks whether the provided packing method is valid.
  *
  * @param stub The ELF32 UPX unpacking stub object.

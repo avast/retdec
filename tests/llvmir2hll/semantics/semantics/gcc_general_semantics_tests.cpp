@@ -40,15 +40,15 @@ SemanticsHasNonEmptyID) {
 TEST_F(GCCGeneralSemanticsTests,
 GetCHeaderFileForKnownFunctionsReturnsCorrectAnswer) {
 	// socket
-	Maybe<std::string> headerForSocket(semantics->getCHeaderFileForFunc("socket"));
+	std::optional<std::string> headerForSocket(semantics->getCHeaderFileForFunc("socket"));
 	ASSERT_TRUE(headerForSocket) << "no header file for `socket`";
-	EXPECT_EQ("sys/socket.h", headerForSocket.get());
+	EXPECT_EQ("sys/socket.h", headerForSocket.value());
 }
 
 TEST_F(GCCGeneralSemanticsTests,
 GetCHeaderFileForUnknownFunctionsReturnsNoAnswer) {
 	// foo
-	Maybe<std::string> headerForFoo(semantics->getCHeaderFileForFunc("foo"));
+	std::optional<std::string> headerForFoo(semantics->getCHeaderFileForFunc("foo"));
 	EXPECT_FALSE(headerForFoo);
 }
 
@@ -59,15 +59,15 @@ GetCHeaderFileForUnknownFunctionsReturnsNoAnswer) {
 TEST_F(GCCGeneralSemanticsTests,
 GetNameOfVarStoringResultForKnownFunctionsReturnsCorrectAnswer) {
 	// socket
-	Maybe<std::string> socketVarName(semantics->getNameOfVarStoringResult("socket"));
+	std::optional<std::string> socketVarName(semantics->getNameOfVarStoringResult("socket"));
 	ASSERT_TRUE(socketVarName) << "no name of the variable storing the result of `socket`";
-	EXPECT_EQ("sock_fd", socketVarName.get());
+	EXPECT_EQ("sock_fd", socketVarName.value());
 }
 
 TEST_F(GCCGeneralSemanticsTests,
 GetNameOfVarStoringResultForUnknownFunctionsReturnsNoAnswer) {
 	// foo
-	Maybe<std::string> fooVarName(semantics->getNameOfVarStoringResult("foo"));
+	std::optional<std::string> fooVarName(semantics->getNameOfVarStoringResult("foo"));
 	EXPECT_FALSE(fooVarName);
 }
 
@@ -78,20 +78,20 @@ GetNameOfVarStoringResultForUnknownFunctionsReturnsNoAnswer) {
 TEST_F(GCCGeneralSemanticsTests,
 GetNameOfParamForKnownFunctionsReturnsCorrectAnswer) {
 	// flock (first parameter)
-	Maybe<std::string> flockParam1Name(semantics->getNameOfParam("flock", 1));
+	std::optional<std::string> flockParam1Name(semantics->getNameOfParam("flock", 1));
 	ASSERT_TRUE(flockParam1Name) << "no name of the first parameter of `flock`";
-	EXPECT_EQ("fd", flockParam1Name.get());
+	EXPECT_EQ("fd", flockParam1Name.value());
 
 	// flock (second parameter)
-	Maybe<std::string> flockParam2Name(semantics->getNameOfParam("flock", 2));
+	std::optional<std::string> flockParam2Name(semantics->getNameOfParam("flock", 2));
 	ASSERT_TRUE(flockParam2Name) << "no name of the second parameter of `flock`";
-	EXPECT_EQ("operation", flockParam2Name.get());
+	EXPECT_EQ("operation", flockParam2Name.value());
 }
 
 TEST_F(GCCGeneralSemanticsTests,
 GetNameOfParamForUnknownFunctionsReturnsNoAnswer) {
 	// foo
-	Maybe<std::string> fooParam1Name(semantics->getNameOfParam("foo", 1));
+	std::optional<std::string> fooParam1Name(semantics->getNameOfParam("foo", 1));
 	EXPECT_FALSE(fooParam1Name) << "there should be no information for `foo`";
 }
 
@@ -102,7 +102,7 @@ GetNameOfParamForUnknownFunctionsReturnsNoAnswer) {
 TEST_F(GCCGeneralSemanticsTests,
 GetSymbolicNamesForParamForKnownFunctionsReturnsCorrectAnswer) {
 	// flock
-	Maybe<IntStringMap> flockSymbolicNames(semantics->getSymbolicNamesForParam("flock", 2));
+	std::optional<IntStringMap> flockSymbolicNames(semantics->getSymbolicNamesForParam("flock", 2));
 	ASSERT_TRUE(flockSymbolicNames) << "no information for `flock`";
 
 	IntStringMap refMap;
@@ -110,13 +110,13 @@ GetSymbolicNamesForParamForKnownFunctionsReturnsCorrectAnswer) {
 	refMap[2] = "LOCK_EX";
 	refMap[4] = "LOCK_NB";
 	refMap[8] = "LOCK_UN";
-	EXPECT_EQ(refMap, flockSymbolicNames.get());
+	EXPECT_EQ(refMap, flockSymbolicNames.value());
 }
 
 TEST_F(GCCGeneralSemanticsTests,
 GetSymbolicNamesForParamForUnknownFunctionsReturnsNoAnswer) {
 	// foo
-	Maybe<IntStringMap> fooSymbolicNames(semantics->getSymbolicNamesForParam("foo", 1));
+	std::optional<IntStringMap> fooSymbolicNames(semantics->getSymbolicNamesForParam("foo", 1));
 	EXPECT_FALSE(fooSymbolicNames);
 }
 

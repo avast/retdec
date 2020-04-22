@@ -22,7 +22,6 @@ class Capstone2LlvmIrTranslatorX86_impl :
 				llvm::Module* m,
 				cs_mode basic = CS_MODE_32,
 				cs_mode extra = CS_MODE_LITTLE_ENDIAN);
-		virtual ~Capstone2LlvmIrTranslatorX86_impl();
 //
 //==============================================================================
 // Mode query & modification methods - from Capstone2LlvmIrTranslator.
@@ -49,15 +48,9 @@ class Capstone2LlvmIrTranslatorX86_impl :
 		virtual bool isX87DataStoreFunction(llvm::Function* f) const override;
 		virtual bool isX87DataStoreFunctionCall(llvm::CallInst* c) const override;
 		virtual llvm::Function* getX87DataStoreFunction() const override;
-		virtual bool isX87TagStoreFunction(llvm::Function* f) const override;
-		virtual bool isX87TagStoreFunctionCall(llvm::CallInst* c) const override;
-		virtual llvm::Function* getX87TagStoreFunction() const override;
 		virtual bool isX87DataLoadFunction(llvm::Function* f) const override;
 		virtual bool isX87DataLoadFunctionCall(llvm::CallInst* c) const override;
 		virtual llvm::Function* getX87DataLoadFunction() const override;
-		virtual bool isX87TagLoadFunction(llvm::Function* f) const override;
-		virtual bool isX87TagLoadFunctionCall(llvm::CallInst* c) const override;
-		virtual llvm::Function* getX87TagLoadFunction() const override;
 
 		virtual uint32_t getParentRegister(uint32_t r) const override;
 //
@@ -120,12 +113,12 @@ class Capstone2LlvmIrTranslatorX86_impl :
 				uint32_t r,
 				llvm::Value* val,
 				llvm::IRBuilder<>& irb,
-				eOpConv ct = eOpConv::ZEXT_TRUNC) override;
+				eOpConv ct = eOpConv::ZEXT_TRUNC_OR_BITCAST) override;
 		virtual llvm::Instruction* storeOp(
 				cs_x86_op& op,
 				llvm::Value* val,
 				llvm::IRBuilder<>& irb,
-				eOpConv ct = eOpConv::ZEXT_TRUNC) override;
+				eOpConv ct = eOpConv::ZEXT_TRUNC_OR_BITCAST) override;
 
 		void storeRegisters(
 				llvm::IRBuilder<>& irb,
@@ -151,17 +144,7 @@ class Capstone2LlvmIrTranslatorX86_impl :
 				llvm::IRBuilder<>& irb,
 				llvm::Value* rNum,
 				llvm::Value* val);
-		llvm::CallInst* storeX87TagReg(
-				llvm::IRBuilder<>& irb,
-				llvm::Value* rNum,
-				llvm::Value* val);
-		llvm::CallInst* clearX87TagReg(
-				llvm::IRBuilder<>& irb,
-				llvm::Value* rNum);
 		llvm::CallInst* loadX87DataReg(
-				llvm::IRBuilder<>& irb,
-				llvm::Value* rNum);
-		llvm::CallInst* loadX87TagReg(
 				llvm::IRBuilder<>& irb,
 				llvm::Value* rNum);
 
@@ -237,9 +220,7 @@ class Capstone2LlvmIrTranslatorX86_impl :
 		llvm::Value* idx = nullptr;
 
 		llvm::Function* _x87DataStoreFunction = nullptr; // void (i3, fp80)
-		llvm::Function* _x87TagStoreFunction = nullptr; // void (i3, i2)
 		llvm::Function* _x87DataLoadFunction = nullptr; // fp80 (i3)
-		llvm::Function* _x87TagLoadFunction = nullptr; // i2 (i3)
 //
 //==============================================================================
 // x86 instruction translation methods.
@@ -286,21 +267,40 @@ class Capstone2LlvmIrTranslatorX86_impl :
 		void translateFdecstp(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateFdiv(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateFdivr(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
+		void translateFprem(cs_insn *i, cs_x86 *xi, llvm::IRBuilder<> &irb);
 		void translateFincstp(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateFist(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateFld(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
+		void translateFbld(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
+		void translateFbstp(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
+		void translateFCMovCc(cs_insn *i, cs_x86 *xi, llvm::IRBuilder<> &irb);
 		void translateFloadConstant(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateFmul(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateFninit(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateFrndint(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateFsin(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateFsincos(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
+		void translateFtan(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
+		void translateFatan(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateFsqrt(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
+		void translateFscale(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateFst(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateFsub(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateFsubr(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateFucomPop(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
+		void translateFxam(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
+		void translateFxtract(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateFxch(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
+		void translateF2xm1(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
+		void translateFyl2x(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
+		void translateFfree(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
+		void translateFnstsw(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
+		void translateFnclex(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
+		void translateFrstor(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
+		void translateFnsave(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
+		void translateFnstenv(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
+		void translateFxsave(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
+		void translateFxstor(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateImul(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateInc(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateIns(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);

@@ -27,11 +27,6 @@ ConstInt::ConstInt(const llvm::APSInt &value):
 	Constant(), value(value),
 	type(IntType::create(value.getBitWidth(), value.isSigned())) {}
 
-/**
-* @brief Destructs the constant.
-*/
-ConstInt::~ConstInt() {}
-
 ShPtr<Value> ConstInt::clone() {
 	ShPtr<ConstInt> constInt(ConstInt::create(value));
 	constInt->setMetadata(getMetadata());

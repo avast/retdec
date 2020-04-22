@@ -86,20 +86,13 @@ std::string getCurrentYear() {
 * @param tm Timestamp for conversion.
 */
 std::string timestampToDate(std::tm *tm) {
-	if (!tm) {
-		return "";
-	}
-	const auto conDate = getDate(tm);
-	const auto conTime = getTime(tm);
-	if (conDate.empty() && conTime.empty()) {
-		return "";
-	} else if (conDate.empty()) {
-		return conTime;
-	} else if (conTime.empty()) {
-		return conDate;
+	if (tm == nullptr) {
+		return {};
 	}
 
-	return conDate + " " + conTime;
+	std::stringstream ss;
+	ss << std::put_time(tm, "%FT%T%z");
+	return ss.str();
 }
 
 /**
@@ -107,7 +100,7 @@ std::string timestampToDate(std::tm *tm) {
 * @param timestamp Timestamp for conversion.
 */
 std::string timestampToDate(std::time_t timestamp) {
-	return timestampToDate(std::localtime(&timestamp));
+	return timestampToDate(std::gmtime(&timestamp));
 }
 
 /**

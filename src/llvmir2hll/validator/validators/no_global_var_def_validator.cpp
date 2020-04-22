@@ -23,11 +23,6 @@ REGISTER_AT_FACTORY("NoGlobalVarDef", NO_GLOBAL_VAR_DEF_VALIDATOR_ID, ValidatorF
 NoGlobalVarDefValidator::NoGlobalVarDefValidator(): Validator() {}
 
 /**
-* @brief Destructs the validator.
-*/
-NoGlobalVarDefValidator::~NoGlobalVarDefValidator() {}
-
-/**
 * @brief Creates a new validator.
 */
 ShPtr<Validator> NoGlobalVarDefValidator::create() {

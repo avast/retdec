@@ -13,7 +13,6 @@
 #include "retdec/llvmir2hll/ir/switch_stmt.h"
 #include "retdec/llvmir2hll/optimizer/func_optimizer.h"
 #include "retdec/llvmir2hll/support/debug.h"
-#include "retdec/llvmir2hll/support/maybe.h"
 #include "retdec/llvmir2hll/support/smart_ptr.h"
 
 namespace retdec {
@@ -108,7 +107,6 @@ class DeadCodeOptimizer final: public FuncOptimizer {
 public:
 	DeadCodeOptimizer(ShPtr<Module> module, ShPtr<ArithmExprEvaluator>
 		arithmExprEvaluator);
-	virtual ~DeadCodeOptimizer() override;
 
 	virtual std::string getId() const override { return "DeadCode"; }
 

@@ -9,6 +9,9 @@
 
 #include "fileinfo/file_information/file_information_types/flags.h"
 
+#include <limits>
+
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -19,14 +22,11 @@ namespace fileinfo {
 class DynamicEntry
 {
 	private:
-		std::string type;         ///< type of dynamic entry
-		std::string description;  ///< additional description
-		unsigned long long value; ///< value of dynamic entry
-		Flags flags;              ///< flags of dynamic entry
+		std::string type;
+		std::string description;
+		unsigned long long value = std::numeric_limits<unsigned long long>::max();
+		Flags flags;
 	public:
-		DynamicEntry();
-		~DynamicEntry();
-
 		/// @name Getters
 		/// @{
 		std::string getType() const;
@@ -56,5 +56,6 @@ class DynamicEntry
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

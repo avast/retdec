@@ -102,6 +102,7 @@ ShPtr<Expression> getExitCondition(ShPtr<Statement> loopEnd) {
 * @brief Splits the given "while True" loop @a stmt into three parts.
 *
 * @param[in] stmt "while True" loop to be splitted.
+* @param[in] indVarInfo
 *
 * See the description of SplittedWhileTrueLoop for more details.
 *
@@ -110,7 +111,9 @@ ShPtr<Expression> getExitCondition(ShPtr<Statement> loopEnd) {
 * If the loop either isn't a "while True" loop or it cannot be splitted into
 * the three parts, the null pointer is returned.
 */
-ShPtr<SplittedWhileTrueLoop> splitWhileTrueLoop(ShPtr<WhileLoopStmt> stmt) {
+ShPtr<SplittedWhileTrueLoop> splitWhileTrueLoop(
+		ShPtr<WhileLoopStmt> stmt,
+		ShPtr<IndVarInfo> indVarInfo) {
 	// It has to be a "while True" loop.
 	if (!isWhileTrueLoop(stmt)) {
 		return {};
@@ -136,23 +139,18 @@ ShPtr<SplittedWhileTrueLoop> splitWhileTrueLoop(ShPtr<WhileLoopStmt> stmt) {
 			continue;
 		}
 
-		// TODO Currently, if there is a compound statement other than the
-		// loop's end, we cannot make a deep clone of it. Indeed, recall that
-		// the clone() member function doesn't clone successors of nested
-		// statements. Consequently, we cannot optimize such loops at the
-		// moment.
-		if (currStmt->isCompound()) {
-			return {};
-		}
-
 		if (exitCond) {
 			// TODO This can be done more efficiently.
 			splittedLoop->afterLoopEndStmts = Statement::mergeStatements(
 				splittedLoop->afterLoopEndStmts, ucast<Statement>(currStmt->clone()));
 		} else {
 			// TODO This can be done more efficiently.
-			splittedLoop->beforeLoopEndStmts = Statement::mergeStatements(
-				splittedLoop->beforeLoopEndStmts, ucast<Statement>(currStmt->clone()));
+			if (indVarInfo == nullptr
+					|| !indVarInfo->updateBeforeExit
+					|| currStmt != indVarInfo->updateStmt) {
+				splittedLoop->beforeLoopEndStmts = Statement::mergeStatements(
+					splittedLoop->beforeLoopEndStmts, ucast<Statement>(currStmt->clone()));
+			}
 		}
 
 		currStmt = currStmt->getSuccessor();
@@ -186,12 +184,17 @@ ShPtr<IndVarInfo> getIndVarInfo(ShPtr<WhileLoopStmt> stmt) {
 
 	// Obtain the update statement of the induction variable. During this,
 	// get also the exit condition.
+	bool updateBeforeExit = false;
 	ShPtr<Statement> updateStmt;
 	ShPtr<Expression> exitCond;
 	auto currStmt = stmt->getBody();
 	while (currStmt) {
 		if (isLoopEnd(currStmt)) {
 			updateStmt = skipEmptyStmts(currStmt->getSuccessor());
+			if (!updateStmt) {
+				updateBeforeExit = true;
+				updateStmt = currStmt->getUniquePredecessor();
+			}
 			exitCond = getExitCondition(currStmt);
 			break;
 		}
@@ -201,7 +204,9 @@ ShPtr<IndVarInfo> getIndVarInfo(ShPtr<WhileLoopStmt> stmt) {
 	// Check that both the update statement and the exit condition exist, and
 	// that the update statement is a single statement (empty statements can
 	// be skipped).
-	if (!updateStmt || !exitCond || skipEmptyStmts(updateStmt->getSuccessor())) {
+	if (!updateStmt
+			|| !exitCond
+			|| (!updateBeforeExit && skipEmptyStmts(updateStmt->getSuccessor()))) {
 		// There is either no update statement or no exit condition.
 		return {};
 	}
@@ -244,8 +249,12 @@ ShPtr<IndVarInfo> getIndVarInfo(ShPtr<WhileLoopStmt> stmt) {
 
 	// TODO Check that indVar is used only on "safe" places, meaning that the
 	//      loop can be optimized into a for loop.
-
-	return std::make_shared<IndVarInfo>(initStmt, indVar, exitCond, updateStmt);
+	return std::make_shared<IndVarInfo>(
+			initStmt,
+			indVar,
+			exitCond,
+			updateStmt,
+			updateBeforeExit);
 }
 
 } // namespace llvmir2hll

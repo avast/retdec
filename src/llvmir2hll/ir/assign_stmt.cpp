@@ -19,17 +19,13 @@ namespace llvmir2hll {
 *
 * See create() for more information.
 */
-AssignStmt::AssignStmt(ShPtr<Expression> lhs, ShPtr<Expression> rhs):
-	lhs(lhs), rhs(rhs) {}
-
-/**
-* @brief Destructs the statement.
-*/
-AssignStmt::~AssignStmt() {}
+AssignStmt::AssignStmt(ShPtr<Expression> lhs, ShPtr<Expression> rhs, Address a):
+	Statement(a), lhs(lhs), rhs(rhs) {}
 
 ShPtr<Value> AssignStmt::clone() {
 	ShPtr<AssignStmt> assignStmt(AssignStmt::create(
-		ucast<Expression>(lhs->clone()), ucast<Expression>(rhs->clone())));
+		ucast<Expression>(lhs->clone()), ucast<Expression>(rhs->clone()),
+		nullptr, getAddress()));
 	assignStmt->setMetadata(getMetadata());
 	return assignStmt;
 }
@@ -109,16 +105,17 @@ void AssignStmt::setRhs(ShPtr<Expression> right) {
 * @param[in] lhs Left-hand side of the assignment.
 * @param[in] rhs Right-hand side of the assignment.
 * @param[in] succ Follower of the statement in the program flow.
+* @param[in] a Address.
 *
 * @par Preconditions
 *  - @a lhs and @a rhs are non-null
 */
 ShPtr<AssignStmt> AssignStmt::create(ShPtr<Expression> lhs, ShPtr<Expression> rhs,
-			ShPtr<Statement> succ) {
+			ShPtr<Statement> succ, Address a) {
 	PRECONDITION_NON_NULL(lhs);
 	PRECONDITION_NON_NULL(rhs);
 
-	ShPtr<AssignStmt> stmt(new AssignStmt(lhs, rhs));
+	ShPtr<AssignStmt> stmt(new AssignStmt(lhs, rhs, a));
 	stmt->setSuccessor(succ);
 
 	// Initialization (recall that shared_from_this() cannot be called in a

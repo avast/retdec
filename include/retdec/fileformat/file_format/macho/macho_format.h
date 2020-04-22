@@ -11,7 +11,6 @@
 
 #include <llvm/Object/MachO.h>
 #include <llvm/Object/MachOUniversal.h>
-#include <llvm/Support/MachO.h>
 
 #include "retdec/fileformat/file_format/file_format.h"
 
@@ -113,7 +112,8 @@ class MachOFormat : public FileFormat
 		std::unique_ptr<llvm::object::MachOUniversalBinary> fatFile; ///< parser of universal binary
 	public:
 		MachOFormat(std::string pathToFile, LoadFlags loadFlags = LoadFlags::NONE);
-		virtual ~MachOFormat() override;
+		MachOFormat(std::istream &inputStream, LoadFlags loadFlags = LoadFlags::NONE);
+		MachOFormat(const std::uint8_t *data, std::size_t size, LoadFlags loadFlags = LoadFlags::NONE);
 
 		/// @name Byte value storage methods
 		/// @{

@@ -1,0 +1,12 @@
+1 ?CancelWriteICR@@YGJPAPAUIComponentRecords@@@Z
+2 CreateComponentLibraryTS
+3 GetCatalogCRMClerk
+4 ?GetReadICR@@YGJHPAPAUIComponentRecords@@@Z
+5 ?GetWriteICR@@YGJPAPAUIComponentRecords@@@Z
+6 OpenComponentLibraryTS
+7 ?ReleaseReadICR@@YGXPAPAUIComponentRecords@@@Z
+8 ?SaveWriteICR@@YGJPAPAUIComponentRecords@@@Z
+9 DllCanUnloadNow
+10 DllGetClassObject
+11 DllRegisterServer
+12 DllUnregisterServer

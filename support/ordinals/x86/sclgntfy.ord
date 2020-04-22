@@ -1,0 +1,12 @@
+1 WLEventUnlock
+2 WLEventLogoff
+3 WLEventLogon
+4 WLEventUnlock
+5 WLEventUnlock
+6 WLEventUnlock
+7 WLEventUnlock
+8 WLEventUnlock
+9 WLEventUnlock
+10 DllRegisterServer
+11 DllUnregisterServer
+12 GenerateDefaultEFSRecoveryPolicy

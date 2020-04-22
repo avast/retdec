@@ -10,6 +10,7 @@
 #include "retdec/config/config.h"
 #include "fileinfo/file_presentation/file_presentation.h"
 
+namespace retdec {
 namespace fileinfo {
 
 class ConfigPresentation : public FilePresentation
@@ -35,5 +36,6 @@ class ConfigPresentation : public FilePresentation
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

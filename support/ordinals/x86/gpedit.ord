@@ -1,0 +1,15 @@
+100 CreateRSOPQuery
+101 FreeRSOPQuery
+102 FreeRSOPQueryResults
+103 RunRSOPQuery
+104 SetSysvolSecurityFromDSSecurity
+105 BrowseForGPO
+106 CreateGPOLink
+107 DeleteAllGPOLinks
+108 DeleteGPOLink
+109 DllCanUnloadNow
+110 DllGetClassObject
+111 DllRegisterServer
+112 DllUnregisterServer
+113 ExportRSoPData
+114 ImportRSoPData

@@ -1,0 +1,6 @@
+1 BatteryClassInitializeDevice
+2 BatteryClassIoctl
+3 BatteryClassQueryWmiDataBlock
+4 BatteryClassStatusNotify
+5 BatteryClassSystemControl
+6 BatteryClassUnload

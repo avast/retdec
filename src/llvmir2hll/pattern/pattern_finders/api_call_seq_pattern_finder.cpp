@@ -5,6 +5,7 @@
 */
 
 #include <map>
+#include <optional>
 
 #include "retdec/llvmir2hll/analysis/value_analysis.h"
 #include "retdec/llvmir2hll/ir/call_expr.h"
@@ -52,9 +53,9 @@ using APICallInfoSeqMap = std::multimap<std::string, APICallInfoSeq>;
 void parseAndAddAPICallInfoSeqToMap(APICallInfoSeqMap &map,
 		const std::string &funcName, const std::string &seqTextRepr) {
 	static ShPtr<APICallInfoSeqParser> parser(APICallInfoSeqParser::create());
-	Maybe<APICallInfoSeq> seq(parser->parse(seqTextRepr));
+	std::optional<APICallInfoSeq> seq(parser->parse(seqTextRepr));
 	if (seq) {
-		map.insert(std::make_pair(funcName, seq.get()));
+		map.insert(std::make_pair(funcName, seq.value()));
 	} else {
 		printErrorMessage(
 			"APICallInfoSeqParser failed to parse the following pattern: ",
@@ -1101,11 +1102,6 @@ const APICallInfoSeqMap &API_CALL_INFO_SEQ_MAP(initAPICallInfoSeqMap());
 APICallSeqPatternFinder::APICallSeqPatternFinder(
 	ShPtr<ValueAnalysis> va, ShPtr<CallInfoObtainer> cio):
 		PatternFinder(va, cio), foundPatterns() {}
-
-/**
-* @brief Destructs the finder.
-*/
-APICallSeqPatternFinder::~APICallSeqPatternFinder() {}
 
 /**
 * @brief Creates and returns a new instance of APICallSeqPatternFinder.

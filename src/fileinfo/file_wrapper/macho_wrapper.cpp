@@ -4,13 +4,12 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include <llvm/Support/MachO.h>
-
 #include "fileinfo/file_wrapper/macho_wrapper.h"
 
 using namespace llvm::MachO;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -19,14 +18,6 @@ namespace fileinfo {
  * @param loadFlags Load flags
  */
 MachOWrapper::MachOWrapper(std::string pathToFile, retdec::fileformat::LoadFlags loadFlags) : MachOFormat(pathToFile, loadFlags)
-{
-
-}
-
-/**
- * Destructor
- */
-MachOWrapper::~MachOWrapper()
 {
 
 }
@@ -78,3 +69,4 @@ std::string MachOWrapper::getTypeOfFile() const
 }
 
 } // namespace fileinfo
+} // namespace retdec

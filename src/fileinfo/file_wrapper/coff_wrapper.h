@@ -11,6 +11,7 @@
 #include "fileinfo/file_information/file_information_types/file_section.h"
 #include "fileinfo/file_information/file_information_types/symbol_table/symbol.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -20,7 +21,6 @@ class CoffWrapper : public retdec::fileformat::CoffFormat
 {
 	public:
 		CoffWrapper(std::string pathToFile, retdec::fileformat::LoadFlags loadFlags);
-		virtual ~CoffWrapper() override;
 
 		/// @name Detection methods
 		/// {
@@ -30,5 +30,6 @@ class CoffWrapper : public retdec::fileformat::CoffFormat
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

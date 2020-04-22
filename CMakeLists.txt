@@ -1,5 +1,14 @@
-cmake_minimum_required(VERSION 3.6)
-project(retdec C CXX)
+
+cmake_minimum_required(VERSION 3.8)
+
+project(retdec
+	LANGUAGES C CXX
+	VERSION 4.0
+)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Set the default build type to 'Release'.
 if(NOT CMAKE_BUILD_TYPE)
@@ -8,25 +17,43 @@ if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "${default_build_type}" CACHE STRING "Choose the type of build." FORCE)
 endif()
 
-option(RETDEC_DOC "Build public API documentation (requires Doxygen)." OFF)
-option(RETDEC_TESTS "Build tests." OFF)
-option(RETDEC_DEV_TOOLS "Build dev tools." OFF)
-option(RETDEC_FORCE_OPENSSL_BUILD "Force OpenSSL build." OFF)
-
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+## Includes.
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/utils.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/options.cmake)
 
 # RetDec, and some dependencies (e.g. LLVM, Keystone), require Python 3.
 find_package(PythonInterp 3.4 REQUIRED)
 
-function(append_if condition value)
-	if (${condition})
-		foreach(variable ${ARGN})
-			set(${variable} "${${variable}} ${value}" PARENT_SCOPE)
-		endforeach(variable)
-	endif()
-endfunction()
+### Variables.
+
+## Repository directories.
+set(RETDEC_CMAKE_DIR                "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+set(RETDEC_DEPS_DIR                 "${CMAKE_CURRENT_SOURCE_DIR}/deps")
+set(RETDEC_DOC_DIR                  "${CMAKE_CURRENT_SOURCE_DIR}/doc")
+set(RETDEC_INCLUDE_DIR              "${CMAKE_CURRENT_SOURCE_DIR}/include")
+set(RETDEC_SCRIPTS_DIR              "${CMAKE_CURRENT_SOURCE_DIR}/scripts")
+set(RETDEC_SOURCE_DIR               "${CMAKE_CURRENT_SOURCE_DIR}/src")
+set(RETDEC_SUPPORT_DIR              "${CMAKE_CURRENT_SOURCE_DIR}/support")
+set(RETDEC_TESTS_DIR                "${CMAKE_CURRENT_SOURCE_DIR}/tests")
+## Installation directories.
+# Bins.
+set(RETDEC_INSTALL_BIN_DIR          "${CMAKE_INSTALL_BINDIR}")
+set(RETDEC_INSTALL_BIN_DIR_ABS      "${CMAKE_INSTALL_PREFIX}/${RETDEC_INSTALL_BIN_DIR}")
+set(RETDEC_INSTALL_TESTS_DIR        "${RETDEC_INSTALL_BIN_DIR}")
+# Includes.
+set(RETDEC_INSTALL_INCLUDE_DIR      "${CMAKE_INSTALL_INCLUDEDIR}")
+set(RETDEC_INSTALL_DEPS_INCLUDE_DIR "${RETDEC_INSTALL_INCLUDE_DIR}/retdec")
+# Libs.
+set(RETDEC_INSTALL_LIB_DIR          "${CMAKE_INSTALL_LIBDIR}")
+set(RETDEC_INSTALL_LIB_DIR_ABS      "${CMAKE_INSTALL_PREFIX}/${RETDEC_INSTALL_LIB_DIR}")
+# Data.
+set(RETDEC_INSTALL_DATA_DIR         "${CMAKE_INSTALL_DATADIR}/retdec")
+set(RETDEC_INSTALL_CMAKE_DIR        "${RETDEC_INSTALL_DATA_DIR}/cmake")
+set(RETDEC_INSTALL_DOC_DIR          "${RETDEC_INSTALL_DATA_DIR}/doc")
+set(RETDEC_INSTALL_SUPPORT_DIR      "${RETDEC_INSTALL_DATA_DIR}/support")
+set(RETDEC_INSTALL_SUPPORT_DIR_ABS  "${CMAKE_INSTALL_PREFIX}/${RETDEC_INSTALL_SUPPORT_DIR}")
 
 # On Linux and macOS, set RPATH relative to the origin of the installed
 # executables (i.e. relative to the bin directory). This allows us to move the
@@ -38,7 +65,7 @@ endfunction()
 # bin directory, where they are automatically picked up by executables.
 #
 # For more details, see
-#  - https://github.com/avast-tl/retdec/issues/77
+#  - https://github.com/avast/retdec/issues/77
 #  - https://cmake.org/Wiki/CMake_RPATH_handling
 if(APPLE)
 	set(CMAKE_INSTALL_RPATH "@executable_path/../lib")
@@ -71,6 +98,22 @@ if(MSVC)
 	else()
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W0")
 	endif()
+	add_definitions(-D_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING)
+
+	if(RETDEC_MSVC_STATIC_RUNTIME)
+		string(REPLACE "/MD" "/MT" CMAKE_CXX_FLAGS_RELWITHDEBINFO ${CMAKE_CXX_FLAGS_RELWITHDEBINFO})
+		string(REPLACE "/MD" "/MT" CMAKE_C_FLAGS_RELWITHDEBINFO ${CMAKE_C_FLAGS_RELWITHDEBINFO})
+
+		string(REPLACE "/MD" "/MT" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
+		string(REPLACE "/MD" "/MT" CMAKE_C_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE})
+
+		string(REPLACE "/MDd" "/MT" CMAKE_CXX_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_DEBUG})
+		string(REPLACE "/MDd" "/MT" CMAKE_C_FLAGS_DEBUG ${CMAKE_C_FLAGS_DEBUG})
+
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /MT")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MT")
+		set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
+	endif()
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR
 		CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR
 		CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
@@ -94,15 +137,59 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-parameter")
 endif()
 
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/install-external.cmake)
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/utils.cmake)
-
 add_subdirectory(deps)
-if(RETDEC_DOC)
-	add_subdirectory(doc)
-endif()
-add_subdirectory(scripts)
+cond_add_subdirectory(doc RETDEC_DOC)
+cond_add_subdirectory(scripts RETDEC_ENABLE_SCRIPTS)
 add_subdirectory(src)
-if(RETDEC_TESTS)
-	add_subdirectory(tests)
-endif()
+cond_add_subdirectory(support RETDEC_ENABLE_SUPPORT)
+add_subdirectory(tests)
+
+# Create config version file.
+write_basic_package_version_file(
+	"${CMAKE_CURRENT_BINARY_DIR}/retdec-config-version.cmake"
+	VERSION ${PROJECT_VERSION}
+	COMPATIBILITY ExactVersion
+)
+
+# Create main RetDec CMake config file.
+configure_file(
+	"${CMAKE_CURRENT_LIST_DIR}/retdec-config.cmake"
+	"${CMAKE_CURRENT_BINARY_DIR}/retdec-config.cmake"
+	@ONLY
+)
+
+# Install CMake files.
+install(
+	FILES
+		"${CMAKE_CURRENT_BINARY_DIR}/retdec-config.cmake"
+		"${CMAKE_CURRENT_BINARY_DIR}/retdec-config-version.cmake"
+	DESTINATION
+		"${RETDEC_INSTALL_CMAKE_DIR}"
+)
+
+# Install licenses, readme, changelog, etc.
+install(
+	FILES
+		CHANGELOG.md
+		LICENSE
+		LICENSE-PELIB
+		LICENSE-THIRD-PARTY
+		README.md
+	DESTINATION
+		"${RETDEC_INSTALL_DATA_DIR}"
+)
+
+# Install commit id file.
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/GetGitRevisionDescription.cmake)
+get_git_head_revision(GIT_REFSPEC GIT_COMMIT)
+string(TIMESTAMP DATE UTC)
+file(WRITE
+	"${CMAKE_CURRENT_BINARY_DIR}/BUILD-ID"
+	"This build was generated from commit ${GIT_COMMIT} on ${DATE} (UTC)."
+)
+install(
+	FILES
+		"${CMAKE_CURRENT_BINARY_DIR}/BUILD-ID"
+	DESTINATION
+		"${RETDEC_INSTALL_DATA_DIR}"
+)

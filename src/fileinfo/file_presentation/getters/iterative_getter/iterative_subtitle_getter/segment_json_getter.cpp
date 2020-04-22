@@ -11,6 +11,7 @@
 using namespace retdec::utils;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -35,14 +36,6 @@ SegmentJsonGetter::SegmentJsonGetter(FileInformation &fileInfo) : IterativeSubti
 	commonHeaderElements.push_back("crc32");
 	commonHeaderElements.push_back("md5");
 	commonHeaderElements.push_back("sha256");
-}
-
-/**
- * Destructor
- */
-SegmentJsonGetter::~SegmentJsonGetter()
-{
-
 }
 
 std::size_t SegmentJsonGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const
@@ -92,3 +85,4 @@ bool SegmentJsonGetter::getFlags(std::size_t structIndex, std::size_t recIndex, 
 }
 
 } // namespace fileinfo
+} // namespace retdec

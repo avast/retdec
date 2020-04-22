@@ -27,11 +27,6 @@ ModifiedBeforeReadCFGTraversal::ModifiedBeforeReadCFGTraversal(ShPtr<Variable> v
 	wasModifiedBeforeEveryRead(true) {}
 
 /**
-* @brief Destructs the traverser.
-*/
-ModifiedBeforeReadCFGTraversal::~ModifiedBeforeReadCFGTraversal() {}
-
-/**
 * @brief Returns @c true if the given variable @a var is modified prior to
 *        every read access to it in @a cfg, starting from @a startStmt.
 *

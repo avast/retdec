@@ -6,7 +6,12 @@
 
 #include <regex>
 
-#include "retdec/fileformat-libdwarf-interface/bin_interface.h"
+#include <llvm/DebugInfo/DIContext.h>
+#include <llvm/DebugInfo/DWARF/DWARFContext.h>
+#include <llvm/Object/ObjectFile.h>
+#include <llvm/Support/Debug.h>
+#include <llvm/Support/Format.h>
+#include <llvm/Support/MemoryBuffer.h>
 
 #include "retdec/utils/container.h"
 #include "retdec/utils/conversion.h"
@@ -70,66 +75,66 @@ const std::vector<std::pair<std::string, std::size_t>> delphiStrings =
 /**
  * Get name of original programming language as string
  */
-bool getDwarfLanguageString(Dwarf_Unsigned langCode, std::string &result)
+bool getDwarfLanguageString(uint64_t langCode, std::string &result)
 {
 	switch(langCode)
 	{
-		case DW_LANG_C:
-		case DW_LANG_C89:
-		case DW_LANG_C99:
+		case llvm::dwarf::DW_LANG_C:
+		case llvm::dwarf::DW_LANG_C89:
+		case llvm::dwarf::DW_LANG_C99:
 			result = "C";
 			return true;
-		case DW_LANG_C_plus_plus:
+		case llvm::dwarf::DW_LANG_C_plus_plus:
 			result = "C++";
 			return true;
-		case DW_LANG_ObjC:
+		case llvm::dwarf::DW_LANG_ObjC:
 			result = "Objective-C";
 			return true;
-		case DW_LANG_ObjC_plus_plus:
+		case llvm::dwarf::DW_LANG_ObjC_plus_plus:
 			result = "Objective-C++";
 			return true;
-		case DW_LANG_Ada83:
-		case DW_LANG_Ada95:
+		case llvm::dwarf::DW_LANG_Ada83:
+		case llvm::dwarf::DW_LANG_Ada95:
 			result = "Ada";
 			return true;
-		case DW_LANG_Cobol74:
-		case DW_LANG_Cobol85:
+		case llvm::dwarf::DW_LANG_Cobol74:
+		case llvm::dwarf::DW_LANG_Cobol85:
 			result = "Cobol";
 			return true;
-		case DW_LANG_Fortran77:
-		case DW_LANG_Fortran90:
-		case DW_LANG_Fortran95:
+		case llvm::dwarf::DW_LANG_Fortran77:
+		case llvm::dwarf::DW_LANG_Fortran90:
+		case llvm::dwarf::DW_LANG_Fortran95:
 			result = "Fortran";
 			return true;
-		case DW_LANG_Modula2:
-		case DW_LANG_Modula3:
+		case llvm::dwarf::DW_LANG_Modula2:
+		case llvm::dwarf::DW_LANG_Modula3:
 			result = "Modula";
 			return true;
-		case DW_LANG_Java:
+		case llvm::dwarf::DW_LANG_Java:
 			result = "Java";
 			return true;
-		case DW_LANG_Pascal83:
+		case llvm::dwarf::DW_LANG_Pascal83:
 			result = "Pascal";
 			return true;
-		case DW_LANG_PLI:
+		case llvm::dwarf::DW_LANG_PLI:
 			result = "PL/I";
 			return true;
-		case DW_LANG_UPC:
+		case llvm::dwarf::DW_LANG_UPC:
 			result = "Unified Parallel C";
 			return true;
-		case DW_LANG_D:
+		case llvm::dwarf::DW_LANG_D:
 			result = "D";
 			return true;
-		case DW_LANG_Python:
+		case llvm::dwarf::DW_LANG_Python:
 			result = "Python";
 			return true;
-		case DW_LANG_OpenCL:
+		case llvm::dwarf::DW_LANG_OpenCL:
 			result = "Open Computing Language";
 			return true;
-		case DW_LANG_Go:
+		case llvm::dwarf::DW_LANG_Go:
 			result = "Go";
 			return true;
-		case DW_LANG_Haskel:
+		case llvm::dwarf::DW_LANG_Haskell:
 			result = "Haskell";
 			return true;
 		default:
@@ -252,14 +257,6 @@ Heuristics::Heuristics(
 	}
 
 	noOfSections = sections.size();
-}
-
-/**
- * Destructor
- */
-Heuristics::~Heuristics()
-{
-
 }
 
 /**
@@ -660,79 +657,58 @@ void Heuristics::getDwarfInfo()
 	std::vector<std::string> languages;
 	std::vector<std::size_t> modulesCounter;
 
-	BinInt binInt(fileParser.getPathToFile(), &fileParser);
-	if (!binInt.success())
+	// Open input file as buffer.
+	//
+	llvm::ErrorOr<std::unique_ptr<llvm::MemoryBuffer>> buffOrErr =
+			llvm::MemoryBuffer::getFileOrSTDIN(fileParser.getPathToFile());
+	if (buffOrErr.getError())
+	{
+		return;
+	}
+	std::unique_ptr<llvm::MemoryBuffer> bufferPtr = std::move(buffOrErr.get());
+	llvm::MemoryBufferRef buffer = *bufferPtr;
+
+	// Open buffer as a binary file.
+	//
+	llvm::Expected<std::unique_ptr<llvm::object::Binary>> binOrErr
+			= llvm::object::createBinary(buffer);
+	auto binErr = errorToErrorCode(binOrErr.takeError());
+	if (binErr)
 	{
 		return;
 	}
 
-	Dwarf_Handler eh = nullptr;
-	Dwarf_Ptr ea = nullptr;
-	Dwarf_Debug dbg;
-	Dwarf_Error err;
-	if (dwarf_object_init(binInt.getInt(), eh, ea, &dbg, &err) != DW_DLV_OK)
+	// Handle different flavours of binary files.
+	//
+	auto* obj = llvm::dyn_cast<llvm::object::ObjectFile>(binOrErr->get());
+	if (obj == nullptr)
 	{
+		// There might be other flavours than llvm::object::ObjectFile.
+		// E.g. llvm::object::MachOUniversalBinary, llvm::object::Archive>
+		// These are unhandled at the moment.
 		return;
 	}
+	std::unique_ptr<llvm::DWARFContext> DICtx = llvm::DWARFContext::create(*obj);
 
-	Dwarf_Unsigned cu_header_length = 0;
-	Dwarf_Half version_stamp = 0;
-	Dwarf_Unsigned abbrev_offset = 0;
-	Dwarf_Half address_size = 0;
-	Dwarf_Half offset_size = 0;
-	Dwarf_Half extension_size = 0;
-	Dwarf_Sig8 signature;
-	Dwarf_Unsigned typeoffset = 0;
-	Dwarf_Unsigned next_cu_header = 0;
-	Dwarf_Bool is_info = true;
-
-	while (dwarf_next_cu_header_c(
-				dbg,
-				is_info,
-				&cu_header_length,
-				&version_stamp,
-				&abbrev_offset,
-				&address_size,
-				&offset_size,
-				&extension_size,
-				&signature,
-				&typeoffset,
-				&next_cu_header,
-				&err) == DW_DLV_OK)
+	// Inspect compilation unit DIEs.
+	//
+	for (auto& unit : DICtx->compile_units())
 	{
-		Dwarf_Die cuDie = nullptr;
+		auto unitDie = unit->getUnitDIE(true);
 
-		// CU have single sibling - CU DIE
-		// nullptr - descriptor of first die in CU
-		if (dwarf_siblingof_b(dbg, nullptr, is_info, &cuDie, &err) != DW_DLV_OK)
+		if (auto p = llvm::dwarf::toString(unitDie.find(
+				llvm::dwarf::DW_AT_producer)))
 		{
-			return;
-		}
-
-		Dwarf_Half tag = 0;
-		if (dwarf_tag(cuDie, &tag, &err) != DW_DLV_OK
-				|| tag != DW_TAG_compile_unit)
-		{
-			dwarf_dealloc(dbg, cuDie, DW_DLA_DIE);
-			return;
-		}
-
-		Dwarf_Attribute attr;
-		char* name = nullptr;
-		if (dwarf_attr(cuDie, DW_AT_producer, &attr, &err) == DW_DLV_OK
-				&& dwarf_formstring(attr, &name, &err) == DW_DLV_OK
-				&& name)
-		{
-			std::string producer = name;
+			std::string producer = p.getValue();
 			parseGccProducer(producer)
 					|| parseClangProducer(producer)
 					|| parseTmsProducer(producer);
 		}
 
-		Dwarf_Unsigned language;
-		if (dwarf_attr(cuDie, DW_AT_language, &attr, &err) == DW_DLV_OK
-				&& dwarf_formudata(attr, &language, &err) == DW_DLV_OK)
+		if (auto l = llvm::dwarf::toUnsigned(unitDie.find(
+				llvm::dwarf::DW_AT_language)))
 		{
+			uint64_t language = l.getValue();
 			if (getDwarfLanguageString(language, lang))
 			{
 				if (addUniqueValue(languages, lang, langIndex))
@@ -745,11 +721,7 @@ void Heuristics::getDwarfInfo()
 				}
 			}
 		}
-
-		dwarf_dealloc(dbg, cuDie, DW_DLA_DIE);
 	}
-
-	dwarf_object_finish(dbg, &err);
 
 	const auto noOfLanguages = modulesCounter.size();
 	if (noOfLanguages == 1)

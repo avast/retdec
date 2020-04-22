@@ -10,7 +10,9 @@
 #include <cstdint>
 #include <vector>
 
-#include "retdec/unpacker/dynamic_buffer.h"
+#include "retdec/utils/dynamic_buffer.h"
+
+using namespace retdec::utils;
 
 namespace retdec {
 namespace unpacker {
@@ -26,7 +28,7 @@ public:
 	CompressedData() = delete;
 	CompressedData(const DynamicBuffer& buffer) : _buffer(buffer) {} ///< Constructor.
 	CompressedData(const CompressedData& data) : _buffer(data._buffer) {} ///< Copy constructor.
-	virtual ~CompressedData() {} ///< Destructor.
+	virtual ~CompressedData() = default;
 
 	/**
 	 * Returns the buffer containing compressed data.

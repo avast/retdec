@@ -42,11 +42,6 @@ IfStructureOptimizer::IfStructureOptimizer(ShPtr<Module> module):
 		PRECONDITION_NON_NULL(module);
 	}
 
-/**
-* @brief Destructs the optimizer.
-*/
-IfStructureOptimizer::~IfStructureOptimizer() {}
-
 void IfStructureOptimizer::visit(ShPtr<IfStmt> stmt) {
 	// First of all, visit nested and subsequent statements.
 	FuncOptimizer::visit(stmt);

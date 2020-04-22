@@ -1,0 +1,5 @@
+3 GetProxyDllInfo
+4 DllCanUnloadNow
+5 DllGetClassObject
+6 DllRegisterServer
+7 DllUnregisterServer

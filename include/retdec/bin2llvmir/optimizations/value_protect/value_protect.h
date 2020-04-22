@@ -31,7 +31,7 @@ namespace bin2llvmir {
  *
  * Every even run generates these protections.
  * Every odd run removes them
- * (partially, see https://github.com/avast-tl/retdec/issues/301).
+ * (partially, see https://github.com/avast/retdec/issues/301).
  */
 class ValueProtect : public llvm::ModulePass
 {
@@ -45,7 +45,7 @@ class ValueProtect : public llvm::ModulePass
 		bool run();
 		bool protect();
 		bool protectStack();
-		bool protectRegisters();
+		bool protectRegisters(bool skipCalledFunctions = true);
 		bool protectLoadStores();
 		bool unprotect();
 

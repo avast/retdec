@@ -27,7 +27,6 @@ class LLVM_LIBRARY_VISIBILITY Idioms: public llvm::FunctionPass {
 public:
 	static char ID;
 	Idioms();
-	virtual ~Idioms() override;
 
 	virtual bool runOnFunction(llvm::Function & f) override;
 	virtual bool doInitialization(llvm::Module & M) override;
@@ -36,7 +35,7 @@ public:
 	IdiomsAnalysis * getCompilerAnalysis(llvm::Module & M);
 
 private:
-	IdiomsAnalysis * m_idioms;
+	IdiomsAnalysis * m_idioms = nullptr;
 	Config* m_config = nullptr;
 };
 

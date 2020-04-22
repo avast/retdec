@@ -9,6 +9,7 @@
 
 #include "fileinfo/file_presentation/getters/simple_getter/simple_getter.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -18,11 +19,11 @@ class PdbJsonGetter : public SimpleGetter
 {
 	public:
 		PdbJsonGetter(FileInformation &fileInfo);
-		virtual ~PdbJsonGetter() override;
 
 		virtual std::size_t loadInformation(std::vector<std::string> &desc, std::vector<std::string> &info) const override;
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

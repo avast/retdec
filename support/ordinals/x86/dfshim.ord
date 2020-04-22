@@ -1,0 +1,17 @@
+1 KillService
+2 ShArpMaintain
+3 ShArpMaintainW
+4 ShOpenVerbApplication
+5 ShOpenVerbApplicationW
+6 ShOpenVerbShortcut
+7 ShOpenVerbShortcutW
+8 CleanOnlineAppCache
+9 CreateActContext
+10 CreateCMSFromXml
+11 DllCanUnloadNow
+12 DllGetClassObject
+13 GetCurrentActContext
+14 GetDeploymentDataFromManifest
+15 GetUserStateManager
+16 GetUserStore
+17 ParseManifest

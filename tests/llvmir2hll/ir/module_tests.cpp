@@ -285,6 +285,55 @@ HasUserDefinedFuncsReturnsTrueWhenThereIsDefinitionOfUserDefinedFunc) {
 }
 
 //
+// getDecompilerDefinedFuncs()
+//
+
+TEST_F(ModuleTests,
+GetDecompilerDefinedFuncsReturnsEmptySetWhenThereAreNoFuncs) {
+	ASSERT_EQ(FuncSet(), module->getDecompilerDefinedFuncs());
+}
+
+TEST_F(ModuleTests,
+GetDecompilerDefinedFuncsReturnsCorrectValueWhenThereAreDecompilerDefinedFunc) {
+	// Check that both declarations and definitions are checked.
+	auto myFunc1 = addFuncDecl("my_func1");
+	EXPECT_CALL(*configMock, isDecompilerDefinedFunc(myFunc1->getName()))
+		.WillOnce(Return(true));
+	auto myFunc2 = addFuncDef("my_func2");
+	EXPECT_CALL(*configMock, isDecompilerDefinedFunc(myFunc2->getName()))
+		.WillOnce(Return(true));
+
+	ASSERT_EQ(FuncSet({myFunc1, myFunc2}), module->getDecompilerDefinedFuncs());
+}
+
+//
+// hasDecompilerDefinedFuncs()
+//
+
+TEST_F(ModuleTests,
+HasDecompilerDefinedFuncsReturnsFalseWhenThereAreNoFuncs) {
+	ASSERT_FALSE(module->hasDecompilerDefinedFuncs());
+}
+
+TEST_F(ModuleTests,
+HasDecompilerDefinedFuncsReturnsTrueWhenThereIsDeclarationOfDecompilerDefinedFunc) {
+	auto myFunc = addFuncDecl("my_func");
+	EXPECT_CALL(*configMock, isDecompilerDefinedFunc(myFunc->getName()))
+		.WillOnce(Return(true));
+
+	ASSERT_TRUE(module->hasDecompilerDefinedFuncs());
+}
+
+TEST_F(ModuleTests,
+HasDecompilerDefinedFuncsReturnsTrueWhenThereIsDefinitionOfDecompilerDefinedFunc) {
+	auto myFunc = addFuncDef("my_func");
+	EXPECT_CALL(*configMock, isDecompilerDefinedFunc(myFunc->getName()))
+		.WillOnce(Return(true));
+
+	ASSERT_TRUE(module->hasDecompilerDefinedFuncs());
+}
+
+//
 // getUserDefinedFuncs()
 //
 
@@ -524,19 +573,6 @@ GetDemangledNameOfFuncReturnsCorrectValue) {
 		.WillOnce(Return(DEMANGLED_NAME));
 
 	ASSERT_EQ(DEMANGLED_NAME, module->getDemangledNameOfFunc(myFunc));
-}
-
-//
-// getNamesOfFuncsFixedWithLLVMIRFixer()
-//
-
-TEST_F(ModuleTests,
-GetNamesOfFuncsFixedWithLLVMIRFixerReturnsCorrectValue) {
-	auto FIXED_FUNCS = StringSet({"func1", "func2"});
-	EXPECT_CALL(*configMock, getFuncsFixedWithLLVMIRFixer())
-		.WillOnce(Return(FIXED_FUNCS));
-
-	ASSERT_EQ(FIXED_FUNCS, module->getNamesOfFuncsFixedWithLLVMIRFixer());
 }
 
 //

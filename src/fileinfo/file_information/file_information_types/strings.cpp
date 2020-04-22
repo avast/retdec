@@ -9,15 +9,8 @@
 
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
-
-/**
- * Constructor
- */
-Strings::Strings() : strings(nullptr)
-{
-
-}
 
 std::size_t Strings::getNumberOfStrings() const
 {
@@ -67,3 +60,4 @@ bool Strings::hasRecords() const
 }
 
 } // namespace fileinfo
+} // namespace retdec

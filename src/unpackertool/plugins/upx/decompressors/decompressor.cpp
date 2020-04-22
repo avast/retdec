@@ -8,25 +8,12 @@
 #include "unpackertool/plugins/upx/upx.h"
 #include "unpackertool/plugins/upx/upx_exceptions.h"
 
+using namespace retdec::utils;
 using namespace retdec::unpacker;
 
 namespace retdec {
 namespace unpackertool {
 namespace upx {
-
-/**
- * Constructor.
- */
-Decompressor::Decompressor()
-{
-}
-
-/**
- * Destructor.
- */
-Decompressor::~Decompressor()
-{
-}
 
 /**
  * Performs decompression using provided compressed data and decompresses it into provided buffer.

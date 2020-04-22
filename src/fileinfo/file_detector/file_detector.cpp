@@ -6,7 +6,7 @@
 
 #include <memory>
 
-#include <tinyxml2.h>
+#include <tinyxml2/tinyxml2.h>
 
 #include "retdec/fileformat/file_format/file_format.h"
 #include "fileinfo/file_detector/file_detector.h"
@@ -16,6 +16,7 @@ using namespace retdec::utils;
 using namespace retdec::cpdetect;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -23,18 +24,19 @@ namespace fileinfo {
  *
  * Constructor in subclass must initialize members @a fileParser and @a loaded.
  */
-FileDetector::FileDetector(std::string pathToInputFile, FileInformation &finfo, retdec::cpdetect::DetectParams &searchPar, retdec::fileformat::LoadFlags loadFlags) :
-	fileInfo(finfo), cpParams(searchPar), fileConfig(nullptr), fileParser(nullptr), loaded(false), loadFlags(loadFlags)
+FileDetector::FileDetector(
+		const std::string & pathToInputFile,
+		FileInformation &finfo,
+		retdec::cpdetect::DetectParams &searchPar,
+		retdec::fileformat::LoadFlags loadFlags)
+		: fileInfo(finfo)
+		, cpParams(searchPar)
+		, fileConfig(nullptr)
+		, fileParser(nullptr)
+		, loadFlags(loadFlags)
+		, loaded(false)
 {
 	fileInfo.setPathToFile(pathToInputFile);
-}
-
-/**
- * Destructor
- */
-FileDetector::~FileDetector()
-{
-
 }
 
 /**
@@ -111,8 +113,13 @@ void FileDetector::getOverlayInfo()
 	const auto size = fileParser->getOverlaySize();
 	if(size)
 	{
+		double entropy;
 		fileInfo.setOverlayOffset(fileParser->getDeclaredFileLength());
 		fileInfo.setOverlaySize(size);
+		if(fileParser->getOverlayEntropy(entropy))
+		{
+			fileInfo.setOverlayEntropy(entropy);
+		}
 	}
 }
 
@@ -208,9 +215,16 @@ void FileDetector::getCertificates()
 }
 
 /**
+ * Get information about TLS
+ */
+void FileDetector::getTlsInfo()
+{
+	fileInfo.setTlsInfo(fileParser->getTlsInfo());
+}
+
+/**
  * Get loader information
  */
-
 void FileDetector::getLoaderInfo()
 {
 	// Propagate loader error no matter if the Image pointer will be created or not
@@ -239,6 +253,14 @@ void FileDetector::getLoaderInfo()
 	{
 		fileInfo.setLoaderStatusMessage(image->getStatusMessage());
 	}
+}
+
+/**
+ * Get anomalies
+ */
+void FileDetector::getAnomalies()
+{
+	fileInfo.setAnomalies(fileParser->getAnomalies());
 }
 
 /**
@@ -277,7 +299,26 @@ void FileDetector::getLoaderInfo()
 void FileDetector::setConfigFile(retdec::config::Config &config)
 {
 	fileConfig = &config;
-	fileParser->initFromConfig(config);
+
+	auto& ca = config.architecture;
+	auto endian = ca.isEndianUnknown()
+			? fileParser->getEndianness()
+			: (ca.isEndianLittle()
+					? retdec::utils::Endianness::LITTLE
+					: retdec::utils::Endianness::BIG);
+	auto arch = retdec::fileformat::Architecture::UNKNOWN;
+	if (ca.isX86()) arch = retdec::fileformat::Architecture::X86;
+	if (ca.isX86_64()) arch = retdec::fileformat::Architecture::X86_64;
+	if (ca.isArm32OrThumb()) arch = retdec::fileformat::Architecture::ARM;
+	if (ca.isPpc()) arch = retdec::fileformat::Architecture::POWERPC;
+	if (ca.isMipsOrPic32()) arch = retdec::fileformat::Architecture::MIPS;
+
+	fileParser->initArchitecture(
+			arch,
+			endian,
+			config.architecture.getByteSize(),
+			config.getEntryPoint(),
+			config.getSectionVMA());
 }
 
 /**
@@ -304,8 +345,10 @@ void FileDetector::getAllInformation()
 		getHashes();
 		getAdditionalInfo();
 		getCertificates();
+		getTlsInfo();
 		getLoaderInfo();
 		getStrings();
+		getAnomalies();
 	}
 }
 
@@ -319,3 +362,4 @@ const retdec::fileformat::FileFormat* FileDetector::getFileParser() const
 }
 
 } // namespace fileinfo
+} // namespace retdec

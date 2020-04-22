@@ -6,6 +6,7 @@
 
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_simple_getter/iterative_simple_getter.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -16,14 +17,6 @@ namespace fileinfo {
  * are described in constructor of superclass.
  */
 IterativeSimpleGetter::IterativeSimpleGetter(FileInformation &fileInfo) : IterativeGetter(fileInfo)
-{
-
-}
-
-/**
- * Destructor
- */
-IterativeSimpleGetter::~IterativeSimpleGetter()
 {
 
 }
@@ -54,3 +47,4 @@ void IterativeSimpleGetter::getElementHeader(std::string &elemHeader) const
  */
 
 } // namespace fileinfo
+} // namespace retdec

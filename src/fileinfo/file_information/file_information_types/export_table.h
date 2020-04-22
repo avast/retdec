@@ -9,6 +9,7 @@
 
 #include "retdec/fileformat/types/export_table/export_table.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -17,11 +18,8 @@ namespace fileinfo {
 class ExportTable
 {
 	private:
-		const retdec::fileformat::ExportTable *table;
+		const retdec::fileformat::ExportTable *table = nullptr;
 	public:
-		ExportTable();
-		~ExportTable();
-
 		/// @name Getters
 		/// @{
 		std::size_t getNumberOfExports() const;
@@ -45,5 +43,6 @@ class ExportTable
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

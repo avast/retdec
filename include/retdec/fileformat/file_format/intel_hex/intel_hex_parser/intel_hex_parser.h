@@ -11,7 +11,7 @@
 #include <iostream>
 #include <vector>
 
-#include "retdec/utils/address.h"
+#include "retdec/common/address.h"
 #include "retdec/fileformat/file_format/intel_hex/intel_hex_parser/intel_hex_tokenizer.h"
 
 namespace retdec {
@@ -24,11 +24,8 @@ class IntelHexSection
 {
 	public:
 		unsigned long long index = 0;
-		retdec::utils::Address address;
+		retdec::common::Address address;
 		std::vector<unsigned char> data;
-
-		IntelHexSection();
-		~IntelHexSection();
 
 		/// @name Operators
 		/// @{
@@ -51,7 +48,7 @@ class IntelHexParser
 		std::uint16_t CS;                      ///< Entry point segment (CS register)
 		std::uint16_t IP;                      ///< Entry point instruction (IP register)
 		IntelHexSection actualSection;         ///< Actual section (one section may be constructed from more than one record)
-		retdec::utils::Address actualAddress; ///< Address of last byte saved to actual section
+		retdec::common::Address actualAddress; ///< Address of last byte saved to actual section
 		unsigned long long index;              ///< Indexing
 	public:
 		std::string errorDesc;                 ///< Error description
@@ -68,7 +65,6 @@ class IntelHexParser
 		/// @}
 	public:
 		IntelHexParser();
-		~IntelHexParser();
 
 		/// @name Public parsing methods
 		/// @{

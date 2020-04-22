@@ -25,7 +25,7 @@ enum errcode_t
 
 const std::string TYPES_SUFFIX     = ".json";
 const std::string ABI_SUFFIX       = ".json";
-const std::set<std::string> SIGNATURE_SUFFIXES = {".yar", ".yara"};
+const std::set<std::string> SIGNATURE_SUFFIXES = {".yar", ".yara", ".yarac"};
 
 bool hasEnding(const std::string &str, const std::set<std::string> &suffixes)
 {
@@ -69,11 +69,9 @@ void printHelp()
 	std::cout << "\t--input-file path" << std::endl;
 	std::cout << "\t--unpacked-in-file path" << std::endl;
 	std::cout << "\t--output-file path" << std::endl;
-	std::cout << "\t--frontend-output-file path" << std::endl;
 	std::cout << "\t--decode-only-selected true/false" << std::endl;
 	std::cout << "\t--selected-func name" << std::endl;
 	std::cout << "\t--selected-range range" << std::endl;
-	std::cout << "\t--set-fnc-fixed fncName" << std::endl;
 	std::cout << std::endl;
 }
 
@@ -221,18 +219,10 @@ int handleArguments(std::vector<std::string> &args)
 
 			if (opt == "--compiler")
 			{
-				retdec::config::ToolInfo ci;
+				retdec::common::ToolInfo ci;
 				ci.setName(val);
 				ci.setPercentage(101);
-
-				if (config.tools.empty())
-				{
-					config.tools.insert(ci);
-				}
-				else
-				{
-					config.tools.insert(ci);
-				}
+				config.tools.push_back(ci);
 			}
 			else if (opt == "--arch")
 			{
@@ -338,10 +328,6 @@ int handleArguments(std::vector<std::string> &args)
 			{
 				config.parameters.setOutputFile(val);
 			}
-			else if (opt == "--frontend-output-file")
-			{
-				config.parameters.setFrontendOutputFile(val);
-			}
 			else if (opt == "--decode-only-selected")
 			{
 				config.parameters.setIsSelectedDecodeOnly( (val == "true") ? (true) : (false) );
@@ -352,15 +338,8 @@ int handleArguments(std::vector<std::string> &args)
 			}
 			else if (opt == "--selected-range")
 			{
-				config.parameters.selectedRanges.insert( retdec::config::AddressRangeJson(val) );
-			}
-			else if (opt == "--set-fnc-fixed")
-			{
-				auto f = config.functions.getFunctionByName(val);
-				if (f)
-				{
-					f->setIsFixed(true);
-				}
+				config.parameters.selectedRanges.insert(
+						retdec::common::stringToAddrRange(val));
 			}
 			else
 			{
@@ -381,7 +360,6 @@ int handleArguments(std::vector<std::string> &args)
 		newConfig.globals = config.globals;
 		newConfig.registers = config.registers;
 		newConfig.structures = config.structures;
-		newConfig.segments = config.segments;
 		newConfig.vtables = config.vtables;
 		newConfig.classes = config.classes;
 

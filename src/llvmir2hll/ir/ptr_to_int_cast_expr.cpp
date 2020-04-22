@@ -19,13 +19,6 @@ namespace llvmir2hll {
 PtrToIntCastExpr::PtrToIntCastExpr(ShPtr<Expression> op, ShPtr<Type> dstType):
 	CastExpr(op, dstType) {}
 
-/**
-* @brief Destructs the operator.
-*/
-PtrToIntCastExpr::~PtrToIntCastExpr() {
-	// Observers are removed in the superclass.
-}
-
 bool PtrToIntCastExpr::isEqualTo(ShPtr<Value> otherValue) const {
 	// Both types and values of all operands have to be equal.
 	if (ShPtr<PtrToIntCastExpr> otherCastExpr = cast<PtrToIntCastExpr>(otherValue)) {

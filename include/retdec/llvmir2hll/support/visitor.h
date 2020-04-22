@@ -94,7 +94,7 @@ class WhileLoopStmt;
 */
 class Visitor {
 public:
-	virtual ~Visitor() = 0;
+	virtual ~Visitor() = default;
 
 	virtual void visit(ShPtr<GlobalVarDef> varDef) = 0;
 	virtual void visit(ShPtr<Function> func) = 0;
@@ -172,7 +172,7 @@ public:
 	virtual void visit(ShPtr<UnknownType> type) = 0;
 
 protected:
-	Visitor();
+	Visitor() = default;
 };
 
 } // namespace llvmir2hll

@@ -28,13 +28,16 @@ void printUsage(
 	std::ostream &outputStream)
 {
 	outputStream << "Usage: bin2pat [-o OUTPUT_FILE] [-n NOTE]"
-		<< " INPUT_FILE [INPUT_FILE...]\n\n"
+		<< " <INPUT_FILE [INPUT_FILE...] | -l LIST_FILE>\n\n"
 		<< "-o --output OUTPUT_FILE\n"
 		<< "    Output file path (if not given, stdout is used).\n"
 		<< "    If multiple paths are given, only last one is used.\n\n"
 		<< "-n --note NOTE\n"
 		<< "    Optional note that will be added to all rules.\n"
-		<< "    If multiple notes are given, only last one is used.\n\n";
+		<< "    If multiple notes are given, only last one is used.\n\n"
+		<< "-l --list LIST_FILE\n"
+		<< "    Optionally pass the list of input files as a text file.\n"
+		<< "    This is useful for a large number of input files.\n\n";
 }
 
 void printErrorAndDie(
@@ -79,6 +82,35 @@ void processArgs(
 			else {
 				needValue(args[i]);
 				return;
+			}
+		}
+		else if (args[i] == "-l" || args[i] == "--list") {
+			// Ensure -l --list is not the last thing in args
+			if (&args[i] == &args.back()) {
+				printErrorAndDie("input file missing");
+				return;
+			}
+
+			std::ifstream inputObjects(args[++i]);
+			std::string object;
+
+			if (!inputObjects) {
+				printErrorAndDie("LIST_FILE '" + args[i]
+					+ "' is not a valid file");
+				return;
+			}
+			// Read LIST_FILE until EOF
+			while (std::getline(inputObjects, object)) {
+				// Ensure file exists before proceeding
+				if(!FilesystemPath(object).isFile()) {
+					printErrorAndDie("argument '" + args[i]
+						+ "' contains the filename '" + object
+						+ "' which is not a valid file");
+					return;
+				}
+				else {
+					inPaths.push_back(object);
+				}
 			}
 		}
 		else {

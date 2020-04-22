@@ -5,10 +5,11 @@
  */
 
 #include <initializer_list>
+#include <limits>
 #include <map>
 #include <regex>
 
-#include <tinyxml2.h>
+#include <tinyxml2/tinyxml2.h>
 
 #include "retdec/utils/conversion.h"
 #include "retdec/utils/string.h"
@@ -101,6 +102,17 @@ const std::vector<std::string> msvcRuntimeStrings =
 	toWide(msvcRuntimeString, 4)
 };
 
+const std::vector<PeHeaderStyle> headerStyles =
+{
+//	{"Unknown",      { 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000 }},
+	{"Microsoft",	 { 0x0090, 0x0003, 0x0000, 0x0004, 0x0000, 0xFFFF, 0x0000, 0x00B8, 0x0000, 0x0000, 0x0000, 0x0040, 0x0000 }},
+	{"Borland",		 { 0x0050, 0x0002, 0x0000, 0x0004, 0x000F, 0xFFFF, 0x0000, 0x00B8, 0x0000, 0x0000, 0x0000, 0x0040, 0x001A }},
+	{"PowerBasic",	 { 0x000A, 0x0002, 0x0000, 0x0004, 0x000F, 0xFFFF, 0x0000, 0x00C0, 0x0000, 0x0000, 0x0000, 0x0040, 0x0000 }},
+	{"Watcom",		 { 0x0080, 0x0001, 0x0000, 0x0004, 0x0000, 0xFFFF, 0x0000, 0x00B8, 0x0000, 0x0000, 0x0000, 0x0040, 0x0000 }},
+	{"IBM",			 { 0x0091, 0x0001, 0x0001, 0x0005, 0x0021, 0xFFFF, 0x0005, 0x0200, 0x68A3, 0x0000, 0x0003, 0x0040, 0x0000 }},
+//	{"Empty",        { 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0040, 0x0000 }}
+};
+
 /**
  * Try to find string which indicates AutoIt programming language
  * @param content Content of file
@@ -151,13 +163,6 @@ PeHeuristics::PeHeuristics(
 	: Heuristics(parser, searcher, toolInfo), peParser(parser),
 		declaredLength(parser.getDeclaredFileLength()),
 		loadedLength(parser.getLoadedFileLength())
-{
-}
-
-/**
- * Destructor
- */
-PeHeuristics::~PeHeuristics()
 {
 }
 
@@ -327,6 +332,78 @@ void PeHeuristics::getVisualBasicHeuristics()
 	}
 }
 
+std::int32_t PeHeuristics::getInt32Unaligned(const std::uint8_t * codePtr)
+{
+	const std::int32_t * codePtrInt32 = reinterpret_cast<const std::int32_t *>(codePtr);
+
+	return codePtrInt32[0];
+}
+
+/**
+ * Parses the code, follows NOPs or JMPs
+ */
+const std::uint8_t * PeHeuristics::skip_NOP_JMP8_JMP32(const std::uint8_t * codeBegin, const std::uint8_t * codePtr, const std::uint8_t * codeEnd, std::size_t maxCount)
+{
+	while (codeBegin <= codePtr && codePtr < codeEnd && maxCount > 0)
+	{
+		ssize_t movePtrBy = 0;
+
+		switch (codePtr[0])
+		{
+			case 0x90:  // NOP, move by 1 byte
+				movePtrBy = 1;
+				break;
+
+			case 0xEB:	// JMP rel8
+				if ((codePtr + 2) > codeEnd || codePtr[1] == 0x80)
+					return nullptr;
+				movePtrBy = static_cast<int8_t>(codePtr[1]);
+				break;
+
+			case 0xE9:
+				if ((codePtr + 5) > codeEnd || getInt32Unaligned(codePtr+1) == std::numeric_limits<std::int32_t>::min())
+					return nullptr;
+				movePtrBy = getInt32Unaligned(codePtr + 1);
+				break;
+
+			default:
+				break;
+		}
+
+		// If no increment, it means there was no NOP/JMP and we are done
+		if (movePtrBy == 0)
+			break;
+
+		// Check whether we got into the code range
+		codePtr = codePtr + movePtrBy;
+		maxCount--;
+	}
+	return codePtr;
+}
+
+/**
+ * Detect header heuristics
+ */
+void PeHeuristics::getHeaderStyleHeuristics()
+{
+	const auto &content = search.getPlainString();
+
+	// Must have at least IMAGE_DOS_HEADER
+	if (content.length() > 0x40)
+	{
+		const char * e_cblp = content.c_str() + 0x02;
+
+		for (size_t i = 0; i < headerStyles.size(); i++)
+		{
+			if (!std::memcmp(e_cblp, headerStyles[i].headerWords, sizeof(headerStyles[i].headerWords)))
+			{
+				addLinker(DetectionMethod::HEADER_H, DetectionStrength::MEDIUM, headerStyles[i].headerStyle);
+			}
+		}
+
+	}
+}
+
 /**
  * Try to detect used compiler or packer based on slashed signatures
  */
@@ -399,6 +476,228 @@ void PeHeuristics::getMorphineHeuristics()
 }
 
 /**
+ * Try to detect StarForce protection
+ */
+void PeHeuristics::getStarForceHeuristics()
+{
+	const PeLib::MzHeader & mzHeader = peParser.getMzHeader();
+	const auto epSection = toolInfo.epSection.getIndex();
+	uint32_t e_lfanew = mzHeader.getAddressOfPeHeader();
+	uint16_t e_cblp = mzHeader.getBytesOnLastPage();
+	uint16_t e_cp = mzHeader.getPagesInFile();
+
+	if (noOfSections >= 4)
+	{
+		if (search.exactComparison("68--------FF25", toolInfo.epOffset) || search.exactComparison("FF25", toolInfo.epOffset) || search.exactComparison("E8--------68ADDE0080FF15", toolInfo.epOffset))
+		{
+			// Version A
+			if (!strncmp(sections[0]->getName().c_str(), ".sforce", 7) && !strncmp(sections[epSection]->getName().c_str(), ".start", 6) && (e_cblp == static_cast<uint16_t>(e_lfanew)) && (e_cp == 1))
+			{
+				addPacker(DetectionMethod::COMBINED, DetectionStrength::MEDIUM, "StarForce.A");
+				return;
+			}
+
+			// Version B
+			if (sections[noOfSections-1]->getName() == ".ps4" && sections[noOfSections - 1]->getOffset() == loadedLength)
+			{
+				addPacker(DetectionMethod::COMBINED, DetectionStrength::MEDIUM, "StarForce.B");
+				return;
+			}
+		}
+
+		if (sections[noOfSections - 1]->getName() == ".ps4" && sections[noOfSections - 2]->getName() == ".discard" && sections[noOfSections - 3]->getName() == ".rsrc")
+		{
+			addPacker(DetectionMethod::SECTION_TABLE_H, DetectionStrength::MEDIUM, "StarForce.C");
+			return;
+		}
+	}
+
+	if (13 <= noOfSections && noOfSections <= 15)
+	{
+		if (search.exactComparison("FF25--------FF25--------FF25", toolInfo.epOffset))
+		{
+			if (sections[noOfSections - 1]->getName() == ".ps4")
+			{
+				if (sections[0]->getName() == ".text" && sections[1]->getName() == ".data" && sections[2]->getName() == ".data" && sections[3]->getName() == ".share")
+				{
+					addPacker(DetectionMethod::COMBINED, DetectionStrength::MEDIUM, "StarForce.C");
+					return;
+				}
+			}
+		}
+	}
+}
+
+/**
+ * Try to detect SafeDisc
+ * From ntdll!LdrpCheckForSafeDiscImage
+ */
+void PeHeuristics::getSafeDiscHeuristics()
+{
+	const auto &content = search.getPlainString();
+	const std::string safeDiscString = "BoG_ *90.0&!!  Yy>";
+	auto pos = content.find(safeDiscString, peParser.getSizeOfHeaders() - 0x2C);
+
+	if (pos == peParser.getSizeOfHeaders() - 0x2C)
+	{
+		addPacker(DetectionMethod::SIGNATURE, DetectionStrength::MEDIUM, "SafeDisc");
+	}
+	else
+	{
+		for (std::size_t i = 0; i < noOfSections; i++)
+		{
+			// Note that original code does:
+			// if (!strncmp((char *)pSection->Name, "stxt371\0", sizeof("stxt371\0")))
+			if (sections[i]->getName() == "stxt371")
+			{
+				addPacker(DetectionMethod::SECTION_TABLE_H, DetectionStrength::MEDIUM, "SafeDisc");
+				break;
+			}
+
+			// Note that original code does:
+			// if (!strncmp((char *)pSection->Name, ".txt\0", sizeof(".txt\0")) || !strncmp((char *)pSection->Name, ".txt2\0", sizeof(".txt2\0")))
+			if (sections[i]->getName() == ".txt" || sections[i]->getName() == ".txt2")
+			{
+				addPacker(DetectionMethod::SECTION_TABLE_H, DetectionStrength::LOW, "SafeDisc");
+				break;
+			}
+		}
+	}
+}
+
+bool PeHeuristics::checkSecuROMSignature(const char * fileData, const char * fileDataEnd, uint32_t fileOffset)
+{
+	const uint32_t SecuRomMagic = 0x44646441;	// 'DddA'
+	const char * header = fileData + fileOffset;
+	uint32_t magicValue = 0;
+
+	if (fileData <= header && (header + 0x08) <= fileDataEnd)
+	{
+		const uint32_t * secuRomHeader = reinterpret_cast<const uint32_t *>(header);
+
+		if (secuRomHeader[1] == SecuRomMagic)
+		{
+			return true;
+		}
+		else if ((fileData + secuRomHeader[0] + sizeof(uint32_t)) < fileDataEnd)
+		{
+			memcpy(&magicValue, fileData + secuRomHeader[0], sizeof(uint32_t));
+			if (magicValue == SecuRomMagic)
+			{
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+/**
+ * Try to detect SecuROM protection
+ * From ntdll!LdrpCheckForSecuROMImage
+ */
+void PeHeuristics::getSecuROMHeuristics()
+{
+	const char * fileData;
+	uint32_t SecuromOffs = 0;
+	bool foundSecuROM = false;
+
+	// There must be at least 0x2000 extra bytes beyond the last section,
+	// last data directory, last debug directory and digital signature.
+	if (peParser.getOverlaySize() >= 0x2000)
+	{
+		// The entire file must be loaded to memory
+		if (loadedLength >= declaredLength)
+		{
+			// Retrieve the offset of the securom header
+			fileData = search.getPlainString().c_str();
+			memcpy(&SecuromOffs, fileData + loadedLength - sizeof(uint32_t), sizeof(uint32_t));
+
+			// Verify it
+			if (checkSecuROMSignature(fileData, fileData + loadedLength, SecuromOffs - sizeof(uint32_t)))
+				foundSecuROM = true;
+			if (checkSecuROMSignature(fileData, fileData + loadedLength, loadedLength - (SecuromOffs - 0x0C)))
+				foundSecuROM = true;
+
+			if (foundSecuROM)
+			{
+				addPacker(DetectionMethod::STRING_SEARCH_H, DetectionStrength::HIGH, "SecuROM");
+			}
+		}
+	}
+}
+
+/**
+ * Detection of MPRMMGVA packer
+ */
+void PeHeuristics::getMPRMMGVAHeuristics()
+{
+	const auto &content = search.getPlainString();
+	const uint8_t * fileData = reinterpret_cast<const uint8_t *>(content.c_str());
+	const uint8_t * filePtr = fileData + toolInfo.epOffset;
+	const uint8_t * fileEnd = fileData + content.length();
+	unsigned long long offset1;
+
+	// Skip up to 8 NOPs or JMPs
+	filePtr = skip_NOP_JMP8_JMP32(fileData, filePtr, fileEnd, 8);
+	if (filePtr != nullptr)
+	{
+		if (search.exactComparison("892504----00", toolInfo.epOffset))
+		{
+			offset1 = search.findUnslashedSignature("64FF3500000000", toolInfo.epOffset, toolInfo.epOffset + 0x80);
+			if (offset1 != 0)
+			{
+				if (search.findUnslashedSignature("64892500000000", toolInfo.epOffset + offset1, toolInfo.epOffset + offset1 + 0x40))
+				{
+					addPacker(DetectionMethod::STRING_SEARCH_H, DetectionStrength::HIGH, "MPRMMGVA");
+				}
+			}
+		}
+	}
+}
+
+/**
+ * Detection of ActiveMark packer
+ */
+void PeHeuristics::getActiveMarkHeuristics()
+{
+	if (search.exactComparison("00544D53414D564F48A49BFDFF2624E9D7F1D6F0D6AEBEFCD6DFB5C1D01F07CE", toolInfo.overlayOffset))
+	{
+		addPacker(DetectionMethod::STRING_SEARCH_H, DetectionStrength::HIGH, "ActiveMark");
+	}
+}
+
+/**
+ * Detection of RLPack packer
+ */
+void PeHeuristics::getRLPackHeuristics()
+{
+	if (search.exactComparison("B800000000600BC07458E8000000005805430000008038E9750361EB35E800000000582500F0FFFF33FF66BB195A6683C33466391875120FB7503C03D0BBE944", toolInfo.epOffset) ||
+		search.exactComparison("57C7C772AFB4DF8D3D5FBA581AFFCF0FACF7F20FBDFEF7C75CDC30270FBAF7330FBBF70FCFBF64A909DB85F681DFAC194648F7DF0FA3F7C7C741BC79A085F7D1", toolInfo.epOffset))
+	{
+		addPacker(DetectionMethod::STRING_SEARCH_H, DetectionStrength::HIGH, "RLPack");
+	}
+}
+
+/**
+ * Detection of Petite packer
+ */
+void PeHeuristics::getPetiteHeuristics()
+{
+	if (search.exactComparison("B8--------608DA800----FF68--------6A40680030000068------006A00FF90----00008944241CBB--0300008DB5------008BF850E80A00000074078B44", toolInfo.epOffset) ||
+		search.exactComparison("B8--------669C60508D905C0100006800004000833A000F84--------8B04248B0A0FBAF11F7313FD8BF08BF8037204037A08F3A583C20CFCEBD983C210",     toolInfo.epOffset) ||
+		search.exactComparison("B8--------669C60508BD8030068--------6A00FF50148BCC8DA054BC0000508BC38D9010160000680000----51508004240850800424425080042461508004", toolInfo.epOffset) ||
+		search.exactComparison("B8--------669C60508BD8030068--------6A00FF501C894308680000----8B3C248B336681C780078D741E08893B538B5E10B880080000566A0250576A--6A", toolInfo.epOffset) ||
+		search.exactComparison("B8--------669C60508BD8030068--------6A00FF501C8943088BC303006870BC00006A00FF501C8BCC8DA070BC000089612E536800004000518B7C24048B33", toolInfo.epOffset) ||
+		search.exactComparison("B8--------669C60508D8800----008D90----00008BDC8BE1680000----53508004240850800424425080042461508004249D50800424BB833A000F84DC1400", toolInfo.epOffset) ||
+		search.exactComparison("B8--------68--------64FF350000000064892500000000669C6050", toolInfo.epOffset) ||
+		search.exactComparison("B8--------6A--68--------64FF350000000064892500000000669C60508BD8030068--------6A00FF50", toolInfo.epOffset))
+	{
+		addPacker(DetectionMethod::STRING_SEARCH_H, DetectionStrength::HIGH, "Petite");
+	}
+}
+
+/**
  * Try to detect PELock packer
  */
 void PeHeuristics::getPelockHeuristics()
@@ -420,18 +719,9 @@ void PeHeuristics::getEzirizReactorHeuristics()
 {
 	auto source = DetectionMethod::COMBINED;
 	auto strength = DetectionStrength::HIGH;
-
 	std::string version;
-	if (noOfSections > 3
-			&& fileParser.getSection("reacto")
-			&& !sections[1]->getSizeInFile()
-			&& !sections[2]->getSizeInFile()
-			&& !sections[3]->getSizeInFile())
-	{
-		version = "2.0 - 2.1";
-		source = DetectionMethod::SECTION_TABLE_H;
-	}
-	else if (canSearch)
+
+	if (canSearch)
 	{
 		const auto *sec0 = peParser.getPeSection(0);
 		const auto *sec1 = peParser.getPeSection(1);
@@ -446,7 +736,7 @@ void PeHeuristics::getEzirizReactorHeuristics()
 				&& search.findUnslashedSignature("5266686E204D182276B5331112330C6D0A204D18229EA129611C76B505190158;",
 					sec1->getOffset(), sec1->getOffset() + sec1->getLoadedSize() - 1))
 		{
-			version = "4.8 - 5.0";
+			version = "4.0.0.0 - 6.0.0.0";
 		}
 		else if (noOfSections >= 4
 				&& toolInfo.entryPointOffset
@@ -462,13 +752,11 @@ void PeHeuristics::getEzirizReactorHeuristics()
 				{
 					if (search.exactComparison("E8--------E9--------6A0C68;", toolInfo.epOffset))
 					{
-						version = "4.2";
+						version = "4.0.0.0 - 4.4.7.5";
 					}
-					else if (search.exactComparison(
-								"E8--------E9--------8BFF558BEC83EC208B45085657;",
-								toolInfo.epOffset))
+					else if (search.exactComparison("E8--------E9--------8BFF558BEC83EC208B45085657;", toolInfo.epOffset))
 					{
-						version = "4.5 - 4.7";
+						version = "4.5.0.0 - 6.2.9.2";
 					}
 				}
 			}
@@ -843,12 +1131,36 @@ void PeHeuristics::getExcelsiorHeuristics()
  */
 void PeHeuristics::getVmProtectHeuristics()
 {
+	static const std::size_t BLOCK_COUNT = 64;
+	static const std::size_t BLOCK_SIZE = BLOCK_COUNT * sizeof(std::uint32_t);
 	auto source = DetectionMethod::COMBINED;
 	auto strength = DetectionStrength::HIGH;
 
 	if (noOfSections < 3 || (noOfSections == 3 && !sections[0]->getSizeInFile()))
 	{
 		return;
+	}
+
+	for (std::size_t i = 0; i < noOfSections; ++i) {
+		auto& section = sections[i];
+		if (section->isCode() && section->getSizeInFile() > BLOCK_SIZE)
+		{
+			std::uint32_t checksum = 0;
+			// Compute the sum of first 64 DWORDs of the executable section.
+			for (std::size_t i = 0; i < BLOCK_COUNT; ++i)
+			{
+				checksum += section->getBytesAtOffsetAsNumber<std::uint32_t>(
+					i * sizeof(std::uint32_t)
+				);
+			}
+			// If the checksum is correct, the sample is 100% packed with
+			// VMProtect 2.04+.
+			if (checksum == 0xB7896EB5)
+			{
+				addPacker(source, strength, "VMProtect", "2.04+");
+				return;
+			}
+		}
 	}
 
 	if (toolInfo.entryPointOffset && canSearch)
@@ -966,25 +1278,16 @@ void PeHeuristics::getMsvcIntelHeuristics()
  */
 void PeHeuristics::getArmadilloHeuristic()
 {
-	auto source = DetectionMethod::COMBINED;
-	auto strength = DetectionStrength::LOW;
-
 	auto majorVersion = peParser.getMajorLinkerVersion();
 	auto minorVersion = peParser.getMinorLinkerVersion();
 
 	if (majorVersion == 'S' && minorVersion == 'R')
 	{
-		for (const Section* section : peParser.getSections())
-		{
-			std::string bytes;
-			if (section->getString(bytes, 0, 8) && startsWith(bytes, "PDATA000"))
-			{
-				strength = DetectionStrength::HIGH;
-				break;
-			}
-		}
+		// Note: do NOT perform any extra checks here (like sections named "PDATA000").
+		// They are often not present in the image at all. Not even Windows 10's ntdll.dll
+		// (LdrpIsImageArmadilloProtected) checks for them.
 
-		addPacker(source, strength, "Armadillo");
+		addPacker(DetectionMethod::LINKER_VERSION_H, DetectionStrength::HIGH, "Armadillo");
 	}
 }
 
@@ -1670,8 +1973,16 @@ void PeHeuristics::getFormatSpecificLanguageHeuristics()
 
 void PeHeuristics::getFormatSpecificCompilerHeuristics()
 {
+	getHeaderStyleHeuristics();
 	getSlashedSignatures();
 	getMorphineHeuristics();
+	getStarForceHeuristics();
+	getSafeDiscHeuristics();
+	getSecuROMHeuristics();
+	getMPRMMGVAHeuristics();
+	getActiveMarkHeuristics();
+	getRLPackHeuristics();
+	getPetiteHeuristics();
 	getPelockHeuristics();
 	getEzirizReactorHeuristics();
 	getUpxHeuristics();

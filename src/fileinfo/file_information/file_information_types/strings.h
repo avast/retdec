@@ -11,6 +11,7 @@
 
 #include "retdec/fileformat/types/strings/string.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -19,11 +20,8 @@ namespace fileinfo {
 class Strings
 {
 	private:
-		const std::vector<retdec::fileformat::String>* strings;
+		const std::vector<retdec::fileformat::String>* strings = nullptr;
 	public:
-		Strings();
-		~Strings() = default;
-
 		/// @name Getters
 		/// @{
 		std::size_t getNumberOfStrings() const;
@@ -45,5 +43,6 @@ class Strings
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

@@ -12,6 +12,7 @@
 using namespace retdec::utils;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -30,14 +31,6 @@ StringsJsonGetter::StringsJsonGetter(FileInformation &fileInfo) : IterativeSubti
 	commonHeaderElements.push_back("type");
 	commonHeaderElements.push_back("sectionName");
 	commonHeaderElements.push_back("content");
-}
-
-/**
- * Destructor
- */
-StringsJsonGetter::~StringsJsonGetter()
-{
-
 }
 
 std::size_t StringsJsonGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const
@@ -89,3 +82,4 @@ bool StringsJsonGetter::getFlags(std::size_t structIndex, std::size_t recIndex, 
 }
 
 } // namespace fileinfo
+} // namespace retdec

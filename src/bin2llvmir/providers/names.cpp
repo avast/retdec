@@ -7,6 +7,7 @@
 #include "retdec/bin2llvmir/providers/names.h"
 #include "retdec/utils/string.h"
 
+using namespace retdec::common;
 using namespace retdec::utils;
 
 namespace retdec {
@@ -20,24 +21,36 @@ namespace bin2llvmir {
 
 namespace names {
 
-std::string generateFunctionName(utils::Address a, bool ida)
+std::string generateFunctionName(common::Address a, bool ida)
 {
 	return ida
 			? generatedFunctionPrefixIDA + a.toHexString()
 			: generatedFunctionPrefix + a.toHexString();
 }
 
-std::string generateFunctionNameUnknown(utils::Address a, bool)
+std::string generateFunctionNameUnknown(common::Address a, bool)
 {
 	return generatedFunctionPrefixUnk + a.toHexString();
 }
 
-std::string generateBasicBlockName(utils::Address a)
+std::string generateGlobalVarName(common::Address a, const std::string& name)
+{
+	return (name.empty() ? generatedGlobalVarPrefix : (name + "_"))
+			+ a.toHexString();
+}
+
+std::string generateStackVarName(int offset, const std::string& name)
+{
+	return (name.empty() ? generatedStackVarPrefix : (name + "_"))
+			+ std::to_string(offset);
+}
+
+std::string generateBasicBlockName(common::Address a)
 {
 	return generatedBasicBlockPrefix + a.toHexString();
 }
 
-std::string generateTempVariableName(utils::Address a, unsigned cntr)
+std::string generateTempVariableName(common::Address a, unsigned cntr)
 {
 	return generatedTempVarPrefix + std::to_string(cntr) + "_" + a.toHexString();
 }
@@ -47,7 +60,7 @@ std::string generateFunctionNameUndef(unsigned cntr)
 	return generatedUndefFunctionPrefix + std::to_string(cntr);
 }
 
-std::string generateVtableName(utils::Address a)
+std::string generateVtableName(common::Address a)
 {
 	return generatedVtablePrefix + a.toHexString();
 }
@@ -266,7 +279,7 @@ NameContainer::NameContainer(
 		Config* c,
 		DebugFormat* d,
 		FileImage* i,
-		demangler::CDemangler*,
+		Demangler*,
 		Lti* lti)
 		:
 		_config(c),
@@ -284,7 +297,7 @@ NameContainer::NameContainer(
  * \return \c True if name added, \c false otherwise.
  */
 bool NameContainer::addNameForAddress(
-		retdec::utils::Address a,
+		retdec::common::Address a,
 		const std::string& name,
 		Name::eType type,
 		Lti* lti)
@@ -298,12 +311,12 @@ bool NameContainer::addNameForAddress(
 	return ns.addName(_config, name, type, lti ? lti : _lti);
 }
 
-const Names& NameContainer::getNamesForAddress(retdec::utils::Address a)
+const Names& NameContainer::getNamesForAddress(retdec::common::Address a)
 {
 	return _data[a];
 }
 
-const Name& NameContainer::getPreferredNameForAddress(retdec::utils::Address a)
+const Name& NameContainer::getPreferredNameForAddress(retdec::common::Address a)
 {
 	return _data[a].getPreferredName();
 }
@@ -315,28 +328,20 @@ void NameContainer::initFromConfig()
 			names::entryPointName,
 			Name::eType::ENTRY_POINT);
 
-	for (auto& p : _config->getConfig().functions)
+	for (auto& f : _config->getConfig().functions)
 	{
 		addNameForAddress(
-				p.second.getStart(),
-				p.second.getName(),
+				f.getStart(),
+				f.getName(),
 				Name::eType::CONFIG_FUNCTION);
 	}
 
-	for (auto& p : _config->getConfig().globals)
+	for (auto& g : _config->getConfig().globals)
 	{
 		addNameForAddress(
-				p.second.getStorage().getAddress(),
-				p.second.getName(),
+				g.getStorage().getAddress(),
+				g.getName(),
 				Name::eType::CONFIG_GLOBAL);
-	}
-
-	for (auto& s : _config->getConfig().segments)
-	{
-		addNameForAddress(
-				s.getStart(),
-				s.getName(),
-				Name::eType::CONFIG_SEGMENT);
 	}
 }
 
@@ -355,14 +360,14 @@ void NameContainer::initFromDebug()
 				Name::eType::DEBUG_FUNCTION);
 	}
 
-	for (const auto& p : _debug->globals)
+	for (const auto& g : _debug->globals)
 	{
 		Address addr;
-		if (p.second.getStorage().isMemory(addr))
+		if (g.getStorage().isMemory(addr))
 		{
 			addNameForAddress(
 					addr,
-					p.second.getName(),
+					g.getName(),
 					Name::eType::DEBUG_GLOBAL);
 		}
 	}
@@ -441,7 +446,7 @@ void NameContainer::initFromImage()
 					break;
 			}
 
-			if (_config->getConfig().architecture.isArmOrThumb() && a % 2)
+			if (_config->getConfig().architecture.isArm32OrThumb() && a % 2)
 			{
 				a -= 1;
 			}
@@ -455,7 +460,7 @@ void NameContainer::initFromImage()
 		unsigned long long ep = 0;
 		if (_image->getFileFormat()->getEpAddress(ep))
 		{
-			if (_config->getConfig().architecture.isArmOrThumb() && ep % 2)
+			if (_config->getConfig().architecture.isArm32OrThumb() && ep % 2)
 			{
 				ep -= 1;
 			}
@@ -554,7 +559,7 @@ NameContainer* NamesProvider::addNames(
 		Config* c,
 		DebugFormat* d,
 		FileImage* i,
-		demangler::CDemangler* dm,
+		Demangler* dm,
 		Lti* lti)
 {
 	// Debug info may not be present -> \p d can be nullptr.

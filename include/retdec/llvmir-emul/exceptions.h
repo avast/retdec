@@ -20,9 +20,7 @@ namespace llvmir_emul {
 class LlvmIrEmulatorBaseError : public std::exception
 {
 	public:
-		virtual ~LlvmIrEmulatorBaseError()
-		{
-		}
+		virtual ~LlvmIrEmulatorBaseError() = default;
 };
 
 /**
@@ -35,10 +33,6 @@ class LlvmIrEmulatorError : public LlvmIrEmulatorBaseError
 			_whatMessage(message)
 		{
 			assert(false);
-		}
-
-		virtual ~LlvmIrEmulatorError()
-		{
 		}
 
 		virtual const char* what() const noexcept override

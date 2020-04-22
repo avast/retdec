@@ -28,14 +28,11 @@ AbiX86::AbiX86(llvm::Module* m, Config* c) :
 			X86_REG_ESI,
 			X86_REG_EDI,
 			X86_REG_EBP};
+
+	_defcc = fetchDefaultCC();
 }
 
-AbiX86::~AbiX86()
-{
-
-}
-
-bool AbiX86::isGeneralPurposeRegister(const llvm::Value* val)
+bool AbiX86::isGeneralPurposeRegister(const llvm::Value* val) const
 {
 	uint32_t rid = getRegisterId(val);
 	return rid == X86_REG_EAX
@@ -90,6 +87,20 @@ bool AbiX86::isNopInstruction(cs_insn* insn)
 	}
 
 	return false;
+}
+
+CallingConvention::ID AbiX86::fetchDefaultCC() const
+{
+	if (_config->getConfig().tools.isWatcom())
+	{
+		return CallingConvention::ID::CC_WATCOM;
+	}
+	if (_config->getConfig().tools.isBorland())
+	{
+		return CallingConvention::ID::CC_PASCAL;
+	}
+
+	return CallingConvention::ID::CC_CDECL;
 }
 
 } // namespace bin2llvmir

@@ -1,0 +1,5 @@
+1 WdfDeviceClose
+2 WdfDeviceIoControl
+3 WdfDeviceOpenA
+4 WdfDeviceOpenW
+5 WdfOverlappedComplete

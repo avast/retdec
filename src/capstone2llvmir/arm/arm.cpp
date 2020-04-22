@@ -24,11 +24,6 @@ Capstone2LlvmIrTranslatorArm_impl::Capstone2LlvmIrTranslatorArm_impl(
 	initialize();
 }
 
-Capstone2LlvmIrTranslatorArm_impl::~Capstone2LlvmIrTranslatorArm_impl()
-{
-	// Nothing specific to ARM.
-}
-
 //
 //==============================================================================
 // Mode query & modification methods - from Capstone2LlvmIrTranslator.
@@ -521,7 +516,30 @@ llvm::Instruction* Capstone2LlvmIrTranslatorArm_impl::storeRegister(
 	{
 		throw GenericError("storeRegister() unhandled reg.");
 	}
-	val = generateTypeConversion(irb, val, llvmReg->getValueType(), ct);
+	if (llvmReg->getValueType()->isFloatingPointTy())
+	{
+		switch (ct)
+		{
+			case eOpConv::SITOFP_OR_FPCAST:
+			case eOpConv::UITOFP_OR_FPCAST:
+				val = generateTypeConversion(irb, val, llvmReg->getValueType(), ct);
+				break;
+			default:
+				val = generateTypeConversion(irb, val, llvmReg->getValueType(), eOpConv::FPCAST_OR_BITCAST);
+		}
+	}
+	else
+	{
+		switch (ct)
+		{
+			case eOpConv::SEXT_TRUNC_OR_BITCAST:
+			case eOpConv::ZEXT_TRUNC_OR_BITCAST:
+				val = generateTypeConversion(irb, val, llvmReg->getValueType(), ct);
+				break;
+			default:
+				val = generateTypeConversion(irb, val, llvmReg->getValueType(), eOpConv::SEXT_TRUNC_OR_BITCAST);
+		}
+	}
 
 	return irb.CreateStore(val, llvmReg);
 }
@@ -1115,14 +1133,14 @@ void Capstone2LlvmIrTranslatorArm_impl::translateMovt(cs_insn* i, cs_arm* ai, ll
 	// Add/Fix THUMB unit tests.
 	if (_basicMode == CS_MODE_THUMB)
 	{
-		std::tie(op0, op1) = loadOpBinary(ai, irb, eOpConv::ZEXT_TRUNC);
+		std::tie(op0, op1) = loadOpBinary(ai, irb, eOpConv::ZEXT_TRUNC_OR_BITCAST);
 		op1 = irb.CreateShl(op1, 16);
 		op0 = irb.CreateOr(op0, op1);
 		storeOp(ai->operands[0], op0, irb);
 	}
 	else
 	{
-		std::tie(op0, op1) = loadOpBinary(ai, irb, eOpConv::ZEXT_TRUNC);
+		std::tie(op0, op1) = loadOpBinary(ai, irb, eOpConv::ZEXT_TRUNC_OR_BITCAST);
 		op0 = irb.CreateAnd(op0, 0xffff);
 		op1 = irb.CreateShl(op1, 16);
 		op0 = irb.CreateOr(op0, op1);
@@ -1147,7 +1165,7 @@ void Capstone2LlvmIrTranslatorArm_impl::translateMovw(cs_insn* i, cs_arm* ai, ll
 	}
 	else
 	{
-		std::tie(op0, op1) = loadOpBinary(ai, irb, eOpConv::ZEXT_TRUNC);
+		std::tie(op0, op1) = loadOpBinary(ai, irb, eOpConv::ZEXT_TRUNC_OR_BITCAST);
 		op0 = irb.CreateAnd(op0, 0xffff0000);
 		op0 = irb.CreateOr(op0, op1);
 		storeOp(ai->operands[0], op0, irb);
@@ -1659,11 +1677,6 @@ void Capstone2LlvmIrTranslatorArm_impl::translateStr(cs_insn* i, cs_arm* ai, llv
 			op0 = irb.CreateZExtOrTrunc(op0, irb.getInt16Ty());
 			break;
 		}
-		// TODO: The new commented code is better, but without special handling
-		// in bin2llvmirl, it screws up some tests:
-		// e.g. "many-params.c -a arm -f elf -c gcc -C -O0 -g"
-		// Therefore, at the moment, we generate the same code as original sem.
-		//
 		case ARM_INS_STRD:
 		case ARM_INS_STREXD:
 		{
@@ -1687,12 +1700,15 @@ void Capstone2LlvmIrTranslatorArm_impl::translateStr(cs_insn* i, cs_arm* ai, llv
 	bool subtract = false;
 	if (i->id == ARM_INS_STRD || i->id == ARM_INS_STREXD)
 	{
-		// TODO: op1 is not stored at all at the moment. See comment above.
-
 		if (ai->op_count == 3
 				&& ai->operands[2].type == ARM_OP_MEM)
 		{
 			storeOp(ai->operands[2], op0, irb);
+
+			auto op3 = ai->operands[2];
+			op3.mem.disp += 4;
+			storeOp(op3, op1, irb);
+
 			baseR = ai->operands[2].mem.base;
 			if (auto disp = ai->operands[2].mem.disp)
 			{
@@ -1702,11 +1718,19 @@ void Capstone2LlvmIrTranslatorArm_impl::translateStr(cs_insn* i, cs_arm* ai, llv
 			{
 				idx = loadRegister(ai->operands[2].mem.index, irb);
 			}
+			// Maybe we should add +4 to idx?
 		}
 		else if (ai->op_count == 4
 				&& ai->operands[2].type == ARM_OP_MEM)
 		{
 			storeOp(ai->operands[2], op0, irb);
+
+			// We don't use op4 here, post-index offset is applied to source
+			// address only after the transfers at writeback.
+			auto op3 = ai->operands[2];
+			op3.mem.disp += 4;
+			storeOp(op3, op1, irb);
+
 			baseR = ai->operands[2].mem.base;
 			idx = loadOp(ai->operands[3], irb);
 			subtract = ai->operands[3].subtracted;

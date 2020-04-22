@@ -31,9 +31,6 @@ class Statement;
 class GotoTargetAnalysis: private OrderedAllVisitor,
 		private retdec::utils::NonCopyable {
 public:
-	// It needs to be public so it can be called in ShPtr's destructor.
-	virtual ~GotoTargetAnalysis() override;
-
 	static StmtSet getGotoTargets(ShPtr<Statement> stmt);
 	static bool hasGotoTargets(ShPtr<Statement> stmt);
 

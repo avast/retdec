@@ -11,6 +11,7 @@
 using namespace retdec::utils;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 namespace
@@ -36,14 +37,6 @@ DataDirectoryPlainGetter::DataDirectoryPlainGetter(FileInformation &fileInfo) : 
 	commonHeaderElements.insert(commonHeaderElements.begin(), std::begin(dirHeaderArray), std::end(dirHeaderArray));
 	commonHeaderDesc.insert(commonHeaderDesc.begin(), std::begin(dirHeaderDesc), std::end(dirHeaderDesc));
 	loadRecords();
-}
-
-/**
- * Destructor
- */
-DataDirectoryPlainGetter::~DataDirectoryPlainGetter()
-{
-
 }
 
 std::size_t DataDirectoryPlainGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const
@@ -92,3 +85,4 @@ bool DataDirectoryPlainGetter::getFlagDescriptors(std::size_t structIndex, std::
 }
 
 } // namespace fileinfo
+} // namespace retdec

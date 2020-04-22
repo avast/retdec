@@ -9,6 +9,7 @@
 
 #include "retdec/llvmir2hll/ir/value.h"
 #include "retdec/llvmir2hll/support/smart_ptr.h"
+#include "retdec/llvmir2hll/support/types.h"
 
 namespace retdec {
 namespace llvmir2hll {
@@ -28,8 +29,6 @@ public:
 	static ShPtr<GlobalVarDef> create(ShPtr<Variable> var,
 		ShPtr<Expression> init = nullptr);
 
-	virtual ~GlobalVarDef() override;
-
 	virtual ShPtr<Value> clone() override;
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
 	void replace(ShPtr<Expression> oldExpr, ShPtr<Expression> newExpr);
@@ -38,6 +37,7 @@ public:
 	ShPtr<Expression> getInitializer() const;
 	bool hasInitializer() const;
 	bool definesExternalVar() const;
+	Address getAddress() const;
 
 	void setVar(ShPtr<Variable> newVar);
 	void setInitializer(ShPtr<Expression> newInit);

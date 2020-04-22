@@ -18,13 +18,10 @@ namespace fileformat {
 class ElfSymbol : public Symbol
 {
 	private:
-		unsigned long long elfType;    ///< ELF symbol type
-		unsigned long long elfBind;    ///< ELF symbol bind type
-		unsigned long long elfOther;   ///< ELF symbol other data
+		unsigned long long elfType = 0;    ///< ELF symbol type
+		unsigned long long elfBind = 0;    ///< ELF symbol bind type
+		unsigned long long elfOther = 0;   ///< ELF symbol other data
 	public:
-		ElfSymbol();
-		~ElfSymbol();
-
 		/// @name Getters
 		/// @{
 		unsigned long long getElfType() const;

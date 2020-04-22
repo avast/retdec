@@ -1,0 +1,16 @@
+23 IKEQueryStatistics
+24 IKEEnumMMs
+25 IKEDeleteAssociation
+26 IKEInitiateIKENegotiation
+27 IKEQuerySpiChange
+28 IKERegisterNotifyClient
+30 IKEInit
+31 IKEShutdown
+33 IKEInterfaceChange
+34 IKECloseIKENotifyHandle
+35 IKEQueryIKENegotiationStatus
+36 IKECloseIKENegotiationHandle
+37 IKENotifyPolicyChange
+38 IKEAddSAs
+39 IKESetConfigurationVariables
+40 IKEGetConfigurationVariables

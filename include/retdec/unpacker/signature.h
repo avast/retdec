@@ -12,7 +12,7 @@
 #include <vector>
 
 #include "retdec/loader/loader.h"
-#include "retdec/unpacker/dynamic_buffer.h"
+#include "retdec/utils/dynamic_buffer.h"
 
 namespace retdec {
 namespace unpacker {
@@ -65,7 +65,6 @@ public:
 	public:
 		MatchSettings(uint64_t offset = 0, uint64_t searchDistance = 0);
 		MatchSettings(const MatchSettings& settings);
-		~MatchSettings();
 
 		uint64_t getOffset() const;
 		void setOffset(uint64_t offset);
@@ -123,8 +122,6 @@ public:
 		Byte(Type type, uint8_t expectedValue, uint8_t wildcardMask);
 		Byte(const Byte& byte);
 
-		~Byte();
-
 		Type getType() const;
 		uint8_t getExpectedValue() const;
 		uint8_t getWildcardMask() const;
@@ -147,23 +144,24 @@ public:
 	Signature(const std::initializer_list<Signature::Byte>& initList);
 	Signature(const Signature& signature);
 
-	virtual ~Signature();
+	virtual ~Signature() = default;
 
 	uint64_t getSize() const;
 	uint64_t getCaptureSize() const;
 
 	bool match(const MatchSettings& settings, retdec::loader::Image* file) const;
-	bool match(const MatchSettings& settings, const DynamicBuffer& data) const;
-	bool match(const MatchSettings& settings, retdec::loader::Image* file, DynamicBuffer& captures) const;
-	bool match(const MatchSettings& settings, const DynamicBuffer& data, DynamicBuffer& captures) const;
+	bool match(const MatchSettings& settings, const retdec::utils::DynamicBuffer& data) const;
+	bool match(const MatchSettings& settings, retdec::loader::Image* file, retdec::utils::DynamicBuffer& capturedData) const;
+	bool match(const MatchSettings& settings, const retdec::utils::DynamicBuffer& data,
+				retdec::utils::DynamicBuffer& capturedData) const;
 
 	Signature& operator =(const std::initializer_list<Signature::Byte>& initList);
 
 private:
 	Signature& operator =(const Signature&);
 
-	bool searchMatchImpl(const std::vector<uint8_t>& bytesToMatch, uint64_t offset, uint64_t maxSearchDist, DynamicBuffer* captureBuffer) const;
-	int64_t matchImpl(const std::vector<uint8_t>& bytesToMatch, uint64_t offset, DynamicBuffer* captureBuffer) const;
+	bool searchMatchImpl(const std::vector<uint8_t>& bytesToMatch, uint64_t offset, uint64_t maxSearchDist, retdec::utils::DynamicBuffer* captureBuffer) const;
+	int64_t matchImpl(const std::vector<uint8_t>& bytesToMatch, uint64_t offset, retdec::utils::DynamicBuffer* captureBuffer) const;
 
 	std::vector<Signature::Byte> _buffer; ///< Signature bytes buffer.
 };

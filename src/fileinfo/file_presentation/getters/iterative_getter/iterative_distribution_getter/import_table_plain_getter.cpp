@@ -12,16 +12,16 @@
 using namespace retdec::utils;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 namespace
 {
 
-const std::size_t distributionArray[] = {6, 40, 12, 20, 11, 11, 8};
-const std::string headerArray[] = {"i", "name", "type", "libName", "ordNum", "address", "delayed"};
-const std::string headerDesc[] = {"index", "name of import", "type of symbol", "name of library from which is import imported",
-									"ordinal number of import", "address of import", "delayed import (only PE)"};
-
+const std::size_t distributionArray[] = {6, 50, 12, 11, 13, 8, 20};
+const std::string headerArray[] = {"i", "name", "type", "ordNum", "address", "delayed", "libName"};
+const std::string headerDesc[] = {"index", "name of import", "type of symbol", "ordinal number of import",
+									"address of import", "delayed import (only PE)", "name of library from which is import imported", };
 } // anonymous namespace
 
 /**
@@ -38,14 +38,6 @@ ImportTablePlainGetter::ImportTablePlainGetter(FileInformation &fileInfo) : Iter
 	commonHeaderElements.insert(commonHeaderElements.begin(), std::begin(headerArray), std::end(headerArray));
 	commonHeaderDesc.insert(commonHeaderDesc.begin(), std::begin(headerDesc), std::end(headerDesc));
 	loadRecords();
-}
-
-/**
- * Destructor
- */
-ImportTablePlainGetter::~ImportTablePlainGetter()
-{
-
 }
 
 std::size_t ImportTablePlainGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const
@@ -81,13 +73,13 @@ bool ImportTablePlainGetter::loadRecord(std::size_t structIndex, std::size_t rec
 	record.push_back(numToStr(recIndex));
 	record.push_back(replaceNonprintableChars(fileinfo.getImportName(recIndex)));
 	record.push_back(replaceNonprintableChars(fileinfo.getImportUsageType(recIndex)));
-	record.push_back(replaceNonprintableChars(fileinfo.getImportLibraryName(recIndex)));
 	record.push_back(fileinfo.getImportOrdinalNumberStr(recIndex, std::dec));
 	record.push_back(fileinfo.getImportAddressStr(recIndex, hexWithPrefix));
 	if (fileinfo.getFileFormatEnum() == Format::PE)
 		record.push_back(static_cast<const PeImport*>(fileinfo.getImport(recIndex))->isDelayed() ? "Yes" : "No");
 	else
 		record.push_back(std::string{});
+	record.push_back(replaceNonprintableChars(fileinfo.getImportLibraryName(recIndex)));
 	return true;
 }
 
@@ -105,3 +97,4 @@ bool ImportTablePlainGetter::getFlagDescriptors(std::size_t structIndex, std::ve
 }
 
 } // namespace fileinfo
+} // namespace retdec

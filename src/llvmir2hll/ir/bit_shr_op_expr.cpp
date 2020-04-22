@@ -20,13 +20,6 @@ BitShrOpExpr::BitShrOpExpr(ShPtr<Expression> op1, ShPtr<Expression> op2,
 		Variant variant):
 	BinaryOpExpr(op1, op2), variant(variant) {}
 
-/**
-* @brief Destructs the operator.
-*/
-BitShrOpExpr::~BitShrOpExpr() {
-	// Observers are removed in the superclass.
-}
-
 bool BitShrOpExpr::isEqualTo(ShPtr<Value> otherValue) const {
 	if (ShPtr<BitShrOpExpr> otherValueBitShrOpExpr = cast<BitShrOpExpr>(otherValue)) {
 		return variant == otherValueBitShrOpExpr->variant &&

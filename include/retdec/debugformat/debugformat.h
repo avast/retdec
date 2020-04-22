@@ -7,13 +7,19 @@
 #ifndef RETDEC_DEBUGFORMAT_DEBUGFORMAT_H
 #define RETDEC_DEBUGFORMAT_DEBUGFORMAT_H
 
+#include <llvm/DebugInfo/DIContext.h>
+#include <llvm/DebugInfo/DWARF/DWARFContext.h>
+#include <llvm/Object/ObjectFile.h>
+#include <llvm/Support/Debug.h>
+#include <llvm/Support/Format.h>
+#include <llvm/Support/MemoryBuffer.h>
+
+#include "retdec/common/function.h"
+#include "retdec/common/object.h"
+#include "retdec/common/type.h"
 #include "retdec/pdbparser/pdb_file.h"
-#include "retdec/config/functions.h"
-#include "retdec/config/objects.h"
-#include "retdec/config/types.h"
 
 #include "retdec/demangler/demangler.h"
-#include "retdec/dwarfparser/dwarf_file.h"
 #include "retdec/fileformat/fileformat.h"
 #include "retdec/loader/loader.h"
 
@@ -26,7 +32,7 @@ namespace debugformat {
 class DebugFormat
 {
 	public:
-		using SymbolTable = std::map<retdec::utils::Address, const retdec::fileformat::Symbol*>;
+		using SymbolTable = std::map<retdec::common::Address, const retdec::fileformat::Symbol*>;
 
 	public:
 		DebugFormat();
@@ -34,11 +40,11 @@ class DebugFormat
 				retdec::loader::Image* inFile,
 				const std::string& pdbFile,
 				SymbolTable* symtab,
-				retdec::demangler::CDemangler* demangler,
+				retdec::demangler::Demangler* demangler,
 				unsigned long long imageBase = 0);
 
-		retdec::config::Function* getFunction(retdec::utils::Address a);
-		const retdec::config::Object* getGlobalVar(retdec::utils::Address a);
+		retdec::common::Function* getFunction(retdec::common::Address a);
+		const retdec::common::Object* getGlobalVar(retdec::common::Address a);
 
 		bool hasInformation() const;
 
@@ -47,13 +53,17 @@ class DebugFormat
 		void loadPdbTypes();
 		void loadPdbGlobalVariables();
 		void loadPdbFunctions();
-		retdec::config::Type loadPdbType(retdec::pdbparser::PDBTypeDef* type);
+		retdec::common::Type loadPdbType(retdec::pdbparser::PDBTypeDef* type);
 
 		void loadDwarf();
-		void loadDwarfTypes();
-		void loadDwarfGlobalVariables();
-		void loadDwarfFunctions();
-		retdec::config::Type loadDwarfType(retdec::dwarfparser::DwarfType* type);
+		void loadDwarf_CU(llvm::DWARFDie die);
+		retdec::common::Function loadDwarf_subprogram(llvm::DWARFDie die);
+		std::string loadDwarf_type(llvm::DWARFDie die);
+		std::string _loadDwarf_type(llvm::DWARFDie die);
+		retdec::common::Object loadDwarf_formal_parameter(
+				llvm::DWARFDie die,
+				unsigned argCntr);
+		retdec::common::Object loadDwarf_variable(llvm::DWARFDie die);
 
 		void loadSymtab();
 
@@ -66,16 +76,17 @@ class DebugFormat
 		retdec::loader::Image* _inFile = nullptr;
 		/// Underlying PDB representation.
 		retdec::pdbparser::PDBFile* _pdbFile = nullptr;
-		/// Underlying DWARF representation.
-		retdec::dwarfparser::DwarfFile* _dwarfFile = nullptr;
 		/// Demangler.
-		retdec::demangler::CDemangler* _demangler = nullptr;
+		retdec::demangler::Demangler* _demangler = nullptr;
+
+		/// Dwarf named types cache.
+		std::map<std::pair<llvm::DWARFUnit*, uint32_t>, std::string> dieOff2type;
 
 	public:
-		retdec::config::GlobalVarContainer globals;
-		retdec::config::TypeContainer types;
+		retdec::common::GlobalVarContainer globals;
+		retdec::common::TypeContainer types;
 
-		std::map<retdec::utils::Address, retdec::config::Function> functions;
+		std::map<retdec::common::Address, retdec::common::Function> functions;
 };
 
 } // namespace debugformat

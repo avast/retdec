@@ -11,6 +11,7 @@
 using namespace retdec::utils;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -18,14 +19,6 @@ namespace fileinfo {
  * @param fileInfo Information about file
  */
 EntryPointJsonGetter::EntryPointJsonGetter(FileInformation &fileInfo) : SimpleGetter(fileInfo)
-{
-
-}
-
-/**
- * Destructor
- */
-EntryPointJsonGetter::~EntryPointJsonGetter()
 {
 
 }
@@ -51,3 +44,4 @@ std::size_t EntryPointJsonGetter::loadInformation(std::vector<std::string> &desc
 }
 
 } // namespace fileinfo
+} // namespace retdec

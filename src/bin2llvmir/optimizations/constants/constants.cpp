@@ -22,7 +22,6 @@
 #include "retdec/utils/time.h"
 #include "retdec/bin2llvmir/analyses/symbolic_tree.h"
 #include "retdec/bin2llvmir/optimizations/constants/constants.h"
-#include "retdec/bin2llvmir/providers/abi/abi.h"
 #include "retdec/bin2llvmir/providers/asm_instruction.h"
 const bool debug_enabled = false;
 #include "retdec/bin2llvmir/utils/llvm.h"
@@ -49,18 +48,37 @@ ConstantsAnalysis::ConstantsAnalysis() :
 
 }
 
-bool ConstantsAnalysis::runOnModule(Module &M)
+bool ConstantsAnalysis::runOnModule(llvm::Module& m)
 {
-	m_module = &M;
-	objf = FileImageProvider::getFileImage(&M);
-	config = ConfigProvider::getConfig(&M);
-	auto* abi = AbiProvider::getAbi(&M);
-	dbgf = DebugFormatProvider::getDebugFormat(&M);
+	_module = &m;
+	_config = ConfigProvider::getConfig(_module);
+	_abi = AbiProvider::getAbi(_module);
+	_image = FileImageProvider::getFileImage(_module);
+	_dbgf = DebugFormatProvider::getDebugFormat(_module);
+	return run();
+}
 
+bool ConstantsAnalysis::runOnModuleCustom(
+		llvm::Module& m,
+		Config* c,
+		Abi* a,
+		FileImage* i,
+		DebugFormat* d)
+{
+	_module = &m;
+	_config = c;
+	_abi = a;
+	_image = i;
+	_dbgf = d;
+	return run();
+}
+
+bool ConstantsAnalysis::run()
+{
 	ReachingDefinitionsAnalysis RDA;
-	RDA.runOnModule(M, abi);
+	RDA.runOnModule(*_module, _abi);
 
-	for (Function& f : M.getFunctionList())
+	for (Function& f : *_module)
 	for (inst_iterator I = inst_begin(&f), E = inst_end(&f); I != E;)
 	{
 		Instruction& i = *I;
@@ -93,7 +111,7 @@ bool ConstantsAnalysis::runOnModule(Module &M)
 		}
 	}
 
-	tagFunctionsWithUsedCryptoGlobals();
+	IrModifier::eraseUnusedInstructionsRecursive(_toRemove);
 
 	return false;
 }
@@ -106,14 +124,7 @@ void ConstantsAnalysis::checkForGlobalInInstruction(
 {
 	LOG << llvmObjToString(inst) << std::endl;
 
-	if (val->getType()->isIntegerTy(1)
-			|| (val->getType()->isPointerTy()
-			&& val->getType()->getPointerElementType()->isIntegerTy(1)))
-	{
-		return;
-	}
-
-	SymbolicTree root(RDA, val);
+	auto root = SymbolicTree::PrecomputedRda(RDA, val);
 	root.simplifyNode();
 
 	LOG << root << std::endl;
@@ -122,14 +133,14 @@ void ConstantsAnalysis::checkForGlobalInInstruction(
 	auto* maxC = max ? dyn_cast_or_null<ConstantInt>(max->value) : nullptr;
 	Instruction* userI = max ? dyn_cast_or_null<Instruction>(max->user) : nullptr;
 
-	if (max && maxC && maxC->getZExtValue() != 0)
+	if (max && maxC && maxC->getValue().getActiveBits() <= 64 && maxC->getZExtValue() != 0)
 	if (userI || max == &root)
-	if (objf->getImage()->hasDataOnAddress(maxC->getZExtValue()))
+	if (_image->getImage()->hasDataOnAddress(maxC->getZExtValue()))
 	{
-		IrModifier irm(m_module, config);
+		IrModifier irm(_module, _config);
 		auto* ngv = irm.getGlobalVariable(
-				objf,
-				dbgf,
+				_image,
+				_dbgf,
 				maxC->getZExtValue(),
 				storeValue);
 
@@ -138,6 +149,7 @@ void ConstantsAnalysis::checkForGlobalInInstruction(
 			if (max == &root)
 			{
 				auto* conv = IrModifier::convertConstantToType(ngv, val->getType());
+				_toRemove.insert(val);
 				inst->replaceUsesOfWith(val, conv);
 				return;
 			}
@@ -154,44 +166,9 @@ void ConstantsAnalysis::checkForGlobalInInstruction(
 	if (isa<LoadInst>(inst) && gv && root.ops.size() <= 1)
 	{
 		auto* conv = IrModifier::convertConstantToType(gv, val->getType());
+		_toRemove.insert(val);
 		inst->replaceUsesOfWith(val, conv);
 		return;
-	}
-}
-
-void ConstantsAnalysis::tagFunctionsWithUsedCryptoGlobals()
-{
-	for (GlobalVariable& lgv : m_module->getGlobalList())
-	{
-		auto* cgv = config->getConfigGlobalVariable(&lgv);
-		if (cgv == nullptr || cgv->getCryptoDescription().empty())
-		{
-			continue;
-		}
-
-		for (auto* user : lgv.users())
-		{
-			if (auto* i = dyn_cast_or_null<Instruction>(user))
-			{
-				if (auto* cf = config->getConfigFunction(i->getFunction()))
-				{
-					cf->usedCryptoConstants.insert(cgv->getCryptoDescription());
-				}
-			}
-			else if (auto* e = dyn_cast_or_null<ConstantExpr>(user))
-			{
-				for (auto* u : e->users())
-				{
-					if (auto* i = dyn_cast_or_null<Instruction>(u))
-					{
-						if (auto* cf = config->getConfigFunction(i->getFunction()))
-						{
-							cf->usedCryptoConstants.insert(cgv->getCryptoDescription());
-						}
-					}
-				}
-			}
-		}
 	}
 }
 

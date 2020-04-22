@@ -32,8 +32,6 @@ class ValueAnalysis;
 */
 class LhsRhsUsesCFGTraversal final: public CFGTraversal {
 public:
-	~LhsRhsUsesCFGTraversal();
-
 	static StmtSet getUses(ShPtr<Statement> stmt, ShPtr<CFG> cfg,
 		ShPtr<ValueAnalysis> va, ShPtr<CallInfoObtainer> cio);
 

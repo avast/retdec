@@ -34,51 +34,51 @@ RawDataCompiler::RawDataCompiler(
 	switch(targetArchitecture)
 	{
 		case Architecture::X86:
-			pathPe.append("x86.yarac");
-			pathElf.append("x86.yarac");
-			pathMacho.append("x86.yarac");
+			pathPe.append("x86");
+			pathElf.append("x86c");
+			pathMacho.append("x86");
 			break;
 
 		case Architecture::X86_64:
-			pathPe.append("x64.yarac");
-			pathElf.append("x64.yarac");
-			pathMacho.append("x64.yarac");
+			pathPe.append("x64");
+			pathElf.append("x64");
+			pathMacho.append("x64");
 			break;
 
 		case Architecture::ARM:
 			if (bitWidth == 32)
 			{
-				pathPe.append("arm.yarac");
-				pathElf.append("arm.yarac");
-				pathMacho.append("arm.yarac");
+				pathPe.append("arm");
+				pathElf.append("arm");
+				pathMacho.append("arm");
 			}
 			else
 			{
-				pathElf.append("arm64.yarac");
+				pathElf.append("arm64");
 			}
 			break;
 
 		case Architecture::POWERPC:
 			if (bitWidth == 32)
 			{
-				pathElf.append("ppc.yarac");
-				pathMacho.append("ppc.yarac");
+				pathElf.append("ppc");
+				pathMacho.append("ppc");
 			}
 			else
 			{
-				pathElf.append("ppc64.yarac");
-				pathMacho.append("ppc64.yarac");
+				pathElf.append("ppc64");
+				pathMacho.append("ppc64");
 			}
 			break;
 
 		case Architecture::MIPS:
 			if (bitWidth == 32)
 			{
-				pathElf.append("mips.yarac");
+				pathElf.append("mips");
 			}
 			else
 			{
-				pathElf.append("mips64.yarac");
+				pathElf.append("mips64");
 			}
 			break;
 
@@ -86,20 +86,10 @@ RawDataCompiler::RawDataCompiler(
 			break;
 	}
 
-	if (pathPe.isFile())
-	{
-		internalPaths.emplace_back(pathPe.getPath());
-	}
-	if (pathElf.isFile())
-	{
-		internalPaths.emplace_back(pathElf.getPath());
-	}
-	if (pathMacho.isFile())
-	{
-		internalPaths.emplace_back(pathMacho.getPath());
-	}
+	populateInternalPaths(pathPe);
+	populateInternalPaths(pathElf);
+	populateInternalPaths(pathMacho);
 }
 
 } // namespace cpdetect
 } // namespace retdec
-

@@ -7,9 +7,11 @@
 #ifndef FILEINFO_FILE_DETECTOR_FILE_DETECTOR_H
 #define FILEINFO_FILE_DETECTOR_FILE_DETECTOR_H
 
+#include "retdec/config/config.h"
 #include "retdec/utils/non_copyable.h"
 #include "fileinfo/file_information/file_information.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -33,15 +35,17 @@ class FileDetector : private retdec::utils::NonCopyable
 		void getHashes();
 		void getStrings();
 		void getCertificates();
+		void getTlsInfo();
 		void getLoaderInfo();
+		void getAnomalies();
 		/// @}
 	protected:
-		FileInformation &fileInfo;                           ///< information about file
+		FileInformation &fileInfo;                                  ///< information about file
 		retdec::cpdetect::DetectParams &cpParams;                   ///< parameters for detection of used compiler
-		retdec::config::Config *fileConfig;                 ///< configuration of input file
+		retdec::config::Config *fileConfig;                         ///< configuration of input file
 		std::shared_ptr<retdec::fileformat::FileFormat> fileParser; ///< parser of input file
-		bool loaded;                                         ///< internal state of instance
 		retdec::fileformat::LoadFlags loadFlags;                    ///< load flags for configurable running
+		bool loaded;                                                ///< internal state of instance
 
 		/// @name Pure virtual detection methods
 		/// @{
@@ -52,8 +56,12 @@ class FileDetector : private retdec::utils::NonCopyable
 		virtual retdec::cpdetect::CompilerDetector* createCompilerDetector() const = 0;
 		/// @}
 	public:
-		FileDetector(std::string pathToInputFile, FileInformation &finfo, retdec::cpdetect::DetectParams &searchPar, retdec::fileformat::LoadFlags loadFlags);
-		virtual ~FileDetector();
+		FileDetector(
+				const std::string& pathToInputFile,
+				FileInformation &finfo,
+				retdec::cpdetect::DetectParams &searchPar,
+				retdec::fileformat::LoadFlags loadFlags);
+		virtual ~FileDetector() = default;
 
 		void setConfigFile(retdec::config::Config &config);
 		void getAllInformation();
@@ -61,5 +69,6 @@ class FileDetector : private retdec::utils::NonCopyable
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

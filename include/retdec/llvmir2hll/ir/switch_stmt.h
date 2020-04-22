@@ -45,9 +45,8 @@ public:
 
 public:
 	static ShPtr<SwitchStmt> create(ShPtr<Expression> controlExpr,
-		ShPtr<Statement> succ = nullptr);
-
-	virtual ~SwitchStmt() override;
+		ShPtr<Statement> succ = nullptr,
+		Address a = Address::Undefined);
 
 	virtual ShPtr<Value> clone() override;
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
@@ -88,7 +87,8 @@ public:
 private:
 	// Since instances are created by calling the static function create(), the
 	// constructor can be private.
-	explicit SwitchStmt(ShPtr<Expression> controlExpr);
+	explicit SwitchStmt(ShPtr<Expression> controlExpr,
+		Address a = Address::Undefined);
 
 private:
 	/// List of `case` clauses.

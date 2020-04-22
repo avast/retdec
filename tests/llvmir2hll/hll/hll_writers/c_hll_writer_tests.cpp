@@ -64,7 +64,7 @@ FloatLiteralIsEmittedWithCorrectSuffix) {
 	//
 	module->addGlobalVar(
 		Variable::create("g", FloatType::create(32)),
-		ConstFloat::create(llvm::APFloat(llvm::APFloat::IEEEsingle, "0.0"))
+		ConstFloat::create(llvm::APFloat(llvm::APFloat::IEEEsingle(), "0.0"))
 	);
 
 	auto code = emitCodeForCurrentModule();
@@ -79,7 +79,7 @@ DoubleLiteralIsEmittedWithoutSuffix) {
 	//
 	module->addGlobalVar(
 		Variable::create("g", FloatType::create(64)),
-		ConstFloat::create(llvm::APFloat(llvm::APFloat::IEEEdouble, "0.0"))
+		ConstFloat::create(llvm::APFloat(llvm::APFloat::IEEEdouble(), "0.0"))
 	);
 
 	auto code = emitCodeForCurrentModule();
@@ -94,7 +94,7 @@ LongDoubleLiteralIsEmittedWithCorrectSuffix) {
 	//
 	module->addGlobalVar(
 		Variable::create("g", FloatType::create(80)),
-		ConstFloat::create(llvm::APFloat(llvm::APFloat::x87DoubleExtended, "0.0"))
+		ConstFloat::create(llvm::APFloat(llvm::APFloat::x87DoubleExtended(), "0.0"))
 	);
 
 	auto code = emitCodeForCurrentModule();

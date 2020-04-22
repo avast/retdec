@@ -11,6 +11,7 @@
 using namespace retdec::utils;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -46,14 +47,6 @@ SymbolTablesJsonGetter::SymbolTablesJsonGetter(FileInformation &fileInfo) : Iter
 	commonHeaderElements.push_back("value");
 	commonHeaderElements.push_back("address");
 	commonHeaderElements.push_back("associatedSize");
-}
-
-/**
- * Destructor
- */
-SymbolTablesJsonGetter::~SymbolTablesJsonGetter()
-{
-
 }
 
 std::size_t SymbolTablesJsonGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const
@@ -116,3 +109,4 @@ bool SymbolTablesJsonGetter::getFlags(std::size_t structIndex, std::size_t recIn
 }
 
 } // namespace fileinfo
+} // namespace retdec

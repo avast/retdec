@@ -15,8 +15,9 @@
 #include <llvm/IR/Module.h>
 #include <llvm/Pass.h>
 
-#include "retdec/utils/address.h"
+#include "retdec/common/address.h"
 #include "retdec/bin2llvmir/analyses/reaching_definitions.h"
+#include "retdec/bin2llvmir/providers/abi/abi.h"
 #include "retdec/bin2llvmir/providers/config.h"
 #include "retdec/bin2llvmir/providers/debugformat.h"
 #include "retdec/bin2llvmir/providers/fileimage.h"
@@ -29,9 +30,16 @@ class ConstantsAnalysis : public llvm::ModulePass
 	public:
 		static char ID;
 		ConstantsAnalysis();
-		virtual bool runOnModule(llvm::Module& M) override;
+		virtual bool runOnModule(llvm::Module& m) override;
+		bool runOnModuleCustom(
+				llvm::Module& m,
+				Config* c,
+				Abi* a,
+				FileImage* i,
+				DebugFormat* d);
 
 	private:
+		bool run();
 		void checkForGlobalInInstruction(
 				ReachingDefinitionsAnalysis& RDA,
 				llvm::Instruction* inst,
@@ -40,10 +48,13 @@ class ConstantsAnalysis : public llvm::ModulePass
 		void tagFunctionsWithUsedCryptoGlobals();
 
 	private:
-		llvm::Module * m_module = nullptr;
-		Config* config = nullptr;
-		FileImage* objf = nullptr;
-		DebugFormat* dbgf = nullptr;
+		llvm::Module * _module = nullptr;
+		Config* _config = nullptr;
+		Abi* _abi = nullptr;
+		FileImage* _image = nullptr;
+		DebugFormat* _dbgf = nullptr;
+
+		std::unordered_set<llvm::Value*> _toRemove;
 };
 
 } // namespace bin2llvmir

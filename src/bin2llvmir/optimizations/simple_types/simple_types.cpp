@@ -311,7 +311,7 @@ void SimpleTypesAnalysis::buildEqSets(Module& M)
 			continue;
 		}
 
-		for (auto& arg : F.getArgumentList())
+		for (auto& arg : F.args())
 		{
 			processRoot(&arg);
 		}

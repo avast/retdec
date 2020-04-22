@@ -94,11 +94,6 @@ BitShiftOptimizer::BitShiftOptimizer(ShPtr<Module> module):
 		PRECONDITION_NON_NULL(module);
 	}
 
-/**
-* @brief Destructs the optimizer.
-*/
-BitShiftOptimizer::~BitShiftOptimizer() {}
-
 void BitShiftOptimizer::doOptimization() {
 	// Visit the initializer of all global variables.
 	for (auto i = module->global_var_begin(), e = module->global_var_end();

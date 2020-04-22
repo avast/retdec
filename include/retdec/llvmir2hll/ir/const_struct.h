@@ -38,8 +38,6 @@ public:
 public:
 	static ShPtr<ConstStruct> create(Type value, ShPtr<StructType> type);
 
-	virtual ~ConstStruct() override;
-
 	virtual ShPtr<Value> clone() override;
 
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;

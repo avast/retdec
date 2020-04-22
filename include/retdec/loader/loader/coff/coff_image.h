@@ -18,7 +18,6 @@ class CoffImage : public Image
 {
 public:
 	CoffImage(const std::shared_ptr<retdec::fileformat::FileFormat>& fileFormat);
-	virtual ~CoffImage();
 
 	virtual bool load() override;
 

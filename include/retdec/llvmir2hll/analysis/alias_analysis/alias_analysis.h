@@ -31,7 +31,7 @@ class Variable;
 */
 class AliasAnalysis: private retdec::utils::NonCopyable {
 public:
-	virtual ~AliasAnalysis() = 0;
+	virtual ~AliasAnalysis() = default;
 
 	virtual void init(ShPtr<Module> module);
 	virtual bool isInitialized() const;
@@ -71,7 +71,7 @@ public:
 	virtual std::string getId() const = 0;
 
 protected:
-	AliasAnalysis();
+	AliasAnalysis() = default;
 
 protected:
 	/// The current module.

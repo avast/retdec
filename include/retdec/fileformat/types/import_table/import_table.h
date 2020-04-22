@@ -23,14 +23,12 @@ class ImportTable
 	private:
 		using importsIterator = std::vector<std::unique_ptr<Import>>::const_iterator;
 		std::vector<std::string> libraries;           ///< name of libraries
+		std::vector<std::string> missingDeps;         ///< missing dependencies
 		std::vector<std::unique_ptr<Import>> imports; ///< stored imports
 		std::string impHashCrc32;                     ///< imphash CRC32
 		std::string impHashMd5;                       ///< imphash MD5
 		std::string impHashSha256;                    ///< imphash SHA256
 	public:
-		ImportTable();
-		~ImportTable();
-
 		/// @name Getters
 		/// @{
 		std::size_t getNumberOfLibraries() const;
@@ -41,6 +39,8 @@ class ImportTable
 		const std::string& getImphashCrc32() const;
 		const std::string& getImphashMd5() const;
 		const std::string& getImphashSha256() const;
+		const std::vector<std::string> & getMissingDependencies() const;
+
 		std::string getLibrary(std::size_t libraryIndex) const;
 		const Import* getImport(std::size_t importIndex) const;
 		const Import* getImport(const std::string &name) const;
@@ -57,7 +57,7 @@ class ImportTable
 		/// @{
 		void computeHashes();
 		void clear();
-		void addLibrary(std::string name);
+		void addLibrary(std::string name, bool missingDependency = false);
 		void addImport(std::unique_ptr<Import>&& import);
 		bool hasLibraries() const;
 		bool hasLibrary(const std::string &name) const;
@@ -65,6 +65,7 @@ class ImportTable
 		bool hasImports() const;
 		bool hasImport(const std::string &name) const;
 		bool hasImport(unsigned long long address) const;
+		bool invalidImpHash() const;
 		bool empty() const;
 		void dump(std::string &dumpTable) const;
 		void dumpLibrary(std::size_t libraryIndex, std::string &libraryDump) const;

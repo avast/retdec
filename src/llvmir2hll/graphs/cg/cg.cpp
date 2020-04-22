@@ -36,11 +36,6 @@ CG::CalledFuncs::CalledFuncs(ShPtr<Function> caller, bool callsOnlyDefinedFuncs,
 CG::CG(ShPtr<Module> module): module(module), callerCalleeMap() {}
 
 /**
-* @brief Destructs the call graph.
-*/
-CG::~CG() {}
-
-/**
 * @brief Returns the module for which this call graph has been created.
 */
 ShPtr<Module> CG::getCorrespondingModule() const {

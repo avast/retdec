@@ -13,10 +13,11 @@ namespace semantics {
 /**
 * @brief Returns the header name for the given function from the given map.
 */
-Maybe<std::string> getCHeaderFileForFuncFromMap(const std::string &funcName,
+std::optional<std::string> getCHeaderFileForFuncFromMap(
+		const std::string &funcName,
 		const StringStringUMap &map) {
 	auto i = map.find(funcName);
-	return i != map.end() ? Just(i->second) : Nothing<std::string>();
+	return i != map.end() ? std::optional<std::string>(i->second) : std::nullopt;
 }
 
 } // namespace semantics

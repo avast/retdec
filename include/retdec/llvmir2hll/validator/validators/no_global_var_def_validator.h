@@ -29,8 +29,6 @@ namespace llvmir2hll {
 */
 class NoGlobalVarDefValidator: public Validator {
 public:
-	virtual ~NoGlobalVarDefValidator() override;
-
 	virtual std::string getId() const override;
 
 	static ShPtr<Validator> create();

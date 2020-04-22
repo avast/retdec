@@ -10,7 +10,6 @@
 #include "retdec/llvmir2hll/ir/int_type.h"
 #include "llvmir2hll/ir/tests_with_module.h"
 #include "retdec/llvmir2hll/ir/variable.h"
-#include "retdec/llvmir2hll/support/maybe.h"
 #include "retdec/llvmir2hll/support/types.h"
 #include "retdec/utils/string.h"
 
@@ -37,6 +36,8 @@ void HLLWriterTests::SetUp() {
 	ON_CALL(*configMock, getLineRangeForFunc(_))
 		.WillByDefault(Return(NO_LINE_RANGE));
 	ON_CALL(*configMock, isUserDefinedFunc(_))
+		.WillByDefault(Return(false));
+	ON_CALL(*configMock, isDecompilerDefinedFunc(_))
 		.WillByDefault(Return(false));
 	ON_CALL(*configMock, isStaticallyLinkedFunc(_))
 		.WillByDefault(Return(false));
@@ -74,13 +75,11 @@ void HLLWriterTests::SetUp() {
 		.WillByDefault(Return(""));
 	ON_CALL(*configMock, getSelectedButNotFoundFuncs())
 		.WillByDefault(Return(StringSet()));
-	ON_CALL(*configMock, getFuncsFixedWithLLVMIRFixer())
-		.WillByDefault(Return(StringSet()));
 
 	ON_CALL(*semanticsMock, getCHeaderFileForFunc(_))
-		.WillByDefault(Return(Nothing<std::string>()));
+		.WillByDefault(Return(std::nullopt));
 	ON_CALL(*semanticsMock, getMainFuncName())
-		.WillByDefault(Return(Nothing<std::string>()));
+		.WillByDefault(Return(std::nullopt));
 
 	// By default, use CHLLWriter to test functionality that is shared between
 	// HLL writers.

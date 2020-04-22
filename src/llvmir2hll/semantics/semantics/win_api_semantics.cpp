@@ -36,27 +36,27 @@ std::string WinAPISemantics::getId() const {
 	return WIN_API_SEMANTICS_ID;
 }
 
-Maybe<std::string> WinAPISemantics::getCHeaderFileForFunc(
+std::optional<std::string> WinAPISemantics::getCHeaderFileForFunc(
 		const std::string &funcName) const {
 	return semantics::win_api::getCHeaderFileForFunc(funcName);
 }
 
-Maybe<bool> WinAPISemantics::funcNeverReturns(
+std::optional<bool> WinAPISemantics::funcNeverReturns(
 		const std::string &funcName) const {
 	return semantics::win_api::funcNeverReturns(funcName);
 }
 
-Maybe<std::string> WinAPISemantics::getNameOfVarStoringResult(
+std::optional<std::string> WinAPISemantics::getNameOfVarStoringResult(
 		const std::string &funcName) const {
 	return semantics::win_api::getNameOfVarStoringResult(funcName);
 }
 
-Maybe<std::string> WinAPISemantics::getNameOfParam(
+std::optional<std::string> WinAPISemantics::getNameOfParam(
 		const std::string &funcName, unsigned paramPos) const {
 	return semantics::win_api::getNameOfParam(funcName, paramPos);
 }
 
-Maybe<IntStringMap> WinAPISemantics::getSymbolicNamesForParam(
+std::optional<IntStringMap> WinAPISemantics::getSymbolicNamesForParam(
 		const std::string &funcName, unsigned paramPos) const {
 	return semantics::win_api::getSymbolicNamesForParam(funcName, paramPos);
 }

@@ -23,10 +23,6 @@ Segment::Segment(const Segment& segment) : _secSeg(segment._secSeg), _address(se
 {
 }
 
-Segment::~Segment()
-{
-}
-
 /**
  * Returns associated section or segment, which was used for loading of this segment.
  *
@@ -93,9 +89,9 @@ std::uint64_t Segment::getPhysicalSize() const
  *
  * @return Address range.
  */
-retdec::utils::Range<std::uint64_t> Segment::getAddressRange() const
+retdec::common::Range<std::uint64_t> Segment::getAddressRange() const
 {
-	return retdec::utils::Range<std::uint64_t>(getAddress(), getEndAddress());
+	return retdec::common::Range<std::uint64_t>(getAddress(), getEndAddress());
 }
 
 /**
@@ -103,9 +99,9 @@ retdec::utils::Range<std::uint64_t> Segment::getAddressRange() const
  *
  * @return Address range.
  */
-retdec::utils::Range<std::uint64_t> Segment::getPhysicalAddressRange() const
+retdec::common::Range<std::uint64_t> Segment::getPhysicalAddressRange() const
 {
-	return retdec::utils::Range<std::uint64_t>(getAddress(), getPhysicalEndAddress());
+	return retdec::common::Range<std::uint64_t>(getAddress(), getPhysicalEndAddress());
 }
 
 /**
@@ -113,7 +109,7 @@ retdec::utils::Range<std::uint64_t> Segment::getPhysicalAddressRange() const
  *
  * @return List of address ranges.
  */
-const retdec::utils::RangeContainer<std::uint64_t>& Segment::getNonDecodableAddressRanges() const
+const retdec::common::RangeContainer<std::uint64_t>& Segment::getNonDecodableAddressRanges() const
 {
 	return _nonDecodableRanges;
 }
@@ -301,9 +297,9 @@ void Segment::shrink(std::uint64_t newAddress, std::uint64_t newSize)
  *
  * @param range Range to add.
  */
-void Segment::addNonDecodableRange(retdec::utils::Range<std::uint64_t> range)
+void Segment::addNonDecodableRange(retdec::common::Range<std::uint64_t> range)
 {
-	retdec::utils::Range<std::uint64_t> secRange(getAddress(), getPhysicalEndAddress());
+	retdec::common::Range<std::uint64_t> secRange(getAddress(), getPhysicalEndAddress());
 	if (!secRange.overlaps(range))
 		return;
 
@@ -311,7 +307,7 @@ void Segment::addNonDecodableRange(retdec::utils::Range<std::uint64_t> range)
 			std::max(range.getStart(), secRange.getStart()),
 			std::min(range.getEnd(), secRange.getEnd()));
 
-	_nonDecodableRanges.addRange(std::move(range));
+	_nonDecodableRanges.insert(std::move(range));
 }
 
 } // namespace loader

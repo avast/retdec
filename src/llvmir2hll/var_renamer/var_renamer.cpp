@@ -44,11 +44,6 @@ VarRenamer::VarRenamer(ShPtr<VarNameGen> varNameGen, bool useDebugNames):
 	}
 
 /**
-* @brief Destructor.
-*/
-VarRenamer::~VarRenamer() {}
-
-/**
 * @brief Renames variables in the given module according to the settings set
 *        when constructing the renamer.
 *

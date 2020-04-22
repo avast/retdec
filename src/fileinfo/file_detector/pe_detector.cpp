@@ -16,6 +16,7 @@ using namespace PeLib;
 using namespace retdec::cpdetect;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 namespace
@@ -30,23 +31,25 @@ const unsigned long long PE_16_FLAGS_SIZE = 16;
 /**
  * Constructor
  * @param pathToInputFile Path to input file
+ * @param dllListFile Path to text file containing list of OS DLLs
  * @param finfo Instance of class for storing information about file
  * @param searchPar Parameters for detection of used compiler (or packer)
  * @param loadFlags Load flags
  */
-PeDetector::PeDetector(std::string pathToInputFile, FileInformation &finfo, retdec::cpdetect::DetectParams &searchPar, retdec::fileformat::LoadFlags loadFlags) :
-	FileDetector(pathToInputFile, finfo, searchPar, loadFlags)
+PeDetector::PeDetector(
+		const std::string & pathToInputFile,
+		const std::string & dllListFile,
+		FileInformation &finfo,
+		retdec::cpdetect::DetectParams &searchPar,
+		retdec::fileformat::LoadFlags loadFlags)
+		: FileDetector(pathToInputFile, finfo, searchPar, loadFlags)
 {
-	fileParser = peParser = std::make_shared<PeWrapper>(fileInfo.getPathToFile(), loadFlags);
+	fileParser = peParser = std::make_shared<PeWrapper>(fileInfo.getPathToFile(), dllListFile, loadFlags);
 	loaded = peParser->isInValidState();
-}
 
-/**
- * Destructor
- */
-PeDetector::~PeDetector()
-{
-
+	// Propagate information about failed load of the DLL list file
+	if(peParser->dllListFailedToLoad())
+		finfo.setDepsListFailedToLoad(dllListFile);
 }
 
 /**
@@ -269,10 +272,9 @@ void PeDetector::getSections()
 											"section can be written to"};
 	const std::string flagsAbbv[flagsSize] = {"b", "E", "i", "u", "l", "t", "g", purgeableAbbv, "L",
 											"P", "R", "d", "c", "p", "s", "x", "r", "w"};
-	FileSection fs;
-
 	for(unsigned long long i = 0; i < storedSections; ++i)
 	{
+		FileSection fs;
 		if(!peParser->getFileSection(i, fs))
 		{
 			continue;
@@ -337,17 +339,29 @@ void PeDetector::getDotnetInfo()
 	fileInfo.setDotnetTypeRefhashSha256(peParser->getTypeRefhashSha256());
 }
 
+/**
+ * Get information about .NET
+ */
+void PeDetector::getVisualBasicInfo()
+{
+	unsigned long long version;
+	if (!peParser->isVisualBasic(version))
+	{
+		return;
+	}
+	fileInfo.setVisualBasicUsed(true);
+	fileInfo.setVisualBasicInfo(peParser->getVisualBasicInfo());
+}
+
 void PeDetector::detectFileClass()
 {
-	switch(peParser->getPeClass())
+	if (peParser->isPe32())
 	{
-		case PEFILE32:
-			fileInfo.setFileClass("32-bit");
-			break;
-		case PEFILE64:
-			fileInfo.setFileClass("64-bit");
-			break;
-		default:;
+		fileInfo.setFileClass("32-bit");
+	}
+	else if (peParser->isPe64())
+	{
+		fileInfo.setFileClass("64-bit");
 	}
 }
 
@@ -494,6 +508,7 @@ void PeDetector::getAdditionalInfo()
 	getCoffSymbols();
 	getRelocationTableInfo();
 	getDotnetInfo();
+	getVisualBasicInfo();
 
 	/* In future we can detect more information about PE files:
 		- TimeDateStamp
@@ -530,3 +545,4 @@ retdec::cpdetect::CompilerDetector* PeDetector::createCompilerDetector() const
 }
 
 } // namespace fileinfo
+} // namespace retdec

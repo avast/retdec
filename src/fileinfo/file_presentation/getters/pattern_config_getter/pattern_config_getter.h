@@ -10,6 +10,7 @@
 #include "retdec/config/config.h"
 #include "fileinfo/file_information/file_information.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -29,9 +30,10 @@ class PatternConfigGetter
 		~PatternConfigGetter();
 
 		bool isEmpty() const;
-		Json::Value getJsonValue() const;
+		retdec::common::PatternContainer& getPatterns();
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

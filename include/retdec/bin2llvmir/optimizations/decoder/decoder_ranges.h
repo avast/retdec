@@ -9,7 +9,7 @@
 
 #include <iostream>
 
-#include "retdec/utils/address.h"
+#include "retdec/common/address.h"
 #include "retdec/bin2llvmir/providers/fileimage.h"
 
 namespace retdec {
@@ -18,26 +18,26 @@ namespace bin2llvmir {
 class RangesToDecode
 {
 	public:
-		void addPrimary(utils::Address s, utils::Address e);
-		void addPrimary(const utils::AddressRange& r);
-		void addAlternative(utils::Address s, utils::Address e);
-		void addAlternative(const utils::AddressRange& r);
+		void addPrimary(common::Address s, common::Address e);
+		void addPrimary(const common::AddressRange& r);
+		void addAlternative(common::Address s, common::Address e);
+		void addAlternative(const common::AddressRange& r);
 		void promoteAlternativeToPrimary();
 
-		void remove(utils::Address s, utils::Address e);
-		void remove(const utils::AddressRange& r);
+		void remove(common::Address s, common::Address e);
+		void remove(const common::AddressRange& r);
 		void removeZeroSequences(FileImage* image);
 
 		bool isStrict() const;
 		bool primaryEmpty() const;
 		bool alternativeEmpty() const;
 
-		const utils::AddressRange& primaryFront() const;
-		const utils::AddressRange& alternativeFront() const;
+		const common::AddressRange& primaryFront() const;
+		const common::AddressRange& alternativeFront() const;
 
-		const utils::AddressRange* getPrimary(utils::Address a) const;
-		const utils::AddressRange* getAlternative(utils::Address a) const;
-		const utils::AddressRange* get(utils::Address a) const;
+		const common::AddressRange* getPrimary(common::Address a) const;
+		const common::AddressRange* getAlternative(common::Address a) const;
+		const common::AddressRange* get(common::Address a) const;
 
 		void setArchitectureInstructionAlignment(unsigned a);
 
@@ -46,11 +46,11 @@ class RangesToDecode
 	private:
 		void removeZeroSequences(
 				FileImage* image,
-				utils::AddressRangeContainer& rs);
+				common::AddressRangeContainer& rs);
 
 	private:
-		utils::AddressRangeContainer _primaryRanges;
-		utils::AddressRangeContainer _alternativeRanges;
+		common::AddressRangeContainer _primaryRanges;
+		common::AddressRangeContainer _alternativeRanges;
 		unsigned archInsnAlign = 0;
 		bool _strict = false;
 };

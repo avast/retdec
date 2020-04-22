@@ -9,7 +9,8 @@
 
 #include <memory>
 
-#include "retdec/utils/range.h"
+#include "retdec/utils/alignment.h"
+#include "retdec/common/range.h"
 #include "retdec/utils/string.h"
 #include "retdec/fileformat/file_format/pe/pe_template_aux.h"
 #include "retdec/fileformat/types/dotnet_headers/clr_header.h"
@@ -172,6 +173,18 @@ template<int bits> unsigned long long peSizeOfOptionalHeader(const PeLib::PeHead
 }
 
 /**
+ * Find out if optional header SizeOfHeaders is rounded up to multiple of FileAlignment
+ * @param peHeader Parser of PE header
+ * @return @c true if SizeOfHeaders is rounded up to multiple of FileAlignment, @c false otherwise
+ */
+template<int bits> unsigned long long peIsSizeOfHeaderMultipleOfFileAlignment(
+									const PeLib::PeHeaderT<bits> &peHeader)
+{
+	std::uint64_t remainder;
+	return retdec::utils::isAligned(peHeader.getSizeOfHeaders(), peHeader.getFileAlignment(), remainder);
+}
+
+/**
  * Get file alignment
  * @param peHeader Parser of PE header
  * @return File alignment
@@ -189,6 +202,16 @@ template<int bits> unsigned long long peFileAlignment(const PeLib::PeHeaderT<bit
 template<int bits> unsigned long long peSectionAlignment(const PeLib::PeHeaderT<bits> &peHeader)
 {
 	return peHeader.getSectionAlignment();
+}
+
+/**
+ * Get size of image headers
+ * @param peHeader Parser of PE header
+ * @return Size of headers
+ */
+template<int bits> unsigned long long peSizeOfHeaders(const PeLib::PeHeaderT<bits> &peHeader)
+{
+	return peHeader.getSizeOfHeaders();
 }
 
 /**
@@ -322,9 +345,9 @@ template<int bits> unsigned long long peNumberOfDelayImportedLibraries(const PeL
 }
 
 /**
- * Get number of data directories
+ * Find out if is DLL
  * @param peHeader Parser of PE header
- * @return Number of data directories
+ * @return @c true if is DLL, @c false otherwise
  */
 template<int bits> bool peIsDll(const PeLib::PeHeaderT<bits> &peHeader)
 {
@@ -461,7 +484,10 @@ template<int bits> bool peDataDirectoryAbsolute(const PeLib::PeHeaderT<bits> &pe
  *
  * If function returns @c false, @a fileName is left unchanged.
  */
-template<int bits> bool peImportedLibraryFileName(const PeLib::ImportDirectory<bits> &peImports, std::string &fileName, unsigned long long index)
+template<int bits> bool peImportedLibraryFileName(
+		const PeLib::ImportDirectory<bits> &peImports,
+		std::string &fileName,
+		unsigned long long index)
 {
 	if(index >= peNumberOfImportedLibraries(peImports))
 	{
@@ -704,6 +730,66 @@ template<int bits> const PeLib::ResourceNode* peResourceTreeRoot(const PeLib::Re
 }
 
 /**
+ * Get TLS directory startAddressOfRawData
+ * @param tls Parser of TLS directory
+ * @return StartAddressOfRawData of TLS directory
+ */
+template<int bits> unsigned long long peTlsStartAddressOfRawData(const PeLib::TlsDirectory<bits> &tls)
+{
+	return tls.getStartAddressOfRawData();
+}
+
+/**
+ * Get TLS directory endAddressOfRawData
+ * @param tls Parser of TLS directory
+ * @return EndAddressOfRawData of TLS directory
+ */
+template<int bits> unsigned long long peTlsEndAddressOfRawData(const PeLib::TlsDirectory<bits> &tls)
+{
+	return tls.getEndAddressOfRawData();
+}
+
+/**
+ * Get TLS directory addressOfIndex
+ * @param tls Parser of TLS directory
+ * @return AddressOfIndex of  TLS directory
+ */
+template<int bits> unsigned long long peTlsAddressOfIndex(const PeLib::TlsDirectory<bits> &tls)
+{
+	return tls.getAddressOfIndex();
+}
+
+/**
+ * Get TLS directory addressOfCallBacks
+ * @param tls Parser of TLS directory
+ * @return AddressOfCallBacks of TLS directory
+ */
+template<int bits> unsigned long long peTlsAddressOfCallBacks(const PeLib::TlsDirectory<bits> &tls)
+{
+	return tls.getAddressOfCallBacks();
+}
+
+/**
+ * Get TLS directory sizeOfZeroFill
+ * @param tls Parser of TLS directory
+ * @return SizeOfZeroFill of TLS directory
+ */
+template<int bits> unsigned long long peTlsSizeOfZeroFill(const PeLib::TlsDirectory<bits> &tls)
+{
+	return tls.getSizeOfZeroFill();
+}
+
+/**
+ * Get TLS directory characteristics
+ * @param tls Parser of TLS directory
+ * @return Characteristics of TLS directory
+ */
+template<int bits> unsigned long long peTlsCharacteristics(const PeLib::TlsDirectory<bits> &tls)
+{
+	return tls.getCharacteristics();
+}
+
+/**
  * Get CLR header
  * @param comHeader Parser of PE COM/CLR directory
  * @return Parsed CLR header
@@ -799,16 +885,16 @@ template<int bits> unsigned long long peSecurityDirSize(const PeLib::PeHeaderT<b
  * @param peImports Parser of PE import directory
  * @return Occupied address ranges
  */
-template<int bits> retdec::utils::RangeContainer<std::uint64_t> peImportDirectoryOccupiedAddresses(const PeLib::ImportDirectory<bits> &peImports)
+template<int bits> retdec::common::RangeContainer<std::uint64_t> peImportDirectoryOccupiedAddresses(const PeLib::ImportDirectory<bits> &peImports)
 {
-	retdec::utils::RangeContainer<std::uint64_t> result;
+	retdec::common::RangeContainer<std::uint64_t> result;
 	for (const auto& addresses : peImports.getOccupiedAddresses())
 	{
 		try
 		{
-			result.addRange(retdec::utils::Range<std::uint64_t>{addresses.first, addresses.second});
+			result.insert(addresses.first, addresses.second);
 		}
-		catch (const retdec::utils::InvalidRangeException&)
+		catch (const retdec::common::InvalidRangeException&)
 		{
 			continue;
 		}
@@ -822,16 +908,16 @@ template<int bits> retdec::utils::RangeContainer<std::uint64_t> peImportDirector
  * @param peExports Parser of PE export directory
  * @return Occupied address ranges
  */
-template<int bits> retdec::utils::RangeContainer<std::uint64_t> peExportDirectoryOccupiedAddresses(const PeLib::ExportDirectoryT<bits> &peExports)
+template<int bits> retdec::common::RangeContainer<std::uint64_t> peExportDirectoryOccupiedAddresses(const PeLib::ExportDirectoryT<bits> &peExports)
 {
-	retdec::utils::RangeContainer<std::uint64_t> result;
+	retdec::common::RangeContainer<std::uint64_t> result;
 	for (const auto& addresses : peExports.getOccupiedAddresses())
 	{
 		try
 		{
-			result.addRange(retdec::utils::Range<std::uint64_t>{addresses.first, addresses.second});
+			result.insert(addresses.first, addresses.second);
 		}
-		catch (const retdec::utils::InvalidRangeException&)
+		catch (const retdec::common::InvalidRangeException&)
 		{
 			continue;
 		}
@@ -845,16 +931,16 @@ template<int bits> retdec::utils::RangeContainer<std::uint64_t> peExportDirector
  * @param peDebug Parser of PE debug directory
  * @return Occupied address ranges
  */
-template<int bits> retdec::utils::RangeContainer<std::uint64_t> peDebugDirectoryOccupiedAddresses(const PeLib::DebugDirectoryT<bits> &peDebug)
+template<int bits> retdec::common::RangeContainer<std::uint64_t> peDebugDirectoryOccupiedAddresses(const PeLib::DebugDirectoryT<bits> &peDebug)
 {
-	retdec::utils::RangeContainer<std::uint64_t> result;
+	retdec::common::RangeContainer<std::uint64_t> result;
 	for (const auto& addresses : peDebug.getOccupiedAddresses())
 	{
 		try
 		{
-			result.addRange(retdec::utils::Range<std::uint64_t>{addresses.first, addresses.second});
+			result.insert(addresses.first, addresses.second);
 		}
-		catch (const retdec::utils::InvalidRangeException&)
+		catch (const retdec::common::InvalidRangeException&)
 		{
 			continue;
 		}
@@ -868,16 +954,16 @@ template<int bits> retdec::utils::RangeContainer<std::uint64_t> peDebugDirectory
  * @param peResources Parser of PE resource directory
  * @return Occupied address ranges
  */
-template<int bits> retdec::utils::RangeContainer<std::uint64_t> peResourceDirectoryOccupiedAddresses(const PeLib::ResourceDirectoryT<bits> &peResources)
+template<int bits> retdec::common::RangeContainer<std::uint64_t> peResourceDirectoryOccupiedAddresses(const PeLib::ResourceDirectoryT<bits> &peResources)
 {
-	retdec::utils::RangeContainer<std::uint64_t> result;
+	retdec::common::RangeContainer<std::uint64_t> result;
 	for (const auto& addresses : peResources.getOccupiedAddresses())
 	{
 		try
 		{
-			result.addRange(retdec::utils::Range<std::uint64_t>{addresses.first, addresses.second});
+			result.insert(addresses.first, addresses.second);
 		}
-		catch (const retdec::utils::InvalidRangeException&)
+		catch (const retdec::common::InvalidRangeException&)
 		{
 			continue;
 		}

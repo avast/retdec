@@ -1084,7 +1084,8 @@ Relocation createRelocation(const std::string &name, std::uint64_t offset, std::
  * @param pathToFile Path to input file
  * @param loadFlags Load flags
  */
-ElfFormat::ElfFormat(std::string pathToFile, LoadFlags loadFlags) : FileFormat(pathToFile, loadFlags)
+ElfFormat::ElfFormat(std::string pathToFile, LoadFlags loadFlags) :
+		FileFormat(pathToFile, loadFlags)
 {
 	initStructures();
 }
@@ -1094,33 +1095,22 @@ ElfFormat::ElfFormat(std::string pathToFile, LoadFlags loadFlags) : FileFormat(p
  * @param inputStream Representation of input file
  * @param loadFlags Load flags
  */
-ElfFormat::ElfFormat(std::istream &inputStream, LoadFlags loadFlags) : FileFormat(inputStream, loadFlags)
+ElfFormat::ElfFormat(std::istream &inputStream, LoadFlags loadFlags) :
+		FileFormat(inputStream, loadFlags)
 {
 	initStructures();
 }
 
 /**
- * Destructor
+ * Constructor
+ * @param data Input data.
+ * @param size Input data size.
+ * @param loadFlags Load flags
  */
-ElfFormat::~ElfFormat()
+ElfFormat::ElfFormat(const std::uint8_t *data, std::size_t size, LoadFlags loadFlags) :
+		FileFormat(data, size, loadFlags)
 {
-
-}
-
-/**
- * Constructor of RelocationTableInfo
- */
-ElfFormat::RelocationTableInfo::RelocationTableInfo() : address(0), size(0), entrySize(0), type(SHT_NULL)
-{
-
-}
-
-/**
- * Destructor of RelocationTableInfo
- */
-ElfFormat::RelocationTableInfo::~RelocationTableInfo()
-{
-
+	initStructures();
 }
 
 /**
@@ -1948,6 +1938,7 @@ void ElfFormat::loadSections()
 		fSec->setElfLink(sec->get_link());
 		fSec->setNumberOfSections(noOfSections);
 		fSec->setArchByteSize(getBytesPerWord());
+		fSec->computeEntropy();
 		sections.push_back(fSec);
 	}
 

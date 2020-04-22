@@ -18,12 +18,11 @@ class AbiArm : public Abi
 	//
 	public:
 		AbiArm(llvm::Module* m, Config* c);
-		virtual ~AbiArm();
 
 	// Registers.
 	//
 	public:
-		virtual bool isGeneralPurposeRegister(const llvm::Value* val) override;
+		virtual bool isGeneralPurposeRegister(const llvm::Value* val) const override;
 
 	// Instructions.
 	//

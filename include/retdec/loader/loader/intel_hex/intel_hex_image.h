@@ -18,7 +18,6 @@ class IntelHexImage : public Image
 {
 public:
 	IntelHexImage(const std::shared_ptr<retdec::fileformat::FileFormat>& fileFormat);
-	virtual ~IntelHexImage();
 
 	virtual bool load() override;
 

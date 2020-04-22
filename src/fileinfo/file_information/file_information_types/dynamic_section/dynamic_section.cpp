@@ -7,23 +7,8 @@
 #include "fileinfo/file_information/file_information_types/dynamic_section/dynamic_section.h"
 #include "fileinfo/file_information/file_information_types/type_conversions.h"
 
+namespace retdec {
 namespace fileinfo {
-
-/**
- * Constructor
- */
-DynamicSection::DynamicSection() : declaredEntries(std::numeric_limits<unsigned long long>::max())
-{
-
-}
-
-/**
- * Destructor
- */
-DynamicSection::~DynamicSection()
-{
-
-}
 
 /**
  * Get number of entries in section
@@ -176,3 +161,4 @@ void DynamicSection::clearEntries()
 }
 
 } // namespace fileinfo
+} // namespace retdec

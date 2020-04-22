@@ -10,22 +10,6 @@ namespace retdec {
 namespace fileformat {
 
 /**
- * Constructor
- */
-ElfSymbol::ElfSymbol() : elfType(0), elfBind(0), elfOther(0)
-{
-
-}
-
-/**
- * Destructor
- */
-ElfSymbol::~ElfSymbol()
-{
-
-}
-
-/**
  * Returns the ELF symbol type.
  * @return ELF symbol type.
  */

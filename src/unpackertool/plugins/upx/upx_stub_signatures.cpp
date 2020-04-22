@@ -8,6 +8,7 @@
 
 using namespace retdec::fileformat;
 using namespace retdec::loader;
+using namespace retdec::utils;
 using namespace retdec::unpacker;
 
 namespace retdec {

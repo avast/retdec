@@ -18,11 +18,8 @@ namespace llvmir2hll {
 * Instances of this class have reference object semantics.
 */
 class Constant: public Expression {
-public:
-	virtual ~Constant() = 0;
-
 protected:
-	Constant();
+	Constant() = default;
 };
 
 } // namespace llvmir2hll

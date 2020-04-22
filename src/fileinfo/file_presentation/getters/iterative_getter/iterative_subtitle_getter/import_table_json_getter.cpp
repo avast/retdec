@@ -12,6 +12,7 @@
 using namespace retdec::utils;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -33,14 +34,6 @@ ImportTableJsonGetter::ImportTableJsonGetter(FileInformation &fileInfo) : Iterat
 	commonHeaderElements.push_back("address");
 	if (fileinfo.getFileFormatEnum() == Format::PE)
 		commonHeaderElements.push_back("delayed");
-}
-
-/**
- * Destructor
- */
-ImportTableJsonGetter::~ImportTableJsonGetter()
-{
-
 }
 
 std::size_t ImportTableJsonGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const
@@ -99,3 +92,4 @@ bool ImportTableJsonGetter::getFlags(std::size_t structIndex, std::size_t recInd
 }
 
 } // namespace fileinfo
+} // namespace retdec

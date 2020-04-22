@@ -7,10 +7,11 @@
 #include <cstdint>
 #include <system_error>
 
-#include <pelib/PeLibInc.h>
+#include <llvm/Object/COFF.h>
 
 #include "retdec/utils/string.h"
 #include "retdec/fileformat/file_format/coff/coff_format.h"
+#include "retdec/pelib/PeLibInc.h"
 
 using namespace retdec::utils;
 using namespace llvm;
@@ -214,7 +215,41 @@ Symbol::UsageType getSymbolUsageType(std::uint8_t storageClass, std::uint8_t com
  * @param pathToFile Path to input file
  * @param loadFlags Load flags
  */
-CoffFormat::CoffFormat(std::string pathToFile, LoadFlags loadFlags) : FileFormat(pathToFile, loadFlags), fileBuffer(MemoryBuffer::getFile(Twine(pathToFile)))
+CoffFormat::CoffFormat(std::string pathToFile, LoadFlags loadFlags) :
+		FileFormat(pathToFile, loadFlags),
+		fileBuffer(MemoryBuffer::getFile(Twine(pathToFile)))
+{
+	initStructures();
+}
+
+/**
+ * Constructor
+ * @param inputStream Representation of input file
+ * @param loadFlags Load flags
+ */
+CoffFormat::CoffFormat(std::istream &inputStream, LoadFlags loadFlags) :
+		FileFormat(inputStream, loadFlags),
+		fileBuffer(MemoryBuffer::getMemBuffer(
+				StringRef(
+						reinterpret_cast<const char*>(bytes.data()),
+						bytes.size()),
+				"",
+				false))
+{
+	initStructures();
+}
+
+/**
+ * Constructor
+ * @param data Input data.
+ * @param size Input data size.
+ * @param loadFlags Load flags
+ */
+CoffFormat::CoffFormat(const std::uint8_t *data, std::size_t size, LoadFlags loadFlags) :
+		FileFormat(data, size, loadFlags),
+		fileBuffer(MemoryBuffer::getMemBuffer(StringRef(
+				reinterpret_cast<const char*>(data),
+				size)))
 {
 	initStructures();
 }
@@ -297,6 +332,7 @@ void CoffFormat::loadSections()
 		{
 			section->load(this);
 		}
+		section->computeEntropy();
 	}
 }
 
@@ -374,6 +410,12 @@ void CoffFormat::loadRelocations()
 	{
 		const auto *ffSec = getSection(secIndex);
 		const auto *coffSec = file->getCOFFSection(sec);
+
+		if (coffSec->PointerToRelocations >= getFileLength())
+		{
+			continue;
+		}
+
 		for(const auto &reloc : file->getRelocations(coffSec))
 		{
 			Relocation rel;

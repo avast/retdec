@@ -51,7 +51,6 @@ class ElfNoteSecSeg
 		/// @name  Constructors and destructor
 		/// @{
 		ElfNoteSecSeg(const SecSeg* assocSecSeg);
-		~ElfNoteSecSeg();
 		/// @}
 
 		/// @name Setters

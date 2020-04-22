@@ -6,6 +6,8 @@
 
 #include <unordered_map>
 
+#include <openssl/evp.h>
+
 #include "retdec/crypto/hash_context.h"
 #include "retdec/utils/container.h"
 #include "retdec/utils/conversion.h"

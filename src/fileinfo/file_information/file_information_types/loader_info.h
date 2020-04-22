@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 
+namespace retdec {
 namespace fileinfo {
 
 class LoadedSegment
@@ -23,7 +24,6 @@ class LoadedSegment
 		LoadedSegment(unsigned long long index, std::string name, unsigned long long address, unsigned long long size);
 		LoadedSegment(const LoadedSegment&);
 		LoadedSegment(LoadedSegment&&);
-		~LoadedSegment();
 
 		std::string getIndexStr(std::ios_base &(* format)(std::ios_base &)) const;
 		std::string getName() const;
@@ -34,15 +34,12 @@ class LoadedSegment
 class LoaderInfo
 {
 	private:
-		unsigned long long _baseAddress;
+		unsigned long long _baseAddress = 0;
 		std::vector<LoadedSegment> _loadedSegments;
 		std::string _statusMessage;
 		retdec::fileformat::LoaderErrorInfo _ldrErrInfo;
 
 	public:
-		LoaderInfo();
-		~LoaderInfo();
-
 		/// @name Getters
 		/// @{
 		std::string getBaseAddressStr(std::ios_base &(* format)(std::ios_base &)) const;
@@ -67,5 +64,6 @@ class LoaderInfo
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

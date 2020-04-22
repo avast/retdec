@@ -1,0 +1,12 @@
+1 GetClientAdvises
+2 DllRegisterServer
+3 DllUnregisterServer
+4 HrGetPnpDeviceStatus
+5 HrLanConnectionNameFromGuidOrPath
+6 HrPnpInstanceIdFromGuid
+7 HrQueryLanMediaState
+8 HrRasConnectionNameFromGuid
+9 NetManDiagFromCommandArgs
+10 ProcessQueue
+11 RasEventNotify
+12 ServiceMain

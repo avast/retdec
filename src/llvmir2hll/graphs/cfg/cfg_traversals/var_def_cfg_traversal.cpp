@@ -28,11 +28,6 @@ VarDefCFGTraversal::VarDefCFGTraversal(ShPtr<CFG> cfg, const VarSet &vars,
 		CFGTraversal(cfg, false), vars(vars), end(end), va(va) {}
 
 /**
-* @brief Destructs the traverser.
-*/
-VarDefCFGTraversal::~VarDefCFGTraversal() {}
-
-/**
 * @brief Returns @c true if a variable from @a vars is defined between @a start
 *        and @a end in @a cfg, @c false otherwise.
 *
@@ -59,9 +54,6 @@ bool VarDefCFGTraversal::isVarDefBetweenStmts(const VarSet &vars,
 	PRECONDITION(va->isInValidState(), "it is not in a valid state");
 
 	ShPtr<VarDefCFGTraversal> traverser(new VarDefCFGTraversal(cfg, vars, end, va));
-	// We mark the start statement as checked so we don't have to check this in
-	// visitStmt().
-	traverser->checkedStmts.insert(start);
 	return traverser->performTraversalFromSuccessors(start);
 }
 

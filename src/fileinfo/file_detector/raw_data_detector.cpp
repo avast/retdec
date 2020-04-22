@@ -10,6 +10,7 @@
 using namespace retdec::cpdetect;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -19,20 +20,15 @@ namespace fileinfo {
  * @param searchPar Parameters for detection of used compiler (or packer)
  * @param loadFlags Load flags
  */
-RawDataDetector::RawDataDetector(std::string pathToInputFile, FileInformation &finfo,
-	retdec::cpdetect::DetectParams &searchPar, retdec::fileformat::LoadFlags loadFlags) :
-	FileDetector(pathToInputFile, finfo, searchPar, loadFlags)
+RawDataDetector::RawDataDetector(
+		std::string pathToInputFile,
+		FileInformation &finfo,
+		retdec::cpdetect::DetectParams &searchPar,
+		retdec::fileformat::LoadFlags loadFlags)
+		: FileDetector(pathToInputFile, finfo, searchPar, loadFlags)
 {
 	fileParser = rawParser = std::make_shared<retdec::fileformat::RawDataFormat>(pathToInputFile, loadFlags);
 	loaded = fileParser->isInValidState();
-}
-
-/**
- * Destructor
- */
-RawDataDetector::~RawDataDetector()
-{
-
 }
 
 /**
@@ -144,3 +140,4 @@ retdec::cpdetect::CompilerDetector* RawDataDetector::createCompilerDetector() co
 }
 
 } // namespace fileinfo
+} // namespace retdec

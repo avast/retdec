@@ -46,11 +46,6 @@ StatementsCounter::StatementsCounter(): OrderedAllVisitor(),
 	numOfStmts(0), recursive(true), includeEmptyStmts(false) {}
 
 /**
-* @brief Destructs the counter.
-*/
-StatementsCounter::~StatementsCounter() {}
-
-/**
 * @brief Returns the number of statements in @a block.
 *
 * @param[in] block Sequence of statements (possibly empty).

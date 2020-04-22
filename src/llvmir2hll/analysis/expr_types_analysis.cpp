@@ -37,11 +37,6 @@ ExprTypesAnalysis::ExprTypesAnalysis():
 	OrderedAllVisitor() {}
 
 /**
-* @brief Destructs the visitor.
-*/
-ExprTypesAnalysis::~ExprTypesAnalysis() {}
-
-/**
 * @brief Adds @a tag to the expression and puts it into @c exprTagsMap.
 *
 * @param[in] expr Tagged expression.

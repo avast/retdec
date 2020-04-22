@@ -14,7 +14,7 @@
 #include <map>
 #include <vector>
 
-#include "retdec/utils/address.h"
+#include "retdec/common/address.h"
 
 namespace retdec {
 namespace rtti_finder {
@@ -33,9 +33,9 @@ class RTTITypeDescriptor
 	//
 	public:
 		/// Virtual table of @c type_info class.
-		retdec::utils::Address vtableAddr;
+		retdec::common::Address vtableAddr;
 		/// Used to keep the demangled name returned by type_info::name()
-		retdec::utils::Address spare;
+		retdec::common::Address spare;
 		/// Mangled type name, e.g. ".H" = "int", ".?AVA@@" = "class A".
 		std::string name;
 
@@ -43,7 +43,7 @@ class RTTITypeDescriptor
 	//
 	public:
 		/// Position of this @c RTTITypeDescriptor entry.
-		retdec::utils::Address address;
+		retdec::common::Address address;
 		/// Virtual table object on address @c vtableAddr.
 		/// ...
 };
@@ -69,7 +69,7 @@ class RTTIBaseClassDescriptor
 
 	public:
 		/// Type descriptor of the class.
-		retdec::utils::Address typeDescriptorAddr;
+		retdec::common::Address typeDescriptorAddr;
 		/// Number of nested classes following in the Base Class Array.
 		uint32_t numContainedBases = 0;
 		/// Pointer-to-member displacement info.
@@ -81,7 +81,7 @@ class RTTIBaseClassDescriptor
 	//
 	public:
 		/// Position of this @c RTTIBaseClassDescriptor entry.
-		retdec::utils::Address address;
+		retdec::common::Address address;
 		/// RTTITypeDescriptor object on address @c typeDescriptorAddr.
 		RTTITypeDescriptor* typeDescriptor = nullptr;
 };
@@ -102,16 +102,16 @@ class RTTIClassHierarchyDescriptor
 		/// Number of classes in pBaseClassArray.
 		uint32_t numBaseClasses = 0;
 		/// Address of base class objects array.
-		retdec::utils::Address baseClassArrayAddr;
+		retdec::common::Address baseClassArrayAddr;
 
 	// Our methods and data.
 	//
 	public:
 		/// Position of this @c RTTIClassHierarchyDescriptor entry.
-		retdec::utils::Address address;
+		retdec::common::Address address;
 		/// Array of addresses of base class objects on address
 		/// @c baseClassArrayAddr.
-		std::vector<retdec::utils::Address> baseClassArray;
+		std::vector<retdec::common::Address> baseClassArray;
 		/// Base class objects - on addresses from @c baseClassArray.
 		/// Together contain information which allows compiler to cast the
 		/// derived class to any of them during execution of the _dynamic_cast_.
@@ -135,15 +135,15 @@ class RTTICompleteObjectLocator
 		/// Constructor displacement offset.
 		uint32_t cdOffset = 0;
 		/// Pointer (address) of type descriptor for this object.
-		retdec::utils::Address typeDescriptorAddr;
+		retdec::common::Address typeDescriptorAddr;
 		/// Pointer (address) of class descriptor for this object.
-		retdec::utils::Address classDescriptorAddr;
+		retdec::common::Address classDescriptorAddr;
 
 	// Our methods and data.
 	//
 	public:
 		/// Position of this @c RTTICompleteObjectLocator entry.
-		retdec::utils::Address address;
+		retdec::common::Address address;
 		/// RTTITypeDescriptor object on address @c typeDescriptorAddr.
 		RTTITypeDescriptor* typeDescriptor = nullptr;
 		/// RTTIClassHierarchyDescriptor object on address
@@ -157,10 +157,10 @@ class RTTICompleteObjectLocator
 class RttiMsvc
 {
 	public:
-		std::map<retdec::utils::Address, RTTICompleteObjectLocator> objLocators;
-		std::map<retdec::utils::Address, RTTITypeDescriptor> typeDescriptors;
-		std::map<retdec::utils::Address, RTTIBaseClassDescriptor> baseClassDescriptors;
-		std::map<retdec::utils::Address, RTTIClassHierarchyDescriptor> classDescriptors;
+		std::map<retdec::common::Address, RTTICompleteObjectLocator> objLocators;
+		std::map<retdec::common::Address, RTTITypeDescriptor> typeDescriptors;
+		std::map<retdec::common::Address, RTTIBaseClassDescriptor> baseClassDescriptors;
+		std::map<retdec::common::Address, RTTIClassHierarchyDescriptor> classDescriptors;
 };
 
 } // namespace rtti_finder

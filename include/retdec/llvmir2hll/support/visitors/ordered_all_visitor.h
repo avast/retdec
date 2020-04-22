@@ -43,8 +43,6 @@ namespace llvmir2hll {
 */
 class OrderedAllVisitor: public Visitor {
 public:
-	virtual ~OrderedAllVisitor() override;
-
 	/// @name Visitor Interface
 	/// @{
 	virtual void visit(ShPtr<GlobalVarDef> varDef) override;

@@ -4,12 +4,13 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
+#include <optional>
+
 #include "retdec/llvmir2hll/ir/function.h"
 #include "retdec/llvmir2hll/ir/module.h"
 #include "retdec/llvmir2hll/semantics/semantics.h"
 #include "retdec/llvmir2hll/support/debug.h"
 #include "retdec/llvmir2hll/support/headers_for_declared_funcs.h"
-#include "retdec/llvmir2hll/support/maybe.h"
 
 namespace retdec {
 namespace llvmir2hll {
@@ -30,10 +31,10 @@ StringSet HeadersForDeclaredFuncs::getHeaders(ShPtr<Module> module) {
 	StringSet headers;
 	for (auto i = module->func_declaration_begin(),
 			e = module->func_declaration_end(); i != e; ++i) {
-		Maybe<std::string> header(
+		std::optional<std::string> header(
 			module->getSemantics()->getCHeaderFileForFunc((*i)->getName()));
 		if (header) {
-			headers.insert(header.get());
+			headers.insert(header.value());
 		}
 	}
 	return headers;

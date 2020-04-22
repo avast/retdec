@@ -42,6 +42,7 @@ template<typename N> bool addUniqueValue(std::vector<N> &currentValues, N newVal
 }
 
 std::ios_base& hexWithPrefix(std::ios_base &str);
+std::ios_base& truncFloat(std::ios_base &str);
 void separateStrings(std::string &str, std::vector<std::string> &words);
 
 } // namespace fileformat

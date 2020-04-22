@@ -26,9 +26,6 @@ public:
 	static unsigned count(ShPtr<Statement> block, bool recursive = true,
 		bool includeEmptyStmts = false);
 
-	// It needs to be public so it can be called in ShPtr's destructor.
-	virtual ~StatementsCounter() override;
-
 private:
 	StatementsCounter();
 

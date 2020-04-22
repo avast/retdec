@@ -9,6 +9,7 @@
 
 #include "fileinfo/file_information/file_information.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -29,7 +30,6 @@ class IterativeGetter
 		std::string title;                                         ///< title of presented structure
 	public:
 		IterativeGetter(FileInformation &fileInfo);
-		virtual ~IterativeGetter();
 
 		/// @name Getters
 		/// @{
@@ -52,5 +52,6 @@ class IterativeGetter
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

@@ -6,57 +6,41 @@ matrix:
   fast_finish: true
   include:
     - os: linux
-      dist: trusty
-      compiler: gcc-4.9
+      dist: bionic
       addons:
         apt:
-          sources:
-            - deadsnakes
-            - ubuntu-toolchain-r-test
           packages:
             - build-essential
-            - gcc-4.8-multilib
-            - gcc-4.9
-            - g++-4.9
-            - cmake
-            - perl
-            - python3.5
-            - flex
-            - bison
+            - gcc-multilib
             - autoconf
             - automake
             - libtool
             - pkg-config
             - m4
             - zlib1g-dev
-            - upx
             - openssl
       env:
-        - MATRIX_EVAL="CC=gcc-4.9 && CXX=g++-4.9 && NPROC=$(nproc)"
+        - MATRIX_EVAL="NPROC=$(nproc)"
         # We need this so that ccache does not cause compilation errors.
         # e.g. retdec/tests/utils/string_tests.cpp:276:2: error: stray '\' in program
         - CCACHE_CPP2=true
 
     - os: osx
-      osx_image: xcode8.3
+      osx_image: xcode11.2
       env:
         - MATRIX_EVAL="NPROC=$(sysctl -n hw.physicalcpu)"
         - CCACHE_CPP2=true
 
 install:
-  # We need to install newer versions of Flex and Bison on MacOS X.
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install flex bison; fi
   # ccache is not installed on OS X.
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install ccache; fi
-  # python 3
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew upgrade python; fi
+  # install for os x the gnu time library
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install gnu-time; fi
+  # install for os x the openssl library
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install openssl@1.1; export OPENSSL_ROOT_DIR=/usr/local/opt/openssl@1.1; fi
 
 before_script:
   - eval "${MATRIX_EVAL}"
-  # We need to use newer versions of Flex and Bison on MacOS X (the ones from Homebrew).
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then export CMAKE_INCLUDE_PATH="/usr/local/opt/flex/include"; fi
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then export CMAKE_LIBRARY_PATH="/usr/local/opt/flex/lib;/usr/local/opt/bison/lib"; fi
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then export PATH="/usr/local/opt/flex/bin:/usr/local/opt/bison/bin:$PATH"; fi
   # We need to add ccache before everything else into PATH.
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then export PATH="/usr/local/opt/ccache/libexec:$PATH"; fi
 
@@ -64,20 +48,18 @@ script:
   - mkdir build && cd build
   # We use "-O0" to speed up the build.
   # "-O0" causes segfaults in LLVM if we do not use "-DNDEBUG" as well.
-  - cmake -DCMAKE_CXX_FLAGS_RELEASE="-O0 -DNDEBUG" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$(pwd)/install" -DRETDEC_TESTS=ON -DRETDEC_DEV_TOOLS=ON ..
+  - cmake -DCMAKE_CXX_FLAGS_RELEASE="-O0 -DNDEBUG" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$(pwd)/install" -DRETDEC_COMPILE_YARA=OFF ..
   - time make install -j $NPROC
   # Check that install is movable and that it does not need the build directory.
   - mv install ../retdec-install
   - cd ..
   - rm -rf build
-  # Run unit tests.
-  - python3 retdec-install/bin/retdec-tests-runner.py
   # Run the decompilation script.
   - python3 retdec-install/bin/retdec-decompiler.py --help
   # Run a simple decompilation.
   - echo -e '#include <stdio.h>\n#include <stdlib.h>\nint main()\n{\n  printf("hello world\\n");\n  return 0;\n}\n' > hello-orig.c
   - cat hello-orig.c
-  - gcc -m32 -o hello hello-orig.c
+  - gcc -o hello hello-orig.c
   - ./hello
   - python3 retdec-install/bin/retdec-decompiler.py hello
   - cat hello.c
@@ -89,6 +71,8 @@ branches:
     - master
     # Version tags.
     - /^v?\d+\.\d+.*$/
+    # Temporarily enable build of this branch.
+    - issue-650
 
 notifications:
   email:

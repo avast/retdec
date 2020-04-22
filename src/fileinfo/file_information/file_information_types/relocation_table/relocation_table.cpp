@@ -7,25 +7,8 @@
 #include "fileinfo/file_information/file_information_types/relocation_table/relocation_table.h"
 #include "fileinfo/file_information/file_information_types/type_conversions.h"
 
+namespace retdec {
 namespace fileinfo {
-
-/**
- * Constructor
- */
-RelocationTable::RelocationTable() : associatedSymbolTableIndex(std::numeric_limits<unsigned long long>::max()),
-										appliesSectionIndex(std::numeric_limits<unsigned long long>::max()),
-										declaredRelocations(std::numeric_limits<unsigned long long>::max())
-{
-
-}
-
-/**
- * Destructor
- */
-RelocationTable::~RelocationTable()
-{
-
-}
 
 /**
  * Get number of relocations in table
@@ -238,3 +221,4 @@ void RelocationTable::clearRelocations()
 }
 
 } // namespace fileinfo
+} // namespace retdec

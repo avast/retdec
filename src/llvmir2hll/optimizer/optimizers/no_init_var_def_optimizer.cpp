@@ -24,11 +24,6 @@ NoInitVarDefOptimizer::NoInitVarDefOptimizer(ShPtr<Module> module):
 		PRECONDITION_NON_NULL(module);
 	}
 
-/**
-* @brief Destructs the optimizer.
-*/
-NoInitVarDefOptimizer::~NoInitVarDefOptimizer() {}
-
 void NoInitVarDefOptimizer::visit(ShPtr<VarDefStmt> stmt) {
 	if (stmt->hasInitializer()) {
 		// There is an initializer, so keep traversing.

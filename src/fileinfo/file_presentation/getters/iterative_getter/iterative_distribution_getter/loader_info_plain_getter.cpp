@@ -12,6 +12,7 @@
 
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 namespace
@@ -37,13 +38,6 @@ LoaderInfoPlainGetter::LoaderInfoPlainGetter(FileInformation &fileInfo) : Iterat
 	commonHeaderElements.insert(commonHeaderElements.begin(), std::begin(headerArray), std::end(headerArray));
 	commonHeaderDesc.insert(commonHeaderDesc.begin(), std::begin(headerDesc), std::end(headerDesc));
 	loadRecords();
-}
-
-/**
- * Destructor
- */
-LoaderInfoPlainGetter::~LoaderInfoPlainGetter()
-{
 }
 
 std::size_t LoaderInfoPlainGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const
@@ -86,3 +80,4 @@ bool LoaderInfoPlainGetter::getFlagDescriptors(std::size_t structIndex, std::vec
 }
 
 } // namespace fileinfo
+} // namespace retdec

@@ -24,14 +24,6 @@ PeFormatParser32::PeFormatParser32(const FileFormat *fInputFile, PeLib::PeFileT<
 
 }
 
-/**
- * Destructor
- */
-PeFormatParser32::~PeFormatParser32()
-{
-
-}
-
 unsigned long long PeFormatParser32::getDeclaredNumberOfSections() const
 {
 	return peDeclaredNumberOfSections(peHeader);
@@ -87,6 +79,11 @@ unsigned long long PeFormatParser32::getOptionalHeaderSize() const
 	return peSizeOfOptionalHeader(peHeader);
 }
 
+bool PeFormatParser32::isSizeOfHeaderMultipleOfFileAlignment() const
+{
+	return peIsSizeOfHeaderMultipleOfFileAlignment(peHeader);
+}
+
 unsigned long long PeFormatParser32::getFileAlignment() const
 {
 	return peFileAlignment(peHeader);
@@ -95,6 +92,11 @@ unsigned long long PeFormatParser32::getFileAlignment() const
 unsigned long long PeFormatParser32::getSectionAlignment() const
 {
 	return peSectionAlignment(peHeader);
+}
+
+unsigned long long PeFormatParser32::getSizeOfHeaders() const
+{
+	return peSizeOfHeaders(peHeader);
 }
 
 unsigned long long PeFormatParser32::getSizeOfImage() const
@@ -278,6 +280,36 @@ const PeLib::ResourceNode* PeFormatParser32::getResourceTreeRoot() const
 	return peResourceTreeRoot(peFile->resDir());
 }
 
+unsigned long long PeFormatParser32::getTlsStartAddressOfRawData() const
+{
+	return peTlsStartAddressOfRawData(peFile->tlsDir());
+}
+
+unsigned long long PeFormatParser32::getTlsEndAddressOfRawData() const
+{
+	return peTlsEndAddressOfRawData(peFile->tlsDir());
+}
+
+unsigned long long PeFormatParser32::getTlsAddressOfIndex() const
+{
+	return peTlsAddressOfIndex(peFile->tlsDir());
+}
+
+unsigned long long PeFormatParser32::getTlsAddressOfCallBacks() const
+{
+	return peTlsAddressOfCallBacks(peFile->tlsDir());
+}
+
+unsigned long long PeFormatParser32::getTlsSizeOfZeroFill() const
+{
+	return peTlsSizeOfZeroFill(peFile->tlsDir());
+}
+
+unsigned long long PeFormatParser32::getTlsCharacteristics() const
+{
+	return peTlsCharacteristics(peFile->tlsDir());
+}
+
 std::unique_ptr<CLRHeader> PeFormatParser32::getClrHeader() const
 {
 	return peGetClrHeader(peFile->comDir());
@@ -313,22 +345,22 @@ unsigned long long PeFormatParser32::getSecurityDirSize() const
 	return peSecurityDirSize(peHeader);
 }
 
-retdec::utils::RangeContainer<std::uint64_t> PeFormatParser32::getImportDirectoryOccupiedAddresses() const
+retdec::common::RangeContainer<std::uint64_t> PeFormatParser32::getImportDirectoryOccupiedAddresses() const
 {
 	return peImportDirectoryOccupiedAddresses(peFile->impDir());
 }
 
-retdec::utils::RangeContainer<std::uint64_t> PeFormatParser32::getExportDirectoryOccupiedAddresses() const
+retdec::common::RangeContainer<std::uint64_t> PeFormatParser32::getExportDirectoryOccupiedAddresses() const
 {
 	return peExportDirectoryOccupiedAddresses(peFile->expDir());
 }
 
-retdec::utils::RangeContainer<std::uint64_t> PeFormatParser32::getDebugDirectoryOccupiedAddresses() const
+retdec::common::RangeContainer<std::uint64_t> PeFormatParser32::getDebugDirectoryOccupiedAddresses() const
 {
 	return peDebugDirectoryOccupiedAddresses(peFile->debugDir());
 }
 
-retdec::utils::RangeContainer<std::uint64_t> PeFormatParser32::getResourceDirectoryOccupiedAddresses() const
+retdec::common::RangeContainer<std::uint64_t> PeFormatParser32::getResourceDirectoryOccupiedAddresses() const
 {
 	return peResourceDirectoryOccupiedAddresses(peFile->resDir());
 }

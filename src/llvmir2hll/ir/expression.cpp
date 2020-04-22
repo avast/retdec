@@ -11,16 +11,6 @@ namespace retdec {
 namespace llvmir2hll {
 
 /**
-* @brief Constructs a new expression.
-*/
-Expression::Expression() {}
-
-/**
-* @brief Destructs the expression.
-*/
-Expression::~Expression() {}
-
-/**
 * @brief Replaces @a oldExpr with @a newExpr.
 *
 * @param[in] oldExpr Old expression to be replaced.

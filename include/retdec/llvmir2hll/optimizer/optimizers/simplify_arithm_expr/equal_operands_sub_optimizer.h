@@ -83,7 +83,6 @@ namespace llvmir2hll {
 class EqualOperandsSubOptimizer final: public SubOptimizer {
 public:
 	EqualOperandsSubOptimizer(ShPtr<ArithmExprEvaluator> arithmExprEvaluator);
-	virtual ~EqualOperandsSubOptimizer() override;
 
 	static ShPtr<SubOptimizer> create(ShPtr<ArithmExprEvaluator>
 		arithmExprEvaluator);

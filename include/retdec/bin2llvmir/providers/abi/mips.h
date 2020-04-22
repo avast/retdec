@@ -18,12 +18,11 @@ class AbiMips : public Abi
 	//
 	public:
 		AbiMips(llvm::Module* m, Config* c);
-		virtual ~AbiMips();
 
 	// Registers.
 	//
 	public:
-		virtual bool isGeneralPurposeRegister(const llvm::Value* val) override;
+		virtual bool isGeneralPurposeRegister(const llvm::Value* val) const override;
 
 	// Instructions.
 	//

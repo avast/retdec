@@ -26,8 +26,6 @@ class Variable;
 */
 class NoVarDefCFGTraversal final: public CFGTraversal {
 public:
-	~NoVarDefCFGTraversal();
-
 	static bool noVarIsDefinedBetweenStmts(ShPtr<Statement> start,
 		const StmtSet &ends, const VarSet &vars, ShPtr<CFG> cfg,
 		ShPtr<ValueAnalysis> va);

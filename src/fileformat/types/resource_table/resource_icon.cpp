@@ -10,23 +10,6 @@ namespace retdec {
 namespace fileformat {
 
 /**
- * Constructor
- */
-ResourceIcon::ResourceIcon() : width(0), height(0), iconSize(0), colorCount(0), planes(0), bitCount(0),
-	iconGroup(0), loadedProperties(false)
-{
-
-}
-
-/**
- * Destructor
- */
-ResourceIcon::~ResourceIcon()
-{
-
-}
-
-/**
  * Get icon width
  * @return Icon with
  */
@@ -186,7 +169,6 @@ bool ResourceIcon::hasLoadedProperties() const
 {
 	return loadedProperties;
 }
-
 
 /**
  * A method which indicates whether color count of an icon is valid.

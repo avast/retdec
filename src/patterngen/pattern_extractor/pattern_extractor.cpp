@@ -525,18 +525,13 @@ std::string PatternExtractor::getArchAsString()
 PatternExtractor::PatternExtractor(
 	const std::string &filePath,
 	const std::string &groupName)
-	: inputFile(createFileFormat(filePath, nullptr, loadFlags)),
+	: inputFile(createFileFormat(filePath, false, loadFlags)),
 	groupName(groupName)
 {
 	stateValid = processFile();
 }
 
-/**
- * Destructor.
- */
-PatternExtractor::~PatternExtractor()
-{
-}
+PatternExtractor::~PatternExtractor() = default;
 
 /**
  * Check state of extractor.

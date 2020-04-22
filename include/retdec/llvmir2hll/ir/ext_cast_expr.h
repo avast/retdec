@@ -35,8 +35,6 @@ public:
 	static ShPtr<ExtCastExpr> create(ShPtr<Expression> op, ShPtr<Type> dstType,
 		Variant variant = Variant::ZExt);
 
-	virtual ~ExtCastExpr() override;
-
 	virtual bool isEqualTo(ShPtr<Value> otherValue) const override;
 	virtual ShPtr<Value> clone() override;
 

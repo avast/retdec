@@ -9,6 +9,7 @@
 #include <llvm/IR/InstIterator.h>
 
 #include "retdec/utils/string.h"
+#include "retdec/bin2llvmir/providers/abi/abi.h"
 #include "retdec/bin2llvmir/providers/asm_instruction.h"
 #include "retdec/bin2llvmir/providers/names.h"
 #include "retdec/bin2llvmir/utils/debug.h"
@@ -281,10 +282,18 @@ Value* convertToType(
 			conv = insertBeforeAfter(i, before, a);
 		}
 	}
+	else if (val->getType()->isVoidTy())
+	{
+		auto* module = before ? before->getModule() : after->getModule();
+		auto* config = ConfigProvider::getConfig(module);
+		auto* dummy = config->getGlobalDummy();
+		conv = convertToType(dummy, type, before, after, constExpr);
+	}
 	else
 	{
 		errs() << "\nconvertValueToType(): unhandled type conversion\n";
 		errs() << *val << "\n";
+		errs() << *val->getType() << "\n";
 		errs() << *type << "\n\n";
 		assert(false);
 		conv = nullptr;
@@ -377,7 +386,7 @@ Constant* detectGlobalVariableInitializerCycle(
 		GlobalVariable* gv,
 		Constant* c,
 		FileImage* objf,
-		retdec::utils::Address addr)
+		retdec::common::Address addr)
 {
 	if (gv == nullptr || c == nullptr || objf == nullptr || addr.isUndefined())
 	{
@@ -413,7 +422,7 @@ bool globalVariableCanBeCreated(
 		Module* module,
 		Config* config,
 		FileImage* objf,
-		retdec::utils::Address &addr,
+		retdec::common::Address &addr,
 		bool strict = false)
 {
 	if (module == nullptr || objf == nullptr || addr.isUndefined())
@@ -463,7 +472,7 @@ bool globalVariableCanBeCreated(
 			}
 
 			// ARM has data after functions, Pic32 does not bother to mark data (e.g. rodata) as data.
-			if ((config->getConfig().architecture.isArmOrThumb()
+			if ((config->getConfig().architecture.isArm32OrThumb()
 					|| config->getConfig().architecture.isPic32())
 					&& !strict)
 			{
@@ -513,7 +522,9 @@ IrModifier::FunctionPair IrModifier::renameFunction(
 	}
 	else
 	{
-		cf = _config->insertFunction(fnc);
+		// TODO: this is really bad, should be solved by better design of config
+		// updates
+		cf = const_cast<common::Function*>(_config->insertFunction(fnc));
 	}
 	return {fnc, cf};
 }
@@ -527,6 +538,8 @@ IrModifier::FunctionPair IrModifier::renameFunction(
  *               Offset is always appended to this name. If you want to get
  *               this name to output C, set it as a real name to returned
  *               config stack variable entry.
+ * @param realName
+ * @param fromDebug
  * @return Pair of LLVM stack var (Alloca instruction) and associated config
  *         stack var.
  */
@@ -534,15 +547,17 @@ IrModifier::StackPair IrModifier::getStackVariable(
 		llvm::Function* fnc,
 		int offset,
 		llvm::Type* type,
-		const std::string& name)
+		const std::string& name,
+		const std::string& realName,
+		bool fromDebug)
 {
-	if (!PointerType::isValidElementType(type))
+	if (!PointerType::isValidElementType(type) || !type->isSized())
 	{
 		type = Abi::getDefaultType(fnc->getParent());
 	}
 
-	std::string n = name.empty() ? "stack_var" : name;
-	n += "_" + std::to_string(offset);
+	std::string n = names::generateStackVarName(offset, name);
+
 	AllocaInst* ret = _config->getLlvmStackVariable(fnc, offset);
 	if (ret)
 	{
@@ -551,13 +566,13 @@ IrModifier::StackPair IrModifier::getStackVariable(
 		return {ret, csv};
 	}
 
-	ret = new AllocaInst(type, n);
+	ret = new AllocaInst(type, Abi::DEFAULT_ADDR_SPACE, n);
 
 	auto it = inst_begin(fnc);
 	assert(it != inst_end(fnc)); // -> create bb, insert alloca.
 	ret->insertBefore(&*it);
 
-	auto* csv = _config->insertStackVariable(ret, offset);
+	auto* csv = _config->insertStackVariable(ret, offset, fromDebug, realName);
 
 	return {ret, csv};
 }
@@ -583,18 +598,18 @@ IrModifier::StackPair IrModifier::getStackVariable(
 GlobalVariable* IrModifier::getGlobalVariable(
 		FileImage* objf,
 		DebugFormat* dbgf,
-		retdec::utils::Address addr,
+		retdec::common::Address addr,
 		bool strict,
-		std::string name)
+		const std::string& name)
 {
 	if (!globalVariableCanBeCreated(_module, _config, objf, addr, strict))
 	{
 		return nullptr;
 	}
 
-	retdec::utils::appendHex(name, addr);
+	std::string n = names::generateGlobalVarName(addr, name);
 
-	if (auto* gv = _config->getLlvmGlobalVariable(name, addr))
+	if (auto* gv = _config->getLlvmGlobalVariable(n, addr))
 	{
 		return gv;
 	}
@@ -611,7 +626,7 @@ GlobalVariable* IrModifier::getGlobalVariable(
 		auto* dt = llvm_utils::stringToLlvmType(_module->getContext(), dgv->type.getLlvmIr());
 		t = dt ? dt : t;
 		c = objf->getConstant(t, addr);
-		name = dgv->getName();
+		n = dgv->getName();
 		realName = dgv->getName();
 		isFromDebug = true;
 	}
@@ -622,7 +637,7 @@ GlobalVariable* IrModifier::getGlobalVariable(
 		auto* dt = llvm_utils::stringToLlvmType(_module->getContext(), cgv->type.getLlvmIr());
 		t = dt ? dt : t;
 		c = objf->getConstant(t, addr);
-		name = cgv->getName();
+		n = cgv->getName();
 		realName = cgv->getName();
 		isFromDebug = true;
 	}
@@ -640,7 +655,7 @@ GlobalVariable* IrModifier::getGlobalVariable(
 		{
 			t = cryptoType;
 			c = objf->getConstant(t, addr);
-			name = cryptoName;
+			n = cryptoName;
 			realName = std::move(cryptoName);
 			isFromDebug = true;
 		}
@@ -652,7 +667,7 @@ GlobalVariable* IrModifier::getGlobalVariable(
 			isConstant,
 			GlobalValue::ExternalLinkage,
 			c,
-			name);
+			n);
 
 	if (c == nullptr)
 	{
@@ -674,14 +689,14 @@ GlobalVariable* IrModifier::getGlobalVariable(
 				c->getType(),
 				isConstant,
 				GlobalValue::ExternalLinkage,
-				c,
-				name);
+				c);
 
 		auto* conv = IrModifier::convertConstantToType(ngv, gv->getType());
-		if (conv != ngv)
+		if (conv != gv)
 		{
 			gv->replaceAllUsesWith(conv);
 		}
+		ngv->takeName(gv);
 		gv->eraseFromParent();
 		gv = ngv;
 	}
@@ -722,7 +737,11 @@ llvm::Value* IrModifier::changeObjectDeclarationType(
 
 	if (auto* alloca = dyn_cast<AllocaInst>(val))
 	{
-		auto* ret = new AllocaInst(toType, alloca->getName(), alloca);
+		auto* ret = new AllocaInst(
+				toType,
+				Abi::DEFAULT_ADDR_SPACE,
+				alloca->getName(),
+				alloca);
 		ret->takeName(alloca);
 		return ret;
 	}
@@ -749,7 +768,7 @@ llvm::Value* IrModifier::changeObjectDeclarationType(
 		auto* ecgv = _config->getConfigGlobalVariable(ogv);
 		if (ecgv)
 		{
-			retdec::config::Object cgv(
+			retdec::common::Object cgv(
 					ecgv->getName(),
 					ecgv->getStorage());
 			cgv.type.setLlvmIr(
@@ -1031,7 +1050,14 @@ IrModifier::FunctionPair IrModifier::modifyFunction(
 	{
 		if (nIt != argNames.end() && !nIt->empty())
 		{
-			i->setName(*nIt);
+			if (auto* st = _config->getLlvmStackVariable(nf, *nIt))
+			{
+				i->takeName(st);
+			}
+			else
+			{
+				i->setName(*nIt);
+			}
 		}
 		else
 		{
@@ -1069,8 +1095,8 @@ IrModifier::FunctionPair IrModifier::modifyFunction(
 		{
 			std::string n = i->getName();
 			assert(!n.empty());
-			auto s = retdec::config::Storage::undefined();
-			retdec::config::Object arg(n, s);
+			auto s = retdec::common::Storage::undefined();
+			retdec::common::Object arg(n, s);
 			if (argNames.size() > idx)
 			{
 				arg.setRealName(argNames[idx]);
@@ -1087,7 +1113,7 @@ IrModifier::FunctionPair IrModifier::modifyFunction(
 			{
 				arg.type.setIsWideString(true);
 			}
-			cf->parameters.insert(arg);
+			cf->parameters.push_back(arg);
 		}
 	}
 
@@ -1349,9 +1375,8 @@ llvm::Argument* IrModifier::modifyFunctionArgumentType(
 		args.push_back(&a == arg ? type : a.getType());
 	}
 	auto* nf = modifyFunction(f, f->getReturnType(), args).first;
-	auto& al = nf->getArgumentList();
 	std::size_t i = 0;
-	for (auto& a : al)
+	for (auto& a : nf->args())
 	{
 		if (i == arg->getArgNo())
 		{
@@ -1378,7 +1403,11 @@ llvm::AllocaInst* IrModifier::createAlloca(
 		return nullptr;
 	}
 
-	return new AllocaInst(ty, name, &fnc->getEntryBlock().front());
+	return new AllocaInst(
+			ty,
+			Abi::DEFAULT_ADDR_SPACE,
+			name,
+			&fnc->getEntryBlock().front());
 }
 
 /**
@@ -1467,6 +1496,75 @@ llvm::CallInst* IrModifier::modifyCallInst(
 	auto* conv = IrModifier::convertValueToType(call->getCalledValue(), t, call);
 
 	return _modifyCallInst(call, conv, args);
+}
+
+void _eraseUnusedInstructionRecursive(
+		const std::unordered_set<llvm::Value*>& workset)
+{
+	std::list<llvm::Instruction*> toEraseList;
+	std::unordered_set<llvm::Value*> toEraseSet;
+	std::list<llvm::Value*> worklist(workset.begin(), workset.end());
+
+	for (auto it = worklist.begin(); it != worklist.end(); ++it)
+	{
+		if (auto* i = dyn_cast<llvm::Instruction>(*it))
+		{
+			// Do not erase instructions with side effects.
+			//
+			if (auto* call = llvm::dyn_cast<CallInst>(i))
+			{
+				auto* cf = call->getCalledFunction();
+				if (!(cf && cf->isIntrinsic()))
+				{
+					continue;
+				}
+			}
+
+			bool erase = i->user_empty();
+			if (!erase)
+			{
+				erase = true;
+				for (auto* u : i->users())
+				{
+					if (toEraseSet.count(u) == 0)
+					{
+						erase = false;
+						break;
+					}
+				}
+			}
+
+			if (erase && toEraseSet.count(i) == 0)
+			{
+				toEraseList.push_back(i);
+				toEraseSet.insert(i);
+				for (auto* op : i->operand_values())
+				{
+					worklist.push_back(op);
+				}
+			}
+		}
+	}
+
+	for (auto* i : toEraseList)
+	{
+		i->eraseFromParent();
+	}
+}
+
+/**
+ * Erase @a insn if it is an unused instruction, and also all its operands
+ * that are also unused instructions.
+ */
+void IrModifier::eraseUnusedInstructionRecursive(llvm::Value* insn)
+{
+	_eraseUnusedInstructionRecursive({insn});
+}
+
+void IrModifier::eraseUnusedInstructionsRecursive(
+		std::unordered_set<llvm::Value*>& insns)
+{
+	_eraseUnusedInstructionRecursive(insns);
 }
 
 } // namespace bin2llvmir

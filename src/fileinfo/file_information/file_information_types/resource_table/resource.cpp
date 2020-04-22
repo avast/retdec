@@ -7,28 +7,8 @@
 #include "fileinfo/file_information/file_information_types/resource_table/resource.h"
 #include "fileinfo/file_information/file_information_types/type_conversions.h"
 
+namespace retdec {
 namespace fileinfo {
-
-/**
- * Constructor
- */
-Resource::Resource() : nameId(std::numeric_limits<std::size_t>::max()),
-						typeId(std::numeric_limits<std::size_t>::max()),
-						languageId(std::numeric_limits<std::size_t>::max()),
-						sublanguageId(std::numeric_limits<std::size_t>::max()),
-						offset(std::numeric_limits<std::size_t>::max()),
-						size(std::numeric_limits<std::size_t>::max())
-{
-
-}
-
-/**
- * Destructor
- */
-Resource::~Resource()
-{
-
-}
 
 /**
  * Get CRC32
@@ -253,3 +233,4 @@ void Resource::setSize(std::size_t rSize)
 }
 
 } // namespace fileinfo
+} // namespace retdec

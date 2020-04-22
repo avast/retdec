@@ -24,7 +24,6 @@ class RawDataImage : public Image
 {
 public:
 	RawDataImage(const std::shared_ptr<retdec::fileformat::FileFormat>& fileFormat);
-	virtual ~RawDataImage() override;
 
 	virtual bool load() override;
 	bool reload();

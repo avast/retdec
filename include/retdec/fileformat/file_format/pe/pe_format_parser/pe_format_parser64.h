@@ -19,7 +19,6 @@ class PeFormatParser64 : public PeFormatParser
 		PeLib::PeHeaderT<64> &peHeader; ///< header of 64-bit PE file
 	public:
 		PeFormatParser64(const FileFormat *fInputFile, PeLib::PeFileT<64> *peFile64);
-		virtual ~PeFormatParser64() override;
 
 		/// @name Detection methods
 		/// @{
@@ -34,8 +33,10 @@ class PeFormatParser64 : public PeFormatParser
 		virtual unsigned long long getFileFlags() const override;
 		virtual unsigned long long getTimeStamp() const override;
 		virtual unsigned long long getOptionalHeaderSize() const override;
+		virtual bool isSizeOfHeaderMultipleOfFileAlignment() const override;
 		virtual unsigned long long getFileAlignment() const override;
 		virtual unsigned long long getSectionAlignment() const override;
+		virtual unsigned long long getSizeOfHeaders() const override;
 		virtual unsigned long long getSizeOfImage() const override;
 		virtual unsigned long long getChecksum() const override;
 		virtual unsigned long long getSizeOfStackReserve() const override;
@@ -68,6 +69,12 @@ class PeFormatParser64 : public PeFormatParser
 		virtual bool getDebugEntryPointerToRawData(unsigned long long index, unsigned long long& pointerToRawData) const override;
 		virtual unsigned long long getResourceDirectoryOffset() const override;
 		virtual const PeLib::ResourceNode* getResourceTreeRoot() const override;
+		virtual unsigned long long getTlsStartAddressOfRawData() const override;
+		virtual unsigned long long getTlsEndAddressOfRawData() const override;
+		virtual unsigned long long getTlsAddressOfIndex() const override;
+		virtual unsigned long long getTlsAddressOfCallBacks() const override;
+		virtual unsigned long long getTlsSizeOfZeroFill() const override;
+		virtual unsigned long long getTlsCharacteristics() const override;
 		virtual std::unique_ptr<CLRHeader> getClrHeader() const override;
 		virtual unsigned long long getNumberOfRelocations() const override;
 		virtual unsigned long long getNumberOfRelocationData(unsigned long long index) const override;
@@ -75,10 +82,10 @@ class PeFormatParser64 : public PeFormatParser
 		virtual unsigned long long getSecurityDirFileOffset() const override;
 		virtual unsigned long long getSecurityDirRva() const override;
 		virtual unsigned long long getSecurityDirSize() const override;
-		virtual retdec::utils::RangeContainer<std::uint64_t> getImportDirectoryOccupiedAddresses() const override;
-		virtual retdec::utils::RangeContainer<std::uint64_t> getExportDirectoryOccupiedAddresses() const override;
-		virtual retdec::utils::RangeContainer<std::uint64_t> getDebugDirectoryOccupiedAddresses() const override;
-		virtual retdec::utils::RangeContainer<std::uint64_t> getResourceDirectoryOccupiedAddresses() const override;
+		virtual retdec::common::RangeContainer<std::uint64_t> getImportDirectoryOccupiedAddresses() const override;
+		virtual retdec::common::RangeContainer<std::uint64_t> getExportDirectoryOccupiedAddresses() const override;
+		virtual retdec::common::RangeContainer<std::uint64_t> getDebugDirectoryOccupiedAddresses() const override;
+		virtual retdec::common::RangeContainer<std::uint64_t> getResourceDirectoryOccupiedAddresses() const override;
 		/// @}
 };
 

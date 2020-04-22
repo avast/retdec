@@ -34,13 +34,6 @@ namespace {
 StringSet getAPICallFuncNames() {
 	StringSet funcNames;
 
-	// The following list is based on the "List of API sequences being logged
-	// by GVMA64" document from AVG. Additionally, it contains all the A/W
-	// variants.
-
-	funcNames.insert("ShellExecute");
-	funcNames.insert("ShellExecuteA");
-	funcNames.insert("ShellExecuteW");
 	funcNames.insert("CreateFile");
 	funcNames.insert("CreateFileA");
 	funcNames.insert("CreateFileW");
@@ -179,11 +172,6 @@ Patterns makePatterns(const Calls &apiCalls) {
 APICallPatternFinder::APICallPatternFinder(
 	ShPtr<ValueAnalysis> va, ShPtr<CallInfoObtainer> cio):
 		PatternFinder(va, cio) {}
-
-/**
-* @brief Destructs the finder.
-*/
-APICallPatternFinder::~APICallPatternFinder() {}
 
 /**
 * @brief Creates and returns a new instance of APICallPatternFinder.

@@ -7,29 +7,8 @@
 #include "fileinfo/file_information/file_information_types/file_segment.h"
 #include "fileinfo/file_information/file_information_types/type_conversions.h"
 
+namespace retdec {
 namespace fileinfo {
-
-/**
- * Constructor
- */
-FileSegment::FileSegment() : index(std::numeric_limits<unsigned long long>::max()),
-								offset(std::numeric_limits<unsigned long long>::max()),
-								virtualAddress(std::numeric_limits<unsigned long long>::max()),
-								physicalAddress(std::numeric_limits<unsigned long long>::max()),
-								sizeInFile(std::numeric_limits<unsigned long long>::max()),
-								sizeInMemory(std::numeric_limits<unsigned long long>::max()),
-								alignment(std::numeric_limits<unsigned long long>::max())
-{
-
-}
-
-/**
- * Destructor
- */
-FileSegment::~FileSegment()
-{
-
-}
 
 /**
  * Get segment type
@@ -318,3 +297,4 @@ void FileSegment::clearFlagsDescriptors()
 }
 
 } // namespace fileinfo
+} // namespace retdec

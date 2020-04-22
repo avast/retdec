@@ -26,11 +26,11 @@ JumpTarget::JumpTarget()
 }
 
 JumpTarget::JumpTarget(
-		retdec::utils::Address a,
+		retdec::common::Address a,
 		eType t,
 		cs_mode m,
-		retdec::utils::Address f,
-		utils::Maybe<std::size_t> sz)
+		retdec::common::Address f,
+		std::optional<std::size_t> sz)
 		:
 		_address(a),
 		_size(sz),
@@ -38,7 +38,7 @@ JumpTarget::JumpTarget(
 		_fromAddress(f),
 		_mode(m)
 {
-	if (config->getConfig().architecture.isArmOrThumb() && _address % 2)
+	if (config->getConfig().architecture.isArm32OrThumb() && _address % 2)
 	{
 		_mode = CS_MODE_THUMB;
 		_address -= 1;
@@ -64,17 +64,17 @@ bool JumpTarget::operator<(const JumpTarget& o) const
 	}
 }
 
-retdec::utils::Address JumpTarget::getAddress() const
+retdec::common::Address JumpTarget::getAddress() const
 {
 	return _address;
 }
 
 bool JumpTarget::hasSize() const
 {
-	return _size.isDefined();
+	return _size.has_value();
 }
 
-utils::Maybe<std::size_t> JumpTarget::getSize() const
+std::optional<std::size_t> JumpTarget::getSize() const
 {
 	return _size;
 }
@@ -84,7 +84,7 @@ JumpTarget::eType JumpTarget::getType() const
 	return _type;
 }
 
-retdec::utils::Address JumpTarget::getFromAddress() const
+retdec::common::Address JumpTarget::getFromAddress() const
 {
 	return _fromAddress;
 }
@@ -166,7 +166,7 @@ std::ostream& operator<<(std::ostream &out, const JumpTarget& jt)
 	}
 	if (jt.hasSize())
 	{
-		out << ", size = " << jt.getSize();
+		out << ", size = " << jt.getSize().value();
 	}
 
 	return out;
@@ -181,24 +181,30 @@ std::ostream& operator<<(std::ostream &out, const JumpTarget& jt)
 Config* JumpTargets::config = nullptr;
 
 const JumpTarget* JumpTargets::push(
-		retdec::utils::Address a,
+		retdec::common::Address a,
 		JumpTarget::eType t,
 		cs_mode m,
-		retdec::utils::Address f,
-		utils::Maybe<std::size_t> sz)
+		retdec::common::Address f,
+		std::optional<std::size_t> sz)
 {
 	static auto& arch = config->getConfig().architecture;
 
+	if (arch.isArm64() && m == CS_MODE_THUMB)
+	{
+		m = CS_MODE_ARM;
+	}
+
 	if (a.isDefined())
 	{
-		if (arch.isArmOrThumb() && a % 2)
+		if (arch.isArm32OrThumb() && a % 2)
 		{
 			m = CS_MODE_THUMB;
 			a -= 1;
 		}
 
-		if ((arch.isArmOrThumb() && m == CS_MODE_ARM && a % 4)
-				|| (arch.isArmOrThumb() && m == CS_MODE_THUMB && a % 2)
+		if ((arch.isArm32OrThumb() && m == CS_MODE_ARM && a % 4)
+				|| (arch.isArm32OrThumb() && m == CS_MODE_THUMB && a % 2)
+				|| (arch.isArm64() && a % 4)
 				|| (arch.isMipsOrPic32() && a % 4)
 				|| (arch.isPpc() && a % 4))
 		{

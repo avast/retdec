@@ -6,6 +6,7 @@
 
 #include "fileinfo/file_information/file_information_types/special_information.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -14,14 +15,6 @@ namespace fileinfo {
  * @param abbv_ Abbreviation of @a desc_
  */
 SpecialInformation::SpecialInformation(std::string desc_, std::string abbv_) : desc(desc_), abbv(abbv_)
-{
-
-}
-
-/**
- * Destructor
- */
-SpecialInformation::~SpecialInformation()
 {
 
 }
@@ -72,3 +65,4 @@ void SpecialInformation::addValue(std::string value)
 }
 
 } // namespace fileinfo
+} // namespace retdec

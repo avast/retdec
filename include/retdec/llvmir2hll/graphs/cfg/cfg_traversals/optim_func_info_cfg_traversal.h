@@ -33,8 +33,6 @@ class Variable;
 */
 class OptimFuncInfoCFGTraversal final: public CFGTraversal {
 public:
-	~OptimFuncInfoCFGTraversal();
-
 	static ShPtr<OptimFuncInfo> getOptimFuncInfo(ShPtr<Module> module,
 		ShPtr<OptimCallInfoObtainer> cio, ShPtr<ValueAnalysis> va,
 		ShPtr<CFG> cfg);

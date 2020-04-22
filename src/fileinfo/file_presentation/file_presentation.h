@@ -9,6 +9,7 @@
 
 #include "fileinfo/file_information/file_information.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -21,11 +22,12 @@ class FilePresentation
 		retdec::cpdetect::ReturnCode returnCode; ///< return code of data member @a fileinfo
 	public:
 		FilePresentation(FileInformation &fileinfo_);
-		virtual ~FilePresentation();
+		virtual ~FilePresentation() = default;
 
 		virtual bool present() = 0;
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

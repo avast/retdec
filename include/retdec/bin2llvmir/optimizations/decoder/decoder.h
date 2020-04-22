@@ -8,6 +8,7 @@
 #define RETDEC_BIN2LLVMIR_OPTIMIZATIONS_DECODER_DECODER_H
 
 #include <map>
+#include <optional>
 #include <queue>
 #include <sstream>
 
@@ -18,9 +19,7 @@
 #include <llvm/Pass.h>
 #include <llvm/Transforms/Utils/BasicBlockUtils.h>
 
-#include "retdec/utils/address.h"
-#include "retdec/bin2llvmir/analyses/reaching_definitions.h"
-#include "retdec/bin2llvmir/analyses/static_code/static_code.h"
+#include "retdec/common/address.h"
 #include "retdec/bin2llvmir/analyses/symbolic_tree.h"
 #include "retdec/bin2llvmir/providers/abi/abi.h"
 #include "retdec/bin2llvmir/providers/asm_instruction.h"
@@ -32,7 +31,9 @@
 #include "retdec/bin2llvmir/optimizations/decoder/decoder_ranges.h"
 #include "retdec/bin2llvmir/optimizations/decoder/jump_targets.h"
 #include "retdec/bin2llvmir/utils/ir_modifier.h"
+#include "retdec/bin2llvmir/utils/symbolic_tree_match.h"
 #include "retdec/capstone2llvmir/capstone2llvmir.h"
+#include "retdec/stacofin/stacofin.h"
 
 namespace retdec {
 namespace bin2llvmir {
@@ -74,6 +75,7 @@ class Decoder : public llvm::ModulePass
 		void initJumpTargets();
 		void initJumpTargetsConfig();
 		void initJumpTargetsEntryPoint();
+		void initJumpTargetsExterns();
 		void initJumpTargetsImports();
 		void initJumpTargetsExports();
 		void initJumpTargetsDebug();
@@ -90,36 +92,36 @@ class Decoder : public llvm::ModulePass
 				const JumpTarget& jt,
 				ByteData bytes,
 				bool strict = false);
-		cs_mode determineMode(cs_insn* insn, utils::Address& target);
+		cs_mode determineMode(cs_insn* insn, common::Address& target);
 		capstone2llvmir::Capstone2LlvmIrTranslator::TranslationResultOne
 				translate(
 						ByteData& bytes,
-						utils::Address& addr,
+						common::Address& addr,
 						llvm::IRBuilder<>& irb);
 
 		bool getJumpTargetsFromInstruction(
-				utils::Address addr,
+				common::Address addr,
 				capstone2llvmir::Capstone2LlvmIrTranslator::TranslationResultOne& tr,
 				std::size_t& rangeSize);
-		utils::Address getJumpTarget(
-				utils::Address addr,
+		common::Address getJumpTarget(
+				common::Address addr,
 				llvm::CallInst* branchCall,
 				llvm::Value* val);
 		bool getJumpTargetSwitch(
-				utils::Address addr,
+				common::Address addr,
 				llvm::CallInst* branchCall,
 				llvm::Value* val,
 				SymbolicTree& st);
 		bool instructionBreaksBasicBlock(
-				utils::Address addr,
+				common::Address addr,
 				capstone2llvmir::Capstone2LlvmIrTranslator::TranslationResultOne& tr);
 		void handleDelaySlotTypical(
-				utils::Address& addr,
+				common::Address& addr,
 				capstone2llvmir::Capstone2LlvmIrTranslator::TranslationResultOne& res,
 				ByteData& bytes,
 				llvm::IRBuilder<>& irb);
 		void handleDelaySlotLikely(
-				utils::Address& addr,
+				common::Address& addr,
 				capstone2llvmir::Capstone2LlvmIrTranslator::TranslationResultOne& res,
 				ByteData& bytes,
 				llvm::IRBuilder<>& irb);
@@ -130,40 +132,40 @@ class Decoder : public llvm::ModulePass
 	// Basic block related methods.
 	//
 	private:
-		utils::Address getBasicBlockAddress(llvm::BasicBlock* b);
-		utils::Address getBasicBlockEndAddress(llvm::BasicBlock* b);
-		utils::Address getBasicBlockAddressAfter(utils::Address a);
-		llvm::BasicBlock* getBasicBlockAtAddress(utils::Address a);
-		llvm::BasicBlock* getBasicBlockBeforeAddress(utils::Address a);
-		llvm::BasicBlock* getBasicBlockAfterAddress(utils::Address a);
-		llvm::BasicBlock* getBasicBlockContainingAddress(utils::Address a);
+		common::Address getBasicBlockAddress(llvm::BasicBlock* b);
+		common::Address getBasicBlockEndAddress(llvm::BasicBlock* b);
+		common::Address getBasicBlockAddressAfter(common::Address a);
+		llvm::BasicBlock* getBasicBlockAtAddress(common::Address a);
+		llvm::BasicBlock* getBasicBlockBeforeAddress(common::Address a);
+		llvm::BasicBlock* getBasicBlockAfterAddress(common::Address a);
+		llvm::BasicBlock* getBasicBlockContainingAddress(common::Address a);
 		llvm::BasicBlock* createBasicBlock(
-				utils::Address a,
+				common::Address a,
 				llvm::Function* f,
 				llvm::BasicBlock* insertAfter = nullptr);
-		void addBasicBlock(utils::Address a, llvm::BasicBlock* b);
+		void addBasicBlock(common::Address a, llvm::BasicBlock* b);
 
-		std::map<utils::Address, llvm::BasicBlock*> _addr2bb;
-		std::map<llvm::BasicBlock*, utils::Address> _bb2addr;
+		std::map<common::Address, llvm::BasicBlock*> _addr2bb;
+		std::map<llvm::BasicBlock*, common::Address> _bb2addr;
 
 	// Function related methods.
 	//
 	private:
-		utils::Address getFunctionAddress(llvm::Function* f);
-		utils::Address getFunctionEndAddress(llvm::Function* f);
-		utils::Address getFunctionAddressAfter(utils::Address a);
-		llvm::Function* getFunctionAtAddress(utils::Address a);
-		llvm::Function* getFunctionBeforeAddress(utils::Address a);
-		llvm::Function* getFunctionAfterAddress(utils::Address a);
-		llvm::Function* getFunctionContainingAddress(utils::Address a);
+		common::Address getFunctionAddress(llvm::Function* f);
+		common::Address getFunctionEndAddress(llvm::Function* f);
+		common::Address getFunctionAddressAfter(common::Address a);
+		llvm::Function* getFunctionAtAddress(common::Address a);
+		llvm::Function* getFunctionBeforeAddress(common::Address a);
+		llvm::Function* getFunctionAfterAddress(common::Address a);
+		llvm::Function* getFunctionContainingAddress(common::Address a);
 		llvm::Function* createFunction(
-				utils::Address a,
+				common::Address a,
 				bool declaration = false);
-		void addFunction(utils::Address a, llvm::Function* f);
-		void addFunctionSize(llvm::Function* f, utils::Maybe<std::size_t> sz);
+		void addFunction(common::Address a, llvm::Function* f);
+		void addFunctionSize(llvm::Function* f, std::optional<std::size_t> sz);
 
-		std::map<utils::Address, llvm::Function*> _addr2fnc;
-		std::map<llvm::Function*, utils::Address> _fnc2addr;
+		std::map<common::Address, llvm::Function*> _addr2fnc;
+		std::map<llvm::Function*, common::Address> _fnc2addr;
 		// Function sizes from debug info/symbol table/config/etc.
 		// Used to prevent function splitting.
 		//
@@ -204,7 +206,16 @@ class Decoder : public llvm::ModulePass
 				std::size_t &decodedSz,
 				bool strict = false);
 		void patternsPseudoCall_arm(llvm::CallInst*& call, AsmInstruction& pAi);
-		cs_mode determineMode_arm(cs_insn* insn, utils::Address& target);
+		cs_mode determineMode_arm(cs_insn* insn, common::Address& target);
+
+	// ARM64 specific.
+	//
+	private:
+		std::size_t decodeJumpTargetDryRun_arm64(
+				const JumpTarget& jt,
+				ByteData bytes,
+				bool strict = false);
+		void patternsPseudoCall_arm64(llvm::CallInst*& call, AsmInstruction& pAi);
 
 	// MIPS specific.
 	//
@@ -258,22 +269,22 @@ class Decoder : public llvm::ModulePass
 		llvm::GlobalVariable* getCallReturnObject();
 
 		void getOrCreateCallTarget(
-				utils::Address addr,
+				common::Address addr,
 				llvm::Function*& tFnc,
 				llvm::BasicBlock*& tBb);
 		void getOrCreateBranchTarget(
-				utils::Address addr,
+				common::Address addr,
 				llvm::BasicBlock*& tBb,
 				llvm::Function*& tFnc,
 				llvm::Instruction* from);
 
 		bool canSplitFunctionOn(llvm::BasicBlock* bb);
 		bool canSplitFunctionOn(
-				utils::Address addr,
+				common::Address addr,
 				llvm::BasicBlock* bb,
 				std::set<llvm::BasicBlock*>& newFncStarts);
-		llvm::Function* splitFunctionOn(utils::Address addr);
-		llvm::Function* splitFunctionOn(utils::Address addr, llvm::BasicBlock* bb);
+		llvm::Function* splitFunctionOn(common::Address addr);
+		llvm::Function* splitFunctionOn(common::Address addr, llvm::BasicBlock* bb);
 
 	// Data.
 	//
@@ -283,10 +294,8 @@ class Decoder : public llvm::ModulePass
 		FileImage* _image = nullptr;
 		DebugFormat* _debug = nullptr;
 		NameContainer* _names = nullptr;
-		Llvm2CapstoneMap* _llvm2capstone = nullptr;
+		Llvm2CapstoneInsnMap* _llvm2capstone = nullptr;
 		Abi* _abi = nullptr;
-
-		ReachingDefinitionsAnalysis _RDA;
 
 		std::unique_ptr<capstone2llvmir::Capstone2LlvmIrTranslator> _c2l;
 		cs_insn* _dryCsInsn = nullptr;
@@ -296,12 +305,14 @@ class Decoder : public llvm::ModulePass
 		RangesToDecode _ranges;
 		JumpTargets _jumpTargets;
 
-		std::set<utils::Address> _imports;
-		std::set<utils::Address> _exports;
-		std::set<utils::Address> _symbols;
-		std::map<utils::Address, const config::Function*> _debugFncs;
-		std::set<utils::Address> _staticFncs;
-		std::set<utils::Address> _vtableFncs;
+		/// Name of all extern functions gathered from object files
+		std::set<std::string> _externs;
+		std::set<common::Address> _imports;
+		std::set<common::Address> _exports;
+		std::set<common::Address> _symbols;
+		std::map<common::Address, const common::Function*> _debugFncs;
+		std::set<common::Address> _staticFncs;
+		std::set<common::Address> _vtableFncs;
 		std::set<llvm::Function*> _terminatingFncs;
 		llvm::Function* _entryPointFunction = nullptr;
 		/// Start of all recognized jump tables.
@@ -315,7 +326,7 @@ class Decoder : public llvm::ModulePass
 		/// Btw, we already have diff problem because default label is added to
 		/// switch -> it has one more succ then cond branch in IDA (if default
 		/// label is not in jump table).
-		std::map<utils::Address, std::set<llvm::SwitchInst*>> _switchTableStarts;
+		std::map<common::Address, std::set<llvm::SwitchInst*>> _switchTableStarts;
 
 		// We create helper BBs (without name and address) to handle MIPS
 		// likely branches. For convenience, we map them to real BBs they will

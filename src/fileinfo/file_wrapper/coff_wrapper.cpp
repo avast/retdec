@@ -8,6 +8,7 @@
 
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -16,14 +17,6 @@ namespace fileinfo {
  * @param loadFlags Load flags
  */
 CoffWrapper::CoffWrapper(std::string pathToFile, retdec::fileformat::LoadFlags loadFlags) : CoffFormat(pathToFile, loadFlags)
-{
-
-}
-
-/**
- * Destructor
- */
-CoffWrapper::~CoffWrapper()
 {
 
 }
@@ -60,3 +53,4 @@ std::string CoffWrapper::getTypeOfFile() const
 }
 
 } // namespace fileinfo
+} // namespace retdec

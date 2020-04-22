@@ -7,20 +7,13 @@
 #include "fileinfo/file_wrapper/pe/pe_template.h"
 #include "fileinfo/file_wrapper/pe/pe_wrapper_parser/pe_wrapper_parser64.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
  * Constructor
  */
 PeWrapperParser64::PeWrapperParser64(PeLib::PeHeaderT<64> peHeader64) : PeWrapperParser(), peHeader(peHeader64)
-{
-
-}
-
-/**
- * Destructor
- */
-PeWrapperParser64::~PeWrapperParser64()
 {
 
 }
@@ -36,3 +29,4 @@ bool PeWrapperParser64::getSection(const unsigned long long secIndex, FileSectio
 }
 
 } // namespace fileinfo
+} // namespace retdec

@@ -29,30 +29,24 @@ MachOCompiler::MachOCompiler(
 
 	if (parser.isFatBinary())
 	{
-		for (auto it = path.begin(), end = path.end(); it != end; it++)
-		{
-			if (it->isFile())
-			{
-				internalPaths.emplace_back(it->getPath());
-			}
-		}
+		populateInternalPaths(path, true);
 	}
 	else
 	{
 		switch(targetArchitecture)
 		{
 			case Architecture::X86:
-				path.append("x86.yarac");
+				path.append("x86");
 				break;
 
 			case Architecture::X86_64:
-				path.append("x64.yarac");
+				path.append("x64");
 				break;
 
 			case Architecture::ARM:
 				if (bitWidth == 32)
 				{
-					path.append("arm.yarac");
+					path.append("arm");
 				}
 				else
 				{
@@ -63,11 +57,11 @@ MachOCompiler::MachOCompiler(
 			case Architecture::POWERPC:
 				if (bitWidth == 32)
 				{
-					path.append("ppc.yarac");
+					path.append("ppc");
 				}
 				else
 				{
-					path.append("ppc64.yarac");
+					path.append("ppc64");
 				}
 				break;
 
@@ -75,13 +69,9 @@ MachOCompiler::MachOCompiler(
 				break;
 		}
 
-		if (path.isFile())
-		{
-			internalPaths.emplace_back(path.getPath());
-		}
+		populateInternalPaths(path);
 	}
 }
 
 } // namespace cpdetect
 } // namespace retdec
-

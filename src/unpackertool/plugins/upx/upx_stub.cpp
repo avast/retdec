@@ -14,8 +14,9 @@
 #include "unpackertool/plugins/upx/upx_stub.h"
 #include "unpackertool/plugins/upx/upx_stub_signatures.h"
 #include "retdec/unpacker/decompression/compressed_data.h"
-#include "retdec/unpacker/dynamic_buffer.h"
+#include "retdec/utils/dynamic_buffer.h"
 
+using namespace retdec::utils;
 using namespace retdec::unpacker;
 
 namespace retdec {
@@ -72,7 +73,7 @@ UpxMetadata UpxMetadata::read(retdec::loader::Image* file)
 	}
 
 	inputFile.read(reinterpret_cast<char*>(&dataBuffer[0]), 1024);
-	retdec::unpacker::DynamicBuffer data(dataBuffer, file->getFileFormat()->getEndianness());
+	DynamicBuffer data(dataBuffer, file->getFileFormat()->getEndianness());
 
 	std::string pattern = "UPX!";
 	for (size_t i = 0; i < 1024 - pattern.length(); ++i)
@@ -81,7 +82,7 @@ UpxMetadata UpxMetadata::read(retdec::loader::Image* file)
 		if (needle == pattern)
 		{
 			std::uint32_t metadataSize = UpxMetadata::getSizeOfVersion(data.read<std::uint8_t>(static_cast<std::uint32_t>(i) + 4));
-			retdec::unpacker::DynamicBuffer metadataBuffer(data, static_cast<std::uint32_t>(i), metadataSize);
+			DynamicBuffer metadataBuffer(data, static_cast<std::uint32_t>(i), metadataSize);
 
 			// Check whether calculated checksum and checksum in header matches
 			// This is the only way how we can validate the metadata
@@ -105,7 +106,7 @@ UpxMetadata UpxMetadata::read(retdec::loader::Image* file)
 	return metadata;
 }
 
-uint8_t UpxMetadata::calcChecksum(const retdec::unpacker::DynamicBuffer& data)
+uint8_t UpxMetadata::calcChecksum(const DynamicBuffer& data)
 {
 	std::uint32_t sum = 0;
 	for (std::uint32_t i = 4; i < data.getRealDataSize() - 1; ++i)
@@ -164,13 +165,6 @@ UpxStub::UpxStub(retdec::loader::Image* inputFile, const UpxStubData* stubData, 
 {
 }
 
-/**
- * Destructor.
- */
-UpxStub::~UpxStub()
-{
-}
-
 std::shared_ptr<UpxStub> UpxStub::createStub(retdec::loader::Image* file)
 {
 	return _createStubImpl(file, nullptr);
@@ -181,7 +175,7 @@ std::shared_ptr<UpxStub> UpxStub::createStub(retdec::loader::Image* file, const 
 	return _createStubImpl(file, &stubBytes);
 }
 
-std::shared_ptr<UpxStub> UpxStub::_createStubImpl(retdec::loader::Image* file, const retdec::unpacker::DynamicBuffer* stubBytes)
+std::shared_ptr<UpxStub> UpxStub::_createStubImpl(retdec::loader::Image* file, const DynamicBuffer* stubBytes)
 {
 	UpxMetadata metadata = UpxMetadata::read(file);
 
@@ -292,7 +286,7 @@ std::shared_ptr<UpxStub> UpxStub::_createStubImpl(retdec::loader::Image* file, c
 		}
 		case retdec::fileformat::Format::PE:
 		{
-			if (static_cast<retdec::fileformat::PeFormat*>(file->getFileFormat())->getPeClass() == PeLib::PEFILE32)
+			if (static_cast<retdec::fileformat::PeFormat*>(file->getFileFormat())->isPe32())
 				stub = new PeUpxStub<32>(file, stubData, capturedData, std::move(decompressor), metadata);
 			else
 				stub = new PeUpxStub<64>(file, stubData, capturedData, std::move(decompressor), metadata);
@@ -377,7 +371,7 @@ void UpxStub::setStubData(const UpxStubData* stubData)
 	_stubData = stubData;
 }
 
-void UpxStub::setStubCapturedData(const retdec::unpacker::DynamicBuffer& stubCapturedData)
+void UpxStub::setStubCapturedData(const DynamicBuffer& stubCapturedData)
 {
 	_stubCapturedData = stubCapturedData;
 }

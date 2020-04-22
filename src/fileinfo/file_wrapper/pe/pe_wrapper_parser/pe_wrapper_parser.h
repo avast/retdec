@@ -12,13 +12,14 @@
 #include "fileinfo/file_information/file_information_types/data_directory.h"
 #include "fileinfo/file_information/file_information_types/file_section.h"
 
+namespace retdec {
 namespace fileinfo {
 
 class PeWrapperParser
 {
 	public:
 		PeWrapperParser();
-		virtual ~PeWrapperParser();
+		virtual ~PeWrapperParser() = default;
 
 		/// @name Detection methods
 		/// @{
@@ -28,5 +29,6 @@ class PeWrapperParser
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

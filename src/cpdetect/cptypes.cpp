@@ -19,30 +19,6 @@ DetectParams::DetectParams(SearchType searchType_, bool internal_, bool external
 }
 
 /**
- * Destructor of DetectParams structure
- */
-DetectParams::~DetectParams()
-{
-
-}
-
-/**
- * Constructor of DetectResult structure
- */
-DetectResult::DetectResult()
-{
-
-}
-
-/**
- * Destructor of DetectResult structure
- */
-DetectResult::~DetectResult()
-{
-
-}
-
-/**
  * Check if result is reliable
  * @return @c true if detected result is reliable, @c false otherwise
  */
@@ -103,41 +79,6 @@ bool DetectResult::isKnownType() const
 bool DetectResult::isUnknownType() const
 {
 	return type == ToolType::UNKNOWN;
-}
-
-/**
- * Constructor of DetectLanguage structure
- */
-DetectLanguage::DetectLanguage() : bytecode(false)
-{
-
-}
-
-/**
- * Destructor of DetectLanguage structure
- */
-DetectLanguage::~DetectLanguage()
-{
-
-}
-
-/**
- * Constructor of CompilerInformation structure
- */
-ToolInformation::ToolInformation()
-	: epOffset(std::numeric_limits<unsigned long long>::max()),
-		epAddress(std::numeric_limits<unsigned long long>::max()),
-		imageBase(std::numeric_limits<unsigned long long>::max())
-{
-
-}
-
-/**
- * Destructor of CompilerInformation structure
- */
-ToolInformation::~ToolInformation()
-{
-
 }
 
 /**
@@ -213,13 +154,13 @@ void ToolInformation::addTool(
 void ToolInformation::addLanguage(const std::string &name, const std::string &extra, bool bytecode)
 {
 	// Prevent duplicates.
-	for(auto &item : detectedLanguages)
+	for (auto &item : detectedLanguages)
 	{
-		if(item.name == name)
+		if (item.name == name)
 		{
-			if(item.additionalInfo.empty() || item.additionalInfo == extra)
+			if (item.additionalInfo.empty() || item.additionalInfo == extra)
 			{
-				if(!item.bytecode)
+				if (!item.bytecode)
 				{
 					item.bytecode = bytecode;
 				}
@@ -252,9 +193,9 @@ bool ToolInformation::isReliableResult(std::size_t resultIndex) const
  */
 bool ToolInformation::hasReliableResult() const
 {
-	for(std::size_t i = 0, e = detectedTools.size(); i < e; ++i)
+	for (std::size_t i = 0, e = detectedTools.size(); i < e; ++i)
 	{
-		if(isReliableResult(i))
+		if (isReliableResult(i))
 		{
 			return true;
 		}
@@ -300,22 +241,6 @@ Packed ToolInformation::isPacked() const
 		default:
 			return Packed::PACKED;
 	}
-}
-
-/**
- * Constructor of Similarity structure
- */
-Similarity::Similarity() : same(0), total(0), ratio(0.0)
-{
-
-}
-
-/**
- * Destructor of Similarity structure
- */
-Similarity::~Similarity()
-{
-
 }
 
 /**
@@ -368,8 +293,14 @@ std::string detectionMetodToString(DetectionMethod method)
 		case DetectionMethod::MANIFEST_H:
 			return "manifest heuristic";
 
+		case DetectionMethod::HEADER_H:
+			return "dos header style";
+
 		case DetectionMethod::OTHER_H:
 			return "heuristic";
+
+		case DetectionMethod::YARA_RULE:
+			return "YARA rule";
 
 		case DetectionMethod::UNKNOWN:
 			/* fall-thru */

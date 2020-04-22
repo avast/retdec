@@ -1,0 +1,7 @@
+1 PushRouter_Close
+2 PushRouter_GetMessage
+3 PushRouter_Open
+4 PushRouter_RegisterClient
+6 PushRouter_SubmitPush
+7 PushRouter_UnRegisterClient
+8 PushRouter_FreeMessage

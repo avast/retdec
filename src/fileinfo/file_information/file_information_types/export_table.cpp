@@ -7,23 +7,8 @@
 #include "fileinfo/file_information/file_information_types/export_table.h"
 #include "fileinfo/file_information/file_information_types/type_conversions.h"
 
+namespace retdec {
 namespace fileinfo {
-
-/**
- * Constructor
- */
-ExportTable::ExportTable() : table(nullptr)
-{
-
-}
-
-/**
- * Destructor
- */
-ExportTable::~ExportTable()
-{
-
-}
 
 /**
  * Get number of exports in table
@@ -116,3 +101,4 @@ bool ExportTable::hasRecords() const
 }
 
 } // namespace fileinfo
+} // namespace retdec

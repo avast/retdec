@@ -9,7 +9,7 @@
 #include <gtest/gtest.h>
 
 #include "retdec/fileformat/fftypes.h"
-#include "retdec/unpacker/dynamic_buffer.h"
+#include "retdec/utils/dynamic_buffer.h"
 
 using namespace ::testing;
 using namespace retdec::utils;

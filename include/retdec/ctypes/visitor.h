@@ -17,7 +17,9 @@ class EnumType;
 class FloatingPointType;
 class FunctionType;
 class IntegralType;
+class NamedType;
 class PointerType;
+class ReferenceType;
 class StructType;
 class TypedefedType;
 class UnionType;
@@ -30,14 +32,16 @@ class VoidType;
 class Visitor
 {
 	public:
-		virtual ~Visitor() = 0;
+		virtual ~Visitor() = default;
 
 		virtual void visit(const std::shared_ptr<ArrayType> &type) = 0;
 		virtual void visit(const std::shared_ptr<EnumType> &type) = 0;
 		virtual void visit(const std::shared_ptr<FloatingPointType> &type) = 0;
 		virtual void visit(const std::shared_ptr<FunctionType> &type) = 0;
 		virtual void visit(const std::shared_ptr<IntegralType> &type) = 0;
+		virtual void visit(const std::shared_ptr<NamedType> &type) = 0;
 		virtual void visit(const std::shared_ptr<PointerType> &type) = 0;
+		virtual void visit(const std::shared_ptr<ReferenceType> &type) = 0;
 		virtual void visit(const std::shared_ptr<StructType> &type) = 0;
 		virtual void visit(const std::shared_ptr<TypedefedType> &type) = 0;
 		virtual void visit(const std::shared_ptr<UnionType> &type) = 0;
@@ -45,7 +49,7 @@ class Visitor
 		virtual void visit(const std::shared_ptr<VoidType> &type) = 0;
 
 	protected:
-		Visitor();
+		Visitor() = default;
 };
 
 } // namespace ctypes

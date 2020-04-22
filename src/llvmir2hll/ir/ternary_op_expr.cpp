@@ -21,11 +21,6 @@ TernaryOpExpr::TernaryOpExpr(ShPtr<Expression> cond, ShPtr<Expression> trueValue
 	ShPtr<Expression> falseValue):
 		Expression(), cond(cond), trueValue(trueValue), falseValue(falseValue) {}
 
-/**
-* @brief Destructs the operator.
-*/
-TernaryOpExpr::~TernaryOpExpr() {}
-
 ShPtr<Value> TernaryOpExpr::clone() {
 	ShPtr<TernaryOpExpr> ternaryOpExpr(TernaryOpExpr::create(
 		ucast<Expression>(cond->clone()),

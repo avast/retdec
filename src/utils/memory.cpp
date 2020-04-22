@@ -4,6 +4,8 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
+#include <cstddef>
+
 #include "retdec/utils/memory.h"
 #include "retdec/utils/os.h"
 #include <cstddef>
@@ -116,7 +118,31 @@ std::size_t getTotalSystemMemoryOnMacOS() {
 bool limitSystemMemoryOnMacOS(std::size_t limit) {
 	// Warning: We have found that limitSystemMemoryOnPOSIX() does not actually
 	// do anything on macOS. We need to find another way. See
-	// https://github.com/avast-tl/retdec/issues/379
+	// https://github.com/avast/retdec/issues/379
+	return limitSystemMemoryOnPOSIX(limit);
+}
+
+#elif defined(OS_BSD)
+
+/**
+* @brief Implementation of @c getTotalSystemMemory() on *BSD.
+*
+* AKA FreeBSD, DragonFly, NetBSD, OpenBSD, TrueOS, PCBSD
+*/
+std::size_t getTotalSystemMemoryOnBSD() {
+	int what[] = { CTL_HW, HW_PHYSMEM };
+	std::size_t value = 0;
+	std::size_t length = sizeof(value);
+	auto rc = sysctl(what, 2, &value, &length, nullptr, 0);
+	return rc != -1 ? value : 0;
+}
+
+/**
+* @brief Implementation of @c limitSystemMemory() on *BSD.
+*
+* AKA FreeBSD, DragonFly, NetBSD, OpenBSD, TrueOS, PCBSD
+*/
+bool limitSystemMemoryOnBSD(std::size_t limit) {
 	return limitSystemMemoryOnPOSIX(limit);
 }
 

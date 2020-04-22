@@ -7,8 +7,11 @@
 #ifndef FILEINFO_FILE_INFORMATION_FILE_INFORMATION_TYPES_FILE_HEADER_H
 #define FILEINFO_FILE_INFORMATION_FILE_INFORMATION_TYPES_FILE_HEADER_H
 
+#include <limits>
+
 #include "fileinfo/file_information/file_information_types/flags.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -27,32 +30,30 @@ class FileHeader
 		std::string osAbiVersion;                   ///< version of operation system or ABI
 		Flags fileFlags;                            ///< file flags
 		Flags dllFlags;                             ///< DLL flags (set only if file is dynamic-link library)
-		unsigned long long numberOfBitsInByte;      ///< number of bits in one byte
-		unsigned long long numberOfBitsInWord;      ///< number of bits in one word
-		unsigned long long fileHeaderSize;          ///< size of this header
-		unsigned long long segmentTableOffset;      ///< offset of segment table in file
-		unsigned long long segmentTableEntrySize;   ///< size of one entry in segment table
-		unsigned long long segmentTableSize;        ///< size of segment table (size of header of segments)
-		unsigned long long numberOfSegments;        ///< number of segments in file
-		unsigned long long sectionTableOffset;      ///< offset of section table in file
-		unsigned long long sectionTableEntrySize;   ///< size of one entry in section table
-		unsigned long long sectionTableSize;        ///< size of section table (size of header of sections)
-		unsigned long long declNumberOfSections;    ///< declared number of sections in file
-		unsigned long long coffFileHeaderSize;      ///< size of COFF file header
-		unsigned long long optionalHeaderSize;      ///< size of optional header
-		unsigned long long checksum;                ///< file checksum
-		unsigned long long stackReserveSize;        ///< size of the stack to reserve
-		unsigned long long stackCommitSize;         ///< size of the stack to commit
-		unsigned long long heapReserveSize;         ///< size of the local heap space to reserve
-		unsigned long long heapCommitSize;          ///< size of the local heap space to commit
-		unsigned long long numberOfDataDirectories; ///< number of data directories
-		unsigned long long numberOfSymbolTables;    ///< number of symbol tables
-		unsigned long long overlayOffset;           ///< offset of overlay
-		unsigned long long overlaySize;             ///< size of overlay
+		unsigned long long numberOfBitsInByte = std::numeric_limits<unsigned long long>::max();      ///< number of bits in one byte
+		unsigned long long numberOfBitsInWord = std::numeric_limits<unsigned long long>::max();      ///< number of bits in one word
+		unsigned long long fileHeaderSize = std::numeric_limits<unsigned long long>::max();          ///< size of this header
+		unsigned long long segmentTableOffset = std::numeric_limits<unsigned long long>::max();      ///< offset of segment table in file
+		unsigned long long segmentTableEntrySize = std::numeric_limits<unsigned long long>::max();   ///< size of one entry in segment table
+		unsigned long long segmentTableSize = std::numeric_limits<unsigned long long>::max();        ///< size of segment table (size of header of segments)
+		unsigned long long numberOfSegments = std::numeric_limits<unsigned long long>::max();        ///< number of segments in file
+		unsigned long long sectionTableOffset = std::numeric_limits<unsigned long long>::max();      ///< offset of section table in file
+		unsigned long long sectionTableEntrySize = std::numeric_limits<unsigned long long>::max();   ///< size of one entry in section table
+		unsigned long long sectionTableSize = std::numeric_limits<unsigned long long>::max();        ///< size of section table (size of header of sections)
+		unsigned long long declNumberOfSections = std::numeric_limits<unsigned long long>::max();    ///< declared number of sections in file
+		unsigned long long coffFileHeaderSize = std::numeric_limits<unsigned long long>::max();      ///< size of COFF file header
+		unsigned long long optionalHeaderSize = std::numeric_limits<unsigned long long>::max();      ///< size of optional header
+		unsigned long long checksum = std::numeric_limits<unsigned long long>::max();                ///< file checksum
+		unsigned long long stackReserveSize = std::numeric_limits<unsigned long long>::max();        ///< size of the stack to reserve
+		unsigned long long stackCommitSize = std::numeric_limits<unsigned long long>::max();         ///< size of the stack to commit
+		unsigned long long heapReserveSize = std::numeric_limits<unsigned long long>::max();         ///< size of the local heap space to reserve
+		unsigned long long heapCommitSize = std::numeric_limits<unsigned long long>::max();          ///< size of the local heap space to commit
+		unsigned long long numberOfDataDirectories = std::numeric_limits<unsigned long long>::max(); ///< number of data directories
+		unsigned long long numberOfSymbolTables = std::numeric_limits<unsigned long long>::max();    ///< number of symbol tables
+		unsigned long long overlayOffset = std::numeric_limits<unsigned long long>::max();           ///< offset of overlay
+		unsigned long long overlaySize = std::numeric_limits<unsigned long long>::max();             ///< size of overlay
+		double overlayEntropy = std::numeric_limits<double>::min();                      ///< overlay data entropy
 	public:
-		FileHeader();
-		~FileHeader();
-
 		/// @name Getters
 		/// @{
 		std::string getTimeStamp() const;
@@ -93,6 +94,7 @@ class FileHeader
 		std::string getNumberOfSymbolTablesStr() const;
 		std::string getOverlayOffsetStr(std::ios_base &(* format)(std::ios_base &)) const;
 		std::string getOverlaySizeStr(std::ios_base &(* format)(std::ios_base &)) const;
+		std::string getOverlayEntropyStr(std::ios_base &(* format)(std::ios_base &)) const;
 		/// @}
 
 		/// @name Setters
@@ -130,6 +132,7 @@ class FileHeader
 		void setNumberOfSymbolTables(unsigned long long tables);
 		void setOverlayOffset(unsigned long long offset);
 		void setOverlaySize(unsigned long long size);
+		void setOverlayEntropy(double entr);
 		/// @}
 
 		/// @name Other methods
@@ -142,5 +145,6 @@ class FileHeader
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

@@ -18,11 +18,12 @@
 #include <llvm/IR/Module.h>
 #include <llvm/Support/raw_ostream.h>
 
-#include "retdec/utils/address.h"
+#include "retdec/common/address.h"
 #include "retdec/capstone2llvmir/exceptions.h"
 
 // These are additions to capstone - include them all here.
 #include "retdec/capstone2llvmir/arm/arm_defs.h"
+#include "retdec/capstone2llvmir/arm64/arm64_defs.h"
 #include "retdec/capstone2llvmir/mips/mips_defs.h"
 #include "retdec/capstone2llvmir/powerpc/powerpc_defs.h"
 #include "retdec/capstone2llvmir/x86/x86_defs.h"
@@ -249,7 +250,7 @@ class Capstone2LlvmIrTranslator
 				llvm::Module* m,
 				cs_mode extra = CS_MODE_LITTLE_ENDIAN);
 
-		virtual ~Capstone2LlvmIrTranslator();
+		virtual ~Capstone2LlvmIrTranslator() = default;
 //
 //==============================================================================
 // Translator configuration methods.
@@ -385,7 +386,7 @@ class Capstone2LlvmIrTranslator
 		virtual TranslationResult translate(
 				const uint8_t* bytes,
 				std::size_t size,
-				retdec::utils::Address a,
+				retdec::common::Address a,
 				llvm::IRBuilder<>& irb,
 				std::size_t count = 0,
 				bool stopOnBranch = false) = 0;
@@ -430,7 +431,7 @@ class Capstone2LlvmIrTranslator
 		virtual TranslationResultOne translateOne(
 				const uint8_t*& bytes,
 				std::size_t& size,
-				retdec::utils::Address& a,
+				retdec::common::Address& a,
 				llvm::IRBuilder<>& irb) = 0;
 //
 //==============================================================================

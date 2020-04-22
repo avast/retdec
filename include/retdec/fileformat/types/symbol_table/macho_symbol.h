@@ -10,7 +10,6 @@
 #include <string>
 
 #include <llvm/Object/MachO.h>
-#include <llvm/Support/MachO.h>
 
 #include "retdec/fileformat/types/export_table/export.h"
 #include "retdec/fileformat/types/import_table/import.h"
@@ -44,9 +43,6 @@ class MachOSymbol
 		template<typename T> void setValues(const T &nList, const llvm::StringRef &strTable, unsigned index);
 		/// @}
 	public:
-		MachOSymbol();
-		~MachOSymbol();
-
 		/// @name Setters
 		/// @{
 		void makeFunction(FileFormat *fileParser);

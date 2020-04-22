@@ -35,27 +35,28 @@ class SecSeg
 			INFO               ///< auxiliary information
 		};
 	private:
-		std::string crc32;                ///< CRC32 of section or segment data
-		std::string md5;                  ///< MD5 of section or segment data
-		std::string sha256;               ///< SHA256 of section or segment data
-		std::string name;                 ///< name of section or segment
-		llvm::StringRef bytes;            ///< reference to content of section or segment
-		Type type;                        ///< type
-		unsigned long long index;         ///< index
-		unsigned long long offset;        ///< start offset in file
-		unsigned long long fileSize;      ///< size in file
-		unsigned long long address;       ///< start address in memory
-		unsigned long long memorySize;    ///< size in memory
-		unsigned long long entrySize;     ///< size of one entry in file
-		bool memorySizeIsValid;           ///< @c true if size in memory is valid
-		bool entrySizeIsValid;            ///< size of one entry in section or segment
-		bool isInMemory;                  ///< @c true if the section or segment will appear in the memory image of a process
-		bool loaded;                      ///< @c true if content of section or segment was successfully loaded from input file
+		std::string crc32;                    ///< CRC32 of section or segment data
+		std::string md5;                      ///< MD5 of section or segment data
+		std::string sha256;                   ///< SHA256 of section or segment data
+		std::string name;                     ///< name of section or segment
+		llvm::StringRef bytes;                ///< reference to content of section or segment
+		Type type = Type::UNDEFINED_SEC_SEG;  ///< type
+		unsigned long long index = 0;         ///< index
+		unsigned long long offset = 0;        ///< start offset in file
+		unsigned long long fileSize = 0;      ///< size in file
+		unsigned long long address = 0;       ///< start address in memory
+		unsigned long long memorySize = 0;    ///< size in memory
+		unsigned long long entrySize = 0;     ///< size of one entry in file
+		double entropy = 0.0;                 ///< entropy in <0,8>
+		bool memorySizeIsValid = false;       ///< @c true if size in memory is valid
+		bool entrySizeIsValid = false;        ///< size of one entry in section or segment
+		bool isInMemory = false;              ///< @c true if the section or segment will appear in the memory image of a process
+		bool loaded = false;                  ///< @c true if content of section or segment was successfully loaded from input file
+		bool isEntropyValid = false;          ///< @c true if entropy has been computed
 
 		void computeHashes();
 	public:
-		SecSeg();
-		virtual ~SecSeg() = 0;
+		virtual ~SecSeg() = default;
 
 		/// @name Query methods
 		/// @{
@@ -97,6 +98,26 @@ class SecSeg
 		bool getSizeInMemory(unsigned long long &sMemorySize) const;
 		bool getSizeOfOneEntry(unsigned long long &sEntrySize) const;
 		bool getMemory() const;
+		bool getEntropy(double &res) const;
+
+		/**
+		 * Read bytes from the given offset as a number of the given type.
+		 * @param sOffset Index from which the number should be read.
+		 * @return The read number. Returns zero if the offset is out-of-bounds or
+		 *         if there are not enough bytes to read.
+		 * @tparam NumberType Type of the number to read and return.
+		 */
+		template<typename NumberType>
+		NumberType getBytesAtOffsetAsNumber(unsigned long long sOffset) const
+		{
+			if(bytes.size() < sizeof(NumberType) || sOffset > bytes.size() - sizeof(NumberType))
+			{
+				return {};
+			}
+
+			auto rawBytes = bytes.data();
+			return *reinterpret_cast<const NumberType *>(&rawBytes[sOffset]);
+		}
 		/// @}
 
 		/// @name Getters of section or segment content
@@ -122,6 +143,7 @@ class SecSeg
 
 		/// @name Other methods
 		/// @{
+		void computeEntropy();
 		void invalidateMemorySize();
 		void invalidateEntrySize();
 		void load(const FileFormat *sOwner);

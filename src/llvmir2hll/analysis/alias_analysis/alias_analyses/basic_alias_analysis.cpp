@@ -21,11 +21,6 @@ REGISTER_AT_FACTORY("basic", BASIC_ALIAS_ANALYSIS_ID, AliasAnalysisFactory,
 BasicAliasAnalysis::BasicAliasAnalysis(): AliasAnalysis() {}
 
 /**
-* @brief Destructs the analysis.
-*/
-BasicAliasAnalysis::~BasicAliasAnalysis() {}
-
-/**
 * @brief Creates a new basic alias analysis.
 */
 ShPtr<AliasAnalysis> BasicAliasAnalysis::create() {

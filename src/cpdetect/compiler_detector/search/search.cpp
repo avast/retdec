@@ -46,11 +46,11 @@ Search::Search(retdec::fileformat::FileFormat &fileParser) : parser(fileParser),
 	fileSupported = parser.hexToLittle(nibbles) && parser.getNumberOfNibblesInByte();
 	jumps = mapGetValueOrDefault(jumpMap, parser.getTargetArchitecture(), std::vector<RelativeJump>());
 
-	for(std::size_t i = 0, e = jumps.size(); i < e; ++i)
+	for (std::size_t i = 0, e = jumps.size(); i < e; ++i)
 	{
 		const auto len = jumps[i].getSlashNibbleSize();
 		averageSlashLen += len;
-		if(!len)
+		if (!len)
 		{
 			jumps.erase(jumps.begin() + i);
 			--i;
@@ -58,32 +58,16 @@ Search::Search(retdec::fileformat::FileFormat &fileParser) : parser(fileParser),
 		}
 	}
 
-	if(averageSlashLen)
+	if (averageSlashLen)
 	{
 		averageSlashLen /= jumps.size();
 	}
 }
 
 /**
- * Destructor
- */
-Search::~Search()
-{
-
-}
-
-/**
  * Constructor of RelativeJump
  */
 Search::RelativeJump::RelativeJump(std::string sSlash, std::size_t sBytesAfter) : slash(sSlash), bytesAfter(sBytesAfter)
-{
-
-}
-
-/**
- * Destructor of RelativeJump
- */
-Search::RelativeJump::~RelativeJump()
 {
 
 }
@@ -193,17 +177,17 @@ const Search::RelativeJump* Search::getRelativeJump(std::size_t fileOffset, std:
 	const auto nibbleOffset = nibblesFromBytes(fileOffset) + shift;
 	moveSize = 0;
 
-	for(const auto &jump : jumps)
+	for (const auto &jump : jumps)
 	{
 		const auto nibblesAfter = nibblesFromBytes(jump.getBytesAfter());
-		if(!hasSubstringOnPosition(nibbles, jump.getSlash(), nibbleOffset) ||
+		if (!hasSubstringOnPosition(nibbles, jump.getSlash(), nibbleOffset) ||
 			(nibbleOffset + jump.getSlashNibbleSize() + nibblesAfter - 1 >= nibbles.length()))
 		{
 			continue;
 		}
 
 		std::uint64_t jumpedBytes = 0;
-		if(!parser.getXByteOffset(fileOffset + bytesFromNibbles(jump.getSlashNibbleSize()), jump.getBytesAfter(), jumpedBytes, Endianness::LITTLE))
+		if (!parser.getXByteOffset(fileOffset + bytesFromNibbles(jump.getSlashNibbleSize()), jump.getBytesAfter(), jumpedBytes, Endianness::LITTLE))
 		{
 			continue;
 		}
@@ -243,13 +227,13 @@ unsigned long long Search::countImpNibbles(const std::string &signPattern) const
 {
 	unsigned long long count = 0;
 
-	for(const auto &c : signPattern)
+	for (const auto &c : signPattern)
 	{
-		if(c == '/')
+		if (c == '/')
 		{
 			count += averageSlashLen;
 		}
-		else if(c != '-' && c != '?' && c != ';')
+		else if (c != '-' && c != '?' && c != ';')
 		{
 			++count;
 		}
@@ -267,7 +251,7 @@ unsigned long long Search::countImpNibbles(const std::string &signPattern) const
  */
 unsigned long long Search::findUnslashedSignature(const std::string &signPattern, std::size_t startOffset, std::size_t stopOffset) const
 {
-	if(startOffset > stopOffset)
+	if (startOffset > stopOffset)
 	{
 		return 0;
 	}
@@ -294,23 +278,23 @@ unsigned long long Search::findUnslashedSignature(const std::string &signPattern
  */
 unsigned long long Search::findSlashedSignature(const std::string &signPattern, std::size_t startOffset, std::size_t stopOffset) const
 {
-	if(startOffset > stopOffset)
+	if (startOffset > stopOffset)
 	{
 		return 0;
 	}
 
 	const auto areaSize = nibblesFromBytes(stopOffset - startOffset + 1);
 	const auto signSize = signPattern.length() - std::count(signPattern.begin(), signPattern.end(), ';');
-	if(areaSize < signSize)
+	if (areaSize < signSize)
 	{
 		return false;
 	}
 	const auto iters = (startOffset == stopOffset) ? 1 : areaSize - signSize + 1;
 
-	for(std::size_t i = 0; i < iters; ++i)
+	for (std::size_t i = 0; i < iters; ++i)
 	{
 		const auto result = exactComparison(signPattern, startOffset, i);
-		if(result)
+		if (result)
 		{
 			return result;
 		}
@@ -328,21 +312,21 @@ unsigned long long Search::findSlashedSignature(const std::string &signPattern, 
  */
 unsigned long long Search::exactComparison(const std::string &signPattern, std::size_t fileOffset, std::size_t shift) const
 {
-	for(std::size_t sigIndex = 0, fileIndex = nibblesFromBytes(fileOffset) + shift, fileLen = nibbles.length();
+	for (std::size_t sigIndex = 0, fileIndex = nibblesFromBytes(fileOffset) + shift, fileLen = nibbles.length();
 		fileIndex < fileLen; ++sigIndex, ++fileIndex)
 	{
-		if(sigIndex == signPattern.length() || signPattern[sigIndex] == ';')
+		if (sigIndex == signPattern.length() || signPattern[sigIndex] == ';')
 		{
 			return countImpNibbles(signPattern);
 		}
-		else if(signPattern[sigIndex] == '/')
+		else if (signPattern[sigIndex] == '/')
 		{
 			std::int64_t moveSize = 0;
 			const auto actShift = (parser.getNumberOfNibblesInByte() ? fileIndex % parser.getNumberOfNibblesInByte() : 0);
 			const auto *jump = getRelativeJump(bytesFromNibbles(fileIndex), actShift, moveSize);
-			if(!jump)
+			if (!jump)
 			{
-				if(!haveSlashes())
+				if (!haveSlashes())
 				{
 					--fileIndex;
 					continue;
@@ -354,7 +338,7 @@ unsigned long long Search::exactComparison(const std::string &signPattern, std::
 			// move after one nibble is in header of cycle
 			fileIndex += jump->getSlashNibbleSize() + nibblesFromBytes(jump->getBytesAfter()) + moveSize - 1;
 		}
-		else if(signPattern[sigIndex] != nibbles[fileIndex] && signPattern[sigIndex] != '-' && signPattern[sigIndex] != '?')
+		else if (signPattern[sigIndex] != nibbles[fileIndex] && signPattern[sigIndex] != '-' && signPattern[sigIndex] != '?')
 		{
 			return 0;
 		}
@@ -377,27 +361,27 @@ bool Search::countSimilarity(const std::string &signPattern, Similarity &sim, st
 {
 	Similarity result;
 
-	for(std::size_t sigIndex = 0, fileIndex = nibblesFromBytes(fileOffset) + shift, fileLen = nibbles.length(); fileIndex < fileLen; ++sigIndex, ++fileIndex)
+	for (std::size_t sigIndex = 0, fileIndex = nibblesFromBytes(fileOffset) + shift, fileLen = nibbles.length(); fileIndex < fileLen; ++sigIndex, ++fileIndex)
 	{
-		if(sigIndex == signPattern.length() || signPattern[sigIndex] == ';')
+		if (sigIndex == signPattern.length() || signPattern[sigIndex] == ';')
 		{
 			sim.same = result.same;
 			sim.total = result.total;
 			sim.ratio = static_cast<double>(result.same) / result.total;
 			return countImpNibbles(signPattern);
 		}
-		else if(signPattern[sigIndex] == '-' || signPattern[sigIndex] == '?')
+		else if (signPattern[sigIndex] == '-' || signPattern[sigIndex] == '?')
 		{
 			continue;
 		}
-		else if(signPattern[sigIndex] == '/')
+		else if (signPattern[sigIndex] == '/')
 		{
 			std::int64_t moveSize = 0;
 			const auto actShift = (parser.getNumberOfNibblesInByte() ? fileIndex % parser.getNumberOfNibblesInByte() : 0);
 			const auto *jump = getRelativeJump(bytesFromNibbles(fileIndex), actShift, moveSize);
-			if(!jump)
+			if (!jump)
 			{
-				if(!haveSlashes())
+				if (!haveSlashes())
 				{
 					--fileIndex;
 					continue;
@@ -413,7 +397,7 @@ bool Search::countSimilarity(const std::string &signPattern, Similarity &sim, st
 			}
 			continue;
 		}
-		else if(signPattern[sigIndex] == nibbles[fileIndex])
+		else if (signPattern[sigIndex] == nibbles[fileIndex])
 		{
 			++result.same;
 		}
@@ -436,14 +420,14 @@ bool Search::countSimilarity(const std::string &signPattern, Similarity &sim, st
  */
 bool Search::areaSimilarity(const std::string &signPattern, Similarity &sim, std::size_t startOffset, std::size_t stopOffset) const
 {
-	if(startOffset > stopOffset)
+	if (startOffset > stopOffset)
 	{
 		return false;
 	}
 
 	const auto areaSize = nibblesFromBytes(stopOffset - startOffset + 1);
 	const auto signSize = signPattern.length() - std::count(signPattern.begin(), signPattern.end(), ';');
-	if(areaSize < signSize)
+	if (areaSize < signSize)
 	{
 		return false;
 	}
@@ -451,9 +435,9 @@ bool Search::areaSimilarity(const std::string &signPattern, Similarity &sim, std
 	auto result = false;
 	Similarity act, max;
 
-	for(std::size_t i = 0; i < iters; ++i)
+	for (std::size_t i = 0; i < iters; ++i)
 	{
-		if(countSimilarity(signPattern, act, startOffset, i) &&
+		if (countSimilarity(signPattern, act, startOffset, i) &&
 			(act.ratio > max.ratio || (areEqual(act.ratio, max.ratio) && act.total > max.total)))
 		{
 			max.same = act.same;
@@ -463,7 +447,7 @@ bool Search::areaSimilarity(const std::string &signPattern, Similarity &sim, std
 		}
 	}
 
-	if(result)
+	if (result)
 	{
 		sim.same = max.same;
 		sim.total = max.total;
@@ -551,13 +535,13 @@ bool Search::createSignature(std::string &pattern, std::size_t fileOffset, std::
 {
 	pattern.clear();
 
-	for(std::size_t i = 0, fileIndex = nibblesFromBytes(fileOffset), fileLen = nibbles.length(), nibbleSize = nibblesFromBytes(size);
+	for (std::size_t i = 0, fileIndex = nibblesFromBytes(fileOffset), fileLen = nibbles.length(), nibbleSize = nibblesFromBytes(size);
 		fileIndex < fileLen && i < nibbleSize; ++i, ++fileIndex)
 	{
 		std::int64_t moveSize = 0;
 		const auto actShift = (parser.getNumberOfNibblesInByte() ? fileIndex % parser.getNumberOfNibblesInByte() : 0);
 		const auto *jump = getRelativeJump(bytesFromNibbles(fileIndex), actShift, moveSize);
-		if(jump)
+		if (jump)
 		{
 			pattern += '/';
 			fileIndex += jump->getSlashNibbleSize() + nibblesFromBytes(jump->getBytesAfter()) + moveSize - 1;

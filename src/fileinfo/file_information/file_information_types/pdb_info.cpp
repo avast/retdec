@@ -7,24 +7,8 @@
 #include "fileinfo/file_information/file_information_types/pdb_info.h"
 #include "fileinfo/file_information/file_information_types/type_conversions.h"
 
+namespace retdec {
 namespace fileinfo {
-
-/**
- * Constructor
- */
-PdbInfo::PdbInfo() : age(std::numeric_limits<std::size_t>::max()),
-						timeStamp(std::numeric_limits<std::size_t>::max())
-{
-
-}
-
-/**
- * Destructor
- */
-PdbInfo::~PdbInfo()
-{
-
-}
 
 /**
  * Get type of PDB file
@@ -119,3 +103,4 @@ void PdbInfo::setTimeStamp(std::size_t sTimeStamp)
 }
 
 } // namespace fileinfo
+} // namespace retdec

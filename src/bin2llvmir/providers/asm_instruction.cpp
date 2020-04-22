@@ -9,7 +9,6 @@
 
 #include "retdec/utils/container.h"
 #include "retdec/bin2llvmir/providers/asm_instruction.h"
-#include "retdec/bin2llvmir/providers/config.h"
 #include "retdec/bin2llvmir/providers/names.h"
 #include "retdec/bin2llvmir/utils/debug.h"
 #include "retdec/bin2llvmir/utils/ir_modifier.h"
@@ -88,7 +87,7 @@ AsmInstruction::AsmInstruction(llvm::Function* f)
 	}
 }
 
-AsmInstruction::AsmInstruction(llvm::Module* m, retdec::utils::Address addr)
+AsmInstruction::AsmInstruction(llvm::Module* m, retdec::common::Address addr)
 {
 	if (m == nullptr)
 	{
@@ -183,7 +182,7 @@ const llvm::GlobalVariable* AsmInstruction::getLlvmToAsmGlobalVariablePrivate(
 	}
 }
 
-Llvm2CapstoneMap& AsmInstruction::getLlvmToCapstoneInsnMap(
+Llvm2CapstoneInsnMap& AsmInstruction::getLlvmToCapstoneInsnMap(
 		const llvm::Module* m)
 {
 	for (auto& p : _module2instMap)
@@ -220,10 +219,10 @@ void AsmInstruction::setLlvmToAsmGlobalVariable(
 	_module2global.emplace_back(m, gv);
 }
 
-retdec::utils::Address AsmInstruction::getInstructionAddress(
+retdec::common::Address AsmInstruction::getInstructionAddress(
 		llvm::Instruction* inst)
 {
-	retdec::utils::Address ret;
+	retdec::common::Address ret;
 	AsmInstruction ai(inst);
 	if (ai.isValid())
 	{
@@ -232,20 +231,76 @@ retdec::utils::Address AsmInstruction::getInstructionAddress(
 	return ret;
 }
 
-retdec::utils::Address AsmInstruction::getBasicBlockAddress(
+retdec::common::Address AsmInstruction::getInstructionEndAddress(
+		llvm::Instruction* inst)
+{
+	retdec::common::Address ret;
+	AsmInstruction ai(inst);
+	if (ai.isValid())
+	{
+		ret = ai.getEndAddress();
+	}
+	return ret;
+}
+
+retdec::common::Address AsmInstruction::getBasicBlockAddress(
 		llvm::BasicBlock* bb)
 {
 	return bb->empty()
-			? retdec::utils::Address()
+			? retdec::common::Address()
 			: getInstructionAddress(&bb->front());
 }
 
-retdec::utils::Address AsmInstruction::getFunctionAddress(
+retdec::common::Address getBasicBlockAddressFromName(llvm::BasicBlock* b)
+{
+	std::string n = b->getName();
+	unsigned long long a = 0;
+	std::string pattern = names::generatedBasicBlockPrefix+"%llx";
+	int ret = std::sscanf(n.c_str(), pattern.c_str(), &a);
+	return ret == 1 ? common::Address(a) : common::Address();
+}
+
+// TODO: not ideal, returns only for BBs with specific names.
+retdec::common::Address AsmInstruction::getTrueBasicBlockAddress(
+		llvm::BasicBlock* bb)
+{
+	std::string n = bb->getName();
+	if (!retdec::utils::startsWith(n, names::generatedBasicBlockPrefix))
+	{
+		return common::Address();
+	}
+
+	if (bb->empty())
+	{
+		return getBasicBlockAddressFromName(bb);
+	}
+
+	AsmInstruction ai(&bb->front());
+	return ai.isValid() ? ai.getAddress() : getBasicBlockAddressFromName(bb);
+}
+
+retdec::common::Address AsmInstruction::getBasicBlockEndAddress(
+		llvm::BasicBlock* bb)
+{
+	return bb->empty()
+			? getBasicBlockAddress(bb)
+			: getInstructionEndAddress(&bb->back());
+}
+
+retdec::common::Address AsmInstruction::getFunctionAddress(
 		llvm::Function* f)
 {
 	return f->empty()
-			? retdec::utils::Address()
+			? retdec::common::Address()
 			: getBasicBlockAddress(&f->front());
+}
+
+retdec::common::Address AsmInstruction::getFunctionEndAddress(
+		llvm::Function* f)
+{
+	return f->empty() || f->back().empty()
+			? getFunctionAddress(f)
+			: getBasicBlockEndAddress(&f->back());
 }
 
 bool AsmInstruction::isLlvmToAsmInstructionPrivate(llvm::Value* inst) const
@@ -300,36 +355,6 @@ cs_insn* AsmInstruction::getCapstoneInsn() const
 	return nullptr;
 }
 
-bool AsmInstruction::isThumb() const
-{
-	cs_insn* ci = getCapstoneInsn();
-	if (ci == nullptr)
-	{
-		return false;
-	}
-
-	for (auto g : ci->detail->groups)
-	{
-		if (g == ARM_GRP_THUMB2DSP
-				|| g == ARM_GRP_THUMB
-				|| g == ARM_GRP_THUMB1ONLY
-				|| g == ARM_GRP_THUMB2)
-		{
-			return true;
-		}
-	}
-
-	return false;
-}
-
-bool AsmInstruction::isConditional(Config* conf) const
-{
-	auto* i = getCapstoneInsn();
-	return conf && conf->getConfig().architecture.isArmOrThumb() && i
-			? i->detail->arm.cc != ARM_CC_AL && i->detail->arm.cc != ARM_CC_INVALID
-			: false;
-}
-
 std::string AsmInstruction::getDsm() const
 {
 	auto* i = getCapstoneInsn();
@@ -341,7 +366,7 @@ std::size_t AsmInstruction::getByteSize() const
 	return getCapstoneInsn()->size;
 }
 
-retdec::utils::Address AsmInstruction::getAddress() const
+retdec::common::Address AsmInstruction::getAddress() const
 {
 	assert(isValid());
 	auto* ci = dyn_cast<ConstantInt>(_llvmToAsmInstr->getValueOperand());
@@ -349,7 +374,7 @@ retdec::utils::Address AsmInstruction::getAddress() const
 	return ci->getZExtValue();
 }
 
-retdec::utils::Address AsmInstruction::getEndAddress() const
+retdec::common::Address AsmInstruction::getEndAddress() const
 {
 	assert(isValid());
 	return getAddress() + getByteSize();
@@ -361,7 +386,7 @@ std::size_t AsmInstruction::getBitSize() const
 	return getByteSize() * 8;
 }
 
-bool AsmInstruction::contains(retdec::utils::Address addr) const
+bool AsmInstruction::contains(retdec::common::Address addr) const
 {
 	return isValid() ? getAddress() <= addr && addr < getEndAddress() : false;
 }
@@ -369,13 +394,6 @@ bool AsmInstruction::contains(retdec::utils::Address addr) const
 llvm::StoreInst* AsmInstruction::getLlvmToAsmInstruction() const
 {
 	return _llvmToAsmInstr;
-}
-
-retdec::utils::Maybe<unsigned> AsmInstruction::getLatency() const
-{
-	assert(false && "AsmInstruction::getLatency() not implemented.");
-	retdec::utils::Maybe<unsigned> ret;
-	return ret;
 }
 
 /**
@@ -560,14 +578,14 @@ bool AsmInstruction::eraseInstructions()
 
 /**
  * Make this ASM instruction terminal -- last in BB, ending with
- * @c TerminatorInst.
+ * terminator @c Instruction.
  * If it already is terminal, nothing is modified and an existing terminator is
  * returned.
  * If it is not terminal yet, BB is split on the next ASM instruction, this
  * instruction ends with an unconditional branch to the new BB, and this branch
  * is returned.
  */
-llvm::TerminatorInst* AsmInstruction::makeTerminal()
+llvm::Instruction* AsmInstruction::makeTerminal()
 {
 	auto next = getNext();
 	if (next.isValid())
@@ -580,16 +598,16 @@ llvm::TerminatorInst* AsmInstruction::makeTerminal()
 			next.getBasicBlock()->splitBasicBlock(
 					next.getLlvmToAsmInstruction(),
 					names::generateBasicBlockName(next.getAddress()));
-			auto* b = dyn_cast_or_null<TerminatorInst>(back());
-			assert(b);
+			auto* b = dyn_cast_or_null<Instruction>(back());
+			assert(b->isTerminator());
 			return b;
 		}
 		// Next in different BB -> no need to split -> ends with terminator.
 		//
 		else
 		{
-			auto* b = dyn_cast_or_null<TerminatorInst>(back());
-			assert(b);
+			auto* b = dyn_cast_or_null<Instruction>(back());
+			assert(b->isTerminator());
 			return b;
 		}
 	}
@@ -597,8 +615,8 @@ llvm::TerminatorInst* AsmInstruction::makeTerminal()
 	//
 	else
 	{
-		auto* b = dyn_cast_or_null<TerminatorInst>(back());
-		assert(b);
+		auto* b = dyn_cast_or_null<Instruction>(back());
+		assert(b->isTerminator());
 		return b;
 	}
 }

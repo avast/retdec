@@ -20,13 +20,6 @@ ModOpExpr::ModOpExpr(ShPtr<Expression> op1, ShPtr<Expression> op2,
 		Variant variant):
 	BinaryOpExpr(op1, op2), variant(variant) {}
 
-/**
-* @brief Destructs the operator.
-*/
-ModOpExpr::~ModOpExpr() {
-	// Observers are removed in the superclass.
-}
-
 bool ModOpExpr::isEqualTo(ShPtr<Value> otherValue) const {
 	if (ShPtr<ModOpExpr> otherValueModOpExpr = cast<ModOpExpr>(otherValue)) {
 		return op1->isEqualTo(otherValueModOpExpr->getFirstOperand()) &&

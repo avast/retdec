@@ -23,11 +23,6 @@ namespace llvmir2hll {
 StructType::StructType(ElementTypes elementTypes, const std::string &name):
 	Type(), elementTypes(elementTypes), name(name) {}
 
-/**
-* @brief Destructs the type.
-*/
-StructType::~StructType() {}
-
 ShPtr<Value> StructType::clone() {
 	return StructType::create(elementTypes);
 }

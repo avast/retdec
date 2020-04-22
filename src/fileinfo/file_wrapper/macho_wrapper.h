@@ -9,6 +9,7 @@
 
 #include "retdec/fileformat/file_format/macho/macho_format.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -18,7 +19,6 @@ class MachOWrapper : public retdec::fileformat::MachOFormat
 {
 	public:
 		MachOWrapper(std::string pathToFile, retdec::fileformat::LoadFlags loadFlags);
-		virtual ~MachOWrapper() override;
 
 		/// @name Detection methods
 		/// {
@@ -28,5 +28,6 @@ class MachOWrapper : public retdec::fileformat::MachOFormat
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

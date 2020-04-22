@@ -7,26 +7,8 @@
 #include "fileinfo/file_information/file_information_types/symbol_table/symbol.h"
 #include "fileinfo/file_information/file_information_types/type_conversions.h"
 
+namespace retdec {
 namespace fileinfo {
-
-/**
- * Constructor
- */
-Symbol::Symbol() : index(std::numeric_limits<unsigned long long>::max()),
-					value(std::numeric_limits<unsigned long long>::max()),
-					address(std::numeric_limits<unsigned long long>::max()),
-					size(std::numeric_limits<unsigned long long>::max())
-{
-
-}
-
-/**
- * Destructor
- */
-Symbol::~Symbol()
-{
-
-}
 
 /**
  * Get symbol name
@@ -192,3 +174,4 @@ void Symbol::setSize(unsigned long long symbolSize)
 }
 
 } // namespace fileinfo
+} // namespace retdec

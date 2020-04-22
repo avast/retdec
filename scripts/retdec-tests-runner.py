@@ -4,11 +4,11 @@
 
 from __future__ import print_function
 
+import importlib
 import os
 import re
 import sys
 
-import importlib
 utils = importlib.import_module('retdec-utils')
 utils.check_python_version()
 utils.ensure_script_is_being_run_from_installed_retdec()
@@ -32,7 +32,6 @@ except ImportError:
     print("warning: module 'colorama' (https://pypi.python.org/pypi/colorama)",
           "not found, running without color support", file=sys.stderr)
 
-import importlib
 config = importlib.import_module('retdec-config')
 utils = importlib.import_module('retdec-utils')
 
@@ -105,9 +104,9 @@ def run_unit_tests_in_dir(path, verbose=False):
     for unit_test in unit_tests_in_dir(path):
         print()
         unit_test_name = os.path.basename(unit_test)
-        print_colored(unit_test_name, colorama.Fore.YELLOW+colorama.Style.BRIGHT)
+        print_colored(unit_test_name, colorama.Fore.YELLOW + colorama.Style.BRIGHT)
 
-        output, return_code, _ = CmdRunner().run_cmd([unit_test, '--gtest_color=yes'], buffer_output=True)
+        output, return_code, _ = CmdRunner.run_cmd([unit_test, '--gtest_color=yes'], buffer_output=True)
         print_output(output, verbose)
 
         if return_code != 0:

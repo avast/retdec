@@ -10,6 +10,7 @@
 
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 namespace
@@ -37,14 +38,6 @@ SegmentPlainGetter::SegmentPlainGetter(FileInformation &fileInfo) : IterativeDis
 	commonHeaderElements.insert(commonHeaderElements.begin(), std::begin(segmentHeaderArray), std::end(segmentHeaderArray));
 	commonHeaderDesc.insert(commonHeaderDesc.begin(), std::begin(segmentHeaderDesc), std::end(segmentHeaderDesc));
 	loadRecords();
-}
-
-/**
- * Destructor
- */
-SegmentPlainGetter::~SegmentPlainGetter()
-{
-
 }
 
 std::size_t SegmentPlainGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const
@@ -102,3 +95,4 @@ bool SegmentPlainGetter::getFlagDescriptors(std::size_t structIndex, std::vector
 }
 
 } // namespace fileinfo
+} // namespace retdec

@@ -9,13 +9,13 @@
 
 #include <capstone/capstone.h>
 
-#include "retdec/config/config.h"
+#include "retdec/common/architecture.h"
 
 namespace retdec {
 namespace bin2llvmir {
 namespace capstone_utils {
 
-std::string mode2string(const config::Architecture& arch, cs_mode m);
+std::string mode2string(const common::Architecture& arch, cs_mode m);
 
 } // namespace capstone_utils
 } // namespace bin2llvmir

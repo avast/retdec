@@ -41,11 +41,6 @@ PreWhileTrueLoopConvOptimizer::PreWhileTrueLoopConvOptimizer(ShPtr<Module> modul
 		PRECONDITION_NON_NULL(va);
 	}
 
-/**
-* @brief Destructs the optimizer.
-*/
-PreWhileTrueLoopConvOptimizer::~PreWhileTrueLoopConvOptimizer() {}
-
 void PreWhileTrueLoopConvOptimizer::doOptimization() {
 	if (!va->isInValidState()) {
 		va->clearCache();

@@ -1,13 +1,7 @@
-find_package(Threads REQUIRED)
-if(UNIX)
-	find_package(ZLIB REQUIRED)
-endif()
 
-if(CMAKE_C_COMPILER)
-	set(CMAKE_C_COMPILER_OPTION "-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}")
-endif()
-if(CMAKE_CXX_COMPILER)
-	set(CMAKE_CXX_COMPILER_OPTION "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")
+find_package(Threads REQUIRED)
+if(UNIX OR MINGW)
+	find_package(ZLIB REQUIRED)
 endif()
 
 # Set the default build type to 'Release'
@@ -23,73 +17,166 @@ else()
 	set(IS_DEBUG_BUILD "NO")
 endif()
 
-# Use the ExternalProject module instead of just CMake because we want to build and
-# install only some tools from LLVM, not all the libraries and tools.
-include(ExternalProject)
+if(RETDEC_MSVC_STATIC_RUNTIME)
+	set(RT_TYPE "MT")
+else()
+	set(RT_TYPE "MD")
+endif()
 
-ExternalProject_Add(llvm-project
-	URL https://github.com/avast-tl/llvm/archive/725d0cee133c6ab9b95c493f05de3b08016f5c3c.zip
-	URL_HASH SHA256=0ec70e790a84df1dcc4e5bb30f9a3ae32eb280aad8a4711158ba227513ddebf4
-	DOWNLOAD_NAME llvm.zip
-	CMAKE_ARGS
-		# Force a release build (we don't need to debug LLVM).
-		# This has no effect on Windows with MSVC, but is useful on Linux.
-		-DCMAKE_BUILD_TYPE=Release
+if(LLVM_LOCAL_DIR)
+	message(STATUS "LLVM: using local LLVM directory.")
 
-		# Force Python3.
-		-DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
+	ExternalProject_Add(llvm-project
+		DOWNLOAD_COMMAND ""
+		SOURCE_DIR "${LLVM_LOCAL_DIR}"
+		CMAKE_ARGS
+			# Force a release build (we don't need to debug LLVM).
+			# This has no effect on Windows with MSVC, but is useful on Linux.
+			-DCMAKE_BUILD_TYPE=Release
+			-DCMAKE_CXX_FLAGS_RELEASE=${CMAKE_CXX_FLAGS_RELEASE}
+			-DLLVM_USE_CRT_RELEASE=${RT_TYPE}
 
-		# Targets to be build.
-		-DLLVM_TARGETS_TO_BUILD=X86
+			# Force Python3.
+			-DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
 
-		# Disable the generation of targets for tests (we don't need them).
-		-DLLVM_INCLUDE_TESTS=NO
+			# Targets to be build.
+			-DLLVM_TARGETS_TO_BUILD=X86
 
-		# Our tools depending on LLVM require RTTI, so build LLVM with it.
-		-DLLVM_REQUIRES_RTTI=YES
+			# Our tools depending on LLVM require RTTI, so build LLVM with it.
+			-DLLVM_REQUIRES_RTTI=YES
 
-		# When building in the debug mode (=> assertions are enabled), we
-		# have to build LLVM with assertions. This prevents link errors
-		# when building the middle-end and back-end (see
-		# https://github.com/oclint/oclint/issues/129).
-		-DLLVM_ENABLE_ASSERTIONS=${IS_DEBUG_BUILD}
+			# When building in the debug mode (=> assertions are enabled), we
+			# have to build LLVM with assertions. This prevents link errors
+			# when building the middle-end and back-end (see
+			# https://github.com/oclint/oclint/issues/129).
+			-DLLVM_ENABLE_ASSERTIONS=${IS_DEBUG_BUILD}
 
-		# Disable the emission of warnings, which are useless since we do
-		# not modify the LLVM sources (of course, except for a few
-		# exceptions).
-		-DLLVM_ENABLE_WARNINGS=NO
+			# Disable the emission of warnings, which are useless since we do
+			# not modify the LLVM sources (of course, except for a few
+			# exceptions).
+			-DLLVM_ENABLE_WARNINGS=NO
 
-		# Disable build of unnecessary LLVM parts.
-		-DLLVM_BUILD_TOOLS=OFF
-		-DLLVM_BUILD_UTILS=OFF
-		-DLLVM_BUILD_RUNTIME=OFF
-		# We don't want this so that we don't have to link with tinfo.
-		# It looks like terminal colors are working even without this.
-		-DLLVM_ENABLE_TERMINFO=OFF
+			# Disable the generation of targets for tests (we don't need them).
+			-DLLVM_INCLUDE_TOOLS=OFF
+			-DLLVM_INCLUDE_UTILS=OFF
+			-DLLVM_INCLUDE_RUNTIMES=OFF
+			-DLLVM_INCLUDE_EXAMPLES=OFF
+			-DLLVM_INCLUDE_TESTS=OFF
+			-DLLVM_INCLUDE_GO_TESTS=OFF
+			-DLLVM_INCLUDE_BENCHMARKS=OFF
+			-DLLVM_INCLUDE_DOCS=OFF
 
-		# Force the use of the same compiler as used to build the top-level
-		# project. Otherwise, the external project may pick up a different
-		# compiler, which may result in link errors.
-		"${CMAKE_C_COMPILER_OPTION}"
-		"${CMAKE_CXX_COMPILER_OPTION}"
+			# Disable build of unnecessary LLVM parts.
+			-DLLVM_BUILD_TOOLS=OFF
+			-DLLVM_BUILD_UTILS=OFF
+			-DLLVM_BUILD_RUNTIMES=OFF
+			-DLLVM_BUILD_RUNTIME=OFF
+			-DLLVM_BUILD_EXAMPLES=OFF
+			-DLLVM_BUILD_TESTS=OFF
+			-DLLVM_BUILD_BENCHMARKS=OFF
+			-DLLVM_BUILD_DOCS=OFF
+			-DLLVM_ENABLE_BINDINGS=OFF
+			# We don't want this so that we don't have to link with tinfo.
+			# It looks like terminal colors are working even without this.
+			-DLLVM_ENABLE_TERMINFO=OFF
 
-	# Disable the installation right after build (we want to install the
-	# needed libraries and tools manually).
-	INSTALL_COMMAND ""
-)
+			# Force the use of the same compiler as used to build the top-level
+			# project. Otherwise, the external project may pick up a different
+			# compiler, which may result in link errors.
+			"${CMAKE_C_COMPILER_OPTION}"
+			"${CMAKE_CXX_COMPILER_OPTION}"
 
-# Add libraries.
-ExternalProject_Get_Property(llvm-project binary_dir)
+		# Disable the installation right after build (we want to install the
+		# needed libraries and tools manually).
+		INSTALL_COMMAND ""
+	)
+	force_configure_step(llvm-project)
+else()
+	message(STATUS "LLVM: using remote LLVM revision.")
 
-add_library(llvm INTERFACE)
-add_dependencies(llvm llvm-project)
+	ExternalProject_Add(llvm-project
+		URL ${LLVM_URL}
+		URL_HASH SHA256=${LLVM_ARCHIVE_SHA256}
+		DOWNLOAD_NAME llvm.zip
+		CMAKE_ARGS
+			# Force a release build (we don't need to debug LLVM).
+			# This has no effect on Windows with MSVC, but is useful on Linux.
+			-DCMAKE_BUILD_TYPE=Release
+			-DCMAKE_CXX_FLAGS_RELEASE=${CMAKE_CXX_FLAGS_RELEASE}
+			-DLLVM_USE_CRT_RELEASE=${RT_TYPE}
+
+			# Force Python3.
+			-DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
+
+			# Targets to be build.
+			-DLLVM_TARGETS_TO_BUILD=X86
+
+			# Our tools depending on LLVM require RTTI, so build LLVM with it.
+			-DLLVM_REQUIRES_RTTI=YES
+
+			# When building in the debug mode (=> assertions are enabled), we
+			# have to build LLVM with assertions. This prevents link errors
+			# when building the middle-end and back-end (see
+			# https://github.com/oclint/oclint/issues/129).
+			-DLLVM_ENABLE_ASSERTIONS=${IS_DEBUG_BUILD}
+
+			# Disable the emission of warnings, which are useless since we do
+			# not modify the LLVM sources (of course, except for a few
+			# exceptions).
+			-DLLVM_ENABLE_WARNINGS=NO
+
+			# Disable the generation of targets for tests (we don't need them).
+			-DLLVM_INCLUDE_TOOLS=OFF
+			-DLLVM_INCLUDE_UTILS=OFF
+			-DLLVM_INCLUDE_RUNTIMES=OFF
+			-DLLVM_INCLUDE_EXAMPLES=OFF
+			-DLLVM_INCLUDE_TESTS=OFF
+			-DLLVM_INCLUDE_GO_TESTS=OFF
+			-DLLVM_INCLUDE_BENCHMARKS=OFF
+			-DLLVM_INCLUDE_DOCS=OFF
+
+			# Disable build of unnecessary LLVM parts.
+			-DLLVM_BUILD_TOOLS=OFF
+			-DLLVM_BUILD_UTILS=OFF
+			-DLLVM_BUILD_RUNTIMES=OFF
+			-DLLVM_BUILD_RUNTIME=OFF
+			-DLLVM_BUILD_EXAMPLES=OFF
+			-DLLVM_BUILD_TESTS=OFF
+			-DLLVM_BUILD_BENCHMARKS=OFF
+			-DLLVM_BUILD_DOCS=OFF
+			-DLLVM_ENABLE_BINDINGS=OFF
+			# We don't want this so that we don't have to link with tinfo.
+			# It looks like terminal colors are working even without this.
+			-DLLVM_ENABLE_TERMINFO=OFF
+
+			# Force the use of the same compiler as used to build the top-level
+			# project. Otherwise, the external project may pick up a different
+			# compiler, which may result in link errors.
+			"${CMAKE_C_COMPILER_OPTION}"
+			"${CMAKE_CXX_COMPILER_OPTION}"
+
+		# Disable the installation right after build (we want to install the
+		# needed libraries and tools manually).
+		INSTALL_COMMAND ""
+	)
+endif()
+
+check_if_variable_changed(LLVM_LOCAL_DIR CHANGED)
+if(CHANGED)
+	ExternalProject_Get_Property(llvm-project binary_dir)
+	message(STATUS "LLVM: path to LLVM directory changed -> cleaning CMake files in ${binary_dir}.")
+	clean_cmake_files(${binary_dir})
+endif()
 
 set(LLVM_LIB_LIST
+	LLVMDebugInfoDWARF
 	LLVMBitWriter
 	LLVMIRReader
 	LLVMObject
+	LLVMBinaryFormat
 	LLVMInstCombine
 	LLVMSupport
+	LLVMDemangle
 	LLVMipo
 	LLVMAsmParser
 	LLVMBitReader
@@ -105,27 +192,109 @@ set(LLVM_LIB_LIST
 	LLVMPasses
 )
 
-if(MSVC)
-	set(DEBUG_DIR "Debug/")
-	set(RELEASE_DIR "Release/")
-endif()
+ExternalProject_Get_Property(llvm-project binary_dir)
+ExternalProject_Get_Property(llvm-project source_dir)
+
+# Create target.
+
+add_library(llvm INTERFACE)
+add_library(retdec::deps::llvm ALIAS llvm)
+add_dependencies(llvm llvm-project)
+
+target_include_directories(llvm
+	SYSTEM INTERFACE
+		$<BUILD_INTERFACE:${source_dir}/include>
+		$<BUILD_INTERFACE:${binary_dir}/include>
+		$<INSTALL_INTERFACE:${RETDEC_INSTALL_DEPS_INCLUDE_DIR}>
+)
 
 foreach(LLVM_LIB ${LLVM_LIB_LIST})
-	target_link_libraries(llvm INTERFACE debug     ${binary_dir}/${DEBUG_DIR}lib/${CMAKE_STATIC_LIBRARY_PREFIX}${LLVM_LIB}${CMAKE_STATIC_LIBRARY_SUFFIX})
-	target_link_libraries(llvm INTERFACE optimized ${binary_dir}/${RELEASE_DIR}lib/${CMAKE_STATIC_LIBRARY_PREFIX}${LLVM_LIB}${CMAKE_STATIC_LIBRARY_SUFFIX})
+	set(LLVM_LIB_NAME  ${CMAKE_STATIC_LIBRARY_PREFIX}${LLVM_LIB}${CMAKE_STATIC_LIBRARY_SUFFIX})
+	set(LLVM_LIB_PNAME ${CMAKE_STATIC_LIBRARY_PREFIX}retdec-${LLVM_LIB}${CMAKE_STATIC_LIBRARY_SUFFIX})
+	set(LLVM_LIB_OPT   ${binary_dir}/${RELEASE_DIR}lib/${LLVM_LIB_NAME})
+	set(LLVM_LIB_DEBUG ${binary_dir}/${DEBUG_DIR}lib/${LLVM_LIB_NAME})
+
+	target_link_libraries(llvm INTERFACE
+		optimized
+			$<BUILD_INTERFACE:${LLVM_LIB_OPT}>
+		debug
+			$<BUILD_INTERFACE:${LLVM_LIB_DEBUG}>
+	)
+
+	# Install libs.
+	# Install both Release and Debug variant to the same location.
+	# We assume that only one variant will be present at the time.
+	install(
+		FILES       ${LLVM_LIB_DEBUG}
+		DESTINATION ${RETDEC_INSTALL_LIB_DIR}
+		RENAME      ${LLVM_LIB_PNAME}
+		OPTIONAL
+	)
+	install(
+		FILES       ${LLVM_LIB_OPT}
+		DESTINATION ${RETDEC_INSTALL_LIB_DIR}
+		RENAME      ${LLVM_LIB_PNAME}
+		OPTIONAL
+	)
+
+	list(APPEND LLVM_LIBS_PATHS "${RETDEC_INSTALL_LIB_DIR_ABS}/${LLVM_LIB_PNAME}")
 endforeach(LLVM_LIB)
 
-if(CMAKE_THREAD_LIBS_INIT)
-	target_link_libraries(llvm INTERFACE debug     ${CMAKE_THREAD_LIBS_INIT})
-	target_link_libraries(llvm INTERFACE optimized ${CMAKE_THREAD_LIBS_INIT})
-endif()
+target_link_libraries(llvm
+	INTERFACE
+		$<INSTALL_INTERFACE:retdec::deps::llvm-libs>
+		Threads::Threads
+)
 
 if(UNIX)
-	target_link_libraries(llvm INTERFACE debug     ${ZLIB_LIBRARIES} dl)
-	target_link_libraries(llvm INTERFACE optimized ${ZLIB_LIBRARIES} dl)
+	set(EXECINFO "")
+	if (${CMAKE_SYSTEM_NAME} MATCHES "BSD")
+		set(EXECINFO "execinfo")
+	endif()
+	target_link_libraries(llvm
+		INTERFACE
+			${ZLIB_LIBRARIES}
+			${CMAKE_DL_LIBS}
+			${EXECINFO}
+	)
+elseif(MINGW)
+	target_link_libraries(llvm INTERFACE ${ZLIB_LIBRARIES})
 endif()
 
-# Set include directories.
-ExternalProject_Get_Property(llvm-project source_dir)
-target_include_directories(llvm SYSTEM INTERFACE ${source_dir}/include)
-target_include_directories(llvm SYSTEM INTERFACE ${binary_dir}/include)
+# Install includes.
+install(
+	DIRECTORY
+		${source_dir}/include/
+		${binary_dir}/include/
+	DESTINATION
+		${RETDEC_INSTALL_DEPS_INCLUDE_DIR}
+)
+
+# Install targets.
+install(TARGETS llvm
+	EXPORT llvm-targets
+)
+
+# Export targets.
+install(EXPORT llvm-targets
+	FILE "retdec-llvm-targets.cmake"
+	NAMESPACE retdec::deps::
+	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
+)
+
+# Configure config file.
+configure_package_config_file(
+	"retdec-llvm-config.cmake"
+	"${CMAKE_CURRENT_BINARY_DIR}/retdec-llvm-config.cmake"
+	INSTALL_DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
+	PATH_VARS
+		LLVM_LIBS_PATHS
+)
+
+# Install CMake files.
+install(
+	FILES
+		"${CMAKE_CURRENT_BINARY_DIR}/retdec-llvm-config.cmake"
+	DESTINATION
+		"${RETDEC_INSTALL_CMAKE_DIR}"
+)

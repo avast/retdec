@@ -9,6 +9,7 @@
 
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_getter.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -24,7 +25,6 @@ class IterativeSubtitleGetter : public IterativeGetter
 		std::string subtitle; ///< subtitle of presented record
 	public:
 		IterativeSubtitleGetter(FileInformation &fileInfo);
-		virtual ~IterativeSubtitleGetter() override;
 
 		/// @name Getters
 		/// @{
@@ -39,5 +39,6 @@ class IterativeSubtitleGetter : public IterativeGetter
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

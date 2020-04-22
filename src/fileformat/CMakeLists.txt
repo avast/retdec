@@ -1,5 +1,7 @@
-set(FILEFORMAT_SOURCES
+
+add_library(fileformat STATIC
 	utils/format_detection.cpp
+	utils/byte_array_buffer.cpp
 	utils/conversions.cpp
 	utils/other.cpp
 	utils/asn1.cpp
@@ -20,6 +22,9 @@ set(FILEFORMAT_SOURCES
 	types/symbol_table/elf_symbol.cpp
 	types/rich_header/rich_header.cpp
 	types/rich_header/linker_info.cpp
+	types/visual_basic/visual_basic_info.cpp
+	types/visual_basic/visual_basic_object.cpp
+	types/visual_basic/visual_basic_extern.cpp
 	types/import_table/import.cpp
 	types/import_table/import_table.cpp
 	types/import_table/pe_import.cpp
@@ -28,10 +33,10 @@ set(FILEFORMAT_SOURCES
 	types/relocation_table/relocation_table.cpp
 	types/relocation_table/relocation.cpp
 	types/resource_table/resource.cpp
-	types/resource_table/resource_table.cpp
-	types/resource_table/resource_tree.cpp
 	types/resource_table/resource_icon.cpp
 	types/resource_table/resource_icon_group.cpp
+	types/resource_table/resource_table.cpp
+	types/resource_table/resource_tree.cpp
 	types/resource_table/bitmap_image.cpp
 	types/certificate_table/certificate.cpp
 	types/certificate_table/certificate_table.cpp
@@ -55,10 +60,12 @@ set(FILEFORMAT_SOURCES
 	types/strings/string.cpp
 	types/note_section/elf_notes.cpp
 	types/note_section/elf_core.cpp
+	types/tls_info/tls_info.cpp
 	file_format/pe/pe_format_parser/pe_format_parser64.cpp
 	file_format/pe/pe_format_parser/pe_format_parser.cpp
 	file_format/pe/pe_format_parser/pe_format_parser32.cpp
 	file_format/pe/pe_format.cpp
+	file_format/pe/pe_dll_list.cpp
 	file_format/coff/coff_format.cpp
 	file_format/intel_hex/intel_hex_parser/intel_hex_tokenizer.cpp
 	file_format/intel_hex/intel_hex_parser/intel_hex_parser.cpp
@@ -68,7 +75,60 @@ set(FILEFORMAT_SOURCES
 	file_format/file_format.cpp
 	file_format/elf/elf_format.cpp
 )
+add_library(retdec::fileformat ALIAS fileformat)
 
-add_library(retdec-fileformat STATIC ${FILEFORMAT_SOURCES})
-target_link_libraries(retdec-fileformat retdec-crypto retdec-config retdec-utils pelib elfio llvm)
-target_include_directories(retdec-fileformat PUBLIC ${PROJECT_SOURCE_DIR}/include/)
+target_compile_features(fileformat PUBLIC cxx_std_17)
+
+target_include_directories(fileformat
+	PUBLIC
+		$<BUILD_INTERFACE:${RETDEC_INCLUDE_DIR}>
+		$<INSTALL_INTERFACE:${RETDEC_INSTALL_INCLUDE_DIR}>
+)
+
+target_link_libraries(fileformat
+	PUBLIC
+		retdec::crypto
+		retdec::common
+		retdec::utils
+		retdec::pelib
+		retdec::deps::elfio
+		retdec::deps::llvm
+)
+
+set_target_properties(fileformat
+	PROPERTIES
+		OUTPUT_NAME "retdec-fileformat"
+)
+
+# Install includes.
+install(
+	DIRECTORY ${RETDEC_INCLUDE_DIR}/retdec/fileformat
+	DESTINATION ${RETDEC_INSTALL_INCLUDE_DIR}/retdec
+)
+
+# Install libs.
+install(TARGETS fileformat
+	EXPORT fileformat-targets
+	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
+	LIBRARY DESTINATION ${RETDEC_INSTALL_LIB_DIR}
+)
+
+# Export targets.
+install(EXPORT fileformat-targets
+	FILE "retdec-fileformat-targets.cmake"
+	NAMESPACE retdec::
+	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
+)
+
+# Install CMake files.
+configure_file(
+	"retdec-fileformat-config.cmake"
+	"${CMAKE_CURRENT_BINARY_DIR}/retdec-fileformat-config.cmake"
+	@ONLY
+)
+install(
+	FILES
+		"${CMAKE_CURRENT_BINARY_DIR}/retdec-fileformat-config.cmake"
+	DESTINATION
+		"${RETDEC_INSTALL_CMAKE_DIR}"
+)

@@ -88,8 +88,6 @@ class CCastOptimizer final: public FuncOptimizer {
 public:
 	CCastOptimizer(ShPtr<Module> module);
 
-	virtual ~CCastOptimizer() override;
-
 	ShPtr<Expression> checkAndOptimize(ShPtr<Expression> dst,
 		ShPtr<Expression> src);
 

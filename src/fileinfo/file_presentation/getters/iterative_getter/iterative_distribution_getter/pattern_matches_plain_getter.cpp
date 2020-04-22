@@ -11,6 +11,7 @@
 using namespace retdec::utils;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 namespace
@@ -40,14 +41,6 @@ PatternMatchesPlainGetter::PatternMatchesPlainGetter(FileInformation &fileInfo, 
 	commonHeaderElements.insert(commonHeaderElements.begin(), std::begin(dirHeaderArray), std::end(dirHeaderArray));
 	commonHeaderDesc.insert(commonHeaderDesc.begin(), std::begin(dirHeaderDesc), std::end(dirHeaderDesc));
 	loadRecords();
-}
-
-/**
- * Destrcutor
- */
-PatternMatchesPlainGetter::~PatternMatchesPlainGetter()
-{
-
 }
 
 std::size_t PatternMatchesPlainGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const
@@ -91,3 +84,4 @@ bool PatternMatchesPlainGetter::getFlagDescriptors(std::size_t structIndex, std:
 }
 
 } // namespace fileinfo
+} // namespace retdec

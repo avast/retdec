@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -25,7 +26,6 @@ class SpecialInformation
 		std::vector<std::string> values; ///< values of special information
 	public:
 		SpecialInformation(std::string desc_, std::string abbv_);
-		~SpecialInformation();
 
 		/// @name Getters
 		/// @{
@@ -42,5 +42,6 @@ class SpecialInformation
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

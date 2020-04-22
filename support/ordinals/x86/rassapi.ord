@@ -1,0 +1,14 @@
+1 RasAdminDLLInit
+2 RasAdminUserSetInfo
+3 RasAdminUserGetInfo
+4 RasAdminGetUserAccountServer
+5 RasAdminPortEnum
+6 RasAdminPortGetInfo
+7 RasAdminPortClearStatistics
+8 RasAdminServerGetInfo
+9 RasAdminPortDisconnect
+10 RasAdminFreeBuffer
+11 RasAdminSetUserParms
+12 RasAdminGetUserParms
+13 RasAdminCompressPhoneNumber
+14 RasAdminGetErrorString

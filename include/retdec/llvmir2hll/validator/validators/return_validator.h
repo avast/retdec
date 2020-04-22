@@ -27,8 +27,6 @@ namespace llvmir2hll {
 */
 class ReturnValidator: public Validator {
 public:
-	virtual ~ReturnValidator() override;
-
 	virtual std::string getId() const override;
 
 	static ShPtr<Validator> create();

@@ -10,7 +10,10 @@
 #include <set>
 #include <string>
 
-#include "retdec/config/base.h"
+#include <rapidjson/document.h>
+#include <rapidjson/writer.h>
+
+#include "retdec/common/address.h"
 
 namespace retdec {
 namespace config {
@@ -36,19 +39,18 @@ class Parameters
 		void setIsKeepAllFunctions(bool b);
 		void setIsSelectedDecodeOnly(bool b);
 		void setOutputFile(const std::string& n);
-		void setFrontendOutputFile(const std::string& n);
 		void setOrdinalNumbersDirectory(const std::string& n);
 		/// @}
 
 		/// @name Parameters get methods.
 		/// @{
 		std::string getOutputFile() const;
-		std::string getFrontendOutputFile() const;
 		std::string getOrdinalNumbersDirectory() const;
 		/// @}
 
-		Json::Value getJsonValue() const;
-		void readJsonValue(const Json::Value& val);
+		template <typename Writer>
+		void serialize(Writer& writer) const;
+		void deserialize(const rapidjson::Value& val);
 
 	public:
 		std::set<std::string> userStaticSignaturePaths;
@@ -67,7 +69,7 @@ class Parameters
 		std::set<std::string> selectedNotFoundFunctions;
 
 		/// Address ranges selected by the user through selective decompilation.
-		BaseSequentialContainer<AddressRangeJson> selectedRanges;
+		common::AddressRangeContainer selectedRanges;
 
 	private:
 		/// Decompilation will verbosely inform about the
@@ -85,7 +87,6 @@ class Parameters
 		bool _selectedDecodeOnly = false;
 
 		std::string _outputFile;
-		std::string _frontendOutputFile;
 		std::string _ordinalNumbersDirectory;
 };
 
