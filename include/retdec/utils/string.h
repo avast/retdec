@@ -175,6 +175,8 @@ std::string asEscapedCString(const WideStringType& value, std::size_t charSize);
 
 std::string removeComments(const std::string& str, char commentChar);
 
+std::string extractVersion(const std::string& input);
+
 } // namespace utils
 } // namespace retdec
 

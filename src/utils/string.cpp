@@ -11,6 +11,7 @@
 #include <cmath>
 #include <cstddef>
 #include <functional>
+#include <regex>
 #include <sstream>
 
 #include "retdec/utils/conversion.h"
@@ -1378,6 +1379,27 @@ std::string removeComments(const std::string& str, char commentChar)
 		}
 	}
 	return ret;
+}
+
+/**
+ * Search for version stored in input string
+ * @param input Input string
+ * @return Found version or empty string if no version found.
+ *
+ * A version is considered to be a substring which consisting of numbers
+ * (and dots). If input string contains more versions, result contains only
+ * the first one.
+ */
+std::string extractVersion(const std::string& input)
+{
+	static std::regex e("([0-9]+\\.)+[0-9]+");
+	std::smatch match;
+	if (regex_search(input, match, e))
+	{
+		return match.str();
+	}
+
+	return std::string();
 }
 
 } // namespace utils

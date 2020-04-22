@@ -1451,6 +1451,33 @@ removeCommentsRemovesDoesNotRemoveIfDifferentCommentCharProvided) {
 	);
 }
 
+//
+// extractVersion()
+//
+TEST_F(StringTests,
+extractVersionFromEmptyString) {
+	ASSERT_EQ(
+		"",
+		extractVersion("")
+	);
+}
+
+TEST_F(StringTests,
+extractVersionFromStringNotContainingVersion) {
+	ASSERT_EQ(
+		"",
+		extractVersion("hello world")
+	);
+}
+
+TEST_F(StringTests,
+extractVersionFromStringContainingVersion) {
+	ASSERT_EQ(
+		"3.14.15",
+		extractVersion("hello 3.14.15 world")
+	);
+}
+
 } // namespace tests
 } // namespace utils
 } // namespace retdec

@@ -17,7 +17,6 @@
 #include "retdec/utils/conversion.h"
 #include "retdec/utils/string.h"
 #include "retdec/cpdetect/compiler_detector/heuristics/heuristics.h"
-#include "retdec/cpdetect/utils/version_solver.h"
 #include "retdec/fileformat/utils/conversions.h"
 
 using namespace retdec::utils;
@@ -502,12 +501,9 @@ bool Heuristics::parseGccComment(const std::string &record)
 		return false;
 	}
 
-	std::string version;
-	if (getVersion(
-			std::regex_replace(
-				record,
-				std::regex("\\([^\\)]+\\)"), ""),
-			version))
+	static std::regex e("\\([^\\)]+\\)");
+	std::string version = extractVersion(std::regex_replace(record, e, ""));
+	if (!version.empty())
 	{
 		addCompiler(source, strength, "GCC", version);
 		return true;
@@ -632,8 +628,7 @@ bool Heuristics::parseGccProducer(const std::string &producer)
 		return false;
 	}
 
-	std::string version;
-	getVersion(producer, version);
+	std::string version = extractVersion(producer);
 
 	addCompiler(source, strength, "GCC", version);
 	addLanguage((c ? "C" : (cpp ? "C++" : "Fortran")));
@@ -655,8 +650,7 @@ bool Heuristics::parseClangProducer(const std::string &producer)
 		return false;
 	}
 
-	std::string version;
-	getVersion(producer, version);
+	std::string version = extractVersion(producer);
 	addCompiler(source, strength, "LLVM", version);
 	return true;
 }
@@ -676,8 +670,7 @@ bool Heuristics::parseTmsProducer(const std::string &producer)
 		return false;
 	}
 
-	std::string version;
-	getVersion(producer, version);
+	std::string version = extractVersion(producer);
 	addCompiler(
 			source,
 			strength,
