@@ -4,6 +4,7 @@
  */
 
 import "pe"
+import "dotnet"
 
 rule ep_exepack_10 {
 	meta:
@@ -108,33 +109,15 @@ rule eziriz_dotnet_reactor_62_or_newer {
 		name = "Eziriz .NET Reactor"
 		version = "6.2.0.0 or newer"
 		extra = ".NET protection"
-	strings:
-		$s01 = "{11111-22222-20001-00001}" wide
-		$s02 = "{11111-22222-30001-00001}" wide
-		$s03 = "{11111-22222-40001-00001}" wide
-		$s04 = "{11111-22222-50001-00001}" wide
 	condition:
 		pe.number_of_sections == 3 and
 		pe.imports("mscoree.dll") and
-		all of them
+		dotnet.number_of_user_strings > 8 and
+		dotnet.user_strings[dotnet.number_of_user_strings - 8] == "{\x001\x001\x001\x001\x001\x00-\x002\x002\x002\x002\x002\x00-\x002\x000\x000\x000\x001\x00-\x000\x000\x000\x000\x001\x00}\x00\x00" and
+		dotnet.user_strings[dotnet.number_of_user_strings - 6] == "{\x001\x001\x001\x001\x001\x00-\x002\x002\x002\x002\x002\x00-\x003\x000\x000\x000\x001\x00-\x000\x000\x000\x000\x001\x00}\x00\x00" and
+		dotnet.user_strings[dotnet.number_of_user_strings - 4] == "{\x001\x001\x001\x001\x001\x00-\x002\x002\x002\x002\x002\x00-\x004\x000\x000\x000\x001\x00-\x000\x000\x000\x000\x001\x00}\x00\x00" and
+		dotnet.user_strings[dotnet.number_of_user_strings - 2] == "{\x001\x001\x001\x001\x001\x00-\x002\x002\x002\x002\x002\x00-\x005\x000\x000\x000\x001\x00-\x000\x000\x000\x000\x001\x00}\x00\x00"
 }
-
-// TODO: When retdec's YARAC will be of a newer version
-//rule eziriz_dotnet_reactor_62_or_newer {
-//	meta:
-//		tool = "P"
-//		name = "Eziriz .NET Reactor"
-//		version = "6.2.0.0 or newer"
-//		extra = ".NET protection"
-//	condition:
-//		pe.number_of_sections == 3 and
-//		pe.imports("mscoree.dll") and
-//		dotnet.number_of_user_strings > 8 and
-//		dotnet.user_strings[dotnet.number_of_user_strings - 8] == "{\x001\x001\x001\x001\x001\x00-\x002\x002\x002\x002\x002\x00-\x002\x000\x000\x000\x001\x00-\x000\x000\x000\x000\x001\x00}\x00\x00" and
-//		dotnet.user_strings[dotnet.number_of_user_strings - 6] == "{\x001\x001\x001\x001\x001\x00-\x002\x002\x002\x002\x002\x00-\x003\x000\x000\x000\x001\x00-\x000\x000\x000\x000\x001\x00}\x00\x00" and
-//		dotnet.user_strings[dotnet.number_of_user_strings - 4] == "{\x001\x001\x001\x001\x001\x00-\x002\x002\x002\x002\x002\x00-\x004\x000\x000\x000\x001\x00-\x000\x000\x000\x000\x001\x00}\x00\x00" and
-//		dotnet.user_strings[dotnet.number_of_user_strings - 2] == "{\x001\x001\x001\x001\x001\x00-\x002\x002\x002\x002\x002\x00-\x005\x000\x000\x000\x001\x00-\x000\x000\x000\x000\x001\x00}\x00\x00"
-//}
 
 rule spirit_15_01 {
 	meta:
