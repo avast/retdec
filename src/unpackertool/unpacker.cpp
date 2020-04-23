@@ -58,7 +58,7 @@ bool detectPackers(const std::string& inputFile, std::vector<retdec::cpdetect::D
 				return false;
 			}
 
-			auto compilerDetector = createCompilerDetector(
+			auto compilerDetector = std::make_unique<CompilerDetector>(
 					*(fileParser.get()),
 					detectionParams,
 					toolInfo

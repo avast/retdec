@@ -1,23 +1,14 @@
 
 add_library(cpdetect STATIC
-	compiler_detector/coff_compiler.cpp
-	compiler_detector/compiler_detector.cpp
-	compiler_detector/elf_compiler.cpp
-	compiler_detector/heuristics/elf_heuristics.cpp
-	compiler_detector/heuristics/heuristics.cpp
-	compiler_detector/heuristics/macho_heuristics.cpp
-	compiler_detector/heuristics/pe_heuristics.cpp
-	compiler_detector/intel_hex_compiler.cpp
-	compiler_detector/macho_compiler.cpp
-	compiler_detector/pe_compiler.cpp
-	compiler_detector/raw_data_compiler.cpp
-	compiler_detector/search/search.cpp
-	compiler_factory.cpp
+	heuristics/elf_heuristics.cpp
+	heuristics/heuristics.cpp
+	heuristics/macho_heuristics.cpp
+	heuristics/pe_heuristics.cpp
+	cpdetect.cpp
 	cptypes.cpp
 	errors.cpp
-	signatures/avg/signature.cpp
-	signatures/avg/signature_checker.cpp
-	utils/version_solver.cpp
+	search.cpp
+	signature.cpp
 )
 add_library(retdec::cpdetect ALIAS cpdetect)
 

@@ -1,13 +1,13 @@
 /**
- * @file include/retdec/cpdetect/compiler_detector/heuristics/pe_heuristics.h
+ * @file include/retdec/cpdetect/heuristics/pe_heuristics.h
  * @brief Definition of PeHeuristics class.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#ifndef RETDEC_CPDETECT_COMPILER_DETECTOR_HEURISTICS_PE_HEURISTICS_H
-#define RETDEC_CPDETECT_COMPILER_DETECTOR_HEURISTICS_PE_HEURISTICS_H
+#ifndef RETDEC_CPDETECT_HEURISTICS_PE_HEURISTICS_H
+#define RETDEC_CPDETECT_HEURISTICS_PE_HEURISTICS_H
 
-#include "retdec/cpdetect/compiler_detector/heuristics/heuristics.h"
+#include "retdec/cpdetect/heuristics/heuristics.h"
 #include "retdec/fileformat/file_format/pe/pe_format.h"
 
 namespace retdec {
@@ -15,8 +15,9 @@ namespace cpdetect {
 
 struct PeHeaderStyle
 {
-	// Note: Having "(const) std::string" instead of "const char *" here makes MS Visual Studio 2017 compiler (v 15.9.8)
-	// exit with "fatal error C1001: An internal error has occurred in the compiler"
+	// Note: Having "(const) std::string" instead of "const char *" here
+	// makes MS Visual Studio 2017 compiler (v 15.9.8) exit with
+	// "fatal error C1001: An internal error has occurred in the compiler"
 	// const std::string headerStyle;
 	const char * headerStyle;
 	uint16_t headerWords[0x0D];
@@ -50,13 +51,20 @@ class PeHeuristics : public Heuristics
 		/// @name Heuristics for detection of used compiler or packer
 		/// @{
 		std::int32_t getInt32Unaligned(const std::uint8_t * codePtr);
-		const std::uint8_t * skip_NOP_JMP8_JMP32(const std::uint8_t * codeBegin, const std::uint8_t * codePtr, const std::uint8_t * codeEnd, std::size_t maxCount);
+		const std::uint8_t * skip_NOP_JMP8_JMP32(
+				const std::uint8_t * codeBegin,
+				const std::uint8_t * codePtr,
+				const std::uint8_t * codeEnd,
+				std::size_t maxCount);
 		void getHeaderStyleHeuristics();
 		void getSlashedSignatures();
 		void getMorphineHeuristics();
 		void getStarForceHeuristics();
 		void getSafeDiscHeuristics();
-		bool checkSecuROMSignature(const char * fileData, const char * fileDataEnd, uint32_t FileOffset);
+		bool checkSecuROMSignature(
+				const char * fileData,
+				const char * fileDataEnd,
+				uint32_t FileOffset);
 		void getSecuROMHeuristics();
 		void getMPRMMGVAHeuristics();
 		void getActiveMarkHeuristics();

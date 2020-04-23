@@ -1,5 +1,5 @@
 /**
- * @file src/cpdetect/compiler_detector/compiler_detector.cpp
+ * @file src/cpdetect/cpdetect.cpp
  * @brief Methods of CompilerDetector class.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
@@ -9,9 +9,12 @@
 #include "retdec/utils/equality.h"
 #include "retdec/utils/filesystem_path.h"
 #include "retdec/utils/string.h"
-#include "retdec/cpdetect/compiler_detector/compiler_detector.h"
+#include "retdec/cpdetect/cpdetect.h"
+#include "retdec/cpdetect/heuristics/elf_heuristics.h"
+#include "retdec/cpdetect/heuristics/heuristics.h"
+#include "retdec/cpdetect/heuristics/macho_heuristics.h"
+#include "retdec/cpdetect/heuristics/pe_heuristics.h"
 #include "retdec/cpdetect/settings.h"
-#include "retdec/cpdetect/utils/version_solver.h"
 #include "retdec/yaracpp/yara_detector/yara_detector.h"
 
 using namespace retdec::fileformat;
@@ -34,7 +37,10 @@ namespace
  *
  * Warning: sort function requires strict weak ordering!
  */
-bool compareExtraInfo(const DetectResult &a, const DetectResult &b, bool &result)
+bool compareExtraInfo(
+		const DetectResult &a,
+		const DetectResult &b,
+		bool &result)
 {
 	// Check by version
 	if (!a.versionInfo.empty() && b.versionInfo.empty())
@@ -108,11 +114,13 @@ bool compareForSort(const DetectResult &a, const DetectResult &b)
 		}
 
 		// Everything is better than incomplete signature detection
-		if (b.source == DetectionMethod::SIGNATURE && b.agreeCount != b.impCount)
+		if (b.source == DetectionMethod::SIGNATURE
+				&& b.agreeCount != b.impCount)
 		{
 			return true;
 		}
-		else if (a.source == DetectionMethod::SIGNATURE && a.agreeCount != a.impCount)
+		else if (a.source == DetectionMethod::SIGNATURE
+				&& a.agreeCount != a.impCount)
 		{
 			return false;
 		}
@@ -164,7 +172,8 @@ ToolType metaToTool(const std::string &toolMeta)
 /**
 * Convert meta to type of tool.
 */
-retdec::cpdetect::DetectionStrength metaToStrength(const retdec::yaracpp::YaraMeta * strengthMeta)
+retdec::cpdetect::DetectionStrength metaToStrength(
+		const retdec::yaracpp::YaraMeta * strengthMeta)
 {
 	if (strengthMeta)
 	{
@@ -191,29 +200,137 @@ retdec::cpdetect::DetectionStrength metaToStrength(const retdec::yaracpp::YaraMe
 /**
  * Constructor
  *
- * Constructor in subclass must create members @a heuristics, @a internalDatabase and @a externalSuffixes
+ * Constructor in subclass must create members @a heuristics,
+ * @a internalDatabase and @a externalSuffixes
  */
 CompilerDetector::CompilerDetector(
-		retdec::fileformat::FileFormat &parser, DetectParams &params, ToolInformation &toolInfo)
-	: fileParser(parser), cpParams(params), toolInfo(toolInfo),
-		targetArchitecture(fileParser.getTargetArchitecture()), search(new Search(fileParser)),
-		heuristics(nullptr), pathToShared(getThisBinaryDirectoryPath())
+		retdec::fileformat::FileFormat &parser,
+		DetectParams &params,
+		ToolInformation &toolInfo)
+		: fileParser(parser)
+		, cpParams(params)
+		, toolInfo(toolInfo)
+		, targetArchitecture(fileParser.getTargetArchitecture())
+		, search(fileParser)
+		, pathToShared(getThisBinaryDirectoryPath())
 {
+	externalSuffixes = EXTERNAL_DATABASE_SUFFIXES;
 
-}
+	bool isFat = false;
+	retdec::utils::FilesystemPath path(pathToShared);
+	path.append(YARA_RULES_PATH);
+	std::set<std::string> formats;
+	std::set<std::string> archs;
+	switch (fileParser.getFileFormat())
+	{
+		case Format::ELF:
+		{
+			auto& elf = *static_cast<fileformat::ElfFormat*>(&fileParser);
+			heuristics = std::make_unique<ElfHeuristics>(elf, search, toolInfo);
+			formats.insert("elf");
+			break;
+		}
+		case Format::PE:
+		{
+			auto& pe = *static_cast<fileformat::PeFormat*>(&fileParser);
+			heuristics = std::make_unique<PeHeuristics>(pe, search, toolInfo);
+			formats.insert("pe");
+			break;
+		}
+		case Format::MACHO:
+		{
+			auto& macho = *static_cast<fileformat::MachOFormat*>(&fileParser);
+			heuristics = std::make_unique<MachOHeuristics>(macho, search, toolInfo);
+			formats.insert("macho");
+			isFat = macho.isFatBinary();
+			break;
+		}
+		case Format::RAW_DATA:
+		{
+			heuristics = std::make_unique<Heuristics>(parser, search, toolInfo);
+			// Any format.
+			formats.insert("elf");
+			formats.insert("macho");
+			formats.insert("pe");
+			break;
+		}
+		case Format::INTEL_HEX:
+		{
+			heuristics = std::make_unique<Heuristics>(parser, search, toolInfo);
+			// Intel Hex was most likely created from ELF.
+			formats.insert("elf");
+			break;
+		}
+		case Format::COFF:
+		{
+			heuristics = std::make_unique<Heuristics>(parser, search, toolInfo);
+			// Maybe something from PE will hit.
+			formats.insert("pe");
+			break;
+		}
+		default:
+		{
+			heuristics = std::make_unique<Heuristics>(parser, search, toolInfo);
+			break;
+		}
+	}
 
-/**
- * Destructor (default implementation)
- */
-CompilerDetector::~CompilerDetector()
-{
-	delete heuristics;
-	delete search;
+	auto bitWidth = fileParser.getWordLength();
+
+	if (!isFat)
+	switch(targetArchitecture)
+	{
+		case Architecture::X86:
+			archs.insert("x86");
+			[[fallthrough]];
+		case Architecture::X86_64:
+			archs.insert("x64");
+			break;
+
+		case Architecture::ARM:
+			if (bitWidth == 32)
+			{
+				archs.insert("arm");
+			}
+			else
+			{
+				archs.insert("arm64");
+			}
+			break;
+
+		case Architecture::MIPS:
+			if (bitWidth == 32)
+			{
+				archs.insert("mips");
+			}
+			else
+			{
+				archs.insert("mips64");
+			}
+			break;
+
+		case Architecture::POWERPC:
+			if (bitWidth == 32)
+			{
+				archs.insert("ppc");
+			}
+			else
+			{
+				archs.insert("ppc64");
+			}
+			break;
+
+		default:
+			break;
+	}
+
+	populateInternalPaths(path, formats, archs);
 }
 
 /**
  * External databases parsing
- * @return @c true if at least one external database was detected, @c false otherwise
+ * @return @c true if at least one external database was detected,
+ * @c false otherwise
  */
 bool CompilerDetector::getExternalDatabases()
 {
@@ -223,7 +340,8 @@ bool CompilerDetector::getExternalDatabases()
 	// iterating over all files in directory
 	for (const auto *subpath : thisDir)
 	{
-		if (subpath->isFile() && std::any_of(externalSuffixes.begin(), externalSuffixes.end(),
+		if (subpath->isFile()
+				&& std::any_of(externalSuffixes.begin(), externalSuffixes.end(),
 			[&] (const auto &suffix)
 			{
 				return endsWith(subpath->getPath(), suffix);
@@ -254,7 +372,9 @@ void CompilerDetector::removeCompilersWithLessSimilarity(double refRatio)
 		{
 			actRatio = static_cast<double>(toolInfo.detectedTools[i].agreeCount)
 					/ toolInfo.detectedTools[i].impCount;
-			if (actRatio + std::numeric_limits<double>::epsilon() * std::abs(actRatio) < refRatio)
+			auto ratio = actRatio + std::numeric_limits<double>::epsilon()
+					 * std::abs(actRatio);
+			if (ratio < refRatio)
 			{
 				toolInfo.detectedTools.erase(toolInfo.detectedTools.begin() + i);
 				--i;
@@ -318,31 +438,42 @@ void CompilerDetector::removeUnusedCompilers()
 
 /**
  * Add all YARA files from the given @p dir to internal paths member.
+ * Expects @p dir structure like this: formats/archs/files
  */
 void CompilerDetector::populateInternalPaths(
 		const retdec::utils::FilesystemPath& dir,
-		bool recursive)
+		const std::set<std::string>& formats,
+		const std::set<std::string>& archs)
 {
 	if (!dir.isDirectory())
 	{
 		return;
 	}
 
-	for (const auto *subpath : dir)
+	for (const auto *sub1 : dir)
 	{
-		if (subpath->isFile()
-				&& std::any_of(externalSuffixes.begin(), externalSuffixes.end(),
-				[&] (const auto &suffix)
-			{
-				return endsWith(subpath->getPath(), suffix);
-			}
-		))
+		if (!(sub1->isDirectory() && endsWith(sub1->getPath(), formats)))
 		{
-			internalPaths.push_back(subpath->getPath());
+			continue;
 		}
-		else if (recursive && subpath->isDirectory())
+
+		for (const auto *sub2 : *sub1)
 		{
-			populateInternalPaths(*subpath);
+			if (!(sub2->isDirectory()
+					&& (archs.empty() || endsWith(sub2->getPath(), archs))))
+			{
+				continue;
+			}
+
+			for (const auto *sub3 : *sub2)
+			{
+				if (!(sub3->isFile() && endsWith(sub3->getPath(), externalSuffixes)))
+				{
+					continue;
+				}
+
+				internalPaths.push_back(sub3->getPath());
+			}
 		}
 	}
 }
@@ -384,63 +515,84 @@ ReturnCode CompilerDetector::getAllSignatures()
 		}
 	}
 
-	yara.analyze(fileParser.getPathToFile(), cpParams.searchType != SearchType::EXACT_MATCH);
+	yara.analyze(
+			fileParser.getPathToFile(),
+			cpParams.searchType != SearchType::EXACT_MATCH
+	);
 	const auto &detected = yara.getDetectedRules();
 	const auto &undetected = yara.getUndetectedRules();
 	auto result = false;
 	if (cpParams.searchType == SearchType::EXACT_MATCH
-			|| (cpParams.searchType == SearchType::MOST_SIMILAR && !detected.empty()))
+			|| (cpParams.searchType == SearchType::MOST_SIMILAR
+					&& !detected.empty()))
 	{
 		for (const auto &rule : detected)
 		{
-			// In order to include result from a rule, there must have been a match
-			if (rule.getFirstMatch())
+			// The rule requires to have the "name" meta-tag
+			const auto *nameMeta = rule.getMeta("name");
+			if (nameMeta)
 			{
-				// The rule requires to have the "name" meta-tag
-				const auto *nameMeta = rule.getMeta("name");
-				if (nameMeta)
+				const auto *toolMeta = rule.getMeta("tool");
+				const auto *versionMeta = rule.getMeta("version");
+				const auto *commentMeta = rule.getMeta("comment");
+				const auto & version = versionMeta
+						? versionMeta->getStringValue()
+						: "";
+				auto toolType = toolMeta
+						? metaToTool(toolMeta->getStringValue())
+						: ToolType::UNKNOWN;
+
+				// Use "extra" meta-tag for extra value if comment is
+				// not available
+				if (!commentMeta)
+					commentMeta = rule.getMeta("extra");
+				const auto & extra = commentMeta
+						? commentMeta->getStringValue()
+						: "";
+
+				// If the rule has the "pattern" meta-tag, it means
+				// that it's a nibble detection
+				const auto *patternMeta = rule.getMeta("pattern");
+				if (patternMeta && rule.getFirstMatch())
 				{
-					const auto *toolMeta = rule.getMeta("tool");
-					const auto *versionMeta = rule.getMeta("version");
-					const auto *commentMeta = rule.getMeta("comment");
-					const auto & version = versionMeta ? versionMeta->getStringValue() : "";
-					auto toolType = toolMeta ? metaToTool(toolMeta->getStringValue()) : ToolType::UNKNOWN;
-
-					// Use "extra" meta-tag for extra value, if comment is not available
-					if (!commentMeta)
-						commentMeta = rule.getMeta("extra");
-					const auto & extra = commentMeta ? commentMeta->getStringValue() : "";
-
-					// If the rule has the "pattern" meta-tag, it means that it's a nibble detection
-					const auto *patternMeta = rule.getMeta("pattern");
-					if (patternMeta)
+					const auto nibbles = search.countImpNibbles(
+							patternMeta->getStringValue());
+					if (nibbles)
 					{
-						const auto nibbles = search->countImpNibbles(patternMeta->getStringValue());
-						if (nibbles)
+						result = true;
+						const auto *languageMeta = rule.getMeta("language");
+						const auto *bytecodeMeta = rule.getMeta("bytecode");
+						commentMeta = commentMeta
+								? commentMeta
+								: rule.getMeta("extra");
+						toolInfo.addTool(
+								nibbles,
+								nibbles,
+								toolType,
+								nameMeta->getStringValue(),
+								version,
+								extra);
+						if (languageMeta)
 						{
-							result = true;
-							const auto *languageMeta = rule.getMeta("language");
-							const auto *bytecodeMeta = rule.getMeta("bytecode");
-							commentMeta = commentMeta ? commentMeta : rule.getMeta("extra");
-							toolInfo.addTool(nibbles, nibbles, toolType, nameMeta->getStringValue(), version, extra);
-							if (languageMeta)
-							{
-								toolInfo.addLanguage(languageMeta->getStringValue(), "", bytecodeMeta ? true : false);
-							}
+							toolInfo.addLanguage(
+									languageMeta->getStringValue(),
+									"",
+									bytecodeMeta ? true : false);
 						}
 					}
-					// If there is no "pattern" meta-tag, we consider the rule to be a heuristic detection
-					else
-					{
-						toolInfo.addTool(
-							DetectionMethod::YARA_RULE,
-							metaToStrength(rule.getMeta("strength")),
-							toolType,
-							nameMeta->getStringValue(),
-							version,
-							extra
-						);
-					}
+				}
+				// If there is no "pattern" meta-tag, we consider
+				// the rule to be a heuristic detection
+				else
+				{
+					toolInfo.addTool(
+						DetectionMethod::YARA_RULE,
+						metaToStrength(rule.getMeta("strength")),
+						toolType,
+						nameMeta->getStringValue(),
+						version,
+						extra
+					);
 				}
 			}
 		}
@@ -473,13 +625,21 @@ ReturnCode CompilerDetector::getAllSignatures()
 			commentMeta = commentMeta ? commentMeta : rule.getMeta("extra");
 			if (match)
 			{
-				const auto nibbles = search->countImpNibbles(pattern);
+				const auto nibbles = search.countImpNibbles(pattern);
 				if (nibbles)
 				{
 					result = true;
 					maxRatio = 1.0;
-					toolInfo.addTool(nibbles, nibbles, toolMeta ? metaToTool(toolMeta->getStringValue()) : ToolType::UNKNOWN,
-						nameMeta->getStringValue(), versionMeta ? versionMeta->getStringValue() : "", commentMeta ? commentMeta->getStringValue() : "");
+					toolInfo.addTool(
+							nibbles,
+							nibbles,
+							toolMeta
+									? metaToTool(toolMeta->getStringValue())
+									: ToolType::UNKNOWN,
+							nameMeta->getStringValue(),
+							versionMeta ? versionMeta->getStringValue() : "",
+							commentMeta ? commentMeta->getStringValue() : ""
+					);
 				}
 				continue;
 			}
@@ -515,16 +675,30 @@ ReturnCode CompilerDetector::getAllSignatures()
 				endShift = endMeta->getIntValue();
 			}
 			const auto start = base + startShift;
-			const auto end = base + endShift + fileParser.bytesFromNibblesRounded(pattern.length()) - 1;
-			if (search->areaSimilarity(pattern, sim, start, end)
+			const auto end = base
+					+ endShift
+					+ fileParser.bytesFromNibblesRounded(pattern.length()) - 1;
+			if (search.areaSimilarity(pattern, sim, start, end)
 					&& (cpParams.searchType == SearchType::SIM_LIST
 						|| (cpParams.searchType == SearchType::MOST_SIMILAR
 							&& sim.ratio >= maxRatio)))
 			{
 				result = true;
 				maxRatio = sim.ratio;
-				toolInfo.addTool(sim.same, sim.total, toolMeta ? metaToTool(toolMeta->getStringValue()) : ToolType::UNKNOWN,
-					nameMeta->getStringValue(), versionMeta ? versionMeta->getStringValue() : "", commentMeta ? commentMeta->getStringValue() : "");
+				toolInfo.addTool(
+						sim.same,
+						sim.total,
+						toolMeta
+								? metaToTool(toolMeta->getStringValue())
+								: ToolType::UNKNOWN,
+						nameMeta->getStringValue(),
+						versionMeta
+								? versionMeta->getStringValue()
+								: "",
+						commentMeta
+								? commentMeta->getStringValue() :
+								""
+				);
 			}
 		}
 	}
@@ -545,7 +719,10 @@ ReturnCode CompilerDetector::getAllCompilers()
 {
 	const auto status = getAllSignatures();
 	getAllHeuristics();
-	std::stable_sort(toolInfo.detectedTools.begin(), toolInfo.detectedTools.end(), compareForSort);
+	std::stable_sort(
+			toolInfo.detectedTools.begin(),
+			toolInfo.detectedTools.end(),
+			compareForSort);
 	removeUnusedCompilers();
 	if (toolInfo.detectedLanguages.empty())
 	{
@@ -564,15 +741,19 @@ ReturnCode CompilerDetector::getAllCompilers()
 		}
 	}
 
-	const bool isDetecteion = toolInfo.detectedTools.size() || toolInfo.detectedLanguages.size();
-	return (status == ReturnCode::UNKNOWN_CP && isDetecteion) ? ReturnCode::OK : status;
+	const bool isDetecteion = toolInfo.detectedTools.size()
+			|| toolInfo.detectedLanguages.size();
+	return status == ReturnCode::UNKNOWN_CP && isDetecteion
+			? ReturnCode::OK
+			: status;
 }
 
 /**
  * Detect all supported information about used compiler or packer
  * @return Status of detection (ReturnCode::OK if all is OK)
  *
- * Compiler can be successfully detected even if is returned a value other than ReturnCode::OK
+ * Compiler can be successfully detected even if is returned a value other
+ * than ReturnCode::OK
  */
 ReturnCode CompilerDetector::getAllInformation()
 {
@@ -590,9 +771,11 @@ ReturnCode CompilerDetector::getAllInformation()
 		toolInfo.overlayOffset = fileParser.getDeclaredFileLength();
 	}
 
-	const bool invalidEntryPoint = !toolInfo.entryPointAddress || !toolInfo.entryPointOffset;
+	const bool invalidEntryPoint = !toolInfo.entryPointAddress
+			|| !toolInfo.entryPointOffset;
 	if (!fileParser.getHexEpBytes(toolInfo.epBytes, cpParams.epBytesCount)
-			&& !invalidEntryPoint && !fileParser.isInValidState())
+			&& !invalidEntryPoint
+			&& !fileParser.isInValidState())
 	{
 		return ReturnCode::FILE_PROBLEM;
 	}
@@ -607,7 +790,9 @@ ReturnCode CompilerDetector::getAllInformation()
 	auto status = getAllCompilers();
 	if (invalidEntryPoint)
 	{
-		if (fileParser.isExecutable() || toolInfo.entryPointAddress || toolInfo.entryPointSection)
+		if (fileParser.isExecutable()
+				|| toolInfo.entryPointAddress
+				|| toolInfo.entryPointSection)
 		{
 			status = ReturnCode::ENTRY_POINT_DETECTION;
 		}

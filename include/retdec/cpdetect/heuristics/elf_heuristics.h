@@ -1,13 +1,13 @@
 /**
- * @file include/retdec/cpdetect/compiler_detector/heuristics/elf_heuristics.h
+ * @file include/retdec/cpdetect/heuristics/elf_heuristics.h
  * @brief Definition of ElfHeuristics class.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#ifndef RETDEC_CPDETECT_COMPILER_DETECTOR_HEURISTICS_ELF_HEURISTICS_H
-#define RETDEC_CPDETECT_COMPILER_DETECTOR_HEURISTICS_ELF_HEURISTICS_H
+#ifndef RETDEC_CPDETECT_HEURISTICS_ELF_HEURISTICS_H
+#define RETDEC_CPDETECT_HEURISTICS_ELF_HEURISTICS_H
 
-#include "retdec/cpdetect/compiler_detector/heuristics/heuristics.h"
+#include "retdec/cpdetect/heuristics/heuristics.h"
 #include "retdec/fileformat/file_format/elf/elf_format.h"
 
 namespace retdec {
@@ -19,7 +19,8 @@ namespace cpdetect {
 class ElfHeuristics : public Heuristics
 {
 	private:
-		retdec::fileformat::ElfFormat &elfParser; ///< parser of input ELF file
+		/// parser of input ELF file
+		retdec::fileformat::ElfFormat &elfParser;
 
 		/// @name Detection methods
 		/// @{
@@ -37,7 +38,8 @@ class ElfHeuristics : public Heuristics
 
 	public:
 		ElfHeuristics(
-				retdec::fileformat::ElfFormat &parser, Search &searcher,
+				retdec::fileformat::ElfFormat &parser,
+				Search &searcher,
 				ToolInformation &toolInfo);
 };
 

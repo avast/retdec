@@ -13,6 +13,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <set>
 
 namespace retdec {
 namespace utils {
@@ -107,6 +108,7 @@ bool startsWith(const std::string &str, const String &withWhat) {
 
 bool endsWith(const std::string &str, const std::string &withWhat);
 bool endsWith(const std::string &str, char withWhat);
+bool endsWith(const std::string &str, const std::set<std::string>& withWhat);
 bool hasSubstringOnPosition(const std::string &str,
 	const std::string &withWhat,
 	std::string::size_type position);
@@ -174,6 +176,8 @@ std::string removeConsecutiveSpaces(const std::string& str);
 std::string asEscapedCString(const WideStringType& value, std::size_t charSize);
 
 std::string removeComments(const std::string& str, char commentChar);
+
+std::string extractVersion(const std::string& input);
 
 } // namespace utils
 } // namespace retdec
