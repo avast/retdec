@@ -333,7 +333,7 @@ void MachODetector::getAdditionalInfo()
  */
 retdec::cpdetect::CompilerDetector* MachODetector::createCompilerDetector() const
 {
-	return new MachOCompiler(*machoParser, cpParams, fileInfo.toolInfo);
+	return new CompilerDetector(*machoParser, cpParams, fileInfo.toolInfo);
 }
 
 /**

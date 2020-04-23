@@ -1,10 +1,10 @@
 /**
- * @file src/cpdetect/compiler_detector/heuristics/macho_heuristics.cpp
+ * @file src/cpdetect/heuristics/macho_heuristics.cpp
  * @brief Methods of MachOHeuristics class.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "retdec/cpdetect/compiler_detector/heuristics/macho_heuristics.h"
+#include "retdec/cpdetect/heuristics/macho_heuristics.h"
 
 using namespace retdec::fileformat;
 

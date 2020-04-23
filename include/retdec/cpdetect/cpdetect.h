@@ -1,19 +1,83 @@
 /**
  * @file include/retdec/cpdetect/cpdetect.h
- * @brief Interface to cpdetectl library.
+ * @brief Class for tool detection.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#ifndef RETDEC_CPDETECT_CPDETECTL_H
-#define RETDEC_CPDETECT_CPDETECTL_H
+#ifndef RETDEC_CPDETECT_CPDETECT_H
+#define RETDEC_CPDETECT_CPDETECT_H
 
-#include "retdec/cpdetect/compiler_detector/coff_compiler.h"
-#include "retdec/cpdetect/compiler_detector/elf_compiler.h"
-#include "retdec/cpdetect/compiler_detector/intel_hex_compiler.h"
-#include "retdec/cpdetect/compiler_detector/macho_compiler.h"
-#include "retdec/cpdetect/compiler_detector/pe_compiler.h"
-#include "retdec/cpdetect/compiler_detector/raw_data_compiler.h"
-#include "retdec/cpdetect/compiler_factory.h"
+#include "retdec/utils/filesystem_path.h"
+#include "retdec/utils/non_copyable.h"
+#include "retdec/cpdetect/heuristics/heuristics.h"
+#include "retdec/cpdetect/search.h"
 #include "retdec/cpdetect/errors.h"
+
+namespace retdec {
+namespace cpdetect {
+
+/**
+ * CompilerDetector - find information about tools
+ */
+class CompilerDetector : private retdec::utils::NonCopyable
+{
+	private:
+		retdec::fileformat::FileFormat &fileParser;
+		DetectParams &cpParams;
+		std::vector<std::string> externalDatabase;
+
+		/// @name External databases parsing
+		/// @{
+		bool getExternalDatabases();
+		/// @}
+
+		/// @name Other methods
+		/// @{
+		void removeCompilersWithLessSimilarity(double ratio);
+		void removeUnusedCompilers();
+		/// @}
+
+		/// @name Detection methods
+		/// @{
+		void getAllHeuristics();
+		ReturnCode getAllSignatures();
+		ReturnCode getAllCompilers();
+		/// @}
+
+	protected:
+		void populateInternalPaths(
+				const retdec::utils::FilesystemPath& dir,
+				bool recursive = false);
+
+	protected:
+		/// results - detected tools
+		ToolInformation &toolInfo;
+		retdec::fileformat::Architecture targetArchitecture;
+		/// class for signature search
+		Search *search;
+		/// class for heuristics detections
+		Heuristics *heuristics;
+		/// internal rule database files
+		std::vector<std::string> internalPaths;
+		/// path to shared folder
+		retdec::utils::FilesystemPath pathToShared;
+		/// external database file suffixes
+		std::set<std::string> externalSuffixes;
+
+	public:
+		CompilerDetector(
+				retdec::fileformat::FileFormat &parser,
+				DetectParams &params,
+				ToolInformation &toolInfo);
+		~CompilerDetector();
+
+		/// @name Detection methods
+		/// @{
+		ReturnCode getAllInformation();
+		/// @}
+};
+
+} // namespace cpdetect
+} // namespace retdec
 
 #endif

@@ -1,5 +1,5 @@
 /**
- * @file src/cpdetect/compiler_detector/heuristics/pe_heuristics.cpp
+ * @file src/cpdetect/heuristics/pe_heuristics.cpp
  * @brief Methods of PeHeuristics class.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
@@ -13,9 +13,9 @@
 
 #include "retdec/utils/conversion.h"
 #include "retdec/utils/string.h"
-#include "retdec/cpdetect/compiler_detector/heuristics/pe_heuristics.h"
+#include "retdec/cpdetect/heuristics/pe_heuristics.h"
 #include "retdec/cpdetect/settings.h"
-#include "retdec/cpdetect/signatures/signature.h"
+#include "retdec/cpdetect/signature.h"
 #include "retdec/fileformat/utils/conversions.h"
 #include "retdec/fileformat/utils/file_io.h"
 #include "retdec/fileformat/utils/other.h"

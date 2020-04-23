@@ -1,11 +1,11 @@
 /**
- * @file include/retdec/cpdetect/signatures/signature.h
+ * @file include/retdec/cpdetect/signature.h
  * @brief Definiton of compiler or packer signature.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#ifndef RETDEC_CPDETECT_SIGNATURES_SIGNATURE_H
-#define RETDEC_CPDETECT_SIGNATURES_SIGNATURE_H
+#ifndef RETDEC_CPDETECT_SIGNATURE_H
+#define RETDEC_CPDETECT_SIGNATURE_H
 
 #include <string>
 

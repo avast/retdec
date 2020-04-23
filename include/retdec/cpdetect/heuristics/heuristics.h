@@ -1,13 +1,13 @@
 /**
- * @file include/retdec/cpdetect/compiler_detector/heuristics/heuristics.h
+ * @file include/retdec/cpdetect/heuristics/heuristics.h
  * @brief Class for heuristics detection.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#ifndef RETDEC_CPDETECT_COMPILER_DETECTOR_HEURISTICS_HEURISTICS_H
-#define RETDEC_CPDETECT_COMPILER_DETECTOR_HEURISTICS_HEURISTICS_H
+#ifndef RETDEC_CPDETECT_HEURISTICS_HEURISTICS_H
+#define RETDEC_CPDETECT_HEURISTICS_HEURISTICS_H
 
-#include "retdec/cpdetect/compiler_detector/search/search.h"
+#include "retdec/cpdetect/search.h"
 #include "retdec/cpdetect/cptypes.h"
 #include "retdec/fileformat/file_format/file_format.h"
 

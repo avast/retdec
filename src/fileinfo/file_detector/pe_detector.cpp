@@ -541,7 +541,7 @@ void PeDetector::getAdditionalInfo()
  */
 retdec::cpdetect::CompilerDetector* PeDetector::createCompilerDetector() const
 {
-	return new PeCompiler(*peParser, cpParams, fileInfo.toolInfo);
+	return new CompilerDetector(*peParser, cpParams, fileInfo.toolInfo);
 }
 
 } // namespace fileinfo

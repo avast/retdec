@@ -136,7 +136,7 @@ retdec::cpdetect::CompilerDetector* RawDataDetector::createCompilerDetector() co
 		cpParams.searchType = SearchType::MOST_SIMILAR;
 	}
 
-	return new RawDataCompiler(*rawParser, cpParams, fileInfo.toolInfo);
+	return new CompilerDetector(*rawParser, cpParams, fileInfo.toolInfo);
 }
 
 } // namespace fileinfo

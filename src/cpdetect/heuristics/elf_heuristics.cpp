@@ -1,5 +1,5 @@
 /**
- * @file src/cpdetect/compiler_detector/heuristics/elf_heuristics.cpp
+ * @file src/cpdetect/heuristics/elf_heuristics.cpp
  * @brief Methods of ElfHeuristics class.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
@@ -9,7 +9,7 @@
 
 #include "retdec/utils/conversion.h"
 #include "retdec/utils/string.h"
-#include "retdec/cpdetect/compiler_detector/heuristics/elf_heuristics.h"
+#include "retdec/cpdetect/heuristics/elf_heuristics.h"
 #include "retdec/fileformat/utils/file_io.h"
 
 using namespace retdec::utils;

@@ -1,5 +1,5 @@
 /**
- * @file src/cpdetect/compiler_detector/search/search.cpp
+ * @file src/cpdetect/search.cpp
  * @brief Class for search in file.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
@@ -11,8 +11,8 @@
 #include "retdec/utils/conversion.h"
 #include "retdec/utils/equality.h"
 #include "retdec/utils/string.h"
-#include "retdec/cpdetect/compiler_detector/search/search.h"
-#include "retdec/cpdetect/signatures/signature.h"
+#include "retdec/cpdetect/search.h"
+#include "retdec/cpdetect/signature.h"
 #include "retdec/fileformat/utils/conversions.h"
 #include "retdec/fileformat/utils/file_io.h"
 

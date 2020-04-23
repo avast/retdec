@@ -1,5 +1,5 @@
 /**
- * @file src/cpdetect/compiler_detector/compiler_detector.cpp
+ * @file src/cpdetect/cpdetect.cpp
  * @brief Methods of CompilerDetector class.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
@@ -9,7 +9,11 @@
 #include "retdec/utils/equality.h"
 #include "retdec/utils/filesystem_path.h"
 #include "retdec/utils/string.h"
-#include "retdec/cpdetect/compiler_detector/compiler_detector.h"
+#include "retdec/cpdetect/cpdetect.h"
+#include "retdec/cpdetect/heuristics/elf_heuristics.h"
+#include "retdec/cpdetect/heuristics/heuristics.h"
+#include "retdec/cpdetect/heuristics/macho_heuristics.h"
+#include "retdec/cpdetect/heuristics/pe_heuristics.h"
 #include "retdec/cpdetect/settings.h"
 #include "retdec/yaracpp/yara_detector/yara_detector.h"
 
@@ -211,7 +215,100 @@ CompilerDetector::CompilerDetector(
 		, heuristics(nullptr)
 		, pathToShared(getThisBinaryDirectoryPath())
 {
+	externalSuffixes = EXTERNAL_DATABASE_SUFFIXES;
 
+	bool isFat = false;
+	retdec::utils::FilesystemPath path(pathToShared);
+	path.append(YARA_RULES_PATH);
+	switch (fileParser.getFileFormat())
+	{
+		case Format::ELF:
+		{
+			auto& elf = *static_cast<fileformat::ElfFormat*>(&fileParser);
+			heuristics = new ElfHeuristics(elf, *search, toolInfo);
+			path.append("elf/");
+			break;
+		}
+		case Format::PE:
+		{
+			auto& pe = *static_cast<fileformat::PeFormat*>(&fileParser);
+			heuristics = new PeHeuristics(pe, *search, toolInfo);
+			path.append("pe/");
+			break;
+		}
+		case Format::MACHO:
+		{
+			auto& macho = *static_cast<fileformat::MachOFormat*>(&fileParser);
+			heuristics = new MachOHeuristics(macho, *search, toolInfo);
+			path.append("macho/");
+			isFat = macho.isFatBinary();
+			break;
+		}
+		case Format::RAW_DATA:
+		case Format::INTEL_HEX:
+		case Format::COFF:
+		default:
+		{
+			heuristics = new Heuristics(parser, *search, toolInfo);
+			break;
+		}
+	}
+
+	if (isFat || fileParser.getFileFormat() == Format::RAW_DATA)
+	{
+		populateInternalPaths(path, true);
+		return;
+	}
+
+	auto bitWidth = fileParser.getWordLength();
+	switch(targetArchitecture)
+	{
+		case Architecture::X86:
+			path.append("x86");
+			break;
+
+		case Architecture::X86_64:
+			path.append("x64");
+			break;
+
+		case Architecture::ARM:
+			if (bitWidth == 32)
+			{
+				path.append("arm");
+			}
+			else
+			{
+				path.append("arm64");
+			}
+			break;
+
+		case Architecture::MIPS:
+			if (bitWidth == 32)
+			{
+				path.append("mips");
+			}
+			else
+			{
+				path.append("mips64");
+			}
+			break;
+
+		case Architecture::POWERPC:
+			if (bitWidth == 32)
+			{
+				path.append("ppc");
+			}
+			else
+			{
+				path.append("ppc64");
+			}
+			break;
+
+		default:
+			break;
+	}
+
+	populateInternalPaths(path);
 }
 
 /**
@@ -358,7 +455,7 @@ void CompilerDetector::populateInternalPaths(
 		}
 		else if (recursive && subpath->isDirectory())
 		{
-			populateInternalPaths(*subpath);
+			populateInternalPaths(*subpath, recursive);
 		}
 	}
 }
