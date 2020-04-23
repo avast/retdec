@@ -280,11 +280,11 @@ CompilerDetector::CompilerDetector(
 	if (!isFat)
 	switch(targetArchitecture)
 	{
-		case Architecture::X86:
-			archs.insert("x86");
-			[[fallthrough]];
 		case Architecture::X86_64:
 			archs.insert("x64");
+			[[fallthrough]];
+		case Architecture::X86:
+			archs.insert("x86");
 			break;
 
 		case Architecture::ARM:
