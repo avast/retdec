@@ -8,7 +8,6 @@
 
 #include "retdec/utils/memory.h"
 #include "retdec/utils/os.h"
-#include <cstddef>
 
 #ifdef OS_WINDOWS
 	#include <windows.h>
