@@ -438,7 +438,7 @@ void CompilerDetector::removeUnusedCompilers()
 
 /**
  * Add all YARA files from the given @p dir to internal paths member.
- * Expects @p dir structure like this: <formats>/<archs>/<files>
+ * Expects @p dir structure like this: formats/archs/files
  */
 void CompilerDetector::populateInternalPaths(
 		const retdec::utils::FilesystemPath& dir,
