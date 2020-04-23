@@ -500,76 +500,71 @@ ReturnCode CompilerDetector::getAllSignatures()
 	{
 		for (const auto &rule : detected)
 		{
-			// In order to include result from a rule,
-			// there must have been a match
-			if (rule.getFirstMatch())
+			// The rule requires to have the "name" meta-tag
+			const auto *nameMeta = rule.getMeta("name");
+			if (nameMeta)
 			{
-				// The rule requires to have the "name" meta-tag
-				const auto *nameMeta = rule.getMeta("name");
-				if (nameMeta)
+				const auto *toolMeta = rule.getMeta("tool");
+				const auto *versionMeta = rule.getMeta("version");
+				const auto *commentMeta = rule.getMeta("comment");
+				const auto & version = versionMeta
+						? versionMeta->getStringValue()
+						: "";
+				auto toolType = toolMeta
+						? metaToTool(toolMeta->getStringValue())
+						: ToolType::UNKNOWN;
+
+				// Use "extra" meta-tag for extra value if comment is
+				// not available
+				if (!commentMeta)
+					commentMeta = rule.getMeta("extra");
+				const auto & extra = commentMeta
+						? commentMeta->getStringValue()
+						: "";
+
+				// If the rule has the "pattern" meta-tag, it means
+				// that it's a nibble detection
+				const auto *patternMeta = rule.getMeta("pattern");
+				if (patternMeta && rule.getFirstMatch())
 				{
-					const auto *toolMeta = rule.getMeta("tool");
-					const auto *versionMeta = rule.getMeta("version");
-					const auto *commentMeta = rule.getMeta("comment");
-					const auto & version = versionMeta
-							? versionMeta->getStringValue()
-							: "";
-					auto toolType = toolMeta
-							? metaToTool(toolMeta->getStringValue())
-							: ToolType::UNKNOWN;
-
-					// Use "extra" meta-tag for extra value if comment is
-					// not available
-					if (!commentMeta)
-						commentMeta = rule.getMeta("extra");
-					const auto & extra = commentMeta
-							? commentMeta->getStringValue()
-							: "";
-
-					// If the rule has the "pattern" meta-tag, it means
-					// that it's a nibble detection
-					const auto *patternMeta = rule.getMeta("pattern");
-					if (patternMeta)
+					const auto nibbles = search.countImpNibbles(
+							patternMeta->getStringValue());
+					if (nibbles)
 					{
-						const auto nibbles = search.countImpNibbles(
-								patternMeta->getStringValue());
-						if (nibbles)
+						result = true;
+						const auto *languageMeta = rule.getMeta("language");
+						const auto *bytecodeMeta = rule.getMeta("bytecode");
+						commentMeta = commentMeta
+								? commentMeta
+								: rule.getMeta("extra");
+						toolInfo.addTool(
+								nibbles,
+								nibbles,
+								toolType,
+								nameMeta->getStringValue(),
+								version,
+								extra);
+						if (languageMeta)
 						{
-							result = true;
-							const auto *languageMeta = rule.getMeta("language");
-							const auto *bytecodeMeta = rule.getMeta("bytecode");
-							commentMeta = commentMeta
-									? commentMeta
-									: rule.getMeta("extra");
-							toolInfo.addTool(
-									nibbles,
-									nibbles,
-									toolType,
-									nameMeta->getStringValue(),
-									version,
-									extra);
-							if (languageMeta)
-							{
-								toolInfo.addLanguage(
-										languageMeta->getStringValue(),
-										"",
-										bytecodeMeta ? true : false);
-							}
+							toolInfo.addLanguage(
+									languageMeta->getStringValue(),
+									"",
+									bytecodeMeta ? true : false);
 						}
 					}
-					// If there is no "pattern" meta-tag, we consider
-					// the rule to be a heuristic detection
-					else
-					{
-						toolInfo.addTool(
-							DetectionMethod::YARA_RULE,
-							metaToStrength(rule.getMeta("strength")),
-							toolType,
-							nameMeta->getStringValue(),
-							version,
-							extra
-						);
-					}
+				}
+				// If there is no "pattern" meta-tag, we consider
+				// the rule to be a heuristic detection
+				else
+				{
+					toolInfo.addTool(
+						DetectionMethod::YARA_RULE,
+						metaToStrength(rule.getMeta("strength")),
+						toolType,
+						nameMeta->getStringValue(),
+						version,
+						extra
+					);
 				}
 			}
 		}

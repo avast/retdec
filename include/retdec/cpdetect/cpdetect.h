@@ -9,9 +9,10 @@
 
 #include "retdec/utils/filesystem_path.h"
 #include "retdec/utils/non_copyable.h"
+#include "retdec/cpdetect/cptypes.h"
+#include "retdec/cpdetect/errors.h"
 #include "retdec/cpdetect/heuristics/heuristics.h"
 #include "retdec/cpdetect/search.h"
-#include "retdec/cpdetect/errors.h"
 
 namespace retdec {
 namespace cpdetect {
