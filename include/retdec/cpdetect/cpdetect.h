@@ -54,9 +54,9 @@ class CompilerDetector : private retdec::utils::NonCopyable
 		ToolInformation &toolInfo;
 		retdec::fileformat::Architecture targetArchitecture;
 		/// class for signature search
-		Search *search;
+		Search search;
 		/// class for heuristics detections
-		Heuristics *heuristics;
+		std::unique_ptr<Heuristics> heuristics;
 		/// internal rule database files
 		std::vector<std::string> internalPaths;
 		/// path to shared folder
@@ -69,7 +69,6 @@ class CompilerDetector : private retdec::utils::NonCopyable
 				retdec::fileformat::FileFormat &parser,
 				DetectParams &params,
 				ToolInformation &toolInfo);
-		~CompilerDetector();
 
 		/// @name Detection methods
 		/// @{

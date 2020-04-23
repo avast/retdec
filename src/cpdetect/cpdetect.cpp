@@ -211,8 +211,7 @@ CompilerDetector::CompilerDetector(
 		, cpParams(params)
 		, toolInfo(toolInfo)
 		, targetArchitecture(fileParser.getTargetArchitecture())
-		, search(new Search(fileParser))
-		, heuristics(nullptr)
+		, search(fileParser)
 		, pathToShared(getThisBinaryDirectoryPath())
 {
 	externalSuffixes = EXTERNAL_DATABASE_SUFFIXES;
@@ -225,21 +224,21 @@ CompilerDetector::CompilerDetector(
 		case Format::ELF:
 		{
 			auto& elf = *static_cast<fileformat::ElfFormat*>(&fileParser);
-			heuristics = new ElfHeuristics(elf, *search, toolInfo);
+			heuristics = std::make_unique<ElfHeuristics>(elf, search, toolInfo);
 			path.append("elf/");
 			break;
 		}
 		case Format::PE:
 		{
 			auto& pe = *static_cast<fileformat::PeFormat*>(&fileParser);
-			heuristics = new PeHeuristics(pe, *search, toolInfo);
+			heuristics = std::make_unique<PeHeuristics>(pe, search, toolInfo);
 			path.append("pe/");
 			break;
 		}
 		case Format::MACHO:
 		{
 			auto& macho = *static_cast<fileformat::MachOFormat*>(&fileParser);
-			heuristics = new MachOHeuristics(macho, *search, toolInfo);
+			heuristics = std::make_unique<MachOHeuristics>(macho, search, toolInfo);
 			path.append("macho/");
 			isFat = macho.isFatBinary();
 			break;
@@ -249,7 +248,7 @@ CompilerDetector::CompilerDetector(
 		case Format::COFF:
 		default:
 		{
-			heuristics = new Heuristics(parser, *search, toolInfo);
+			heuristics = std::make_unique<Heuristics>(parser, search, toolInfo);
 			break;
 		}
 	}
@@ -309,15 +308,6 @@ CompilerDetector::CompilerDetector(
 	}
 
 	populateInternalPaths(path);
-}
-
-/**
- * Destructor (default implementation)
- */
-CompilerDetector::~CompilerDetector()
-{
-	delete heuristics;
-	delete search;
 }
 
 /**
@@ -541,7 +531,7 @@ ReturnCode CompilerDetector::getAllSignatures()
 					const auto *patternMeta = rule.getMeta("pattern");
 					if (patternMeta)
 					{
-						const auto nibbles = search->countImpNibbles(
+						const auto nibbles = search.countImpNibbles(
 								patternMeta->getStringValue());
 						if (nibbles)
 						{
@@ -612,7 +602,7 @@ ReturnCode CompilerDetector::getAllSignatures()
 			commentMeta = commentMeta ? commentMeta : rule.getMeta("extra");
 			if (match)
 			{
-				const auto nibbles = search->countImpNibbles(pattern);
+				const auto nibbles = search.countImpNibbles(pattern);
 				if (nibbles)
 				{
 					result = true;
@@ -665,7 +655,7 @@ ReturnCode CompilerDetector::getAllSignatures()
 			const auto end = base
 					+ endShift
 					+ fileParser.bytesFromNibblesRounded(pattern.length()) - 1;
-			if (search->areaSimilarity(pattern, sim, start, end)
+			if (search.areaSimilarity(pattern, sim, start, end)
 					&& (cpParams.searchType == SearchType::SIM_LIST
 						|| (cpParams.searchType == SearchType::MOST_SIMILAR
 							&& sim.ratio >= maxRatio)))
