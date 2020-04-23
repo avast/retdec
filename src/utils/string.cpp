@@ -680,6 +680,23 @@ bool endsWith(const std::string &str, char withWhat) {
 }
 
 /**
+* @return @c true if @a str ends with any of the suffixes in @a withWhat,
+         @c false otherwise
+*/
+bool endsWith(const std::string &str, const std::set<std::string>& withWhat)
+{
+	for (auto& s : withWhat)
+	{
+		if (endsWith(str, s))
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+/**
 * @brief Returns @c true if @a str has substring @a withWhat on index
 *        @a position.
 */

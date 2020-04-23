@@ -13,6 +13,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <set>
 
 namespace retdec {
 namespace utils {
@@ -107,6 +108,7 @@ bool startsWith(const std::string &str, const String &withWhat) {
 
 bool endsWith(const std::string &str, const std::string &withWhat);
 bool endsWith(const std::string &str, char withWhat);
+bool endsWith(const std::string &str, const std::set<std::string>& withWhat);
 bool hasSubstringOnPosition(const std::string &str,
 	const std::string &withWhat,
 	std::string::size_type position);

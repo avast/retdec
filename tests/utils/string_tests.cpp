@@ -610,6 +610,24 @@ EndsWithDoesNotEnd) {
 	EXPECT_FALSE(endsWith("abcDEF", "DEG"));
 }
 
+TEST_F(StringTests,
+EndsWithSetDoesNotEnd) {
+	EXPECT_FALSE(endsWith("", std::set<std::string>{}));
+	EXPECT_FALSE(endsWith("", std::set<std::string>{"a", "bb", "ccc"}));
+	EXPECT_FALSE(endsWith("b", std::set<std::string>{"c"}));
+	EXPECT_FALSE(endsWith("X  ", std::set<std::string>{"X "}));
+	EXPECT_FALSE(endsWith("abcDEF", std::set<std::string>{"DEG"}));
+}
+
+TEST_F(StringTests,
+EndsWithSetEnds) {
+	EXPECT_TRUE(endsWith("", std::set<std::string>{""}));
+	EXPECT_TRUE(endsWith("abcde", std::set<std::string>{"e"}));
+	EXPECT_TRUE(endsWith("abcde", std::set<std::string>{"de"}));
+	EXPECT_TRUE(endsWith("abcde", std::set<std::string>{"cde"}));
+	EXPECT_TRUE(endsWith("abcde", std::set<std::string>{"a", "ab", "cde", "xyz"}));
+}
+
 //
 // hasSubstringOnPosition()
 //

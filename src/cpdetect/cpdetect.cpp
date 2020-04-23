@@ -219,33 +219,55 @@ CompilerDetector::CompilerDetector(
 	bool isFat = false;
 	retdec::utils::FilesystemPath path(pathToShared);
 	path.append(YARA_RULES_PATH);
+	std::set<std::string> formats;
+	std::set<std::string> archs;
 	switch (fileParser.getFileFormat())
 	{
 		case Format::ELF:
 		{
 			auto& elf = *static_cast<fileformat::ElfFormat*>(&fileParser);
 			heuristics = std::make_unique<ElfHeuristics>(elf, search, toolInfo);
-			path.append("elf/");
+			formats.insert("elf");
 			break;
 		}
 		case Format::PE:
 		{
 			auto& pe = *static_cast<fileformat::PeFormat*>(&fileParser);
 			heuristics = std::make_unique<PeHeuristics>(pe, search, toolInfo);
-			path.append("pe/");
+			formats.insert("pe");
 			break;
 		}
 		case Format::MACHO:
 		{
 			auto& macho = *static_cast<fileformat::MachOFormat*>(&fileParser);
 			heuristics = std::make_unique<MachOHeuristics>(macho, search, toolInfo);
-			path.append("macho/");
+			formats.insert("macho");
 			isFat = macho.isFatBinary();
 			break;
 		}
 		case Format::RAW_DATA:
+		{
+			heuristics = std::make_unique<Heuristics>(parser, search, toolInfo);
+			// Any format.
+			formats.insert("elf");
+			formats.insert("macho");
+			formats.insert("pe");
+			break;
+		}
 		case Format::INTEL_HEX:
+		{
+			heuristics = std::make_unique<Heuristics>(parser, search, toolInfo);
+			// Intel Hex was most likely created from ELF.
+			formats.insert("elf");
+			break;
+		}
 		case Format::COFF:
+		{
+			heuristics = std::make_unique<Heuristics>(parser, search, toolInfo);
+			// Maybe something from PE will hit.
+			formats.insert("pe");
+			break;
+		}
 		default:
 		{
 			heuristics = std::make_unique<Heuristics>(parser, search, toolInfo);
@@ -253,53 +275,48 @@ CompilerDetector::CompilerDetector(
 		}
 	}
 
-	if (isFat || fileParser.getFileFormat() == Format::RAW_DATA)
-	{
-		populateInternalPaths(path, true);
-		return;
-	}
-
 	auto bitWidth = fileParser.getWordLength();
+
+	if (!isFat)
 	switch(targetArchitecture)
 	{
 		case Architecture::X86:
-			path.append("x86");
-			break;
-
+			archs.insert("x86");
+			[[fallthrough]];
 		case Architecture::X86_64:
-			path.append("x64");
+			archs.insert("x64");
 			break;
 
 		case Architecture::ARM:
 			if (bitWidth == 32)
 			{
-				path.append("arm");
+				archs.insert("arm");
 			}
 			else
 			{
-				path.append("arm64");
+				archs.insert("arm64");
 			}
 			break;
 
 		case Architecture::MIPS:
 			if (bitWidth == 32)
 			{
-				path.append("mips");
+				archs.insert("mips");
 			}
 			else
 			{
-				path.append("mips64");
+				archs.insert("mips64");
 			}
 			break;
 
 		case Architecture::POWERPC:
 			if (bitWidth == 32)
 			{
-				path.append("ppc");
+				archs.insert("ppc");
 			}
 			else
 			{
-				path.append("ppc64");
+				archs.insert("ppc64");
 			}
 			break;
 
@@ -307,7 +324,7 @@ CompilerDetector::CompilerDetector(
 			break;
 	}
 
-	populateInternalPaths(path);
+	populateInternalPaths(path, formats, archs);
 }
 
 /**
@@ -421,31 +438,42 @@ void CompilerDetector::removeUnusedCompilers()
 
 /**
  * Add all YARA files from the given @p dir to internal paths member.
+ * Expects @p dir structure like this: <formats>/<archs>/<files>
  */
 void CompilerDetector::populateInternalPaths(
 		const retdec::utils::FilesystemPath& dir,
-		bool recursive)
+		const std::set<std::string>& formats,
+		const std::set<std::string>& archs)
 {
 	if (!dir.isDirectory())
 	{
 		return;
 	}
 
-	for (const auto *subpath : dir)
+	for (const auto *sub1 : dir)
 	{
-		if (subpath->isFile()
-				&& std::any_of(externalSuffixes.begin(), externalSuffixes.end(),
-				[&] (const auto &suffix)
-			{
-				return endsWith(subpath->getPath(), suffix);
-			}
-		))
+		if (!(sub1->isDirectory() && endsWith(sub1->getPath(), formats)))
 		{
-			internalPaths.push_back(subpath->getPath());
+			continue;
 		}
-		else if (recursive && subpath->isDirectory())
+
+		for (const auto *sub2 : *sub1)
 		{
-			populateInternalPaths(*subpath, recursive);
+			if (!(sub2->isDirectory()
+					&& (archs.empty() || endsWith(sub2->getPath(), archs))))
+			{
+				continue;
+			}
+
+			for (const auto *sub3 : *sub2)
+			{
+				if (!(sub3->isFile() && endsWith(sub3->getPath(), externalSuffixes)))
+				{
+					continue;
+				}
+
+				internalPaths.push_back(sub3->getPath());
+			}
 		}
 	}
 }

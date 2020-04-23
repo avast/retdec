@@ -48,7 +48,8 @@ class CompilerDetector : private retdec::utils::NonCopyable
 	protected:
 		void populateInternalPaths(
 				const retdec::utils::FilesystemPath& dir,
-				bool recursive = false);
+				const std::set<std::string>& formats,
+				const std::set<std::string>& archs);
 
 	protected:
 		/// results - detected tools
