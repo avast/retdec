@@ -25,6 +25,7 @@
 #define NOP_FPU_STACK 0
 #define ANALYZE_FAIL false
 #define ANALYZE_SUCCESS true
+#define PERFORMANCE_CEIL 1000
 
 namespace retdec {
 namespace bin2llvmir {

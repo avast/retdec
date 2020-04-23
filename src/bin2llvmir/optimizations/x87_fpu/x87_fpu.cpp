@@ -213,17 +213,29 @@ bool X87FpuAnalysis::run()
 			}
 		}
 
-		const auto& pivHouseholderQr = funMd.A.colPivHouseholderQr();
-		int matRank = pivHouseholderQr.rank();
-		int augmentedMatRank = augmentedRank(funMd.A, funMd.B);
+		if (funMd.A.rows() <= PERFORMANCE_CEIL)
+		{
+			const auto& pivHouseholderQr = funMd.A.colPivHouseholderQr();
+			int matRank = pivHouseholderQr.rank();
+			int augmentedMatRank = augmentedRank(funMd.A, funMd.B);
 
-		if (matRank == augmentedMatRank) // there is exactly one solution
-		{
-			funMd.x = pivHouseholderQr.solve(funMd.B);
+			if (matRank == augmentedMatRank) // there is exactly one solution
+			{
+				funMd.x = pivHouseholderQr.solve(funMd.B);
+			}
+			else
+			{
+				funMd.analyzeSuccess = false;
+			}
 		}
-		else
+		else // worst scenario => due to performance ceil turn to simple no CFG analyse
 		{
-			funMd.analyzeSuccess = false;
+			int height = funMd.A.rows();
+			funMd.x.resize(height, 1);
+			for (int i = 0; i < height; ++i)
+			{
+				funMd.x(i, 0) = EMPTY_FPU_STACK;
+			}
 		}
 	}
 
