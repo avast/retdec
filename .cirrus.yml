@@ -8,11 +8,14 @@ task:
       image: freebsd-12-1-release-amd64
       image: freebsd-11-3-release-amd64
   install_script:
+    - pkg update
     - pkg install -y git cmake python37 bison autotools textproc/flex
   script:
     - ln -sf /usr/local/bin/python3.7 /usr/local/bin/python3
     - mkdir build
     - cd build
     - cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local
-    - echo "using: make -j"`sysctl -n kern.smp.cpus`
-    - make -j`sysctl -n kern.smp.cpus`
+    - CPUS=`sysctl -n kern.smp.cpus`
+    - CPUS=`expr $CPUS + 1`
+    - echo "using: make -j"$CPUS
+    - make -j$CPUS
