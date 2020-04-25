@@ -16,6 +16,7 @@
 
 #include "retdec/bin2llvmir/utils/ir_modifier.h"
 #include "retdec/bin2llvmir/utils/llvm.h"
+#include "retdec/capstone2llvmir/x86/x86.h"
 
 using namespace llvm;
 using namespace retdec::bin2llvmir::llvm_utils;
@@ -437,7 +438,7 @@ bool X87FpuAnalysis::analyzeBasicBlock(
 
 bool X87FpuAnalysis::isValidRegisterIndex(int index)
 {
-	return (X86_REG_ST0 <= index && index <= X86_REG_ST7) || (X87_REG_TAG0 <= index && index <= X87_REG_TAG7);
+	return (X86_REG_ST0 <= index && index <= X86_REG_ST7);
 }
 
 bool X87FpuAnalysis::optimizeAnalyzedFpuInstruction()
@@ -453,19 +454,9 @@ bool X87FpuAnalysis::optimizeAnalyzedFpuInstruction()
 
 		for (auto& i : funMd.pseudoCalls)
 		{
-			int regBase;
+			int regBase = uint32_t(X86_REG_ST0);
 			auto *callStore = _config->isLlvmX87StorePseudoFunctionCall(i.second);
 			auto *callLoad = _config->isLlvmX87LoadPseudoFunctionCall(i.second);
-			if (callStore)
-			{
-				regBase = _config->isLlvmX87DataStorePseudoFunctionCall(callStore)
-						  ? uint32_t(X86_REG_ST0) : uint32_t(X87_REG_TAG0);
-			}
-			else // callLoad
-			{
-				regBase = _config->isLlvmX87DataLoadPseudoFunctionCall(callLoad)
-						  ? uint32_t(X86_REG_ST0) : uint32_t(X87_REG_TAG0);
-			}
 
 			double bbIn = funMd.x(funMd.indexes[i.second->getParent()][funMd.inIndex], 0);
 			int diff = (int)i.first % EMPTY_FPU_STACK; // correction of possible stack over/under-flow
