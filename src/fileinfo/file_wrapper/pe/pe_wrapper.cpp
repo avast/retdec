@@ -14,6 +14,7 @@ using namespace retdec::utils;
 using namespace PeLib;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 namespace
@@ -94,23 +95,27 @@ std::string getSymbolType(byte type)
  * @param dllListFile Path to text file containing list of OS DLLs
  * @param loadFlags Load flags
  */
-PeWrapper::PeWrapper(const std::string & pathToFile, const std::string & dllListFile, retdec::fileformat::LoadFlags loadFlags) : PeFormat(pathToFile, dllListFile, loadFlags), wrapperParser(nullptr)
+PeWrapper::PeWrapper(
+		const std::string & pathToFile,
+		const std::string & dllListFile,
+		retdec::fileformat::LoadFlags loadFlags)
+		: PeFormat(pathToFile, dllListFile, loadFlags), wrapperParser(nullptr)
 {
-	switch(peClass)
+	if (isPe32())
 	{
-		case PEFILE32:
-			wrapperParser = new PeWrapperParser32(*peHeader32);
-			break;
-		case PEFILE64:
-			wrapperParser = new PeWrapperParser64(*peHeader64);
-			break;
-		default:
-			stateIsValid = false;
+		wrapperParser = new PeWrapperParser32(*peHeader32);
 	}
-	if(stateIsValid)
+	else if (isPe64())
 	{
-		file->readRelocationsDirectory();
+		wrapperParser = new PeWrapperParser64(*peHeader64);
 	}
+	else
+	{
+		stateIsValid = false;
+		return;
+	}
+
+	file->readRelocationsDirectory();
 }
 
 /**
@@ -214,3 +219,4 @@ bool PeWrapper::getCoffSymbol(unsigned long long index, Symbol &symbol) const
 }
 
 } // namespace fileinfo
+} // namespace retdec

@@ -12,8 +12,15 @@ namespace cpdetect {
 /**
  * Constructor of DetectParams structure
  */
-DetectParams::DetectParams(SearchType searchType_, bool internal_, bool external_, std::size_t epBytesCount_) :
-		searchType(searchType_), internal(internal_), external(external_), epBytesCount(epBytesCount_)
+DetectParams::DetectParams(
+		SearchType searchType_,
+		bool internal_,
+		bool external_,
+		std::size_t epBytesCount_)
+		: searchType(searchType_)
+		, internal(internal_)
+		, external(external_)
+		, epBytesCount(epBytesCount_)
 {
 
 }
@@ -24,7 +31,8 @@ DetectParams::DetectParams(SearchType searchType_, bool internal_, bool external
  */
 bool DetectResult::isReliable() const
 {
-	return source != DetectionMethod::UNKNOWN && strength > DetectionStrength::MEDIUM;
+	return source != DetectionMethod::UNKNOWN
+			&& strength > DetectionStrength::MEDIUM;
 }
 
 /**
@@ -91,8 +99,12 @@ bool DetectResult::isUnknownType() const
  * @param extra Extra information about compiler
  */
 void ToolInformation::addTool(
-		DetectionMethod source, DetectionStrength strength, ToolType toolType,
-		const std::string &name, const std::string &version, const std::string &extra)
+		DetectionMethod source,
+		DetectionStrength strength,
+		ToolType toolType,
+		const std::string &name,
+		const std::string &version,
+		const std::string &extra)
 {
 	DetectResult compiler;
 	compiler.source = source;
@@ -117,8 +129,12 @@ void ToolInformation::addTool(
  * This method implies DetectionMethod::SIGNATURE. Strength is computed.
  */
 void ToolInformation::addTool(
-		std::size_t matchNibbles, std::size_t totalNibbles, ToolType toolType,
-		const std::string &name, const std::string &version, const std::string &extra)
+		std::size_t matchNibbles,
+		std::size_t totalNibbles,
+		ToolType toolType,
+		const std::string &name,
+		const std::string &version,
+		const std::string &extra)
 {
 	DetectResult compiler;
 	compiler.source = DetectionMethod::SIGNATURE;
@@ -151,16 +167,19 @@ void ToolInformation::addTool(
  * @param extra Extra information about detected language
  * @param bytecode Whether language uses byte-code
  */
-void ToolInformation::addLanguage(const std::string &name, const std::string &extra, bool bytecode)
+void ToolInformation::addLanguage(
+		const std::string &name,
+		const std::string &extra,
+		bool bytecode)
 {
 	// Prevent duplicates.
-	for(auto &item : detectedLanguages)
+	for (auto &item : detectedLanguages)
 	{
-		if(item.name == name)
+		if (item.name == name)
 		{
-			if(item.additionalInfo.empty() || item.additionalInfo == extra)
+			if (item.additionalInfo.empty() || item.additionalInfo == extra)
 			{
-				if(!item.bytecode)
+				if (!item.bytecode)
 				{
 					item.bytecode = bytecode;
 				}
@@ -180,22 +199,25 @@ void ToolInformation::addLanguage(const std::string &name, const std::string &ex
 /**
  * Check out if detected result is reliable
  * @param resultIndex Index of selected result
- * @return @c true if selected result is detected based on reliable source, @c false otherwise
+ * @return @c true if selected result is detected based on reliable source,
+ *         @c false otherwise
  */
 bool ToolInformation::isReliableResult(std::size_t resultIndex) const
 {
-	return (resultIndex < detectedTools.size()) ? detectedTools[resultIndex].isReliable() : false;
+	return resultIndex < detectedTools.size()
+			&& detectedTools[resultIndex].isReliable();
 }
 
 /**
  * Check if at least one reliable result was detected
- * @return @c true if at least one reliable result was detected, @c false otherwise
+ * @return @c true if at least one reliable result was detected,
+ *         @c false otherwise
  */
 bool ToolInformation::hasReliableResult() const
 {
-	for(std::size_t i = 0, e = detectedTools.size(); i < e; ++i)
+	for (std::size_t i = 0, e = detectedTools.size(); i < e; ++i)
 	{
-		if(isReliableResult(i))
+		if (isReliableResult(i))
 		{
 			return true;
 		}
@@ -298,6 +320,9 @@ std::string detectionMetodToString(DetectionMethod method)
 
 		case DetectionMethod::OTHER_H:
 			return "heuristic";
+
+		case DetectionMethod::YARA_RULE:
+			return "YARA rule";
 
 		case DetectionMethod::UNKNOWN:
 			/* fall-thru */

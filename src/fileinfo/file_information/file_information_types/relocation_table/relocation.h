@@ -7,8 +7,10 @@
 #ifndef FILEINFO_FILE_INFORMATION_FILE_INFORMATION_TYPES_RELOCATION_TABLE_RELOCATION_H
 #define FILEINFO_FILE_INFORMATION_FILE_INFORMATION_TYPES_RELOCATION_TABLE_RELOCATION_H
 
+#include <limits>
 #include <string>
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -49,5 +51,6 @@ class Relocation
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

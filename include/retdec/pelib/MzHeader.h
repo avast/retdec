@@ -13,7 +13,7 @@
 #ifndef MZHEADER_H
 #define MZHEADER_H
 
-#include "pelib/PeLibInc.h"
+#include "retdec/pelib/PeLibInc.h"
 
 namespace PeLib
 {

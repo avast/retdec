@@ -9,6 +9,9 @@
 
 #include "fileinfo/file_information/file_information_types/flags.h"
 
+#include <limits>
+
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -53,5 +56,6 @@ class DynamicEntry
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

@@ -1,11 +1,3 @@
-include(ExternalProject)
-
-if(CMAKE_C_COMPILER)
-	set(CMAKE_C_COMPILER_OPTION "-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}")
-endif()
-if(CMAKE_CXX_COMPILER)
-	set(CMAKE_CXX_COMPILER_OPTION "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")
-endif()
 
 if(CAPSTONE_LOCAL_DIR)
 	message(STATUS "Capstone: using local Capstone directory.")
@@ -18,7 +10,7 @@ if(CAPSTONE_LOCAL_DIR)
 			-DCMAKE_BUILD_TYPE=Release
 			-DCAPSTONE_BUILD_STATIC=ON
 			-DCAPSTONE_BUILD_SHARED=OFF
-			-DCAPSTONE_BUILD_STATIC_RUNTIME=OFF
+			-DCAPSTONE_BUILD_STATIC_RUNTIME=${RETDEC_MSVC_STATIC_RUNTIME}
 			-DCAPSTONE_BUILD_TESTS=OFF
 			-DCAPSTONE_X86_ATT_DISABLE=OFF
 			# Enabled architectures.
@@ -60,7 +52,7 @@ else()
 			-DCMAKE_BUILD_TYPE=Release
 			-DCAPSTONE_BUILD_STATIC=ON
 			-DCAPSTONE_BUILD_SHARED=OFF
-			-DCAPSTONE_BUILD_STATIC_RUNTIME=OFF
+			-DCAPSTONE_BUILD_STATIC_RUNTIME=${RETDEC_MSVC_STATIC_RUNTIME}
 			-DCAPSTONE_BUILD_TESTS=OFF
 			-DCAPSTONE_X86_ATT_DISABLE=OFF
 			# Enabled architectures.
@@ -104,10 +96,79 @@ endif()
 ExternalProject_Get_Property(capstone-project source_dir)
 ExternalProject_Get_Property(capstone-project binary_dir)
 
-# Add libraries.
+set(CAPSTONE_LIB_NAME  ${CMAKE_STATIC_LIBRARY_PREFIX}capstone${CMAKE_STATIC_LIBRARY_SUFFIX})
+set(CAPSTONE_LIB_PNAME ${CMAKE_STATIC_LIBRARY_PREFIX}retdec-capstone${CMAKE_STATIC_LIBRARY_SUFFIX})
+set(CAPSTONE_LIB_DEBUG ${binary_dir}/${DEBUG_DIR}${CAPSTONE_LIB_NAME})
+set(CAPSTONE_LIB_OPT   ${binary_dir}/${RELEASE_DIR}${CAPSTONE_LIB_NAME})
+
+# Create target.
 add_library(capstone INTERFACE)
+add_library(retdec::deps::capstone ALIAS capstone)
 add_dependencies(capstone capstone-project)
-target_include_directories(capstone SYSTEM INTERFACE ${source_dir}/include)
-target_include_directories(capstone SYSTEM INTERFACE ${source_dir}/arch)
-target_link_libraries(capstone INTERFACE debug ${binary_dir}/${DEBUG_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}capstone${CMAKE_STATIC_LIBRARY_SUFFIX})
-target_link_libraries(capstone INTERFACE optimized ${binary_dir}/${RELEASE_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}capstone${CMAKE_STATIC_LIBRARY_SUFFIX})
+
+target_include_directories(capstone
+	SYSTEM INTERFACE
+		$<BUILD_INTERFACE:${source_dir}/include>
+		$<BUILD_INTERFACE:${source_dir}/arch>
+		$<INSTALL_INTERFACE:${RETDEC_INSTALL_DEPS_INCLUDE_DIR}>
+)
+
+target_link_libraries(capstone INTERFACE
+		$<INSTALL_INTERFACE:retdec::deps::capstone-libs>
+	debug
+		$<BUILD_INTERFACE:${CAPSTONE_LIB_DEBUG}>
+	optimized
+		$<BUILD_INTERFACE:${CAPSTONE_LIB_OPT}>
+)
+
+# Install includes.
+install(
+	DIRECTORY   ${source_dir}/include/
+	DESTINATION ${RETDEC_INSTALL_DEPS_INCLUDE_DIR}
+)
+
+# Install libs.
+# Install both Release and Debug variant to the same location.
+# We assume that only one variant will be present at the time.
+install(
+    FILES       ${CAPSTONE_LIB_DEBUG}
+    DESTINATION ${RETDEC_INSTALL_LIB_DIR}
+	RENAME      ${CAPSTONE_LIB_PNAME}
+	OPTIONAL
+)
+install(
+    FILES       ${CAPSTONE_LIB_OPT}
+	DESTINATION ${RETDEC_INSTALL_LIB_DIR}
+	RENAME      ${CAPSTONE_LIB_PNAME}
+	OPTIONAL
+)
+
+# Install targets.
+install(TARGETS capstone
+	EXPORT capstone-targets
+)
+
+# Export targets.
+install(EXPORT capstone-targets
+	FILE "retdec-capstone-targets.cmake"
+	NAMESPACE retdec::deps::
+	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
+)
+
+# Configure config file.
+set(CAPSTONE_LIB_INSTALLED "${RETDEC_INSTALL_LIB_DIR_ABS}/${CAPSTONE_LIB_PNAME}")
+configure_package_config_file(
+	"retdec-capstone-config.cmake"
+	"${CMAKE_CURRENT_BINARY_DIR}/retdec-capstone-config.cmake"
+	INSTALL_DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
+	PATH_VARS
+		CAPSTONE_LIB_INSTALLED
+)
+
+# Install CMake files.
+install(
+	FILES
+		"${CMAKE_CURRENT_BINARY_DIR}/retdec-capstone-config.cmake"
+	DESTINATION
+		"${RETDEC_INSTALL_CMAKE_DIR}"
+)

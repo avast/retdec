@@ -9,8 +9,8 @@
 #include <cstdint>
 #include <vector>
 
-namespace yaracpp
-{
+namespace retdec {
+namespace yaracpp {
 
 /**
  * Representation of one match
@@ -41,3 +41,4 @@ class YaraMatch
 };
 
 } // namespace yaracpp
+} // namespace retdec

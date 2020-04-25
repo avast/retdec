@@ -7,6 +7,7 @@
 #include "fileinfo/file_information/file_information_types/file_header.h"
 #include "fileinfo/file_information/file_information_types/type_conversions.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -702,3 +703,4 @@ void FileHeader::clearDllFlagsDescriptors()
 }
 
 } // namespace fileinfo
+} // namespace retdec

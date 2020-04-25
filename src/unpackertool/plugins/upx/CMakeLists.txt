@@ -1,4 +1,5 @@
-set(UPX_SOURCES
+
+add_library(unpacker-upx STATIC
 	upx_stub_signatures.cpp
 	upx.cpp
 	pe/pe_upx_stub.cpp
@@ -13,7 +14,25 @@ set(UPX_SOURCES
 	decompressors/decompressor.cpp
 	elf/elf_upx_stub.cpp
 )
+add_library(retdec::unpacker-upx ALIAS unpacker-upx)
 
-add_library(retdec-unpacker-upx STATIC ${UPX_SOURCES})
-target_link_libraries(retdec-unpacker-upx retdec-unpacker retdec-fileformat retdec-utils)
-target_include_directories(retdec-unpacker-upx PUBLIC ${PROJECT_SOURCE_DIR}/src/)
+target_compile_features(unpacker-upx PUBLIC cxx_std_17)
+
+target_include_directories(unpacker-upx
+	PUBLIC
+		$<BUILD_INTERFACE:${RETDEC_INCLUDE_DIR}>
+		$<BUILD_INTERFACE:${RETDEC_SOURCE_DIR}>
+		# not installed
+)
+
+target_link_libraries(unpacker-upx
+	PUBLIC
+		retdec::unpacker
+		retdec::fileformat
+		retdec::utils
+)
+
+set_target_properties(unpacker-upx
+	PROPERTIES
+		OUTPUT_NAME "retdec-unpacker-upx"
+)

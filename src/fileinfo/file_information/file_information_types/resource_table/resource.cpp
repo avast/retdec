@@ -7,6 +7,7 @@
 #include "fileinfo/file_information/file_information_types/resource_table/resource.h"
 #include "fileinfo/file_information/file_information_types/type_conversions.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -232,3 +233,4 @@ void Resource::setSize(std::size_t rSize)
 }
 
 } // namespace fileinfo
+} // namespace retdec

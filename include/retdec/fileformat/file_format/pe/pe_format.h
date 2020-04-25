@@ -19,6 +19,9 @@
 #include "retdec/fileformat/types/visual_basic/visual_basic_info.h"
 #include "retdec/pelib/PeLib.h"
 
+// Forward declare OpenSSL structures used in this header.
+typedef struct pkcs7_st PKCS7;
+
 namespace retdec {
 namespace fileformat {
 
@@ -123,7 +126,6 @@ class PeFormat : public FileFormat
 		PeLib::PeFile *file;              ///< PeLib representation of PE file
 		PeLib::PeHeaderT<32> *peHeader32; ///< header of 32-bit PE file
 		PeLib::PeHeaderT<64> *peHeader64; ///< header of 64-bit PE file
-		int peClass;                      ///< class of PE file
 	public:
 		PeFormat(const std::string & pathToFile, const std::string & dllListFile, LoadFlags loadFlags = LoadFlags::NONE);
 		PeFormat(std::istream &inputStream, LoadFlags loadFlags = LoadFlags::NONE);
@@ -189,7 +191,8 @@ class PeFormat : public FileFormat
 		bool dllListFailedToLoad() const;
 		bool initDllList(const std::string & dllListFile);
 
-		int getPeClass() const;
+		PeLib::PeFile32* isPe32() const;
+		PeLib::PeFile64* isPe64() const;
 		bool isDotNet() const;
 		bool isPackedDotNet() const;
 		bool isVisualBasic(unsigned long long &version) const;

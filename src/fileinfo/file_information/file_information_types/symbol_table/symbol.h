@@ -7,8 +7,10 @@
 #ifndef FILEINFO_FILE_INFORMATION_FILE_INFORMATION_TYPES_SYMBOL_TABLE_SYMBOL_H
 #define FILEINFO_FILE_INFORMATION_FILE_INFORMATION_TYPES_SYMBOL_TABLE_SYMBOL_H
 
+#include <limits>
 #include <string>
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -57,5 +59,6 @@ class Symbol
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

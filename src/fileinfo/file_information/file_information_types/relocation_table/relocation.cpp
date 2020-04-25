@@ -7,6 +7,7 @@
 #include "fileinfo/file_information/file_information_types/relocation_table/relocation.h"
 #include "fileinfo/file_information/file_information_types/type_conversions.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -119,3 +120,4 @@ void Relocation::setCalculatedValue(long long value)
 }
 
 } // namespace fileinfo
+} // namespace retdec

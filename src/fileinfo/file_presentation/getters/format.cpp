@@ -11,6 +11,7 @@
 
 using namespace retdec::utils;
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -63,3 +64,4 @@ void addUniqueValues(std::vector<std::string> &currentVal, const std::vector<std
 }
 
 } // namespace fileinfo
+} // namespace retdec

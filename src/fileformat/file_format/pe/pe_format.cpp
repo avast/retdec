@@ -573,14 +573,13 @@ void PeFormat::initStructures(const std::string & dllListFile)
 	formatParser = nullptr;
 	peHeader32 = nullptr;
 	peHeader64 = nullptr;
-	peClass = PEFILE_UNKNOWN;
 	errorLoadingDllList = false;
 
 	// If we got an override list of dependency DLLs, we load them into the map
 	initDllList(dllListFile);
 
 	file = openPeFile(fileStream);
-	if(file)
+	if (file)
 	{
 		stateIsValid = true;
 		try
@@ -603,36 +602,23 @@ void PeFormat::initStructures(const std::string & dllListFile)
 			initLoaderErrorInfo();
 
 			mzHeader = file->mzHeader();
-			switch((peClass = getFileType(fileStream)))
+
+			if (auto *f32 = isPe32())
 			{
-				case PEFILE32:
-				{
-					auto *f32 = dynamic_cast<PeFileT<32>*>(file);
-					if(f32)
-					{
-						peHeader32 = &(f32->peHeader());
-						formatParser = new PeFormatParser32(this, static_cast<PeFileT<32>*>(file));
-					}
-					stateIsValid = f32 && peHeader32;
-					break;
-				}
-				case PEFILE64:
-				{
-					auto *f64 = dynamic_cast<PeFileT<64>*>(file);
-					if(f64)
-					{
-						peHeader64 = &(f64->peHeader());
-						formatParser = new PeFormatParser64(this, static_cast<PeFileT<64>*>(file));
-					}
-					stateIsValid = f64 && peHeader64;
-					break;
-				}
-				default:
-				{
-					stateIsValid = false;
-				}
+				peHeader32 = &(f32->peHeader());
+				formatParser = new PeFormatParser32(this, static_cast<PeFileT<32>*>(file));
 			}
-		} catch(...)
+			else if (auto *f64 = isPe64())
+			{
+				peHeader64 = &(f64->peHeader());
+				formatParser = new PeFormatParser64(this, static_cast<PeFileT<64>*>(file));
+			}
+			else
+			{
+				stateIsValid = false;
+			}
+		}
+		catch(...)
 		{
 			stateIsValid = false;
 		}
@@ -2997,7 +2983,7 @@ std::size_t PeFormat::getBytesPerWord() const
 		case PELIB_IMAGE_FILE_MACHINE_R3000_LITTLE:
 			return 4;
 		case PELIB_IMAGE_FILE_MACHINE_R4000:
-			return (peClass == PEFILE64 ? 8 : 4);
+			return (isPe64() ? 8 : 4);
 		case PELIB_IMAGE_FILE_MACHINE_R10000:
 			return 8;
 		case PELIB_IMAGE_FILE_MACHINE_WCEMIPSV2:
@@ -3020,7 +3006,7 @@ std::size_t PeFormat::getBytesPerWord() const
 		// Architecture::POWERPC
 		case PELIB_IMAGE_FILE_MACHINE_POWERPC:
 		case PELIB_IMAGE_FILE_MACHINE_POWERPCFP:
-			return (peClass == PEFILE64 ? 8 : 4);
+			return (isPe64() ? 8 : 4);
 
 		// unsupported architecture
 		default:
@@ -3420,14 +3406,14 @@ bool PeFormat::initDllList(const std::string & dllListFile)
 	return true;
 }
 
-/**
- * Get class of PE file
- * @return PeLib::PEFILE32 if file is 32-bit PE file, PeLib::PEFILE64 if file is
- *    64-bit PE file or any other value otherwise
- */
-int PeFormat::getPeClass() const
+PeLib::PeFile32* PeFormat::isPe32() const
 {
-	return peClass;
+	return dynamic_cast<PeFile32*>(file);
+}
+
+PeLib::PeFile64* PeFormat::isPe64() const
+{
+	return dynamic_cast<PeFile64*>(file);
 }
 
 /**

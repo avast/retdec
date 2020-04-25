@@ -13,22 +13,22 @@
 #ifndef PEFILE_H
 #define PEFILE_H
 
-#include "pelib/PeLibInc.h"
-#include "pelib/MzHeader.h"
-#include "pelib/PeHeader.h"
-#include "pelib/ImportDirectory.h"
-#include "pelib/ExportDirectory.h"
-#include "pelib/BoundImportDirectory.h"
-#include "pelib/ResourceDirectory.h"
-#include "pelib/RelocationsDirectory.h"
-#include "pelib/ComHeaderDirectory.h"
-#include "pelib/IatDirectory.h"
-#include "pelib/DebugDirectory.h"
-#include "pelib/TlsDirectory.h"
-#include "pelib/RichHeader.h"
-#include "pelib/CoffSymbolTable.h"
-#include "pelib/DelayImportDirectory.h"
-#include "pelib/SecurityDirectory.h"
+#include "retdec/pelib/PeLibInc.h"
+#include "retdec/pelib/MzHeader.h"
+#include "retdec/pelib/PeHeader.h"
+#include "retdec/pelib/ImportDirectory.h"
+#include "retdec/pelib/ExportDirectory.h"
+#include "retdec/pelib/BoundImportDirectory.h"
+#include "retdec/pelib/ResourceDirectory.h"
+#include "retdec/pelib/RelocationsDirectory.h"
+#include "retdec/pelib/ComHeaderDirectory.h"
+#include "retdec/pelib/IatDirectory.h"
+#include "retdec/pelib/DebugDirectory.h"
+#include "retdec/pelib/TlsDirectory.h"
+#include "retdec/pelib/RichHeader.h"
+#include "retdec/pelib/CoffSymbolTable.h"
+#include "retdec/pelib/DelayImportDirectory.h"
+#include "retdec/pelib/SecurityDirectory.h"
 
 namespace PeLib
 {
@@ -705,7 +705,8 @@ namespace PeLib
 	{
 		unsigned int uiEntryPointRva = peHeader().getAddressOfEntryPoint();
 		std::uint64_t uiOffset = peHeader().rvaToOffset(uiEntryPointRva);
-		std::uint64_t entryPointCode[2];
+		// Initialize to anything not zero, because later we check if zero.
+		std::uint64_t entryPointCode[2] = {1, 1};
 
 		// No point of reading entry point that is beyond the file size
 		std::uint64_t ulFileSize = fileSize(m_iStream);
@@ -771,6 +772,11 @@ namespace PeLib
 
 		// Check errors in entry point
 		ldrError = checkEntryPointErrors();
+		if (ldrError != LDR_ERROR_NONE)
+			return ldrError;
+
+		// Check errors in entry point
+		ldrError = securityDir().loaderError();
 		if (ldrError != LDR_ERROR_NONE)
 			return ldrError;
 

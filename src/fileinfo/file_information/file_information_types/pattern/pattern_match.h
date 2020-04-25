@@ -7,6 +7,9 @@
 #ifndef FILEINFO_FILE_INFORMATION_FILE_INFORMATION_TYPES_PATTERN_PATTERN_MATCH_H
 #define FILEINFO_FILE_INFORMATION_FILE_INFORMATION_TYPES_PATTERN_PATTERN_MATCH_H
 
+#include <limits>
+
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -50,5 +53,6 @@ class PatternMatch
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

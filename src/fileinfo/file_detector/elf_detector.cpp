@@ -15,6 +15,7 @@ using namespace ELFIO;
 using namespace retdec::cpdetect;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 namespace
@@ -1968,7 +1969,8 @@ void ElfDetector::getAdditionalInfo()
  */
 retdec::cpdetect::CompilerDetector* ElfDetector::createCompilerDetector() const
 {
-	return new ElfCompiler(*elfParser, cpParams, fileInfo.toolInfo);
+	return new CompilerDetector(*elfParser, cpParams, fileInfo.toolInfo);
 }
 
 } // namespace fileinfo
+} // namespace retdec

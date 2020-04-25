@@ -16,6 +16,7 @@ using namespace PeLib;
 using namespace retdec::cpdetect;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 namespace
@@ -354,15 +355,13 @@ void PeDetector::getVisualBasicInfo()
 
 void PeDetector::detectFileClass()
 {
-	switch(peParser->getPeClass())
+	if (peParser->isPe32())
 	{
-		case PEFILE32:
-			fileInfo.setFileClass("32-bit");
-			break;
-		case PEFILE64:
-			fileInfo.setFileClass("64-bit");
-			break;
-		default:;
+		fileInfo.setFileClass("32-bit");
+	}
+	else if (peParser->isPe64())
+	{
+		fileInfo.setFileClass("64-bit");
 	}
 }
 
@@ -542,7 +541,8 @@ void PeDetector::getAdditionalInfo()
  */
 retdec::cpdetect::CompilerDetector* PeDetector::createCompilerDetector() const
 {
-	return new PeCompiler(*peParser, cpParams, fileInfo.toolInfo);
+	return new CompilerDetector(*peParser, cpParams, fileInfo.toolInfo);
 }
 
 } // namespace fileinfo
+} // namespace retdec

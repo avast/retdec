@@ -18,6 +18,7 @@ RetDec uses the following third-party libraries or other resources:
 10) yara: https://virustotal.github.io/yara/
 11) yaramod: https://github.com/avast/yaramod
 12) Eigen: http://eigen.tuxfamily.org/index.php?title=Main_Page
+13) cmake-modules: https://github.com/rpavlik/cmake-modules
 
 These third-party libraries or other resources are licensed under the
 following licenses:
@@ -795,36 +796,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
-===============================================================================
-12) Eigen
-===============================================================================
-
-Eigen is Free Software. Starting from the 3.1.1 version, it is licensed under
-the MPL2, which is a simple weak copyleft license. Common questions about the
-MPL2 are answered in the official MPL2 FAQ.
-
-Earlier versions were licensed under the LGPL3+.
-
-Note that currently, a few features rely on third-party code licensed under the
-LGPL: SimplicialCholesky, AMD ordering, and constrained_cg. Such features can
-be explicitly disabled by compiling with the EIGEN_MPL2_ONLY preprocessor symbol
-defined. Furthermore, Eigen provides interface classes for various third-party
-libraries (usually recognizable by the <Eigen/*Support> header name). Of course
-you have to mind the license of the so-included library when using them.
-
-Virtually any software may use Eigen. For example, closed-source software may use
-Eigen without having to disclose its own source code. Many proprietary and
-closed-source software projects are using Eigen right now, as well as many
-BSD-licensed projects.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.

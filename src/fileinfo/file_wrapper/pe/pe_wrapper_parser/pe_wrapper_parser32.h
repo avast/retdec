@@ -10,6 +10,7 @@
 #include "fileinfo/file_wrapper/pe/pe_wrapper_parser/pe_wrapper_parser.h"
 #include "retdec/pelib/PeLib.h"
 
+namespace retdec {
 namespace fileinfo {
 
 class PeWrapperParser32 : public PeWrapperParser
@@ -27,5 +28,6 @@ class PeWrapperParser32 : public PeWrapperParser
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

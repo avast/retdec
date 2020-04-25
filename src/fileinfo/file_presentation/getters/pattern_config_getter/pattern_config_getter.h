@@ -10,6 +10,7 @@
 #include "retdec/config/config.h"
 #include "fileinfo/file_information/file_information.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -33,5 +34,6 @@ class PatternConfigGetter
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

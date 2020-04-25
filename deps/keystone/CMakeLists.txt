@@ -1,11 +1,3 @@
-include(ExternalProject)
-
-if(CMAKE_C_COMPILER)
-	set(CMAKE_C_COMPILER_OPTION "-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}")
-endif()
-if(CMAKE_CXX_COMPILER)
-	set(CMAKE_CXX_COMPILER_OPTION "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")
-endif()
 
 if(KEYSTONE_LOCAL_DIR)
 	message(STATUS "Keystone: using local Keystone directory.")
@@ -20,7 +12,7 @@ if(KEYSTONE_LOCAL_DIR)
 			# Python is used to generate LLVMBuild.cmake file. Python2 generates this file
 			# with UNIX paths, which do not work. Python3 generates proper Windows paths.
 			-DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
-			-DKEYSTONE_BUILD_STATIC_RUNTIME=OFF
+			-DKEYSTONE_BUILD_STATIC_RUNTIME=${RETDEC_MSVC_STATIC_RUNTIME}
 			# Force the use of the same compiler as used to build the top-level
 			# project. Otherwise, the external project may pick up a different
 			# compiler, which may result in link errors.
@@ -46,7 +38,7 @@ else()
 			# Python is used to generate LLVMBuild.cmake file. Python2 generates this file
 			# with UNIX paths, which do not work. Python3 generates proper Windows paths.
 			-DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
-			-DKEYSTONE_BUILD_STATIC_RUNTIME=OFF
+			-DKEYSTONE_BUILD_STATIC_RUNTIME=${RETDEC_MSVC_STATIC_RUNTIME}
 			# Force the use of the same compiler as used to build the top-level
 			# project. Otherwise, the external project may pick up a different
 			# compiler, which may result in link errors.
@@ -72,9 +64,19 @@ endif()
 ExternalProject_Get_Property(keystone-project source_dir)
 ExternalProject_Get_Property(keystone-project binary_dir)
 
-# Add libraries.
+# Create target.
 add_library(keystone INTERFACE)
+add_library(retdec::deps::keystone ALIAS keystone)
 add_dependencies(keystone keystone-project)
-target_include_directories(keystone SYSTEM INTERFACE ${source_dir}/include)
-target_link_libraries(keystone INTERFACE debug ${binary_dir}/llvm/lib/${DEBUG_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}keystone${CMAKE_STATIC_LIBRARY_SUFFIX})
-target_link_libraries(keystone INTERFACE optimized ${binary_dir}/llvm/lib/${RELEASE_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}keystone${CMAKE_STATIC_LIBRARY_SUFFIX})
+
+target_include_directories(keystone
+	SYSTEM INTERFACE
+		$<BUILD_INTERFACE:${source_dir}/include>
+)
+
+target_link_libraries(keystone INTERFACE
+	debug
+		${binary_dir}/llvm/lib/${DEBUG_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}keystone${CMAKE_STATIC_LIBRARY_SUFFIX}
+	optimized
+		${binary_dir}/llvm/lib/${RELEASE_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}keystone${CMAKE_STATIC_LIBRARY_SUFFIX}
+)

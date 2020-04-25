@@ -1,8 +1,6 @@
 # RetDec
 
 [![Travis CI build status](https://travis-ci.org/avast/retdec.svg?branch=master)](https://travis-ci.org/avast/retdec)
-[![AppVeyor build status](https://ci.appveyor.com/api/projects/status/daqstq396hb8ixjg/branch/master?svg=true
-)](https://ci.appveyor.com/project/avast/retdec?branch=master)
 [![TeamCity build status](https://retdec-tc.avast.com/app/rest/builds/aggregated/strob:(buildType:(project:(id:Retdec)))/statusIcon)](https://retdec-tc.avast.com/project.html?projectId=Retdec&guest=1)
 
 [RetDec](https://retdec.com/) is a retargetable machine-code decompiler based on [LLVM](https://llvm.org/).
@@ -35,7 +33,7 @@ For more information, check out our
 
 ## Installation and Use
 
-Currently, we support Windows (7 or later), Linux, macOS, and (experimentally) FreeBSD. An installed version of RetDec requires approximately 4 GB of free disk space.
+Currently, we support Windows (7 or later), Linux, macOS, and (experimentally) FreeBSD. An installed version of RetDec requires approximately 5 to 6 GB of free disk space.
 
 ### Windows
 
@@ -112,6 +110,39 @@ Currently, we support Windows (7 or later), Linux, macOS, and (experimentally) F
 
    For more information, run `retdec-decompiler.py` with `--help`.
 
+### Use of RetDec libraries
+
+As of RetDec version 4.0 you can easily use various RetDec libraries in your projects - if they are build with CMake. RetDec installation contains all the necessary headers, libraries, and CMake scripts.
+
+If you installed RetDec into a standard installation location of your system (e.g. `/usr`, `/usr/local`), all you need to do in order to use its components is:
+
+```cmake
+find_package(retdec 4.0 REQUIRED
+   COMPONENTS
+      <component>
+      [...]
+)
+target_link_libraries(your-project
+   PUBLIC
+      retdec::<component>
+      [...]
+)
+```
+
+If you did not install RetDec somewhere where it can be automatically discovered, you need to help CMake find it before `find_package()` is used. There are generally two ways to do it (pick & use only one):
+
+1. Add the RetDec installation directory to [`CMAKE_PREFIX_PATH`](https://cmake.org/cmake/help/latest/variable/CMAKE_PREFIX_PATH.html):
+    ```cmake
+    list(APPEND CMAKE_PREFIX_PATH ${RETDEC_INSTALL_DIR})
+    ```
+
+2. Set the path to installed RetDec CMake scripts to `retdec_DIR`:
+    ```cmake
+    set(retdec_DIR ${RETDEC_INSTALL_DIR}/share/retdec/cmake)
+    ```
+
+See the [Repository Overview](https://github.com/avast/retdec/wiki/Repository-Overview) wiki page for the list of available RetDec components, or the [retdec-build-system-tests](https://github.com/avast/retdec-build-system-tests) for demos on how to use them.
+
 ## Build and Installation
 
 This section describes a local build and installation of RetDec. Instructions for Docker are given in the next section.
@@ -155,7 +186,6 @@ sudo pacman --needed -S base-devel cmake git perl python3 autoconf automake libt
 * [CMake](https://cmake.org/) (version >= 3.6)
 * [Git](https://git-scm.com/)
 * [Active Perl](https://www.activestate.com/activeperl). It needs to be the first Perl in `PATH`, or it has to be provided to CMake using `CMAKE_PROGRAM_PATH` variable, e.g. `-DCMAKE_PROGRAM_PATH=/c/perl/bin`. Does NOT work with Strawberry Perl or MSYS2 Perl (you would have to install a pre-built version of OpenSSL, see below).
-  * Alternatively, you can install OpenSSL directly from [here](https://slproweb.com/products/Win32OpenSSL.html). This means OpenSSL won't be built and you don't need to install any Perl. Do not install Light version of OpenSSL as they don't contain development files.
 * [Python](https://www.python.org/) (version >= 3.4)
 * Optional: [Doxygen](http://ftp.stack.nl/pub/users/dimitri/doxygen-1.8.13-setup.exe) and [Graphviz](https://graphviz.gitlab.io/_pages/Download/windows/graphviz-2.38.msi) for generating API documentation
 
@@ -238,7 +268,6 @@ You can pass the following additional parameters to `cmake`:
 * `-DRETDEC_DOC=ON` to build with API documentation (requires Doxygen and Graphviz, disabled by default).
 * `-DRETDEC_TESTS=ON` to build with tests (disabled by default).
 * `-DRETDEC_DEV_TOOLS=ON` to build with development tools (disabled by default).
-* `-DRETDEC_FORCE_OPENSSL_BUILD=ON` to force OpenSSL build even if it is installed in the system (disabled by default).
 * `-DRETDEC_COMPILE_YARA=OFF` to disable YARA rules compilation at installation step (enabled by default).
 * `-DCMAKE_BUILD_TYPE=Debug` to build with debugging information, which is useful during development. By default, the project is built in the `Release` mode. This has no effect on Windows, but the same thing can be achieved by running `cmake --build .` with the `--config Debug` parameter.
 * `-DCMAKE_PROGRAM_PATH=<path>` to use Perl at `<path>` (probably useful only on Windows).
@@ -285,64 +314,9 @@ Our TeamCity servers are continuously generating up-to-date RetDec packages from
 
 You can use these as you wish, but keep in mind that there are no guarantees they will work on your system (especially the Linux version), and that regressions are a possibility. To get a stable RetDec version, either download the latest official pre-built package or build the latest RetDec version tag.
 
-* [Windows Server 2016, version 10.0](https://retdec-tc.avast.com/repository/download/Retdec_WinBuild/.lastSuccessful/package/retdec-master-windows-64b.zip?guest=1)
-* [Ubuntu Bionic Linux, version 18.04](https://retdec-tc.avast.com/repository/download/RetDec_LinuxBuild/.lastSuccessful/package/retdec-master-linux-64b.zip?guest=1)
-* [Mac OS X, version 10.14.6](https://retdec-tc.avast.com/repository/download/Retdec_MacBuild/.lastSuccessful/package/retdec-master-macos-64b.zip?guest=1)
-
-## Repository Overview
-
-This repository contains the following libraries:
-* `ar-extractor` - library for extracting object files from archives (based on LLVM).
-* `bin2llvmir` - library of LLVM passes for translating binaries into LLVM IR modules.
-* `capstone2llvmir` - binary instructions to LLVM IR translation library.
-* `config` - library for representing and managing RetDec configuration databases.
-* `cpdetect` - library for compiler and packer detection in binaries.
-* `crypto` - collection of cryptographic functions.
-* `ctypes` - C++ library for representing C function data types.
-* `debugformat` - library for uniform representation of DWARF and PDB debugging information.
-* `demangler` - demangling library capable to handle names generated by the GCC/Clang, Microsoft Visual C++, and Borland C++ compilers.
-* `fileformat` - library for parsing and uniform representation of various object file formats. Currently supporting the following formats: COFF, ELF, Intel HEX, Mach-O, PE, raw data.
-* `llvm-support` - set of LLVM related utility functions.
-* `llvmir-emul` - LLVM IR emulation library used for unit testing.
-* `llvmir2hll` - library for translating LLVM IR modules to high-level source codes (C, Python-like language).
-* `loader` - library for uniform representation of binaries loaded to memory. Supports the same formats as fileformat.
-* `macho-extractor` - library for extracting regular Mach-O binaries from fat Mach-O binaries (based on LLVM).
-* `patterngen` - binary pattern extractor library.
-* `pdbparser` - Microsoft PDB files parser library.
-* `pelib` - Microsoft Portable Executable files manipulation library.
-* `stacofin` - static code finder library.
-* `unpacker` - collection of unpacking functions.
-* `utils` - general C++ utility library.
-* `yaracpp` - C++ wrapper for YARA.
-
-This repository contains the following tools:
-* `ar-extractortool` - frontend for the ar-extractor library (installed as `retdec-ar-extractor`).
-* `bin2llvmirtool` - frontend for the `bin2llvmir` library (installed as `retdec-bin2llvmir`).
-* `bin2pat` - tool for generating patterns from binaries (installed as `retdec-bin2pat`).
-* `capstone2llvmirtool` - frontend for the `capstone2llvmir` library (installed as `retdec-capstone2llvmir`).
-* `configtool` - frontend for the `config` library (installed as `retdec-config`).
-* `ctypesparser` - C++ library for parsing C function data types from JSON files into `ctypes` representation (installed as `retdec-ctypesparser`).
-* `demangler_grammar_gen` -- tool for generating new grammars for the `demangler` library (installed as `retdec-demangler-grammar-gen`).
-* `demanglertool` -- frontend for the `demangler` library (installed as `retdec-demangler`).
-* `fileinfo` - binary analysis tool. Supports the same formats as `fileformat` (installed as `retdec-fileinfo`).
-* `idr2pat` - tool for extracting patterns from IDR knowledge bases (installed as `retdec-idr2pat`).
-* `llvmir2hlltool` - frontend for the `llvmir2hll` library (installed as `retdec-llvmir2hll`).
-* `macho-extractortool` - frontend for the `macho-extractor` library (installed as `retdec-macho-extractor`).
-* `pat2yara` - tool for processing patterns to YARA signatures (installed as `retdec-pat2yara`).
-* `stacofintool` - frontend for the `stacofin` library (installed as `retdec-stacofin`).
-* `unpackertool` - plugin-based unpacker (installed as `retdec-unpacker`).
-
-This repository contains the following scripts:
-* `retdec-decompiler.py` - the main decompilation script binding it all together. This is the tool to use for full binary-to-C decompilations.
-* Support scripts used by `retdec-decompiler.py`:
-  * `retdec-config.py` - decompiler's configuration file.
-  * `retdec-archive-decompiler.py` - decompiles objects in the given AR archive.
-  * `retdec-fileinfo.py` - a Fileinfo tool wrapper.
-  * `retdec-signature-from-library-creator.py` - extracts function signatures from the given library.
-  * `retdec-unpacker.py` - tries to unpack the given executable file by using any of the supported unpackers.
-  * `retdec-utils.py` - a collection of Python utilities.
-* `retdec-tests-runner.py` - run all tests in the unit test directory.
-* `type_extractor` - generation of type information (for internal use only)
+* [Windows Server 2016, version 10.0](https://retdec-tc.avast.com/repository/download/Retdec_WinBuild/.lastSuccessful/package/retdec-master-windows-64b.7z?guest=1)
+* [Ubuntu Bionic Linux, version 18.04](https://retdec-tc.avast.com/repository/download/RetDec_LinuxBuild/.lastSuccessful/package/retdec-master-linux-64b.tar.xz?guest=1)
+* [Mac OS X, version 10.14.6](https://retdec-tc.avast.com/repository/download/Retdec_MacBuild/.lastSuccessful/package/retdec-master-macos-64b.tar.xz?guest=1)
 
 ## Project Documentation
 
@@ -351,8 +325,10 @@ See the [project documentation](https://retdec-tc.avast.com/repository/download/
 ## Related Repositories
 
 * [retdec-idaplugin](https://github.com/avast/retdec-idaplugin) -- Embeds RetDec into IDA (Interactive Disassembler) and makes its use much easier.
+* [retdec-r2plugin](https://github.com/avast/retdec-r2plugin) -- Embeds RetDec into Radare2 and makes its use much easier.
 * [retdec-regression-tests-framework](https://github.com/avast/retdec-regression-tests-framework) -- A framework for writing and running regression tests for RetDec and related tools. This is a must if you plan to contribute to the RetDec project.
 * [retdec-regression-tests](https://github.com/avast/retdec-regression-tests) -- A suite of regression tests for RetDec and related tools.
+* [retdec-build-system-tests](https://github.com/avast/retdec-build-system-tests) -- A suite of tests for RetDec's build system. This can also serve as a collection of demos on how to use RetDec libraries.
 * [vim-syntax-retdecdsm](https://github.com/s3rvac/vim-syntax-retdecdsm) -- Vim syntax-highlighting file for the output from the RetDec's disassembler (`.dsm` files).
 
 ## License

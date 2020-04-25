@@ -7,8 +7,10 @@
 #ifndef FILEINFO_FILE_INFORMATION_FILE_INFORMATION_TYPES_PDB_INFO_H
 #define FILEINFO_FILE_INFORMATION_FILE_INFORMATION_TYPES_PDB_INFO_H
 
+#include <limits>
 #include <string>
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -45,5 +47,6 @@ class PdbInfo
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

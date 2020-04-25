@@ -340,7 +340,7 @@ llvm::Instruction* optimizeLoad(llvm::LoadInst* load, Config* c)
 
 	conv->takeName(load);
 	load->replaceAllUsesWith(conv);
-	load->eraseFromParent();
+	IrModifier::eraseUnusedInstructionRecursive(load);
 
 	return call;
 }
@@ -410,7 +410,7 @@ llvm::Instruction* optimizeStore(llvm::StoreInst* store, Config* c)
 
 	auto* call = CallInst::Create(replacement, {ptr, val}, "", store);
 
-	store->eraseFromParent();
+	IrModifier::eraseUnusedInstructionRecursive(store);
 
 	return call;
 }

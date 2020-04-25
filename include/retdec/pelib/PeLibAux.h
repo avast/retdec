@@ -22,8 +22,8 @@
 #pragma warning(disable:4244)		// C4244: 'argument': conversion from 'uint64_t' to 'unsigned int', possible loss of data
 #endif
 
-#include "pelib/OutputBuffer.h"
-#include "pelib/InputBuffer.h"
+#include "retdec/pelib/OutputBuffer.h"
+#include "retdec/pelib/InputBuffer.h"
 
 //get rid of duplicate windows.h definitions
 #ifdef ERROR_NONE
@@ -99,6 +99,10 @@ namespace PeLib
 		// Errors from entry point checker
 		LDR_ERROR_ENTRY_POINT_OUT_OF_IMAGE,         // The entry point is out of the image
 		LDR_ERROR_ENTRY_POINT_ZEROED,               // The entry point is zeroed
+
+		// Errors from signature parser
+		LDR_ERROR_DIGITAL_SIGNATURE_CUT,            // The file signature is out of the file
+		LDR_ERROR_DIGITAL_SIGNATURE_ZEROED,         // The file signature is zeroed
 
 		LDR_ERROR_MAX
 

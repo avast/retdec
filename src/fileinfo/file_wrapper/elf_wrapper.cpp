@@ -8,6 +8,7 @@
 
 using namespace ELFIO;
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -91,3 +92,4 @@ ELFIO::relocation_section_accessor* ElfWrapper::getRelocationTable(unsigned long
 }
 
 } // namespace fileinfo
+} // namespace retdec

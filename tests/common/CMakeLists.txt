@@ -1,5 +1,5 @@
 
-add_executable(retdec-tests-common
+add_executable(tests-common
 	address_tests.cpp
 	architecture_tests.cpp
 	class_tests.cpp
@@ -13,8 +13,17 @@ add_executable(retdec-tests-common
 	tool_info_tests.cpp
 	type_tests.cpp
 )
-target_link_libraries(retdec-tests-common
-	retdec-common
-	gmock_main
+
+target_link_libraries(tests-common
+	retdec::common
+	retdec::deps::gmock_main
 )
-install(TARGETS retdec-tests-common RUNTIME DESTINATION ${RETDEC_TESTS_DIR})
+
+set_target_properties(tests-common
+	PROPERTIES
+		OUTPUT_NAME "retdec-tests-common"
+)
+
+install(TARGETS tests-common
+	RUNTIME DESTINATION ${RETDEC_INSTALL_TESTS_DIR}
+)

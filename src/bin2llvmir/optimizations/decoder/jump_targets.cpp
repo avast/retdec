@@ -189,6 +189,11 @@ const JumpTarget* JumpTargets::push(
 {
 	static auto& arch = config->getConfig().architecture;
 
+	if (arch.isArm64() && m == CS_MODE_THUMB)
+	{
+		m = CS_MODE_ARM;
+	}
+
 	if (a.isDefined())
 	{
 		if (arch.isArm32OrThumb() && a % 2)

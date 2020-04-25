@@ -123,6 +123,8 @@ bool StackAnalysis::run()
 		}
 	}
 
+	IrModifier::eraseUnusedInstructionsRecursive(_toRemove);
+
 	return false;
 }
 
@@ -135,7 +137,7 @@ void StackAnalysis::handleInstruction(
 {
 	LOG << llvmObjToString(inst) << std::endl;
 
-	SymbolicTree root(RDA, val, &val2val);
+	auto root = SymbolicTree::PrecomputedRdaWithValueMap(RDA, val, &val2val);
 	LOG << root << std::endl;
 
 	if (!root.isVal2ValMapUsed())
@@ -237,18 +239,19 @@ void StackAnalysis::handleInstruction(
 				a->getType()->getElementType(),
 				inst);
 		new StoreInst(conv, a, inst);
-		s->eraseFromParent();
+		_toRemove.insert(s);
 	}
 	else if (l && l->getPointerOperand() == val)
 	{
 		auto* nl = new LoadInst(a, "", l);
 		auto* conv = IrModifier::convertValueToType(nl, l->getType(), l);
 		l->replaceAllUsesWith(conv);
-		l->eraseFromParent();
+		_toRemove.insert(l);
 	}
 	else
 	{
 		auto* conv = IrModifier::convertValueToType(a, val->getType(), inst);
+		_toRemove.insert(val);
 		inst->replaceUsesOfWith(val, conv);
 	}
 }

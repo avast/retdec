@@ -6,7 +6,7 @@ function(patch_vcxproj file)
 
     string(REPLACE
         "<PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;CUCKOO_MODULE;HASH_MODULE;DOTNET_MODULE;HAVE_LIBCRYPTO;USE_WINDOWS_PROC;YR_BUILDING_STATIC_LIB;PROFILING_ENABLED</PreprocessorDefinitions>"
-        "<PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;MACHO_MODULE;USE_WINDOWS_PROC</PreprocessorDefinitions>"
+        "<PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;DOTNET_MODULE;MACHO_MODULE;USE_WINDOWS_PROC</PreprocessorDefinitions>"
         new_content
         "${new_content}"
     )
@@ -18,7 +18,7 @@ function(patch_vcxproj file)
     )
     string(REPLACE
         "<PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;CUCKOO_MODULE;HASH_MODULE;DOTNET_MODULE;HAVE_LIBCRYPTO;USE_WINDOWS_PROC;YR_BUILDING_STATIC_LIBC;PROFILING_ENABLED</PreprocessorDefinitions>"
-        "<PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;MACHO_MODULE;USE_WINDOWS_PROC</PreprocessorDefinitions>"
+        "<PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;DOTNET_MODULE;MACHO_MODULE;USE_WINDOWS_PROC</PreprocessorDefinitions>"
         new_content
         "${new_content}"
     )
@@ -30,13 +30,13 @@ function(patch_vcxproj file)
     )
     string(REPLACE
         "<PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;CUCKOO_MODULE;HASH_MODULE;DOTNET_MODULE;HAVE_LIBCRYPTO;USE_WINDOWS_PROC;YR_BUILDING_STATIC_LIB</PreprocessorDefinitions>"
-        "<PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;MACHO_MODULE;USE_WINDOWS_PROC</PreprocessorDefinitions>"
+        "<PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;DOTNET_MODULE;MACHO_MODULE;USE_WINDOWS_PROC</PreprocessorDefinitions>"
         new_content
         "${new_content}"
     )
     string(REPLACE
         "<PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;CUCKOO_MODULE;HASH_MODULE;DOTNET_MODULE;HAVE_LIBCRYPTO;USE_WINDOWS_PROC;YR_BUILDING_STATIC_LIB;NDEBUG=1</PreprocessorDefinitions>"
-        "<PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;MACHO_MODULE;USE_WINDOWS_PROC;NDEBUG=1</PreprocessorDefinitions>"
+        "<PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;DOTNET_MODULE;MACHO_MODULE;USE_WINDOWS_PROC;NDEBUG=1</PreprocessorDefinitions>"
         new_content
         "${new_content}"
     )
@@ -70,6 +70,15 @@ function(patch_vcxproj file)
         new_content
         "${new_content}"
     )
+
+	if(RETDEC_MSVC_STATIC_RUNTIME)
+		string(REPLACE
+			"MultiThreadedDLL"
+			"MultiThreaded"
+			new_content
+			"${new_content}"
+		)
+	endif()
 
     if("${new_content}" STREQUAL "${content}")
         message("-- Patching: ${file} skipped")

@@ -12,6 +12,7 @@
 #include "fileinfo/file_information/file_information_types/data_directory.h"
 #include "fileinfo/file_information/file_information_types/file_section.h"
 
+namespace retdec {
 namespace fileinfo {
 
 class PeWrapperParser
@@ -28,5 +29,6 @@ class PeWrapperParser
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

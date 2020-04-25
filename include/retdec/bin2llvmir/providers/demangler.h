@@ -48,6 +48,8 @@ public:
 
 	FunctionPair getPairFunction(const std::string &mangled);
 
+	demangler::Demangler* getDemangler();
+
 private:
 	llvm::Type *getLlvmType(std::shared_ptr<retdec::ctypes::Type> type);
 

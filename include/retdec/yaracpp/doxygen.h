@@ -7,5 +7,5 @@
 // As there is no better place to comment this namespace, we do this in the
 // present file.
 
-/// @namespace yaracpp A library providing parsing and detection of
+/// @namespace retdec::yaracpp A library providing parsing and detection of
 /// YARA rules.

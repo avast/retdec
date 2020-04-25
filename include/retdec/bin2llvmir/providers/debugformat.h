@@ -9,6 +9,7 @@
 
 #include <llvm/IR/Module.h>
 
+#include "retdec/bin2llvmir/providers/demangler.h"
 #include "retdec/bin2llvmir/providers/fileimage.h"
 #include "retdec/debugformat/debugformat.h"
 

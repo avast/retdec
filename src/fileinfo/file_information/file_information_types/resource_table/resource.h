@@ -7,8 +7,10 @@
 #ifndef FILEINFO_FILE_INFORMATION_FILE_INFORMATION_TYPES_RESOURCE_TABLE_RESOURCE_H
 #define FILEINFO_FILE_INFORMATION_FILE_INFORMATION_TYPES_RESOURCE_TABLE_RESOURCE_H
 
+#include <limits>
 #include <string>
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -66,5 +68,6 @@ class Resource
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

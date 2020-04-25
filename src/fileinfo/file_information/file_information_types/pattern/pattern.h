@@ -12,6 +12,7 @@
 
 #include "fileinfo/file_information/file_information_types/pattern/pattern_match.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -69,5 +70,6 @@ class Pattern
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

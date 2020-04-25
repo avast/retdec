@@ -11,6 +11,7 @@
 using namespace retdec::utils;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -100,3 +101,4 @@ std::size_t BasicPlainGetter::loadInformation(std::vector<std::string> &desc, st
 }
 
 } // namespace fileinfo
+} // namespace retdec

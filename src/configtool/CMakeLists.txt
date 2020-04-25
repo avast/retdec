@@ -1,8 +1,19 @@
-set(RETDEC_CONFIGTOOL_SOURCES
+
+add_executable(configtool
 	configtool.cpp
 )
 
-add_executable(retdec-configtool ${RETDEC_CONFIGTOOL_SOURCES})
-set_target_properties(retdec-configtool PROPERTIES OUTPUT_NAME "retdec-config")
-target_link_libraries(retdec-configtool retdec-config)
-install(TARGETS retdec-configtool RUNTIME DESTINATION bin)
+target_compile_features(configtool PUBLIC cxx_std_17)
+
+target_link_libraries(configtool
+	retdec::config
+)
+
+set_target_properties(configtool
+	PROPERTIES
+		OUTPUT_NAME "retdec-config"
+)
+
+install(TARGETS configtool
+	RUNTIME DESTINATION ${RETDEC_INSTALL_BIN_DIR}
+)

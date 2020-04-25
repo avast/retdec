@@ -9,8 +9,8 @@
 #include <iomanip>
 #include <array>
 
-#include "pelib/PeLibInc.h"
-#include "pelib/RichHeader.h"
+#include "retdec/pelib/PeLibInc.h"
+#include "retdec/pelib/RichHeader.h"
 
 namespace PeLib
 {

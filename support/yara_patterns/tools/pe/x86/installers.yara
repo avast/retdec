@@ -16,6 +16,41 @@ rule arc_sfx {
 		$1 at pe.entry_point
 }
 
+private rule astrum_strings {
+	strings:
+		$1 = "Astrum Installer package #"
+		$2 = "AstrumInstaller"
+	condition:
+		all of them
+}
+
+rule astrum_uv_01 {
+	meta:
+		tool = "I"
+		name = "Astrum"
+		pattern = "558BEC83EC0C535657BE28774700FF75088BCEE8B13700008BCEE87E0B00008BCEE86413000085C07D1533DB8BCE"
+	strings:
+		$fixed1 = { 55 8B EC 83 EC 0C 53 56 57 }
+		$fixed2 = { E8 ?? ?? 00 00 8B CE E8 ?? ?? 00 00 8B CE E8 ?? ?? 00 00 85 C0 7D 15 33 DB 8B CE }
+		$s1 = { BE 28 77 47 00 FF 75 08 8B CE }
+		$s2 = { FF 15 ?? ?? ?? ?? FF 75 08 BE 18 88 47 00 8B CE }
+	condition:
+		all of ($fixed*) and
+		1 of ($s*) and
+		astrum_strings
+}
+
+rule astrum_uv_02 {
+	meta:
+		tool = "I"
+		name = "Astrum"
+		pattern = "6A4033C0598DBD????????F3AB66ABAA"
+	strings:
+		$1 = { 6A 40 33 C0 59 8D BD ?? ?? ?? ?? F3 AB 66 AB AA }
+	condition:
+		$1 and astrum_strings
+}
+
 rule kgb_sfx {
 	meta:
 		tool = "I"
@@ -108,6 +143,42 @@ rule exemplar_installer {
 		$1 = { 55 8B EC 83 EC ?? 53 56 57 FF 15 ?? ?? ?? ?? 8B 1D ?? ?? ?? ?? 8B F0 85 F6 75 ?? 6A ?? FF D3 8A 06 8B 3D ?? ?? ?? ?? 3C ?? 75 ?? 56 FF D7 }
 	condition:
 		$1 at pe.entry_point
+}
+
+rule pyinstaller_27
+{
+	meta:
+		tool = "I"
+		name = "PyInstaller"
+		version = "2.7"
+		strength = "high"
+	strings:
+		$s00 = "Cannot GetProcAddress for PySys_SetObject"
+		$s01 = "Error coping %s"
+		$s02 = "Error loading Python DLL: %s (error code %d)"
+		$s03 = "PYTHONHOME"
+	condition:
+		pe.number_of_resources > 0 and
+		@s00 < pe.sections[2].raw_data_offset and
+		all of them
+}
+
+rule pyinstaller_3x
+{
+	meta:
+		tool = "I"
+		name = "PyInstaller"
+		version = "3.x"
+		strength = "high"
+	strings:
+		$s00 = "Failed to get address for PySys_SetObject"
+		$s01 = "Error copying %s"
+		$s02 = "Error loading Python DLL '%s'"
+		$s03 = "pyi-windows-manifest-filename"
+	condition:
+		pe.number_of_resources > 0 and
+		@s00 < pe.sections[2].raw_data_offset and
+		all of them
 }
 
 rule installanywhere_61 {

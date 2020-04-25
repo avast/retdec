@@ -4,8 +4,8 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#ifndef RETDEC_BIN2LLVMIR_OPTIMIZATIONS_INST_OPT_INST_OPT_H
-#define RETDEC_BIN2LLVMIR_OPTIMIZATIONS_INST_OPT_INST_OPT_H
+#ifndef RETDEC_BIN2LLVMIR_OPTIMIZATIONS_INST_OPT_INST_OPT_PASS_H
+#define RETDEC_BIN2LLVMIR_OPTIMIZATIONS_INST_OPT_INST_OPT_PASS_H
 
 #include <llvm/IR/Function.h>
 #include <llvm/IR/Instructions.h>

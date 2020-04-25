@@ -18,6 +18,7 @@ using namespace llvm::object;
 using namespace retdec::cpdetect;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -332,7 +333,7 @@ void MachODetector::getAdditionalInfo()
  */
 retdec::cpdetect::CompilerDetector* MachODetector::createCompilerDetector() const
 {
-	return new MachOCompiler(*machoParser, cpParams, fileInfo.toolInfo);
+	return new CompilerDetector(*machoParser, cpParams, fileInfo.toolInfo);
 }
 
 /**
@@ -345,3 +346,4 @@ bool MachODetector::isMachoUniversalArchive()
 }
 
 } // namespace fileinfo
+} // namespace retdec

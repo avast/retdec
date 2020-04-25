@@ -10,6 +10,7 @@
 using namespace retdec::cpdetect;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -137,7 +138,8 @@ void IntelHexDetector::getAdditionalInfo()
  */
 retdec::cpdetect::CompilerDetector* IntelHexDetector::createCompilerDetector() const
 {
-	return new IntelHexCompiler(*ihexParser, cpParams, fileInfo.toolInfo);
+	return new CompilerDetector(*ihexParser, cpParams, fileInfo.toolInfo);
 }
 
 } // namespace fileinfo
+} // namespace retdec

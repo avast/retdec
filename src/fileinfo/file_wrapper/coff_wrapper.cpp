@@ -8,6 +8,7 @@
 
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -52,3 +53,4 @@ std::string CoffWrapper::getTypeOfFile() const
 }
 
 } // namespace fileinfo
+} // namespace retdec

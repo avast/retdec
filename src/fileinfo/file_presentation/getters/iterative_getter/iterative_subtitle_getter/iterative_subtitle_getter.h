@@ -9,6 +9,7 @@
 
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_getter.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -38,5 +39,6 @@ class IterativeSubtitleGetter : public IterativeGetter
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

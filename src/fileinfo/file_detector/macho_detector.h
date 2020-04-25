@@ -10,6 +10,7 @@
 #include "fileinfo/file_detector/file_detector.h"
 #include "fileinfo/file_wrapper/macho_wrapper.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -49,5 +50,6 @@ class MachODetector : public FileDetector
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

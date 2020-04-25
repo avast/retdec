@@ -7,8 +7,10 @@
 #ifndef FILEINFO_FILE_INFORMATION_FILE_INFORMATION_TYPES_DATA_DIRECTORY_H
 #define FILEINFO_FILE_INFORMATION_FILE_INFORMATION_TYPES_DATA_DIRECTORY_H
 
+#include <limits>
 #include <string>
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -42,5 +44,6 @@ class DataDirectory
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

@@ -9,6 +9,7 @@
 
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -132,3 +133,4 @@ bool RichHeader::hasRecords() const
 }
 
 } // namespace fileinfo
+} // namespace retdec

@@ -8,7 +8,9 @@
 #define FILEINFO_FILE_DETECTOR_INTEL_HEX_DETECTOR_H
 
 #include "fileinfo/file_detector/file_detector.h"
+#include "retdec/fileformat/file_format/intel_hex/intel_hex_format.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -42,5 +44,6 @@ class IntelHexDetector : public FileDetector
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

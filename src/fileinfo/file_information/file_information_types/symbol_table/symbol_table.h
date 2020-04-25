@@ -10,6 +10,7 @@
 #include "fileinfo/file_information/file_information_types/special_information.h"
 #include "fileinfo/file_information/file_information_types/symbol_table/symbol.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -69,5 +70,6 @@ class SymbolTable
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

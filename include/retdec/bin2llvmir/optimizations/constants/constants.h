@@ -53,6 +53,8 @@ class ConstantsAnalysis : public llvm::ModulePass
 		Abi* _abi = nullptr;
 		FileImage* _image = nullptr;
 		DebugFormat* _dbgf = nullptr;
+
+		std::unordered_set<llvm::Value*> _toRemove;
 };
 
 } // namespace bin2llvmir

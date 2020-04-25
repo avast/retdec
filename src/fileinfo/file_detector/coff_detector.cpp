@@ -21,6 +21,7 @@ using namespace PeLib;
 using namespace retdec::cpdetect;
 using namespace retdec::fileformat;
 
+namespace retdec {
 namespace fileinfo {
 
 namespace {
@@ -524,7 +525,8 @@ void CoffDetector::getAdditionalInfo()
  */
 retdec::cpdetect::CompilerDetector* CoffDetector::createCompilerDetector() const
 {
-	return new CoffCompiler(*coffParser, cpParams, fileInfo.toolInfo);
+	return new CompilerDetector(*coffParser, cpParams, fileInfo.toolInfo);
 }
 
 } // namespace fileinfo
+} // namespace retdec

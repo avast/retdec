@@ -8,6 +8,7 @@
 #include <vector>
 
 #include <openssl/pem.h>
+#include <openssl/x509.h>
 
 #include "retdec/utils/conversion.h"
 #include "retdec/fileformat/types/certificate_table/certificate.h"

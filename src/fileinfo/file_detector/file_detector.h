@@ -11,6 +11,7 @@
 #include "retdec/utils/non_copyable.h"
 #include "fileinfo/file_information/file_information.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -68,5 +69,6 @@ class FileDetector : private retdec::utils::NonCopyable
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

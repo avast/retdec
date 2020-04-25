@@ -12,7 +12,6 @@
 #include <llvm/IR/Instructions.h>
 
 #include "retdec/utils/string.h"
-#include "retdec/bin2llvmir/analyses/reaching_definitions.h"
 #include "retdec/bin2llvmir/optimizations/idioms_libgcc/idioms_libgcc.h"
 #include "retdec/bin2llvmir/utils/llvm.h"
 #include "retdec/bin2llvmir/utils/debug.h"
@@ -46,8 +45,6 @@ class IdiomsLibgccImpl
 
 	public:
 		bool testArchAndInitialize(common::Architecture& arch, Abi* abi);
-
-		void localize(llvm::Value* v);
 
 		void log(
 				llvm::Instruction* orig,
@@ -244,25 +241,6 @@ bool IdiomsLibgccImpl::testArchAndInitialize(
 		return false;
 	}
 	return true;
-}
-
-void IdiomsLibgccImpl::localize(llvm::Value* v)
-{
-	Instruction* i = dyn_cast<Instruction>(llvm_utils::skipCasts(v));
-	if (i == nullptr)
-	{
-		return;
-	}
-
-	auto defs = ReachingDefinitionsAnalysis::defsFromUse_onDemand(i);
-	if (defs.size() != 1)
-	{
-		return;
-	}
-	auto* def = dyn_cast<StoreInst>(*defs.begin());
-
-	auto uses = ReachingDefinitionsAnalysis::usesFromDef_onDemand(def);
-	IrModifier::localize(def, uses);
 }
 
 void IdiomsLibgccImpl::log(
@@ -661,9 +639,6 @@ void IdiomsLibgccImpl::addf(llvm::CallInst* inst)
 
 	log(inst, {l0, l1, r0, s0});
 	replaceResultUses(inst, r0);
-
-	localize(l0);
-	localize(l1);
 }
 
 /**
@@ -682,9 +657,6 @@ void IdiomsLibgccImpl::divf(llvm::CallInst* inst)
 
 	log(inst, {l0, l1, r0, s0});
 	replaceResultUses(inst, r0);
-
-	localize(l0);
-	localize(l1);
 }
 
 /**
@@ -703,9 +675,6 @@ void IdiomsLibgccImpl::mulf(llvm::CallInst* inst)
 
 	log(inst, {l0, l1, r0, s0});
 	replaceResultUses(inst, r0);
-
-	localize(l0);
-	localize(l1);
 }
 
 /**
@@ -724,9 +693,6 @@ void IdiomsLibgccImpl::subf(llvm::CallInst* inst)
 
 	log(inst, {l0, l1, r0, s0});
 	replaceResultUses(inst, r0);
-
-	localize(l0);
-	localize(l1);
 }
 
 /**
@@ -745,9 +711,6 @@ void IdiomsLibgccImpl::subrf(llvm::CallInst* inst)
 
 	log(inst, {l0, l1, r0, s0});
 	replaceResultUses(inst, r0);
-
-	localize(l0);
-	localize(l1);
 }
 
 /**

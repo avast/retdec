@@ -7,8 +7,11 @@
 #ifndef FILEINFO_FILE_INFORMATION_FILE_INFORMATION_TYPES_FILE_SEGMENT_H
 #define FILEINFO_FILE_INFORMATION_FILE_INFORMATION_TYPES_FILE_SEGMENT_H
 
+#include <limits>
+
 #include "fileinfo/file_information/file_information_types/flags.h"
 
+namespace retdec {
 namespace fileinfo {
 
 /**
@@ -77,5 +80,6 @@ class FileSegment
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

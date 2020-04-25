@@ -13,6 +13,7 @@
 
 #include "retdec/fileformat/types/dotnet_types/dotnet_class.h"
 
+namespace retdec {
 namespace fileinfo {
 
 struct StreamInfo
@@ -108,5 +109,6 @@ class DotnetInfo
 };
 
 } // namespace fileinfo
+} // namespace retdec
 
 #endif

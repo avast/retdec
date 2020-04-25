@@ -8,10 +8,11 @@
 #include <sstream>
 #include <string>
 
-#include "retdec/stacofin/stacofin.h"
-#include "retdec/yaracpp/yara_detector/yara_detector.h"
+#include "retdec/fileformat/fileformat.h"
 #include "retdec/loader/loader/image.h"
+#include "retdec/stacofin/stacofin.h"
 #include "retdec/utils/string.h"
+#include "retdec/yaracpp/yara_detector/yara_detector.h"
 
 /**
  * Set \c debug_enabled to \c true to enable this LOG macro.
@@ -24,7 +25,7 @@ static bool debug_enabled = false;
 using namespace retdec::common;
 using namespace retdec::loader;
 using namespace retdec::utils;
-using namespace yaracpp;
+using namespace retdec::yaracpp;
 
 namespace retdec {
 namespace stacofin {

@@ -7,7 +7,7 @@
 #ifndef RETDEC_CTYPES2LLVM_H
 #define RETDEC_CTYPES2LLVM_H
 
-#include "llvm/IR/Module.h"
+#include <llvm/IR/Module.h>
 
 #include "retdec/bin2llvmir/providers/config.h"
 #include "retdec/ctypes/context.h"

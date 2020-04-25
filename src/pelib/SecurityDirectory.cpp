@@ -4,11 +4,14 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "pelib/PeLibInc.h"
-#include "pelib/SecurityDirectory.h"
+#include "retdec/pelib/PeLibInc.h"
+#include "retdec/pelib/SecurityDirectory.h"
 
 namespace PeLib
 {
+	SecurityDirectory::SecurityDirectory() : m_ldrError(LDR_ERROR_NONE)
+	{}
+
 	unsigned int SecurityDirectory::calcNumberOfCertificates() const
 	{
 		return (unsigned int)m_certs.size();
@@ -19,12 +22,19 @@ namespace PeLib
 		return m_certs[index].Certificate;
 	}
 
+	LoaderError SecurityDirectory::loaderError() const
+	{
+		return m_ldrError;
+	}
+
 	int SecurityDirectory::read(
 			std::istream& inStream,
 			unsigned int uiOffset,
 			unsigned int uiSize)
 	{
 		IStreamWrapper inStream_w(inStream);
+
+		m_ldrError = LDR_ERROR_NONE;
 
 		if (!inStream_w)
 		{
@@ -34,6 +44,7 @@ namespace PeLib
 		std::uint64_t ulFileSize = fileSize(inStream_w);
 		if (ulFileSize < uiOffset + uiSize)
 		{
+			m_ldrError = LDR_ERROR_DIGITAL_SIGNATURE_CUT;
 			return ERROR_INVALID_FILE;
 		}
 
@@ -41,6 +52,13 @@ namespace PeLib
 
 		std::vector<unsigned char> vCertDirectory(uiSize);
 		inStream_w.read(reinterpret_cast<char*>(vCertDirectory.data()), uiSize);
+
+		// Verify zeroed certificates (00002edec5247488029b2cc69568dda90714eeed8de0d84f1488635196b7e708)
+		if (std::all_of(vCertDirectory.begin(), vCertDirectory.end(), [](unsigned char item) { return item == 0; }))
+		{
+			m_ldrError = LDR_ERROR_DIGITAL_SIGNATURE_ZEROED;
+			return ERROR_INVALID_FILE;
+		}
 
 		InputBuffer inpBuffer(vCertDirectory);
 
