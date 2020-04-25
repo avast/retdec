@@ -20,6 +20,7 @@ ExternalProject_Add(eigen_project
 )
 
 add_library(eigen INTERFACE)
+add_library(retdec::deps::eigen ALIAS eigen)
 add_dependencies(eigen eigen_project)
 
 ExternalProject_Get_Property(eigen_project source_dir)

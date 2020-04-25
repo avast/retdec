@@ -132,6 +132,7 @@ target_link_libraries(bin2llvmir
 		retdec::utils
 		retdec::llvm-support
 		retdec::deps::llvm
+		retdec::deps::eigen
 )
 
 set_target_properties(bin2llvmir
