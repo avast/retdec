@@ -16,6 +16,41 @@ rule arc_sfx {
 		$1 at pe.entry_point
 }
 
+private rule astrum_strings {
+	strings:
+		$1 = "Astrum Installer package #"
+		$2 = "AstrumInstaller"
+	condition:
+		all of them
+}
+
+rule astrum_uv_01 {
+	meta:
+		tool = "I"
+		name = "Astrum"
+		pattern = "558BEC83EC0C535657BE28774700FF75088BCEE8B13700008BCEE87E0B00008BCEE86413000085C07D1533DB8BCE"
+	strings:
+		$fixed1 = { 55 8B EC 83 EC 0C 53 56 57 }
+		$fixed2 = { E8 ?? ?? 00 00 8B CE E8 ?? ?? 00 00 8B CE E8 ?? ?? 00 00 85 C0 7D 15 33 DB 8B CE }
+		$s1 = { BE 28 77 47 00 FF 75 08 8B CE }
+		$s2 = { FF 15 ?? ?? ?? ?? FF 75 08 BE 18 88 47 00 8B CE }
+	condition:
+		all of ($fixed*) and
+		1 of ($s*) and
+		astrum_strings
+}
+
+rule astrum_uv_02 {
+	meta:
+		tool = "I"
+		name = "Astrum"
+		pattern = "6A4033C0598DBD????????F3AB66ABAA"
+	strings:
+		$1 = { 6A 40 33 C0 59 8D BD ?? ?? ?? ?? F3 AB 66 AB AA }
+	condition:
+		$1 and astrum_strings
+}
+
 rule kgb_sfx {
 	meta:
 		tool = "I"
