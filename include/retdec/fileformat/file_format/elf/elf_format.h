@@ -65,7 +65,9 @@ class ElfFormat : public FileFormat
 		void loadSymbols(const ELFIO::elfio *file, const ELFIO::symbol_section_accessor *elfSymbolTable, const ELFIO::section *elfSection);
 		void loadSymbols(const SymbolTable &oldTab, const DynamicTable &dynTab, ELFIO::section &got);
 		void loadDynamicTable(DynamicTable &table, const ELFIO::dynamic_section_accessor *elfDynamicTable);
-		bool loadDynamicTable(const ELFIO::dynamic_section_accessor *elfDynamicTable, const ELFIO::section *sec);
+		DynamicTable* loadDynamicTable(
+				const ELFIO::dynamic_section_accessor *elfDynamicTable,
+				const ELFIO::section *sec);
 		void loadSections();
 		void loadSegments();
 		void loadDynamicSegmentSection();
