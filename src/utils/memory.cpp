@@ -145,30 +145,6 @@ bool limitSystemMemoryOnBSD(std::size_t limit) {
 	return limitSystemMemoryOnPOSIX(limit);
 }
 
-#elif defined(OS_BSD)
-
-/**
-* @brief Implementation of @c getTotalSystemMemory() on *BSD.
-*
-* AKA FreeBSD, DragonFly, NetBSD, OpenBSD, TrueOS, PCBSD
-*/
-std::size_t getTotalSystemMemoryOnBSD() {
-	int what[] = { CTL_HW, HW_PHYSMEM };
-	std::size_t value = 0;
-	std::size_t length = sizeof(value);
-	auto rc = sysctl(what, 2, &value, &length, nullptr, 0);
-	return rc != -1 ? value : 0;
-}
-
-/**
-* @brief Implementation of @c limitSystemMemory() on *BSD.
-*
-* AKA FreeBSD, DragonFly, NetBSD, OpenBSD, TrueOS, PCBSD
-*/
-bool limitSystemMemoryOnBSD(std::size_t limit) {
-	return limitSystemMemoryOnPOSIX(limit);
-}
-
 #else
 
 /*

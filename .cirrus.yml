@@ -9,7 +9,7 @@ task:
       image: freebsd-11-3-release-amd64
   install_script:
     - pkg update
-    - pkg install -y git cmake python37 bison autotools textproc/flex
+    - pkg install -y git cmake python bison autotools textproc/flex
   script:
     - ln -sf /usr/local/bin/python3.7 /usr/local/bin/python3
     - mkdir build
