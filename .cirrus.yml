@@ -18,4 +18,4 @@ task:
     - CPUS=`sysctl -n kern.smp.cpus`
     - CPUS=`expr $CPUS + 1`
     - echo "using: make -j"$CPUS
-    - make 
+    - make -j2

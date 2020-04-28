@@ -256,7 +256,8 @@ Note: Although RetDec now supports a system-wide installation ([#94](https://git
     # Install/upgrade them:
     sudo pkg install cmake python37 autotools
     ```
-  * `cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local # /usr/local is consistent with all software that is not part of a FreeBSD release`
+    # `/usr/local` is the standard installation path for software that is not part of a base (FreeBSD) operating system`
+  * `cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local
   * `make -jN` (`N` is the number of processes to use for parallel build, typically number of cores + 1 gives fastest compilation time)
   * `make install`
 
