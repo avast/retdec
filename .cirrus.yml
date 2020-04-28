@@ -10,7 +10,7 @@ task:
   install_script:
     - pkg update
     - pkg install -y git cmake python bison autotools textproc/flex
-  script:
+  build_script:
     - ln -sf /usr/local/bin/python3.7 /usr/local/bin/python3
     - mkdir build
     - cd build
