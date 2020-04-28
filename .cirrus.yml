@@ -15,7 +15,4 @@ task:
     - mkdir build
     - cd build
     - cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local
-    - CPUS=`sysctl -n kern.smp.cpus`
-    - CPUS=`expr $CPUS + 1`
-    - echo "using: make -j"$CPUS
     - make -j2
