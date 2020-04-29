@@ -9,7 +9,9 @@ task:
       image: freebsd-11-3-release-amd64
   install_script:
     - sed -i.bak -e 's/quarterly/latest/' /etc/pkg/FreeBSD.conf
+    - cat /etc/pkg/FreeBSD.conf
     - pkg update
+    - pkg upgrade -y
     - pkg install -y git cmake python bison autotools textproc/flex
   build_script:
     - ln -sf /usr/local/bin/python3.7 /usr/local/bin/python3
