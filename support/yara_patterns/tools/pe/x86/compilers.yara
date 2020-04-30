@@ -228,6 +228,27 @@ rule aut2exe_33143 {
 		$1 at pe.entry_point
 }
 
+rule autohotkey_uv_01 {
+	meta:
+		tool = "C"
+		name = "AHK2Exe"
+		language = "AutoHotKey"
+		bytecode = true
+	strings:
+		$1 = ">AUTOHOTKEY SCRIPT<"
+		$2 = ">AUTOHOTKEY SCRIPT<" wide
+	condition:
+		pe.is_32bit() and
+		for 1 of them : (
+			@ > pe.sections[pe.section_index(".rdata")].raw_data_offset and
+			@ < pe.sections[pe.section_index(".rdata")].raw_data_offset +
+			pe.sections[pe.section_index(".rdata")].raw_data_size
+		) or
+		for 1 i in (0 .. pe.number_of_resources) : (
+			pe.resources[i].name_string matches />AUTOHOTKEY SCRIPT</
+		)
+}
+
 rule borland_c {
 	meta:
 		tool = "C"
