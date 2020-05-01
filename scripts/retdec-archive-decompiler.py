@@ -182,14 +182,17 @@ class ArchiveDecompiler:
             # We have to use indexes instead of names because archives can contain multiple files with same name.
             log_file = self.library_path + '.file_' + str(file_index) + '.log.verbose'
 
-            # Do not escape!
-            output, rc, timeouted = CmdRunner.run_cmd([sys.executable, config.DECOMPILER, '--ar-index=' + str(i), '-o',
+            arg_list_ = [sys.executable, config.DECOMPILER, '--ar-index=' + str(i), '-o',
                                                       self.library_path + '.file_' + str(file_index) + '.c',
-                                                      self.library_path] + self.decompiler_args,
+                                                      self.library_path]
+            if self.decompiler_args:
+                arg_list_.append(self.decompiler_args)
+            # Do not escape!
+            output, rc, timeouted = CmdRunner.run_cmd(arg_list_,
                                                       timeout=self.timeout,
                                                       buffer_output=True)
 
-            with open(log_file, 'wb') as f:
+            with open(log_file, 'w') as f:
                 f.write(output)
 
             if timeouted:
