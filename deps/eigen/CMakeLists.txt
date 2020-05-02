@@ -27,4 +27,15 @@ ExternalProject_Get_Property(eigen_project source_dir)
 
 set(EIGEN_INCLUDE_DIR "${source_dir}/Eigen")
 
-target_include_directories(eigen INTERFACE ${EIGEN_INCLUDE_DIR})
+target_include_directories(eigen INTERFACE $<BUILD_INTERFACE:${EIGEN_INCLUDE_DIR}>)
+
+install(TARGETS eigen
+	EXPORT eigen-targets
+)
+
+# Export targets.
+install(EXPORT eigen-targets
+	FILE "retdec-eigen-targets.cmake"
+	NAMESPACE retdec::deps::
+	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
+)
