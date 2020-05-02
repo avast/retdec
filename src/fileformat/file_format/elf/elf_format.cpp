@@ -2026,10 +2026,10 @@ void ElfFormat::loadDynamicSegmentSection()
 				}
 				sec->load(*reader.get_istream(), sec->get_offset(), sec->get_size());
 
-				auto dyn = dynamic_section_accessor(reader, sec);
-				if (loadDynamicTable(&dyn, sec))
+				dynamic_section_accessor dyn(reader, sec);
+				if (auto* tbl = loadDynamicTable(&dyn, sec))
 				{
-					loadInfoFromDynamicTables(*dynamicTables.back(), sec);
+					loadInfoFromDynamicTables(*tbl, sec);
 				}
 			}
 		}
@@ -2067,11 +2067,11 @@ void ElfFormat::loadInfoFromDynamicSegment()
 		dynamic->set_size(segSz);
 		dynamic->set_data(seg->get_data(), segSz);
 
-		auto *accessor = new dynamic_section_accessor(writer, dynamic);
-		loadDynamicTable(accessor, dynamic);
-		delete accessor;
-
-		loadInfoFromDynamicTables(*dynamicTables.back(), dynamic);
+		dynamic_section_accessor accessor(writer, dynamic);
+		if (auto* tbl = loadDynamicTable(&accessor, dynamic))
+		{
+			loadInfoFromDynamicTables(*tbl, dynamic);
+		}
 	}
 }
 
@@ -2079,9 +2079,9 @@ void ElfFormat::loadInfoFromDynamicSegment()
  * Load dynamic table
  * @param elfDynamicTable Pointer to dynamic section accessor
  * @param sec Pointer to dynamic table section
- * @return @c True if table was successfully loaded, @c false otherwise.
+ * @return Successfully loaded table, @c nullptr otherwise.
  */
-bool ElfFormat::loadDynamicTable(
+DynamicTable* ElfFormat::loadDynamicTable(
 		const ELFIO::dynamic_section_accessor *elfDynamicTable,
 		const ELFIO::section *sec)
 {
@@ -2093,13 +2093,12 @@ bool ElfFormat::loadDynamicTable(
 	loadDynamicTable(*table, elfDynamicTable);
 	if (table->getNumberOfRecords() > 0)
 	{
-		dynamicTables.push_back(table);
-		return true;
+		return dynamicTables.emplace_back(table);
 	}
 	else
 	{
 		delete table;
-		return false;
+		return nullptr;
 	}
 }
 
@@ -2148,9 +2147,8 @@ void ElfFormat::loadInfoFromDynamicTables(DynamicTable &dynTab, ELFIO::section *
 		return;
 	}
 
-	auto *dynAccessor = new dynamic_section_accessor(writer, sec);
-	loadDynamicTable(dynTab, dynAccessor);
-	delete dynAccessor;
+	dynamic_section_accessor dynAccessor(writer, sec);
+	loadDynamicTable(dynTab, &dynAccessor);
 
 	auto *symTab = addSymbolTable(sec, dynTab, strTab);
 	if(!symTab)
