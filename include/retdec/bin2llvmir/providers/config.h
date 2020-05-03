@@ -24,9 +24,7 @@ class Config
 {
 	public:
 		static Config empty(llvm::Module* m);
-		static Config fromFile(llvm::Module* m, const std::string& path);
 		static Config fromConfig(llvm::Module* m, retdec::config::Config& c);
-		static Config fromJsonString(llvm::Module* m, const std::string& json);
 
 		void doFinalization();
 
@@ -178,14 +176,14 @@ class Config
 				llvm::Type*& type) const;
 
 	private:
+		Config(retdec::config::Config& c);
 		void tagFunctionsWithUsedCryptoGlobals();
 
 	public:
 		llvm::Module* _module = nullptr;
 
 	private:
-		retdec::config::Config _configDB;
-		std::string _configPath;
+		retdec::config::Config& _configDB;
 		llvm::GlobalVariable* _globalDummy = nullptr;
 
 		llvm::Function* _callFunction = nullptr;
@@ -204,10 +202,6 @@ class ConfigProvider
 {
 	public:
 		static Config* addConfig(llvm::Module* m, retdec::config::Config& c);
-		static Config* addConfigFile(llvm::Module* m, const std::string& path);
-		static Config* addConfigJsonString(
-				llvm::Module* m,
-				const std::string& json);
 		static Config* getConfig(llvm::Module* m);
 		static bool getConfig(llvm::Module* m, Config*& c);
 		static void doFinalization(llvm::Module* m);

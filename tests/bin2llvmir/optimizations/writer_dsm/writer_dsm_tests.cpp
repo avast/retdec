@@ -31,19 +31,21 @@ TEST_F(DsmWriterTests, testHeaderGeneration)
 	parseInput(R"(
 		@whatever = global i64 0
 	)");
-	auto c = Config::fromJsonString(module.get(), R"({
+
+	auto c = config::Config::fromJsonString(R"({
 		"architecture" : {
 			"bitSize" : 32,
 			"endian" : "little",
 			"name" : "arm"
 		}
 	})");
-	auto abi = AbiProvider::addAbi(module.get(), &c);
+	auto config = Config::fromConfig(module.get(), c);
+	auto abi = AbiProvider::addAbi(module.get(), &config);
 	auto format = createFormat();
-	auto image = FileImage(module.get(), std::move(format), &c);
+	auto image = FileImage(module.get(), std::move(format), &config);
 
 	std::stringstream ret;
-	bool b = pass.runOnModuleCustom(*module, &c, &image, abi, ret);
+	bool b = pass.runOnModuleCustom(*module, &config, &image, abi, ret);
 
 	std::string ref =
 R"(^;;

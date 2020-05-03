@@ -295,6 +295,7 @@ add_library(llvmir2hll STATIC
 	var_renamer/var_renamers/readable_var_renamer.cpp
 	var_renamer/var_renamers/simple_var_renamer.cpp
 	var_renamer/var_renamers/unified_var_renamer.cpp
+	llvmir2hll.cpp
 )
 add_library(retdec::llvmir2hll ALIAS llvmir2hll)
 

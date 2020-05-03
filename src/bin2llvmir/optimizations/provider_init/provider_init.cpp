@@ -34,12 +34,6 @@ static RegisterPass<ProviderInitialization> X(
 		 false // Analysis Pass
 );
 
-cl::opt<std::string> ConfigPath(
-		"config-path",
-		cl::desc("Path to the config file."),
-		cl::init("")
-);
-
 ProviderInitialization::ProviderInitialization(retdec::config::Config* c) :
 		ModulePass(ID)
 {
@@ -66,10 +60,6 @@ bool ProviderInitialization::runOnModule(Module& m)
 	if (_config)
 	{
 		c = ConfigProvider::addConfig(&m, *_config);
-	}
-	else if (!ConfigPath.empty())
-	{
-		c = ConfigProvider::addConfigFile(&m, ConfigPath);
 	}
 
 	if (c == nullptr)
