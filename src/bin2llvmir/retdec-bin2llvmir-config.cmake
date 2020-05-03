@@ -8,6 +8,7 @@ if(NOT TARGET retdec::bin2llvmir)
             debugformat
             demangler
             stacofin
+            cpdetect
             loader
             fileformat
             config

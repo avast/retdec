@@ -125,6 +125,7 @@ target_link_libraries(bin2llvmir
 		retdec::debugformat
 		retdec::demangler
 		retdec::stacofin
+		retdec::cpdetect
 		retdec::loader
 		retdec::fileformat
 		retdec::config

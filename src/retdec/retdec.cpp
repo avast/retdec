@@ -1472,51 +1472,16 @@ c.parameters = params;
 c.parameters.setOrdinalNumbersDirectory("/home/peter/retdec/retdec/build/install/bin/../share/retdec/support/x86/ords/");
 c.parameters.libraryTypeInfoPaths =
 {
-	"/home/peter/retdec/retdec/build/install/bin/../share/retdec/support/generic/types/arm.json",
-	"/home/peter/retdec/retdec/build/install/bin/../share/retdec/support/generic/types/cstdlib.json",
-	"/home/peter/retdec/retdec/build/install/bin/../share/retdec/support/generic/types/linux.json",
-	"/home/peter/retdec/retdec/build/install/bin/../share/retdec/support/generic/types/windows.json",
-	"/home/peter/retdec/retdec/build/install/bin/../share/retdec/support/generic/types/windrivers.json"
+	"/home/peter/retdec/retdec/build/install/share/retdec/support/generic/types/arm.json",
+	"/home/peter/retdec/retdec/build/install/share/retdec/support/generic/types/cstdlib.json",
+	"/home/peter/retdec/retdec/build/install/share/retdec/support/generic/types/linux.json",
+	"/home/peter/retdec/retdec/build/install/share/retdec/support/generic/types/windows.json",
+	"/home/peter/retdec/retdec/build/install/share/retdec/support/generic/types/windrivers.json"
 };
 c.parameters.staticSignaturePaths =
 {
-	"/home/peter/retdec/retdec/build/install/bin/../share/retdec/support/generic/yara_patterns/static-code/pe/32/le/arm/arm-debug-vs-2015.yarac",
-	"/home/peter/retdec/retdec/build/install/bin/../share/retdec/support/generic/yara_patterns/static-code/pe/32/le/arm/arm-debug-vs-2017.yarac",
-	"/home/peter/retdec/retdec/build/install/bin/../share/retdec/support/generic/yara_patterns/static-code/pe/32/le/arm/arm-mingw-4.4.0.yarac",
-	"/home/peter/retdec/retdec/build/install/bin/../share/retdec/support/generic/yara_patterns/static-code/pe/32/le/arm/arm-vs-2015.yarac",
-	"/home/peter/retdec/retdec/build/install/bin/../share/retdec/support/generic/yara_patterns/static-code/pe/32/le/arm/arm-vs-2017.yarac",
-	"/home/peter/retdec/retdec/build/install/bin/../share/retdec/support/generic/yara_patterns/static-code/pe/32/le/arm/ucrt/arm-debug.yarac",
-	"/home/peter/retdec/retdec/build/install/bin/../share/retdec/support/generic/yara_patterns/static-code/pe/32/le/arm/ucrt/arm.yarac"
+	"/home/peter/retdec/retdec/build/install/share/retdec/support/generic/yara_patterns/static-code",
 };
-c.setEntryPoint(0x11000);
-c.setImageBase(0x10000);
-c.fileType.setIsExecutable();
-c.fileFormat.setIsPe32();
-c.architecture.setIsArm32();
-c.architecture.setIsEndianLittle();
-c.languages.insert(retdec::common::Language("C"));
-
-retdec::common::ToolInfo ti1;
-ti1.setType("compiler");
-ti1.setName("mingw");
-ti1.setPercentage(1.0);
-ti1.setVersion("4.4.0");
-c.tools.push_back(ti1);
-
-retdec::common::ToolInfo ti2;
-ti2.setType("compiler");
-ti2.setName("gcc");
-ti2.setPercentage(0.0);
-ti2.setVersion("4.4.0");
-ti2.setIsFromHeuristics(true);
-c.tools.push_back(ti2);
-
-retdec::common::ToolInfo ti3;
-ti3.setType("linker");
-ti3.setName("microsoft");
-ti3.setPercentage(0.0);
-ti3.setIsFromHeuristics(true);
-c.tools.push_back(ti3);
 
 ConfigPath = c.parameters.getOutputConfigFile();
 OutputFilename = c.parameters.getOutputFile();
