@@ -9,6 +9,7 @@ add_library(bin2llvmir STATIC
 	optimizations/class_hierarchy/hierarchy.cpp
 	optimizations/class_hierarchy/hierarchy_analysis.cpp
 	optimizations/cond_branch_opt/cond_branch_opt.cpp
+	optimizations/config_generator/config_generator.cpp
 	optimizations/constants/constants.cpp
 	optimizations/decoder/arm.cpp
 	optimizations/decoder/arm64.cpp
