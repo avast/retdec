@@ -62,6 +62,8 @@ class Parameters
 		uint64_t getMaxMemoryLimit() const;
 		/// @}
 
+		void fixRelativePaths(const std::string& configPath);
+
 		template <typename Writer>
 		void serialize(Writer& writer) const;
 		void deserialize(const rapidjson::Value& val);
@@ -84,6 +86,9 @@ class Parameters
 
 		/// Address ranges selected by the user through selective decompilation.
 		common::AddressRangeContainer selectedRanges;
+
+		/// LLVM passes.
+		std::vector<std::string> llvmPasses;
 
 	private:
 		/// Decompilation will verbosely inform about the

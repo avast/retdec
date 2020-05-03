@@ -107,5 +107,13 @@ install(CODE "
 	endif()
 ")
 
+# Install retdec config.
+#
+set(RETDEC_DECOMPILER_CONFIG "decompiler-config.json")
+install(
+	FILES       ${RETDEC_DECOMPILER_CONFIG}
+	DESTINATION ${RETDEC_INSTALL_DATA_DIR}
+)
+
 # Is this necessary?
 set(CMAKE_INSTALL_MESSAGE ALWAYS)

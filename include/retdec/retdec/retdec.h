@@ -13,7 +13,7 @@
 
 #include "retdec/common/basic_block.h"
 #include "retdec/common/function.h"
-#include "retdec/config/parameters.h"
+#include "retdec/config/config.h"
 
 namespace retdec {
 
@@ -44,7 +44,7 @@ LlvmModuleContextPair disassemble(
 /**
  *
  */
-bool decompile(const retdec::config::Parameters& params);
+bool decompile(retdec::config::Config& config);
 
 } // namespace retdec
 

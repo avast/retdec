@@ -33,17 +33,20 @@
 #include <llvm/Support/ToolOutputFile.h>
 #include <llvm/Target/TargetMachine.h>
 
-#include "retdec/config/parameters.h"
+#include "retdec/config/config.h"
 #include "retdec/retdec/retdec.h"
+#include "retdec/utils/binary_path.h"
+#include "retdec/utils/filesystem_path.h"
 
 class ProgramOptions
 {
 public:
 	std::string programName;
-	retdec::config::Parameters params;
+	retdec::config::Parameters& params;
 
 public:
-	ProgramOptions(int argc, char *argv[])
+	ProgramOptions(int argc, char *argv[], retdec::config::Parameters& p)
+			: params(p)
 	{
 		if (argc > 0)
 		{
@@ -145,15 +148,29 @@ private:
 
 int main(int argc, char **argv)
 {
+	retdec::config::Config config;
+
+	auto binpath = retdec::utils::getThisBinaryDirectoryPath();
+	retdec::utils::FilesystemPath configPath(binpath.getParentPath());
+	configPath.append("share");
+	configPath.append("retdec");
+	configPath.append("decompiler-config.json");
+	if (configPath.exists())
+	{
+		config = retdec::config::Config::fromFile(configPath.getPath());
+		config.parameters.fixRelativePaths(configPath.getParentPath());
+	}
+
 	llvm::sys::PrintStackTraceOnErrorSignal(argv[0]);
 	llvm::PrettyStackTraceProgram X(argc, argv);
 	llvm::llvm_shutdown_obj Y; // Call llvm_shutdown() on exit.
 	llvm::EnableDebugBuffering = true;
 
-	ProgramOptions po(argc, argv);
+	ProgramOptions po(argc, argv, config.parameters);
 	po.dump();
+	config.setInputFile(config.parameters.getInputFile());
 
-	if (retdec::decompile(po.params))
+	if (retdec::decompile(config))
 	{
 		std::cout << "decompilation FAILED" << std::endl;
 	}

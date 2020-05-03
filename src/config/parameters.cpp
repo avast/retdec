@@ -10,6 +10,7 @@
 #include "retdec/config/parameters.h"
 #include "retdec/serdes/address.h"
 #include "retdec/serdes/std.h"
+#include "retdec/utils/filesystem_path.h"
 
 namespace {
 
@@ -27,6 +28,7 @@ const std::string JSON_frontendFunctions        = "frontendFunctions";
 const std::string JSON_selectedNotFoundFncs     = "selectedNotFoundFncs";
 const std::string JSON_selectedRanges           = "selectedRanges";
 const std::string JSON_selectedInteresting      = "selectedInteresting";
+const std::string JSON_llvmPasses               = "llvmPasses";
 
 } // anonymous namespace
 
@@ -187,6 +189,41 @@ uint64_t Parameters::getMaxMemoryLimit() const
 	return _maxMemoryLimit;
 }
 
+void fixPath(std::string& path, utils::FilesystemPath root)
+{
+	utils::FilesystemPath p(path);
+	if (p.isRelative())
+	{
+		root.append(p.getPath());
+		path = root.getAbsolutePath();
+	}
+}
+
+void fixPaths(std::set<std::string>& set, utils::FilesystemPath root)
+{
+	std::set<std::string> nset;
+
+	for (auto p : set)
+	{
+		fixPath(p, root);
+		nset.insert(p);
+	}
+
+	set = nset;
+}
+
+void Parameters::fixRelativePaths(const std::string& configPath)
+{
+	utils::FilesystemPath c(configPath);
+
+	fixPaths(userStaticSignaturePaths, c);
+	fixPaths(staticSignaturePaths, c);
+	fixPaths(libraryTypeInfoPaths, c);
+	fixPaths(semanticPaths, c);
+	fixPaths(abiPaths, c);
+	fixPath(_ordinalNumbersDirectory, c);
+}
+
 /**
  * Returns JSON object (associative array) holding parameters information.
  * @return JSON object.
@@ -210,6 +247,7 @@ void Parameters::serialize(Writer& writer) const
 	serdes::serializeContainer(writer, JSON_selectedFunctions, selectedFunctions);
 	serdes::serializeContainer(writer, JSON_frontendFunctions, frontendFunctions);
 	serdes::serializeContainer(writer, JSON_selectedNotFoundFncs, selectedNotFoundFunctions);
+	serdes::serializeContainer(writer, JSON_llvmPasses, llvmPasses);
 
 	writer.EndObject();
 }
@@ -243,6 +281,7 @@ void Parameters::deserialize(const rapidjson::Value& val)
 	serdes::deserializeContainer(val, JSON_selectedFunctions, selectedFunctions);
 	serdes::deserializeContainer(val, JSON_frontendFunctions, frontendFunctions);
 	serdes::deserializeContainer(val, JSON_selectedNotFoundFncs, selectedNotFoundFunctions);
+	serdes::deserializeContainer(val, JSON_llvmPasses, llvmPasses);
 }
 
 } // namespace config

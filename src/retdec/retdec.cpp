@@ -441,12 +441,13 @@ static inline void addPass(
 	PM.add(P);
 }
 
-bool decompile(const retdec::config::Parameters& params)
+bool decompile(retdec::config::Config& config)
+// bool decompile(const retdec::config::Parameters& params)
 {
 	llvm_support::printPhase("Initialization");
 	auto& passRegistry = initializeLlvmPasses();
 
-	limitMaximalMemoryIfRequested(params);
+	// limitMaximalMemoryIfRequested(params);
 
 	auto context = std::make_unique<llvm::LLVMContext>();
 	auto module = createLlvmModule(*context);
@@ -454,175 +455,7 @@ bool decompile(const retdec::config::Parameters& params)
 	// Create a PassManager to hold and optimize the collection of passes we
 	// are about to build.
 	llvm::legacy::PassManager pm;
-
-config::Config c;
-c.setInputFile(params.getInputFile());
-c.parameters = params;
-c.parameters.setOrdinalNumbersDirectory("/home/peter/retdec/retdec/build/install/bin/../share/retdec/support/x86/ords/");
-c.parameters.libraryTypeInfoPaths =
-{
-	"/home/peter/retdec/retdec/build/install/share/retdec/support/generic/types/arm.json",
-	"/home/peter/retdec/retdec/build/install/share/retdec/support/generic/types/cstdlib.json",
-	"/home/peter/retdec/retdec/build/install/share/retdec/support/generic/types/linux.json",
-	"/home/peter/retdec/retdec/build/install/share/retdec/support/generic/types/windows.json",
-	"/home/peter/retdec/retdec/build/install/share/retdec/support/generic/types/windrivers.json"
-};
-c.parameters.staticSignaturePaths =
-{
-	"/home/peter/retdec/retdec/build/install/share/retdec/support/generic/yara_patterns/static-code",
-};
-
-	std::vector<std::string> passes =
-	{
-		// retdec
-		"provider-init",
-		"decoder",
-		"verify",
-		"x86-addr-spaces",
-		"x87-fpu",
-		"main-detection",
-		"idioms-libgcc",
-		"inst-opt",
-		"cond-branch-opt",
-		"syscalls",
-		"stack",
-		"constants",
-		"param-return",
-		"inst-opt-rda",
-		"inst-opt",
-		"simple-types",
-		"write-dsm",
-		"remove-asm-instrs",
-		"class-hierarchy",
-		"select-fncs",
-		"unreachable-funcs",
-		"inst-opt",
-		"register-localization",
-		"value-protect",
-		// llvm 1
-		"instcombine",
-		"tbaa",
-		"basicaa",
-		"simplifycfg",
-		"early-cse",
-		"tbaa",
-		"basicaa",
-		"globalopt",
-		"mem2reg",
-		"instcombine",
-		"simplifycfg",
-		"early-cse",
-		"lazy-value-info",
-		"jump-threading",
-		"correlated-propagation",
-		"simplifycfg",
-		"instcombine",
-		"simplifycfg",
-		"reassociate",
-		"loops",
-		"loop-simplify",
-		"lcssa",
-		"loop-rotate",
-		"licm",
-		"lcssa",
-		"instcombine",
-		"loop-simplifycfg",
-		"loop-simplify",
-		"aa",
-		"loop-accesses",
-		"loop-load-elim",
-		"lcssa",
-		"indvars",
-		"loop-idiom",
-		"loop-deletion",
-		"gvn",
-		"sccp",
-		"instcombine",
-		"lazy-value-info",
-		"jump-threading",
-		"correlated-propagation",
-		"dse",
-		"bdce",
-		"adce",
-		"simplifycfg",
-		"instcombine",
-		"strip-dead-prototypes",
-		"globaldce",
-		"constmerge",
-		"constprop",
-		"instcombine",
-		// llvm 2
-		"instcombine",
-		"tbaa",
-		"basicaa",
-		"simplifycfg",
-		"early-cse",
-		"tbaa",
-		"basicaa",
-		"globalopt",
-		"mem2reg",
-		"instcombine",
-		"simplifycfg",
-		"early-cse",
-		"lazy-value-info",
-		"jump-threading",
-		"correlated-propagation",
-		"simplifycfg",
-		"instcombine",
-		"simplifycfg",
-		"reassociate",
-		"loops",
-		"loop-simplify",
-		"lcssa",
-		"loop-rotate",
-		"licm",
-		"lcssa",
-		"instcombine",
-		"loop-simplifycfg",
-		"loop-simplify",
-		"aa",
-		"loop-accesses",
-		"loop-load-elim",
-		"lcssa",
-		"indvars",
-		"loop-idiom",
-		"loop-deletion",
-		"gvn",
-		"sccp",
-		"instcombine",
-		"lazy-value-info",
-		"jump-threading",
-		"correlated-propagation",
-		"dse",
-		"bdce",
-		"adce",
-		"simplifycfg",
-		"instcombine",
-		"strip-dead-prototypes",
-		"globaldce",
-		"constmerge",
-		"constprop",
-		"instcombine",
-		// retdec + llvm
-		"inst-opt",
-		"simple-types",
-		"stack-ptr-op-remove",
-		"idioms",
-		"instcombine",
-		"inst-opt",
-		"idioms",
-		"remove-phi",
-		"value-protect",
-		"sink",
-		"verify",
-		"write-ll",
-		"write-bc",
-		// llvmir2hll
-		"loops",
-		"scalar-evolution",
-		"llvmir2hll",
-	};
-	for (auto& p : passes)
+	for (auto& p : config.parameters.llvmPasses)
 	{
 		if (auto* info = passRegistry.getPassInfo(p))
 		{
@@ -632,12 +465,12 @@ c.parameters.staticSignaturePaths =
 			if (info->getTypeInfo() == &bin2llvmir::ProviderInitialization::ID)
 			{
 				auto* p = static_cast<bin2llvmir::ProviderInitialization*>(pass);
-				p->setConfig(&c);
+				p->setConfig(&config);
 			}
 			if (info->getTypeInfo() == &llvmir2hll::LlvmIr2Hll::ID)
 			{
 				auto* p = static_cast<llvmir2hll::LlvmIr2Hll*>(pass);
-				p->setConfig(&c);
+				p->setConfig(&config);
 			}
 		}
 		else
