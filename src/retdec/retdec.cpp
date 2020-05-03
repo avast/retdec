@@ -14,7 +14,6 @@
 #include <llvm/Analysis/ScalarEvolution.h>
 #include <llvm/Analysis/TargetLibraryInfo.h>
 #include <llvm/Analysis/TargetTransformInfo.h>
-#include <llvm/Bitcode/BitcodeWriterPass.h>
 #include <llvm/CodeGen/CommandFlags.inc>
 #include <llvm/IR/CFG.h>
 #include <llvm/IR/DataLayout.h>
@@ -30,7 +29,6 @@
 #include <llvm/LinkAllIR.h>
 #include <llvm/MC/SubtargetFeature.h>
 #include <llvm/Support/Debug.h>
-#include <llvm/Support/FileSystem.h>
 #include <llvm/Support/Host.h>
 #include <llvm/Support/ManagedStatic.h>
 #include <llvm/Support/PrettyStackTrace.h>
@@ -492,58 +490,6 @@ static inline void addPass(
 
 	PM.add(new ModulePassPrinter(pn));
 	PM.add(P);
-}
-
-/**
- * Create bitcode output file object.
- */
-std::unique_ptr<ToolOutputFile> createBitcodeOutputFile(
-		const retdec::config::Parameters& params)
-{
-	std::unique_ptr<ToolOutputFile> Out;
-
-	auto& bitcodeOut = params.getOutputBitcodeFile();
-	if (bitcodeOut.empty())
-	{
-		throw std::runtime_error("bitcode output file was not specified");
-	}
-
-	std::error_code EC;
-	Out.reset(new ToolOutputFile(bitcodeOut, EC, sys::fs::F_None));
-	if (EC)
-	{
-		throw std::runtime_error(
-			"failed to create llvm::ToolOutputFile for .bc: " + EC.message()
-		);
-	}
-
-	return Out;
-}
-
-/**
- * Create assembly output file object.
- */
-std::unique_ptr<ToolOutputFile> createAssemblyOutputFile(
-		const retdec::config::Parameters& params)
-{
-	std::unique_ptr<ToolOutputFile> Out;
-
-	auto& asmOut = params.getOutputLlvmirFile();
-	if (asmOut.empty())
-	{
-		throw std::runtime_error("LLVM IR output file was not specified");
-	}
-
-	std::error_code EC;
-	Out.reset(new ToolOutputFile(asmOut, EC, sys::fs::F_None));
-	if (EC)
-	{
-		throw std::runtime_error(
-			"failed to create llvm::ToolOutputFile for .ll: " + EC.message()
-		);
-	}
-
-	return Out;
 }
 
 //==============================================================================
@@ -1648,7 +1594,7 @@ pm.add(new bin2llvmir::ProviderInitialization(&c));
 		"inst-opt-rda",
 		"inst-opt",
 		"simple-types",
-		"generate-dsm",
+		"write-dsm",
 		"remove-asm-instrs",
 		"class-hierarchy",
 		"select-fncs",
@@ -1770,8 +1716,14 @@ pm.add(new bin2llvmir::ProviderInitialization(&c));
 		"idioms",
 		"remove-phi",
 		"value-protect",
-		"config-generator",
+		"write-config",
 		"sink",
+		"verify",
+		"write-ll",
+		"write-bc",
+		// llvmir2hll
+		"loops",
+		"scalar-evolution",
 	};
 	for (auto& p : passes)
 	{
@@ -1787,24 +1739,6 @@ pm.add(new bin2llvmir::ProviderInitialization(&c));
 		throw std::runtime_error("cannot create pass: " + p);
 	}
 
-	// Check that the module is well formed on completion of optimization
-	addPass(pm, createVerifierPass());
-
-	// Write bitcode to the output as the last step.
-	std::unique_ptr<ToolOutputFile> bcOut = createBitcodeOutputFile(params);
-	raw_ostream *bcOs = &bcOut->os();
-	bool PreserveBitcodeUseListOrder = false;
-	addPass(pm, createBitcodeWriterPass(*bcOs, PreserveBitcodeUseListOrder));
-
-	// Write assembly to the output as the last step.
-	std::unique_ptr<ToolOutputFile> llOut = createAssemblyOutputFile(params);
-	raw_ostream *llOs = &llOut->os();
-	bool PreserveAssemblyUseListOrder = false;
-	addPass(
-			pm,
-			createPrintModulePass(*llOs, "", PreserveAssemblyUseListOrder),
-			"Assembly Writer"); // original name = "Print module to stderr"
-
 //==============================================================================
 // llvmir2hll
 //==============================================================================
@@ -1815,8 +1749,6 @@ pm.add(new bin2llvmir::ProviderInitialization(&c));
 		return EXIT_FAILURE;
 	}
 
-	pm.add(new LoopInfoWrapperPass());
-	pm.add(new ScalarEvolutionWrapperPass());
 	raw_pwrite_stream &os(out->os());
 	pm.add(new Decompiler(os, params));
 
@@ -1828,8 +1760,6 @@ pm.add(new bin2llvmir::ProviderInitialization(&c));
 	pm.run(*module);
 
 	// Declare success.
-	bcOut->keep();
-	llOut->keep();
 	out->keep();
 
 	return EXIT_SUCCESS;

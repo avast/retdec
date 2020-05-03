@@ -1,11 +1,11 @@
 /**
- * @file include/retdec/bin2llvmir/optimizations/dsm_generator/dsm_generator.h
- * @brief Produce DSM output.
+ * @file include/retdec/bin2llvmir/optimizations/writer_dsm/writer_dsm.h
+ * @brief Generate the current disassembly.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#ifndef RETDEC_BIN2LLVMIR_OPTIMIZATIONS_DSM_GENERATOR_DSM_GENERATOR_H
-#define RETDEC_BIN2LLVMIR_OPTIMIZATIONS_DSM_GENERATOR_DSM_GENERATOR_H
+#ifndef RETDEC_BIN2LLVMIR_OPTIMIZATIONS_WRITER_DSM_WRITER_DSM_H
+#define RETDEC_BIN2LLVMIR_OPTIMIZATIONS_WRITER_DSM_WRITER_DSM_H
 
 #include <ostream>
 
@@ -20,11 +20,11 @@
 namespace retdec {
 namespace bin2llvmir {
 
-class DsmGenerator : public llvm::ModulePass
+class DsmWriter : public llvm::ModulePass
 {
 	public:
 		static char ID;
-		DsmGenerator();
+		DsmWriter();
 		virtual bool runOnModule(llvm::Module& m) override;
 		bool runOnModuleCustom(
 				llvm::Module& m,

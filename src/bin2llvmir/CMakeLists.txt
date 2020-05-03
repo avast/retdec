@@ -9,7 +9,6 @@ add_library(bin2llvmir STATIC
 	optimizations/class_hierarchy/hierarchy.cpp
 	optimizations/class_hierarchy/hierarchy_analysis.cpp
 	optimizations/cond_branch_opt/cond_branch_opt.cpp
-	optimizations/config_generator/config_generator.cpp
 	optimizations/constants/constants.cpp
 	optimizations/decoder/arm.cpp
 	optimizations/decoder/arm64.cpp
@@ -24,7 +23,6 @@ add_library(bin2llvmir STATIC
 	optimizations/decoder/patterns.cpp
 	optimizations/decoder/powerpc.cpp
 	optimizations/decoder/x86.cpp
-	optimizations/dsm_generator/dsm_generator.cpp
 	optimizations/dump_module/dump_module.cpp
 	optimizations/idioms/idioms.cpp
 	optimizations/idioms/idioms_abstract.cpp
@@ -60,6 +58,10 @@ add_library(bin2llvmir STATIC
 	optimizations/stack/stack.cpp
 	optimizations/stack_pointer_ops/stack_pointer_ops.cpp
 	optimizations/value_protect/value_protect.cpp
+	optimizations/writer_bc/writer_bc.cpp
+	optimizations/writer_config/writer_config.cpp
+	optimizations/writer_dsm/writer_dsm.cpp
+	optimizations/writer_ll/writer_ll.cpp
 	optimizations/syscalls/arm.cpp
 	optimizations/syscalls/arm64.cpp
 	optimizations/syscalls/mips.cpp

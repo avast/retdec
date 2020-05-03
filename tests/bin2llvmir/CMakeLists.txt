@@ -2,7 +2,6 @@
 add_executable(tests-bin2llvmir
 	analyses/reaching_definitions_tests.cpp
 	optimizations/asm_inst_remover/asm_inst_remover_tests.cpp
-	optimizations/dsm_generator/dsm_generator_tests.cpp
 	optimizations/idioms_libgcc/idioms_libgcc_tests.cpp
 	optimizations/inst_opt/inst_opt_pass_tests.cpp
 	optimizations/inst_opt/inst_opt_tests.cpp
@@ -10,6 +9,7 @@ add_executable(tests-bin2llvmir
 	optimizations/stack_pointer_ops/stack_pointer_ops_tests.cpp
 	optimizations/unreachable_funcs/unreachable_funcs_tests.cpp
 	optimizations/value_protect/value_protect_test.cpp
+	optimizations/writer_dsm/writer_dsm_tests.cpp
 	optimizations/x86_addr_spaces/x86_addr_spaces_pass_test.cpp
 	optimizations/x86_addr_spaces/x86_addr_spaces_test.cpp
 	providers/asm_instruction_tests.cpp

@@ -1,10 +1,10 @@
 /**
- * @file src/bin2llvmir/optimizations/config_generator/config_generator.h
+ * @file src/bin2llvmir/optimizations/writer_config/writer_config.h
  * @brief Generate the current config.
  * @copyright (c) 2020 Avast Software, licensed under the MIT license
  */
 
-#include "retdec/bin2llvmir/optimizations/config_generator/config_generator.h"
+#include "retdec/bin2llvmir/optimizations/writer_config/writer_config.h"
 #include "retdec/bin2llvmir/providers/config.h"
 
 using namespace llvm;
@@ -12,22 +12,22 @@ using namespace llvm;
 namespace retdec {
 namespace bin2llvmir {
 
-char ConfigGenerator::ID = 0;
+char ConfigWriter::ID = 0;
 
-static RegisterPass<ConfigGenerator> X(
-		"config-generator",
+static RegisterPass<ConfigWriter> X(
+		"write-config",
 		"Generate the current config",
 		 false, // Only looks at CFG
 		 false // Analysis Pass
 );
 
-ConfigGenerator::ConfigGenerator() :
+ConfigWriter::ConfigWriter() :
 		ModulePass(ID)
 {
 
 }
 
-bool ConfigGenerator::runOnModule(Module& M)
+bool ConfigWriter::runOnModule(Module& M)
 {
 	auto* c = ConfigProvider::getConfig(&M);
 	c->doFinalization();
