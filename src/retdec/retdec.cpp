@@ -402,7 +402,7 @@ void limitMaximalMemoryIfRequested(const retdec::config::Parameters& params)
 {
 	if (params.isMaxMemoryLimitHalfRam())
 	{
-		auto ok = retdec::utils::limitSystemMemoryToHalfOfTotalSystemMemory();
+		auto ok = utils::limitSystemMemoryToHalfOfTotalSystemMemory();
 		if (!ok)
 		{
 			throw std::runtime_error(
@@ -412,7 +412,7 @@ void limitMaximalMemoryIfRequested(const retdec::config::Parameters& params)
 	}
 	else if (auto lim = params.getMaxMemoryLimit(); lim > 0)
 	{
-		auto ok = retdec::utils::limitSystemMemory(lim);
+		auto ok = utils::limitSystemMemory(lim);
 		if (!ok)
 		{
 			throw std::runtime_error(
@@ -448,16 +448,16 @@ class ModulePassPrinter : public ModulePass
 
 		bool runOnModule(Module &M) override
 		{
-			// if (llvmPassesNormalized.count(retdec::utils::toLower(PhaseName)))
+			// if (llvmPassesNormalized.count(utils::toLower(PhaseName)))
 			// {
-			// 	if (!llvmPassesNormalized.count(retdec::utils::toLower(LastPhase)))
+			// 	if (!llvmPassesNormalized.count(utils::toLower(LastPhase)))
 			// 	{
-			// 		retdec::llvm_support::printPhase(LlvmAggregatePhaseName);
+			// 		llvm_support::printPhase(LlvmAggregatePhaseName);
 			// 	}
 			// }
 			// else
 			{
-				retdec::llvm_support::printPhase(PhaseName);
+				llvm_support::printPhase(PhaseName);
 			}
 
 			// LastPhase gets updated every time.
@@ -587,7 +587,11 @@ std::unique_ptr<ToolOutputFile> getOutputStream(
 {
 	// Open the file.
 	std::error_code ec;
-	auto out = std::make_unique<ToolOutputFile>(params.getOutputFile(), ec, sys::fs::F_None);
+	auto out = std::make_unique<ToolOutputFile>(
+			params.getOutputFile(),
+			ec,
+			sys::fs::F_None
+	);
 	if (ec)
 	{
 		errs() << ec.message() << '\n';
@@ -604,7 +608,8 @@ std::unique_ptr<ToolOutputFile> getOutputStream(
 * The list is comma separated and has no beginning or trailing whitespace.
 */
 template<typename FactoryType>
-std::string getListOfSupportedObjects() {
+std::string getListOfSupportedObjects()
+{
 	return joinStrings(FactoryType::getInstance().getRegisteredObjects());
 }
 
@@ -622,17 +627,28 @@ std::string getListOfSupportedObjects() {
 * @tparam FactoryType Type of the factory in whose objects we are interested in.
 */
 template<typename FactoryType>
-void printErrorUnsupportedObject(const std::string &typeOfObjectsSingular,
-		const std::string &typeOfObjectsPlural) {
+void printErrorUnsupportedObject(
+		const std::string &typeOfObjectsSingular,
+		const std::string &typeOfObjectsPlural)
+{
 	std::string supportedObjects(getListOfSupportedObjects<FactoryType>());
-	if (!supportedObjects.empty()) {
-		retdec::llvm_support::printErrorMessage("Invalid name of the ",
-			typeOfObjectsSingular, " (supported names are: ", supportedObjects,
-			").");
-	} else {
-		retdec::llvm_support::printErrorMessage("There are no available ",
-			typeOfObjectsPlural, ". Please SHIT, recompile the backend and try it"
-			" again.");
+	if (!supportedObjects.empty())
+	{
+		llvm_support::printErrorMessage(
+				"Invalid name of the ",
+				typeOfObjectsSingular,
+				" (supported names are: ",
+				supportedObjects,
+				")."
+		);
+	}
+	else
+	{
+		llvm_support::printErrorMessage(
+				"There are no available ",
+				typeOfObjectsPlural,
+				". Please SHIT, recompile the backend and try it again."
+		);
 	}
 }
 
@@ -652,14 +668,18 @@ void printErrorUnsupportedObject(const std::string &typeOfObjectsSingular,
 * can be enabled by using the `-emit-debug-comments` parameter. For more
 * information, run llvmir2hll with `-help`.
 */
-class Decompiler: public ModulePass {
+class Decompiler: public ModulePass
+{
 public:
 	explicit Decompiler(
 			raw_pwrite_stream &out,
 			const retdec::config::Parameters& params,
 			config::Config& c);
 
-	virtual llvm::StringRef getPassName() const override { return "Decompiler"; }
+	virtual llvm::StringRef getPassName() const override
+	{
+		return "Decompiler";
+	}
 	virtual bool runOnModule(Module &m) override;
 
 public:
@@ -667,19 +687,19 @@ public:
 	static char ID;
 
 private:
-	virtual void getAnalysisUsage(AnalysisUsage &au) const override {
+	virtual void getAnalysisUsage(AnalysisUsage &au) const override
+	{
 		au.addRequired<llvm::LoopInfoWrapperPass>();
 		au.addRequired<llvm::ScalarEvolutionWrapperPass>();
 		au.setPreservesAll();
 	}
 
 	bool initialize(Module &m);
-	// bool limitMaximalMemoryIfRequested();
 	void createSemantics();
 	void createSemanticsFromParameter();
 	void createSemanticsFromLLVMIR();
 	bool loadConfig();
-	// void saveConfig();
+	void saveConfig();
 	bool convertLLVMIRToBIR();
 	void removeLibraryFuncs();
 	void removeCodeUnreachableInCFG();
@@ -699,49 +719,50 @@ private:
 	void finalize();
 	void cleanup();
 
-	retdec::llvmir2hll::StringSet parseListOfOpts(const std::string &opts) const;
+	llvmir2hll::StringSet parseListOfOpts(
+			const std::string &opts) const;
 	std::string getTypeOfRunOptimizations() const;
-	retdec::llvmir2hll::StringVector getIdsOfPatternFindersToBeRun() const;
-	retdec::llvmir2hll::PatternFinderRunner::PatternFinders instantiatePatternFinders(
-		const retdec::llvmir2hll::StringVector &pfsIds);
-	ShPtr<retdec::llvmir2hll::PatternFinderRunner> instantiatePatternFinderRunner() const;
-	retdec::llvmir2hll::StringSet getPrefixesOfFuncsToBeRemoved() const;
+	llvmir2hll::StringVector getIdsOfPatternFindersToBeRun() const;
+	llvmir2hll::PatternFinderRunner::PatternFinders instantiatePatternFinders(
+		const llvmir2hll::StringVector &pfsIds);
+	ShPtr<llvmir2hll::PatternFinderRunner> instantiatePatternFinderRunner() const;
+	llvmir2hll::StringSet getPrefixesOfFuncsToBeRemoved() const;
 
 private:
 	/// Output stream into which the generated code will be emitted.
 	raw_pwrite_stream &out;
 
-	const retdec::config::Parameters& params;
+	const config::Parameters& params;
 
 	/// The input LLVM module.
 	Module *llvmModule;
 
 	/// The resulting module in BIR.
-	ShPtr<retdec::llvmir2hll::Module> resModule;
+	ShPtr<llvmir2hll::Module> resModule;
 
 	/// The used semantics.
-	ShPtr<retdec::llvmir2hll::Semantics> semantics;
+	ShPtr<llvmir2hll::Semantics> semantics;
 
 	/// The used config.
-	ShPtr<retdec::llvmir2hll::Config> config;
+	ShPtr<llvmir2hll::Config> config;
 
 	/// The used HLL writer.
-	ShPtr<retdec::llvmir2hll::HLLWriter> hllWriter;
+	ShPtr<llvmir2hll::HLLWriter> hllWriter;
 
 	/// The used alias analysis.
-	ShPtr<retdec::llvmir2hll::AliasAnalysis> aliasAnalysis;
+	ShPtr<llvmir2hll::AliasAnalysis> aliasAnalysis;
 
 	/// The used obtainer of information about function and function calls.
-	ShPtr<retdec::llvmir2hll::CallInfoObtainer> cio;
+	ShPtr<llvmir2hll::CallInfoObtainer> cio;
 
 	/// The used evaluator of arithmetical expressions.
-	ShPtr<retdec::llvmir2hll::ArithmExprEvaluator> arithmExprEvaluator;
+	ShPtr<llvmir2hll::ArithmExprEvaluator> arithmExprEvaluator;
 
 	/// The used generator of variable names.
-	ShPtr<retdec::llvmir2hll::VarNameGen> varNameGen;
+	ShPtr<llvmir2hll::VarNameGen> varNameGen;
 
 	/// The used renamer of variables.
-	ShPtr<retdec::llvmir2hll::VarRenamer> varRenamer;
+	ShPtr<llvmir2hll::VarRenamer> varRenamer;
 };
 
 // Static variables and constants initialization.
@@ -755,7 +776,7 @@ char Decompiler::ID = 0;
 */
 Decompiler::Decompiler(
 		raw_pwrite_stream &out,
-		const retdec::config::Parameters& params,
+		const config::Parameters& params,
 		config::Config& c)
 		:
 		ModulePass(ID),
@@ -765,7 +786,7 @@ Decompiler::Decompiler(
 		resModule(),
 		semantics(),
 		// config(&c),
-		// config(retdec::llvmir2hll::JSONConfig::fromString(c.generateJsonString())),
+		// config(llvmir2hll::JSONConfig::fromString(c.generateJsonString())),
 		hllWriter(),
 		aliasAnalysis(),
 		cio(),
@@ -776,93 +797,133 @@ Decompiler::Decompiler(
 	// std::cout << c.generateJsonString() << std::endl;
 }
 
-bool Decompiler::runOnModule(Module &m) {
-	if (Debug) retdec::llvm_support::printPhase("initialization");
+bool Decompiler::runOnModule(Module &m)
+{
+	llvm_support::printPhase("initialization", Debug);
 
 	bool decompilationShouldContinue = initialize(m);
-	if (!decompilationShouldContinue) {
+	if (!decompilationShouldContinue)
+	{
 		return false;
 	}
 
-	if (Debug) retdec::llvm_support::printPhase("conversion of LLVM IR into BIR");
+	llvm_support::printPhase("conversion of LLVM IR into BIR", Debug);
 	decompilationShouldContinue = convertLLVMIRToBIR();
-	if (!decompilationShouldContinue) {
+	if (!decompilationShouldContinue)
+	{
 		return false;
 	}
 
-	retdec::llvmir2hll::StringSet funcPrefixes(getPrefixesOfFuncsToBeRemoved());
-	if (Debug) retdec::llvm_support::printPhase("removing functions prefixed with [" + joinStrings(funcPrefixes) + "]");
+	llvmir2hll::StringSet funcPrefixes(getPrefixesOfFuncsToBeRemoved());
+	llvm_support::printPhase(
+			"removing functions prefixed with ["
+			+ joinStrings(funcPrefixes) + "]",
+			Debug
+	);
 	removeFuncsPrefixedWith(funcPrefixes);
 
-	// if (!KeepLibraryFunctions) {
-	// 	if (Debug) retdec::llvm_support::printPhase("removing functions from standard libraries");
-	// 	removeLibraryFuncs();
-	// }
+	if (!KeepLibraryFunctions)
+	{
+		llvm_support::printPhase(
+				"removing functions from standard libraries",
+				Debug
+		);
+		removeLibraryFuncs();
+	}
 
 	// The following phase needs to be done right after the conversion because
 	// there may be code that is not reachable in a CFG. This happens because
 	// the conversion of LLVM IR to BIR is not perfect, so it may introduce
 	// unreachable code. This causes problems later during optimizations
 	// because the code exists in BIR, but not in a CFG.
-	if (Debug) retdec::llvm_support::printPhase("removing code that is not reachable in a CFG");
+	llvm_support::printPhase(
+			"removing code that is not reachable in a CFG",
+			Debug
+	);
 	removeCodeUnreachableInCFG();
 
-	if (Debug) retdec::llvm_support::printPhase("signed/unsigned types fixing");
+	llvm_support::printPhase("signed/unsigned types fixing", Debug);
 	fixSignedUnsignedTypes();
 
-	if (Debug) retdec::llvm_support::printPhase("converting LLVM intrinsic functions to standard functions");
+	llvm_support::printPhase(
+			"converting LLVM intrinsic functions to standard functions",
+			Debug
+	);
 	convertLLVMIntrinsicFunctions();
 
-	if (resModule->isDebugInfoAvailable()) {
-		if (Debug) retdec::llvm_support::printPhase("obtaining debug information");
+	if (resModule->isDebugInfoAvailable())
+	{
+		llvm_support::printPhase("obtaining debug information", Debug);
 		obtainDebugInfo();
 	}
 
-	if (!NoOpts) {
-		if (Debug) retdec::llvm_support::printPhase("alias analysis [" + aliasAnalysis->getId() + "]");
+	if (!NoOpts)
+	{
+		llvm_support::printPhase(
+				"alias analysis [" + aliasAnalysis->getId() + "]",
+				Debug
+		);
 		initAliasAnalysis();
 
-		if (Debug) retdec::llvm_support::printPhase("optimizations [" + getTypeOfRunOptimizations() + "]");
+		llvm_support::printPhase(
+				"optimizations [" + getTypeOfRunOptimizations()	+ "]",
+				Debug
+		);
 		runOptimizations();
 	}
 
-	if (!NoVarRenaming) {
-		if (Debug) retdec::llvm_support::printPhase("variable renaming [" + varRenamer->getId() + "]");
+	if (!NoVarRenaming)
+	{
+		llvm_support::printPhase(
+				"variable renaming [" + varRenamer->getId() + "]",
+				Debug
+		);
 		renameVariables();
 	}
 
-	if (!NoSymbolicNames) {
-		if (Debug) retdec::llvm_support::printPhase("converting constants to symbolic names");
+	if (!NoSymbolicNames)
+	{
+		llvm_support::printPhase(
+				"converting constants to symbolic names",
+				Debug
+		);
 		convertConstantsToSymbolicNames();
 	}
 
-	if (ValidateModule) {
-		if (Debug) retdec::llvm_support::printPhase("module validation");
+	if (ValidateModule)
+	{
+		llvm_support::printPhase("module validation", Debug);
 		validateResultingModule();
 	}
 
-	if (!FindPatterns.empty()) {
-		if (Debug) retdec::llvm_support::printPhase("finding patterns");
+	if (!FindPatterns.empty())
+	{
+		llvm_support::printPhase("finding patterns", Debug);
 		findPatterns();
 	}
 
-	if (EmitCFGs) {
-		if (Debug) retdec::llvm_support::printPhase("emission of control-flow graphs");
+	if (EmitCFGs)
+	{
+		llvm_support::printPhase("emission of control-flow graphs", Debug);
 		emitCFGs();
 	}
 
-	if (EmitCG) {
-		if (Debug) retdec::llvm_support::printPhase("emission of a call graph");
+	if (EmitCG)
+	{
+		llvm_support::printPhase("emission of a call graph", Debug);
 		emitCG();
 	}
 
-	if (Debug) retdec::llvm_support::printPhase("emission of the target code [" + hllWriter->getId() + "]");
+	llvm_support::printPhase(
+			"emission of the target code [" + hllWriter->getId() + "]",
+			Debug
+	);
 	emitTargetHLLCode();
 
-	if (Debug) retdec::llvm_support::printPhase("finalization");
+	llvm_support::printPhase("finalization", Debug);
 	finalize();
 
-	if (Debug) retdec::llvm_support::printPhase("cleanup");
+	llvm_support::printPhase("cleanup", Debug);
 	cleanup();
 
 	return false;
@@ -874,85 +935,120 @@ bool Decompiler::runOnModule(Module &m) {
 * @return @c true if the decompilation should continue (the initialization went
 *         OK), @c false otherwise.
 */
-bool Decompiler::initialize(Module &m) {
+bool Decompiler::initialize(Module &m)
+{
 	llvmModule = &m;
-
-	// Maximal memory limitation.
-	// bool memoryLimitationSucceeded = limitMaximalMemoryIfRequested();
-	// if (!memoryLimitationSucceeded) {
-	// 	return false;
-	// }
 
 	// Instantiate the requested HLL writer and make sure it exists. We need to
 	// explicitly specify template parameters because raw_pwrite_stream has
 	// a private copy constructor, so it needs to be passed by reference.
-	if (Debug) retdec::llvm_support::printSubPhase("creating the used HLL writer [" + TargetHLL + "]");
-	hllWriter = retdec::llvmir2hll::HLLWriterFactory::getInstance().createObject<
+	llvm_support::printSubPhase(
+			"creating the used HLL writer [" + TargetHLL + "]",
+			Debug
+	);
+	hllWriter = llvmir2hll::HLLWriterFactory::getInstance().createObject<
 		raw_pwrite_stream &>(TargetHLL, out, OutputFormat);
-	if (!hllWriter) {
-		printErrorUnsupportedObject<retdec::llvmir2hll::HLLWriterFactory>(
-			"target HLL", "target HLLs");
+	if (!hllWriter)
+	{
+		printErrorUnsupportedObject<llvmir2hll::HLLWriterFactory>(
+				"target HLL", "target HLLs"
+		);
 		return false;
 	}
 
 	// Instantiate the requested alias analysis and make sure it exists.
-	if (Debug) retdec::llvm_support::printSubPhase("creating the used alias analysis [" + AliasAnalysis + "]");
-	aliasAnalysis = retdec::llvmir2hll::AliasAnalysisFactory::getInstance().createObject(
-		AliasAnalysis);
-	if (!aliasAnalysis) {
-		printErrorUnsupportedObject<retdec::llvmir2hll::AliasAnalysisFactory>(
-			"alias analysis", "alias analyses");
+	llvm_support::printSubPhase(
+			"creating the used alias analysis [" + AliasAnalysis + "]",
+			Debug
+	);
+	aliasAnalysis = llvmir2hll::AliasAnalysisFactory::getInstance().createObject(
+		AliasAnalysis
+	);
+	if (!aliasAnalysis)
+	{
+		printErrorUnsupportedObject<llvmir2hll::AliasAnalysisFactory>(
+				"alias analysis", "alias analyses"
+		);
 		return false;
 	}
 
 	// Instantiate the requested obtainer of information about function
 	// calls and make sure it exists.
-	if (Debug) retdec::llvm_support::printSubPhase("creating the used call info obtainer [" + CallInfoObtainer + "]");
-	cio = retdec::llvmir2hll::CallInfoObtainerFactory::getInstance().createObject(
-		CallInfoObtainer);
-	if (!cio) {
-		printErrorUnsupportedObject<retdec::llvmir2hll::CallInfoObtainerFactory>(
-			"call info obtainer", "call info obtainers");
+	llvm_support::printSubPhase(
+			"creating the used call info obtainer [" + CallInfoObtainer + "]",
+			Debug
+	);
+	cio = llvmir2hll::CallInfoObtainerFactory::getInstance().createObject(
+		CallInfoObtainer
+	);
+	if (!cio)
+	{
+		printErrorUnsupportedObject<llvmir2hll::CallInfoObtainerFactory>(
+				"call info obtainer", "call info obtainers"
+		);
 		return false;
 	}
 
 	// Instantiate the requested evaluator of arithmetical expressions and make
 	// sure it exists.
-	if (Debug) retdec::llvm_support::printSubPhase("creating the used evaluator of arithmetical expressions [" +
-		ArithmExprEvaluator + "]");
-	arithmExprEvaluator = retdec::llvmir2hll::ArithmExprEvaluatorFactory::getInstance().createObject(
+	llvm_support::printSubPhase(
+			"creating the used evaluator of arithmetical expressions [" +
+			ArithmExprEvaluator + "]",
+			Debug
+	);
+	auto& aeef = llvmir2hll::ArithmExprEvaluatorFactory::getInstance();
+	arithmExprEvaluator = aeef.createObject(
 		ArithmExprEvaluator);
-	if (!arithmExprEvaluator) {
-		printErrorUnsupportedObject<retdec::llvmir2hll::ArithmExprEvaluatorFactory>(
-			"evaluator of arithmetical expressions", "evaluators of arithmetical expressions");
+	if (!arithmExprEvaluator)
+	{
+		printErrorUnsupportedObject<llvmir2hll::ArithmExprEvaluatorFactory>(
+				"evaluator of arithmetical expressions",
+				"evaluators of arithmetical expressions"
+		);
 		return false;
 	}
 
 	// Instantiate the requested variable names generator and make sure it
 	// exists.
-	if (Debug) retdec::llvm_support::printSubPhase("creating the used variable names generator [" + VarNameGen + "]");
-	varNameGen = retdec::llvmir2hll::VarNameGenFactory::getInstance().createObject(
-		VarNameGen, VarNameGenPrefix);
-	if (!varNameGen) {
-		printErrorUnsupportedObject<retdec::llvmir2hll::VarNameGenFactory>(
-			"variable names generator", "variable names generators");
+	llvm_support::printSubPhase(
+			"creating the used variable names generator [" + VarNameGen + "]",
+			Debug
+	);
+	varNameGen = llvmir2hll::VarNameGenFactory::getInstance().createObject(
+		VarNameGen,
+		VarNameGenPrefix
+	);
+	if (!varNameGen)
+	{
+		printErrorUnsupportedObject<llvmir2hll::VarNameGenFactory>(
+				"variable names generator", "variable names generators"
+		);
 		return false;
 	}
 
 	// Instantiate the requested variable renamer and make sure it exists.
-	if (Debug) retdec::llvm_support::printSubPhase("creating the used variable renamer [" + VarRenamer + "]");
-	varRenamer = retdec::llvmir2hll::VarRenamerFactory::getInstance().createObject(
-		VarRenamer, varNameGen, true);
-	if (!varRenamer) {
-		printErrorUnsupportedObject<retdec::llvmir2hll::VarRenamerFactory>(
-			"renamer of variables", "renamers of variables");
+	llvm_support::printSubPhase(
+			"creating the used variable renamer [" + VarRenamer + "]",
+			Debug
+	);
+	varRenamer = llvmir2hll::VarRenamerFactory::getInstance().createObject(
+			VarRenamer,
+			varNameGen,
+			true
+	);
+	if (!varRenamer)
+	{
+		printErrorUnsupportedObject<llvmir2hll::VarRenamerFactory>(
+				"renamer of variables", "renamers of variables"
+		);
 		return false;
 	}
 
 	createSemantics();
 
 	bool configLoaded = loadConfig();
-	if (!configLoaded) {
+	if (!configLoaded)
+	{
 		return false;
 	}
 
@@ -961,38 +1057,17 @@ bool Decompiler::initialize(Module &m) {
 }
 
 /**
-* @brief Limits the maximal memory of the tool based on the command-line
-*        parameters.
-*/
-// bool Decompiler::limitMaximalMemoryIfRequested() {
-// 	if (MaxMemoryLimitHalfRAM) {
-// 		auto limitationSucceeded = limitSystemMemoryToHalfOfTotalSystemMemory();
-// 		if (!limitationSucceeded) {
-// 			retdec::llvm_support::printErrorMessage(
-// 				"Failed to limit maximal memory to half of system RAM."
-// 			);
-// 			return false;
-// 		}
-// 	} else if (MaxMemoryLimit > 0) {
-// 		auto limitationSucceeded = limitSystemMemory(MaxMemoryLimit);
-// 		if (!limitationSucceeded) {
-// 			retdec::llvm_support::printErrorMessage(
-// 				"Failed to limit maximal memory to " + std::to_string(MaxMemoryLimit) + "."
-// 			);
-// 		}
-// 	}
-
-// 	return true;
-// }
-
-/**
 * @brief Creates the used semantics.
 */
-void Decompiler::createSemantics() {
-	if (!Semantics.empty()) {
+void Decompiler::createSemantics()
+{
+	if (!Semantics.empty())
+	{
 		// The user has requested some concrete semantics, so use it.
 		createSemanticsFromParameter();
-	} else {
+	}
+	else
+	{
 		// The user didn't request any semantics, so create it based on the
 		// data in the input LLVM IR.
 		createSemanticsFromLLVMIR();
@@ -1002,29 +1077,47 @@ void Decompiler::createSemantics() {
 /**
 * @brief Creates the used semantics as requested by the user.
 */
-void Decompiler::createSemanticsFromParameter() {
-	if (Semantics.empty() || Semantics == "-") {
+void Decompiler::createSemanticsFromParameter()
+{
+	if (Semantics.empty() || Semantics == "-")
+	{
 		// Do no use any semantics.
-		if (Debug) retdec::llvm_support::printSubPhase("creating the used semantics [none]");
-		semantics = retdec::llvmir2hll::DefaultSemantics::create();
-	} else {
+		llvm_support::printSubPhase(
+				"creating the used semantics [none]",
+				Debug
+		);
+		semantics = llvmir2hll::DefaultSemantics::create();
+	}
+	else
+	{
 		// Use the given semantics.
-		if (Debug) retdec::llvm_support::printSubPhase("creating the used semantics [" + Semantics + "]");
-		semantics = retdec::llvmir2hll::CompoundSemanticsBuilder::build(split(Semantics, ','));
+		llvm_support::printSubPhase(
+				"creating the used semantics [" + Semantics + "]",
+				Debug
+		);
+		semantics = llvmir2hll::CompoundSemanticsBuilder::build(
+				split(Semantics, ',')
+		);
 	}
 }
 
 /**
 * @brief Creates the used semantics based on the data in the input LLVM IR.
 */
-void Decompiler::createSemanticsFromLLVMIR() {
+void Decompiler::createSemanticsFromLLVMIR()
+{
 	// Create a list of the semantics to be used.
 	// TODO Use some data from the input LLVM IR, like the used compiler.
 	std::string usedSemantics("libc,gcc-general,win-api");
 
 	// Use the list to create the semantics.
-	if (Debug) retdec::llvm_support::printSubPhase("creating the used semantics [" + usedSemantics + "]");
-	semantics = retdec::llvmir2hll::CompoundSemanticsBuilder::build(split(usedSemantics, ','));
+	llvm_support::printSubPhase(
+			"creating the used semantics [" + usedSemantics + "]",
+			Debug
+	);
+	semantics = llvmir2hll::CompoundSemanticsBuilder::build(
+			split(usedSemantics, ',')
+	);
 }
 
 /**
@@ -1032,20 +1125,25 @@ void Decompiler::createSemanticsFromLLVMIR() {
 *
 * @return @a true if the config was loaded successfully, @c false otherwise.
 */
-bool Decompiler::loadConfig() {
+bool Decompiler::loadConfig()
+{
 	// Currently, we always use the JSON config.
-	if (ConfigPath.empty()) {
-		if (Debug) retdec::llvm_support::printSubPhase("creating a new config");
-		config = retdec::llvmir2hll::JSONConfig::empty();
+	if (ConfigPath.empty())
+	{
+		llvm_support::printSubPhase("creating a new config", Debug);
+		config = llvmir2hll::JSONConfig::empty();
 		return true;
 	}
 
-	if (Debug) retdec::llvm_support::printSubPhase("loading the input config");
-	try {
-		config = retdec::llvmir2hll::JSONConfig::fromFile(ConfigPath);
+	llvm_support::printSubPhase("loading the input config", Debug);
+	try
+	{
+		config = llvmir2hll::JSONConfig::fromFile(ConfigPath);
 		return true;
-	} catch (const retdec::llvmir2hll::ConfigError &ex) {
-		retdec::llvm_support::printErrorMessage(
+	}
+	catch (const llvmir2hll::ConfigError &ex)
+	{
+		llvm_support::printErrorMessage(
 			"Loading of the config failed: " + ex.getMessage() + "."
 		);
 		return false;
@@ -1055,11 +1153,13 @@ bool Decompiler::loadConfig() {
 /**
 * @brief Saves the config file.
 */
-// void Decompiler::saveConfig() {
-	// if (!ConfigPath.empty()) {
-	// 	config->saveTo(ConfigPath);
-	// }
-// }
+void Decompiler::saveConfig()
+{
+	if (!ConfigPath.empty())
+	{
+		config->saveTo(ConfigPath);
+	}
+}
 
 /**
 * @brief Convert the LLVM IR module into a BIR module using the instantiated
@@ -1067,15 +1167,22 @@ bool Decompiler::loadConfig() {
 * @return @c True if decompilation should continue, @c False if something went
 *         wrong and decompilation should abort.
 */
-bool Decompiler::convertLLVMIRToBIR() {
-	auto llvm2BIRConverter = retdec::llvmir2hll::LLVMIR2BIRConverter::create(this);
+bool Decompiler::convertLLVMIRToBIR()
+{
+	auto llvm2BIRConverter = llvmir2hll::LLVMIR2BIRConverter::create(this);
 	// Options
 	llvm2BIRConverter->setOptionStrictFPUSemantics(StrictFPUSemantics);
 
-	std::string moduleName = ForcedModuleName.empty() ?
-		llvmModule->getModuleIdentifier() : ForcedModuleName;
-	resModule = llvm2BIRConverter->convert(llvmModule, moduleName,
-		semantics, config, Debug);
+	std::string moduleName = ForcedModuleName.empty()
+			? llvmModule->getModuleIdentifier()
+			: ForcedModuleName;
+	resModule = llvm2BIRConverter->convert(
+			llvmModule,
+			moduleName,
+			semantics,
+			config,
+			Debug
+	);
 
 	return true;
 }
@@ -1084,16 +1191,20 @@ bool Decompiler::convertLLVMIRToBIR() {
 * @brief Removes defined functions which are from some standard library whose
 *        header file has to be included because of some function declarations.
 */
-void Decompiler::removeLibraryFuncs() {
-	retdec::llvmir2hll::FuncVector removedFuncs(retdec::llvmir2hll::LibraryFuncsRemover::removeFuncs(
-		resModule));
+void Decompiler::removeLibraryFuncs()
+{
+	llvmir2hll::FuncVector removedFuncs(
+			llvmir2hll::LibraryFuncsRemover::removeFuncs(resModule)
+	);
 
-	if (Debug) {
+	if (Debug)
+	{
 		// Emit the functions that were turned into declarations. Before that,
 		// however, sort them by name to provide a more deterministic output.
-		retdec::llvmir2hll::sortByName(removedFuncs);
-		for (const auto &func : removedFuncs) {
-			retdec::llvm_support::printSubPhase("removing " + func->getName() + "()");
+		llvmir2hll::sortByName(removedFuncs);
+		for (const auto &func : removedFuncs)
+		{
+			llvm_support::printSubPhase("removing " + func->getName() + "()");
 		}
 	}
 }
@@ -1102,54 +1213,70 @@ void Decompiler::removeLibraryFuncs() {
 * @brief Removes code from all the functions in the module that is unreachable
 *        in the CFG.
 */
-void Decompiler::removeCodeUnreachableInCFG() {
-	retdec::llvmir2hll::UnreachableCodeInCFGRemover::removeCode(resModule);
+void Decompiler::removeCodeUnreachableInCFG()
+{
+	llvmir2hll::UnreachableCodeInCFGRemover::removeCode(resModule);
 }
 
 /**
 * @brief Removes functions with the given prefix.
 */
-void Decompiler::removeFuncsPrefixedWith(const retdec::llvmir2hll::StringSet &prefixes) {
-	retdec::llvmir2hll::FuncsWithPrefixRemover::removeFuncs(resModule, prefixes);
+void Decompiler::removeFuncsPrefixedWith(
+		const retdec::llvmir2hll::StringSet &prefixes)
+{
+	llvmir2hll::FuncsWithPrefixRemover::removeFuncs(resModule, prefixes);
 }
 
 /**
 * @brief Fixes signed and unsigned types in the resulting module.
 */
-void Decompiler::fixSignedUnsignedTypes() {
-	retdec::llvmir2hll::ExprTypesFixer::fixTypes(resModule);
+void Decompiler::fixSignedUnsignedTypes()
+{
+	llvmir2hll::ExprTypesFixer::fixTypes(resModule);
 }
 
 /**
 * @brief Converts LLVM intrinsic functions to functions from the standard
 *        library.
 */
-void Decompiler::convertLLVMIntrinsicFunctions() {
-	retdec::llvmir2hll::LLVMIntrinsicConverter::convert(resModule);
+void Decompiler::convertLLVMIntrinsicFunctions()
+{
+	llvmir2hll::LLVMIntrinsicConverter::convert(resModule);
 }
 
 /**
 * @brief When available, obtains debugging information.
 */
-void Decompiler::obtainDebugInfo() {
-	retdec::llvmir2hll::LLVMDebugInfoObtainer::obtainVarNames(resModule);
+void Decompiler::obtainDebugInfo()
+{
+	llvmir2hll::LLVMDebugInfoObtainer::obtainVarNames(resModule);
 }
 
 /**
 * @brief Initializes the alias analysis.
 */
-void Decompiler::initAliasAnalysis() {
+void Decompiler::initAliasAnalysis()
+{
 	aliasAnalysis->init(resModule);
 }
 
 /**
 * @brief Runs the optimizations over the resulting module.
 */
-void Decompiler::runOptimizations() {
-	ShPtr<retdec::llvmir2hll::OptimizerManager> optManager(new retdec::llvmir2hll::OptimizerManager(
-		parseListOfOpts(EnabledOpts), parseListOfOpts(DisabledOpts),
-		hllWriter, retdec::llvmir2hll::ValueAnalysis::create(aliasAnalysis, true), cio,
-		arithmExprEvaluator, AggressiveOpts, Debug));
+void Decompiler::runOptimizations()
+{
+	ShPtr<llvmir2hll::OptimizerManager> optManager(
+			new llvmir2hll::OptimizerManager(
+					parseListOfOpts(EnabledOpts),
+					parseListOfOpts(DisabledOpts),
+					hllWriter,
+					llvmir2hll::ValueAnalysis::create(aliasAnalysis, true),
+					cio,
+					arithmExprEvaluator,
+					AggressiveOpts,
+					Debug
+			)
+	);
 	optManager->optimize(resModule);
 }
 
@@ -1157,30 +1284,36 @@ void Decompiler::runOptimizations() {
 * @brief Renames variables in the resulting module by using the selected
 *        variable renamer.
 */
-void Decompiler::renameVariables() {
+void Decompiler::renameVariables()
+{
 	varRenamer->renameVars(resModule);
 }
 
 /**
 * @brief Converts constants in function calls to symbolic names.
 */
-void Decompiler::convertConstantsToSymbolicNames() {
-	retdec::llvmir2hll::ConstSymbolConverter::convert(resModule);
+void Decompiler::convertConstantsToSymbolicNames()
+{
+	llvmir2hll::ConstSymbolConverter::convert(resModule);
 }
 
 /**
 * @brief Validates the resulting module.
 */
-void Decompiler::validateResultingModule() {
+void Decompiler::validateResultingModule()
+{
 	// Run all the registered validators over the resulting module, sorted by
 	// name.
-	retdec::llvmir2hll::StringVector regValidatorIDs(
-		retdec::llvmir2hll::ValidatorFactory::getInstance().getRegisteredObjects());
+	llvmir2hll::StringVector regValidatorIDs(
+		llvmir2hll::ValidatorFactory::getInstance().getRegisteredObjects()
+	);
 	std::sort(regValidatorIDs.begin(), regValidatorIDs.end());
-	for (const auto &id : regValidatorIDs) {
-		if (Debug) retdec::llvm_support::printSubPhase("running " + id + "Validator");
-		ShPtr<retdec::llvmir2hll::Validator> validator(
-			retdec::llvmir2hll::ValidatorFactory::getInstance().createObject(id));
+	for (const auto &id : regValidatorIDs)
+	{
+		llvm_support::printSubPhase("running " + id + "Validator", Debug);
+		ShPtr<llvmir2hll::Validator> validator(
+				llvmir2hll::ValidatorFactory::getInstance().createObject(id)
+		);
 		validator->validate(resModule, true);
 	}
 }
@@ -1188,17 +1321,23 @@ void Decompiler::validateResultingModule() {
 /**
 * @brief Finds patterns in the resulting module.
 */
-void Decompiler::findPatterns() {
-	retdec::llvmir2hll::StringVector pfsIds(getIdsOfPatternFindersToBeRun());
-	retdec::llvmir2hll::PatternFinderRunner::PatternFinders pfs(instantiatePatternFinders(pfsIds));
-	ShPtr<retdec::llvmir2hll::PatternFinderRunner> pfr(instantiatePatternFinderRunner());
+void Decompiler::findPatterns()
+{
+	llvmir2hll::StringVector pfsIds(getIdsOfPatternFindersToBeRun());
+	llvmir2hll::PatternFinderRunner::PatternFinders pfs(
+			instantiatePatternFinders(pfsIds)
+	);
+	ShPtr<llvmir2hll::PatternFinderRunner> pfr(
+			instantiatePatternFinderRunner()
+	);
 	pfr->run(pfs, resModule);
 }
 
 /**
 * @brief Emits the target HLL code.
 */
-void Decompiler::emitTargetHLLCode() {
+void Decompiler::emitTargetHLLCode()
+{
 	hllWriter->setOptionEmitDebugComments(EmitDebugComments);
 	hllWriter->setOptionKeepAllBrackets(KeepAllBrackets);
 	hllWriter->setOptionEmitTimeVaryingInfo(!NoTimeVaryingInfo);
@@ -1209,14 +1348,16 @@ void Decompiler::emitTargetHLLCode() {
 /**
 * @brief Finalizes the run of the back-end part.
 */
-void Decompiler::finalize() {
-	// saveConfig();
+void Decompiler::finalize()
+{
+	saveConfig();
 }
 
 /**
 * @brief Cleanup.
 */
-void Decompiler::cleanup() {
+void Decompiler::cleanup()
+{
 	// Nothing to do.
 
 	// Note: Do not remove this phase, even if there is nothing to do. The
@@ -1229,18 +1370,22 @@ void Decompiler::cleanup() {
 * @brief Emits a control-flow graph (CFG) for each function in the resulting
 *        module.
 */
-void Decompiler::emitCFGs() {
+void Decompiler::emitCFGs()
+{
 	// Make sure that the requested CFG writer exists.
-	retdec::llvmir2hll::StringVector availCFGWriters(
-		retdec::llvmir2hll::CFGWriterFactory::getInstance().getRegisteredObjects());
-	if (!hasItem(availCFGWriters, std::string(CFGWriter))) {
-		printErrorUnsupportedObject<retdec::llvmir2hll::CFGWriterFactory>(
+	llvmir2hll::StringVector availCFGWriters(
+		llvmir2hll::CFGWriterFactory::getInstance().getRegisteredObjects());
+	if (!hasItem(availCFGWriters, std::string(CFGWriter)))
+	{
+		printErrorUnsupportedObject<llvmir2hll::CFGWriterFactory>(
 			"CFG writer", "CFG writers");
 		return;
 	}
 
 	// Instantiate a CFG builder.
-	ShPtr<retdec::llvmir2hll::CFGBuilder> cfgBuilder(retdec::llvmir2hll::NonRecursiveCFGBuilder::create());
+	ShPtr<llvmir2hll::CFGBuilder> cfgBuilder(
+			llvmir2hll::NonRecursiveCFGBuilder::create()
+	);
 
 	// Get the extension of the files that will be written (we use the CFG
 	// writer's name for this purpose).
@@ -1248,21 +1393,37 @@ void Decompiler::emitCFGs() {
 
 	// For each function in the resulting module...
 	for (auto i = resModule->func_definition_begin(),
-			e = resModule->func_definition_end(); i != e; ++i) {
+			e = resModule->func_definition_end();
+			i != e;
+			++i)
+	{
 		// Open the output file.
-		std::string fileName(OutputFilename + ".cfg." + (*i)->getName() + "." + fileExt);
+		std::string fileName(
+				OutputFilename + ".cfg." + (*i)->getName() + "." + fileExt
+		);
 		std::ofstream out(fileName.c_str());
-		if (!out) {
-			retdec::llvm_support::printErrorMessage("Cannot open " + fileName + " for writing.");
+		if (!out)
+		{
+			llvm_support::printErrorMessage(
+					"Cannot open " + fileName + " for writing."
+			);
 			return;
 		}
 		// Create a CFG for the current function and emit it into the opened
 		// file.
-		ShPtr<retdec::llvmir2hll::CFGWriter> writer(retdec::llvmir2hll::CFGWriterFactory::getInstance(
-			).createObject<ShPtr<retdec::llvmir2hll::CFG>, std::ostream &>(
-				CFGWriter, cfgBuilder->getCFG(*i), out));
-		ASSERT_MSG(writer, "instantiation of the requested CFG writer `"
-			<< CFGWriter << "` failed");
+		auto& cfgwf = llvmir2hll::CFGWriterFactory::getInstance();
+		ShPtr<llvmir2hll::CFGWriter> writer(
+				cfgwf.createObject<ShPtr<llvmir2hll::CFG>, std::ostream &>(
+						CFGWriter,
+						cfgBuilder->getCFG(*i),
+						out
+				)
+		);
+		ASSERT_MSG(
+				writer,
+				"instantiation of the requested CFG writer `"
+				<< CFGWriter << "` failed"
+		);
 		writer->emitCFG();
 	}
 }
@@ -1270,13 +1431,18 @@ void Decompiler::emitCFGs() {
 /**
 * @brief Emits a call graph (CG) for the resulting module.
 */
-void Decompiler::emitCG() {
+void Decompiler::emitCG()
+{
 	// Make sure that the requested CG writer exists.
-	retdec::llvmir2hll::StringVector availCGWriters(
-		retdec::llvmir2hll::CGWriterFactory::getInstance().getRegisteredObjects());
-	if (!hasItem(availCGWriters, std::string(CGWriter))) {
-		printErrorUnsupportedObject<retdec::llvmir2hll::CGWriterFactory>(
-			"CG writer", "CG writers");
+	auto& inst = llvmir2hll::CGWriterFactory::getInstance();
+	llvmir2hll::StringVector availCGWriters(
+			inst.getRegisteredObjects()
+	);
+	if (!hasItem(availCGWriters, std::string(CGWriter)))
+	{
+		printErrorUnsupportedObject<llvmir2hll::CGWriterFactory>(
+				"CG writer", "CG writers"
+		);
 		return;
 	}
 
@@ -1287,17 +1453,25 @@ void Decompiler::emitCG() {
 	// Open the output file.
 	std::string fileName(OutputFilename + ".cg." + fileExt);
 	std::ofstream out(fileName.c_str());
-	if (!out) {
-		retdec::llvm_support::printErrorMessage("Cannot open " + fileName + " for writing.");
+	if (!out)
+	{
+		llvm_support::printErrorMessage(
+				"Cannot open " + fileName + " for writing."
+		);
 		return;
 	}
 
 	// Create a CG for the current module and emit it into the opened file.
-	ShPtr<retdec::llvmir2hll::CGWriter> writer(retdec::llvmir2hll::CGWriterFactory::getInstance(
-		).createObject<ShPtr<retdec::llvmir2hll::CG>, std::ostream &>(
-			CGWriter, retdec::llvmir2hll::CGBuilder::getCG(resModule), out));
-	ASSERT_MSG(writer,
-		"instantiation of the requested CG writer `" << CGWriter << "` failed");
+	auto& cgwf = llvmir2hll::CGWriterFactory::getInstance();
+	ShPtr<llvmir2hll::CGWriter> writer(
+			cgwf.createObject<ShPtr<llvmir2hll::CG>, std::ostream &>(
+			CGWriter, llvmir2hll::CGBuilder::getCG(resModule), out
+	));
+	ASSERT_MSG(
+			writer,
+			"instantiation of the requested CG writer `"
+			<< CGWriter << "` failed"
+	);
 	writer->emitCG();
 }
 
@@ -1306,26 +1480,35 @@ void Decompiler::emitCG() {
 *
 * @a opts should be a list of strings separated by a comma.
 */
-retdec::llvmir2hll::StringSet Decompiler::parseListOfOpts(const std::string &opts) const {
-	retdec::llvmir2hll::StringVector parsedOpts(split(opts, ','));
-	return retdec::llvmir2hll::StringSet(parsedOpts.begin(), parsedOpts.end());
+retdec::llvmir2hll::StringSet Decompiler::parseListOfOpts(
+		const std::string &opts) const
+{
+	llvmir2hll::StringVector parsedOpts(split(opts, ','));
+	return llvmir2hll::StringSet(parsedOpts.begin(), parsedOpts.end());
 }
 
 /**
 * @brief Returns the type of optimizations that should be run (as a string).
 */
-std::string Decompiler::getTypeOfRunOptimizations() const {
+std::string Decompiler::getTypeOfRunOptimizations() const
+{
 	return AggressiveOpts ? "aggressive" : "normal";
 }
 
 /**
 * @brief Returns the IDs of pattern finders to be run.
 */
-retdec::llvmir2hll::StringVector Decompiler::getIdsOfPatternFindersToBeRun() const {
-	if (FindPatterns == "all") {
+retdec::llvmir2hll::StringVector
+Decompiler::getIdsOfPatternFindersToBeRun() const
+{
+	if (FindPatterns == "all")
+	{
 		// Get all of them.
-		return retdec::llvmir2hll::PatternFinderFactory::getInstance().getRegisteredObjects();
-	} else {
+		auto& inst = llvmir2hll::PatternFinderFactory::getInstance();
+		return inst.getRegisteredObjects();
+	}
+	else
+	{
 		// Get only the selected IDs.
 		return split(FindPatterns, ',');
 	}
@@ -1336,22 +1519,32 @@ retdec::llvmir2hll::StringVector Decompiler::getIdsOfPatternFindersToBeRun() con
 *
 * If a pattern finder cannot be instantiated, a warning message is emitted.
 */
-retdec::llvmir2hll::PatternFinderRunner::PatternFinders Decompiler::instantiatePatternFinders(
-		const retdec::llvmir2hll::StringVector &pfsIds) {
+retdec::llvmir2hll::PatternFinderRunner::PatternFinders
+Decompiler::instantiatePatternFinders(
+		const retdec::llvmir2hll::StringVector &pfsIds)
+{
 	// Pattern finders need a value analysis, so create it.
 	initAliasAnalysis();
-	ShPtr<retdec::llvmir2hll::ValueAnalysis> va(retdec::llvmir2hll::ValueAnalysis::create(aliasAnalysis, true));
+	ShPtr<llvmir2hll::ValueAnalysis> va(
+			llvmir2hll::ValueAnalysis::create(aliasAnalysis, true));
 
 	// Re-initialize cio to be sure its up-to-date.
-	cio->init(retdec::llvmir2hll::CGBuilder::getCG(resModule), va);
+	cio->init(llvmir2hll::CGBuilder::getCG(resModule), va);
 
-	retdec::llvmir2hll::PatternFinderRunner::PatternFinders pfs;
-	for (const auto pfId : pfsIds) {
-		ShPtr<retdec::llvmir2hll::PatternFinder> pf(
-			retdec::llvmir2hll::PatternFinderFactory::getInstance().createObject(pfId, va, cio));
-		if (!pf && Debug) {
-			retdec::llvm_support::printWarningMessage("the requested pattern finder '" + pfId + "' does not exist");
-		} else {
+	llvmir2hll::PatternFinderRunner::PatternFinders pfs;
+	for (const auto pfId : pfsIds)
+	{
+		auto& inst = llvmir2hll::PatternFinderFactory::getInstance();
+		ShPtr<llvmir2hll::PatternFinder> pf(
+				inst.createObject(pfId, va, cio)
+		);
+		if (!pf && Debug)
+		{
+			llvm_support::printWarningMessage(
+				"the requested pattern finder '" + pfId + "' does not exist");
+		}
+		else
+		{
 			pfs.push_back(pf);
 		}
 	}
@@ -1361,72 +1554,25 @@ retdec::llvmir2hll::PatternFinderRunner::PatternFinders Decompiler::instantiateP
 /**
 * @brief Instantiates and returns a proper PatternFinderRunner.
 */
-ShPtr<retdec::llvmir2hll::PatternFinderRunner> Decompiler::instantiatePatternFinderRunner() const {
-	if (Debug) {
-		return ShPtr<retdec::llvmir2hll::PatternFinderRunner>(new retdec::llvmir2hll::CLIPatternFinderRunner(llvm::errs()));
+ShPtr<retdec::llvmir2hll::PatternFinderRunner>
+Decompiler::instantiatePatternFinderRunner() const
+{
+	if (Debug)
+	{
+		return ShPtr<llvmir2hll::PatternFinderRunner>(
+			new llvmir2hll::CLIPatternFinderRunner(llvm::errs()));
 	}
-	return ShPtr<retdec::llvmir2hll::PatternFinderRunner>(new retdec::llvmir2hll::NoActionPatternFinderRunner());
+	return ShPtr<llvmir2hll::PatternFinderRunner>(
+		new llvmir2hll::NoActionPatternFinderRunner()
+	);
 }
 
 /**
 * @brief Returns the prefixes of functions to be removed.
 */
-retdec::llvmir2hll::StringSet Decompiler::getPrefixesOfFuncsToBeRemoved() const {
+retdec::llvmir2hll::StringSet Decompiler::getPrefixesOfFuncsToBeRemoved() const
+{
 	return config->getPrefixesOfFuncsToBeRemoved();
-}
-
-//
-// External interface
-//
-
-class DecompilerTargetMachine: public TargetMachine {
-public:
-	const retdec::config::Parameters& params;
-	config::Config& c;
-
-	DecompilerTargetMachine(
-			const Target &t,
-			StringRef dataLayoutString,
-			const Triple &targetTriple,
-			StringRef cpu,
-			StringRef fs,
-			const TargetOptions &options,
-			const retdec::config::Parameters& params,
-			config::Config& c)
-			: TargetMachine(t, dataLayoutString, targetTriple, cpu, fs, options)
-			, params(params)
-			, c(c)
-
-	{}
-
-	virtual bool addPassesToEmitFile(
-			PassManagerBase &pm,
-			raw_pwrite_stream &out,
-			raw_pwrite_stream *,
-			CodeGenFileType fileType,
-			bool disableVerify = true,
-			MachineModuleInfo *MMI = nullptr) override;
-
-
-};
-
-bool DecompilerTargetMachine::addPassesToEmitFile(
-		PassManagerBase &pm,
-		raw_pwrite_stream &out,
-		raw_pwrite_stream *,
-		CodeGenFileType fileType,
-		bool disableVerify,
-		MachineModuleInfo *MMI) {
-	if (fileType != TargetMachine::CGFT_AssemblyFile) {
-		return true;
-	}
-
-	// Add and initialize all required passes to perform the decompilation.
-	pm.add(new LoopInfoWrapperPass());
-	pm.add(new ScalarEvolutionWrapperPass());
-	pm.add(new Decompiler(out, params, c));
-
-	return false;
 }
 
 //==============================================================================
@@ -1442,7 +1588,7 @@ bool decompile(const retdec::config::Parameters& params)
 // bin2llvmir
 //==============================================================================
 
-	retdec::llvm_support::printPhase("Initialization");
+	llvm_support::printPhase("Initialization");
 	auto& passRegistry = initializeLlvmPasses();
 
 	limitMaximalMemoryIfRequested(params);
@@ -1664,27 +1810,9 @@ pm.add(new bin2llvmir::ProviderInitialization(&c));
 			createPrintModulePass(*llOs, "", PreserveAssemblyUseListOrder),
 			"Assembly Writer"); // original name = "Print module to stderr"
 
-	// Now that we have all of the passes ready, run them.
-	// pm.run(*module);
-
-	// Declare success.
-	// retdec::llvm_support::printPhase("Cleanup");
-	// bcOut->keep();
-	// llOut->keep();
-
 //==============================================================================
 // llvmir2hll
 //==============================================================================
-
-	llvm::Triple triple(module->getTargetTriple());
-	if (triple.getTriple().empty()) {
-		triple.setTriple(sys::getDefaultTargetTriple());
-	}
-
-	// Get the target-specific parser.
-	auto target = std::make_unique<DecompilerTargetMachine>(
-		decompilerTarget, "", triple, "", "", TargetOptions(), params, c
-	);
 
 	// Figure out where we are going to send the output.
 	auto out = getOutputStream(params);
@@ -1692,42 +1820,19 @@ pm.add(new bin2llvmir::ProviderInitialization(&c));
 		return EXIT_FAILURE;
 	}
 
-	// Override default to generate verbose assembly.
-	{
-		raw_pwrite_stream &os(out->os());
-
-		bool disableVerify = false;
-
-		// Ask the target to add back-end passes as necessary.
-		if (target->addPassesToEmitFile(
-				pm,
-				os,
-				nullptr,
-				llvm::TargetMachine::CodeGenFileType(),
-				disableVerify)) {
-			errs() << ": target does not support generation of this"
-					<< " file type!\n";
-			return 1;
-		}
-
-	// 	// Before executing passes, print the final values of the LLVM options.
-	// 	// cl::PrintOptionValues();
-
-	// 	// pm.run(*mod);
-	}
-
-// pm.add(new LoopInfoWrapperPass());
-// pm.add(new ScalarEvolutionWrapperPass());
-// raw_pwrite_stream &os(out->os());
-// pm.add(new Decompiler(os));
+	pm.add(new LoopInfoWrapperPass());
+	pm.add(new ScalarEvolutionWrapperPass());
+	raw_pwrite_stream &os(out->os());
+	pm.add(new Decompiler(os, params, c));
 
 //==============================================================================
 // together
 //==============================================================================
 
+	// Now that we have all of the passes ready, run them.
 	pm.run(*module);
 
-	retdec::llvm_support::printPhase("Cleanup");
+	// Declare success.
 	bcOut->keep();
 	llOut->keep();
 	out->keep();

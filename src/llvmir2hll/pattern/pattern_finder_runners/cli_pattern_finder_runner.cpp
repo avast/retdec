@@ -38,7 +38,7 @@ CLIPatternFinderRunner::CLIPatternFinderRunner(llvm::raw_ostream &os):
 */
 void CLIPatternFinderRunner::doActionsBeforePatternFinderRuns(
 		ShPtr<PatternFinder> pf) {
-	printSubPhase("running " + pf->getId() + "PatternFinder", os);
+	printSubPhase("running " + pf->getId() + "PatternFinder", true, os);
 }
 
 /**

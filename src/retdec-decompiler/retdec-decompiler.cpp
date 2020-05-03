@@ -72,34 +72,38 @@ public:
 			}
 			else if (c == "-o")
 			{
-std::string out = getParamOrDie(argc, argv, i);
+				std::string out = getParamOrDie(argc, argv, i);
 				params.setOutputFile(out);
-auto lastDot = out.find_last_of('.');
-if (lastDot != std::string::npos)
-{
-	out = out.substr(0, lastDot);
-}
-params.setOutputAsmFile(out + ".dsm");
-params.setOutputBitcodeFile(out + ".bc");
-params.setOutputLlvmirFile(out + ".ll");
-params.setOutputConfigFile(out + ".config.json");
+
+				auto lastDot = out.find_last_of('.');
+				if (lastDot != std::string::npos)
+				{
+					out = out.substr(0, lastDot);
+				}
+				params.setOutputAsmFile(out + ".dsm");
+				params.setOutputBitcodeFile(out + ".bc");
+				params.setOutputLlvmirFile(out + ".ll");
+				params.setOutputConfigFile(out + ".config.json");
 			}
 			// Input file is the only argument that does not have -x or --xyz
 			// before it. But only one input is expected.
 			else if (params.getInputFile().empty())
 			{
-std::cout << "================> input = " << c << std::endl;
 				auto& out = c;
 				params.setInputFile(out);
-				if (params.getOutputAsmFile().empty()) params.setOutputAsmFile(out + ".dsm");
-				if (params.getOutputBitcodeFile().empty()) params.setOutputBitcodeFile(out + ".bc");
-				if (params.getOutputLlvmirFile().empty()) params.setOutputLlvmirFile(out + ".ll");
-				if (params.getOutputConfigFile().empty()) params.setOutputConfigFile(out + ".config.json");
-				if (params.getOutputFile().empty()) params.setOutputFile(out + ".c");
+				if (params.getOutputAsmFile().empty())
+					params.setOutputAsmFile(out + ".dsm");
+				if (params.getOutputBitcodeFile().empty())
+					params.setOutputBitcodeFile(out + ".bc");
+				if (params.getOutputLlvmirFile().empty())
+					params.setOutputLlvmirFile(out + ".ll");
+				if (params.getOutputConfigFile().empty())
+					params.setOutputConfigFile(out + ".config.json");
+				if (params.getOutputFile().empty())
+					params.setOutputFile(out + ".c");
 			}
 			else
 			{
-std::cout << "================> unrecognized = " << c << std::endl;
 				printHelpAndDie();
 			}
 		}
