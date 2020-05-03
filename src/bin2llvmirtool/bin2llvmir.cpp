@@ -220,20 +220,6 @@ std::string ModulePassPrinter::LastPhase = std::string();
 const std::string ModulePassPrinter::LlvmAggregatePhaseName = "LLVM";
 
 /**
- * Add the pass to the pass manager + possible verification.
- */
-static inline void addPassWithPossibleVerification(
-		legacy::PassManagerBase &PM,
-		Pass *P,
-		const std::string& phaseName = std::string())
-{
-	std::string pn = phaseName.empty() ? P->getPassName().str() : phaseName;
-
-	PM.add(new ModulePassPrinter(pn));
-	PM.add(P);
-}
-
-/**
  * Add the pass to the pass manager - no verification.
  */
 static inline void addPassWithoutVerification(
@@ -434,7 +420,7 @@ int _main(int argc, char **argv)
 
 		if (P)
 		{
-			addPassWithPossibleVerification(Passes, P);
+			addPassWithoutVerification(Passes, P);
 		}
 	}
 
