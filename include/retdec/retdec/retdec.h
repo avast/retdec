@@ -13,6 +13,7 @@
 
 #include "retdec/common/basic_block.h"
 #include "retdec/common/function.h"
+#include "retdec/config/parameters.h"
 
 namespace retdec {
 
@@ -37,7 +38,13 @@ struct LlvmModuleContextPair
  */
 LlvmModuleContextPair disassemble(
 		const std::string& inputPath,
-		retdec::common::FunctionSet* fs = nullptr);
+		retdec::common::FunctionSet* fs = nullptr
+);
+
+/**
+ *
+ */
+bool decompile(const retdec::config::Parameters& params);
 
 } // namespace retdec
 
