@@ -23,7 +23,7 @@ namespace bin2llvmir {
 char SelectFunctions::ID = 0;
 
 static RegisterPass<SelectFunctions> X(
-		"select-fncs",
+		"retdec-select-fncs",
 		"Selected functions optimization",
 		 false, // Only looks at CFG
 		 false // Analysis Pass

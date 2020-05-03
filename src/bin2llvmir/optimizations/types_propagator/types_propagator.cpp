@@ -16,7 +16,7 @@ namespace bin2llvmir {
 char TypesPropagator::ID = 0;
 
 static llvm::RegisterPass<TypesPropagator> X(
-		"types-propagation",
+		"retdec-types-propagation",
 		"Data types propagation",
 		false, // Only looks at CFG
 		false // Analysis Pass

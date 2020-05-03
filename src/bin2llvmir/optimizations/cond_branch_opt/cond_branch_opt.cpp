@@ -26,7 +26,7 @@ namespace bin2llvmir {
 char CondBranchOpt::ID = 0;
 
 static RegisterPass<CondBranchOpt> X(
-		"cond-branch-opt",
+		"retdec-cond-branch-opt",
 		"Conditional branch optimization",
 		false, // Only looks at CFG
 		false // Analysis Pass

@@ -28,7 +28,7 @@ namespace bin2llvmir {
 char ProviderInitialization::ID = 0;
 
 static RegisterPass<ProviderInitialization> X(
-		"provider-init",
+		"retdec-provider-init",
 		"Providers initialization",
 		 false, // Only looks at CFG
 		 false // Analysis Pass

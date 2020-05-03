@@ -28,7 +28,7 @@ namespace bin2llvmir {
 char StackPointerOpsRemove::ID = 0;
 
 static RegisterPass<StackPointerOpsRemove> X(
-		"stack-ptr-op-remove",
+		"retdec-stack-ptr-op-remove",
 		"Stack pointer operations optimization",
 		false, // Only looks at CFG
 		false // Analysis Pass

@@ -28,7 +28,7 @@ namespace bin2llvmir {
 char StackAnalysis::ID = 0;
 
 static RegisterPass<StackAnalysis> X(
-		"stack",
+		"retdec-stack",
 		"Stack optimization",
 		false, // Only looks at CFG
 		false // Analysis Pass

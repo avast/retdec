@@ -262,7 +262,7 @@ char ValueProtect::ID = 0;
 std::map<llvm::Type*, llvm::Function*> ValueProtect::_type2fnc;
 
 static RegisterPass<ValueProtect> X(
-		"value-protect",
+		"retdec-value-protect",
 		"Value protection optimization",
 		false, // Only looks at CFG
 		false // Analysis Pass

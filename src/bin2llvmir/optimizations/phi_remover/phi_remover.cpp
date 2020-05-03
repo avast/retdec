@@ -18,7 +18,7 @@ namespace bin2llvmir {
 char PhiRemover::ID = 0;
 
 static llvm::RegisterPass<PhiRemover> X(
-		"remove-phi",
+		"retdec-remove-phi",
 		"Phi removal",
 		 false, // Only looks at CFG
 		 false // Analysis Pass

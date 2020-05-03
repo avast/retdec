@@ -123,7 +123,7 @@ namespace llvmir2hll {
 char LlvmIr2Hll::ID = 0;
 
 static RegisterPass<LlvmIr2Hll> X(
-		"llvmir2hll",
+		"retdec-llvmir2hll",
 		"LLVM IR -> HLL",
 		 false, // Only looks at CFG
 		 false // Analysis Pass

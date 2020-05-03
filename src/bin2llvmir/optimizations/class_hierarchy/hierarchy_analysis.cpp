@@ -21,7 +21,7 @@ namespace bin2llvmir {
 char ClassHierarchyAnalysis::ID = 0;
 
 static RegisterPass<ClassHierarchyAnalysis> RegisterPass(
-		"class-hierarchy",
+		"retdec-class-hierarchy",
 		"C++ class hierarchy optimization",
 		false, // Only looks at CFG
 		false // Analysis Pass

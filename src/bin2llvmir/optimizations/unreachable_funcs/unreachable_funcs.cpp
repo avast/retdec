@@ -94,7 +94,7 @@ bool cannotBeOptimized(Function& func, const std::set<llvm::Function*>& funcs)
 char UnreachableFuncs::ID = 0;
 
 RegisterPass<UnreachableFuncs> UnreachableFuncsRegistered(
-		"unreachable-funcs",
+		"retdec-unreachable-funcs",
 		"Unreachable functions optimization",
 		false,
 		false);

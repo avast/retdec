@@ -24,7 +24,7 @@ struct GlobalOpt;
 
 char Idioms::ID = 0;
 RegisterPass<Idioms> IdiomsRegistered(
-		"idioms",
+		"retdec-idioms",
 		"Instruction idioms optimization",
 		false,
 		false);

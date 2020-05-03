@@ -16,7 +16,7 @@ namespace bin2llvmir {
 char SyscallFixer::ID = 0;
 
 static RegisterPass<SyscallFixer> X(
-		"syscalls",
+		"retdec-syscalls",
 		"Syscalls optimization",
 		false, // Only looks at CFG
 		false // Analysis Pass

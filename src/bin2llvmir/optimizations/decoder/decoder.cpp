@@ -24,7 +24,7 @@ namespace bin2llvmir {
 char Decoder::ID = 0;
 
 static llvm::RegisterPass<Decoder> X(
-		"decoder",
+		"retdec-decoder",
 		"Input binary to LLVM IR decoding",
 		false, // Only looks at CFG
 		false // Analysis Pass

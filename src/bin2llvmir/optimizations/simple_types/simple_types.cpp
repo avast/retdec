@@ -51,7 +51,7 @@ std::string priority2string(eSourcePriority p)
 char SimpleTypesAnalysis::ID = 0;
 
 static RegisterPass<SimpleTypesAnalysis> X(
-		"simple-types",
+		"retdec-simple-types",
 		"Simple types recovery optimization",
 		 false, // Only looks at CFG
 		 false // Analysis Pass

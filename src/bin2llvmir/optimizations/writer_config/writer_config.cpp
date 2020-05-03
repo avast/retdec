@@ -15,7 +15,7 @@ namespace bin2llvmir {
 char ConfigWriter::ID = 0;
 
 static RegisterPass<ConfigWriter> X(
-		"write-config",
+		"retdec-write-config",
 		"Generate the current config",
 		 false, // Only looks at CFG
 		 false // Analysis Pass

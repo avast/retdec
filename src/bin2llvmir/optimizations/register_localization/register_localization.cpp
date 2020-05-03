@@ -27,7 +27,7 @@ char RegisterLocalization::ID = 0;
 std::map<llvm::Type*, llvm::Function*> RegisterLocalization::_type2fnc;
 
 static RegisterPass<RegisterLocalization> X(
-		"register-localization",
+		"retdec-register-localization",
 		"Make all registers local",
 		false, // Only looks at CFG
 		false // Analysis Pass

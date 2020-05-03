@@ -39,7 +39,7 @@ namespace bin2llvmir {
 char ParamReturn::ID = 0;
 
 static RegisterPass<ParamReturn> X(
-		"param-return",
+		"retdec-param-return",
 		"Function parameters and returns optimization",
 		false, // Only looks at CFG
 		false // Analysis Pass

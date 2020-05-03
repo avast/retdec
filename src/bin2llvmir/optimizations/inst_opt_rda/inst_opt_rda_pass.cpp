@@ -19,7 +19,7 @@ namespace bin2llvmir {
 char InstructionRdaOptimizer::ID = 0;
 
 static RegisterPass<InstructionRdaOptimizer> X(
-		"inst-opt-rda",
+		"retdec-inst-opt-rda",
 		"LLVM instruction optimization using RDA",
 		false, // Only looks at CFG
 		false // Analysis Pass

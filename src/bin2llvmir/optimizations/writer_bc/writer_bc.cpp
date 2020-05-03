@@ -19,7 +19,7 @@ namespace bin2llvmir {
 char BitcodeWriter::ID = 0;
 
 static RegisterPass<BitcodeWriter> X(
-		"write-bc",
+		"retdec-write-bc",
 		"Generate the current bitcode",
 		 false, // Only looks at CFG
 		 false // Analysis Pass

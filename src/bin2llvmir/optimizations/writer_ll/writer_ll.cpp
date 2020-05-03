@@ -18,7 +18,7 @@ namespace bin2llvmir {
 char LlvmIrWriter::ID = 0;
 
 static RegisterPass<LlvmIrWriter> X(
-		"write-ll",
+		"retdec-write-ll",
 		"Generate the current LLVM IR",
 		 false, // Only looks at CFG
 		 false // Analysis Pass

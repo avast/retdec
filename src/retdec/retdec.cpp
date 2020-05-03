@@ -379,37 +379,44 @@ class ModulePassPrinter : public ModulePass
 	public:
 		static char ID;
 		std::string PhaseName;
+		std::string PhaseArg;
 		std::string PassName;
 
-		static const std::string LlvmAggregatePhaseName;
 		static std::string LastPhase;
+		inline static const std::string LlvmAggregatePhaseName = "LLVM";
 
 	public:
-		ModulePassPrinter(const std::string& phaseName) :
-				ModulePass(ID),
-				PhaseName(phaseName),
-				PassName("ModulePass Printer: " + PhaseName)
+		ModulePassPrinter(
+				const std::string& phaseName,
+				const std::string& phaseArg)
+				: ModulePass(ID)
+				, PhaseName(phaseName)
+				, PhaseArg(phaseArg)
+				, PassName("ModulePass Printer: " + PhaseName)
 		{
 
 		}
 
 		bool runOnModule(Module &M) override
 		{
-			// if (llvmPassesNormalized.count(utils::toLower(PhaseName)))
-			// {
-			// 	if (!llvmPassesNormalized.count(utils::toLower(LastPhase)))
-			// 	{
-			// 		llvm_support::printPhase(LlvmAggregatePhaseName);
-			// 	}
-			// }
-			// else
+			if (utils::startsWith(PhaseArg, "retdec"))
 			{
 				llvm_support::printPhase(PhaseName);
+				LastPhase = PhaseArg;
 			}
+			else
+			{
+				// aggregate LLVM
+				if (LastPhase != LlvmAggregatePhaseName)
+				{
+					llvm_support::printPhase(LlvmAggregatePhaseName);
+					LastPhase = LlvmAggregatePhaseName;
+				}
 
-			// LastPhase gets updated every time.
-			LastPhase = PhaseName;
-
+				// print all
+				// llvm_support::printPhase(PhaseName);
+				// LastPhase = PhaseArg;
+			}
 			return false;
 		}
 
@@ -424,8 +431,7 @@ class ModulePassPrinter : public ModulePass
 		}
 };
 char ModulePassPrinter::ID = 0;
-std::string ModulePassPrinter::LastPhase = std::string();
-const std::string ModulePassPrinter::LlvmAggregatePhaseName = "LLVM";
+std::string ModulePassPrinter::LastPhase;
 
 /**
  * Add the pass to the pass manager - no verification.
@@ -433,16 +439,16 @@ const std::string ModulePassPrinter::LlvmAggregatePhaseName = "LLVM";
 static inline void addPass(
 		legacy::PassManagerBase& PM,
 		Pass* P,
-		const std::string& phaseName = std::string())
+		const PassInfo* PI)
 {
-	std::string pn = phaseName.empty() ? P->getPassName().str() : phaseName;
-
-	PM.add(new ModulePassPrinter(pn));
+	PM.add(new ModulePassPrinter(
+			PI->getPassName().str(),
+			PI->getPassArgument().str()
+	));
 	PM.add(P);
 }
 
 bool decompile(retdec::config::Config& config)
-// bool decompile(const retdec::config::Parameters& params)
 {
 	llvm_support::printPhase("Initialization");
 	auto& passRegistry = initializeLlvmPasses();
@@ -460,7 +466,7 @@ bool decompile(retdec::config::Config& config)
 		if (auto* info = passRegistry.getPassInfo(p))
 		{
 			auto* pass = info->createPass();
-			addPass(pm, pass);
+			addPass(pm, pass, info);
 
 			if (info->getTypeInfo() == &bin2llvmir::ProviderInitialization::ID)
 			{

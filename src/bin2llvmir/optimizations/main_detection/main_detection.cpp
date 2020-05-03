@@ -26,7 +26,7 @@ namespace bin2llvmir {
 char MainDetection::ID = 0;
 
 static RegisterPass<MainDetection> X(
-		"main-detection",
+		"retdec-main-detection",
 		"Main function identification optimization",
 		false, // Only looks at CFG
 		false // Analysis Pass

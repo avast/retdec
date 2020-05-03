@@ -28,7 +28,7 @@ namespace bin2llvmir {
 char DsmWriter::ID = 0;
 
 static llvm::RegisterPass<DsmWriter> X(
-		"write-dsm",
+		"retdec-write-dsm",
 		"Disassembly generation",
 		 false, // Only looks at CFG
 		 false // Analysis Pass
