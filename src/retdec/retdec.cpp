@@ -673,8 +673,8 @@ class Decompiler: public ModulePass
 public:
 	explicit Decompiler(
 			raw_pwrite_stream &out,
-			const retdec::config::Parameters& params,
-			config::Config& c);
+			const retdec::config::Parameters& params
+	);
 
 	virtual llvm::StringRef getPassName() const override
 	{
@@ -774,10 +774,7 @@ char Decompiler::ID = 0;
 * @param[in] out Output stream into which the generated HLL code will be
 *                emitted.
 */
-Decompiler::Decompiler(
-		raw_pwrite_stream &out,
-		const config::Parameters& params,
-		config::Config& c)
+Decompiler::Decompiler(raw_pwrite_stream &out, const config::Parameters& params)
 		:
 		ModulePass(ID),
 		out(out),
@@ -785,8 +782,6 @@ Decompiler::Decompiler(
 		llvmModule(nullptr),
 		resModule(),
 		semantics(),
-		// config(&c),
-		// config(llvmir2hll::JSONConfig::fromString(c.generateJsonString())),
 		hllWriter(),
 		aliasAnalysis(),
 		cio(),
@@ -794,7 +789,7 @@ Decompiler::Decompiler(
 		varNameGen(),
 		varRenamer()
 {
-	// std::cout << c.generateJsonString() << std::endl;
+
 }
 
 bool Decompiler::runOnModule(Module &m)
@@ -1823,7 +1818,7 @@ pm.add(new bin2llvmir::ProviderInitialization(&c));
 	pm.add(new LoopInfoWrapperPass());
 	pm.add(new ScalarEvolutionWrapperPass());
 	raw_pwrite_stream &os(out->os());
-	pm.add(new Decompiler(os, params, c));
+	pm.add(new Decompiler(os, params));
 
 //==============================================================================
 // together
