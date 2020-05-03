@@ -106,6 +106,10 @@ void Config::doFinalization()
 	{
 		_configDB.generateJsonFile(_configPath);
 	}
+	else if (!_configDB.parameters.getOutputConfigFile().empty())
+	{
+		_configDB.generateJsonFile(_configDB.parameters.getOutputConfigFile());
+	}
 }
 
 retdec::config::Config& Config::getConfig()
