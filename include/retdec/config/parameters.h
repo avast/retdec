@@ -31,6 +31,7 @@ class Parameters
 		bool isKeepAllFunctions() const;
 		bool isSelectedDecodeOnly() const;
 		bool isFrontendFunction(const std::string& funcName) const;
+		bool isMaxMemoryLimitHalfRam() const;
 		/// @}
 
 		/// @name Parameters set methods.
@@ -38,14 +39,27 @@ class Parameters
 		void setIsVerboseOutput(bool b);
 		void setIsKeepAllFunctions(bool b);
 		void setIsSelectedDecodeOnly(bool b);
-		void setOutputFile(const std::string& n);
 		void setOrdinalNumbersDirectory(const std::string& n);
+		void setInputFile(const std::string& file);
+		void setOutputFile(const std::string& n);
+		void setOutputBitcodeFile(const std::string& file);
+		void setOutputAsmFile(const std::string& file);
+		void setOutputLlvmirFile(const std::string& file);
+		void setOutputConfigFile(const std::string& file);
+		void setMaxMemoryLimit(uint64_t limit);
+		void setMaxMemoryLimitHalfRam(bool f);
 		/// @}
 
 		/// @name Parameters get methods.
 		/// @{
-		std::string getOutputFile() const;
-		std::string getOrdinalNumbersDirectory() const;
+		const std::string& getOrdinalNumbersDirectory() const;
+		const std::string& getInputFile() const;
+		const std::string& getOutputFile() const;
+		const std::string& getOutputBitcodeFile() const;
+		const std::string& getOutputAsmFile() const;
+		const std::string& getOutputLlvmirFile() const;
+		const std::string& getOutputConfigFile() const;
+		uint64_t getMaxMemoryLimit() const;
 		/// @}
 
 		template <typename Writer>
@@ -86,8 +100,15 @@ class Parameters
 		/// results.
 		bool _selectedDecodeOnly = false;
 
-		std::string _outputFile;
 		std::string _ordinalNumbersDirectory;
+		std::string _outputFile;
+		std::string _inputFile;
+		std::string _outputBitcodeFile;
+		std::string _outputAsmFile;
+		std::string _outputLlFile;
+		std::string _outputConfigFile;
+		uint64_t _maxMemoryLimit = 0;
+		bool _maxMemoryLimitHalfRam = true;
 };
 
 } // namespace config

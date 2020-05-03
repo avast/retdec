@@ -83,6 +83,11 @@ bool Parameters::isFrontendFunction(const std::string& funcName) const
 	return false;
 }
 
+bool Parameters::isMaxMemoryLimitHalfRam() const
+{
+	return _maxMemoryLimitHalfRam;
+}
+
 void Parameters::setIsVerboseOutput(bool b)
 {
 	_verboseOutput = b;
@@ -102,19 +107,84 @@ void Parameters::setOutputFile(const std::string& n)
 	_outputFile = n;
 }
 
+void Parameters::setOutputBitcodeFile(const std::string& file)
+{
+	_outputBitcodeFile = file;
+}
+
+void Parameters::setOutputAsmFile(const std::string& file)
+{
+	_outputAsmFile = file;
+}
+
+void Parameters::setOutputLlvmirFile(const std::string& file)
+{
+	_outputLlFile = file;
+}
+
+void Parameters::setOutputConfigFile(const std::string& file)
+{
+	_outputConfigFile = file;
+}
+
 void Parameters::setOrdinalNumbersDirectory(const std::string& n)
 {
 	_ordinalNumbersDirectory = n;
 }
 
-std::string Parameters::getOutputFile() const
+void Parameters::setInputFile(const std::string& file)
+{
+	_inputFile = file;
+}
+
+void Parameters::setMaxMemoryLimit(uint64_t limit)
+{
+	_maxMemoryLimit = limit;
+}
+
+void Parameters::setMaxMemoryLimitHalfRam(bool f)
+{
+	_maxMemoryLimitHalfRam = f;
+}
+
+const std::string& Parameters::getOrdinalNumbersDirectory() const
+{
+	return _ordinalNumbersDirectory;
+}
+
+const std::string& Parameters::getInputFile() const
+{
+	return _inputFile;
+}
+
+const std::string& Parameters::getOutputFile() const
 {
 	return _outputFile;
 }
 
-std::string Parameters::getOrdinalNumbersDirectory() const
+const std::string& Parameters::getOutputBitcodeFile() const
 {
-	return _ordinalNumbersDirectory;
+	return _outputBitcodeFile;
+}
+
+const std::string& Parameters::getOutputAsmFile() const
+{
+	return _outputAsmFile;
+}
+
+const std::string& Parameters::getOutputLlvmirFile() const
+{
+	return _outputLlFile;
+}
+
+const std::string& Parameters::getOutputConfigFile() const
+{
+	return _outputConfigFile;
+}
+
+uint64_t Parameters::getMaxMemoryLimit() const
+{
+	return _maxMemoryLimit;
 }
 
 /**
