@@ -441,8 +441,6 @@ static inline void addPass(
 	PM.add(P);
 }
 
-llvm::Target decompilerTarget;
-
 bool decompile(const retdec::config::Parameters& params)
 {
 	llvm_support::printPhase("Initialization");
@@ -453,21 +451,9 @@ bool decompile(const retdec::config::Parameters& params)
 	auto context = std::make_unique<llvm::LLVMContext>();
 	auto module = createLlvmModule(*context);
 
-	// Add an appropriate TargetLibraryInfo pass for the module's triple.
-	Triple ModuleTriple(module->getTargetTriple());
-	TargetLibraryInfoImpl TLII(ModuleTriple);
-
 	// Create a PassManager to hold and optimize the collection of passes we
 	// are about to build.
 	llvm::legacy::PassManager pm;
-
-	// The -disable-simplify-libcalls flag actually disables all builtin optzns.
-	TLII.disableAllFunctions();
-
-	addPass(pm, new TargetLibraryInfoWrapperPass(TLII));
-
-	// Add internal analysis passes from the target machine.
-	addPass(pm, createTargetTransformInfoWrapperPass(TargetIRAnalysis()));
 
 config::Config c;
 c.setInputFile(params.getInputFile());
@@ -485,8 +471,6 @@ c.parameters.staticSignaturePaths =
 {
 	"/home/peter/retdec/retdec/build/install/share/retdec/support/generic/yara_patterns/static-code",
 };
-
-// pm.add(new bin2llvmir::ProviderInitialization(&c));
 
 	std::vector<std::string> passes =
 	{
@@ -629,7 +613,6 @@ c.parameters.staticSignaturePaths =
 		"idioms",
 		"remove-phi",
 		"value-protect",
-//		"write-config",
 		"sink",
 		"verify",
 		"write-ll",
