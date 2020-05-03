@@ -88,6 +88,10 @@ public:
 				params.setOutputLlvmirFile(out + ".ll");
 				params.setOutputConfigFile(out + ".config.json");
 			}
+			else if (c == "-k" || c == "--keep-unreachable-funcs")
+			{
+				params.setIsKeepAllFunctions(true);
+			}
 			// Input file is the only argument that does not have -x or --xyz
 			// before it. But only one input is expected.
 			else if (params.getInputFile().empty())
@@ -140,6 +144,7 @@ private:
 				<< "[-h|--help]\n"
 				<< "[--max-memory] Limits the maximal memory used by the given number of bytes.\n"
 				<< "[--no-memory-limit] Disables the default memory limit (half of system RAM)\n"
+				<< "[-k|--keep-unreachable-funcs] Keep functions that are unreachable from the main function.\n"
 				<< "\tinputFile\n";
 
 		exit(EXIT_SUCCESS);
