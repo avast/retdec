@@ -37,6 +37,7 @@ Config::Config(retdec::config::Config& c)
 
 Config Config::empty(llvm::Module* m)
 {
+	_emptyConfig = retdec::config::Config();
 	Config config(_emptyConfig);
 	config._module = m;
 	return config;
