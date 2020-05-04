@@ -135,7 +135,8 @@ bool UnreachableFuncs::run()
 		return false;
 	}
 	if (config->getConfig().fileType.isShared()
-			|| config->getConfig().fileType.isObject())
+			|| config->getConfig().fileType.isObject()
+			|| config->getConfig().parameters.isKeepAllFunctions())
 	{
 		return false;
 	}
