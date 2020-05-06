@@ -631,7 +631,8 @@ void LlvmIr2Hll::runOptimizations()
 	ShPtr<llvmir2hll::OptimizerManager> optManager(
 			new llvmir2hll::OptimizerManager(
 					parseListOfOpts(EnabledOpts),
-					parseListOfOpts(DisabledOpts),
+					// parseListOfOpts(DisabledOpts),
+					parseListOfOpts(globalConfig->parameters.backendDisabledOpts),
 					hllWriter,
 					llvmir2hll::ValueAnalysis::create(aliasAnalysis, true),
 					cio,

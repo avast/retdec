@@ -54,6 +54,8 @@
 #include "retdec/retdec/retdec.h"
 #include "retdec/utils/memory.h"
 
+// extern llvm::cl::opt<bool> PrintAfterAll;
+
 //==============================================================================
 // disassembler
 //==============================================================================
@@ -454,6 +456,7 @@ bool decompile(retdec::config::Config& config)
 	auto& passRegistry = initializeLlvmPasses();
 
 	// limitMaximalMemoryIfRequested(params);
+	// PrintAfterAll = true;
 
 	auto context = std::make_unique<llvm::LLVMContext>();
 	auto module = createLlvmModule(*context);
@@ -461,6 +464,17 @@ bool decompile(retdec::config::Config& config)
 	// Create a PassManager to hold and optimize the collection of passes we
 	// are about to build.
 	llvm::legacy::PassManager pm;
+
+	// Without this LLVM does more opts than we would like it to.
+	// e.g. printf() call -> puts() call
+	//
+	// Add an appropriate TargetLibraryInfo pass for the module's triple.
+	Triple ModuleTriple(module->getTargetTriple());
+	TargetLibraryInfoImpl TLII(ModuleTriple);
+	// The -disable-simplify-libcalls flag actually disables all builtin optzns.
+	TLII.disableAllFunctions();
+	pm.add(new TargetLibraryInfoWrapperPass(TLII));
+
 	for (auto& p : config.parameters.llvmPasses)
 	{
 		if (auto* info = passRegistry.getPassInfo(p))

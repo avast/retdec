@@ -148,7 +148,11 @@ std::set<std::string> selectSignaturePaths(
 	std::set<std::string> vsSigsSpecific;
 	if (c.tools.isMsvc())
 	{
-		selectSignaturesWithNames(allSigs, sigs, {"ucrt"});
+		selectSignaturesWithNames(
+				allSigs,
+				sigs,
+				{arch, archSize, format, "ucrt"}
+		);
 
 		std::size_t major = 0;
 		std::size_t minor = 0;
@@ -428,6 +432,11 @@ std::set<std::string> selectSignaturePaths(
 				{"pe", archSize, "delphi", "kb7"}
 		);
 	}
+
+// for (auto& s : sigs)
+// {
+// 	std::cout << "+++ [stacofin] " << s << std::endl;
+// }
 
 	return sigs;
 }

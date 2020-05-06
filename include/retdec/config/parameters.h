@@ -114,6 +114,11 @@ class Parameters
 		std::string _outputConfigFile;
 		uint64_t _maxMemoryLimit = 0;
 		bool _maxMemoryLimitHalfRam = true;
+
+// TODO:
+// public, not serialized, not tested, etc.
+public:
+	std::string backendDisabledOpts;
 };
 
 } // namespace config

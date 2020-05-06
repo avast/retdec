@@ -5,6 +5,7 @@
  */
 
 #include <iostream>
+#include <iostream>
 
 #include <llvm/ADT/Triple.h>
 #include <llvm/Analysis/LoopInfo.h>
@@ -37,6 +38,7 @@
 #include "retdec/retdec/retdec.h"
 #include "retdec/utils/binary_path.h"
 #include "retdec/utils/filesystem_path.h"
+#include "retdec/utils/string.h"
 
 class ProgramOptions
 {
@@ -44,6 +46,7 @@ public:
 	std::string programName;
 	retdec::config::Config& config;
 	retdec::config::Parameters& params;
+	std::list<std::string> _argv;
 
 public:
 	ProgramOptions(
@@ -61,26 +64,52 @@ public:
 
 		for (int i = 1; i < argc; ++i)
 		{
-			std::string c = argv[i];
+			_argv.push_back(argv[i]);
+		}
 
-			if (c == "-h" || c == "--help")
+		// for (int i = 1; i < argc; ++i)
+		for (auto i = _argv.begin(); i != _argv.end();)
+		{
+			// std::string c = argv[i];
+			std::string c = *i;
+
+			if (isParam(i, "-h", "--help"))
 			{
 				printHelpAndDie();
 			}
-			else if (c == "-m" || c == "--mode")
+			else if (isParam(i, "", "-print-after-all"))
 			{
-				auto m = getParamOrDie(argc, argv, i);
+				llvm::StringMap<llvm::cl::Option*> &opts = llvm::cl::getRegisteredOptions();
+
+				// opts["print-after-all"]->printOptionInfo(80);
+				// opts["print-after-all"]->printOptionValue(80, true);
+
+				auto* paa = static_cast<llvm::cl::opt<bool>*>(opts["print-after-all"]);
+				paa->setInitialValue(true);
+
+				// opts["print-after-all"]->printOptionValue(80, true);
+			}
+			else if (isParam(i, "-m", "--mode"))
+			{
+				auto m = getParamOrDie(i);
 				if (!(m == "bin" || m == "raw" || m == "ll"))
 				{
 					throw std::runtime_error(
 						"[-m|--mode] unknown mode: " + m
 					);
 				}
-				// TODO: what to do with this?
+				if (m == "raw")
+				{
+					// TODO
+					// In py there was always 32 for raw.
+					// we should demand other argument, e.g. --bit-size
+					config.fileFormat.setIsRaw32();
+					config.architecture.setBitSize(32);
+				}
 			}
-			else if (c == "-a" || c == "--arch")
+			else if (isParam(i, "-a", "--arch"))
 			{
-				auto a = getParamOrDie(argc, argv, i);
+				auto a = getParamOrDie(i);
 				if (!(a == "mips" || a == "pic32" || a == "arm" || a == "thumb"
 						|| a == "arm64" || a == "powerpc" || a == "x86"
 						|| a == "x86-64"))
@@ -91,9 +120,9 @@ public:
 				}
 				config.architecture.setName(a);
 			}
-			else if (c == "-e" || c == "--endian")
+			else if (isParam(i, "-e", "--endian"))
 			{
-				auto e = getParamOrDie(argc, argv, i);
+				auto e = getParamOrDie(i);
 				if (e == "little")
 				{
 					config.architecture.setIsEndianLittle();
@@ -109,21 +138,21 @@ public:
 					);
 				}
 			}
-			else if (c == "--max-memory")
+			else if (isParam(i, "", "--max-memory"))
 			{
 				params.setMaxMemoryLimit(std::stoull(
-					getParamOrDie(argc, argv, i)
+					getParamOrDie(i)
 				));
 				params.setMaxMemoryLimitHalfRam(false);
 			}
-			else if (c == "--no-memory-limit")
+			else if (isParam(i, "", "--no-memory-limit"))
 			{
 				params.setMaxMemoryLimit(0);
 				params.setMaxMemoryLimitHalfRam(false);
 			}
-			else if (c == "-o")
+			else if (isParam(i, "-o", "--output"))
 			{
-				std::string out = getParamOrDie(argc, argv, i);
+				std::string out = getParamOrDie(i);
 				params.setOutputFile(out);
 
 				auto lastDot = out.find_last_of('.');
@@ -136,17 +165,17 @@ public:
 				params.setOutputLlvmirFile(out + ".ll");
 				params.setOutputConfigFile(out + ".config.json");
 			}
-			else if (c == "-k" || c == "--keep-unreachable-funcs")
+			else if (isParam(i, "-k", "--keep-unreachable-funcs"))
 			{
 				params.setIsKeepAllFunctions(true);
 			}
-			else if (c == "-p" || c == "--pdb")
+			else if (isParam(i, "-p", "--pdb"))
 			{
-				config.setPdbInputFile(getParamOrDie(argc, argv, i));
+				config.setPdbInputFile(getParamOrDie(i));
 			}
-			else if (c == "--select-ranges")
+			else if (isParam(i, "", "--select-ranges"))
 			{
-				std::stringstream ranges(getParamOrDie(argc, argv, i));
+				std::stringstream ranges(getParamOrDie(i));
 				while(ranges.good())
 				{
 					std::string range;
@@ -158,9 +187,9 @@ public:
 					}
 				}
 			}
-			else if (c == "--select-functions")
+			else if (isParam(i, "", "--select-functions"))
 			{
-				std::stringstream funcs(getParamOrDie(argc, argv, i));
+				std::stringstream funcs(getParamOrDie(i));
 				while(funcs.good())
 				{
 					std::string func;
@@ -171,9 +200,31 @@ public:
 					}
 				}
 			}
-			else if (c == "--select-decode-only")
+			else if (isParam(i, "", "--select-decode-only"))
 			{
 				params.setIsSelectedDecodeOnly(true);
+			}
+			else if (isParam(i, "", "--raw-section-vma"))
+			{
+				retdec::common::Address addr(getParamOrDie(i));
+				config.setSectionVMA(addr);
+			}
+			else if (isParam(i, "", "--raw-entry-point"))
+			{
+				retdec::common::Address addr(getParamOrDie(i));
+				config.setEntryPoint(addr);
+			}
+			else if (isParam(i, "", "--backend-disabled-opts"))
+			{
+				params.backendDisabledOpts = getParamOrDie(i);
+			}
+			else if (isParam(i, "", "--static-code-archive"))
+			{
+				// TODO
+			}
+			else if (isParam(i, "", "--cleanup"))
+			{
+				// TODO
 			}
 			// Input file is the only argument that does not have -x or --xyz
 			// before it. But only one input is expected.
@@ -195,7 +246,13 @@ public:
 			}
 			else
 			{
+std::cout << "=============> unrecognized option: " << c << std::endl;
 				printHelpAndDie();
+			}
+
+			if (i != _argv.end())
+			{
+				++i;
 			}
 		}
 	}
@@ -213,6 +270,7 @@ public:
 	{
 		std::cout << programName << R"(:
 	[-h|--help]
+	[-o|--output] Output file.
 	[-m|--mode MODE] Force the type of decompilation mode [bin|ll|raw] (default: bin otherwise).
 	[-a|--arch ARCH] Specify target architecture [mips|pic32|arm|thumb|arm64|powerpc|x86|x86-64].
 	                 Required if it cannot be autodetected from the input (e.g. raw mode, Intel HEX).
@@ -223,6 +281,11 @@ public:
 	[--select-ranges RANGES] Specify a comma separated list of ranges to decompile (example: 0x100-0x200,0x300-0x400,0x500-0x600).
 	[--select-functions FUNCS] Specify a comma separated list of functions to decompile (example: fnc1,fnc2,fnc3).
 	[--select-decode-only] Decode only selected parts (functions/ranges). Faster decompilation, but worse results.
+	[--raw-section-vma]
+	[--raw-entry-point]
+	[--backend-disabled-opts]
+	[--static-code-archive]
+	[--cleanup]
 	[--max-memory MAX_MEMORY] Limits the maximal memory used by the given number of bytes.
 	[--no-memory-limit] Disables the default memory limit (half of system RAM)
 	FILE
@@ -232,11 +295,46 @@ public:
 	}
 
 private:
-	std::string getParamOrDie(int argc, char *argv[], int& i)
+	bool isParam(
+			std::list<std::string>::iterator i,
+			const std::string& shortp,
+			const std::string& longp = std::string())
 	{
-		if (argc > i+1)
+		std::string str = *i;
+
+		if (!shortp.empty() && retdec::utils::startsWith(str, shortp))
 		{
-			return argv[++i];
+			str.erase(0, shortp.length());
+			if (str.size() > 1 && str[0] == '=')
+			{
+				str.erase(0, 1);
+				++i;
+				_argv.insert(i, str);
+			}
+			return true;
+		}
+
+		if (!longp.empty() && retdec::utils::startsWith(str, longp))
+		{
+			str.erase(0, longp.length());
+			if (str.size() > 1 && str[0] == '=')
+			{
+				str.erase(0, 1);
+				++i;
+				_argv.insert(i, str);
+			}
+			return true;
+		}
+
+		return false;
+	}
+
+	std::string getParamOrDie(std::list<std::string>::iterator& i)
+	{
+		++i;
+		if (i != _argv.end())
+		{
+			return *i;
 		}
 		else
 		{
