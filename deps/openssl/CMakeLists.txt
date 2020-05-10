@@ -94,7 +94,12 @@ elseif(OS_LINUX)
 		set(OPENSSL_CONFIGURE_ARCH "linux-generic64")
 	endif()
 elseif(OS_DARWIN)
-	set(OPENSSL_MAKE make -j${CPUS})
+	execute_process(
+		COMMAND xcrun --show-sdk-path
+		OUTPUT_VARIABLE MACOS_SDK_PATH
+		OUTPUT_STRIP_TRAILING_WHITESPACE
+	)
+	set(OPENSSL_MAKE make SDKROOT=${MACOS_SDK_PATH} -j${CPUS})
 	if(ARCH_X86)
 		set(OPENSSL_CONFIGURE_ARCH "darwin-i386-cc")
 	elseif(ARCH_X64)
