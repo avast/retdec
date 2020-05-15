@@ -120,8 +120,8 @@ llvm::Function* Decoder::createFunction(common::Address a, bool declaration)
 	if (n.empty())
 	{
 		n = known
-				? names::generateFunctionName(a, _config->getConfig().isIda())
-				: names::generateFunctionNameUnknown(a, _config->getConfig().isIda());
+				? names::generateFunctionName(a)
+				: names::generateFunctionNameUnknown(a);
 	}
 
 	auto* f = llvm::Function::Create(

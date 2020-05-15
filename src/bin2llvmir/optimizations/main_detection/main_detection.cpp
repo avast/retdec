@@ -91,11 +91,7 @@ bool MainDetection::run()
 		mainAddr = getFromFunctionNames();
 	}
 
-	if (!(_config->getConfig().isIda()
-			&& _config->getConfig().parameters.isSomethingSelected()))
-	{
-		changed = applyResult(mainAddr);
-	}
+	changed = applyResult(mainAddr);
 
 	removeStaticallyLinked();
 
@@ -532,7 +528,7 @@ bool MainDetection::applyResult(retdec::common::Address mainAddr)
 		std::string n = f->getName();
 		// TODO: better, we want to know it is main, but we do not want to
 		// rename it if it is from IDA (and maybe never).
-		if (n != "main" && ! _config->getConfig().isIda())
+		if (n != "main")
 		{
 			irmodif.renameFunction(f, "main");
 			_names->addNameForAddress(

@@ -124,6 +124,7 @@ public:
 	std::string backendDisabledOpts;
 	bool backendNoOpts = false;
 	std::set<std::string> cryptoPatternPaths;
+	bool detectStatiCode = true;
 };
 
 } // namespace config

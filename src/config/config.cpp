@@ -30,7 +30,6 @@
 
 namespace {
 
-const std::string JSON_ida               = "ida";
 const std::string JSON_date              = "date";
 const std::string JSON_time              = "time";
 const std::string JSON_inputFile         = "inputFile";
@@ -81,8 +80,6 @@ Config Config::fromJsonString(const std::string& json)
 	return config;
 }
 
-bool Config::isIda() const { return _ida; }
-
 void Config::setInputFile(const std::string& n)          { _inputFile = n; }
 void Config::setUnpackedInputFile(const std::string& n)  { _unpackedInputFile = n; }
 void Config::setPdbInputFile(const std::string& n)       { _pdbInputFile = n; }
@@ -91,7 +88,6 @@ void Config::setEntryPoint(const retdec::common::Address& a)     { _entryPoint =
 void Config::setMainAddress(const retdec::common::Address& a)    { _mainAddress = a; }
 void Config::setSectionVMA(const retdec::common::Address& a)     { _sectionVMA = a; }
 void Config::setImageBase(const retdec::common::Address& a)      { _imageBase = a; }
-void Config::setIsIda(bool b)                            { _ida = b; }
 
 std::string Config::getInputFile() const          { return _inputFile; }
 std::string Config::getUnpackedInputFile() const  { return _unpackedInputFile; }
@@ -174,7 +170,6 @@ std::string Config::generateJsonString() const
 	serdes::serializeString(writer, JSON_time, retdec::utils::getCurrentTime());
 	serdes::serializeString(writer, JSON_inputFile, getInputFile());
 
-	if (isIda()) serdes::serializeBool(writer, JSON_ida, isIda());
 	if (!getUnpackedInputFile().empty()) serdes::serializeString(writer, JSON_unpackedInputFile, getUnpackedInputFile());
 	if (!getPdbInputFile().empty()) serdes::serializeString(writer, JSON_pdbInputFile, getPdbInputFile());
 	if (!getFrontendVersion().empty()) serdes::serializeString(writer, JSON_frontendVersion, getFrontendVersion());
@@ -227,7 +222,6 @@ void Config::readJsonString(const std::string& json)
 
 	try
 	{
-		setIsIda( serdes::deserializeBool(root, JSON_ida) );
 		setInputFile( serdes::deserializeString(root, JSON_inputFile) );
 		setUnpackedInputFile( serdes::deserializeString(root, JSON_unpackedInputFile) );
 		setPdbInputFile( serdes::deserializeString(root, JSON_pdbInputFile) );

@@ -544,8 +544,7 @@ void Decoder::initAllowedRangesWithConfig()
 void Decoder::initJumpTargets()
 {
 	initJumpTargetsConfig();
-	if (!(_config->getConfig().isIda()
-			&& _config->getConfig().parameters.isSomethingSelected()))
+	if (_config->getConfig().parameters.detectStatiCode)
 	{
 		initStaticCode();
 	}

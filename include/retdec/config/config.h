@@ -36,11 +36,6 @@ class Config
 		static Config fromJsonString(const std::string& json);
 		/// @}
 
-		/// @name Config query methods.
-		/// @{
-		bool isIda() const;
-		/// @}
-
 		/// @name Config set methods.
 		/// @{
 		void setInputFile(const std::string& n);
@@ -51,7 +46,6 @@ class Config
 		void setMainAddress(const retdec::common::Address& a);
 		void setSectionVMA(const retdec::common::Address& a);
 		void setImageBase(const retdec::common::Address& a);
-		void setIsIda(bool b);
 		/// @}
 
 		/// @name Config get methods.
@@ -100,8 +94,6 @@ class Config
 		retdec::common::Address _mainAddress;
 		retdec::common::Address _sectionVMA;
 		retdec::common::Address _imageBase;
-
-		bool _ida = false;
 };
 
 } // namespace config
