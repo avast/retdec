@@ -220,42 +220,34 @@ void Config::readJsonString(const std::string& json)
 
 	*this = Config();
 
-	try
+	setInputFile( serdes::deserializeString(root, JSON_inputFile) );
+	setUnpackedInputFile( serdes::deserializeString(root, JSON_unpackedInputFile) );
+	setPdbInputFile( serdes::deserializeString(root, JSON_pdbInputFile) );
+	setFrontendVersion( serdes::deserializeString(root, JSON_frontendVersion) );
+	serdes::deserialize(root, JSON_entryPoint, _entryPoint);
+	serdes::deserialize(root, JSON_mainAddress, _mainAddress);
+	serdes::deserialize(root, JSON_sectionVMA, _sectionVMA);
+	serdes::deserialize(root, JSON_imageBase, _imageBase);
+
+	auto params = root.FindMember(JSON_parameters);
+	if (params != root.MemberEnd())
 	{
-		setInputFile( serdes::deserializeString(root, JSON_inputFile) );
-		setUnpackedInputFile( serdes::deserializeString(root, JSON_unpackedInputFile) );
-		setPdbInputFile( serdes::deserializeString(root, JSON_pdbInputFile) );
-		setFrontendVersion( serdes::deserializeString(root, JSON_frontendVersion) );
-		serdes::deserialize(root, JSON_entryPoint, _entryPoint);
-		serdes::deserialize(root, JSON_mainAddress, _mainAddress);
-		serdes::deserialize(root, JSON_sectionVMA, _sectionVMA);
-		serdes::deserialize(root, JSON_imageBase, _imageBase);
-
-		auto params = root.FindMember(JSON_parameters);
-		if (params != root.MemberEnd())
-		{
-			parameters.deserialize(params->value);
-		}
-
-		serdes::deserialize(root, JSON_architecture, architecture);
-		serdes::deserialize(root, JSON_fileType, fileType);
-		serdes::deserialize(root, JSON_fileFormat, fileFormat);
-
-		serdes::deserializeContainer(root, JSON_tools, tools);
-		serdes::deserializeContainer(root, JSON_languages, languages);
-		serdes::deserializeContainer(root, JSON_functions, functions);
-		serdes::deserializeContainer(root, JSON_globals, globals);
-		serdes::deserializeContainer(root, JSON_registers, registers);
-		serdes::deserializeContainer(root, JSON_structures, structures);
-		serdes::deserializeContainer(root, JSON_vtables, vtables);
-		serdes::deserializeContainer(root, JSON_classes, classes);
-		serdes::deserializeContainer(root, JSON_patterns, patterns);
+		parameters.deserialize(params->value);
 	}
-	catch (const InternalException& e)
-	{
-		auto loc = retdec::utils::getLineAndColumnFromPosition(json, e.getPosition());
-		throw ParseException(e.getMessage(), loc.first, loc.second);
-	}
+
+	serdes::deserialize(root, JSON_architecture, architecture);
+	serdes::deserialize(root, JSON_fileType, fileType);
+	serdes::deserialize(root, JSON_fileFormat, fileFormat);
+
+	serdes::deserializeContainer(root, JSON_tools, tools);
+	serdes::deserializeContainer(root, JSON_languages, languages);
+	serdes::deserializeContainer(root, JSON_functions, functions);
+	serdes::deserializeContainer(root, JSON_globals, globals);
+	serdes::deserializeContainer(root, JSON_registers, registers);
+	serdes::deserializeContainer(root, JSON_structures, structures);
+	serdes::deserializeContainer(root, JSON_vtables, vtables);
+	serdes::deserializeContainer(root, JSON_classes, classes);
+	serdes::deserializeContainer(root, JSON_patterns, patterns);
 }
 
 } // namespace config
