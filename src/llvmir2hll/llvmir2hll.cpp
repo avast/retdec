@@ -210,7 +210,7 @@ bool LlvmIr2Hll::runOnModule(llvm::Module &m)
 		obtainDebugInfo();
 	}
 
-	if (!globalConfig->parameters.backendNoOpts)
+	if (!globalConfig->parameters.isBackendNoOpts())
 	{
 		llvm_support::printPhase(
 				"alias analysis [" + aliasAnalysis->getId() + "]",
@@ -630,8 +630,7 @@ void LlvmIr2Hll::runOptimizations()
 	ShPtr<llvmir2hll::OptimizerManager> optManager(
 			new llvmir2hll::OptimizerManager(
 					parseListOfOpts(EnabledOpts),
-					// parseListOfOpts(DisabledOpts),
-					parseListOfOpts(globalConfig->parameters.backendDisabledOpts),
+					parseListOfOpts(globalConfig->parameters.getBackendDisabledOpts()),
 					hllWriter,
 					llvmir2hll::ValueAnalysis::create(aliasAnalysis, true),
 					cio,

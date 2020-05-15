@@ -344,33 +344,6 @@ llvm::PassRegistry& initializeLlvmPasses()
 	return Registry;
 }
 
-// /**
-// * Limits the maximal memory of the tool based on the command-line parameters.
-// */
-// void limitMaximalMemoryIfRequested(const retdec::config::Parameters& params)
-// {
-// 	if (params.isMaxMemoryLimitHalfRam())
-// 	{
-// 		auto ok = utils::limitSystemMemoryToHalfOfTotalSystemMemory();
-// 		if (!ok)
-// 		{
-// 			throw std::runtime_error(
-// 				"failed to limit maximal memory to half of system RAM"
-// 			);
-// 		}
-// 	}
-// 	else if (auto lim = params.getMaxMemoryLimit(); lim > 0)
-// 	{
-// 		auto ok = utils::limitSystemMemory(lim);
-// 		if (!ok)
-// 		{
-// 			throw std::runtime_error(
-// 				"failed to limit maximal memory to " + std::to_string(lim)
-// 			);
-// 		}
-// 	}
-// }
-
 /**
  * This pass just prints phase information about other, subsequent passes.
  * In pass manager, tt should be placed right before the pass which phase info

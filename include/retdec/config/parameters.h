@@ -32,6 +32,8 @@ class Parameters
 		bool isSelectedDecodeOnly() const;
 		bool isFrontendFunction(const std::string& funcName) const;
 		bool isMaxMemoryLimitHalfRam() const;
+		bool isBackendNoOpts() const;
+		bool isDetectStaticCode() const;
 		/// @}
 
 		/// @name Parameters set methods.
@@ -53,6 +55,9 @@ class Parameters
 		void setEntryPoint(const retdec::common::Address& a);
 		void setMainAddress(const retdec::common::Address& a);
 		void setSectionVMA(const retdec::common::Address& a);
+		void setBackendDisabledOpts(const std::string& o);
+		void setIsBackendNoOpts(bool b);
+		void setIsDetectStaticCode(bool b);
 		/// @}
 
 		/// @name Parameters get methods.
@@ -70,6 +75,7 @@ class Parameters
 		retdec::common::Address getEntryPoint() const;
 		retdec::common::Address getMainAddress() const;
 		retdec::common::Address getSectionVMA() const;
+		const std::string& getBackendDisabledOpts() const;
 		/// @}
 
 		void fixRelativePaths(const std::string& configPath);
@@ -82,7 +88,7 @@ class Parameters
 		std::set<std::string> userStaticSignaturePaths;
 		std::set<std::string> staticSignaturePaths;
 		std::set<std::string> libraryTypeInfoPaths;
-		std::set<std::string> semanticPaths;
+		std::set<std::string> cryptoPatternPaths;
 		std::set<std::string> abiPaths;
 		std::set<std::string> frontendFunctions;
 
@@ -115,29 +121,25 @@ class Parameters
 		/// results.
 		bool _selectedDecodeOnly = false;
 
-std::string _ordinalNumbersDirectory;
-std::string _inputFile;
-std::string _inputPdbFile;
+		std::string _ordinalNumbersDirectory;
+		std::string _inputFile;
+		std::string _inputPdbFile;
 		std::string _outputFile;
-std::string _outputBitcodeFile;
-std::string _outputAsmFile;
-std::string _outputLlFile;
-std::string _outputConfigFile;
-std::string _outputUnpackedFile;
+		std::string _outputBitcodeFile;
+		std::string _outputAsmFile;
+		std::string _outputLlFile;
+		std::string _outputConfigFile;
+		std::string _outputUnpackedFile;
 		uint64_t _maxMemoryLimit = 0;
 		bool _maxMemoryLimitHalfRam = true;
+
+		std::string _backendDisabledOpts;
+		bool _backendNoOpts = false;
+		bool _detectStaticCode = true;
 
 		retdec::common::Address _entryPoint;
 		retdec::common::Address _mainAddress;
 		retdec::common::Address _sectionVMA;
-
-// TODO:
-// public, not serialized, not tested, etc.
-public:
-	std::string backendDisabledOpts;
-	bool backendNoOpts = false;
-	std::set<std::string> cryptoPatternPaths;
-	bool detectStatiCode = true;
 };
 
 } // namespace config

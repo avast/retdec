@@ -17,22 +17,33 @@ namespace {
 const std::string JSON_verboseOut               = "verboseOut";
 const std::string JSON_keepAllFuncs             = "keepAllFuncs";
 const std::string JSON_selectedDecodeOnly       = "selectedDecodeOnly";
-const std::string JSON_outputFile               = "outputFile";
 const std::string JSON_ordinalNumDir            = "ordinalNumDirectory";
 const std::string JSON_userStaticSigPaths       = "userStaticSignPaths";
 const std::string JSON_staticSigPaths           = "staticSignPaths";
 const std::string JSON_libraryTypeInfoPaths     = "libraryTypeInfoPaths";
 const std::string JSON_cryptoPatternPaths       = "cryptoPatternPaths";
 const std::string JSON_abiPaths                 = "abiPaths";
-const std::string JSON_selectedFunctions        = "selectedFunctions";
 const std::string JSON_frontendFunctions        = "frontendFunctions";
+const std::string JSON_selectedFunctions        = "selectedFunctions";
 const std::string JSON_selectedNotFoundFncs     = "selectedNotFoundFncs";
 const std::string JSON_selectedRanges           = "selectedRanges";
-const std::string JSON_selectedInteresting      = "selectedInteresting";
 const std::string JSON_llvmPasses               = "llvmPasses";
 const std::string JSON_entryPoint               = "entryPoint";
 const std::string JSON_mainAddress              = "mainAddress";
 const std::string JSON_sectionVMA               = "sectionVMA";
+
+const std::string JSON_inputFile                = "inputFile";
+const std::string JSON_inputPdbFile             = "inputPdbFile";
+const std::string JSON_outputFile               = "outputFile";
+const std::string JSON_outputBitcodeFile        = "outputBitcodeFile";
+const std::string JSON_outputAsmFile            = "outputAsmFile";
+const std::string JSON_outputLlFile             = "outputLlFile";
+const std::string JSON_outputConfigFile         = "outputConfigFile";
+const std::string JSON_outputUnpackedFile       = "outputUnpackedFile";
+
+const std::string JSON_backendDisabledOpts      = "backendDisabledOpts";
+const std::string JSON_backendNoOpts            = "backendNoOpts";
+const std::string JSON_detectStaticCode         = "detectStaticCode";
 
 } // anonymous namespace
 
@@ -92,6 +103,16 @@ bool Parameters::isFrontendFunction(const std::string& funcName) const
 bool Parameters::isMaxMemoryLimitHalfRam() const
 {
 	return _maxMemoryLimitHalfRam;
+}
+
+bool Parameters::isBackendNoOpts() const
+{
+	return _backendNoOpts;
+}
+
+bool Parameters::isDetectStaticCode() const
+{
+	return _detectStaticCode;
 }
 
 void Parameters::setIsVerboseOutput(bool b)
@@ -177,6 +198,21 @@ void Parameters::setSectionVMA(const retdec::common::Address& a)
 	_sectionVMA = a;
 }
 
+void Parameters::setBackendDisabledOpts(const std::string& o)
+{
+	_backendDisabledOpts = o;
+}
+
+void Parameters::setIsBackendNoOpts(bool b)
+{
+	_backendNoOpts = b;
+}
+
+void Parameters::setIsDetectStaticCode(bool b)
+{
+	_detectStaticCode = b;
+}
+
 const std::string& Parameters::getOrdinalNumbersDirectory() const
 {
 	return _ordinalNumbersDirectory;
@@ -242,6 +278,11 @@ retdec::common::Address Parameters::getSectionVMA() const
 	return _sectionVMA;
 }
 
+const std::string& Parameters::getBackendDisabledOpts() const
+{
+	return _backendDisabledOpts;
+}
+
 void fixPath(std::string& path, utils::FilesystemPath root)
 {
 	utils::FilesystemPath p(path);
@@ -272,7 +313,6 @@ void Parameters::fixRelativePaths(const std::string& configPath)
 	fixPaths(userStaticSignaturePaths, c);
 	fixPaths(staticSignaturePaths, c);
 	fixPaths(libraryTypeInfoPaths, c);
-	fixPaths(semanticPaths, c);
 	fixPaths(abiPaths, c);
 	fixPaths(cryptoPatternPaths, c);
 	fixPath(_ordinalNumbersDirectory, c);
@@ -290,8 +330,20 @@ void Parameters::serialize(Writer& writer) const
 	serdes::serializeBool(writer, JSON_verboseOut, isVerboseOutput());
 	serdes::serializeBool(writer, JSON_keepAllFuncs, isKeepAllFunctions());
 	serdes::serializeBool(writer, JSON_selectedDecodeOnly, isSelectedDecodeOnly());
-	serdes::serializeString(writer, JSON_outputFile, getOutputFile());
 	serdes::serializeString(writer, JSON_ordinalNumDir, getOrdinalNumbersDirectory());
+
+	serdes::serializeString(writer, JSON_inputFile, getInputFile());
+	serdes::serializeString(writer, JSON_inputPdbFile, getInputPdbFile());
+	serdes::serializeString(writer, JSON_outputFile, getOutputFile());
+	serdes::serializeString(writer, JSON_outputBitcodeFile, getOutputBitcodeFile());
+	serdes::serializeString(writer, JSON_outputAsmFile, getOutputAsmFile());
+	serdes::serializeString(writer, JSON_outputLlFile, getOutputLlvmirFile());
+	serdes::serializeString(writer, JSON_outputConfigFile, getOutputConfigFile());
+	serdes::serializeString(writer, JSON_outputUnpackedFile, getOutputUnpackedFile());
+
+	serdes::serializeString(writer, JSON_backendDisabledOpts, getBackendDisabledOpts());
+	serdes::serializeBool(writer, JSON_backendNoOpts, isBackendNoOpts());
+	serdes::serializeBool(writer, JSON_detectStaticCode, isDetectStaticCode());
 
 	serdes::serializeContainer(writer, JSON_selectedRanges, selectedRanges);
 	serdes::serializeContainer(writer, JSON_userStaticSigPaths, userStaticSignaturePaths);
@@ -330,7 +382,19 @@ void Parameters::deserialize(const rapidjson::Value& val)
 	setIsKeepAllFunctions( serdes::deserializeBool(val, JSON_keepAllFuncs) );
 	setIsSelectedDecodeOnly( serdes::deserializeBool(val, JSON_selectedDecodeOnly) );
 	setOrdinalNumbersDirectory( serdes::deserializeString(val, JSON_ordinalNumDir) );
+
+	setInputFile( serdes::deserializeString(val, JSON_inputFile) );
+	setInputPdbFile( serdes::deserializeString(val, JSON_inputPdbFile) );
 	setOutputFile( serdes::deserializeString(val, JSON_outputFile) );
+	setOutputBitcodeFile( serdes::deserializeString(val, JSON_outputBitcodeFile) );
+	setOutputAsmFile( serdes::deserializeString(val, JSON_outputAsmFile) );
+	setOutputLlvmirFile( serdes::deserializeString(val, JSON_outputLlFile) );
+	setOutputConfigFile( serdes::deserializeString(val, JSON_outputConfigFile) );
+	setOutputUnpackedFile( serdes::deserializeString(val, JSON_outputUnpackedFile) );
+
+	setBackendDisabledOpts( serdes::deserializeString(val, JSON_backendDisabledOpts) );
+	setIsBackendNoOpts( serdes::deserializeBool(val, JSON_backendNoOpts, false) );
+	setIsDetectStaticCode( serdes::deserializeBool(val, JSON_detectStaticCode, true) );
 
 	serdes::deserialize(val, JSON_entryPoint, _entryPoint);
 	serdes::deserialize(val, JSON_mainAddress, _mainAddress);

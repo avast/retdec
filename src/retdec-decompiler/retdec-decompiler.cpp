@@ -286,11 +286,11 @@ public:
 			}
 			else if (isParam(i, "", "--backend-disabled-opts"))
 			{
-				params.backendDisabledOpts = getParamOrDie(i);
+				params.setBackendDisabledOpts(getParamOrDie(i));
 			}
 			else if (isParam(i, "", "--backend-no-opts"))
 			{
-				params.backendNoOpts = true;
+				params.setIsBackendNoOpts(true);
 			}
 			else if (isParam(i, "", "--ar-index"))
 			{
