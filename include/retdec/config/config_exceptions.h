@@ -14,11 +14,18 @@ namespace retdec {
 namespace config {
 
 /**
+ * Base class for Config exceptions which can be thrown to the outside world (library users).
+ */
+class Exception : public std::exception
+{
+};
+
+/**
  * Config exception which can be thrown to the outside world (library users).
  * It represents an error during JSON parsing.
  * It contains an error message and line and column in JSON where error occurred.
  */
-class ParseException : public std::exception
+class ParseException : public Exception
 {
 	public:
 		ParseException(
@@ -74,7 +81,7 @@ class ParseException : public std::exception
  * Config exception which can be thrown to the outside world (library users).
  * It is thrown when provided input file can not be opened.
  */
-class FileNotFoundException : public std::exception
+class FileNotFoundException : public Exception
 {
 	public:
 		FileNotFoundException(const std::string& message) :
