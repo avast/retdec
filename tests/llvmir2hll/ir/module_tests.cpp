@@ -865,19 +865,6 @@ GetDebugNameForLocalVarReturnsCorrectValue) {
 }
 
 //
-// getFrontendRelease()
-//
-
-TEST_F(ModuleTests,
-GetFrontendReleaseReturnsCorrectValue) {
-	auto FRONTEND_RELEASE = "v1.0"s;
-	EXPECT_CALL(*configMock, getFrontendRelease())
-		.WillOnce(Return(FRONTEND_RELEASE));
-
-	ASSERT_EQ(FRONTEND_RELEASE, module->getFrontendRelease());
-}
-
-//
 // getNumberOfFuncsDetectedInFrontend()
 //
 

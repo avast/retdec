@@ -65,8 +65,6 @@ void HLLWriterTests::SetUp() {
 		.WillByDefault(Return(StringVector()));
 	ON_CALL(*configMock, getDemangledNameOfClass(_))
 		.WillByDefault(Return(""));
-	ON_CALL(*configMock, getFrontendRelease())
-		.WillByDefault(Return(""));
 	ON_CALL(*configMock, getNumberOfFuncsDetectedInFrontend())
 		.WillByDefault(Return(0));
 	ON_CALL(*configMock, getDetectedCompilerOrPacker())

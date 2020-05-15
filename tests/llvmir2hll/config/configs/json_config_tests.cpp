@@ -1598,26 +1598,6 @@ GetPrefixesOfFuncsToBeRemovedReturnsCorrectValueWhenThereArePrefixes) {
 }
 
 //
-// getFrontendRelease()
-//
-
-TEST_F(JSONConfigTests,
-GetFrontendReleaseReturnsEmptyStringWhenThereIsNoRelease) {
-	auto config = JSONConfig::empty();
-
-	ASSERT_EQ("", config->getFrontendRelease());
-}
-
-TEST_F(JSONConfigTests,
-GetFrontendReleaseReturnsCorrectStringWhenReleaseIsSet) {
-	auto config = JSONConfig::fromString(R"({
-		"frontendVersion": "v1.0"
-	})");
-
-	ASSERT_EQ("v1.0", config->getFrontendRelease());
-}
-
-//
 // getNumberOfFuncsDetectedInFrontend()
 //
 

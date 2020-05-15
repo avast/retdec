@@ -857,15 +857,6 @@ void Module::addDebugNameForVar(ShPtr<Variable> var, const std::string &name) {
 }
 
 /**
-* @brief Returns the release of the front-end.
-*
-* If there is no release, it returns the empty string.
-*/
-std::string Module::getFrontendRelease() const {
-	return config->getFrontendRelease();
-}
-
-/**
 * @brief Returns the number of functions detected in the front-end.
 */
 std::size_t Module::getNumberOfFuncsDetectedInFrontend() const {

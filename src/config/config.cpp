@@ -35,7 +35,6 @@ const std::string JSON_time              = "time";
 const std::string JSON_inputFile         = "inputFile";
 const std::string JSON_unpackedInputFile = "inputFileUnpacked";
 const std::string JSON_pdbInputFile      = "inputFilePdb";
-const std::string JSON_frontendVersion   = "frontendVersion";
 const std::string JSON_parameters        = "decompParams";
 const std::string JSON_architecture      = "architecture";
 const std::string JSON_fileType          = "fileType";
@@ -83,7 +82,6 @@ Config Config::fromJsonString(const std::string& json)
 void Config::setInputFile(const std::string& n)          { _inputFile = n; }
 void Config::setUnpackedInputFile(const std::string& n)  { _unpackedInputFile = n; }
 void Config::setPdbInputFile(const std::string& n)       { _pdbInputFile = n; }
-void Config::setFrontendVersion(const std::string& n)    { _frontendVersion = n; }
 void Config::setEntryPoint(const retdec::common::Address& a)     { _entryPoint = a; }
 void Config::setMainAddress(const retdec::common::Address& a)    { _mainAddress = a; }
 void Config::setSectionVMA(const retdec::common::Address& a)     { _sectionVMA = a; }
@@ -92,7 +90,6 @@ void Config::setImageBase(const retdec::common::Address& a)      { _imageBase = 
 std::string Config::getInputFile() const          { return _inputFile; }
 std::string Config::getUnpackedInputFile() const  { return _unpackedInputFile; }
 std::string Config::getPdbInputFile() const       { return _pdbInputFile; }
-std::string Config::getFrontendVersion() const    { return _frontendVersion; }
 std::string Config::getConfigFileName() const     { return _configFileName; }
 retdec::common::Address Config::getEntryPoint() const     { return _entryPoint; }
 retdec::common::Address Config::getMainAddress() const    { return _mainAddress; }
@@ -172,7 +169,6 @@ std::string Config::generateJsonString() const
 
 	if (!getUnpackedInputFile().empty()) serdes::serializeString(writer, JSON_unpackedInputFile, getUnpackedInputFile());
 	if (!getPdbInputFile().empty()) serdes::serializeString(writer, JSON_pdbInputFile, getPdbInputFile());
-	if (!getFrontendVersion().empty()) serdes::serializeString(writer, JSON_frontendVersion, getFrontendVersion());
 	if (getEntryPoint().isDefined()) serdes::serialize(writer, JSON_entryPoint, getEntryPoint());
 	if (getMainAddress().isDefined()) serdes::serialize(writer, JSON_mainAddress, getMainAddress());
 	if (getSectionVMA().isDefined()) serdes::serialize(writer, JSON_sectionVMA, getSectionVMA());
@@ -223,7 +219,6 @@ void Config::readJsonString(const std::string& json)
 	setInputFile( serdes::deserializeString(root, JSON_inputFile) );
 	setUnpackedInputFile( serdes::deserializeString(root, JSON_unpackedInputFile) );
 	setPdbInputFile( serdes::deserializeString(root, JSON_pdbInputFile) );
-	setFrontendVersion( serdes::deserializeString(root, JSON_frontendVersion) );
 	serdes::deserialize(root, JSON_entryPoint, _entryPoint);
 	serdes::deserialize(root, JSON_mainAddress, _mainAddress);
 	serdes::deserialize(root, JSON_sectionVMA, _sectionVMA);

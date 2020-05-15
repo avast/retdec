@@ -41,7 +41,6 @@ class Config
 		void setInputFile(const std::string& n);
 		void setUnpackedInputFile(const std::string& n);
 		void setPdbInputFile(const std::string& n);
-		void setFrontendVersion(const std::string& n);
 		void setEntryPoint(const retdec::common::Address& a);
 		void setMainAddress(const retdec::common::Address& a);
 		void setSectionVMA(const retdec::common::Address& a);
@@ -53,7 +52,6 @@ class Config
 		std::string getInputFile() const;
 		std::string getUnpackedInputFile() const;
 		std::string getPdbInputFile() const;
-		std::string getFrontendVersion() const;
 		std::string getConfigFileName() const;
 		retdec::common::Address getEntryPoint() const;
 		retdec::common::Address getMainAddress() const;
@@ -87,7 +85,6 @@ class Config
 		std::string _inputFile;
 		std::string _unpackedInputFile;
 		std::string _pdbInputFile;
-		std::string _frontendVersion;
 		std::string _configFileName;
 
 		retdec::common::Address _entryPoint;
