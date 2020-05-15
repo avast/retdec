@@ -733,7 +733,7 @@ namespace PeLib
 			{
 				if((rc.entry.irde.Name & 0x7FFFFFFF) > uiSizeOfImage)
 				{
-					resDir->setLoaderError(LDR_ERROR_RSRC_NAME_OVER_END_OF_IMAGE);
+					resDir->setLoaderError(LDR_ERROR_RSRC_NAME_OUT_OF_IMAGE);
 				}
 			}
 
@@ -741,8 +741,16 @@ namespace PeLib
 			{
 				if((rc.entry.irde.OffsetToData & 0x7FFFFFFF) > uiSizeOfImage)
 				{
-					auto ldrError = (rc.entry.irde.OffsetToData & 0x80000000) ? LDR_ERROR_RSRC_SUBDIR_OVER_END_OF_IMAGE : LDR_ERROR_RSRC_DATA_OVER_END_OF_IMAGE;
-					resDir->setLoaderError(ldrError);
+					// Is it a subdirectory?
+					if(rc.entry.irde.OffsetToData & 0x80000000)
+					{
+						resDir->setLoaderError(LDR_ERROR_RSRC_SUBDIR_OUT_OF_IMAGE);
+						return ERROR_NONE;
+					}
+					else
+					{
+						resDir->setLoaderError(LDR_ERROR_RSRC_DATA_OUT_OF_IMAGE);
+					}
 				}
 			}
 

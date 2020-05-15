@@ -73,9 +73,9 @@ namespace PeLib
 
 		// Resource directory detected errors
 		{"LDR_ERROR_RSRC_OVER_END_OF_IMAGE",       "Array of resource directory entries goes beyond end of the image" },
-		{"LDR_ERROR_RSRC_NAME_OVER_END_OF_IMAGE",  "One of the resource names points out of the image" },
-		{"LDR_ERROR_RSRC_DATA_OVER_END_OF_IMAGE",  "One of the resource data points out of the image" },
-		{"LDR_ERROR_RSRC_SUBDIR_OVER_END_OF_IMAGE","One of the resource subdirectories points out of the image" },
+		{"LDR_ERROR_RSRC_NAME_OUT_OF_IMAGE",       "One of the resource names points out of the image" },
+		{"LDR_ERROR_RSRC_DATA_OUT_OF_IMAGE",       "One of the resource data points out of the image" },
+		{"LDR_ERROR_RSRC_SUBDIR_OUT_OF_IMAGE",     "One of the resource subdirectories points out of the image" },
 
 		// Entry point error detection
 		{"LDR_ERROR_ENTRY_POINT_OUT_OF_IMAGE",     "The position of the entry point is out of the image" },
@@ -197,6 +197,9 @@ namespace PeLib
 		// These errors indicate damaged PE file, but the file is usually loadable anyway
 		return (ldrError == LDR_ERROR_FILE_IS_CUT_LOADABLE ||
 				ldrError == LDR_ERROR_RSRC_OVER_END_OF_IMAGE ||
+				ldrError == LDR_ERROR_RSRC_NAME_OUT_OF_IMAGE ||
+				ldrError == LDR_ERROR_RSRC_DATA_OUT_OF_IMAGE ||
+				ldrError == LDR_ERROR_RSRC_SUBDIR_OUT_OF_IMAGE ||
 				ldrError == LDR_ERROR_ENTRY_POINT_OUT_OF_IMAGE ||
 				ldrError == LDR_ERROR_ENTRY_POINT_ZEROED ||
 				ldrError == LDR_ERROR_DIGITAL_SIGNATURE_CUT ||
