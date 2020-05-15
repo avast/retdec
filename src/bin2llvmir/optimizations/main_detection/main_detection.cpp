@@ -100,7 +100,7 @@ bool MainDetection::run()
 
 bool MainDetection::skipAnalysis()
 {
-	return _config->getConfig().getMainAddress().isDefined()
+	return _config->getConfig().parameters.getMainAddress().isDefined()
 			|| _config->getConfig().fileType.isShared();
 }
 
@@ -156,7 +156,7 @@ retdec::common::Address MainDetection::getFromContext()
 			&& _config->getConfig().architecture.isMipsOrPic32() && _image)
 	{
 		auto* epSeg = _image->getImage()->getSegmentFromAddress(
-				_config->getConfig().getEntryPoint());
+				_config->getConfig().parameters.getEntryPoint());
 
 		if (epSeg)
 		{
@@ -401,7 +401,7 @@ retdec::common::Address MainDetection::getFromContext()
 retdec::common::Address MainDetection::getFromEntryPointOffset(int offset)
 {
 	Address mainAddr;
-	Address ep = _config->getConfig().getEntryPoint();
+	Address ep = _config->getConfig().parameters.getEntryPoint();
 	Address jmpMainAddr = ep + offset;
 	auto ai = AsmInstruction(_module, jmpMainAddr);
 	auto* c = ai.getInstructionFirst<CallInst>();
@@ -522,7 +522,7 @@ bool MainDetection::applyResult(retdec::common::Address mainAddr)
 	bool changed = false;
 
 	IrModifier irmodif(_module, _config);
-	_config->getConfig().setMainAddress(mainAddr);
+	_config->getConfig().parameters.setMainAddress(mainAddr);
 	if (auto* f = _config->getLlvmFunction(mainAddr))
 	{
 		std::string n = f->getName();

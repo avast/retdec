@@ -32,17 +32,11 @@ namespace {
 
 const std::string JSON_date              = "date";
 const std::string JSON_time              = "time";
-const std::string JSON_inputFile         = "inputFile";
-const std::string JSON_pdbInputFile      = "inputFilePdb";
 const std::string JSON_parameters        = "decompParams";
 const std::string JSON_architecture      = "architecture";
 const std::string JSON_fileType          = "fileType";
 const std::string JSON_fileFormat        = "fileFormat";
 const std::string JSON_tools             = "tools";
-const std::string JSON_imageBase         = "imageBase";
-const std::string JSON_entryPoint        = "entryPoint";
-const std::string JSON_mainAddress       = "mainAddress";
-const std::string JSON_sectionVMA        = "sectionVMA";
 const std::string JSON_functions         = "functions";
 const std::string JSON_globals           = "globals";
 const std::string JSON_registers         = "registers";
@@ -77,20 +71,6 @@ Config Config::fromJsonString(const std::string& json)
 	config.readJsonString(json);
 	return config;
 }
-
-void Config::setInputFile(const std::string& n)          { _inputFile = n; }
-void Config::setPdbInputFile(const std::string& n)       { _pdbInputFile = n; }
-void Config::setEntryPoint(const retdec::common::Address& a)     { _entryPoint = a; }
-void Config::setMainAddress(const retdec::common::Address& a)    { _mainAddress = a; }
-void Config::setSectionVMA(const retdec::common::Address& a)     { _sectionVMA = a; }
-void Config::setImageBase(const retdec::common::Address& a)      { _imageBase = a; }
-
-std::string Config::getInputFile() const          { return _inputFile; }
-std::string Config::getPdbInputFile() const       { return _pdbInputFile; }
-retdec::common::Address Config::getEntryPoint() const     { return _entryPoint; }
-retdec::common::Address Config::getMainAddress() const    { return _mainAddress; }
-retdec::common::Address Config::getSectionVMA() const     { return _sectionVMA; }
-retdec::common::Address Config::getImageBase() const      { return _imageBase; }
 
 /**
  * Reads JSON file into internal representation.
@@ -140,7 +120,9 @@ std::string Config::generateJsonFile() const
  */
 std::string Config::generateJsonFile(const std::string& outputFilePath) const
 {
-	std::string jsonName = (outputFilePath.empty()) ? (getInputFile() + ".json") : (outputFilePath);
+	std::string jsonName = outputFilePath.empty()
+			? parameters.getInputFile() + ".json"
+			: outputFilePath;
 
 	std::ofstream jsonFile( jsonName.c_str() );
 	jsonFile << generateJsonString();
@@ -161,13 +143,6 @@ std::string Config::generateJsonString() const
 
 	serdes::serializeString(writer, JSON_date, retdec::utils::getCurrentDate());
 	serdes::serializeString(writer, JSON_time, retdec::utils::getCurrentTime());
-	serdes::serializeString(writer, JSON_inputFile, getInputFile());
-
-	if (!getPdbInputFile().empty()) serdes::serializeString(writer, JSON_pdbInputFile, getPdbInputFile());
-	if (getEntryPoint().isDefined()) serdes::serialize(writer, JSON_entryPoint, getEntryPoint());
-	if (getMainAddress().isDefined()) serdes::serialize(writer, JSON_mainAddress, getMainAddress());
-	if (getSectionVMA().isDefined()) serdes::serialize(writer, JSON_sectionVMA, getSectionVMA());
-	if (getImageBase().isDefined()) serdes::serialize(writer, JSON_imageBase, getImageBase());
 
 	writer.String(JSON_parameters);
 	parameters.serialize(writer);
@@ -210,13 +185,6 @@ void Config::readJsonString(const std::string& json)
 	}
 
 	*this = Config();
-
-	setInputFile( serdes::deserializeString(root, JSON_inputFile) );
-	setPdbInputFile( serdes::deserializeString(root, JSON_pdbInputFile) );
-	serdes::deserialize(root, JSON_entryPoint, _entryPoint);
-	serdes::deserialize(root, JSON_mainAddress, _mainAddress);
-	serdes::deserialize(root, JSON_sectionVMA, _sectionVMA);
-	serdes::deserialize(root, JSON_imageBase, _imageBase);
 
 	auto params = root.FindMember(JSON_parameters);
 	if (params != root.MemberEnd())

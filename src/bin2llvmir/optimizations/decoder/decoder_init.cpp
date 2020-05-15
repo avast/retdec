@@ -327,7 +327,7 @@ void Decoder::initAllowedRangesWithSegments()
 		auto& rc = seg->getNonDecodableAddressRanges();
 		for (auto& r : rc)
 		{
-			if (!r.contains(_config->getConfig().getEntryPoint()))
+			if (!r.contains(_config->getConfig().parameters.getEntryPoint()))
 			{
 				_ranges.remove(r.getStart(), r.getEnd());
 			}
@@ -597,7 +597,7 @@ void Decoder::initJumpTargetsEntryPoint()
 {
 	LOG << "\n" << "initJumpTargetsEntryPoint():" << std::endl;
 
-	auto ep = _config->getConfig().getEntryPoint();
+	auto ep = _config->getConfig().parameters.getEntryPoint();
 	if (auto* jt = _jumpTargets.push(
 			ep,
 			JumpTarget::eType::ENTRY_POINT,

@@ -81,8 +81,8 @@ FileImage::FileImage(
 			arch,
 			endian,
 			c.architecture.getByteSize(),
-			c.getEntryPoint(),
-			c.getSectionVMA());
+			c.parameters.getEntryPoint(),
+			c.parameters.getSectionVMA());
 
 	if (auto* imgRaw = dynamic_cast<retdec::loader::RawDataImage*>(
 			_image.get()))

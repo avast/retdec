@@ -190,7 +190,7 @@ bool ProviderInitialization::runOnModule(Module& m)
 //==============================================================================
 	auto* f = FileImageProvider::addFileImage(
 			&m,
-			c->getConfig().getInputFile(),
+			c->getConfig().parameters.getInputFile(),
 			c);
 	if (f == nullptr)
 	{
@@ -246,18 +246,10 @@ bool ProviderInitialization::runOnModule(Module& m)
 		if (f->getFileFormat()->isObjectFile()) ft.setIsObject();
 		if (f->getFileFormat()->isDll()) ft.setIsShared();
 	}
-	if (auto* pe = dynamic_cast<const fileformat::PeFormat*>(f->getFileFormat()))
-	{
-		unsigned long long ib = 0;
-		if (pe->getImageBaseAddress(ib))
-		{
-			c->getConfig().setImageBase(ib);
-		}
-	}
 	unsigned long long ep = 0;
 	if (f->getFileFormat()->getEpAddress(ep))
 	{
-		c->getConfig().setEntryPoint(ep);
+		c->getConfig().parameters.setEntryPoint(ep);
 	}
 //==============================================================================
 
@@ -362,7 +354,7 @@ bool ProviderInitialization::runOnModule(Module& m)
 	{
 		yara.addRuleFile(crypto);
 	}
-	yara.analyze(c->getConfig().getInputFile());
+	yara.analyze(c->getConfig().parameters.getInputFile());
 	for(const auto &rule : yara.getDetectedRules())
 	{
 		common::Pattern p = saveCryptoRule(
@@ -396,9 +388,9 @@ bool ProviderInitialization::runOnModule(Module& m)
 	auto* debug = DebugFormatProvider::addDebugFormat(
 			&m,
 			f->getImage(),
-			c->getConfig().getPdbInputFile(),
-			c->getConfig().getImageBase(),
-			d);
+			c->getConfig().parameters.getInputPdbFile(),
+			d
+	);
 
 	auto* lti = LtiProvider::addLti(&m, c, typeConfig, f->getImage());
 

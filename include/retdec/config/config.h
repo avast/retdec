@@ -36,26 +36,6 @@ class Config
 		static Config fromJsonString(const std::string& json);
 		/// @}
 
-		/// @name Config set methods.
-		/// @{
-		void setInputFile(const std::string& n);
-		void setPdbInputFile(const std::string& n);
-		void setEntryPoint(const retdec::common::Address& a);
-		void setMainAddress(const retdec::common::Address& a);
-		void setSectionVMA(const retdec::common::Address& a);
-		void setImageBase(const retdec::common::Address& a);
-		/// @}
-
-		/// @name Config get methods.
-		/// @{
-		std::string getInputFile() const;
-		std::string getPdbInputFile() const;
-		retdec::common::Address getEntryPoint() const;
-		retdec::common::Address getMainAddress() const;
-		retdec::common::Address getSectionVMA() const;
-		retdec::common::Address getImageBase() const;
-		/// @}
-
 		std::string generateJsonString() const;
 		std::string generateJsonFile() const;
 		std::string generateJsonFile(const std::string& outputFilePath) const;
@@ -77,15 +57,6 @@ class Config
 		common::VtableContainer vtables;
 		common::ClassContainer classes;
 		common::PatternContainer patterns;
-
-	private:
-		std::string _inputFile;
-		std::string _pdbInputFile;
-
-		retdec::common::Address _entryPoint;
-		retdec::common::Address _mainAddress;
-		retdec::common::Address _sectionVMA;
-		retdec::common::Address _imageBase;
 };
 
 } // namespace config

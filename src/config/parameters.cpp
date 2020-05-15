@@ -30,6 +30,9 @@ const std::string JSON_selectedNotFoundFncs     = "selectedNotFoundFncs";
 const std::string JSON_selectedRanges           = "selectedRanges";
 const std::string JSON_selectedInteresting      = "selectedInteresting";
 const std::string JSON_llvmPasses               = "llvmPasses";
+const std::string JSON_entryPoint               = "entryPoint";
+const std::string JSON_mainAddress              = "mainAddress";
+const std::string JSON_sectionVMA               = "sectionVMA";
 
 } // anonymous namespace
 
@@ -145,6 +148,11 @@ void Parameters::setInputFile(const std::string& file)
 	_inputFile = file;
 }
 
+void Parameters::setInputPdbFile(const std::string& file)
+{
+	_inputPdbFile = file;
+}
+
 void Parameters::setMaxMemoryLimit(uint64_t limit)
 {
 	_maxMemoryLimit = limit;
@@ -155,6 +163,20 @@ void Parameters::setMaxMemoryLimitHalfRam(bool f)
 	_maxMemoryLimitHalfRam = f;
 }
 
+void Parameters::setEntryPoint(const retdec::common::Address& a)
+{
+	_entryPoint = a;
+}
+void Parameters::setMainAddress(const retdec::common::Address& a)
+{
+	_mainAddress = a;
+}
+
+void Parameters::setSectionVMA(const retdec::common::Address& a)
+{
+	_sectionVMA = a;
+}
+
 const std::string& Parameters::getOrdinalNumbersDirectory() const
 {
 	return _ordinalNumbersDirectory;
@@ -163,6 +185,11 @@ const std::string& Parameters::getOrdinalNumbersDirectory() const
 const std::string& Parameters::getInputFile() const
 {
 	return _inputFile;
+}
+
+const std::string& Parameters::getInputPdbFile() const
+{
+	return _inputPdbFile;
 }
 
 const std::string& Parameters::getOutputFile() const
@@ -198,6 +225,21 @@ const std::string& Parameters::getOutputUnpackedFile() const
 uint64_t Parameters::getMaxMemoryLimit() const
 {
 	return _maxMemoryLimit;
+}
+
+retdec::common::Address Parameters::getEntryPoint() const
+{
+	return _entryPoint;
+}
+
+retdec::common::Address Parameters::getMainAddress() const
+{
+	return _mainAddress;
+}
+
+retdec::common::Address Parameters::getSectionVMA() const
+{
+	return _sectionVMA;
 }
 
 void fixPath(std::string& path, utils::FilesystemPath root)
@@ -262,6 +304,10 @@ void Parameters::serialize(Writer& writer) const
 	serdes::serializeContainer(writer, JSON_selectedNotFoundFncs, selectedNotFoundFunctions);
 	serdes::serializeContainer(writer, JSON_llvmPasses, llvmPasses);
 
+	serdes::serialize(writer, JSON_entryPoint, getEntryPoint());
+	serdes::serialize(writer, JSON_mainAddress, getMainAddress());
+	serdes::serialize(writer, JSON_sectionVMA, getSectionVMA());
+
 	writer.EndObject();
 }
 template void Parameters::serialize(
@@ -285,6 +331,10 @@ void Parameters::deserialize(const rapidjson::Value& val)
 	setIsSelectedDecodeOnly( serdes::deserializeBool(val, JSON_selectedDecodeOnly) );
 	setOrdinalNumbersDirectory( serdes::deserializeString(val, JSON_ordinalNumDir) );
 	setOutputFile( serdes::deserializeString(val, JSON_outputFile) );
+
+	serdes::deserialize(val, JSON_entryPoint, _entryPoint);
+	serdes::deserialize(val, JSON_mainAddress, _mainAddress);
+	serdes::deserialize(val, JSON_sectionVMA, _sectionVMA);
 
 	serdes::deserializeContainer(val, JSON_selectedRanges, selectedRanges);
 	serdes::deserializeContainer(val, JSON_staticSigPaths, staticSignaturePaths);

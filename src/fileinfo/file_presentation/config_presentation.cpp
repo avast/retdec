@@ -150,7 +150,7 @@ bool ConfigPresentation::present()
 		return true;
 	}
 
-	outDoc.setInputFile(fileinfo.getPathToFile());
+	outDoc.parameters.setInputFile(fileinfo.getPathToFile());
 
 	if(fileinfo.getFileFormatEnum() == Format::ELF)
 	{
@@ -232,11 +232,7 @@ bool ConfigPresentation::present()
 
 	if(fileinfo.toolInfo.entryPointAddress)
 	{
-		outDoc.setEntryPoint(fileinfo.toolInfo.epAddress);
-	}
-	if(!fileinfo.getImageBaseStr(std::dec).empty())
-	{
-		outDoc.setImageBase(fileinfo.toolInfo.imageBase);
+		outDoc.parameters.setEntryPoint(fileinfo.toolInfo.epAddress);
 	}
 
 	presentCompiler();

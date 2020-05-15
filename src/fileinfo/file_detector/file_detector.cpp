@@ -317,8 +317,8 @@ void FileDetector::setConfigFile(retdec::config::Config &config)
 			arch,
 			endian,
 			config.architecture.getByteSize(),
-			config.getEntryPoint(),
-			config.getSectionVMA());
+			config.parameters.getEntryPoint(),
+			config.parameters.getSectionVMA());
 }
 
 /**

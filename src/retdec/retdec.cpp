@@ -306,7 +306,7 @@ LlvmModuleContextPair disassemble(
 	auto module = createLlvmModule(*context);
 
 	config::Config c;
-	c.setInputFile(inputPath);
+	c.parameters.setInputFile(inputPath);
 
 	// Create a PassManager to hold and optimize the collection of passes we
 	// are about to build.

@@ -41,6 +41,7 @@ class Parameters
 		void setIsSelectedDecodeOnly(bool b);
 		void setOrdinalNumbersDirectory(const std::string& n);
 		void setInputFile(const std::string& file);
+		void setInputPdbFile(const std::string& file);
 		void setOutputFile(const std::string& n);
 		void setOutputBitcodeFile(const std::string& file);
 		void setOutputAsmFile(const std::string& file);
@@ -49,12 +50,16 @@ class Parameters
 		void setOutputUnpackedFile(const std::string& file);
 		void setMaxMemoryLimit(uint64_t limit);
 		void setMaxMemoryLimitHalfRam(bool f);
+		void setEntryPoint(const retdec::common::Address& a);
+		void setMainAddress(const retdec::common::Address& a);
+		void setSectionVMA(const retdec::common::Address& a);
 		/// @}
 
 		/// @name Parameters get methods.
 		/// @{
 		const std::string& getOrdinalNumbersDirectory() const;
 		const std::string& getInputFile() const;
+		const std::string& getInputPdbFile() const;
 		const std::string& getOutputFile() const;
 		const std::string& getOutputBitcodeFile() const;
 		const std::string& getOutputAsmFile() const;
@@ -62,6 +67,9 @@ class Parameters
 		const std::string& getOutputConfigFile() const;
 		const std::string& getOutputUnpackedFile() const;
 		uint64_t getMaxMemoryLimit() const;
+		retdec::common::Address getEntryPoint() const;
+		retdec::common::Address getMainAddress() const;
+		retdec::common::Address getSectionVMA() const;
 		/// @}
 
 		void fixRelativePaths(const std::string& configPath);
@@ -107,16 +115,21 @@ class Parameters
 		/// results.
 		bool _selectedDecodeOnly = false;
 
-		std::string _ordinalNumbersDirectory;
+std::string _ordinalNumbersDirectory;
+std::string _inputFile;
+std::string _inputPdbFile;
 		std::string _outputFile;
-		std::string _inputFile;
-		std::string _outputBitcodeFile;
-		std::string _outputAsmFile;
-		std::string _outputLlFile;
-		std::string _outputConfigFile;
+std::string _outputBitcodeFile;
+std::string _outputAsmFile;
+std::string _outputLlFile;
+std::string _outputConfigFile;
 std::string _outputUnpackedFile;
 		uint64_t _maxMemoryLimit = 0;
 		bool _maxMemoryLimitHalfRam = true;
+
+		retdec::common::Address _entryPoint;
+		retdec::common::Address _mainAddress;
+		retdec::common::Address _sectionVMA;
 
 // TODO:
 // public, not serialized, not tested, etc.

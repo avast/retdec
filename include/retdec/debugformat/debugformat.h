@@ -40,8 +40,8 @@ class DebugFormat
 				retdec::loader::Image* inFile,
 				const std::string& pdbFile,
 				SymbolTable* symtab,
-				retdec::demangler::Demangler* demangler,
-				unsigned long long imageBase = 0);
+				retdec::demangler::Demangler* demangler
+		);
 
 		retdec::common::Function* getFunction(retdec::common::Address a);
 		const retdec::common::Object* getGlobalVar(retdec::common::Address a);

@@ -43,7 +43,6 @@ class DebugFormatProvider
 				llvm::Module* m,
 				retdec::loader::Image* objf,
 				const std::string& pdbFile,
-				const retdec::common::Address& imageBase,
 				Demangler* demangler);
 
 		static DebugFormat* getDebugFormat(llvm::Module* m);

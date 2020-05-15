@@ -232,7 +232,7 @@ public:
 			}
 			else if (isParam(i, "-p", "--pdb"))
 			{
-				config.setPdbInputFile(getParamOrDie(i));
+				config.parameters.setInputPdbFile(getParamOrDie(i));
 			}
 			else if (isParam(i, "", "--select-ranges"))
 			{
@@ -268,12 +268,12 @@ public:
 			else if (isParam(i, "", "--raw-section-vma"))
 			{
 				retdec::common::Address addr(getParamOrDie(i));
-				config.setSectionVMA(addr);
+				params.setSectionVMA(addr);
 			}
 			else if (isParam(i, "", "--raw-entry-point"))
 			{
 				retdec::common::Address addr(getParamOrDie(i));
-				config.setEntryPoint(addr);
+				params.setEntryPoint(addr);
 			}
 			else if (isParam(i, "", "--cleanup"))
 			{
@@ -318,7 +318,6 @@ public:
 			else if (params.getInputFile().empty())
 			{
 				auto& out = c;
-				config.setInputFile(out);
 				params.setInputFile(out);
 				if (params.getOutputAsmFile().empty())
 					params.setOutputAsmFile(out + ".dsm");
@@ -508,7 +507,6 @@ if (fat.isValid())
 		}
 	}
 
-	config.setInputFile(po.arExtractPath + "_m");
 	config.parameters.setInputFile(po.arExtractPath + "_m");
 }
 
@@ -555,7 +553,6 @@ if (po.arIdx || !po.arName.empty())
 		}
 	}
 
-	config.setInputFile(po.arExtractPath);
 	config.parameters.setInputFile(po.arExtractPath);
 }
 else
@@ -617,7 +614,6 @@ char* uargv[4] = {
 auto unpackCode = retdec::unpackertool::_main(4, uargv);
 if (unpackCode == 0) // EXIT_CODE_OK
 {
-	config.setInputFile(config.parameters.getOutputUnpackedFile());
 	config.parameters.setInputFile(config.parameters.getOutputUnpackedFile());
 }
 

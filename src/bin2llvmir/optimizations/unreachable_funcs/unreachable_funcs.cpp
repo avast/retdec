@@ -144,7 +144,7 @@ bool UnreachableFuncs::run()
 	// The main function has to be a definition, not just a declaration. This
 	// is needed when decompiling shared libraries containing an import of main.
 	//
-	mainFunc = config->getLlvmFunction(config->getConfig().getMainAddress());
+	mainFunc = config->getLlvmFunction(config->getConfig().parameters.getMainAddress());
 	if (mainFunc == nullptr || mainFunc->isDeclaration())
 	{
 		return false;

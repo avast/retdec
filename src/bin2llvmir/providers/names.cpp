@@ -324,7 +324,7 @@ const Name& NameContainer::getPreferredNameForAddress(retdec::common::Address a)
 void NameContainer::initFromConfig()
 {
 	addNameForAddress(
-			_config->getConfig().getEntryPoint(),
+			_config->getConfig().parameters.getEntryPoint(),
 			names::entryPointName,
 			Name::eType::ENTRY_POINT);
 
