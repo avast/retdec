@@ -98,7 +98,10 @@ FileImage::FileImage(
 		throw std::runtime_error("Missing basic info about input file"
 				" -> there can be no decompilation");
 	}
+}
 
+void FileImage::initRtti(Config* config)
+{
 	if (config->getConfig().tools.isMsvc())
 	{
 		_rtti.findMsvc(getImage());

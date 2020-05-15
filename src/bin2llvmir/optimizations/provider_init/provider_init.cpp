@@ -5,6 +5,7 @@
  */
 
 #include <iostream>
+#include <regex>
 
 #include <llvm/Support/CommandLine.h>
 
@@ -19,11 +20,130 @@
 #include "retdec/bin2llvmir/providers/lti.h"
 #include "retdec/bin2llvmir/providers/names.h"
 #include "retdec/cpdetect/cpdetect.h"
+#include "retdec/yaracpp/yara_detector/yara_detector.h"
 
 using namespace llvm;
 
 namespace retdec {
 namespace bin2llvmir {
+
+common::Pattern saveCryptoRule(
+		const yaracpp::YaraRule &rule,
+		retdec::fileformat::FileFormat* file)
+{
+	const auto name = rule.getName();
+	auto pattern = common::Pattern::crypto(name, "", name);
+	const auto *descMeta = rule.getMeta("description");
+	if(!descMeta)
+	{
+		descMeta = rule.getMeta("desc");
+	}
+	pattern.setDescription(descMeta ? descMeta->getStringValue() : name);
+	std::smatch rMatch, rMatchFlt;
+	bool isInt = false, isFlt = false, entrySize = false;
+	if(regex_search(name, rMatch, std::regex("__([0-9]+)_(big|lil|byt)_")))
+	{
+		entrySize = true;
+		if(rMatch[2] == "lil")
+		{
+			pattern.setIsEndianLittle();
+		}
+		else if(rMatch[2] == "big")
+		{
+			pattern.setIsEndianBig();
+		}
+
+		if(regex_search(name, rMatchFlt, std::regex("__flt([0-9]+)___")))
+		{
+			isFlt = true;
+			pattern.setName(rMatchFlt.prefix());
+			if(!descMeta)
+			{
+				pattern.setDescription(rMatchFlt.prefix());
+			}
+		}
+		else
+		{
+			isInt = true;
+			pattern.setName(rMatch.prefix());
+			if(!descMeta)
+			{
+				pattern.setDescription(rMatch.prefix());
+			}
+		}
+	}
+
+	std::string descInfo;
+	unsigned long long entrySizeValue = 0;
+	if(entrySize
+			&& rMatch.size() > 1
+			&& utils::strToNum(rMatch[1], entrySizeValue, std::dec))
+	{
+		descInfo.push_back('(');
+		descInfo += rMatch[1];
+		descInfo += "-bit";
+	}
+	else
+	{
+		entrySize = false;
+	}
+
+	if(pattern.isEndianLittle() || pattern.isEndianBig())
+	{
+		if(descInfo.empty())
+		{
+			descInfo.push_back('(');
+		}
+		else
+		{
+			descInfo += ", ";
+		}
+		descInfo += (pattern.isEndianLittle() ? "little" : "big");
+		descInfo += " endian";
+	}
+
+	if(!descInfo.empty())
+	{
+		if(descInfo[0] == '(')
+		{
+			descInfo.push_back(')');
+		}
+		pattern.setDescription(pattern.getDescription() + " " + descInfo);
+	}
+
+	for(std::size_t i = 0, e = rule.getNumberOfMatches(); i < e; ++i)
+	{
+		const auto *match = rule.getMatch(i);
+		if(!match)
+		{
+			continue;
+		}
+		common::Pattern::Match patMatch;
+		if(isFlt)
+		{
+			patMatch.setIsTypeFloatingPoint();
+		}
+		else if(isInt)
+		{
+			patMatch.setIsTypeIntegral();
+		}
+		patMatch.setSize(match->getDataSize());
+
+		if(entrySize)
+		{
+			patMatch.setEntrySize(entrySizeValue / file->getByteLength());
+		}
+		patMatch.setOffset(match->getOffset());
+		unsigned long long val = 0;
+		if(file->getAddressFromOffset(val, match->getOffset()))
+		{
+			patMatch.setAddress(val);
+		}
+		pattern.matches.push_back(patMatch);
+	}
+
+	return pattern;
+}
 
 char ProviderInitialization::ID = 0;
 
@@ -67,6 +187,7 @@ bool ProviderInitialization::runOnModule(Module& m)
 		return false;
 	}
 
+//==============================================================================
 	auto* f = FileImageProvider::addFileImage(
 			&m,
 			c->getConfig().getInputFile(),
@@ -75,7 +196,7 @@ bool ProviderInitialization::runOnModule(Module& m)
 	{
 		return false;
 	}
-
+//==============================================================================
 	// TODO:
 	// This happens if config is not initialized via fileinfo etc.
 	// This is not the right place for this.
@@ -138,6 +259,15 @@ bool ProviderInitialization::runOnModule(Module& m)
 	{
 		c->getConfig().setEntryPoint(ep);
 	}
+//==============================================================================
+
+	if ((f->getFileFormat()->getTargetArchitecture() == fileformat::Architecture::POWERPC
+			|| f->getFileFormat()->getTargetArchitecture() == fileformat::Architecture::MIPS)
+			&& f->getFileFormat()->getWordLength() == 64)
+	{
+		throw std::runtime_error("Unsupported target format and architecture combination");
+	}
+
 //==============================================================================
 	// TODO:
 	// we could probably be using cpdetect results,
@@ -210,12 +340,44 @@ bool ProviderInitialization::runOnModule(Module& m)
 
 			c->getConfig().tools.push_back(ci);
 		}
+		for (auto& l : tools.detectedLanguages)
+		{
+			if (l.bytecode)
+			{
+				std::cerr << "Warning: Detected " << l.name
+						<< " bytecode, which cannot be decompiled by our machine-code decompiler. The decompilation result may be inaccurate.";
+			}
+		}
 	}
 	// TODO: this is needed, but we should remove the whole PIC thing.
 	if (c->getConfig().tools.isPic32())
 	{
 		c->getConfig().architecture.setIsPic32();
 	}
+
+//==============================================================================
+
+	yaracpp::YaraDetector yara;
+	for (auto& crypto : c->getConfig().parameters.cryptoPatternPaths)
+	{
+		yara.addRuleFile(crypto);
+	}
+	yara.analyze(c->getConfig().getInputFile());
+	for(const auto &rule : yara.getDetectedRules())
+	{
+		common::Pattern p = saveCryptoRule(
+				rule,
+				f->getFileFormat()
+		);
+		c->getConfig().patterns.push_back(p);
+	}
+	// TODO: these should be implemented in common pattern, not here or in fileinfo
+	// TODO: removeRedundantCryptoRules()
+	// TODO: sortCryptoPatternMatches()
+
+//==============================================================================
+	// TODO: this can happen only after tools are detected.
+	f->initRtti(c);
 //==============================================================================
 
 	auto* abi = AbiProvider::addAbi(&m, c);

@@ -3,7 +3,7 @@
         "verboseOut": false,
         "keepAllFuncs": false,
         "selectedDecodeOnly": false,
-        "ordinalNumDirectory": "./support/x86/ords/",
+        "ordinalNumDirectory": "./support/ordinals/",
         "staticSignPaths": [
             "./support/generic/yara_patterns/static-code/"
         ],
@@ -13,6 +13,10 @@
             "./support/generic/types/linux.json",
             "./support/generic/types/windows.json",
             "./support/generic/types/windrivers.json"
+        ],
+        "cryptoPatternPaths": [
+            "./support/generic/yara_patterns/signsrch/signsrch.yarac",
+            "./support/generic/yara_patterns/signsrch/signsrch_regex.yarac"
         ],
         "llvmPasses" : [
             "retdec-provider-init",

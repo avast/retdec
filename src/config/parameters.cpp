@@ -22,6 +22,7 @@ const std::string JSON_ordinalNumDir            = "ordinalNumDirectory";
 const std::string JSON_userStaticSigPaths       = "userStaticSignPaths";
 const std::string JSON_staticSigPaths           = "staticSignPaths";
 const std::string JSON_libraryTypeInfoPaths     = "libraryTypeInfoPaths";
+const std::string JSON_cryptoPatternPaths       = "cryptoPatternPaths";
 const std::string JSON_abiPaths                 = "abiPaths";
 const std::string JSON_selectedFunctions        = "selectedFunctions";
 const std::string JSON_frontendFunctions        = "frontendFunctions";
@@ -129,6 +130,11 @@ void Parameters::setOutputConfigFile(const std::string& file)
 	_outputConfigFile = file;
 }
 
+void Parameters::setOutputUnpackedFile(const std::string& file)
+{
+	_outputUnpackedFile = file;
+}
+
 void Parameters::setOrdinalNumbersDirectory(const std::string& n)
 {
 	_ordinalNumbersDirectory = n;
@@ -184,6 +190,11 @@ const std::string& Parameters::getOutputConfigFile() const
 	return _outputConfigFile;
 }
 
+const std::string& Parameters::getOutputUnpackedFile() const
+{
+	return _outputUnpackedFile;
+}
+
 uint64_t Parameters::getMaxMemoryLimit() const
 {
 	return _maxMemoryLimit;
@@ -221,6 +232,7 @@ void Parameters::fixRelativePaths(const std::string& configPath)
 	fixPaths(libraryTypeInfoPaths, c);
 	fixPaths(semanticPaths, c);
 	fixPaths(abiPaths, c);
+	fixPaths(cryptoPatternPaths, c);
 	fixPath(_ordinalNumbersDirectory, c);
 }
 
@@ -243,6 +255,7 @@ void Parameters::serialize(Writer& writer) const
 	serdes::serializeContainer(writer, JSON_userStaticSigPaths, userStaticSignaturePaths);
 	serdes::serializeContainer(writer, JSON_staticSigPaths, staticSignaturePaths);
 	serdes::serializeContainer(writer, JSON_libraryTypeInfoPaths, libraryTypeInfoPaths);
+	serdes::serializeContainer(writer, JSON_cryptoPatternPaths, cryptoPatternPaths);
 	serdes::serializeContainer(writer, JSON_abiPaths, abiPaths);
 	serdes::serializeContainer(writer, JSON_selectedFunctions, selectedFunctions);
 	serdes::serializeContainer(writer, JSON_frontendFunctions, frontendFunctions);
@@ -277,6 +290,7 @@ void Parameters::deserialize(const rapidjson::Value& val)
 	serdes::deserializeContainer(val, JSON_staticSigPaths, staticSignaturePaths);
 	serdes::deserializeContainer(val, JSON_userStaticSigPaths, userStaticSignaturePaths);
 	serdes::deserializeContainer(val, JSON_libraryTypeInfoPaths, libraryTypeInfoPaths);
+	serdes::deserializeContainer(val, JSON_cryptoPatternPaths, cryptoPatternPaths);
 	serdes::deserializeContainer(val, JSON_abiPaths, abiPaths);
 	serdes::deserializeContainer(val, JSON_selectedFunctions, selectedFunctions);
 	serdes::deserializeContainer(val, JSON_frontendFunctions, frontendFunctions);

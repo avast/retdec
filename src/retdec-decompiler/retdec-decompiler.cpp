@@ -34,11 +34,43 @@
 #include <llvm/Support/ToolOutputFile.h>
 #include <llvm/Target/TargetMachine.h>
 
+#include "retdec/ar-extractor/archive_wrapper.h"
+#include "retdec/ar-extractor/detection.h"
 #include "retdec/config/config.h"
 #include "retdec/retdec/retdec.h"
+#include "retdec/macho-extractor/break_fat.h"
+#include "retdec/unpackertool/unpackertool.h"
 #include "retdec/utils/binary_path.h"
 #include "retdec/utils/filesystem_path.h"
 #include "retdec/utils/string.h"
+#include "retdec/utils/memory.h"
+
+/**
+* Limits the maximal memory of the tool based on the command-line parameters.
+*/
+void limitMaximalMemoryIfRequested(const retdec::config::Parameters& params)
+{
+	if (params.isMaxMemoryLimitHalfRam())
+	{
+		auto ok = retdec::utils::limitSystemMemoryToHalfOfTotalSystemMemory();
+		if (!ok)
+		{
+			throw std::runtime_error(
+				"failed to limit maximal memory to half of system RAM"
+			);
+		}
+	}
+	else if (auto lim = params.getMaxMemoryLimit(); lim > 0)
+	{
+		auto ok = retdec::utils::limitSystemMemory(lim);
+		if (!ok)
+		{
+			throw std::runtime_error(
+				"failed to limit maximal memory to " + std::to_string(lim)
+			);
+		}
+	}
+}
 
 class ProgramOptions
 {
@@ -47,6 +79,10 @@ public:
 	retdec::config::Config& config;
 	retdec::config::Parameters& params;
 	std::list<std::string> _argv;
+
+	std::string arExtractPath;
+	std::string arName;
+	std::optional<uint64_t> arIdx;
 
 public:
 	ProgramOptions(
@@ -66,11 +102,34 @@ public:
 		{
 			_argv.push_back(argv[i]);
 		}
+	}
 
-		// for (int i = 1; i < argc; ++i)
+	void load()
+	{
 		for (auto i = _argv.begin(); i != _argv.end();)
 		{
-			// std::string c = argv[i];
+			if (isParam(i, "", "--config"))
+			{
+				auto backup = config.parameters;
+
+				try
+				{
+					config = retdec::config::Config::fromFile(getParamOrDie(i));
+				}
+				catch (const retdec::config::ParseException& e)
+				{
+					throw std::runtime_error(
+						"loading of config failed: " + std::string(e.what())
+					);
+				}
+
+				config.parameters = backup;
+			}
+			++i;
+		}
+
+		for (auto i = _argv.begin(); i != _argv.end();)
+		{
 			std::string c = *i;
 
 			if (isParam(i, "-h", "--help"))
@@ -164,6 +223,8 @@ public:
 				params.setOutputBitcodeFile(out + ".bc");
 				params.setOutputLlvmirFile(out + ".ll");
 				params.setOutputConfigFile(out + ".config.json");
+				params.setOutputUnpackedFile(out + "-unpacked");
+				arExtractPath = out + "-extracted";
 			}
 			else if (isParam(i, "-k", "--keep-unreachable-funcs"))
 			{
@@ -214,17 +275,43 @@ public:
 				retdec::common::Address addr(getParamOrDie(i));
 				config.setEntryPoint(addr);
 			}
+			else if (isParam(i, "", "--cleanup"))
+			{
+				// TODO
+			}
+			else if (isParam(i, "", "--config"))
+			{
+				getParamOrDie(i);
+				// ignore
+			}
 			else if (isParam(i, "", "--backend-disabled-opts"))
 			{
 				params.backendDisabledOpts = getParamOrDie(i);
 			}
-			else if (isParam(i, "", "--static-code-archive"))
+			else if (isParam(i, "", "--backend-no-opts"))
 			{
-				// TODO
+				params.backendNoOpts = true;
 			}
-			else if (isParam(i, "", "--cleanup"))
+			else if (isParam(i, "", "--ar-index"))
 			{
-				// TODO
+				auto a = getParamOrDie(i);
+				try
+				{
+					arIdx = std::stoull(a);
+				}
+				catch (...)
+				{
+					std::cerr << "Invalid --ar-index argument: " << a << std::endl;
+					exit(EXIT_FAILURE);
+				}
+			}
+			else if (isParam(i, "", "--ar-name"))
+			{
+				arName = getParamOrDie(i);
+			}
+			else if (isParam(i, "", "--static-code-sigfile"))
+			{
+				params.userStaticSignaturePaths.insert(getParamOrDie(i));
 			}
 			// Input file is the only argument that does not have -x or --xyz
 			// before it. But only one input is expected.
@@ -243,6 +330,10 @@ public:
 					params.setOutputConfigFile(out + ".config.json");
 				if (params.getOutputFile().empty())
 					params.setOutputFile(out + ".c");
+				if (params.getOutputUnpackedFile().empty())
+					params.setOutputUnpackedFile(out + "-unpacked");
+				if (arExtractPath.empty())
+					arExtractPath = out + "-extracted";
 			}
 			else
 			{
@@ -283,9 +374,13 @@ std::cout << "=============> unrecognized option: " << c << std::endl;
 	[--select-decode-only] Decode only selected parts (functions/ranges). Faster decompilation, but worse results.
 	[--raw-section-vma]
 	[--raw-entry-point]
-	[--backend-disabled-opts]
-	[--static-code-archive]
 	[--cleanup]
+	[--config]
+	[--backend-disabled-opts]
+	[--backend-no-opts]
+	[--ar-index]
+	[--ar-name]
+	[--static-code-sigfile]
 	[--max-memory MAX_MEMORY] Limits the maximal memory used by the given number of bytes.
 	[--no-memory-limit] Disables the default memory limit (half of system RAM)
 	FILE
@@ -365,20 +460,188 @@ int main(int argc, char **argv)
 	llvm::EnableDebugBuffering = true;
 
 	ProgramOptions po(argc, argv, config, config.parameters);
+	try
+	{
+		po.load();
+	}
+	catch (const std::runtime_error& e)
+	{
+		std::cerr << "Error: " << e.what() << std::endl;
+		return EXIT_FAILURE;
+	}
+
 	po.dump();
 	if (config.parameters.getInputFile().empty())
 	{
 		po.printHelpAndDie();
 	}
 
-	if (retdec::decompile(config))
+	limitMaximalMemoryIfRequested(config.parameters);
+
+// macho extract
+// =============================================================================
+
+retdec::macho_extractor::BreakMachOUniversal fat(config.parameters.getInputFile());
+if (fat.isValid())
+{
+	if (config.architecture.isKnown())
 	{
-		std::cout << "decompilation FAILED" << std::endl;
+		if (!fat.extractArchiveForFamily(
+				config.architecture.getName(),
+				po.arExtractPath + "_m"))
+		{
+			std::cerr << "Invalid --arch option '"
+					<< config.architecture.getName()
+					<< "'. File contains these architecture families:"
+					<< std::endl;
+			fat.listArchitectures(std::cerr);
+			return EXIT_FAILURE;
+		}
 	}
 	else
 	{
-		std::cout << "decompilation OK" << std::endl;
+		if (!fat.extractBestArchive(po.arExtractPath + "_m"))
+		{
+			// TODO
+			std::cerr << "shit 3" << std::endl;
+			return EXIT_FAILURE;
+		}
 	}
+
+	config.setInputFile(po.arExtractPath + "_m");
+	config.parameters.setInputFile(po.arExtractPath + "_m");
+}
+
+// ar extract
+// =============================================================================
+
+if (po.arIdx || !po.arName.empty())
+// if (!fat.isValid() && po.arIdx || !po.arName.empty())
+{
+	bool ok = true;
+	std::string errMsg;
+	retdec::ar_extractor::ArchiveWrapper arw(
+			config.parameters.getInputFile(),
+			ok,
+			errMsg
+	);
+
+	if (!ok)
+	{
+		throw std::runtime_error("failed to create archive wrapper: " + errMsg);
+	}
+
+	if (po.arIdx)
+	{
+		if (!arw.extractByIndex(po.arIdx.value(), errMsg, po.arExtractPath))
+		{
+			std::cerr << errMsg << std::endl;
+			std::cerr << "Error: File on index '"
+					<< po.arIdx.value()
+					<< "' was not found in the input archive."
+					<< " Valid indexes are 0-" << arw.getNumberOfObjects()-1 << "."
+					<< std::endl;
+			throw std::runtime_error("failed to extract archive: " + errMsg);
+		}
+	}
+	else if (!po.arName.empty())
+	{
+		if (!arw.extractByName(po.arName, errMsg, po.arExtractPath))
+		{
+			std::cerr << "Error: File named '" << po.arName
+					<< "' was not found in the input archive."
+					<< std::endl;
+			throw std::runtime_error("failed to extract archive: " + errMsg);
+		}
+	}
+
+	config.setInputFile(po.arExtractPath);
+	config.parameters.setInputFile(po.arExtractPath);
+}
+else
+{
+	bool ok = true;
+	std::string errMsg;
+	retdec::ar_extractor::ArchiveWrapper arw(
+			config.parameters.getInputFile(),
+			ok,
+			errMsg
+	);
+	if (ok && arw.isThinArchive())
+	{
+		std::cerr << "This file is an archive!" << std::endl;
+		std::cerr << "Error: File is a thin archive and cannot be decompiled." << std::endl;
+		return EXIT_FAILURE;
+	}
+	else if (ok && arw.isEmptyArchive())
+	{
+		std::cerr << "This file is an archive!" << std::endl;
+		std::cerr << "Error: The input archive is empty." << std::endl;
+		return EXIT_FAILURE;
+	}
+	else if (ok)
+	{
+		std::cerr << "This file is an archive!" << std::endl;
+
+		std::string result;
+		if (arw.getPlainTextList(result, errMsg, false, true))
+		{
+			std::cerr << result << std::endl;
+		}
+		return EXIT_FAILURE;
+	}
+
+	if (!ok && retdec::ar_extractor::isArchive(config.parameters.getInputFile()))
+	{
+		std::cerr << "This file is an archive!" << std::endl;
+		std::cerr << "Error: The input archive has invalid format." << std::endl;
+		return EXIT_FAILURE;
+	}
+}
+
+// unpack
+// =============================================================================
+
+std::vector<std::string> unpackArgs;
+unpackArgs.push_back("whatever_program_name");
+unpackArgs.push_back(config.parameters.getInputFile());
+unpackArgs.push_back("--output");
+unpackArgs.push_back(config.parameters.getOutputUnpackedFile());
+char* uargv[4] = {
+		unpackArgs[0].data(),
+		unpackArgs[1].data(),
+		unpackArgs[2].data(),
+		unpackArgs[3].data()
+};
+
+auto unpackCode = retdec::unpackertool::_main(4, uargv);
+if (unpackCode == 0) // EXIT_CODE_OK
+{
+	config.setInputFile(config.parameters.getOutputUnpackedFile());
+	config.parameters.setInputFile(config.parameters.getOutputUnpackedFile());
+}
+
+// decompiler
+// =============================================================================
+
+	try
+	{
+		if (retdec::decompile(config))
+		{
+			std::cout << "decompilation FAILED" << std::endl;
+		}
+		else
+		{
+			std::cout << "decompilation OK" << std::endl;
+		}
+	}
+	catch (const std::runtime_error& e)
+	{
+		std::cerr << "Error: " << e.what() << std::endl;
+		return EXIT_FAILURE;
+	}
+
+// =============================================================================
 
 	return 0;
 }

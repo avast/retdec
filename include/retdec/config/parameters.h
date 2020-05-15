@@ -46,6 +46,7 @@ class Parameters
 		void setOutputAsmFile(const std::string& file);
 		void setOutputLlvmirFile(const std::string& file);
 		void setOutputConfigFile(const std::string& file);
+		void setOutputUnpackedFile(const std::string& file);
 		void setMaxMemoryLimit(uint64_t limit);
 		void setMaxMemoryLimitHalfRam(bool f);
 		/// @}
@@ -59,6 +60,7 @@ class Parameters
 		const std::string& getOutputAsmFile() const;
 		const std::string& getOutputLlvmirFile() const;
 		const std::string& getOutputConfigFile() const;
+		const std::string& getOutputUnpackedFile() const;
 		uint64_t getMaxMemoryLimit() const;
 		/// @}
 
@@ -112,6 +114,7 @@ class Parameters
 		std::string _outputAsmFile;
 		std::string _outputLlFile;
 		std::string _outputConfigFile;
+std::string _outputUnpackedFile;
 		uint64_t _maxMemoryLimit = 0;
 		bool _maxMemoryLimitHalfRam = true;
 
@@ -119,6 +122,8 @@ class Parameters
 // public, not serialized, not tested, etc.
 public:
 	std::string backendDisabledOpts;
+	bool backendNoOpts = false;
+	std::set<std::string> cryptoPatternPaths;
 };
 
 } // namespace config

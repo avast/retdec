@@ -516,8 +516,13 @@ std::string NameContainer::getNameFromImportLibAndOrd(
 
 bool NameContainer::loadImportOrds(const std::string& libName)
 {
+	std::string arch;
+	if (_config->getConfig().architecture.isArm()) arch = "arm";
+	else if (_config->getConfig().architecture.isX86()) arch = "x86";
+	else return false;
+
 	auto dir = _config->getConfig().parameters.getOrdinalNumbersDirectory();
-	auto filePath = dir + "/" + libName + ".ord";
+	auto filePath = dir + "/" + arch + "/" + libName + ".ord";
 
 	std::ifstream inputFile;
 	inputFile.open(filePath);

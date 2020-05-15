@@ -77,12 +77,8 @@ written to '${YARAC_VERSION_PATH}'\")
 # Install ordinal number databases.
 #
 install(
-	DIRECTORY ordinals/arm/
-	DESTINATION ${SUPPORT_TARGET_DIR}/arm/ords
-)
-install(
-	DIRECTORY ordinals/x86/
-	DESTINATION ${SUPPORT_TARGET_DIR}/x86/ords
+	DIRECTORY ordinals
+	DESTINATION ${SUPPORT_TARGET_DIR}/
 )
 
 # Install yara patterns.

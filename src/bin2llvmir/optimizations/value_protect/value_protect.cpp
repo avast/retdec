@@ -310,6 +310,9 @@ bool ValueProtect::run()
 
 bool ValueProtect::protect()
 {
+	// TODO: this is a random place for this. solve better.
+	_config->tagFunctionsWithUsedCryptoGlobals();
+
 	_config->getConfig().parameters.frontendFunctions.insert(
 			names::generatedUndefFunctionPrefix);
 

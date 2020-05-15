@@ -5,7 +5,12 @@ retdec-decompiler.cpp
 
 target_compile_features(retdec-decompiler PUBLIC cxx_std_17)
 
-target_link_libraries(retdec-decompiler retdec::retdec)
+target_link_libraries(retdec-decompiler
+	retdec::ar-extractor
+	retdec::macho-extractor
+	retdec::unpackertool
+	retdec::retdec
+)
 
 # Due to the implementation of the plugin system in LLVM, we have to link our
 # libraries into retdec as a whole.

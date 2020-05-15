@@ -23,7 +23,6 @@ std::string oSemantics = "";
 bool EmitDebugComments = true;
 std::string EnabledOpts = "";
 std::string DisabledOpts = "";
-bool NoOpts = false;
 bool AggressiveOpts = false;
 bool NoVarRenaming = false;
 bool NoSymbolicNames = false;
@@ -211,7 +210,7 @@ bool LlvmIr2Hll::runOnModule(llvm::Module &m)
 		obtainDebugInfo();
 	}
 
-	if (!NoOpts)
+	if (!globalConfig->parameters.backendNoOpts)
 	{
 		llvm_support::printPhase(
 				"alias analysis [" + aliasAnalysis->getId() + "]",

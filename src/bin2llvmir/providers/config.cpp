@@ -315,12 +315,15 @@ const retdec::common::Object* Config::insertGlobalVariable(
 	cgv.setIsFromDebug(fromDebug);
 	cgv.setRealName(realName);
 	cgv.setCryptoDescription(cryptoDesc);
+if (!cryptoDesc.empty())
+std::cout << gv->getName().str() << " ========> " << cryptoDesc << std::endl;
 	cgv.type.setLlvmIr(llvmObjToString(gv->getType()->getElementType()));
 	if (gv->hasInitializer() && gv->getInitializer()->getName() == "wide-string")
 	{
 		cgv.type.setIsWideString(true);
 	}
 	auto p = _configDB.globals.insert(cgv);
+
 	return &(*p.first);
 }
 
@@ -694,7 +697,7 @@ void Config::tagFunctionsWithUsedCryptoGlobals()
 		{
 			continue;
 		}
-
+std::cout << lgv.getName().str() << std::endl;
 		for (auto* user : lgv.users())
 		{
 			if (auto* i = dyn_cast_or_null<Instruction>(user))

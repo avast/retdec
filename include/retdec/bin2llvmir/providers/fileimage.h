@@ -41,6 +41,8 @@ class FileImage
 				std::unique_ptr<retdec::loader::Image> img,
 				Config* config);
 
+		void initRtti(Config* config);
+
 	// Constant getters - get LLVM constant from the given address.
 	//
 	public:

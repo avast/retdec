@@ -27,6 +27,7 @@ class Config
 		static Config fromConfig(llvm::Module* m, retdec::config::Config& c);
 
 		void doFinalization();
+		void tagFunctionsWithUsedCryptoGlobals();
 
 	public:
 		retdec::config::Config& getConfig();
@@ -177,7 +178,6 @@ class Config
 
 	private:
 		Config(retdec::config::Config& c);
-		void tagFunctionsWithUsedCryptoGlobals();
 
 	public:
 		llvm::Module* _module = nullptr;
