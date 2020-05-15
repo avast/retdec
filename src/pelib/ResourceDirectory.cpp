@@ -727,6 +727,25 @@ namespace PeLib
 			childInpBuffer >> rc.entry.irde.Name;
 			childInpBuffer >> rc.entry.irde.OffsetToData;
 
+			// If the resource entry goes out of the image, then the image is claimed as corrupt by
+			// Windows loader check (PspLocateInPEManifest -> LdrpResGetResourceDirectory)
+			if(rc.entry.irde.Name & 0x80000000)
+			{
+				if((rc.entry.irde.Name & 0x7FFFFFFF) > uiSizeOfImage)
+				{
+					resDir->setLoaderError(LDR_ERROR_RSRC_NAME_OVER_END_OF_IMAGE);
+				}
+			}
+
+			// Check whether the resource data/subdirectory goes out of the image
+			{
+				if((rc.entry.irde.OffsetToData & 0x7FFFFFFF) > uiSizeOfImage)
+				{
+					auto ldrError = (rc.entry.irde.OffsetToData & 0x80000000) ? LDR_ERROR_RSRC_SUBDIR_OVER_END_OF_IMAGE : LDR_ERROR_RSRC_DATA_OVER_END_OF_IMAGE;
+					resDir->setLoaderError(ldrError);
+				}
+			}
+
 			unsigned int lastPos = inStream_w.tellg();
 
 			if (rc.entry.irde.Name & PELIB_IMAGE_RESOURCE_NAME_IS_STRING)
