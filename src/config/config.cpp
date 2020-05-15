@@ -33,7 +33,6 @@ namespace {
 const std::string JSON_date              = "date";
 const std::string JSON_time              = "time";
 const std::string JSON_inputFile         = "inputFile";
-const std::string JSON_unpackedInputFile = "inputFileUnpacked";
 const std::string JSON_pdbInputFile      = "inputFilePdb";
 const std::string JSON_parameters        = "decompParams";
 const std::string JSON_architecture      = "architecture";
@@ -61,7 +60,7 @@ namespace config {
 Config Config::empty(const std::string& path)
 {
 	Config config;
-	config._configFileName = path;
+	config.parameters.setOutputConfigFile(path);
 	return config;
 }
 
@@ -80,7 +79,6 @@ Config Config::fromJsonString(const std::string& json)
 }
 
 void Config::setInputFile(const std::string& n)          { _inputFile = n; }
-void Config::setUnpackedInputFile(const std::string& n)  { _unpackedInputFile = n; }
 void Config::setPdbInputFile(const std::string& n)       { _pdbInputFile = n; }
 void Config::setEntryPoint(const retdec::common::Address& a)     { _entryPoint = a; }
 void Config::setMainAddress(const retdec::common::Address& a)    { _mainAddress = a; }
@@ -88,9 +86,7 @@ void Config::setSectionVMA(const retdec::common::Address& a)     { _sectionVMA =
 void Config::setImageBase(const retdec::common::Address& a)      { _imageBase = a; }
 
 std::string Config::getInputFile() const          { return _inputFile; }
-std::string Config::getUnpackedInputFile() const  { return _unpackedInputFile; }
 std::string Config::getPdbInputFile() const       { return _pdbInputFile; }
-std::string Config::getConfigFileName() const     { return _configFileName; }
 retdec::common::Address Config::getEntryPoint() const     { return _entryPoint; }
 retdec::common::Address Config::getMainAddress() const    { return _mainAddress; }
 retdec::common::Address Config::getSectionVMA() const     { return _sectionVMA; }
@@ -109,7 +105,7 @@ void Config::readJsonFile(const std::string& input)
 	std::ifstream jsonFile(input, std::ios::in | std::ios::binary);
 	if (!jsonFile)
 	{
-		_configFileName.clear();
+		parameters.setOutputConfigFile(std::string());
 		std::string msg = "Input file \"" + input + "\" can not be opened.";
 		throw FileNotFoundException(msg);
 	}
@@ -122,7 +118,7 @@ void Config::readJsonFile(const std::string& input)
 	jsonFile.close();
 
 	readJsonString(jsonContent);
-	_configFileName = input;
+	parameters.setOutputConfigFile(input);
 }
 
 /**
@@ -132,8 +128,8 @@ void Config::readJsonFile(const std::string& input)
 std::string Config::generateJsonFile() const
 {
 	std::string out;
-	if (!_configFileName.empty())
-		out = _configFileName;
+	if (!parameters.getOutputConfigFile().empty())
+		out = parameters.getOutputConfigFile();
 	return generateJsonFile( out );
 }
 
@@ -167,7 +163,6 @@ std::string Config::generateJsonString() const
 	serdes::serializeString(writer, JSON_time, retdec::utils::getCurrentTime());
 	serdes::serializeString(writer, JSON_inputFile, getInputFile());
 
-	if (!getUnpackedInputFile().empty()) serdes::serializeString(writer, JSON_unpackedInputFile, getUnpackedInputFile());
 	if (!getPdbInputFile().empty()) serdes::serializeString(writer, JSON_pdbInputFile, getPdbInputFile());
 	if (getEntryPoint().isDefined()) serdes::serialize(writer, JSON_entryPoint, getEntryPoint());
 	if (getMainAddress().isDefined()) serdes::serialize(writer, JSON_mainAddress, getMainAddress());
@@ -217,7 +212,6 @@ void Config::readJsonString(const std::string& json)
 	*this = Config();
 
 	setInputFile( serdes::deserializeString(root, JSON_inputFile) );
-	setUnpackedInputFile( serdes::deserializeString(root, JSON_unpackedInputFile) );
 	setPdbInputFile( serdes::deserializeString(root, JSON_pdbInputFile) );
 	serdes::deserialize(root, JSON_entryPoint, _entryPoint);
 	serdes::deserialize(root, JSON_mainAddress, _mainAddress);
