@@ -265,7 +265,6 @@ add_library(llvmir2hll STATIC
 	support/const_symbol_converter.cpp
 	support/expr_types_fixer.cpp
 	support/expression_negater.cpp
-	support/funcs_with_prefix_remover.cpp
 	support/global_vars_sorter.cpp
 	support/headers_for_declared_funcs.cpp
 	support/library_funcs_remover.cpp

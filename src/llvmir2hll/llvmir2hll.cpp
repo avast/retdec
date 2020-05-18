@@ -167,14 +167,6 @@ bool LlvmIr2Hll::runOnModule(llvm::Module &m)
 		return false;
 	}
 
-	llvmir2hll::StringSet funcPrefixes(getPrefixesOfFuncsToBeRemoved());
-	llvm_support::printPhase(
-			"removing functions prefixed with ["
-			+ joinStrings(funcPrefixes) + "]",
-			Debug
-	);
-	removeFuncsPrefixedWith(funcPrefixes);
-
 	if (!KeepLibraryFunctions)
 	{
 		llvm_support::printPhase(
@@ -581,15 +573,6 @@ void LlvmIr2Hll::removeCodeUnreachableInCFG()
 }
 
 /**
-* @brief Removes functions with the given prefix.
-*/
-void LlvmIr2Hll::removeFuncsPrefixedWith(
-		const retdec::llvmir2hll::StringSet &prefixes)
-{
-	llvmir2hll::FuncsWithPrefixRemover::removeFuncs(resModule, prefixes);
-}
-
-/**
 * @brief Fixes signed and unsigned types in the resulting module.
 */
 void LlvmIr2Hll::fixSignedUnsignedTypes()
@@ -931,14 +914,6 @@ LlvmIr2Hll::instantiatePatternFinderRunner() const
 	return ShPtr<llvmir2hll::PatternFinderRunner>(
 		new llvmir2hll::NoActionPatternFinderRunner()
 	);
-}
-
-/**
-* @brief Returns the prefixes of functions to be removed.
-*/
-retdec::llvmir2hll::StringSet LlvmIr2Hll::getPrefixesOfFuncsToBeRemoved() const
-{
-	return config->getPrefixesOfFuncsToBeRemoved();
 }
 
 } // namespace llvmir2hll

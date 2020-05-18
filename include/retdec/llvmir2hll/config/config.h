@@ -317,11 +317,6 @@ public:
 	/// @{
 
 	/**
-	* @brief Returns a set of prefixes of functions to be removed.
-	*/
-	virtual StringSet getPrefixesOfFuncsToBeRemoved() const = 0;
-
-	/**
 	* @brief Returns the number of functions detected in the front-end.
 	*
 	* Returns @c 0 if there are no detected functions.

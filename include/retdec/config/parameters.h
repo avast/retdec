@@ -30,7 +30,6 @@ class Parameters
 		bool isVerboseOutput() const;
 		bool isKeepAllFunctions() const;
 		bool isSelectedDecodeOnly() const;
-		bool isFrontendFunction(const std::string& funcName) const;
 		bool isMaxMemoryLimitHalfRam() const;
 		bool isBackendNoOpts() const;
 		bool isDetectStaticCode() const;
@@ -90,7 +89,6 @@ class Parameters
 		std::set<std::string> libraryTypeInfoPaths;
 		std::set<std::string> cryptoPatternPaths;
 		std::set<std::string> abiPaths;
-		std::set<std::string> frontendFunctions;
 
 		/// Functions' names which were selected by the user through
 		/// selective decompilation.

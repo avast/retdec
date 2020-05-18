@@ -153,13 +153,13 @@
             "retdec-inst-opt",
             "retdec-idioms",
             "retdec-remove-phi",
-            "retdec-value-protect",
             "sink",
             "verify",
-            "retdec-write-ll",
-            "retdec-write-bc",
             "loops",
             "scalar-evolution",
+            "retdec-value-protect",
+            "retdec-write-ll",
+            "retdec-write-bc",
             "retdec-llvmir2hll"
         ]
     }

@@ -63,7 +63,6 @@
 #include "retdec/llvmir2hll/support/const_symbol_converter.h"
 #include "retdec/llvmir2hll/support/debug.h"
 #include "retdec/llvmir2hll/support/expr_types_fixer.h"
-#include "retdec/llvmir2hll/support/funcs_with_prefix_remover.h"
 #include "retdec/llvmir2hll/support/library_funcs_remover.h"
 #include "retdec/llvmir2hll/support/unreachable_code_in_cfg_remover.h"
 #include "retdec/llvmir2hll/utils/ir.h"
@@ -122,7 +121,6 @@ private:
 	bool convertLLVMIRToBIR();
 	void removeLibraryFuncs();
 	void removeCodeUnreachableInCFG();
-	void removeFuncsPrefixedWith(const retdec::llvmir2hll::StringSet &prefixes);
 	void fixSignedUnsignedTypes();
 	void convertLLVMIntrinsicFunctions();
 	void obtainDebugInfo();
@@ -145,7 +143,6 @@ private:
 	llvmir2hll::PatternFinderRunner::PatternFinders instantiatePatternFinders(
 		const llvmir2hll::StringVector &pfsIds);
 	ShPtr<llvmir2hll::PatternFinderRunner> instantiatePatternFinderRunner() const;
-	llvmir2hll::StringSet getPrefixesOfFuncsToBeRemoved() const;
 
 private:
 	/// The input LLVM module.

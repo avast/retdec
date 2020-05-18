@@ -68,7 +68,6 @@
 #include "retdec/llvmir2hll/support/const_symbol_converter.h"
 #include "retdec/llvmir2hll/support/debug.h"
 #include "retdec/llvmir2hll/support/expr_types_fixer.h"
-#include "retdec/llvmir2hll/support/funcs_with_prefix_remover.h"
 #include "retdec/llvmir2hll/support/library_funcs_remover.h"
 #include "retdec/llvmir2hll/support/unreachable_code_in_cfg_remover.h"
 #include "retdec/llvmir2hll/utils/ir.h"
@@ -344,7 +343,6 @@ private:
 	bool convertLLVMIRToBIR();
 	void removeLibraryFuncs();
 	void removeCodeUnreachableInCFG();
-	void removeFuncsPrefixedWith(const retdec::llvmir2hll::StringSet &prefixes);
 	void fixSignedUnsignedTypes();
 	void convertLLVMIntrinsicFunctions();
 	void obtainDebugInfo();
@@ -366,7 +364,6 @@ private:
 	retdec::llvmir2hll::PatternFinderRunner::PatternFinders instantiatePatternFinders(
 		const retdec::llvmir2hll::StringVector &pfsIds);
 	ShPtr<retdec::llvmir2hll::PatternFinderRunner> instantiatePatternFinderRunner() const;
-	retdec::llvmir2hll::StringSet getPrefixesOfFuncsToBeRemoved() const;
 
 private:
 	/// Output stream into which the generated code will be emitted.
@@ -430,10 +427,6 @@ bool Decompiler::runOnModule(Module &m) {
 	if (!decompilationShouldContinue) {
 		return false;
 	}
-
-	retdec::llvmir2hll::StringSet funcPrefixes(getPrefixesOfFuncsToBeRemoved());
-	if (Debug) retdec::llvm_support::printPhase("removing functions prefixed with [" + joinStrings(funcPrefixes) + "]");
-	removeFuncsPrefixedWith(funcPrefixes);
 
 	if (!KeepLibraryFunctions) {
 		if (Debug) retdec::llvm_support::printPhase("removing functions from standard libraries");
@@ -748,13 +741,6 @@ void Decompiler::removeCodeUnreachableInCFG() {
 }
 
 /**
-* @brief Removes functions with the given prefix.
-*/
-void Decompiler::removeFuncsPrefixedWith(const retdec::llvmir2hll::StringSet &prefixes) {
-	retdec::llvmir2hll::FuncsWithPrefixRemover::removeFuncs(resModule, prefixes);
-}
-
-/**
 * @brief Fixes signed and unsigned types in the resulting module.
 */
 void Decompiler::fixSignedUnsignedTypes() {
@@ -1007,13 +993,6 @@ ShPtr<retdec::llvmir2hll::PatternFinderRunner> Decompiler::instantiatePatternFin
 		return ShPtr<retdec::llvmir2hll::PatternFinderRunner>(new retdec::llvmir2hll::CLIPatternFinderRunner(llvm::errs()));
 	}
 	return ShPtr<retdec::llvmir2hll::PatternFinderRunner>(new retdec::llvmir2hll::NoActionPatternFinderRunner());
-}
-
-/**
-* @brief Returns the prefixes of functions to be removed.
-*/
-retdec::llvmir2hll::StringSet Decompiler::getPrefixesOfFuncsToBeRemoved() const {
-	return config->getPrefixesOfFuncsToBeRemoved();
 }
 
 //

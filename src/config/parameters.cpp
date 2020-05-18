@@ -23,7 +23,6 @@ const std::string JSON_staticSigPaths           = "staticSignPaths";
 const std::string JSON_libraryTypeInfoPaths     = "libraryTypeInfoPaths";
 const std::string JSON_cryptoPatternPaths       = "cryptoPatternPaths";
 const std::string JSON_abiPaths                 = "abiPaths";
-const std::string JSON_frontendFunctions        = "frontendFunctions";
 const std::string JSON_selectedFunctions        = "selectedFunctions";
 const std::string JSON_selectedNotFoundFncs     = "selectedNotFoundFncs";
 const std::string JSON_selectedRanges           = "selectedRanges";
@@ -82,22 +81,6 @@ bool Parameters::isSelectedDecodeOnly() const { return _selectedDecodeOnly; }
 bool Parameters::isSomethingSelected() const
 {
 	return ( !selectedFunctions.empty() || !selectedRanges.empty());
-}
-
-/**
- * Find out if the provided function name is among helper frontend function names.
- * @param funcName Function name to check.
- * @return @c True if any frontend function is substring in @a funcName.
- *         @c False otherwise.
- */
-bool Parameters::isFrontendFunction(const std::string& funcName) const
-{
-	for (auto& n : frontendFunctions)
-	{
-		if (funcName.find(n) != std::string::npos)
-			return true;
-	}
-	return false;
 }
 
 bool Parameters::isMaxMemoryLimitHalfRam() const
@@ -352,7 +335,6 @@ void Parameters::serialize(Writer& writer) const
 	serdes::serializeContainer(writer, JSON_cryptoPatternPaths, cryptoPatternPaths);
 	serdes::serializeContainer(writer, JSON_abiPaths, abiPaths);
 	serdes::serializeContainer(writer, JSON_selectedFunctions, selectedFunctions);
-	serdes::serializeContainer(writer, JSON_frontendFunctions, frontendFunctions);
 	serdes::serializeContainer(writer, JSON_selectedNotFoundFncs, selectedNotFoundFunctions);
 	serdes::serializeContainer(writer, JSON_llvmPasses, llvmPasses);
 
@@ -407,7 +389,6 @@ void Parameters::deserialize(const rapidjson::Value& val)
 	serdes::deserializeContainer(val, JSON_cryptoPatternPaths, cryptoPatternPaths);
 	serdes::deserializeContainer(val, JSON_abiPaths, abiPaths);
 	serdes::deserializeContainer(val, JSON_selectedFunctions, selectedFunctions);
-	serdes::deserializeContainer(val, JSON_frontendFunctions, frontendFunctions);
 	serdes::deserializeContainer(val, JSON_selectedNotFoundFncs, selectedNotFoundFunctions);
 	serdes::deserializeContainer(val, JSON_llvmPasses, llvmPasses);
 }
