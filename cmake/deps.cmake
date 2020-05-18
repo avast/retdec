@@ -27,11 +27,11 @@ set(KEYSTONE_ARCHIVE_SHA256
 )
 
 set(LLVM_URL
-    "https://github.com/avast/llvm/archive/4dde56e0b93e013bc3d3e1f7cbd02d2c67f8dade.zip"
+    "https://github.com/avast/llvm/archive/1459e28198b64aaa2710eeacb9c90c18cfcf69a9.zip"
     CACHE INTERNAL "URL of LLVM archive to use."
 )
 set(LLVM_ARCHIVE_SHA256
-    "b479b0aca48cec49211b797d25113fae67af397aeae326f9ba272f1e9961c6c5"
+    "54067d9019440ad9afe8a3114968d251ff7ef8cc94a765fe6d6f6e85981866ed"
     CACHE INTERNAL ""
 )
 
