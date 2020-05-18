@@ -114,8 +114,6 @@ PeWrapper::PeWrapper(
 		stateIsValid = false;
 		return;
 	}
-
-	file->readRelocationsDirectory();
 }
 
 /**

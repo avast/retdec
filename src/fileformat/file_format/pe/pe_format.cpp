@@ -597,6 +597,7 @@ void PeFormat::initStructures(const std::string & dllListFile)
 			file->readResourceDirectory();
 			file->readSecurityDirectory();
 			file->readComHeaderDirectory();
+			file->readRelocationsDirectory();
 
 			// Fill-in the loader error info from PE file
 			initLoaderErrorInfo();

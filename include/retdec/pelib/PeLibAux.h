@@ -107,14 +107,21 @@ namespace PeLib
 		LDR_ERROR_DIGITAL_SIGNATURE_CUT,            // The file signature is out of the file
 		LDR_ERROR_DIGITAL_SIGNATURE_ZEROED,         // The file signature is zeroed
 
+		// Errors from relocations
+		LDR_ERROR_RELOCATIONS_OUT_OF_IMAGE,         // The relocation directory points out of the image
+		LDR_ERROR_RELOC_BLOCK_INVALID_VA,           // A relocation block has invalid virtual address
+		LDR_ERROR_RELOC_BLOCK_INVALID_LENGTH,       // A relocation block has invalid length
+		LDR_ERROR_RELOC_ENTRY_BAD_TYPE,             // A relocation entry has invalid type
+
 		LDR_ERROR_MAX
 
 	};
 
-	struct LoaderErrorString
+	struct LoaderErrorInfo
 	{
 		const char * loaderErrorString;
 		const char * loaderErrorUserFriendly;
+		bool loadableAnyway;
 	};
 
 	class PeFile;
@@ -443,6 +450,18 @@ namespace PeLib
 		PELIB_IMAGE_SUBSYSTEM_POSIX_CUI	    = 7,
 		PELIB_IMAGE_SUBSYSTEM_NATIVE_WINDOWS       = 8,
 		PELIB_IMAGE_SUBSYSTEM_WINDOWS_CE_GUI       = 9
+	};
+
+	enum : uint16_t
+	{
+		PELIB_IMAGE_REL_BASED_ABSOLUTE        = 0,
+		PELIB_IMAGE_REL_BASED_HIGH            = 1,
+		PELIB_IMAGE_REL_BASED_LOW             = 2,
+		PELIB_IMAGE_REL_BASED_HIGHLOW         = 3,
+		PELIB_IMAGE_REL_BASED_HIGHADJ         = 4,
+		PELIB_IMAGE_REL_BASED_MIPS_JMPADDR    = 5,
+		PELIB_IMAGE_REL_BASED_MIPS_JMPADDR16  = 9,
+		PELIB_IMAGE_REL_BASED_DIR64           = 10
 	};
 
 	enum

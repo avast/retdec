@@ -770,12 +770,17 @@ namespace PeLib
 		if (ldrError != LDR_ERROR_NONE)
 			return ldrError;
 
+		// Check errors in relocations directory
+		ldrError = relocDir().loaderError();
+		if (ldrError != LDR_ERROR_NONE)
+			return ldrError;
+
 		// Check errors in entry point
 		ldrError = checkEntryPointErrors();
 		if (ldrError != LDR_ERROR_NONE)
 			return ldrError;
 
-		// Check errors in entry point
+		// Check errors in security directory
 		ldrError = securityDir().loaderError();
 		if (ldrError != LDR_ERROR_NONE)
 			return ldrError;
