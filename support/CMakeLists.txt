@@ -53,7 +53,7 @@ does not match the current version '\${YARAC_CURRENT_VERSION}' \
 install(CODE "
 	execute_process(
 		# -u = unbuffered -> print debug messages right away.
-		COMMAND \"${PYTHON_EXECUTABLE}\" -u \"${CMAKE_SOURCE_DIR}/support/install-share.py\" \"${CMAKE_INSTALL_PREFIX}\" \"${SUPPORT_PKG_URL}\" \"${SUPPORT_PKG_SHA256}\" \"${SUPPORT_PKG_VERSION}\"
+		COMMAND \"${PYTHON_EXECUTABLE}\" -u \"${PROJECT_SOURCE_DIR}/support/install-share.py\" \"${CMAKE_INSTALL_PREFIX}\" \"${SUPPORT_PKG_URL}\" \"${SUPPORT_PKG_SHA256}\" \"${SUPPORT_PKG_VERSION}\"
 		RESULT_VARIABLE INSTALL_SHARE_RES
 	)
 	if(INSTALL_SHARE_RES)
@@ -91,14 +91,14 @@ install(
 
 # Install YARA rules for tools detection.
 #
-set(YARA_INSTALL_PY "${CMAKE_SOURCE_DIR}/support/install-yara.py")
+set(YARA_INSTALL_PY "${PROJECT_SOURCE_DIR}/support/install-yara.py")
 
 install(CODE "
 	execute_process(
 		COMMAND \"${PYTHON_EXECUTABLE}\" -u \"${YARA_INSTALL_PY}\"
 			\"${YARAC_PATH}\"
 			\"${SUPPORT_TARGET_DIR}\"
-			\"${CMAKE_SOURCE_DIR}/support/yara_patterns\"
+			\"${PROJECT_SOURCE_DIR}/support/yara_patterns\"
 			${RETDEC_COMPILE_YARA}
 		RESULT_VARIABLE INSTALL_YARA_RES
 	)
