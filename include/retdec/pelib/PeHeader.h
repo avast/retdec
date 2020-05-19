@@ -1094,6 +1094,12 @@ namespace PeLib
 			ibBuffer >> ishCurr.NumberOfRelocations;
 			ibBuffer >> ishCurr.NumberOfLinenumbers;
 			ibBuffer >> ishCurr.Characteristics;
+
+			// PointerToRawData is aligned down to 0x200 by the Windows loader.
+			// This is because the section is mapped to memory based on file sectors.
+			// Also, it is independent to FileAlignment value.
+			ishCurr.PointerToRawData = ishCurr.PointerToRawData & ~(PELIB_SECTOR_SIZE - 1);
+
 			vIshdCurr.push_back(ishCurr);
 
 			uiOffset += PELIB_IMAGE_SECTION_HEADER::size();
