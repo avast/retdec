@@ -230,6 +230,8 @@ namespace PeLib
 	const dword PELIB_MAX_IMPORTED_FUNCTIONS = 0x1000;          // Maximum number of exported functions (per DLL) that we support
 	const dword PELIB_MAX_EXPORTED_FUNCTIONS = 0x1000;          // Maximum number of exported functions that we support
 
+	const dword PELIB_SECTOR_SIZE = 0x200;
+
 	template<int bits>
 	struct PELIB_IMAGE_ORDINAL_FLAGS;
 
