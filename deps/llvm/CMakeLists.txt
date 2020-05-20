@@ -56,6 +56,11 @@ if(LLVM_LOCAL_DIR)
 			# exceptions).
 			-DLLVM_ENABLE_WARNINGS=NO
 
+			# Enable exceptions. We want to get std::bad_alloc().
+			# Without this, LLVM aborts instead of throwing.
+			-DLLVM_ENABLE_RTTI=ON
+			-DLLVM_ENABLE_EH=ON
+
 			# Disable the generation of targets for tests (we don't need them).
 			-DLLVM_INCLUDE_TOOLS=OFF
 			-DLLVM_INCLUDE_UTILS=OFF
@@ -124,6 +129,11 @@ else()
 			# not modify the LLVM sources (of course, except for a few
 			# exceptions).
 			-DLLVM_ENABLE_WARNINGS=NO
+
+			# Enable exceptions. We want to get std::bad_alloc().
+			# Without this, LLVM aborts instead of throwing.
+			-DLLVM_ENABLE_RTTI=ON
+			-DLLVM_ENABLE_EH=ON
 
 			# Disable the generation of targets for tests (we don't need them).
 			-DLLVM_INCLUDE_TOOLS=OFF
