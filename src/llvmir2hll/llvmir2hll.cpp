@@ -140,7 +140,6 @@ LlvmIr2Hll::LlvmIr2Hll(retdec::config::Config* c) :
 void LlvmIr2Hll::setConfig(retdec::config::Config* c)
 {
 	globalConfig = c;
-	assert(globalConfig);
 }
 
 void LlvmIr2Hll::getAnalysisUsage(llvm::AnalysisUsage &au) const

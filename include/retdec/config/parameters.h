@@ -33,6 +33,7 @@ class Parameters
 		bool isMaxMemoryLimitHalfRam() const;
 		bool isBackendNoOpts() const;
 		bool isDetectStaticCode() const;
+		bool isTimeout() const;
 		/// @}
 
 		/// @name Parameters set methods.
@@ -51,6 +52,7 @@ class Parameters
 		void setOutputUnpackedFile(const std::string& file);
 		void setMaxMemoryLimit(uint64_t limit);
 		void setMaxMemoryLimitHalfRam(bool f);
+		void setTimeout(uint64_t seconds);
 		void setEntryPoint(const retdec::common::Address& a);
 		void setMainAddress(const retdec::common::Address& a);
 		void setSectionVMA(const retdec::common::Address& a);
@@ -71,6 +73,7 @@ class Parameters
 		const std::string& getOutputConfigFile() const;
 		const std::string& getOutputUnpackedFile() const;
 		uint64_t getMaxMemoryLimit() const;
+		uint64_t getTimeout() const;
 		retdec::common::Address getEntryPoint() const;
 		retdec::common::Address getMainAddress() const;
 		retdec::common::Address getSectionVMA() const;
@@ -130,6 +133,7 @@ class Parameters
 		std::string _outputUnpackedFile;
 		uint64_t _maxMemoryLimit = 0;
 		bool _maxMemoryLimitHalfRam = true;
+		uint64_t _timeout = 0;
 
 		std::string _backendDisabledOpts;
 		bool _backendNoOpts = false;

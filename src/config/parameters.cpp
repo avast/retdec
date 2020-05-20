@@ -43,6 +43,7 @@ const std::string JSON_outputUnpackedFile       = "outputUnpackedFile";
 const std::string JSON_backendDisabledOpts      = "backendDisabledOpts";
 const std::string JSON_backendNoOpts            = "backendNoOpts";
 const std::string JSON_detectStaticCode         = "detectStaticCode";
+const std::string JSON_timeout                  = "timeout";
 
 } // anonymous namespace
 
@@ -96,6 +97,11 @@ bool Parameters::isBackendNoOpts() const
 bool Parameters::isDetectStaticCode() const
 {
 	return _detectStaticCode;
+}
+
+bool Parameters::isTimeout() const
+{
+	return _timeout != 0;
 }
 
 void Parameters::setIsVerboseOutput(bool b)
@@ -165,6 +171,11 @@ void Parameters::setMaxMemoryLimit(uint64_t limit)
 void Parameters::setMaxMemoryLimitHalfRam(bool f)
 {
 	_maxMemoryLimitHalfRam = f;
+}
+
+void Parameters::setTimeout(uint64_t seconds)
+{
+	_timeout = seconds;
 }
 
 void Parameters::setEntryPoint(const retdec::common::Address& a)
@@ -244,6 +255,11 @@ const std::string& Parameters::getOutputUnpackedFile() const
 uint64_t Parameters::getMaxMemoryLimit() const
 {
 	return _maxMemoryLimit;
+}
+
+uint64_t Parameters::getTimeout() const
+{
+	return _timeout;
 }
 
 retdec::common::Address Parameters::getEntryPoint() const
@@ -327,6 +343,7 @@ void Parameters::serialize(Writer& writer) const
 	serdes::serializeString(writer, JSON_backendDisabledOpts, getBackendDisabledOpts());
 	serdes::serializeBool(writer, JSON_backendNoOpts, isBackendNoOpts());
 	serdes::serializeBool(writer, JSON_detectStaticCode, isDetectStaticCode());
+	serdes::serializeUint64(writer, JSON_timeout, getTimeout());
 
 	serdes::serializeContainer(writer, JSON_selectedRanges, selectedRanges);
 	serdes::serializeContainer(writer, JSON_userStaticSigPaths, userStaticSignaturePaths);
@@ -377,6 +394,7 @@ void Parameters::deserialize(const rapidjson::Value& val)
 	setBackendDisabledOpts( serdes::deserializeString(val, JSON_backendDisabledOpts) );
 	setIsBackendNoOpts( serdes::deserializeBool(val, JSON_backendNoOpts, false) );
 	setIsDetectStaticCode( serdes::deserializeBool(val, JSON_detectStaticCode, true) );
+	setTimeout( serdes::deserializeUint64(val, JSON_timeout, 0) );
 
 	serdes::deserialize(val, JSON_entryPoint, _entryPoint);
 	serdes::deserialize(val, JSON_mainAddress, _mainAddress);

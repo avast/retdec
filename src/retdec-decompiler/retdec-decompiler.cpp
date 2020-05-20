@@ -5,7 +5,10 @@
  */
 
 #include <iostream>
-#include <iostream>
+#include <fstream>
+#include <future>
+#include <chrono>
+#include <thread>
 
 #include <llvm/ADT/Triple.h>
 #include <llvm/Analysis/LoopInfo.h>
@@ -80,6 +83,7 @@ public:
 	retdec::config::Parameters& params;
 	std::list<std::string> _argv;
 
+	std::string mode = "bin";
 	std::string arExtractPath;
 	std::string arName;
 	std::optional<uint64_t> arIdx;
@@ -165,6 +169,8 @@ public:
 					config.fileFormat.setIsRaw32();
 					config.architecture.setBitSize(32);
 				}
+
+				mode = m;
 			}
 			else if (isParam(i, "-a", "--arch"))
 			{
@@ -313,6 +319,19 @@ public:
 			{
 				params.userStaticSignaturePaths.insert(getParamOrDie(i));
 			}
+			else if (isParam(i, "", "--timeout"))
+			{
+				auto t = getParamOrDie(i);
+				try
+				{
+					params.setTimeout(std::stoull(t));
+				}
+				catch (...)
+				{
+					std::cerr << "Invalid --timeout argument: " << t << std::endl;
+					exit(EXIT_FAILURE);
+				}
+			}
 			// Input file is the only argument that does not have -x or --xyz
 			// before it. But only one input is expected.
 			else if (params.getInputFile().empty())
@@ -364,7 +383,7 @@ std::cout << "=============> unrecognized option: " << c << std::endl;
 	[-m|--mode MODE] Force the type of decompilation mode [bin|ll|raw] (default: bin otherwise).
 	[-a|--arch ARCH] Specify target architecture [mips|pic32|arm|thumb|arm64|powerpc|x86|x86-64].
 	                 Required if it cannot be autodetected from the input (e.g. raw mode, Intel HEX).
-	[-e||--endian ENDIAN] Specify target endianness [little|big].
+	[-e|--endian ENDIAN] Specify target endianness [little|big].
 	                      Required if it cannot be autodetected from the input (e.g. raw mode, Intel HEX).
 	[-p|--pdb FILE] File with PDB debug information.
 	[-k|--keep-unreachable-funcs] Keep functions that are unreachable from the main function.
@@ -380,6 +399,7 @@ std::cout << "=============> unrecognized option: " << c << std::endl;
 	[--ar-index]
 	[--ar-name]
 	[--static-code-sigfile]
+	[--timeout SECONDS]
 	[--max-memory MAX_MEMORY] Limits the maximal memory used by the given number of bytes.
 	[--no-memory-limit] Disables the default memory limit (half of system RAM)
 	FILE
@@ -438,44 +458,12 @@ private:
 	}
 };
 
-int main(int argc, char **argv)
+int decompile(retdec::config::Config& config, ProgramOptions& po)
 {
-	retdec::config::Config config;
-
-	auto binpath = retdec::utils::getThisBinaryDirectoryPath();
-	retdec::utils::FilesystemPath configPath(binpath.getParentPath());
-	configPath.append("share");
-	configPath.append("retdec");
-	configPath.append("decompiler-config.json");
-	if (configPath.exists())
-	{
-		config = retdec::config::Config::fromFile(configPath.getPath());
-		config.parameters.fixRelativePaths(configPath.getParentPath());
-	}
-
-	llvm::sys::PrintStackTraceOnErrorSignal(argv[0]);
-	llvm::PrettyStackTraceProgram X(argc, argv);
-	llvm::llvm_shutdown_obj Y; // Call llvm_shutdown() on exit.
-	llvm::EnableDebugBuffering = true;
-
-	ProgramOptions po(argc, argv, config, config.parameters);
-	try
-	{
-		po.load();
-	}
-	catch (const std::runtime_error& e)
-	{
-		std::cerr << "Error: " << e.what() << std::endl;
-		return EXIT_FAILURE;
-	}
-
-	po.dump();
-	if (config.parameters.getInputFile().empty())
-	{
-		po.printHelpAndDie();
-	}
-
-	limitMaximalMemoryIfRequested(config.parameters);
+	// llvm::sys::PrintStackTraceOnErrorSignal(argv[0]);
+	// llvm::PrettyStackTraceProgram X(argc, argv);
+	// llvm::llvm_shutdown_obj Y; // Call llvm_shutdown() on exit.
+	// llvm::EnableDebugBuffering = true;
 
 // macho extract
 // =============================================================================
@@ -502,7 +490,6 @@ if (fat.isValid())
 		if (!fat.extractBestArchive(po.arExtractPath + "_m"))
 		{
 			// TODO
-			std::cerr << "shit 3" << std::endl;
 			return EXIT_FAILURE;
 		}
 	}
@@ -637,7 +624,78 @@ if (unpackCode == 0) // EXIT_CODE_OK
 		return EXIT_FAILURE;
 	}
 
+	return 0;
+}
+
+int main(int argc, char **argv)
+{
+	retdec::config::Config config;
+
+	auto binpath = retdec::utils::getThisBinaryDirectoryPath();
+	retdec::utils::FilesystemPath configPath(binpath.getParentPath());
+	configPath.append("share");
+	configPath.append("retdec");
+	configPath.append("decompiler-config.json");
+	if (configPath.exists())
+	{
+		config = retdec::config::Config::fromFile(configPath.getPath());
+		config.parameters.fixRelativePaths(configPath.getParentPath());
+		config.parameters.setOutputConfigFile("");
+	}
+
+	ProgramOptions po(argc, argv, config, config.parameters);
+	try
+	{
+		po.load();
+	}
+	catch (const std::runtime_error& e)
+	{
+		std::cerr << "Error: " << e.what() << std::endl;
+		return EXIT_FAILURE;
+	}
+
+	po.dump();
+	if (config.parameters.getInputFile().empty())
+	{
+		po.printHelpAndDie();
+	}
+
+	limitMaximalMemoryIfRequested(config.parameters);
+
+// decompile
 // =============================================================================
+
+try
+{
+	std::stringstream buffer;
+	if (config.parameters.isTimeout())
+	{
+		std::packaged_task<int(retdec::config::Config&, ProgramOptions&)> task(decompile);
+		auto future = task.get_future();
+		std::thread thr(std::move(task), std::ref(config), std::ref(po));
+		auto timeout = std::chrono::seconds(config.parameters.getTimeout());
+		if (future.wait_for(timeout) != std::future_status::timeout)
+		{
+			thr.join();
+			future.get(); // this will propagate exception from f() if any
+		}
+		else
+		{
+			thr.detach(); // we leave the thread still running
+			std::cerr << "timeout after: " << config.parameters.getTimeout()
+					<< " seconds" << std::endl;
+			exit(137);
+		}
+	}
+	else
+	{
+		decompile(config, po);
+	}
+}
+catch (const std::bad_alloc& e)
+{
+	exit(135);
+}
 
 	return 0;
 }

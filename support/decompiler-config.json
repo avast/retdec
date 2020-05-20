@@ -3,6 +3,7 @@
         "verboseOut": false,
         "keepAllFuncs": false,
         "selectedDecodeOnly": false,
+        "timeout": 0,
         "ordinalNumDirectory": "./support/ordinals/",
         "staticSignPaths": [
             "./support/generic/yara_patterns/static-code/"
