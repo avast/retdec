@@ -46,7 +46,6 @@ TEST_F(DebugFormatProviderTests, addDebugFormatAddsDebugFormatForModule)
 			module.get(),
 			image.get(),
 			"",
-			0x0,
 			nullptr);
 	auto* r2 = DebugFormatProvider::getDebugFormat(module.get());
 	DebugFormat* r3 = nullptr;
@@ -64,7 +63,6 @@ TEST_F(DebugFormatProviderTests, addDebugFormatReturnNullptrIfFileImageNotProvid
 			module.get(),
 			nullptr,
 			"",
-			0x0,
 			nullptr);
 
 	EXPECT_EQ(nullptr, r1);
@@ -88,7 +86,6 @@ TEST_F(DebugFormatProviderTests, clearRemovesAllData)
 			module.get(),
 			image.get(),
 			"",
-			0x0,
 			nullptr);
 	auto* r1 = DebugFormatProvider::getDebugFormat(module.get());
 	EXPECT_NE(nullptr, r1);
