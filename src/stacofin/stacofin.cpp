@@ -433,11 +433,6 @@ std::set<std::string> selectSignaturePaths(
 		);
 	}
 
-for (auto& s : sigs)
-{
-	std::cout << "+++ [stacofin] " << s << std::endl;
-}
-
 	return sigs;
 }
 
