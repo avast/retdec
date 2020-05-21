@@ -1,5 +1,5 @@
 /**
- * @file src/yaracpp/yara_detector/yara_detector.cpp
+ * @file src/yaracpp/yara_detector.cpp
  * @brief Interpret of YARA rules.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
@@ -8,13 +8,12 @@
 #include <yara/compiler.h>
 #include <yara/types.h>
 
-#include "retdec/yaracpp/yara_detector/yara_detector.h"
+#include "retdec/yaracpp/yara_detector.h"
 
 namespace retdec {
 namespace yaracpp {
 
-namespace
-{
+namespace {
 
 /**
  * Interface for YARA scanning interface. Uses template specialization
@@ -29,9 +28,19 @@ struct Scanner {};
 template <>
 struct Scanner<std::string>
 {
-	static bool scan(YR_RULES* rules, YR_CALLBACK_FUNC callback, YaraDetector::CallbackSettings& settings, const std::string& pathToFile)
+	static bool scan(
+			YR_RULES* rules,
+			YR_CALLBACK_FUNC callback,
+			YaraDetector::CallbackSettings& settings,
+			const std::string& pathToFile)
 	{
-		return yr_rules_scan_file(rules, pathToFile.c_str(), 0, callback, &settings, 0) == ERROR_SUCCESS;
+		return yr_rules_scan_file(
+				rules,
+				pathToFile.c_str(),
+				0,
+				callback,
+				&settings, 0
+		) == ERROR_SUCCESS;
 	}
 };
 
@@ -41,9 +50,20 @@ struct Scanner<std::string>
 template <>
 struct Scanner<std::vector<std::uint8_t>>
 {
-	static bool scan(YR_RULES* rules, YR_CALLBACK_FUNC callback, YaraDetector::CallbackSettings& settings, const std::vector<std::uint8_t>& buffer)
+	static bool scan(
+			YR_RULES* rules,
+			YR_CALLBACK_FUNC callback,
+			YaraDetector::CallbackSettings& settings,
+			const std::vector<std::uint8_t>& buffer)
 	{
-		return yr_rules_scan_mem(rules, const_cast<uint8_t*>(buffer.data()), buffer.size(), 0, callback, &settings, 0) == ERROR_SUCCESS;
+		return yr_rules_scan_mem(
+				rules,
+				const_cast<uint8_t*>(buffer.data()),
+				buffer.size(),
+				0,
+				callback,
+				&settings, 0
+		) == ERROR_SUCCESS;
 	}
 };
 
@@ -52,20 +72,29 @@ struct Scanner<std::vector<std::uint8_t>>
  * always passes correct type into Scanner template.
  */
 template <typename T>
-bool scan(YR_RULES* rules, YR_CALLBACK_FUNC callback, YaraDetector::CallbackSettings& settings, T&& value)
+bool scan(
+		YR_RULES* rules,
+		YR_CALLBACK_FUNC callback,
+		YaraDetector::CallbackSettings& settings,
+		T&& value)
 {
-	return Scanner<std::decay_t<T>>::scan(rules, callback, settings, std::forward<T>(value));
+	return Scanner<std::decay_t<T>>::scan(
+			rules,
+			callback,
+			settings,
+			std::forward<T>(value)
+	);
 }
 
-}
+} // anonymous namespace
 
 /**
  * Constructor
  */
-YaraDetector::YaraDetector() : compiler(nullptr), files(), detectedRules(), undetectedRules(), textFilesRules(nullptr),
-	precompiledRules(), stateIsValid(true), needsRecompilation(true)
+YaraDetector::YaraDetector()
 {
-	stateIsValid = ((yr_initialize() == ERROR_SUCCESS) && (yr_compiler_create(&compiler) == ERROR_SUCCESS));
+	stateIsValid = ((yr_initialize() == ERROR_SUCCESS)
+			&& (yr_compiler_create(&compiler) == ERROR_SUCCESS));
 	std::uint32_t max_match_data = 65536;
 	yr_set_configuration(YR_CONFIG_MAX_MATCH_DATA, &max_match_data);
 }
@@ -109,16 +138,13 @@ YaraDetector::~YaraDetector()
  * @param cDetected Into this variable detected rules will be stored
  * @param cUndetected Into this variable undetected rules will be stored
  */
-YaraDetector::CallbackSettings::CallbackSettings(bool cStoreAll, std::vector<YaraRule> &cDetected, std::vector<YaraRule> &cUndetected) :
-	storeAll(cStoreAll), storedDetected(cDetected), storedUndetected(cUndetected)
-{
-
-}
-
-/**
- * Destructor of settings class
- */
-YaraDetector::CallbackSettings::~CallbackSettings()
+YaraDetector::CallbackSettings::CallbackSettings(
+		bool cStoreAll,
+		std::vector<YaraRule> &cDetected,
+		std::vector<YaraRule> &cUndetected)
+		: storeAll(cStoreAll)
+		, storedDetected(cDetected)
+		, storedUndetected(cUndetected)
 {
 
 }
@@ -152,16 +178,23 @@ bool YaraDetector::CallbackSettings::storeAllRules() const
 
 /**
  * Callback function for scanning of input file
+ * @param context YARA context
  * @param message Type of message from libyara
  * @param messageData Content of message
  * @param userData @c Pointer for save information about detected rules
  * @return Instruction for the next scan
  *
- * Read libyara documentation for more detailed information about callback function
+ * Read libyara documentation for more detailed information about
+ * callback function
  */
-int YaraDetector::yaraCallback(int message, void *messageData, void *userData)
+int YaraDetector::yaraCallback(
+		YR_SCAN_CONTEXT* context,
+		int message,
+		void *messageData,
+		void *userData)
 {
-	if(message == CALLBACK_MSG_IMPORT_MODULE || message == CALLBACK_MSG_MODULE_IMPORTED)
+	if(message == CALLBACK_MSG_IMPORT_MODULE
+			|| message == CALLBACK_MSG_MODULE_IMPORTED)
 	{
 		return CALLBACK_CONTINUE;
 	}
@@ -169,7 +202,8 @@ int YaraDetector::yaraCallback(int message, void *messageData, void *userData)
 	{
 		return CALLBACK_ABORT;
 	}
-	else if(message != CALLBACK_MSG_RULE_MATCHING && message != CALLBACK_MSG_RULE_NOT_MATCHING)
+	else if(message != CALLBACK_MSG_RULE_MATCHING
+			&& message != CALLBACK_MSG_RULE_NOT_MATCHING)
 	{
 		return CALLBACK_ERROR;
 	}
@@ -195,7 +229,7 @@ int YaraDetector::yaraCallback(int message, void *messageData, void *userData)
 	YR_META *meta;
 	yr_rule_metas_foreach(actRule, meta)
 	{
-		if(meta && meta->type != META_TYPE_NULL)
+		if(meta)
 		{
 			YaraMeta yaralMeta;
 			yaralMeta.setId(meta->identifier);
@@ -221,7 +255,7 @@ int YaraDetector::yaraCallback(int message, void *messageData, void *userData)
 			if(string)
 			{
 				YR_MATCH *match;
-				yr_string_matches_foreach(string, match)
+				yr_string_matches_foreach(context, string, match)
 				{
 					if(match)
 					{
@@ -263,7 +297,9 @@ bool YaraDetector::addRules(const char *string)
  *                  this allows to have multiple rules with the same ID across
  *                  multiple rule files.
  */
-bool YaraDetector::addRuleFile(const std::string &pathToFile, const std::string &nameSpace)
+bool YaraDetector::addRuleFile(
+		const std::string &pathToFile,
+		const std::string &nameSpace)
 {
 	// AT first, try to load the files as precompiled file
 	YR_RULES* rules = nullptr;
@@ -304,10 +340,13 @@ bool YaraDetector::isInValidState() const
 /**
  * Analyze input file
  * @param pathToInputFile Path to input file
- * @param storeAllRules If this parameter is set to @c true, store all rules (not only detected)
+ * @param storeAllRules If this parameter is set to @c true,
+ *                      store all rules (not only detected)
  * @return @c true if analysis completed without any error, otherwise @c false.
  */
-bool YaraDetector::analyze(const std::string &pathToInputFile, bool storeAllRules)
+bool YaraDetector::analyze(
+		const std::string &pathToInputFile,
+		bool storeAllRules)
 {
 	return analyzeWithScan(pathToInputFile, storeAllRules);
 }
@@ -315,7 +354,8 @@ bool YaraDetector::analyze(const std::string &pathToInputFile, bool storeAllRule
 /**
  * Analyze input bytes
  * @param bytes Vector of input bytes
- * @param storeAllRules If this parameter is set to @c true, store all rules (not only detected)
+ * @param storeAllRules If this parameter is set to @c true,
+ *                      store all rules (not only detected)
  * @return @c true if analysis completed without any error, otherwise @c false.
  */
 bool YaraDetector::analyze(std::vector<std::uint8_t> &bytes, bool storeAllRules)
@@ -344,13 +384,18 @@ const std::vector<YaraRule>& YaraDetector::getUndetectedRules() const
 /**
  * Analyze input sequence
  * @param value Value to analyze
- * @param storeAllRules If this parameter is set to @c true, store all rules (not only detected)
+ * @param storeAllRules If this parameter is set to @c true,
+ *                      store all rules (not only detected)
  * @return @c true if analysis completed without any error, otherwise @c false.
  */
 template <typename T>
 bool YaraDetector::analyzeWithScan(T&& value, bool storeAllRules)
 {
-	auto settings = CallbackSettings(storeAllRules, detectedRules, undetectedRules);
+	auto settings = CallbackSettings(
+			storeAllRules,
+			detectedRules,
+			undetectedRules
+	);
 
 	auto rules = getCompiledRules();
 	if (!(rules))
@@ -375,8 +420,10 @@ bool YaraDetector::analyzeWithScan(T&& value, bool storeAllRules)
 YR_RULES* YaraDetector::getCompiledRules()
 {
 	// File is text file and needs to be compiled first
-	// All text files are compiled into single YR_RULES structure and we shouldn't compile it twice if it's not needed
-	// analyze() called for the first time or the file was added since the last analyze() call
+	// All text files are compiled into single YR_RULES structure and
+	// we shouldn't compile it twice if it's not needed
+	// analyze() called for the first time or the file was added since the
+	// last analyze() call
 	if (needsRecompilation)
 	{
 		YR_RULES* rules = nullptr;

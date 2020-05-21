@@ -15,7 +15,7 @@
 #include "retdec/cpdetect/heuristics/macho_heuristics.h"
 #include "retdec/cpdetect/heuristics/pe_heuristics.h"
 #include "retdec/cpdetect/settings.h"
-#include "retdec/yaracpp/yara_detector/yara_detector.h"
+#include "retdec/yaracpp/yara_detector.h"
 
 using namespace retdec::fileformat;
 using namespace retdec::utils;

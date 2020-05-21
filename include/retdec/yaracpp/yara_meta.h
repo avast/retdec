@@ -1,10 +1,11 @@
 /**
- * @file include/retdec/yaracpp/types/yara_meta.h
+ * @file include/retdec/yaracpp/yara_meta.h
  * @brief Library representation of one YARA meta.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#pragma once
+#ifndef RETDEC_YARACPP_YARA_META_H
+#define RETDEC_YARACPP_YARA_META_H
 
 #include <string>
 
@@ -23,10 +24,11 @@ class YaraMeta
 			Int
 		};
 	private:
-		std::string id;         ///< name of meta
-		Type type;              ///< type of meta
-		std::string strValue;   ///< string value of meta
-		std::uint64_t intValue; ///< int value of meta
+	    /// name of meta
+		std::string id;
+		Type type;
+		std::string strValue;
+		std::uint64_t intValue;
 	public:
 		/// @name Const getters
 		/// @{
@@ -53,3 +55,5 @@ class YaraMeta
 
 } // namespace yaracpp
 } // namespace retdec
+
+#endif

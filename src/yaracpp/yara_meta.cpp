@@ -1,12 +1,12 @@
 /**
- * @file src/yaracpp/types/yara_meta.cpp
+ * @file src/yaracpp/yara_meta.cpp
  * @brief Library representation of one YARA meta.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
 #include <cassert>
 
-#include "retdec/yaracpp/types/yara_meta.h"
+#include "retdec/yaracpp/yara_meta.h"
 
 namespace retdec {
 namespace yaracpp {
