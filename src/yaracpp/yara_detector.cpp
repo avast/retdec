@@ -178,6 +178,7 @@ bool YaraDetector::CallbackSettings::storeAllRules() const
 
 /**
  * Callback function for scanning of input file
+ * @param context YARA context
  * @param message Type of message from libyara
  * @param messageData Content of message
  * @param userData @c Pointer for save information about detected rules
