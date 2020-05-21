@@ -1,5 +1,5 @@
 /**
- * @file include/retdec/yaracpp/types/yara_rule.h
+ * @file include/retdec/yaracpp/yara_rule.h
  * @brief Library representation of one YARA rule.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
