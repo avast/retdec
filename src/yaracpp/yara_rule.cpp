@@ -1,10 +1,10 @@
 /**
- * @file src/yaracpp/types/yara_rule.cpp
+ * @file src/yaracpp/yara_rule.cpp
  * @brief Library representation of one YARA rule.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "retdec/yaracpp/types/yara_rule.h"
+#include "retdec/yaracpp/yara_rule.h"
 
 #include <ostream>
 
@@ -100,7 +100,9 @@ std::size_t YaraRule::getNumberOfMatches() const
  */
 YaraMeta* YaraRule::getMeta(const std::string &id)
 {
-	return const_cast<YaraMeta*>(static_cast<const YaraRule*>(this)->getMeta(id));
+	return const_cast<YaraMeta*>(
+			static_cast<const YaraRule*>(this)->getMeta(id)
+	);
 }
 
 /**
@@ -119,7 +121,9 @@ YaraMatch* YaraRule::getMatch(std::size_t index)
  */
 YaraMatch* YaraRule::getFirstMatch()
 {
-	return const_cast<YaraMatch*>(static_cast<const YaraRule*>(this)->getFirstMatch());
+	return const_cast<YaraMatch*>(
+			static_cast<const YaraRule*>(this)->getFirstMatch()
+	);
 }
 
 /**

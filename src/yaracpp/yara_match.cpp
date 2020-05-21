@@ -1,10 +1,10 @@
 /**
- * @file src/yaracpp/types/yara_match.cpp
+ * @file src/yaracpp/yara_match.cpp
  * @brief Library representation of one YARA match.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "retdec/yaracpp/types/yara_match.h"
+#include "retdec/yaracpp/yara_match.h"
 
 namespace retdec {
 namespace yaracpp {
