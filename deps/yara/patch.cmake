@@ -5,67 +5,104 @@ function(patch_vcxproj file)
     set(new_content "${content}")
 
     string(REPLACE
-        "<PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;CUCKOO_MODULE;HASH_MODULE;DOTNET_MODULE;HAVE_LIBCRYPTO;USE_WINDOWS_PROC;YR_BUILDING_STATIC_LIB;PROFILING_ENABLED</PreprocessorDefinitions>"
-        "<PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;DOTNET_MODULE;MACHO_MODULE;USE_WINDOWS_PROC</PreprocessorDefinitions>"
-        new_content
-        "${new_content}"
-    )
-    string(REPLACE
-        "<AdditionalDependencies>jansson.lib;libcrypto.lib;%(AdditionalDependencies)</AdditionalDependencies>"
-        "<AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>"
-        new_content
-        "${new_content}"
-    )
-    string(REPLACE
-        "<PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;CUCKOO_MODULE;HASH_MODULE;DOTNET_MODULE;HAVE_LIBCRYPTO;USE_WINDOWS_PROC;YR_BUILDING_STATIC_LIBC;PROFILING_ENABLED</PreprocessorDefinitions>"
-        "<PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;DOTNET_MODULE;MACHO_MODULE;USE_WINDOWS_PROC</PreprocessorDefinitions>"
-        new_content
-        "${new_content}"
-    )
-    string(REPLACE
-        "<AdditionalDependencies>crypt32.lib;ws2_32.lib;advapi32.lib;jansson.lib;libcrypto.lib;%(AdditionalDependencies)</AdditionalDependencies>"
-        "<AdditionalDependencies>crypt32.lib;ws2_32.lib;advapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>"
-        new_content
-        "${new_content}"
-    )
-    string(REPLACE
-        "<PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;CUCKOO_MODULE;HASH_MODULE;DOTNET_MODULE;HAVE_LIBCRYPTO;USE_WINDOWS_PROC;YR_BUILDING_STATIC_LIB</PreprocessorDefinitions>"
-        "<PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;DOTNET_MODULE;MACHO_MODULE;USE_WINDOWS_PROC</PreprocessorDefinitions>"
-        new_content
-        "${new_content}"
-    )
-    string(REPLACE
-        "<PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;CUCKOO_MODULE;HASH_MODULE;DOTNET_MODULE;HAVE_LIBCRYPTO;USE_WINDOWS_PROC;YR_BUILDING_STATIC_LIB;NDEBUG=1</PreprocessorDefinitions>"
-        "<PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;DOTNET_MODULE;MACHO_MODULE;USE_WINDOWS_PROC;NDEBUG=1</PreprocessorDefinitions>"
-        new_content
-        "${new_content}"
-    )
-    string(REPLACE
-        "<AdditionalIncludeDirectories>..\\..\\..\\libyara;..\\..\\..\\libyara\\include;..\\..\\..;..\\packages\\YARA.Jansson.x64.1.1.0\\include;..\\packages\\YARA.OpenSSL.x64.1.1.0\\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>"
-        "<AdditionalIncludeDirectories>..\\..\\..\\libyara;..\\..\\..\\libyara\\include;..\\..\\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>"
-        new_content
-        "${new_content}"
-    )
-    string(REPLACE
-        "<AdditionalLibraryDirectories>..\\packages\\YARA.OpenSSL.x64.1.1.0\\lib;..\\packages\\YARA.Jansson.x64.1.1.0\\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>"
-        "<AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>"
-        new_content
-        "${new_content}"
-    )
-    string(REPLACE
-        "<ClCompile Include=\"..\\..\\..\\libyara\\modules\\cuckoo.c\" />"
+        "jansson.lib"
         ""
         new_content
         "${new_content}"
     )
     string(REPLACE
-        "<ClCompile Include=\"..\\..\\..\\libyara\\modules\\dex.c\" />"
+        "libcrypto.lib"
+        ""
+        new_content
+        "${new_content}"
+    )
+	# We also use this to enable macho module.
+    string(REPLACE
+        "CUCKOO_MODULE"
+        "MACHO_MODULE"
+        new_content
+        "${new_content}"
+    )
+    string(REPLACE
+        "HASH_MODULE"
         ""
         new_content
         "${new_content}"
     )
     string(REPLACE
-        "<ClCompile Include=\"..\\..\\..\\libyara\\modules\\hash.c\" />"
+        "HAVE_LIBCRYPTO"
+        ""
+        new_content
+        "${new_content}"
+    )
+    string(REPLACE
+        "PROFILING_ENABLED"
+        ""
+        new_content
+        "${new_content}"
+    )
+    string(REPLACE
+        "..\\packages\\YARA.Jansson.x64.1.1.0\\include"
+        ""
+        new_content
+        "${new_content}"
+    )
+    string(REPLACE
+        "..\\packages\\YARA.Jansson.x86.1.1.0\\include"
+        ""
+        new_content
+        "${new_content}"
+    )
+    string(REPLACE
+        "..\\packages\\YARA.Jansson.x64.1.1.0\\lib"
+        ""
+        new_content
+        "${new_content}"
+    )
+    string(REPLACE
+        "..\\packages\\YARA.Jansson.x86.1.1.0\\lib"
+        ""
+        new_content
+        "${new_content}"
+    )
+    string(REPLACE
+        "..\\packages\\YARA.OpenSSL.x64.1.1.0\\include"
+        ""
+        new_content
+        "${new_content}"
+    )
+    string(REPLACE
+        "..\\packages\\YARA.OpenSSL.x86.1.1.0\\include"
+        ""
+        new_content
+        "${new_content}"
+    )
+    string(REPLACE
+        "..\\packages\\YARA.OpenSSL.x64.1.1.0\\lib"
+        ""
+        new_content
+        "${new_content}"
+    )
+    string(REPLACE
+        "..\\packages\\YARA.OpenSSL.x86.1.1.0\\lib"
+        ""
+        new_content
+        "${new_content}"
+    )
+    string(REPLACE
+		"<ClCompile Include=\"..\\..\\..\\libyara\\modules\\cuckoo\\cuckoo.c\" />"
+        ""
+        new_content
+        "${new_content}"
+    )
+    string(REPLACE
+        "<ClCompile Include=\"..\\..\\..\\libyara\\modules\\dex\\dex.c\" />"
+        ""
+        new_content
+        "${new_content}"
+    )
+    string(REPLACE
+        "<ClCompile Include=\"..\\..\\..\\libyara\\modules\\hash\\hash.c\" />"
         ""
         new_content
         "${new_content}"
