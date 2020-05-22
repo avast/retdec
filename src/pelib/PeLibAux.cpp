@@ -91,6 +91,9 @@ namespace PeLib
 		{"LDR_ERROR_RELOC_BLOCK_INVALID_LENGTH",   "A relocation block has invalid length", true },
 		{"LDR_ERROR_RELOC_ENTRY_BAD_TYPE",         "A relocation entry has invalid type", true },
 
+		// Other errors
+	    {"LDR_ERROR_INMEMORY_IMAGE",               "The file is an in-memory image", false },
+
 	};
 
 	PELIB_IMAGE_FILE_MACHINE_ITERATOR::PELIB_IMAGE_FILE_MACHINE_ITERATOR()

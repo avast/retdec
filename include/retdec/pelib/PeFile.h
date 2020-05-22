@@ -213,6 +213,7 @@ namespace PeLib
 
 		  /// Checks the entry point code
 		  LoaderError checkEntryPointErrors() const;
+		  LoaderError checkForInMemoryLayout(LoaderError ldrError) const;
 
 		  /// Returns a loader error, if there was any
 		  LoaderError loaderError() const;
@@ -738,55 +739,82 @@ namespace PeLib
 		return LDR_ERROR_NONE;
 	}
 
+	template<int bits>
+	LoaderError PeFileT<bits>::checkForInMemoryLayout(LoaderError ldrError) const
+	{
+		std::uint64_t ulFileSize = fileSize(m_iStream);
+		std::uint64_t sizeOfImage = peHeader().getSizeOfImage();
+
+		// The file size must be greater or equal to SizeOfImage
+		if(ulFileSize >= sizeOfImage)
+		{
+			// SectionAlignment must be greater than file alignment
+			if(peHeader().getSectionAlignment() > peHeader().getFileAlignment())
+			{
+				// SizeOfHeaders must be smaller than SectionAlignment
+				if(peHeader().getSizeOfHeaders() < peHeader().getSectionAlignment())
+				{
+					std::size_t headerDataSize = peHeader().getSectionAlignment() - peHeader().getSizeOfHeaders();
+
+					// Read the entire after-header-data
+					std::vector<unsigned char> headerData(headerDataSize);
+					m_iStream.seekg(peHeader().getSizeOfHeaders(), std::ios::beg);
+					m_iStream.read(reinterpret_cast<char *>(headerData.data()), headerDataSize);
+
+					// Check whether there are zeros only. If yes, we consider
+					// the file to be an in-memory image
+					if(std::all_of(headerData.begin(), headerData.end(), [](char item) { return item == 0; }))
+						ldrError = LDR_ERROR_INMEMORY_IMAGE;
+				}
+			}
+		}
+
+		return ldrError;
+	}
+
 	// Returns an error code indicating loader problem. We check every part of the PE file
 	// for possible loader problem. If anything wrong was found, we report it
 	template<int bits>
 	LoaderError PeFileT<bits>::loaderError() const
 	{
-		LoaderError ldrError;
-
-		// Was there a problem in the DOS header?
-		ldrError = mzHeader().loaderError();
-		if (ldrError != LDR_ERROR_NONE)
-			return ldrError;
+		// Check for problems in DOS header
+		LoaderError ldrError = mzHeader().loaderError();
 
 		// Was there a problem in the NT headers?
-		ldrError = peHeader().loaderError();
-		if (ldrError != LDR_ERROR_NONE)
-			return ldrError;
+		if (ldrError == LDR_ERROR_NONE)
+			ldrError = peHeader().loaderError();
 
 		// Check the loader error
-		ldrError = coffSymTab().loaderError();
-		if (ldrError != LDR_ERROR_NONE)
-			return ldrError;
+		if (ldrError == LDR_ERROR_NONE)
+			ldrError = coffSymTab().loaderError();
 
 		// Check errors in import directory
-		ldrError = impDir().loaderError();
-		if (ldrError != LDR_ERROR_NONE)
-			return ldrError;
+		if (ldrError == LDR_ERROR_NONE)
+			ldrError = impDir().loaderError();
 
 		// Check errors in resource directory
-		ldrError = resDir().loaderError();
-		if (ldrError != LDR_ERROR_NONE)
-			return ldrError;
+		if (ldrError == LDR_ERROR_NONE)
+			ldrError = resDir().loaderError();
 
 		// Check errors in relocations directory
-		ldrError = relocDir().loaderError();
-		if (ldrError != LDR_ERROR_NONE)
-			return ldrError;
-
-		// Check errors in entry point
-		ldrError = checkEntryPointErrors();
-		if (ldrError != LDR_ERROR_NONE)
-			return ldrError;
+		if (ldrError == LDR_ERROR_NONE)
+			ldrError = relocDir().loaderError();
 
 		// Check errors in security directory
-		ldrError = securityDir().loaderError();
-		if (ldrError != LDR_ERROR_NONE)
-			return ldrError;
+		if (ldrError == LDR_ERROR_NONE)
+			ldrError = securityDir().loaderError();
+
+		// Check errors in entry point
+		if (ldrError == LDR_ERROR_NONE)
+			ldrError = checkEntryPointErrors();
+
+		// If there was a loaded error, we'll check whether
+		// the file can't actually be an in-memory version
+		if(ldrError != LDR_ERROR_NONE)
+			ldrError = checkForInMemoryLayout(ldrError);
 
 		// Nothing wrond found
-		return LDR_ERROR_NONE;
+		return ldrError;
 	}
 }
 
