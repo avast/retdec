@@ -982,9 +982,9 @@ void ImportTable::dump(std::string &dumpTable) const
 		for(const auto &imp : imports)
 		{
 			ret << "; " << std::hex << imp->getName() << " (addr: " << imp->getAddress() <<
-				", ord: " << std::dec << (imp->getOrdinalNumber(aux) ? numToStr(aux, std::dec) : "-") <<
+				", ord: " << std::dec << (imp->getOrdinalNumber(aux) ? std::to_string(aux) : "-") <<
 				", libId: " << (imp->getLibraryIndex() < getNumberOfLibraries() ?
-				numToStr(imp->getLibraryIndex(), std::dec) : "-") << ")\n";
+				std::to_string(imp->getLibraryIndex()) : "-") << ")\n";
 		}
 	}
 
@@ -1027,7 +1027,7 @@ void ImportTable::dumpLibrary(std::size_t libraryIndex, std::string &libraryDump
 		for(const auto &i : indexes)
 		{
 			ret << "; " << std::hex << imports[i]->getName() << " (addr: " << imports[i]->getAddress() <<
-				", ord: " << std::dec << (imports[i]->getOrdinalNumber(aux) ? numToStr(aux, std::dec) : "-") <<
+				", ord: " << std::dec << (imports[i]->getOrdinalNumber(aux) ? std::to_string(aux) : "-") <<
 				", libId: " << imports[i]->getLibraryIndex() << ")\n";
 		}
 	}

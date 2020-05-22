@@ -64,7 +64,7 @@ bool DynamicSectionsJsonGetter::getRecord(std::size_t structIndex, std::size_t r
 	}
 
 	record.clear();
-	record.push_back(numToStr(recIndex));
+	record.push_back(std::to_string(recIndex));
 	record.push_back(toLower(fileinfo.getDynamicEntryType(structIndex, recIndex)));
 	record.push_back(fileinfo.getDynamicEntryValueStr(structIndex, recIndex, hexWithPrefix));
 	record.push_back(fileinfo.getDynamicEntryDescription(structIndex, recIndex));

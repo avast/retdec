@@ -891,8 +891,8 @@ void ResourceTable::dump(std::string &dumpTable) const
 
 		for(const auto &res : table)
 		{
-			auto sName = (res->hasEmptyName() && res->getNameId(aux)) ? numToStr(aux, std::dec) : res->getName();
-			auto sType = (res->hasEmptyType() && res->getTypeId(aux)) ? numToStr(aux, std::dec) : res->getType();
+			auto sName = (res->hasEmptyName() && res->getNameId(aux)) ? std::to_string(aux) : res->getName();
+			auto sType = (res->hasEmptyType() && res->getTypeId(aux)) ? std::to_string(aux) : res->getType();
 			auto sLang = res->getLanguage();
 			if(sType.empty())
 			{
@@ -902,10 +902,10 @@ void ResourceTable::dump(std::string &dumpTable) const
 			{
 				if(res->getLanguageId(aux))
 				{
-					sLang = numToStr(aux, std::dec);
+					sLang = std::to_string(aux);
 					if(res->getSublanguageId(aux))
 					{
-						sLang += ":" + numToStr(aux, std::dec);
+						sLang += ":" + std::to_string(aux);
 					}
 				}
 				else

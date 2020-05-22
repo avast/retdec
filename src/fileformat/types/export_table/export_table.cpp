@@ -241,7 +241,10 @@ void ExportTable::dump(std::string &dumpTable) const
 
 		for(const auto &exp : exports)
 		{
-			ret << "; " << std::hex << exp.getName() << " (addr: " << exp.getAddress() << ", ord: " << std::dec << (exp.getOrdinalNumber(aux) ? numToStr(aux, std::dec) : "-") << ")\n";
+			ret << "; " << std::hex << exp.getName() << " (addr: "
+				<< exp.getAddress() << ", ord: " << std::dec
+				<< (exp.getOrdinalNumber(aux) ? std::to_string(aux) : "-")
+				<< ")\n";
 		}
 	}
 

@@ -42,7 +42,7 @@ std::size_t AnomaliesJsonGetter::getBasicInfo(std::size_t structIndex, std::vect
 	info.clear();
 
 	desc.push_back("numberOfAnomalies");
-	info.push_back(numToStr(fileinfo.getNumberOfAnomalies()));
+	info.push_back(std::to_string(fileinfo.getNumberOfAnomalies()));
 
 	return info.size();
 }
@@ -55,7 +55,7 @@ bool AnomaliesJsonGetter::getRecord(std::size_t structIndex, std::size_t recInde
 	}
 
 	record.clear();
-	record.push_back(numToStr(recIndex));
+	record.push_back(std::to_string(recIndex));
 	record.push_back(fileinfo.getAnomalyIdentifier(recIndex));
 	record.push_back(fileinfo.getAnomalyDescription(recIndex));
 

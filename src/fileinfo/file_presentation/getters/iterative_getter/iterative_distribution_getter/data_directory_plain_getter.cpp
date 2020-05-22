@@ -50,7 +50,7 @@ std::size_t DataDirectoryPlainGetter::getBasicInfo(std::size_t structIndex, std:
 	info.clear();
 
 	desc.push_back("Number of data directories: ");
-	info.push_back(numToStr(fileinfo.getNumberOfStoredDataDirectories()));
+	info.push_back(std::to_string(fileinfo.getNumberOfStoredDataDirectories()));
 
 	return info.size();
 }
@@ -63,7 +63,7 @@ bool DataDirectoryPlainGetter::loadRecord(std::size_t structIndex, std::size_t r
 	}
 
 	record.clear();
-	record.push_back(numToStr(recIndex));
+	record.push_back(std::to_string(recIndex));
 	record.push_back(fileinfo.getDataDirectoryType(recIndex));
 	record.push_back(fileinfo.getDataDirectoryAddressStr(recIndex, hexWithPrefix));
 	record.push_back(fileinfo.getDataDirectorySizeStr(recIndex, hexWithPrefix));

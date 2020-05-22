@@ -258,10 +258,6 @@ unsigned int byteSwap32(unsigned int val);
 std::string byteSwap16(const std::string &val);
 std::string byteSwap32(const std::string &val);
 
-std::string unsignedToBinString(unsigned long long int nValue, int nLength);
-unsigned long long int binStringToUnsigned(const char *sValue);
-long long int binStringToSigned(const char *sValue);
-
 std::vector<uint8_t> hexStringToBytes(const std::string& hexIn);
 std::string bytesToHexString(const std::vector<uint8_t>& bytes);
 

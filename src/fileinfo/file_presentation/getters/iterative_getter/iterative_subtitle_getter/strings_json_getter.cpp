@@ -44,7 +44,7 @@ std::size_t StringsJsonGetter::getBasicInfo(std::size_t structIndex, std::vector
 	info.clear();
 
 	desc.push_back("numberOfStrings");
-	info.push_back(numToStr(fileinfo.getNumberOfDetectedStrings()));
+	info.push_back(std::to_string(fileinfo.getNumberOfDetectedStrings()));
 
 	return info.size();
 }
@@ -59,7 +59,7 @@ bool StringsJsonGetter::getRecord(std::size_t structIndex, std::size_t recIndex,
 	const auto& strings = fileinfo.getStrings();
 
 	record.clear();
-	record.push_back(numToStr(recIndex));
+	record.push_back(std::to_string(recIndex));
 	record.push_back(strings.getStringFileOffsetStr(recIndex, hexWithPrefix));
 	record.push_back(toLower(strings.getStringTypeStr(recIndex)));
 	record.push_back(replaceNonprintableChars(strings.getStringSectionName(recIndex)));

@@ -73,7 +73,7 @@ std::size_t ElfCoreMapPlainGetter::getBasicInfo(
 
 	const auto& fMap = fileinfo.getElfCoreInfo().getFileMap();
 	desc.push_back("Number of entries: ");
-	info.push_back(numToStr(fMap.size()));
+	info.push_back(std::to_string(fMap.size()));
 
 	return info.size();
 }
@@ -92,7 +92,7 @@ bool ElfCoreMapPlainGetter::loadRecord(
 	auto& entry = fileinfo.getElfCoreInfo().getFileMap()[recIndex];
 
 	record.clear();
-	record.push_back(numToStr(recIndex));
+	record.push_back(std::to_string(recIndex));
 	record.push_back(toHex(entry.address, true));
 	record.push_back(std::to_string(entry.size));
 	record.push_back(std::to_string(entry.page));

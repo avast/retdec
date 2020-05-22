@@ -259,54 +259,6 @@ byteSwap32SSuccess) {
 }
 
 //
-// unsignedToBinString()
-//
-
-TEST_F(ConversionTests,
-unsignedToBinStringSuccess) {
-	EXPECT_EQ("00000000000000011110001001000000", unsignedToBinString(123456, 32));
-	EXPECT_EQ("011110001001000000", unsignedToBinString(123456, 18));
-	EXPECT_EQ("11110001001000000", unsignedToBinString(123456, 17));
-	EXPECT_EQ("1110001001000000", unsignedToBinString(123456, 16));
-	EXPECT_EQ("01000000", unsignedToBinString(123456, 8));
-	EXPECT_EQ("0", unsignedToBinString(123456, 1));
-	EXPECT_EQ("", unsignedToBinString(123456, 0));
-}
-
-//
-// binStringToUnsigned()
-//
-
-TEST_F(ConversionTests,
-binStringToUnsignedSuccess) {
-	EXPECT_EQ(123456, binStringToUnsigned("00000000000000011110001001000000"));
-	EXPECT_EQ(123456, binStringToUnsigned("011110001001000000"));
-	EXPECT_EQ(123456, binStringToUnsigned("11110001001000000"));
-	EXPECT_EQ(57920, binStringToUnsigned("1110001001000000"));
-	EXPECT_EQ(64, binStringToUnsigned("01000000"));
-	EXPECT_EQ(0, binStringToUnsigned("0"));
-	EXPECT_EQ(1, binStringToUnsigned("1"));
-	EXPECT_EQ(0, binStringToUnsigned(""));
-}
-
-//
-// binStringToSigned()
-//
-
-TEST_F(ConversionTests,
-binStringToSignedSuccess) {
-	EXPECT_EQ(123456, binStringToSigned("00000000000000011110001001000000"));
-	EXPECT_EQ(123456, binStringToSigned("011110001001000000"));
-
-	EXPECT_EQ(-16448, binStringToSigned("1011111111000000"));
-	EXPECT_EQ(-6, binStringToSigned("11010"));
-	EXPECT_EQ(-13, binStringToSigned("10011"));
-	EXPECT_EQ(-2, binStringToSigned("1111111111111110"));
-	EXPECT_EQ(-12582809, binStringToSigned("11010000000000000001100111"));
-	EXPECT_EQ(-12578294, binStringToSigned("11010000000001001000001010"));
-}
-
-//
 // hexStringToBytes()
 //
 

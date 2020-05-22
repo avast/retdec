@@ -51,7 +51,7 @@ bool MissingDepsJsonGetter::getRecord(std::size_t structIndex, std::size_t recIn
 	}
 
 	record.clear();
-	record.push_back(retdec::utils::numToStr(recIndex));
+	record.push_back(std::to_string(recIndex));
 	record.push_back(retdec::utils::replaceNonprintableChars(fileinfo.getMissingDepName(recIndex)));
 	return true;
 }

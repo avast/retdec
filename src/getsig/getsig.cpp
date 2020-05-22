@@ -386,7 +386,7 @@ std::string getYaraRule(
 	std::string condition = "$1 at ";
 	if (options.isOffset)
 	{
-		condition += numToStr(options.offset);
+		condition += std::to_string(options.offset);
 	}
 	else
 	{

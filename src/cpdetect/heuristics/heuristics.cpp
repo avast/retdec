@@ -765,7 +765,7 @@ void Heuristics::getDwarfInfo()
 	{
 		for (std::size_t i = 0; i < noOfLanguages; ++i)
 		{
-			addLanguage(languages[i], numToStr(modulesCounter[i])
+			addLanguage(languages[i], std::to_string(modulesCounter[i])
 						+ " module" + (modulesCounter[i] > 1 ? "s" : ""));
 		}
 	}

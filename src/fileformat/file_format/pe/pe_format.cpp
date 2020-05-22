@@ -3698,7 +3698,7 @@ void PeFormat::scanForSectionAnomalies()
 		}
 
 		const auto name = sec->getName();
-		const std::string msgName = (name.empty()) ? numToStr(sec->getIndex()) : name;
+		const std::string msgName = (name.empty()) ? std::to_string(sec->getIndex()) : name;
 		const auto flags = sec->getPeCoffFlags();
 		if (!name.empty())
 		{
@@ -3766,7 +3766,7 @@ void PeFormat::scanForSectionAnomalies()
 			if ((secStart <= cmpSecStart && cmpSecStart < secEnd) ||
 				(cmpSecStart <= secStart && secStart < cmpSecEnd))
 			{
-				const std::string cmpMsgName = (cmpName.empty()) ? numToStr(cmpSec->getIndex()) : cmpName;
+				const std::string cmpMsgName = (cmpName.empty()) ? std::to_string(cmpSec->getIndex()) : cmpName;
 				anomalies.emplace_back("OverlappingSections", "Sections " + replaceNonprintableChars(msgName) + " and " + replaceNonprintableChars(cmpMsgName) + " overlap");
 			}
 		}
@@ -3792,7 +3792,7 @@ void PeFormat::scanForResourceAnomalies()
 		}
 
 		std::size_t nameId;
-		std::string msgName = (res->getNameId(nameId)) ? numToStr(nameId) : "<unknown>";
+		std::string msgName = (res->getNameId(nameId)) ? std::to_string(nameId) : "<unknown>";
 
 		// scan for resource size over 100MB
 		if (res->getSizeInFile() >= 100000000UL)
@@ -3839,7 +3839,7 @@ void PeFormat::scanForImportAnomalies()
 					}
 					else
 					{
-						msgName = numToStr(ordNum);
+						msgName = std::to_string(ordNum);
 					}
 
 				}
@@ -3883,7 +3883,7 @@ void PeFormat::scanForExportAnomalies()
 					}
 					else
 					{
-						msgName = numToStr(ordNum);
+						msgName = std::to_string(ordNum);
 					}
 
 				}

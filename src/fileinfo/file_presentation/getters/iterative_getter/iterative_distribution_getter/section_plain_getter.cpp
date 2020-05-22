@@ -64,7 +64,7 @@ std::size_t SectionPlainGetter::getBasicInfo(std::size_t structIndex, std::vecto
 	desc.push_back("CRC32             : ");
 	desc.push_back("MD5               : ");
 	desc.push_back("SHA256            : ");
-	info.push_back(numToStr(fileinfo.getNumberOfStoredSections()));
+	info.push_back(std::to_string(fileinfo.getNumberOfStoredSections()));
 	info.push_back(fileinfo.getSectionTableCrc32());
 	info.push_back(fileinfo.getSectionTableMd5());
 	info.push_back(fileinfo.getSectionTableSha256());
