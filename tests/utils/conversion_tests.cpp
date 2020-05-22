@@ -194,51 +194,6 @@ BytesToBits) {
 }
 
 //
-// byteToULong()
-//
-
-TEST_F(ConversionTests,
-byteToULongSuccess) {
-	EXPECT_EQ(0, byteToULong("00000000", 8, false));
-	EXPECT_EQ(1, byteToULong("00000001", 8, false));
-	EXPECT_EQ(128, byteToULong("10000000", 8, false));
-	EXPECT_EQ(255, byteToULong("11111111", 8, false));
-
-	EXPECT_EQ(0, byteToULong("00000000", 8, true));
-	EXPECT_EQ(128, byteToULong("00000001", 8, true));
-	EXPECT_EQ(1, byteToULong("10000000", 8, true));
-	EXPECT_EQ(255, byteToULong("11111111", 8, true));
-
-	EXPECT_EQ(0, byteToULong("0000000000000000", 16));
-	EXPECT_EQ(1, byteToULong("0000000000000001", 16));
-	EXPECT_EQ(128, byteToULong("0000000010000000", 16));
-	EXPECT_EQ(255, byteToULong("0000000011111111", 16));
-	EXPECT_EQ(256, byteToULong("0000000100000000", 16));
-	EXPECT_EQ(32768, byteToULong("1000000000000000", 16));
-	EXPECT_EQ(65280, byteToULong("1111111100000000", 16));
-
-	EXPECT_EQ(1, byteToULong("1", 1));
-	EXPECT_EQ(2, byteToULong("10", 2));
-	EXPECT_EQ(7, byteToULong("111", 3));
-}
-
-TEST_F(ConversionTests,
-byteToULongFailure) {
-	EXPECT_EQ(0, byteToULong("", 0, false));
-	EXPECT_EQ(0, byteToULong("", 0, true));
-	EXPECT_EQ(0, byteToULong("11111111", 0, false));
-	EXPECT_EQ(0, byteToULong("11111111", 0, true));
-
-	EXPECT_EQ(0, byteToULong("10200000", 8, false));
-	EXPECT_EQ(0, byteToULong("10200000", 8, true));
-
-	EXPECT_EQ(0, byteToULong("1x", 2, false));
-	EXPECT_EQ(0, byteToULong("1x", 2, true));
-	EXPECT_EQ(0, byteToULong("-1", 2, false));
-	EXPECT_EQ(0, byteToULong("-1", 2, true));
-}
-
-//
 // double10toDouble8()
 //
 

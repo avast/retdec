@@ -117,34 +117,6 @@ std::string bytesToBits(const std::vector<N> &bytes) {
 }
 
 /**
- * @brief Converts the given number into a bits.
- *
- * @param[in] byte Number to be converted into a bits.
- *
- * @return Resulting string.
- */
-template<typename N>
-std::string byteToBits(N byte) {
-	std::vector<N> vect(1, byte);
-	return bytesToBits(vect);
-}
-
-/**
- * Converts the single byte into a hexadecimal string representation
- * @param oStr Output stream
- * @param byte Data to be converted
- * @param uppercase @c true if hex letters (A-F) should be uppercase
- */
-template<typename N> void byteToHexString(
-		std::ostream& oStr,
-		N byte,
-		bool uppercase = true)
-{
-	oStr << std::hex << std::setfill('0') << std::setw(2)
-			<< (uppercase ? std::uppercase : std::nouppercase) << (byte & 0xFF);
-}
-
-/**
  * Converts the given array of numbers into a hexadecimal string representation
  * @param data Array to be converted into a hexadecimal string
  * @param dataSize Size of array
@@ -277,11 +249,6 @@ template<typename N> void bytesToString(
 {
 	bytesToString(bytes.data(), bytes.size(), result, offset, size);
 }
-
-unsigned long byteToULong8(const char *sByte, bool switchBitsOrder);
-unsigned long byteToULongVariable(const char *sByte, std::size_t iByteSize);
-unsigned long byteToULong(const char *sByte, std::size_t iByteSize,
-	bool switchBitsOrder = false);
 
 void double10ToDouble8(std::vector<unsigned char> &dest,
 	const std::vector<unsigned char> &src);
