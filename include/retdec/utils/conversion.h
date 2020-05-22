@@ -310,6 +310,8 @@ long long int binStringToSigned(const char *sValue);
 std::vector<uint8_t> hexStringToBytes(const std::string& hexIn);
 std::string bytesToHexString(const std::vector<uint8_t>& bytes);
 
+char* byteToHex_fast(unsigned char b, bool lowerAlpha = true);
+
 /// @}
 
 } // namespace utils

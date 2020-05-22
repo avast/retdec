@@ -49,17 +49,17 @@ bool isNonasciiChar(unsigned char c) {
 *        their hexadecimal values.
 */
 std::string replaceChars(const std::string &str, bool (* predicate)(unsigned char)) {
-	std::stringstream result;
-	const std::size_t maxC = (1 << (sizeof(std::string::value_type) * CHAR_BIT)) - 1;
-	for (const auto &c : str) {
+	std::string prefix("\\x");
+	std::string result;
+	result.reserve(str.size() * 4);
+	for (const auto c : str) {
 		if (predicate(c)) {
-			const auto val = numToStr<std::size_t>(c & maxC, std::hex);
-			result << "\\x" << std::setw(2) << std::setfill('0') << val;
+			result += prefix + byteToHex_fast(c);
 		} else {
-			result << c;
+			result += c;
 		}
 	}
-	return result.str();
+	return result;
 }
 
 //
