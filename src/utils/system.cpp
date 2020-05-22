@@ -7,27 +7,8 @@
 #include "retdec/utils/os.h"
 #include "retdec/utils/system.h"
 
-// sleep()
-#ifdef OS_WINDOWS
-	#include <windows.h>
-#else
-	#include <unistd.h>
-#endif
-
 namespace retdec {
 namespace utils {
-
-/**
-* @brief Sleeps for the given number of seconds.
-*/
-void sleep(unsigned seconds) {
-	#ifdef OS_WINDOWS
-		// The Windows version expects the number in milliseconds.
-		::Sleep(seconds * 1000);
-	#else
-		::sleep(seconds);
-	#endif
-}
 
 /**
 * @brief Finds out if the runtime architecture is little endian.
