@@ -92,7 +92,7 @@ namespace PeLib
 		{"LDR_ERROR_RELOC_ENTRY_BAD_TYPE",         "A relocation entry has invalid type", true },
 
 		// Other errors
-	    {"LDR_ERROR_INMEMORY_IMAGE",               "The file is an in-memory image", false },
+		{"LDR_ERROR_INMEMORY_IMAGE",               "The file is an in-memory image", false },
 
 	};
 
