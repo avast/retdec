@@ -20,7 +20,10 @@ namespace {
  */
 const std::size_t FILE_BURST_READ_LENGTH = 0x100000;
 
-template <typename N> bool readBytes(std::istream& fileStream, std::vector<N>& result, std::size_t desiredSize)
+template <typename N> bool readBytes(
+		std::istream& fileStream,
+		std::vector<N>& result,
+		std::size_t desiredSize)
 {
 	// We can read directly from the file without any conversions.
 	if (sizeof(N) == 1)
@@ -32,9 +35,11 @@ template <typename N> bool readBytes(std::istream& fileStream, std::vector<N>& r
 
 		// Read and check for error bits
 		// If badbit is set, then something bad happened and data are not valid.
-		// If EOF bit is not set and fail bit is set, then there was some other problem with reading data.
-		// If EOF bit and failbit are set, then it just means the file was truncated, but we should not report
-		//   it as error. Instead, we just shrink the result buffer to the number of bytes we have read.
+		// If EOF bit is not set and fail bit is set, then there was some other
+		// problem with reading data.
+		// If EOF bit and failbit are set, then it just means the file was
+		// truncated, but we should not report it as error. Instead, we just
+		// shrink the result buffer to the number of bytes we have read.
 		fileStream.read(buffer, desiredSize);
 		if (fileStream.bad() || (!fileStream.eof() && fileStream.fail()))
 			return false;
@@ -61,12 +66,18 @@ template <typename N> bool readBytes(std::istream& fileStream, std::vector<N>& r
 	return true;
 }
 
-template <typename N> bool writeBytes(std::ostream& fileStream, const std::vector<N>& data, std::size_t desiredSize)
+template <typename N> bool writeBytes(
+		std::ostream& fileStream,
+		const std::vector<N>& data,
+		std::size_t desiredSize)
 {
 	// We can write directly to the file without any conversions.
 	if (sizeof(N) == 1)
 	{
-		fileStream.write(reinterpret_cast<const char*>(data.data()), desiredSize);
+		fileStream.write(
+				reinterpret_cast<const char*>(data.data()),
+				desiredSize
+		);
 		return fileStream.good();
 	}
 	else
@@ -88,14 +99,18 @@ template <typename N> bool writeBytes(std::ostream& fileStream, const std::vecto
  * @param fileStream Representation of input file
  * @param result Into this parameter the resulting bytes are stored
  * @param start Start offset of read
- * @param desiredSize Number of bytes for read. If this parameter is set to zero,
- *    function will read all bytes from @a start until end of file.
+ * @param desiredSize Number of bytes for read. If this parameter is set
+ *        to zero, function will read all bytes from @a start until end of file.
  *
  * @return @c true if operation went OK, otherwise @c false
  *
  * If function returns @c false, @a bytes is set to empty vector
  */
-template <typename N> bool readFile(std::istream& fileStream, std::vector<N>& result, std::size_t start = 0, std::size_t desiredSize = 0)
+template <typename N> bool readFile(
+		std::istream& fileStream,
+		std::vector<N>& result,
+		std::size_t start = 0,
+		std::size_t desiredSize = 0)
 {
 	// Seek to the given offset and check if nothing bad happened
 	fileStream.seekg(start, std::ios::beg);
@@ -128,14 +143,18 @@ template <typename N> bool readFile(std::istream& fileStream, std::vector<N>& re
  * @param fileName Name of the file
  * @param result Into this parameter the resulting bytes are stored
  * @param start Start offset of read
- * @param desiredSize Number of bytes for read. If this parameter is set to zero,
- *    function will read all bytes from @a start until end of file.
+ * @param desiredSize Number of bytes for read. If this parameter is set to
+ *    zero, function will read all bytes from @a start until end of file.
  *
  * @return @c true if operation went OK, otherwise @c false
  *
  * If function returns @c false, @a bytes is set to empty vector
  */
-template <typename N> bool readFile(const std::string& fileName, std::vector<N>& result, std::size_t start = 0, std::size_t desiredSize = 0)
+template <typename N> bool readFile(
+		const std::string& fileName,
+		std::vector<N>& result,
+		std::size_t start = 0,
+		std::size_t desiredSize = 0)
 {
 	result.clear();
 
@@ -152,12 +171,16 @@ template <typename N> bool readFile(const std::string& fileName, std::vector<N>&
  * @param fileStream Representation of output file
  * @param data Data to write into the file
  * @param start Start offset of write
- * @param desiredSize Number of bytes to write. If this parameter is set to zero,
- *    function will write all bytes from @c data.
+ * @param desiredSize Number of bytes to write. If this parameter is set
+ *        to zero, function will write all bytes from @c data.
  *
  * @return @c true if operation went OK, otherwise @c false
  */
-template <typename N> bool writeFile(std::ostream& fileStream, const std::vector<N>& data, std::size_t start = 0, std::size_t desiredSize = 0)
+template <typename N> bool writeFile(
+		std::ostream& fileStream,
+		const std::vector<N>& data,
+		std::size_t start = 0,
+		std::size_t desiredSize = 0)
 {
 	fileStream.seekp(start, std::ios::beg);
 	if (!fileStream.good())
@@ -176,14 +199,21 @@ template <typename N> bool writeFile(std::ostream& fileStream, const std::vector
  * @param fileName Name of the file
  * @param data Data to write into the file
  * @param start Start offset of write
- * @param desiredSize Number of bytes to write. If this parameter is set to zero,
- *    function will write all bytes from @c data.
+ * @param desiredSize Number of bytes to write. If this parameter is set
+ *        to zero, function will write all bytes from @c data.
  *
  * @return @c true if operation went OK, otherwise @c false
  */
-template <typename N> bool writeFile(const std::string& fileName, const std::vector<N>& data, std::size_t start = 0, std::size_t desiredSize = 0)
+template <typename N> bool writeFile(
+		const std::string& fileName,
+		const std::vector<N>& data,
+		std::size_t start = 0,
+		std::size_t desiredSize = 0)
 {
-	std::ofstream file(fileName, std::ios::out | std::ios::trunc | std::ios::binary);
+	std::ofstream file(
+			fileName,
+			std::ios::out | std::ios::trunc | std::ios::binary
+	);
 	if (!file.is_open())
 		return false;
 
