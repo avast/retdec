@@ -21,100 +21,7 @@ namespace utils {
 /// @name Conversions
 /// @{
 
-std::string toHex(std::uint64_t i, bool addBase = false, unsigned fillToN = 0);
-
-/**
-* @brief Converts the given string into a number.
-*
-* @param[in] str String to be converted into a number.
-* @param[out] number Into this parameter the resulting number is stored.
-* @param[in] format Number format (e.g. std::dec, std::hex).
-*
-* @return @c true if the conversion went ok, @c false otherwise.
-*
-* If the conversion fails, @a number is left unchanged.
-*/
-template<typename N>
-inline bool strToNum(const std::string &str, N &number,
-		std::ios_base &(* format)(std::ios_base &) = std::dec) {
-	std::istringstream strStream(str);
-	N convNumber = 0;
-	strStream >> format >> convNumber;
-	if (strStream.fail() || !strStream.eof()) {
-		return false;
-	}
-
-	// The above checks do not detect conversion of a negative number into an
-	// unsigned integer. We have to perform an additional check here.
-	if (std::is_unsigned<N>::value && str[0] == '-') {
-		return false;
-	}
-
-	number = convNumber;
-	return true;
-}
-
-/**
-* @brief Converts the given number into a string.
-*
-* @param[in] number Number for conversion.
-* @param[in] format String format (e.g. std::dec, std::hex).
-*
-* @return Resulting string.
-*/
-template<typename N>
-inline std::string numToStr(const N number,
-		std::ios_base &(* format)(std::ios_base &) = std::dec) {
-	std::ostringstream strStream;
-	strStream << format << number;
-	return strStream.str();
-}
-
-namespace
-{
-	const std::size_t BITS_IN_BYTE = 8;
-}
-
-/**
- * @brief Converts the given array of numbers into a bits.
- *
- * @param[in] data Array of numbers.
- * @param[in] dataSize Size of array.
- *
- * @return Resulting string.
- */
-template<typename N>
-std::string bytesToBits(const N *data, std::size_t dataSize) {
-	if(!data) {
-		dataSize = 0;
-	}
-
-	std::string result;
-	result.reserve(dataSize * BITS_IN_BYTE);
-
-	for (std::size_t i = 0; i < dataSize; ++i) {
-		auto& item = data[i];
-
-		for(std::size_t j = 0; j < BITS_IN_BYTE; ++j) {
-			// 0x80 = 0b10000000
-			result += ((item << j) & 0x80) ? '1' : '0';
-		}
-	}
-
-	return result;
-}
-
-/**
- * @brief Converts the given vector of numbers into a bits.
- *
- * @param[in] bytes Vector to be converted into a bits.
- *
- * @return Resulting string.
- */
-template<typename N>
-std::string bytesToBits(const std::vector<N> &bytes) {
-	return bytesToBits(bytes.data(), bytes.size());
-}
+//==============================================================================
 
 /**
  * Converts the given array of numbers into a hexadecimal string representation
@@ -197,6 +104,106 @@ template<typename N> void bytesToHexString(
 }
 
 /**
+* @brief Converts the given number into a string.
+*
+* @param[in] number Number for conversion.
+* @param[in] format String format (e.g. std::dec, std::hex).
+*
+* @return Resulting string.
+*/
+template<typename N>
+inline std::string numToStr(const N number,
+		std::ios_base &(* format)(std::ios_base &) = std::dec) {
+	std::ostringstream strStream;
+	strStream << format << number;
+	return strStream.str();
+}
+
+std::string toHex(std::uint64_t i, bool addBase = false, unsigned fillToN = 0);
+
+std::string bytesToHexString(const std::vector<uint8_t>& bytes);
+
+char* byteToHex_fast(unsigned char b, bool lowerAlpha = true);
+
+//==============================================================================
+
+/**
+* @brief Converts the given string into a number.
+*
+* @param[in] str String to be converted into a number.
+* @param[out] number Into this parameter the resulting number is stored.
+* @param[in] format Number format (e.g. std::dec, std::hex).
+*
+* @return @c true if the conversion went ok, @c false otherwise.
+*
+* If the conversion fails, @a number is left unchanged.
+*/
+template<typename N>
+inline bool strToNum(const std::string &str, N &number,
+		std::ios_base &(* format)(std::ios_base &) = std::dec) {
+	std::istringstream strStream(str);
+	N convNumber = 0;
+	strStream >> format >> convNumber;
+	if (strStream.fail() || !strStream.eof()) {
+		return false;
+	}
+
+	// The above checks do not detect conversion of a negative number into an
+	// unsigned integer. We have to perform an additional check here.
+	if (std::is_unsigned<N>::value && str[0] == '-') {
+		return false;
+	}
+
+	number = convNumber;
+	return true;
+}
+
+namespace
+{
+	const std::size_t BITS_IN_BYTE = 8;
+}
+
+/**
+ * @brief Converts the given array of numbers into a bits.
+ *
+ * @param[in] data Array of numbers.
+ * @param[in] dataSize Size of array.
+ *
+ * @return Resulting string.
+ */
+template<typename N>
+std::string bytesToBits(const N *data, std::size_t dataSize) {
+	if(!data) {
+		dataSize = 0;
+	}
+
+	std::string result;
+	result.reserve(dataSize * BITS_IN_BYTE);
+
+	for (std::size_t i = 0; i < dataSize; ++i) {
+		auto& item = data[i];
+
+		for(std::size_t j = 0; j < BITS_IN_BYTE; ++j) {
+			// 0x80 = 0b10000000
+			result += ((item << j) & 0x80) ? '1' : '0';
+		}
+	}
+
+	return result;
+}
+
+/**
+ * @brief Converts the given vector of numbers into a bits.
+ *
+ * @param[in] bytes Vector to be converted into a bits.
+ *
+ * @return Resulting string.
+ */
+template<typename N>
+std::string bytesToBits(const std::vector<N> &bytes) {
+	return bytesToBits(bytes.data(), bytes.size());
+}
+/**
  * Converts the given array of numbers into a string
  * @param data Array to be converted into a string
  * @param dataSize Size of array
@@ -259,9 +266,6 @@ std::string byteSwap16(const std::string &val);
 std::string byteSwap32(const std::string &val);
 
 std::vector<uint8_t> hexStringToBytes(const std::string& hexIn);
-std::string bytesToHexString(const std::vector<uint8_t>& bytes);
-
-char* byteToHex_fast(unsigned char b, bool lowerAlpha = true);
 
 /// @}
 

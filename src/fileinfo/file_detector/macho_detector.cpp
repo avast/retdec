@@ -185,8 +185,8 @@ void MachODetector::getEncryption()
 	{
 		std::stringstream message;
 		message << "Warning: This file is encrypted (encryption algorithm: " << id
-			<< ", offset: " << numToStr(offset, hexWithPrefix)
-			<< ", size: " << numToStr(size, hexWithPrefix) << ").";
+			<< ", offset: " << numToStr(offset, std::hex)
+			<< ", size: " << numToStr(size, std::hex) << ").";
 		fileInfo.messages.push_back(message.str());
 	}
 }
