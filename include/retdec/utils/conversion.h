@@ -24,53 +24,6 @@ namespace utils {
 std::string toHex(std::uint64_t i, bool addBase = false, unsigned fillToN = 0);
 
 /**
-* @brief Converts the given value into a string.
-*
-* @tparam T Type of @a value.
-*/
-template<typename T>
-inline std::string toString(const T &value) {
-	std::ostringstream out;
-	out << value;
-	return out.str();
-}
-
-// Specialization for bool
-template<>
-inline std::string toString<bool>(const bool &value) {
-	std::ostringstream out;
-	out << std::boolalpha << value;
-	return out.str();
-}
-
-// Specialization for float
-template<>
-inline std::string toString<float>(const float &value) {
-	const int sigDigits = std::numeric_limits<float>::digits10;
-	std::ostringstream out;
-	out << std::setprecision(sigDigits) << value;
-	return out.str();
-}
-
-// Specialization for double
-template<>
-inline std::string toString<double>(const double &value) {
-	const int sigDigits = std::numeric_limits<double>::digits10;
-	std::ostringstream out;
-	out << std::setprecision(sigDigits) << value;
-	return out.str();
-}
-
-// Specialization for long double
-template<>
-inline std::string toString<long double>(const long double &value) {
-	const int sigDigits = std::numeric_limits<long double>::digits10;
-	std::ostringstream out;
-	out << std::setprecision(sigDigits) << value;
-	return out.str();
-}
-
-/**
 * @brief Converts the given string into a number.
 *
 * @param[in] str String to be converted into a number.
@@ -182,9 +135,13 @@ std::string byteToBits(N byte) {
  * @param byte Data to be converted
  * @param uppercase @c true if hex letters (A-F) should be uppercase
  */
-template<typename N> void byteToHexString(std::ostream& oStr, N byte, bool uppercase = true)
+template<typename N> void byteToHexString(
+		std::ostream& oStr,
+		N byte,
+		bool uppercase = true)
 {
-	oStr << std::hex << std::setfill('0') << std::setw(2) << (uppercase ? std::uppercase : std::nouppercase) << (byte & 0xFF);
+	oStr << std::hex << std::setfill('0') << std::setw(2)
+			<< (uppercase ? std::uppercase : std::nouppercase) << (byte & 0xFF);
 }
 
 /**
@@ -197,7 +154,13 @@ template<typename N> void byteToHexString(std::ostream& oStr, N byte, bool upper
  *    (0 means all bytes from @a offset)
  * @param uppercase @c true if hex letters (A-F) should be uppercase
  */
-template<typename N> void bytesToHexString(const N *data, std::size_t dataSize, std::string &result, std::size_t offset = 0, std::size_t size = 0, bool uppercase = true)
+template<typename N> void bytesToHexString(
+		const N *data,
+		std::size_t dataSize,
+		std::string &result,
+		std::size_t offset = 0,
+		std::size_t size = 0,
+		bool uppercase = true)
 {
 	if(!data)
 	{
@@ -210,13 +173,15 @@ template<typename N> void bytesToHexString(const N *data, std::size_t dataSize, 
 	}
 	else
 	{
-		size = (size == 0 || offset + size > dataSize) ? dataSize - offset : size;
+		size = (size == 0 || offset + size > dataSize)
+				? dataSize - offset
+				: size;
 	}
 
 	// Sample: 4A2A008CF1AEE9BA49D8D1DAA22D8E868365ACE633823D464478239F27ED4F18
 	// Tool: redec-fileinfo.exe, Debug, x64, data = image, dataSize = 0xE1BC00
-	// Optimized: This code now takes 0.106 seconds to convert (measured in VS 2015 IDE)
-	// (down from about 40 seconds)
+	// Optimized: This code now takes 0.106 seconds to convert
+	// (measured in VS 2015 IDE) (down from about 40 seconds)
 	const char * intToHex = uppercase ? "0123456789ABCDEF" : "0123456789abcdef";
 	std::size_t hexIndex = 0;
 
@@ -242,9 +207,21 @@ template<typename N> void bytesToHexString(const N *data, std::size_t dataSize, 
  *    (0 means all bytes from @a offset)
  * @param uppercase @c true if hex letters (A-F) should be uppercase
  */
-template<typename N> void bytesToHexString(const std::vector<N> &bytes, std::string &result, std::size_t offset = 0, std::size_t size = 0, bool uppercase = true)
+template<typename N> void bytesToHexString(
+		const std::vector<N> &bytes,
+		std::string &result,
+		std::size_t offset = 0,
+		std::size_t size = 0,
+		bool uppercase = true)
 {
-	bytesToHexString(bytes.data(), bytes.size(), result, offset, size, uppercase);
+	bytesToHexString(
+			bytes.data(),
+			bytes.size(),
+			result,
+			offset,
+			size,
+			uppercase
+	);
 }
 
 /**
@@ -256,7 +233,12 @@ template<typename N> void bytesToHexString(const std::vector<N> &bytes, std::str
  * @param size Number of bytes from @a data for conversion
  *    (0 means all bytes from @a offset)
  */
-template<typename N> void bytesToString(const N *data, std::size_t dataSize, std::string &result, std::size_t offset = 0, std::size_t size = 0)
+template<typename N> void bytesToString(
+		const N *data,
+		std::size_t dataSize,
+		std::string &result,
+		std::size_t offset = 0,
+		std::size_t size = 0)
 {
 	if(!data)
 	{
@@ -269,7 +251,9 @@ template<typename N> void bytesToString(const N *data, std::size_t dataSize, std
 	}
 	else
 	{
-		size = (size == 0 || offset + size > dataSize) ? dataSize - offset : size;
+		size = (size == 0 || offset + size > dataSize)
+				? dataSize - offset
+				: size;
 	}
 
 	result.clear();
@@ -285,7 +269,11 @@ template<typename N> void bytesToString(const N *data, std::size_t dataSize, std
  * @param size Number of bytes from @a bytes for conversion
  *    (0 means all bytes from @a offset)
  */
-template<typename N> void bytesToString(const std::vector<N> &bytes, std::string &result, std::size_t offset = 0, std::size_t size = 0)
+template<typename N> void bytesToString(
+		const std::vector<N> &bytes,
+		std::string &result,
+		std::size_t offset = 0,
+		std::size_t size = 0)
 {
 	bytesToString(bytes.data(), bytes.size(), result, offset, size);
 }

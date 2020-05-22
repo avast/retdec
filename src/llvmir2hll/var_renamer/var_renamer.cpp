@@ -21,7 +21,6 @@
 
 using retdec::utils::hasItem;
 using retdec::utils::mapGetValueOrDefault;
-using retdec::utils::toString;
 
 namespace retdec {
 namespace llvmir2hll {
@@ -279,7 +278,7 @@ std::string VarRenamer::generateUniqueName(ShPtr<Variable> var,
 		// The name does not end with a number -> append numbers.
 		unsigned varNum = 2;
 		do {
-			newName = name + toString(varNum++);
+			newName = name + std::to_string(varNum++);
 		} while (nameExists(newName, func));
 	}
 	return newName;

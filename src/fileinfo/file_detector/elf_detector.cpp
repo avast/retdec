@@ -1198,7 +1198,7 @@ void ElfDetector::getCoreInfo()
 		auto name = mapGetValueOrDefault(auxVecMap, entry.first, "");
 		if(name.empty())
 		{
-			name = "UNKNOWN " + toString(entry.first);
+			name = "UNKNOWN " + std::to_string(entry.first);
 		}
 		fileInfo.addAuxVectorEntry(name, entry.second);
 	}

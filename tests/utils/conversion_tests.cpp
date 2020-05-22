@@ -56,43 +56,6 @@ ToHexCorrectConversionWithFill) {
 }
 
 //
-// toString()
-//
-
-TEST_F(ConversionTests,
-ToStringBool) {
-	EXPECT_EQ("true", toString(true));
-	EXPECT_EQ("false", toString(false));
-}
-
-TEST_F(ConversionTests,
-ToStringInt) {
-	EXPECT_EQ("-100", toString(-100));
-	EXPECT_EQ("-1", toString(-1));
-	EXPECT_EQ("0", toString(0));
-	EXPECT_EQ("1", toString(1));
-	EXPECT_EQ("100", toString(100));
-}
-
-TEST_F(ConversionTests,
-ToStringString) {
-	EXPECT_EQ("", toString(std::string("")));
-	EXPECT_EQ("test", toString(std::string("test")));
-}
-
-TEST_F(ConversionTests,
-ToStringCharPointer) {
-	EXPECT_EQ("", toString(""));
-	EXPECT_EQ("test", toString("test"));
-}
-
-TEST_F(ConversionTests,
-ToStringChar) {
-	EXPECT_EQ("a", toString('a'));
-	EXPECT_EQ("\n", toString('\n'));
-}
-
-//
 // strToNum()
 //
 

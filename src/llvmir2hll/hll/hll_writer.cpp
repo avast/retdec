@@ -51,7 +51,6 @@ using retdec::utils::joinStrings;
 using retdec::utils::split;
 using retdec::utils::startsWith;
 using retdec::utils::toHex;
-using retdec::utils::toString;
 
 namespace retdec {
 namespace llvmir2hll {
@@ -1260,7 +1259,7 @@ std::string HLLWriter::getRawGotoLabel(ShPtr<Statement> stmt) {
 	}
 
 	// Fall-back.
-	return "generated_" + toString(currFuncGotoLabelCounter++);
+	return "generated_" + std::to_string(currFuncGotoLabelCounter++);
 }
 
 /**
