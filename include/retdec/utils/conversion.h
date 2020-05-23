@@ -21,7 +21,7 @@ namespace utils {
 /// @name Conversions
 /// @{
 
-//==============================================================================
+char* byteToHexString(uint8_t b, bool uppercase = true);
 
 /**
  * Converts the given array of numbers into a hexadecimal string representation
@@ -32,6 +32,7 @@ namespace utils {
  * @param size Number of bytes from @a data for conversion
  *    (0 means all bytes from @a offset)
  * @param uppercase @c true if hex letters (A-F) should be uppercase
+ * @param spacing insert ' ' between every byte
  */
 template<typename N> void bytesToHexString(
 		const N *data,
@@ -39,41 +40,32 @@ template<typename N> void bytesToHexString(
 		std::string &result,
 		std::size_t offset = 0,
 		std::size_t size = 0,
-		bool uppercase = true)
+		bool uppercase = true,
+		bool spacing = false)
 {
-	if(!data)
+	if (data == nullptr || offset >= dataSize)
 	{
-		dataSize = 0;
+		return;
 	}
 
-	if(offset >= dataSize)
-	{
-		size = 0;
-	}
-	else
-	{
-		size = (size == 0 || offset + size > dataSize)
-				? dataSize - offset
-				: size;
-	}
+	size = (size == 0 || offset + size > dataSize)
+			? dataSize - offset
+			: size;
 
-	// Sample: 4A2A008CF1AEE9BA49D8D1DAA22D8E868365ACE633823D464478239F27ED4F18
-	// Tool: redec-fileinfo.exe, Debug, x64, data = image, dataSize = 0xE1BC00
-	// Optimized: This code now takes 0.106 seconds to convert
-	// (measured in VS 2015 IDE) (down from about 40 seconds)
-	const char * intToHex = uppercase ? "0123456789ABCDEF" : "0123456789abcdef";
 	std::size_t hexIndex = 0;
 
-	// Reserve the necessary space for the hexa string
-	result.resize(size * 2);
+	std::size_t sz = spacing ? (size * 3 - 1) : (size * 2);
+	result.resize(sz);
 
-	// Convert to hexa byte-by-byte. No reallocations
-	for (std::size_t i = 0; i < size; ++i, hexIndex += 2)
+	for (std::size_t i = 0; i < size; ++i)
 	{
-		std::uint8_t oneByte = data[offset + i];
-
-		result[hexIndex + 0] = intToHex[(oneByte >> 0x04) & 0x0F];
-		result[hexIndex + 1] = intToHex[(oneByte >> 0x00) & 0x0F];
+		if (spacing && hexIndex > 0)
+		{
+			result[hexIndex++] = ' ';
+		}
+		auto res = byteToHexString(data[offset + i], uppercase);
+		result[hexIndex++] = res[0];
+		result[hexIndex++] = res[1];
 	}
 }
 
@@ -85,13 +77,15 @@ template<typename N> void bytesToHexString(
  * @param size Number of bytes from @a bytes for conversion
  *    (0 means all bytes from @a offset)
  * @param uppercase @c true if hex letters (A-F) should be uppercase
+ * @param spacing insert ' ' between every byte
  */
 template<typename N> void bytesToHexString(
 		const std::vector<N> &bytes,
 		std::string &result,
 		std::size_t offset = 0,
 		std::size_t size = 0,
-		bool uppercase = true)
+		bool uppercase = true,
+		bool spacing = false)
 {
 	bytesToHexString(
 			bytes.data(),
@@ -99,33 +93,66 @@ template<typename N> void bytesToHexString(
 			result,
 			offset,
 			size,
-			uppercase
+			uppercase,
+			spacing
 	);
 }
 
 /**
-* @brief Converts the given number into a string.
+* @brief Converts the given integer into its hexadecimal representation.
 *
-* @param[in] number Number for conversion.
-* @param[in] format String format (e.g. std::dec, std::hex).
+* @param[in] w Number to be converted.
+* @param[in] addBase Prepends "0x" before the result.
+* @param[in] fillToN If needed, prepends "0" before the result to get at least
+*                    @c fillToN characters long string.
 *
-* @return Resulting string.
+* All letters in the result are lowercase.
 */
-template<typename N>
-inline std::string numToStr(const N number,
-		std::ios_base &(* format)(std::ios_base &) = std::dec) {
-	std::ostringstream strStream;
-	strStream << format << number;
-	return strStream.str();
+template<typename I>
+std::string intToHexString(I w, bool addBase = false, unsigned fillToN = 0)
+{
+	static const char* digits = "0123456789abcdef";
+
+	size_t hex_len = sizeof(I)<<1;
+
+	std::string rc(hex_len,'0');
+	for (size_t i = 0, j = (hex_len-1)*4 ; i < hex_len; ++i, j -= 4)
+	{
+		rc[i] = digits[(w>>j) & 0x0f];
+	}
+
+	bool started = false;
+	std::string res;
+	size_t j = 0;
+	if (addBase)
+	{
+		res.resize(rc.size() + 2);
+		res[0] = '0';
+		res[1] = 'x';
+		j = 2;
+	}
+	else
+	{
+		res.resize(rc.size());
+	}
+	for (size_t i = 0; i < rc.size(); ++i)
+	{
+		if (started)
+		{
+			res[j++] = rc[i];
+		}
+		else if (rc[i] != '0' || (rc.size() - i <= fillToN) || (i == rc.size() - 1))
+		{
+			res[j++] = rc[i];
+			started = true;
+		}
+	}
+	res.resize(j);
+
+	return res;
 }
 
-std::string toHex(std::uint64_t i, bool addBase = false, unsigned fillToN = 0);
-
-std::string bytesToHexString(const std::vector<uint8_t>& bytes);
-
-char* byteToHex_fast(unsigned char b, bool lowerAlpha = true);
-
-//==============================================================================
+std::vector<uint8_t> hexStringToBytes(const std::string& hexIn);
 
 /**
 * @brief Converts the given string into a number.
@@ -264,8 +291,6 @@ unsigned short byteSwap16(unsigned short val);
 unsigned int byteSwap32(unsigned int val);
 std::string byteSwap16(const std::string &val);
 std::string byteSwap32(const std::string &val);
-
-std::vector<uint8_t> hexStringToBytes(const std::string& hexIn);
 
 /// @}
 

@@ -251,8 +251,8 @@ std::string PeHeuristics::getUpxAdditionalInfo(std::size_t metadataPos)
 
 			auto id = static_cast<std::uint32_t>(content[metadataPos + 28]);
 			auto param = static_cast<std::uint32_t>(content[metadataPos + 29]);
-			info += "[Filter: 0x" + numToStr(id, std::hex)
-					+ ", Param: 0x" + numToStr(param, std::hex) + ']';
+			info += "[Filter: 0x" + intToHexString(id)
+					+ ", Param: 0x" + intToHexString(param) + ']';
 		}
 	}
 

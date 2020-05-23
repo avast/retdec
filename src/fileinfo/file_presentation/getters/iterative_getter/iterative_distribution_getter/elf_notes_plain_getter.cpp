@@ -89,7 +89,7 @@ std::size_t ElfNotesPlainGetter::getBasicInfo(
 	desc.push_back("File offset    : ");
 	desc.push_back("Size in file   : ");
 	desc.push_back("Number of notes: ");
-	info.push_back(toHex(notes.getSecSegOffset(), true));
+	info.push_back(intToHexString(notes.getSecSegOffset(), true));
 	info.push_back(std::to_string(notes.getSecSegLength()));
 	info.push_back(std::to_string(notes.getNotes().size()));
 
@@ -113,8 +113,8 @@ bool ElfNotesPlainGetter::loadRecord(
 	record.clear();
 	record.push_back(std::to_string(recIndex));
 	record.push_back(replaceNonprintableChars(note.owner));
-	record.push_back(toHex(note.type, true, 8));
-	record.push_back(toHex(note.dataOffset, true, 8));
+	record.push_back(intToHexString(note.type, true, 8));
+	record.push_back(intToHexString(note.dataOffset, true, 8));
 	record.push_back(std::to_string(note.dataLength));
 	record.push_back(replaceNonprintableChars(note.description));
 

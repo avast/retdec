@@ -50,7 +50,6 @@ using retdec::utils::hasItem;
 using retdec::utils::joinStrings;
 using retdec::utils::split;
 using retdec::utils::startsWith;
-using retdec::utils::toHex;
 
 namespace retdec {
 namespace llvmir2hll {

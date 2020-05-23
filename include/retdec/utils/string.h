@@ -161,10 +161,6 @@ void removeSuffix(std::string &n, const std::string &suffix = "_");
 std::string removeSuffixRet(const std::string &n,
 	const std::string &suffix = "_");
 
-// TODO: This is the same as toHex() in conversion.h
-// Use implementation in conversion.h, but make it to take uint64_t or template.
-std::string toHexString(unsigned long long val);
-
 std::string normalizeName(const std::string &name);
 std::string normalizeNamePrefix(const std::string &name);
 

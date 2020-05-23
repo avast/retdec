@@ -18,10 +18,8 @@
 
 #include "retdec/capstone2llvmir/capstone2llvmir.h"
 
-using namespace std;
-
 // byte ptr [0x12345678], 0x11
-vector<uint8_t> CODE = retdec::utils::hexStringToBytes("80 05 78 56 34 12 11 00");
+std::vector<uint8_t> CODE = retdec::utils::hexStringToBytes("80 05 78 56 34 12 11 00");
 
 class ProgramOptions
 {
@@ -152,11 +150,13 @@ class ProgramOptions
 
 		void dump()
 		{
+			std::string tmp;
+			retdec::utils::bytesToHexString(code, tmp, 0, 0, false, true);
 			cout << endl;
 			cout << "Program Options:" << endl;
 			cout << "\t" << "arch   : " << arch << " (" << _arch << ")" << endl;
 			cout << "\t" << "base   : " << hex << base << " (" << _base << ")" << endl;
-			cout << "\t" << "code   : " << retdec::utils::bytesToHexString(code) << " (" << _code << ")" << endl;
+			cout << "\t" << "code   : " << tmp << " (" << _code << ")" << endl;
 			cout << "\t" << "asm text : " << text << endl;
 			cout << "\t" << "b mode : " << hex << basicMode << " (" << _basicMode << ")" << endl;
 			cout << "\t" << "e mode : " << hex << extraMode << " (" << _extraMode << ")" << endl;
@@ -166,6 +166,8 @@ class ProgramOptions
 
 		void printHelpAndDie()
 		{
+			std::string tmp;
+			retdec::utils::bytesToHexString(CODE, tmp, 0, 0, false, true);
 			cout << _programName << ":\n"
 				"\t-a name   Set architecture name.\n"
 				"\t          Possible values: arm, arm64, mips, x86, ppc, sparc, sysz, xcore\n"
@@ -174,7 +176,7 @@ class ProgramOptions
 				"\t          Default value 0x1000.\n"
 				"\t-c code   Binary data to translate in hexadecimal format.\n"
 				"\t          E.g. \"0b 84 d1 a0 80 60 40\" or \"0b84d1a0806040\".\n"
-				"\t          Default value: \"" << retdec::utils::bytesToHexString(CODE) << "\"\n"
+				"\t          Default value: \"" << tmp << "\"\n"
 				"\t-t asm    Assembly text to assemble, disassemble and dump.\n"
 				"\t          Most of the time, this is more convenient than -c option.\n"
 				"\t-m mode   Capstone basic mode to use.\n"

@@ -54,7 +54,7 @@ std::string replaceChars(const std::string &str, bool (* predicate)(unsigned cha
 	result.reserve(str.size() * 4);
 	for (const auto c : str) {
 		if (predicate(c)) {
-			result += prefix + byteToHex_fast(c);
+			result += prefix + byteToHexString(c, false);
 		} else {
 			result += c;
 		}
@@ -442,8 +442,8 @@ std::string unicodeToAscii(const std::uint8_t *bytes, std::size_t nBytes)
 		else
 		{
 			const std::size_t maxC = (1 << (sizeof(std::string::value_type) * CHAR_BIT)) - 1;
-			const auto val1 = numToStr<std::size_t>(bytes[i] & maxC, std::hex);
-			const auto val2 = numToStr<std::size_t>(bytes[i + 1] & maxC, std::hex);
+			const auto val1 = intToHexString(bytes[i] & maxC);
+			const auto val2 = intToHexString(bytes[i + 1] & maxC);
 			result << "\\x" << std::setw(2) << std::setfill('0') << val1;
 			result << "\\x" << std::setw(2) << std::setfill('0') << val2;
 		}
@@ -488,8 +488,8 @@ std::string unicodeToAscii(const std::uint8_t *bytes, std::size_t nBytes, std::s
 		else
 		{
 			const std::size_t maxC = (1 << (sizeof(std::string::value_type) * CHAR_BIT)) - 1;
-			const auto val1 = numToStr<std::size_t>(bytes[i] & maxC, std::hex);
-			const auto val2 = numToStr<std::size_t>(bytes[i + 1] & maxC, std::hex);
+			const auto val1 = intToHexString(bytes[i] & maxC);
+			const auto val2 = intToHexString(bytes[i + 1] & maxC);
 			result << "\\x" << std::setw(2) << std::setfill('0') << val1;
 			result << "\\x" << std::setw(2) << std::setfill('0') << val2;
 		}
@@ -1132,15 +1132,6 @@ std::string removeSuffixRet(const std::string &n, const std::string &suffix) {
 		ret = ret.substr(0, found);
 	}
 	return ret;
-}
-
-/**
-* @brief Returns hex-string form of the given integer.
-*/
-std::string toHexString(unsigned long long val) {
-	std::stringstream ss;
-	ss << std::hex << val;
-	return ss.str();
 }
 
 /**

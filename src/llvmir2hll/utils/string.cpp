@@ -16,7 +16,6 @@ using retdec::utils::hasOnlyDecimalDigits;
 using retdec::utils::hasOnlyHexadecimalDigits;
 using retdec::utils::split;
 using retdec::utils::startsWith;
-using retdec::utils::toHex;
 using retdec::utils::toLower;
 
 namespace retdec {
@@ -43,7 +42,7 @@ std::string makeIdentifierValid(const std::string &id) {
 		} else if (c == '.') {
 			resId += '_';
 		} else {
-			resId += "_" + toHex(c) + "_";
+			resId += "_" + utils::intToHexString(c) + "_";
 		}
 	}
 	return resId;

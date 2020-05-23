@@ -93,7 +93,7 @@ bool ElfCoreMapPlainGetter::loadRecord(
 
 	record.clear();
 	record.push_back(std::to_string(recIndex));
-	record.push_back(toHex(entry.address, true));
+	record.push_back(intToHexString(entry.address, true));
 	record.push_back(std::to_string(entry.size));
 	record.push_back(std::to_string(entry.page));
 	record.push_back(replaceNonprintableChars(entry.path));

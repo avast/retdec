@@ -1511,7 +1511,7 @@ void PeFormat::loadExports()
 
 		if(hasNonprintableChars(newExport.getName()))
 		{
-			newExport.setName("exported_function_" + numToStr(newExport.getAddress(), std::hex));
+			newExport.setName("exported_function_" + intToHexString(newExport.getAddress()));
 		}
 		exportTable->addExport(newExport);
 	}
@@ -1576,13 +1576,13 @@ void PeFormat::loadPdbInfo()
 				get2ByteOffset(guidOffset + 6, res3) && get2ByteOffset(guidOffset + 8, res4, getInverseEndianness()) &&
 				getXByteOffset(guidOffset + 10, 6, res5, getInverseEndianness()))
 			{
-				pdbInfo->setGuid(toUpper(numToStr(res1, std::hex) + "-" + numToStr(res2, std::hex) + "-" +
-					numToStr(res3, std::hex) + "-" + numToStr(res4, std::hex) + "-" + numToStr(res5, std::hex)));
+				pdbInfo->setGuid(toUpper(intToHexString(res1) + "-" + intToHexString(res2) + "-" +
+					intToHexString(res3) + "-" + intToHexString(res4) + "-" + intToHexString(res5)));
 			}
 		}
 		else if(get4ByteOffset(guidOffset, res1))
 		{
-			pdbInfo->setGuid(toUpper(numToStr(res1, std::hex)));
+			pdbInfo->setGuid(toUpper(intToHexString(res1)));
 		}
 
 		const auto ageOffset = guidOffset + (isRsds ? 16 : 4);

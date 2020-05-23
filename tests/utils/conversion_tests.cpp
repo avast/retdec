@@ -20,39 +20,39 @@ namespace tests {
 class ConversionTests: public Test {};
 
 //
-// toHex()
+// intToHexString()
 //
 
 TEST_F(ConversionTests,
 ToHexCorrectConversionNoBase) {
-	EXPECT_EQ("0", toHex(0x0, false));
-	EXPECT_EQ("1", toHex(0x1, false));
-	EXPECT_EQ("f", toHex(0xf, false));
-	EXPECT_EQ("400", toHex(0x400, false));
-	EXPECT_EQ("ffff", toHex(0xffff, false));
+	EXPECT_EQ("0", intToHexString(0x0, false));
+	EXPECT_EQ("1", intToHexString(0x1, false));
+	EXPECT_EQ("f", intToHexString(0xf, false));
+	EXPECT_EQ("400", intToHexString(0x400, false));
+	EXPECT_EQ("ffff", intToHexString(0xffff, false));
 }
 
 TEST_F(ConversionTests,
 ToHexCorrectConversionWithBase) {
-	EXPECT_EQ("0x0", toHex(0x0, true));
-	EXPECT_EQ("0x1", toHex(0x1, true));
-	EXPECT_EQ("0xf", toHex(0xf, true));
-	EXPECT_EQ("0x400", toHex(0x400, true));
-	EXPECT_EQ("0xffff", toHex(0xffff, true));
+	EXPECT_EQ("0x0", intToHexString(0x0, true));
+	EXPECT_EQ("0x1", intToHexString(0x1, true));
+	EXPECT_EQ("0xf", intToHexString(0xf, true));
+	EXPECT_EQ("0x400", intToHexString(0x400, true));
+	EXPECT_EQ("0xffff", intToHexString(0xffff, true));
 }
 
 TEST_F(ConversionTests,
 ToHexCorrectConversionWithFill) {
-	EXPECT_EQ("0x0", toHex(0x0, true, 0));
-	EXPECT_EQ("0", toHex(0x0, false, 0));
-	EXPECT_EQ("0x0000", toHex(0x0, true, 4));
-	EXPECT_EQ("0000", toHex(0x0, false, 4));
-	EXPECT_EQ("0x1234", toHex(0x1234, true, 2));
-	EXPECT_EQ("1234", toHex(0x1234, false, 2));
-	EXPECT_EQ("0x1234", toHex(0x1234, true, 4));
-	EXPECT_EQ("1234", toHex(0x1234, false, 4));
-	EXPECT_EQ("0x00001234", toHex(0x1234, true, 8));
-	EXPECT_EQ("00001234", toHex(0x1234, false, 8));
+	EXPECT_EQ("0x0", intToHexString(0x0, true, 0));
+	EXPECT_EQ("0", intToHexString(0x0, false, 0));
+	EXPECT_EQ("0x0000", intToHexString(0x0, true, 4));
+	EXPECT_EQ("0000", intToHexString(0x0, false, 4));
+	EXPECT_EQ("0x1234", intToHexString(0x1234, true, 2));
+	EXPECT_EQ("1234", intToHexString(0x1234, false, 2));
+	EXPECT_EQ("0x1234", intToHexString(0x1234, true, 4));
+	EXPECT_EQ("1234", intToHexString(0x1234, false, 4));
+	EXPECT_EQ("0x00001234", intToHexString(0x1234, true, 8));
+	EXPECT_EQ("00001234", intToHexString(0x1234, false, 8));
 }
 
 //
@@ -276,7 +276,9 @@ hexStringToBytesSuccess) {
 TEST_F(ConversionTests,
 bytesToHexStringSuccess) {
 	std::vector<uint8_t> vres = {0x0b, 0x84, 0xd1, 0xa0, 0x80, 0x60, 0x40};
-	EXPECT_EQ("0b 84 d1 a0 80 60 40", bytesToHexString(vres));
+	std::string res;
+	bytesToHexString(vres, res, 0, 0, false, true);
+	EXPECT_EQ("0b 84 d1 a0 80 60 40", res);
 }
 
 } // namespace tests

@@ -88,7 +88,7 @@ bool ElfAuxVPlainGetter::loadRecord(
 	record.clear();
 	record.push_back(std::to_string(recIndex));
 	record.push_back(entry.first);
-	record.push_back(toHex(entry.second, true));
+	record.push_back(intToHexString(entry.second, true));
 
 	return true;
 }
