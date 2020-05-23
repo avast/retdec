@@ -143,7 +143,7 @@ class ProgramOptions
 				case CS_ARCH_MAX:
 				case CS_ARCH_ALL:
 				default:
-					cerr << "Can not get Capstone arch to default Capstone basic mode." << endl;
+					std::cerr << "Can not get Capstone arch to default Capstone basic mode." << std::endl;
 					exit(1);
 			}
 		}
@@ -152,23 +152,23 @@ class ProgramOptions
 		{
 			std::string tmp;
 			retdec::utils::bytesToHexString(code, tmp, 0, 0, false, true);
-			cout << endl;
-			cout << "Program Options:" << endl;
-			cout << "\t" << "arch   : " << arch << " (" << _arch << ")" << endl;
-			cout << "\t" << "base   : " << hex << base << " (" << _base << ")" << endl;
-			cout << "\t" << "code   : " << tmp << " (" << _code << ")" << endl;
-			cout << "\t" << "asm text : " << text << endl;
-			cout << "\t" << "b mode : " << hex << basicMode << " (" << _basicMode << ")" << endl;
-			cout << "\t" << "e mode : " << hex << extraMode << " (" << _extraMode << ")" << endl;
-			cout << "\t" << "out    : " << outFile << endl;
-			cout << endl;
+			std::cout << std::endl;
+			std::cout << "Program Options:" << std::endl;
+			std::cout << "\t" << "arch   : " << arch << " (" << _arch << ")" << std::endl;
+			std::cout << "\t" << "base   : " << std::hex << base << " (" << _base << ")" << std::endl;
+			std::cout << "\t" << "code   : " << tmp << " (" << _code << ")" << std::endl;
+			std::cout << "\t" << "asm text : " << text << std::endl;
+			std::cout << "\t" << "b mode : " << std::hex << basicMode << " (" << _basicMode << ")" << std::endl;
+			std::cout << "\t" << "e mode : " << std::hex << extraMode << " (" << _extraMode << ")" << std::endl;
+			std::cout << "\t" << "out    : " << outFile << std::endl;
+			std::cout << std::endl;
 		}
 
 		void printHelpAndDie()
 		{
 			std::string tmp;
 			retdec::utils::bytesToHexString(CODE, tmp, 0, 0, false, true);
-			cout << _programName << ":\n"
+			std::cout << _programName << ":\n"
 				"\t-a name   Set architecture name.\n"
 				"\t          Possible values: arm, arm64, mips, x86, ppc, sparc, sysz, xcore\n"
 				"\t          Default value: x86.\n"
@@ -195,19 +195,19 @@ class ProgramOptions
 	public:
 		cs_arch arch = CS_ARCH_X86;
 		uint64_t base = 0x1000;
-		vector<uint8_t> code = CODE;
-		string text;
+		std::vector<uint8_t> code = CODE;
+		std::string text;
 		cs_mode basicMode = CS_MODE_32;
 		cs_mode extraMode = CS_MODE_LITTLE_ENDIAN;
-		string outFile = "-"; // "-" == stdout for llvm::raw_fd_ostream.
+		std::string outFile = "-"; // "-" == stdout for llvm::raw_fd_ostream.
 
 	private:
-		string _programName = "capstone2llvmir";
-		string _arch;
-		string _base;
-		string _code;
-		string _basicMode;
-		string _extraMode;
+		std::string _programName = "capstone2llvmir";
+		std::string _arch;
+		std::string _base;
+		std::string _code;
+		std::string _basicMode;
+		std::string _extraMode;
 		bool _useDefaultBasicMode = true;
 };
 
@@ -220,9 +220,9 @@ void printVersion()
 	int minor = 0;
 	int version = cs_version(&major, &minor);
 
-	cout << endl;
-	cout << "Capstone version: " << version << " (major: " << major
-			<< ", minor: " << minor << ")" << endl;
+	std::cout << std::endl;
+	std::cout << "Capstone version: " << version << " (major: " << major
+			<< ", minor: " << minor << ")" << std::endl;
 }
 
 ks_arch capstoneArchToKeystoneArch(cs_arch a)
@@ -240,7 +240,7 @@ ks_arch capstoneArchToKeystoneArch(cs_arch a)
 		case CS_ARCH_MAX:
 		case CS_ARCH_ALL:
 		default:
-			cerr << "Can not convert Capstone arch to Keystone arch." << endl;
+			std::cerr << "Can not convert Capstone arch to Keystone arch." << std::endl;
 			exit(1);
 	}
 }
@@ -283,7 +283,7 @@ ks_mode capstoneModeBasicToKeystoneMode(cs_arch a, cs_mode m)
 	}
 	else
 	{
-		cerr << "Can not convert Capstone basic mode to Keystone mode." << endl;
+		std::cerr << "Can not convert Capstone basic mode to Keystone mode." << std::endl;
 		exit(1);
 	}
 }
@@ -316,7 +316,7 @@ ks_mode capstoneModeExtraToKeystoneMode(cs_arch a, cs_mode m)
 	}
 	else
 	{
-		cerr << "Can not convert Capstone extra mode to Keystone mode." << endl;
+		std::cerr << "Can not convert Capstone extra mode to Keystone mode." << std::endl;
 		exit(1);
 	}
 }
@@ -335,7 +335,7 @@ void assemble(ProgramOptions& po)
 	if (ks_open(arch, basic | extra, &ks) != KS_ERR_OK)
 	{
 		ks_err err = ks_errno(ks);
-		cerr << "Keystone Error: " << ks_strerror(err) << endl;
+		std::cerr << "Keystone Error: " << ks_strerror(err) << std::endl;
 		exit(1);
 	}
 
@@ -346,7 +346,7 @@ void assemble(ProgramOptions& po)
 	if (ks_asm(ks, po.text.data(), po.base, &enc, &sz, &cnt) != KS_ERR_OK)
 	{
 		ks_err err = ks_errno(ks);
-		cerr << "Keystone Error: " << ks_strerror(err) << endl;
+		std::cerr << "Keystone Error: " << ks_strerror(err) << std::endl;
 		exit(1);
 	}
 
@@ -361,7 +361,7 @@ void assemble(ProgramOptions& po)
 	if (ks_close(ks) != KS_ERR_OK)
 	{
 		ks_err err = ks_errno(ks);
-		cerr << "Keystone Error: " << ks_strerror(err) << endl;
+		std::cerr << "Keystone Error: " << ks_strerror(err) << std::endl;
 		exit(1);
 	}
 }
