@@ -127,3 +127,24 @@ endfunction()
 
 patch_vcxproj("${yara_path}/windows/vs2015/libyara/libyara.vcxproj")
 patch_vcxproj("${yara_path}/windows/vs2015/libyara/libyara.vcxproj")
+
+# https://github.com/VirusTotal/yara/pull/1289
+function(patch_dotnet file)
+    file(READ "${file}" content)
+    set(new_content "${content}")
+
+    string(REPLACE
+        "// Return a 0 size as an error.\n    result.size = 0;\n"
+        "// Return a 0 size as an error.\n    result.size = 0;\n    return result;\n"
+        new_content
+        "${new_content}"
+    )
+
+    if("${new_content}" STREQUAL "${content}")
+        message("-- Patching: ${file} skipped")
+    else()
+        message("-- Patching: ${file} patched")
+        file(WRITE "${file}" "${new_content}")
+    endif()
+endfunction()
+patch_dotnet("${yara_path}/libyara/modules/dotnet/dotnet.c")
