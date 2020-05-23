@@ -13,6 +13,8 @@
 #ifndef IMPORTDIRECTORY_H
 #define IMPORTDIRECTORY_H
 
+#include <set>
+
 #include "retdec/pelib/PeLibAux.h"
 #include "retdec/pelib/PeHeader.h"
 
@@ -699,6 +701,7 @@ namespace PeLib
 		}
 
 		// FirstThunk - IAT
+		std::set<dword> seenOffsets;
 		for (unsigned int i=0;i<vOldIidCurr.size();i++)
 		{
 			bool hasValidIlt = hasValidOriginalFirstThunk(vOldIidCurr[i].impdesc, peHeader);
@@ -708,7 +711,11 @@ namespace PeLib
 			{
 				return ERROR_INVALID_FILE;
 			}
-
+			if (seenOffsets.count(uiVaoft))
+			{
+				continue;
+			}
+			seenOffsets.insert(uiVaoft);
 			PELIB_THUNK_DATA<bits> tdCurr;
 
 			inStream_w.clear();
