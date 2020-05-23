@@ -2057,7 +2057,7 @@ void ElfFormat::loadInfoFromDynamicSegment()
 		std::size_t segSz = getFileLength() - seg->get_offset();
 
 		seg->load(*reader.get_istream(), seg->get_offset(), segSz);
-		auto *dynamic = writer.sections.add("dynamic_" + numToStr(noOfDynTables++));
+		auto *dynamic = writer.sections.add("dynamic_" + std::to_string(noOfDynTables++));
 		dynamic->set_type(SHT_DYNAMIC);
 		dynamic->set_offset(seg->get_offset());
 		dynamic->set_address(seg->get_virtual_address());

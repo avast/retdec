@@ -168,7 +168,7 @@ void RelocationTable::dump(std::string &dumpTable) const
 		for(const auto &item : table)
 		{
 			ret << "; " << std::hex << item.getName() << " (addr: " << item.getAddress() <<
-				", section: " << (item.getLinkToSection(aux) ? numToStr(aux) : "-") <<
+				", section: " << (item.getLinkToSection(aux) ? std::to_string(aux) : "-") <<
 				", offset: " << item.getSectionOffset() << ") mask:";
 
 			for (const auto &byteMask : item.getMask())

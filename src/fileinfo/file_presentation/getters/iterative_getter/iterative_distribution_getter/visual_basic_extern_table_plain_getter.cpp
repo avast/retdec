@@ -55,7 +55,7 @@ std::size_t VisualBasicExternTablePlainGetter::getBasicInfo(std::size_t structIn
 	desc.push_back("CRC32            : ");
 	desc.push_back("MD5              : ");
 	desc.push_back("SHA256           : ");
-	info.push_back(numToStr(fileinfo.getVisualBasicNumberOfExterns()));
+	info.push_back(std::to_string(fileinfo.getVisualBasicNumberOfExterns()));
 	info.push_back(fileinfo.getVisualBasicExternTableHashCrc32());
 	info.push_back(fileinfo.getVisualBasicExternTableHashMd5());
 	info.push_back(fileinfo.getVisualBasicExternTableHashSha256());
@@ -71,7 +71,7 @@ bool VisualBasicExternTablePlainGetter::loadRecord(std::size_t structIndex, std:
 	}
 
 	record.clear();
-	record.push_back(numToStr(recIndex));
+	record.push_back(std::to_string(recIndex));
 	record.push_back(replaceNonprintableChars(fileinfo.getVisualBasicExternApiName(recIndex)));
 	record.push_back(replaceNonprintableChars(fileinfo.getVisualBasicExternModuleName(recIndex)));
 	return true;

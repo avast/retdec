@@ -51,7 +51,7 @@ std::size_t AnomaliesPlainGetter::getBasicInfo(std::size_t structIndex, std::vec
 	info.clear();
 
 	desc.push_back("Number of anomalies: ");
-	info.push_back(numToStr(fileinfo.getNumberOfAnomalies()));
+	info.push_back(std::to_string(fileinfo.getNumberOfAnomalies()));
 
 	return info.size();
 }
@@ -64,7 +64,7 @@ bool AnomaliesPlainGetter::loadRecord(std::size_t structIndex, std::size_t recIn
 	}
 
 	record.clear();
-	record.push_back(numToStr(recIndex));
+	record.push_back(std::to_string(recIndex));
 	record.push_back(fileinfo.getAnomalyIdentifier(recIndex));
 	record.push_back(fileinfo.getAnomalyDescription(recIndex));
 

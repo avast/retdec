@@ -197,7 +197,7 @@ std::string PeHeuristics::getEnigmaVersion()
 						pos + pattern.length() + 1,
 						result2))
 		{
-			return numToStr(result1) + "." + numToStr(result2);
+			return std::to_string(result1) + "." + std::to_string(result2);
 		}
 	}
 
@@ -251,8 +251,8 @@ std::string PeHeuristics::getUpxAdditionalInfo(std::size_t metadataPos)
 
 			auto id = static_cast<std::uint32_t>(content[metadataPos + 28]);
 			auto param = static_cast<std::uint32_t>(content[metadataPos + 29]);
-			info += "[Filter: 0x" + numToStr(id, std::hex)
-					+ ", Param: 0x" + numToStr(param, std::hex) + ']';
+			info += "[Filter: 0x" + intToHexString(id)
+					+ ", Param: 0x" + intToHexString(param) + ']';
 		}
 	}
 
@@ -333,7 +333,7 @@ void PeHeuristics::getVisualBasicHeuristics()
 	unsigned long long version = 0;
 	if (peParser.isVisualBasic(version))
 	{
-		addCompiler(source, strength, "Visual Basic", numToStr(version));
+		addCompiler(source, strength, "Visual Basic", std::to_string(version));
 		addLanguage("Visual Basic");
 	}
 }
@@ -1890,7 +1890,7 @@ void PeHeuristics::getNsPackSectionHeuristics()
 		std::size_t counter = 0;
 		for (std::size_t i = 1; i < noOfSections; ++i)
 		{
-			if (sections[i]->getName() != (namePrefix + numToStr(i)))
+			if (sections[i]->getName() != (namePrefix + std::to_string(i)))
 			{
 				if (++counter > 1)
 				{

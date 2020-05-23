@@ -12,7 +12,11 @@
 namespace retdec {
 namespace utils {
 
-bool isAligned(std::uint64_t value, std::uint64_t alignment, std::uint64_t& remainder);
+bool isAligned(
+		std::uint64_t value,
+		std::uint64_t alignment,
+		std::uint64_t& remainder);
+
 std::uint64_t alignDown(std::uint64_t value, std::uint64_t alignment);
 std::uint64_t alignUp(std::uint64_t value, std::uint64_t alignment);
 

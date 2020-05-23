@@ -60,10 +60,10 @@ bool PatternMatchesPlainGetter::loadRecord(std::size_t structIndex, std::size_t 
 	record.clear();
 	record.push_back(" ");
 	unsigned long long val;
-	record.push_back(matches[recIndex].getOffset(val) ? numToStr(val, hexWithPrefix) : "");
-	record.push_back(matches[recIndex].getAddress(val) ? numToStr(val, hexWithPrefix) : "");
-	record.push_back(matches[recIndex].getDataSize(val) ? numToStr(val, hexWithPrefix) : "");
-	record.push_back(matches[recIndex].getEntrySize(val) ? numToStr(val, std::dec) : "");
+	record.push_back(matches[recIndex].getOffset(val) ? intToHexString(val) : "");
+	record.push_back(matches[recIndex].getAddress(val) ? intToHexString(val) : "");
+	record.push_back(matches[recIndex].getDataSize(val) ? intToHexString(val) : "");
+	record.push_back(matches[recIndex].getEntrySize(val) ? std::to_string(val) : "");
 	record.push_back(matches[recIndex].isInteger() ? "yes" : "no");
 	record.push_back(matches[recIndex].isFloatingPoint() ? "yes" : "no");
 

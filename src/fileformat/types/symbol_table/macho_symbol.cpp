@@ -177,7 +177,7 @@ Export MachOSymbol::getAsExport() const
 	Export exportSym;
 	if(name.empty())
 	{
-		exportSym.setName("exported_function_" + numToStr(value, std::hex));
+		exportSym.setName("exported_function_" + intToHexString(value));
 	}
 	else
 	{

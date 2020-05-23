@@ -57,7 +57,7 @@ std::string getSymbolLinkToSection(word link)
 		return "DEBUG";
 	}
 
-	return numToStr(link - 1);
+	return std::to_string(link - 1);
 }
 
 /**

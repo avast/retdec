@@ -13,8 +13,6 @@
 #include "retdec/llvmir2hll/utils/graphviz.h"
 #include "retdec/utils/conversion.h"
 
-using retdec::utils::toString;
-
 namespace retdec {
 namespace llvmir2hll {
 

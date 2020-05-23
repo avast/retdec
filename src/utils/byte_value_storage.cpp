@@ -43,7 +43,10 @@ bool swapEndianness(std::string &str, std::size_t items, std::size_t length = 1)
 		{
 			for (std::size_t k = 0; k < length; ++k)
 			{
-				std::swap(str[i + j * length + k], str[i + (items - j) * length - k - 1]);
+				std::swap(
+						str[i + j * length + k],
+						str[i + (items - j) * length - k - 1]
+				);
 			}
 		}
 
@@ -53,7 +56,10 @@ bool swapEndianness(std::string &str, std::size_t items, std::size_t length = 1)
 			{
 				for (std::size_t k = 0; k < middleLengthIndex; ++k)
 				{
-					std::swap(str[i + j * length + k], str[i + (j + 1) * length - k - 1]);
+					std::swap(
+							str[i + j * length + k],
+							str[i + (j + 1) * length - k - 1]
+					);
 				}
 			}
 		}
@@ -166,7 +172,13 @@ bool ByteValueStorage::hexToBig(std::string& str) const
 		return false;
 	}
 
-	return isBigEndian() ? true : swapEndianness(str, getBytesPerWord(), getNumberOfNibblesInByte());
+	return isBigEndian()
+			? true
+			: swapEndianness(
+					str,
+					getBytesPerWord(),
+					getNumberOfNibblesInByte()
+			);
 }
 
 /**
@@ -183,7 +195,13 @@ bool ByteValueStorage::hexToLittle(std::string& str) const
 		return false;
 	}
 
-	return isLittleEndian() ? true : swapEndianness(str, getBytesPerWord(), getNumberOfNibblesInByte());
+	return isLittleEndian()
+			? true
+			: swapEndianness(
+					str,
+					getBytesPerWord(),
+					getNumberOfNibblesInByte()
+			);
 }
 
 /**
@@ -255,7 +273,8 @@ bool ByteValueStorage::bitsToLittle(std::vector<unsigned char>& values) const
 }
 
 /**
- * Get integer (1B) located at provided address using the specified endian or default file endian
+ * Get integer (1B) located at provided address using the specified endian
+ * or default file endian
  *
  * @param address Address to get integer from
  * @param res Result integer
@@ -263,13 +282,17 @@ bool ByteValueStorage::bitsToLittle(std::vector<unsigned char>& values) const
  *
  * @return Status of operation (@c true if all is OK, @c false otherwise)
  */
-bool ByteValueStorage::get1Byte(std::uint64_t address, std::uint64_t& res, Endianness e/* = Endianness::UNKNOWN*/) const
+bool ByteValueStorage::get1Byte(
+		std::uint64_t address,
+		std::uint64_t& res,
+		Endianness e) const
 {
 	return getXByte(address, 1, res, e);
 }
 
 /**
- * Get integer (2B) located at provided address using the specified endian or default file endian
+ * Get integer (2B) located at provided address using the specified endian
+ * or default file endian
  *
  * @param address Address to get integer from
  * @param res Result integer
@@ -277,13 +300,17 @@ bool ByteValueStorage::get1Byte(std::uint64_t address, std::uint64_t& res, Endia
  *
  * @return Status of operation (@c true if all is OK, @c false otherwise)
  */
-bool ByteValueStorage::get2Byte(std::uint64_t address, std::uint64_t& res, Endianness e/* = Endianness::UNKNOWN*/) const
+bool ByteValueStorage::get2Byte(
+		std::uint64_t address,
+		std::uint64_t& res,
+		Endianness e) const
 {
 	return getXByte(address, 2, res, e);
 }
 
 /**
- * Get integer (4B) located at provided address using the specified endian or default file endian
+ * Get integer (4B) located at provided address using the specified endian
+ * or default file endian
  *
  * @param address Address to get integer from
  * @param res Result integer
@@ -291,13 +318,17 @@ bool ByteValueStorage::get2Byte(std::uint64_t address, std::uint64_t& res, Endia
  *
  * @return Status of operation (@c true if all is OK, @c false otherwise)
  */
-bool ByteValueStorage::get4Byte(std::uint64_t address, std::uint64_t& res, Endianness e/* = Endianness::UNKNOWN*/) const
+bool ByteValueStorage::get4Byte(
+		std::uint64_t address,
+		std::uint64_t& res,
+		Endianness e) const
 {
 	return getXByte(address, 4, res, e);
 }
 
 /**
- * Get integer (8B) located at provided address using the specified endian or default file endian
+ * Get integer (8B) located at provided address using the specified endian
+ * or default file endian
  *
  * @param address Address to get integer from
  * @param res Result integer
@@ -305,7 +336,10 @@ bool ByteValueStorage::get4Byte(std::uint64_t address, std::uint64_t& res, Endia
  *
  * @return Status of operation (@c true if all is OK, @c false otherwise)
  */
-bool ByteValueStorage::get8Byte(std::uint64_t address, std::uint64_t& res, Endianness e/* = Endianness::UNKNOWN*/) const
+bool ByteValueStorage::get8Byte(
+		std::uint64_t address,
+		std::uint64_t& res,
+		Endianness e) const
 {
 	return getXByte(address, 8, res, e);
 }
@@ -337,7 +371,8 @@ bool ByteValueStorage::get10Byte(std::uint64_t address, long double& res) const
 }
 
 /**
- * Get word located at provided address using the specified endian or default file endian
+ * Get word located at provided address using the specified endian
+ * or default file endian
  *
  * @param address Address to get integer from
  * @param res Result integer
@@ -345,7 +380,10 @@ bool ByteValueStorage::get10Byte(std::uint64_t address, long double& res) const
  *
  * @return Status of operation (@c true if all is OK, @c false otherwise)
  */
-bool ByteValueStorage::getWord(std::uint64_t address, std::uint64_t& res, Endianness e/* = Endianness::UNKNOWN*/) const
+bool ByteValueStorage::getWord(
+		std::uint64_t address,
+		std::uint64_t& res,
+		Endianness e) const
 {
 	return getXByte(address, getBytesPerWord(), res, e);
 }
@@ -397,7 +435,8 @@ bool ByteValueStorage::getDouble(std::uint64_t address, double& res) const
 	}
 	// 2.33 (0x4002a3d7 0a3d70a4) in data section as: a4703d0a d7a30240.
 	// New ARM compilers are also generating this kind of double constants.
-	// We are not sure, what part of binary determines which kind of double constants are used.
+	// We are not sure, what part of binary determines which kind of double
+	// constants are used.
 	// Currently we use new kind for ARMs > version 5.
 	// To find relevant info, google: "ARM double mixed endian".
 
@@ -406,7 +445,8 @@ bool ByteValueStorage::getDouble(std::uint64_t address, double& res) const
 }
 
 /**
- * Set integer (1B) located at provided address using the specified endian or default file endian
+ * Set integer (1B) located at provided address using the specified endian
+ * or default file endian
  *
  * @param address Address to set integer at
  * @param val Integer to set
@@ -414,13 +454,17 @@ bool ByteValueStorage::getDouble(std::uint64_t address, double& res) const
  *
  * @return Status of operation (@c true if all is OK, @c false otherwise)
  */
-bool ByteValueStorage::set1Byte(std::uint64_t address, std::uint64_t val, Endianness e /*= Endianness::UNKNOWN*/)
+bool ByteValueStorage::set1Byte(
+		std::uint64_t address,
+		std::uint64_t val,
+		Endianness e)
 {
 	return setXByte(address, 1, val, e);
 }
 
 /**
- * Set integer (2B) located at provided address using the specified endian or default file endian
+ * Set integer (2B) located at provided address using the specified endian
+ * or default file endian
  *
  * @param address Address to set integer at
  * @param val Integer to set
@@ -428,13 +472,17 @@ bool ByteValueStorage::set1Byte(std::uint64_t address, std::uint64_t val, Endian
  *
  * @return Status of operation (@c true if all is OK, @c false otherwise)
  */
-bool ByteValueStorage::set2Byte(std::uint64_t address, std::uint64_t val, Endianness e /*= Endianness::UNKNOWN*/)
+bool ByteValueStorage::set2Byte(
+		std::uint64_t address,
+		std::uint64_t val,
+		Endianness e)
 {
 	return setXByte(address, 2, val, e);
 }
 
 /**
- * Set integer (4B) located at provided address using the specified endian or default file endian
+ * Set integer (4B) located at provided address using the specified endian
+ * or default file endian
  *
  * @param address Address to set integer at
  * @param val Integer to set
@@ -442,13 +490,17 @@ bool ByteValueStorage::set2Byte(std::uint64_t address, std::uint64_t val, Endian
  *
  * @return Status of operation (@c true if all is OK, @c false otherwise)
  */
-bool ByteValueStorage::set4Byte(std::uint64_t address, std::uint64_t val, Endianness e /*= Endianness::UNKNOWN*/)
+bool ByteValueStorage::set4Byte(
+		std::uint64_t address,
+		std::uint64_t val,
+		Endianness e)
 {
 	return setXByte(address, 4, val, e);
 }
 
 /**
- * Set integer (8B) located at provided address using the specified endian or default file endian
+ * Set integer (8B) located at provided address using the specified endian
+ * or default file endian
  *
  * @param address Address to set integer at
  * @param val Integer to set
@@ -456,7 +508,10 @@ bool ByteValueStorage::set4Byte(std::uint64_t address, std::uint64_t val, Endian
  *
  * @return Status of operation (@c true if all is OK, @c false otherwise)
  */
-bool ByteValueStorage::set8Byte(std::uint64_t address, std::uint64_t val, Endianness e /*= Endianness::UNKNOWN*/)
+bool ByteValueStorage::set8Byte(
+		std::uint64_t address,
+		std::uint64_t val,
+		Endianness e)
 {
 	return setXByte(address, 8, val, e);
 }
@@ -484,7 +539,8 @@ bool ByteValueStorage::set10Byte(std::uint64_t address, long double val)
 }
 
 /**
- * Set word located at provided address using the specified endian or default file endian
+ * Set word located at provided address using the specified endian or default
+ * file endian
  *
  * @param address Address to set integer at
  * @param val Integer to set
@@ -492,7 +548,10 @@ bool ByteValueStorage::set10Byte(std::uint64_t address, long double val)
  *
  * @return Status of operation (@c true if all is OK, @c false otherwise)
  */
-bool ByteValueStorage::setWord(std::uint64_t address, std::uint64_t val, Endianness e /*= Endianness::UNKNOWN*/)
+bool ByteValueStorage::setWord(
+		std::uint64_t address,
+		std::uint64_t val,
+		Endianness e)
 {
 	return setXByte(address, getBytesPerWord(), val, e);
 }
@@ -541,15 +600,22 @@ bool ByteValueStorage::setDouble(std::uint64_t address, double val)
  *
  * @param address Address to get string from
  * @param res Result string
- * @param size Requested size of string (if @a size is zero, read until zero byte)
+ * @param size Requested size of string (if @a size is zero,
+ *             read until zero byte)
  *
  * @return Status of operation (@c true if all is OK, @c false otherwise)
  */
-bool ByteValueStorage::getNTBS(std::uint64_t address, std::string& res, std::size_t size/* = 0*/) const
+bool ByteValueStorage::getNTBS(
+		std::uint64_t address,
+		std::string& res,
+		std::size_t size) const
 {
 	using namespace std::placeholders;
 
-	GetNByteFn get1ByteFn = std::bind(&ByteValueStorage::get1Byte, this, _1, _2, _3);
+	GetNByteFn get1ByteFn = std::bind(
+			&ByteValueStorage::get1Byte,
+			this, _1, _2, _3
+	);
 	return getNTBSImpl(get1ByteFn, address, res, size);
 }
 
@@ -567,11 +633,17 @@ bool ByteValueStorage::getNTBS(std::uint64_t address, std::string& res, std::siz
  *       Use this only if your are certain there is wide string on the address.
  *       See @c getNTWSNice() for a faster wide-string-probing method.
  */
-bool ByteValueStorage::getNTWS(std::uint64_t address, std::size_t width, std::vector<std::uint64_t>& res) const
+bool ByteValueStorage::getNTWS(
+		std::uint64_t address,
+		std::size_t width,
+		std::vector<std::uint64_t>& res) const
 {
 	using namespace std::placeholders;
 
-	GetXByteFn getXByteFn = std::bind(&ByteValueStorage::getXByte, this, _1, _2, _3, _4);
+	GetXByteFn getXByteFn = std::bind(
+			&ByteValueStorage::getXByte,
+			this, _1, _2, _3, _4
+	);
 	return getNTWSImpl(getXByteFn, address, width, res);
 }
 
@@ -589,16 +661,23 @@ bool ByteValueStorage::getNTWS(std::uint64_t address, std::size_t width, std::ve
  *       non-ASCII character. Use this for fast wide string probing.
  *       See @c getNTWS() for a slower wide-string-forcing method.
  */
-bool ByteValueStorage::getNTWSNice(std::uint64_t address, std::size_t width, std::vector<std::uint64_t>& res) const
+bool ByteValueStorage::getNTWSNice(
+		std::uint64_t address,
+		std::size_t width,
+		std::vector<std::uint64_t>& res) const
 {
 	using namespace std::placeholders;
 
-	GetXByteFn getXByteFn = std::bind(&ByteValueStorage::getXByte, this, _1, _2, _3, _4);
+	GetXByteFn getXByteFn = std::bind(
+			&ByteValueStorage::getXByte,
+			this, _1, _2, _3, _4
+	);
 	return getNTWSNiceImpl(getXByteFn, address, width, res);
 }
 
 /**
- * Get integer (@a x bytes) array located at provided address using the specified array size and endian (or default file endian)
+ * Get integer (@a x bytes) array located at provided address using the
+ * specified array size and endian (or default file endian)
  *
  * @param address Address to get integer array from
  * @param x Number of bytes for one array item
@@ -608,7 +687,12 @@ bool ByteValueStorage::getNTWSNice(std::uint64_t address, std::size_t width, std
  *
  * @return Status of operation (@c true if all is OK, @c false otherwise)
  */
-bool ByteValueStorage::getXByteArray(std::uint64_t address, std::uint64_t x, std::vector<std::uint64_t>& res, std::size_t size, Endianness e/* = Endianness::UNKNOWN*/) const
+bool ByteValueStorage::getXByteArray(
+		std::uint64_t address,
+		std::uint64_t x,
+		std::vector<std::uint64_t>& res,
+		std::size_t size,
+		Endianness e) const
 {
 	std::uint64_t r = 0;
 
@@ -629,7 +713,8 @@ bool ByteValueStorage::getXByteArray(std::uint64_t address, std::uint64_t x, std
 }
 
 /**
- * Get integer (1B) array located at provided address using the specified array size and endian (or default file endian)
+ * Get integer (1B) array located at provided address using the specified
+ * array size and endian (or default file endian)
  *
  * @param address Address to get integer array from
  * @param res Result integer array
@@ -638,13 +723,18 @@ bool ByteValueStorage::getXByteArray(std::uint64_t address, std::uint64_t x, std
  *
  * @return Status of operation (@c true if all is OK, @c false otherwise)
  */
-bool ByteValueStorage::get1ByteArray(std::uint64_t address, std::vector<std::uint64_t>& res, std::size_t size, Endianness e/* = Endianness::UNKNOWN*/) const
+bool ByteValueStorage::get1ByteArray(
+		std::uint64_t address,
+		std::vector<std::uint64_t>& res,
+		std::size_t size,
+		Endianness e) const
 {
 	return getXByteArray(address, 1, res, size, e);
 }
 
 /**
- * Get integer (2B) array located at provided address using the specified array size and endian (or default file endian)
+ * Get integer (2B) array located at provided address using the specified
+ * array size and endian (or default file endian)
  *
  * @param address Address to get integer array from
  * @param res Result integer array
@@ -653,13 +743,18 @@ bool ByteValueStorage::get1ByteArray(std::uint64_t address, std::vector<std::uin
  *
  * @return Status of operation (@c true if all is OK, @c false otherwise)
  */
-bool ByteValueStorage::get2ByteArray(std::uint64_t address, std::vector<std::uint64_t>& res, std::size_t size, Endianness e/* = Endianness::UNKNOWN*/) const
+bool ByteValueStorage::get2ByteArray(
+		std::uint64_t address,
+		std::vector<std::uint64_t>& res,
+		std::size_t size,
+		Endianness e) const
 {
 	return getXByteArray(address, 2, res, size, e);
 }
 
 /**
- * Get integer (4B) array located at provided address using the specified array size and endian (or default file endian)
+ * Get integer (4B) array located at provided address using the specified
+ * array size and endian (or default file endian)
  *
  * @param address Address to get integer array from
  * @param res Result integer array
@@ -668,13 +763,18 @@ bool ByteValueStorage::get2ByteArray(std::uint64_t address, std::vector<std::uin
  *
  * @return Status of operation (@c true if all is OK, @c false otherwise)
  */
-bool ByteValueStorage::get4ByteArray(std::uint64_t address, std::vector<std::uint64_t>& res, std::size_t size, Endianness e/* = Endianness::UNKNOWN*/) const
+bool ByteValueStorage::get4ByteArray(
+		std::uint64_t address,
+		std::vector<std::uint64_t>& res,
+		std::size_t size,
+		Endianness e) const
 {
 	return getXByteArray(address, 4, res, size, e);
 }
 
 /**
- * Get integer (8B) array located at provided address using the specified array size and endian (or default file endian)
+ * Get integer (8B) array located at provided address using the specified
+ * array size and endian (or default file endian)
  *
  * @param address Address to get integer array from
  * @param res Result integer array
@@ -683,13 +783,18 @@ bool ByteValueStorage::get4ByteArray(std::uint64_t address, std::vector<std::uin
  *
  * @return Status of operation (@c true if all is OK, @c false otherwise)
  */
-bool ByteValueStorage::get8ByteArray(std::uint64_t address, std::vector<std::uint64_t>& res, std::size_t size, Endianness e/* = Endianness::UNKNOWN*/) const
+bool ByteValueStorage::get8ByteArray(
+		std::uint64_t address,
+		std::vector<std::uint64_t>& res,
+		std::size_t size,
+		Endianness e) const
 {
 	return getXByteArray(address, 8, res, size, e);
 }
 
 /**
- * Get long double (10B) array located at provided address using the specified array size
+ * Get long double (10B) array located at provided address using the specified
+ * array size
  *
  * @param address Address to get long double from
  * @param res Result long double array
@@ -697,7 +802,10 @@ bool ByteValueStorage::get8ByteArray(std::uint64_t address, std::vector<std::uin
  *
  * @return Status of operation (@c true if all is OK, @c false otherwise)
  */
-bool ByteValueStorage::get10ByteArray(std::uint64_t address, std::vector<long double>& res, std::size_t size) const
+bool ByteValueStorage::get10ByteArray(
+		std::uint64_t address,
+		std::vector<long double>& res,
+		std::size_t size) const
 {
 	long double r = 0;
 
@@ -718,7 +826,8 @@ bool ByteValueStorage::get10ByteArray(std::uint64_t address, std::vector<long do
 }
 
 /**
- * Get word array located at provided address using the specified size and endian (or default file endian)
+ * Get word array located at provided address using the specified size
+ * and endian (or default file endian)
  *
  * @param address Address to get integer from
  * @param res Result integer
@@ -727,7 +836,11 @@ bool ByteValueStorage::get10ByteArray(std::uint64_t address, std::vector<long do
  *
  * @return Status of operation (@c true if all is OK, @c false otherwise)
  */
-bool ByteValueStorage::getWordArray(std::uint64_t address, std::vector<std::uint64_t>& res, std::size_t size, Endianness e/* = Endianness::UNKNOWN*/) const
+bool ByteValueStorage::getWordArray(
+		std::uint64_t address,
+		std::vector<std::uint64_t>& res,
+		std::size_t size,
+		Endianness e) const
 {
 	return getXByteArray(address, getBytesPerWord(), res, size, e);
 }
@@ -741,7 +854,10 @@ bool ByteValueStorage::getWordArray(std::uint64_t address, std::vector<std::uint
  *
  * @return Status of operation (@c true if all is OK, @c false otherwise)
  */
-bool ByteValueStorage::getFloatArray(std::uint64_t address, std::vector<float>& res, std::size_t size) const
+bool ByteValueStorage::getFloatArray(
+		std::uint64_t address,
+		std::vector<float>& res,
+		std::size_t size) const
 {
 	float r = 0;
 
@@ -770,7 +886,10 @@ bool ByteValueStorage::getFloatArray(std::uint64_t address, std::vector<float>& 
  *
  * @return Status of operation (@c true if all is OK, @c false otherwise)
  */
-bool ByteValueStorage::getDoubleArray(std::uint64_t address, std::vector<double>& res, std::size_t size) const
+bool ByteValueStorage::getDoubleArray(
+		std::uint64_t address,
+		std::vector<double>& res,
+		std::size_t size) const
 {
 	double r = 0;
 
@@ -795,7 +914,8 @@ bool ByteValueStorage::getDoubleArray(std::uint64_t address, std::vector<double>
  *
  * @param data Vector of bytes
  * @param value Resulted value
- * @param endian Endian - if specified it is forced, otherwise file's endian is used
+ * @param endian Endian - if specified it is forced, otherwise file's endian
+ *               is used
  * @param offset Offset of first byte from @a data which will be converted
  *    (0 means first offset from @a data)
  * @param size Number of bytes for conversion (0 means all bytes from @a offset
@@ -803,9 +923,16 @@ bool ByteValueStorage::getDoubleArray(std::uint64_t address, std::vector<double>
  *
  * @return @c true if conversion went OK, @c false otherwise
  */
-bool ByteValueStorage::createValueFromBytes(const std::vector<std::uint8_t>& data, std::uint64_t& value, Endianness endian, std::uint64_t offset/* = 0*/, std::uint64_t size/* = 0*/) const
+bool ByteValueStorage::createValueFromBytes(
+		const std::vector<std::uint8_t>& data,
+		std::uint64_t& value,
+		Endianness endian,
+		std::uint64_t offset,
+		std::uint64_t size) const
 {
-	const std::uint64_t realSize = (!size || offset + size > data.size()) ? data.size() - offset : size;
+	const std::uint64_t realSize = (!size || offset + size > data.size())
+			? data.size() - offset
+			: size;
 	if (offset >= data.size() || (size && realSize != size))
 	{
 		return false;
@@ -828,7 +955,9 @@ bool ByteValueStorage::createValueFromBytes(const std::vector<std::uint8_t>& dat
 
 	for (std::uint64_t i = 0; i < realSize; ++i)
 	{
-		value += static_cast<std::uint64_t>(data[offset + i]) << (getByteLength() * (endian == Endianness::LITTLE ? i : realSize - i - 1));
+		value += static_cast<std::uint64_t>(data[offset + i])
+				<< (getByteLength()
+					* (endian == Endianness::LITTLE ? i : realSize - i - 1));
 	}
 
 	return true;
@@ -840,11 +969,16 @@ bool ByteValueStorage::createValueFromBytes(const std::vector<std::uint8_t>& dat
  * @param data Integer
  * @param x Width of integer
  * @param value Resulted vector of bytes
- * @param endian Endian - if specified it is forced, otherwise file's endian is used
+ * @param endian Endian - if specified it is forced, otherwise file's
+ *               endian is used
  *
  * @return @c true if conversion went OK, @c false otherwise
  */
-bool ByteValueStorage::createBytesFromValue(std::uint64_t data, std::uint64_t x, std::vector<std::uint8_t>& value, Endianness endian) const
+bool ByteValueStorage::createBytesFromValue(
+		std::uint64_t data,
+		std::uint64_t x,
+		std::vector<std::uint8_t>& value,
+		Endianness endian) const
 {
 	if (endian == Endianness::UNKNOWN && isLittleEndian())
 	{
@@ -873,7 +1007,9 @@ bool ByteValueStorage::createBytesFromValue(std::uint64_t data, std::uint64_t x,
 	return true;
 }
 
-bool ByteValueStorage::get10ByteImpl(const std::vector<std::uint8_t>& data, long double& res) const
+bool ByteValueStorage::get10ByteImpl(
+		const std::vector<std::uint8_t>& data,
+		long double& res) const
 {
 	if (systemHasLongDouble())
 	{
@@ -889,7 +1025,9 @@ bool ByteValueStorage::get10ByteImpl(const std::vector<std::uint8_t>& data, long
 	return true;
 }
 
-bool ByteValueStorage::getFloatImpl(const std::vector<std::uint8_t>& data, float& res) const
+bool ByteValueStorage::getFloatImpl(
+		const std::vector<std::uint8_t>& data,
+		float& res) const
 {
 	if (data.size() != sizeof(float))
 	{
@@ -900,7 +1038,9 @@ bool ByteValueStorage::getFloatImpl(const std::vector<std::uint8_t>& data, float
 	return true;
 }
 
-bool ByteValueStorage::getDoubleImpl(const std::vector<std::uint8_t>& data, double& res) const
+bool ByteValueStorage::getDoubleImpl(
+		const std::vector<std::uint8_t>& data,
+		double& res) const
 {
 	if (data.size() != sizeof(double))
 	{
@@ -911,7 +1051,10 @@ bool ByteValueStorage::getDoubleImpl(const std::vector<std::uint8_t>& data, doub
 	return true;
 }
 
-bool ByteValueStorage::getNTBSImpl(const GetNByteFn& get1ByteFn, std::uint64_t address, std::string& res, std::size_t size) const
+bool ByteValueStorage::getNTBSImpl(
+		const GetNByteFn& get1ByteFn,
+		std::uint64_t address,
+		std::string& res, std::size_t size) const
 {
 	std::uint64_t c = 0;
 	auto suc = get1ByteFn(address, c, getEndianness());
@@ -930,7 +1073,11 @@ bool ByteValueStorage::getNTBSImpl(const GetNByteFn& get1ByteFn, std::uint64_t a
 	return !res.empty();
 }
 
-bool ByteValueStorage::getNTWSImpl(const GetXByteFn& getXByteFn, std::uint64_t address, std::size_t width, std::vector<std::uint64_t>& res) const
+bool ByteValueStorage::getNTWSImpl(
+		const GetXByteFn& getXByteFn,
+		std::uint64_t address,
+		std::size_t width,
+		std::vector<std::uint64_t>& res) const
 {
 	std::vector<std::uint64_t> tmp;
 	std::uint64_t item = 0;
@@ -959,7 +1106,11 @@ bool ByteValueStorage::getNTWSImpl(const GetXByteFn& getXByteFn, std::uint64_t a
 	return ret;
 }
 
-bool ByteValueStorage::getNTWSNiceImpl(const GetXByteFn& getXByteFn, std::uint64_t address, std::size_t width, std::vector<std::uint64_t>& res) const
+bool ByteValueStorage::getNTWSNiceImpl(
+		const GetXByteFn& getXByteFn,
+		std::uint64_t address,
+		std::size_t width,
+		std::vector<std::uint64_t>& res) const
 {
 	std::vector<std::uint64_t> tmp;
 	std::uint64_t item = 0;
