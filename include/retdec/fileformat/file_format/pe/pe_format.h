@@ -116,7 +116,7 @@ class PeFormat : public FileFormat
 		/// @}
 		/// @name Auxiliary scanning methods
 		/// @{
-		void scanForSectionAnomalies();
+		void scanForSectionAnomalies(unsigned anamaliesLimit = 1000);
 		void scanForResourceAnomalies();
 		void scanForImportAnomalies();
 		void scanForExportAnomalies();

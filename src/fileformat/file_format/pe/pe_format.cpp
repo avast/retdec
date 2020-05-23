@@ -3658,39 +3658,51 @@ void PeFormat::scanForAnomalies()
 /**
  * Scan for section anomalies
  */
-void PeFormat::scanForSectionAnomalies()
+void PeFormat::scanForSectionAnomalies(unsigned anamaliesLimit)
 {
 	std::size_t nSecs = getDeclaredNumberOfSections();
 
 	unsigned long long epAddr;
 	if (getEpAddress(epAddr))
 	{
-		const PeCoffSection *epSec = dynamic_cast<const PeCoffSection*>(getEpSection());
+		auto *epSec = dynamic_cast<const PeCoffSection*>(getEpSection());
 		if (epSec)
 		{
 			// scan EP in last section
 			const PeCoffSection *lastSec = (nSecs) ? getPeSection(nSecs - 1) : nullptr;
 			if (epSec == lastSec)
 			{
-				anomalies.emplace_back("EpInLastSection", "Entry point in the last section");
+				anomalies.emplace_back(
+					"EpInLastSection", "Entry point in the last section"
+				);
 			}
 
 			// scan EP in writable section
 			if (epSec->getPeCoffFlags() & PELIB_IMAGE_SCN_MEM_WRITE)
 			{
-				anomalies.emplace_back("EpInWritableSection", "Entry point in writable section");
+				anomalies.emplace_back(
+					"EpInWritableSection", "Entry point in writable section"
+				);
 			}
 		}
 		else
 		{
 			// scan EP outside mapped sections
-			anomalies.emplace_back("EpOutsideSections", "Entry point is outside of mapped sections");
+			anomalies.emplace_back(
+				"EpOutsideSections", "Entry point is outside of mapped sections"
+			);
 		}
 	}
 
-	std::vector<std::string> duplSections;
+	std::set<std::string> duplSecNames;
+	std::set<std::string> secNames;
 	for (std::size_t i = 0; i < nSecs; i++)
 	{
+		if (anomalies.size() > anamaliesLimit)
+		{
+			break;
+		}
+
 		auto sec = getPeSection(i);
 		if (!sec)
 		{
@@ -3698,24 +3710,45 @@ void PeFormat::scanForSectionAnomalies()
 		}
 
 		const auto name = sec->getName();
+		auto pname = replaceNonprintableChars(name);
 		const std::string msgName = (name.empty()) ? std::to_string(sec->getIndex()) : name;
+		auto pmsgName = replaceNonprintableChars(msgName);
 		const auto flags = sec->getPeCoffFlags();
 		if (!name.empty())
 		{
+			// scan for duplicit section names
+			bool duplName = duplSecNames.find(name) != duplSecNames.end();
+			if (!duplName && secNames.find(name) != secNames.end())
+			{
+				anomalies.emplace_back(
+						"DuplicitSectionNames",
+						"Multiple sections with name " + replaceNonprintableChars(name)
+				);
+				duplSecNames.insert(name);
+				duplName = true;
+			}
+			secNames.insert(name);
+
 			// scan for packer section names
 			if (usualPackerSections.find(name) != usualPackerSections.end())
 			{
-				if (std::find(duplSections.begin(), duplSections.end(), name) == duplSections.end())
+				if (!duplName)
 				{
-					anomalies.emplace_back("PackerSectionName", "Packer section name: " + replaceNonprintableChars(name));
+					anomalies.emplace_back(
+							"PackerSectionName",
+							"Packer section name: " + pname
+					);
 				}
 			}
 			// scan for unusual section names
 			else if (usualSectionNames.find(name) == usualSectionNames.end())
 			{
-				if (std::find(duplSections.begin(), duplSections.end(), name) == duplSections.end())
+				if (!duplName)
 				{
-					anomalies.emplace_back("UnusualSectionName", "Unusual section name: " + replaceNonprintableChars(name));
+					anomalies.emplace_back(
+							"UnusualSectionName",
+							"Unusual section name: " + pname
+					);
 				}
 			}
 
@@ -3723,51 +3756,58 @@ void PeFormat::scanForSectionAnomalies()
 			auto characIt = usualSectionCharacteristics.find(name);
 			if (characIt != usualSectionCharacteristics.end() && characIt->second != flags)
 			{
-				anomalies.emplace_back("UnusualSectionFlags", "Section " + replaceNonprintableChars(name) + " has unusual characteristics");
+				anomalies.emplace_back(
+						"UnusualSectionFlags",
+						"Section " + pname + " has unusual characteristics"
+				);
 			}
 		}
 
 		// scan size over 100MB
 		if (sec->getSizeInFile() >= 100000000UL)
 		{
-			anomalies.emplace_back("LargeSection", "Section " + replaceNonprintableChars(msgName) + " has size over 100MB");
+			anomalies.emplace_back(
+					"LargeSection",
+					"Section " + pmsgName + " has size over 100MB"
+			);
 		}
 
 		// scan section marked uninitialized but contains data
 		if ((flags & PELIB_IMAGE_SCN_CNT_UNINITIALIZED_DATA) && (sec->getOffset() != 0 || sec->getSizeInFile() != 0))
 		{
-			anomalies.emplace_back("UninitSectionHasData", "Section " + replaceNonprintableChars(msgName) + " is marked uninitialized but contains data");
+			anomalies.emplace_back(
+					"UninitSectionHasData",
+					"Section " + pmsgName + " is marked uninitialized but contains data"
+			);
 		}
 
 		for (std::size_t j = i + 1; j < nSecs; j++)
 		{
+			if (anomalies.size() > anamaliesLimit)
+			{
+				break;
+			}
+
 			auto cmpSec = getSection(j);
 			if (!cmpSec)
 			{
 				continue;
 			}
 
-			// scan for duplicit section names
-			const auto cmpName = cmpSec->getName();
-			if (!name.empty() && name == cmpName)
-			{
-				if (std::find(duplSections.begin(), duplSections.end(), name) == duplSections.end())
-				{
-					anomalies.emplace_back("DuplicitSectionNames", "Multiple sections with name " + replaceNonprintableChars(name));
-					duplSections.push_back(name);
-				}
-			}
-
 			// scan for overlapping sections
 			auto secStart = sec->getOffset();
 			auto secEnd = secStart + sec->getSizeInFile();
+			const auto cmpName = cmpSec->getName();
 			auto cmpSecStart = cmpSec->getOffset();
 			auto cmpSecEnd = cmpSecStart + cmpSec->getSizeInFile();
 			if ((secStart <= cmpSecStart && cmpSecStart < secEnd) ||
 				(cmpSecStart <= secStart && secStart < cmpSecEnd))
 			{
-				const std::string cmpMsgName = (cmpName.empty()) ? std::to_string(cmpSec->getIndex()) : cmpName;
-				anomalies.emplace_back("OverlappingSections", "Sections " + replaceNonprintableChars(msgName) + " and " + replaceNonprintableChars(cmpMsgName) + " overlap");
+				const std::string cmpMsgName = cmpName.empty() ? std::to_string(cmpSec->getIndex()) : cmpName;
+				anomalies.emplace_back(
+						"OverlappingSections",
+						"Sections " + pmsgName + " and " + replaceNonprintableChars(cmpMsgName) + " overlap"
+				);
 			}
 		}
 	}
