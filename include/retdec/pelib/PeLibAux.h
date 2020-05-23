@@ -113,6 +113,9 @@ namespace PeLib
 		LDR_ERROR_RELOC_BLOCK_INVALID_LENGTH,       // A relocation block has invalid length
 		LDR_ERROR_RELOC_ENTRY_BAD_TYPE,             // A relocation entry has invalid type
 
+		// Other errors
+		LDR_ERROR_INMEMORY_IMAGE,                   // The file is a 1:1 in-memory image
+
 		LDR_ERROR_MAX
 
 	};
