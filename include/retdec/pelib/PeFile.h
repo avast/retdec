@@ -748,13 +748,17 @@ namespace PeLib
 		// The file size must be greater or equal to SizeOfImage
 		if(ulFileSize >= sizeOfImage)
 		{
+			dword sectionAlignment = peHeader().getSectionAlignment();
+			dword fileAlignment = peHeader().getFileAlignment();
+			dword sizeOfHeaders = peHeader().getSizeOfHeaders();
+
 			// SectionAlignment must be greater than file alignment
-			if(peHeader().getSectionAlignment() > peHeader().getFileAlignment())
+			if(sectionAlignment >= PELIB_PAGE_SIZE && sectionAlignment > fileAlignment)
 			{
 				// SizeOfHeaders must be smaller than SectionAlignment
-				if(peHeader().getSizeOfHeaders() < peHeader().getSectionAlignment())
+				if(sizeOfHeaders < sectionAlignment)
 				{
-					std::size_t headerDataSize = peHeader().getSectionAlignment() - peHeader().getSizeOfHeaders();
+					std::size_t headerDataSize = sectionAlignment - sizeOfHeaders;
 
 					// Read the entire after-header-data
 					std::vector<unsigned char> headerData(headerDataSize);
