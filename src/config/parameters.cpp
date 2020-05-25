@@ -39,11 +39,15 @@ const std::string JSON_outputAsmFile            = "outputAsmFile";
 const std::string JSON_outputLlFile             = "outputLlFile";
 const std::string JSON_outputConfigFile         = "outputConfigFile";
 const std::string JSON_outputUnpackedFile       = "outputUnpackedFile";
+const std::string JSON_outputFormat             = "outputFormat";
 
 const std::string JSON_backendDisabledOpts      = "backendDisabledOpts";
 const std::string JSON_backendNoOpts            = "backendNoOpts";
 const std::string JSON_detectStaticCode         = "detectStaticCode";
+
 const std::string JSON_timeout                  = "timeout";
+const std::string JSON_maxMemoryLimit           = "maxMemoryLimit";
+const std::string JSON_maxMemoryLimitHalfRam    = "maxMemoryLimitHalfRam";
 
 } // anonymous namespace
 
@@ -148,6 +152,11 @@ void Parameters::setOutputUnpackedFile(const std::string& file)
 	_outputUnpackedFile = file;
 }
 
+void Parameters::setOutputFormat(const std::string& format)
+{
+	_outputFormat = format;
+}
+
 void Parameters::setOrdinalNumbersDirectory(const std::string& n)
 {
 	_ordinalNumbersDirectory = n;
@@ -168,7 +177,7 @@ void Parameters::setMaxMemoryLimit(uint64_t limit)
 	_maxMemoryLimit = limit;
 }
 
-void Parameters::setMaxMemoryLimitHalfRam(bool f)
+void Parameters::setIsMaxMemoryLimitHalfRam(bool f)
 {
 	_maxMemoryLimitHalfRam = f;
 }
@@ -250,6 +259,11 @@ const std::string& Parameters::getOutputConfigFile() const
 const std::string& Parameters::getOutputUnpackedFile() const
 {
 	return _outputUnpackedFile;
+}
+
+const std::string& Parameters::getOutputFormat() const
+{
+	return _outputFormat;
 }
 
 uint64_t Parameters::getMaxMemoryLimit() const
@@ -339,11 +353,15 @@ void Parameters::serialize(Writer& writer) const
 	serdes::serializeString(writer, JSON_outputLlFile, getOutputLlvmirFile());
 	serdes::serializeString(writer, JSON_outputConfigFile, getOutputConfigFile());
 	serdes::serializeString(writer, JSON_outputUnpackedFile, getOutputUnpackedFile());
+	serdes::serializeString(writer, JSON_outputFormat, getOutputFormat());
 
 	serdes::serializeString(writer, JSON_backendDisabledOpts, getBackendDisabledOpts());
 	serdes::serializeBool(writer, JSON_backendNoOpts, isBackendNoOpts());
 	serdes::serializeBool(writer, JSON_detectStaticCode, isDetectStaticCode());
+
 	serdes::serializeUint64(writer, JSON_timeout, getTimeout());
+	serdes::serializeUint64(writer, JSON_maxMemoryLimit, getMaxMemoryLimit());
+	serdes::serializeBool(writer, JSON_maxMemoryLimitHalfRam, isMaxMemoryLimitHalfRam());
 
 	serdes::serializeContainer(writer, JSON_selectedRanges, selectedRanges);
 	serdes::serializeContainer(writer, JSON_userStaticSigPaths, userStaticSignaturePaths);
@@ -390,11 +408,15 @@ void Parameters::deserialize(const rapidjson::Value& val)
 	setOutputLlvmirFile( serdes::deserializeString(val, JSON_outputLlFile) );
 	setOutputConfigFile( serdes::deserializeString(val, JSON_outputConfigFile) );
 	setOutputUnpackedFile( serdes::deserializeString(val, JSON_outputUnpackedFile) );
+	setOutputFormat( serdes::deserializeString(val, JSON_outputFormat) );
 
 	setBackendDisabledOpts( serdes::deserializeString(val, JSON_backendDisabledOpts) );
 	setIsBackendNoOpts( serdes::deserializeBool(val, JSON_backendNoOpts, false) );
 	setIsDetectStaticCode( serdes::deserializeBool(val, JSON_detectStaticCode, true) );
+
 	setTimeout( serdes::deserializeUint64(val, JSON_timeout, 0) );
+	setMaxMemoryLimit( serdes::deserializeUint64(val, JSON_maxMemoryLimit, 0) );
+	setIsMaxMemoryLimitHalfRam( serdes::deserializeBool(val, JSON_maxMemoryLimitHalfRam, true) );
 
 	serdes::deserialize(val, JSON_entryPoint, _entryPoint);
 	serdes::deserialize(val, JSON_mainAddress, _mainAddress);

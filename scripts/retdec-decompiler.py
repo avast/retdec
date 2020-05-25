@@ -1,78 +1,3 @@
-#!/usr/bin/env python3
-
-"""Decompiles the given file into the selected target high-level language."""
-
-from __future__ import print_function
-
-import argparse
-import glob
-import importlib
-import json
-import os
-import shutil
-import sys
-import time
-
-config = importlib.import_module('retdec-config')
-retdec_signature_from_library_creator = importlib.import_module('retdec-signature-from-library-creator')
-retdec_unpacker = importlib.import_module('retdec-unpacker')
-utils = importlib.import_module('retdec-utils')
-utils.check_python_version()
-utils.ensure_script_is_being_run_from_installed_retdec()
-
-SigFromLib = retdec_signature_from_library_creator.SigFromLib
-Unpacker = retdec_unpacker.Unpacker
-CmdRunner = utils.CmdRunner
-
-
-sys.stdout = utils.Unbuffered(sys.stdout)
-
-
-def parse_args(args):
-    parser = argparse.ArgumentParser(description=__doc__,
-                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-
-    parser.add_argument('input',
-                        metavar='FILE',
-                        help='File to decompile.')
-
-    parser.add_argument('-a', '--arch',
-                        dest='arch',
-                        metavar='ARCH',
-                        choices=['mips', 'pic32', 'arm', 'thumb', 'arm64', 'powerpc', 'x86', 'x86-64'],
-                        help='Specify target architecture [mips|pic32|arm|thumb|arm64|powerpc|x86|x86-64].'
-                             ' Required if it cannot be autodetected from the input (e.g. raw mode, Intel HEX).')
-
-    parser.add_argument('-e', '--endian',
-                        dest='endian',
-                        metavar='ENDIAN',
-                        choices=['little', 'big'],
-                        help='Specify target endianness [little|big].'
-                             ' Required if it cannot be autodetected from the input (e.g. raw mode, Intel HEX).')
-
-    parser.add_argument('-k', '--keep-unreachable-funcs',
-                        dest='keep_unreachable_funcs',
-                        action='store_true',
-                        help='Keep functions that are unreachable from the main function.')
-
-    parser.add_argument('-l', '--target-language',
-                        dest='hll',
-                        default='c',
-                        metavar='LANGUAGE',
-                        choices=['c'],
-                        help='Target high-level language [c].')
-
-    parser.add_argument('-m', '--mode',
-                        dest='mode',
-                        metavar='MODE',
-                        choices=['bin', 'll', 'raw'],
-                        help='Force the type of decompilation mode [bin|ll|raw]'
-                             '(default: ll if input\'s suffix is \'.ll\', bin otherwise).')
-
-    parser.add_argument('-o', '--output',
-                        dest='output',
-                        metavar='FILE',
-                        help='Output file.')
 
     parser.add_argument('-f', '--output-format',
                         dest='output_format',
@@ -80,16 +5,6 @@ def parse_args(args):
                         metavar='OUTPUT_FORMAT',
                         choices=['plain', 'json', 'json-human'],
                         help='Output format [plain|json|json-human].')
-
-    parser.add_argument('-p', '--pdb',
-                        dest='pdb',
-                        metavar='FILE',
-                        help='File with PDB debug information.')
-
-    parser.add_argument('--generate-log',
-                        dest='generate_log',
-                        action='store_true',
-                        help=argparse.SUPPRESS)
 
     parser.add_argument('--ar-index',
                         dest='ar_index',
@@ -105,11 +20,6 @@ def parse_args(args):
                         dest='backend_aggressive_opts',
                         action='store_true',
                         help='Enables aggressive optimizations.')
-
-    parser.add_argument('--backend-arithm-expr-evaluator',
-                        dest='backend_arithm_expr_evaluator',
-                        default='c',
-                        help='Name of the used evaluator of arithmetical expressions.')
 
     parser.add_argument('--backend-call-info-obtainer',
                         dest='backend_call_info_obtainer',
@@ -210,11 +120,6 @@ def parse_args(args):
                         dest='backend_semantics',
                         help='A comma-separated list of the used semantics.')
 
-    parser.add_argument('--backend-strict-fpu-semantics',
-                        dest='backend_strict_fpu_semantics',
-                        action='store_true',
-                        help='Disables backend optimizations.')
-
     parser.add_argument('--backend-var-renamer',
                         dest='backend_var_renamer',
                         default='readable',
@@ -230,21 +135,6 @@ def parse_args(args):
     parser.add_argument('--config',
                         dest='config_db',
                         help='Specify JSON decompilation configuration file.')
-
-    parser.add_argument('--no-config',
-                        dest='no_config',
-                        action='store_true',
-                        help='State explicitly that config file is not to be used.')
-
-    parser.add_argument('--fileinfo-verbose',
-                        dest='fileinfo_verbose',
-                        action='store_true',
-                        help='Print all detected information about input file.')
-
-    parser.add_argument('--fileinfo-use-all-external-patterns',
-                        dest='fileinfo_use_all_external_patterns',
-                        action='store_true',
-                        help='Use all detection rules from external YARA databases.')
 
     parser.add_argument('--graph-format',
                         dest='graph_format',
@@ -279,12 +169,6 @@ def parse_args(args):
                         help='Specify a comma separated list of ranges to decompile '
                              '(example: 0x100-0x200,0x300-0x400,0x500-0x600).')
 
-    parser.add_argument('--stop-after',
-                        dest='stop_after',
-                        choices=['fileinfo', 'unpacker', 'bin2llvmir', 'llvmir2hll'],
-                        help='Stop the decompilation after the given tool '
-                             '(supported tools: fileinfo, unpacker, bin2llvmir, llvmir2hll).')
-
     parser.add_argument('--static-code-sigfile',
                         dest='static_code_sigfile',
                         action='append',
@@ -303,61 +187,6 @@ def parse_args(args):
                         help='No default signatures for statically linked code analysis are loaded '
                              '(options static-code-sigfile/archive are still available).')
 
-    parser.add_argument('--max-memory',
-                        dest='max_memory',
-                        help='Limits the maximal memory of fileinfo, unpacker, bin2llvmir, '
-                             'and llvmir2hll into the given number of bytes.')
-
-    parser.add_argument('--no-memory-limit',
-                        dest='no_memory_limit',
-                        action='store_true',
-                        help='Disables the default memory limit (half of system RAM) of fileinfo, '
-                             'unpacker, bin2llvmir, and llvmir2hll.')
-
-    return parser.parse_args(args)
-
-
-class Decompiler:
-    def __init__(self, args):
-        self.args = parse_args(args)
-
-        self.input_file = ''
-        self.output_file = ''
-        self.config_file = ''
-        self.selected_ranges = []
-        self.selected_functions = []
-        self.signatures_to_remove = []
-        self.arch = ''
-        self.mode = ''
-        self.format = ''
-        self.pdb_file = ''
-
-        self.out_bc = ''
-        self.out_ll = ''
-
-        self.out_unpacked = ''
-        self.out_restored = ''
-        self.out_archive = ''
-
-        self.log_decompilation_start_date = ''
-        self.log_fileinfo_rc = 0
-        self.log_fileinfo_time = 0
-        self.log_fileinfo_output = ''
-        self.log_fileinfo_memory = 0
-
-        self.log_unpacker_output = ''
-        self.log_unpacker_rc = 0
-
-        self.log_bin2llvmir_rc = 0
-        self.log_bin2llvmir_time = 0
-        self.log_bin2llvmir_memory = 0
-        self.log_bin2llvmir_output = ''
-
-        self.log_llvmir2hll_rc = 0
-        self.log_llvmir2hll_time = 0
-        self.log_llvmir2hll_memory = 0
-        self.log_llvmir2hll_output = ''
-
     def _check_arguments(self):
         """Check proper combination of input arguments.
         """
@@ -371,22 +200,6 @@ class Decompiler:
         else:
             utils.print_error('No input file was specified')
             return False
-
-        if self.args.max_memory:
-            if self.args.no_memory_limit:
-                utils.print_error('Clashing options: --max-memory and --no-memory-limit')
-                return False
-
-            try:
-                max_memory = int(self.args.max_memory)
-                if max_memory <= 0:
-                    utils.print_error('Invalid value for --max-memory: %s (expected a positive integer)'
-                                      % self.args.max_memory)
-                    return False
-            except ValueError:
-                utils.print_error('Invalid value for --max-memory: %s (expected a positive integer)'
-                                  % self.args.max_memory)
-                return False
 
         for sca in self.args.static_code_archive:
             if not os.path.isfile(sca):
@@ -448,28 +261,6 @@ class Decompiler:
 
             self.pdb_file = os.path.abspath(self.args.pdb)
 
-        # Try to detect desired decompilation mode if not set by user.
-        # We cannot detect 'raw' mode because it overlaps with 'bin' (at least not based on extension).
-        if not self.args.mode:
-            if self.args.input.endswith('.ll'):
-                self.mode = 'll'
-            else:
-                self.mode = 'bin'
-        else:
-            self.mode = self.args.mode
-
-        # Print warning message about unsupported combinations of options.
-        if self.mode == 'll':
-            if self.args.arch:
-                utils.print_warning('Option -a|--arch is not used in mode ' + self.mode)
-
-            if self.args.pdb:
-                utils.print_warning('Option -p|--pdb is not used in mode ' + self.mode)
-
-            if not self.args.config_db and not self.args.no_config:
-                utils.print_error('Option --config or --no-config must be specified in mode ' + self.mode)
-                return False
-
         elif self.mode == 'raw':
             # Errors -- missing critical arguments.
             if not self.args.arch:
@@ -527,32 +318,6 @@ class Decompiler:
 
         return True
 
-    def _print_warning_if_decompiling_bytecode(self):
-        """Prints a warning if we are decompiling bytecode."""
-
-        bytecode, _, _ = CmdRunner.run_cmd([config.CONFIGTOOL, self.config_file, '--read', '--bytecode'], buffer_output=True)
-
-        if bytecode != '':
-            utils.print_warning('Detected %s bytecode, which cannot be decompiled by our machine-code decompiler.'
-                                ' The decompilation result may be inaccurate.' % bytecode)
-
-    def _check_whether_decompilation_should_be_forcefully_stopped(self, tool_name):
-        """Checks whether the decompilation should be forcefully stopped because of the
-        --stop-after parameter. If so, cleanup is run and the script exits with 0.
-        Arguments:
-          tool_name Name of the tool.
-        The function expects the self.args.stop_after variable to be set.
-        """
-
-        if self.args.stop_after == tool_name:
-            if self.args.generate_log:
-                self._generate_log()
-
-            self._cleanup()
-            print('\n#### Forced stop due to  \'--stop-after %s\'...' % self.args.stop_after)
-            return True
-        return False
-
     def _cleanup(self):
         """Cleanup working directory"""
 
@@ -574,56 +339,10 @@ class Decompiler:
             for sig in self.signatures_to_remove:
                 utils.remove_file_forced(sig)
 
-    def _generate_log(self):
-        log_decompilation_end_date = str(int(time.time()))
-
-        self.log_fileinfo_output = self.log_fileinfo_output
-        self.log_unpacker_output = self.log_unpacker_output
-        self.log_bin2llvmir_output = self.log_bin2llvmir_output
-        self.log_llvmir2hll_output = self.log_llvmir2hll_output
-
-        log = {
-            'input_file': self.input_file,
-            'pdb_file': self.pdb_file,
-            'start_date': self.log_decompilation_start_date,
-            'end_date': log_decompilation_end_date,
-            'mode': self.mode,
-            'arch': self.arch,
-            'format': self.format,
-            'fileinfo_rc': self.log_fileinfo_rc,
-            'unpacker_rc': self.log_unpacker_rc,
-            'bin2llvmir_rc': self.log_bin2llvmir_rc,
-            'llvmir2hll_rc': self.log_llvmir2hll_rc,
-            'fileinfo_output': self.log_fileinfo_output,
-            'unpacker_output': self.log_unpacker_output,
-            'bin2llvmir_output': self.log_bin2llvmir_output,
-            'llvmir2hll_output': self.log_llvmir2hll_output,
-            'fileinfo_runtime': self.log_fileinfo_time,
-            'bin2llvmir_runtime': self.log_bin2llvmir_time,
-            'llvmir2hll_runtime': self.log_llvmir2hll_time,
-            'fileinfo_memory': self.log_fileinfo_memory,
-            'bin2llvmir_memory': self.log_bin2llvmir_memory,
-            'llvmir2hll_memory': self.log_llvmir2hll_memory,
-        }
-
-        # The consumer of the log currently assumes that all values are
-        # strings, so ensure that everything is a string.
-        for k, v in log.items():
-            log[k] = str(v)
-
-        log_file = self.output_file + '.decompilation.log'
-        with open(log_file, 'w') as f:
-            json.dump(log, f, indent=4)
-            f.write('\n')
-
     def decompile(self):
         # Check arguments and set default values for unset options.
         if not self._check_arguments():
             return 1
-
-        # Initialize variables used by logging.
-        if self.args.generate_log:
-            self.log_decompilation_start_date = str(int(time.time()))
 
         if self.args.raw_entry_point:
             self.args.raw_entry_point = int(self.args.raw_entry_point, 16 if self.args.raw_entry_point.startswith('0x') else 10)
@@ -779,67 +498,20 @@ class Decompiler:
             #
             fileinfo_params = ['-c', self.config_file, '--similarity', self.input_file, '--no-hashes=all']
 
-            if self.args.fileinfo_verbose:
-                fileinfo_params = ['-c', self.config_file, '--similarity', '--verbose', self.input_file]
-
             for par in config.FILEINFO_EXTERNAL_YARA_PRIMARY_CRYPTO_DATABASES:
                 fileinfo_params.extend(['--crypto', par])
 
-            if self.args.fileinfo_use_all_external_patterns:
-                for par in config.FILEINFO_EXTERNAL_YARA_EXTRA_CRYPTO_DATABASES:
-                    fileinfo_params.extend(['--crypto', par])
-
-            if self.args.max_memory:
-                fileinfo_params.extend(['--max-memory', self.args.max_memory])
-            elif not self.args.no_memory_limit:
-                # By default, we want to limit the memory of fileinfo into half of
-                # system RAM to prevent potential black screens on Windows (#270).
-                fileinfo_params.append('--max-memory-half-ram')
-
             print('\n##### Gathering file information...')
             fileinfo_rc = 0
-            if self.args.generate_log:
-                self.log_fileinfo_memory, self.log_fileinfo_time, self.log_fileinfo_output, self.log_fileinfo_rc = \
-                    CmdRunner.run_measured_cmd([config.FILEINFO] + fileinfo_params, timeout=config.LOG_TIMEOUT, print_run_msg=True)
-
-                print(self.log_fileinfo_output)
-            else:
-                _, fileinfo_rc, _ = CmdRunner.run_cmd([config.FILEINFO] + fileinfo_params, print_run_msg=True)
-
-            if fileinfo_rc != 0:
-                if self.args.generate_log:
-                    self._generate_log()
-
-                self._cleanup()
-                return 1
-
-            if self._check_whether_decompilation_should_be_forcefully_stopped('fileinfo'):
-                return 0
+            _, fileinfo_rc, _ = CmdRunner.run_cmd([config.FILEINFO] + fileinfo_params, print_run_msg=True)
 
             #
             # Unpacking.
             #
             unpack_params = ['--extended-exit-codes', '--output', self.out_unpacked, self.input_file]
 
-            if self.args.max_memory:
-                unpack_params.extend(['--max-memory', self.args.max_memory])
-            elif not self.args.no_memory_limit:
-                # By default, we want to limit the memory of retdec-unpacker into half
-                # of system RAM to prevent potential black screens on Windows (#270).
-                unpack_params.append('--max-memory-half-ram')
-
             unpacker = Unpacker(unpack_params)
-            if self.args.generate_log:
-                # we should get the output from the unpacker tool
-                self.log_unpacker_output, self.log_unpacker_rc = unpacker.unpack_all(log_output=True)
-
-                unpacker_rc = self.log_unpacker_rc
-                print(self.log_unpacker_output)
-            else:
-                _, unpacker_rc = unpacker.unpack_all()
-
-            if self._check_whether_decompilation_should_be_forcefully_stopped('unpacker'):
-                return 0
+            _, unpacker_rc = unpacker.unpack_all()
 
             # RET_UNPACK_OK=0
             # RET_UNPACKER_NOTHING_TO_DO_OTHERS_OK=1
@@ -851,44 +523,11 @@ class Decompiler:
                 self.input_file = self.out_unpacked
                 fileinfo_params = ['-c', self.config_file, '--similarity', self.input_file, '--no-hashes=all']
 
-                if self.args.fileinfo_verbose:
-                    fileinfo_params = ['-c', self.config_file, '--similarity', '--verbose', self.input_file]
-
                 for pd in config.FILEINFO_EXTERNAL_YARA_PRIMARY_CRYPTO_DATABASES:
                     fileinfo_params.extend(['--crypto', pd])
 
-                if self.args.fileinfo_use_all_external_patterns:
-                    for ed in config.FILEINFO_EXTERNAL_YARA_EXTRA_CRYPTO_DATABASES:
-                        fileinfo_params.extend(['--crypto', ed])
-
-                if self.args.max_memory:
-                    fileinfo_params.extend(['--max-memory', self.args.max_memory])
-                elif not self.args.no_memory_limit:
-                    # By default, we want to limit the memory of fileinfo into half of
-                    # system RAM to prevent potential black screens on Windows (#270).
-                    fileinfo_params.append('--max-memory-half-ram')
-
                 print('\t##### Gathering file information after unpacking...')
-                if self.args.generate_log:
-                    fileinfo_memory, fileinfo_time, self.log_fileinfo_output, self.log_fileinfo_rc \
-                        = CmdRunner.run_measured_cmd([config.FILEINFO] + fileinfo_params, timeout=config.LOG_TIMEOUT, print_run_msg=True)
-
-                    fileinfo_rc = self.log_fileinfo_rc
-                    self.log_fileinfo_time += fileinfo_time
-                    self.log_fileinfo_memory = (self.log_fileinfo_memory + fileinfo_memory) / 2
-
-                    print(self.log_fileinfo_output)
-                else:
-                    _, fileinfo_rc, _ = CmdRunner.run_cmd([config.FILEINFO] + fileinfo_params, print_run_msg=True)
-
-                if fileinfo_rc != 0:
-                    if self.args.generate_log:
-                        self._generate_log()
-
-                    self._cleanup()
-                    return 1
-
-                self._print_warning_if_decompiling_bytecode()
+                _, fileinfo_rc, _ = CmdRunner.run_cmd([config.FILEINFO] + fileinfo_params, print_run_msg=True)
 
             # Check whether the architecture was specified.
             if self.arch:
@@ -932,9 +571,6 @@ class Decompiler:
             elif self.arch in ['powerpc', 'mips', 'pic32']:
                 pass
             else:
-                if self.args.generate_log:
-                    self._generate_log()
-
                 self._cleanup()
                 utils.print_error('Unsupported target architecture \'%s\'. Supported architectures: '
                                   'Intel x86, Intel x86-64, ARM, ARM + Thumb, ARM64, MIPS, PIC32, PowerPC.' % self.arch)
@@ -945,8 +581,6 @@ class Decompiler:
             fileclass, _, _ = CmdRunner.run_cmd([config.CONFIGTOOL, self.config_file, '--read', '--file-class'], buffer_output=True)
 
             if fileclass not in ['16', '32', '64']:
-                if self.args.generate_log:
-                    self._generate_log()
 
                 self._cleanup()
                 utils.print_error(
@@ -956,9 +590,6 @@ class Decompiler:
 
             # TODO this should be somehow connected somewhere else
             if fileclass == '64' and self.arch in ['mips', 'pic32', 'powerpc']:
-                if self.args.generate_log:
-                    self.generate_log()
-
                 self._cleanup()
                 utils.print_error(
                     'Unsupported target format and architecture combination: \'%s%s\' + \'%s\'.' % (
@@ -982,9 +613,6 @@ class Decompiler:
             elif endian_result == 'big':
                 sig_endian = 'be'
             else:
-                if self.args.generate_log:
-                    self._generate_log()
-
                 self._cleanup()
                 utils.print_error('Cannot determine endiannesss.')
                 return 1
@@ -997,8 +625,6 @@ class Decompiler:
                 sig_arch = 'x86';
 
             signatures_dir = os.path.join(config.GENERIC_SIGNATURES_DIR, sig_format, fileclass, sig_endian, sig_arch)
-
-            self._print_warning_if_decompiling_bytecode()
 
             # Decompile unreachable functions.
             if self.args.keep_unreachable_funcs:
@@ -1090,46 +716,19 @@ class Decompiler:
 
             bin2llvmir_params.extend(['-config-path', self.config_file])
 
-            if self.args.max_memory:
-                bin2llvmir_params.extend(['-max-memory', self.args.max_memory])
-            elif not self.args.no_memory_limit:
-                # By default, we want to limit the memory of bin2llvmir into half of
-                # system RAM to prevent potential black screens on Windows (#270).
-                bin2llvmir_params.append('-max-memory-half-ram')
-
             print('\n##### Decompiling ' + self.input_file + ' into ' + self.out_bc + '...')
-            if self.args.generate_log:
-                self.log_bin2llvmir_memory, self.log_bin2llvmir_time, self.log_bin2llvmir_output, \
-                self.log_bin2llvmir_rc = CmdRunner.run_measured_cmd([config.BIN2LLVMIR] + bin2llvmir_params + ['-o',
-                                                               self.out_bc], timeout=config.LOG_TIMEOUT, print_run_msg=True)
-
-                bin2llvmir_rc = self.log_bin2llvmir_rc
-                print(self.log_bin2llvmir_output)
-            else:
-                _, bin2llvmir_rc, _ = CmdRunner.run_cmd([config.BIN2LLVMIR] + bin2llvmir_params + ['-o', self.out_bc], print_run_msg=True)
+            _, bin2llvmir_rc, _ = CmdRunner.run_cmd([config.BIN2LLVMIR] + bin2llvmir_params + ['-o', self.out_bc], print_run_msg=True)
 
             if bin2llvmir_rc != 0:
-                if self.args.generate_log:
-                    self._generate_log()
-
                 self._cleanup()
                 utils.print_error('Decompilation to LLVM IR failed')
                 return 1
-
-            if self._check_whether_decompilation_should_be_forcefully_stopped('bin2llvmir'):
-                return 0
-
-        # LL mode goes straight to backend.
-        if self.mode == 'll':
-            self.out_bc = self.input_file
-            self.config_file = self.args.config_db
 
         # Create parameters for the llvmir2hll call.
         llvmir2hll_params = ['-target-hll=' + self.args.hll, '-output-format=' + self.args.output_format,
                              '-var-renamer=' + self.args.backend_var_renamer,
                              '-var-name-gen=fruit', '-var-name-gen-prefix=',
                              '-call-info-obtainer=' + self.args.backend_call_info_obtainer,
-                             '-arithm-expr-evaluator=' + self.args.backend_arithm_expr_evaluator, '-validate-module',
                              '-o', self.output_file,
                              self.out_bc]
 
@@ -1184,46 +783,20 @@ class Decompiler:
         if self.args.backend_force_module_name:
             llvmir2hll_params.append('-force-module-name=' + self.args.backend_force_module_name)
 
-        if self.args.backend_strict_fpu_semantics:
-            llvmir2hll_params.append('-strict-fpu-semantics')
-
         if self.args.backend_emit_cfg:
             llvmir2hll_params.append('-emit-cfgs')
 
         if self.args.backend_cfg_test:
             llvmir2hll_params.append('--backend-cfg-test')
 
-        if self.args.max_memory:
-            llvmir2hll_params.extend(['-max-memory', self.args.max_memory])
-        elif not self.args.no_memory_limit:
-            # By default, we want to limit the memory of llvmir2hll into half of system
-            # RAM to prevent potential black screens on Windows (#270).
-            llvmir2hll_params.append('-max-memory-half-ram')
-
         # Decompile the optimized IR code.
         print('\n##### Decompiling ' + self.out_bc + ' into ' + self.output_file + '...')
-        if self.args.generate_log:
-            self.log_llvmir2hll_memory, self.log_llvmir2hll_time, self.log_llvmir2hll_output, self.log_llvmir2hll_rc = CmdRunner.run_measured_cmd(
-                [config.LLVMIR2HLL] + llvmir2hll_params,
-                timeout=config.LOG_TIMEOUT,
-                print_run_msg=True
-            )
-
-            llvmir2hll_rc = self.log_llvmir2hll_rc
-            print(self.log_llvmir2hll_output)
-        else:
-            _, llvmir2hll_rc, _ = CmdRunner.run_cmd([config.LLVMIR2HLL] + llvmir2hll_params, print_run_msg=True)
+        _, llvmir2hll_rc, _ = CmdRunner.run_cmd([config.LLVMIR2HLL] + llvmir2hll_params, print_run_msg=True)
 
         if llvmir2hll_rc != 0:
-            if self.args.generate_log:
-                self._generate_log()
-
             self._cleanup()
             utils.print_error('Decompilation of file %s failed' % self.out_bc)
             return 1
-
-        if self._check_whether_decompilation_should_be_forcefully_stopped('llvmir2hll'):
-            return 0
 
         # Convert .dot graphs to desired format.
         if ((self.args.backend_emit_cg and self.args.backend_cg_conversion == 'auto') or (
@@ -1256,17 +829,5 @@ class Decompiler:
         with open(self.output_file, 'w') as fh:
             [fh.write('%s\n' % line) for line in new]
 
-        # Store the information about the decompilation into the JSON file.
-        if self.args.generate_log:
-            self._generate_log()
-
         # Success!
         self._cleanup()
-        print('\n##### Done!')
-
-        return 0
-
-
-if __name__ == '__main__':
-    decompiler = Decompiler(sys.argv[1:])
-    sys.exit(decompiler.decompile())

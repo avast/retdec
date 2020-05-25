@@ -1,9 +1,12 @@
 {
     "decompParams": {
         "verboseOut": false,
+        "outputFormat": "plain",
         "keepAllFuncs": false,
         "selectedDecodeOnly": false,
         "timeout": 0,
+        "maxMemoryLimit": 0,
+        "maxMemoryLimitHalfRam": true,
         "ordinalNumDirectory": "./support/ordinals/",
         "staticSignPaths": [
             "./support/generic/yara_patterns/static-code/"

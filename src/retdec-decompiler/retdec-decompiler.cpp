@@ -155,7 +155,7 @@ public:
 			else if (isParam(i, "-m", "--mode"))
 			{
 				auto m = getParamOrDie(i);
-				if (!(m == "bin" || m == "raw" || m == "ll"))
+				if (!(m == "bin" || m == "raw"))
 				{
 					throw std::runtime_error(
 						"[-m|--mode] unknown mode: " + m
@@ -203,17 +203,28 @@ public:
 					);
 				}
 			}
+			else if (isParam(i, "-f", "--output-format"))
+			{
+				auto of = getParamOrDie(i);
+				if (!(of == "plain" || of == "json" || of == "json-human"))
+				{
+					throw std::runtime_error(
+						"[-f|--output-format] unknown output format: " + of
+					);
+				}
+				config.parameters.setOutputFormat(of);
+			}
 			else if (isParam(i, "", "--max-memory"))
 			{
 				params.setMaxMemoryLimit(std::stoull(
 					getParamOrDie(i)
 				));
-				params.setMaxMemoryLimitHalfRam(false);
+				params.setIsMaxMemoryLimitHalfRam(false);
 			}
 			else if (isParam(i, "", "--no-memory-limit"))
 			{
 				params.setMaxMemoryLimit(0);
-				params.setMaxMemoryLimitHalfRam(false);
+				params.setIsMaxMemoryLimitHalfRam(false);
 			}
 			else if (isParam(i, "-o", "--output"))
 			{
@@ -379,12 +390,13 @@ std::cout << "=============> unrecognized option: " << c << std::endl;
 	{
 		std::cout << programName << R"(:
 	[-h|--help]
-	[-o|--output] Output file.
-	[-m|--mode MODE] Force the type of decompilation mode [bin|ll|raw] (default: bin otherwise).
+	[-o|--output FILE] Output file.
+	[-f|--output-format OUTPUT_FORMAT] Output format [plain|json|json-human] (default: plain).
+	[-m|--mode MODE] Force the type of decompilation mode [bin|raw] (default: bin).
 	[-a|--arch ARCH] Specify target architecture [mips|pic32|arm|thumb|arm64|powerpc|x86|x86-64].
 	                 Required if it cannot be autodetected from the input (e.g. raw mode, Intel HEX).
 	[-e|--endian ENDIAN] Specify target endianness [little|big].
-	                      Required if it cannot be autodetected from the input (e.g. raw mode, Intel HEX).
+	                     Required if it cannot be autodetected from the input (e.g. raw mode, Intel HEX).
 	[-p|--pdb FILE] File with PDB debug information.
 	[-k|--keep-unreachable-funcs] Keep functions that are unreachable from the main function.
 	[--select-ranges RANGES] Specify a comma separated list of ranges to decompile (example: 0x100-0x200,0x300-0x400,0x500-0x600).
@@ -401,8 +413,8 @@ std::cout << "=============> unrecognized option: " << c << std::endl;
 	[--static-code-sigfile]
 	[--timeout SECONDS]
 	[--max-memory MAX_MEMORY] Limits the maximal memory used by the given number of bytes.
-	[--no-memory-limit] Disables the default memory limit (half of system RAM)
-	FILE
+	[--no-memory-limit] Disables the default memory limit (half of system RAM).
+	FILE File to decompile.
 )";
 
 		exit(EXIT_SUCCESS);

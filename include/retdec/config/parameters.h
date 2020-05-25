@@ -50,8 +50,9 @@ class Parameters
 		void setOutputLlvmirFile(const std::string& file);
 		void setOutputConfigFile(const std::string& file);
 		void setOutputUnpackedFile(const std::string& file);
+		void setOutputFormat(const std::string& format);
 		void setMaxMemoryLimit(uint64_t limit);
-		void setMaxMemoryLimitHalfRam(bool f);
+		void setIsMaxMemoryLimitHalfRam(bool f);
 		void setTimeout(uint64_t seconds);
 		void setEntryPoint(const retdec::common::Address& a);
 		void setMainAddress(const retdec::common::Address& a);
@@ -72,6 +73,7 @@ class Parameters
 		const std::string& getOutputLlvmirFile() const;
 		const std::string& getOutputConfigFile() const;
 		const std::string& getOutputUnpackedFile() const;
+		const std::string& getOutputFormat() const;
 		uint64_t getMaxMemoryLimit() const;
 		uint64_t getTimeout() const;
 		retdec::common::Address getEntryPoint() const;
@@ -131,6 +133,7 @@ class Parameters
 		std::string _outputLlFile;
 		std::string _outputConfigFile;
 		std::string _outputUnpackedFile;
+		std::string _outputFormat;
 		uint64_t _maxMemoryLimit = 0;
 		bool _maxMemoryLimitHalfRam = true;
 		uint64_t _timeout = 0;

@@ -16,8 +16,15 @@ using retdec::utils::limitSystemMemoryToHalfOfTotalSystemMemory;
 using retdec::utils::split;
 using retdec::utils::strToNum;
 
+// Fixed options.
+// These used to be controllable by user via program options, but during
+// refactoring they become fixed. Implement it back if needed.
 std::string TargetHLL = "c";
-std::string OutputFormat = "plain";
+std::string oArithmExprEvaluator = "c";
+bool ValidateModule = true;
+bool StrictFPUSemantics = false;
+
+// TODO
 bool Debug = true;
 std::string oSemantics = "";
 bool EmitDebugComments = true;
@@ -30,7 +37,6 @@ bool KeepAllBrackets = false;
 bool KeepLibraryFunctions = false;
 bool NoTimeVaryingInfo = false;
 bool NoCompoundOperators = false;
-bool ValidateModule = false;
 std::string FindPatterns = "";
 std::string oAliasAnalysis = "simple";
 std::string oVarNameGen = "fruit";
@@ -41,9 +47,7 @@ std::string oCFGWriter = "dot";
 bool EmitCG = false;
 std::string oCGWriter = "dot";
 std::string oCallInfoObtainer = "optim";
-std::string oArithmExprEvaluator = "c";
 std::string ForcedModuleName = "";
-bool StrictFPUSemantics = false;
 
 std::unique_ptr<llvm::ToolOutputFile> getOutputStream(
 		const std::string& outputFile)
@@ -304,7 +308,7 @@ bool LlvmIr2Hll::initialize(llvm::Module &m)
 			Debug
 	);
 	hllWriter = llvmir2hll::HLLWriterFactory::getInstance().createObject<
-		raw_pwrite_stream &>(TargetHLL, os, OutputFormat);
+		raw_pwrite_stream &>(TargetHLL, os, globalConfig->parameters.getOutputFormat());
 	if (!hllWriter)
 	{
 		printErrorUnsupportedObject<llvmir2hll::HLLWriterFactory>(
