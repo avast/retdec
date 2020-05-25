@@ -62,7 +62,9 @@ TEST_F(UnreachableFuncsTests, addressOfFunc01)
 		}
 	)");
 	auto config = config::Config::fromJsonString(R"({
-		"mainAddress" : "0x1000",
+		"decompParams": {
+			"mainAddress" : "0x1000"
+		},
 		"functions" :
 		[
 			{
@@ -123,7 +125,9 @@ TEST_F(UnreachableFuncsTests, funcInGlobalVarInit)
 		}
 	)");
 	auto config = config::Config::fromJsonString(R"({
-		"mainAddress" : "0x1000",
+		"decompParams": {
+			"mainAddress" : "0x1000"
+		},
 		"functions" :
 		[
 			{
@@ -244,7 +248,9 @@ TEST_F(UnreachableFuncsTests, indirectCall01)
 		}
 	)");
 	auto config = config::Config::fromJsonString(R"({
-		"mainAddress" : "0x1000",
+		"decompParams": {
+			"mainAddress" : "0x1000"
+		},
 		"functions" :
 		[
 			{
@@ -341,7 +347,9 @@ TEST_F(UnreachableFuncsTests, mainAndFuncs01)
 		}
 	)");
 	auto config = config::Config::fromJsonString(R"({
-		"mainAddress" : "0x1000",
+		"decompParams": {
+			"mainAddress" : "0x1000"
+		},
 		"functions" :
 		[
 			{
@@ -400,7 +408,9 @@ TEST_F(UnreachableFuncsTests, mainAndFuncs02)
 		}
 	)");
 	auto config = config::Config::fromJsonString(R"({
-		"mainAddress" : "0x1000",
+		"decompParams": {
+			"mainAddress" : "0x1000"
+		},
 		"functions" :
 		[
 			{
@@ -461,7 +471,9 @@ TEST_F(UnreachableFuncsTests, mainAndFuncs03)
 		}
 	)");
 	auto config = config::Config::fromJsonString(R"({
-		"mainAddress" : "0x1000",
+		"decompParams": {
+			"mainAddress" : "0x1000"
+		},
 		"functions" :
 		[
 			{
@@ -537,7 +549,9 @@ TEST_F(UnreachableFuncsTests, mainAndFuncs04)
 		}
 	)");
 	auto config = config::Config::fromJsonString(R"({
-		"mainAddress" : "0x1000",
+		"decompParams": {
+			"mainAddress" : "0x1000"
+		},
 		"functions" :
 		[
 			{
@@ -591,7 +605,9 @@ TEST_F(UnreachableFuncsTests, mainOnlyDeclaration)
 		declare i32 @main(i32 %arg1, i8** nocapture %arg2)
 	)");
 	auto config = config::Config::fromJsonString(R"({
-		"mainAddress" : "0x1000",
+		"decompParams": {
+			"mainAddress" : "0x1000"
+		},
 		"functions" :
 		[
 			{
@@ -693,7 +709,9 @@ TEST_F(UnreachableFuncsTests, onlyMain01)
 		}
 	)");
 	auto config = config::Config::fromJsonString(R"({
-		"mainAddress" : "0x1000",
+		"decompParams": {
+			"mainAddress" : "0x1000"
+		},
 		"functions" :
 		[
 			{
@@ -739,7 +757,9 @@ TEST_F(UnreachableFuncsTests, onlyMain02)
 		}
 	)");
 	auto config = config::Config::fromJsonString(R"({
-		"mainAddress" : "0x1000",
+		"decompParams": {
+			"mainAddress" : "0x1000"
+		},
 		"functions" :
 		[
 			{
