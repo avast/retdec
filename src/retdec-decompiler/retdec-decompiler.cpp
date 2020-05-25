@@ -665,6 +665,7 @@ int main(int argc, char **argv)
 // decompile
 // =============================================================================
 
+int ret = 0;
 try
 {
 	std::stringstream buffer;
@@ -677,7 +678,7 @@ try
 		if (future.wait_for(timeout) != std::future_status::timeout)
 		{
 			thr.join();
-			future.get(); // this will propagate exception from f() if any
+			ret = future.get(); // this will propagate exception from f() if any
 		}
 		else
 		{
@@ -689,7 +690,7 @@ try
 	}
 	else
 	{
-		decompile(config, po);
+		ret = decompile(config, po);
 	}
 }
 catch (const std::bad_alloc& e)
@@ -697,5 +698,5 @@ catch (const std::bad_alloc& e)
 	exit(135);
 }
 
-	return 0;
+	return ret;
 }
