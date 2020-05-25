@@ -20,7 +20,7 @@
 #include "retdec/bin2llvmir/providers/lti.h"
 #include "retdec/bin2llvmir/providers/names.h"
 #include "retdec/cpdetect/cpdetect.h"
-#include "retdec/yaracpp/yara_detector/yara_detector.h"
+#include "retdec/yaracpp/yara_detector.h"
 
 using namespace llvm;
 

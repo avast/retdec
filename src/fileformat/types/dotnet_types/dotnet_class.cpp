@@ -102,7 +102,7 @@ std::string DotnetClass::getNameWithParentClassIndex() const
 		return name;
 	}
 
-	return name + "." + numToStr(parent->getIndex() - 1);
+	return name + "." + std::to_string(parent->getIndex() - 1);
 }
 
 /**

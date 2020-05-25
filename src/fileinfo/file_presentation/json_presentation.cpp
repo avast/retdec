@@ -340,7 +340,7 @@ void JsonPresentation::presentMissingDepsInfo(Writer& writer) const
 
 	writer.String("missingDeps");
 	writer.StartObject();
-	serializeString(writer, "count", numToStr(numberOfMissingDeps));
+	serializeString(writer, "count", std::to_string(numberOfMissingDeps));
 	presentIterativeSubtitle(writer, MissingDepsJsonGetter(fileinfo));
 	writer.EndObject();
 }
@@ -384,20 +384,20 @@ void JsonPresentation::presentCertificates(Writer& writer) const
 	serializeString(
 			writer,
 			"numberOfCertificates",
-			numToStr(fileinfo.getNumberOfStoredCertificates()));
+			std::to_string(fileinfo.getNumberOfStoredCertificates()));
 	if (fileinfo.hasCertificateTableSignerCertificate())
 	{
 		serializeString(
 				writer,
 				"signerCertificateIndex",
-				numToStr(fileinfo.getCertificateTableSignerCertificateIndex()));
+				std::to_string(fileinfo.getCertificateTableSignerCertificateIndex()));
 	}
 	if (fileinfo.hasCertificateTableCounterSignerCertificate())
 	{
 		serializeString(
 				writer,
 				"counterSignerCertificateIndex",
-				numToStr(fileinfo.getCertificateTableCounterSignerCertificateIndex()));
+				std::to_string(fileinfo.getCertificateTableCounterSignerCertificateIndex()));
 	}
 
 	writer.String("certificates");
@@ -409,7 +409,7 @@ void JsonPresentation::presentCertificates(Writer& writer) const
 		serializeString(
 			writer,
 			"index",
-			numToStr(i));
+			std::to_string(i));
 		serializeString(
 			writer,
 			"validSince",

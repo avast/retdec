@@ -51,7 +51,7 @@ std::size_t VersionInfoStringTablePlainGetter::getBasicInfo(std::size_t structIn
 	info.clear();
 
 	desc.push_back("Number of strings: ");
-	info.push_back(numToStr(fileinfo.getNumberOfVersionInfoStrings()));
+	info.push_back(std::to_string(fileinfo.getNumberOfVersionInfoStrings()));
 
 	return info.size();
 }
@@ -64,7 +64,7 @@ bool VersionInfoStringTablePlainGetter::loadRecord(std::size_t structIndex, std:
 	}
 
 	record.clear();
-	record.push_back(numToStr(recIndex));
+	record.push_back(std::to_string(recIndex));
 	record.push_back(replaceNonprintableChars(fileinfo.getVersionInfoStringName(recIndex)));
 	record.push_back(replaceNonprintableChars(fileinfo.getVersionInfoStringValue(recIndex)));
 	return true;

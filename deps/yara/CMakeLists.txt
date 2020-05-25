@@ -19,18 +19,47 @@ if(MSVC)
 	set(YARA_WIN_DIR       ${YARA_DIR}/windows/vs2015)
 	set(YARA_SOLUTION      ${YARA_WIN_DIR}/yara.sln)
 	set(YARA_LIBRARY_DIR   ${YARA_WIN_DIR}/libyara/$<CONFIGURATION>)
+	set(YARA_CLEAN_COMMAND "${CMAKE_VS_MSBUILD_COMMAND}"
+		/t:Clean
+		${YARA_SOLUTION}
+	)
 	set(YARA_BUILD_COMMAND "${CMAKE_VS_MSBUILD_COMMAND}"
 		/m:${CPUS}
 		/p:Platform=${PLATFORM}
 		/p:Configuration=$<CONFIGURATION>
 		/p:PlatformToolset=${CMAKE_VS_PLATFORM_TOOLSET}
 		/p:WindowsTargetPlatformVersion=${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}
-		${YARA_SOLUTION})
+		${YARA_SOLUTION}
+	)
 	set(YARAC_PATH         ${YARA_WIN_DIR}/\${CMAKE_INSTALL_CONFIG_NAME}/${YARAC_NAME})
 else()
 	set(YARA_LIBRARY_DIR ${YARA_DIR}/libyara/.libs)
+	set(YARA_CLEAN_COMMAND make clean)
 	set(YARA_BUILD_COMMAND make -j${CPUS})
 	set(YARAC_PATH         ${YARA_DIR}/yarac)
+endif()
+
+# These are not used on MSVC, but we use it on all platforms to detect if
+# build configuration changed - changes in config should be mirrored on both
+# MSVC & Linux.
+# We also clean for MSVC if patch file changed.
+set(YARA_CONFIGURE_ARGS
+	--prefix=${YARA_INSTALL_DIR}
+	--enable-dotnet
+	--enable-macho
+	--disable-shared
+	--without-crypto
+	CC=${CMAKE_C_COMPILER}
+	CFLAGS=${CMAKE_C_FLAGS}
+)
+check_if_variable_changed(YARA_CONFIGURE_ARGS CHANGED)
+if(CHANGED)
+	message(STATUS "YARA: configuration arguments changed -> rebuilding YARA.")
+endif()
+
+check_if_variable_changed(YARA_LOCAL_DIR CHANGED)
+if(CHANGED)
+	message(STATUS "YARA: path to YARA directory changed -> rebuilding YARA.")
 endif()
 
 if(YARA_LOCAL_DIR)
@@ -42,12 +71,13 @@ if(YARA_LOCAL_DIR)
 		SOURCE_DIR "${YARA_LOCAL_DIR}"
 		DOWNLOAD_NAME yara.zip
 		BUILD_IN_SOURCE 1
+		BUILD_ALWAYS ${CHANGED}
 		# Patch the Yara sources.
 		PATCH_COMMAND
 			${CMAKE_COMMAND} -Dyara_path=<SOURCE_DIR> -DRETDEC_MSVC_STATIC_RUNTIME=${RETDEC_MSVC_STATIC_RUNTIME} -P ${CMAKE_CURRENT_SOURCE_DIR}/patch.cmake
 		CONFIGURE_COMMAND ""
-		BUILD_COMMAND ""
-			${YARA_BUILD_COMMAND}
+		BUILD_COMMAND ${YARA_CLEAN_COMMAND}
+		COMMAND       ${YARA_BUILD_COMMAND}
 		INSTALL_COMMAND ""
 	)
 	force_configure_step(yara)
@@ -60,21 +90,15 @@ else()
 		URL_HASH SHA256=${YARA_ARCHIVE_SHA256}
 		DOWNLOAD_NAME yara.zip
 		BUILD_IN_SOURCE 1
+		BUILD_ALWAYS ${CHANGED}
 		# Patch the Yara sources.
 		PATCH_COMMAND
 			${CMAKE_COMMAND} -Dyara_path=<SOURCE_DIR> -DRETDEC_MSVC_STATIC_RUNTIME=${RETDEC_MSVC_STATIC_RUNTIME} -P ${CMAKE_CURRENT_SOURCE_DIR}/patch.cmake
 		CONFIGURE_COMMAND ""
-		BUILD_COMMAND ""
-			${YARA_BUILD_COMMAND}
+		BUILD_COMMAND ${YARA_CLEAN_COMMAND}
+		COMMAND       ${YARA_BUILD_COMMAND}
 		INSTALL_COMMAND ""
 	)
-endif()
-
-check_if_variable_changed(YARA_LOCAL_DIR CHANGED)
-if(CHANGED)
-	ExternalProject_Get_Property(yara binary_dir)
-	message(STATUS "YARA: path to YARA directory changed -> cleaning CMake files in ${binary_dir}.")
-	clean_cmake_files(${binary_dir})
 endif()
 
 # https://github.com/avast/retdec/issues/439
@@ -93,14 +117,16 @@ if(NOT MSVC)
 		DEPENDEES configure
 		DEPENDERS build
 		COMMAND ./bootstrap.sh
-		COMMAND ./configure
-			--prefix=${YARA_INSTALL_DIR}
-			--enable-dotnet
-			--enable-macho
-			--disable-shared
-			--without-crypto
-			CC=${CMAKE_C_COMPILER}
-			CFLAGS=${CMAKE_C_FLAGS}
+		COMMAND ./configure ${YARA_CONFIGURE_ARGS}
+	)
+else()
+	# Clean if patch file changed.
+	ExternalProject_Add_Step(yara configure-msvc
+		WORKING_DIRECTORY ${YARA_DIR}
+		DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/patch.cmake
+		DEPENDEES configure
+		DEPENDERS build
+		COMMAND ${YARA_CLEAN_COMMAND}
 	)
 endif()
 

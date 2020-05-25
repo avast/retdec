@@ -95,6 +95,9 @@ namespace PeLib
 
 		// Errors from resource parser
 		LDR_ERROR_RSRC_OVER_END_OF_IMAGE,           // Array of resource directory entries goes beyond end of the image
+		LDR_ERROR_RSRC_NAME_OUT_OF_IMAGE,           // One of the resource names points out of the image
+		LDR_ERROR_RSRC_DATA_OUT_OF_IMAGE,           // One of the resource data points out of the image
+		LDR_ERROR_RSRC_SUBDIR_OUT_OF_IMAGE,         // One of the resource subdirectories points out of the image
 
 		// Errors from entry point checker
 		LDR_ERROR_ENTRY_POINT_OUT_OF_IMAGE,         // The entry point is out of the image
@@ -104,14 +107,24 @@ namespace PeLib
 		LDR_ERROR_DIGITAL_SIGNATURE_CUT,            // The file signature is out of the file
 		LDR_ERROR_DIGITAL_SIGNATURE_ZEROED,         // The file signature is zeroed
 
+		// Errors from relocations
+		LDR_ERROR_RELOCATIONS_OUT_OF_IMAGE,         // The relocation directory points out of the image
+		LDR_ERROR_RELOC_BLOCK_INVALID_VA,           // A relocation block has invalid virtual address
+		LDR_ERROR_RELOC_BLOCK_INVALID_LENGTH,       // A relocation block has invalid length
+		LDR_ERROR_RELOC_ENTRY_BAD_TYPE,             // A relocation entry has invalid type
+
+		// Other errors
+		LDR_ERROR_INMEMORY_IMAGE,                   // The file is a 1:1 in-memory image
+
 		LDR_ERROR_MAX
 
 	};
 
-	struct LoaderErrorString
+	struct LoaderErrorInfo
 	{
 		const char * loaderErrorString;
 		const char * loaderErrorUserFriendly;
+		bool loadableAnyway;
 	};
 
 	class PeFile;
@@ -219,6 +232,8 @@ namespace PeLib
 	const dword PELIB_MAX_IMPORT_DLLS        = 0x100;           // Maximum number of imported DLLs we consider OK
 	const dword PELIB_MAX_IMPORTED_FUNCTIONS = 0x1000;          // Maximum number of exported functions (per DLL) that we support
 	const dword PELIB_MAX_EXPORTED_FUNCTIONS = 0x1000;          // Maximum number of exported functions that we support
+
+	const dword PELIB_SECTOR_SIZE = 0x200;
 
 	template<int bits>
 	struct PELIB_IMAGE_ORDINAL_FLAGS;
@@ -440,6 +455,18 @@ namespace PeLib
 		PELIB_IMAGE_SUBSYSTEM_POSIX_CUI	    = 7,
 		PELIB_IMAGE_SUBSYSTEM_NATIVE_WINDOWS       = 8,
 		PELIB_IMAGE_SUBSYSTEM_WINDOWS_CE_GUI       = 9
+	};
+
+	enum : uint16_t
+	{
+		PELIB_IMAGE_REL_BASED_ABSOLUTE        = 0,
+		PELIB_IMAGE_REL_BASED_HIGH            = 1,
+		PELIB_IMAGE_REL_BASED_LOW             = 2,
+		PELIB_IMAGE_REL_BASED_HIGHLOW         = 3,
+		PELIB_IMAGE_REL_BASED_HIGHADJ         = 4,
+		PELIB_IMAGE_REL_BASED_MIPS_JMPADDR    = 5,
+		PELIB_IMAGE_REL_BASED_MIPS_JMPADDR16  = 9,
+		PELIB_IMAGE_REL_BASED_DIR64           = 10
 	};
 
 	enum

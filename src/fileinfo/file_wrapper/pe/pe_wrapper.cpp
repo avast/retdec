@@ -57,7 +57,7 @@ std::string getSymbolLinkToSection(word link)
 		return "DEBUG";
 	}
 
-	return numToStr(link - 1);
+	return std::to_string(link - 1);
 }
 
 /**
@@ -114,8 +114,6 @@ PeWrapper::PeWrapper(
 		stateIsValid = false;
 		return;
 	}
-
-	file->readRelocationsDirectory();
 }
 
 /**

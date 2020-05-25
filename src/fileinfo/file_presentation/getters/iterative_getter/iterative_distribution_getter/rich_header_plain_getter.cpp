@@ -49,7 +49,7 @@ std::size_t RichHeaderPlainGetter::getBasicInfo(std::size_t structIndex, std::ve
 	info.clear();
 
 	desc.push_back("Number of records: ");
-	info.push_back(numToStr(fileinfo.getNumberOfStoredRecordsInRichHeader()));
+	info.push_back(std::to_string(fileinfo.getNumberOfStoredRecordsInRichHeader()));
 
 	return info.size();
 }
@@ -62,7 +62,7 @@ bool RichHeaderPlainGetter::loadRecord(std::size_t structIndex, std::size_t recI
 	}
 
 	record.clear();
-	record.push_back(numToStr(recIndex));
+	record.push_back(std::to_string(recIndex));
 	const auto productId = fileinfo.getRichHeaderRecordProductIdStr(recIndex);
 	const auto productBuild = fileinfo.getRichHeaderRecordProductBuildStr(recIndex);
 	record.push_back(!productId.empty() && !productBuild.empty() ? productId + "." + productBuild : "");

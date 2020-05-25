@@ -201,8 +201,8 @@ void Asn1Object::init()
 
 	// First number from OID is stored as 40*X + Y where OID is 'X.Y'
 	auto first = contentData[0];
-	_identifier += retdec::utils::numToStr(first / 40) + '.';
-	_identifier += retdec::utils::numToStr(first % 40);
+	_identifier += std::to_string(first / 40) + '.';
+	_identifier += std::to_string(first % 40);
 	if (contentData.size() != 1)
 		_identifier += '.';
 
@@ -216,7 +216,7 @@ void Asn1Object::init()
 			continue;
 		}
 
-		_identifier += retdec::utils::numToStr(subident);
+		_identifier += std::to_string(subident);
 		if (itr + 1 != contentData.end())
 			_identifier += '.';
 		subident = 0;

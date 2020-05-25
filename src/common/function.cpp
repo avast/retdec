@@ -7,9 +7,6 @@
 #include <algorithm>
 
 #include "retdec/common/function.h"
-#include "retdec/utils/const.h"
-
-using retdec::utils::likeConstVersion;
 
 namespace retdec {
 namespace common {

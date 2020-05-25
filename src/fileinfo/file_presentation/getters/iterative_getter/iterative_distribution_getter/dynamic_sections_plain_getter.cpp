@@ -74,7 +74,7 @@ bool DynamicSectionsPlainGetter::loadRecord(std::size_t structIndex, std::size_t
 	std::vector<std::string> desc, abbv;
 	fileinfo.getDynamicEntryFlagsDescriptors(structIndex, recIndex, desc, abbv);
 	record.clear();
-	record.push_back(numToStr(recIndex));
+	record.push_back(std::to_string(recIndex));
 	record.push_back(fileinfo.getDynamicEntryType(structIndex, recIndex));
 	record.push_back(abbvSerialization(abbv));
 	record.push_back(fileinfo.getDynamicEntryValueStr(structIndex, recIndex, hexWithPrefix));

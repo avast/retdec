@@ -10,17 +10,22 @@ namespace retdec {
 namespace utils {
 
 /**
- * Checks whether given value is aligned based on alignment value. Alignment must be power of 2.
+ * Checks whether given value is aligned based on alignment value.
+ * Alignment must be power of 2.
  *
  * @param value Value to be checked.
  * @param alignment Alignment to check. Must be power of 2.
- * @param remainder Output value that is non-zero if value is not aligned and zero if it is aligned.
- *   It contains @c value modulo @c alignment. Contains undefined value if alignment is not power of 2.
+ * @param remainder Output value that is non-zero if value is not aligned
+ *   and zero if it is aligned. It contains @c value modulo @c alignment.
+ *   Contains undefined value if alignment is not power of 2.
  *
- * @return True if value is aligned to given alignment, false otherwise. If alignment is not power of 2
- *   the return value is undefined.
+ * @return True if value is aligned to given alignment, false otherwise.
+ *   If alignment is not power of 2 the return value is undefined.
  */
-bool isAligned(std::uint64_t value, std::uint64_t alignment, std::uint64_t& remainder)
+bool isAligned(
+		std::uint64_t value,
+		std::uint64_t alignment,
+		std::uint64_t& remainder)
 {
 	return (remainder = (value & (alignment - 1))) == 0;
 }
@@ -31,7 +36,8 @@ bool isAligned(std::uint64_t value, std::uint64_t alignment, std::uint64_t& rema
  * @param value Value to align.
  * @param alignment Alignment to use.
  *
- * @return Value aligned down. If alignment is not power of 2, return value is undefined.
+ * @return Value aligned down. If alignment is not power of 2,
+ *         return value is undefined.
  */
 std::uint64_t alignDown(std::uint64_t value, std::uint64_t alignment)
 {
@@ -44,7 +50,8 @@ std::uint64_t alignDown(std::uint64_t value, std::uint64_t alignment)
  * @param value Value to align.
  * @param alignment Alignment to use.
  *
- * @return Value aligned up. If alignment is not power of 2, return value is undefined.
+ * @return Value aligned up. If alignment is not power of 2,
+ *         return value is undefined.
  */
 std::uint64_t alignUp(std::uint64_t value, std::uint64_t alignment)
 {

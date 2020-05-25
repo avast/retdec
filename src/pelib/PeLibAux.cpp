@@ -25,7 +25,7 @@ namespace PeLib
 	const qword PELIB_IMAGE_ORDINAL_FLAGS<64>::PELIB_IMAGE_ORDINAL_FLAG = 0x8000000000000000ULL;
 
 	// Keep in sync with PeLib::LoaderError!!!
-	static const std::vector<LoaderErrorString> LdrErrStrings =
+	static const std::vector<LoaderErrorInfo> LdrErrStrings =
 	{
 		{"LDR_ERROR_NONE",                         "No error"},
 		{"LDR_ERROR_FILE_TOO_BIG",                 "The file is larger than 4GB - 1"},
@@ -61,7 +61,7 @@ namespace PeLib
 		{"LDR_ERROR_INVALID_SECTION_RAWSIZE",      "Invalid raw data size of a section" },
 		{"LDR_ERROR_INVALID_SIZE_OF_IMAGE",        "IMAGE_OPTIONAL_HEADER::SizeOfImage doesn't match the (header+sections)" },
 		{"LDR_ERROR_FILE_IS_CUT",                  "The PE file is cut" },
-		{"LDR_ERROR_FILE_IS_CUT_LOADABLE",         "The PE file is cut, but loadable" },
+		{"LDR_ERROR_FILE_IS_CUT_LOADABLE",         "The PE file is cut, but loadable", true},
 
 		// Import directory detected errors
 		{"LDR_ERROR_IMPDIR_OUT_OF_FILE",           "Offset of the import directory is out of the file" },
@@ -72,15 +72,28 @@ namespace PeLib
 		{"LDR_ERROR_IMPDIR_IMPORT_COUNT_EXCEEDED", "Number of imported functions exceeds maximum" },
 
 		// Resource directory detected errors
-		{"LDR_ERROR_RSRC_OVER_END_OF_IMAGE",       "Array of resource directory entries goes beyond end of the image" },
+		{"LDR_ERROR_RSRC_OVER_END_OF_IMAGE",       "Array of resource directory entries goes beyond end of the image", true },
+		{"LDR_ERROR_RSRC_NAME_OUT_OF_IMAGE",       "One of the resource names points out of the image", true },
+		{"LDR_ERROR_RSRC_DATA_OUT_OF_IMAGE",       "One of the resource data points out of the image", true },
+		{"LDR_ERROR_RSRC_SUBDIR_OUT_OF_IMAGE",     "One of the resource subdirectories points out of the image", true },
 
 		// Entry point error detection
-		{"LDR_ERROR_ENTRY_POINT_OUT_OF_IMAGE",     "The position of the entry point is out of the image" },
-		{"LDR_ERROR_ENTRY_POINT_ZEROED",           "The entry point is zeroed; probably damaged file" },
+		{"LDR_ERROR_ENTRY_POINT_OUT_OF_IMAGE",     "The position of the entry point is out of the image", true },
+		{"LDR_ERROR_ENTRY_POINT_ZEROED",           "The entry point is zeroed; probably damaged file", true },
 
 		// Signature error detection
-		{"LDR_ERROR_DIGITAL_SIGNATURE_CUT",        "The digital signature is cut or missing; probably damaged file" },
-		{"LDR_ERROR_DIGITAL_SIGNATURE_ZEROED",     "The digital signature is zeroed; probably damaged file" },
+		{"LDR_ERROR_DIGITAL_SIGNATURE_CUT",        "The digital signature is cut or missing; probably damaged file", true },
+		{"LDR_ERROR_DIGITAL_SIGNATURE_ZEROED",     "The digital signature is zeroed; probably damaged file", true },
+
+		// Relocation errors
+		{"LDR_ERROR_RELOCATIONS_OUT_OF_IMAGE",     "The relocation directory points out of the image", true },
+		{"LDR_ERROR_RELOC_BLOCK_INVALID_VA",       "A relocation block has invalid virtual address", true },
+		{"LDR_ERROR_RELOC_BLOCK_INVALID_LENGTH",   "A relocation block has invalid length", true },
+		{"LDR_ERROR_RELOC_ENTRY_BAD_TYPE",         "A relocation entry has invalid type", true },
+
+		// Other errors
+		{"LDR_ERROR_INMEMORY_IMAGE",               "The file is an in-memory image", false },
+
 	};
 
 	PELIB_IMAGE_FILE_MACHINE_ITERATOR::PELIB_IMAGE_FILE_MACHINE_ITERATOR()
@@ -191,13 +204,18 @@ namespace PeLib
 
 	bool getLoaderErrorLoadableAnyway(LoaderError ldrError)
 	{
-		// These errors indicate damaged PE file, but the file is usually loadable anyway
-		return (ldrError == LDR_ERROR_FILE_IS_CUT_LOADABLE ||
-				ldrError == LDR_ERROR_RSRC_OVER_END_OF_IMAGE ||
-				ldrError == LDR_ERROR_ENTRY_POINT_OUT_OF_IMAGE ||
-				ldrError == LDR_ERROR_ENTRY_POINT_ZEROED ||
-				ldrError == LDR_ERROR_DIGITAL_SIGNATURE_CUT ||
-				ldrError == LDR_ERROR_DIGITAL_SIGNATURE_ZEROED);
+		std::size_t index = (std::size_t)ldrError;
+
+		// When the index is within range
+		if (index < LdrErrStrings.size())
+		{
+			return LdrErrStrings[index].loadableAnyway;
+		}
+
+		// If this assert triggers, we need to add the missing string
+		// to the PeLib::LdrErrStrings vector
+		assert(false);
+		return false;
 	}
 
 	// Anti-assert feature. Debug version of isprint in MS Visual C++ asserts

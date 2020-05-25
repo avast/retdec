@@ -110,7 +110,7 @@ std::string ResourceTable::computePerceptualAvgHash(const ResourceIcon &icon) co
 		}
 	}
 
-	return retdec::utils::toHex(bytes, false, 16);
+	return retdec::utils::intToHexString(bytes, false, 16);
 }
 
 /**
@@ -891,8 +891,8 @@ void ResourceTable::dump(std::string &dumpTable) const
 
 		for(const auto &res : table)
 		{
-			auto sName = (res->hasEmptyName() && res->getNameId(aux)) ? numToStr(aux, std::dec) : res->getName();
-			auto sType = (res->hasEmptyType() && res->getTypeId(aux)) ? numToStr(aux, std::dec) : res->getType();
+			auto sName = (res->hasEmptyName() && res->getNameId(aux)) ? std::to_string(aux) : res->getName();
+			auto sType = (res->hasEmptyType() && res->getTypeId(aux)) ? std::to_string(aux) : res->getType();
 			auto sLang = res->getLanguage();
 			if(sType.empty())
 			{
@@ -902,10 +902,10 @@ void ResourceTable::dump(std::string &dumpTable) const
 			{
 				if(res->getLanguageId(aux))
 				{
-					sLang = numToStr(aux, std::dec);
+					sLang = std::to_string(aux);
 					if(res->getSublanguageId(aux))
 					{
-						sLang += ":" + numToStr(aux, std::dec);
+						sLang += ":" + std::to_string(aux);
 					}
 				}
 				else
@@ -915,8 +915,8 @@ void ResourceTable::dump(std::string &dumpTable) const
 			}
 			const auto md5 = res->hasMd5() ? res->getMd5() : "-";
 			ret << "; " << sName << " (type: " << sType << ", language: " << sLang << ", offset: " <<
-				numToStr(res->getOffset(), std::hex) << ", declSize: " << numToStr(res->getSizeInFile(), std::hex) <<
-				", loadedSize: " << numToStr(res->getLoadedSize(), std::hex) << ", md5: " << md5 << ")\n";
+				intToHexString(res->getOffset()) << ", declSize: " << intToHexString(res->getSizeInFile()) <<
+				", loadedSize: " << intToHexString(res->getLoadedSize()) << ", md5: " << md5 << ")\n";
 		}
 	}
 

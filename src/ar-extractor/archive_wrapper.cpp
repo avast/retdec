@@ -85,7 +85,7 @@ bool checkError(
 	std::string &errorMessage)
 {
 	if (error) {
-		errorMessage = toString(std::move(error));
+		errorMessage = llvm::toString(std::move(error));
 		return true;
 	}
 
@@ -119,7 +119,7 @@ ArchiveWrapper::ArchiveWrapper(
 	Error error = Error::success();
 	archive = std::make_unique<Archive>(buffer.get()->getMemBufferRef(), error);
 	if (error) {
-		errorMessage = toString(std::move(error));
+		errorMessage = llvm::toString(std::move(error));
 		return;
 	}
 

@@ -460,7 +460,7 @@ std::string lcidToStr(std::size_t lcid)
 	auto l = lcids.find(lcid);
 	if (l == lcids.end())
 	{
-		return numToStr(lcid, std::dec);
+		return std::to_string(lcid);
 	}
 	return l->second;
 }
@@ -475,7 +475,7 @@ std::string codePageToStr(std::size_t cpage)
 	auto cpg = codePages.find(cpage);
 	if (cpg == codePages.end())
 	{
-		return numToStr(cpage, std::dec);
+		return std::to_string(cpage);
 	}
 	return cpg->second;
 }

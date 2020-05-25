@@ -54,7 +54,7 @@ std::size_t TypeRefTablePlainGetter::getBasicInfo(std::size_t structIndex, std::
 	desc.push_back("CRC32                   : ");
 	desc.push_back("MD5                     : ");
 	desc.push_back("SHA256                  : ");
-	info.push_back(numToStr(fileinfo.getNumberOfStoredDotnetImportedClasses()));
+	info.push_back(std::to_string(fileinfo.getNumberOfStoredDotnetImportedClasses()));
 	info.push_back(fileinfo.getDotnetTypeRefhashCrc32());
 	info.push_back(fileinfo.getDotnetTypeRefhashMd5());
 	info.push_back(fileinfo.getDotnetTypeRefhashSha256());
@@ -70,7 +70,7 @@ bool TypeRefTablePlainGetter::loadRecord(std::size_t structIndex, std::size_t re
 	}
 
 	record.clear();
-	record.push_back(numToStr(recIndex));
+	record.push_back(std::to_string(recIndex));
 	record.push_back(replaceNonprintableChars(fileinfo.getDotnetImportedClassNameWithParentClassIndex(recIndex)));
 	record.push_back(replaceNonprintableChars(fileinfo.getDotnetImportedClassNameSpace(recIndex)));
 	record.push_back(replaceNonprintableChars(fileinfo.getDotnetImportedClassLibName(recIndex)));

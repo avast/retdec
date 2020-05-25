@@ -547,7 +547,7 @@ std::string getSymbolLinkToSection(unsigned long long link)
 		case SHN_XINDEX:
 			return "XINDEX";
 		default:
-			return numToStr(link);
+			return std::to_string(link);
 	}
 }
 
@@ -787,7 +787,7 @@ ElfDetector::ElfDetector(
  */
 void ElfDetector::getFileVersion()
 {
-	fileInfo.setFileVersion(numToStr(elfParser->getFileVersion()));
+	fileInfo.setFileVersion(std::to_string(elfParser->getFileVersion()));
 }
 
 /**
@@ -795,7 +795,7 @@ void ElfDetector::getFileVersion()
  */
 void ElfDetector::getFileHeaderInfo()
 {
-	fileInfo.setFileHeaderVersion(numToStr(elfParser->getFileHeaderVersion()));
+	fileInfo.setFileHeaderVersion(std::to_string(elfParser->getFileHeaderVersion()));
 	fileInfo.setFileHeaderSize(elfParser->getFileHeaderSize());
 }
 
@@ -1198,7 +1198,7 @@ void ElfDetector::getCoreInfo()
 		auto name = mapGetValueOrDefault(auxVecMap, entry.first, "");
 		if(name.empty())
 		{
-			name = "UNKNOWN " + toString(entry.first);
+			name = "UNKNOWN " + std::to_string(entry.first);
 		}
 		fileInfo.addAuxVectorEntry(name, entry.second);
 	}
@@ -1284,7 +1284,7 @@ void ElfDetector::getOsAbiInfo()
 		abi = "Architecture-specific ABI extension";
 	}
 	fileInfo.setOsAbi(abi);
-	fileInfo.setOsAbiVersion(numToStr(abiVersion));
+	fileInfo.setOsAbiVersion(std::to_string(abiVersion));
 }
 
 /**
@@ -1352,7 +1352,7 @@ void ElfDetector::getOsAbiInfoNote()
 				if(elfParser->get4ByteOffset(notes[0].dataOffset, result))
 				{
 					fileInfo.setOsAbi("Android");
-					fileInfo.setOsAbiVersion(numToStr(result));
+					fileInfo.setOsAbiVersion(std::to_string(result));
 					return;
 				}
 			}

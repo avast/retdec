@@ -34,7 +34,7 @@ std::string SymbolPattern::getReferenceString() const
 		if (!ref.name.empty() && isPrintable(ref.name)) {
 			// Only first reference is printed.
 			if (!hasItem(used, ref.name)) {
-				result += toHex(ref.offset, false, 4) + " " + ref.name + " ";
+				result += intToHexString(ref.offset, false, 4) + " " + ref.name + " ";
 				used.push_back(ref.name);
 			}
 		}

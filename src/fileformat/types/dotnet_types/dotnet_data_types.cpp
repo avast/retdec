@@ -47,8 +47,8 @@ std::string DotnetDataTypeArray::getText() const
 		if (itr->first != 0 || itr->second != 0)
 		{
 			if (itr->first != 0)
-				dimStr += retdec::utils::numToStr(itr->first) + "...";
-			dimStr += retdec::utils::numToStr(itr->second);
+				dimStr += std::to_string(itr->first) + "...";
+			dimStr += std::to_string(itr->second);
 		}
 
 		repr += dimStr;

@@ -113,10 +113,10 @@ rule eziriz_dotnet_reactor_62_or_newer {
 		pe.number_of_sections == 3 and
 		pe.imports("mscoree.dll") and
 		dotnet.number_of_user_strings > 8 and
-		dotnet.user_strings[dotnet.number_of_user_strings - 8] == "{\x001\x001\x001\x001\x001\x00-\x002\x002\x002\x002\x002\x00-\x002\x000\x000\x000\x001\x00-\x000\x000\x000\x000\x001\x00}\x00\x00" and
-		dotnet.user_strings[dotnet.number_of_user_strings - 6] == "{\x001\x001\x001\x001\x001\x00-\x002\x002\x002\x002\x002\x00-\x003\x000\x000\x000\x001\x00-\x000\x000\x000\x000\x001\x00}\x00\x00" and
-		dotnet.user_strings[dotnet.number_of_user_strings - 4] == "{\x001\x001\x001\x001\x001\x00-\x002\x002\x002\x002\x002\x00-\x004\x000\x000\x000\x001\x00-\x000\x000\x000\x000\x001\x00}\x00\x00" and
-		dotnet.user_strings[dotnet.number_of_user_strings - 2] == "{\x001\x001\x001\x001\x001\x00-\x002\x002\x002\x002\x002\x00-\x005\x000\x000\x000\x001\x00-\x000\x000\x000\x000\x001\x00}\x00\x00"
+		dotnet.user_strings[dotnet.number_of_user_strings - 8] == "{\x001\x001\x001\x001\x001\x00-\x002\x002\x002\x002\x002\x00-\x002\x000\x000\x000\x001\x00-\x000\x000\x000\x000\x001\x00}\x00" and
+		dotnet.user_strings[dotnet.number_of_user_strings - 6] == "{\x001\x001\x001\x001\x001\x00-\x002\x002\x002\x002\x002\x00-\x003\x000\x000\x000\x001\x00-\x000\x000\x000\x000\x001\x00}\x00" and
+		dotnet.user_strings[dotnet.number_of_user_strings - 4] == "{\x001\x001\x001\x001\x001\x00-\x002\x002\x002\x002\x002\x00-\x004\x000\x000\x000\x001\x00-\x000\x000\x000\x000\x001\x00}\x00" and
+		dotnet.user_strings[dotnet.number_of_user_strings - 2] == "{\x001\x001\x001\x001\x001\x00-\x002\x002\x002\x002\x002\x00-\x005\x000\x000\x000\x001\x00-\x000\x000\x000\x000\x001\x00}\x00"
 }
 
 rule spirit_15_01 {
@@ -3728,6 +3728,29 @@ rule beroexepacker_100_lzma_02 {
 		$1 = { 83 7C 24 08 01 0F 85 ?? ?? ?? ?? 60 68 ?? ?? ?? ?? 68 ?? ?? ?? ?? 68 ?? ?? ?? ?? E8 ?? ?? ?? ?? BE ?? ?? ?? ?? B9 ?? ?? ?? ?? 8B F9 81 FE ?? ?? ?? ?? 7F 10 AC 47 04 18 2C 02 73 F0 29 3E 03 F1 03 F9 EB E8 }
 	condition:
 		$1 at pe.entry_point
+}
+
+private rule beroexepacker_uv_prologue {
+	strings:
+		$1 = { 60 FC B9 ?? ?? ?? ?? BE ?? ?? ?? ?? BF ?? ?? ?? ?? F3 A4 }
+		$2 = { 60 E8 00 00 00 00 }
+		$3 = { 60 68 ?? ?? ?? ?? 68 ?? ?? ?? ?? 68 ?? ?? ?? ?? E8 ?? ?? ?? ?? }
+		$4 = { 60 C8 94 0C 00 60 }
+	condition:
+		for any of them : ( $ in (pe.entry_point .. pe.entry_point + 11))
+}
+
+rule beroexepacker_uv_01 {
+	meta:
+		tool = "P"
+		name = "BeRoEXEPacker"
+	strings:
+		 $1 = { 5E 81 C6 A7 00 00 00 BF ?? ?? ?? ?? 57 FC B2 80 33 DB A4 B3 02 E8 71 00 00 00 73 F6 33 C9 E8 68 00 00 00 73 1C 33 C0 E8 5F 00 00 00 73 23 B3 02 41 B0 10 E8 53 00 00 00 12 C0 73 }
+		 $2 = { B9 04 00 00 00 2B CE 81 FE ?? ?? ?? ?? 77 1E AC 04 18 2C 02 72 0D 3C 25 75 ED 8A 06 24 F0 3C 80 75 E5 46 8D 3C 0E 29 3E 83 C6 04 EB DA }
+		 $3 = { AD 89 45 FC 33 C0 F7 D0 89 45 F8 F7 D0 B4 08 B9 23 03 00 00 8D BD 6C F3 FF FF F3 AB BF ?? ?? ?? ?? E9 AC 00 00 00 }
+		 $4 = { B9 ?? ?? ?? ?? BB ?? ?? ?? ?? BE ?? ?? ?? ?? 8B FB FC F3 A4 68 ?? ?? ?? ?? 68 ?? ?? ?? ?? 68 ?? ?? ?? ?? 68 ?? ?? ?? ?? 53 B8 ?? ?? ?? ?? FF D0 }
+	condition:
+		beroexepacker_uv_prologue and 1 of them
 }
 
 rule bitarts {

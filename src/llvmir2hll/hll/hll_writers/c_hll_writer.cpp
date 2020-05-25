@@ -107,7 +107,6 @@
 using namespace retdec::llvm_support;
 
 using retdec::utils::addToSet;
-using retdec::utils::toString;
 
 namespace retdec {
 namespace llvmir2hll {
@@ -1963,7 +1962,7 @@ void CHLLWriter::emitStructDeclaration(ShPtr<StructType> structType,
 		ShPtr<Type> elemType(elements.at(i));
 		// Create a dummy variable so we can use emitVarWithType().
 		// All elements are named e#, where # is a number.
-		emitVarWithType(Variable::create("e" + toString(i), elemType));
+		emitVarWithType(Variable::create("e" + std::to_string(i), elemType));
 		out->punctuation(';');
 		if (!emitInline) {
 			out->newLine();
@@ -2095,7 +2094,7 @@ std::string CHLLWriter::genNameForUnnamedStruct(const StructTypeVector &usedStru
 	std::string structName;
 	// Create new names until we find a name without a clash.
 	do {
-		structName = "struct" + toString(++unnamedStructCounter);
+		structName = "struct" + std::to_string(++unnamedStructCounter);
 		for (const auto &type : usedStructTypes) {
 			if (cast<StructType>(type)->getName() == structName) {
 				// We have found a clash, so try a different name.

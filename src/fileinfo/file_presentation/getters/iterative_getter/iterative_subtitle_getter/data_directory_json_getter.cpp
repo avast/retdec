@@ -42,7 +42,7 @@ std::size_t DataDirectoryJsonGetter::getBasicInfo(std::size_t structIndex, std::
 	info.clear();
 
 	desc.push_back("numberOfDataDirectories");
-	info.push_back(numToStr(fileinfo.getNumberOfStoredDataDirectories()));
+	info.push_back(std::to_string(fileinfo.getNumberOfStoredDataDirectories()));
 
 	return info.size();
 }
@@ -55,7 +55,7 @@ bool DataDirectoryJsonGetter::getRecord(std::size_t structIndex, std::size_t rec
 	}
 
 	record.clear();
-	record.push_back(numToStr(recIndex));
+	record.push_back(std::to_string(recIndex));
 	record.push_back(fileinfo.getDataDirectoryType(recIndex));
 	record.push_back(fileinfo.getDataDirectoryAddressStr(recIndex, hexWithPrefix));
 	record.push_back(fileinfo.getDataDirectorySizeStr(recIndex, hexWithPrefix));

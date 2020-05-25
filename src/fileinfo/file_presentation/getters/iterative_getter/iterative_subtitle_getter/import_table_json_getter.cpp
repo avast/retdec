@@ -50,7 +50,7 @@ std::size_t ImportTableJsonGetter::getBasicInfo(std::size_t structIndex, std::ve
 	desc.push_back("crc32");
 	desc.push_back("md5");
 	desc.push_back("sha256");
-	info.push_back(numToStr(fileinfo.getNumberOfStoredImports()));
+	info.push_back(std::to_string(fileinfo.getNumberOfStoredImports()));
 	info.push_back(fileinfo.getImphashCrc32());
 	info.push_back(fileinfo.getImphashMd5());
 	info.push_back(fileinfo.getImphashSha256());
@@ -66,7 +66,7 @@ bool ImportTableJsonGetter::getRecord(std::size_t structIndex, std::size_t recIn
 	}
 
 	record.clear();
-	record.push_back(numToStr(recIndex));
+	record.push_back(std::to_string(recIndex));
 	record.push_back(replaceNonprintableChars(fileinfo.getImportName(recIndex)));
 	record.push_back(replaceNonprintableChars(fileinfo.getImportUsageType(recIndex)));
 	record.push_back(replaceNonprintableChars(fileinfo.getImportLibraryName(recIndex)));

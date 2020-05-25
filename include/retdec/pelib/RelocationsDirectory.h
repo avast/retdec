@@ -25,11 +25,18 @@ namespace PeLib
 	{
 		protected:
 		  std::vector<IMG_BASE_RELOC> m_vRelocations; ///< Used to store the relocation data.
+		  LoaderError m_ldrError;                     /// Error detected by the import table parser
 
-		  void read(InputBuffer& inputbuffer, unsigned int uiSize);
+		  void read(InputBuffer& inputbuffer, unsigned int uiSize, unsigned int sizeOfImage);
 
 		public:
+		  /// Constructor and destructor
+		  RelocationsDirectory();
 		  virtual ~RelocationsDirectory() = default;
+
+		  /// Retrieve the loader error
+		  LoaderError loaderError() const;
+		  void setLoaderError(LoaderError ldrError);
 
 		  /// Returns the number of relocations in the relocations directory.
 		  unsigned int calcNumberOfRelocations() const; // EXPORT
@@ -37,7 +44,7 @@ namespace PeLib
 		  unsigned int calcNumberOfRelocationData(unsigned int ulRelocation) const; // EXPORT
 
 		  /// Read a file's relocations directory.
-		  int read(const unsigned char* buffer, unsigned int buffersize); // EXPORT
+		  int read(const unsigned char* buffer, unsigned int buffersize, unsigned int sizeOfImage); // EXPORT
 		  /// Returns the size of the relocations directory.
 		  unsigned int size() const; // EXPORT
 
@@ -89,10 +96,18 @@ namespace PeLib
 		unsigned int uiOffset = peHeader.rvaToOffset(peHeader.getIddBaseRelocRva());
 		unsigned int uiSize = peHeader.getIddBaseRelocSize();
 
+		// Check whether the relocations are out of the image
+		if(uiOffset == std::numeric_limits<unsigned int>::max())
+		{
+			RelocationsDirectory::setLoaderError(LDR_ERROR_RELOCATIONS_OUT_OF_IMAGE);
+			return ERROR_INVALID_FILE;
+		}
+
 		// If uiSize is big enough it can overflow after addition with uiOffset, ulFileSize < uiOffset + uiSize can be true,
 		//   even though it should be false.
-		if ((ulFileSize < uiSize) || (ulFileSize < uiOffset + uiSize))
+		if (uiSize > ulFileSize || (uiOffset + uiSize) > ulFileSize)
 		{
+			RelocationsDirectory::setLoaderError(LDR_ERROR_RELOCATIONS_OUT_OF_IMAGE);
 			return ERROR_INVALID_FILE;
 		}
 
@@ -102,7 +117,7 @@ namespace PeLib
 		inStream_w.read(reinterpret_cast<char*>(vRelocDirectory.data()), uiSize);
 
 		InputBuffer ibBuffer{vRelocDirectory};
-		RelocationsDirectory::read(ibBuffer, uiSize);
+		RelocationsDirectory::read(ibBuffer, uiSize, (unsigned int)peHeader.getSizeOfImage());
 
 		return ERROR_NONE;
 	}

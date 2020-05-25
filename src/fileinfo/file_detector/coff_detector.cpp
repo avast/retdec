@@ -50,7 +50,7 @@ std::string getSymbolLinkToSection(std::int16_t link)
 		return "DEBUG";
 	}
 
-	return numToStr(link - 1);
+	return std::to_string(link - 1);
 }
 
 /**
