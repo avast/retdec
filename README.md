@@ -43,17 +43,16 @@ Currently, we support Windows (7 or later), Linux, macOS, and (experimentally) F
 
 3. Install the following programs:
 
-    * [Python](https://www.python.org/) (version >= 3.4)
     * [UPX](https://upx.github.io/) (Optional: if you want to use UPX unpacker in the preprocessing stage)
     * [Graphviz](https://graphviz.gitlab.io/_pages/Download/windows/graphviz-2.38.msi) (Optional: if you want to generate call or control flow graphs)
 
-4. Now, you are all set to run the decompiler. To decompile a binary file named `test.exe`, run the following command (ensure that `python` runs Python 3; as an alternative, you can try `py -3`)
+4. Now, you are all set to run the decompiler. To decompile a binary file named `test.exe`, run
 
     ```
-    python $RETDEC_INSTALL_DIR/bin/retdec-decompiler.py test.exe
+    $RETDEC_INSTALL_DIR/bin/retdec-decompiler test.exe
     ```
 
-   For more information, run `retdec-decompiler.py` with `--help`.
+   For more information, run `retdec-decompiler` with `--help`.
 
 ### Linux
 
@@ -61,17 +60,16 @@ Currently, we support Windows (7 or later), Linux, macOS, and (experimentally) F
 
 2. After you have built the decompiler, you will need to install the following packages via your distribution's package manager:
 
-    * [Python](https://www.python.org/) (version >= 3.4)
     * [UPX](https://upx.github.io/) (Optional: if you want to use UPX unpacker in the preprocessing stage)
     * [Graphviz](http://www.graphviz.org/) (Optional: if you want to generate call or control flow graphs)
 
 3. Now, you are all set to run the decompiler. To decompile a binary file named `test.exe`, run
 
     ```
-    $RETDEC_INSTALL_DIR/bin/retdec-decompiler.py test.exe
+    $RETDEC_INSTALL_DIR/bin/retdec-decompiler test.exe
     ```
 
-   For more information, run `retdec-decompiler.py` with `--help`.
+   For more information, run `retdec-decompiler` with `--help`.
 
 ### macOS
 
@@ -79,36 +77,28 @@ Currently, we support Windows (7 or later), Linux, macOS, and (experimentally) F
 
 2. After you have built the decompiler, you will need to install the following packages:
 
-    * [Python](https://www.python.org/) (version >= 3.4)
     * [UPX](https://upx.github.io/) (Optional: if you want to use UPX unpacker in the preprocessing stage)
     * [Graphviz](http://www.graphviz.org/) (Optional: if you want to generate call or control flow graphs)
 
 3. Now, you are all set to run the decompiler. To decompile a binary file named `test.exe`, run
 
     ```
-    $RETDEC_INSTALL_DIR/bin/retdec-decompiler.py test.exe
+    $RETDEC_INSTALL_DIR/bin/retdec-decompiler test.exe
     ```
 
-   For more information, run `retdec-decompiler.py` with `--help`.
+   For more information, run `retdec-decompiler` with `--help`.
 
 ### FreeBSD (Experimental)
 
 1. There are currently no pre-built "ports" packages for FreeBSD. You will have to build and install the decompiler by yourself. The process is described below.
 
-2. After you have built the decompiler, you may need to install the following packages and execute the following command:
+2. Now, you are all set to run the decompiler. To decompile a binary file named `test.exe`, run
 
     ```
-    sudo pkg install python37
-    sudo ln -s /usr/local/bin/python3.7 /usr/local/bin/python3
+    $RETDEC_INSTALL_DIR/bin/retdec-decompiler test.exe
     ```
 
-3. Now, you are all set to run the decompiler. To decompile a binary file named `test.exe`, run
-
-    ```
-    $RETDEC_INSTALL_DIR/bin/retdec-decompiler.py test.exe
-    ```
-
-   For more information, run `retdec-decompiler.py` with `--help`.
+   For more information, run `retdec-decompiler` with `--help`.
 
 ### Use of RetDec libraries
 
@@ -304,7 +294,7 @@ chmod 0777 /path/to/local/directory
 ```
 Now, you can run the decompiler inside a container:
 ```
-docker run --rm -v /path/to/local/directory:/destination retdec retdec-decompiler.py /destination/binary
+docker run --rm -v /path/to/local/directory:/destination retdec retdec-decompiler /destination/binary
 ```
 Note: Do not modify the `/destination` part is. You only need to change `/path/to/local/directory`. Output files will then be generated to `/path/to/local/directory`.
 
