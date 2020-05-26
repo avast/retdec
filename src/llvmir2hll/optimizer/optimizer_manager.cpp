@@ -150,14 +150,6 @@ void OptimizerManager::optimize(ShPtr<Module> m) {
 	// clear.
 
 	//
-	// Perform initial, HLL-dependent optimizations.
-	//
-	if (hllWriter->getId() == "py") {
-		// Optimizations for Python'.
-		run<RemoveAllCastsOptimizer>(m);
-	}
-
-	//
 	// Perform HLL-independent optimizations.
 	//
 	if (!enableDebug) {
@@ -269,14 +261,8 @@ void OptimizerManager::optimize(ShPtr<Module> m) {
 	//
 	// Perform final, HLL-dependent optimizations.
 	//
-	if (hllWriter->getId() == "c") {
-		// Optimizations for C.
-		run<CCastOptimizer>(m);
-		run<CArrayArgOptimizer>(m);
-	} else if (hllWriter->getId() == "py") {
-		// Optimizations for Python'.
-		run<NoInitVarDefOptimizer>(m);
-	}
+	run<CCastOptimizer>(m);
+	run<CArrayArgOptimizer>(m);
 }
 
 /**
