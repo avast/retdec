@@ -347,22 +347,7 @@ public:
 			// before it. But only one input is expected.
 			else if (params.getInputFile().empty())
 			{
-				auto& out = c;
-				params.setInputFile(out);
-				if (params.getOutputAsmFile().empty())
-					params.setOutputAsmFile(out + ".dsm");
-				if (params.getOutputBitcodeFile().empty())
-					params.setOutputBitcodeFile(out + ".bc");
-				if (params.getOutputLlvmirFile().empty())
-					params.setOutputLlvmirFile(out + ".ll");
-				if (params.getOutputConfigFile().empty())
-					params.setOutputConfigFile(out + ".config.json");
-				if (params.getOutputFile().empty())
-					params.setOutputFile(out + ".c");
-				if (params.getOutputUnpackedFile().empty())
-					params.setOutputUnpackedFile(out + "-unpacked");
-				if (arExtractPath.empty())
-					arExtractPath = out + "-extracted";
+				params.setInputFile(c);
 			}
 			else
 			{
@@ -375,6 +360,28 @@ std::cout << "=============> unrecognized option: " << c << std::endl;
 				++i;
 			}
 		}
+	}
+
+	void check()
+	{
+		auto in = params.getInputFile();
+		if (params.getOutputAsmFile().empty())
+			params.setOutputAsmFile(in + ".dsm");
+		if (params.getOutputBitcodeFile().empty())
+			params.setOutputBitcodeFile(in + ".bc");
+		if (params.getOutputLlvmirFile().empty())
+			params.setOutputLlvmirFile(in + ".ll");
+		if (params.getOutputConfigFile().empty())
+			params.setOutputConfigFile(in + ".config.json");
+		if (params.getOutputFile().empty())
+			if (params.getOutputFormat() == "plain")
+				params.setOutputFile(in + ".c");
+			else
+				params.setOutputFile(in + ".c.json");
+		if (params.getOutputUnpackedFile().empty())
+			params.setOutputUnpackedFile(in + "-unpacked");
+		if (arExtractPath.empty())
+			arExtractPath = in + "-extracted";
 	}
 
 	void dump()
@@ -390,7 +397,7 @@ std::cout << "=============> unrecognized option: " << c << std::endl;
 	{
 		std::cout << programName << R"(:
 	[-h|--help]
-	[-o|--output FILE] Output file.
+	[-o|--output FILE] Output file (default: INPUT_FILE.c if OUTPUT_FORMAT is plain, INPUT_FILE.c.json if OUTPUT_FORMAT is json|json-human).
 	[-f|--output-format OUTPUT_FORMAT] Output format [plain|json|json-human] (default: plain).
 	[-m|--mode MODE] Force the type of decompilation mode [bin|raw] (default: bin).
 	[-a|--arch ARCH] Specify target architecture [mips|pic32|arm|thumb|arm64|powerpc|x86|x86-64].
@@ -414,7 +421,7 @@ std::cout << "=============> unrecognized option: " << c << std::endl;
 	[--timeout SECONDS]
 	[--max-memory MAX_MEMORY] Limits the maximal memory used by the given number of bytes.
 	[--no-memory-limit] Disables the default memory limit (half of system RAM).
-	FILE File to decompile.
+	INPUT_FILE File to decompile.
 )";
 
 		exit(EXIT_SUCCESS);
@@ -659,6 +666,7 @@ int main(int argc, char **argv)
 	try
 	{
 		po.load();
+		po.check();
 	}
 	catch (const std::runtime_error& e)
 	{
