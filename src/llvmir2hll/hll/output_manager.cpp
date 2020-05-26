@@ -14,6 +14,11 @@ OutputManager::~OutputManager()
 
 }
 
+void OutputManager::finalize()
+{
+
+}
+
 void OutputManager::setCommentPrefix(const std::string& prefix)
 {
 	_commentPrefix = prefix;

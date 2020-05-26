@@ -292,6 +292,8 @@ bool HLLWriter::emitTargetCode(ShPtr<Module> module) {
 	if (emitMetaInfoHeader()) { codeEmitted = true; out->newLine(); }
 	if (emitMetaInfo()) { codeEmitted = true; out->newLine(); }
 
+	out->finalize();
+
 	return codeEmitted;
 }
 

@@ -18,7 +18,6 @@ class PlainOutputManager : public OutputManager
 {
 	public:
 		PlainOutputManager(llvm::raw_ostream& out);
-		virtual ~PlainOutputManager();
 
 	public:
 		virtual void newLine() override;

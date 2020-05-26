@@ -28,7 +28,7 @@ class JsonOutputManager : public OutputManager
 {
 	public:
 		JsonOutputManager(llvm::raw_ostream& out);
-		virtual ~JsonOutputManager();
+		virtual void finalize() override;
 
 	public:
 		virtual void newLine() override;

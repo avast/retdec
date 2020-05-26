@@ -16,11 +16,6 @@ PlainOutputManager::PlainOutputManager(llvm::raw_ostream& out) :
 
 }
 
-PlainOutputManager::~PlainOutputManager()
-{
-
-}
-
 void PlainOutputManager::newLine()
 {
 	_out << "\n";

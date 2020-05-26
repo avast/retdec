@@ -22,6 +22,7 @@ class OutputManager
 	// Ctors, dtros.
 	public:
 		virtual ~OutputManager();
+		virtual void finalize();
 
 	// Configuration methods.
 	//
