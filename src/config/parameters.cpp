@@ -41,9 +41,21 @@ const std::string JSON_outputConfigFile         = "outputConfigFile";
 const std::string JSON_outputUnpackedFile       = "outputUnpackedFile";
 const std::string JSON_outputFormat             = "outputFormat";
 
-const std::string JSON_backendDisabledOpts      = "backendDisabledOpts";
-const std::string JSON_backendNoOpts            = "backendNoOpts";
 const std::string JSON_detectStaticCode         = "detectStaticCode";
+const std::string JSON_backendDisabledOpts      = "backendDisabledOpts";
+const std::string JSON_backendEnabledOpts       = "backendEnabledOpts";
+const std::string JSON_backendCallInfoObtainer  = "backendCallInfoObtainer";
+const std::string JSON_backendVarRenamer        = "backendVarRenamer";
+const std::string JSON_backendNoOpts            = "backendNoOpts";
+const std::string JSON_backendEmitCfg           = "backendEmitCfg";
+const std::string JSON_backendEmitCg            = "backendEmitCg";
+const std::string JSON_backendAggressiveOpts    = "backendAggressiveOpts";
+const std::string JSON_backendKeepAllBrackets   = "backendKeepAllBrackets";
+const std::string JSON_backendKeepLibraryFuncs  = "backendKeepLibraryFuncs";
+const std::string JSON_backendNoTimeVaryingInfo = "backendNoTimeVaryingInfo";
+const std::string JSON_backendNoVarRenaming     = "backendNoVarRenaming";
+const std::string JSON_backendNoCompoundOperators = "backendNoCompoundOperators";
+const std::string JSON_backendNoSymbolicNames   = "backendNoSymbolicNames";
 
 const std::string JSON_timeout                  = "timeout";
 const std::string JSON_maxMemoryLimit           = "maxMemoryLimit";
@@ -97,6 +109,52 @@ bool Parameters::isBackendNoOpts() const
 {
 	return _backendNoOpts;
 }
+
+bool Parameters::isBackendEmitCfg() const
+{
+	return _backendEmitCfg;
+}
+
+bool Parameters::isBackendEmitCg() const
+{
+	return _backendEmitCg;
+}
+
+bool Parameters::isBackendAggressiveOpts() const
+{
+	return _backendAggressiveOpts;
+}
+
+bool Parameters::isBackendKeepAllBrackets() const
+{
+	return _backendKeepAllBrackets;
+}
+
+bool Parameters::isBackendKeepLibraryFuncs() const
+{
+	return _backendKeepLibraryFuncs;
+}
+
+bool Parameters::isBackendNoTimeVaryingInfo() const
+{
+	return _backendNoTimeVaryingInfo;
+}
+
+bool Parameters::isBackendNoVarRenaming() const
+{
+	return _backendNoVarRenaming;
+}
+
+bool Parameters::isBackendNoCompoundOperators() const
+{
+	return _backendNoCompoundOperators;
+}
+
+bool Parameters::isBackendNoSymbolicNames() const
+{
+	return _backendNoSymbolicNames;
+}
+
 
 bool Parameters::isDetectStaticCode() const
 {
@@ -206,9 +264,69 @@ void Parameters::setBackendDisabledOpts(const std::string& o)
 	_backendDisabledOpts = o;
 }
 
+void Parameters::setBackendEnabledOpts(const std::string& o)
+{
+	_backendEnabledOpts = o;
+}
+
+void Parameters::setBackendCallInfoObtainer(const std::string& val)
+{
+	_backendCallInfoObtainer = val;
+}
+
+void Parameters::setBackendVarRenamer(const std::string& val)
+{
+	_backendVarRenamer = val;
+}
+
 void Parameters::setIsBackendNoOpts(bool b)
 {
 	_backendNoOpts = b;
+}
+
+void Parameters::setIsBackendEmitCfg(bool b)
+{
+	_backendEmitCfg = b;
+}
+
+void Parameters::setIsBackendEmitCg(bool b)
+{
+	_backendEmitCg = b;
+}
+
+void Parameters::setIsBackendAggressiveOpts(bool b)
+{
+	_backendAggressiveOpts = b;
+}
+
+void Parameters::setIsBackendKeepAllBrackets(bool b)
+{
+	_backendKeepAllBrackets = b;
+}
+
+void Parameters::setIsBackendKeepLibraryFuncs(bool b)
+{
+	_backendKeepLibraryFuncs = b;
+}
+
+void Parameters::setIsBackendNoTimeVaryingInfo(bool b)
+{
+	_backendNoTimeVaryingInfo = b;
+}
+
+void Parameters::setIsBackendNoVarRenaming(bool b)
+{
+	_backendNoVarRenaming = b;
+}
+
+void Parameters::setIsBackendNoCompoundOperators(bool b)
+{
+	_backendNoCompoundOperators = b;
+}
+
+void Parameters::setIsBackendNoSymbolicNames(bool b)
+{
+	_backendNoSymbolicNames = b;
 }
 
 void Parameters::setIsDetectStaticCode(bool b)
@@ -296,6 +414,21 @@ const std::string& Parameters::getBackendDisabledOpts() const
 	return _backendDisabledOpts;
 }
 
+const std::string& Parameters::getBackendEnabledOpts() const
+{
+	return _backendEnabledOpts;
+}
+
+const std::string& Parameters::getBackendCallInfoObtainer() const
+{
+	return _backendCallInfoObtainer;
+}
+
+const std::string& Parameters::getBackendVarRenamer() const
+{
+	return _backendVarRenamer;
+}
+
 void fixPath(std::string& path, utils::FilesystemPath root)
 {
 	utils::FilesystemPath p(path);
@@ -356,8 +489,20 @@ void Parameters::serialize(Writer& writer) const
 	serdes::serializeString(writer, JSON_outputFormat, getOutputFormat());
 
 	serdes::serializeString(writer, JSON_backendDisabledOpts, getBackendDisabledOpts());
+	serdes::serializeString(writer, JSON_backendEnabledOpts, getBackendEnabledOpts());
+	serdes::serializeString(writer, JSON_backendCallInfoObtainer, getBackendCallInfoObtainer());
+	serdes::serializeString(writer, JSON_backendVarRenamer, getBackendVarRenamer());
 	serdes::serializeBool(writer, JSON_backendNoOpts, isBackendNoOpts());
+	serdes::serializeBool(writer, JSON_backendEmitCfg, isBackendEmitCfg());
+	serdes::serializeBool(writer, JSON_backendEmitCg, isBackendEmitCg());
 	serdes::serializeBool(writer, JSON_detectStaticCode, isDetectStaticCode());
+	serdes::serializeBool(writer, JSON_backendAggressiveOpts, isBackendAggressiveOpts());
+	serdes::serializeBool(writer, JSON_backendKeepAllBrackets, isBackendKeepAllBrackets());
+	serdes::serializeBool(writer, JSON_backendKeepLibraryFuncs, isBackendKeepLibraryFuncs());
+	serdes::serializeBool(writer, JSON_backendNoTimeVaryingInfo, isBackendNoTimeVaryingInfo());
+	serdes::serializeBool(writer, JSON_backendNoVarRenaming, isBackendNoVarRenaming());
+	serdes::serializeBool(writer, JSON_backendNoCompoundOperators, isBackendNoCompoundOperators());
+	serdes::serializeBool(writer, JSON_backendNoSymbolicNames, isBackendNoSymbolicNames());
 
 	serdes::serializeUint64(writer, JSON_timeout, getTimeout());
 	serdes::serializeUint64(writer, JSON_maxMemoryLimit, getMaxMemoryLimit());
@@ -410,9 +555,21 @@ void Parameters::deserialize(const rapidjson::Value& val)
 	setOutputUnpackedFile( serdes::deserializeString(val, JSON_outputUnpackedFile) );
 	setOutputFormat( serdes::deserializeString(val, JSON_outputFormat) );
 
-	setBackendDisabledOpts( serdes::deserializeString(val, JSON_backendDisabledOpts) );
-	setIsBackendNoOpts( serdes::deserializeBool(val, JSON_backendNoOpts, false) );
 	setIsDetectStaticCode( serdes::deserializeBool(val, JSON_detectStaticCode, true) );
+	setBackendDisabledOpts( serdes::deserializeString(val, JSON_backendDisabledOpts) );
+	setBackendEnabledOpts( serdes::deserializeString(val, JSON_backendEnabledOpts) );
+	setBackendCallInfoObtainer( serdes::deserializeString(val, JSON_backendCallInfoObtainer, "optim") );
+	setBackendVarRenamer( serdes::deserializeString(val, JSON_backendVarRenamer, "readable") );
+	setIsBackendNoOpts( serdes::deserializeBool(val, JSON_backendNoOpts, false) );
+	setIsBackendEmitCfg( serdes::deserializeBool(val, JSON_backendEmitCfg, false) );
+	setIsBackendEmitCg( serdes::deserializeBool(val, JSON_backendEmitCg, false) );
+	setIsBackendAggressiveOpts( serdes::deserializeBool(val, JSON_backendAggressiveOpts, false) );
+	setIsBackendKeepAllBrackets( serdes::deserializeBool(val, JSON_backendKeepAllBrackets, false) );
+	setIsBackendKeepLibraryFuncs( serdes::deserializeBool(val, JSON_backendKeepLibraryFuncs, false) );
+	setIsBackendNoTimeVaryingInfo( serdes::deserializeBool(val, JSON_backendNoTimeVaryingInfo, false) );
+	setIsBackendNoVarRenaming( serdes::deserializeBool(val, JSON_backendNoVarRenaming, false) );
+	setIsBackendNoCompoundOperators( serdes::deserializeBool(val, JSON_backendNoCompoundOperators, false) );
+	setIsBackendNoSymbolicNames( serdes::deserializeBool(val, JSON_backendNoSymbolicNames, false) );
 
 	setTimeout( serdes::deserializeUint64(val, JSON_timeout, 0) );
 	setMaxMemoryLimit( serdes::deserializeUint64(val, JSON_maxMemoryLimit, 0) );

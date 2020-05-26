@@ -30,10 +30,19 @@ class Parameters
 		bool isVerboseOutput() const;
 		bool isKeepAllFunctions() const;
 		bool isSelectedDecodeOnly() const;
-		bool isMaxMemoryLimitHalfRam() const;
-		bool isBackendNoOpts() const;
 		bool isDetectStaticCode() const;
 		bool isTimeout() const;
+		bool isMaxMemoryLimitHalfRam() const;
+		bool isBackendNoOpts() const;
+		bool isBackendEmitCfg() const;
+		bool isBackendEmitCg() const;
+		bool isBackendAggressiveOpts() const;
+		bool isBackendKeepAllBrackets() const;
+		bool isBackendKeepLibraryFuncs() const;
+		bool isBackendNoTimeVaryingInfo() const;
+		bool isBackendNoVarRenaming() const;
+		bool isBackendNoCompoundOperators() const;
+		bool isBackendNoSymbolicNames() const;
 		/// @}
 
 		/// @name Parameters set methods.
@@ -58,8 +67,20 @@ class Parameters
 		void setMainAddress(const retdec::common::Address& a);
 		void setSectionVMA(const retdec::common::Address& a);
 		void setBackendDisabledOpts(const std::string& o);
-		void setIsBackendNoOpts(bool b);
+		void setBackendEnabledOpts(const std::string& o);
+		void setBackendCallInfoObtainer(const std::string& val);
+		void setBackendVarRenamer(const std::string& val);
 		void setIsDetectStaticCode(bool b);
+		void setIsBackendNoOpts(bool b);
+		void setIsBackendEmitCfg(bool b);
+		void setIsBackendEmitCg(bool b);
+		void setIsBackendAggressiveOpts(bool b);
+		void setIsBackendKeepAllBrackets(bool b);
+		void setIsBackendKeepLibraryFuncs(bool b);
+		void setIsBackendNoTimeVaryingInfo(bool b);
+		void setIsBackendNoVarRenaming(bool b);
+		void setIsBackendNoCompoundOperators(bool b);
+		void setIsBackendNoSymbolicNames(bool b);
 		/// @}
 
 		/// @name Parameters get methods.
@@ -80,6 +101,9 @@ class Parameters
 		retdec::common::Address getMainAddress() const;
 		retdec::common::Address getSectionVMA() const;
 		const std::string& getBackendDisabledOpts() const;
+		const std::string& getBackendEnabledOpts() const;
+		const std::string& getBackendCallInfoObtainer() const;
+		const std::string& getBackendVarRenamer() const;
 		/// @}
 
 		void fixRelativePaths(const std::string& configPath);
@@ -138,9 +162,21 @@ class Parameters
 		bool _maxMemoryLimitHalfRam = true;
 		uint64_t _timeout = 0;
 
-		std::string _backendDisabledOpts;
-		bool _backendNoOpts = false;
 		bool _detectStaticCode = true;
+		std::string _backendDisabledOpts;
+		std::string _backendEnabledOpts;
+		std::string _backendCallInfoObtainer = "optim";
+		std::string _backendVarRenamer = "readable";
+		bool _backendNoOpts = false;
+		bool _backendEmitCfg = false;
+		bool _backendEmitCg = false;
+		bool _backendAggressiveOpts = false;
+		bool _backendKeepAllBrackets = false;
+		bool _backendKeepLibraryFuncs = false;
+		bool _backendNoTimeVaryingInfo = false;
+		bool _backendNoVarRenaming = false;
+		bool _backendNoCompoundOperators = false;
+		bool _backendNoSymbolicNames = false;
 
 		retdec::common::Address _entryPoint;
 		retdec::common::Address _mainAddress;

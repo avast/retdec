@@ -19,35 +19,24 @@ using retdec::utils::strToNum;
 // Fixed options.
 // These used to be controllable by user via program options, but during
 // refactoring they become fixed. Implement it back if needed.
+//
 std::string TargetHLL = "c";
 std::string oArithmExprEvaluator = "c";
 bool ValidateModule = true;
 bool StrictFPUSemantics = false;
-
-// TODO
-bool Debug = true;
-std::string oSemantics = "";
-bool EmitDebugComments = true;
-std::string EnabledOpts = "";
-std::string DisabledOpts = "";
-bool AggressiveOpts = false;
-bool NoVarRenaming = false;
-bool NoSymbolicNames = false;
-bool KeepAllBrackets = false;
-bool KeepLibraryFunctions = false;
-bool NoTimeVaryingInfo = false;
-bool NoCompoundOperators = false;
-std::string FindPatterns = "";
-std::string oAliasAnalysis = "simple";
-std::string oVarNameGen = "fruit";
-std::string VarNameGenPrefix = "";
-std::string oVarRenamer = "readable";
-bool EmitCFGs = false;
-std::string oCFGWriter = "dot";
-bool EmitCG = false;
-std::string oCGWriter = "dot";
-std::string oCallInfoObtainer = "optim";
 std::string ForcedModuleName = "";
+// This could be implemented, but it would have to be across all parts
+// (including bin2llvmir), and all messages, not just pahses.
+// Otherwise it is useless half solution.
+bool Debug = true;
+bool EmitDebugComments = true;
+std::string oCFGWriter = "dot";
+std::string oCGWriter = "dot";
+std::string VarNameGenPrefix = "";
+std::string oVarNameGen = "fruit"; // fruit|num|word
+std::string oAliasAnalysis = "simple"; // simple|basic
+std::string FindPatterns = ""; // all TODO: enable?
+std::string oSemantics = "";
 
 std::unique_ptr<llvm::ToolOutputFile> getOutputStream(
 		const std::string& outputFile)
@@ -170,7 +159,7 @@ bool LlvmIr2Hll::runOnModule(llvm::Module &m)
 		return false;
 	}
 
-	if (!KeepLibraryFunctions)
+	if (!globalConfig->parameters.isBackendKeepLibraryFuncs())
 	{
 		llvm_support::printPhase(
 				"removing functions from standard libraries",
@@ -220,7 +209,7 @@ bool LlvmIr2Hll::runOnModule(llvm::Module &m)
 		runOptimizations();
 	}
 
-	if (!NoVarRenaming)
+	if (!globalConfig->parameters.isBackendNoVarRenaming())
 	{
 		llvm_support::printPhase(
 				"variable renaming [" + varRenamer->getId() + "]",
@@ -229,7 +218,7 @@ bool LlvmIr2Hll::runOnModule(llvm::Module &m)
 		renameVariables();
 	}
 
-	if (!NoSymbolicNames)
+	if (!globalConfig->parameters.isBackendNoSymbolicNames())
 	{
 		llvm_support::printPhase(
 				"converting constants to symbolic names",
@@ -250,13 +239,13 @@ bool LlvmIr2Hll::runOnModule(llvm::Module &m)
 		findPatterns();
 	}
 
-	if (EmitCFGs)
+	if (globalConfig->parameters.isBackendEmitCfg())
 	{
 		llvm_support::printPhase("emission of control-flow graphs", Debug);
 		emitCFGs();
 	}
 
-	if (EmitCG)
+	if (globalConfig->parameters.isBackendEmitCg())
 	{
 		llvm_support::printPhase("emission of a call graph", Debug);
 		emitCG();
@@ -336,11 +325,12 @@ bool LlvmIr2Hll::initialize(llvm::Module &m)
 	// Instantiate the requested obtainer of information about function
 	// calls and make sure it exists.
 	llvm_support::printSubPhase(
-			"creating the used call info obtainer [" + oCallInfoObtainer + "]",
+			"creating the used call info obtainer ["
+			+ globalConfig->parameters.getBackendCallInfoObtainer() + "]",
 			Debug
 	);
 	cio = llvmir2hll::CallInfoObtainerFactory::getInstance().createObject(
-		oCallInfoObtainer
+		globalConfig->parameters.getBackendCallInfoObtainer()
 	);
 	if (!cio)
 	{
@@ -388,11 +378,12 @@ bool LlvmIr2Hll::initialize(llvm::Module &m)
 
 	// Instantiate the requested variable renamer and make sure it exists.
 	llvm_support::printSubPhase(
-			"creating the used variable renamer [" + oVarRenamer + "]",
+			"creating the used variable renamer ["
+			+ globalConfig->parameters.getBackendVarRenamer() + "]",
 			Debug
 	);
 	varRenamer = llvmir2hll::VarRenamerFactory::getInstance().createObject(
-			oVarRenamer,
+			globalConfig->parameters.getBackendVarRenamer(),
 			varNameGen,
 			true
 	);
@@ -615,13 +606,13 @@ void LlvmIr2Hll::runOptimizations()
 {
 	ShPtr<llvmir2hll::OptimizerManager> optManager(
 			new llvmir2hll::OptimizerManager(
-					parseListOfOpts(EnabledOpts),
+					parseListOfOpts(globalConfig->parameters.getBackendEnabledOpts()),
 					parseListOfOpts(globalConfig->parameters.getBackendDisabledOpts()),
 					hllWriter,
 					llvmir2hll::ValueAnalysis::create(aliasAnalysis, true),
 					cio,
 					arithmExprEvaluator,
-					AggressiveOpts,
+					globalConfig->parameters.isBackendAggressiveOpts(),
 					Debug
 			)
 	);
@@ -687,9 +678,15 @@ void LlvmIr2Hll::findPatterns()
 void LlvmIr2Hll::emitTargetHLLCode()
 {
 	hllWriter->setOptionEmitDebugComments(EmitDebugComments);
-	hllWriter->setOptionKeepAllBrackets(KeepAllBrackets);
-	hllWriter->setOptionEmitTimeVaryingInfo(!NoTimeVaryingInfo);
-	hllWriter->setOptionUseCompoundOperators(!NoCompoundOperators);
+	hllWriter->setOptionKeepAllBrackets(
+		globalConfig->parameters.isBackendKeepAllBrackets()
+	);
+	hllWriter->setOptionEmitTimeVaryingInfo(
+		!globalConfig->parameters.isBackendNoTimeVaryingInfo()
+	);
+	hllWriter->setOptionUseCompoundOperators(
+		!globalConfig->parameters.isBackendNoCompoundOperators()
+	);
 	hllWriter->emitTargetCode(resModule);
 }
 
@@ -844,7 +841,9 @@ retdec::llvmir2hll::StringSet LlvmIr2Hll::parseListOfOpts(
 */
 std::string LlvmIr2Hll::getTypeOfRunOptimizations() const
 {
-	return AggressiveOpts ? "aggressive" : "normal";
+	return globalConfig->parameters.isBackendAggressiveOpts()
+			? "aggressive"
+			: "normal";
 }
 
 /**

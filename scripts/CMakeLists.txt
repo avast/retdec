@@ -1,18 +1,6 @@
 
 install(
-	PROGRAMS "retdec-config.py"
-	DESTINATION ${RETDEC_INSTALL_BIN_DIR}
-)
-install(
 	PROGRAMS "retdec-archive-decompiler.py"
-	DESTINATION ${RETDEC_INSTALL_BIN_DIR}
-)
-install(
-	PROGRAMS "retdec-decompiler.py"
-	DESTINATION ${RETDEC_INSTALL_BIN_DIR}
-)
-install(
-	PROGRAMS "retdec-fileinfo.py"
 	DESTINATION ${RETDEC_INSTALL_BIN_DIR}
 )
 

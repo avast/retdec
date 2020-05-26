@@ -4,6 +4,16 @@
  * @copyright (c) 2020 Avast Software, licensed under the MIT license
  */
 
+/**
+ * TODO: paths are checked that they exists and converted to absolute paths.
+ * TODO: format == ihex: -a -e must be specified
+ *       set bitsize = 32, fileclass = 32
+ * TODO: resulting file stripepd = trailing whitespace, redundant empty new lines
+ * TODO: mode = raw: -a -e must be specified
+ *       set bitsize = 32, fileclass = 32
+ * TODO: Options --ar-name and --ar-index are mutually exclusive. Pick one
+ */
+
 #include <iostream>
 #include <fstream>
 #include <future>
@@ -168,6 +178,7 @@ public:
 					// we should demand other argument, e.g. --bit-size
 					config.fileFormat.setIsRaw32();
 					config.architecture.setBitSize(32);
+					params.setIsKeepAllFunctions(true);
 				}
 
 				mode = m;
@@ -175,8 +186,13 @@ public:
 			else if (isParam(i, "-a", "--arch"))
 			{
 				auto a = getParamOrDie(i);
-				if (!(a == "mips" || a == "pic32" || a == "arm" || a == "thumb"
-						|| a == "arm64" || a == "powerpc" || a == "x86"
+				if (!(a == "mips"
+						|| a == "pic32"
+						|| a == "arm"
+						|| a == "thumb"
+						|| a == "arm64"
+						|| a == "powerpc"
+						|| a == "x86"
 						|| a == "x86-64"))
 				{
 					throw std::runtime_error(
@@ -262,6 +278,7 @@ public:
 					if (r.getStart().isDefined() && r.getEnd().isDefined())
 					{
 						params.selectedRanges.insert(r);
+						params.setIsKeepAllFunctions(true);
 					}
 				}
 			}
@@ -275,6 +292,7 @@ public:
 					if (!func.empty())
 					{
 						params.selectedFunctions.insert(func);
+						params.setIsKeepAllFunctions(true);
 					}
 				}
 			}
@@ -286,28 +304,101 @@ public:
 			{
 				retdec::common::Address addr(getParamOrDie(i));
 				params.setSectionVMA(addr);
+				// TODO: must be used in RAW mode
 			}
 			else if (isParam(i, "", "--raw-entry-point"))
 			{
 				retdec::common::Address addr(getParamOrDie(i));
 				params.setEntryPoint(addr);
+				// TODO: rename to simply entry point
+				// TODO: must be used in RAW mode
 			}
 			else if (isParam(i, "", "--cleanup"))
 			{
-				// TODO
+				// TODO: remove unpacked, archive results, macho results, etc.
 			}
 			else if (isParam(i, "", "--config"))
 			{
 				getParamOrDie(i);
 				// ignore
 			}
+			else if (isParam(i, "", "--disable-static-code-detection"))
+			{
+				params.setIsDetectStaticCode(false);
+			}
 			else if (isParam(i, "", "--backend-disabled-opts"))
 			{
 				params.setBackendDisabledOpts(getParamOrDie(i));
 			}
+			else if (isParam(i, "", "--backend-enabled-opts"))
+			{
+				params.setBackendEnabledOpts(getParamOrDie(i));
+			}
+			else if (isParam(i, "", "--backend-call-info-obtainer"))
+			{
+				auto n = getParamOrDie(i);
+				if (!(n == "optim" || n == "pessim"))
+				{
+					throw std::runtime_error(
+						"[--backend-call-info-obtainer] unknown name: " + n
+					);
+				}
+				params.setBackendCallInfoObtainer(n);
+			}
+			else if (isParam(i, "", "--backend-var-renamer"))
+			{
+				auto s = getParamOrDie(i);
+				if (!(s == "address"
+						|| s == "hungarian"
+						|| s == "readable"
+						|| s == "simple"
+						|| s == "unified"))
+				{
+					throw std::runtime_error(
+						"[--backend-var-renamer] unknown style: " + s
+					);
+				}
+				params.setBackendVarRenamer(s);
+			}
 			else if (isParam(i, "", "--backend-no-opts"))
 			{
 				params.setIsBackendNoOpts(true);
+			}
+			else if (isParam(i, "", "--backend-emit-cfg"))
+			{
+				params.setIsBackendEmitCfg(true);
+			}
+			else if (isParam(i, "", "--backend-emit-cg"))
+			{
+				params.setIsBackendEmitCg(true);
+			}
+			else if (isParam(i, "", "--backend-aggressive-opts"))
+			{
+				params.setIsBackendAggressiveOpts(true);
+			}
+			else if (isParam(i, "", "--backend-keep-all-brackets"))
+			{
+				params.setIsBackendKeepAllBrackets(true);
+			}
+			else if (isParam(i, "", "--backend-keep-library-funcs"))
+			{
+				params.setIsBackendKeepLibraryFuncs(true);
+			}
+			else if (isParam(i, "", "--backend-no-time-varying-info"))
+			{
+				params.setIsBackendNoTimeVaryingInfo(true);
+			}
+			else if (isParam(i, "", "--backend-no-var-renaming"))
+			{
+				params.setIsBackendNoVarRenaming(true);
+			}
+			else if (isParam(i, "", "--backend-no-compound-operators"))
+			{
+				params.setIsBackendNoCompoundOperators(true);
+			}
+			else if (isParam(i, "", "--backend-no-symbolic-names"))
+			{
+				params.setIsBackendNoSymbolicNames(true);
 			}
 			else if (isParam(i, "", "--ar-index"))
 			{
@@ -396,7 +487,7 @@ std::cout << "=============> unrecognized option: " << c << std::endl;
 	void printHelpAndDie()
 	{
 		std::cout << programName << R"(:
-	[-h|--help]
+	[-h|--help] Print this help.
 	[-o|--output FILE] Output file (default: INPUT_FILE.c if OUTPUT_FORMAT is plain, INPUT_FILE.c.json if OUTPUT_FORMAT is json|json-human).
 	[-f|--output-format OUTPUT_FORMAT] Output format [plain|json|json-human] (default: plain).
 	[-m|--mode MODE] Force the type of decompilation mode [bin|raw] (default: bin).
@@ -409,18 +500,37 @@ std::cout << "=============> unrecognized option: " << c << std::endl;
 	[--select-ranges RANGES] Specify a comma separated list of ranges to decompile (example: 0x100-0x200,0x300-0x400,0x500-0x600).
 	[--select-functions FUNCS] Specify a comma separated list of functions to decompile (example: fnc1,fnc2,fnc3).
 	[--select-decode-only] Decode only selected parts (functions/ranges). Faster decompilation, but worse results.
-	[--raw-section-vma]
-	[--raw-entry-point]
-	[--cleanup]
-	[--config]
-	[--backend-disabled-opts]
-	[--backend-no-opts]
-	[--ar-index]
-	[--ar-name]
-	[--static-code-sigfile]
+
+	[--raw-section-vma ADDRESS] Virtual address where section created from the raw binary will be placed.
+	[--raw-entry-point ADDRESS] Entry point address used for raw binary (default: architecture dependent).
+
+	[--cleanup] Removes temporary files created during the decompilation.
+	[--config] Specify JSON decompilation configuration file.
+
+	[--ar-index INDEX] Pick file from archive for decompilation by its zero-based index.
+	[--ar-name NAME] Pick file from archive for decompilation by its name.
+	[--static-code-sigfile FILE] Adds additional signature file for static code detection.
+
+	[--disable-static-code-detection] Prevents detection of statically linked code.
+	[--backend-disabled-opts LIST] Prevents the optimizations from the given comma-separated list of optimizations to be run.
+	[--backend-enabled-opts LIST] Runs only the optimizations from the given comma-separated list of optimizations.
+	[--backend-call-info-obtainer NAME] Name of the obtainer of information about function calls [optim|pessim] (Default: optim).
+	[--backend-var-renamer STYLE] Used renamer of variables [address|hungarian|readable|simple|unified] (Default: readable).
+	[--backend-no-opts] Disables backend optimizations.
+	[--backend-emit-cfg] Emits a CFG for each function in the backend IR (in the .dot format).
+	[--backend-emit-cg] Emits a CG for the decompiled module in the backend IR (in the .dot format).
+	[--backend-aggressive-opts] Enables aggressive optimizations.
+	[--backend-keep-all-brackets] Keeps all brackets in the generated code.
+	[--backend-keep-library-funcs] Keep functions from standard libraries.
+	[--backend-no-time-varying-info] Do not emit time-varying information, like dates.
+	[--backend-no-var-renaming] Disables renaming of variables in the backend.
+	[--backend-no-compound-operators] Do not emit compound operators (like +=) instead of assignments.
+	[--backend-no-symbolic-names] Disables the conversion of constant arguments to their symbolic names.
+
 	[--timeout SECONDS]
 	[--max-memory MAX_MEMORY] Limits the maximal memory used by the given number of bytes.
 	[--no-memory-limit] Disables the default memory limit (half of system RAM).
+
 	INPUT_FILE File to decompile.
 )";
 
@@ -684,6 +794,9 @@ int main(int argc, char **argv)
 
 // decompile
 // =============================================================================
+
+// TODO: error messages.
+// TODO: cleanup on error
 
 int ret = 0;
 try

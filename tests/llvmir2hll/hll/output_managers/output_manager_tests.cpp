@@ -31,9 +31,7 @@ void OutputManagerTests::SetUp()
 
 std::string OutputManagerTests::emitCode()
 {
-	// We need to call the manager's destrutor to make sure all the code was
-	// emited.
-	manager.reset();
+	manager->finalize();
 	return codeStream.str();
 }
 
