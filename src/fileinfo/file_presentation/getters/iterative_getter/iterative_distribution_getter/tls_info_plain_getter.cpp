@@ -57,7 +57,7 @@ std::size_t TlsInfoPlainGetter::getBasicInfo(std::size_t structIndex, std::vecto
 	desc.push_back("Address of index             : ");
 	desc.push_back("Size of zero fill            : ");
 	desc.push_back("Characteristics              : ");
-	info.push_back(numToStr(fileinfo.getTlsNumberOfCallBacks()));
+	info.push_back(std::to_string(fileinfo.getTlsNumberOfCallBacks()));
 	info.push_back(fileinfo.getTlsRawDataStartAddrStr(hexWithPrefix));
 	info.push_back(fileinfo.getTlsRawDataEndAddrStr(hexWithPrefix));
 	info.push_back(fileinfo.getTlsIndexAddrStr(hexWithPrefix));
@@ -76,7 +76,7 @@ bool TlsInfoPlainGetter::loadRecord(std::size_t structIndex, std::size_t recInde
 	}
 
 	record.clear();
-	record.push_back(numToStr(recIndex));
+	record.push_back(std::to_string(recIndex));
 	record.push_back(fileinfo.getTlsCallBackAddrStr(recIndex, hexWithPrefix));
 	return true;
 }

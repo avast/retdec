@@ -1,16 +1,17 @@
 /**
- * @file include/retdec/yaracpp/types/yara_rule.h
+ * @file include/retdec/yaracpp/yara_rule.h
  * @brief Library representation of one YARA rule.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#pragma once
+#ifndef RETDEC_YARACPP_YARA_RULE_H
+#define RETDEC_YARACPP_YARA_RULE_H
 
 #include <iosfwd>
 #include <vector>
 
-#include "retdec/yaracpp/types/yara_match.h"
-#include "retdec/yaracpp/types/yara_meta.h"
+#include "retdec/yaracpp/yara_match.h"
+#include "retdec/yaracpp/yara_meta.h"
 
 namespace retdec {
 namespace yaracpp {
@@ -21,9 +22,9 @@ namespace yaracpp {
 class YaraRule
 {
 	private:
-		std::string name;               ///< name of rule
-		std::vector<YaraMeta> metas;    ///< all meta-data related to rule
-		std::vector<YaraMatch> matches; ///< all matches of rule
+		std::string name;
+		std::vector<YaraMeta> metas;
+		std::vector<YaraMatch> matches;
 	public:
 		/// @name Const getters
 		/// @{
@@ -63,3 +64,5 @@ class YaraRule
 
 } // namespace yaracpp
 } // namespace retdec
+
+#endif

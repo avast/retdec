@@ -183,13 +183,22 @@ class ArchiveDecompiler:
             log_file = self.library_path + '.file_' + str(file_index) + '.log.verbose'
 
             # Do not escape!
-            output, rc, timeouted = CmdRunner.run_cmd([sys.executable, config.DECOMPILER, '--ar-index=' + str(i), '-o',
-                                                      self.library_path + '.file_' + str(file_index) + '.c',
-                                                      self.library_path] + self.decompiler_args,
-                                                      timeout=self.timeout,
-                                                      buffer_output=True)
+            arg_list = [
+                sys.executable,
+                config.DECOMPILER,
+                '--ar-index=' + str(i),
+                '-o', self.library_path + '.file_' + str(file_index) + '.c',
+                self.library_path,
+            ]
+            if self.decompiler_args:
+                arg_list.append(self.decompiler_args)
+            output, rc, timeouted = CmdRunner.run_cmd(
+                arg_list,
+                timeout=self.timeout,
+                buffer_output=True,
+            )
 
-            with open(log_file, 'wb') as f:
+            with open(log_file, 'w') as f:
                 f.write(output)
 
             if timeouted:

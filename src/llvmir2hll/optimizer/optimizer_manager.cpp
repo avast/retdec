@@ -4,6 +4,9 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
+#include <chrono>
+#include <thread>
+
 #include "retdec/llvmir2hll/analysis/value_analysis.h"
 #include "retdec/llvmir2hll/graphs/cg/cg_builder.h"
 #include "retdec/llvmir2hll/hll/hll_writer.h"
@@ -52,7 +55,6 @@ using namespace retdec::llvm_support;
 using namespace std::string_literals;
 
 using retdec::utils::hasItem;
-using retdec::utils::sleep;
 using retdec::utils::startsWith;
 
 namespace retdec {
@@ -322,7 +324,7 @@ void OptimizerManager::runOptimizerProvidedItShouldBeRun(ShPtr<Optimizer> optimi
 			optimizer->optimize();
 		} catch (const std::bad_alloc &) {
 			printWarningMessage("out of memory; trying to recover");
-			sleep(1);
+			std::this_thread::sleep_for(std::chrono::seconds(1));
 		}
 	} else {
 		// Just run the optimizer and let std::bad_alloc propagate.

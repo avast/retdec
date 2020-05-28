@@ -21,7 +21,6 @@
 
 using retdec::utils::hasItem;
 using retdec::utils::replaceCharsWithStrings;
-using retdec::utils::toString;
 
 namespace retdec {
 namespace llvmir2hll {
@@ -63,7 +62,9 @@ std::string createLabel(const std::string &str) {
 */
 std::string cfgNodeToGraphvizNode(ShPtr<CFG::Node> cfgNode) {
 	// To ensure uniqueness, we use the node's address.
-	return "Node" + createLabel(toString(cfgNode.get()));
+	return "Node" + createLabel(
+			std::to_string(reinterpret_cast<intptr_t>(cfgNode.get()))
+		);
 }
 
 /**

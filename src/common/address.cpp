@@ -11,7 +11,7 @@
 #include <vector>
 
 #include "retdec/common/address.h"
-// #include "retdec/common/string.h"
+#include "retdec/utils/conversion.h"
 
 namespace retdec {
 namespace common {
@@ -127,10 +127,7 @@ uint64_t Address::getValue() const
 std::string Address::toHexString() const
 {
 	assert(isDefined());
-
-	std::stringstream ss;
-	ss << std::hex << address;
-	return ss.str();
+	return utils::intToHexString(address);
 }
 
 std::string Address::toHexPrefixString() const

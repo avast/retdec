@@ -14,7 +14,6 @@
 using namespace std::string_literals;
 
 using retdec::utils::addSlashes;
-using retdec::utils::toHex;
 
 namespace retdec {
 namespace llvmir2hll {
@@ -48,7 +47,7 @@ std::string UtilsGraphviz::createNodeName(const std::string &str) {
 		// Every other character is converted into its hexadecimal
 		// representation.
 		else {
-			nodeName += toHex(c);
+			nodeName += utils::intToHexString(c);
 		}
 	}
 

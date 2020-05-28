@@ -75,7 +75,7 @@ bool RelocationTablesJsonGetter::getRecord(std::size_t structIndex, std::size_t 
 	}
 
 	record.clear();
-	record.push_back(numToStr(recIndex));
+	record.push_back(std::to_string(recIndex));
 	record.push_back(fileinfo.getRelocationTypeStr(structIndex, recIndex));
 	record.push_back(fileinfo.getRelocationOffsetStr(structIndex, recIndex, hexWithPrefix));
 	record.push_back(replaceNonprintableChars(fileinfo.getRelocationSymbolName(structIndex, recIndex)));

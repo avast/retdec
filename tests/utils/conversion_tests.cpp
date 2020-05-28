@@ -20,76 +20,39 @@ namespace tests {
 class ConversionTests: public Test {};
 
 //
-// toHex()
+// intToHexString()
 //
 
 TEST_F(ConversionTests,
 ToHexCorrectConversionNoBase) {
-	EXPECT_EQ("0", toHex(0x0, false));
-	EXPECT_EQ("1", toHex(0x1, false));
-	EXPECT_EQ("f", toHex(0xf, false));
-	EXPECT_EQ("400", toHex(0x400, false));
-	EXPECT_EQ("ffff", toHex(0xffff, false));
+	EXPECT_EQ("0", intToHexString(0x0, false));
+	EXPECT_EQ("1", intToHexString(0x1, false));
+	EXPECT_EQ("f", intToHexString(0xf, false));
+	EXPECT_EQ("400", intToHexString(0x400, false));
+	EXPECT_EQ("ffff", intToHexString(0xffff, false));
 }
 
 TEST_F(ConversionTests,
 ToHexCorrectConversionWithBase) {
-	EXPECT_EQ("0x0", toHex(0x0, true));
-	EXPECT_EQ("0x1", toHex(0x1, true));
-	EXPECT_EQ("0xf", toHex(0xf, true));
-	EXPECT_EQ("0x400", toHex(0x400, true));
-	EXPECT_EQ("0xffff", toHex(0xffff, true));
+	EXPECT_EQ("0x0", intToHexString(0x0, true));
+	EXPECT_EQ("0x1", intToHexString(0x1, true));
+	EXPECT_EQ("0xf", intToHexString(0xf, true));
+	EXPECT_EQ("0x400", intToHexString(0x400, true));
+	EXPECT_EQ("0xffff", intToHexString(0xffff, true));
 }
 
 TEST_F(ConversionTests,
 ToHexCorrectConversionWithFill) {
-	EXPECT_EQ("0x0", toHex(0x0, true, 0));
-	EXPECT_EQ("0", toHex(0x0, false, 0));
-	EXPECT_EQ("0x0000", toHex(0x0, true, 4));
-	EXPECT_EQ("0000", toHex(0x0, false, 4));
-	EXPECT_EQ("0x1234", toHex(0x1234, true, 2));
-	EXPECT_EQ("1234", toHex(0x1234, false, 2));
-	EXPECT_EQ("0x1234", toHex(0x1234, true, 4));
-	EXPECT_EQ("1234", toHex(0x1234, false, 4));
-	EXPECT_EQ("0x00001234", toHex(0x1234, true, 8));
-	EXPECT_EQ("00001234", toHex(0x1234, false, 8));
-}
-
-//
-// toString()
-//
-
-TEST_F(ConversionTests,
-ToStringBool) {
-	EXPECT_EQ("true", toString(true));
-	EXPECT_EQ("false", toString(false));
-}
-
-TEST_F(ConversionTests,
-ToStringInt) {
-	EXPECT_EQ("-100", toString(-100));
-	EXPECT_EQ("-1", toString(-1));
-	EXPECT_EQ("0", toString(0));
-	EXPECT_EQ("1", toString(1));
-	EXPECT_EQ("100", toString(100));
-}
-
-TEST_F(ConversionTests,
-ToStringString) {
-	EXPECT_EQ("", toString(std::string("")));
-	EXPECT_EQ("test", toString(std::string("test")));
-}
-
-TEST_F(ConversionTests,
-ToStringCharPointer) {
-	EXPECT_EQ("", toString(""));
-	EXPECT_EQ("test", toString("test"));
-}
-
-TEST_F(ConversionTests,
-ToStringChar) {
-	EXPECT_EQ("a", toString('a'));
-	EXPECT_EQ("\n", toString('\n'));
+	EXPECT_EQ("0x0", intToHexString(0x0, true, 0));
+	EXPECT_EQ("0", intToHexString(0x0, false, 0));
+	EXPECT_EQ("0x0000", intToHexString(0x0, true, 4));
+	EXPECT_EQ("0000", intToHexString(0x0, false, 4));
+	EXPECT_EQ("0x1234", intToHexString(0x1234, true, 2));
+	EXPECT_EQ("1234", intToHexString(0x1234, false, 2));
+	EXPECT_EQ("0x1234", intToHexString(0x1234, true, 4));
+	EXPECT_EQ("1234", intToHexString(0x1234, false, 4));
+	EXPECT_EQ("0x00001234", intToHexString(0x1234, true, 8));
+	EXPECT_EQ("00001234", intToHexString(0x1234, false, 8));
 }
 
 //
@@ -231,51 +194,6 @@ BytesToBits) {
 }
 
 //
-// byteToULong()
-//
-
-TEST_F(ConversionTests,
-byteToULongSuccess) {
-	EXPECT_EQ(0, byteToULong("00000000", 8, false));
-	EXPECT_EQ(1, byteToULong("00000001", 8, false));
-	EXPECT_EQ(128, byteToULong("10000000", 8, false));
-	EXPECT_EQ(255, byteToULong("11111111", 8, false));
-
-	EXPECT_EQ(0, byteToULong("00000000", 8, true));
-	EXPECT_EQ(128, byteToULong("00000001", 8, true));
-	EXPECT_EQ(1, byteToULong("10000000", 8, true));
-	EXPECT_EQ(255, byteToULong("11111111", 8, true));
-
-	EXPECT_EQ(0, byteToULong("0000000000000000", 16));
-	EXPECT_EQ(1, byteToULong("0000000000000001", 16));
-	EXPECT_EQ(128, byteToULong("0000000010000000", 16));
-	EXPECT_EQ(255, byteToULong("0000000011111111", 16));
-	EXPECT_EQ(256, byteToULong("0000000100000000", 16));
-	EXPECT_EQ(32768, byteToULong("1000000000000000", 16));
-	EXPECT_EQ(65280, byteToULong("1111111100000000", 16));
-
-	EXPECT_EQ(1, byteToULong("1", 1));
-	EXPECT_EQ(2, byteToULong("10", 2));
-	EXPECT_EQ(7, byteToULong("111", 3));
-}
-
-TEST_F(ConversionTests,
-byteToULongFailure) {
-	EXPECT_EQ(0, byteToULong("", 0, false));
-	EXPECT_EQ(0, byteToULong("", 0, true));
-	EXPECT_EQ(0, byteToULong("11111111", 0, false));
-	EXPECT_EQ(0, byteToULong("11111111", 0, true));
-
-	EXPECT_EQ(0, byteToULong("10200000", 8, false));
-	EXPECT_EQ(0, byteToULong("10200000", 8, true));
-
-	EXPECT_EQ(0, byteToULong("1x", 2, false));
-	EXPECT_EQ(0, byteToULong("1x", 2, true));
-	EXPECT_EQ(0, byteToULong("-1", 2, false));
-	EXPECT_EQ(0, byteToULong("-1", 2, true));
-}
-
-//
 // double10toDouble8()
 //
 
@@ -341,54 +259,6 @@ byteSwap32SSuccess) {
 }
 
 //
-// unsignedToBinString()
-//
-
-TEST_F(ConversionTests,
-unsignedToBinStringSuccess) {
-	EXPECT_EQ("00000000000000011110001001000000", unsignedToBinString(123456, 32));
-	EXPECT_EQ("011110001001000000", unsignedToBinString(123456, 18));
-	EXPECT_EQ("11110001001000000", unsignedToBinString(123456, 17));
-	EXPECT_EQ("1110001001000000", unsignedToBinString(123456, 16));
-	EXPECT_EQ("01000000", unsignedToBinString(123456, 8));
-	EXPECT_EQ("0", unsignedToBinString(123456, 1));
-	EXPECT_EQ("", unsignedToBinString(123456, 0));
-}
-
-//
-// binStringToUnsigned()
-//
-
-TEST_F(ConversionTests,
-binStringToUnsignedSuccess) {
-	EXPECT_EQ(123456, binStringToUnsigned("00000000000000011110001001000000"));
-	EXPECT_EQ(123456, binStringToUnsigned("011110001001000000"));
-	EXPECT_EQ(123456, binStringToUnsigned("11110001001000000"));
-	EXPECT_EQ(57920, binStringToUnsigned("1110001001000000"));
-	EXPECT_EQ(64, binStringToUnsigned("01000000"));
-	EXPECT_EQ(0, binStringToUnsigned("0"));
-	EXPECT_EQ(1, binStringToUnsigned("1"));
-	EXPECT_EQ(0, binStringToUnsigned(""));
-}
-
-//
-// binStringToSigned()
-//
-
-TEST_F(ConversionTests,
-binStringToSignedSuccess) {
-	EXPECT_EQ(123456, binStringToSigned("00000000000000011110001001000000"));
-	EXPECT_EQ(123456, binStringToSigned("011110001001000000"));
-
-	EXPECT_EQ(-16448, binStringToSigned("1011111111000000"));
-	EXPECT_EQ(-6, binStringToSigned("11010"));
-	EXPECT_EQ(-13, binStringToSigned("10011"));
-	EXPECT_EQ(-2, binStringToSigned("1111111111111110"));
-	EXPECT_EQ(-12582809, binStringToSigned("11010000000000000001100111"));
-	EXPECT_EQ(-12578294, binStringToSigned("11010000000001001000001010"));
-}
-
-//
 // hexStringToBytes()
 //
 
@@ -406,7 +276,9 @@ hexStringToBytesSuccess) {
 TEST_F(ConversionTests,
 bytesToHexStringSuccess) {
 	std::vector<uint8_t> vres = {0x0b, 0x84, 0xd1, 0xa0, 0x80, 0x60, 0x40};
-	EXPECT_EQ("0b 84 d1 a0 80 60 40", bytesToHexString(vres));
+	std::string res;
+	bytesToHexString(vres, res, 0, 0, false, true);
+	EXPECT_EQ("0b 84 d1 a0 80 60 40", res);
 }
 
 } // namespace tests

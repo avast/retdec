@@ -51,7 +51,7 @@ std::size_t StringsPlainGetter::getBasicInfo(std::size_t structIndex, std::vecto
 	info.clear();
 
 	desc.push_back("Number of strings: ");
-	info.push_back(numToStr(fileinfo.getNumberOfDetectedStrings()));
+	info.push_back(std::to_string(fileinfo.getNumberOfDetectedStrings()));
 
 	return info.size();
 }
@@ -66,7 +66,7 @@ bool StringsPlainGetter::loadRecord(std::size_t structIndex, std::size_t recInde
 	const auto& strings = fileinfo.getStrings();
 
 	record.clear();
-	record.push_back(numToStr(recIndex));
+	record.push_back(std::to_string(recIndex));
 	record.push_back(strings.getStringFileOffsetStr(recIndex, hexWithPrefix));
 	record.push_back(strings.getStringTypeStr(recIndex));
 	record.push_back(replaceNonprintableChars(strings.getStringSectionName(recIndex)));

@@ -4,7 +4,6 @@ add_executable(tests-utils
 	array_tests.cpp
 	binary_path_tests.cpp
 	byte_value_storage_tests.cpp
-	const_tests.cpp
 	container_tests.cpp
 	conversion_tests.cpp
 	filter_iterator_tests.cpp

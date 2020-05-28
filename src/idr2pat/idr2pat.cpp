@@ -104,7 +104,7 @@ std::string getRelocationsAsString(
 	std::string result;
 	for (const auto &reloc : relocations) {
 		if (!reloc.second.empty()) {
-			result += toHex(reloc.first, false, 4) + " " + reloc.second + " ";
+			result += intToHexString(reloc.first, false, 4) + " " + reloc.second + " ";
 		}
 	}
 

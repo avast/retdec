@@ -10,8 +10,6 @@
 namespace retdec {
 namespace utils {
 
-void sleep(unsigned seconds);
-
 bool isLittleEndian();
 
 bool systemHasLongDouble();

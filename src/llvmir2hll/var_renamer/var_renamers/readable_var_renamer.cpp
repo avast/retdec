@@ -31,7 +31,6 @@ using namespace std::string_literals;
 
 using retdec::utils::addToSet;
 using retdec::utils::arraySize;
-using retdec::utils::toString;
 
 namespace retdec {
 namespace llvmir2hll {
@@ -406,7 +405,7 @@ std::string ReadableVarRenamer::genNameForFuncParam(
 	// number the parameters correctly, e.g. p2 is always the second parameter,
 	// no matter if the first parameter has assigned a name from debug
 	// information.
-	return "a"s + toString(func->getParamPos(var));
+	return "a"s + std::to_string(func->getParamPos(var));
 }
 
 void ReadableVarRenamer::visit(ShPtr<ForLoopStmt> stmt) {

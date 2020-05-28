@@ -27,11 +27,11 @@ set(KEYSTONE_ARCHIVE_SHA256
 )
 
 set(LLVM_URL
-    "https://github.com/avast/llvm/archive/d17df7fb9a1d585fdfa3643e666506d1bead4443.zip"
+    "https://github.com/avast/llvm/archive/1459e28198b64aaa2710eeacb9c90c18cfcf69a9.zip"
     CACHE INTERNAL "URL of LLVM archive to use."
 )
 set(LLVM_ARCHIVE_SHA256
-    "904cffe42bffac3030df0a6bb07b0ccc9c221ac46d7621a49a5f400196e27f3e"
+    "54067d9019440ad9afe8a3114968d251ff7ef8cc94a765fe6d6f6e85981866ed"
     CACHE INTERNAL ""
 )
 
@@ -45,13 +45,12 @@ set(OPENSSL_ARCHIVE_SHA256
     CACHE INTERNAL ""
 )
 
-# 3.11.0
 set(YARA_URL
-    "https://github.com/VirusTotal/yara/archive/b9f925bb4e2b998bd6bb2f2e3cc2087c62fdd5b9.zip"
+    "https://github.com/VirusTotal/yara/archive/v4.0.1.zip"
     CACHE INTERNAL "URL of Yara archive to use."
 )
 set(YARA_ARCHIVE_SHA256
-    "8ebec236ede6f20f27ad597452a02dcc54ac3c73f09fea8c93c3a6bf10fbc890"
+    "4dcc6907b8537b67b52a61aa76f01196a4cc8e8e9f5fb6e4dd835692c2370e83"
     CACHE INTERNAL ""
 )
 

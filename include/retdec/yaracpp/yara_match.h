@@ -1,10 +1,11 @@
 /**
- * @file include/retdec/yaracpp/types/yara_match.h
+ * @file include/retdec/yaracpp/yara_match.h
  * @brief Library representation of one YARA match.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#pragma once
+#ifndef RETDEC_YARACPP_YARA_MATCH_H
+#define RETDEC_YARACPP_YARA_MATCH_H
 
 #include <cstdint>
 #include <vector>
@@ -18,8 +19,8 @@ namespace yaracpp {
 class YaraMatch
 {
 	private:
-		std::size_t offset;             ///< offset of match detection
-		std::vector<std::uint8_t> data; ///< data
+		std::size_t offset;
+		std::vector<std::uint8_t> data;
 	public:
 		/// @name Getters
 		/// @{
@@ -42,3 +43,5 @@ class YaraMatch
 
 } // namespace yaracpp
 } // namespace retdec
+
+#endif

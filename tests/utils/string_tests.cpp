@@ -1270,16 +1270,6 @@ removeSuffixRetDoesNothingWhenSuffixNotFound) {
 }
 
 //
-// toHexString()
-//
-
-TEST_F(StringTests,
-toHexStringSuccess) {
-	EXPECT_EQ("0", toHexString(0x0));
-	EXPECT_EQ("123456789abcdef", toHexString(0x123456789abcdef));
-}
-
-//
 // normalizeName()
 //
 

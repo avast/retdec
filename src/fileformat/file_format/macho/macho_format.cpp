@@ -952,7 +952,7 @@ void MachOFormat::dyldInfoCommand(const llvm::object::MachOObjectFile::LoadComma
 			std::string name = exportRef.name().str();
 			if(name.empty())
 			{
-				exportSym.setName("exported_function_" + numToStr(exportRef.address(), std::hex));
+				exportSym.setName("exported_function_" + intToHexString(exportRef.address()));
 			}
 			else
 			{

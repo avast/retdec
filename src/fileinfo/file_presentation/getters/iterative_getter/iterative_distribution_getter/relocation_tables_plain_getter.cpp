@@ -80,7 +80,7 @@ bool RelocationTablesPlainGetter::loadRecord(std::size_t structIndex, std::size_
 	}
 
 	record.clear();
-	record.push_back(numToStr(recIndex));
+	record.push_back(std::to_string(recIndex));
 	record.push_back(fileinfo.getRelocationTypeStr(structIndex, recIndex));
 	record.push_back(fileinfo.getRelocationOffsetStr(structIndex, recIndex, hexWithPrefix));
 	record.push_back(replaceNonprintableChars(fileinfo.getRelocationSymbolName(structIndex, recIndex)));

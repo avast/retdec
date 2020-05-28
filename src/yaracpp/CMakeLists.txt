@@ -1,9 +1,9 @@
 
 add_library(yaracpp STATIC
-	types/yara_match.cpp
-	types/yara_meta.cpp
-	types/yara_rule.cpp
-	yara_detector/yara_detector.cpp
+	yara_match.cpp
+	yara_meta.cpp
+	yara_rule.cpp
+	yara_detector.cpp
 )
 add_library(retdec::yaracpp ALIAS yaracpp)
 
