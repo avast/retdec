@@ -57,4 +57,3 @@ install(
 	DESTINATION
 		"${RETDEC_INSTALL_CMAKE_DIR}"
 )
-

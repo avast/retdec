@@ -189,7 +189,7 @@ bool X87FpuAnalysis::run()
 		funMd.addEquation({{enterBlock, 1, funMd.inIndex}}, EMPTY_FPU_STACK);
 
 		for (Function::iterator bbIt=funMd.function.begin(),
-		 	bbEndIt = funMd.function.end(); bbIt != bbEndIt; ++bbIt)
+			bbEndIt = funMd.function.end(); bbIt != bbEndIt; ++bbIt)
 		{
 			BasicBlock* bb = bbIt.operator->();
 			int relativeOutBbTop = 0;

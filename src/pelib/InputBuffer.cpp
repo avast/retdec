@@ -65,4 +65,3 @@ namespace PeLib
 		ulIndex = 0;
 	}
 }
-
