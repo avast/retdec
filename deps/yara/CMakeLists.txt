@@ -39,6 +39,16 @@ else()
 	set(YARAC_PATH         ${YARA_DIR}/yarac)
 endif()
 
+# https://github.com/avast/retdec/issues/439
+if(APPLE)
+	execute_process(
+		COMMAND xcrun --show-sdk-path
+		OUTPUT_VARIABLE MACOS_SDK_PATH
+		OUTPUT_STRIP_TRAILING_WHITESPACE
+	)
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --sysroot=${MACOS_SDK_PATH}")
+endif()
+
 # These are not used on MSVC, but we use it on all platforms to detect if
 # build configuration changed - changes in config should be mirrored on both
 # MSVC & Linux.
@@ -99,16 +109,6 @@ else()
 		COMMAND       ${YARA_BUILD_COMMAND}
 		INSTALL_COMMAND ""
 	)
-endif()
-
-# https://github.com/avast/retdec/issues/439
-if(APPLE)
-	execute_process(
-		COMMAND xcrun --show-sdk-path
-		OUTPUT_VARIABLE MACOS_SDK_PATH
-		OUTPUT_STRIP_TRAILING_WHITESPACE
-	)
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --sysroot=${MACOS_SDK_PATH}")
 endif()
 
 if(NOT MSVC)

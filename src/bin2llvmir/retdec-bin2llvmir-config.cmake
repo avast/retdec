@@ -17,6 +17,7 @@ if(NOT TARGET retdec::bin2llvmir)
             utils
             llvm-support
             llvm
+            eigen
     )
 
     include(${CMAKE_CURRENT_LIST_DIR}/retdec-bin2llvmir-targets.cmake)

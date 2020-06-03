@@ -88,7 +88,7 @@ bool PhiRemover::run()
 
 		auto* entryBb = &f.getEntryBlock();
 		llvm::BasicBlock::iterator insertIt = entryBb->begin();
-   		while (llvm::isa<llvm::AllocaInst>(insertIt))
+		while (llvm::isa<llvm::AllocaInst>(insertIt))
 		{
 			++insertIt;
 		}

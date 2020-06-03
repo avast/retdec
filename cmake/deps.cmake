@@ -63,6 +63,14 @@ set(YARAMOD_ARCHIVE_SHA256
     CACHE INTERNAL ""
 )
 
+set(EIGEN_URL
+    "https://gitlab.com/api/v4/projects/libeigen%2Feigen/repository/archive.zip?sha=0dd9643ad547d3dd2e23ded1d3376d0f7bdc8ada"
+    CACHE INTERNAL "URL of Eigen archive to use."
+)
+set(EIGEN_ARCHIVE_SHA256
+    "f56e0551aed4bdcb39cf6c5e51b1267b1221666e6090bddc1a0eaf89e7c3e2a3"
+    CACHE INTERNAL "")
+
 set(SUPPORT_PKG_URL
     "https://github.com/avast/retdec-support/releases/download/2019-03-08/retdec-support_2019-03-08.tar.xz"
     CACHE INTERNAL "URL of RetDec support package to use."

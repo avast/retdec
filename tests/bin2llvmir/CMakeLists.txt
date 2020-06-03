@@ -12,6 +12,7 @@ add_executable(tests-bin2llvmir
 	optimizations/writer_dsm/writer_dsm_tests.cpp
 	optimizations/x86_addr_spaces/x86_addr_spaces_pass_test.cpp
 	optimizations/x86_addr_spaces/x86_addr_spaces_test.cpp
+	optimizations/x87_fpu/x87_fpu_test.cpp
 	providers/asm_instruction_tests.cpp
 	providers/config_tests.cpp
 	providers/debugformat_tests.cpp
@@ -22,8 +23,7 @@ add_executable(tests-bin2llvmir
 	utils/instcombine_tests.cpp
 	utils/ir_modifier_tests.cpp
 	utils/llvm_tests.cpp
-	utils/simplifycfg_tests.cpp
-)
+	utils/simplifycfg_tests.cpp)
 
 target_include_directories(tests-bin2llvmir
 	PRIVATE

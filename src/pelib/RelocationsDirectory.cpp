@@ -52,7 +52,7 @@ namespace PeLib
 		// 1) IMG_BASE_RELOC followed by array of USHORTs.
 		// 2) IMG_BASE_RELOC followed by array of USHORTs
 		// and so on, up to uiSize
-		while((offset + PELIB_IMAGE_SIZEOF_BASE_RELOCATION) < uiSize) 
+		while((offset + PELIB_IMAGE_SIZEOF_BASE_RELOCATION) < uiSize)
 		{
 			IMG_BASE_RELOC ibrCurr;
 

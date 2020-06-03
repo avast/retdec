@@ -21,7 +21,7 @@ namespace fileinfo {
 class DynamicSection
 {
 	private:
-	 	/// declared number of entries in section
+		/// declared number of entries in section
 		unsigned long long declaredEntries = std::numeric_limits<unsigned long long>::max();
 		std::string name;
 		std::vector<DynamicEntry> table;
