@@ -4,6 +4,11 @@ install(
 	DESTINATION ${RETDEC_INSTALL_BIN_DIR}
 )
 
+install(
+	PROGRAMS "retdec-fileinfo.py"
+	DESTINATION ${RETDEC_INSTALL_BIN_DIR}
+)
+
 if(RETDEC_TESTS)
 	install(
 		PROGRAMS "retdec-tests-runner.py"
