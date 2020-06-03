@@ -4,16 +4,6 @@
  * @copyright (c) 2020 Avast Software, licensed under the MIT license
  */
 
-/**
- * TODO: format == ihex: -a -e must be specified
- *       set bitsize = 32, fileclass = 32
- * TODO: resulting file stripepd = trailing whitespace, redundant empty new lines
- * TODO: mode = raw: -a -e must be specified
- *       set bitsize = 32, fileclass = 32
- * TODO: Options --ar-name and --ar-index are mutually exclusive. Pick one
- * TODO: remove unpacked, archive results, macho results, etc.
- */
-
 #include <iostream>
 #include <fstream>
 #include <future>
@@ -50,6 +40,7 @@
 #include "retdec/ar-extractor/archive_wrapper.h"
 #include "retdec/ar-extractor/detection.h"
 #include "retdec/config/config.h"
+#include "retdec/llvm-support/diagnostics.h"
 #include "retdec/retdec/retdec.h"
 #include "retdec/macho-extractor/break_fat.h"
 #include "retdec/unpackertool/unpackertool.h"
@@ -57,6 +48,9 @@
 #include "retdec/utils/filesystem_path.h"
 #include "retdec/utils/string.h"
 #include "retdec/utils/memory.h"
+
+const int EXIT_TIMEOUT = 137;
+const int EXIT_BAD_ALLOC = 135;
 
 //
 //==============================================================================
@@ -72,12 +66,14 @@ class ProgramOptions
 		retdec::config::Parameters& params;
 		std::list<std::string> _argv;
 
-		bool cleanup = false;
 		std::string mode = "bin";
 		uint64_t bitSize = 32;
 		std::string arExtractPath;
 		std::string arName;
 		std::optional<uint64_t> arIdx;
+
+		bool cleanup = false;
+		std::set<std::string> toClean;
 
 	public:
 		ProgramOptions(
@@ -126,9 +122,6 @@ void ProgramOptions::load()
 	for (auto i = _argv.begin(); i != _argv.end();)
 	{
 		// Load config if specified.
-		// TODO:
-		// We should probably merge data loaded from config with the
-		// loaded default config.
 		if (isParam(i, "", "--config"))
 		{
 			auto backup = config.parameters;
@@ -147,6 +140,11 @@ void ProgramOptions::load()
 				);
 			}
 
+			// TODO:
+			// This redefines all the params from the loaded config.
+			// Maybe we should do some kind of merge.
+			// But it is hard to know what was defined, what was not,
+			// and which value to prefer.
 			config.parameters = backup;
 		}
 		++i;
@@ -290,7 +288,7 @@ void ProgramOptions::loadOption(std::list<std::string>::iterator& i)
 	}
 	else if (isParam(i, "-o", "--output"))
 	{
-		std::string out = checkFile(getParamOrDie(i), "[-o|--output]");
+		std::string out = getParamOrDie(i);
 		params.setOutputFile(out);
 
 		auto lastDot = out.find_last_of('.');
@@ -322,7 +320,7 @@ void ProgramOptions::loadOption(std::list<std::string>::iterator& i)
 			std::string range;
 			getline(ranges, range, ',' );
 			auto r = retdec::common::stringToAddrRange(range);
-			if (!r.getStart().isUndefined() || !r.getEnd().isUndefined())
+			if (r.getStart().isUndefined() || r.getEnd().isUndefined())
 			{
 				throw std::runtime_error(
 					"[--select-ranges] invalid range: " + range
@@ -463,6 +461,14 @@ void ProgramOptions::loadOption(std::list<std::string>::iterator& i)
 	}
 	else if (isParam(i, "", "--ar-index"))
 	{
+		if (!arName.empty())
+		{
+			throw std::runtime_error(
+				"[--ar-index] and [--ar-name] are mutually exclusive, "
+				"use only one"
+			);
+		}
+
 		auto val = getParamOrDie(i);
 		try
 		{
@@ -477,6 +483,14 @@ void ProgramOptions::loadOption(std::list<std::string>::iterator& i)
 	}
 	else if (isParam(i, "", "--ar-name"))
 	{
+		if (arIdx.has_value())
+		{
+			throw std::runtime_error(
+				"[--ar-name] and [--ar-index] are mutually exclusive, "
+				"use only one"
+			);
+		}
+
 		arName = getParamOrDie(i);
 	}
 	else if (isParam(i, "", "--static-code-sigfile"))
@@ -550,6 +564,18 @@ void ProgramOptions::afterLoad()
 				"[--mode=raw] option --raw-entry-point must be set"
 			);
 		}
+		if (config.architecture.isUnknown())
+		{
+			throw std::runtime_error(
+				"[--mode=raw] option -a|--arch must be set"
+			);
+		}
+		if (config.architecture.isEndianUnknown())
+		{
+			throw std::runtime_error(
+				"[--mode=raw] option -e|--endian must be set"
+			);
+		}
 
 		config.fileFormat.setIsRaw();
 		config.fileFormat.setFileClassBits(bitSize);
@@ -571,7 +597,7 @@ std::string ProgramOptions::checkFile(
 		const std::string& errorMsgPrefix)
 {
 	retdec::utils::FilesystemPath fs(path);
-	if (!fs.exists() || fs.isFile())
+	if (!fs.exists() || !fs.isFile())
 	{
 		throw std::runtime_error(errorMsgPrefix + " bad file: " + path);
 	}
@@ -581,33 +607,35 @@ std::string ProgramOptions::checkFile(
 void ProgramOptions::printHelpAndDie()
 {
 	std::cout << programName << R"(:
+Mandatory arguments:
+	INPUT_FILE File to decompile.
+General arguments:
 	[-o|--output FILE] Output file (default: INPUT_FILE.c if OUTPUT_FORMAT is plain, INPUT_FILE.c.json if OUTPUT_FORMAT is json|json-human).
 	[-f|--output-format OUTPUT_FORMAT] Output format [plain|json|json-human] (default: plain).
 	[-m|--mode MODE] Force the type of decompilation mode [bin|raw] (default: bin).
+	[-p|--pdb FILE] File with PDB debug information.
+	[-k|--keep-unreachable-funcs] Keep functions that are unreachable from the main function.
+	[--cleanup] Removes temporary files created during the decompilation.
+	[--config] Specify JSON decompilation configuration file.
+	[--disable-static-code-detection] Prevents detection of statically linked code.
+Selective decompilation arguments:
+	[--select-ranges RANGES] Specify a comma separated list of ranges to decompile (example: 0x100-0x200,0x300-0x400,0x500-0x600).
+	[--select-functions FUNCS] Specify a comma separated list of functions to decompile (example: fnc1,fnc2,fnc3).
+	[--select-decode-only] Decode only selected parts (functions/ranges). Faster decompilation, but worse results.
+Raw or Intel HEX decompilation arguments:
 	[-a|--arch ARCH] Specify target architecture [mips|pic32|arm|thumb|arm64|powerpc|x86|x86-64].
 	                 Required if it cannot be autodetected from the input (e.g. raw mode, Intel HEX).
 	[-e|--endian ENDIAN] Specify target endianness [little|big].
 	                     Required if it cannot be autodetected from the input (e.g. raw mode, Intel HEX).
 	[-b|--bit-size SIZE] Specify target bit size [16|32|64] (default: 32).
 	                     Required if it cannot be autodetected from the input (e.g. raw mode).
-
-	[-p|--pdb FILE] File with PDB debug information.
-	[-k|--keep-unreachable-funcs] Keep functions that are unreachable from the main function.
-	[--select-ranges RANGES] Specify a comma separated list of ranges to decompile (example: 0x100-0x200,0x300-0x400,0x500-0x600).
-	[--select-functions FUNCS] Specify a comma separated list of functions to decompile (example: fnc1,fnc2,fnc3).
-	[--select-decode-only] Decode only selected parts (functions/ranges). Faster decompilation, but worse results.
-
 	[--raw-section-vma ADDRESS] Virtual address where section created from the raw binary will be placed.
 	[--raw-entry-point ADDRESS] Entry point address used for raw binary (default: architecture dependent).
-
-	[--cleanup] Removes temporary files created during the decompilation.
-	[--config] Specify JSON decompilation configuration file.
-
+Archive decompilation arguments:
 	[--ar-index INDEX] Pick file from archive for decompilation by its zero-based index.
 	[--ar-name NAME] Pick file from archive for decompilation by its name.
 	[--static-code-sigfile FILE] Adds additional signature file for static code detection.
-
-	[--disable-static-code-detection] Prevents detection of statically linked code.
+Backend arguments:
 	[--backend-disabled-opts LIST] Prevents the optimizations from the given comma-separated list of optimizations to be run.
 	[--backend-enabled-opts LIST] Runs only the optimizations from the given comma-separated list of optimizations.
 	[--backend-call-info-obtainer NAME] Name of the obtainer of information about function calls [optim|pessim] (Default: optim).
@@ -622,17 +650,15 @@ void ProgramOptions::printHelpAndDie()
 	[--backend-no-var-renaming] Disables renaming of variables in the backend.
 	[--backend-no-compound-operators] Do not emit compound operators (like +=) instead of assignments.
 	[--backend-no-symbolic-names] Disables the conversion of constant arguments to their symbolic names.
-
+Decompilation process arguments:
 	[--timeout SECONDS]
 	[--max-memory MAX_MEMORY] Limits the maximal memory used by the given number of bytes.
 	[--no-memory-limit] Disables the default memory limit (half of system RAM).
-
+LLVM IR debug arguments:
 	[--print-after-all] Dump LLVM IR to stderr after every LLVM pass.
 	[--print-before-all] Dump LLVM IR to stderr before every LLVM pass.
-
+Other arguments:
 	[-h|--help] Print this help.
-
-	INPUT_FILE File to decompile.
 )";
 
 	exit(EXIT_SUCCESS);
@@ -727,171 +753,184 @@ void limitMaximalMemoryIfRequested(const retdec::config::Parameters& params)
 
 int decompile(retdec::config::Config& config, ProgramOptions& po)
 {
-	// llvm::sys::PrintStackTraceOnErrorSignal(argv[0]);
-	// llvm::PrettyStackTraceProgram X(argc, argv);
-	// llvm::llvm_shutdown_obj Y; // Call llvm_shutdown() on exit.
-	// llvm::EnableDebugBuffering = true;
-
-// macho extract
-// =============================================================================
-
-retdec::macho_extractor::BreakMachOUniversal fat(config.parameters.getInputFile());
-if (fat.isValid())
-{
-	if (config.architecture.isKnown())
-	{
-		if (!fat.extractArchiveForFamily(
-				config.architecture.getName(),
-				po.arExtractPath + "_m"))
-		{
-			std::cerr << "Invalid --arch option '"
-					<< config.architecture.getName()
-					<< "'. File contains these architecture families:"
-					<< std::endl;
-			fat.listArchitectures(std::cerr);
-			return EXIT_FAILURE;
-		}
-	}
-	else
-	{
-		if (!fat.extractBestArchive(po.arExtractPath + "_m"))
-		{
-			// TODO
-			return EXIT_FAILURE;
-		}
-	}
-
-	config.parameters.setInputFile(po.arExtractPath + "_m");
-}
-
-// ar extract
-// =============================================================================
-
-if (po.arIdx || !po.arName.empty())
-// if (!fat.isValid() && po.arIdx || !po.arName.empty())
-{
-	bool ok = true;
-	std::string errMsg;
-	retdec::ar_extractor::ArchiveWrapper arw(
-			config.parameters.getInputFile(),
-			ok,
-			errMsg
+	// Macho-O extraction.
+	//
+	retdec::macho_extractor::BreakMachOUniversal fat(
+			config.parameters.getInputFile()
 	);
-
-	if (!ok)
+	if (fat.isValid())
 	{
-		throw std::runtime_error("failed to create archive wrapper: " + errMsg);
-	}
+		retdec::llvm_support::printPhase("Mach-O extraction");
 
-	if (po.arIdx)
-	{
-		if (!arw.extractByIndex(po.arIdx.value(), errMsg, po.arExtractPath))
+		auto extractedFile = po.arExtractPath + "_m";
+
+		if (config.architecture.isKnown())
 		{
-			std::cerr << errMsg << std::endl;
-			std::cerr << "Error: File on index '"
-					<< po.arIdx.value()
-					<< "' was not found in the input archive."
-					<< " Valid indexes are 0-" << arw.getNumberOfObjects()-1 << "."
-					<< std::endl;
-			throw std::runtime_error("failed to extract archive: " + errMsg);
-		}
-	}
-	else if (!po.arName.empty())
-	{
-		if (!arw.extractByName(po.arName, errMsg, po.arExtractPath))
-		{
-			std::cerr << "Error: File named '" << po.arName
-					<< "' was not found in the input archive."
-					<< std::endl;
-			throw std::runtime_error("failed to extract archive: " + errMsg);
-		}
-	}
-
-	config.parameters.setInputFile(po.arExtractPath);
-}
-else
-{
-	bool ok = true;
-	std::string errMsg;
-	retdec::ar_extractor::ArchiveWrapper arw(
-			config.parameters.getInputFile(),
-			ok,
-			errMsg
-	);
-	if (ok && arw.isThinArchive())
-	{
-		std::cerr << "This file is an archive!" << std::endl;
-		std::cerr << "Error: File is a thin archive and cannot be decompiled." << std::endl;
-		return EXIT_FAILURE;
-	}
-	else if (ok && arw.isEmptyArchive())
-	{
-		std::cerr << "This file is an archive!" << std::endl;
-		std::cerr << "Error: The input archive is empty." << std::endl;
-		return EXIT_FAILURE;
-	}
-	else if (ok)
-	{
-		std::cerr << "This file is an archive!" << std::endl;
-
-		std::string result;
-		if (arw.getPlainTextList(result, errMsg, false, true))
-		{
-			std::cerr << result << std::endl;
-		}
-		return EXIT_FAILURE;
-	}
-
-	if (!ok && retdec::ar_extractor::isArchive(config.parameters.getInputFile()))
-	{
-		std::cerr << "This file is an archive!" << std::endl;
-		std::cerr << "Error: The input archive has invalid format." << std::endl;
-		return EXIT_FAILURE;
-	}
-}
-
-// unpack
-// =============================================================================
-
-std::vector<std::string> unpackArgs;
-unpackArgs.push_back("whatever_program_name");
-unpackArgs.push_back(config.parameters.getInputFile());
-unpackArgs.push_back("--output");
-unpackArgs.push_back(config.parameters.getOutputUnpackedFile());
-char* uargv[4] = {
-		unpackArgs[0].data(),
-		unpackArgs[1].data(),
-		unpackArgs[2].data(),
-		unpackArgs[3].data()
-};
-
-auto unpackCode = retdec::unpackertool::_main(4, uargv);
-if (unpackCode == 0) // EXIT_CODE_OK
-{
-	config.parameters.setInputFile(config.parameters.getOutputUnpackedFile());
-}
-
-// decompiler
-// =============================================================================
-
-	try
-	{
-		if (retdec::decompile(config))
-		{
-			std::cout << "decompilation FAILED" << std::endl;
+			if (!fat.extractArchiveForFamily(
+					config.architecture.getName(),
+					extractedFile))
+			{
+				std::stringstream ss;
+				ss << "Invalid --arch option '"
+						<< config.architecture.getName()
+						<< "'. File contains these architecture families:"
+						<< std::endl;
+				fat.listArchitectures(ss);
+				throw std::runtime_error(ss.str());
+			}
 		}
 		else
 		{
-			std::cout << "decompilation OK" << std::endl;
+			if (!fat.extractBestArchive(extractedFile))
+			{
+				throw std::runtime_error(
+						"Mach-O extraction: extractBestArchive() failed."
+				);
+				return EXIT_FAILURE;
+			}
 		}
-	}
-	catch (const std::runtime_error& e)
-	{
-		std::cerr << "Error: " << e.what() << std::endl;
-		return EXIT_FAILURE;
+
+		config.parameters.setInputFile(extractedFile);
+		po.toClean.insert(extractedFile);
 	}
 
-	return 0;
+	// Archive extraction.
+	//
+	if (po.arIdx || !po.arName.empty())
+	{
+		retdec::llvm_support::printPhase("Archive extraction");
+
+		bool ok = true;
+		std::string errMsg;
+		retdec::ar_extractor::ArchiveWrapper arw(
+				config.parameters.getInputFile(),
+				ok,
+				errMsg
+		);
+
+		if (!ok)
+		{
+			throw std::runtime_error(
+					"failed to create archive wrapper: " + errMsg
+			);
+		}
+
+		if (po.arIdx)
+		{
+			if (!arw.extractByIndex(po.arIdx.value(), errMsg, po.arExtractPath))
+			{
+				throw std::runtime_error(
+						"failed to extract archive: " + errMsg + "\n"
+						"Error: File on index '"
+						+ std::to_string(po.arIdx.value())
+						+ "' was not found in the input archive."
+						  " Valid indexes are 0-"
+						+ std::to_string(arw.getNumberOfObjects()-1)
+						+ ".\n"
+				);
+			}
+		}
+		else if (!po.arName.empty())
+		{
+			if (!arw.extractByName(po.arName, errMsg, po.arExtractPath))
+			{
+				throw std::runtime_error(
+						"failed to extract archive: " + errMsg + "\n"
+						"Error: File named '" + po.arName
+						+ "' was not found in the input archive.\n"
+				);
+			}
+		}
+
+		config.parameters.setInputFile(po.arExtractPath);
+		po.toClean.insert(po.arExtractPath);
+	}
+	else
+	{
+		bool ok = true;
+		std::string errMsg;
+		retdec::ar_extractor::ArchiveWrapper arw(
+				config.parameters.getInputFile(),
+				ok,
+				errMsg
+		);
+		if (ok && arw.isThinArchive())
+		{
+			std::cerr << "This file is an archive!" << std::endl;
+			std::cerr << "Error: File is a thin archive and cannot be decompiled." << std::endl;
+			return EXIT_FAILURE;
+		}
+		else if (ok && arw.isEmptyArchive())
+		{
+			std::cerr << "This file is an archive!" << std::endl;
+			std::cerr << "Error: The input archive is empty." << std::endl;
+			return EXIT_FAILURE;
+		}
+		else if (ok)
+		{
+			std::cerr << "This file is an archive!" << std::endl;
+
+			std::string result;
+			if (arw.getPlainTextList(result, errMsg, false, true))
+			{
+				std::cerr << result << std::endl;
+			}
+			return EXIT_FAILURE;
+		}
+
+		if (!ok && retdec::ar_extractor::isArchive(config.parameters.getInputFile()))
+		{
+			std::cerr << "This file is an archive!" << std::endl;
+			std::cerr << "Error: The input archive has invalid format." << std::endl;
+			return EXIT_FAILURE;
+		}
+	}
+
+	// Unpacking
+	//
+	retdec::llvm_support::printPhase("Unpacking");
+	std::vector<std::string> unpackArgs;
+	unpackArgs.push_back("whatever_program_name");
+	unpackArgs.push_back(config.parameters.getInputFile());
+	unpackArgs.push_back("--output");
+	unpackArgs.push_back(config.parameters.getOutputUnpackedFile());
+	char* uargv[4] = {
+			unpackArgs[0].data(),
+			unpackArgs[1].data(),
+			unpackArgs[2].data(),
+			unpackArgs[3].data()
+	};
+	auto unpackCode = retdec::unpackertool::_main(4, uargv);
+	if (unpackCode == 0) // EXIT_CODE_OK
+	{
+		config.parameters.setInputFile(
+				config.parameters.getOutputUnpackedFile()
+		);
+		po.toClean.insert(config.parameters.getOutputUnpackedFile());
+	}
+
+	// Decompilation.
+	//
+	return retdec::decompile(config);
+}
+
+//
+//==============================================================================
+// Cleanup.
+//==============================================================================
+//
+
+void cleanup(ProgramOptions& po)
+{
+	if (!po.cleanup)
+	{
+		return;
+	}
+
+	for (auto& p : po.toClean)
+	{
+		remove(p.c_str());
+	}
 }
 
 //
@@ -902,8 +941,16 @@ if (unpackCode == 0) // EXIT_CODE_OK
 
 int main(int argc, char **argv)
 {
-	retdec::config::Config config;
+	// Set LLVM debug.
+	//
+	llvm::sys::PrintStackTraceOnErrorSignal(argv[0]);
+	llvm::PrettyStackTraceProgram X(argc, argv);
+	llvm::llvm_shutdown_obj Y; // Call llvm_shutdown() on exit.
+	llvm::EnableDebugBuffering = true;
 
+	// Load the default config parameters.
+	//
+	retdec::config::Config config;
 	auto binpath = retdec::utils::getThisBinaryDirectoryPath();
 	retdec::utils::FilesystemPath configPath(binpath.getParentPath());
 	configPath.append("share");
@@ -916,6 +963,8 @@ int main(int argc, char **argv)
 		config.parameters.setOutputConfigFile("");
 	}
 
+	// Parse program arguments.
+	//
 	ProgramOptions po(argc, argv, config, config.parameters);
 	try
 	{
@@ -927,46 +976,55 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
+	// Limit program memory.
+	//
 	limitMaximalMemoryIfRequested(config.parameters);
 
-// decompile
-// =============================================================================
 
-// TODO: error messages.
-// TODO: cleanup on error
-
-int ret = 0;
-try
-{
-	std::stringstream buffer;
-	if (config.parameters.isTimeout())
+	// Decompile.
+	//
+	int ret = 0;
+	try
 	{
-		std::packaged_task<int(retdec::config::Config&, ProgramOptions&)> task(decompile);
-		auto future = task.get_future();
-		std::thread thr(std::move(task), std::ref(config), std::ref(po));
-		auto timeout = std::chrono::seconds(config.parameters.getTimeout());
-		if (future.wait_for(timeout) != std::future_status::timeout)
+		std::stringstream buffer;
+		if (config.parameters.isTimeout())
 		{
-			thr.join();
-			ret = future.get(); // this will propagate exception from f() if any
+			std::packaged_task<
+					int(retdec::config::Config&,
+					ProgramOptions&)> task(decompile);
+			auto future = task.get_future();
+			std::thread thr(std::move(task), std::ref(config), std::ref(po));
+			auto timeout = std::chrono::seconds(config.parameters.getTimeout());
+			if (future.wait_for(timeout) != std::future_status::timeout)
+			{
+				thr.join();
+				ret = future.get(); // this will propagate exception
+			}
+			else
+			{
+				thr.detach(); // we leave the thread still running
+				std::cerr << "timeout after: " << config.parameters.getTimeout()
+						<< " seconds" << std::endl;
+				ret = EXIT_TIMEOUT;
+			}
 		}
 		else
 		{
-			thr.detach(); // we leave the thread still running
-			std::cerr << "timeout after: " << config.parameters.getTimeout()
-					<< " seconds" << std::endl;
-			exit(137);
+			ret = decompile(config, po);
 		}
 	}
-	else
+	catch (const std::runtime_error& e)
 	{
-		ret = decompile(config, po);
+		std::cerr << "Error: " << e.what() << std::endl;
+		ret = EXIT_FAILURE;
 	}
-}
-catch (const std::bad_alloc& e)
-{
-	exit(135);
-}
+	catch (const std::bad_alloc& e)
+	{
+		std::cerr << "catched std::bad_alloc" << std::endl;
+		ret = EXIT_BAD_ALLOC;
+	}
+
+	cleanup(po);
 
 	return ret;
 }

@@ -176,6 +176,8 @@ bool ProviderInitialization::runOnModule(Module& m)
 		return false;
 	}
 
+	// Config.
+	//
 	Config* c = nullptr;
 	if (_config)
 	{
@@ -184,26 +186,23 @@ bool ProviderInitialization::runOnModule(Module& m)
 
 	if (c == nullptr)
 	{
-		return false;
+		throw std::runtime_error("ProviderInitialization: c == nullptr");
 	}
 
-//==============================================================================
+	// Fileimage.
+	//
 	auto* f = FileImageProvider::addFileImage(
 			&m,
 			c->getConfig().parameters.getInputFile(),
 			c);
 	if (f == nullptr)
 	{
-		return false;
+		throw std::runtime_error("ProviderInitialization: f == nullptr");
 	}
-//==============================================================================
-	// TODO:
-	// This happens if config is not initialized via fileinfo etc.
-	// This is not the right place for this.
-	// Refactor the whole thing around this.
-	// Reduce the amount of data read from config.
-	// Most of these could be read from fileformat.
-//==============================================================================
+
+	// Set config info from fileimage (it was not initialized by fileinfo).
+	// TODO: refactor the whole thing around this.
+	//
 	auto& a = c->getConfig().architecture;
 	if (a.isUnknown())
 	{
@@ -251,7 +250,6 @@ bool ProviderInitialization::runOnModule(Module& m)
 	{
 		c->getConfig().parameters.setEntryPoint(ep);
 	}
-//==============================================================================
 
 	if ((f->getFileFormat()->getTargetArchitecture() == fileformat::Architecture::POWERPC
 			|| f->getFileFormat()->getTargetArchitecture() == fileformat::Architecture::MIPS)
@@ -260,10 +258,9 @@ bool ProviderInitialization::runOnModule(Module& m)
 		throw std::runtime_error("Unsupported target format and architecture combination");
 	}
 
-//==============================================================================
-	// TODO:
-	// we could probably be using cpdetect results,
-	// not reason to translate it to config tools
+	// Run cpdetect and set info to config.
+	// TODO: we could probably be using cpdetect results.
+	//
 	cpdetect::ToolInformation tools;
 	cpdetect::DetectParams searchParams(
 			cpdetect::SearchType::MOST_SIMILAR,
@@ -337,7 +334,9 @@ bool ProviderInitialization::runOnModule(Module& m)
 			if (l.bytecode)
 			{
 				std::cerr << "Warning: Detected " << l.name
-						<< " bytecode, which cannot be decompiled by our machine-code decompiler. The decompilation result may be inaccurate.";
+						<< " bytecode, which cannot be decompiled by our "
+						"machine-code decompiler. "
+						"The decompilation result may be inaccurate.";
 			}
 		}
 	}
@@ -347,8 +346,8 @@ bool ProviderInitialization::runOnModule(Module& m)
 		c->getConfig().architecture.setIsPic32();
 	}
 
-//==============================================================================
-
+	// YARA crypto patterns scanning.
+	//
 	yaracpp::YaraDetector yara;
 	for (auto& crypto : c->getConfig().parameters.cryptoPatternPaths)
 	{
@@ -363,15 +362,15 @@ bool ProviderInitialization::runOnModule(Module& m)
 		);
 		c->getConfig().patterns.push_back(p);
 	}
-	// TODO: these should be implemented in common pattern, not here or in fileinfo
 	// TODO: removeRedundantCryptoRules()
 	// TODO: sortCryptoPatternMatches()
 
-//==============================================================================
-	// TODO: this can happen only after tools are detected.
+	// This can happen only after tools are detected.
+	//
 	f->initRtti(c);
-//==============================================================================
 
+	// ABI.
+	//
 	auto* abi = AbiProvider::addAbi(&m, c);
 	SymbolicTree::setAbi(abi);
 	SymbolicTree::setConfig(c);
@@ -382,7 +381,7 @@ bool ProviderInitialization::runOnModule(Module& m)
 	auto* d = DemanglerProvider::addDemangler(&m, c, typeConfig);
 	if (d == nullptr)
 	{
-		return false;
+		throw std::runtime_error("ProviderInitialization: d == nullptr");
 	}
 
 	auto* debug = DebugFormatProvider::addDebugFormat(
