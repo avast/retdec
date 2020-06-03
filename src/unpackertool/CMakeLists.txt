@@ -1,8 +1,19 @@
 
-# Plugins.
-add_subdirectory(plugins)
-
 add_library(unpackertool STATIC
+	plugins/mpress/mpress.cpp
+	plugins/upx/upx_stub_signatures.cpp
+	plugins/upx/upx.cpp
+	plugins/upx/pe/pe_upx_stub.cpp
+	plugins/upx/unfilter.cpp
+	plugins/upx/upx_stub.cpp
+	plugins/upx/macho/macho_upx_stub.cpp
+	plugins/upx/decompressors/decompressor_direct_jump.cpp
+	plugins/upx/decompressors/decompressor_scrambler.cpp
+	plugins/upx/decompressors/decompressor_upxshit.cpp
+	plugins/upx/decompressors/decompressor_nrv.cpp
+	plugins/upx/decompressors/decompressor_lzma.cpp
+	plugins/upx/decompressors/decompressor.cpp
+	plugins/upx/elf/elf_upx_stub.cpp
 	arg_handler.cpp
 	unpacker.cpp
 	plugin_mgr.cpp
@@ -21,8 +32,6 @@ target_include_directories(unpackertool
 target_link_libraries(unpackertool
 	PUBLIC
 		retdec::unpacker
-		retdec::unpacker-upx
-		retdec::unpacker-mpress
 		retdec::loader
 		retdec::cpdetect
 		retdec::utils
@@ -41,7 +50,7 @@ install(
 )
 
 # Install libs.
-install(TARGETS unpackertool unpacker-mpress unpacker-upx
+install(TARGETS unpackertool
 	EXPORT unpackertool-targets
 	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 	LIBRARY DESTINATION ${RETDEC_INSTALL_LIB_DIR}
