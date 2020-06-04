@@ -27,6 +27,11 @@ if(MSVC)
 	set_property(TARGET retdec-decompiler
 		APPEND_STRING PROPERTY LINK_FLAGS " /FORCE:MULTIPLE"
 	)
+	# Increase the stack size of the created binaries on MS Windows because the
+	# default value is too small. The default Linux value is 8388608 (8 MB).
+	set_property(TARGET retdec-decompiler
+		APPEND_STRING PROPERTY LINK_FLAGS " /STACK:16777216"
+	)
 	# Allow the 32b version of bin2llvmir on Windows handle addresses larger
 	# than 2 GB (up to 4 GB).
 	if(CMAKE_SIZEOF_VOID_P MATCHES "4")
