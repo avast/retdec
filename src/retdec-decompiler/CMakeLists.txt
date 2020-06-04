@@ -17,11 +17,12 @@ target_link_libraries(retdec-decompiler
 if(MSVC)
 	# -WHOLEARCHIVE needs path to the target, but when we use the target like
 	# that, its properties (associated includes, etc.) are not propagated.
-	# Therefore, we state 'bin2llvmir' twice in target_link_libraries(),
+	# Therefore, we state 'bin2llvmir|llvmir2hll' twice in target_link_libraries(),
 	# first as a target to get its properties, second as path to library to
 	# link it as a whole.
 	target_link_libraries(retdec-decompiler
 		retdec::bin2llvmir -WHOLEARCHIVE:$<TARGET_FILE_NAME:retdec::bin2llvmir>
+		retdec::llvmir2hll -WHOLEARCHIVE:$<TARGET_FILE_NAME:retdec::llvmir2hll>
 	)
 	set_property(TARGET retdec-decompiler
 		APPEND_STRING PROPERTY LINK_FLAGS " /FORCE:MULTIPLE"
@@ -36,6 +37,7 @@ if(MSVC)
 elseif(APPLE)
 	target_link_libraries(retdec-decompiler
 		-Wl,-force_load retdec::bin2llvmir
+		-Wl,-force_load retdec::llvmir2hll
 	)
 else() # Linux
 	target_link_libraries(retdec-decompiler
