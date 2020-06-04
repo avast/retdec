@@ -31,6 +31,7 @@ if(CAPSTONE_LOCAL_DIR)
 			# compiler, which may result in link errors.
 			"${CMAKE_C_COMPILER_OPTION}"
 			"${CMAKE_CXX_COMPILER_OPTION}"
+			-DCMAKE_POSITION_INDEPENDENT_CODE=${CMAKE_POSITION_INDEPENDENT_CODE}
 		# Patch the Capstone sources.
 		PATCH_COMMAND
 			${CMAKE_COMMAND} -Dcapstone_path=<SOURCE_DIR> -P ${CMAKE_CURRENT_SOURCE_DIR}/patch.cmake
@@ -73,6 +74,7 @@ else()
 			# compiler, which may result in link errors.
 			"${CMAKE_C_COMPILER_OPTION}"
 			"${CMAKE_CXX_COMPILER_OPTION}"
+			-DCMAKE_POSITION_INDEPENDENT_CODE=${CMAKE_POSITION_INDEPENDENT_CODE}
 		# Patch the Capstone sources.
 		PATCH_COMMAND
 			${CMAKE_COMMAND} -Dcapstone_path=<SOURCE_DIR> -P ${CMAKE_CURRENT_SOURCE_DIR}/patch.cmake

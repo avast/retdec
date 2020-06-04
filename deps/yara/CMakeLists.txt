@@ -55,6 +55,7 @@ endif()
 # We also clean for MSVC if patch file changed.
 set(YARA_CONFIGURE_ARGS
 	--prefix=${YARA_INSTALL_DIR}
+	--with-pic
 	--enable-dotnet
 	--enable-macho
 	--disable-shared

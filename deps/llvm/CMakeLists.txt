@@ -90,6 +90,7 @@ if(LLVM_LOCAL_DIR)
 			# compiler, which may result in link errors.
 			"${CMAKE_C_COMPILER_OPTION}"
 			"${CMAKE_CXX_COMPILER_OPTION}"
+			-DCMAKE_POSITION_INDEPENDENT_CODE=${CMAKE_POSITION_INDEPENDENT_CODE}
 
 		# Disable the installation right after build (we want to install the
 		# needed libraries and tools manually).
@@ -164,6 +165,7 @@ else()
 			# compiler, which may result in link errors.
 			"${CMAKE_C_COMPILER_OPTION}"
 			"${CMAKE_CXX_COMPILER_OPTION}"
+			-DCMAKE_POSITION_INDEPENDENT_CODE=${CMAKE_POSITION_INDEPENDENT_CODE}
 
 		# Disable the installation right after build (we want to install the
 		# needed libraries and tools manually).
