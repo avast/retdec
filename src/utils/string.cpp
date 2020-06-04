@@ -6,13 +6,16 @@
 
 #include <algorithm>
 #include <cassert>
+#include <codecvt>
 #include <cctype>
 #include <climits>
 #include <cmath>
 #include <cstddef>
 #include <functional>
+#include <locale>
 #include <regex>
 #include <sstream>
+#include <string_view>
 
 #include "retdec/utils/conversion.h"
 #include "retdec/utils/string.h"
@@ -419,37 +422,8 @@ std::string toWide(const std::string &str, std::string::size_type length) {
 */
 std::string unicodeToAscii(const std::uint8_t *bytes, std::size_t nBytes)
 {
-	std::stringstream result;
-	if (!bytes || !nBytes)
-	{
-		return {};
-	}
-	if (nBytes & 1)
-	{
-		nBytes--;
-	}
-
-	for (std::size_t i = 0; i < nBytes; i += 2)
-	{
-		if (bytes[i] == 0 && bytes[i + 1] == 0)
-		{
-			break;
-		}
-		if (bytes[i + 1] == 0 && isPrintableChar(bytes[i]))
-		{
-			result << bytes[i];
-		}
-		else
-		{
-			const std::size_t maxC = (1 << (sizeof(std::string::value_type) * CHAR_BIT)) - 1;
-			const auto val1 = intToHexString(bytes[i] & maxC);
-			const auto val2 = intToHexString(bytes[i + 1] & maxC);
-			result << "\\x" << std::setw(2) << std::setfill('0') << val1;
-			result << "\\x" << std::setw(2) << std::setfill('0') << val2;
-		}
-	}
-
-	return result.str();
+	std::size_t tmp;
+	return unicodeToAscii(bytes, nBytes, tmp);
 }
 
 /**
@@ -463,7 +437,8 @@ std::string unicodeToAscii(const std::uint8_t *bytes, std::size_t nBytes)
 */
 std::string unicodeToAscii(const std::uint8_t *bytes, std::size_t nBytes, std::size_t &nRead)
 {
-	std::stringstream result;
+	static std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> convert;
+
 	if (!bytes || !nBytes)
 	{
 		return {};
@@ -473,7 +448,16 @@ std::string unicodeToAscii(const std::uint8_t *bytes, std::size_t nBytes, std::s
 		nBytes--;
 	}
 
-	std::size_t i;
+	auto u16 = std::u16string_view{reinterpret_cast<const char16_t*>(bytes)};
+	std::size_t realSize = std::min(u16.size(), nBytes / 2);
+	if (auto result = convert.to_bytes(u16.data(), u16.data() + realSize); !result.empty())
+	{
+		nRead = (realSize + 1) * sizeof(char16_t); // we are dealing with char16_t pointers
+		return result;
+	}
+
+	std::stringstream result;
+	std::size_t i = 0;
 	for (i = 0; i < nBytes; i += 2)
 	{
 		if (bytes[i] == 0 && bytes[i + 1] == 0)
