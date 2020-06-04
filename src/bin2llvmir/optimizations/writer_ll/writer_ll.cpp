@@ -1,5 +1,5 @@
 /**
- * @file src/bin2llvmir/optimizations/writer_ll/writer_ll.h
+ * @file src/bin2llvmir/optimizations/writer_ll/writer_ll.cpp
  * @brief Generate the current LLVM IR.
  * @copyright (c) 2020 Avast Software, licensed under the MIT license
  */

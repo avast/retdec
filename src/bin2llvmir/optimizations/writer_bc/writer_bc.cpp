@@ -1,5 +1,5 @@
 /**
- * @file src/bin2llvmir/optimizations/writer_bc/writer_bc.h
+ * @file src/bin2llvmir/optimizations/writer_bc/writer_bc.cpp
  * @brief Generate the current bitcode.
  * @copyright (c) 2020 Avast Software, licensed under the MIT license
  */

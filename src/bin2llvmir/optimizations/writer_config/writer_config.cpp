@@ -1,5 +1,5 @@
 /**
- * @file src/bin2llvmir/optimizations/writer_config/writer_config.h
+ * @file src/bin2llvmir/optimizations/writer_config/writer_config.cpp
  * @brief Generate the current config.
  * @copyright (c) 2020 Avast Software, licensed under the MIT license
  */
