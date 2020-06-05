@@ -25,7 +25,6 @@ import os
 import shutil
 import sys
 
-config = importlib.import_module('retdec-config')
 utils = importlib.import_module('retdec-utils')
 utils.check_python_version()
 utils.ensure_script_is_being_run_from_installed_retdec()
@@ -33,6 +32,8 @@ utils.ensure_script_is_being_run_from_installed_retdec()
 CmdRunner = utils.CmdRunner
 sys.stdout = utils.Unbuffered(sys.stdout)
 
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+UNPACKER = os.path.join(SCRIPT_DIR, 'retdec-unpacker')
 
 def parse_args(_args):
     parser = argparse.ArgumentParser(description=__doc__,
@@ -137,7 +138,7 @@ class Unpacker:
             unpacker_params.append('--max-memory-half-ram')
 
         self._print('\n##### Trying to unpack ' + self.input + ' into ' + output + ' by using generic unpacker...')
-        out, unpacker_rc, _ = CmdRunner.run_cmd([config.UNPACKER] + unpacker_params, buffer_output=True, print_run_msg=True)
+        out, unpacker_rc, _ = CmdRunner.run_cmd([UNPACKER] + unpacker_params, buffer_output=True, print_run_msg=True)
         self._print(out)
 
         if unpacker_rc == self.UNPACKER_EXIT_CODE_OK:

@@ -17,7 +17,7 @@ namespace bin2llvmir {
 char InstructionOptimizer::ID = 0;
 
 static RegisterPass<InstructionOptimizer> X(
-		"inst-opt",
+		"retdec-inst-opt",
 		"LLVM instruction optimization",
 		false, // Only looks at CFG
 		false // Analysis Pass

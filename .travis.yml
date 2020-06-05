@@ -55,13 +55,13 @@ script:
   - cd ..
   - rm -rf build
   # Run the decompilation script.
-  - python3 retdec-install/bin/retdec-decompiler.py --help
+  - retdec-install/bin/retdec-decompiler --help
   # Run a simple decompilation.
   - echo -e '#include <stdio.h>\n#include <stdlib.h>\nint main()\n{\n  printf("hello world\\n");\n  return 0;\n}\n' > hello-orig.c
   - cat hello-orig.c
   - gcc -o hello hello-orig.c
   - ./hello
-  - python3 retdec-install/bin/retdec-decompiler.py hello
+  - retdec-install/bin/retdec-decompiler hello
   - cat hello.c
   - grep "int main(int argc, char \*\* argv)" hello.c
 

@@ -1570,54 +1570,6 @@ GetDebugNameForLocalVarReturnsCorrectValueWhenLocalVarIsParameterWithAssignedDeb
 }
 
 //
-// getPrefixesOfFuncsToBeRemoved()
-//
-
-TEST_F(JSONConfigTests,
-GetPrefixesOfFuncsToBeRemovedReturnsEmptySetWhenThereAreNoPrefixes) {
-	auto config = JSONConfig::empty();
-
-	ASSERT_EQ(StringSet(), config->getPrefixesOfFuncsToBeRemoved());
-}
-
-TEST_F(JSONConfigTests,
-GetPrefixesOfFuncsToBeRemovedReturnsCorrectValueWhenThereArePrefixes) {
-	auto config = JSONConfig::fromString(R"({
-		"decompParams": {
-			"frontendFunctions": [
-				"prefix1",
-				"prefix2"
-			]
-		}
-	})");
-
-	ASSERT_EQ(
-		StringSet({"prefix1", "prefix2"}),
-		config->getPrefixesOfFuncsToBeRemoved()
-	);
-}
-
-//
-// getFrontendRelease()
-//
-
-TEST_F(JSONConfigTests,
-GetFrontendReleaseReturnsEmptyStringWhenThereIsNoRelease) {
-	auto config = JSONConfig::empty();
-
-	ASSERT_EQ("", config->getFrontendRelease());
-}
-
-TEST_F(JSONConfigTests,
-GetFrontendReleaseReturnsCorrectStringWhenReleaseIsSet) {
-	auto config = JSONConfig::fromString(R"({
-		"frontendVersion": "v1.0"
-	})");
-
-	ASSERT_EQ("v1.0", config->getFrontendRelease());
-}
-
-//
 // getNumberOfFuncsDetectedInFrontend()
 //
 

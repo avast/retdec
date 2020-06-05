@@ -9,7 +9,6 @@ import re
 import shutil
 import sys
 
-config = importlib.import_module('retdec-config')
 utils = importlib.import_module('retdec-utils')
 utils.check_python_version()
 CmdRunner = utils.CmdRunner
@@ -17,9 +16,12 @@ CmdRunner = utils.CmdRunner
 
 sys.stdout = utils.Unbuffered(sys.stdout)
 
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+DECOMPILER = os.path.join(SCRIPT_DIR, 'retdec-decompiler')
+EXTRACT = os.path.join(SCRIPT_DIR, 'retdec-macho-extractor')
 
 def parse_args(args):
-    parser = argparse.ArgumentParser(description='Runs the decompilation script with the given optional arguments over'
+    parser = argparse.ArgumentParser(description='Runs the decompilation with the given optional arguments over'
                                                  ' all files in the given static library or prints list of files in'
                                                  ' plain text with --plain argument or in JSON format with'
                                                  ' --json argument. You can pass arguments for decompilation after'
@@ -130,13 +132,13 @@ class ArchiveDecompiler:
         if utils.is_macho_archive(self.library_path):
             if self.enable_list_mode:
                 if self.use_json_format:
-                    CmdRunner.run_cmd([config.EXTRACT, '--objects', '--json', self.library_path])
+                    CmdRunner.run_cmd([EXTRACT, '--objects', '--json', self.library_path])
                 else:
-                    CmdRunner.run_cmd([config.EXTRACT, '--objects', self.library_path])
+                    CmdRunner.run_cmd([EXTRACT, '--objects', self.library_path])
                 return 1
 
             self.tmp_archive = self.library_path + '.a'
-            CmdRunner.run_cmd([config.EXTRACT, '--best', '--out', self.tmp_archive, self.library_path])
+            CmdRunner.run_cmd([EXTRACT, '--best', '--out', self.tmp_archive, self.library_path])
             self.library_path = self.tmp_archive
 
         # Check for thin archives.
@@ -166,8 +168,8 @@ class ArchiveDecompiler:
             self._cleanup()
             return 0
 
-        # Run the decompilation script over all the found files.
-        print('Running `%s' % config.DECOMPILER, end='')
+        # Run the decompilation over all the found files.
+        print('Running `%s' % DECOMPILER, end='')
 
         if self.decompiler_args:
             print(' '.join(self.decompiler_args), end='')
@@ -185,7 +187,7 @@ class ArchiveDecompiler:
             # Do not escape!
             arg_list = [
                 sys.executable,
-                config.DECOMPILER,
+                DECOMPILER,
                 '--ar-index=' + str(i),
                 '-o', self.library_path + '.file_' + str(file_index) + '.c',
                 self.library_path,

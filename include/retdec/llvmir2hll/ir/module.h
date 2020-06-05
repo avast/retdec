@@ -173,7 +173,6 @@ public:
 
 	/// @name Meta Information
 	/// @{
-	std::string getFrontendRelease() const;
 	std::size_t getNumberOfFuncsDetectedInFrontend() const;
 	std::string getDetectedCompilerOrPacker() const;
 	std::string getDetectedLanguage() const;

@@ -19,7 +19,7 @@ namespace bin2llvmir {
 char AsmInstructionRemover::ID = 0;
 
 static RegisterPass<AsmInstructionRemover> X(
-		"remove-asm-instrs",
+		"retdec-remove-asm-instrs",
 		"Assembly mapping instruction removal",
 		 false, // Only looks at CFG
 		 false // Analysis Pass

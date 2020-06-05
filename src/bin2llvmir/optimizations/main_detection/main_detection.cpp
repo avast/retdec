@@ -26,7 +26,7 @@ namespace bin2llvmir {
 char MainDetection::ID = 0;
 
 static RegisterPass<MainDetection> X(
-		"main-detection",
+		"retdec-main-detection",
 		"Main function identification optimization",
 		false, // Only looks at CFG
 		false // Analysis Pass
@@ -91,11 +91,7 @@ bool MainDetection::run()
 		mainAddr = getFromFunctionNames();
 	}
 
-	if (!(_config->getConfig().isIda()
-			&& _config->getConfig().parameters.isSomethingSelected()))
-	{
-		changed = applyResult(mainAddr);
-	}
+	changed = applyResult(mainAddr);
 
 	removeStaticallyLinked();
 
@@ -104,7 +100,7 @@ bool MainDetection::run()
 
 bool MainDetection::skipAnalysis()
 {
-	return _config->getConfig().getMainAddress().isDefined()
+	return _config->getConfig().parameters.getMainAddress().isDefined()
 			|| _config->getConfig().fileType.isShared();
 }
 
@@ -160,7 +156,7 @@ retdec::common::Address MainDetection::getFromContext()
 			&& _config->getConfig().architecture.isMipsOrPic32() && _image)
 	{
 		auto* epSeg = _image->getImage()->getSegmentFromAddress(
-				_config->getConfig().getEntryPoint());
+				_config->getConfig().parameters.getEntryPoint());
 
 		if (epSeg)
 		{
@@ -405,7 +401,7 @@ retdec::common::Address MainDetection::getFromContext()
 retdec::common::Address MainDetection::getFromEntryPointOffset(int offset)
 {
 	Address mainAddr;
-	Address ep = _config->getConfig().getEntryPoint();
+	Address ep = _config->getConfig().parameters.getEntryPoint();
 	Address jmpMainAddr = ep + offset;
 	auto ai = AsmInstruction(_module, jmpMainAddr);
 	auto* c = ai.getInstructionFirst<CallInst>();
@@ -526,13 +522,13 @@ bool MainDetection::applyResult(retdec::common::Address mainAddr)
 	bool changed = false;
 
 	IrModifier irmodif(_module, _config);
-	_config->getConfig().setMainAddress(mainAddr);
+	_config->getConfig().parameters.setMainAddress(mainAddr);
 	if (auto* f = _config->getLlvmFunction(mainAddr))
 	{
 		std::string n = f->getName();
 		// TODO: better, we want to know it is main, but we do not want to
 		// rename it if it is from IDA (and maybe never).
-		if (n != "main" && ! _config->getConfig().isIda())
+		if (n != "main")
 		{
 			irmodif.renameFunction(f, "main");
 			_names->addNameForAddress(

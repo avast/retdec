@@ -18,6 +18,7 @@ if(KEYSTONE_LOCAL_DIR)
 			# compiler, which may result in link errors.
 			"${CMAKE_C_COMPILER_OPTION}"
 			"${CMAKE_CXX_COMPILER_OPTION}"
+			-DCMAKE_POSITION_INDEPENDENT_CODE=${CMAKE_POSITION_INDEPENDENT_CODE}
 		# Disable the update step.
 		UPDATE_COMMAND ""
 		# Disable the install step.
@@ -44,6 +45,7 @@ else()
 			# compiler, which may result in link errors.
 			"${CMAKE_C_COMPILER_OPTION}"
 			"${CMAKE_CXX_COMPILER_OPTION}"
+			-DCMAKE_POSITION_INDEPENDENT_CODE=${CMAKE_POSITION_INDEPENDENT_CODE}
 		# Disable the update step.
 		UPDATE_COMMAND ""
 		# Disable the install step.

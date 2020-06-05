@@ -27,7 +27,7 @@ namespace bin2llvmir {
 char X87FpuAnalysis::ID = 0;
 
 static RegisterPass<X87FpuAnalysis> X(
-		"x87-fpu",
+		"retdec-x87-fpu",
 		"x87 fpu register analysis",
 		false, // Only looks at CFG
 		false // Analysis Pass

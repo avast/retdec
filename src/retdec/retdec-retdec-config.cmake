@@ -4,6 +4,7 @@ if(NOT TARGET retdec::retdec)
         REQUIRED
         COMPONENTS
             bin2llvmir
+            llvmir2hll
             config
             common
             capstone

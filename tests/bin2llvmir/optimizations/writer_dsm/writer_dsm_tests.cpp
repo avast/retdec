@@ -1,13 +1,13 @@
 /**
-* @file tests/bin2llvmir/optimizations/dsm_generator/tests/dsm_generator_tests.cpp
-* @brief Tests for the @c DsmGenerator pass.
+* @file tests/bin2llvmir/optimizations/writer_dsm/tests/writer_dsm_tests.cpp
+* @brief Tests for the @c DsmWriter pass.
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
 #include <regex>
 #include <sstream>
 
-#include "retdec/bin2llvmir/optimizations/dsm_generator/dsm_generator.h"
+#include "retdec/bin2llvmir/optimizations/writer_dsm/writer_dsm.h"
 #include "bin2llvmir/utils/llvmir_tests.h"
 
 using namespace ::testing;
@@ -20,30 +20,32 @@ namespace tests {
 /**
  * @brief Tests for the @c DsmGenerator pass.
  */
-class DsmGeneratorTests: public LlvmIrTests
+class DsmWriterTests: public LlvmIrTests
 {
 	protected:
-		DsmGenerator pass;
+		DsmWriter pass;
 };
 
-TEST_F(DsmGeneratorTests, testHeaderGeneration)
+TEST_F(DsmWriterTests, testHeaderGeneration)
 {
 	parseInput(R"(
 		@whatever = global i64 0
 	)");
-	auto c = Config::fromJsonString(module.get(), R"({
+
+	auto c = config::Config::fromJsonString(R"({
 		"architecture" : {
 			"bitSize" : 32,
 			"endian" : "little",
 			"name" : "arm"
 		}
 	})");
-	auto abi = AbiProvider::addAbi(module.get(), &c);
+	auto config = Config::fromConfig(module.get(), c);
+	auto abi = AbiProvider::addAbi(module.get(), &config);
 	auto format = createFormat();
-	auto image = FileImage(module.get(), std::move(format), &c);
+	auto image = FileImage(module.get(), std::move(format), &config);
 
 	std::stringstream ret;
-	bool b = pass.runOnModuleCustom(*module, &c, &image, abi, ret);
+	bool b = pass.runOnModuleCustom(*module, &config, &image, abi, ret);
 
 	std::string ref =
 R"(^;;

@@ -107,8 +107,6 @@ public:
 
 	/// @name Meta Information
 	/// @{
-	virtual StringSet getPrefixesOfFuncsToBeRemoved() const override;
-	virtual std::string getFrontendRelease() const override;
 	virtual std::size_t getNumberOfFuncsDetectedInFrontend() const override;
 	virtual std::string getDetectedCompilerOrPacker() const override;
 	virtual std::string getDetectedLanguage() const override;

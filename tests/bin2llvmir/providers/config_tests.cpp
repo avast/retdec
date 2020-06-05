@@ -583,35 +583,6 @@ class ConfigProviderTests: public LlvmIrTests
 
 };
 
-TEST_F(ConfigProviderTests, addConfigJsonStringAddsConfigForModule)
-{
-	auto* r1 = ConfigProvider::addConfigJsonString(module.get(), "{}");
-	auto* r2 = ConfigProvider::getConfig(module.get());
-	Config* r3 = nullptr;
-	bool b = ConfigProvider::getConfig(module.get(), r3);
-
-	EXPECT_NE(nullptr, r1);
-	EXPECT_EQ(r1, r2);
-	EXPECT_EQ(r1, r3);
-	EXPECT_TRUE(b);
-}
-
-TEST_F(ConfigProviderTests, addConfigFileThrowsExceptionWhenBadPathProvided)
-{
-	ASSERT_ANY_THROW(ConfigProvider::addConfigFile(module.get(), "/this/is/a/bad/path"));
-}
-
-TEST_F(ConfigProviderTests, clearRemovesAllData)
-{
-	ConfigProvider::addConfigJsonString(module.get(), "{}");
-	auto* r1 = ConfigProvider::getConfig(module.get());
-	EXPECT_NE(nullptr, r1);
-
-	ConfigProvider::clear();
-	auto* r2 = ConfigProvider::getConfig(module.get());
-	EXPECT_EQ(nullptr, r2);
-}
-
 } // namespace tests
 } // namespace bin2llvmir
 } // namespace retdec

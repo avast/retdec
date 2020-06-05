@@ -36,37 +36,6 @@ class Config
 		static Config fromJsonString(const std::string& json);
 		/// @}
 
-		/// @name Config query methods.
-		/// @{
-		bool isIda() const;
-		/// @}
-
-		/// @name Config set methods.
-		/// @{
-		void setInputFile(const std::string& n);
-		void setUnpackedInputFile(const std::string& n);
-		void setPdbInputFile(const std::string& n);
-		void setFrontendVersion(const std::string& n);
-		void setEntryPoint(const retdec::common::Address& a);
-		void setMainAddress(const retdec::common::Address& a);
-		void setSectionVMA(const retdec::common::Address& a);
-		void setImageBase(const retdec::common::Address& a);
-		void setIsIda(bool b);
-		/// @}
-
-		/// @name Config get methods.
-		/// @{
-		std::string getInputFile() const;
-		std::string getUnpackedInputFile() const;
-		std::string getPdbInputFile() const;
-		std::string getFrontendVersion() const;
-		std::string getConfigFileName() const;
-		retdec::common::Address getEntryPoint() const;
-		retdec::common::Address getMainAddress() const;
-		retdec::common::Address getSectionVMA() const;
-		retdec::common::Address getImageBase() const;
-		/// @}
-
 		std::string generateJsonString() const;
 		std::string generateJsonFile() const;
 		std::string generateJsonFile(const std::string& outputFilePath) const;
@@ -88,20 +57,6 @@ class Config
 		common::VtableContainer vtables;
 		common::ClassContainer classes;
 		common::PatternContainer patterns;
-
-	private:
-		std::string _inputFile;
-		std::string _unpackedInputFile;
-		std::string _pdbInputFile;
-		std::string _frontendVersion;
-		std::string _configFileName;
-
-		retdec::common::Address _entryPoint;
-		retdec::common::Address _mainAddress;
-		retdec::common::Address _sectionVMA;
-		retdec::common::Address _imageBase;
-
-		bool _ida = false;
 };
 
 } // namespace config

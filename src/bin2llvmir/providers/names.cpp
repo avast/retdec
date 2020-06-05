@@ -324,7 +324,7 @@ const Name& NameContainer::getPreferredNameForAddress(retdec::common::Address a)
 void NameContainer::initFromConfig()
 {
 	addNameForAddress(
-			_config->getConfig().getEntryPoint(),
+			_config->getConfig().parameters.getEntryPoint(),
 			names::entryPointName,
 			Name::eType::ENTRY_POINT);
 
@@ -516,8 +516,13 @@ std::string NameContainer::getNameFromImportLibAndOrd(
 
 bool NameContainer::loadImportOrds(const std::string& libName)
 {
+	std::string arch;
+	if (_config->getConfig().architecture.isArm()) arch = "arm";
+	else if (_config->getConfig().architecture.isX86()) arch = "x86";
+	else return false;
+
 	auto dir = _config->getConfig().parameters.getOrdinalNumbersDirectory();
-	auto filePath = dir + "/" + libName + ".ord";
+	auto filePath = dir + "/" + arch + "/" + libName + ".ord";
 
 	std::ifstream inputFile;
 	inputFile.open(filePath);

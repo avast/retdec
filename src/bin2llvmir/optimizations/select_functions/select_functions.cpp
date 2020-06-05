@@ -23,7 +23,7 @@ namespace bin2llvmir {
 char SelectFunctions::ID = 0;
 
 static RegisterPass<SelectFunctions> X(
-		"select-fncs",
+		"retdec-select-fncs",
 		"Selected functions optimization",
 		 false, // Only looks at CFG
 		 false // Analysis Pass
@@ -78,38 +78,26 @@ bool SelectFunctions::run(Module& M)
 				<< " -- " << cf->getEnd() << std::endl;
 
 		bool inRanges = false;
-		if (_config->getConfig().isIda()
-				&& !_config->getConfig().parameters.selectedRanges.empty())
+		retdec::common::AddressRange fncRange;
+		if (cf->getStart().isDefined()
+				&& cf->getEnd().isDefined()
+				&& cf->getStart() < cf->getEnd())
 		{
-			auto r = _config->getConfig().parameters.selectedRanges.front();
-			if (r.getStart() == cf->getStart())
+			fncRange = retdec::common::AddressRange(
+					cf->getStart(),
+					cf->getEnd());
+		}
+		for (auto& r : _config->getConfig().parameters.selectedRanges)
+		{
+			if (r.contains(cf->getStart()))
 			{
 				inRanges = true;
+				break;
 			}
-		}
-		else
-		{
-			retdec::common::AddressRange fncRange;
-			if (cf->getStart().isDefined()
-					&& cf->getEnd().isDefined()
-					&& cf->getStart() < cf->getEnd())
+			if (fncRange.contains(r.getStart()))
 			{
-				fncRange = retdec::common::AddressRange(
-						cf->getStart(),
-						cf->getEnd());
-			}
-			for (auto& r : _config->getConfig().parameters.selectedRanges)
-			{
-				if (r.contains(cf->getStart()))
-				{
-					inRanges = true;
-					break;
-				}
-				if (fncRange.contains(r.getStart()))
-				{
-					inRanges = true;
-					break;
-				}
+				inRanges = true;
+				break;
 			}
 		}
 		if (inRanges)

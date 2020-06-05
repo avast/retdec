@@ -69,7 +69,7 @@ JsonOutputManager<Writer>::JsonOutputManager(llvm::raw_ostream& out) :
 }
 
 template <typename Writer>
-JsonOutputManager<Writer>::~JsonOutputManager()
+void JsonOutputManager<Writer>::finalize()
 {
 	writer.EndArray();
 

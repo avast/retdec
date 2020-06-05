@@ -53,8 +53,15 @@ void printPrefixedPhase(const std::string &prefix, const std::string &phaseName,
 *
 * A new line is appended after the emitted text and the stream is flushed.
 */
-void printPhase(const std::string &phaseName, llvm::raw_ostream &stream) {
-	printPrefixedPhase("Running phase: ", phaseName, stream);
+void printPhase(
+		const std::string &phaseName,
+		bool print,
+		llvm::raw_ostream &stream)
+{
+	if (print)
+	{
+		printPrefixedPhase("Running phase: ", phaseName, stream);
+	}
 }
 
 /**
@@ -62,8 +69,15 @@ void printPhase(const std::string &phaseName, llvm::raw_ostream &stream) {
 *
 * A new line is appended after the emitted text and the stream is flushed.
 */
-void printSubPhase(const std::string &phaseName, llvm::raw_ostream &stream) {
-	printPrefixedPhase(" -> ", phaseName, stream);
+void printSubPhase(
+		const std::string &phaseName,
+		bool print,
+		llvm::raw_ostream &stream)
+{
+	if (print)
+	{
+		printPrefixedPhase(" -> ", phaseName, stream);
+	}
 }
 
 /**
@@ -71,8 +85,15 @@ void printSubPhase(const std::string &phaseName, llvm::raw_ostream &stream) {
 *
 * A new line is appended after the emitted text and the stream is flushed.
 */
-void printSubSubPhase(const std::string &phaseName, llvm::raw_ostream &stream) {
-	printPrefixedPhase("     -> ", phaseName, stream);
+void printSubSubPhase(
+		const std::string &phaseName,
+		bool print,
+		llvm::raw_ostream &stream)
+{
+	if (print)
+	{
+		printPrefixedPhase("     -> ", phaseName, stream);
+	}
 }
 
 /**
@@ -80,8 +101,15 @@ void printSubSubPhase(const std::string &phaseName, llvm::raw_ostream &stream) {
 *
 * A new line is appended after the emitted text and the stream is flushed.
 */
-void printSubSubSubPhase(const std::string &phaseName, llvm::raw_ostream &stream) {
-	printPrefixedPhase("         -> ", phaseName, stream);
+void printSubSubSubPhase(
+		const std::string &phaseName,
+		bool print,
+		llvm::raw_ostream &stream)
+{
+	if (print)
+	{
+		printPrefixedPhase("         -> ", phaseName, stream);
+	}
 }
 
 } // namespace llvm_support

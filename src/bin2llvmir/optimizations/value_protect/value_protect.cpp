@@ -262,7 +262,7 @@ char ValueProtect::ID = 0;
 std::map<llvm::Type*, llvm::Function*> ValueProtect::_type2fnc;
 
 static RegisterPass<ValueProtect> X(
-		"value-protect",
+		"retdec-value-protect",
 		"Value protection optimization",
 		false, // Only looks at CFG
 		false // Analysis Pass
@@ -310,8 +310,8 @@ bool ValueProtect::run()
 
 bool ValueProtect::protect()
 {
-	_config->getConfig().parameters.frontendFunctions.insert(
-			names::generatedUndefFunctionPrefix);
+	// TODO: this is a random place for this. solve better.
+	_config->tagFunctionsWithUsedCryptoGlobals();
 
 	bool changed = false;
 
@@ -638,13 +638,11 @@ llvm::Function* ValueProtect::createFunction(llvm::Type* t)
 	return fnc;
 }
 
-/**
- * TODO: Only partial removal, see:
- * https://github.com/avast/retdec/issues/301
- */
 bool ValueProtect::unprotect()
 {
 	bool changed = false;
+
+	std::map<std::pair<Function*, Type*>, Value*> ft2v;
 
 	for (auto& p : _type2fnc)
 	{
@@ -654,6 +652,7 @@ bool ValueProtect::unprotect()
 		{
 			auto* u = *uIt;
 			++uIt;
+			Instruction* i = cast<Instruction>(u);
 
 			for (auto uuIt = u->user_begin(); uuIt != u->user_end();)
 			{
@@ -667,12 +666,31 @@ bool ValueProtect::unprotect()
 				}
 			}
 
-			Instruction* i = cast<Instruction>(u);
-			if (i->user_empty())
+			if (!i->user_empty())
 			{
-				i->eraseFromParent();
-				changed = true;
+				Value* v = nullptr;
+				auto fIt = ft2v.find({i->getFunction(), i->getType()});
+				if (fIt != ft2v.end())
+				{
+					v = fIt->second;
+				}
+				else
+				{
+					v = new AllocaInst(
+							i->getType(),
+							0,
+							"",
+							&i->getFunction()->front().front()
+					);
+					ft2v[{i->getFunction(), i->getType()}] = v;
+				}
+
+				auto* load = new LoadInst(v, "", i);
+				i->replaceAllUsesWith(load);
 			}
+
+			i->eraseFromParent();
+			changed = true;
 		}
 
 		if (fnc->user_empty())

@@ -317,18 +317,6 @@ public:
 	/// @{
 
 	/**
-	* @brief Returns a set of prefixes of functions to be removed.
-	*/
-	virtual StringSet getPrefixesOfFuncsToBeRemoved() const = 0;
-
-	/**
-	* @brief Returns the release of the front-end.
-	*
-	* Returns the empty string if there is no front-end release.
-	*/
-	virtual std::string getFrontendRelease() const = 0;
-
-	/**
 	* @brief Returns the number of functions detected in the front-end.
 	*
 	* Returns @c 0 if there are no detected functions.

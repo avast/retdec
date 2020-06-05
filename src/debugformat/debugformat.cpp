@@ -25,14 +25,12 @@ DebugFormat::DebugFormat()
  * @param pdbFile   Input PDB file to load debugging information from.
  * @param symtab    Symbol table.
  * @param demangler Demangled instance used for this input file.
- * @param imageBase Image base used in PDB initialization.
  */
 DebugFormat::DebugFormat(
 		retdec::loader::Image* inFile,
 		const std::string& pdbFile,
 		SymbolTable* symtab,
-		retdec::demangler::Demangler* demangler,
-		unsigned long long imageBase)
+		retdec::demangler::Demangler* demangler)
 		:
 		_symtab(symtab),
 		_inFile(inFile),
@@ -44,6 +42,14 @@ DebugFormat::DebugFormat(
 	if (s == retdec::pdbparser::PDB_STATE_OK)
 	{
 		LOG << "\n*** DebugFormat::DebugFormat(): PDB" << std::endl;
+
+		unsigned long long imageBase = 0;
+		if (auto* pe = dynamic_cast<const fileformat::PeFormat*>(
+				inFile->getFileFormat()))
+		{
+			pe->getImageBaseAddress(imageBase);
+		}
+
 		_pdbFile->initialize(imageBase);
 		loadPdb();
 	}

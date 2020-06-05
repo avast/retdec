@@ -33,13 +33,14 @@ class DemanglerFactoryTests: public LlvmIrTests
 
 TEST_F(DemanglerFactoryTests, GetItanumDemangler)
 {
-	auto config = Config::fromJsonString(module.get(), R"({
+	auto c = config::Config::fromJsonString(R"({
 		"architecture" : {
 			"bitSize" : 32,
 			"endian" : "little",
 			"name" : "x86"
 		}
 	})");
+	auto config = Config::fromConfig(module.get(), c);
 
 	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
 	auto dem = DemanglerFactory::getItaniumDemangler(module.get(), &config, std::move(typeConfig));
@@ -50,13 +51,14 @@ TEST_F(DemanglerFactoryTests, GetItanumDemangler)
 
 TEST_F(DemanglerFactoryTests, GetMicrosoftDemangler)
 {
-	auto config = Config::fromJsonString(module.get(), R"({
+	auto c = config::Config::fromJsonString(R"({
 		"architecture" : {
 			"bitSize" : 32,
 			"endian" : "little",
 			"name" : "x86"
 		}
 	})");
+	auto config = Config::fromConfig(module.get(), c);
 
 	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
 	auto dem = DemanglerFactory::getMicrosoftDemangler(module.get(), &config, std::move(typeConfig));
@@ -67,13 +69,14 @@ TEST_F(DemanglerFactoryTests, GetMicrosoftDemangler)
 
 TEST_F(DemanglerFactoryTests, GetBorlandDemangler)
 {
-	auto config = Config::fromJsonString(module.get(), R"({
+	auto c = config::Config::fromJsonString(R"({
 		"architecture" : {
 			"bitSize" : 32,
 			"endian" : "little",
 			"name" : "x86"
 		}
 	})");
+	auto config = Config::fromConfig(module.get(), c);
 
 	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
 	auto dem = DemanglerFactory::getBorlandDemangler(module.get(), &config, std::move(typeConfig));
@@ -99,13 +102,14 @@ class DemanglerProviderTests: public LlvmIrTests
 TEST_F(DemanglerProviderTests, addDemanglerAddsDemanglerForModule)
 {
 
-	auto config = Config::fromJsonString(module.get(), R"({
+	auto c = config::Config::fromJsonString(R"({
 		"architecture" : {
 			"bitSize" : 32,
 			"endian" : "little",
 			"name" : "x86"
 		}
 	})");
+	auto config = Config::fromConfig(module.get(), c);
 
 	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
 	auto *r1 = DemanglerProvider::addDemangler(
@@ -124,13 +128,14 @@ TEST_F(DemanglerProviderTests, addDemanglerAddsDemanglerForModule)
 
 TEST_F(DemanglerProviderTests, getDemanglerReturnsNullptrForUnknownModule)
 {
-	auto config = Config::fromJsonString(module.get(), R"({
+	auto c = config::Config::fromJsonString(R"({
 		"architecture" : {
 			"bitSize" : 32,
 			"endian" : "little",
 			"name" : "x86"
 		}
 	})");
+	auto config = Config::fromConfig(module.get(), c);
 	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
 	DemanglerProvider::addDemangler(
 		module.get(),
@@ -148,13 +153,14 @@ TEST_F(DemanglerProviderTests, getDemanglerReturnsNullptrForUnknownModule)
 
 TEST_F(DemanglerProviderTests, addedDemanglerWorks)
 {
-	auto config = Config::fromJsonString(module.get(), R"({
+	auto c = config::Config::fromJsonString(R"({
 		"architecture" : {
 			"bitSize" : 32,
 			"endian" : "little",
 			"name" : "x86"
 		}
 	})");
+	auto config = Config::fromConfig(module.get(), c);
 	parseInput(R"(
 		define void @_ZN9wikipedia7article8print_toERSo() {
 			ret void
@@ -174,13 +180,14 @@ TEST_F(DemanglerProviderTests, addedDemanglerWorks)
 
 TEST_F(DemanglerProviderTests, clearRemovesAllData)
 {
-	auto config = Config::fromJsonString(module.get(), R"({
+	auto c = config::Config::fromJsonString(R"({
 		"architecture" : {
 			"bitSize" : 32,
 			"endian" : "little",
 			"name" : "x86"
 		}
 	})");
+	auto config = Config::fromConfig(module.get(), c);
 	auto typeConfig = std::make_unique<ctypesparser::TypeConfig>();
 	DemanglerProvider::addDemangler(
 		module.get(),

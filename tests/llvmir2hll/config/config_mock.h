@@ -54,8 +54,6 @@ public:
 	MOCK_CONST_METHOD1(getDebugNameForGlobalVar, std::string (const std::string &));
 	MOCK_CONST_METHOD2(getDebugNameForLocalVar, std::string (const std::string &,
 		const std::string &));
-	MOCK_CONST_METHOD0(getPrefixesOfFuncsToBeRemoved, StringSet ());
-	MOCK_CONST_METHOD0(getFrontendRelease, std::string ());
 	MOCK_CONST_METHOD0(getNumberOfFuncsDetectedInFrontend, std::size_t ());
 	MOCK_CONST_METHOD0(getDetectedCompilerOrPacker, std::string ());
 	MOCK_CONST_METHOD0(getDetectedLanguage, std::string ());

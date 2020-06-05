@@ -50,14 +50,26 @@ void printColoredLine(llvm::raw_ostream &stream, llvm::raw_ostream::Colors color
 /// @name Phases
 /// @{
 
-void printPhase(const std::string &phaseName,
-	llvm::raw_ostream &stream = llvm::outs());
-void printSubPhase(const std::string &phaseName,
-	llvm::raw_ostream &stream = llvm::outs());
-void printSubSubPhase(const std::string &phaseName,
-	llvm::raw_ostream &stream = llvm::outs());
-void printSubSubSubPhase(const std::string &phaseName,
-	llvm::raw_ostream &stream = llvm::outs());
+void printPhase(
+		const std::string &phaseName,
+		bool print = true,
+		llvm::raw_ostream &stream = llvm::outs()
+);
+void printSubPhase(
+		const std::string &phaseName,
+		bool print = true,
+		llvm::raw_ostream &stream = llvm::outs()
+);
+void printSubSubPhase(
+		const std::string &phaseName,
+		bool print = true,
+		llvm::raw_ostream &stream = llvm::outs()
+);
+void printSubSubSubPhase(
+		const std::string &phaseName,
+		bool print = true,
+		llvm::raw_ostream &stream = llvm::outs()
+);
 
 /// @}
 

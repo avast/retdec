@@ -129,7 +129,6 @@ add_executable(tests-llvmir2hll
 	semantics/semantics/libc_semantics_tests.cpp
 	semantics/semantics/win_api_semantics_tests.cpp
 	support/const_symbol_converter_tests.cpp
-	support/funcs_with_prefix_remover_tests.cpp
 	support/global_vars_sorter_tests.cpp
 	support/headers_for_declared_funcs_tests.cpp
 	support/library_funcs_remover_tests.cpp

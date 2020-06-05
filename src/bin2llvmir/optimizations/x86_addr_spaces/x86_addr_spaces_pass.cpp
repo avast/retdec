@@ -17,7 +17,7 @@ namespace bin2llvmir {
 char X86AddressSpacesPass::ID = 0;
 
 static RegisterPass<X86AddressSpacesPass> X(
-		"x86-addr-spaces",
+		"retdec-x86-addr-spaces",
 		"x86 address spaces optimization",
 		false, // Only looks at CFG
 		false // Analysis Pass

@@ -1214,7 +1214,7 @@ void IdiomsLibgccImpl::rcmpge(llvm::CallInst* inst)
 char IdiomsLibgcc::ID = 0;
 
 static RegisterPass<IdiomsLibgcc> X(
-		"idioms-libgcc",
+		"retdec-idioms-libgcc",
 		"Libgcc idioms optimization",
 		false, // Only looks at CFG
 		false // Analysis Pass

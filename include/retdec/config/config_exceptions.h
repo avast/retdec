@@ -28,11 +28,15 @@ class Exception : public std::exception
 class ParseException : public Exception
 {
 	public:
-		ParseException(const std::string& message, std::size_t line, std::size_t column) :
-			_message(message),
-			_line(line),
-			_column(column),
-			_whatMessage(_message +
+		ParseException(
+				const std::string& message,
+				std::size_t line,
+				std::size_t column)
+				:
+				_message(message),
+				_line(line),
+				_column(column),
+				_whatMessage(_message +
 					" @ line = " + std::to_string(_line) +
 					", column = " + std::to_string(_column))
 		{
@@ -92,45 +96,6 @@ class FileNotFoundException : public Exception
 		}
 
 	private:
-		/// Message returned by @c what() method.
-		std::string _whatMessage;
-};
-
-/**
- * Config internal exception used only inside the library.
- * It is always caught by the library and therefore is never propagated to
- * the outside world (library users).
- */
-class InternalException : public std::exception
-{
-	public:
-		InternalException(const std::string& message, std::size_t position) :
-			_message(message),
-			_position(position)
-		{
-			_whatMessage = _message + " @ position = " + std::to_string(_position);
-		}
-
-		std::string getMessage() const
-		{
-			return _message;
-		}
-
-		std::size_t getPosition() const
-		{
-			return _position;
-		}
-
-		virtual const char* what() const noexcept override
-		{
-			return _whatMessage.c_str();
-		}
-
-	private:
-		/// Error message.
-		std::string _message;
-		/// Position (byte distance from start) in JSON where error occurred.
-		std::size_t _position = 0;
 		/// Message returned by @c what() method.
 		std::string _whatMessage;
 };

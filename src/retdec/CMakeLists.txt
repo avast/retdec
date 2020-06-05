@@ -19,6 +19,7 @@ target_link_libraries(retdec
 		retdec::deps::llvm
 	PRIVATE
 		retdec::bin2llvmir
+		retdec::llvmir2hll
 		retdec::config
 )
 

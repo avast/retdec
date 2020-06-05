@@ -61,8 +61,10 @@ TEST_F(UnreachableFuncsTests, addressOfFunc01)
 		  ret i32 0
 		}
 	)");
-	ConfigProvider::addConfigJsonString(module.get(), R"({
-		"mainAddress" : "0x1000",
+	auto config = config::Config::fromJsonString(R"({
+		"decompParams": {
+			"mainAddress" : "0x1000"
+		},
 		"functions" :
 		[
 			{
@@ -71,6 +73,7 @@ TEST_F(UnreachableFuncsTests, addressOfFunc01)
 			}
 		]
 	})");
+	ConfigProvider::addConfig(module.get(), config);
 
 	runOnModule();
 
@@ -121,8 +124,10 @@ TEST_F(UnreachableFuncsTests, funcInGlobalVarInit)
 		  ret i32 0
 		}
 	)");
-	ConfigProvider::addConfigJsonString(module.get(), R"({
-		"mainAddress" : "0x1000",
+	auto config = config::Config::fromJsonString(R"({
+		"decompParams": {
+			"mainAddress" : "0x1000"
+		},
 		"functions" :
 		[
 			{
@@ -131,6 +136,7 @@ TEST_F(UnreachableFuncsTests, funcInGlobalVarInit)
 			}
 		]
 	})");
+	ConfigProvider::addConfig(module.get(), config);
 
 	runOnModule();
 
@@ -241,8 +247,10 @@ TEST_F(UnreachableFuncsTests, indirectCall01)
 		  ret i32 0
 		}
 	)");
-	ConfigProvider::addConfigJsonString(module.get(), R"({
-		"mainAddress" : "0x1000",
+	auto config = config::Config::fromJsonString(R"({
+		"decompParams": {
+			"mainAddress" : "0x1000"
+		},
 		"functions" :
 		[
 			{
@@ -251,6 +259,7 @@ TEST_F(UnreachableFuncsTests, indirectCall01)
 			}
 		]
 	})");
+	ConfigProvider::addConfig(module.get(), config);
 
 	runOnModule();
 
@@ -337,8 +346,10 @@ TEST_F(UnreachableFuncsTests, mainAndFuncs01)
 		  ret i32 0
 		}
 	)");
-	ConfigProvider::addConfigJsonString(module.get(), R"({
-		"mainAddress" : "0x1000",
+	auto config = config::Config::fromJsonString(R"({
+		"decompParams": {
+			"mainAddress" : "0x1000"
+		},
 		"functions" :
 		[
 			{
@@ -347,6 +358,7 @@ TEST_F(UnreachableFuncsTests, mainAndFuncs01)
 			}
 		]
 	})");
+	ConfigProvider::addConfig(module.get(), config);
 
 	runOnModule();
 
@@ -395,8 +407,10 @@ TEST_F(UnreachableFuncsTests, mainAndFuncs02)
 		  ret i32 0
 		}
 	)");
-	ConfigProvider::addConfigJsonString(module.get(), R"({
-		"mainAddress" : "0x1000",
+	auto config = config::Config::fromJsonString(R"({
+		"decompParams": {
+			"mainAddress" : "0x1000"
+		},
 		"functions" :
 		[
 			{
@@ -405,6 +419,7 @@ TEST_F(UnreachableFuncsTests, mainAndFuncs02)
 			}
 		]
 	})");
+	ConfigProvider::addConfig(module.get(), config);
 
 	runOnModule();
 
@@ -455,8 +470,10 @@ TEST_F(UnreachableFuncsTests, mainAndFuncs03)
 		  ret i32 0
 		}
 	)");
-	ConfigProvider::addConfigJsonString(module.get(), R"({
-		"mainAddress" : "0x1000",
+	auto config = config::Config::fromJsonString(R"({
+		"decompParams": {
+			"mainAddress" : "0x1000"
+		},
 		"functions" :
 		[
 			{
@@ -465,6 +482,7 @@ TEST_F(UnreachableFuncsTests, mainAndFuncs03)
 			}
 		]
 	})");
+	ConfigProvider::addConfig(module.get(), config);
 
 	runOnModule();
 
@@ -530,8 +548,10 @@ TEST_F(UnreachableFuncsTests, mainAndFuncs04)
 		  ret i32 0
 		}
 	)");
-	ConfigProvider::addConfigJsonString(module.get(), R"({
-		"mainAddress" : "0x1000",
+	auto config = config::Config::fromJsonString(R"({
+		"decompParams": {
+			"mainAddress" : "0x1000"
+		},
 		"functions" :
 		[
 			{
@@ -540,6 +560,7 @@ TEST_F(UnreachableFuncsTests, mainAndFuncs04)
 			}
 		]
 	})");
+	ConfigProvider::addConfig(module.get(), config);
 
 	runOnModule();
 
@@ -583,8 +604,10 @@ TEST_F(UnreachableFuncsTests, mainOnlyDeclaration)
 		; Can't be optimized.
 		declare i32 @main(i32 %arg1, i8** nocapture %arg2)
 	)");
-	ConfigProvider::addConfigJsonString(module.get(), R"({
-		"mainAddress" : "0x1000",
+	auto config = config::Config::fromJsonString(R"({
+		"decompParams": {
+			"mainAddress" : "0x1000"
+		},
 		"functions" :
 		[
 			{
@@ -593,6 +616,7 @@ TEST_F(UnreachableFuncsTests, mainOnlyDeclaration)
 			}
 		]
 	})");
+	ConfigProvider::addConfig(module.get(), config);
 
 	runOnModule();
 
@@ -684,8 +708,10 @@ TEST_F(UnreachableFuncsTests, onlyMain01)
 		  ret i32 0
 		}
 	)");
-	ConfigProvider::addConfigJsonString(module.get(), R"({
-		"mainAddress" : "0x1000",
+	auto config = config::Config::fromJsonString(R"({
+		"decompParams": {
+			"mainAddress" : "0x1000"
+		},
 		"functions" :
 		[
 			{
@@ -694,6 +720,7 @@ TEST_F(UnreachableFuncsTests, onlyMain01)
 			}
 		]
 	})");
+	ConfigProvider::addConfig(module.get(), config);
 
 	runOnModule();
 
@@ -729,8 +756,10 @@ TEST_F(UnreachableFuncsTests, onlyMain02)
 		  ret i32 0
 		}
 	)");
-	ConfigProvider::addConfigJsonString(module.get(), R"({
-		"mainAddress" : "0x1000",
+	auto config = config::Config::fromJsonString(R"({
+		"decompParams": {
+			"mainAddress" : "0x1000"
+		},
 		"functions" :
 		[
 			{
@@ -739,6 +768,7 @@ TEST_F(UnreachableFuncsTests, onlyMain02)
 			}
 		]
 	})");
+	ConfigProvider::addConfig(module.get(), config);
 
 	runOnModule();
 

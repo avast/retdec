@@ -104,12 +104,6 @@ bool usesWithOneDefInSameBb(
 		return false;
 	}
 
-std::cout << " --- " << llvmObjToString(use->use)
-	<< " @ " << AsmInstruction::getInstructionAddress(use->use)
-	<< "  ||  " << llvmObjToString((*use->defs.begin())->def)
-	<< " @ " << AsmInstruction::getInstructionAddress((*use->defs.begin())->def)
-	<< std::endl;
-
 	load->replaceAllUsesWith(store->getValueOperand());
 	IrModifier::eraseUnusedInstructionRecursive(load);
 

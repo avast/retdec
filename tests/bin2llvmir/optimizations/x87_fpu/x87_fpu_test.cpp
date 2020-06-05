@@ -24,7 +24,8 @@ class X87FpuAnalysisTests: public LlvmIrTests
 {
 protected:
 	Abi *abi;
-	Config config;
+	retdec::config::Config c;
+	Config *config;
 
 	X87FpuAnalysis pass;
 	void setX86Environment(std::string architecture, std::string callingConvention);
@@ -47,7 +48,7 @@ protected:
 
 void X87FpuAnalysisTests::setX86Environment(std::string architecture, std::string callingConvention)
 {
-	config = Config::fromJsonString(module.get(), R"({
+	c = config::Config::fromJsonString(R"({
 		"architecture" : {
 			"bitSize" : )" + architecture + R"(,
 			"endian" : "little",
@@ -66,12 +67,12 @@ void X87FpuAnalysisTests::setX86Environment(std::string architecture, std::strin
 			}
 		]
 	})");
+	config = ConfigProvider::addConfig(module.get(), c);
 
+	config->setLlvmX87DataStorePseudoFunction(getFunctionByName("__frontend_reg_store.fpr"));
+	config->setLlvmX87DataLoadPseudoFunction(getFunctionByName("__frontend_reg_load.fpr"));
 
-	config.setLlvmX87DataStorePseudoFunction(getFunctionByName("__frontend_reg_store.fpr"));
-	config.setLlvmX87DataLoadPseudoFunction(getFunctionByName("__frontend_reg_load.fpr"));
-
-	abi = AbiProvider::addAbi(module.get(), &config);
+	abi = AbiProvider::addAbi(module.get(), config);
 	abi->addRegister(X87_REG_TOP, getGlobalByName("fpu_stat_TOP"));
 
 	unsigned numberOfFpuRegisters = 8;
@@ -109,7 +110,7 @@ TEST_F(X87FpuAnalysisTests, x86_16bit_cdecl_call_of_analyzed_function_success)
 		})");
 
 	setX86Environment("16", "cdecl");
-	bool b = pass.runOnModuleCustom(*module, &config, abi);
+	bool b = pass.runOnModuleCustom(*module, config, abi);
 
 	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
 		define void @foo() {
@@ -159,7 +160,7 @@ TEST_F(X87FpuAnalysisTests, x86_16bit_cdecl_call_of_not_analyzed_function_succes
 		})");
 
 		setX86Environment("16", "cdecl");
-		bool b = pass.runOnModuleCustom(*module, &config, abi);
+		bool b = pass.runOnModuleCustom(*module, config, abi);
 
 		std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
 		define void @boo() {
@@ -214,7 +215,7 @@ TEST_F(X87FpuAnalysisTests, x86_16bit_pascal_call_of_analyzed_function_success)
 		})");
 
 	setX86Environment("16", "pascal");
-	bool b = pass.runOnModuleCustom(*module, &config, abi);
+	bool b = pass.runOnModuleCustom(*module, config, abi);
 
 	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
 		define void @foo() {
@@ -268,7 +269,7 @@ TEST_F(X87FpuAnalysisTests, x86_16bit_pascal_call_of_not_analyzed_function_succe
 		})");
 
 	setX86Environment("16", "pascal");
-	bool b = pass.runOnModuleCustom(*module, &config, abi);
+	bool b = pass.runOnModuleCustom(*module, config, abi);
 
 	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
 		define void @boo() {
@@ -335,7 +336,7 @@ TEST_F(X87FpuAnalysisTests, x86_16bit_fastcall_call_of_analyzed_function_success
 		})");
 
 	setX86Environment("16", "fastcall");
-	bool b = pass.runOnModuleCustom(*module, &config, abi);
+	bool b = pass.runOnModuleCustom(*module, config, abi);
 
 	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
 		define void @foo() {
@@ -403,7 +404,7 @@ TEST_F(X87FpuAnalysisTests, x86_16bit_fastcall_call_of_not_analyzed_function_suc
 		})");
 
 	setX86Environment("16", "fastcall");
-	bool b = pass.runOnModuleCustom(*module, &config, abi);
+	bool b = pass.runOnModuleCustom(*module, config, abi);
 
 	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
 		define void @boo() {
@@ -470,7 +471,7 @@ TEST_F(X87FpuAnalysisTests, x86_32bit_cdecl_call_of_analyzed_function_success)
 		})");
 
 	setX86Environment("32", "cdecl");
-	bool b = pass.runOnModuleCustom(*module, &config, abi);
+	bool b = pass.runOnModuleCustom(*module, config, abi);
 
 	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
 		define void @foo() {
@@ -524,7 +525,7 @@ TEST_F(X87FpuAnalysisTests, x86_32bit_cdecl_call_of_not_analyzed_function_succes
 		})");
 
 	setX86Environment("32", "cdecl");
-	bool b = pass.runOnModuleCustom(*module, &config, abi);
+	bool b = pass.runOnModuleCustom(*module, config, abi);
 
 	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
 		define void @boo() {
@@ -594,7 +595,7 @@ TEST_F(X87FpuAnalysisTests, x86_32bit_stdcall_call_of_analyzed_function_success)
 		})");
 
 	setX86Environment("32", "stdcall");
-	bool b = pass.runOnModuleCustom(*module, &config, abi);
+	bool b = pass.runOnModuleCustom(*module, config, abi);
 
 	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
 		define void @foo() {
@@ -658,7 +659,7 @@ TEST_F(X87FpuAnalysisTests, x86_32bit_stdcall_call_of_not_analyzed_function_succ
 		})");
 
 	setX86Environment("32", "stdcall");
-	bool b = pass.runOnModuleCustom(*module, &config, abi);
+	bool b = pass.runOnModuleCustom(*module, config, abi);
 
 	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
 		define void @boo() {
@@ -715,7 +716,7 @@ TEST_F(X87FpuAnalysisTests, x86_32bit_pascal_call_of_analyzed_function_success)
 		})");
 
 	setX86Environment("32", "pascal");
-	bool b = pass.runOnModuleCustom(*module, &config, abi);
+	bool b = pass.runOnModuleCustom(*module, config, abi);
 
 	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
 		define void @foo() {
@@ -772,7 +773,7 @@ TEST_F(X87FpuAnalysisTests, x86_32bit_pascal_call_of_not_analyzed_function_succe
 		})");
 
 	setX86Environment("32", "pascal");
-	bool b = pass.runOnModuleCustom(*module, &config, abi);
+	bool b = pass.runOnModuleCustom(*module, config, abi);
 
 	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
 		define void @boo() {
@@ -850,7 +851,7 @@ TEST_F(X87FpuAnalysisTests, x86_32bit_fastcall_call_of_analyzed_function_success
 		})");
 
 	setX86Environment("32", "fastcall");
-	bool b = pass.runOnModuleCustom(*module, &config, abi);
+	bool b = pass.runOnModuleCustom(*module, config, abi);
 
 	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
 		define void @foo() {
@@ -927,7 +928,7 @@ TEST_F(X87FpuAnalysisTests, x86_32bit_fastcall_call_of_not_analyzed_function_suc
 		})");
 
 	setX86Environment("32", "fastcall");
-	bool b = pass.runOnModuleCustom(*module, &config, abi);
+	bool b = pass.runOnModuleCustom(*module, config, abi);
 
 	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
 		define void @boo() {
@@ -997,7 +998,7 @@ TEST_F(X87FpuAnalysisTests, x86_32bit_thiscall)
 		})");
 
 	setX86Environment("32", "thiscall");
-	bool b = pass.runOnModuleCustom(*module, &config, abi);
+	bool b = pass.runOnModuleCustom(*module, config, abi);
 
 	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
 		define void @foo() {
@@ -1051,7 +1052,7 @@ TEST_F(X87FpuAnalysisTests, x86_32bit_watcom)
 		})");
 
 	setX86Environment("32", "watcom");
-	bool b = pass.runOnModuleCustom(*module, &config, abi);
+	bool b = pass.runOnModuleCustom(*module, config, abi);
 
 	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
 		define void @foo() {
@@ -1106,7 +1107,7 @@ TEST_F(X87FpuAnalysisTests, x86_32bit_analyze_not_FP_return_success)
 		})");
 
 	setX86Environment("32", "unknown");
-	bool b = pass.runOnModuleCustom(*module, &config, abi);
+	bool b = pass.runOnModuleCustom(*module, config, abi);
 
 	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
 		define void @foo() {
@@ -1164,7 +1165,7 @@ TEST_F(X87FpuAnalysisTests, x86_64bit_call_of_analyzed_function_success)
 		})");
 
 	setX86Environment("64", "unknown");
-	bool b = pass.runOnModuleCustom(*module, &config, abi);
+	bool b = pass.runOnModuleCustom(*module, config, abi);
 
 	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
 		define void @foo() {
@@ -1216,7 +1217,7 @@ TEST_F(X87FpuAnalysisTests, x86_64bit_call_of_not_analyzed_function_success)
 		})");
 
 	setX86Environment("64", "unknown");
-	bool b = pass.runOnModuleCustom(*module, &config, abi);
+	bool b = pass.runOnModuleCustom(*module, config, abi);
 
 	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
 		define void @boo() {
@@ -1281,7 +1282,7 @@ TEST_F(X87FpuAnalysisTests, if_branch_or_loop)
 		})");
 
 	setX86Environment("64", "unknown");
-	bool b = pass.runOnModuleCustom(*module, &config, abi);
+	bool b = pass.runOnModuleCustom(*module, config, abi);
 
 	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
 		define void @foo() {
@@ -1363,7 +1364,7 @@ TEST_F(X87FpuAnalysisTests, if_else_branch)
 )");
 
 	setX86Environment("64", "unknown");
-	bool b = pass.runOnModuleCustom(*module, &config, abi);
+	bool b = pass.runOnModuleCustom(*module, config, abi);
 
 	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
 		define void @foo() {
@@ -1460,7 +1461,7 @@ TEST_F(X87FpuAnalysisTests, if_elseif_else_branch_or_switch)
 )");
 
 	setX86Environment("64", "unknown");
-	bool b = pass.runOnModuleCustom(*module, &config, abi);
+	bool b = pass.runOnModuleCustom(*module, config, abi);
 
 	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
 		define void @foo() {
@@ -1543,7 +1544,7 @@ TEST_F(X87FpuAnalysisTests, nested_branch_0)
 )");
 
 	setX86Environment("64", "unknown");
-	bool b = pass.runOnModuleCustom(*module, &config, abi);
+	bool b = pass.runOnModuleCustom(*module, config, abi);
 
 	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
 	define void @foo() {
@@ -1620,7 +1621,7 @@ TEST_F(X87FpuAnalysisTests, nested_branch_1)
 )");
 
 	setX86Environment("64", "unknown");
-	bool b = pass.runOnModuleCustom(*module, &config, abi);
+	bool b = pass.runOnModuleCustom(*module, config, abi);
 
 	std::string exp = PREDEFINED_REGISTERS_AND_FUNCTIONS + R"(
 	define void @foo() {
@@ -1690,7 +1691,7 @@ TEST_F(X87FpuAnalysisTests, if_else_branch_fail)
 )");
 
 	setX86Environment("64", "unknown");
-	bool b = pass.runOnModuleCustom(*module, &config, abi);
+	bool b = pass.runOnModuleCustom(*module, config, abi);
 
 	EXPECT_FALSE(b);
 } // if_else_branch_fail

@@ -38,8 +38,8 @@ void serialize(Writer& writer, const common::ToolInfo& ti)
 	serializeString(writer, JSON_type, ti.getType());
 	serializeString(writer, JSON_name, ti.getName());
 	serializeDouble(writer, JSON_percentage, ti.getPercentage());
-	serializeUint64(writer, JSON_percentage, ti.getIdenticalSignificantNibbles());
-	serializeUint64(writer, JSON_percentage, ti.getTotalSignificantNibbles());
+	serializeUint64(writer, JSON_idSignNibbles, ti.getIdenticalSignificantNibbles());
+	serializeUint64(writer, JSON_totalSignNibbles, ti.getTotalSignificantNibbles());
 	serializeBool(writer, JSON_heuristics, ti.isFromHeuristics());
 	serializeString(writer, JSON_version, ti.getVersion());
 	serializeString(writer, JSON_additional, ti.getAdditionalInfo());

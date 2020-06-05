@@ -15,11 +15,15 @@
 #include "retdec/fileformat/fileformat.h"
 #include "arg_handler.h"
 #include "retdec/unpacker/plugin.h"
+#include "retdec/unpackertool/unpackertool.h"
 #include "plugin_mgr.h"
 
 using namespace retdec::utils;
 using namespace retdec::unpacker;
 using namespace retdec::unpackertool;
+
+namespace retdec {
+namespace unpackertool {
 
 /**
  * Possible exit codes of the unpacker as program.
@@ -193,7 +197,7 @@ ExitCode processArgs(ArgHandler& handler, char argc, char** argv)
 	return EXIT_CODE_OK;
 }
 
-int main(int argc, char** argv)
+int _main(int argc, char** argv)
 {
 	ArgHandler handler("unpacker options [PACKED_FILE] [optional]");
 	handler.setHelp(
@@ -231,3 +235,6 @@ int main(int argc, char** argv)
 
 	return processArgs(handler, argc, argv);
 }
+
+} // namespace unpackertool
+} // namespace retdec

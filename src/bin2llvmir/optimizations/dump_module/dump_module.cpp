@@ -16,7 +16,7 @@ namespace bin2llvmir {
 char DumpModule::ID = 0;
 
 static RegisterPass<DumpModule> X(
-		"dump-module",
+		"retdec-dump-module",
 		"Module to LLVM IR file dumper",
 		 false, // Only looks at CFG
 		 false // Analysis Pass

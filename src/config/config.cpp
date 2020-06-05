@@ -30,22 +30,13 @@
 
 namespace {
 
-const std::string JSON_ida               = "ida";
 const std::string JSON_date              = "date";
 const std::string JSON_time              = "time";
-const std::string JSON_inputFile         = "inputFile";
-const std::string JSON_unpackedInputFile = "inputFileUnpacked";
-const std::string JSON_pdbInputFile      = "inputFilePdb";
-const std::string JSON_frontendVersion   = "frontendVersion";
 const std::string JSON_parameters        = "decompParams";
 const std::string JSON_architecture      = "architecture";
 const std::string JSON_fileType          = "fileType";
 const std::string JSON_fileFormat        = "fileFormat";
 const std::string JSON_tools             = "tools";
-const std::string JSON_imageBase         = "imageBase";
-const std::string JSON_entryPoint        = "entryPoint";
-const std::string JSON_mainAddress       = "mainAddress";
-const std::string JSON_sectionVMA        = "sectionVMA";
 const std::string JSON_functions         = "functions";
 const std::string JSON_globals           = "globals";
 const std::string JSON_registers         = "registers";
@@ -63,7 +54,7 @@ namespace config {
 Config Config::empty(const std::string& path)
 {
 	Config config;
-	config._configFileName = path;
+	config.parameters.setOutputConfigFile(path);
 	return config;
 }
 
@@ -81,28 +72,6 @@ Config Config::fromJsonString(const std::string& json)
 	return config;
 }
 
-bool Config::isIda() const { return _ida; }
-
-void Config::setInputFile(const std::string& n)          { _inputFile = n; }
-void Config::setUnpackedInputFile(const std::string& n)  { _unpackedInputFile = n; }
-void Config::setPdbInputFile(const std::string& n)       { _pdbInputFile = n; }
-void Config::setFrontendVersion(const std::string& n)    { _frontendVersion = n; }
-void Config::setEntryPoint(const retdec::common::Address& a)     { _entryPoint = a; }
-void Config::setMainAddress(const retdec::common::Address& a)    { _mainAddress = a; }
-void Config::setSectionVMA(const retdec::common::Address& a)     { _sectionVMA = a; }
-void Config::setImageBase(const retdec::common::Address& a)      { _imageBase = a; }
-void Config::setIsIda(bool b)                            { _ida = b; }
-
-std::string Config::getInputFile() const          { return _inputFile; }
-std::string Config::getUnpackedInputFile() const  { return _unpackedInputFile; }
-std::string Config::getPdbInputFile() const       { return _pdbInputFile; }
-std::string Config::getFrontendVersion() const    { return _frontendVersion; }
-std::string Config::getConfigFileName() const     { return _configFileName; }
-retdec::common::Address Config::getEntryPoint() const     { return _entryPoint; }
-retdec::common::Address Config::getMainAddress() const    { return _mainAddress; }
-retdec::common::Address Config::getSectionVMA() const     { return _sectionVMA; }
-retdec::common::Address Config::getImageBase() const      { return _imageBase; }
-
 /**
  * Reads JSON file into internal representation.
  * If file can not be opened, an instance of @c FileNotFoundException is thrown.
@@ -116,7 +85,7 @@ void Config::readJsonFile(const std::string& input)
 	std::ifstream jsonFile(input, std::ios::in | std::ios::binary);
 	if (!jsonFile)
 	{
-		_configFileName.clear();
+		parameters.setOutputConfigFile(std::string());
 		std::string msg = "Input file \"" + input + "\" can not be opened.";
 		throw FileNotFoundException(msg);
 	}
@@ -129,7 +98,7 @@ void Config::readJsonFile(const std::string& input)
 	jsonFile.close();
 
 	readJsonString(jsonContent);
-	_configFileName = input;
+	parameters.setOutputConfigFile(input);
 }
 
 /**
@@ -139,8 +108,8 @@ void Config::readJsonFile(const std::string& input)
 std::string Config::generateJsonFile() const
 {
 	std::string out;
-	if (!_configFileName.empty())
-		out = _configFileName;
+	if (!parameters.getOutputConfigFile().empty())
+		out = parameters.getOutputConfigFile();
 	return generateJsonFile( out );
 }
 
@@ -151,7 +120,9 @@ std::string Config::generateJsonFile() const
  */
 std::string Config::generateJsonFile(const std::string& outputFilePath) const
 {
-	std::string jsonName = (outputFilePath.empty()) ? (getInputFile() + ".json") : (outputFilePath);
+	std::string jsonName = outputFilePath.empty()
+			? parameters.getInputFile() + ".json"
+			: outputFilePath;
 
 	std::ofstream jsonFile( jsonName.c_str() );
 	jsonFile << generateJsonString();
@@ -172,16 +143,6 @@ std::string Config::generateJsonString() const
 
 	serdes::serializeString(writer, JSON_date, retdec::utils::getCurrentDate());
 	serdes::serializeString(writer, JSON_time, retdec::utils::getCurrentTime());
-	serdes::serializeString(writer, JSON_inputFile, getInputFile());
-
-	if (isIda()) serdes::serializeBool(writer, JSON_ida, isIda());
-	if (!getUnpackedInputFile().empty()) serdes::serializeString(writer, JSON_unpackedInputFile, getUnpackedInputFile());
-	if (!getPdbInputFile().empty()) serdes::serializeString(writer, JSON_pdbInputFile, getPdbInputFile());
-	if (!getFrontendVersion().empty()) serdes::serializeString(writer, JSON_frontendVersion, getFrontendVersion());
-	if (getEntryPoint().isDefined()) serdes::serialize(writer, JSON_entryPoint, getEntryPoint());
-	if (getMainAddress().isDefined()) serdes::serialize(writer, JSON_mainAddress, getMainAddress());
-	if (getSectionVMA().isDefined()) serdes::serialize(writer, JSON_sectionVMA, getSectionVMA());
-	if (getImageBase().isDefined()) serdes::serialize(writer, JSON_imageBase, getImageBase());
 
 	writer.String(JSON_parameters);
 	parameters.serialize(writer);
@@ -225,43 +186,25 @@ void Config::readJsonString(const std::string& json)
 
 	*this = Config();
 
-	try
+	auto params = root.FindMember(JSON_parameters);
+	if (params != root.MemberEnd())
 	{
-		setIsIda( serdes::deserializeBool(root, JSON_ida) );
-		setInputFile( serdes::deserializeString(root, JSON_inputFile) );
-		setUnpackedInputFile( serdes::deserializeString(root, JSON_unpackedInputFile) );
-		setPdbInputFile( serdes::deserializeString(root, JSON_pdbInputFile) );
-		setFrontendVersion( serdes::deserializeString(root, JSON_frontendVersion) );
-		serdes::deserialize(root, JSON_entryPoint, _entryPoint);
-		serdes::deserialize(root, JSON_mainAddress, _mainAddress);
-		serdes::deserialize(root, JSON_sectionVMA, _sectionVMA);
-		serdes::deserialize(root, JSON_imageBase, _imageBase);
-
-		auto params = root.FindMember(JSON_parameters);
-		if (params != root.MemberEnd())
-		{
-			parameters.deserialize(params->value);
-		}
-
-		serdes::deserialize(root, JSON_architecture, architecture);
-		serdes::deserialize(root, JSON_fileType, fileType);
-		serdes::deserialize(root, JSON_fileFormat, fileFormat);
-
-		serdes::deserializeContainer(root, JSON_tools, tools);
-		serdes::deserializeContainer(root, JSON_languages, languages);
-		serdes::deserializeContainer(root, JSON_functions, functions);
-		serdes::deserializeContainer(root, JSON_globals, globals);
-		serdes::deserializeContainer(root, JSON_registers, registers);
-		serdes::deserializeContainer(root, JSON_structures, structures);
-		serdes::deserializeContainer(root, JSON_vtables, vtables);
-		serdes::deserializeContainer(root, JSON_classes, classes);
-		serdes::deserializeContainer(root, JSON_patterns, patterns);
+		parameters.deserialize(params->value);
 	}
-	catch (const InternalException& e)
-	{
-		auto loc = retdec::utils::getLineAndColumnFromPosition(json, e.getPosition());
-		throw ParseException(e.getMessage(), loc.first, loc.second);
-	}
+
+	serdes::deserialize(root, JSON_architecture, architecture);
+	serdes::deserialize(root, JSON_fileType, fileType);
+	serdes::deserialize(root, JSON_fileFormat, fileFormat);
+
+	serdes::deserializeContainer(root, JSON_tools, tools);
+	serdes::deserializeContainer(root, JSON_languages, languages);
+	serdes::deserializeContainer(root, JSON_functions, functions);
+	serdes::deserializeContainer(root, JSON_globals, globals);
+	serdes::deserializeContainer(root, JSON_registers, registers);
+	serdes::deserializeContainer(root, JSON_structures, structures);
+	serdes::deserializeContainer(root, JSON_vtables, vtables);
+	serdes::deserializeContainer(root, JSON_classes, classes);
+	serdes::deserializeContainer(root, JSON_patterns, patterns);
 }
 
 } // namespace config
