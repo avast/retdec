@@ -33,10 +33,30 @@ const std::size_t COFF_FILE_HEADER_BYTE_SIZE = 20;
 
 const std::map<std::pair<std::size_t, std::string>, Format> magicFormatMap =
 {
+	// PE
 	{{0, "MZ"}, Format::PE},
 	{{0, "ZM"}, Format::PE},
+	// COFF
+	{{0, "\xc4""\x01"}, Format::COFF}, // ARM little
+	{{0, "\x4c""\x01"}, Format::COFF}, // x86 little
+	// https://opensource.apple.com/source/file/file-23/file/magic/Magdir/mips.auto.html
+	{{0, "\x01""\x60"}, Format::COFF}, // MIPSEB ECOFF executable
+	{{0, "\x60""\x01"}, Format::COFF}, // MIPSEB-LE ECOFF executable
+	{{0, "\x01""\x62"}, Format::COFF}, // MIPSEL-BE ECOFF executable
+	{{0, "\x62""\x01"}, Format::COFF}, // MIPSEL ECOFF executable
+	{{0, "\x01""\x63"}, Format::COFF}, // MIPSEB MIPS-II ECOFF executable
+	{{0, "\x63""\x01"}, Format::COFF}, // MIPSEB-LE MIPS-II ECOFF executable
+	{{0, "\x01""\x66"}, Format::COFF}, // MIPSEL-BE MIPS-II ECOFF executable
+	{{0, "\x66""\x01"}, Format::COFF}, // MIPSEL MIPS-II ECOFF executable
+	{{0, "\x01""\x40"}, Format::COFF}, // MIPSEB MIPS-III ECOFF executable
+	{{0, "\x40""\x01"}, Format::COFF}, // MIPSEB-LE MIPS-III ECOFF executable
+	{{0, "\x01""\x42"}, Format::COFF}, // MIPSEL-BE MIPS-III ECOFF executable
+	{{0, "\x42""\x01"}, Format::COFF}, // MIPSEL MIPS-III ECOFF executable
+	// ELF
 	{{0, "\x7F""ELF"}, Format::ELF},
+	// Intel-Hex
 	{{0, ":"}, Format::INTEL_HEX},
+	// Mach-O
 	{{0, "\xFE""\xED""\xFA""\xCE"}, Format::MACHO}, // Mach-O
 	{{0, "\xFE""\xED""\xFA""\xCF"}, Format::MACHO}, // Mach-O
 	{{0, "\xCE""\xFA""\xED""\xFE"}, Format::MACHO}, // Mach-O
@@ -55,6 +75,14 @@ void resetStream(std::istream& stream)
 {
 	stream.clear();
 	stream.seekg(0, std::ios::beg);
+}
+
+std::uint64_t streamSize(std::istream& stream)
+{
+	stream.seekg(0, std::ios::end);
+	std::uint64_t sz =stream.tellg();
+	resetStream(stream);
+	return sz;
 }
 
 /**
@@ -93,56 +121,6 @@ bool isPe(std::istream& stream)
 	}
 
 	return signature == 0x4550 || signature == 0x50450000;
-}
-
-/**
- * Check if input file is in COFF format
- * @param stream Input stream
- * @param header First bytes of input file (COFF file header)
- * @return @c true if input file is COFF file, @c false otherwise
- */
-bool isCoff(std::istream& stream, const std::string &header)
-{
-	resetStream(stream);
-
-	if(header.size() < COFF_FILE_HEADER_BYTE_SIZE
-			|| hasSubstringOnPosition(header, "ELF", 1))
-	{
-		return false;
-	}
-
-	std::string s(std::istreambuf_iterator<char>(stream), {});
-
-	auto buffer = MemoryBuffer::getMemBuffer(
-			llvm::StringRef(
-					reinterpret_cast<const char*>(s.data()),
-					s.size()),
-			"",
-			false);
-
-	if(buffer == nullptr)
-	{
-		return false;
-	}
-
-	std::error_code errorCode;
-	COFFObjectFile coff(buffer.get()->getMemBufferRef(), errorCode);
-	if (errorCode)
-	{
-		return false;
-	}
-
-	PELIB_IMAGE_FILE_MACHINE_ITERATOR it;
-	bool validMachineCode = it.isValidMachineCode(
-			static_cast<PELIB_IMAGE_FILE_MACHINE>(coff.getMachine()));
-	bool unknownMachineCode =
-			coff.getMachine() == PELIB_IMAGE_FILE_MACHINE::PELIB_IMAGE_FILE_MACHINE_UNKNOWN;
-	if (!validMachineCode
-			|| (unknownMachineCode && coff.getNumberOfSections() == 0))
-	{
-		return false;
-	}
-	return true;
 }
 
 /**
@@ -227,18 +205,40 @@ Format detectFileFormat(std::istream &inputStream, bool isRaw)
 		return Format::RAW_DATA;
 	}
 
+	// Try unknown formats.
+	//
 	resetStream(inputStream);
-
-	std::size_t magicSize = 0;
-
-	for(const auto &formatMap : {magicFormatMap, unknownFormatMap})
+	std::size_t umagicSize = 0;
+	for(const auto &item : unknownFormatMap)
 	{
-		for(const auto &item : formatMap)
+		umagicSize = std::max(umagicSize, item.first.first + item.first.second.length());
+	}
+	std::string umagic;
+	try
+	{
+		umagic.resize(umagicSize);
+		inputStream.read(&umagic[0], umagicSize);
+		for(const auto &item : unknownFormatMap)
 		{
-			magicSize = std::max(magicSize, item.first.first + item.first.second.length());
+			if(hasSubstringOnPosition(umagic, item.first.second, item.first.first))
+			{
+				return Format::UNKNOWN;
+			}
 		}
 	}
+	catch(...)
+	{
+		// ignore
+	}
 
+	// Try known formats.
+	//
+	resetStream(inputStream);
+	std::size_t magicSize = 0;
+	for(const auto &item : magicFormatMap)
+	{
+		magicSize = std::max(magicSize, item.first.first + item.first.second.length());
+	}
 	std::string magic;
 	try
 	{
@@ -250,14 +250,6 @@ Format detectFileFormat(std::istream &inputStream, bool isRaw)
 		return Format::UNDETECTABLE;
 	}
 
-	for(const auto &item : unknownFormatMap)
-	{
-		if(hasSubstringOnPosition(magic, item.first.second, item.first.first))
-		{
-			return Format::UNKNOWN;
-		}
-	}
-
 	for(const auto &item : magicFormatMap)
 	{
 		if(hasSubstringOnPosition(magic, item.first.second, item.first.first))
@@ -266,6 +258,10 @@ Format detectFileFormat(std::istream &inputStream, bool isRaw)
 			{
 				case Format::PE:
 					return isPe(inputStream) ? Format::PE : Format::UNKNOWN;
+				case Format::COFF:
+					if (streamSize(inputStream) < COFF_FILE_HEADER_BYTE_SIZE)
+						return Format::UNKNOWN;
+					return Format::COFF;
 				case Format::MACHO:
 					if (isStrangeFeedface(inputStream) || isJava(inputStream))
 					{
@@ -277,11 +273,6 @@ Format detectFileFormat(std::istream &inputStream, bool isRaw)
 					return item.second;
 			}
 		}
-	}
-
-	if(isCoff(inputStream, magic))
-	{
-		return Format::COFF;
 	}
 
 	return Format::UNKNOWN;
