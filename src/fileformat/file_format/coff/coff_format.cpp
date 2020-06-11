@@ -507,30 +507,14 @@ bool CoffFormat::getRelocationMask(unsigned relType, std::vector<std::uint8_t> &
 
 retdec::utils::Endianness CoffFormat::getEndianness() const
 {
-	switch(file->getMachine())
+	const llvm::object::coff_bigobj_file_header* bigHeader = nullptr;
+	if (!file->getCOFFBigObjHeader(bigHeader) && bigHeader)
 	{
-		case PELIB_IMAGE_FILE_MACHINE_I386:
-		case PELIB_IMAGE_FILE_MACHINE_I486:
-		case PELIB_IMAGE_FILE_MACHINE_PENTIUM:
-		case PELIB_IMAGE_FILE_MACHINE_AMD64:
-		case PELIB_IMAGE_FILE_MACHINE_R3000_LITTLE:
-		case PELIB_IMAGE_FILE_MACHINE_R4000:
-		case PELIB_IMAGE_FILE_MACHINE_R10000:
-		case PELIB_IMAGE_FILE_MACHINE_WCEMIPSV2:
-		case PELIB_IMAGE_FILE_MACHINE_MIPS16:
-		case PELIB_IMAGE_FILE_MACHINE_MIPSFPU:
-		case PELIB_IMAGE_FILE_MACHINE_MIPSFPU16:
-		case PELIB_IMAGE_FILE_MACHINE_ARM:
-		case PELIB_IMAGE_FILE_MACHINE_THUMB:
-		case PELIB_IMAGE_FILE_MACHINE_ARMNT:
-		case PELIB_IMAGE_FILE_MACHINE_ARM64:
-		case PELIB_IMAGE_FILE_MACHINE_POWERPC:
-		case PELIB_IMAGE_FILE_MACHINE_POWERPCFP:
-			return Endianness::LITTLE;
-		case PELIB_IMAGE_FILE_MACHINE_R3000_BIG:
-			return Endianness::BIG;
-		default:
-			return Endianness::UNKNOWN;
+		return Endianness::BIG;
+	}
+	else
+	{
+		return Endianness::LITTLE;
 	}
 }
 
