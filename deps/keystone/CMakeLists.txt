@@ -77,8 +77,5 @@ target_include_directories(keystone
 )
 
 target_link_libraries(keystone INTERFACE
-	debug
-		${binary_dir}/llvm/lib/${DEBUG_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}keystone${CMAKE_STATIC_LIBRARY_SUFFIX}
-	optimized
-		${binary_dir}/llvm/lib/${RELEASE_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}keystone${CMAKE_STATIC_LIBRARY_SUFFIX}
+	${binary_dir}/llvm/lib/${MSVC_CONFIG}${CMAKE_STATIC_LIBRARY_PREFIX}keystone${CMAKE_STATIC_LIBRARY_SUFFIX}
 )
