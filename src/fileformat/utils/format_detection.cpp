@@ -92,7 +92,7 @@ bool isPe(std::istream& stream)
 		return false;
 	}
 
-	return signature == 0x4550 || signature == 0x50450000;
+	return (signature == PELIB_IMAGE_NT_SIGNATURE);
 }
 
 /**
