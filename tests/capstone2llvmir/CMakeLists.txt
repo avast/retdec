@@ -20,6 +20,10 @@ target_link_libraries(tests-capstone2llvmir
 	retdec::deps::gmock_main
 )
 
+if(MSVC)
+	target_compile_options(tests-capstone2llvmir PUBLIC "/bigobj")
+endif()
+
 set_target_properties(tests-capstone2llvmir
 	PROPERTIES
 		OUTPUT_NAME "retdec-tests-capstone2llvmir"
