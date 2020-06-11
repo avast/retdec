@@ -402,6 +402,8 @@ const std::unordered_set<std::string> usualPackerSections
 	"pec4",
 	"pec5",
 	"pec6",
+	"gu_idata",             // Created by retdec-unpacker
+	"gu_rsrc"               // Created by retdec-unpacker
 };
 
 const std::map<std::string, std::size_t> usualSectionCharacteristics
@@ -3794,20 +3796,24 @@ void PeFormat::scanForSectionAnomalies(unsigned anamaliesLimit)
 				continue;
 			}
 
-			// scan for overlapping sections
-			auto secStart = sec->getOffset();
-			auto secEnd = secStart + sec->getSizeInFile();
-			const auto cmpName = cmpSec->getName();
-			auto cmpSecStart = cmpSec->getOffset();
-			auto cmpSecEnd = cmpSecStart + cmpSec->getSizeInFile();
-			if ((secStart <= cmpSecStart && cmpSecStart < secEnd) ||
-				(cmpSecStart <= secStart && secStart < cmpSecEnd))
+			// scan for overlapping sections.
+			// DO NOT check if the previous section has zero size.
+			if(sec->getSizeInFile() != 0)
 			{
-				const std::string cmpMsgName = cmpName.empty() ? std::to_string(cmpSec->getIndex()) : cmpName;
-				anomalies.emplace_back(
+				auto secStart = sec->getOffset();
+				auto secEnd = secStart + sec->getSizeInFile();
+				const auto cmpName = cmpSec->getName();
+				auto cmpSecStart = cmpSec->getOffset();
+				auto cmpSecEnd = cmpSecStart + cmpSec->getSizeInFile();
+				if((secStart <= cmpSecStart && cmpSecStart < secEnd) ||
+					(cmpSecStart <= secStart && secStart < cmpSecEnd))
+				{
+					const std::string cmpMsgName = cmpName.empty() ? std::to_string(cmpSec->getIndex()) : cmpName;
+					anomalies.emplace_back(
 						"OverlappingSections",
 						"Sections " + pmsgName + " and " + replaceNonprintableChars(cmpMsgName) + " overlap"
-				);
+					);
+				}
 			}
 		}
 	}
