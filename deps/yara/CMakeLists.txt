@@ -32,7 +32,7 @@ if(MSVC)
 		/p:WindowsTargetPlatformVersion=${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}
 		${YARA_SOLUTION}
 	)
-	set(YARAC_PATH         ${YARA_WIN_DIR}/\${CMAKE_INSTALL_CONFIG_NAME}/${YARAC_NAME})
+	set(YARAC_PATH         ${YARA_WIN_DIR}/${MSVC_CONFIG}/${YARAC_NAME})
 else()
 	set(YARA_LIBRARY_DIR ${YARA_DIR}/libyara/.libs)
 	set(YARA_CLEAN_COMMAND make clean)
