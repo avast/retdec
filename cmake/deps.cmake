@@ -55,11 +55,11 @@ set(YARA_ARCHIVE_SHA256
 )
 
 set(YARAMOD_URL
-    "https://github.com/avast/yaramod/archive/57f4ee87372aba7735bbcc1ed870f43faaa8127b.zip"
+    "https://github.com/avast/yaramod/archive/fe9ef1c3a2767868f31cb5a7189c173b4b27557b.zip"
     CACHE INTERNAL "URL of YaraMod archive to use."
 )
 set(YARAMOD_ARCHIVE_SHA256
-    "c7fdfc1a425d5bcab18fd336e284ee3dff0fe64749a46348af289cfed6fe2b92"
+    "55445a8a21fab13cbdf228f397635c587e2a58605407be32bc70329de60c6016"
     CACHE INTERNAL ""
 )
 

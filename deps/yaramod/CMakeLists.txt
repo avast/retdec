@@ -9,6 +9,7 @@ if(YARAMOD_LOCAL_DIR)
 			# This does not work on MSVC, but may be useful on Linux.
 			-DCMAKE_BUILD_TYPE=Release
 			-DCMAKE_CXX_FLAGS_RELEASE=${CMAKE_CXX_FLAGS_RELEASE}
+			-DCMAKE_CXX_FLAGS_DEBUG=${CMAKE_CXX_FLAGS_DEBUG}
 			# Force the use of the same compiler as used to build the top-level
 			# project. Otherwise, the external project may pick up a different
 			# compiler, which may result in link errors.
@@ -32,6 +33,7 @@ else()
 			# This does not work on MSVC, but may be useful on Linux.
 			-DCMAKE_BUILD_TYPE=Release
 			-DCMAKE_CXX_FLAGS_RELEASE=${CMAKE_CXX_FLAGS_RELEASE}
+			-DCMAKE_CXX_FLAGS_DEBUG=${CMAKE_CXX_FLAGS_DEBUG}
 			# Force the use of the same compiler as used to build the top-level
 			# project. Otherwise, the external project may pick up a different
 			# compiler, which may result in link errors.
