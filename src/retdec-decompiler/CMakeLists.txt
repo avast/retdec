@@ -24,14 +24,20 @@ if(MSVC)
 		retdec::bin2llvmir -WHOLEARCHIVE:$<TARGET_FILE_NAME:retdec::bin2llvmir>
 		retdec::llvmir2hll -WHOLEARCHIVE:$<TARGET_FILE_NAME:retdec::llvmir2hll>
 	)
-	target_link_options(retdec-decompiler PUBLIC "/FORCE:MULTIPLE")
+	set_property(TARGET retdec-decompiler
+		APPEND_STRING PROPERTY LINK_FLAGS " /FORCE:MULTIPLE"
+	)
 	# Increase the stack size of the created binaries on MS Windows because the
 	# default value is too small. The default Linux value is 8388608 (8 MB).
-	target_link_options(retdec-decompiler PUBLIC "/STACK:16777216")
+	set_property(TARGET retdec-decompiler
+		APPEND_STRING PROPERTY LINK_FLAGS " /STACK:16777216"
+	)
 	# Allow the 32b version of bin2llvmir on Windows handle addresses larger
 	# than 2 GB (up to 4 GB).
 	if(CMAKE_SIZEOF_VOID_P MATCHES "4")
-		target_link_options(retdec-decompiler PUBLIC "/LARGEADDRESSAWARE")
+		set_property(TARGET retdec
+			APPEND_STRING PROPERTY LINK_FLAGS " /LARGEADDRESSAWARE"
+		)
 	endif()
 elseif(APPLE)
 	target_link_libraries(retdec-decompiler

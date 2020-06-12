@@ -77,17 +77,15 @@ set(GMOCK_INCLUDE_DIR ${source_dir}/googlemock/include)
 
 # Create targets.
 
+set(MSVC_DEBUG_LIB_SUFFIX $<$<AND:${MSVC_GE},$<CONFIG:Debug>>:d>)
+
 # gtest
 add_library(gtest INTERFACE)
 add_library(retdec::deps::gtest ALIAS gtest)
 add_dependencies(gtest googletest)
 target_link_libraries(gtest INTERFACE
-	debug
-		${binary_dir}/lib/${DEBUG_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}gtest${DEBUG_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}
-	optimized
-		${binary_dir}/lib/${RELEASE_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}gtest${CMAKE_STATIC_LIBRARY_SUFFIX}
-	general
-		Threads::Threads
+	${binary_dir}/lib/${MSVC_CONFIG}${CMAKE_STATIC_LIBRARY_PREFIX}gtest${MSVC_DEBUG_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}
+	Threads::Threads
 )
 target_include_directories(gtest
 	SYSTEM INTERFACE
@@ -98,24 +96,16 @@ target_include_directories(gtest
 add_library(gtest_main INTERFACE)
 add_library(retdec::deps::gtest_main ALIAS gtest_main)
 target_link_libraries(gtest_main INTERFACE
-	debug
-		${binary_dir}/lib/${DEBUG_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}gtest_main${DEBUG_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}
-	optimized
-		${binary_dir}/lib/${RELEASE_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}gtest_main${CMAKE_STATIC_LIBRARY_SUFFIX}
-	general
-		gtest
+	${binary_dir}/lib/${MSVC_CONFIG}${CMAKE_STATIC_LIBRARY_PREFIX}gtest_main${MSVC_DEBUG_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}
+	gtest
 )
 
 # gmock
 add_library(gmock INTERFACE)
 add_library(retdec::deps::gmock ALIAS gmock)
 target_link_libraries(gmock INTERFACE
-	debug
-		${binary_dir}/lib/${DEBUG_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}gmock${DEBUG_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}
-	optimized
-		${binary_dir}/lib/${RELEASE_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}gmock${CMAKE_STATIC_LIBRARY_SUFFIX}
-	general
-		gtest
+	${binary_dir}/lib/${MSVC_CONFIG}${CMAKE_STATIC_LIBRARY_PREFIX}gmock${MSVC_DEBUG_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}
+	gtest
 )
 target_include_directories(gmock
 	SYSTEM INTERFACE
@@ -126,10 +116,6 @@ target_include_directories(gmock
 add_library(gmock_main INTERFACE)
 add_library(retdec::deps::gmock_main ALIAS gmock_main)
 target_link_libraries(gmock_main INTERFACE
-	debug
-		${binary_dir}/lib/${DEBUG_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}gmock_main${DEBUG_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}
-	optimized
-		${binary_dir}/lib/${RELEASE_DIR}${CMAKE_STATIC_LIBRARY_PREFIX}gmock_main${CMAKE_STATIC_LIBRARY_SUFFIX}
-	general
-		gmock
+	${binary_dir}/lib/${MSVC_CONFIG}${CMAKE_STATIC_LIBRARY_PREFIX}gmock_main${MSVC_DEBUG_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}
+	gmock
 )

@@ -11,11 +11,8 @@ if(CMAKE_CXX_COMPILER)
 	set(CMAKE_CXX_COMPILER_OPTION "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")
 endif()
 
-if(MSVC)
-	set(RELEASE_DIR "Release/")
-	set(DEBUG_DIR "Debug/")
-	set(DEBUG_LIB_SUFFIX "d")
-endif()
+set(MSVC_GE $<BOOL:${MSVC}>)
+set(MSVC_CONFIG $<${MSVC_GE}:$<CONFIG>/>)
 
 cond_add_subdirectory(capstone RETDEC_ENABLE_CAPSTONE)
 cond_add_subdirectory(elfio RETDEC_ENABLE_ELFIO)

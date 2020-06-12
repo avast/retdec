@@ -16,9 +16,10 @@ if(MSVC)
 		set(YARAC_NAME "yarac32.exe" CACHE STRING "Yarac binary name" FORCE)
 	endif()
 
+	set(MSVC_CONFIG $<IF:$<CONFIG:Debug>,Debug,Release>)
 	set(YARA_WIN_DIR       ${YARA_DIR}/windows/vs2015)
 	set(YARA_SOLUTION      ${YARA_WIN_DIR}/yara.sln)
-	set(YARA_LIBRARY_DIR   ${YARA_WIN_DIR}/libyara/$<CONFIGURATION>)
+	set(YARA_LIBRARY_DIR   ${YARA_WIN_DIR}/libyara/${MSVC_CONFIG})
 	set(YARA_CLEAN_COMMAND "${CMAKE_VS_MSBUILD_COMMAND}"
 		/t:Clean
 		${YARA_SOLUTION}
@@ -26,7 +27,7 @@ if(MSVC)
 	set(YARA_BUILD_COMMAND "${CMAKE_VS_MSBUILD_COMMAND}"
 		/m:${CPUS}
 		/p:Platform=${PLATFORM}
-		/p:Configuration=$<CONFIGURATION>
+		/p:Configuration=${MSVC_CONFIG}
 		/p:PlatformToolset=${CMAKE_VS_PLATFORM_TOOLSET}
 		/p:WindowsTargetPlatformVersion=${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}
 		${YARA_SOLUTION}

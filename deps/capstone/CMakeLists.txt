@@ -100,8 +100,7 @@ ExternalProject_Get_Property(capstone-project binary_dir)
 
 set(CAPSTONE_LIB_NAME  ${CMAKE_STATIC_LIBRARY_PREFIX}capstone${CMAKE_STATIC_LIBRARY_SUFFIX})
 set(CAPSTONE_LIB_PNAME ${CMAKE_STATIC_LIBRARY_PREFIX}retdec-capstone${CMAKE_STATIC_LIBRARY_SUFFIX})
-set(CAPSTONE_LIB_DEBUG ${binary_dir}/${DEBUG_DIR}${CAPSTONE_LIB_NAME})
-set(CAPSTONE_LIB_OPT   ${binary_dir}/${RELEASE_DIR}${CAPSTONE_LIB_NAME})
+set(CAPSTONE_LIB       ${binary_dir}/${MSVC_CONFIG}${CAPSTONE_LIB_NAME})
 
 # Create target.
 add_library(capstone INTERFACE)
@@ -116,11 +115,8 @@ target_include_directories(capstone
 )
 
 target_link_libraries(capstone INTERFACE
+		$<BUILD_INTERFACE:${CAPSTONE_LIB}>
 		$<INSTALL_INTERFACE:retdec::deps::capstone-libs>
-	debug
-		$<BUILD_INTERFACE:${CAPSTONE_LIB_DEBUG}>
-	optimized
-		$<BUILD_INTERFACE:${CAPSTONE_LIB_OPT}>
 )
 
 # Install includes.
@@ -130,16 +126,8 @@ install(
 )
 
 # Install libs.
-# Install both Release and Debug variant to the same location.
-# We assume that only one variant will be present at the time.
 install(
-    FILES       ${CAPSTONE_LIB_DEBUG}
-    DESTINATION ${RETDEC_INSTALL_LIB_DIR}
-	RENAME      ${CAPSTONE_LIB_PNAME}
-	OPTIONAL
-)
-install(
-    FILES       ${CAPSTONE_LIB_OPT}
+	FILES       ${CAPSTONE_LIB}
 	DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 	RENAME      ${CAPSTONE_LIB_PNAME}
 	OPTIONAL

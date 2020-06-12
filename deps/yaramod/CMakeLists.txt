@@ -60,8 +60,7 @@ ExternalProject_Get_Property(yaramod-project binary_dir)
 
 set(YARAMOD_LIB_NAME  ${CMAKE_STATIC_LIBRARY_PREFIX}yaramod${CMAKE_STATIC_LIBRARY_SUFFIX})
 set(YARAMOD_LIB_PNAME ${CMAKE_STATIC_LIBRARY_PREFIX}retdec-yaramod${CMAKE_STATIC_LIBRARY_SUFFIX})
-set(YARAMOD_LIB_OPT   ${binary_dir}/src/${RELEASE_DIR}${YARAMOD_LIB_NAME})
-set(YARAMOD_LIB_DEBUG ${binary_dir}/src/${DEBUG_DIR}${YARAMOD_LIB_NAME})
+set(YARAMOD_LIB       ${binary_dir}/src/${MSVC_CONFIG}${YARAMOD_LIB_NAME})
 
 set(FMT_LIB_NAME      ${CMAKE_STATIC_LIBRARY_PREFIX}pog_fmt${CMAKE_STATIC_LIBRARY_SUFFIX})
 set(FMT_LIB_PNAME     ${CMAKE_STATIC_LIBRARY_PREFIX}retdec-pog_fmt${CMAKE_STATIC_LIBRARY_SUFFIX})
@@ -88,12 +87,9 @@ target_include_directories(yaramod
 		$<INSTALL_INTERFACE:${RETDEC_INSTALL_DEPS_INCLUDE_DIR}>
 )
 
-target_link_libraries(yaramod INTERFACE
-	debug
-		$<BUILD_INTERFACE:${YARAMOD_LIB_DEBUG}>
-	optimized
-		$<BUILD_INTERFACE:${YARAMOD_LIB_OPT}>
-	general
+target_link_libraries(yaramod
+	INTERFACE
+		$<BUILD_INTERFACE:${YARAMOD_LIB}>
 		$<BUILD_INTERFACE:${FMT_LIB}>
 		$<BUILD_INTERFACE:${RE2_LIB}>
 		$<INSTALL_INTERFACE:retdec::deps::yaramod-libs>
@@ -109,17 +105,9 @@ install(
 )
 
 # Install libs.
-# Install both Release and Debug variant to the same location.
-# We assume that only one variant will be present at the time.
 install(
-    FILES       ${YARAMOD_LIB_DEBUG}
+    FILES       ${YARAMOD_LIB}
     DESTINATION ${RETDEC_INSTALL_LIB_DIR}
-	RENAME      ${YARAMOD_LIB_PNAME}
-	OPTIONAL
-)
-install(
-    FILES       ${YARAMOD_LIB_OPT}
-	DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 	RENAME      ${YARAMOD_LIB_PNAME}
 	OPTIONAL
 )

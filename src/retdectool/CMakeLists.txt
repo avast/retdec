@@ -12,17 +12,21 @@ target_link_libraries(retdectool retdec::retdec)
 if(MSVC)
 	# -WHOLEARCHIVE needs path to the target, but when we use the target like
 	# that, its properties (associated includes, etc.) are not propagated.
-	# Therefore, we state 'retdectool' twice in target_link_libraries(),
+	# Therefore, we state 'bin2llvmir' twice in target_link_libraries(),
 	# first as a target to get its properties, second as path to library to
 	# link it as a whole.
 	target_link_libraries(retdectool
 		retdec::bin2llvmir -WHOLEARCHIVE:$<TARGET_FILE_NAME:retdec::bin2llvmir>
 	)
-	target_link_options(retdectool PUBLIC "/FORCE:MULTIPLE")
-	# Allow the 32b version of retdectool on Windows handle addresses larger
+	set_property(TARGET retdectool
+		APPEND_STRING PROPERTY LINK_FLAGS " /FORCE:MULTIPLE"
+	)
+	# Allow the 32b version of bin2llvmir on Windows handle addresses larger
 	# than 2 GB (up to 4 GB).
 	if(CMAKE_SIZEOF_VOID_P MATCHES "4")
-		target_link_options(retdectool PUBLIC "/LARGEADDRESSAWARE")
+		set_property(TARGET retdec
+			APPEND_STRING PROPERTY LINK_FLAGS " /LARGEADDRESSAWARE"
+		)
 	endif()
 elseif(APPLE)
 	target_link_libraries(retdectool
