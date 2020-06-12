@@ -321,9 +321,7 @@ target_link_libraries(llvmir2hll
 #   fatal error C1128: number of sections exceeded object file format
 #                      limit: compile with /bigobj
 if(MSVC)
-	set_property(TARGET llvmir2hll
-		APPEND_STRING PROPERTY COMPILE_FLAGS " /bigobj"
-	)
+	target_compile_options(llvmir2hll PUBLIC "/bigobj")
 endif()
 
 set_target_properties(llvmir2hll
