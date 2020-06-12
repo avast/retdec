@@ -702,6 +702,10 @@ void MachOFormat::oldEntryPointCommand(const llvm::object::MachOObjectFile::Load
 void MachOFormat::loadDylibCommand(const llvm::object::MachOObjectFile::LoadCommandInfo &commandInfo)
 {
 	auto command = file->getDylibIDLoadCommand(commandInfo);
+	if (command.dylib.name >= command.cmdsize)
+	{
+		return;
+	}
 	std::string name = commandInfo.Ptr + command.dylib.name;
 	// Try to get short name
 	StringRef sufix;
