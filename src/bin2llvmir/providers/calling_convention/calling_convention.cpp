@@ -194,8 +194,9 @@ CallingConventionProvider* CallingConventionProvider::getProvider()
 
 void CallingConventionProvider::clear()
 {
-	auto* ccp = getProvider();
-	ccp->_id2cc.clear();
+	// TODO: probably not needed. and definitely not working.
+//	auto* ccp = getProvider();
+//	ccp->_id2cc.clear();
 }
 
 void CallingConventionProvider::registerCC(
