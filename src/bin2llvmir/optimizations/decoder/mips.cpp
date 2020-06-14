@@ -75,7 +75,7 @@ std::size_t Decoder::decodeJumpTargetDryRun_mips(
 		return true;
 	}
 
-	static csh ce = _c2l->getCapstoneEngine();
+	csh ce = _c2l->getCapstoneEngine();
 
 	uint64_t addr = jt.getAddress();
 	std::size_t nops = 0;

@@ -29,7 +29,7 @@ namespace inst_opt_rda {
  */
 bool unusedStores(llvm::Instruction* insn, ReachingDefinitionsAnalysis& RDA)
 {
-	static auto* abi = AbiProvider::getAbi(insn->getModule());
+	auto* abi = AbiProvider::getAbi(insn->getModule());
 	auto* store = llvm::dyn_cast<llvm::StoreInst>(insn);
 	if (store == nullptr
 			|| (llvm::isa<llvm::GlobalVariable>(store->getPointerOperand())

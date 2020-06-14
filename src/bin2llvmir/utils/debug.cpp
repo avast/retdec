@@ -97,7 +97,7 @@ void dumpControFlowToJsonBasicBlock(
 		llvm::BasicBlock& bbEnd,
 		std::ostream &out)
 {
-	static auto* config = ConfigProvider::getConfig(bb.getModule());
+	auto* config = ConfigProvider::getConfig(bb.getModule());
 
 	auto start = AsmInstruction::getTrueBasicBlockAddress(&bb);
 	auto end = AsmInstruction::getBasicBlockEndAddress(&bbEnd);
@@ -212,7 +212,7 @@ void dumpControFlowToJsonFunction(
 		llvm::Function& f,
 		std::ostream &out)
 {
-	static auto* config = ConfigProvider::getConfig(f.getParent());
+	auto* config = ConfigProvider::getConfig(f.getParent());
 
 	auto start = AsmInstruction::getFunctionAddress(&f);
 	auto end = AsmInstruction::getFunctionEndAddress(&f);

@@ -135,6 +135,7 @@ class SymbolicTree
 	// Global SymbolicTree configuration methods and data.
 	//
 	public:
+		static void clear();
 		static bool isVal2ValMapUsed();
 		static void setAbi(Abi* abi);
 		static void setConfig(Config* config);

@@ -78,7 +78,8 @@ class Collector
 		bool extractFormatString(CallEntry* ce) const;
 
 		bool storesString(llvm::StoreInst* si, std::string& str) const;
-		llvm::Value* getRoot(llvm::Value* i, bool first = true) const;
+		llvm::Value* getRoot(llvm::Value* i) const;
+		llvm::Value* _getRoot(llvm::Value* i, std::set<llvm::Value*>& seen) const;
 
 	protected:
 		const Abi* _abi;

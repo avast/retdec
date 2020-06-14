@@ -170,11 +170,16 @@ void ProviderInitialization::setConfig(retdec::config::Config* c)
  */
 bool ProviderInitialization::runOnModule(Module& m)
 {
-	static bool firstRun = true;
-	if (!firstRun)
-	{
-		return false;
-	}
+	AbiProvider::clear();
+	AsmInstruction::clear();
+	ConfigProvider::clear();
+	DebugFormatProvider::clear();
+	DemanglerProvider::clear();
+	FileImageProvider::clear();
+	LtiProvider::clear();
+	NamesProvider::clear();
+	SymbolicTree::clear();
+	CallingConventionProvider::clear();
 
 	// Config.
 	//
@@ -396,8 +401,6 @@ bool ProviderInitialization::runOnModule(Module& m)
 	NamesProvider::addNames(&m, c, debug, f, d, lti);
 
 	AsmInstruction::clear();
-
-	firstRun = false;
 
 	return false;
 }

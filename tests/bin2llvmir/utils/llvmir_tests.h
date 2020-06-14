@@ -29,6 +29,7 @@
 #include "retdec/bin2llvmir/providers/demangler.h"
 #include "retdec/bin2llvmir/providers/fileimage.h"
 #include "retdec/bin2llvmir/providers/lti.h"
+#include "retdec/bin2llvmir/providers/names.h"
 #include "retdec/bin2llvmir/utils/debug.h"
 #include "retdec/utils/string.h"
 
@@ -56,12 +57,15 @@ class LlvmIrTests : public ::testing::Test
 		void clearAllStaticData()
 		{
 			AbiProvider::clear();
+			AsmInstruction::clear();
 			ConfigProvider::clear();
 			DebugFormatProvider::clear();
 			DemanglerProvider::clear();
 			FileImageProvider::clear();
-			AsmInstruction::clear();
 			LtiProvider::clear();
+			NamesProvider::clear();
+			SymbolicTree::clear();
+			CallingConventionProvider::clear();
 		}
 
 		/**

@@ -78,7 +78,7 @@ void RangesToDecode::removeZeroSequences(
 		FileImage* image,
 		common::AddressRangeContainer& rs)
 {
-	static unsigned minSequence = 0x50; // TODO: Maybe should be smaller.
+	unsigned minSequence = 0x50; // TODO: Maybe should be smaller.
 	retdec::common::AddressRangeContainer toRemove;
 
 	for (auto& range : rs)

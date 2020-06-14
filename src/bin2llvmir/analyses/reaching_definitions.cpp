@@ -94,7 +94,7 @@ void ReachingDefinitionsAnalysis::initializeBasicBlocks(llvm::Function& F)
 {
 	for (BasicBlock& B : F)
 	{
-		BasicBlockEntry bbe(&B);
+		BasicBlockEntry bbe(&B, bbMap.size());
 
 		int insnPos = -1;
 		for (Instruction& I : B)
@@ -385,11 +385,9 @@ std::ostream& operator<<(std::ostream& out, const ReachingDefinitionsAnalysis& r
 //=============================================================================
 //
 
-int BasicBlockEntry::newUID = 0;
-
-BasicBlockEntry::BasicBlockEntry(const llvm::BasicBlock* b) :
+BasicBlockEntry::BasicBlockEntry(const llvm::BasicBlock* b, std::size_t _id) :
 	bb(b),
-	id(newUID++)
+	id(_id)
 {
 
 }
