@@ -548,7 +548,7 @@ bool Collector::storesString(StoreInst* si, std::string& str) const
 llvm::Value* Collector::getRoot(llvm::Value* i) const
 {
 	std::set<llvm::Value*> seen;
-	_getRoot(i, seen);
+	return _getRoot(i, seen);
 }
 
 llvm::Value* Collector::_getRoot(llvm::Value* i, std::set<llvm::Value*>& seen) const
