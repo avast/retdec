@@ -707,7 +707,15 @@ void CHLLWriter::visit(ShPtr<BitShrOpExpr> expr) {
 
 void CHLLWriter::visit(ShPtr<CallExpr> expr) {
 	// Called expression.
-	emitExprWithBracketsIfNeeded(expr->getCalledExpr());
+	auto var = cast<Variable>(expr->getCalledExpr());
+	if (var && module->getFuncByName(var->getName()))
+	{
+		out->functionId(var->getName());
+	}
+	else
+	{
+		emitExprWithBracketsIfNeeded(expr->getCalledExpr());
+	}
 
 	// Arguments.
 	out->punctuation('(');
