@@ -109,7 +109,7 @@ std::size_t Decoder::decodeJumpTargetDryRun_arm(
 	auto basicMode = _c2l->getBasicMode();
 	if (mode != basicMode) _c2l->modifyBasicMode(mode);
 
-	static csh ce = _c2l->getCapstoneEngine();
+	csh ce = _c2l->getCapstoneEngine();
 
 	decodedSz = 0;
 	uint64_t addr = jt.getAddress();

@@ -187,7 +187,7 @@ const JumpTarget* JumpTargets::push(
 		retdec::common::Address f,
 		std::optional<std::size_t> sz)
 {
-	static auto& arch = config->getConfig().architecture;
+	auto& arch = config->getConfig().architecture;
 
 	if (arch.isArm64() && m == CS_MODE_THUMB)
 	{

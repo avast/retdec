@@ -192,6 +192,13 @@ CallingConventionProvider* CallingConventionProvider::getProvider()
 	return &instance;
 }
 
+void CallingConventionProvider::clear()
+{
+	// TODO: probably not needed. and definitely not working.
+//	auto* ccp = getProvider();
+//	ccp->_id2cc.clear();
+}
+
 void CallingConventionProvider::registerCC(
 					const CallingConvention::ID& cc,
 					const CallingConvention::ConstructorMethod& con)

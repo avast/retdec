@@ -259,7 +259,7 @@ void DsmWriter::generateFunction(
 
 void DsmWriter::getAsmInstructionHex(AsmInstruction& ai, std::ostream& ret)
 {
-	static std::size_t longestHexa = _longestInst * 3 - 1;
+	std::size_t longestHexa = _longestInst * 3 - 1;
 	const std::size_t aiHexa = ai.getByteSize() * 3 - 1;
 
 	std::vector<std::uint64_t> bytes;

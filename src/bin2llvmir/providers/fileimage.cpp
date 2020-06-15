@@ -507,7 +507,7 @@ llvm::Constant* FileImage::getConstant(
 			refGvs.push_back(newGv);
 			addr += Abi::getTypeByteSize(_module, Abi::getDefaultType(_module));
 
-			static auto& conf = config->getConfig();
+			auto& conf = config->getConfig();
 			if (conf.globals.getObjectByAddress(addr))
 			{
 				break;

@@ -303,6 +303,11 @@ bool ValueProtect::run()
 
 	bool changed = false;
 
+	if (!_type2fnc.empty() && _type2fnc.begin()->second->getParent() != _module)
+	{
+		_type2fnc.clear();
+	}
+
 	changed = _type2fnc.empty() ? protect() : unprotect();
 
 	return changed;

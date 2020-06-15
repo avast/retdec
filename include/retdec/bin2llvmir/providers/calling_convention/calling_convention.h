@@ -129,6 +129,7 @@ class CallingConventionProvider
 	// Destructor, singleton method.
 	public:
 		static CallingConventionProvider* getProvider();
+		static void clear();
 
 	// Factory methods.
 	public:

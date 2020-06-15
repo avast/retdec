@@ -97,7 +97,7 @@ if (fnc.getName() != "_func") continue;
 
 bool TypesPropagator::skipRootProcessing(llvm::Value* val)
 {
-	static auto* special = AsmInstruction::getLlvmToAsmGlobalVariable(_module);
+	auto* special = AsmInstruction::getLlvmToAsmGlobalVariable(_module);
 	return val == special
 			|| _abi->isRegister(val)
 			// || (llvm::isa<llvm::Instruction>(val)

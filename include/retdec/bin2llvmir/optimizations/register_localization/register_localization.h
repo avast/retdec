@@ -40,7 +40,6 @@ class RegisterLocalization : public llvm::ModulePass
 		llvm::Module* _module = nullptr;
 		Abi* _abi = nullptr;
 		Config* _config = nullptr;
-		static std::map<llvm::Type*, llvm::Function*> _type2fnc;
 };
 
 } // namespace bin2llvmir

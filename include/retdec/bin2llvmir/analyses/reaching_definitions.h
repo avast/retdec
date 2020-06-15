@@ -83,7 +83,7 @@ class Use
 class BasicBlockEntry
 {
 	public:
-		BasicBlockEntry(const llvm::BasicBlock* b = nullptr);
+		BasicBlockEntry(const llvm::BasicBlock* b = nullptr, std::size_t _id = 0);
 
 		std::string getName() const;
 		friend std::ostream& operator<<(
@@ -115,7 +115,6 @@ class BasicBlockEntry
 
 	private:
 		unsigned id;
-	    static int newUID;
 };
 
 class ReachingDefinitionsAnalysis

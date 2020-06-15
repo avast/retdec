@@ -132,7 +132,7 @@ using EquationEntrySet = std::unordered_set<EquationEntry, EquationEntryHash>;
 class EqSet
 {
 	public:
-		EqSet();
+		EqSet(std::size_t id);
 		void insert(Config* config, llvm::Value* v, eSourcePriority p = eSourcePriority::PRIORITY_NONE);
 		void insert(llvm::Type* t, eSourcePriority p = eSourcePriority::PRIORITY_NONE);
 		void propagate(llvm::Module* module);
@@ -157,8 +157,7 @@ class EqSet
 
 	public:
 		/// Each instance gets its own unique ID for debug print purposes.
-		static unsigned newUID;
-		const unsigned id;
+		const std::size_t id;
 
 		/// Type of an entire equivalence set.
 		TypeEntry masterType;
