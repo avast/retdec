@@ -19,7 +19,7 @@ namespace PeLib
 	* @param strFuncname Name of the function.
 	* @param dwFuncAddr RVA of the function.
 	**/
-	void ExportDirectory::addFunction(const std::string& strFuncname, dword dwFuncAddr)
+	void ExportDirectory::addFunction(const std::string& strFuncname, std::uint32_t dwFuncAddr)
 	{
 		PELIB_EXP_FUNC_INFORMATION efiCurr;
 		efiCurr.funcname = strFuncname;
@@ -69,7 +69,7 @@ namespace PeLib
 	* @param dwRva RVA of the export directory.
 	* \todo fValid flag
 	**/
-	void ExportDirectory::rebuild(std::vector<byte>& vBuffer, dword dwRva) const
+	void ExportDirectory::rebuild(std::vector<std::uint8_t>& vBuffer, std::uint32_t dwRva) const
 	{
 		unsigned int uiSizeDirectory = sizeof(PELIB_IMAGE_EXPORT_DIRECTORY);
 
@@ -220,7 +220,7 @@ namespace PeLib
 	* @param dwIndex Number which identifies an exported function.
 	* @return The ordinal of that function.
 	**/
-	word ExportDirectory::getFunctionOrdinal(std::size_t dwIndex) const
+	std::uint16_t ExportDirectory::getFunctionOrdinal(std::size_t dwIndex) const
 	{
 		return m_ied.functions[dwIndex].ordinal;
 	}
@@ -229,7 +229,7 @@ namespace PeLib
 	* @param dwIndex Number which identifies an exported function.
 	* @return The RVA of the name string of that function.
 	**/
-	dword ExportDirectory::getAddressOfName(std::size_t dwIndex) const
+	std::uint32_t ExportDirectory::getAddressOfName(std::size_t dwIndex) const
 	{
 		return m_ied.functions[dwIndex].addrofname;
 	}
@@ -238,7 +238,7 @@ namespace PeLib
 	* @param dwIndex Number which identifies an exported function.
 	* @return The RVA of that function.
 	**/
-	dword ExportDirectory::getAddressOfFunction(std::size_t dwIndex) const
+	std::uint32_t ExportDirectory::getAddressOfFunction(std::size_t dwIndex) const
 	{
 		return m_ied.functions[dwIndex].addroffunc;
 	}
@@ -256,7 +256,7 @@ namespace PeLib
 	* @param dwIndex Number which identifies an exported function.
 	* @param wValue The ordinal of that function.
 	**/
-	void ExportDirectory::setFunctionOrdinal(std::size_t dwIndex, word wValue)
+	void ExportDirectory::setFunctionOrdinal(std::size_t dwIndex, std::uint16_t wValue)
 	{
 		m_ied.functions[dwIndex].ordinal = wValue;
 	}
@@ -265,7 +265,7 @@ namespace PeLib
 	* @param dwIndex Number which identifies an exported function.
 	* @param dwValue The RVA of the name string of that function.
 	**/
-	void ExportDirectory::setAddressOfName(std::size_t dwIndex, dword dwValue)
+	void ExportDirectory::setAddressOfName(std::size_t dwIndex, std::uint32_t dwValue)
 	{
 		m_ied.functions[dwIndex].addrofname = dwValue;
 	}
@@ -274,7 +274,7 @@ namespace PeLib
 	* @param dwIndex Number which identifies an exported function.
 	* @param dwValue The RVA of that function.
 	**/
-	void ExportDirectory::setAddressOfFunction(std::size_t dwIndex, dword dwValue)
+	void ExportDirectory::setAddressOfFunction(std::size_t dwIndex, std::uint32_t dwValue)
 	{
 		m_ied.functions[dwIndex].addroffunc = dwValue;
 	}
@@ -282,7 +282,7 @@ namespace PeLib
 	/**
 	* @return The ordinal base of the export directory.
 	**/
-	dword ExportDirectory::getBase() const
+	std::uint32_t ExportDirectory::getBase() const
 	{
 		return m_ied.ied.Base;
 	}
@@ -290,7 +290,7 @@ namespace PeLib
 	/**
 	* @return The characteristics of the export directory.
 	**/
-	dword ExportDirectory::getCharacteristics() const
+	std::uint32_t ExportDirectory::getCharacteristics() const
 	{
 		return m_ied.ied.Characteristics;
 	}
@@ -298,7 +298,7 @@ namespace PeLib
 	/**
 	* @return The time/date stamp of the export directory.
 	**/
-	dword ExportDirectory::getTimeDateStamp() const
+	std::uint32_t ExportDirectory::getTimeDateStamp() const
 	{
 		return m_ied.ied.TimeDateStamp;
 	}
@@ -306,7 +306,7 @@ namespace PeLib
 	/**
 	* @return The MajorVersion of the export directory.
 	**/
-	word ExportDirectory::getMajorVersion() const
+	std::uint16_t ExportDirectory::getMajorVersion() const
 	{
 		return m_ied.ied.MajorVersion;
 	}
@@ -314,7 +314,7 @@ namespace PeLib
 	/**
 	* @return The MinorVersion of the export directory.
 	**/
-	word ExportDirectory::getMinorVersion() const
+	std::uint16_t ExportDirectory::getMinorVersion() const
 	{
 		return m_ied.ied.MinorVersion;
 	}
@@ -322,7 +322,7 @@ namespace PeLib
 	/**
 	* @return The RVA of the name of the file.
 	**/
-	dword ExportDirectory::getName() const
+	std::uint32_t ExportDirectory::getName() const
 	{
 		return m_ied.ied.Name;
 	}
@@ -330,7 +330,7 @@ namespace PeLib
 	/**
 	* @return The NumberOfFunctions of the export directory.
 	**/
-	dword ExportDirectory::getNumberOfFunctions() const
+	std::uint32_t ExportDirectory::getNumberOfFunctions() const
 	{
 		return m_ied.ied.NumberOfFunctions;
 	}
@@ -338,7 +338,7 @@ namespace PeLib
 	/**
 	* @return The NumberOfNames of the export directory.
 	**/
-	dword ExportDirectory::getNumberOfNames() const
+	std::uint32_t ExportDirectory::getNumberOfNames() const
 	{
 		return m_ied.ied.NumberOfNames;
 	}
@@ -346,7 +346,7 @@ namespace PeLib
 	/**
 	* @return The AddressOfFunctions of the export directory.
 	**/
-	dword ExportDirectory::getAddressOfFunctions() const
+	std::uint32_t ExportDirectory::getAddressOfFunctions() const
 	{
 		return m_ied.ied.AddressOfFunctions;
 	}
@@ -354,30 +354,30 @@ namespace PeLib
 	/**
 	* @return The AddressOfNames of the export directory.
 	**/
-	dword ExportDirectory::getAddressOfNames() const
+	std::uint32_t ExportDirectory::getAddressOfNames() const
 	{
 		return m_ied.ied.AddressOfNames;
 	}
 
-/*	dword ExportDirectory::getNumberOfNameOrdinals() const
+/*	std::uint32_t ExportDirectory::getNumberOfNameOrdinals() const
 	{
-		return static_cast<dword>(m_ied.functions.size());
+		return static_cast<std::uint32_t>(m_ied.functions.size());
 	}
 
-	dword ExportDirectory::getNumberOfAddressOfFunctionNames() const
+	std::uint32_t ExportDirectory::getNumberOfAddressOfFunctionNames() const
 	{
-		return static_cast<dword>(m_ied.functions.size());
+		return static_cast<std::uint32_t>(m_ied.functions.size());
 	}
 
-	dword ExportDirectory::getNumberOfAddressOfFunctions() const
+	std::uint32_t ExportDirectory::getNumberOfAddressOfFunctions() const
 	{
-		return static_cast<dword>(m_ied.functions.size());
+		return static_cast<std::uint32_t>(m_ied.functions.size());
 	}
 */
 	/**
 	* @return The AddressOfNameOrdinals of the export directory.
 	**/
-	dword ExportDirectory::getAddressOfNameOrdinals() const
+	std::uint32_t ExportDirectory::getAddressOfNameOrdinals() const
 	{
 		return m_ied.ied.AddressOfNameOrdinals;
 	}
@@ -385,7 +385,7 @@ namespace PeLib
 	/**
 	* @param dwValue The ordinal base of the export directory.
 	**/
-	void ExportDirectory::setBase(dword dwValue)
+	void ExportDirectory::setBase(std::uint32_t dwValue)
 	{
 		m_ied.ied.Base = dwValue;
 	}
@@ -393,7 +393,7 @@ namespace PeLib
 	/**
 	* @param dwValue The Characteristics of the export directory.
 	**/
-	void ExportDirectory::setCharacteristics(dword dwValue)
+	void ExportDirectory::setCharacteristics(std::uint32_t dwValue)
 	{
 		m_ied.ied.Characteristics = dwValue;
 	}
@@ -401,7 +401,7 @@ namespace PeLib
 	/**
 	* @param dwValue The TimeDateStamp of the export directory.
 	**/
-	void ExportDirectory::setTimeDateStamp(dword dwValue)
+	void ExportDirectory::setTimeDateStamp(std::uint32_t dwValue)
 	{
 		m_ied.ied.TimeDateStamp = dwValue;
 	}
@@ -409,7 +409,7 @@ namespace PeLib
 	/**
 	* @param wValue The MajorVersion of the export directory.
 	**/
-	void ExportDirectory::setMajorVersion(word wValue)
+	void ExportDirectory::setMajorVersion(std::uint16_t wValue)
 	{
 		m_ied.ied.MajorVersion = wValue;
 	}
@@ -417,7 +417,7 @@ namespace PeLib
 	/**
 	* @param wValue The MinorVersion of the export directory.
 	**/
-	void ExportDirectory::setMinorVersion(word wValue)
+	void ExportDirectory::setMinorVersion(std::uint16_t wValue)
 	{
 		m_ied.ied.MinorVersion = wValue;
 	}
@@ -425,7 +425,7 @@ namespace PeLib
 	/**
 	* @param dwValue The Name of the export directory.
 	**/
-	void ExportDirectory::setName(dword dwValue)
+	void ExportDirectory::setName(std::uint32_t dwValue)
 	{
 		m_ied.ied.Name = dwValue;
 	}
@@ -433,7 +433,7 @@ namespace PeLib
 	/**
 	* @param dwValue The NumberOfFunctions of the export directory.
 	**/
-	void ExportDirectory::setNumberOfFunctions(dword dwValue)
+	void ExportDirectory::setNumberOfFunctions(std::uint32_t dwValue)
 	{
 		m_ied.ied.NumberOfFunctions = dwValue;
 	}
@@ -441,7 +441,7 @@ namespace PeLib
 	/**
 	* @param dwValue The NumberOfNames of the export directory.
 	**/
-	void ExportDirectory::setNumberOfNames(dword dwValue)
+	void ExportDirectory::setNumberOfNames(std::uint32_t dwValue)
 	{
 		m_ied.ied.NumberOfNames = dwValue;
 	}
@@ -449,7 +449,7 @@ namespace PeLib
 	/**
 	* @param dwValue The AddressOfFunctions of the export directory.
 	**/
-	void ExportDirectory::setAddressOfFunctions(dword dwValue)
+	void ExportDirectory::setAddressOfFunctions(std::uint32_t dwValue)
 	{
 		m_ied.ied.AddressOfFunctions = dwValue;
 	}
@@ -457,12 +457,12 @@ namespace PeLib
 	/**
 	* @param dwValue The AddressOfNames of the export directory.
 	**/
-	void ExportDirectory::setAddressOfNames(dword dwValue)
+	void ExportDirectory::setAddressOfNames(std::uint32_t dwValue)
 	{
 		m_ied.ied.AddressOfNames = dwValue;
 	}
 
-	void ExportDirectory::setAddressOfNameOrdinals(dword value)
+	void ExportDirectory::setAddressOfNameOrdinals(std::uint32_t value)
 	{
 		m_ied.ied.AddressOfNameOrdinals = value;
 	}

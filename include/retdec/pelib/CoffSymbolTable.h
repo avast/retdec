@@ -18,9 +18,9 @@ namespace PeLib
 	{
 		private:
 			std::size_t stringTableSize;
-			dword numberOfStoredSymbols;
-			std::vector<unsigned char> stringTable;
-			std::vector<unsigned char> symbolTableDump;
+			std::uint32_t numberOfStoredSymbols;
+			ByteBuffer stringTable;
+			ByteBuffer symbolTableDump;
 			std::vector<PELIB_IMAGE_COFF_SYMBOL> symbolTable;
 			LoaderError m_ldrError;
 
@@ -32,20 +32,17 @@ namespace PeLib
 			LoaderError loaderError() const;
 			void setLoaderError(LoaderError ldrError);
 
-			int read(
-					std::istream& inStream,
-					unsigned int uiOffset,
-					unsigned int uiSize);
+			int read(ByteBuffer & fileData, std::size_t uiOffset, std::size_t uiSize);
 			std::size_t getSizeOfStringTable() const;
 			std::size_t getNumberOfStoredSymbols() const;
-			dword getSymbolIndex(std::size_t ulSymbol) const;
+			std::uint32_t getSymbolIndex(std::size_t ulSymbol) const;
 			std::string getSymbolName(std::size_t ulSymbol) const;
-			dword getSymbolValue(std::size_t ulSymbol) const;
-			word getSymbolSectionNumber(std::size_t ulSymbol) const;
-			byte getSymbolTypeComplex(std::size_t ulSymbol) const;
-			byte getSymbolTypeSimple(std::size_t ulSymbol) const;
-			byte getSymbolStorageClass(std::size_t ulSymbol) const;
-			byte getSymbolNumberOfAuxSymbols(std::size_t ulSymbol) const;
+			std::uint32_t getSymbolValue(std::size_t ulSymbol) const;
+			std::uint16_t getSymbolSectionNumber(std::size_t ulSymbol) const;
+			std::uint8_t getSymbolTypeComplex(std::size_t ulSymbol) const;
+			std::uint8_t getSymbolTypeSimple(std::size_t ulSymbol) const;
+			std::uint8_t getSymbolStorageClass(std::size_t ulSymbol) const;
+			std::uint8_t getSymbolNumberOfAuxSymbols(std::size_t ulSymbol) const;
 	};
 }
 

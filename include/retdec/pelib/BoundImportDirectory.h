@@ -33,7 +33,7 @@ namespace PeLib
 		  virtual ~BoundImportDirectory() = default;
 
 		  /// Adds another bound import.
-		  int addBoundImport(const std::string& strModuleName, dword dwTds, word dwOmn, word wWfr); // EXPORT
+		  int addBoundImport(const std::string& strModuleName, std::uint32_t dwTds, std::uint16_t dwOmn, std::uint16_t wWfr); // EXPORT
 		  /// Identifies a module through it's name.
 		  int getModuleIndex(const std::string& strModuleName) const; // EXPORT
 		  /// Returns the number of files in the BoundImport directory.
@@ -41,7 +41,7 @@ namespace PeLib
 		  /// Reads the BoundImport directory table from a PE file.
 		  int read(unsigned char* pcBuffer, unsigned int uiSize); // EXPORT
 		  /// Rebuilds the BoundImport directory.
-		  void rebuild(std::vector<byte>& vBuffer, bool fMakeValid = true) const; // EXPORT
+		  void rebuild(std::vector<std::uint8_t>& vBuffer, bool fMakeValid = true) const; // EXPORT
 		  /// Empties the BoundImport directory.
 		  void clear(); // EXPORT
 		  /// Removes a bound import.
@@ -49,39 +49,39 @@ namespace PeLib
 		  /// Returns the size of the BoundImport directory.
 		  unsigned int size() const; // EXPORT
 		  /// Writes the current bound import directory to a file.
-		  int write(const std::string& strFilename, dword dwOffset, bool fMakeValid = true) const; // EXPORT
+		  int write(const std::string& strFilename, std::uint32_t dwOffset, bool fMakeValid = true) const; // EXPORT
 
 		  /// Retrieves the TimeDateStamp value of a bound import.
-		  dword getTimeDateStamp(dword dwBidnr) const; // EXPORT
+		  std::uint32_t getTimeDateStamp(std::uint32_t dwBidnr) const; // EXPORT
 		  /// Retrieves the OffsetModuleName value of a bound import.
-		  word getOffsetModuleName(dword dwBidnr) const; // EXPORT
+		  std::uint16_t getOffsetModuleName(std::uint32_t dwBidnr) const; // EXPORT
 		  /// Retrieves the NumberOfModuleForwarderRefs value of a bound import.
-		  word getNumberOfModuleForwarderRefs(dword dwBidnr) const; // EXPORT
+		  std::uint16_t getNumberOfModuleForwarderRefs(std::uint32_t dwBidnr) const; // EXPORT
 		  /// Retrieves the ModuleName value of a bound import.
-		  std::string getModuleName(dword dwBidnr) const; // EXPORT
+		  std::string getModuleName(std::uint32_t dwBidnr) const; // EXPORT
 
 		  /// Updates the TimeDateStamp value of a bound import.
-		  void setTimeDateStamp(dword dwBidnr, dword dwTds); // EXPORT
+		  void setTimeDateStamp(std::uint32_t dwBidnr, std::uint32_t dwTds); // EXPORT
 		  /// Updates the OffsetModuleName value of a bound import.
-		  void setOffsetModuleName(dword dwBidnr, word wOmn); // EXPORT
+		  void setOffsetModuleName(std::uint32_t dwBidnr, std::uint16_t wOmn); // EXPORT
 		  /// Updates the NumberOfModuleForwarderRefs value of a bound import.
-		  void setNumberOfModuleForwarderRefs(dword dwBidnr, word wMfr); // EXPORT
+		  void setNumberOfModuleForwarderRefs(std::uint32_t dwBidnr, std::uint16_t wMfr); // EXPORT
 		  /// Updates the ModuleName value of a bound import.
-		  void setModuleName(dword dwBidnr, const std::string& strModuleName); // EXPORT
+		  void setModuleName(std::uint32_t dwBidnr, const std::string& strModuleName); // EXPORT
 
-		  dword getTimeDateStamp(dword dwBidnr, dword forwardedModule) const; // EXPORT _module
-		  word getOffsetModuleName(dword dwBidnr, dword forwardedModule) const; // EXPORT _module
-		  word getNumberOfModuleForwarderRefs(dword dwBidnr, dword forwardedModule) const; // EXPORT _module
-		  std::string getModuleName(dword dwBidnr, dword forwardedModule) const; // EXPORT _module
+		  std::uint32_t getTimeDateStamp(std::uint32_t dwBidnr, std::uint32_t forwardedModule) const; // EXPORT _module
+		  std::uint16_t getOffsetModuleName(std::uint32_t dwBidnr, std::uint32_t forwardedModule) const; // EXPORT _module
+		  std::uint16_t getNumberOfModuleForwarderRefs(std::uint32_t dwBidnr, std::uint32_t forwardedModule) const; // EXPORT _module
+		  std::string getModuleName(std::uint32_t dwBidnr, std::uint32_t forwardedModule) const; // EXPORT _module
 
-		  void setTimeDateStamp(dword dwBidnr, dword forwardedModule, dword dwTds); // EXPORT _module
-		  void setOffsetModuleName(dword dwBidnr, dword forwardedModule, word wOmn); // EXPORT _module
-		  void setNumberOfModuleForwarderRefs(dword dwBidnr, dword forwardedModule, word wMfr); // EXPORT _module
-		  void setModuleName(dword dwBidnr, dword forwardedModule, const std::string& strModuleName); // EXPORT _module
+		  void setTimeDateStamp(std::uint32_t dwBidnr, std::uint32_t forwardedModule, std::uint32_t dwTds); // EXPORT _module
+		  void setOffsetModuleName(std::uint32_t dwBidnr, std::uint32_t forwardedModule, std::uint16_t wOmn); // EXPORT _module
+		  void setNumberOfModuleForwarderRefs(std::uint32_t dwBidnr, std::uint32_t forwardedModule, std::uint16_t wMfr); // EXPORT _module
+		  void setModuleName(std::uint32_t dwBidnr, std::uint32_t forwardedModule, const std::string& strModuleName); // EXPORT _module
 
-		  word calcNumberOfModuleForwarderRefs(dword dwBidnr) const; // EXPORT
-		  void addForwardedModule(dword dwBidnr, const std::string& name, dword timeStamp = 0, word offsetModuleName = 0, word forwardedModules = 0); // EXPORT
-		  void removeForwardedModule(dword dwBidnr, word forwardedModule); // EXPORT
+		  std::uint16_t calcNumberOfModuleForwarderRefs(std::uint32_t dwBidnr) const; // EXPORT
+		  void addForwardedModule(std::uint32_t dwBidnr, const std::string& name, std::uint32_t timeStamp = 0, std::uint16_t offsetModuleName = 0, std::uint16_t forwardedModules = 0); // EXPORT
+		  void removeForwardedModule(std::uint32_t dwBidnr, std::uint16_t forwardedModule); // EXPORT
 	};
 
 	template <int bits>
@@ -109,7 +109,7 @@ namespace PeLib
 			return ERROR_OPENING_FILE;
 		}
 
-		dword dwOffset = peHeader.rvaToOffset(peHeader.getIddBoundImportRva());
+		std::uint32_t dwOffset = peHeader.rvaToOffset(peHeader.getIddBoundImportRva());
 		unsigned int uiSize = peHeader.getIddBoundImportSize();
 
 		if (fileSize(inStream_w) < dwOffset + uiSize)

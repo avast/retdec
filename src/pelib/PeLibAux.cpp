@@ -22,7 +22,7 @@
 
 namespace PeLib
 {
-	const qword PELIB_IMAGE_ORDINAL_FLAGS<64>::PELIB_IMAGE_ORDINAL_FLAG = 0x8000000000000000ULL;
+	const std::uint64_t PELIB_IMAGE_ORDINAL_FLAGS<64>::PELIB_IMAGE_ORDINAL_FLAG = 0x8000000000000000ULL;
 
 	// Keep in sync with PeLib::LoaderError!!!
 	static const std::vector<LoaderErrorInfo> LdrErrStrings =
@@ -302,39 +302,6 @@ namespace PeLib
 		return t1 == t2;
 	}
 
-	PELIB_IMAGE_DOS_HEADER::PELIB_IMAGE_DOS_HEADER()
-	{
-		e_magic = 0;
-		e_cblp = 0;
-		e_cp = 0;
-		e_crlc = 0;
-		e_cparhdr = 0;
-		e_minalloc = 0;
-		e_maxalloc = 0;
-		e_ss = 0;
-		e_sp = 0;
-		e_csum = 0;
-		e_ip = 0;
-		e_cs = 0;
-		e_lfarlc = 0;
-		e_ovno = 0;
-
-		for (unsigned int i = 0; i < sizeof(e_res) / sizeof(e_res[0]); i++)
-		{
-			e_res[i] = 0;
-		}
-
-		e_oemid = 0;
-		e_oeminfo = 0;
-
-		for (unsigned int i = 0; i < sizeof(e_res2) / sizeof(e_res2[0]); i++)
-		{
-			e_res2[i] = 0;
-		}
-
-		e_lfanew = 0;
-	}
-
 	PELIB_EXP_FUNC_INFORMATION::PELIB_EXP_FUNC_INFORMATION()
 	{
 		addroffunc = 0;
@@ -462,8 +429,8 @@ namespace PeLib
 			return PEFILE_UNKNOWN;
 		}
 
-		word machine = pef.peHeader().getMachine();
-		word magic = pef.peHeader().getMagic();
+		std::uint16_t machine = pef.peHeader().getMachine();
+		std::uint16_t magic = pef.peHeader().getMagic();
 
 		// jk2012-02-20: make the PEFILE32 be the default return value
 		if ((machine == PELIB_IMAGE_FILE_MACHINE_AMD64
@@ -540,7 +507,7 @@ namespace PeLib
 		}
 	}
 
-	unsigned int PELIB_IMAGE_BOUND_DIRECTORY::size() const
+	std::size_t PELIB_IMAGE_BOUND_DIRECTORY::size() const
 	{
 		unsigned int size = 0;
 		for (unsigned int i = 0; i < moduleForwarders.size(); ++i)

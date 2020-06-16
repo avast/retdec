@@ -35,89 +35,89 @@ namespace PeLib
 		  /// Read a file's COM+ runtime descriptor directory.
 		  int read(unsigned char* buffer, unsigned int buffersize); // EXPORT
 		  /// Rebuild the COM+ descriptor.
-		  void rebuild(std::vector<byte>& vBuffer) const; // EXPORT
+		  void rebuild(std::vector<std::uint8_t>& vBuffer) const; // EXPORT
 		  /// Returns the size of the current COM+ descriptor.
 		  unsigned int size() const; // EXPORT
 		  /// Writes the current COM+ descriptor directory to a file.
 		  int write(const std::string& strFilename, unsigned int dwOffset) const; // EXPORT
 
 		  /// Get the COM+ descriptor's SizeOfHeader (cb) value.
-		  dword getSizeOfHeader() const; // EXPORT
+		  std::uint32_t getSizeOfHeader() const; // EXPORT
 		  /// Get the COM+ descriptor's MajorRuntimeVersion value.
-		  word getMajorRuntimeVersion() const; // EXPORT
+		  std::uint16_t getMajorRuntimeVersion() const; // EXPORT
 		  /// Get the COM+ descriptor's MinorRuntimeVersion value.
-		  word getMinorRuntimeVersion() const; // EXPORT
+		  std::uint16_t getMinorRuntimeVersion() const; // EXPORT
 		  /// Get the COM+ descriptor's MetaData (Virtual Address) value.
-		  dword getMetaDataVa() const; // EXPORT
+		  std::uint32_t getMetaDataVa() const; // EXPORT
 		  /// Get the COM+ descriptor's MetaData (Size) value.
-		  dword getMetaDataSize() const; // EXPORT
+		  std::uint32_t getMetaDataSize() const; // EXPORT
 		  /// Get the COM+ descriptor's Flags value.
-		  dword getFlags() const; // EXPORT
+		  std::uint32_t getFlags() const; // EXPORT
 		  /// Get the COM+ descriptor's EntryPointToken value.
-		  dword getEntryPointToken() const; // EXPORT
+		  std::uint32_t getEntryPointToken() const; // EXPORT
 		  /// Get the COM+ descriptor's Resources (Virtual Address) value.
-		  dword getResourcesVa() const; // EXPORT
+		  std::uint32_t getResourcesVa() const; // EXPORT
 		  /// Get the COM+ descriptor's Resources (Size) value.
-		  dword getResourcesSize() const; // EXPORT
+		  std::uint32_t getResourcesSize() const; // EXPORT
 		  /// Get the COM+ descriptor's StrongNameSignature (Virtual Address) value.
-		  dword getStrongNameSignatureVa() const; // EXPORT
+		  std::uint32_t getStrongNameSignatureVa() const; // EXPORT
 		  /// Get the COM+ descriptor's StrongNameSignature (Size) value.
-		  dword getStrongNameSignatureSize() const; // EXPORT
+		  std::uint32_t getStrongNameSignatureSize() const; // EXPORT
 		  /// Get the COM+ descriptor's CodeManagerTable (Virtual Address) value.
-		  dword getCodeManagerTableVa() const; // EXPORT
+		  std::uint32_t getCodeManagerTableVa() const; // EXPORT
 		  /// Get the COM+ descriptor's CodeManagerTable (Size) value.
-		  dword getCodeManagerTableSize() const; // EXPORT
+		  std::uint32_t getCodeManagerTableSize() const; // EXPORT
 		  /// Get the COM+ descriptor's VTableFixup (Virtual Address) value.
-		  dword getVTableFixupsVa() const; // EXPORT
+		  std::uint32_t getVTableFixupsVa() const; // EXPORT
 		  /// Get the COM+ descriptor's VTableFixup (Size) value.
-		  dword getVTableFixupsSize() const; // EXPORT
+		  std::uint32_t getVTableFixupsSize() const; // EXPORT
 		  /// Get the COM+ descriptor's ExportAddressTable (Virtual Address) value.
-		  dword getExportAddressTableJumpsVa() const; // EXPORT
+		  std::uint32_t getExportAddressTableJumpsVa() const; // EXPORT
 		  /// Get the COM+ descriptor's ExportAddressTable (Size) value.
-		  dword getExportAddressTableJumpsSize() const; // EXPORT
+		  std::uint32_t getExportAddressTableJumpsSize() const; // EXPORT
 		  /// Get the COM+ descriptor's ManagedNativeHeader (Virtual Address) value.
-		  dword getManagedNativeHeaderVa() const; // EXPORT
+		  std::uint32_t getManagedNativeHeaderVa() const; // EXPORT
 		  /// Get the COM+ descriptor's ManagedNativeHeader (Size) value.
-		  dword getManagedNativeHeaderSize() const; // EXPORT
+		  std::uint32_t getManagedNativeHeaderSize() const; // EXPORT
 
 		  /// Change the COM+ descriptor's SizeOfHeader (cb) value.
-		  void setSizeOfHeader(dword dwValue); // EXPORT
+		  void setSizeOfHeader(std::uint32_t dwValue); // EXPORT
 		  /// Change the COM+ descriptor's MajorRuntimeVersion value.
-		  void setMajorRuntimeVersion(word wValue); // EXPORT
+		  void setMajorRuntimeVersion(std::uint16_t wValue); // EXPORT
 		  /// Change the COM+ descriptor's MinorRuntimeVersion value.
-		  void setMinorRuntimeVersion(word wValue); // EXPORT
+		  void setMinorRuntimeVersion(std::uint16_t wValue); // EXPORT
 		  /// Change the COM+ descriptor's MetaData (VirtualAddress) value.
-		  void setMetaDataVa(dword dwValue); // EXPORT
+		  void setMetaDataVa(std::uint32_t dwValue); // EXPORT
 		  /// Change the COM+ descriptor's MetaData (Size) value.
-		  void setMetaDataSize(dword dwValue); // EXPORT
+		  void setMetaDataSize(std::uint32_t dwValue); // EXPORT
 		  /// Change the COM+ descriptor's Flags value.
-		  void setFlags(dword dwValue); // EXPORT
+		  void setFlags(std::uint32_t dwValue); // EXPORT
 		  /// Change the COM+ descriptor's EntryPointToken value.
-		  void setEntryPointToken(dword dwValue); // EXPORT
+		  void setEntryPointToken(std::uint32_t dwValue); // EXPORT
 		  /// Change the COM+ descriptor's Resources (VirtualAddress) value.
-		  void setResourcesVa(dword dwValue); // EXPORT
+		  void setResourcesVa(std::uint32_t dwValue); // EXPORT
 		  /// Change the COM+ descriptor's Resources (Size) value.
-		  void setResourcesSize(dword dwValue); // EXPORT
+		  void setResourcesSize(std::uint32_t dwValue); // EXPORT
 		  /// Change the COM+ descriptor's StrongNameSignatureVa (VirtualAddress) value.
-		  void setStrongNameSignatureVa(dword dwValue); // EXPORT
+		  void setStrongNameSignatureVa(std::uint32_t dwValue); // EXPORT
 		  /// Change the COM+ descriptor's StrongNameSignatureVa (Size) value.
-		  void setStrongNameSignagureSize(dword dwValue); // EXPORT
+		  void setStrongNameSignagureSize(std::uint32_t dwValue); // EXPORT
 		  /// Change the COM+ descriptor's CodeManagerTable (VirtualAddress) value.
-		  void setCodeManagerTableVa(dword dwValue); // EXPORT
+		  void setCodeManagerTableVa(std::uint32_t dwValue); // EXPORT
 		  /// Change the COM+ descriptor's CodeManagerTable (Size) value.
-		  void setCodeManagerTableSize(dword dwValue); // EXPORT
+		  void setCodeManagerTableSize(std::uint32_t dwValue); // EXPORT
 		  /// Change the COM+ descriptor's VTableFixups (VirtualAddress) value.
-		  void setVTableFixupsVa(dword dwValue); // EXPORT
+		  void setVTableFixupsVa(std::uint32_t dwValue); // EXPORT
 		  /// Change the COM+ descriptor's VTableFixups (Size) value.
-		  void setVTableFixupsSize(dword dwValue); // EXPORT
+		  void setVTableFixupsSize(std::uint32_t dwValue); // EXPORT
 		  /// Change the COM+ descriptor's ExportAddressTableJumps (VirtualAddress) value.
-		  void setExportAddressTableJumpsVa(dword dwValue); // EXPORT
+		  void setExportAddressTableJumpsVa(std::uint32_t dwValue); // EXPORT
 		  /// Change the COM+ descriptor's ExportAddressTableJumps (Size) value.
-		  void setExportAddressTableJumpsSize(dword dwValue); // EXPORT
+		  void setExportAddressTableJumpsSize(std::uint32_t dwValue); // EXPORT
 		  /// Change the COM+ descriptor's ManagedNativeHeader (VirtualAddress) value.
-		  void setManagedNativeHeaderVa(dword dwValue); // EXPORT
+		  void setManagedNativeHeaderVa(std::uint32_t dwValue); // EXPORT
 		  /// Change the COM+ descriptor's ManagedNativeHeader (Size) value.
-		  void setManagedNativeHeaderSize(dword dwValue); // EXPORT
+		  void setManagedNativeHeaderSize(std::uint32_t dwValue); // EXPORT
 	};
 
 	template <int bits>
@@ -155,7 +155,7 @@ namespace PeLib
 
 		inStream_w.seekg(uiOffset, std::ios::beg);
 
-		std::vector<byte> vComDescDirectory(uiSize);
+		std::vector<std::uint8_t> vComDescDirectory(uiSize);
 		inStream_w.read(reinterpret_cast<char*>(vComDescDirectory.data()), uiSize);
 
 		InputBuffer ibBuffer{vComDescDirectory};

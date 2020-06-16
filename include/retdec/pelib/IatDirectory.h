@@ -15,6 +15,7 @@
 
 #include "retdec/pelib/PeLibInc.h"
 #include "retdec/pelib/PeHeader.h"
+#include "retdec/pelib/ImageLoader.h"
 
 namespace PeLib
 {
@@ -25,7 +26,7 @@ namespace PeLib
 	class IatDirectory
 	{
 		protected:
-		  std::vector<dword> m_vIat; ///< Stores the individual IAT fields.
+		  std::vector<std::uint32_t> m_vIat; ///< Stores the individual IAT fields.
 
 		  int read(InputBuffer& inputBuffer, unsigned int dwOffset, unsigned int dwFileSize);
 
@@ -34,68 +35,28 @@ namespace PeLib
 
 		  /// Reads the Import Address Table from a PE file.
 		  int read(unsigned char* buffer, unsigned int buffersize); // EXPORT
+		  /// Reads the Import Address Table from an image loader
+		  int read(PeLib::ImageLoader & imageLoader); // EXPORT
 		  /// Returns the number of fields in the IAT.
 		  unsigned int calcNumberOfAddresses() const; // EXPORT
 		  /// Adds another address to the IAT.
-		  void addAddress(dword dwValue); // EXPORT
+		  void addAddress(std::uint32_t dwValue); // EXPORT
 		  /// Removes an address from the IAT.
 		  void removeAddress(unsigned int index); // EXPORT
 		  /// Empties the IAT.
 		  void clear(); // EXPORT
 		  // Rebuilds the IAT.
-		  void rebuild(std::vector<byte>& vBuffer) const; // EXPORT
+		  void rebuild(std::vector<std::uint8_t>& vBuffer) const; // EXPORT
 		  /// Returns the size of the current IAT.
 		  unsigned int size() const; // EXPORT
 		  /// Writes the current IAT to a file.
 		  int write(const std::string& strFilename, unsigned int uiOffset) const; // EXPORT
 
 		  /// Retrieve the value of a field in the IAT.
-		  dword getAddress(unsigned int index) const; // EXPORT
+		  std::uint32_t getAddress(unsigned int index) const; // EXPORT
 		  /// Change the value of a field in the IAT.
-		  void setAddress(dword dwAddrnr, dword dwValue); // EXPORT
+		  void setAddress(std::uint32_t dwAddrnr, std::uint32_t dwValue); // EXPORT
 	};
-
-	template <int bits>
-	class IatDirectoryT : public IatDirectory
-	{
-		public:
-		  int read(std::istream& inStream, const PeHeaderT<bits>& peHeader); // EXPORT
-	};
-
-	/**
-	* Reads the Import Address table from a file.
-	* @param inStream Input stream.
-	* @param peHeader A valid PE header which is necessary because some RVA calculations need to be done.
-	**/
-	template <int bits>
-	int IatDirectoryT<bits>::read(std::istream& inStream, const PeHeaderT<bits>& peHeader)
-	{
-		IStreamWrapper inStream_w(inStream);
-
-		if (!inStream_w)
-		{
-			return ERROR_OPENING_FILE;
-		}
-
-		std::uint64_t ulFileSize = fileSize(inStream_w);
-		std::uint64_t dwOffset = peHeader.rvaToOffset(peHeader.getIddIatRva());
-		std::uint64_t dwSize = peHeader.getIddIatSize();
-
-		if (ulFileSize <= dwOffset)
-		{
-			return ERROR_INVALID_FILE;
-		}
-
-		dwSize = std::min(ulFileSize - dwOffset, dwSize);
-		inStream_w.seekg(dwOffset, std::ios::beg);
-
-		std::vector<byte> vBuffer(dwSize);
-		inStream_w.read(reinterpret_cast<char*>(vBuffer.data()), dwSize);
-
-		InputBuffer inpBuffer{vBuffer};
-		return IatDirectory::read(inpBuffer, dwOffset, ulFileSize);
-	}
-
 }
 
 #endif

@@ -34,7 +34,7 @@ namespace PeLib
 		  int read(std::istream& inStream, const PeHeaderT<bits> &peHeader); // EXPORT
 		  int read(unsigned char* buffer, unsigned int buffersize); // EXPORT
 		  /// Rebuilds the TLS directory.
-		  void rebuild(std::vector<byte>& vBuffer) const; // EXPORT
+		  void rebuild(std::vector<std::uint8_t>& vBuffer) const; // EXPORT
 		  /// Returns the size of the TLS Directory.
 		  unsigned int size() const; // EXPORT
 		  /// Writes the TLS directory to a file.
@@ -49,22 +49,22 @@ namespace PeLib
 		  /// Returns the AddressOfCallBacks value of the TLS header.
 		  typename FieldSizes<bits>::VAR4_8 getAddressOfCallBacks() const; // EXPORT
 		  /// Returns the SizeOfZeroFill value of the TLS header.
-		  dword getSizeOfZeroFill() const; // EXPORT
+		  std::uint32_t getSizeOfZeroFill() const; // EXPORT
 		  /// Returns the Characteristics value of the TLS header.
-		  dword getCharacteristics() const; // EXPORT
+		  std::uint32_t getCharacteristics() const; // EXPORT
 
 		  /// Sets the StartAddressOfRawData value of the TLS header.
-		  void setStartAddressOfRawData(dword dwValue); // EXPORT
+		  void setStartAddressOfRawData(std::uint32_t dwValue); // EXPORT
 		  /// Sets the EndAddressOfRawData value of the TLS header.
-		  void setEndAddressOfRawData(dword dwValue); // EXPORT
+		  void setEndAddressOfRawData(std::uint32_t dwValue); // EXPORT
 		  /// Sets the AddressOfIndex value of the TLS header.
-		  void setAddressOfIndex(dword dwValue); // EXPORT
+		  void setAddressOfIndex(std::uint32_t dwValue); // EXPORT
 		  /// Sets the AddressOfCallBacks value of the TLS header.
-		  void setAddressOfCallBacks(dword dwValue); // EXPORT
+		  void setAddressOfCallBacks(std::uint32_t dwValue); // EXPORT
 		  /// Sets the SizeOfZeroFill value of the TLS header.
-		  void setSizeOfZeroFill(dword dwValue); // EXPORT
+		  void setSizeOfZeroFill(std::uint32_t dwValue); // EXPORT
 		  /// Sets the Characteristics value of the TLS header.
-		  void setCharacteristics(dword dwValue); // EXPORT
+		  void setCharacteristics(std::uint32_t dwValue); // EXPORT
 	};
 
 	template<int bits>
@@ -90,7 +90,7 @@ namespace PeLib
 			return ERROR_INVALID_FILE;
 		}
 
-		std::vector<byte> vTlsDirectory(buffer, buffer + buffersize);
+		std::vector<std::uint8_t> vTlsDirectory(buffer, buffer + buffersize);
 
 		InputBuffer ibBuffer(vTlsDirectory);
 		read(ibBuffer);
@@ -124,7 +124,7 @@ namespace PeLib
 
 		inStream_w.seekg(uiOffset, std::ios::beg);
 
-		std::vector<byte> vTlsDirectory(uiSize);
+		std::vector<std::uint8_t> vTlsDirectory(uiSize);
 		inStream_w.read(reinterpret_cast<char*>(vTlsDirectory.data()), uiSize);
 
 		InputBuffer ibBuffer{vTlsDirectory};
@@ -137,7 +137,7 @@ namespace PeLib
 	* @param vBuffer Buffer where the TLS directory will be written to.
 	**/
 	template<int bits>
-	void TlsDirectory<bits>::rebuild(std::vector<byte>& vBuffer) const
+	void TlsDirectory<bits>::rebuild(std::vector<std::uint8_t>& vBuffer) const
 	{
 		OutputBuffer obBuffer(vBuffer);
 
@@ -237,7 +237,7 @@ namespace PeLib
 	* @return The SizeOfZeroFill value of the TLS directory.
 	**/
 	template<int bits>
-	dword TlsDirectory<bits>::getSizeOfZeroFill() const
+	std::uint32_t TlsDirectory<bits>::getSizeOfZeroFill() const
 	{
 		return m_tls.SizeOfZeroFill;
 	}
@@ -246,7 +246,7 @@ namespace PeLib
 	* @return The Characteristics value of the TLS directory.
 	**/
 	template<int bits>
-	dword TlsDirectory<bits>::getCharacteristics() const
+	std::uint32_t TlsDirectory<bits>::getCharacteristics() const
 	{
 		return m_tls.Characteristics;
 	}
@@ -255,7 +255,7 @@ namespace PeLib
 	* @param dwValue The new StartAddressOfRawData value of the TLS directory.
 	**/
 	template<int bits>
-	void TlsDirectory<bits>::setStartAddressOfRawData(dword dwValue)
+	void TlsDirectory<bits>::setStartAddressOfRawData(std::uint32_t dwValue)
 	{
 		m_tls.StartAddressOfRawData = dwValue;
 	}
@@ -264,7 +264,7 @@ namespace PeLib
 	* @param dwValue The new EndAddressOfRawData value of the TLS directory.
 	**/
 	template<int bits>
-	void TlsDirectory<bits>::setEndAddressOfRawData(dword dwValue)
+	void TlsDirectory<bits>::setEndAddressOfRawData(std::uint32_t dwValue)
 	{
 		m_tls.EndAddressOfRawData = dwValue;
 	}
@@ -273,7 +273,7 @@ namespace PeLib
 	* @param dwValue The new AddressOfIndex value of the TLS directory.
 	**/
 	template<int bits>
-	void TlsDirectory<bits>::setAddressOfIndex(dword dwValue)
+	void TlsDirectory<bits>::setAddressOfIndex(std::uint32_t dwValue)
 	{
 		m_tls.AddressOfIndex = dwValue;
 	}
@@ -282,7 +282,7 @@ namespace PeLib
 	* @param dwValue The new AddressOfCallBacks value of the TLS directory.
 	**/
 	template<int bits>
-	void TlsDirectory<bits>::setAddressOfCallBacks(dword dwValue)
+	void TlsDirectory<bits>::setAddressOfCallBacks(std::uint32_t dwValue)
 	{
 		m_tls.AddressOfCallBacks = dwValue;
 	}
@@ -291,7 +291,7 @@ namespace PeLib
 	* @param dwValue The new SizeOfZeroFill value of the TLS directory.
 	**/
 	template<int bits>
-	void TlsDirectory<bits>::setSizeOfZeroFill(dword dwValue)
+	void TlsDirectory<bits>::setSizeOfZeroFill(std::uint32_t dwValue)
 	{
 		m_tls.SizeOfZeroFill = dwValue;
 	}
@@ -300,7 +300,7 @@ namespace PeLib
 	* @param dwValue The new Characteristics value of the TLS directory.
 	**/
 	template<int bits>
-	void TlsDirectory<bits>::setCharacteristics(dword dwValue)
+	void TlsDirectory<bits>::setCharacteristics(std::uint32_t dwValue)
 	{
 		m_tls.Characteristics = dwValue;
 	}

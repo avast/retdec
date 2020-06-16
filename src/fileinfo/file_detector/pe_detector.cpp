@@ -82,7 +82,7 @@ void PeDetector::getFileFlags()
 											"aggressively trim working set",
 											"application can handle addresses larger than 2 GB",
 											"reversed endianness",
-											"computer supports 32-bit words",
+											"computer supports 32-bit std::uint16_ts",
 											"debugging information was removed",
 											"copy image from removable media",
 											"copy image from network",
@@ -475,7 +475,7 @@ void PeDetector::detectArchitecture()
 			result = "Matsushita AM33";
 			break;
 		case PELIB_IMAGE_FILE_MACHINE_EBC:
-			result = "EFI byte code";
+			result = "EFI std::uint8_t code";
 			break;
 		case PELIB_IMAGE_FILE_MACHINE_MSIL:
 			result = "MSIL - Microsoft Intermediate Language (aka CIL - Common Intermediate Language)";

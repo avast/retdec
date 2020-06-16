@@ -6,6 +6,7 @@ add_library(pelib STATIC
 	DebugDirectory.cpp
 	ExportDirectory.cpp
 	IatDirectory.cpp
+	ImageLoader.cpp
 	InputBuffer.cpp
 	MzHeader.cpp
 	OutputBuffer.cpp

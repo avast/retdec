@@ -47,10 +47,12 @@ enum PELIB_COMPARE_RESULT : std::uint32_t
 };
 
 typedef bool (_cdecl * PFN_VERIFY_ADDRESS)(void * ptr, size_t length);
+typedef bool (_cdecl * PFN_COMPARE_CALLBACK)(size_t BytesCompared, size_t BytesTotal);
 
 struct PELIB_IMAGE_COMPARE
 {
 	PFN_VERIFY_ADDRESS PfnVerifyAddress;       // Custom function for verifying memory address
+	PFN_COMPARE_CALLBACK PfnCompareCallback;   // Custom function for calling compare callback
 	PELIB_COMPARE_RESULT compareResult;
 	const char * dumpIfNotEqual;               // If non-NULL, the image will be dumped into that file
 	std::uint32_t differenceOffset;
@@ -123,7 +125,7 @@ class ImageLoader
 	~ImageLoader();
 
 	int Load(std::vector<std::uint8_t> & fileData, bool loadHeadersOnly = false);
-	int Load(std::ifstream & fs, std::streamoff fileOffset = 0, bool loadHeadersOnly = false);
+	int Load(std::istream & fs, std::streamoff fileOffset = 0, bool loadHeadersOnly = false);
 	int Load(const char * fileName, bool loadHeadersOnly = false);
 
 	bool relocateImage(std::uint64_t newImageBase);
@@ -131,13 +133,26 @@ class ImageLoader
 	std::uint32_t readImage(void * buffer, std::uint32_t rva, std::uint32_t bytesToRead);
 	std::uint32_t writeImage(void * buffer, std::uint32_t rva, std::uint32_t bytesToRead);
 
+	std::uint32_t readString(std::string & str, std::uint32_t rva, std::uint32_t maxLength = 65535);
+	std::uint32_t stringLength(std::uint32_t rva, std::uint32_t maxLength = 65535) const;
+
+	std::uint32_t readPointer(std::uint32_t rva, std::uint64_t & pointerValue);
+	std::uint32_t pointerSize() const;
+
 	std::uint32_t dumpImage(const char * fileName);
 
-	std::uint64_t getImageBase();
-	std::uint32_t getSizeOfImage();
-	std::uint32_t getSizeOfImageAligned();
-	std::uint32_t getFileOffsetFromRva(std::uint32_t rva);
-	std::uint32_t getImageProtection(std::uint32_t characteristics);
+	std::uint32_t getPeFileBitability() const;
+	std::uint32_t getNtSignature() const;
+	std::uint32_t getPointerToSymbolTable() const;
+	std::uint32_t getNumberOfSymbols() const;
+	std::uint64_t getImageBase() const;
+	std::uint32_t getSizeOfHeaders() const;
+	std::uint32_t getSizeOfImage() const;
+	std::uint32_t getSizeOfImageAligned() const;
+	std::uint32_t getDataDirRva(std::size_t dataDirIndex) const;
+	std::uint32_t getDataDirSize(std::size_t dataDirIndex) const;
+	std::uint32_t getFileOffsetFromRva(std::uint32_t rva) const;
+	std::uint32_t getImageProtection(std::uint32_t characteristics) const;
 
 	int setLoaderError(LoaderError ldrErr);
 	LoaderError loaderError();
@@ -163,6 +178,9 @@ class ImageLoader
 	int captureOptionalHeader32(std::uint8_t * filePtr, std::uint8_t * fileEnd);
 	int captureOptionalHeader64(std::uint8_t * filePtr, std::uint8_t * fileEnd);
 
+	int verifyDosHeader(PELIB_IMAGE_DOS_HEADER & hdr, std::size_t fileSize);
+	int verifyDosHeader(std::istream & fs, std::streamoff fileOffset, std::size_t fileSize);
+
 	int loadImageAsIs(std::vector<std::uint8_t> & fileData);
 
 	std::size_t getMismatchOffset(void * buffer1, void * buffer2, std::uint32_t rva, std::size_t length);
@@ -184,25 +202,26 @@ class ImageLoader
 	bool checkForBadAppContainer();
 	bool isImageMappedOk();
 
-	std::uint32_t AlignToSize(std::uint32_t ByteSize, std::uint32_t AlignSize)
+	static std::uint32_t AlignToSize(std::uint32_t ByteSize, std::uint32_t AlignSize)
 	{
 		return ((ByteSize + (AlignSize - 1)) & ~(AlignSize - 1));
 	}
 
-	std::uint32_t BytesToPages(std::uint32_t ByteSize)
+	static std::uint32_t BytesToPages(std::uint32_t ByteSize)
 	{
 		return (ByteSize >> PELIB_PAGE_SIZE_SHIFT) + ((ByteSize & (PELIB_PAGE_SIZE - 1)) != 0);
 	}
 
 	static uint8_t ImageProtectionArray[16];
-																
-	std::vector<PELIB_IMAGE_SECTION_HEADER> sections;   // Vector of headers
+
+	std::vector<PELIB_IMAGE_SECTION_HEADER_BASE> sections; // Vector of section headers
 	std::vector<PELIB_FILE_PAGE> pages;                 // PE file pages as if mapped
 	std::vector<std::uint8_t> imageAsIs;                // Loaded content of the image in case it couldn't have been mapped
 	PELIB_IMAGE_DOS_HEADER  dosHeader;                  // Loaded DOS header
 	PELIB_IMAGE_FILE_HEADER fileHeader;                 // Loaded NT file header
 	PELIB_IMAGE_OPTIONAL_HEADER optionalHeader;         // 32/64-bit optional header
 	LoaderError ldrError;
+	std::uint32_t ntSignature;
 	std::uint32_t loaderMode;
 	std::uint32_t maxSectionCount;
 	bool ntHeadersSizeCheck;                            // If true, the loader requires minimum size of NT headers

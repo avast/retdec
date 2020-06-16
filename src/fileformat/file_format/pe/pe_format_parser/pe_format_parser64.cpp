@@ -191,7 +191,7 @@ bool PeFormatParser64::getEpOffset(unsigned long long &epOffset) const
 	}
 
 	const auto offset = peEpOffset(peHeader);
-	if(offset == std::numeric_limits<qword>::max())
+	if(offset == std::numeric_limits<std::uint64_t>::max())
 	{
 		return false;
 	}

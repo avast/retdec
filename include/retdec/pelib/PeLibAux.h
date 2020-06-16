@@ -129,111 +129,37 @@ namespace PeLib
 
 	class PeFile;
 
-// It's necessary to make sure that a byte has 8 bits and that the platform has a 8 bit type,
-// a 16bit type and a bit type. That's because binary PE files are pretty picky about their
-// structure.
-
-	#if CHAR_BIT == 8
-		#if UCHAR_MAX == 255
-			typedef unsigned char byte;
-	//		typedef std::bitset<8> byte;
-		#else
-			#error You need to change some typedefs (Code: 8). Please read the PeLib documentation.
-		#endif
-
-		#if USHRT_MAX == 65535U
-			typedef unsigned short word;
-	//		typedef std::bitset<16> word;
-		#else
-			#error You need to change some typedefs (Code: 16). Please read the PeLib documentation.
-		#endif
-
-		#if UINT_MAX == 4294967295UL
-			typedef unsigned int dword;
-	//		typedef std::bitset<32> dword;
-		#else
-			#error You need to change some typedefs (Code: 32). Please read the PeLib documentation.
-		#endif
-
-		typedef unsigned long long qword;
-
-//		#if ULLONG_MAX == 18446744073709551615
-//			typedef unsigned long long qword;
-//		#else
-//			#error You need to change some typedefs (Code: 32). Please read the PeLib documentation.
-//		#endif
-	#else
-		#error You need to change some typedefs. Please read the PeLib documentation.
-	#endif
-
-/*	enum bits {BITS_BYTE = 8, BITS_WORD = 16, BITS_DWORD = 32};
-
-	template<bits value>
-	class DataType
-	{
-		private:
-		  std::bitset<value> bsValue;
-		  unsigned long ulValue;
-
-		public:
-		  void operator=(unsigned long ulValue)
-		  {
-			bsValue = ulValue;
-		  }
-
-		  operator unsigned long() const
-		  {
-			return bsValue.to_ulong();
-		  }
-
-		  const int operator&()
-		  {
-		  	ulValue = bsValue;
-		  	return ulValue;
-		  }
-
-	};
-
-	typedef DataType<BITS_BYTE> byte;
-	typedef DataType<BITS_WORD> word;
-	typedef DataType<BITS_DWORD> dword;
-*/
+	typedef std::vector<std::uint8_t> ByteBuffer;
 
 	enum {PEFILE32 = 32,
-		  PEFILE64 = 64,
-		  PEFILE_UNKNOWN = 0};
+		PEFILE64 = 64,
+		PEFILE_UNKNOWN = 0};
 
-	enum {BoundImportDirectoryId = 1,
-		  ComHeaderDirectoryId,
-		  ExportDirectoryId,
-		  IatDirectoryId,
-		  ImportDirectoryId,
-		  MzHeaderId,
-		  PeHeaderId,
-		  RelocationsId,
-		  PeFileId,
-		  ResourceDirectoryId,
-		  DebugDirectoryId,
-		  TlsDirectoryId
-	};
+	const std::uint16_t PELIB_IMAGE_DOS_SIGNATURE = 0x5A4D;
 
-	const word PELIB_IMAGE_DOS_SIGNATURE = 0x5A4D;
+	const std::uint32_t PELIB_PAGE_SIZE = 0x1000;
 
-	const dword PELIB_PAGE_SIZE = 0x1000;
+	const std::uint32_t PELIB_PAGE_SIZE_SHIFT = 12;
 
-	const dword PELIB_PAGE_SIZE_SHIFT = 12;
+	const std::uint32_t PELIB_SIZE_64KB = 0x10000;
 
-	const dword PELIB_SIZE_64KB = 0x10000;
+	const std::uint32_t PELIB_IMAGE_NT_SIGNATURE = 0x00004550;
 
-	const dword PELIB_IMAGE_NT_SIGNATURE = 0x00004550;
+	const std::uint32_t PELIB_MM_SIZE_OF_LARGEST_IMAGE = 0x77000000;
 
-	const dword PELIB_MM_SIZE_OF_LARGEST_IMAGE = 0x77000000;
+	const std::uint32_t PELIB_MAX_IMPORT_DLLS        = 0x100;           // Maximum number of imported DLLs we consider OK
+	const std::uint32_t PELIB_MAX_IMPORTED_FUNCTIONS = 0x1000;          // Maximum number of exported functions (per DLL) that we support
+	const std::uint32_t PELIB_MAX_EXPORTED_FUNCTIONS = 0x1000;          // Maximum number of exported functions that we support
+	const std::uint32_t PE_MAX_SECTION_COUNT_XP = 96;
+	const std::uint32_t PE_MAX_SECTION_COUNT_7 = 192;
 
-	const dword PELIB_MAX_IMPORT_DLLS        = 0x100;           // Maximum number of imported DLLs we consider OK
-	const dword PELIB_MAX_IMPORTED_FUNCTIONS = 0x1000;          // Maximum number of exported functions (per DLL) that we support
-	const dword PELIB_MAX_EXPORTED_FUNCTIONS = 0x1000;          // Maximum number of exported functions that we support
+	const std::uint32_t PELIB_SECTOR_SIZE = 0x200;
 
-	const dword PELIB_SECTOR_SIZE = 0x200;
+	const std::uint32_t PELIB_IMAGE_NUMBEROF_DIRECTORY_ENTRIES = 16;
+
+	const std::uint32_t PELIB_IMAGE_RESOURCE_NAME_IS_STRING = 0x80000000;
+
+	const std::uint32_t PELIB_IMAGE_RESOURCE_DATA_IS_DIRECTORY = 0x80000000;
 
 	template<int bits>
 	struct PELIB_IMAGE_ORDINAL_FLAGS;
@@ -241,20 +167,14 @@ namespace PeLib
 	template<>
 	struct PELIB_IMAGE_ORDINAL_FLAGS<32>
 	{
-		static const dword PELIB_IMAGE_ORDINAL_FLAG = 0x80000000;
+		static const std::uint32_t PELIB_IMAGE_ORDINAL_FLAG = 0x80000000;
 	};
 
 	template<>
 	struct PELIB_IMAGE_ORDINAL_FLAGS<64>
 	{
-		static const qword PELIB_IMAGE_ORDINAL_FLAG;
+		static const std::uint64_t PELIB_IMAGE_ORDINAL_FLAG;
 	};
-
-	const unsigned long PELIB_IMAGE_NUMBEROF_DIRECTORY_ENTRIES = 16;
-
-	const unsigned long PELIB_IMAGE_RESOURCE_NAME_IS_STRING = 0x80000000;
-
-	const unsigned long PELIB_IMAGE_RESOURCE_DATA_IS_DIRECTORY = 0x80000000;
 
 	enum
 	{
@@ -275,7 +195,19 @@ namespace PeLib
 		PELIB_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR
 	};
 
-	enum : unsigned long long
+	enum : std::uint32_t
+	{
+		PELIB_PAGE_NOACCESS          = 0x01,
+		PELIB_PAGE_READONLY          = 0x02,
+		PELIB_PAGE_READWRITE         = 0x04,
+		PELIB_PAGE_WRITECOPY         = 0x08,
+		PELIB_PAGE_EXECUTE           = 0x10,
+		PELIB_PAGE_EXECUTE_READ      = 0x20,
+		PELIB_PAGE_EXECUTE_READWRITE = 0x40,
+		PELIB_PAGE_EXECUTE_WRITECOPY = 0x80,
+	};
+
+	enum : std::uint32_t
 	{
 		PELIB_IMAGE_SCN_TYPE_NO_PAD		= 0x00000008,
 		PELIB_IMAGE_SCN_CNT_CODE		   = 0x00000020,
@@ -355,58 +287,6 @@ namespace PeLib
 		PELIB_IMAGE_FILE_MACHINE_MSIL			= 0xC0EE
 	};
 
-	class PELIB_IMAGE_FILE_MACHINE_ITERATOR
-	{
-		public:
-			typedef std::vector<PELIB_IMAGE_FILE_MACHINE>::const_iterator imageFileMachineIterator;
-		private:
-			const std::vector<PELIB_IMAGE_FILE_MACHINE> all =
-			{
-				PELIB_IMAGE_FILE_MACHINE_UNKNOWN,
-				PELIB_IMAGE_FILE_MACHINE_I386,
-				PELIB_IMAGE_FILE_MACHINE_I486,
-				PELIB_IMAGE_FILE_MACHINE_PENTIUM,
-				PELIB_IMAGE_FILE_MACHINE_R3000_BIG,
-				PELIB_IMAGE_FILE_MACHINE_R3000_LITTLE,
-				PELIB_IMAGE_FILE_MACHINE_R4000,
-				PELIB_IMAGE_FILE_MACHINE_R10000,
-				PELIB_IMAGE_FILE_MACHINE_WCEMIPSV2,
-				PELIB_IMAGE_FILE_MACHINE_ALPHA,
-				PELIB_IMAGE_FILE_MACHINE_SH3,
-				PELIB_IMAGE_FILE_MACHINE_SH3DSP,
-				PELIB_IMAGE_FILE_MACHINE_SH3E,
-				PELIB_IMAGE_FILE_MACHINE_SH4,
-				PELIB_IMAGE_FILE_MACHINE_SH5,
-				PELIB_IMAGE_FILE_MACHINE_ARM,
-				PELIB_IMAGE_FILE_MACHINE_THUMB,
-				PELIB_IMAGE_FILE_MACHINE_ARMNT,
-				PELIB_IMAGE_FILE_MACHINE_AM33,
-				PELIB_IMAGE_FILE_MACHINE_POWERPC,
-				PELIB_IMAGE_FILE_MACHINE_POWERPCFP,
-				PELIB_IMAGE_FILE_MACHINE_IA64,
-				PELIB_IMAGE_FILE_MACHINE_MIPS16,
-				PELIB_IMAGE_FILE_MACHINE_MOTOROLA68000,
-				PELIB_IMAGE_FILE_MACHINE_PARISC,
-				PELIB_IMAGE_FILE_MACHINE_ALPHA64,
-				PELIB_IMAGE_FILE_MACHINE_AXP64,
-				PELIB_IMAGE_FILE_MACHINE_MIPSFPU,
-				PELIB_IMAGE_FILE_MACHINE_MIPSFPU16,
-				PELIB_IMAGE_FILE_MACHINE_TRICORE,
-				PELIB_IMAGE_FILE_MACHINE_EBC,
-				PELIB_IMAGE_FILE_MACHINE_AMD64,
-				PELIB_IMAGE_FILE_MACHINE_M32R,
-				PELIB_IMAGE_FILE_MACHINE_ARM64,
-				PELIB_IMAGE_FILE_MACHINE_MSIL
-			};
-		public:
-			PELIB_IMAGE_FILE_MACHINE_ITERATOR();
-			~PELIB_IMAGE_FILE_MACHINE_ITERATOR();
-
-			bool isValidMachineCode(PELIB_IMAGE_FILE_MACHINE value) const;
-			imageFileMachineIterator begin() const;
-			imageFileMachineIterator end() const;
-	};
-
 	enum
 	{
 		PELIB_IMAGE_FILE_RELOCS_STRIPPED	   = 0x0001,
@@ -434,7 +314,9 @@ namespace PeLib
 		PELIB_IMAGE_DLLCHARACTERISTICS_NO_ISOLATION            = 0x0200,
 		PELIB_IMAGE_DLLCHARACTERISTICS_NO_SEH                  = 0x0400,
 		PELIB_IMAGE_DLLCHARACTERISTICS_NO_BIND                 = 0x0800,
+		PELIB_IMAGE_DLLCHARACTERISTICS_APPCONTAINER            = 0x1000,
 		PELIB_IMAGE_DLLCHARACTERISTICS_WDM_DRIVER              = 0x2000,
+		PELIB_IMAGE_DLLCHARACTERISTICS_GUARD_CF                = 0x4000,
 		PELIB_IMAGE_DLLCHARACTERISTICS_TERMINAL_SERVER_AWARE   = 0x8000
 	};
 
@@ -628,42 +510,100 @@ namespace PeLib
 		return size + v.size();
 	}
 
+	class PELIB_IMAGE_FILE_MACHINE_ITERATOR
+	{
+		public:
+		typedef std::vector<PELIB_IMAGE_FILE_MACHINE>::const_iterator imageFileMachineIterator;
+		private:
+		const std::vector<PELIB_IMAGE_FILE_MACHINE> all =
+		{
+			PELIB_IMAGE_FILE_MACHINE_UNKNOWN,
+			PELIB_IMAGE_FILE_MACHINE_I386,
+			PELIB_IMAGE_FILE_MACHINE_I486,
+			PELIB_IMAGE_FILE_MACHINE_PENTIUM,
+			PELIB_IMAGE_FILE_MACHINE_R3000_BIG,
+			PELIB_IMAGE_FILE_MACHINE_R3000_LITTLE,
+			PELIB_IMAGE_FILE_MACHINE_R4000,
+			PELIB_IMAGE_FILE_MACHINE_R10000,
+			PELIB_IMAGE_FILE_MACHINE_WCEMIPSV2,
+			PELIB_IMAGE_FILE_MACHINE_ALPHA,
+			PELIB_IMAGE_FILE_MACHINE_SH3,
+			PELIB_IMAGE_FILE_MACHINE_SH3DSP,
+			PELIB_IMAGE_FILE_MACHINE_SH3E,
+			PELIB_IMAGE_FILE_MACHINE_SH4,
+			PELIB_IMAGE_FILE_MACHINE_SH5,
+			PELIB_IMAGE_FILE_MACHINE_ARM,
+			PELIB_IMAGE_FILE_MACHINE_THUMB,
+			PELIB_IMAGE_FILE_MACHINE_ARMNT,
+			PELIB_IMAGE_FILE_MACHINE_AM33,
+			PELIB_IMAGE_FILE_MACHINE_POWERPC,
+			PELIB_IMAGE_FILE_MACHINE_POWERPCFP,
+			PELIB_IMAGE_FILE_MACHINE_IA64,
+			PELIB_IMAGE_FILE_MACHINE_MIPS16,
+			PELIB_IMAGE_FILE_MACHINE_MOTOROLA68000,
+			PELIB_IMAGE_FILE_MACHINE_PARISC,
+			PELIB_IMAGE_FILE_MACHINE_ALPHA64,
+			PELIB_IMAGE_FILE_MACHINE_AXP64,
+			PELIB_IMAGE_FILE_MACHINE_MIPSFPU,
+			PELIB_IMAGE_FILE_MACHINE_MIPSFPU16,
+			PELIB_IMAGE_FILE_MACHINE_TRICORE,
+			PELIB_IMAGE_FILE_MACHINE_EBC,
+			PELIB_IMAGE_FILE_MACHINE_AMD64,
+			PELIB_IMAGE_FILE_MACHINE_M32R,
+			PELIB_IMAGE_FILE_MACHINE_ARM64,
+			PELIB_IMAGE_FILE_MACHINE_MSIL
+		};
+		public:
+		PELIB_IMAGE_FILE_MACHINE_ITERATOR();
+		~PELIB_IMAGE_FILE_MACHINE_ITERATOR();
+
+		bool isValidMachineCode(PELIB_IMAGE_FILE_MACHINE value) const;
+		imageFileMachineIterator begin() const;
+		imageFileMachineIterator end() const;
+	};
+
 	struct PELIB_IMAGE_DOS_HEADER
 	{
-		word   e_magic;
-		word   e_cblp;
-		word   e_cp;
-		word   e_crlc;
-		word   e_cparhdr;
-		word   e_minalloc;
-		word   e_maxalloc;
-		word   e_ss;
-		word   e_sp;
-		word   e_csum;
-		word   e_ip;
-		word   e_cs;
-		word   e_lfarlc;
-		word   e_ovno;
-		word   e_res[4];
-		word   e_oemid;
-		word   e_oeminfo;
-		word   e_res2[10];
-		dword   e_lfanew;
+		std::uint16_t e_magic;
+		std::uint16_t e_cblp;
+		std::uint16_t e_cp;
+		std::uint16_t e_crlc;
+		std::uint16_t e_cparhdr;
+		std::uint16_t e_minalloc;
+		std::uint16_t e_maxalloc;
+		std::uint16_t e_ss;
+		std::uint16_t e_sp;
+		std::uint16_t e_csum;
+		std::uint16_t e_ip;
+		std::uint16_t e_cs;
+		std::uint16_t e_lfarlc;
+		std::uint16_t e_ovno;
+		std::uint16_t e_res[4];
+		std::uint16_t e_oemid;
+		std::uint16_t e_oeminfo;
+		std::uint16_t e_res2[10];
+		std::uint32_t e_lfanew;
 
-		PELIB_IMAGE_DOS_HEADER();
+		PELIB_IMAGE_DOS_HEADER()
+		{
+			memset(this, 0, sizeof(PELIB_IMAGE_DOS_HEADER));
+		}
 
-		static inline unsigned int size() {return 64;}
+		static inline std::size_t size()
+		{
+			return 64;
+		}
 	};
 
 	struct PELIB_IMAGE_FILE_HEADER
 	{
-		word	Machine;
-		word    NumberOfSections;
-		dword   TimeDateStamp;
-		dword   PointerToSymbolTable;
-		dword   NumberOfSymbols;
-		word    SizeOfOptionalHeader;
-		word    Characteristics;
+		std::uint16_t Machine;
+		std::uint16_t NumberOfSections;
+		std::uint32_t TimeDateStamp;
+		std::uint32_t PointerToSymbolTable;
+		std::uint32_t NumberOfSymbols;
+		std::uint16_t SizeOfOptionalHeader;
+		std::uint16_t Characteristics;
 
 		PELIB_IMAGE_FILE_HEADER()
 		{
@@ -676,13 +616,16 @@ namespace PeLib
 			Characteristics = 0;
 		}
 
-		static inline unsigned int size() {return 20;}
+		static inline std::size_t size()
+		{
+			return 20;
+		}
 	};
 
 	struct PELIB_IMAGE_DATA_DIRECTORY
 	{
-		dword   VirtualAddress;
-		dword   Size;
+		std::uint32_t VirtualAddress;
+		std::uint32_t Size;
 
 		PELIB_IMAGE_DATA_DIRECTORY()
 		{
@@ -690,7 +633,7 @@ namespace PeLib
 			Size = 0;
 		}
 
-		static inline unsigned int size() {return 8;}
+		static inline std::size_t size() {return 8;}
 	};
 
 	template<int>
@@ -699,136 +642,142 @@ namespace PeLib
 	template<>
 	struct FieldSizes<32>
 	{
-		typedef dword VAR4_8;
+		typedef std::uint32_t VAR4_8;
 	};
 
 	template<>
 	struct FieldSizes<64>
 	{
-		typedef qword VAR4_8;
+		typedef std::uint64_t VAR4_8;
+	};
+
+	struct PELIB_IMAGE_OPTIONAL_HEADER32
+	{
+		std::uint16_t Magic;
+		std::uint8_t  MajorLinkerVersion;
+		std::uint8_t  MinorLinkerVersion;
+		std::uint32_t SizeOfCode;
+		std::uint32_t SizeOfInitializedData;
+		std::uint32_t SizeOfUninitializedData;
+		std::uint32_t AddressOfEntryPoint;
+		std::uint32_t BaseOfCode;
+		std::uint32_t BaseOfData;
+		std::uint32_t ImageBase;
+		std::uint32_t SectionAlignment;
+		std::uint32_t FileAlignment;
+		std::uint16_t MajorOperatingSystemVersion;
+		std::uint16_t MinorOperatingSystemVersion;
+		std::uint16_t MajorImageVersion;
+		std::uint16_t MinorImageVersion;
+		std::uint16_t MajorSubsystemVersion;
+		std::uint16_t MinorSubsystemVersion;
+		std::uint32_t Win32VersionValue;
+		std::uint32_t SizeOfImage;
+		std::uint32_t SizeOfHeaders;
+		std::uint32_t CheckSum;
+		std::uint16_t Subsystem;
+		std::uint16_t DllCharacteristics;
+		std::uint32_t SizeOfStackReserve;
+		std::uint32_t SizeOfStackCommit;
+		std::uint32_t SizeOfHeapReserve;
+		std::uint32_t SizeOfHeapCommit;
+		std::uint32_t LoaderFlags;
+		std::uint32_t NumberOfRvaAndSizes;
+
+		PELIB_IMAGE_DATA_DIRECTORY DataDirectory[PELIB_IMAGE_NUMBEROF_DIRECTORY_ENTRIES];
+	};
+
+	struct PELIB_IMAGE_OPTIONAL_HEADER64
+	{
+		std::uint16_t Magic;
+		std::uint8_t  MajorLinkerVersion;
+		std::uint8_t  MinorLinkerVersion;
+		std::uint32_t SizeOfCode;
+		std::uint32_t SizeOfInitializedData;
+		std::uint32_t SizeOfUninitializedData;
+		std::uint32_t AddressOfEntryPoint;
+		std::uint32_t BaseOfCode;
+		std::uint64_t ImageBase;
+		std::uint32_t SectionAlignment;
+		std::uint32_t FileAlignment;
+		std::uint16_t MajorOperatingSystemVersion;
+		std::uint16_t MinorOperatingSystemVersion;
+		std::uint16_t MajorImageVersion;
+		std::uint16_t MinorImageVersion;
+		std::uint16_t MajorSubsystemVersion;
+		std::uint16_t MinorSubsystemVersion;
+		std::uint32_t Win32VersionValue;
+		std::uint32_t SizeOfImage;
+		std::uint32_t SizeOfHeaders;
+		std::uint32_t CheckSum;
+		std::uint16_t Subsystem;
+		std::uint16_t DllCharacteristics;
+		std::uint64_t SizeOfStackReserve;
+		std::uint64_t SizeOfStackCommit;
+		std::uint64_t SizeOfHeapReserve;
+		std::uint64_t SizeOfHeapCommit;
+		std::uint32_t LoaderFlags;
+		std::uint32_t NumberOfRvaAndSizes;
+
+		PELIB_IMAGE_DATA_DIRECTORY DataDirectory[PELIB_IMAGE_NUMBEROF_DIRECTORY_ENTRIES];
+	};
+
+	// Common structure for both 32-bit and 64-bit PE files
+	struct PELIB_IMAGE_OPTIONAL_HEADER
+	{
+		std::uint16_t Magic;
+		std::uint8_t  MajorLinkerVersion;
+		std::uint8_t  MinorLinkerVersion;
+		std::uint32_t SizeOfCode;
+		std::uint32_t SizeOfInitializedData;
+		std::uint32_t SizeOfUninitializedData;
+		std::uint32_t AddressOfEntryPoint;
+		std::uint32_t BaseOfCode;
+		std::uint32_t BaseOfData;
+		std::uint64_t ImageBase;
+		std::uint32_t SectionAlignment;
+		std::uint32_t FileAlignment;
+		std::uint16_t MajorOperatingSystemVersion;
+		std::uint16_t MinorOperatingSystemVersion;
+		std::uint16_t MajorImageVersion;
+		std::uint16_t MinorImageVersion;
+		std::uint16_t MajorSubsystemVersion;
+		std::uint16_t MinorSubsystemVersion;
+		std::uint32_t Win32VersionValue;
+		std::uint32_t SizeOfImage;
+		std::uint32_t SizeOfHeaders;
+		std::uint32_t CheckSum;
+		std::uint16_t Subsystem;
+		std::uint16_t DllCharacteristics;
+		std::uint64_t SizeOfStackReserve;
+		std::uint64_t SizeOfStackCommit;
+		std::uint64_t SizeOfHeapReserve;
+		std::uint64_t SizeOfHeapCommit;
+		std::uint32_t LoaderFlags;
+		std::uint32_t NumberOfRvaAndSizes;
+
+		PELIB_IMAGE_DATA_DIRECTORY DataDirectory[PELIB_IMAGE_NUMBEROF_DIRECTORY_ENTRIES];
 	};
 
 	template<int x>
-	struct PELIB_IMAGE_OPTIONAL_HEADER_BASE
+	struct PELIB_IMAGE_NT_HEADERS_EX
 	{
-		typedef typename FieldSizes<x>::VAR4_8 VAR4_8;
-
-		word    Magic;
-		byte    MajorLinkerVersion;
-		byte    MinorLinkerVersion;
-		dword   SizeOfCode;
-		dword   SizeOfInitializedData;
-		dword   SizeOfUninitializedData;
-		dword   AddressOfEntryPoint;
-		dword   BaseOfCode;
-		dword   BaseOfData;
-		VAR4_8  ImageBase;
-		dword   SectionAlignment;
-		dword   FileAlignment;
-		word    MajorOperatingSystemVersion;
-		word    MinorOperatingSystemVersion;
-		word    MajorImageVersion;
-		word    MinorImageVersion;
-		word    MajorSubsystemVersion;
-		word    MinorSubsystemVersion;
-		dword   Win32VersionValue;
-		dword   SizeOfImage;
-		dword   SizeOfHeaders;
-		dword   CheckSum;
-		word    Subsystem;
-		word    DllCharacteristics;
-		VAR4_8  SizeOfStackReserve;
-		VAR4_8  SizeOfStackCommit;
-		VAR4_8  SizeOfHeapReserve;
-		VAR4_8  SizeOfHeapCommit;
-		dword   LoaderFlags;
-		dword   NumberOfRvaAndSizes;
-//		PELIB_IMAGE_DATA_DIRECTORY DataDirectory[IMAGE_NUMBEROF_DIRECTORY_ENTRIES];
-
-		PELIB_IMAGE_OPTIONAL_HEADER_BASE();
-	};
-
-	template<int x>
-	PELIB_IMAGE_OPTIONAL_HEADER_BASE<x>::PELIB_IMAGE_OPTIONAL_HEADER_BASE()
-	{
-		Magic = 0;
-		MajorLinkerVersion = 0;
-		MinorLinkerVersion = 0;
-		SizeOfCode = 0;
-		SizeOfInitializedData = 0;
-		SizeOfUninitializedData = 0;
-		AddressOfEntryPoint = 0;
-		BaseOfCode = 0;
-//		BaseOfData = 0;
-		ImageBase = 0;
-		SectionAlignment = 0;
-		FileAlignment = 0;
-		MajorOperatingSystemVersion = 0;
-		MinorOperatingSystemVersion = 0;
-		MajorImageVersion = 0;
-		MinorImageVersion = 0;
-		MajorSubsystemVersion = 0;
-		MinorSubsystemVersion = 0;
-		Win32VersionValue = 0;
-		SizeOfImage = 0;
-		SizeOfHeaders = 0;
-		CheckSum = 0;
-		Subsystem = 0;
-		DllCharacteristics = 0;
-		SizeOfStackReserve = 0;
-		SizeOfStackCommit = 0;
-		SizeOfHeapReserve = 0;
-		SizeOfHeapCommit = 0;
-		LoaderFlags = 0;
-		NumberOfRvaAndSizes = 0;
-	}
-
-	template<int>
-	struct PELIB_IMAGE_OPTIONAL_HEADER;
-
-	template<>
-	struct PELIB_IMAGE_OPTIONAL_HEADER<32> : public PELIB_IMAGE_OPTIONAL_HEADER_BASE<32>
-	{
-		dword  BaseOfData;
-
-		static inline unsigned int size() {return 224 - 0x10 * 8;}
-
-		PELIB_IMAGE_OPTIONAL_HEADER<32>() : PELIB_IMAGE_OPTIONAL_HEADER_BASE<32>(), BaseOfData(0)
-		{
-
-		}
-	};
-
-	template<>
-	struct PELIB_IMAGE_OPTIONAL_HEADER<64> : public PELIB_IMAGE_OPTIONAL_HEADER_BASE<64>
-	{
-		static inline unsigned int size() {return 240 - 0x10 * 8;}
-
-		PELIB_IMAGE_OPTIONAL_HEADER<64>() : PELIB_IMAGE_OPTIONAL_HEADER_BASE<64>()
-		{
-
-		}
-	};
-
-	template<int x>
-	struct PELIB_IMAGE_NT_HEADERS
-	{
-		dword Signature;
+		std::uint32_t Signature;
 		PELIB_IMAGE_FILE_HEADER FileHeader;
-		PELIB_IMAGE_OPTIONAL_HEADER<x> OptionalHeader;
+		PELIB_IMAGE_OPTIONAL_HEADER OptionalHeader;
 		std::vector<PELIB_IMAGE_DATA_DIRECTORY> dataDirectories;
 		bool lastDirectoryIsIncomplete;
 
 		unsigned int sizeOfSignature() const
 		{
-			return sizeof(dword);
+			return sizeof(std::uint32_t);
 		}
 
 		unsigned int size() const
 		{
 			return sizeOfSignature()
 				+ PELIB_IMAGE_FILE_HEADER::size()
-				+ PELIB_IMAGE_OPTIONAL_HEADER<x>::size()
+				+ sizeof(PELIB_IMAGE_OPTIONAL_HEADER)
 				+ static_cast<unsigned int>(dataDirectories.size()) * PELIB_IMAGE_DATA_DIRECTORY::size();
 		}
 
@@ -843,7 +792,7 @@ namespace PeLib
 			return res;
 		}
 
-		PELIB_IMAGE_NT_HEADERS()
+		PELIB_IMAGE_NT_HEADERS_EX()
 		{
 			Signature = 0;
 			lastDirectoryIsIncomplete = false;
@@ -853,27 +802,28 @@ namespace PeLib
 	const unsigned int PELIB_IMAGE_SIZEOF_SHORT_NAME  = 8;
 	const unsigned int PELIB_IMAGE_SIZEOF_MAX_NAME    = 1024;
 
-	struct PELIB_IMAGE_SECTION_HEADER
+	struct PELIB_IMAGE_SECTION_HEADER_BASE
 	{
-		byte Name[PELIB_IMAGE_SIZEOF_SHORT_NAME];
-		dword	VirtualSize;
-		dword   VirtualAddress;
-		dword   SizeOfRawData;
-		dword   PointerToRawData;
-		dword   PointerToRelocations;
-		dword   PointerToLinenumbers;
-		word    NumberOfRelocations;
-		word    NumberOfLinenumbers;
-		dword   Characteristics;
+		std::uint8_t  Name[PELIB_IMAGE_SIZEOF_SHORT_NAME];
+		std::uint32_t VirtualSize;
+		std::uint32_t VirtualAddress;
+		std::uint32_t SizeOfRawData;
+		std::uint32_t PointerToRawData;
+		std::uint32_t PointerToRelocations;
+		std::uint32_t PointerToLinenumbers;
+		std::uint16_t NumberOfRelocations;
+		std::uint16_t NumberOfLinenumbers;
+		std::uint32_t Characteristics;
+	};
+
+
+	struct PELIB_IMAGE_SECTION_HEADER : public PELIB_IMAGE_SECTION_HEADER_BASE
+	{
 		std::string StringTableName;
 
 		PELIB_IMAGE_SECTION_HEADER()
 		{
-			for (unsigned int i = 0; i < sizeof(Name) / sizeof(Name[0]); i++)
-			{
-				Name[i] = 0;
-			}
-
+			memset(Name, 0, sizeof(Name));
 			VirtualSize = 0;
 			VirtualAddress = 0;
 			SizeOfRawData = 0;
@@ -886,23 +836,21 @@ namespace PeLib
 			StringTableName = "";
 		}
 
-		static inline unsigned int size() {return 40;}
+		static inline std::size_t size() { return sizeof(PELIB_IMAGE_SECTION_HEADER); }
+
 		bool biggerFileOffset(const PELIB_IMAGE_SECTION_HEADER& ish) const;
 		bool biggerVirtualAddress(const PELIB_IMAGE_SECTION_HEADER& ish) const;
 		bool isFullNameSet() const;
 	};
 
-	template<int bits>
 	struct PELIB_IMAGE_THUNK_DATA
 	{
-		typename FieldSizes<bits>::VAR4_8 Ordinal;
+		std::uint64_t Ordinal;
 
 		PELIB_IMAGE_THUNK_DATA()
 		{
 			Ordinal = 0;
 		}
-
-		static inline unsigned int size() { return sizeof(typename FieldSizes<bits>::VAR4_8); }
 	};
 
 	template<int bits>
@@ -918,11 +866,11 @@ namespace PeLib
 
 	struct PELIB_IMAGE_IMPORT_DESCRIPTOR
 	{
-		dword   OriginalFirstThunk;
-		dword   TimeDateStamp;
-		dword   ForwarderChain;
-		dword   Name;
-		dword   FirstThunk;
+		std::uint32_t	OriginalFirstThunk;
+		std::uint32_t	TimeDateStamp;
+		std::uint32_t	ForwarderChain;
+		std::uint32_t	Name;
+		std::uint32_t	FirstThunk;
 
 		PELIB_IMAGE_IMPORT_DESCRIPTOR()
 		{
@@ -933,22 +881,22 @@ namespace PeLib
 			FirstThunk = 0;
 		}
 
-		static inline unsigned int size() {return 20;}
+		static inline std::size_t size() {return 20;}
 	};
 
 	struct PELIB_IMAGE_EXPORT_DIRECTORY
 	{
-		dword   Characteristics;
-		dword   TimeDateStamp;
-		word    MajorVersion;
-		word    MinorVersion;
-		dword   Name;
-		dword   Base;
-		dword   NumberOfFunctions;
-		dword   NumberOfNames;
-		dword   AddressOfFunctions;
-		dword   AddressOfNames;
-		dword   AddressOfNameOrdinals;
+		std::uint32_t	Characteristics;
+		std::uint32_t	TimeDateStamp;
+		std::uint16_t	MajorVersion;
+		std::uint16_t	MinorVersion;
+		std::uint32_t	Name;
+		std::uint32_t	Base;
+		std::uint32_t	NumberOfFunctions;
+		std::uint32_t	NumberOfNames;
+		std::uint32_t	AddressOfFunctions;
+		std::uint32_t	AddressOfNames;
+		std::uint32_t	AddressOfNameOrdinals;
 
 		PELIB_IMAGE_EXPORT_DIRECTORY()
 		{
@@ -965,14 +913,17 @@ namespace PeLib
 			AddressOfNameOrdinals = 0;
 		}
 
-		static inline unsigned int size() {return 40;}
+		static inline std::size_t size()
+		{
+			return sizeof(PELIB_IMAGE_EXPORT_DIRECTORY);
+		}
 	};
 
 	struct PELIB_IMAGE_BOUND_IMPORT_DESCRIPTOR
 	{
-		dword   TimeDateStamp;
-		word    OffsetModuleName;
-		word    NumberOfModuleForwarderRefs;
+		std::uint32_t	TimeDateStamp;
+		std::uint16_t	OffsetModuleName;
+		std::uint16_t	NumberOfModuleForwarderRefs;
 
 		PELIB_IMAGE_BOUND_IMPORT_DESCRIPTOR()
 		{
@@ -981,7 +932,7 @@ namespace PeLib
 			NumberOfModuleForwarderRefs = 0;
 		}
 
-		static unsigned int size()
+		static inline std::size_t size()
 		{
 			return 8;
 		}
@@ -999,14 +950,14 @@ namespace PeLib
 		/// Compares the passed filename to the struct's filename.
 		bool equal(const std::string strModuleName2) const;
 
-		unsigned int size() const;
+		std::size_t size() const;
 	};
 
 	struct PELIB_EXP_FUNC_INFORMATION
 	{
-		dword addroffunc;
-		dword addrofname;
-		word ordinal;
+		std::uint32_t addroffunc;
+		std::uint32_t addrofname;
+		std::uint16_t ordinal;
 		std::string funcname;
 
 		PELIB_EXP_FUNC_INFORMATION();
@@ -1024,24 +975,26 @@ namespace PeLib
 
 	struct PELIB_IMAGE_RESOURCE_DIRECTORY
 	{
-		dword Characteristics;
-		dword TimeDateStamp;
-		word MajorVersion;
-		word MinorVersion;
-		word NumberOfNamedEntries;
-		word NumberOfIdEntries;
-
+		std::uint32_t	Characteristics;
+		std::uint32_t	TimeDateStamp;
+		std::uint16_t	MajorVersion;
+		std::uint16_t	MinorVersion;
+		std::uint16_t	NumberOfNamedEntries;
+		std::uint16_t	NumberOfIdEntries;
+		
 		PELIB_IMAGE_RESOURCE_DIRECTORY();
 
-		static inline unsigned int size() {return 16;}
+		static inline std::size_t size() {return 16;}
 	};
 
 	struct PELIB_IMAGE_RESOURCE_DIRECTORY_ENTRY
 	{
-		dword Name;
-		dword OffsetToData;
+		std::uint32_t	Name;
+		std::uint32_t	OffsetToData;
+
 		PELIB_IMAGE_RESOURCE_DIRECTORY_ENTRY();
-		static inline unsigned int size() {return 8;}
+
+		static inline std::size_t size() {return 8;}
 	};
 
 	const unsigned int PELIB_IMAGE_SIZEOF_BASE_RELOCATION = 8;
@@ -1057,21 +1010,21 @@ namespace PeLib
 
 	struct PELIB_IMAGE_BASE_RELOCATION
 	{
-		dword VirtualAddress;
-		dword SizeOfBlock;
+		std::uint32_t	VirtualAddress;
+		std::uint32_t	SizeOfBlock;
 
 		PELIB_IMAGE_BASE_RELOCATION();
-		static inline unsigned int size() {return 8;}
+		static inline std::size_t size() {return 72;}
 	};
 
 	struct PELIB_IMAGE_COR20_HEADER
 	{
-		dword cb;
-		word MajorRuntimeVersion;
-		word MinorRuntimeVersion;
+		std::uint32_t	cb;
+		std::uint16_t	MajorRuntimeVersion;
+		std::uint16_t	MinorRuntimeVersion;
 		PELIB_IMAGE_DATA_DIRECTORY MetaData;
-		dword Flags;
-		dword EntryPointToken;
+		std::uint32_t	Flags;
+		std::uint32_t	EntryPointToken;
 		PELIB_IMAGE_DATA_DIRECTORY Resources;
 		PELIB_IMAGE_DATA_DIRECTORY StrongNameSignature;
 		PELIB_IMAGE_DATA_DIRECTORY CodeManagerTable;
@@ -1080,7 +1033,7 @@ namespace PeLib
 		PELIB_IMAGE_DATA_DIRECTORY ManagedNativeHeader;
 
 		PELIB_IMAGE_COR20_HEADER();
-		static inline unsigned int size() {return 72;}
+		static inline std::size_t size() {return 72;}
 	};
 
 	// Used to store a file's export table.
@@ -1091,23 +1044,24 @@ namespace PeLib
 		/// The original filename of current file.
 		std::string name;
 		std::vector<PELIB_EXP_FUNC_INFORMATION> functions;
-		inline unsigned int size() const
+
+		inline std::size_t size() const
 		{
-			return (unsigned int)(PELIB_IMAGE_EXPORT_DIRECTORY::size() + name.size() + 1 +
+			return (PELIB_IMAGE_EXPORT_DIRECTORY::size() + name.size() + 1 +
 			std::accumulate(functions.begin(), functions.end(), 0, accumulate<PELIB_EXP_FUNC_INFORMATION>));
 		}
 	};
 
 	bool isEqualNc(const std::string& s1, const std::string& s2);
+
 	// Used for parsing a file's import table. It combines the function name, the hint
 	// and the IMAGE_THUNK_DATA of an imported function.
-	template<int bits>
 	struct PELIB_THUNK_DATA
 	{
 		/// The IMAGE_THUNK_DATA struct of an imported function.
-		PELIB_IMAGE_THUNK_DATA<bits> itd;
+		PELIB_IMAGE_THUNK_DATA itd;
 		/// The hint of an imported function.
-		word hint;
+		std::uint16_t hint;
 		/// The function name of an imported function.
 		std::string fname;
 
@@ -1116,7 +1070,7 @@ namespace PeLib
 			hint = 0;
 		}
 
-		bool equalHint(word wHint) const
+		bool equalHint(std::uint16_t wHint) const
 		{
 			return hint == wHint;
 //			return itd.Ordinal == (wHint | PELIB_IMAGE_ORDINAL_FLAGS<bits>::PELIB_IMAGE_ORDINAL_FLAG);
@@ -1126,15 +1080,13 @@ namespace PeLib
 		{
 			return isEqualNc(fname, strFunctionName);
 		}
-
-		unsigned int size() const {return PELIB_IMAGE_THUNK_DATA<bits>::size() + fname.size() + 1 + sizeof(hint);}
 	};
 
 	template<int bits>
 	struct PELIB_DELAY_IMPORT
 	{
 		PELIB_VAR_SIZE<bits> address;
-		word hint;
+		std::uint16_t hint;
 		std::string fname;
 
 		PELIB_DELAY_IMPORT() : hint(0)
@@ -1145,7 +1097,6 @@ namespace PeLib
 
 	// Used to store a file's import table. Every struct of this sort
 	// can store import information of one DLL.
-	template<int bits>
 	struct PELIB_IMAGE_IMPORT_DIRECTORY
 	{
 		/// The IMAGE_IMPORT_DESCRIPTOR of an imported DLL.
@@ -1153,17 +1104,18 @@ namespace PeLib
 		/// The name of an imported DLL.
 		std::string name;
 		/// All original first thunk values of an imported DLL.
-		std::vector<PELIB_THUNK_DATA<bits> > originalfirstthunk;
+		std::vector<PELIB_THUNK_DATA> originalfirstthunk;
 		/// All first thunk value of an imported DLL.
-		std::vector<PELIB_THUNK_DATA<bits> > firstthunk;
+		std::vector<PELIB_THUNK_DATA> firstthunk;
 
-//		bool operator==(std::string strFilename) const;
-		inline unsigned int size() const
+		inline std::size_t size() const
 		{
-			return PELIB_IMAGE_IMPORT_DESCRIPTOR::size() + name.size() + 1 + // descriptor + dllname
-			std::accumulate(originalfirstthunk.begin(), originalfirstthunk.end(), 0, accumulate<PELIB_THUNK_DATA<bits> >) + // thunks (PeLib uses only one thunk)
-			PELIB_IMAGE_THUNK_DATA<bits>::size(); // zero-termination
+			return sizeof(PELIB_IMAGE_IMPORT_DESCRIPTOR) +                // descriptor
+				   name.size() + 1 +                                      // dllname
+				   sizeof(PELIB_THUNK_DATA) * originalfirstthunk.size() + // thunks (PeLib uses only one thunk)
+				   sizeof(PELIB_IMAGE_THUNK_DATA);                        // zero-termination
 		}
+
 
 		bool operator==(std::string strFilename) const
 		{
@@ -1176,10 +1128,10 @@ namespace PeLib
 
 	struct PELIB_IMAGE_RESOURCE_DATA_ENTRY
 	{
-		dword OffsetToData;
-		dword Size;
-		dword CodePage;
-		dword Reserved;
+		std::uint32_t	OffsetToData;
+		std::uint32_t	Size;
+		std::uint32_t	CodePage;
+		std::uint32_t	Reserved;
 
 		static inline unsigned int size() {return 16;}
 
@@ -1189,27 +1141,27 @@ namespace PeLib
 	struct PELIB_IMAGE_RESOURCE_DATA
 	{
 		PELIB_IMAGE_RESOURCE_DATA_ENTRY irdEntry;
-		std::vector<byte> vData;
+		std::vector<std::uint8_t> vData;
 	};
 
 	struct IMG_BASE_RELOC
 	{
 		PELIB_IMAGE_BASE_RELOCATION ibrRelocation;
-		std::vector<word> vRelocData;
+		std::vector<std::uint16_t> vRelocData;
 	};
 
 	struct PELIB_IMAGE_DEBUG_DIRECTORY
 	{
-		dword Characteristics;
-		dword TimeDateStamp;
-		word MajorVersion;
-		word MinorVersion;
-		dword Type;
-		dword SizeOfData;
-		dword AddressOfRawData;
-		dword PointerToRawData;
+		std::uint32_t	Characteristics;
+		std::uint32_t	TimeDateStamp;
+		std::uint16_t	MajorVersion;
+		std::uint16_t	MinorVersion;
+		std::uint32_t	Type;
+		std::uint32_t	SizeOfData;
+		std::uint32_t	AddressOfRawData;
+		std::uint32_t	PointerToRawData;
 
-		static unsigned int size() {return 28;}
+		static std::size_t size() {return 28;}
 
 		PELIB_IMAGE_DEBUG_DIRECTORY();
 	};
@@ -1217,7 +1169,7 @@ namespace PeLib
 	struct PELIB_IMG_DEBUG_DIRECTORY
 	{
 		PELIB_IMAGE_DEBUG_DIRECTORY idd;
-		std::vector<byte> data;
+		std::vector<std::uint8_t> data;
 	};
 
 	template<int bits>
@@ -1227,8 +1179,8 @@ namespace PeLib
 		typename FieldSizes<bits>::VAR4_8 EndAddressOfRawData;
 		typename FieldSizes<bits>::VAR4_8 AddressOfIndex;
 		typename FieldSizes<bits>::VAR4_8 AddressOfCallBacks;
-		dword SizeOfZeroFill;
-		dword Characteristics;
+		std::uint32_t SizeOfZeroFill;
+		std::uint32_t Characteristics;
 
 		PELIB_IMAGE_TLS_DIRECTORY_BASE()
 		{
@@ -1306,14 +1258,14 @@ namespace PeLib
 
 	struct PELIB_IMAGE_COFF_SYMBOL
 	{
-		dword Index;
+		std::uint32_t Index;
 		std::string Name;
-		dword Value;
-		word SectionNumber;
-		byte TypeComplex;
-		byte TypeSimple;
-		byte StorageClass;
-		byte NumberOfAuxSymbols;
+		std::uint32_t Value;
+		std::uint16_t SectionNumber;
+		std::uint8_t TypeComplex;
+		std::uint8_t TypeSimple;
+		std::uint8_t StorageClass;
+		std::uint8_t NumberOfAuxSymbols;
 
 		PELIB_IMAGE_COFF_SYMBOL() : Index(0), Value(0), SectionNumber(0),
 			TypeComplex(0), TypeSimple(0), StorageClass(0), NumberOfAuxSymbols(0)
@@ -1325,9 +1277,9 @@ namespace PeLib
 	struct PELIB_IMAGE_RICH_HEADER_RECORD
 	{
 		std::string Signature;
-		word ProductId;
-		word ProductBuild;
-		dword Count;
+		std::uint16_t ProductId;
+		std::uint16_t ProductBuild;
+		std::uint32_t Count;
 		std::string ProductName;
 		std::string VisualStudioName;
 
@@ -1348,17 +1300,17 @@ namespace PeLib
 			std::vector<PELIB_DELAY_IMPORT<bits>> Functions;
 
 		public:
-			dword Attributes;
-			dword NameRva;
+			std::uint32_t Attributes;
+			std::uint32_t NameRva;
 			std::string Name;
-			dword ModuleHandleRva;
-			dword DelayImportAddressTableRva;
-			dword DelayImportNameTableRva;
-			dword BoundDelayImportTableRva;
-			dword UnloadDelayImportTableRva;
-			dword TimeStamp;
-			dword DelayImportAddressTableOffset;
-			dword DelayImportNameTableOffset;
+			std::uint32_t ModuleHandleRva;
+			std::uint32_t DelayImportAddressTableRva;
+			std::uint32_t DelayImportNameTableRva;
+			std::uint32_t BoundDelayImportTableRva;
+			std::uint32_t UnloadDelayImportTableRva;
+			std::uint32_t TimeStamp;
+			std::uint32_t DelayImportAddressTableOffset;
+			std::uint32_t DelayImportNameTableOffset;
 
 			PELIB_IMAGE_DELAY_IMPORT_DIRECTORY_RECORD()
 			{
@@ -1453,9 +1405,9 @@ namespace PeLib
 
 	struct PELIB_IMAGE_CERTIFICATE_ENTRY
 	{
-		dword Length;
-		word Revision;
-		word CertificateType;
+		std::uint32_t Length;
+		std::uint16_t Revision;
+		std::uint16_t CertificateType;
 		std::vector<unsigned char> Certificate;
 
 		static inline unsigned int size() { return 8; }

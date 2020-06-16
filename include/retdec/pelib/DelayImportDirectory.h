@@ -123,15 +123,15 @@ namespace PeLib
 					// Convert older (MS Visual C++ 6.0) delay-import descriptor to newer one.
 					// These delay-import descriptors are distinguishable by lowest bit in rec.Attributes to be zero.
 					// Sample: 2775d97f8bdb3311ace960a42eee35dbec84b9d71a6abbacb26c14e83f5897e4
-					rec.NameRva                    = (dword)normalizeDelayImportValue(rec, peHeader, rec.NameRva);
-					rec.ModuleHandleRva            = (dword)normalizeDelayImportValue(rec, peHeader, rec.ModuleHandleRva);
-					rec.DelayImportAddressTableRva = (dword)normalizeDelayImportValue(rec, peHeader, rec.DelayImportAddressTableRva);
-					rec.DelayImportNameTableRva    = (dword)normalizeDelayImportValue(rec, peHeader, rec.DelayImportNameTableRva);
-					rec.BoundDelayImportTableRva   = (dword)normalizeDelayImportValue(rec, peHeader, rec.BoundDelayImportTableRva);
-					rec.UnloadDelayImportTableRva  = (dword)normalizeDelayImportValue(rec, peHeader, rec.UnloadDelayImportTableRva);
+					rec.NameRva                    = (std::uint32_t)normalizeDelayImportValue(rec, peHeader, rec.NameRva);
+					rec.ModuleHandleRva            = (std::uint32_t)normalizeDelayImportValue(rec, peHeader, rec.ModuleHandleRva);
+					rec.DelayImportAddressTableRva = (std::uint32_t)normalizeDelayImportValue(rec, peHeader, rec.DelayImportAddressTableRva);
+					rec.DelayImportNameTableRva    = (std::uint32_t)normalizeDelayImportValue(rec, peHeader, rec.DelayImportNameTableRva);
+					rec.BoundDelayImportTableRva   = (std::uint32_t)normalizeDelayImportValue(rec, peHeader, rec.BoundDelayImportTableRva);
+					rec.UnloadDelayImportTableRva  = (std::uint32_t)normalizeDelayImportValue(rec, peHeader, rec.UnloadDelayImportTableRva);
 
-					rec.DelayImportAddressTableOffset = (dword)peHeader.rvaToOffset(rec.DelayImportAddressTableRva);
-					rec.DelayImportNameTableOffset = (dword)peHeader.rvaToOffset(rec.DelayImportNameTableRva);
+					rec.DelayImportAddressTableOffset = (std::uint32_t)peHeader.rvaToOffset(rec.DelayImportAddressTableRva);
+					rec.DelayImportNameTableOffset = (std::uint32_t)peHeader.rvaToOffset(rec.DelayImportNameTableRva);
 
 					// Get name of library
 					getStringFromFileOffset(inStream_w, rec.Name, (std::size_t)peHeader.rvaToOffset(rec.NameRva), IMPORT_LIBRARY_MAX_LENGTH);
@@ -152,7 +152,7 @@ namespace PeLib
 					for(;;)
 					{
 						PELIB_VAR_SIZE<bits> nameAddr;
-						std::vector<byte> vBuffer(sizeof(nameAddr.Value));
+						std::vector<std::uint8_t> vBuffer(sizeof(nameAddr.Value));
 
 						// Read the value from the file
 						inStream_w.read(reinterpret_cast<char*>(vBuffer.data()), sizeof(nameAddr.Value));
@@ -184,7 +184,7 @@ namespace PeLib
 					for (std::size_t i = 0, e = nameAddresses.size(); i < e; ++i)
 					{
 						PELIB_VAR_SIZE<bits> funcAddr;
-						std::vector<byte> vBuffer(sizeof(funcAddr.Value));
+						std::vector<std::uint8_t> vBuffer(sizeof(funcAddr.Value));
 
 						// Read the value from the file
 						inStream_w.read(reinterpret_cast<char*>(vBuffer.data()), sizeof(funcAddr.Value));
@@ -228,7 +228,7 @@ namespace PeLib
 						}
 						else
 						{
-							function.hint = (word)(nameAddr.Value & 0xFFFF);
+							function.hint = (std::uint16_t)(nameAddr.Value & 0xFFFF);
 						}
 
 						// Fill-in function address. The table is always in the image itself

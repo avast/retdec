@@ -49,25 +49,25 @@ namespace PeLib
 		  unsigned int size() const; // EXPORT
 
 		  /// Returns the VA of a relocation.
-		  dword getVirtualAddress(unsigned int ulRelocation) const; // EXPORT
+		  std::uint32_t getVirtualAddress(unsigned int ulRelocation) const; // EXPORT
 		  /// Returns the SizeOfBlock value of a relocation.
-		  dword getSizeOfBlock(unsigned int ulRelocation) const; // EXPORT
+		  std::uint32_t getSizeOfBlock(unsigned int ulRelocation) const; // EXPORT
 		  /// Returns the RelocationData of a relocation.
-		  word getRelocationData(unsigned int ulRelocation, unsigned int ulDataNumber) const; // EXPORT
+		  std::uint16_t getRelocationData(unsigned int ulRelocation, unsigned int ulDataNumber) const; // EXPORT
 
 		  /// Changes the relocation data of a relocation.
-		  void setRelocationData(unsigned int ulRelocation, unsigned int ulDataNumber, word wData); // EXPORT
+		  void setRelocationData(unsigned int ulRelocation, unsigned int ulDataNumber, std::uint16_t wData); // EXPORT
 
 		  /// Changes the VirtualAddress of a relocation.
-		  void setVirtualAddress(unsigned int ulRelocation, dword dwValue); // EXPORT
+		  void setVirtualAddress(unsigned int ulRelocation, std::uint32_t dwValue); // EXPORT
 		  /// Changes the SizeOfBlock of a relocation.
-		  void setSizeOfBlock(unsigned int ulRelocation, dword dwValue); // EXPORT
+		  void setSizeOfBlock(unsigned int ulRelocation, std::uint32_t dwValue); // EXPORT
 
 		  void addRelocation(); // EXPORT
 		  /// Adds new data to a relocation.
-		  void addRelocationData(unsigned int ulRelocation, word wValue); // EXPORT
+		  void addRelocationData(unsigned int ulRelocation, std::uint16_t wValue); // EXPORT
 		  /// Removes data from a relocation.
-//		  void removeRelocationData(unsigned int ulRelocation, word wValue); // EXPORT
+		  void removeRelocationData(unsigned int ulRelocation, std::uint16_t wValue); // EXPORT
 		  void removeRelocation(unsigned int index); // EXPORT
 		  void removeRelocationData(unsigned int relocindex, unsigned int dataindex); // EXPORT
 	};

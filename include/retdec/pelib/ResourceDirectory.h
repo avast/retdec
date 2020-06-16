@@ -40,7 +40,7 @@ namespace PeLib
 
 		public:
 		  /// Function which compares a resource ID to the node's resource ID.
-		  bool equalId(dword wId) const; // EXPORT
+		  bool equalId(std::uint32_t wId) const; // EXPORT
 		  /// Function which compares a string to the node's resource name.
 		  bool equalName(std::string strName) const; // EXPORT
 		  /// Predicate that determines if a child is identified by name or by ID.
@@ -49,7 +49,7 @@ namespace PeLib
 		  bool operator<(const ResourceChild& rc) const; // EXPORT
 
 		  /// A comparison function for searching a resource element by its ID.
-		  bool hasEqual(dword id) const { return equalId(id); }
+		  bool hasEqual(std::uint32_t id) const { return equalId(id); }
 		  /// A comparison function for searching a resource element by its name.
 		  bool hasEqual(const std::string& name) const { return equalName(name); }
 
@@ -68,16 +68,16 @@ namespace PeLib
 		  /// Returns the name of the node.
 		  std::string getName() const; // EXPORT
 		  /// Returns the Name value of the node.
-		  dword getOffsetToName() const; // EXPORT
+		  std::uint32_t getOffsetToName() const; // EXPORT
 		  /// Returns the OffsetToData value of the node.
-		  dword getOffsetToData() const; // EXPORT
+		  std::uint32_t getOffsetToData() const; // EXPORT
 
 		  /// Sets the name of the node.
 		  void setName(const std::string& strNewName); // EXPORT
 		  /// Sets the Name value of the node.
-		  void setOffsetToName(dword dwNewOffset); // EXPORT
+		  void setOffsetToName(std::uint32_t dwNewOffset); // EXPORT
 		  /// Sets the OffsetToData value of the node.
-		  void setOffsetToData(dword dwNewOffset); // EXPORT
+		  void setOffsetToData(std::uint32_t dwNewOffset); // EXPORT
 
 		  /// Returns the size of a resource child.
 //		unsigned int size() const;
@@ -136,7 +136,7 @@ namespace PeLib
 
 		private:
 		  /// The resource data.
-		  std::vector<byte> m_data;
+		  std::vector<std::uint8_t> m_data;
 		  /// PeLib equivalent of the Win32 structure IMAGE_RESOURCE_DATA_ENTRY
 		  PELIB_IMAGE_RESOURCE_DATA_ENTRY entry;
 
@@ -157,27 +157,27 @@ namespace PeLib
 //		  unsigned int size() const;
 
 		  /// Returns the resource data of this resource leaf.
-		  std::vector<byte> getData() const; // EXPORT
+		  std::vector<std::uint8_t> getData() const; // EXPORT
 		  /// Sets the resource data of this resource leaf.
-		  void setData(const std::vector<byte>& vData); // EXPORT
+		  void setData(const std::vector<std::uint8_t>& vData); // EXPORT
 
 		  /// Returns the OffsetToData value of this resource leaf.
-		  dword getOffsetToData() const; // EXPORT
+		  std::uint32_t getOffsetToData() const; // EXPORT
 		  /// Returns the Size value of this resource leaf.
-		  dword getSize() const; // EXPORT
+		  std::uint32_t getSize() const; // EXPORT
 		  /// Returns the CodePage value of this resource leaf.
-		  dword getCodePage() const; // EXPORT
+		  std::uint32_t getCodePage() const; // EXPORT
 		  /// Returns the Reserved value of this resource leaf.
-		  dword getReserved() const; // EXPORT
+		  std::uint32_t getReserved() const; // EXPORT
 
 		  /// Sets the OffsetToData value of this resource leaf.
-		  void setOffsetToData(dword dwValue); // EXPORT
+		  void setOffsetToData(std::uint32_t dwValue); // EXPORT
 		  /// Sets the Size value of this resource leaf.
-		  void setSize(dword dwValue); // EXPORT
+		  void setSize(std::uint32_t dwValue); // EXPORT
 		  /// Sets the CodePage value of this resource leaf.
-		  void setCodePage(dword dwValue); // EXPORT
+		  void setCodePage(std::uint32_t dwValue); // EXPORT
 		  /// Sets the Reserved value of this resource leaf.
-		  void setReserved(dword dwValue); // EXPORT
+		  void setReserved(std::uint32_t dwValue); // EXPORT
 		  /// Constructor
 		  ResourceLeaf();
 		  /// Destructor
@@ -224,42 +224,42 @@ namespace PeLib
 		  /// Returns the name of one of the node's children.
 		  std::string getChildName(unsigned int uiIndex) const; // EXPORT
 		  /// Returns the Name value of one of the node's children.
-		  dword getOffsetToChildName(unsigned int uiIndex) const; // EXPORT
+		  std::uint32_t getOffsetToChildName(unsigned int uiIndex) const; // EXPORT
 		  /// Returns the OffsetToData value of one of the node's children.
-		  dword getOffsetToChildData(unsigned int uiIndex) const; // EXPORT
+		  std::uint32_t getOffsetToChildData(unsigned int uiIndex) const; // EXPORT
 
 		  /// Sets the name of one of the node's children.
 		  void setChildName(unsigned int uiIndex, const std::string& strNewName); // EXPORT
 		  /// Sets the Name value of one of the node's children.
-		  void setOffsetToChildName(unsigned int uiIndex, dword dwNewOffset); // EXPORT
+		  void setOffsetToChildName(unsigned int uiIndex, std::uint32_t dwNewOffset); // EXPORT
 		  /// Sets the OffsetToData value of one of the node's children.
-		  void setOffsetToChildData(unsigned int uiIndex, dword dwNewOffset); // EXPORT
+		  void setOffsetToChildData(unsigned int uiIndex, std::uint32_t dwNewOffset); // EXPORT
 
 		  /// Returns the node's Characteristics value.
-		  dword getCharacteristics() const; // EXPORT
+		  std::uint32_t getCharacteristics() const; // EXPORT
 		  /// Returns the node's TimeDateStamp value.
-		  dword getTimeDateStamp() const; // EXPORT
+		  std::uint32_t getTimeDateStamp() const; // EXPORT
 		  /// Returns the node's MajorVersion value.
-		  word getMajorVersion() const; // EXPORT
+		  std::uint16_t getMajorVersion() const; // EXPORT
 		  /// Returns the node's MinorVersion value.
-		  word getMinorVersion() const; // EXPORT
+		  std::uint16_t getMinorVersion() const; // EXPORT
 		  /// Returns the node's NumberOfNamedEntries value.
-		  word getNumberOfNamedEntries() const; // EXPORT
+		  std::uint16_t getNumberOfNamedEntries() const; // EXPORT
 		  /// Returns the node's NumberOfIdEntries value.
-		  word getNumberOfIdEntries() const; // EXPORT
+		  std::uint16_t getNumberOfIdEntries() const; // EXPORT
 
 		  /// Sets the node's Characteristics value.
-		  void setCharacteristics(dword value); // EXPORT
+		  void setCharacteristics(std::uint32_t value); // EXPORT
 		  /// Sets the node's TimeDateStamp value.
-		  void setTimeDateStamp(dword value); // EXPORT
+		  void setTimeDateStamp(std::uint32_t value); // EXPORT
 		  /// Sets the node's MajorVersion value.
-		  void setMajorVersion(word value); // EXPORT
+		  void setMajorVersion(std::uint16_t value); // EXPORT
 		  /// Sets the node's MinorVersion value.
-		  void setMinorVersion(word value); // EXPORT
+		  void setMinorVersion(std::uint16_t value); // EXPORT
 		  /// Sets the node's NumberOfNamedEntries value.
-		  void setNumberOfNamedEntries(word value); // EXPORT
+		  void setNumberOfNamedEntries(std::uint16_t value); // EXPORT
 		  /// Sets the node's NumberOfIdEntries value.
-		  void setNumberOfIdEntries(word value); // EXPORT
+		  void setNumberOfIdEntries(std::uint16_t value); // EXPORT
 
 		  /// Returns the size of a resource node.
 //		unsigned int size() const;
@@ -280,12 +280,12 @@ namespace PeLib
 
 	/// Fixes NumberOfIdEntries value of a node.
 	template<>
-	struct fixNumberOfEntries<dword>
+	struct fixNumberOfEntries<std::uint32_t>
 	{
 		/// Fixes a resource node's NumberOfIdEntries value.
 		static void fix(ResourceNode* node)
 		{
-			node->header.NumberOfIdEntries = static_cast<PeLib::word>(
+			node->header.NumberOfIdEntries = static_cast<std::uint16_t>(
 				node->children.size() - std::count_if(
 						node->children.begin(),
 						node->children.end(),
@@ -302,7 +302,7 @@ namespace PeLib
 		/// Fixes a resource node's NumberOfNamedEntries value.
 		static void fix(ResourceNode* node)
 		{
-			node->header.NumberOfNamedEntries = static_cast<PeLib::word>(
+			node->header.NumberOfNamedEntries = static_cast<std::uint16_t>(
 				std::count_if(
 					node->children.begin(),
 					node->children.end(),
@@ -373,19 +373,19 @@ namespace PeLib
 
 		  /// Returns the data of a resource.
 		  template<typename S, typename T>
-		  int getResourceDataT(S restypeid, T resid, std::vector<byte>& data) const;
+		  int getResourceDataT(S restypeid, T resid, std::vector<std::uint8_t>& data) const;
 
 		  /// Sets the data of a resource.
 		  template<typename S, typename T>
-		  int setResourceDataT(S restypeid, T resid, std::vector<byte>& data);
+		  int setResourceDataT(S restypeid, T resid, std::vector<std::uint8_t>& data);
 
 		  /// Returns the ID of a resource.
 		  template<typename S, typename T>
-		  dword getResourceIdT(S restypeid, T resid) const;
+		  std::uint32_t getResourceIdT(S restypeid, T resid) const;
 
 		  /// Sets the ID of a resource.
 		  template<typename S, typename T>
-		  int setResourceIdT(S restypeid, T resid, dword dwNewResId);
+		  int setResourceIdT(S restypeid, T resid, std::uint32_t dwNewResId);
 
 		  /// Returns the name of a resource.
 		  template<typename S, typename T>
@@ -411,7 +411,7 @@ namespace PeLib
 		  /// Corrects a erroneous resource directory.
 		  void makeValid();
 		  /// Rebuilds the resource directory.
-		  void rebuild(std::vector<byte>& vBuffer, unsigned int uiRva) const;
+		  void rebuild(std::vector<std::uint8_t>& vBuffer, unsigned int uiRva) const;
 		  /// Recalculate the tree for different RVA
 		  void recalculate(unsigned int& uiNewSize, unsigned int uiNewRva);
 		  /// Returns the size of the rebuilt resource directory.
@@ -420,12 +420,12 @@ namespace PeLib
 		  int write(const std::string& strFilename, unsigned int uiOffset, unsigned int uiRva) const;
 
 		  /// Adds a new resource type.
-		  int addResourceType(dword dwResTypeId);
+		  int addResourceType(std::uint32_t dwResTypeId);
 		  /// Adds a new resource type.
 		  int addResourceType(const std::string& strResTypeName);
 
 		  /// Removes a resource type and all of it's resources.
-		  int removeResourceType(dword dwResTypeId);
+		  int removeResourceType(std::uint32_t dwResTypeId);
 		  /// Removes a resource type and all of it's resources.
 		  int removeResourceType(const std::string& strResTypeName);
 
@@ -433,20 +433,20 @@ namespace PeLib
 		  int removeResourceTypeByIndex(unsigned int uiIndex);
 
 		  /// Adds a new resource.
-		  int addResource(dword dwResTypeId, dword dwResId);
+		  int addResource(std::uint32_t dwResTypeId, std::uint32_t dwResId);
 		  /// Adds a new resource.
-		  int addResource(dword dwResTypeId, const std::string& strResName);
+		  int addResource(std::uint32_t dwResTypeId, const std::string& strResName);
 		  /// Adds a new resource.
-		  int addResource(const std::string& strResTypeName, dword dwResId);
+		  int addResource(const std::string& strResTypeName, std::uint32_t dwResId);
 		  /// Adds a new resource.
 		  int addResource(const std::string& strResTypeName, const std::string& strResName);
 
 		  /// Removes a resource.
-		  int removeResource(dword dwResTypeId, dword dwResId);
+		  int removeResource(std::uint32_t dwResTypeId, std::uint32_t dwResId);
 		  /// Removes a resource.
-		  int removeResource(dword dwResTypeId, const std::string& strResName);
+		  int removeResource(std::uint32_t dwResTypeId, const std::string& strResName);
 		  /// Removes a resource.
-		  int removeResource(const std::string& strResTypeName, dword dwResId);
+		  int removeResource(const std::string& strResTypeName, std::uint32_t dwResId);
 		  /// Removes a resource.
 		  int removeResource(const std::string& strResTypeName, const std::string& strResName);
 
@@ -457,17 +457,17 @@ namespace PeLib
 		  unsigned int getNumberOfResourceTypes() const;
 
 		  /// Returns the ID of a resource type.
-		  dword getResourceTypeIdByIndex(unsigned int uiIndex) const;
+		  std::uint32_t getResourceTypeIdByIndex(unsigned int uiIndex) const;
 		  /// Returns the name of a resource type.
 		  std::string getResourceTypeNameByIndex(unsigned int uiIndex) const;
 
 		  /// Converts a resource type ID to an index.
-		  int resourceTypeIdToIndex(dword dwResTypeId) const;
+		  int resourceTypeIdToIndex(std::uint32_t dwResTypeId) const;
 		  /// Converts a resource type name to an index.
 		  int resourceTypeNameToIndex(const std::string& strResTypeName) const;
 
 		  /// Returns the number of resources of a certain resource type.
-		  unsigned int getNumberOfResources(dword dwId) const;
+		  unsigned int getNumberOfResources(std::uint32_t dwId) const;
 		  /// Returns the number of resources of a certain resource type.
 		  unsigned int getNumberOfResources(const std::string& strResTypeName) const;
 
@@ -475,63 +475,63 @@ namespace PeLib
 		  unsigned int getNumberOfResourcesByIndex(unsigned int uiIndex) const;
 
 		  /// Returns the data of a certain resource.
-		  void getResourceData(dword dwResTypeId, dword dwResId, std::vector<byte>& data) const;
+		  void getResourceData(std::uint32_t dwResTypeId, std::uint32_t dwResId, std::vector<std::uint8_t>& data) const;
 		  /// Returns the data of a certain resource.
-		  void getResourceData(dword dwResTypeId, const std::string& strResName, std::vector<byte>& data) const;
+		  void getResourceData(std::uint32_t dwResTypeId, const std::string& strResName, std::vector<std::uint8_t>& data) const;
 		  /// Returns the data of a certain resource.
-		  void getResourceData(const std::string& strResTypeName, dword dwResId, std::vector<byte>& data) const;
+		  void getResourceData(const std::string& strResTypeName, std::uint32_t dwResId, std::vector<std::uint8_t>& data) const;
 		  /// Returns the data of a certain resource.
-		  void getResourceData(const std::string& strResTypeName, const std::string& strResName, std::vector<byte>& data) const;
+		  void getResourceData(const std::string& strResTypeName, const std::string& strResName, std::vector<std::uint8_t>& data) const;
 
 		  /// Returns the data of a certain resource.
-		  void getResourceDataByIndex(unsigned int uiResTypeIndex, unsigned int uiResIndex, std::vector<byte>& data) const;
+		  void getResourceDataByIndex(unsigned int uiResTypeIndex, unsigned int uiResIndex, std::vector<std::uint8_t>& data) const;
 
 		  /// Sets the data of a certain resource.
-		  void setResourceData(dword dwResTypeId, dword dwResId, std::vector<byte>& data);
+		  void setResourceData(std::uint32_t dwResTypeId, std::uint32_t dwResId, std::vector<std::uint8_t>& data);
 		  /// Sets the data of a certain resource.
-		  void setResourceData(dword dwResTypeId, const std::string& strResName, std::vector<byte>& data);
+		  void setResourceData(std::uint32_t dwResTypeId, const std::string& strResName, std::vector<std::uint8_t>& data);
 		  /// Sets the data of a certain resource.
-		  void setResourceData(const std::string& strResTypeName, dword dwResId, std::vector<byte>& data);
+		  void setResourceData(const std::string& strResTypeName, std::uint32_t dwResId, std::vector<std::uint8_t>& data);
 		  /// Sets the data of a certain resource.
-		  void setResourceData(const std::string& strResTypeName, const std::string& strResName, std::vector<byte>& data);
+		  void setResourceData(const std::string& strResTypeName, const std::string& strResName, std::vector<std::uint8_t>& data);
 
 		  /// Sets the data of a certain resource.
-		  void setResourceDataByIndex(unsigned int uiResTypeIndex, unsigned int uiResIndex, std::vector<byte>& data);
+		  void setResourceDataByIndex(unsigned int uiResTypeIndex, unsigned int uiResIndex, std::vector<std::uint8_t>& data);
 
 		  /// Returns the ID of a certain resource.
-		  dword getResourceId(dword dwResTypeId, const std::string& strResName) const;
+		  std::uint32_t getResourceId(std::uint32_t dwResTypeId, const std::string& strResName) const;
 		  /// Returns the ID of a certain resource.
-		  dword getResourceId(const std::string& strResTypeName, const std::string& strResName) const;
+		  std::uint32_t getResourceId(const std::string& strResTypeName, const std::string& strResName) const;
 
 		  /// Returns the ID of a certain resource.
-		  dword getResourceIdByIndex(unsigned int uiResTypeIndex, unsigned int uiResIndex) const;
+		  std::uint32_t getResourceIdByIndex(unsigned int uiResTypeIndex, unsigned int uiResIndex) const;
 
 		  /// Sets the ID of a certain resource.
-		  void setResourceId(dword dwResTypeId, dword dwResId, dword dwNewResId);
+		  void setResourceId(std::uint32_t dwResTypeId, std::uint32_t dwResId, std::uint32_t dwNewResId);
 		  /// Sets the ID of a certain resource.
-		  void setResourceId(dword dwResTypeId, const std::string& strResName, dword dwNewResId);
+		  void setResourceId(std::uint32_t dwResTypeId, const std::string& strResName, std::uint32_t dwNewResId);
 		  /// Sets the ID of a certain resource.
-		  void setResourceId(const std::string& strResTypeName, dword dwResId, dword dwNewResId);
+		  void setResourceId(const std::string& strResTypeName, std::uint32_t dwResId, std::uint32_t dwNewResId);
 		  /// Sets the ID of a certain resource.
-		  void setResourceId(const std::string& strResTypeName, const std::string& strResName, dword dwNewResId);
+		  void setResourceId(const std::string& strResTypeName, const std::string& strResName, std::uint32_t dwNewResId);
 
 		  /// Sets the ID of a certain resource.
-		  void setResourceIdByIndex(unsigned int uiResTypeIndex, unsigned int uiResIndex, dword dwNewResId);
+		  void setResourceIdByIndex(unsigned int uiResTypeIndex, unsigned int uiResIndex, std::uint32_t dwNewResId);
 
 		  /// Returns the name of a certain resource.
-		  std::string getResourceName(dword dwResTypeId, dword dwResId) const;
+		  std::string getResourceName(std::uint32_t dwResTypeId, std::uint32_t dwResId) const;
 		  /// Returns the name of a certain resource.
-		  std::string getResourceName(const std::string& strResTypeName, dword dwResId) const;
+		  std::string getResourceName(const std::string& strResTypeName, std::uint32_t dwResId) const;
 
 		  /// Returns the name of a certain resource.
 		  std::string getResourceNameByIndex(unsigned int uiResTypeIndex, unsigned int uiResIndex) const;
 
 		  /// Sets the name of a certain resource.
-		  void setResourceName(dword dwResTypeId, dword dwResId, const std::string& strNewResName);
+		  void setResourceName(std::uint32_t dwResTypeId, std::uint32_t dwResId, const std::string& strNewResName);
 		  /// Sets the name of a certain resource.
-		  void setResourceName(dword dwResTypeId, const std::string& strResName, const std::string& strNewResName);
+		  void setResourceName(std::uint32_t dwResTypeId, const std::string& strResName, const std::string& strNewResName);
 		  /// Sets the name of a certain resource.
-		  void setResourceName(const std::string& strResTypeName, dword dwResId, const std::string& strNewResName);
+		  void setResourceName(const std::string& strResTypeName, std::uint32_t dwResId, const std::string& strNewResName);
 		  /// Sets the name of a certain resource.
 		  void setResourceName(const std::string& strResTypeName, const std::string& strResName, const std::string& strNewResName);
 
@@ -693,7 +693,7 @@ namespace PeLib
 	* @param data The data of the resource will be written into this vector.
 	**/
 	template<typename S, typename T>
-	int ResourceDirectory::getResourceDataT(S restypeid, T resid, std::vector<byte>& data) const
+	int ResourceDirectory::getResourceDataT(S restypeid, T resid, std::vector<std::uint8_t>& data) const
 	{
 		std::vector<ResourceChild>::const_iterator ResIter = locateResourceT(restypeid, resid);
 		ResourceNode* currNode = static_cast<ResourceNode*>(ResIter->child);
@@ -710,7 +710,7 @@ namespace PeLib
 	* @param data The new data of the resource is taken from this vector.
 	**/
 	template<typename S, typename T>
-	int ResourceDirectory::setResourceDataT(S restypeid, T resid, std::vector<byte>& data)
+	int ResourceDirectory::setResourceDataT(S restypeid, T resid, std::vector<std::uint8_t>& data)
 	{
 		std::vector<ResourceChild>::iterator ResIter = locateResourceT(restypeid, resid);
 		ResourceNode* currNode = static_cast<ResourceNode*>(ResIter->child);
@@ -728,7 +728,7 @@ namespace PeLib
 	* @return The ID of the specified resource.
 	**/
 	template<typename S, typename T>
-	dword ResourceDirectory::getResourceIdT(S restypeid, T resid) const
+	std::uint32_t ResourceDirectory::getResourceIdT(S restypeid, T resid) const
 	{
 		std::vector<ResourceChild>::const_iterator ResIter = locateResourceT(restypeid, resid);
 		return ResIter->entry.irde.Name;
@@ -741,7 +741,7 @@ namespace PeLib
 	* @param dwNewResId New ID of the resource.
 	**/
 	template<typename S, typename T>
-	int ResourceDirectory::setResourceIdT(S restypeid, T resid, dword dwNewResId)
+	int ResourceDirectory::setResourceIdT(S restypeid, T resid, std::uint32_t dwNewResId)
 	{
 		std::vector<ResourceChild>::iterator ResIter = locateResourceT(restypeid, resid);
 		ResIter->entry.irde.Name = dwNewResId;

@@ -16,6 +16,7 @@
 #include "retdec/pelib/PeLibInc.h"
 #include "retdec/pelib/MzHeader.h"
 #include "retdec/pelib/PeHeader.h"
+#include "retdec/pelib/ImageLoader.h"
 #include "retdec/pelib/ImportDirectory.h"
 #include "retdec/pelib/ExportDirectory.h"
 #include "retdec/pelib/BoundImportDirectory.h"
@@ -85,6 +86,8 @@ namespace PeLib
 
 		  virtual void visit(PeFileVisitor &v) = 0;
 
+		  /// Reads the basic headers needed to process the file
+		  virtual int loadPeHeaders(ByteBuffer & fileData) = 0;
 		  /// Reads the MZ header of the current file from disc.
 		  virtual int readMzHeader() = 0; // EXPORT
 		  /// Reads the export directory of the current file from disc.
@@ -110,7 +113,7 @@ namespace PeLib
 		  /// Reads rich header of the current file.
 		  virtual int readRichHeader(std::size_t offset, std::size_t size, bool ignoreInvalidKey = false)  = 0; // EXPORT
 		  /// Reads the COFF symbol table of the current file.
-		  virtual int readCoffSymbolTable() = 0; // EXPORT
+		  virtual int readCoffSymbolTable(ByteBuffer & fileData) = 0; // EXPORT
 		  /// Reads delay import directory of the current file.
 		  virtual int readDelayImportDirectory() = 0; // EXPORT
 		  /// Reads security directory of the current file.
@@ -153,17 +156,18 @@ namespace PeLib
 	      std::ifstream m_ifStream;
 	      std::istream& m_iStream;
 
-		  PeHeader32_64 m_peh; ///< PE header of the current file.
-		  ExportDirectoryT<bits> m_expdir; ///< Export directory of the current file.
-		  ImportDirectory<bits> m_impdir; ///< Import directory of the current file.
-		  BoundImportDirectoryT<bits> m_boundimpdir; ///< BoundImportDirectory of the current file.
-		  ResourceDirectoryT<bits> m_resdir; ///< ResourceDirectory of the current file.
-		  RelocationsDirectoryT<bits> m_relocs; ///< Relocations directory of the current file.
-		  ComHeaderDirectoryT<bits> m_comdesc; ///< COM+ descriptor directory of the current file.
-		  IatDirectoryT<bits> m_iat; ///< Import address table of the current file.
-		  DebugDirectoryT<bits> m_debugdir; ///< Debug directory of the current file.
-		  DelayImportDirectory<bits> m_delayimpdir; ///< Delay import directory of the current file.
-		  TlsDirectory<bits> m_tlsdir; ///< TLS directory of the current file.
+		  ImageLoader m_imageLoader;
+		  PeHeader32_64 m_peh;                              ///< PE header of the current file.
+		  ExportDirectoryT<bits> m_expdir;                  ///< Export directory of the current file.
+		  ImportDirectory m_impdir;                         ///< Import directory of the current file.
+		  BoundImportDirectoryT<bits> m_boundimpdir;        ///< BoundImportDirectory of the current file.
+		  ResourceDirectoryT<bits> m_resdir;                ///< ResourceDirectory of the current file.
+		  RelocationsDirectoryT<bits> m_relocs;             ///< Relocations directory of the current file.
+		  ComHeaderDirectoryT<bits> m_comdesc;              ///< COM+ descriptor directory of the current file.
+		  IatDirectory m_iat;                               ///< Import address table of the current file.
+		  DebugDirectoryT<bits> m_debugdir;                 ///< Debug directory of the current file.
+		  DelayImportDirectory<bits> m_delayimpdir;         ///< Delay import directory of the current file.
+		  TlsDirectory<bits> m_tlsdir;                      ///< TLS directory of the current file.
 
 		public:
 		  /// Default constructor which exists only for the sake of allowing to construct files without filenames.
@@ -180,6 +184,8 @@ namespace PeLib
 		  /// Changes the name of the current file.
 		  void setFileName(std::string strFilename);
 
+		  /// Reads the basic headers needed to process the file
+		  int loadPeHeaders(ByteBuffer & fileData);
 		  /// Reads the MZ header of the current file from disc.
 		  int readMzHeader() ;
 		  /// Reads the export directory of the current file from disc.
@@ -205,7 +211,7 @@ namespace PeLib
 		  /// Reads rich header of the current file.
 		  int readRichHeader(std::size_t offset, std::size_t size, bool ignoreInvalidKey = false) ;
 		  /// Reads the COFF symbol table of the current file.
-		  int readCoffSymbolTable() ;
+		  int readCoffSymbolTable(ByteBuffer & fileData);
 		  /// Reads delay import directory of the current file.
 		  int readDelayImportDirectory() ;
 		  /// Reads the security directory of the current file.
@@ -234,9 +240,9 @@ namespace PeLib
 		  ExportDirectoryT<bits>& expDir(); // EXPORT
 
 		  /// Accessor function for the import directory.
-		  const ImportDirectory<bits>& impDir() const;
+		  const ImportDirectory & impDir() const;
 		  /// Accessor function for the import directory.
-		  ImportDirectory<bits>& impDir();
+		  ImportDirectory & impDir();
 
 		  /// Accessor function for the bound import directory.
 		  const BoundImportDirectoryT<bits>& boundImpDir() const;
@@ -259,9 +265,9 @@ namespace PeLib
 		  ComHeaderDirectoryT<bits>& comDir(); // EXPORT
 
 		  /// Accessor function for the IAT directory.
-		  const IatDirectoryT<bits>& iatDir() const;
+		  const IatDirectory & iatDir() const;
 		  /// Accessor function for the IAT directory.
-		  IatDirectoryT<bits>& iatDir(); // EXPORT
+		  IatDirectory & iatDir(); // EXPORT
 
 		  /// Accessor function for the debug directory.
 		  const DebugDirectoryT<bits>& debugDir() const;
@@ -317,7 +323,7 @@ namespace PeLib
 	**/
 	template<int bits>
 	PeFileT<bits>::PeFileT(const std::string& strFilename) :
-			m_iStream(m_ifStream)
+			m_iStream(m_ifStream), m_imageLoader(0)
 	{
 		m_filename = strFilename;
 		m_ifStream.open(m_filename, std::ifstream::binary);
@@ -326,15 +332,16 @@ namespace PeLib
 	/**
 	* @param stream Input stream.
 	**/
+
 	template<int bits>
 	PeFileT<bits>::PeFileT(std::istream& stream) :
-			m_iStream(stream)
+			m_iStream(stream), m_imageLoader(0)
 	{
  	}
 
 	template<int bits>
 	PeFileT<bits>::PeFileT() :
-			m_iStream(m_ifStream)
+			m_iStream(m_ifStream), m_imageLoader(0)
 	{
 	}
 
@@ -366,7 +373,7 @@ namespace PeLib
 	* @return A reference to the file's import directory.
 	**/
 	template<int bits>
-	const ImportDirectory<bits>& PeFileT<bits>::impDir() const
+	const ImportDirectory & PeFileT<bits>::impDir() const
 	{
 		return m_impdir;
 	}
@@ -375,7 +382,7 @@ namespace PeLib
 	* @return A reference to the file's import directory.
 	**/
 	template<int bits>
-	ImportDirectory<bits>& PeFileT<bits>::impDir()
+	ImportDirectory & PeFileT<bits>::impDir()
 	{
 		return m_impdir;
 	}
@@ -501,13 +508,13 @@ namespace PeLib
 	}
 
 	template <int bits>
-	const IatDirectoryT<bits>& PeFileT<bits>::iatDir() const
+	const IatDirectory & PeFileT<bits>::iatDir() const
 	{
 		return m_iat;
 	}
 
 	template <int bits>
-	IatDirectoryT<bits>& PeFileT<bits>::iatDir()
+	IatDirectory & PeFileT<bits>::iatDir()
 	{
 		return m_iat;
 	}
@@ -548,6 +555,12 @@ namespace PeLib
 	}
 
 	template<int bits>
+	int PeFileT<bits>::loadPeHeaders(ByteBuffer & fileData)
+	{
+		return m_imageLoader.Load(fileData);
+	}
+
+	template<int bits>
 	int PeFileT<bits>::readMzHeader()
 	{
 		return mzHeader().read(m_iStream);
@@ -563,15 +576,14 @@ namespace PeLib
 	}
 
 	template<int bits>
-	int PeFileT<bits>::readCoffSymbolTable()
+	int PeFileT<bits>::readCoffSymbolTable(ByteBuffer & fileData)
 	{
-		if (peHeader().getPointerToSymbolTable()
-				&& peHeader().getNumberOfSymbols())
+		if(m_imageLoader.getPointerToSymbolTable() && m_imageLoader.getNumberOfSymbols())
 		{
 			return coffSymTab().read(
-					m_iStream,
-					static_cast<unsigned int>(peHeader().getPointerToSymbolTable()),
-					peHeader().getNumberOfSymbols() * PELIB_IMAGE_SIZEOF_COFF_SYMBOL);
+					fileData,
+					m_imageLoader.getPointerToSymbolTable(),
+					m_imageLoader.getNumberOfSymbols() * PELIB_IMAGE_SIZEOF_COFF_SYMBOL);
 		}
 		return ERROR_COFF_SYMBOL_TABLE_DOES_NOT_EXIST;
 	}
@@ -590,10 +602,9 @@ namespace PeLib
 	template<int bits>
 	int PeFileT<bits>::readImportDirectory()
 	{
-		if (peHeader().calcNumberOfRvaAndSizes() >= 2
-			&& peHeader().getIddImportRva())
+		if(m_imageLoader.getDataDirRva(PELIB_IMAGE_DIRECTORY_ENTRY_IMPORT))
 		{
-			return impDir().read(m_iStream, peHeader());
+			return impDir().read(m_imageLoader);
 		}
 		return ERROR_DIRECTORY_DOES_NOT_EXIST;
 	}
@@ -671,10 +682,9 @@ namespace PeLib
 	template<int bits>
 	int PeFileT<bits>::readIatDirectory()
 	{
-		if (peHeader().calcNumberOfRvaAndSizes() >= 13
-			&& peHeader().getIddIatRva() && peHeader().getIddIatSize())
+		if(m_imageLoader.getDataDirRva(PELIB_IMAGE_DIRECTORY_ENTRY_IAT))
 		{
-			return iatDir().read(m_iStream, peHeader());
+			return iatDir().read(m_imageLoader);
 		}
 		return ERROR_DIRECTORY_DOES_NOT_EXIST;
 	}
@@ -748,9 +758,9 @@ namespace PeLib
 		// The file size must be greater or equal to SizeOfImage
 		if(ulFileSize >= sizeOfImage)
 		{
-			dword sectionAlignment = peHeader().getSectionAlignment();
-			dword fileAlignment = peHeader().getFileAlignment();
-			dword sizeOfHeaders = peHeader().getSizeOfHeaders();
+			std::uint32_t sectionAlignment = peHeader().getSectionAlignment();
+			std::uint32_t fileAlignment = peHeader().getFileAlignment();
+			std::uint32_t sizeOfHeaders = peHeader().getSizeOfHeaders();
 
 			// SectionAlignment must be greater than file alignment
 			if(sectionAlignment >= PELIB_PAGE_SIZE && sectionAlignment > fileAlignment)
@@ -761,7 +771,7 @@ namespace PeLib
 					std::size_t headerDataSize = sectionAlignment - sizeOfHeaders;
 
 					// Read the entire after-header-data
-					std::vector<unsigned char> headerData(headerDataSize);
+					ByteBuffer headerData(headerDataSize);
 					m_iStream.seekg(peHeader().getSizeOfHeaders(), std::ios::beg);
 					m_iStream.read(reinterpret_cast<char *>(headerData.data()), headerDataSize);
 

@@ -58,7 +58,7 @@ namespace PeLib
 		// XXX: Note, debug data is not read at all. This might or might not change
 		//      in the future.
 
-		std::vector<byte> vDebugDirectory(buffer, buffer + buffersize);
+		std::vector<std::uint8_t> vDebugDirectory(buffer, buffer + buffersize);
 
 		InputBuffer ibBuffer(vDebugDirectory);
 
@@ -73,7 +73,7 @@ namespace PeLib
 	* Rebuilds the current debug directory.
 	* @param vBuffer Buffer where the rebuilt directory is stored.
 	**/
-	void DebugDirectory::rebuild(std::vector<byte>& vBuffer) const
+	void DebugDirectory::rebuild(std::vector<std::uint8_t>& vBuffer) const
 	{
 		OutputBuffer obBuffer(vBuffer);
 
@@ -168,7 +168,7 @@ namespace PeLib
 	* @param uiIndex Identifies the debug structure.
 	* @return Characteristics value of the debug structure.
 	**/
-	dword DebugDirectory::getCharacteristics(std::size_t uiIndex) const
+	std::uint32_t DebugDirectory::getCharacteristics(std::size_t uiIndex) const
 	{
 		return m_vDebugInfo[uiIndex].idd.Characteristics;
 	}
@@ -179,7 +179,7 @@ namespace PeLib
 	* @param uiIndex Identifies the debug structure.
 	* @return TimeDateStamp value of the debug structure.
 	**/
-	dword DebugDirectory::getTimeDateStamp(std::size_t uiIndex) const
+	std::uint32_t DebugDirectory::getTimeDateStamp(std::size_t uiIndex) const
 	{
 		return m_vDebugInfo[uiIndex].idd.TimeDateStamp;
 	}
@@ -190,7 +190,7 @@ namespace PeLib
 	* @param uiIndex Identifies the debug structure.
 	* @return MajorVersion value of the debug structure.
 	**/
-	word DebugDirectory::getMajorVersion(std::size_t uiIndex) const
+	std::uint16_t DebugDirectory::getMajorVersion(std::size_t uiIndex) const
 	{
 		return m_vDebugInfo[uiIndex].idd.MajorVersion;
 	}
@@ -201,7 +201,7 @@ namespace PeLib
 	* @param uiIndex Identifies the debug structure.
 	* @return MinorVersion value of the debug structure.
 	**/
-	word DebugDirectory::getMinorVersion(std::size_t uiIndex) const
+	std::uint16_t DebugDirectory::getMinorVersion(std::size_t uiIndex) const
 	{
 		return m_vDebugInfo[uiIndex].idd.MinorVersion;
 	}
@@ -212,7 +212,7 @@ namespace PeLib
 	* @param uiIndex Identifies the debug structure.
 	* @return Type value of the debug structure.
 	**/
-	dword DebugDirectory::getType(std::size_t uiIndex) const
+	std::uint32_t DebugDirectory::getType(std::size_t uiIndex) const
 	{
 		return m_vDebugInfo[uiIndex].idd.Type;
 	}
@@ -223,7 +223,7 @@ namespace PeLib
 	* @param uiIndex Identifies the debug structure.
 	* @return SizeOfData value of the debug structure.
 	**/
-	dword DebugDirectory::getSizeOfData(std::size_t uiIndex) const
+	std::uint32_t DebugDirectory::getSizeOfData(std::size_t uiIndex) const
 	{
 		return m_vDebugInfo[uiIndex].idd.SizeOfData;
 	}
@@ -234,7 +234,7 @@ namespace PeLib
 	* @param uiIndex Identifies the debug structure.
 	* @return AddressOfRawData value of the debug structure.
 	**/
-	dword DebugDirectory::getAddressOfRawData(std::size_t uiIndex) const
+	std::uint32_t DebugDirectory::getAddressOfRawData(std::size_t uiIndex) const
 	{
 		return m_vDebugInfo[uiIndex].idd.AddressOfRawData;
 	}
@@ -245,12 +245,12 @@ namespace PeLib
 	* @param uiIndex Identifies the debug structure.
 	* @return PointerToRawData value of the debug structure.
 	**/
-	dword DebugDirectory::getPointerToRawData(std::size_t uiIndex) const
+	std::uint32_t DebugDirectory::getPointerToRawData(std::size_t uiIndex) const
 	{
 		return m_vDebugInfo[uiIndex].idd.PointerToRawData;
 	}
 
-	std::vector<byte> DebugDirectory::getData(std::size_t index) const
+	std::vector<std::uint8_t> DebugDirectory::getData(std::size_t index) const
 	{
 		return m_vDebugInfo[index].data;
 	}
@@ -261,7 +261,7 @@ namespace PeLib
 	* @param uiIndex Identifies the debug structure.
 	* @param dwValue New value of the Characteristics value of the debug structure.
 	**/
-	void DebugDirectory::setCharacteristics(std::size_t uiIndex, dword dwValue)
+	void DebugDirectory::setCharacteristics(std::size_t uiIndex, std::uint32_t dwValue)
 	{
 		m_vDebugInfo[uiIndex].idd.Characteristics = dwValue;
 	}
@@ -272,7 +272,7 @@ namespace PeLib
 	* @param uiIndex Identifies the debug structure.
 	* @param dwValue New value of the TimeDateStamp value of the debug structure.
 	**/
-	void DebugDirectory::setTimeDateStamp(std::size_t uiIndex, dword dwValue)
+	void DebugDirectory::setTimeDateStamp(std::size_t uiIndex, std::uint32_t dwValue)
 	{
 		m_vDebugInfo[uiIndex].idd.TimeDateStamp = dwValue;
 	}
@@ -283,7 +283,7 @@ namespace PeLib
 	* @param uiIndex Identifies the debug structure.
 	* @param wValue New value of the MajorVersion value of the debug structure.
 	**/
-	void DebugDirectory::setMajorVersion(std::size_t uiIndex, word wValue)
+	void DebugDirectory::setMajorVersion(std::size_t uiIndex, std::uint16_t wValue)
 	{
 		m_vDebugInfo[uiIndex].idd.MajorVersion = wValue;
 	}
@@ -294,7 +294,7 @@ namespace PeLib
 	* @param uiIndex Identifies the debug structure.
 	* @param wValue New value of the MinorVersion value of the debug structure.
 	**/
-	void DebugDirectory::setMinorVersion(std::size_t uiIndex, word wValue)
+	void DebugDirectory::setMinorVersion(std::size_t uiIndex, std::uint16_t wValue)
 	{
 		m_vDebugInfo[uiIndex].idd.MinorVersion = wValue;
 	}
@@ -305,7 +305,7 @@ namespace PeLib
 	* @param uiIndex Identifies the debug structure.
 	* @param dwValue New value of the Type value of the debug structure.
 	**/
-	void DebugDirectory::setType(std::size_t uiIndex, dword dwValue)
+	void DebugDirectory::setType(std::size_t uiIndex, std::uint32_t dwValue)
 	{
 		m_vDebugInfo[uiIndex].idd.Type = dwValue;
 	}
@@ -316,7 +316,7 @@ namespace PeLib
 	* @param uiIndex Identifies the debug structure.
 	* @param dwValue New value of the SizeOfData value of the debug structure.
 	**/
-	void DebugDirectory::setSizeOfData(std::size_t uiIndex, dword dwValue)
+	void DebugDirectory::setSizeOfData(std::size_t uiIndex, std::uint32_t dwValue)
 	{
 		m_vDebugInfo[uiIndex].idd.SizeOfData = dwValue;
 	}
@@ -327,7 +327,7 @@ namespace PeLib
 	* @param uiIndex Identifies the debug structure.
 	* @param dwValue New value of the AddressOfRawData value of the debug structure.
 	**/
-	void DebugDirectory::setAddressOfRawData(std::size_t uiIndex, dword dwValue)
+	void DebugDirectory::setAddressOfRawData(std::size_t uiIndex, std::uint32_t dwValue)
 	{
 		m_vDebugInfo[uiIndex].idd.AddressOfRawData = dwValue;
 	}
@@ -338,12 +338,12 @@ namespace PeLib
 	* @param uiIndex Identifies the debug structure.
 	* @param dwValue New value of the PointerToRawData value of the debug structure.
 	**/
-	void DebugDirectory::setPointerToRawData(std::size_t uiIndex, dword dwValue)
+	void DebugDirectory::setPointerToRawData(std::size_t uiIndex, std::uint32_t dwValue)
 	{
 		m_vDebugInfo[uiIndex].idd.PointerToRawData = dwValue;
 	}
 
-	void DebugDirectory::setData(std::size_t index, const std::vector<byte>& data)
+	void DebugDirectory::setData(std::size_t index, const std::vector<std::uint8_t>& data)
 	{
 		m_vDebugInfo[index].data = data;
 	}

@@ -15,16 +15,18 @@
 
 namespace PeLib
 {
+	/*
 	template<>
-	void PeHeaderT<32>::readBaseOfData(InputBuffer& ibBuffer, PELIB_IMAGE_NT_HEADERS<32>& header) const
+	void PeHeaderT<32>::readBaseOfData(InputBuffer& ibBuffer, PELIB_IMAGE_NT_HEADERS & header) const
 	{
 		ibBuffer >> header.OptionalHeader.BaseOfData;
 	}
 
 	template<>
-	void PeHeaderT<64>::readBaseOfData(InputBuffer&, PELIB_IMAGE_NT_HEADERS<64>&) const
+	void PeHeaderT<64>::readBaseOfData(InputBuffer&, PELIB_IMAGE_NT_HEADERS &) const
 	{
 	}
+	*/
 
 	template<>
 	void PeHeaderT<32>::rebuildBaseOfData(OutputBuffer& obBuffer) const
@@ -75,7 +77,7 @@ namespace PeLib
 	/**
 	* @return The BaseOfData value from the PE header.
 	**/
-	dword PeHeader32::getBaseOfData() const
+	std::uint32_t PeHeader32::getBaseOfData() const
 	{
 		return m_inthHeader.OptionalHeader.BaseOfData;
 	}
@@ -84,7 +86,7 @@ namespace PeLib
 	* Changes the file's BaseOfData.
 	* @param dwValue New value.
 	**/
-	void PeHeader32::setBaseOfData(dword dwValue)
+	void PeHeader32::setBaseOfData(std::uint32_t dwValue)
 	{
 		m_inthHeader.OptionalHeader.BaseOfData = dwValue;
 	}

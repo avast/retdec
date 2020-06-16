@@ -556,7 +556,8 @@ template <int bits> UpxExtraData PeUpxStub<bits>::parseExtraData(DynamicBuffer& 
 
 	std::uint16_t numberOfSections = unpackedData.read<std::uint16_t>(originalHeaderOffset + sizeof(PeLib::PELIB_IMAGE_NT_SIGNATURE) + 0x2);
 	std::uint32_t numberOfDirectories = unpackedData.read<std::uint32_t>(originalHeaderOffset + PeUpxStubTraits<bits>::NumberOfRvaAndSizesOffset);
-	std::uint32_t dataDirectoriesStart = sizeof(PeLib::PELIB_IMAGE_NT_SIGNATURE) + PeLib::PELIB_IMAGE_FILE_HEADER::size() + PeLib::PELIB_IMAGE_OPTIONAL_HEADER<bits>::size();
+	std::uint32_t sizeOfOptionalHeader = (bits == 64) ? sizeof(PeLib::PELIB_IMAGE_OPTIONAL_HEADER64) : sizeof(PeLib::PELIB_IMAGE_OPTIONAL_HEADER32);
+	std::uint32_t dataDirectoriesStart = sizeof(PeLib::PELIB_IMAGE_NT_SIGNATURE) + PeLib::PELIB_IMAGE_FILE_HEADER::size() + sizeOfOptionalHeader;
 	std::uint32_t sectionHeadersStart = dataDirectoriesStart + numberOfDirectories * PeLib::PELIB_IMAGE_DATA_DIRECTORY::size();
 	std::uint32_t sectionHeadersEnd = sectionHeadersStart + PeLib::PELIB_IMAGE_SECTION_HEADER::size() * numberOfSections;
 
@@ -674,7 +675,7 @@ template <int bits> void PeUpxStub<bits>::fixImports(const DynamicBuffer& unpack
 		lowestFirstThunk = std::min(lowestFirstThunk, firstThunk);
 		readPos += 4;
 
-		// There is some kind of 1 byte "hint"
+		// There is some kind of 1 std::uint8_t "hint"
 		// Recognizes between import by name and by ordinal
 		// Hint 0 means end of the symbols in this library
 		std::uint8_t hint;
@@ -1307,7 +1308,7 @@ template <int bits> void PeUpxStub<bits>::loadResources(PeLib::ResourceNode* roo
 			std::string name = "";
 
 			// It is wide string, but rarely contains any unicode characters
-			// We will use regular ASCII string and pretend we are reading 1-byte characters
+			// We will use regular ASCII string and pretend we are reading 1-std::uint8_t characters
 			std::uint16_t charsRead = 0;
 			while (charsRead < nameLength)
 			{

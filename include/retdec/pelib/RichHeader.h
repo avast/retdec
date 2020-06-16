@@ -23,9 +23,9 @@ namespace PeLib
 		private:
 			bool headerIsValid;
 			bool validStructure;
-			dword key;
+			std::uint32_t key;
 			std::size_t noOfIters;
-			std::vector<dword> decryptedHeader;
+			std::vector<std::uint32_t> decryptedHeader;
 			std::vector<PELIB_IMAGE_RICH_HEADER_RECORD> records;
 
 			void init();
@@ -45,8 +45,8 @@ namespace PeLib
 			bool isHeaderValid() const;
 			bool isStructureValid() const;
 			std::size_t getNumberOfIterations() const;
-			dword getKey() const;
-			const dword* getDecryptedHeaderItem(std::size_t index) const;
+			std::uint32_t getKey() const;
+			const std::uint32_t* getDecryptedHeaderItem(std::size_t index) const;
 			std::string getDecryptedHeaderItemSignature(std::size_t index) const;
 			std::string getDecryptedHeaderItemsSignature(std::initializer_list<std::size_t> indexes) const;
 			std::vector<std::uint8_t> getDecryptedHeaderBytes() const;

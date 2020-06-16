@@ -149,7 +149,7 @@ namespace PeLib
 
 		originalOffset = 0;
 
-		std::vector<byte> vBuffer(PELIB_IMAGE_DOS_HEADER::size());
+		std::vector<std::uint8_t> vBuffer(PELIB_IMAGE_DOS_HEADER::size());
 		inStream_w.read(reinterpret_cast<char*>(vBuffer.data()), static_cast<unsigned int>(vBuffer.size()));
 		inStream_w.seekg(0, std::ios::beg);
 		m_headerString.clear();
@@ -185,7 +185,7 @@ namespace PeLib
 			return ERROR_INVALID_FILE;
 		}
 
-		std::vector<byte> vBuffer(pcBuffer, pcBuffer + uiSize);
+		std::vector<std::uint8_t> vBuffer(pcBuffer, pcBuffer + uiSize);
 		for (int i=0;i<0x40;i++) std::cout << std::hex << (int)vBuffer[i] << " ";
 
 		originalOffset = originalOffs;
@@ -201,7 +201,7 @@ namespace PeLib
 	* must call #PeLib::MzHeader::makeValid first.
 	* @param vBuffer Buffer where the rebuilt MZ header will be stored.
 	**/
-	void MzHeader::rebuild(std::vector<byte>& vBuffer) const
+	void MzHeader::rebuild(std::vector<std::uint8_t>& vBuffer) const
 	{
 		OutputBuffer obBuffer(vBuffer);
 
@@ -254,7 +254,7 @@ namespace PeLib
 	* @param dwOffset Offset the header will be written to (defaults to 0).
 	* @return A non-zero value is returned if a problem occurred.
 	**/
-	int MzHeader::write(const std::string& strFilename, dword dwOffset = 0) const
+	int MzHeader::write(const std::string& strFilename, std::uint32_t dwOffset = 0) const
 	{
 		std::fstream ofFile(strFilename.c_str(), std::ios_base::in);
 
@@ -306,7 +306,7 @@ namespace PeLib
 	/**
 	* Returns the MZ header's e_magic value.
 	**/
-	word MzHeader::getMagicNumber() const
+	std::uint16_t MzHeader::getMagicNumber() const
 	{
 		return m_idhHeader.e_magic;
 	}
@@ -314,7 +314,7 @@ namespace PeLib
 	/**
 	* Returns the MZ header's e_cblp value.
 	**/
-	word MzHeader::getBytesOnLastPage() const
+	std::uint16_t MzHeader::getBytesOnLastPage() const
 	{
 		return m_idhHeader.e_cblp;
 	}
@@ -322,7 +322,7 @@ namespace PeLib
 	/**
 	* Returns the MZ header's e_cp value.
 	**/
-	word MzHeader::getPagesInFile() const
+	std::uint16_t MzHeader::getPagesInFile() const
 	{
 		return m_idhHeader.e_cp;
 	}
@@ -330,7 +330,7 @@ namespace PeLib
 	/**
 	* Returns the MZ header's e_crlc value.
 	**/
-	word MzHeader::getRelocations() const
+	std::uint16_t MzHeader::getRelocations() const
 	{
 		return m_idhHeader.e_crlc;
 	}
@@ -338,7 +338,7 @@ namespace PeLib
 	/**
 	* Returns the MZ header's e_cparhdr value.
 	**/
-	word MzHeader::getSizeOfHeader() const
+	std::uint16_t MzHeader::getSizeOfHeader() const
 	{
 		return m_idhHeader.e_cparhdr;
 	}
@@ -346,7 +346,7 @@ namespace PeLib
 	/**
 	* Returns the MZ header's e_minalloc value.
 	**/
-	word MzHeader::getMinExtraParagraphs() const
+	std::uint16_t MzHeader::getMinExtraParagraphs() const
 	{
 		return m_idhHeader.e_minalloc;
 	}
@@ -354,7 +354,7 @@ namespace PeLib
 	/**
 	* Returns the MZ header's e_maxalloc value.
 	**/
-	word MzHeader::getMaxExtraParagraphs() const
+	std::uint16_t MzHeader::getMaxExtraParagraphs() const
 	{
 		return m_idhHeader.e_maxalloc;
 	}
@@ -362,7 +362,7 @@ namespace PeLib
 	/**
 	* Returns the MZ header's e_ss value.
 	**/
-	word MzHeader::getSsValue() const
+	std::uint16_t MzHeader::getSsValue() const
 	{
 		return m_idhHeader.e_ss;
 	}
@@ -370,7 +370,7 @@ namespace PeLib
 	/**
 	* Returns the MZ header's e_sp value.
 	**/
-	word MzHeader::getSpValue() const
+	std::uint16_t MzHeader::getSpValue() const
 	{
 		return m_idhHeader.e_sp;
 	}
@@ -378,7 +378,7 @@ namespace PeLib
 	/**
 	* Returns the MZ header's e_csum value.
 	**/
-	word MzHeader::getChecksum() const
+	std::uint16_t MzHeader::getChecksum() const
 	{
 		return m_idhHeader.e_csum;
 	}
@@ -386,7 +386,7 @@ namespace PeLib
 	/**
 	* Returns the MZ header's e_ip value.
 	**/
-	word MzHeader::getIpValue() const
+	std::uint16_t MzHeader::getIpValue() const
 	{
 		return m_idhHeader.e_ip;
 	}
@@ -394,7 +394,7 @@ namespace PeLib
 	/**
 	* Returns the MZ header's e_cs value.
 	**/
-	word MzHeader::getCsValue() const
+	std::uint16_t MzHeader::getCsValue() const
 	{
 		return m_idhHeader.e_cs;
 	}
@@ -402,7 +402,7 @@ namespace PeLib
 	/**
 	* Returns the MZ header's e_lfarlc value.
 	**/
-	word MzHeader::getAddrOfRelocationTable() const
+	std::uint16_t MzHeader::getAddrOfRelocationTable() const
 	{
 		return m_idhHeader.e_lfarlc;
 	}
@@ -410,7 +410,7 @@ namespace PeLib
 	/**
 	* Returns the MZ header's e_ovno value.
 	**/
-	word MzHeader::getOverlayNumber() const
+	std::uint16_t MzHeader::getOverlayNumber() const
 	{
 		return m_idhHeader.e_ovno;
 	}
@@ -418,7 +418,7 @@ namespace PeLib
 	/**
 	* Returns the MZ header's e_oemid value.
 	**/
-	word MzHeader::getOemIdentifier() const
+	std::uint16_t MzHeader::getOemIdentifier() const
 	{
 		return m_idhHeader.e_oemid;
 	}
@@ -426,7 +426,7 @@ namespace PeLib
 	/**
 	* Returns the MZ header's e_oeminfo value.
 	**/
-	word MzHeader::getOemInformation() const
+	std::uint16_t MzHeader::getOemInformation() const
 	{
 		return m_idhHeader.e_oeminfo;
 	}
@@ -434,7 +434,7 @@ namespace PeLib
 	/**
 	* Returns the MZ header's e_lfanew value.
 	**/
-	dword MzHeader::getAddressOfPeHeader() const
+	std::uint32_t MzHeader::getAddressOfPeHeader() const
 	{
 		return m_idhHeader.e_lfanew;
 	}
@@ -442,9 +442,9 @@ namespace PeLib
 	/**
 	* Returns the MZ header's e_res[uiNr] value. If the parameter uiNr is out of range
 	* you will get undefined behaviour.
-	* @param uiNr The index of the word in the e_res array (valid range: 0-3)
+	* @param uiNr The index of the std::uint16_t in the e_res array (valid range: 0-3)
 	**/
-	word MzHeader::getReservedWords1(unsigned int uiNr) const
+	std::uint16_t MzHeader::getReservedWords1(unsigned int uiNr) const
 	{
 		return m_idhHeader.e_res[uiNr];
 	}
@@ -452,9 +452,9 @@ namespace PeLib
 	/**
 	* Returns the MZ header's e_res2[uiNr] value. If the parameter uiNr is out of range
 	* you will get undefined behaviour.
-	* @param uiNr The index of the word in the e_res array (valid range: 0-9)
+	* @param uiNr The index of the std::uint16_t in the e_res array (valid range: 0-9)
 	**/
-	word MzHeader::getReservedWords2(unsigned int uiNr) const
+	std::uint16_t MzHeader::getReservedWords2(unsigned int uiNr) const
 	{
 		return m_idhHeader.e_res2[uiNr];
 	}
@@ -463,7 +463,7 @@ namespace PeLib
 	* Sets the MZ header's e_magic value.
 	* @param wValue The new value of e_magic.
 	**/
-	void MzHeader::setMagicNumber(word wValue)
+	void MzHeader::setMagicNumber(std::uint16_t wValue)
 	{
 		m_idhHeader.e_magic = wValue;
 	}
@@ -472,7 +472,7 @@ namespace PeLib
 	* Sets the MZ header's e_cblp value.
 	* @param wValue The new value of e_cblp.
 	**/
-	void MzHeader::setBytesOnLastPage(word wValue)
+	void MzHeader::setBytesOnLastPage(std::uint16_t wValue)
 	{
 		m_idhHeader.e_cblp = wValue;
 	}
@@ -481,7 +481,7 @@ namespace PeLib
 	* Sets the MZ header's e_cp value.
 	* @param wValue The new value of e_cp.
 	**/
-	void MzHeader::setPagesInFile(word wValue)
+	void MzHeader::setPagesInFile(std::uint16_t wValue)
 	{
 		m_idhHeader.e_cp = wValue;
 	}
@@ -490,7 +490,7 @@ namespace PeLib
 	* Sets the MZ header's e_crlc value.
 	* @param wValue The new value of e_crlc.
 	**/
-	void MzHeader::setRelocations(word wValue)
+	void MzHeader::setRelocations(std::uint16_t wValue)
 	{
 		m_idhHeader.e_crlc = wValue;
 	}
@@ -499,7 +499,7 @@ namespace PeLib
 	* Sets the MZ header's e_cparhdr value.
 	* @param wValue The new value of e_cparhdr.
 	**/
-	void MzHeader::setSizeOfHeader(word wValue)
+	void MzHeader::setSizeOfHeader(std::uint16_t wValue)
 	{
 		m_idhHeader.e_cparhdr = wValue;
 	}
@@ -508,7 +508,7 @@ namespace PeLib
 	* Sets the MZ header's e_minalloc value.
 	* @param wValue The new value of e_minalloc.
 	**/
-	void MzHeader::setMinExtraParagraphs(word wValue)
+	void MzHeader::setMinExtraParagraphs(std::uint16_t wValue)
 	{
 		m_idhHeader.e_minalloc = wValue;
 	}
@@ -517,7 +517,7 @@ namespace PeLib
 	* Sets the MZ header's e_maxalloc value.
 	* @param wValue The new value of e_maxalloc.
 	**/
-	void MzHeader::setMaxExtraParagraphs(word wValue)
+	void MzHeader::setMaxExtraParagraphs(std::uint16_t wValue)
 	{
 		m_idhHeader.e_maxalloc = wValue;
 	}
@@ -526,7 +526,7 @@ namespace PeLib
 	* Sets the MZ header's e_ss value.
 	* @param wValue The new value of e_ss.
 	**/
-	void MzHeader::setSsValue(word wValue)
+	void MzHeader::setSsValue(std::uint16_t wValue)
 	{
 		m_idhHeader.e_ss = wValue;
 	}
@@ -535,7 +535,7 @@ namespace PeLib
 	* Sets the MZ header's e_sp value.
 	* @param wValue The new value of e_sp.
 	**/
-	void MzHeader::setSpValue(word wValue)
+	void MzHeader::setSpValue(std::uint16_t wValue)
 	{
 		m_idhHeader.e_sp = wValue;
 	}
@@ -544,7 +544,7 @@ namespace PeLib
 	* Sets the MZ header's e_csum value.
 	* @param wValue The new value of e_csum.
 	**/
-	void MzHeader::setChecksum(word wValue)
+	void MzHeader::setChecksum(std::uint16_t wValue)
 	{
 		m_idhHeader.e_csum = wValue;
 	}
@@ -553,7 +553,7 @@ namespace PeLib
 	* Sets the MZ header's e_ip value.
 	* @param wValue The new value of e_ip.
 	**/
-	void MzHeader::setIpValue(word wValue)
+	void MzHeader::setIpValue(std::uint16_t wValue)
 	{
 		m_idhHeader.e_ip = wValue;
 	}
@@ -562,7 +562,7 @@ namespace PeLib
 	* Sets the MZ header's e_cs value.
 	* @param wValue The new value of e_cs.
 	**/
-	void MzHeader::setCsValue(word wValue)
+	void MzHeader::setCsValue(std::uint16_t wValue)
 	{
 		m_idhHeader.e_cs = wValue;
 	}
@@ -571,7 +571,7 @@ namespace PeLib
 	* Sets the MZ header's e_lfarlc value.
 	* @param wValue The new value of e_lfarlc.
 	**/
-	void MzHeader::setAddrOfRelocationTable(word wValue)
+	void MzHeader::setAddrOfRelocationTable(std::uint16_t wValue)
 	{
 		m_idhHeader.e_lfarlc = wValue;
 	}
@@ -580,7 +580,7 @@ namespace PeLib
 	* Sets the MZ header's e_ovno value.
 	* @param wValue The new value of e_ovno.
 	**/
-	void MzHeader::setOverlayNumber(word wValue)
+	void MzHeader::setOverlayNumber(std::uint16_t wValue)
 	{
 		m_idhHeader.e_ovno = wValue;
 	}
@@ -589,7 +589,7 @@ namespace PeLib
 	* Sets the MZ header's e_oemid value.
 	* @param wValue The new value of e_oemid.
 	**/
-	void MzHeader::setOemIdentifier(word wValue)
+	void MzHeader::setOemIdentifier(std::uint16_t wValue)
 	{
 		m_idhHeader.e_oemid = wValue;
 	}
@@ -598,7 +598,7 @@ namespace PeLib
 	* Sets the MZ header's e_oeminfo value.
 	* @param wValue The new value of e_oeminfo.
 	**/
-	void MzHeader::setOemInformation(word wValue)
+	void MzHeader::setOemInformation(std::uint16_t wValue)
 	{
 		m_idhHeader.e_oeminfo = wValue;
 	}
@@ -607,7 +607,7 @@ namespace PeLib
 	* Sets the MZ header's e_lfanew value.
 	* @param lValue The new value of e_lfanew.
 	**/
-	void MzHeader::setAddressOfPeHeader(dword lValue)
+	void MzHeader::setAddressOfPeHeader(std::uint32_t lValue)
 	{
 		m_idhHeader.e_lfanew = lValue;
 	}
@@ -615,10 +615,10 @@ namespace PeLib
 	/**
 	* Sets the MZ header's e_res[uiNr] value. If the parameter uiNr is out of range
 	* you will get undefined behaviour.
-	* @param uiNr The index of the word in the e_res array (valid range: 0-3)
+	* @param uiNr The index of the std::uint16_t in the e_res array (valid range: 0-3)
 	* @param wValue The new value of e_res[nr].
 	**/
-	void MzHeader::setReservedWords1(unsigned int uiNr, word wValue)
+	void MzHeader::setReservedWords1(unsigned int uiNr, std::uint16_t wValue)
 	{
 		m_idhHeader.e_res[uiNr] = wValue;
 	}
@@ -626,10 +626,10 @@ namespace PeLib
 	/**
 	* Sets the MZ header's e_res2[uiNr] value. If the parameter uiNr is out of range
 	* you will get undefined behaviour.
-	* @param uiNr The index of the word in the e_res2 array (valid range: 0-9)
+	* @param uiNr The index of the std::uint16_t in the e_res2 array (valid range: 0-9)
 	* @param wValue The new value of e_res[nr].
 	**/
-	void MzHeader::setReservedWords2(unsigned int uiNr, word wValue)
+	void MzHeader::setReservedWords2(unsigned int uiNr, std::uint16_t wValue)
 	{
 		m_idhHeader.e_res2[uiNr] = wValue;
 	}

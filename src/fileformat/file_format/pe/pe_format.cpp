@@ -31,6 +31,8 @@
 #include "retdec/fileformat/utils/conversions.h"
 #include "retdec/fileformat/utils/crypto.h"
 #include "retdec/fileformat/utils/file_io.h"
+#include "retdec/crypto/crypto.h"
+#include "retdec/pelib/ImageLoader.h"
 
 using namespace retdec::utils;
 using namespace PeLib;
@@ -460,13 +462,13 @@ std::size_t findDosStub(const std::string &plainFile)
  * @param storageClass PE symbol storage class
  * @return Type of symbol
  */
-Symbol::Type getSymbolType(word link, dword value, byte storageClass)
+Symbol::Type getSymbolType(std::uint16_t link, std::uint16_t value, std::uint8_t storageClass)
 {
 	if(!link)
 	{
 		return value ? Symbol::Type::COMMON : Symbol::Type::EXTERN;
 	}
-	else if(link == std::numeric_limits<word>::max() || link == std::numeric_limits<word>::max() - 1)
+	else if(link == std::numeric_limits<std::uint16_t>::max() || link == std::numeric_limits<std::uint16_t>::max() - 1)
 	{
 		return Symbol::Type::ABSOLUTE_SYM;
 	}
@@ -488,7 +490,7 @@ Symbol::Type getSymbolType(word link, dword value, byte storageClass)
  * @param complexType PE symbol type
  * @return Usage type of symbol
  */
-Symbol::UsageType getSymbolUsageType(byte storageClass, byte complexType)
+Symbol::UsageType getSymbolUsageType(std::uint8_t storageClass, std::uint8_t complexType)
 {
 	if(complexType >= 0x20 && complexType < 0x30)
 	{
@@ -580,16 +582,19 @@ void PeFormat::initStructures(const std::string & dllListFile)
 
 	// If we got an override list of dependency DLLs, we load them into the map
 	initDllList(dllListFile);
+	stateIsValid = false;
 
-	file = openPeFile(fileStream);
+	file = new PeFile64(fileStream);
 	if (file)
 	{
-		stateIsValid = true;
 		try
 		{
-			file->readMzHeader();
-			file->readPeHeader();
-			file->readCoffSymbolTable();
+			if(file->loadPeHeaders(bytes) == ERROR_NONE)
+				stateIsValid = true;
+
+			//file->readMzHeader();
+			//file->readPeHeader();
+			file->readCoffSymbolTable(bytes);
 			file->readImportDirectory();
 			file->readIatDirectory();
 			file->readBoundImportDirectory();
@@ -617,19 +622,9 @@ void PeFormat::initStructures(const std::string & dllListFile)
 				peHeader64 = &(f64->peHeader());
 				formatParser = new PeFormatParser64(this, static_cast<PeFileT<64>*>(file));
 			}
-			else
-			{
-				stateIsValid = false;
-			}
 		}
 		catch(...)
-		{
-			stateIsValid = false;
-		}
-	}
-	else
-	{
-		stateIsValid = false;
+		{}
 	}
 
 	if(stateIsValid)
@@ -1413,8 +1408,8 @@ void PeFormat::loadSymbols()
 	for(std::size_t i = 0, e = symTab.getNumberOfStoredSymbols(); i < e; ++i)
 	{
 		auto symbol = std::make_shared<Symbol>();
-		const word link = symTab.getSymbolSectionNumber(i);
-		if(!link || link == std::numeric_limits<word>::max() || link == std::numeric_limits<word>::max() - 1)
+		const std::uint16_t link = symTab.getSymbolSectionNumber(i);
+		if(!link || link == std::numeric_limits<std::uint16_t>::max() || link == std::numeric_limits<std::uint16_t>::max() - 1)
 		{
 			symbol->invalidateLinkToSection();
 			symbol->invalidateAddress();
@@ -2302,7 +2297,7 @@ void PeFormat::parseMetadataStream(std::uint64_t baseAddress, std::uint64_t offs
 	metadataStream->setMajorVersion(majorVersion);
 	metadataStream->setMinorVersion(minorVersion);
 
-	// 'heapOffsetSizes' define whether we should use word or dword for indexes into different streams
+	// 'heapOffsetSizes' define whether we should use std::uint16_t or dstd::uint16_t for indexes into different streams
 	metadataStream->setStringStreamIndexSize(heapOffsetSizes & 0x01 ? 4 : 2);
 	metadataStream->setGuidStreamIndexSize(heapOffsetSizes & 0x02 ? 4 : 2);
 	metadataStream->setBlobStreamIndexSize(heapOffsetSizes & 0x04 ? 4 : 2);
@@ -2494,14 +2489,14 @@ void PeFormat::parseBlobStream(std::uint64_t baseAddress, std::uint64_t offset, 
 	std::size_t inStreamOffset = 0;
 	while (inStreamOffset < size)
 	{
-		// First byte is length of next element in the blob
+		// First std::uint8_t is length of next element in the blob
 		lengthSize = 1;
 		if (!get1Byte(address + inStreamOffset, length))
 		{
 			return;
 		}
 
-		// 2-byte length encoding if the length is 10xxxxxx
+		// 2-std::uint8_t length encoding if the length is 10xxxxxx
 		if ((length & 0xC0) == 0x80)
 		{
 			if (!get2Byte(address + inStreamOffset, length, Endianness::BIG))
@@ -2512,7 +2507,7 @@ void PeFormat::parseBlobStream(std::uint64_t baseAddress, std::uint64_t offset, 
 			length &= ~0xC000;
 			lengthSize = 2;
 		}
-		// 4-byte length encoding if the length is 110xxxxx
+		// 4-std::uint8_t length encoding if the length is 110xxxxx
 		else if ((length & 0xE0) == 0xC0)
 		{
 			if (!get4Byte(address + inStreamOffset, length, Endianness::BIG))
@@ -2724,7 +2719,7 @@ void PeFormat::detectTypeLibId()
 				continue;
 			}
 
-			// Custom attributes contain one word 0x0001 at the beginning so we skip it,
+			// Custom attributes contain one std::uint16_t 0x0001 at the beginning so we skip it,
 			// followed by length of the string, which is GUID we are looking for
 			auto length = typeLibData[2];
 			typeLibId = retdec::utils::toLower(std::string(reinterpret_cast<const char*>(typeLibData.data() + 3), length));

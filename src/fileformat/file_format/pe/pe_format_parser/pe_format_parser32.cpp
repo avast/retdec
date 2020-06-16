@@ -191,7 +191,7 @@ bool PeFormatParser32::getEpOffset(unsigned long long &epOffset) const
 	}
 
 	const auto offset = peEpOffset(peHeader);
-	if(offset == std::numeric_limits<dword>::max())
+	if(offset == std::numeric_limits<std::uint32_t>::max())
 	{
 		return false;
 	}

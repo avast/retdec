@@ -333,7 +333,7 @@ void FileFormat::setLoadedBytes(std::vector<unsigned char> *lBytes)
 
 /**
  * If fileformat is Intel HEX or raw binary then it does not contain
- * critical information like architecture, endianness or word size.
+ * critical information like architecture, endianness or std::uint16_t size.
  * However, fileformat users expect it to contain this information.
  * Therefore, this method needs to be called to set these critical information.
  */
@@ -684,8 +684,8 @@ std::size_t FileFormat::getNibbleLength() const
 }
 
 /**
- * Get number of bits in one byte
- * @return Number of bits in one byte
+ * Get number of bits in one std::uint8_t
+ * @return Number of bits in one std::uint8_t
  * @note This assumes architectures with 8-bit bytes and may break if some
  *    exotic architecture is encountered.
  */
@@ -696,8 +696,8 @@ std::size_t FileFormat::getByteLength() const
 }
 
 /**
- * Get number of bits in one word
- * @return Number of bits in one word or zero if this feature is not
+ * Get number of bits in one std::uint16_t
+ * @return Number of bits in one std::uint16_t or zero if this feature is not
  *    supported for target architecture of input file.
  *
  * Supported architectures are defined as enumeration type Architecture.
@@ -708,8 +708,8 @@ std::size_t FileFormat::getWordLength() const
 }
 
 /**
- * Get number of nibbles in one byte
- * @return Number of nibbles in one byte or zero if this feature is not
+ * Get number of nibbles in one std::uint8_t
+ * @return Number of nibbles in one std::uint8_t or zero if this feature is not
  *    supported for target architecture of input file.
  *
  * Supported architectures are defined as enumeration type Architecture.
@@ -1967,7 +1967,7 @@ bool FileFormat::getXByte(std::uint64_t address, std::uint64_t x, std::uint64_t 
 }
 
 /**
- * Get @a x bytes long byte array from specified address
+ * Get @a x bytes long std::uint8_t array from specified address
  * @param address Address to get array from
  * @param x Number of bytes for get
  * @param res Result array
@@ -2061,8 +2061,8 @@ bool FileFormat::get8ByteOffset(std::uint64_t offset, std::uint64_t &res, retdec
 
 /**
  * Get long double from the specified offset
- * If system has 80-bit (10-byte) long double, copy data directly.
- * Else convert 80-bit (10-byte) long double into 64-bit (8-byte) double.
+ * If system has 80-bit (10-std::uint8_t) long double, copy data directly.
+ * Else convert 80-bit (10-std::uint8_t) long double into 64-bit (8-std::uint8_t) double.
  * @param offset Offset to get double from
  * @param res Result double
  * @return Status of operation (@c true if all is OK, @c false otherwise)
@@ -2107,7 +2107,7 @@ bool FileFormat::getXByteOffset(std::uint64_t offset, std::uint64_t x, std::uint
 }
 
 /**
- * Get @a x bytes long byte array from specified offset
+ * Get @a x bytes long std::uint8_t array from specified offset
  * @param offset Offset to get array from
  * @param x Number of bytes for get
  * @param res Result array
@@ -2126,7 +2126,7 @@ bool FileFormat::getXBytesOffset(std::uint64_t offset, std::uint64_t x, std::vec
 }
 
 /**
- * Get word located at provided offset using the specified endian or default file endian
+ * Get std::uint16_t located at provided offset using the specified endian or default file endian
  * @param offset Offset to get integer from
  * @param res Result integer
  * @param e Endian - if specified it is forced, otherwise file's endian is used
@@ -2138,10 +2138,10 @@ bool FileFormat::getWordOffset(std::uint64_t offset, std::uint64_t &res, retdec:
 }
 
 /**
- * Get NTBS (null-terminated byte string) from specified offset
+ * Get NTBS (null-terminated std::uint8_t string) from specified offset
  * @param offset Offset to get string from
  * @param res Result string
- * @param size Requested size of string (if @a size is zero, read until zero byte)
+ * @param size Requested size of string (if @a size is zero, read until zero std::uint8_t)
  * @return Status of operation (@c true if all is OK, @c false otherwise)
  */
 bool FileFormat::getNTBSOffset(std::uint64_t offset, std::string &res, std::size_t size) const
@@ -2445,11 +2445,11 @@ void FileFormat::dump(std::string &dumpFile)
 		ret << "; Entry point offset: " << offset << "\n";
 	}
 
-	ret << "; Bytes per word: " << std::dec << getBytesPerWord() << "\n";
-	ret << "; Bits per word: " << getWordLength() << "\n";
-	ret << "; Bits per byte: " << getByteLength() << "\n";
+	ret << "; Bytes per std::uint16_t: " << std::dec << getBytesPerWord() << "\n";
+	ret << "; Bits per std::uint16_t: " << getWordLength() << "\n";
+	ret << "; Bits per std::uint8_t: " << getByteLength() << "\n";
 	ret << "; Bits per nibble: " << getNibbleLength() << "\n";
-	ret << "; Nibbles per byte: " << getNumberOfNibblesInByte() << "\n";
+	ret << "; Nibbles per std::uint8_t: " << getNumberOfNibblesInByte() << "\n";
 
 	if(getNumberOfSections())
 	{

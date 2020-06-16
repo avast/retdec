@@ -38,7 +38,7 @@ namespace PeLib
 		}
 	}
 
-	void RelocationsDirectory::setRelocationData(unsigned int ulRelocation, unsigned int ulDataNumber, word wData)
+	void RelocationsDirectory::setRelocationData(unsigned int ulRelocation, unsigned int ulDataNumber, std::uint16_t wData)
 	{
 		m_vRelocations[ulRelocation].vRelocData[ulDataNumber] = wData;
 	}
@@ -144,7 +144,7 @@ namespace PeLib
 
 		for (unsigned int i=0;i<m_vRelocations.size();i++)
 		{
-			size2 += static_cast<unsigned int>(m_vRelocations[i].vRelocData.size()) * sizeof(word);
+			size2 += static_cast<unsigned int>(m_vRelocations[i].vRelocData.size()) * sizeof(std::uint16_t);
 		}
 
 		return size2;
@@ -155,12 +155,12 @@ namespace PeLib
 		return static_cast<unsigned int>(m_vRelocations.size());
 	}
 
-	dword RelocationsDirectory::getVirtualAddress(unsigned int ulRelocation) const
+	std::uint32_t RelocationsDirectory::getVirtualAddress(unsigned int ulRelocation) const
 	{
 		return m_vRelocations[ulRelocation].ibrRelocation.VirtualAddress;
 	}
 
-	dword RelocationsDirectory::getSizeOfBlock(unsigned int ulRelocation) const
+	std::uint32_t RelocationsDirectory::getSizeOfBlock(unsigned int ulRelocation) const
 	{
 		return m_vRelocations[ulRelocation].ibrRelocation.SizeOfBlock;
 	}
@@ -170,17 +170,17 @@ namespace PeLib
 		return static_cast<unsigned int>(m_vRelocations[ulRelocation].vRelocData.size());
 	}
 
-	word RelocationsDirectory::getRelocationData(unsigned int ulRelocation, unsigned int ulDataNumber) const
+	std::uint16_t RelocationsDirectory::getRelocationData(unsigned int ulRelocation, unsigned int ulDataNumber) const
 	{
 		return m_vRelocations[ulRelocation].vRelocData[ulDataNumber];
 	}
 
-	void RelocationsDirectory::setVirtualAddress(unsigned int ulRelocation, dword dwValue)
+	void RelocationsDirectory::setVirtualAddress(unsigned int ulRelocation, std::uint32_t dwValue)
 	{
 		m_vRelocations[ulRelocation].ibrRelocation.VirtualAddress = dwValue;
 	}
 
-	void RelocationsDirectory::setSizeOfBlock(unsigned int ulRelocation, dword dwValue)
+	void RelocationsDirectory::setSizeOfBlock(unsigned int ulRelocation, std::uint32_t dwValue)
 	{
 		m_vRelocations[ulRelocation].ibrRelocation.SizeOfBlock = dwValue;
 	}
@@ -191,12 +191,12 @@ namespace PeLib
 		m_vRelocations.push_back(newrelocation);
 	}
 
-	void RelocationsDirectory::addRelocationData(unsigned int ulRelocation, word wValue)
+	void RelocationsDirectory::addRelocationData(unsigned int ulRelocation, std::uint16_t wValue)
 	{
 		m_vRelocations[ulRelocation].vRelocData.push_back(wValue);
 	}
 
-/*	void RelocationsDirectory::removeRelocationData(unsigned int ulRelocation, word wValue)
+/*	void RelocationsDirectory::removeRelocationData(unsigned int ulRelocation, std::uint16_t wValue)
 	{
 		// If you get an error with Borland C++ here you have two options: Upgrade your compiler
 		// or use the commented line instead of the line below.

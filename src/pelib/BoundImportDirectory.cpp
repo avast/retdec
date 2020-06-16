@@ -26,7 +26,7 @@ namespace PeLib
 	* @param wOmn Value of the OffsetModuleName of the bound import field.
 	* @param wWfr Value of the NumberOfModuleForwarderRefs of the bound import field.
 	**/
-	int BoundImportDirectory::addBoundImport(const std::string& strModuleName, dword dwTds, word wOmn, word wWfr)
+	int BoundImportDirectory::addBoundImport(const std::string& strModuleName, std::uint32_t dwTds, std::uint16_t wOmn, std::uint16_t wWfr)
 	{
 		for (unsigned int i=0;i<m_vIbd.size();i++)
 		{
@@ -114,7 +114,7 @@ namespace PeLib
 
 		for (unsigned int i=0;i<currentDirectory.size();i++)
 		{
-			dword wOmn = currentDirectory[i].ibdDescriptor.OffsetModuleName;
+			std::uint32_t wOmn = currentDirectory[i].ibdDescriptor.OffsetModuleName;
 			if (wOmn > dwSize)
 			{
 				return ERROR_INVALID_FILE;
@@ -128,7 +128,7 @@ namespace PeLib
 
 			for (unsigned int j=0;j<currentDirectory[i].moduleForwarders.size();j++)
 			{
-				dword wOmn2 = currentDirectory[i].moduleForwarders[j].ibdDescriptor.OffsetModuleName;
+				std::uint32_t wOmn2 = currentDirectory[i].moduleForwarders[j].ibdDescriptor.OffsetModuleName;
 				if (wOmn2 > dwSize)
 				{
 					return ERROR_INVALID_FILE;
@@ -174,13 +174,13 @@ namespace PeLib
 	* @param vBuffer Buffer where the rebuilt BoundImport directory will be stored.
 	* @param fMakeValid If this flag is true a valid directory will be produced.
 	**/
-	void BoundImportDirectory::rebuild(std::vector<byte>& vBuffer, bool fMakeValid) const
+	void BoundImportDirectory::rebuild(std::vector<std::uint8_t>& vBuffer, bool fMakeValid) const
 	{
-		std::map<std::string, word> filename_offsets;
+		std::map<std::string, std::uint16_t> filename_offsets;
 
 		OutputBuffer obBuffer(vBuffer);
 
-		word ulNameOffset = static_cast<word>((totalModules() + 1) * PELIB_IMAGE_BOUND_IMPORT_DESCRIPTOR::size());
+		std::uint16_t ulNameOffset = static_cast<std::uint16_t>((totalModules() + 1) * PELIB_IMAGE_BOUND_IMPORT_DESCRIPTOR::size());
 
 		for (unsigned int i=0;i<m_vIbd.size();i++)
 		{
@@ -193,7 +193,7 @@ namespace PeLib
 				{
 					filename_offsets[m_vIbd[i].strModuleName] = ulNameOffset;
 					obBuffer << ulNameOffset;
-					ulNameOffset += static_cast<word>(m_vIbd[i].strModuleName.size() + 1);
+					ulNameOffset += static_cast<std::uint16_t>(m_vIbd[i].strModuleName.size() + 1);
 				}
 				else
 				{
@@ -217,7 +217,7 @@ namespace PeLib
 					{
 						filename_offsets[m_vIbd[i].moduleForwarders[j].strModuleName] = ulNameOffset;
 						obBuffer << ulNameOffset;
-						ulNameOffset += static_cast<word>(m_vIbd[i].moduleForwarders[j].strModuleName.size() + 1);
+						ulNameOffset += static_cast<std::uint16_t>(m_vIbd[i].moduleForwarders[j].strModuleName.size() + 1);
 					}
 					else
 					{
@@ -233,9 +233,9 @@ namespace PeLib
 			}
 		}
 
-		obBuffer << static_cast<dword>(0);
-		obBuffer << static_cast<word>(0);
-		obBuffer << static_cast<word>(0);
+		obBuffer << static_cast<std::uint32_t>(0);
+		obBuffer << static_cast<std::uint16_t>(0);
+		obBuffer << static_cast<std::uint16_t>(0);
 
 		for (unsigned int i=0;i<m_vIbd.size();i++)
 		{
@@ -317,7 +317,7 @@ namespace PeLib
 	* @param dwOffset File offset the bound importdirectory will be written to.
 	* @param fMakeValid If this flag is true a valid directory will be produced.
 	**/
-	int BoundImportDirectory::write(const std::string& strFilename, dword dwOffset,  bool fMakeValid) const
+	int BoundImportDirectory::write(const std::string& strFilename, std::uint32_t dwOffset,  bool fMakeValid) const
 	{
 		std::fstream ofFile(strFilename.c_str(), std::ios_base::in);
 
@@ -354,7 +354,7 @@ namespace PeLib
 	* @param dwBidnr Number of the bound import field.
 	* @return Value of the TimeDateStamp of the bound import field.
 	**/
-	dword BoundImportDirectory::getTimeDateStamp(dword dwBidnr) const
+	std::uint32_t BoundImportDirectory::getTimeDateStamp(std::uint32_t dwBidnr) const
 	{
 		return m_vIbd[dwBidnr].ibdDescriptor.TimeDateStamp;
 	}
@@ -364,7 +364,7 @@ namespace PeLib
 	* @param dwBidnr Number of the bound import field.
 	* @return Value of the OffsetModuleName of the bound import field.
 	**/
-	word BoundImportDirectory::getOffsetModuleName(dword dwBidnr) const
+	std::uint16_t BoundImportDirectory::getOffsetModuleName(std::uint32_t dwBidnr) const
 	{
 		return m_vIbd[dwBidnr].ibdDescriptor.OffsetModuleName;
 	}
@@ -374,7 +374,7 @@ namespace PeLib
 	* @param dwBidnr Number of the bound import field.
 	* @return Value of the NumberOfModuleForwarderRefs of the bound import field.
 	**/
-	word BoundImportDirectory::getNumberOfModuleForwarderRefs(dword dwBidnr) const
+	std::uint16_t BoundImportDirectory::getNumberOfModuleForwarderRefs(std::uint32_t dwBidnr) const
 	{
 		return m_vIbd[dwBidnr].ibdDescriptor.NumberOfModuleForwarderRefs;
 	}
@@ -384,7 +384,7 @@ namespace PeLib
 	* @param dwBidnr Number of the bound import field.
 	* @return Value of the ModuleName of the bound import field.
 	**/
-	std::string BoundImportDirectory::getModuleName(dword dwBidnr) const
+	std::string BoundImportDirectory::getModuleName(std::uint32_t dwBidnr) const
 	{
 		return m_vIbd[dwBidnr].strModuleName;
 	}
@@ -394,7 +394,7 @@ namespace PeLib
 	* @param dwBidnr Number of the bound import field which will be changed.
 	* @param dwTds New value of the TimeDateStamp of the bound import field.
 	**/
-	void BoundImportDirectory::setTimeDateStamp(dword dwBidnr, dword dwTds)
+	void BoundImportDirectory::setTimeDateStamp(std::uint32_t dwBidnr, std::uint32_t dwTds)
 	{
 		m_vIbd[dwBidnr].ibdDescriptor.TimeDateStamp = dwTds;
 	}
@@ -404,7 +404,7 @@ namespace PeLib
 	* @param dwBidnr Number of the bound import field which will be changed.
 	* @param wOmn New value of the OffsetModuleName of the bound import field.
 	**/
-	void BoundImportDirectory::setOffsetModuleName(dword dwBidnr, word wOmn)
+	void BoundImportDirectory::setOffsetModuleName(std::uint32_t dwBidnr, std::uint16_t wOmn)
 	{
 		m_vIbd[dwBidnr].ibdDescriptor.OffsetModuleName = wOmn;
 	}
@@ -414,7 +414,7 @@ namespace PeLib
 	* @param dwBidnr Number of the bound import field which will be changed.
 	* @param wMfr New value of the NumberOfModuleForwarderRefs of the bound import field.
 	**/
-	void BoundImportDirectory::setNumberOfModuleForwarderRefs(dword dwBidnr, word wMfr)
+	void BoundImportDirectory::setNumberOfModuleForwarderRefs(std::uint32_t dwBidnr, std::uint16_t wMfr)
 	{
 		m_vIbd[dwBidnr].ibdDescriptor.NumberOfModuleForwarderRefs = wMfr;
 	}
@@ -424,57 +424,57 @@ namespace PeLib
 	* @param dwBidnr Number of the bound import field which will be changed.
 	* @param strModuleName New value of the ModuleName of the bound import field.
 	**/
-	void BoundImportDirectory::setModuleName(dword dwBidnr, const std::string& strModuleName)
+	void BoundImportDirectory::setModuleName(std::uint32_t dwBidnr, const std::string& strModuleName)
 	{
 		m_vIbd[dwBidnr].strModuleName = strModuleName;
 	}
 
-	dword BoundImportDirectory::getTimeDateStamp(dword dwBidnr, dword forwardedModule) const
+	std::uint32_t BoundImportDirectory::getTimeDateStamp(std::uint32_t dwBidnr, std::uint32_t forwardedModule) const
 	{
 		return m_vIbd[dwBidnr].moduleForwarders[forwardedModule].ibdDescriptor.TimeDateStamp;
 	}
 
-	word BoundImportDirectory::getOffsetModuleName(dword dwBidnr, dword forwardedModule) const
+	std::uint16_t BoundImportDirectory::getOffsetModuleName(std::uint32_t dwBidnr, std::uint32_t forwardedModule) const
 	{
 		return m_vIbd[dwBidnr].moduleForwarders[forwardedModule].ibdDescriptor.OffsetModuleName;
 	}
 
-	word BoundImportDirectory::getNumberOfModuleForwarderRefs(dword dwBidnr, dword forwardedModule) const
+	std::uint16_t BoundImportDirectory::getNumberOfModuleForwarderRefs(std::uint32_t dwBidnr, std::uint32_t forwardedModule) const
 	{
 		return m_vIbd[dwBidnr].moduleForwarders[forwardedModule].ibdDescriptor.NumberOfModuleForwarderRefs;
 	}
 
-	std::string BoundImportDirectory::getModuleName(dword dwBidnr, dword forwardedModule) const
+	std::string BoundImportDirectory::getModuleName(std::uint32_t dwBidnr, std::uint32_t forwardedModule) const
 	{
 		return m_vIbd[dwBidnr].moduleForwarders[forwardedModule].strModuleName;
 	}
 
-	void BoundImportDirectory::setTimeDateStamp(dword dwBidnr, dword forwardedModule, dword dwTds)
+	void BoundImportDirectory::setTimeDateStamp(std::uint32_t dwBidnr, std::uint32_t forwardedModule, std::uint32_t dwTds)
 	{
 		m_vIbd[dwBidnr].moduleForwarders[forwardedModule].ibdDescriptor.TimeDateStamp = dwTds;
 	}
 
-	void BoundImportDirectory::setOffsetModuleName(dword dwBidnr, dword forwardedModule, word wOmn)
+	void BoundImportDirectory::setOffsetModuleName(std::uint32_t dwBidnr, std::uint32_t forwardedModule, std::uint16_t wOmn)
 	{
 		m_vIbd[dwBidnr].moduleForwarders[forwardedModule].ibdDescriptor.OffsetModuleName = wOmn;
 	}
 
-	void BoundImportDirectory::setNumberOfModuleForwarderRefs(dword dwBidnr, dword forwardedModule, word wMfr)
+	void BoundImportDirectory::setNumberOfModuleForwarderRefs(std::uint32_t dwBidnr, std::uint32_t forwardedModule, std::uint16_t wMfr)
 	{
 		m_vIbd[dwBidnr].moduleForwarders[forwardedModule].ibdDescriptor.NumberOfModuleForwarderRefs = wMfr;
 	}
 
-	void BoundImportDirectory::setModuleName(dword dwBidnr, dword forwardedModule, const std::string& strModuleName)
+	void BoundImportDirectory::setModuleName(std::uint32_t dwBidnr, std::uint32_t forwardedModule, const std::string& strModuleName)
 	{
 		m_vIbd[dwBidnr].moduleForwarders[forwardedModule].strModuleName = strModuleName;
 	}
 
-	word BoundImportDirectory::calcNumberOfModuleForwarderRefs(dword dwBidnr) const
+	std::uint16_t BoundImportDirectory::calcNumberOfModuleForwarderRefs(std::uint32_t dwBidnr) const
 	{
-		return static_cast<word>(m_vIbd[dwBidnr].moduleForwarders.size());
+		return static_cast<std::uint16_t>(m_vIbd[dwBidnr].moduleForwarders.size());
 	}
 
-	void BoundImportDirectory::addForwardedModule(dword dwBidnr, const std::string& name, dword timeStamp, word offsetModuleName, word forwardedModules)
+	void BoundImportDirectory::addForwardedModule(std::uint32_t dwBidnr, const std::string& name, std::uint32_t timeStamp, std::uint16_t offsetModuleName, std::uint16_t forwardedModules)
 	{
 		// XXX: Maybe test if there are already 0xFFFF forwarded modules.
 		// XXX: Check for duplicate entries. Is it also necessary to check
@@ -491,7 +491,7 @@ namespace PeLib
 		m_vIbd[dwBidnr].moduleForwarders.push_back(ibdCurrent);
 	}
 
-	void BoundImportDirectory::removeForwardedModule(dword dwBidnr, word forwardedModule)
+	void BoundImportDirectory::removeForwardedModule(std::uint32_t dwBidnr, std::uint16_t forwardedModule)
 	{
 		m_vIbd[dwBidnr].moduleForwarders.erase(m_vIbd[dwBidnr].moduleForwarders.begin() + forwardedModule);
 	}

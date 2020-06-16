@@ -42,17 +42,17 @@ std::string getDirectoryType(unsigned long long dirIndex)
  * @param link Link to section in number representation
  * @return Link to section in string representation
  */
-std::string getSymbolLinkToSection(word link)
+std::string getSymbolLinkToSection(std::uint16_t link)
 {
 	if(!link)
 	{
 		return "UNDEFINED";
 	}
-	else if(link == std::numeric_limits<word>::max())
+	else if(link == std::numeric_limits<std::uint16_t>::max())
 	{
 		return "ABSOLUTE";
 	}
-	else if(link == std::numeric_limits<word>::max() - 1)
+	else if(link == std::numeric_limits<std::uint16_t>::max() - 1)
 	{
 		return "DEBUG";
 	}
@@ -65,7 +65,7 @@ std::string getSymbolLinkToSection(word link)
  * @param type Type of symbol in number representation
  * @return Type of symbol in string representation
  */
-std::string getSymbolType(byte type)
+std::string getSymbolType(std::uint8_t type)
 {
 	if(type < 0x10)
 	{

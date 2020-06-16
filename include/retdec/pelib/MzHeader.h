@@ -66,13 +66,13 @@ namespace PeLib
 		  int read(unsigned char* pcBuffer, unsigned int uiSize, unsigned int originalOffs = 0); // EXPORT _fromMemory
 
 		  /// Rebuild the MZ header.
-		  void rebuild(std::vector<byte>& vBuffer) const; // EXPORT
+		  void rebuild(std::vector<std::uint8_t>& vBuffer) const; // EXPORT
 
 		  /// Returns the size of the current MZ header.
 		  unsigned int size() const; // EXPORT
 
 		  /// Writes the current MZ header to offset 0 of a file.
-		  int write(const std::string& strFilename, dword dwOffset) const; // EXPORT
+		  int write(const std::string& strFilename, std::uint32_t dwOffset) const; // EXPORT
 
 		  /// Gets MZ header.
 		  const PELIB_IMAGE_DOS_HEADER& getHeader() const; // EXPORT
@@ -80,82 +80,82 @@ namespace PeLib
 		  const std::string& getString() const; // EXPORT
 
 		  /// Gets the e_magic value of the MZ header.
-		  word getMagicNumber() const; // EXPORT
+		  std::uint16_t getMagicNumber() const; // EXPORT
 		  /// Gets the e_cblp value of the MZ header.
-		  word getBytesOnLastPage() const; // EXPORT
+		  std::uint16_t getBytesOnLastPage() const; // EXPORT
 		  /// Gets the e_cp value of the MZ header.
-		  word getPagesInFile() const; // EXPORT
+		  std::uint16_t getPagesInFile() const; // EXPORT
 		  /// Gets the e_crlc value of the MZ header.
-		  word getRelocations() const; // EXPORT
+		  std::uint16_t getRelocations() const; // EXPORT
 		  /// Gets the e_cparhdr value of the MZ header.
-		  word getSizeOfHeader() const; // EXPORT
+		  std::uint16_t getSizeOfHeader() const; // EXPORT
 		  /// Gets the e_minalloc value of the MZ header.
-		  word getMinExtraParagraphs() const; // EXPORT
+		  std::uint16_t getMinExtraParagraphs() const; // EXPORT
 		  /// Gets the e_maxalloc value of the MZ header.
-		  word getMaxExtraParagraphs() const; // EXPORT
+		  std::uint16_t getMaxExtraParagraphs() const; // EXPORT
 		  /// Gets the e_ss value of the MZ header.
-		  word getSsValue() const; // EXPORT
+		  std::uint16_t getSsValue() const; // EXPORT
 		  /// Gets the e_sp value of the MZ header.
-		  word getSpValue() const; // EXPORT
+		  std::uint16_t getSpValue() const; // EXPORT
 		  /// Gets the e_csum value of the MZ header.
-		  word getChecksum() const; // EXPORT
+		  std::uint16_t getChecksum() const; // EXPORT
 		  /// Gets the e_ip value of the MZ header.
-		  word getIpValue() const; // EXPORT
+		  std::uint16_t getIpValue() const; // EXPORT
 		  /// Gets the e_cs value of the MZ header.
-		  word getCsValue() const; // EXPORT
+		  std::uint16_t getCsValue() const; // EXPORT
 		  /// Gets the e_lfarlc value of the MZ header.
-		  word getAddrOfRelocationTable() const; // EXPORT
+		  std::uint16_t getAddrOfRelocationTable() const; // EXPORT
 		  /// Gets the e_ovnovalue of the MZ header.
-		  word getOverlayNumber() const; // EXPORT
+		  std::uint16_t getOverlayNumber() const; // EXPORT
 		  /// Gets the e_oemid value of the MZ header.
-		  word getOemIdentifier() const; // EXPORT
+		  std::uint16_t getOemIdentifier() const; // EXPORT
 		  /// Gets the e_oeminfo value of the MZ header.
-		  word getOemInformation() const; // EXPORT
+		  std::uint16_t getOemInformation() const; // EXPORT
 		  /// Gets the e_lfanew value of the MZ header.
-		  dword getAddressOfPeHeader() const; // EXPORT
+		  std::uint32_t getAddressOfPeHeader() const; // EXPORT
 		  /// Gets the e_res of the MZ header.
-		  word getReservedWords1(unsigned int uiNr) const; // EXPORT
+		  std::uint16_t getReservedWords1(unsigned int uiNr) const; // EXPORT
 		  /// Gets the e_res2 of the MZ header.
-		  word getReservedWords2(unsigned int uiNr) const; // EXPORT
+		  std::uint16_t getReservedWords2(unsigned int uiNr) const; // EXPORT
 
 		  /// Sets the e_magic value of the MZ header.
-		  void setMagicNumber(word wValue); // EXPORT
+		  void setMagicNumber(std::uint16_t wValue); // EXPORT
 		  /// Sets the e_cblp value of the MZ header.
-		  void setBytesOnLastPage(word wValue); // EXPORT
+		  void setBytesOnLastPage(std::uint16_t wValue); // EXPORT
 		  /// Sets the e_cp value of the MZ header.
-		  void setPagesInFile(word wValue); // EXPORT
+		  void setPagesInFile(std::uint16_t wValue); // EXPORT
 		  /// Sets the e_crlc value of the MZ header.
-		  void setRelocations(word wValue); // EXPORT
+		  void setRelocations(std::uint16_t wValue); // EXPORT
 		  /// Sets the e_cparhdr value of the MZ header.
-		  void setSizeOfHeader(word wValue); // EXPORT
+		  void setSizeOfHeader(std::uint16_t wValue); // EXPORT
 		  /// Sets the e_minalloc value of the MZ header.
-		  void setMinExtraParagraphs(word wValue); // EXPORT
+		  void setMinExtraParagraphs(std::uint16_t wValue); // EXPORT
 		  /// Sets the e_maxalloc value of the MZ header.
-		  void setMaxExtraParagraphs(word wValue); // EXPORT
+		  void setMaxExtraParagraphs(std::uint16_t wValue); // EXPORT
 		  /// Sets the e_ss value of the MZ header.
-		  void setSsValue(word wValue); // EXPORT
+		  void setSsValue(std::uint16_t wValue); // EXPORT
 		  /// Sets the e_sp value of the MZ header.
-		  void setSpValue(word wValue); // EXPORT
+		  void setSpValue(std::uint16_t wValue); // EXPORT
 		  /// Sets the e_csum value of the MZ header.
-		  void setChecksum(word wValue); // EXPORT
+		  void setChecksum(std::uint16_t wValue); // EXPORT
 		  /// Sets the e_ip value of the MZ header.
-		  void setIpValue(word wValue); // EXPORT
+		  void setIpValue(std::uint16_t wValue); // EXPORT
 		  /// Sets the e_cs value of the MZ header.
-		  void setCsValue(word wValue); // EXPORT
+		  void setCsValue(std::uint16_t wValue); // EXPORT
 		  /// Sets the e_lfarlc value of the MZ header.
-		  void setAddrOfRelocationTable(word wValue); // EXPORT
+		  void setAddrOfRelocationTable(std::uint16_t wValue); // EXPORT
 		  /// Sets the e_ovno value of the MZ header.
-		  void setOverlayNumber(word wValue); // EXPORT
+		  void setOverlayNumber(std::uint16_t wValue); // EXPORT
 		  /// Sets the e_oemid value of the MZ header.
-		  void setOemIdentifier(word wValue); // EXPORT
+		  void setOemIdentifier(std::uint16_t wValue); // EXPORT
 		  /// Sets the e_oeminfo value of the MZ header.
-		  void setOemInformation(word wValue); // EXPORT
+		  void setOemInformation(std::uint16_t wValue); // EXPORT
 		  /// Sets the e_lfanew value of the MZ header.
-		  void setAddressOfPeHeader(dword dwValue); // EXPORT
+		  void setAddressOfPeHeader(std::uint32_t dwValue); // EXPORT
 		  /// Sets the e_res value of the MZ header.
-		  void setReservedWords1(unsigned int uiNr, word wValue); // EXPORT
+		  void setReservedWords1(unsigned int uiNr, std::uint16_t wValue); // EXPORT
 		  /// Sets the e_res2 value of the MZ header.
-		  void setReservedWords2(unsigned int uiNr, word wValue); // EXPORT
+		  void setReservedWords2(unsigned int uiNr, std::uint16_t wValue); // EXPORT
 	};
 }
 

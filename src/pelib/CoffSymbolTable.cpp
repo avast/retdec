@@ -28,7 +28,7 @@ namespace PeLib
 		for (std::size_t i = 0, e = uiSize / PELIB_IMAGE_SIZEOF_COFF_SYMBOL; i < e; ++i)
 		{
 			symbol.Name.clear();
-			dword Zeroes, NameOffset;
+			std::uint32_t Zeroes, NameOffset;
 			inputbuffer >> Zeroes;
 			inputbuffer >> NameOffset;
 			inputbuffer >> symbol.Value;
@@ -37,7 +37,7 @@ namespace PeLib
 			inputbuffer >> symbol.TypeSimple;
 			inputbuffer >> symbol.StorageClass;
 			inputbuffer >> symbol.NumberOfAuxSymbols;
-			symbol.Index = (PeLib::dword)i;
+			symbol.Index = (std::uint32_t)i;
 			if (!Zeroes)
 			{
 				if (stringTableSize && NameOffset)
@@ -69,71 +69,62 @@ namespace PeLib
 			symbolTable.push_back(symbol);
 		}
 
-		numberOfStoredSymbols = (dword)symbolTable.size();
+		numberOfStoredSymbols = (std::uint32_t)symbolTable.size();
 	}
 
-	int CoffSymbolTable::read(
-			std::istream& inStream,
-			unsigned int uiOffset,
-			unsigned int uiSize)
+	int CoffSymbolTable::read(ByteBuffer & fileData, std::size_t uiOffset, std::size_t uiSize)
 	{
-		IStreamWrapper inStream_w(inStream);
-
-		if (!inStream_w)
-		{
-			return ERROR_OPENING_FILE;
-		}
-
 		// Check for overflow
 		if ((uiOffset + uiSize) < uiOffset)
 		{
 			return ERROR_INVALID_FILE;
 		}
 
-		std::uint64_t ulFileSize = fileSize(inStream_w);
-		std::uint64_t stringTableOffset = uiOffset + uiSize;
+		std::size_t ulFileSize = fileData.size();
+		std::size_t stringTableOffset = uiOffset + uiSize;
 		if (uiOffset >= ulFileSize || stringTableOffset >= ulFileSize)
 		{
 			return ERROR_INVALID_FILE;
 		}
 
-		inStream_w.seekg(uiOffset, std::ios::beg);
-		symbolTableDump.resize(uiSize);
-		inStream_w.read(reinterpret_cast<char*>(symbolTableDump.data()), uiSize);
+		// Copy part of the file data into symbol table dump
+		symbolTableDump.assign(fileData.begin() + uiOffset, fileData.begin() + uiOffset + uiSize);
+		uiOffset += uiSize;
+
 		InputBuffer ibBuffer(symbolTableDump);
 
-		// read size of string table
+		// Read size of string table
 		if (ulFileSize >= stringTableOffset + 4)
 		{
-			stringTable.resize(4);
-			inStream_w.read(reinterpret_cast<char*>(stringTable.data()), 4);
-			InputBuffer strBuf(stringTable);
-			strBuf >> stringTableSize;
+			memcpy(&stringTableSize, fileData.data() + stringTableOffset, sizeof(uint32_t));
+			uiOffset = stringTableOffset + sizeof(uint32_t);
 		}
 
-		if (inStream_w.gcount() < 4)
+		if(ulFileSize > uiOffset)
 		{
-			stringTableSize = (std::size_t)inStream_w.gcount();
-		}
-		else if (inStream_w.gcount() == 4 && stringTableSize < 4)
-		{
-			stringTableSize = 4;
+			if ((ulFileSize - uiOffset) < 4)
+			{
+				memcpy(&stringTableSize, fileData.data() + stringTableOffset, sizeof(uint32_t));
+			}
+			else if ((ulFileSize - uiOffset) == 4 && stringTableSize < 4)
+			{
+				stringTableSize = 4;
+			}
 		}
 
 		if (stringTableSize > ulFileSize || uiOffset + stringTableSize > ulFileSize)
 		{
-			stringTableSize = (std::size_t)(ulFileSize - uiOffset);
+			stringTableSize = (ulFileSize - uiOffset);
 		}
 
 		// read string table
 		if (stringTableSize > 4)
 		{
 			stringTable.resize(stringTableSize);
-			inStream_w.read(reinterpret_cast<char*>(stringTable.data() + 4), stringTableSize - 4);
+			memcpy(stringTable.data() + 4, fileData.data() + uiOffset, stringTableSize - 4);
 		}
 
 		read(ibBuffer, uiSize);
-
 		return ERROR_NONE;
 	}
 
@@ -160,7 +151,7 @@ namespace PeLib
 		return numberOfStoredSymbols;
 	}
 
-	dword CoffSymbolTable::getSymbolIndex(std::size_t ulSymbol) const
+	std::uint32_t CoffSymbolTable::getSymbolIndex(std::size_t ulSymbol) const
 	{
 		return symbolTable[ulSymbol].Index;
 	}
@@ -170,32 +161,32 @@ namespace PeLib
 		return symbolTable[ulSymbol].Name;
 	}
 
-	dword CoffSymbolTable::getSymbolValue(std::size_t ulSymbol) const
+	std::uint32_t CoffSymbolTable::getSymbolValue(std::size_t ulSymbol) const
 	{
 		return symbolTable[ulSymbol].Value;
 	}
 
-	word CoffSymbolTable::getSymbolSectionNumber(std::size_t ulSymbol) const
+	std::uint16_t CoffSymbolTable::getSymbolSectionNumber(std::size_t ulSymbol) const
 	{
 		return symbolTable[ulSymbol].SectionNumber;
 	}
 
-	byte CoffSymbolTable::getSymbolTypeComplex(std::size_t ulSymbol) const
+	std::uint8_t CoffSymbolTable::getSymbolTypeComplex(std::size_t ulSymbol) const
 	{
 		return symbolTable[ulSymbol].TypeComplex;
 	}
 
-	byte CoffSymbolTable::getSymbolTypeSimple(std::size_t ulSymbol) const
+	std::uint8_t CoffSymbolTable::getSymbolTypeSimple(std::size_t ulSymbol) const
 	{
 		return symbolTable[ulSymbol].TypeSimple;
 	}
 
-	byte CoffSymbolTable::getSymbolStorageClass(std::size_t ulSymbol) const
+	std::uint8_t CoffSymbolTable::getSymbolStorageClass(std::size_t ulSymbol) const
 	{
 		return symbolTable[ulSymbol].StorageClass;
 	}
 
-	byte CoffSymbolTable::getSymbolNumberOfAuxSymbols(std::size_t ulSymbol) const
+	std::uint8_t CoffSymbolTable::getSymbolNumberOfAuxSymbols(std::size_t ulSymbol) const
 	{
 		return symbolTable[ulSymbol].NumberOfAuxSymbols;
 	}

@@ -329,7 +329,7 @@ template<int bits> unsigned long long peNumberOfStoredDataDirectories(const PeLi
  * @param peImports Parser of PE import directory
  * @return Number of imported libraries
  */
-template<int bits> unsigned long long peNumberOfImportedLibraries(const PeLib::ImportDirectory<bits> &peImports)
+inline unsigned long long peNumberOfImportedLibraries(const PeLib::ImportDirectory &peImports)
 {
 	return peImports.getNumberOfFiles(PeLib::OLDDIR);
 }
@@ -484,8 +484,8 @@ template<int bits> bool peDataDirectoryAbsolute(const PeLib::PeHeaderT<bits> &pe
  *
  * If function returns @c false, @a fileName is left unchanged.
  */
-template<int bits> bool peImportedLibraryFileName(
-		const PeLib::ImportDirectory<bits> &peImports,
+inline bool peImportedLibraryFileName(
+		const PeLib::ImportDirectory &peImports,
 		std::string &fileName,
 		unsigned long long index)
 {
@@ -531,7 +531,7 @@ template<int bits> bool peDelayImportedLibraryFileName(const PeLib::DelayImportD
  * If function returns info about import, or @c nullptr if invalid import is requested.
  */
 template<int bits> std::unique_ptr<PeImport> peImport(const PeLib::PeHeaderT<bits> &peHeader,
-	const PeLib::ImportDirectory<bits> &peImports,
+	const PeLib::ImportDirectory &peImports,
 	unsigned long long fileIndex, unsigned long long importIndex)
 {
 	if(fileIndex >= peNumberOfImportedLibraries(peImports) ||
@@ -885,7 +885,7 @@ template<int bits> unsigned long long peSecurityDirSize(const PeLib::PeHeaderT<b
  * @param peImports Parser of PE import directory
  * @return Occupied address ranges
  */
-template<int bits> retdec::common::RangeContainer<std::uint64_t> peImportDirectoryOccupiedAddresses(const PeLib::ImportDirectory<bits> &peImports)
+inline retdec::common::RangeContainer<std::uint64_t> peImportDirectoryOccupiedAddresses(const PeLib::ImportDirectory &peImports)
 {
 	retdec::common::RangeContainer<std::uint64_t> result;
 	for (const auto& addresses : peImports.getOccupiedAddresses())

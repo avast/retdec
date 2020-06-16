@@ -42,14 +42,14 @@ namespace PeLib
 	class PeHeaderT : public PeHeader
 	{
 		private:
-		  void readBaseOfData(InputBuffer& ibBuffer, PELIB_IMAGE_NT_HEADERS<x>& header) const;
+		  //void readBaseOfData(InputBuffer& ibBuffer, PELIB_IMAGE_NT_HEADERS & header) const;
 		  void rebuildBaseOfData(OutputBuffer& obBuffer) const;
 
 		protected:
 		  std::vector<PELIB_IMAGE_SECTION_HEADER> m_vIsh; ///< Stores section header information.
-		  PELIB_IMAGE_NT_HEADERS<x> m_inthHeader; ///< Stores Nt header information.
+		  PELIB_IMAGE_NT_HEADERS_EX<x> m_inthHeader; ///< Stores Nt header information.
 		  MzHeader m_mzHeader; ///< Stored DOS header.
-		  dword m_uiOffset; ///< Equivalent to the value returned by #PeLib::MzHeader::getAddressOfPeHeader
+		  std::uint32_t m_uiOffset; ///< Equivalent to the value returned by #PeLib::MzHeader::getAddressOfPeHeader
 		  LoaderError m_ldrError;
 		  unsigned long m_checksumFileOffset; ///< File offset of checksum field in optional PE header
 		  unsigned long m_secDirFileOffset; ///< File offset of security data directory
@@ -66,13 +66,13 @@ namespace PeLib
 		  LoaderError loaderError() const;
 
 		  /// Add a section to the header.
-		  int addSection(const std::string& strName, dword dwSize); // EXPORT
+		  int addSection(const std::string& strName, std::uint32_t dwSize); // EXPORT
 
 		  // Splits a section into two.
-		  int splitSection(word uiSectionnr, const std::string& first, const std::string& second, dword dwSplitOffset); // EXPORT
+		  int splitSection(std::uint16_t uiSectionnr, const std::string& first, const std::string& second, std::uint32_t dwSplitOffset); // EXPORT
 
 		  // Removes a section.
-		  int removeSection(word uiSectionnr); // EXPORT
+		  int removeSection(std::uint16_t uiSectionnr); // EXPORT
 
 		  unsigned int calcSizeOfImage() const; // EXPORT
 
@@ -89,21 +89,21 @@ namespace PeLib
 		  unsigned int calcRva() const; // EXPORT
 
 		  /// Returns the number of sections in the current file.
-		  word calcNumberOfSections() const; // EXPORT
+		  std::uint16_t calcNumberOfSections() const; // EXPORT
 
 		  void enlargeLastSection(unsigned int uiSize); // EXPORT
 
 		  /// Returns the section Id of the section that contains the offset.
-		  word getSectionWithOffset(VAR4_8 dwOffset) const; // EXPORT
+		  std::uint16_t getSectionWithOffset(VAR4_8 dwOffset) const; // EXPORT
 
 		  /// Returns the number of the section which the given relative address points to.
-		  word getSectionWithRva(VAR4_8 rva) const; // EXPORT
+		  std::uint16_t getSectionWithRva(VAR4_8 rva) const; // EXPORT
 
 		  bool isValid() const; // EXPORT
 		  bool isValid(unsigned int foo) const; // EXPORT
 
 		  /// Corrects the current PE header.
-		  void makeValid(dword dwOffset); // EXPORT
+		  void makeValid(std::uint32_t dwOffset); // EXPORT
 
 		  /// Converts a file offset to a relative virtual offset.
 		  unsigned int offsetToRva(VAR4_8 dwOffset) const; // EXPORT
@@ -117,18 +117,18 @@ namespace PeLib
 				  unsigned int uiOffset,
 				  const MzHeader &mzHeader); // EXPORT
 
-		  void readHeader(InputBuffer& ibBuffer, PELIB_IMAGE_NT_HEADERS<x>& header);
+		  void readHeader(InputBuffer& ibBuffer, PELIB_IMAGE_NT_HEADERS_EX<x>& header);
 		  void readDataDirectories(
 				  std::istream& inStream,
 				  unsigned int uiOffset,
-				  PELIB_IMAGE_NT_HEADERS<x>& header);
+				  PELIB_IMAGE_NT_HEADERS_EX<x>& header);
 		  std::vector<PELIB_IMAGE_SECTION_HEADER> readSections(
 				  std::istream& inStream,
 				  unsigned int uiOffset,
-				  PELIB_IMAGE_NT_HEADERS<x>& header);
+				  PELIB_IMAGE_NT_HEADERS_EX<x>& header);
 
 		  /// Rebuilds the current PE header.
-		  void rebuild(std::vector<byte>& vBuffer) const; // EXPORT
+		  void rebuild(std::vector<std::uint8_t>& vBuffer) const; // EXPORT
 
 		  // Checks whether RVA is valid for this image.
 		  bool isValidRva(VAR4_8 dwRva) const; // EXPORT
@@ -153,7 +153,7 @@ namespace PeLib
 		  /// Writes sections to a file.
 		  int writeSections(const std::string& strFilename) const; // EXPORT
 		  /// Overwrites a section with new data.
-		  int writeSectionData(const std::string& strFilename, word wSecnr, const std::vector<byte>& vBuffer) const; // EXPORT
+		  int writeSectionData(const std::string& strFilename, std::uint16_t wSecnr, const std::vector<std::uint8_t>& vBuffer) const; // EXPORT
 
 		  /// Returns file offset of checksum field
 		  unsigned int getChecksumFileOffset() const; // EXPORT
@@ -162,70 +162,70 @@ namespace PeLib
 
 // header getters
 		  /// Returns reference to NT headers.
-		  const PELIB_IMAGE_NT_HEADERS<x>& getNtHeaders() const; // EXPORT
+		  const PELIB_IMAGE_NT_HEADERS_EX<x>& getNtHeaders() const; // EXPORT
 		  /// Returns the Signature value of the header.
-		  dword getNtSignature() const; // EXPORT
+		  std::uint32_t getNtSignature() const; // EXPORT
 		  /// Returns the Machine value of the header.
-		  word getMachine() const; // EXPORT
+		  std::uint16_t getMachine() const; // EXPORT
 		  /// Returns the Sections value of the header.
-		  word getNumberOfSections() const; // EXPORT
+		  std::uint16_t getNumberOfSections() const; // EXPORT
 		  /// Returns the TimeDateStamp value of the header.
-		  dword getTimeDateStamp() const; // EXPORT
+		  std::uint32_t getTimeDateStamp() const; // EXPORT
 		  /// Returns the PointerToSymbolTable value of the header.
-		  dword getPointerToSymbolTable() const; // EXPORT
+		  std::uint32_t getPointerToSymbolTable() const; // EXPORT
 		  /// Returns the NumberOfSymbols value of the header.
-		  dword getNumberOfSymbols() const; // EXPORT
+		  std::uint32_t getNumberOfSymbols() const; // EXPORT
 		  /// Returns the SizeOfOptionalHeader value of the header.
-		  word getSizeOfOptionalHeader() const; // EXPORT
+		  std::uint16_t getSizeOfOptionalHeader() const; // EXPORT
 		  /// Returns the Characteristics value of the header.
-		  word getCharacteristics() const; // EXPORT
+		  std::uint16_t getCharacteristics() const; // EXPORT
 
 		  /// Returns the Magic value of the header.
-		  word getMagic() const; // EXPORT
+		  std::uint16_t getMagic() const; // EXPORT
 		  /// Returns the MajorLinkerVersion value of the header.
-		  byte getMajorLinkerVersion() const; // EXPORT
+		  std::uint8_t getMajorLinkerVersion() const; // EXPORT
 		  /// Returns the MinorLinkerVersion value of the header.
-		  byte getMinorLinkerVersion() const; // EXPORT
+		  std::uint8_t getMinorLinkerVersion() const; // EXPORT
 		  /// Returns the SizeOfCode value of the header.
-		  dword getSizeOfCode() const; // EXPORT
+		  std::uint32_t getSizeOfCode() const; // EXPORT
 		  /// Returns the SizeOfInitializedData value of the header.
-		  dword getSizeOfInitializedData() const; // EXPORT
+		  std::uint32_t getSizeOfInitializedData() const; // EXPORT
 		  /// Returns the SizeOfUninitializedData value of the header.
-		  dword getSizeOfUninitializedData() const; // EXPORT
+		  std::uint32_t getSizeOfUninitializedData() const; // EXPORT
 		  /// Returns the AddressOfEntryPoint value of the header.
-		  dword getAddressOfEntryPoint() const; // EXPORT
+		  std::uint32_t getAddressOfEntryPoint() const; // EXPORT
 		  /// Returns the BaseOfCode value of the header.
-		  dword getBaseOfCode() const; // EXPORT
+		  std::uint32_t getBaseOfCode() const; // EXPORT
 		  /// Returns the ImageBase value of the header.
 		  VAR4_8 getImageBase() const; // EXPORT
 		  /// Returns the SectionAlignment value of the header.
-		  dword getSectionAlignment() const; // EXPORT
+		  std::uint32_t getSectionAlignment() const; // EXPORT
 		  /// Returns the FileAlignment value of the header.
-		  dword getFileAlignment() const; // EXPORT
+		  std::uint32_t getFileAlignment() const; // EXPORT
 		  /// Returns the MajorOperatingSystemVersion value of the header.
-		  word getMajorOperatingSystemVersion() const; // EXPORT
+		  std::uint16_t getMajorOperatingSystemVersion() const; // EXPORT
 		  /// Returns the MinorOperatingSystemVersion value of the header.
-		  word getMinorOperatingSystemVersion() const; // EXPORT
+		  std::uint16_t getMinorOperatingSystemVersion() const; // EXPORT
 		  /// Returns the MajorImageVersion value of the header.
-		  word getMajorImageVersion() const; // EXPORT
+		  std::uint16_t getMajorImageVersion() const; // EXPORT
 		  /// Returns the MinorImageVersion value of the header.
-		  word getMinorImageVersion() const; // EXPORT
+		  std::uint16_t getMinorImageVersion() const; // EXPORT
 		  /// Returns the MajorSubsystemVersion value of the header.
-		  word getMajorSubsystemVersion() const; // EXPORT
+		  std::uint16_t getMajorSubsystemVersion() const; // EXPORT
 		  /// Returns the MinorSubsystemVersion value of the header.
-		  word getMinorSubsystemVersion() const; // EXPORT
+		  std::uint16_t getMinorSubsystemVersion() const; // EXPORT
 		  /// Returns the Reserved1 value of the header.
-		  dword getWin32VersionValue() const; // EXPORT
+		  std::uint32_t getWin32VersionValue() const; // EXPORT
 		  /// Returns the SizeOfImage value of the header.
-		  dword getSizeOfImage() const; // EXPORT
+		  std::uint32_t getSizeOfImage() const; // EXPORT
 		  /// Returns the SizeOfHeaders value of the header.
-		  dword getSizeOfHeaders() const; // EXPORT
+		  std::uint32_t getSizeOfHeaders() const; // EXPORT
 		  /// Returns the CheckSum value of the header.
-		  dword getCheckSum() const; // EXPORT
+		  std::uint32_t getCheckSum() const; // EXPORT
 		  /// Returns the Subsystem value of the header.
-		  word getSubsystem() const; // EXPORT
+		  std::uint16_t getSubsystem() const; // EXPORT
 		  /// Returns the DllCharacteristics value of the header.
-		  word getDllCharacteristics() const; // EXPORT
+		  std::uint16_t getDllCharacteristics() const; // EXPORT
 		  /// Returns the SizeOfStackReserve value of the header.
 		  VAR4_8 getSizeOfStackReserve() const; // EXPORT
 		  /// Returns the SizeOfStackCommit value of the header.
@@ -235,172 +235,172 @@ namespace PeLib
 		  /// Returns the SizeOfHeapCommit value of the header.
 		  VAR4_8 getSizeOfHeapCommit() const; // EXPORT
 		  /// Returns the LoaderFlags value of the header.
-		  dword getLoaderFlags() const; // EXPORT
+		  std::uint32_t getLoaderFlags() const; // EXPORT
 		  /// Returns the NumberOfRvaAndSizes value of the header.
-		  dword getNumberOfRvaAndSizes() const; // EXPORT
-		  dword calcNumberOfRvaAndSizes() const; // EXPORT
+		  std::uint32_t getNumberOfRvaAndSizes() const; // EXPORT
+		  std::uint32_t calcNumberOfRvaAndSizes() const; // EXPORT
 
 		  void addDataDirectory(); // EXPORT
-		  void removeDataDirectory(dword index); // EXPORT
+		  void removeDataDirectory(std::uint32_t index); // EXPORT
 
 // image directory getters
 		  /// Returns the relative virtual address of the image directory Export.
-		  dword getIddExportRva() const; // EXPORT
+		  std::uint32_t getIddExportRva() const; // EXPORT
 		  /// Returns the size of the image directory Export.
-		  dword getIddExportSize() const; // EXPORT
+		  std::uint32_t getIddExportSize() const; // EXPORT
 		  /// Returns the relative virtual address of the image directory Import.
-		  dword getIddImportRva() const; // EXPORT
+		  std::uint32_t getIddImportRva() const; // EXPORT
 		  /// Returns the size of the image directory Import.
-		  dword getIddImportSize() const; // EXPORT
+		  std::uint32_t getIddImportSize() const; // EXPORT
 		  /// Returns the relative virtual address of the image directory Resource.
-		  dword getIddResourceRva() const; // EXPORT
+		  std::uint32_t getIddResourceRva() const; // EXPORT
 		  /// Returns the size of the image directory Resource.
-		  dword getIddResourceSize() const; // EXPORT
+		  std::uint32_t getIddResourceSize() const; // EXPORT
 		  /// Returns the relative virtual address of the image directory Exception.
-		  dword getIddExceptionRva() const; // EXPORT
+		  std::uint32_t getIddExceptionRva() const; // EXPORT
 		  /// Returns the size of the image directory Exception.
-		  dword getIddExceptionSize() const; // EXPORT
+		  std::uint32_t getIddExceptionSize() const; // EXPORT
 		  /// Returns the relative virtual address of the image directory Security.
-		  dword getIddSecurityRva() const; // EXPORT
+		  std::uint32_t getIddSecurityRva() const; // EXPORT
 		  /// Returns the size of the image directory Security.
-		  dword getIddSecuritySize() const; // EXPORT
+		  std::uint32_t getIddSecuritySize() const; // EXPORT
 		  /// Returns the relative virtual address of the image directory Base Reloc.
-		  dword getIddBaseRelocRva() const; // EXPORT
+		  std::uint32_t getIddBaseRelocRva() const; // EXPORT
 		  /// Returns the size of the image directory Base Reloc.
-		  dword getIddBaseRelocSize() const; // EXPORT
+		  std::uint32_t getIddBaseRelocSize() const; // EXPORT
 		  /// Returns the relative virtual address of the image directory Debug.
-		  dword getIddDebugRva() const; // EXPORT
+		  std::uint32_t getIddDebugRva() const; // EXPORT
 		  /// Returns the size of the image directory Debug.
-		  dword getIddDebugSize() const; // EXPORT
+		  std::uint32_t getIddDebugSize() const; // EXPORT
 		  /// Returns the relative virtual address of the image directory Architecture.
-		  dword getIddArchitectureRva() const; // EXPORT
+		  std::uint32_t getIddArchitectureRva() const; // EXPORT
 		  /// Returns the size of the image directory Architecture.
-		  dword getIddArchitectureSize() const; // EXPORT
+		  std::uint32_t getIddArchitectureSize() const; // EXPORT
 		  /// Returns the relative virtual address of the image directory GlobalPtr.
-		  dword getIddGlobalPtrRva() const; // EXPORT
+		  std::uint32_t getIddGlobalPtrRva() const; // EXPORT
 		  /// Returns the size of the image directory GlobalPtr.
-		  dword getIddGlobalPtrSize() const; // EXPORT
+		  std::uint32_t getIddGlobalPtrSize() const; // EXPORT
 		  /// Returns the relative virtual address of the image directory Tls.
-		  dword getIddTlsRva() const; // EXPORT
+		  std::uint32_t getIddTlsRva() const; // EXPORT
 		  /// Returns the size of the image directory Tls.
-		  dword getIddTlsSize() const; // EXPORT
+		  std::uint32_t getIddTlsSize() const; // EXPORT
 		  /// Returns the relative virtual address of the image directory LoadConfig.
-		  dword getIddLoadConfigRva() const; // EXPORT
+		  std::uint32_t getIddLoadConfigRva() const; // EXPORT
 		  /// Returns the size of the image directory LoadConfig.
-		  dword getIddLoadConfigSize() const; // EXPORT
+		  std::uint32_t getIddLoadConfigSize() const; // EXPORT
 		  /// Returns the relative virtual address of the image directory BoundImport.
-		  dword getIddBoundImportRva() const; // EXPORT
+		  std::uint32_t getIddBoundImportRva() const; // EXPORT
 		  /// Returns the size of the image directory BoundImport.
-		  dword getIddBoundImportSize() const; // EXPORT
+		  std::uint32_t getIddBoundImportSize() const; // EXPORT
 		  /// Returns the relative virtual address of the image directory Iat.
-		  dword getIddIatRva() const; // EXPORT
+		  std::uint32_t getIddIatRva() const; // EXPORT
 		  /// Returns the size of the image directory Iat.
-		  dword getIddIatSize() const; // EXPORT
+		  std::uint32_t getIddIatSize() const; // EXPORT
 		  /// Returns the relative virtual address of the image directory DelayImport.
-		  dword getIddDelayImportRva() const; // EXPORT
+		  std::uint32_t getIddDelayImportRva() const; // EXPORT
 		  /// Returns the size of the image directory DelayImport.
-		  dword getIddDelayImportSize() const; // EXPORT
+		  std::uint32_t getIddDelayImportSize() const; // EXPORT
 		  /// Returns the relative virtual address of the image directory COM Descriptor.
-		  dword getIddComHeaderRva() const; // EXPORT
+		  std::uint32_t getIddComHeaderRva() const; // EXPORT
 		  /// Returns the size of the image directory COM Descriptor.
-		  dword getIddComHeaderSize() const; // EXPORT
+		  std::uint32_t getIddComHeaderSize() const; // EXPORT
 
 		  /// Returns the relative virtual address of an image directory.
-		  dword getImageDataDirectoryRva(dword dwDirectory) const; // EXPORT
+		  std::uint32_t getImageDataDirectoryRva(std::uint32_t dwDirectory) const; // EXPORT
 		  /// Returns the size of an image directory.
-		  dword getImageDataDirectorySize(dword dwDirectory) const; // EXPORT
+		  std::uint32_t getImageDataDirectorySize(std::uint32_t dwDirectory) const; // EXPORT
 
-		  void setImageDataDirectoryRva(dword dwDirectory, dword value); // EXPORT
-		  void setImageDataDirectorySize(dword dwDirectory, dword value); // EXPORT
+		  void setImageDataDirectoryRva(std::uint32_t dwDirectory, std::uint32_t value); // EXPORT
+		  void setImageDataDirectorySize(std::uint32_t dwDirectory, std::uint32_t value); // EXPORT
 
 // section getters
 		  /// Returns the name of a section.
-		  std::string getSectionName(word uiSectionnr) const; // EXPORT
+		  std::string getSectionName(std::uint16_t uiSectionnr) const; // EXPORT
 		  // Returns the name of a section stored in string table
-		  std::string getSectionNameFromStringTable(word uiSectionnr) const; // EXPORT
+		  std::string getSectionNameFromStringTable(std::uint16_t uiSectionnr) const; // EXPORT
 		  /// Returns the virtual size of a section.
-		  dword getVirtualSize(word uiSectionnr) const; // EXPORT
+		  std::uint32_t getVirtualSize(std::uint16_t uiSectionnr) const; // EXPORT
 		  /// Returns the virtual address of a section.
-		  dword getVirtualAddress(word uiSectionnr) const; // EXPORT
+		  std::uint32_t getVirtualAddress(std::uint16_t uiSectionnr) const; // EXPORT
 		  /// Returns the size of a section's raw data.
-		  dword getSizeOfRawData(word uiSectionnr) const; // EXPORT
+		  std::uint32_t getSizeOfRawData(std::uint16_t uiSectionnr) const; // EXPORT
 		  /// Returns file offset of the data of a section.
-		  dword getPointerToRawData(word uiSectionnr) const; // EXPORT
+		  std::uint32_t getPointerToRawData(std::uint16_t uiSectionnr) const; // EXPORT
 		  /// Returns the rva of the relocations of a section.
-		  dword getPointerToRelocations(word uiSectionnr) const; // EXPORT
+		  std::uint32_t getPointerToRelocations(std::uint16_t uiSectionnr) const; // EXPORT
 		  /// Returns the rva of the line numbers of a section.
-		  dword getPointerToLinenumbers(word uiSectionnr) const; // EXPORT
+		  std::uint32_t getPointerToLinenumbers(std::uint16_t uiSectionnr) const; // EXPORT
 		  /// Returns the number of relocations of a section.
-		  dword getNumberOfRelocations(word uiSectionnr) const; // EXPORT
+		  std::uint32_t getNumberOfRelocations(std::uint16_t uiSectionnr) const; // EXPORT
 		  /// Returns the number of line numbers of a section.
-		  dword getNumberOfLinenumbers(word uiSectionnr) const; // EXPORT
+		  std::uint32_t getNumberOfLinenumbers(std::uint16_t uiSectionnr) const; // EXPORT
 		  /// Returns the characteristics of a section.
-		  dword getCharacteristics(word uiSectionnr) const; // EXPORT _section
+		  std::uint32_t getCharacteristics(std::uint16_t uiSectionnr) const; // EXPORT _section
 
 // header setters
 		  /// Sets the Signature value of the header.
-		  void setNtSignature(dword value); // EXPORT
+		  void setNtSignature(std::uint32_t value); // EXPORT
 		  /// Sets the Machine value of the header.
-		  void setMachine(word value); // EXPORT
+		  void setMachine(std::uint16_t value); // EXPORT
 		  /// Sets the Sections value of the header.
-		  void setNumberOfSections(word value); // EXPORT
+		  void setNumberOfSections(std::uint16_t value); // EXPORT
 		  /// Sets the TimeDateStamp value of the header.
-		  void setTimeDateStamp(dword value); // EXPORT
+		  void setTimeDateStamp(std::uint32_t value); // EXPORT
 		  /// Sets the PointerToSymbolTable value of the header.
-		  void setPointerToSymbolTable(dword value); // EXPORT
+		  void setPointerToSymbolTable(std::uint32_t value); // EXPORT
 		  /// Sets the NumberOfSymbols value of the header.
-		  void setNumberOfSymbols(dword value); // EXPORT
+		  void setNumberOfSymbols(std::uint32_t value); // EXPORT
 		  /// Sets the SizeOfOptionalHeader value of the header.
-		  void setSizeOfOptionalHeader(word value); // EXPORT
+		  void setSizeOfOptionalHeader(std::uint16_t value); // EXPORT
 		  /// Sets the Characteristics value of the header.
-		  void setCharacteristics(word value); // EXPORT _section
+		  void setCharacteristics(std::uint16_t value); // EXPORT _section
 
 		  /// Sets the Magic value of the header.
-		  void setMagic(word value); // EXPORT
+		  void setMagic(std::uint16_t value); // EXPORT
 		  /// Sets the MajorLinkerVersion value of the header.
-		  void setMajorLinkerVersion(byte value); // EXPORT
+		  void setMajorLinkerVersion(std::uint8_t value); // EXPORT
 		  /// Sets the MinorLinkerVersion value of the header.
-		  void setMinorLinkerVersion(byte value); // EXPORT
+		  void setMinorLinkerVersion(std::uint8_t value); // EXPORT
 		  /// Sets the SizeOfCode value of the header.
-		  void setSizeOfCode(dword value); // EXPORT
+		  void setSizeOfCode(std::uint32_t value); // EXPORT
 		  /// Sets the SizeOfInitializedData value of the header.
-		  void setSizeOfInitializedData(dword value); // EXPORT
+		  void setSizeOfInitializedData(std::uint32_t value); // EXPORT
 		  /// Sets the SizeOfUninitializedData value of the header.
-		  void setSizeOfUninitializedData(dword value); // EXPORT
+		  void setSizeOfUninitializedData(std::uint32_t value); // EXPORT
 		  /// Sets the AddressOfEntryPoint value of the header.
-		  void setAddressOfEntryPoint(dword value); // EXPORT
+		  void setAddressOfEntryPoint(std::uint32_t value); // EXPORT
 		  /// Sets the BaseOfCode value of the header.
-		  void setBaseOfCode(dword value); // EXPORT
+		  void setBaseOfCode(std::uint32_t value); // EXPORT
 		  /// Sets the ImageBase value of the header.
 		  void setImageBase(VAR4_8 value); // EXPORT
 		  /// Sets the SectionAlignment value of the header.
-		  void setSectionAlignment(dword value); // EXPORT
+		  void setSectionAlignment(std::uint32_t value); // EXPORT
 		  /// Sets the FileAlignment value of the header.
-		  void setFileAlignment(dword value); // EXPORT
+		  void setFileAlignment(std::uint32_t value); // EXPORT
 		  /// Sets the MajorOperatingSystemVersion value of the header.
-		  void setMajorOperatingSystemVersion(word value); // EXPORT
+		  void setMajorOperatingSystemVersion(std::uint16_t value); // EXPORT
 		  /// Sets the MinorOperatingSystemVersion value of the header.
-		  void setMinorOperatingSystemVersion(word value); // EXPORT
+		  void setMinorOperatingSystemVersion(std::uint16_t value); // EXPORT
 		  /// Sets the MajorImageVersion value of the header.
-		  void setMajorImageVersion(word value); // EXPORT
+		  void setMajorImageVersion(std::uint16_t value); // EXPORT
 		  /// Sets the MinorImageVersion value of the header.
-		  void setMinorImageVersion(word value); // EXPORT
+		  void setMinorImageVersion(std::uint16_t value); // EXPORT
 		  /// Sets the MajorSubsystemVersion value of the header.
-		  void setMajorSubsystemVersion(word value); // EXPORT
+		  void setMajorSubsystemVersion(std::uint16_t value); // EXPORT
 		  /// Sets the MinorSubsystemVersion value of the header.
-		  void setMinorSubsystemVersion(word value); // EXPORT
+		  void setMinorSubsystemVersion(std::uint16_t value); // EXPORT
 		  /// Sets the Reserved1 value of the header.
-		  void setWin32VersionValue(dword value); // EXPORT
+		  void setWin32VersionValue(std::uint32_t value); // EXPORT
 		  /// Sets the SizeOfImage value of the header.
-		  void setSizeOfImage(dword value); // EXPORT
+		  void setSizeOfImage(std::uint32_t value); // EXPORT
 		  /// Sets the SizeOfHeaders value of the header.
-		  void setSizeOfHeaders(dword value); // EXPORT
+		  void setSizeOfHeaders(std::uint32_t value); // EXPORT
 		  /// Sets the CheckSum value of the header.
-		  void setCheckSum(dword value); // EXPORT
+		  void setCheckSum(std::uint32_t value); // EXPORT
 		  /// Sets the Subsystem value of the header.
-		  void setSubsystem(word value); // EXPORT
+		  void setSubsystem(std::uint16_t value); // EXPORT
 		  /// Sets the DllCharacteristics value of the header.
-		  void setDllCharacteristics(word value); // EXPORT
+		  void setDllCharacteristics(std::uint16_t value); // EXPORT
 		  /// Sets the SizeOfStackReserve value of the header.
 		  void setSizeOfStackReserve(VAR4_8 value); // EXPORT
 		  /// Sets the SizeOfStackCommit value of the header.
@@ -410,71 +410,71 @@ namespace PeLib
 		  /// Sets the SizeOfHeapCommit value of the header.
 		  void setSizeOfHeapCommit(VAR4_8 value); // EXPORT
 		  /// Sets the LoaderFlags value of the header.
-		  void setLoaderFlags(dword value); // EXPORT
+		  void setLoaderFlags(std::uint32_t value); // EXPORT
 		  /// Sets the NumberOfRvaAndSizes value of the header.
-		  void setNumberOfRvaAndSizes(dword value); // EXPORT
+		  void setNumberOfRvaAndSizes(std::uint32_t value); // EXPORT
 
 // image directory getters
-		  void setIddDebugRva(dword dwValue); // EXPORT
-		  void setIddDebugSize(dword dwValue); // EXPORT
-		  void setIddDelayImportRva(dword dwValue); // EXPORT
-		  void setIddDelayImportSize(dword dwValue); // EXPORT
-		  void setIddExceptionRva(dword dwValue); // EXPORT
-		  void setIddExceptionSize(dword dwValue); // EXPORT
-		  void setIddGlobalPtrRva(dword dwValue); // EXPORT
-		  void setIddGlobalPtrSize(dword dwValue); // EXPORT
-		  void setIddIatRva(dword dwValue); // EXPORT
-		  void setIddIatSize(dword dwValue); // EXPORT
-		  void setIddLoadConfigRva(dword dwValue); // EXPORT
-		  void setIddLoadConfigSize(dword dwValue); // EXPORT
-		  void setIddResourceRva(dword dwValue); // EXPORT
-		  void setIddResourceSize(dword dwValue); // EXPORT
-		  void setIddSecurityRva(dword dwValue); // EXPORT
-		  void setIddSecuritySize(dword dwValue); // EXPORT
-		  void setIddTlsRva(dword dwValue); // EXPORT
-		  void setIddTlsSize(dword dwValue); // EXPORT
+		  void setIddDebugRva(std::uint32_t dwValue); // EXPORT
+		  void setIddDebugSize(std::uint32_t dwValue); // EXPORT
+		  void setIddDelayImportRva(std::uint32_t dwValue); // EXPORT
+		  void setIddDelayImportSize(std::uint32_t dwValue); // EXPORT
+		  void setIddExceptionRva(std::uint32_t dwValue); // EXPORT
+		  void setIddExceptionSize(std::uint32_t dwValue); // EXPORT
+		  void setIddGlobalPtrRva(std::uint32_t dwValue); // EXPORT
+		  void setIddGlobalPtrSize(std::uint32_t dwValue); // EXPORT
+		  void setIddIatRva(std::uint32_t dwValue); // EXPORT
+		  void setIddIatSize(std::uint32_t dwValue); // EXPORT
+		  void setIddLoadConfigRva(std::uint32_t dwValue); // EXPORT
+		  void setIddLoadConfigSize(std::uint32_t dwValue); // EXPORT
+		  void setIddResourceRva(std::uint32_t dwValue); // EXPORT
+		  void setIddResourceSize(std::uint32_t dwValue); // EXPORT
+		  void setIddSecurityRva(std::uint32_t dwValue); // EXPORT
+		  void setIddSecuritySize(std::uint32_t dwValue); // EXPORT
+		  void setIddTlsRva(std::uint32_t dwValue); // EXPORT
+		  void setIddTlsSize(std::uint32_t dwValue); // EXPORT
 
-		  void setIddImportRva(dword dwValue); // EXPORT
-		  void setIddImportSize(dword dwValue); // EXPORT
-		  void setIddExportRva(dword dwValue); // EXPORT
-		  void setIddExportSize(dword dwValue); // EXPORT
+		  void setIddImportRva(std::uint32_t dwValue); // EXPORT
+		  void setIddImportSize(std::uint32_t dwValue); // EXPORT
+		  void setIddExportRva(std::uint32_t dwValue); // EXPORT
+		  void setIddExportSize(std::uint32_t dwValue); // EXPORT
 
-		  void setIddBaseRelocRva(dword value); // EXPORT
-		  void setIddBaseRelocSize(dword value); // EXPORT
-		  void setIddArchitectureRva(dword value); // EXPORT
-		  void setIddArchitectureSize(dword value); // EXPORT
-		  void setIddComHeaderRva(dword value); // EXPORT
-		  void setIddComHeaderSize(dword value); // EXPORT
+		  void setIddBaseRelocRva(std::uint32_t value); // EXPORT
+		  void setIddBaseRelocSize(std::uint32_t value); // EXPORT
+		  void setIddArchitectureRva(std::uint32_t value); // EXPORT
+		  void setIddArchitectureSize(std::uint32_t value); // EXPORT
+		  void setIddComHeaderRva(std::uint32_t value); // EXPORT
+		  void setIddComHeaderSize(std::uint32_t value); // EXPORT
 
 		  /// Set the name of a section.
-		  void setSectionName(word uiSectionnr, std::string strName); // EXPORT
+		  void setSectionName(std::uint16_t uiSectionnr, std::string strName); // EXPORT
 		  /// Set the virtual size of a section.
-		  void setVirtualSize(word uiSectionnr, dword dwValue); // EXPORT
+		  void setVirtualSize(std::uint16_t uiSectionnr, std::uint32_t dwValue); // EXPORT
 		  /// Set the virtual address of a section.
-		  void setVirtualAddress(word uiSectionnr, dword dwValue); // EXPORT
+		  void setVirtualAddress(std::uint16_t uiSectionnr, std::uint32_t dwValue); // EXPORT
 		  /// Set the size of raw data of a section.
-		  void setSizeOfRawData(word uiSectionnr, dword dwValue); // EXPORT
+		  void setSizeOfRawData(std::uint16_t uiSectionnr, std::uint32_t dwValue); // EXPORT
 		  /// Set the file offset of a section.
-		  void setPointerToRawData(word uiSectionnr, dword dwValue); // EXPORT
+		  void setPointerToRawData(std::uint16_t uiSectionnr, std::uint32_t dwValue); // EXPORT
 		  /// Set the pointer to relocations of a section.
-		  void setPointerToRelocations(word uiSectionnr, dword dwValue); // EXPORT
+		  void setPointerToRelocations(std::uint16_t uiSectionnr, std::uint32_t dwValue); // EXPORT
 		  /// Set the pointer to linenumbers of a section.
-		  void setPointerToLinenumbers(word uiSectionnr, dword dwValue); // EXPORT
+		  void setPointerToLinenumbers(std::uint16_t uiSectionnr, std::uint32_t dwValue); // EXPORT
 		  /// Set the number of relocations a section.
-		  void setNumberOfRelocations(word uiSectionnr, dword dwValue); // EXPORT
+		  void setNumberOfRelocations(std::uint16_t uiSectionnr, std::uint32_t dwValue); // EXPORT
 		  /// Set the number of linenumbers section.
-		  void setNumberOfLinenumbers(word uiSectionnr, dword dwValue); // EXPORT
+		  void setNumberOfLinenumbers(std::uint16_t uiSectionnr, std::uint32_t dwValue); // EXPORT
 		  /// Set the characteristics of a section.
-		  void setCharacteristics(word uiSectionnr, dword dwValue); // EXPORT
+		  void setCharacteristics(std::uint16_t uiSectionnr, std::uint32_t dwValue); // EXPORT
 	};
 
 	class PeHeader32 : public PeHeaderT<32>
 	{
 		public:
 		  /// Returns the BaseOfData value of the header.
-		  dword getBaseOfData() const; // EXPORT
+		  std::uint32_t getBaseOfData() const; // EXPORT
 		  /// Sets the BaseOfData value of the header.
-		  void setBaseOfData(dword value); // EXPORT
+		  void setBaseOfData(std::uint32_t value); // EXPORT
 	};
 
 	class PeHeader64 : public PeHeaderT<64>
@@ -488,7 +488,7 @@ namespace PeLib
 	}
 
 	template<int x>
-	void PeHeaderT<x>::removeDataDirectory(dword index)
+	void PeHeaderT<x>::removeDataDirectory(std::uint32_t index)
 	{
 		if (m_inthHeader.lastDirectoryIsIncomplete && index == m_inthHeader.dataDirectories.size() - 1)
 		{
@@ -509,7 +509,7 @@ namespace PeLib
 	* \todo Better code that handles files with 0 sections.
 	**/
 	template<int x>
-	int PeHeaderT<x>::addSection(const std::string& strName, dword dwSize)
+	int PeHeaderT<x>::addSection(const std::string& strName, std::uint32_t dwSize)
 	{
 		unsigned int uiSecnr = calcNumberOfSections();
 
@@ -530,8 +530,8 @@ namespace PeLib
 			}
 		}
 
-		dword dwOffset = calcOffset(/*dwSize*/);
-		dword dwRva = calcRva(/*dwSize*/);
+		std::uint32_t dwOffset = calcOffset(/*dwSize*/);
+		std::uint32_t dwRva = calcRva(/*dwSize*/);
 
 		PELIB_IMAGE_SECTION_HEADER ishdCurr;
 		m_vIsh.push_back(ishdCurr);
@@ -558,7 +558,7 @@ namespace PeLib
 	* @todo Add option to split any section without restrictions.
 	**/
 	template<int x>
-	int PeHeaderT<x>::splitSection(word uiSectionnr, const std::string& first, const std::string& second, dword dwSplitOffset)
+	int PeHeaderT<x>::splitSection(std::uint16_t uiSectionnr, const std::string& first, const std::string& second, std::uint32_t dwSplitOffset)
 	{
 		if (!getFileAlignment())
 		{
@@ -587,7 +587,7 @@ namespace PeLib
 		for (int i = calcNumberOfSections() - 2; i >= uiSectionnr + 1; --i)
 			m_vIsh[i + 1] = m_vIsh[i];
 
-		dword originalSize = getSizeOfRawData(uiSectionnr);
+		std::uint32_t originalSize = getSizeOfRawData(uiSectionnr);
 
 		// Setup the first of the new sections
 		setSectionName(uiSectionnr, first);
@@ -611,13 +611,13 @@ namespace PeLib
 	* @param uiSectionnr The index of the section to remove.
 	**/
 	template<int x>
-	int PeHeaderT<x>::removeSection(word uiSectionnr)
+	int PeHeaderT<x>::removeSection(std::uint16_t uiSectionnr)
 	{
 		if (uiSectionnr >= calcNumberOfSections())
 			return ERROR_ENTRY_NOT_FOUND;
 
-		dword rawDiff = getSizeOfRawData(uiSectionnr);
-		dword virtualDiff = getVirtualSize(uiSectionnr);
+		std::uint32_t rawDiff = getSizeOfRawData(uiSectionnr);
+		std::uint32_t virtualDiff = getVirtualSize(uiSectionnr);
 		for (int i = uiSectionnr + 1; i < calcNumberOfSections(); ++i)
 		{
 			setPointerToRawData(i, getPointerToRawData(i) - rawDiff);
@@ -652,7 +652,7 @@ namespace PeLib
 	}
 
 	/**
-	* Calculates the space between the last byte of the header and the first byte that's used for something
+	* Calculates the space between the last std::uint8_t of the header and the first std::uint8_t that's used for something
 	* else (that's either the first section or an image directory).
 	* @return Unused space after the header.
 	* \todo There are PE files with sections beginning at offset 0. They
@@ -694,7 +694,7 @@ namespace PeLib
 		if (directories >= 14 && getIddDelayImportRva()  && rvaToOffset(getIddDelayImportRva()) < dwMinOffset) dwMinOffset = rvaToOffset(getIddDelayImportRva());
 		if (directories >= 15 && getIddComHeaderRva()  && rvaToOffset(getIddComHeaderRva()) < dwMinOffset) dwMinOffset = rvaToOffset(getIddComHeaderRva());
 
-		for (word i=0;i<calcNumberOfSections();i++)
+		for (std::uint16_t i=0;i<calcNumberOfSections();i++)
 		{
 			if ((getPointerToRawData(i) < dwMinOffset || dwMinOffset == 0xFFFFFFFF) && getSizeOfRawData(i))
 			{
@@ -714,7 +714,7 @@ namespace PeLib
 	{
 		unsigned int maxoffset = size();
 
-		for (word i=0;i<calcNumberOfSections();i++)
+		for (std::uint16_t i=0;i<calcNumberOfSections();i++)
 		{
 			if (getPointerToRawData(i) + getSizeOfRawData(i) > maxoffset) maxoffset = getPointerToRawData(i) + getSizeOfRawData(i);
 		}
@@ -736,7 +736,7 @@ namespace PeLib
 		//                  In this file each and every section has a VSize of 0 but it still runs.
 
 		unsigned int maxoffset = size();
-		for (word i=0;i<calcNumberOfSections();i++)
+		for (std::uint16_t i=0;i<calcNumberOfSections();i++)
 		{
 			if (getVirtualAddress(i) + std::max(getVirtualSize(i), getSizeOfRawData(i)) > maxoffset) maxoffset = getVirtualAddress(i) + std::max(getVirtualSize(i), getSizeOfRawData(i));
 		}
@@ -750,9 +750,9 @@ namespace PeLib
 	* @return Number of currently defined sections.
 	**/
 	template<int x>
-	word PeHeaderT<x>::calcNumberOfSections() const
+	std::uint16_t PeHeaderT<x>::calcNumberOfSections() const
 	{
-		return static_cast<PeLib::word>(m_vIsh.size());
+		return static_cast<std::uint16_t>(m_vIsh.size());
 	}
 
 	/**
@@ -781,22 +781,22 @@ namespace PeLib
 	* @return Section Id of the section which contains the offset.
 	**/
 	template<int x>
-	word PeHeaderT<x>::getSectionWithOffset(VAR4_8 dwOffset) const
+	std::uint16_t PeHeaderT<x>::getSectionWithOffset(VAR4_8 dwOffset) const
 	{
 		// Offset = 0 must be handled explicitly as there are files
 		// with sections that begin at offset 0, that means the section
 		// only exists in memory.
 
-		if (!dwOffset) return std::numeric_limits<word>::max();
+		if (!dwOffset) return std::numeric_limits<std::uint16_t>::max();
 
-		for (word i=0;i<calcNumberOfSections();i++)
+		for (std::uint16_t i=0;i<calcNumberOfSections();i++)
 		{
 			// Explicity exclude sections with raw pointer = 0.
-			dword rawptr = getPointerToRawData(i);
+			std::uint32_t rawptr = getPointerToRawData(i);
 			if (rawptr && rawptr <= dwOffset && rawptr + getSizeOfRawData(i) > dwOffset) return i;
 		}
 
-		return std::numeric_limits<word>::max();
+		return std::numeric_limits<std::uint16_t>::max();
 	}
 
 	/**
@@ -805,23 +805,23 @@ namespace PeLib
 	* @return Section Id of the section which contains the Rva.
 	**/
 	template<int x>
-	word PeHeaderT<x>::getSectionWithRva(VAR4_8 dwRva) const
+	std::uint16_t PeHeaderT<x>::getSectionWithRva(VAR4_8 dwRva) const
 	{
 		// Major note here: It's possible for sections to exist with a Virtual Size of 0.
 		//                  That's why it's necessary to use std::max(Vsize, RawSize) here.
 		//                  An example for such a file is dbeng6.exe (made by Sybase).
 		//                  In this file each and every section has a VSize of 0 but it still runs.
 
-		word actIndex = 0;
+		std::uint16_t actIndex = 0;
 		bool detected = false;
 
-		for (word i=0;i<calcNumberOfSections();i++)
+		for (std::uint16_t i=0;i<calcNumberOfSections();i++)
 		{
 			// Weird VC++7 error doesn't allow me to use std::max here.
-			dword max = getVirtualSize(i) >= getSizeOfRawData(i) ? getVirtualSize(i) : getSizeOfRawData(i);
+			std::uint32_t max = getVirtualSize(i) >= getSizeOfRawData(i) ? getVirtualSize(i) : getSizeOfRawData(i);
 			if (getVirtualAddress(i) <= dwRva && getVirtualAddress(i) + max > dwRva)
 			{
-				dword actMax = getVirtualSize(actIndex) >= getSizeOfRawData(actIndex) ? getVirtualSize(actIndex) : getSizeOfRawData(actIndex);
+				std::uint32_t actMax = getVirtualSize(actIndex) >= getSizeOfRawData(actIndex) ? getVirtualSize(actIndex) : getSizeOfRawData(actIndex);
 				if (!detected || (getVirtualAddress(i) > getVirtualAddress(actIndex) || (getVirtualAddress(i) == getVirtualAddress(actIndex) && max < actMax)))
 				{
 					actIndex = i;
@@ -842,11 +842,11 @@ namespace PeLib
 	* \todo 32bit and 64bit versions.
 	**/
 	template<int x>
-	void PeHeaderT<x>::makeValid(dword dwOffset)
+	void PeHeaderT<x>::makeValid(std::uint32_t dwOffset)
 	{
 		setNtSignature(PELIB_IMAGE_NT_SIGNATURE); // 'PE'
 		setNumberOfSections(calcNumberOfSections());
-		setSizeOfOptionalHeader(PELIB_IMAGE_OPTIONAL_HEADER<x>::size() + calcNumberOfRvaAndSizes() * 8);
+		setSizeOfOptionalHeader(sizeof(PELIB_IMAGE_OPTIONAL_HEADER) + calcNumberOfRvaAndSizes() * 8);
 
 		if (getCharacteristics() == 0)
 			setCharacteristics(PELIB_IMAGE_FILE_EXECUTABLE_IMAGE | PELIB_IMAGE_FILE_32BIT_MACHINE);
@@ -878,12 +878,12 @@ namespace PeLib
 		m_inthHeader.dataDirectories.resize(getNumberOfRvaAndSizes());
 
 		// Code below depends on code above. Don't change the order.
-		dword dwSizeOfHeaders = alignOffset(dwOffset + size(), getFileAlignment());
+		std::uint32_t dwSizeOfHeaders = alignOffset(dwOffset + size(), getFileAlignment());
 		setSizeOfHeaders(dwSizeOfHeaders);
 
-		dword dwSizeOfImage = alignOffset(dwSizeOfHeaders, getSectionAlignment());
+		std::uint32_t dwSizeOfImage = alignOffset(dwSizeOfHeaders, getSectionAlignment());
 
-		dword dwOffsetDiff = dwSizeOfHeaders - getPointerToRawData(0);
+		std::uint32_t dwOffsetDiff = dwSizeOfHeaders - getPointerToRawData(0);
 		for (int i=0;i<calcNumberOfSections();i++)
 		{
 			dwSizeOfImage += alignOffset(getVirtualSize(i), getSectionAlignment());
@@ -902,7 +902,7 @@ namespace PeLib
 	{
 		if (dwOffset < calcStartOfCode()) return dwOffset;
 
-		PeLib::word uiSecnr = getSectionWithOffset(dwOffset);
+		std::uint16_t uiSecnr = getSectionWithOffset(dwOffset);
 
 		if (uiSecnr == 0xFFFF) return (unsigned int)-1;
 
@@ -919,7 +919,7 @@ namespace PeLib
 	{
 		if (dwOffset < calcStartOfCode()) return getImageBase() + dwOffset;
 
-		PeLib::word uiSecnr = getSectionWithOffset(dwOffset);
+		std::uint16_t uiSecnr = getSectionWithOffset(dwOffset);
 
 		if (uiSecnr == 0xFFFF) return -1;
 
@@ -927,7 +927,7 @@ namespace PeLib
 	}
 
 	template<int x>
-	void PeHeaderT<x>::readHeader(InputBuffer& ibBuffer, PELIB_IMAGE_NT_HEADERS<x>& header)
+	void PeHeaderT<x>::readHeader(InputBuffer& ibBuffer, PELIB_IMAGE_NT_HEADERS_EX<x>& header)
 	{
 		ibBuffer >> header.Signature;
 
@@ -947,7 +947,7 @@ namespace PeLib
 		ibBuffer >> header.OptionalHeader.SizeOfUninitializedData;
 		ibBuffer >> header.OptionalHeader.AddressOfEntryPoint;
 		ibBuffer >> header.OptionalHeader.BaseOfCode;
-		readBaseOfData(ibBuffer, header);
+		//readBaseOfData(ibBuffer, header);
 		ibBuffer >> header.OptionalHeader.ImageBase;
 		ibBuffer >> header.OptionalHeader.SectionAlignment;
 		ibBuffer >> header.OptionalHeader.FileAlignment;
@@ -976,7 +976,7 @@ namespace PeLib
 	void PeHeaderT<x>::readDataDirectories(
 			std::istream& inStream,
 			unsigned int uiOffset,
-			PELIB_IMAGE_NT_HEADERS<x>& header)
+			PELIB_IMAGE_NT_HEADERS_EX<x>& header)
 	{
 		IStreamWrapper inStream_w(inStream);
 
@@ -1030,7 +1030,7 @@ namespace PeLib
 	std::vector<PELIB_IMAGE_SECTION_HEADER> PeHeaderT<x>::readSections(
 			std::istream& inStream,
 			unsigned int uiOffset,
-			PELIB_IMAGE_NT_HEADERS<x>& header)
+			PELIB_IMAGE_NT_HEADERS_EX<x>& header)
 	{
 		IStreamWrapper inStream_w(inStream);
 
@@ -1038,7 +1038,7 @@ namespace PeLib
 		std::vector<PELIB_IMAGE_SECTION_HEADER> vIshdCurr;
 		bool bRawDataBeyondEOF = false;
 
-		std::vector<unsigned char> ishBuffer(PELIB_IMAGE_SECTION_HEADER::size());
+		std::vector<unsigned char> ishBuffer(sizeof(PELIB_IMAGE_SECTION_HEADER));
 		PELIB_IMAGE_SECTION_HEADER ishCurr;
 		std::uint64_t ulFileSize = fileSize(inStream_w);
 
@@ -1049,7 +1049,7 @@ namespace PeLib
 
 		for (unsigned int i = 0; i < header.FileHeader.NumberOfSections; i++)
 		{
-			if (uiOffset + PELIB_IMAGE_SECTION_HEADER::size() > ulFileSize)
+			if (uiOffset + sizeof(PELIB_IMAGE_SECTION_HEADER) > ulFileSize)
 				break;
 
 			// Clear error bits, because reading from symbol table might have failed.
@@ -1106,7 +1106,7 @@ namespace PeLib
 
 			vIshdCurr.push_back(ishCurr);
 
-			uiOffset += PELIB_IMAGE_SECTION_HEADER::size();
+			uiOffset += sizeof(PELIB_IMAGE_SECTION_HEADER);
 		}
 
 		// Verify section headers
@@ -1263,7 +1263,7 @@ namespace PeLib
 
 		m_mzHeader = mzHeader;
 		m_uiOffset = ntHeaderOffset;
-		PELIB_IMAGE_NT_HEADERS<x> header;
+		PELIB_IMAGE_NT_HEADERS_EX<x> header;
 
 		if (!inStream_w)
 		{
@@ -1345,7 +1345,7 @@ namespace PeLib
 		if(header.OptionalHeader.SizeOfHeaders > header.OptionalHeader.SizeOfImage)
 			setLoaderError(LDR_ERROR_SIZE_OF_HEADERS_INVALID);
 
-		// On 64-bit Windows, size of optional header must be properly aligned to 8-byte boundary
+		// On 64-bit Windows, size of optional header must be properly aligned to 8-std::uint8_t boundary
 		if (header.FileHeader.SizeOfOptionalHeader & (sizeof(std::uint64_t) - 1))
 			setLoaderError(LDR_ERROR_SIZE_OF_OPTHDR_NOT_ALIGNED);
 
@@ -1380,7 +1380,7 @@ namespace PeLib
 	* @param vBuffer Buffer where the rebuilt header will be stored.
 	**/
 	template<int x>
-	void PeHeaderT<x>::rebuild(std::vector<byte>& vBuffer) const
+	void PeHeaderT<x>::rebuild(std::vector<std::uint8_t>& vBuffer) const
 	{
 		OutputBuffer obBuffer(vBuffer);
 
@@ -1472,7 +1472,7 @@ namespace PeLib
 		if (rva < getFileAlignment())
 			return true;
 
-		for (word i = 0; i < calcNumberOfSections(); ++i)
+		for (std::uint16_t i = 0; i < calcNumberOfSections(); ++i)
 		{
 			// Sample 91DE52AB3F94A6372088DD843485414BA2B3734BDF58C4DE40DF3B50B4301C57:
 			// Section[0].VirtualAddress = 0x1000
@@ -1480,8 +1480,8 @@ namespace PeLib
 			// Section[0].SizeOfRawData = 0x3600
 			// IMAGE_IMPORT_DESCRIPTOR[0]::Name is 0x44DE, which is evaluated as invalid if alignment is not taken into account
 
-			dword beginOfSection = getVirtualAddress(i);
-			dword sizeOfSection = getVirtualSize(i);
+			std::uint32_t beginOfSection = getVirtualAddress(i);
+			std::uint32_t sizeOfSection = getVirtualSize(i);
 
 			// Perform proper alignment on the section length
 			if (sizeOfSection == 0)
@@ -1508,7 +1508,7 @@ namespace PeLib
 		// XXX: Not correct
 		if (dwRva < 0x1000) return dwRva;
 
-		PeLib::word uiSecnr = getSectionWithRva(dwRva);
+		std::uint16_t uiSecnr = getSectionWithRva(dwRva);
 
 		if (uiSecnr == 0xFFFF || dwRva > getVirtualAddress(uiSecnr) + getSizeOfRawData(uiSecnr))
 		{
@@ -1640,7 +1640,7 @@ namespace PeLib
 	* @param vBuffer New data of the section.
 	**/
 	template<int x>
-	int PeHeaderT<x>::writeSectionData(const std::string& strFilename, word wSecnr, const std::vector<byte>& vBuffer) const
+	int PeHeaderT<x>::writeSectionData(const std::string& strFilename, std::uint16_t wSecnr, const std::vector<std::uint8_t>& vBuffer) const
 	{
 		std::fstream ofFile(strFilename.c_str(), std::ios_base::in);
 
@@ -1728,7 +1728,7 @@ namespace PeLib
 	* @return Reference to NT headers.
 	**/
 	template<int x>
-	const PELIB_IMAGE_NT_HEADERS<x>& PeHeaderT<x>::getNtHeaders() const
+	const PELIB_IMAGE_NT_HEADERS_EX<x>& PeHeaderT<x>::getNtHeaders() const
 	{
 		return m_inthHeader;
 	}
@@ -1738,7 +1738,7 @@ namespace PeLib
 	* @return The Nt signature value from the PE header.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getNtSignature() const
+	std::uint32_t PeHeaderT<x>::getNtSignature() const
 	{
 		return m_inthHeader.Signature;
 	}
@@ -1748,7 +1748,7 @@ namespace PeLib
 	* @return The Machine value from the PE header.
 	**/
 	template<int x>
-	word PeHeaderT<x>::getMachine() const
+	std::uint16_t PeHeaderT<x>::getMachine() const
 	{
 		return m_inthHeader.FileHeader.Machine;
 	}
@@ -1759,7 +1759,7 @@ namespace PeLib
 	* @return The NumberOfSections value from the PE header.
 	**/
 	template<int x>
-	word PeHeaderT<x>::getNumberOfSections() const
+	std::uint16_t PeHeaderT<x>::getNumberOfSections() const
 	{
 		return m_inthHeader.FileHeader.NumberOfSections;
 	}
@@ -1769,7 +1769,7 @@ namespace PeLib
 	* @return The TimeDateStamp value from the PE header.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getTimeDateStamp() const
+	std::uint32_t PeHeaderT<x>::getTimeDateStamp() const
 	{
 		return m_inthHeader.FileHeader.TimeDateStamp;
 	}
@@ -1779,7 +1779,7 @@ namespace PeLib
 	* @return The PointerToSymbolTable value from the PE header.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getPointerToSymbolTable() const
+	std::uint32_t PeHeaderT<x>::getPointerToSymbolTable() const
 	{
 		return m_inthHeader.FileHeader.PointerToSymbolTable;
 	}
@@ -1789,7 +1789,7 @@ namespace PeLib
 	* @return The NumberOfSymbols value from the PE header.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getNumberOfSymbols() const
+	std::uint32_t PeHeaderT<x>::getNumberOfSymbols() const
 	{
 		return m_inthHeader.FileHeader.NumberOfSymbols;
 	}
@@ -1799,7 +1799,7 @@ namespace PeLib
 	* @return The SizeOfOptionalHeader value from the PE header.
 	**/
 	template<int x>
-	word PeHeaderT<x>::getSizeOfOptionalHeader() const
+	std::uint16_t PeHeaderT<x>::getSizeOfOptionalHeader() const
 	{
 		return m_inthHeader.FileHeader.SizeOfOptionalHeader;
 	}
@@ -1808,7 +1808,7 @@ namespace PeLib
 	* @return The Characteristics value from the PE header.
 	**/
 	template<int x>
-	word PeHeaderT<x>::getCharacteristics() const
+	std::uint16_t PeHeaderT<x>::getCharacteristics() const
 	{
 		return m_inthHeader.FileHeader.Characteristics;
 	}
@@ -1817,7 +1817,7 @@ namespace PeLib
 	* @return The Magic value from the PE header.
 	**/
 	template<int x>
-	word PeHeaderT<x>::getMagic() const
+	std::uint16_t PeHeaderT<x>::getMagic() const
 	{
 		return m_inthHeader.OptionalHeader.Magic;
 	}
@@ -1826,7 +1826,7 @@ namespace PeLib
 	* @return The MajorLinkerVersion value from the PE header.
 	**/
 	template<int x>
-	byte PeHeaderT<x>::getMajorLinkerVersion() const
+	std::uint8_t PeHeaderT<x>::getMajorLinkerVersion() const
 	{
 		return m_inthHeader.OptionalHeader.MajorLinkerVersion;
 	}
@@ -1835,7 +1835,7 @@ namespace PeLib
 	* @return The MinorLinkerVersion value from the PE header.
 	**/
 	template<int x>
-	byte PeHeaderT<x>::getMinorLinkerVersion() const
+	std::uint8_t PeHeaderT<x>::getMinorLinkerVersion() const
 	{
 		return m_inthHeader.OptionalHeader.MinorLinkerVersion;
 	}
@@ -1844,7 +1844,7 @@ namespace PeLib
 	* @return The SizeOfCode value from the PE header.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getSizeOfCode() const
+	std::uint32_t PeHeaderT<x>::getSizeOfCode() const
 	{
 		return m_inthHeader.OptionalHeader.SizeOfCode;
 	}
@@ -1853,7 +1853,7 @@ namespace PeLib
 	* @return The SizeOfInitializedData value from the PE header.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getSizeOfInitializedData() const
+	std::uint32_t PeHeaderT<x>::getSizeOfInitializedData() const
 	{
 		return m_inthHeader.OptionalHeader.SizeOfInitializedData;
 	}
@@ -1862,7 +1862,7 @@ namespace PeLib
 	* @return The SizeOfUninitializedData value from the PE header.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getSizeOfUninitializedData() const
+	std::uint32_t PeHeaderT<x>::getSizeOfUninitializedData() const
 	{
 		return m_inthHeader.OptionalHeader.SizeOfUninitializedData;
 	}
@@ -1871,7 +1871,7 @@ namespace PeLib
 	* @return The AddressOfEntryPoint value from the PE header.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getAddressOfEntryPoint() const
+	std::uint32_t PeHeaderT<x>::getAddressOfEntryPoint() const
 	{
 		return m_inthHeader.OptionalHeader.AddressOfEntryPoint;
 	}
@@ -1880,7 +1880,7 @@ namespace PeLib
 	* @return The BaseOfCode value from the PE header.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getBaseOfCode() const
+	std::uint32_t PeHeaderT<x>::getBaseOfCode() const
 	{
 		return m_inthHeader.OptionalHeader.BaseOfCode;
 	}
@@ -1898,7 +1898,7 @@ namespace PeLib
 	* @return The SectionAlignment value from the PE header.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getSectionAlignment() const
+	std::uint32_t PeHeaderT<x>::getSectionAlignment() const
 	{
 		return m_inthHeader.OptionalHeader.SectionAlignment;
 	}
@@ -1907,7 +1907,7 @@ namespace PeLib
 	* @return The FileAlignment value from the PE header.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getFileAlignment() const
+	std::uint32_t PeHeaderT<x>::getFileAlignment() const
 	{
 		return m_inthHeader.OptionalHeader.FileAlignment;
 	}
@@ -1916,7 +1916,7 @@ namespace PeLib
 	* @return The MajorOperatingSystemVersion value from the PE header.
 	**/
 	template<int x>
-	word PeHeaderT<x>::getMajorOperatingSystemVersion() const
+	std::uint16_t PeHeaderT<x>::getMajorOperatingSystemVersion() const
 	{
 		return m_inthHeader.OptionalHeader.MajorOperatingSystemVersion;
 	}
@@ -1925,7 +1925,7 @@ namespace PeLib
 	* @return The MinorOperatingSystemVersion value from the PE header.
 	**/
 	template<int x>
-	word PeHeaderT<x>::getMinorOperatingSystemVersion() const
+	std::uint16_t PeHeaderT<x>::getMinorOperatingSystemVersion() const
 	{
 		return m_inthHeader.OptionalHeader.MinorOperatingSystemVersion;
 	}
@@ -1934,7 +1934,7 @@ namespace PeLib
 	* @return The MajorImageVersion value from the PE header.
 	**/
 	template<int x>
-	word PeHeaderT<x>::getMajorImageVersion() const
+	std::uint16_t PeHeaderT<x>::getMajorImageVersion() const
 	{
 		return m_inthHeader.OptionalHeader.MajorImageVersion;
 	}
@@ -1943,7 +1943,7 @@ namespace PeLib
 	* @return The MinorImageVersion value from the PE header.
 	**/
 	template<int x>
-	word PeHeaderT<x>::getMinorImageVersion() const
+	std::uint16_t PeHeaderT<x>::getMinorImageVersion() const
 	{
 		return m_inthHeader.OptionalHeader.MinorImageVersion;
 	}
@@ -1952,7 +1952,7 @@ namespace PeLib
 	* @return The MajorSubsystemVersion value from the PE header.
 	**/
 	template<int x>
-	word PeHeaderT<x>::getMajorSubsystemVersion() const
+	std::uint16_t PeHeaderT<x>::getMajorSubsystemVersion() const
 	{
 		return m_inthHeader.OptionalHeader.MajorSubsystemVersion;
 	}
@@ -1961,7 +1961,7 @@ namespace PeLib
 	* @return The MinorSubsystemVersion value from the PE header.
 	**/
 	template<int x>
-	word PeHeaderT<x>::getMinorSubsystemVersion() const
+	std::uint16_t PeHeaderT<x>::getMinorSubsystemVersion() const
 	{
 		return m_inthHeader.OptionalHeader.MinorSubsystemVersion;
 	}
@@ -1970,7 +1970,7 @@ namespace PeLib
 	* @return The WinVersionValue value from the PE header.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getWin32VersionValue() const
+	std::uint32_t PeHeaderT<x>::getWin32VersionValue() const
 	{
 		return m_inthHeader.OptionalHeader.Win32VersionValue;
 	}
@@ -1979,7 +1979,7 @@ namespace PeLib
 	* @return The SizeOfImage value from the PE header.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getSizeOfImage() const
+	std::uint32_t PeHeaderT<x>::getSizeOfImage() const
 	{
 		return m_inthHeader.OptionalHeader.SizeOfImage;
 	}
@@ -1988,7 +1988,7 @@ namespace PeLib
 	* @return The SizeOfHeaders value from the PE header.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getSizeOfHeaders() const
+	std::uint32_t PeHeaderT<x>::getSizeOfHeaders() const
 	{
 		return m_inthHeader.OptionalHeader.SizeOfHeaders;
 	}
@@ -1997,7 +1997,7 @@ namespace PeLib
 	* @return The CheckSums value from the PE header.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getCheckSum() const
+	std::uint32_t PeHeaderT<x>::getCheckSum() const
 	{
 		return m_inthHeader.OptionalHeader.CheckSum;
 	}
@@ -2006,7 +2006,7 @@ namespace PeLib
 	* @return The Subsystem value from the PE header.
 	**/
 	template<int x>
-	word PeHeaderT<x>::getSubsystem() const
+	std::uint16_t PeHeaderT<x>::getSubsystem() const
 	{
 		return m_inthHeader.OptionalHeader.Subsystem;
 	}
@@ -2015,7 +2015,7 @@ namespace PeLib
 	* @return The DllCharacteristics value from the PE header.
 	**/
 	template<int x>
-	word PeHeaderT<x>::getDllCharacteristics() const
+	std::uint16_t PeHeaderT<x>::getDllCharacteristics() const
 	{
 		return m_inthHeader.OptionalHeader.DllCharacteristics;
 	}
@@ -2060,7 +2060,7 @@ namespace PeLib
 	* @return The LoaderFlags value from the PE header.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getLoaderFlags() const
+	std::uint32_t PeHeaderT<x>::getLoaderFlags() const
 	{
 		return m_inthHeader.OptionalHeader.LoaderFlags;
 	}
@@ -2069,15 +2069,15 @@ namespace PeLib
 	* @return The NumberOfRvaAndSizes value from the PE header.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getNumberOfRvaAndSizes() const
+	std::uint32_t PeHeaderT<x>::getNumberOfRvaAndSizes() const
 	{
 		return m_inthHeader.OptionalHeader.NumberOfRvaAndSizes;
 	}
 
 	template<int x>
-	dword PeHeaderT<x>::calcNumberOfRvaAndSizes() const
+	std::uint32_t PeHeaderT<x>::calcNumberOfRvaAndSizes() const
 	{
-		return static_cast<dword>(m_inthHeader.dataDirectories.size());
+		return static_cast<std::uint32_t>(m_inthHeader.dataDirectories.size());
 	}
 
 	/**
@@ -2085,7 +2085,7 @@ namespace PeLib
 	* @return The Rva of the Export directory.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getIddExportRva() const
+	std::uint32_t PeHeaderT<x>::getIddExportRva() const
 	{
 		return m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress;
 	}
@@ -2095,7 +2095,7 @@ namespace PeLib
 	* @return The sizeof the Export directory.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getIddExportSize() const
+	std::uint32_t PeHeaderT<x>::getIddExportSize() const
 	{
 		return m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_EXPORT].Size;
 	}
@@ -2105,7 +2105,7 @@ namespace PeLib
 	* @return The Rva of the Import directory.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getIddImportRva() const
+	std::uint32_t PeHeaderT<x>::getIddImportRva() const
 	{
 		return m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress;
 	}
@@ -2115,7 +2115,7 @@ namespace PeLib
 	* @return The size of the Import directory.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getIddImportSize() const
+	std::uint32_t PeHeaderT<x>::getIddImportSize() const
 	{
 		return m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_IMPORT].Size;
 	}
@@ -2125,7 +2125,7 @@ namespace PeLib
 	* @return The Rva of the Resource directory.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getIddResourceRva() const
+	std::uint32_t PeHeaderT<x>::getIddResourceRva() const
 	{
 		return m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_RESOURCE].VirtualAddress;
 	}
@@ -2135,7 +2135,7 @@ namespace PeLib
 	* @return The size of the Resource directory.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getIddResourceSize() const
+	std::uint32_t PeHeaderT<x>::getIddResourceSize() const
 	{
 		return m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_RESOURCE].Size;
 	}
@@ -2145,7 +2145,7 @@ namespace PeLib
 	* @return The Rva of the Exception directory.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getIddExceptionRva() const
+	std::uint32_t PeHeaderT<x>::getIddExceptionRva() const
 	{
 		return m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_EXCEPTION].VirtualAddress;
 	}
@@ -2155,7 +2155,7 @@ namespace PeLib
 	* @return The size of the Exception directory.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getIddExceptionSize() const
+	std::uint32_t PeHeaderT<x>::getIddExceptionSize() const
 	{
 		return m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_EXCEPTION].Size;
 	}
@@ -2165,7 +2165,7 @@ namespace PeLib
 	* @return The Rva of the Security directory.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getIddSecurityRva() const
+	std::uint32_t PeHeaderT<x>::getIddSecurityRva() const
 	{
 		return m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_SECURITY].VirtualAddress;
 	}
@@ -2175,7 +2175,7 @@ namespace PeLib
 	* @return The size of the Security directory.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getIddSecuritySize() const
+	std::uint32_t PeHeaderT<x>::getIddSecuritySize() const
 	{
 		return m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_SECURITY].Size;
 	}
@@ -2185,7 +2185,7 @@ namespace PeLib
 	* @return The Rva of the Base Reloc directory.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getIddBaseRelocRva() const
+	std::uint32_t PeHeaderT<x>::getIddBaseRelocRva() const
 	{
 		return m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_BASERELOC].VirtualAddress;
 	}
@@ -2195,7 +2195,7 @@ namespace PeLib
 	* @return The size of the Base Reloc directory.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getIddBaseRelocSize() const
+	std::uint32_t PeHeaderT<x>::getIddBaseRelocSize() const
 	{
 		return m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_BASERELOC].Size;
 	}
@@ -2205,7 +2205,7 @@ namespace PeLib
 	* @return The Rva of the Debug directory.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getIddDebugRva() const
+	std::uint32_t PeHeaderT<x>::getIddDebugRva() const
 	{
 		return m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_DEBUG].VirtualAddress;
 	}
@@ -2215,7 +2215,7 @@ namespace PeLib
 	* @return The size of the Debug directory.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getIddDebugSize() const
+	std::uint32_t PeHeaderT<x>::getIddDebugSize() const
 	{
 		return m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_DEBUG].Size;
 	}
@@ -2225,7 +2225,7 @@ namespace PeLib
 	* @return The Rva of the Architecture directory.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getIddArchitectureRva() const
+	std::uint32_t PeHeaderT<x>::getIddArchitectureRva() const
 	{
 		return m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_ARCHITECTURE].VirtualAddress;
 	}
@@ -2235,7 +2235,7 @@ namespace PeLib
 	* @return The size of the Architecture directory.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getIddArchitectureSize() const
+	std::uint32_t PeHeaderT<x>::getIddArchitectureSize() const
 	{
 		return m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_ARCHITECTURE].Size;
 	}
@@ -2245,7 +2245,7 @@ namespace PeLib
 	* @return The Rva of the GlobalPtr directory.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getIddGlobalPtrRva() const
+	std::uint32_t PeHeaderT<x>::getIddGlobalPtrRva() const
 	{
 		return m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_GLOBALPTR].VirtualAddress;
 	}
@@ -2255,7 +2255,7 @@ namespace PeLib
 	* @return The size of the GlobalPtr directory.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getIddGlobalPtrSize() const
+	std::uint32_t PeHeaderT<x>::getIddGlobalPtrSize() const
 	{
 		return m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_GLOBALPTR].Size;
 	}
@@ -2265,7 +2265,7 @@ namespace PeLib
 	* @return The Rva of the Tls directory.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getIddTlsRva() const
+	std::uint32_t PeHeaderT<x>::getIddTlsRva() const
 	{
 		return m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress;
 	}
@@ -2275,7 +2275,7 @@ namespace PeLib
 	* @return The size of the Tls directory.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getIddTlsSize() const
+	std::uint32_t PeHeaderT<x>::getIddTlsSize() const
 	{
 		return m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_TLS].Size;
 	}
@@ -2285,7 +2285,7 @@ namespace PeLib
 	* @return The Rva of the LoadConfig directory.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getIddLoadConfigRva() const
+	std::uint32_t PeHeaderT<x>::getIddLoadConfigRva() const
 	{
 		return m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG].VirtualAddress;
 	}
@@ -2295,7 +2295,7 @@ namespace PeLib
 	* @return The size of the LoadConfig directory.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getIddLoadConfigSize() const
+	std::uint32_t PeHeaderT<x>::getIddLoadConfigSize() const
 	{
 		return m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG].Size;
 	}
@@ -2305,7 +2305,7 @@ namespace PeLib
 	* @return The Rva of the BoundImport directory.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getIddBoundImportRva() const
+	std::uint32_t PeHeaderT<x>::getIddBoundImportRva() const
 	{
 		return m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT].VirtualAddress;
 	}
@@ -2315,7 +2315,7 @@ namespace PeLib
 	* @return The size of the BoundImport directory.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getIddBoundImportSize() const
+	std::uint32_t PeHeaderT<x>::getIddBoundImportSize() const
 	{
 		return m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT].Size;
 	}
@@ -2325,7 +2325,7 @@ namespace PeLib
 	* @return The Rva of the IAT directory.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getIddIatRva() const
+	std::uint32_t PeHeaderT<x>::getIddIatRva() const
 	{
 		return m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_IAT].VirtualAddress;
 	}
@@ -2335,7 +2335,7 @@ namespace PeLib
 	* @return The size of the IAT directory.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getIddIatSize() const
+	std::uint32_t PeHeaderT<x>::getIddIatSize() const
 	{
 		return m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_IAT].Size;
 	}
@@ -2345,7 +2345,7 @@ namespace PeLib
 	* @return The Rva of the DelayImport directory.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getIddDelayImportRva() const
+	std::uint32_t PeHeaderT<x>::getIddDelayImportRva() const
 	{
 		return m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT].VirtualAddress;
 	}
@@ -2355,7 +2355,7 @@ namespace PeLib
 	* @return The size of the DelayImport directory.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getIddDelayImportSize() const
+	std::uint32_t PeHeaderT<x>::getIddDelayImportSize() const
 	{
 		return m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT].Size;
 	}
@@ -2365,7 +2365,7 @@ namespace PeLib
 	* @return The Rva of the COM Descriptor directory.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getIddComHeaderRva() const
+	std::uint32_t PeHeaderT<x>::getIddComHeaderRva() const
 	{
 		return m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR].VirtualAddress;
 	}
@@ -2375,7 +2375,7 @@ namespace PeLib
 	* @return The Rva of the COM Descriptor directory.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getIddComHeaderSize() const
+	std::uint32_t PeHeaderT<x>::getIddComHeaderSize() const
 	{
 		return m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR].Size;
 	}
@@ -2386,13 +2386,13 @@ namespace PeLib
 	* @return The Rva of the image directory.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getImageDataDirectoryRva(dword dwDirectory) const
+	std::uint32_t PeHeaderT<x>::getImageDataDirectoryRva(std::uint32_t dwDirectory) const
 	{
 		return m_inthHeader.dataDirectories[dwDirectory].VirtualAddress;
 	}
 
 	template<int x>
-	void PeHeaderT<x>::setImageDataDirectoryRva(dword dwDirectory, dword value)
+	void PeHeaderT<x>::setImageDataDirectoryRva(std::uint32_t dwDirectory, std::uint32_t value)
 	{
 		m_inthHeader.dataDirectories[dwDirectory].VirtualAddress = value;
 	}
@@ -2403,13 +2403,13 @@ namespace PeLib
 	* @return The size of the image directory.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getImageDataDirectorySize(dword dwDirectory) const
+	std::uint32_t PeHeaderT<x>::getImageDataDirectorySize(std::uint32_t dwDirectory) const
 	{
 		return m_inthHeader.dataDirectories[dwDirectory].Size;
 	}
 
 	template<int x>
-	void PeHeaderT<x>::setImageDataDirectorySize(dword dwDirectory, dword value)
+	void PeHeaderT<x>::setImageDataDirectorySize(std::uint32_t dwDirectory, std::uint32_t value)
 	{
 		m_inthHeader.dataDirectories[dwDirectory].Size = value;
 	}
@@ -2420,7 +2420,7 @@ namespace PeLib
 	* @return The name of the section.
 	**/
 	template<int x>
-	std::string PeHeaderT<x>::getSectionName(word wSectionnr) const
+	std::string PeHeaderT<x>::getSectionName(std::uint16_t wSectionnr) const
 	{
 		std::string sectionName = "";
 
@@ -2433,7 +2433,7 @@ namespace PeLib
 	}
 
 	template<int x>
-	std::string PeHeaderT<x>::getSectionNameFromStringTable(word wSectionnr) const
+	std::string PeHeaderT<x>::getSectionNameFromStringTable(std::uint16_t wSectionnr) const
 	{
 		return m_vIsh[wSectionnr].StringTableName;
 	}
@@ -2444,7 +2444,7 @@ namespace PeLib
 	* @return The virtual size of the section.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getVirtualSize(word wSectionnr) const
+	std::uint32_t PeHeaderT<x>::getVirtualSize(std::uint16_t wSectionnr) const
 	{
 		return m_vIsh[wSectionnr].VirtualSize;
 	}
@@ -2455,7 +2455,7 @@ namespace PeLib
 	* @return The Rva of the section.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getVirtualAddress(word wSectionnr) const
+	std::uint32_t PeHeaderT<x>::getVirtualAddress(std::uint16_t wSectionnr) const
 	{
 		return m_vIsh[wSectionnr].VirtualAddress;
 	}
@@ -2466,7 +2466,7 @@ namespace PeLib
 	* @return The size of raw data of the section.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getSizeOfRawData(word wSectionnr) const
+	std::uint32_t PeHeaderT<x>::getSizeOfRawData(std::uint16_t wSectionnr) const
 	{
 		return m_vIsh[wSectionnr].SizeOfRawData;
 	}
@@ -2477,7 +2477,7 @@ namespace PeLib
 	* @return The file offset of the section.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getPointerToRawData(word wSectionnr) const
+	std::uint32_t PeHeaderT<x>::getPointerToRawData(std::uint16_t wSectionnr) const
 	{
 		return m_vIsh[wSectionnr].PointerToRawData;
 	}
@@ -2488,7 +2488,7 @@ namespace PeLib
 	* @return The pointer to relocations of the section.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getPointerToRelocations(word wSectionnr) const
+	std::uint32_t PeHeaderT<x>::getPointerToRelocations(std::uint16_t wSectionnr) const
 	{
 		return m_vIsh[wSectionnr].PointerToRelocations;
 	}
@@ -2499,7 +2499,7 @@ namespace PeLib
 	* @return The pointer to line numbers of the section.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getPointerToLinenumbers(word wSectionnr) const
+	std::uint32_t PeHeaderT<x>::getPointerToLinenumbers(std::uint16_t wSectionnr) const
 	{
 		return m_vIsh[wSectionnr].PointerToLinenumbers;
 	}
@@ -2510,7 +2510,7 @@ namespace PeLib
 	* @return The number of relocations of the section.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getNumberOfRelocations(word wSectionnr) const
+	std::uint32_t PeHeaderT<x>::getNumberOfRelocations(std::uint16_t wSectionnr) const
 	{
 		return m_vIsh[wSectionnr].NumberOfRelocations;
 	}
@@ -2521,7 +2521,7 @@ namespace PeLib
 	* @return The number of line numbers of the section.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getNumberOfLinenumbers(word wSectionnr) const
+	std::uint32_t PeHeaderT<x>::getNumberOfLinenumbers(std::uint16_t wSectionnr) const
 	{
 		return m_vIsh[wSectionnr].NumberOfLinenumbers;
 	}
@@ -2532,7 +2532,7 @@ namespace PeLib
 	* @return The characteristics of the section.
 	**/
 	template<int x>
-	dword PeHeaderT<x>::getCharacteristics(word wSectionnr) const
+	std::uint32_t PeHeaderT<x>::getCharacteristics(std::uint16_t wSectionnr) const
 	{
 		return m_vIsh[wSectionnr].Characteristics;
 	}
@@ -2542,7 +2542,7 @@ namespace PeLib
 	* @param dwValue New value.
 	**/
 	template<int x>
-	void PeHeaderT<x>::setNtSignature(dword dwValue)
+	void PeHeaderT<x>::setNtSignature(std::uint32_t dwValue)
 	{
 		m_inthHeader.Signature = dwValue;
 	}
@@ -2552,7 +2552,7 @@ namespace PeLib
 	* @param wValue New value.
 	**/
 	template<int x>
-	void PeHeaderT<x>::setMachine(word wValue)
+	void PeHeaderT<x>::setMachine(std::uint16_t wValue)
 	{
 		m_inthHeader.FileHeader.Machine = wValue;
 	}
@@ -2562,7 +2562,7 @@ namespace PeLib
 	* @param wValue New value.
 	**/
 	template<int x>
-	void PeHeaderT<x>::setNumberOfSections(word wValue)
+	void PeHeaderT<x>::setNumberOfSections(std::uint16_t wValue)
 	{
 		m_inthHeader.FileHeader.NumberOfSections = wValue;
 	}
@@ -2572,7 +2572,7 @@ namespace PeLib
 	* @param dwValue New value.
 	**/
 	template<int x>
-	void PeHeaderT<x>::setTimeDateStamp(dword dwValue)
+	void PeHeaderT<x>::setTimeDateStamp(std::uint32_t dwValue)
 	{
 		m_inthHeader.FileHeader.TimeDateStamp = dwValue;
 	}
@@ -2582,7 +2582,7 @@ namespace PeLib
 	* @param dwValue New value.
 	**/
 	template<int x>
-	void PeHeaderT<x>::setPointerToSymbolTable(dword dwValue)
+	void PeHeaderT<x>::setPointerToSymbolTable(std::uint32_t dwValue)
 	{
 		m_inthHeader.FileHeader.PointerToSymbolTable = dwValue;
 	}
@@ -2592,7 +2592,7 @@ namespace PeLib
 	* @param dwValue New value.
 	**/
 	template<int x>
-	void PeHeaderT<x>::setNumberOfSymbols(dword dwValue)
+	void PeHeaderT<x>::setNumberOfSymbols(std::uint32_t dwValue)
 	{
 		m_inthHeader.FileHeader.NumberOfSymbols = dwValue;
 	}
@@ -2602,7 +2602,7 @@ namespace PeLib
 	* @param wValue New value.
 	**/
 	template<int x>
-	void PeHeaderT<x>::setSizeOfOptionalHeader(word wValue)
+	void PeHeaderT<x>::setSizeOfOptionalHeader(std::uint16_t wValue)
 	{
 		m_inthHeader.FileHeader.SizeOfOptionalHeader = wValue;
 	}
@@ -2612,7 +2612,7 @@ namespace PeLib
 	* @param wValue New value.
 	**/
 	template<int x>
-	void PeHeaderT<x>::setCharacteristics(word wValue)
+	void PeHeaderT<x>::setCharacteristics(std::uint16_t wValue)
 	{
 		m_inthHeader.FileHeader.Characteristics = wValue;
 	}
@@ -2622,7 +2622,7 @@ namespace PeLib
 	* @param wValue New value.
 	**/
 	template<int x>
-	void PeHeaderT<x>::setMagic(word wValue)
+	void PeHeaderT<x>::setMagic(std::uint16_t wValue)
 	{
 		m_inthHeader.OptionalHeader.Magic = wValue;
 	}
@@ -2632,7 +2632,7 @@ namespace PeLib
 	* @param bValue New value.
 	**/
 	template<int x>
-	void PeHeaderT<x>::setMajorLinkerVersion(byte bValue)
+	void PeHeaderT<x>::setMajorLinkerVersion(std::uint8_t bValue)
 	{
 		m_inthHeader.OptionalHeader.MajorLinkerVersion = bValue;
 	}
@@ -2642,7 +2642,7 @@ namespace PeLib
 	* @param bValue New value.
 	**/
 	template<int x>
-	void PeHeaderT<x>::setMinorLinkerVersion(byte bValue)
+	void PeHeaderT<x>::setMinorLinkerVersion(std::uint8_t bValue)
 	{
 		m_inthHeader.OptionalHeader.MinorLinkerVersion = bValue;
 	}
@@ -2652,7 +2652,7 @@ namespace PeLib
 	* @param dwValue New value.
 	**/
 	template<int x>
-	void PeHeaderT<x>::setSizeOfCode(dword dwValue)
+	void PeHeaderT<x>::setSizeOfCode(std::uint32_t dwValue)
 	{
 		m_inthHeader.OptionalHeader.SizeOfCode = dwValue;
 	}
@@ -2662,7 +2662,7 @@ namespace PeLib
 	* @param dwValue New value.
 	**/
 	template<int x>
-	void PeHeaderT<x>::setSizeOfInitializedData(dword dwValue)
+	void PeHeaderT<x>::setSizeOfInitializedData(std::uint32_t dwValue)
 	{
 		m_inthHeader.OptionalHeader.SizeOfInitializedData = dwValue;
 	}
@@ -2672,7 +2672,7 @@ namespace PeLib
 	* @param dwValue New value.
 	**/
 	template<int x>
-	void PeHeaderT<x>::setSizeOfUninitializedData(dword dwValue)
+	void PeHeaderT<x>::setSizeOfUninitializedData(std::uint32_t dwValue)
 	{
 		m_inthHeader.OptionalHeader.SizeOfUninitializedData = dwValue;
 	}
@@ -2682,7 +2682,7 @@ namespace PeLib
 	* @param dwValue New value.
 	**/
 	template<int x>
-	void PeHeaderT<x>::setAddressOfEntryPoint(dword dwValue)
+	void PeHeaderT<x>::setAddressOfEntryPoint(std::uint32_t dwValue)
 	{
 		m_inthHeader.OptionalHeader.AddressOfEntryPoint = dwValue;
 	}
@@ -2692,7 +2692,7 @@ namespace PeLib
 	* @param dwValue New value.
 	**/
 	template<int x>
-	void PeHeaderT<x>::setBaseOfCode(dword dwValue)
+	void PeHeaderT<x>::setBaseOfCode(std::uint32_t dwValue)
 	{
 		m_inthHeader.OptionalHeader.BaseOfCode = dwValue;
 	}
@@ -2712,7 +2712,7 @@ namespace PeLib
 	* @param dwValue New value.
 	**/
 	template<int x>
-	void PeHeaderT<x>::setSectionAlignment(dword dwValue)
+	void PeHeaderT<x>::setSectionAlignment(std::uint32_t dwValue)
 	{
 		m_inthHeader.OptionalHeader.SectionAlignment = dwValue;
 	}
@@ -2722,7 +2722,7 @@ namespace PeLib
 	* @param dwValue New value.
 	**/
 	template<int x>
-	void PeHeaderT<x>::setFileAlignment(dword dwValue)
+	void PeHeaderT<x>::setFileAlignment(std::uint32_t dwValue)
 	{
 		m_inthHeader.OptionalHeader.FileAlignment = dwValue;
 	}
@@ -2732,7 +2732,7 @@ namespace PeLib
 	* @param wValue New value.
 	**/
 	template<int x>
-	void PeHeaderT<x>::setMajorOperatingSystemVersion(word wValue)
+	void PeHeaderT<x>::setMajorOperatingSystemVersion(std::uint16_t wValue)
 	{
 		m_inthHeader.OptionalHeader.MajorOperatingSystemVersion = wValue;
 	}
@@ -2742,7 +2742,7 @@ namespace PeLib
 	* @param wValue New value.
 	**/
 	template<int x>
-	void PeHeaderT<x>::setMinorOperatingSystemVersion(word wValue)
+	void PeHeaderT<x>::setMinorOperatingSystemVersion(std::uint16_t wValue)
 	{
 		m_inthHeader.OptionalHeader.MinorOperatingSystemVersion = wValue;
 	}
@@ -2752,7 +2752,7 @@ namespace PeLib
 	* @param wValue New value.
 	**/
 	template<int x>
-	void PeHeaderT<x>::setMajorImageVersion(word wValue)
+	void PeHeaderT<x>::setMajorImageVersion(std::uint16_t wValue)
 	{
 		m_inthHeader.OptionalHeader.MajorImageVersion = wValue;
 	}
@@ -2762,7 +2762,7 @@ namespace PeLib
 	* @param wValue New value.
 	**/
 	template<int x>
-	void PeHeaderT<x>::setMinorImageVersion(word wValue)
+	void PeHeaderT<x>::setMinorImageVersion(std::uint16_t wValue)
 	{
 		m_inthHeader.OptionalHeader.MinorImageVersion = wValue;
 	}
@@ -2772,7 +2772,7 @@ namespace PeLib
 	* @param wValue New value.
 	**/
 	template<int x>
-	void PeHeaderT<x>::setMajorSubsystemVersion(word wValue)
+	void PeHeaderT<x>::setMajorSubsystemVersion(std::uint16_t wValue)
 	{
 		m_inthHeader.OptionalHeader.MajorSubsystemVersion = wValue;
 	}
@@ -2782,7 +2782,7 @@ namespace PeLib
 	* @param wValue New value.
 	**/
 	template<int x>
-	void PeHeaderT<x>::setMinorSubsystemVersion(word wValue)
+	void PeHeaderT<x>::setMinorSubsystemVersion(std::uint16_t wValue)
 	{
 		m_inthHeader.OptionalHeader.MinorSubsystemVersion = wValue;
 	}
@@ -2792,7 +2792,7 @@ namespace PeLib
 	* @param dwValue New value.
 	**/
 	template<int x>
-	void PeHeaderT<x>::setWin32VersionValue(dword dwValue)
+	void PeHeaderT<x>::setWin32VersionValue(std::uint32_t dwValue)
 	{
 		m_inthHeader.OptionalHeader.Win32VersionValue = dwValue;
 	}
@@ -2802,7 +2802,7 @@ namespace PeLib
 	* @param dwValue New value.
 	**/
 	template<int x>
-	void PeHeaderT<x>::setSizeOfImage(dword dwValue)
+	void PeHeaderT<x>::setSizeOfImage(std::uint32_t dwValue)
 	{
 		m_inthHeader.OptionalHeader.SizeOfImage = dwValue;
 	}
@@ -2812,7 +2812,7 @@ namespace PeLib
 	* @param dwValue New value.
 	**/
 	template<int x>
-	void PeHeaderT<x>::setSizeOfHeaders(dword dwValue)
+	void PeHeaderT<x>::setSizeOfHeaders(std::uint32_t dwValue)
 	{
 		m_inthHeader.OptionalHeader.SizeOfHeaders = dwValue;
 	}
@@ -2822,7 +2822,7 @@ namespace PeLib
 	* @param dwValue New value.
 	**/
 	template<int x>
-	void PeHeaderT<x>::setCheckSum(dword dwValue)
+	void PeHeaderT<x>::setCheckSum(std::uint32_t dwValue)
 	{
 		m_inthHeader.OptionalHeader.CheckSum = dwValue;
 	}
@@ -2832,7 +2832,7 @@ namespace PeLib
 	* @param wValue New value.
 	**/
 	template<int x>
-	void PeHeaderT<x>::setSubsystem(word wValue)
+	void PeHeaderT<x>::setSubsystem(std::uint16_t wValue)
 	{
 		m_inthHeader.OptionalHeader.Subsystem = wValue;
 	}
@@ -2842,7 +2842,7 @@ namespace PeLib
 	* @param wValue New value.
 	**/
 	template<int x>
-	void PeHeaderT<x>::setDllCharacteristics(word wValue)
+	void PeHeaderT<x>::setDllCharacteristics(std::uint16_t wValue)
 	{
 		m_inthHeader.OptionalHeader.DllCharacteristics = wValue;
 	}
@@ -2892,7 +2892,7 @@ namespace PeLib
 	* @param dwValue New value.
 	**/
 	template<int x>
-	void PeHeaderT<x>::setLoaderFlags(dword dwValue)
+	void PeHeaderT<x>::setLoaderFlags(std::uint32_t dwValue)
 	{
 		m_inthHeader.OptionalHeader.LoaderFlags = dwValue;
 	}
@@ -2902,115 +2902,115 @@ namespace PeLib
 	* @param dwValue New value.
 	**/
 	template<int x>
-	void PeHeaderT<x>::setNumberOfRvaAndSizes(dword dwValue)
+	void PeHeaderT<x>::setNumberOfRvaAndSizes(std::uint32_t dwValue)
 	{
 		m_inthHeader.OptionalHeader.NumberOfRvaAndSizes = dwValue;
 	}
 
 	template<int x>
-	void PeHeaderT<x>::setIddDebugRva(dword dwValue)
+	void PeHeaderT<x>::setIddDebugRva(std::uint32_t dwValue)
 	{
 		m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_DEBUG].VirtualAddress = dwValue;
 	}
 
 	template<int x>
-	void PeHeaderT<x>::setIddDebugSize(dword dwValue)
+	void PeHeaderT<x>::setIddDebugSize(std::uint32_t dwValue)
 	{
 		m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_DEBUG].Size = dwValue;
 	}
 
 	template<int x>
-	void PeHeaderT<x>::setIddDelayImportRva(dword dwValue)
+	void PeHeaderT<x>::setIddDelayImportRva(std::uint32_t dwValue)
 	{
 		m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT].VirtualAddress = dwValue;
 	}
 
 	template<int x>
-	void PeHeaderT<x>::setIddDelayImportSize(dword dwValue)
+	void PeHeaderT<x>::setIddDelayImportSize(std::uint32_t dwValue)
 	{
 		m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT].Size = dwValue;
 	}
 
 	template<int x>
-	void PeHeaderT<x>::setIddExceptionRva(dword dwValue)
+	void PeHeaderT<x>::setIddExceptionRva(std::uint32_t dwValue)
 	{
 		m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_EXCEPTION].VirtualAddress = dwValue;
 	}
 
 	template<int x>
-	void PeHeaderT<x>::setIddExceptionSize(dword dwValue)
+	void PeHeaderT<x>::setIddExceptionSize(std::uint32_t dwValue)
 	{
 		m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_EXCEPTION].Size = dwValue;
 	}
 
 	template<int x>
-	void PeHeaderT<x>::setIddGlobalPtrRva(dword dwValue)
+	void PeHeaderT<x>::setIddGlobalPtrRva(std::uint32_t dwValue)
 	{
 		m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_GLOBALPTR].VirtualAddress = dwValue;
 	}
 
 	template<int x>
-	void PeHeaderT<x>::setIddGlobalPtrSize(dword dwValue)
+	void PeHeaderT<x>::setIddGlobalPtrSize(std::uint32_t dwValue)
 	{
 		m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_GLOBALPTR].Size = dwValue;
 	}
 
 	template<int x>
-	void PeHeaderT<x>::setIddIatRva(dword dwValue)
+	void PeHeaderT<x>::setIddIatRva(std::uint32_t dwValue)
 	{
 		m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_IAT].VirtualAddress = dwValue;
 	}
 
 	template<int x>
-	void PeHeaderT<x>::setIddIatSize(dword dwValue)
+	void PeHeaderT<x>::setIddIatSize(std::uint32_t dwValue)
 	{
 		m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_IAT].Size = dwValue;
 	}
 
 	template<int x>
-	void PeHeaderT<x>::setIddLoadConfigRva(dword dwValue)
+	void PeHeaderT<x>::setIddLoadConfigRva(std::uint32_t dwValue)
 	{
 		m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG].VirtualAddress = dwValue;
 	}
 
 	template<int x>
-	void PeHeaderT<x>::setIddLoadConfigSize(dword dwValue)
+	void PeHeaderT<x>::setIddLoadConfigSize(std::uint32_t dwValue)
 	{
 		m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG].Size = dwValue;
 	}
 
 	template<int x>
-	void PeHeaderT<x>::setIddResourceRva(dword dwValue)
+	void PeHeaderT<x>::setIddResourceRva(std::uint32_t dwValue)
 	{
 		m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_RESOURCE].VirtualAddress = dwValue;
 	}
 
 	template<int x>
-	void PeHeaderT<x>::setIddResourceSize(dword dwValue)
+	void PeHeaderT<x>::setIddResourceSize(std::uint32_t dwValue)
 	{
 		m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_RESOURCE].Size = dwValue;
 	}
 
 	template<int x>
-	void PeHeaderT<x>::setIddSecurityRva(dword dwValue)
+	void PeHeaderT<x>::setIddSecurityRva(std::uint32_t dwValue)
 	{
 		m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_SECURITY].VirtualAddress = dwValue;
 	}
 
 	template<int x>
-	void PeHeaderT<x>::setIddSecuritySize(dword dwValue)
+	void PeHeaderT<x>::setIddSecuritySize(std::uint32_t dwValue)
 	{
 		m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_SECURITY].Size = dwValue;
 	}
 
 	template<int x>
-	void PeHeaderT<x>::setIddTlsRva(dword dwValue)
+	void PeHeaderT<x>::setIddTlsRva(std::uint32_t dwValue)
 	{
 		m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress = dwValue;
 	}
 
 	template<int x>
-	void PeHeaderT<x>::setIddTlsSize(dword dwValue)
+	void PeHeaderT<x>::setIddTlsSize(std::uint32_t dwValue)
 	{
 		m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_TLS].Size = dwValue;
 	}
@@ -3020,7 +3020,7 @@ namespace PeLib
 	* @param dwValue New value.
 	**/
 	template<int x>
-	void PeHeaderT<x>::setIddExportRva(dword dwValue)
+	void PeHeaderT<x>::setIddExportRva(std::uint32_t dwValue)
 	{
 		m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress = dwValue;
 	}
@@ -3030,43 +3030,43 @@ namespace PeLib
 	* @param dwValue New value.
 	**/
 	template<int x>
-	void PeHeaderT<x>::setIddExportSize(dword dwValue)
+	void PeHeaderT<x>::setIddExportSize(std::uint32_t dwValue)
 	{
 		m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_EXPORT].Size = dwValue;
 	}
 
 	template<int x>
-	void PeHeaderT<x>::setIddBaseRelocRva(dword value)
+	void PeHeaderT<x>::setIddBaseRelocRva(std::uint32_t value)
 	{
 		m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_BASERELOC].VirtualAddress = value;
 	}
 
 	template<int x>
-	void PeHeaderT<x>::setIddBaseRelocSize(dword value)
+	void PeHeaderT<x>::setIddBaseRelocSize(std::uint32_t value)
 	{
 		m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_BASERELOC].Size = value;
 	}
 
 	template<int x>
-	void PeHeaderT<x>::setIddArchitectureRva(dword value)
+	void PeHeaderT<x>::setIddArchitectureRva(std::uint32_t value)
 	{
 		m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_ARCHITECTURE].VirtualAddress = value;
 	}
 
 	template<int x>
-	void PeHeaderT<x>::setIddArchitectureSize(dword value)
+	void PeHeaderT<x>::setIddArchitectureSize(std::uint32_t value)
 	{
 		m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_ARCHITECTURE].Size = value;
 	}
 
 	template<int x>
-	void PeHeaderT<x>::setIddComHeaderRva(dword value)
+	void PeHeaderT<x>::setIddComHeaderRva(std::uint32_t value)
 	{
 		m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR].VirtualAddress = value;
 	}
 
 	template<int x>
-	void PeHeaderT<x>::setIddComHeaderSize(dword value)
+	void PeHeaderT<x>::setIddComHeaderSize(std::uint32_t value)
 	{
 		m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR].Size = value;
 	}
@@ -3076,7 +3076,7 @@ namespace PeLib
 	* @param dwValue New value.
 	**/
 	template<int x>
-	void PeHeaderT<x>::setIddImportRva(dword dwValue)
+	void PeHeaderT<x>::setIddImportRva(std::uint32_t dwValue)
 	{
 		m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress = dwValue;
 	}
@@ -3086,7 +3086,7 @@ namespace PeLib
 	* @param dwValue New value.
 	**/
 	template<int x>
-	void PeHeaderT<x>::setIddImportSize(dword dwValue)
+	void PeHeaderT<x>::setIddImportSize(std::uint32_t dwValue)
 	{
 		m_inthHeader.dataDirectories[PELIB_IMAGE_DIRECTORY_ENTRY_IMPORT].Size = dwValue;
 	}
@@ -3097,7 +3097,7 @@ namespace PeLib
 	* @param strName New name.
 	**/
 	template<int x>
-	void PeHeaderT<x>::setSectionName(word wSectionnr, std::string strName)
+	void PeHeaderT<x>::setSectionName(std::uint16_t wSectionnr, std::string strName)
 	{
 		strncpy(reinterpret_cast<char*>(m_vIsh[wSectionnr].Name), strName.c_str(), sizeof(m_vIsh[wSectionnr].Name));
 	}
@@ -3108,7 +3108,7 @@ namespace PeLib
 	* @param dwValue New value.
 	**/
 	template<int x>
-	void PeHeaderT<x>::setVirtualSize(word wSectionnr, dword dwValue)
+	void PeHeaderT<x>::setVirtualSize(std::uint16_t wSectionnr, std::uint32_t dwValue)
 	{
 		m_vIsh[wSectionnr].VirtualSize = dwValue;
 	}
@@ -3119,7 +3119,7 @@ namespace PeLib
 	* @param dwValue New value.
 	**/
 	template<int x>
-	void PeHeaderT<x>::setVirtualAddress(word wSectionnr, dword dwValue)
+	void PeHeaderT<x>::setVirtualAddress(std::uint16_t wSectionnr, std::uint32_t dwValue)
 	{
 		m_vIsh[wSectionnr].VirtualAddress = dwValue;
 	}
@@ -3130,7 +3130,7 @@ namespace PeLib
 	* @param dwValue New value.
 	**/
 	template<int x>
-	void PeHeaderT<x>::setSizeOfRawData(word wSectionnr, dword dwValue)
+	void PeHeaderT<x>::setSizeOfRawData(std::uint16_t wSectionnr, std::uint32_t dwValue)
 	{
 		m_vIsh[wSectionnr].SizeOfRawData = dwValue;
 	}
@@ -3141,7 +3141,7 @@ namespace PeLib
 	* @param dwValue New value.
 	**/
 	template<int x>
-	void PeHeaderT<x>::setPointerToRawData(word wSectionnr, dword dwValue)
+	void PeHeaderT<x>::setPointerToRawData(std::uint16_t wSectionnr, std::uint32_t dwValue)
 	{
 		m_vIsh[wSectionnr].PointerToRawData = dwValue;
 	}
@@ -3152,7 +3152,7 @@ namespace PeLib
 	* @param dwValue New value.
 	**/
 	template<int x>
-	void PeHeaderT<x>::setPointerToRelocations(word wSectionnr, dword dwValue)
+	void PeHeaderT<x>::setPointerToRelocations(std::uint16_t wSectionnr, std::uint32_t dwValue)
 	{
 		m_vIsh[wSectionnr].PointerToRelocations = dwValue;
 	}
@@ -3163,7 +3163,7 @@ namespace PeLib
 	* @param dwValue New value.
 	**/
 	template<int x>
-	void PeHeaderT<x>::setPointerToLinenumbers(word wSectionnr, dword dwValue)
+	void PeHeaderT<x>::setPointerToLinenumbers(std::uint16_t wSectionnr, std::uint32_t dwValue)
 	{
 		m_vIsh[wSectionnr].PointerToLinenumbers = dwValue;
 	}
@@ -3174,7 +3174,7 @@ namespace PeLib
 	* @param dwValue New value.
 	**/
 	template<int x>
-	void PeHeaderT<x>::setNumberOfRelocations(word wSectionnr, dword dwValue)
+	void PeHeaderT<x>::setNumberOfRelocations(std::uint16_t wSectionnr, std::uint32_t dwValue)
 	{
 		m_vIsh[wSectionnr].NumberOfRelocations = dwValue;
 	}
@@ -3185,7 +3185,7 @@ namespace PeLib
 	* @param dwValue New value.
 	**/
 	template<int x>
-	void PeHeaderT<x>::setNumberOfLinenumbers(word wSectionnr, dword dwValue)
+	void PeHeaderT<x>::setNumberOfLinenumbers(std::uint16_t wSectionnr, std::uint32_t dwValue)
 	{
 		m_vIsh[wSectionnr].NumberOfLinenumbers = dwValue;
 	}
@@ -3196,7 +3196,7 @@ namespace PeLib
 	* @param dwValue New value.
 	**/
 	template<int x>
-	void PeHeaderT<x>::setCharacteristics(word wSectionnr, dword dwValue)
+	void PeHeaderT<x>::setCharacteristics(std::uint16_t wSectionnr, std::uint32_t dwValue)
 	{
 		m_vIsh[wSectionnr].Characteristics = dwValue;
 	}

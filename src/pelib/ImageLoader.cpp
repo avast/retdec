@@ -11,7 +11,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "ImageLoader.h"
+#include "retdec/pelib/ImageLoader.h"
 
 //-----------------------------------------------------------------------------
 // Anti-headache
@@ -56,6 +56,7 @@ PeLib::ImageLoader::ImageLoader(uint32_t loaderFlags)
 	memset(&dosHeader, 0, sizeof(PELIB_IMAGE_DOS_HEADER));
 	memset(&fileHeader, 0, sizeof(PELIB_IMAGE_FILE_HEADER));
 	memset(&optionalHeader, 0, sizeof(PELIB_IMAGE_OPTIONAL_HEADER));
+	ntSignature = 0;
 	ldrError = LDR_ERROR_NONE;
 
 	// By default, set the most benevolent settings
@@ -148,6 +149,102 @@ uint32_t PeLib::ImageLoader::writeImage(void * buffer, std::uint32_t rva, std::u
 	return readWriteImage(buffer, rva, bytesToRead, writeToPage);
 }
 
+uint32_t PeLib::ImageLoader::stringLength(uint32_t rva, uint32_t maxLength) const
+{
+	uint32_t rvaBegin = rva;
+	uint32_t rvaEnd = rva + maxLength;
+
+	// Check the last possible address where we read
+	if(rvaEnd > getSizeOfImageAligned())
+		rvaEnd = getSizeOfImageAligned();
+
+	// Is the offset within the image?
+	if(rva < rvaEnd)
+	{
+		size_t pageIndex = rva / PELIB_PAGE_SIZE;
+
+		// The page index must be in range
+		if(pageIndex < pages.size())
+		{
+			while(rva < rvaEnd)
+			{
+				const PELIB_FILE_PAGE & page = pages[pageIndex];
+				uint32_t rvaEndPage = (pageIndex + 1) * PELIB_PAGE_SIZE;
+
+				// If zero page, means we found an RVA with zero
+				if(page.buffer.empty())
+					return rva;
+
+				// Perhaps the last page loaded?
+				if(rvaEndPage > rvaEnd)
+					rvaEndPage = rvaEnd;
+
+				// Try to find the zero byte on the page
+				for(; rva < rvaEndPage; rva++)
+				{
+					if(page.buffer[rva & (PELIB_PAGE_SIZE - 1)] == 0)
+					{
+						return rva;
+					}
+				}
+
+				// Move pointers
+				pageIndex++;
+			}
+		}
+	}
+
+	// Return the offset of the zero byte on the page
+	return rva - rvaBegin;
+}
+
+uint32_t PeLib::ImageLoader::readString(std::string & str, uint32_t rva, uint32_t maxLength)
+{
+	// Check the length of the string at the rva
+	uint32_t length = stringLength(rva, maxLength);
+
+	// Allocate needeed size in the string
+	str.resize(length + 1);
+
+	// Read the string from the image
+	readImage((void *)str.data(), rva, length);
+	return length;
+}
+
+uint32_t PeLib::ImageLoader::readPointer(uint32_t rva, uint64_t & pointerValue)
+{
+	uint32_t bytesRead = 0;
+
+	switch(getPeFileBitability())
+	{
+		case 64:
+			if(readImage(&pointerValue, rva, sizeof(uint64_t)) == sizeof(uint64_t))
+				return sizeof(uint64_t);
+			break;
+
+		case 32:
+		{
+			uint32_t pointerValue32 = 0;
+
+			bytesRead = readImage(&pointerValue32, rva, sizeof(uint32_t));
+			if(bytesRead == sizeof(uint32_t))
+			{
+				pointerValue = pointerValue32;
+				return sizeof(uint32_t);
+			}
+
+			break;
+		}
+	}
+
+	return 0;
+}
+
+uint32_t PeLib::ImageLoader::pointerSize()  const
+{
+	return getPeFileBitability() / 8;
+}
+					
 uint32_t PeLib::ImageLoader::dumpImage(const char * fileName)
 {
 	// Create the file for dumping
@@ -172,22 +269,65 @@ uint32_t PeLib::ImageLoader::dumpImage(const char * fileName)
 	return bytesWritten;
 }
 
-uint64_t PeLib::ImageLoader::getImageBase()
+uint32_t PeLib::ImageLoader::getPeFileBitability() const
+{
+	if(fileHeader.Machine == PELIB_IMAGE_FILE_MACHINE_AMD64 || fileHeader.Machine == PELIB_IMAGE_FILE_MACHINE_IA64)
+		return 64;
+
+	if(fileHeader.Machine == PELIB_IMAGE_FILE_MACHINE_I386)
+		return 32;
+
+	return 0;
+}
+
+uint32_t PeLib::ImageLoader::getNtSignature() const
+{
+	return ntSignature;
+}
+
+uint32_t PeLib::ImageLoader::getPointerToSymbolTable() const
+{
+	return fileHeader.PointerToSymbolTable;
+}
+
+uint32_t PeLib::ImageLoader::getNumberOfSymbols() const
+{
+	return fileHeader.NumberOfSymbols;
+}
+
+uint64_t PeLib::ImageLoader::getImageBase() const
 {
 	return optionalHeader.ImageBase;
 }
 
-uint32_t PeLib::ImageLoader::getSizeOfImage()
+uint32_t PeLib::ImageLoader::getSizeOfHeaders() const
+{
+	return optionalHeader.SizeOfHeaders;
+}
+
+uint32_t PeLib::ImageLoader::getSizeOfImage() const
 {
 	return optionalHeader.SizeOfImage;
 }
 
-uint32_t PeLib::ImageLoader::getSizeOfImageAligned()
+uint32_t PeLib::ImageLoader::getSizeOfImageAligned() const
 {
 	return AlignToSize(optionalHeader.SizeOfImage, PELIB_PAGE_SIZE);
 }
 
-uint32_t PeLib::ImageLoader::getFileOffsetFromRva(std::uint32_t rva)
+uint32_t PeLib::ImageLoader::getDataDirRva(size_t dataDirIndex) const
+{
+    // The data directory must be present there
+    return (optionalHeader.NumberOfRvaAndSizes > dataDirIndex) ? optionalHeader.DataDirectory[dataDirIndex].VirtualAddress : 0;
+}
+
+uint32_t PeLib::ImageLoader::getDataDirSize(size_t dataDirIndex) const
+{
+	// The data directory must be present there
+	return (optionalHeader.NumberOfRvaAndSizes > dataDirIndex) ? optionalHeader.DataDirectory[dataDirIndex].Size : 0;
+}
+
+uint32_t PeLib::ImageLoader::getFileOffsetFromRva(std::uint32_t rva) const
 {
 	// If we have sections loaded, then we calculate the file offset from section headers
 	if(sections.size())
@@ -218,7 +358,7 @@ uint32_t PeLib::ImageLoader::getFileOffsetFromRva(std::uint32_t rva)
 	return rva;
 }
 
-uint32_t PeLib::ImageLoader::getImageProtection(std::uint32_t sectionCharacteristics)
+uint32_t PeLib::ImageLoader::getImageProtection(std::uint32_t sectionCharacteristics) const
 {
 	uint32_t Index = 0;
 
@@ -280,49 +420,79 @@ int PeLib::ImageLoader::Load(std::vector<uint8_t> & fileData, bool loadHeadersOn
 	// Shall we map the image content?
 	if(loadHeadersOnly == false)
 	{
-		// If there was no detected image error, map the image as if Windows loader would do
-		if(ldrError == LDR_ERROR_NONE || ldrError == LDR_ERROR_FILE_IS_CUT_LOADABLE)
+		// Large amount of memory may be allocated during loading the image to memory.
+		// We need to handle low memory condition carefully here
+		try
 		{
-			fileError = captureImageSections(fileData);
-		}
+			// If there was no detected image error, map the image as if Windows loader would do
+			if(ldrError == LDR_ERROR_NONE || ldrError == LDR_ERROR_FILE_IS_CUT_LOADABLE)
+			{
+				fileError = captureImageSections(fileData);
+			}
 
-		// If there was any kind of error that prevents the image from being mapped,
-		// we load the content as-is and translate virtual addresses using getFileOffsetFromRva
-		if(pages.size() == 0)
+			// If there was any kind of error that prevents the image from being mapped,
+			// we load the content as-is and translate virtual addresses using getFileOffsetFromRva
+			if(pages.size() == 0)
+			{
+				fileError = loadImageAsIs(fileData);
+			}
+		}
+		catch(const std::bad_alloc&)
 		{
-			fileError = loadImageAsIs(fileData);
+			fileError = ERROR_NOT_ENOUGH_SPACE;
 		}
 	}
 
 	return fileError;
 }
 
-int PeLib::ImageLoader::Load(std::ifstream & fs, std::streamoff fileOffset, bool loadHeadersOnly)
+int PeLib::ImageLoader::Load(std::istream & fs, std::streamoff fileOffset, bool loadHeadersOnly)
 {
 	std::vector<uint8_t> fileData;
 	std::streampos fileSize;
 	size_t fileSize2;
+	int fileError;
 
-	// Get the file size and move to the desired offset
+	// Get the file size
 	fs.seekg(0, std::ios::end);
 	fileSize = fs.tellg();
-	fs.seekg(fileOffset);
 
-	// The file must be greater than sizeof DOS header
-	if(fileSize < sizeof(PELIB_IMAGE_DOS_HEADER))
+	// Verify overflow of the file offset
+	if(fileOffset > fileSize)
 		return ERROR_INVALID_FILE;
-	
+
 	// Windows loader refuses to load any file which is larger than 0xFFFFFFFF
-	if((fileSize >> 32) != 0)
+	if(((fileSize - fileOffset) >> 32) != 0)
 		return setLoaderError(LDR_ERROR_FILE_TOO_BIG);
-	fileSize2 = static_cast<size_t>(fileSize);
+	fileSize2 = static_cast<size_t>(fileSize - fileOffset);
 
-	// Resize the vector so it can hold entire file
-	fileData.resize(fileSize2);
+	// Optimization: Read and verify IMAGE_DOS_HEADER first to see if it *could* be a PE file
+	// This prevents reading the entire file (possibly a very large one) just to find out it's not a PE
+	if((fileError = verifyDosHeader(fs, fileOffset, fileSize2)) != ERROR_NONE)
+		return fileError;
 
-	// Read the entire file to memory
-	if(fs.read(reinterpret_cast<char*>(fileData.data()), fileSize2).bad())
-		return false;
+	// Resize the vector so it can hold entire file. Note that this can
+	// potentially allocate a very large memory block, so we need to handle that carefully
+	try
+	{
+		fileData.resize(fileSize2);
+	}
+	catch(const std::bad_alloc&)
+	{
+		return ERROR_NOT_ENOUGH_SPACE;
+	}
+
+	// Read the entire file to memory. Note that under Windows
+	// and under low memory condition, the underlying OS call (NtReadFile)
+	// can fail on low memory. When that happens, fs.read will read less than
+	// required. We need to verify the number of bytes read
+	//  and set the low memory condition flag
+	fs.seekg(fileOffset);
+	fs.read(reinterpret_cast<char*>(fileData.data()), fileSize2);
+	if(fs.gcount() < (fileSize - fileOffset))
+	{
+		return ERROR_NOT_ENOUGH_SPACE;
+	}
 
 	// Call the Load interface on char buffer
 	return Load(fileData, loadHeadersOnly);
@@ -584,14 +754,7 @@ int PeLib::ImageLoader::captureDosHeader(std::vector<uint8_t> & fileData)
 	memcpy(&dosHeader, fileBegin, sizeof(PELIB_IMAGE_DOS_HEADER));
 
 	// Verify DOS header
-	if(dosHeader.e_magic != PELIB_IMAGE_DOS_SIGNATURE)
-		return ERROR_INVALID_FILE;
-	if(dosHeader.e_lfanew & 3)
-		return setLoaderError(LDR_ERROR_E_LFANEW_UNALIGNED);
-	if(dosHeader.e_lfanew > fileData.size())
-		return setLoaderError(LDR_ERROR_E_LFANEW_OUT_OF_FILE);
-
-	return ERROR_NONE;
+	return verifyDosHeader(dosHeader, fileData.size());
 }
 
 int PeLib::ImageLoader::captureNtHeaders(std::vector<uint8_t> & fileData)
@@ -599,7 +762,6 @@ int PeLib::ImageLoader::captureNtHeaders(std::vector<uint8_t> & fileData)
 	uint8_t * fileBegin = fileData.data();
 	uint8_t * filePtr = fileBegin + dosHeader.e_lfanew;
 	uint8_t * fileEnd = fileBegin + fileData.size();
-	uint32_t ntSignature;
 	size_t ntHeaderSize;
 
 	// Windows 7 or newer require that the file size is greater or equal to sizeof(IMAGE_NT_HEADERS)
@@ -758,12 +920,12 @@ int PeLib::ImageLoader::captureSectionHeaders(std::vector<uint8_t> & fileData)
 	// Read and verify all section headers
 	for(uint16_t i = 0; i < fileHeader.NumberOfSections; i++)
 	{
-		PELIB_IMAGE_SECTION_HEADER sectHdr{};
+		PELIB_IMAGE_SECTION_HEADER_BASE sectHdr{};
 
 		// Capture one section header
-		if((filePtr + sizeof(PELIB_IMAGE_SECTION_HEADER)) > fileEnd)
+		if((filePtr + sizeof(PELIB_IMAGE_SECTION_HEADER_BASE)) > fileEnd)
 			break;
-		memcpy(&sectHdr, filePtr, sizeof(PELIB_IMAGE_SECTION_HEADER));
+		memcpy(&sectHdr, filePtr, sizeof(PELIB_IMAGE_SECTION_HEADER_BASE));
 
 		uint32_t PointerToRawData = (sectHdr.SizeOfRawData != 0) ? sectHdr.PointerToRawData : 0;
 		uint32_t EndOfRawData = PointerToRawData + sectHdr.SizeOfRawData;
@@ -825,7 +987,7 @@ int PeLib::ImageLoader::captureSectionHeaders(std::vector<uint8_t> & fileData)
 
 		// Insert the header to the list
 		sections.push_back(sectHdr);
-		filePtr += sizeof(PELIB_IMAGE_SECTION_HEADER);
+		filePtr += sizeof(PELIB_IMAGE_SECTION_HEADER_BASE);
 	}
 
 	// Verify the image size. Note that this check is no longer performed by Windows 10
@@ -850,7 +1012,7 @@ int PeLib::ImageLoader::captureSectionHeaders(std::vector<uint8_t> & fileData)
 		{
 			if (!sections.empty())
 			{
-				PELIB_IMAGE_SECTION_HEADER & lastSection = sections.back();
+				PELIB_IMAGE_SECTION_HEADER_BASE & lastSection = sections.back();
 				uint32_t PointerToRawData = (lastSection.SizeOfRawData != 0) ? lastSection.PointerToRawData : 0;
 				uint32_t EndOfRawData = PointerToRawData + lastSection.SizeOfRawData;
 
@@ -934,20 +1096,20 @@ int PeLib::ImageLoader::captureImageSections(std::vector<uint8_t> & fileData)
 	// Windows loader patches PointerToRawData to zero, including the mapped image.
 	// Tested on Windows XP and Windows 10.
 	uint32_t rva = dosHeader.e_lfanew + sizeof(uint32_t) + sizeof(PELIB_IMAGE_FILE_HEADER) + fileHeader.SizeOfOptionalHeader;
-	for(size_t i = 0; i < sections.size(); i++, rva += sizeof(PELIB_IMAGE_SECTION_HEADER))
+	for(size_t i = 0; i < sections.size(); i++, rva += sizeof(PELIB_IMAGE_SECTION_HEADER_BASE))
 	{
-		PELIB_IMAGE_SECTION_HEADER sectHdr{};
+		PELIB_IMAGE_SECTION_HEADER_BASE sectHdr{};
 
 		// Read the section from the header. This is necessary, as for some files,
 		// section headers are not contained in the image.
 		// Example: c8b31a912d91407a834071268366eb404d5e771b8281fdde301e15a8a82bf01b
-		readImage(&sectHdr, rva, sizeof(PELIB_IMAGE_SECTION_HEADER));
+		readImage(&sectHdr, rva, sizeof(PELIB_IMAGE_SECTION_HEADER_BASE));
 
 		// Patch PointerToRawData to zero, if SizeOfRawData is zero.
 		if(sectHdr.PointerToRawData != 0 && sectHdr.SizeOfRawData == 0)
 		{
 			sectHdr.PointerToRawData = 0;
-			writeImage(&sectHdr, rva, sizeof(PELIB_IMAGE_SECTION_HEADER));
+			writeImage(&sectHdr, rva, sizeof(PELIB_IMAGE_SECTION_HEADER_BASE));
 		}
 	}
 
@@ -1009,6 +1171,40 @@ int PeLib::ImageLoader::captureOptionalHeader32(uint8_t * filePtr, uint8_t * fil
 	memcpy(optionalHeader.DataDirectory, optionalHeader32.DataDirectory, sizeof(PELIB_IMAGE_DATA_DIRECTORY) * numberOfRvaAndSizes);
 
 	return ERROR_NONE;
+}
+
+int PeLib::ImageLoader::verifyDosHeader(PELIB_IMAGE_DOS_HEADER & hdr, size_t fileSize)
+{
+	if(hdr.e_magic != PELIB_IMAGE_DOS_SIGNATURE)
+		return ERROR_INVALID_FILE;
+	if(hdr.e_lfanew & 3)
+		return setLoaderError(LDR_ERROR_E_LFANEW_UNALIGNED);
+	if(hdr.e_lfanew > fileSize)
+		return setLoaderError(LDR_ERROR_E_LFANEW_OUT_OF_FILE);
+
+	return ERROR_NONE;
+}
+
+int PeLib::ImageLoader::verifyDosHeader(std::istream & fs, std::streamoff fileOffset, std::size_t fileSize)
+{
+	PELIB_IMAGE_DOS_HEADER tempDosHeader;
+	int fileError;
+
+	// The file size must be at least size of DOS header
+	if((fileOffset + sizeof(PELIB_IMAGE_DOS_HEADER)) >= fileSize)
+		return ERROR_INVALID_FILE;
+	fs.seekg(fileOffset);
+
+	// Read the DOS header
+	if(fs.read(reinterpret_cast<char*>(&tempDosHeader), sizeof(PELIB_IMAGE_DOS_HEADER)).bad())
+		return ERROR_INVALID_FILE;
+
+	// Verify the DOS header
+	if((fileError = verifyDosHeader(tempDosHeader, fileSize)) != ERROR_NONE)
+		return fileError;
+
+	// If the DOS header points out of the file, it's a wrong file too
+	return (ldrError == LDR_ERROR_E_LFANEW_OUT_OF_FILE) ? ERROR_INVALID_FILE : ERROR_NONE;
 }
 
 int PeLib::ImageLoader::loadImageAsIs(std::vector<std::uint8_t> & fileData)
@@ -1258,7 +1454,7 @@ bool PeLib::ImageLoader::isRvaOfSectionHeaderPointerToRawData(uint32_t rva)
 	for(size_t i = 0; i < sections.size(); i++)
 	{
 		// Get the reference to the section header
-		PELIB_IMAGE_SECTION_HEADER & sectHdr = sections[i];
+		PELIB_IMAGE_SECTION_HEADER_BASE & sectHdr = sections[i];
 
 		// Must be a section with SizeOfRawData = 0
 		if(sectHdr.SizeOfRawData == 0)
@@ -1268,8 +1464,8 @@ bool PeLib::ImageLoader::isRvaOfSectionHeaderPointerToRawData(uint32_t rva)
 				sizeof(uint32_t) +
 				sizeof(PELIB_IMAGE_FILE_HEADER) +
 				fileHeader.SizeOfOptionalHeader +
-				i * sizeof(PELIB_IMAGE_SECTION_HEADER) +
-				0x14;		// FIELD_OFFSET(PELIB_IMAGE_SECTION_HEADER, PointerToRawData)
+				i * sizeof(PELIB_IMAGE_SECTION_HEADER_BASE) +
+				0x14;		// FIELD_OFFSET(PELIB_IMAGE_SECTION_HEADER_BASE, PointerToRawData)
 
 			if(rvaOfLastSectionPointerToRawData <= rva && rva < rvaOfLastSectionPointerToRawData + sizeof(uint32_t))
 				return true;
@@ -1346,6 +1542,12 @@ void PeLib::ImageLoader::compareWithWindowsMappedImage(PELIB_IMAGE_COMPARE & Ima
 			// If the windows page is inaccessible, our page must be inaccessible as well
 			bool isGoodPageWin = isGoodPagePointer(ImageCompare.PfnVerifyAddress, winImageData);
 			bool isGoodPageMy  = isGoodMappedPage(rva);
+
+			// If we have a compare callback, call it
+			if(ImageCompare.PfnCompareCallback != nullptr)
+			{
+				ImageCompare.PfnCompareCallback(rva, imageSize);
+			}
 
 			// Both are accessible -> Compare the page
 			if(isGoodPageWin && isGoodPageMy)

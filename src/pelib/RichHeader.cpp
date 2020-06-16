@@ -697,14 +697,14 @@ namespace PeLib
 
 namespace
 {
-	std::string makeSignature(dword value)
+	std::string makeSignature(std::uint32_t value)
 	{
 		std::stringstream signature;
-		signature << std::hex << std::setfill('0') << std::setw(2 * sizeof(dword)) << std::uppercase << value;
+		signature << std::hex << std::setfill('0') << std::setw(2 * sizeof(std::uint32_t)) << std::uppercase << value;
 		return signature.str();
 	}
 
-	std::string makeSignature(dword first, dword second)
+	std::string makeSignature(std::uint32_t first, std::uint32_t second)
 	{
 		return makeSignature(first) + makeSignature(second);
 	}
@@ -822,8 +822,8 @@ namespace
 		{
 			PELIB_IMAGE_RICH_HEADER_RECORD record;
 
-			record.ProductId = (word)(decryptedHeader[i] >> 0x10);
-			record.ProductBuild = (word)(decryptedHeader[i] & 0xFFFF);
+			record.ProductId = (std::uint16_t)(decryptedHeader[i] >> 0x10);
+			record.ProductBuild = (std::uint16_t)(decryptedHeader[i] & 0xFFFF);
 			record.Count = decryptedHeader[i + 1];
 			record.Signature = makeSignature(decryptedHeader[i], decryptedHeader[i + 1]);
 
@@ -838,16 +838,16 @@ namespace
 	void RichHeader::read(InputBuffer& inputbuffer, std::size_t uiSize, bool ignoreInvalidKey)
 	{
 		init();
-		std::vector<dword> rich;
+		std::vector<std::uint32_t> rich;
 
-		for (std::size_t i = 0, e = uiSize / sizeof(dword); i < e; ++i)
+		for (std::size_t i = 0, e = uiSize / sizeof(std::uint32_t); i < e; ++i)
 		{
-			dword actInput;
+			std::uint32_t actInput;
 			inputbuffer >> actInput;
 			rich.push_back(actInput);
 		}
 
-		dword sign[] = {0x68636952};
+		std::uint32_t sign[] = {0x68636952};
 		auto lastPos = rich.end();
 
 		// try to find signature of rich header and key for decryption
@@ -922,12 +922,12 @@ namespace
 		return noOfIters;
 	}
 
-	dword RichHeader::getKey() const
+	std::uint32_t RichHeader::getKey() const
 	{
 		return key;
 	}
 
-	const dword* RichHeader::getDecryptedHeaderItem(std::size_t index) const
+	const std::uint32_t* RichHeader::getDecryptedHeaderItem(std::size_t index) const
 	{
 		return (index < decryptedHeader.size()) ? &decryptedHeader[index] : nullptr;
 	}
@@ -952,7 +952,7 @@ namespace
 
 	std::vector<std::uint8_t> RichHeader::getDecryptedHeaderBytes() const
 	{
-		std::vector<std::uint8_t> result(decryptedHeader.size() * sizeof(dword));
+		std::vector<std::uint8_t> result(decryptedHeader.size() * sizeof(std::uint32_t));
 		std::memcpy(result.data(), reinterpret_cast<const std::uint8_t*>(decryptedHeader.data()), result.size());
 		return result;
 	}

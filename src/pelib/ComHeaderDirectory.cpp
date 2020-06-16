@@ -49,7 +49,7 @@ namespace PeLib
 			return ERROR_INVALID_FILE;
 		}
 
-		std::vector<byte> vComDescDirectory(buffer, buffer + buffersize);
+		std::vector<std::uint8_t> vComDescDirectory(buffer, buffer + buffersize);
 
 		InputBuffer ibBuffer(vComDescDirectory);
 		read(ibBuffer);
@@ -60,7 +60,7 @@ namespace PeLib
 	* Rebuilds the current COM+ descriptor.
 	* @param vBuffer Buffer where the COM+ descriptor will be written to.
 	**/
-	void ComHeaderDirectory::rebuild(std::vector<byte>& vBuffer) const
+	void ComHeaderDirectory::rebuild(std::vector<std::uint8_t>& vBuffer) const
 	{
 		OutputBuffer obBuffer(vBuffer);
 
@@ -132,7 +132,7 @@ namespace PeLib
 	/**
 	* @return SizeOfHeader value of the current COM+ descriptor.
 	**/
-	dword ComHeaderDirectory::getSizeOfHeader() const
+	std::uint32_t ComHeaderDirectory::getSizeOfHeader() const
 	{
 		return m_ichComHeader.cb;
 	}
@@ -140,7 +140,7 @@ namespace PeLib
 	/**
 	* @return MajorRuntimeVersion value of the current COM+ descriptor.
 	**/
-	word ComHeaderDirectory::getMajorRuntimeVersion() const
+	std::uint16_t ComHeaderDirectory::getMajorRuntimeVersion() const
 	{
 		return m_ichComHeader.MajorRuntimeVersion;
 	}
@@ -148,7 +148,7 @@ namespace PeLib
 	/**
 	* @return MinorRuntimeVersion value of the current COM+ descriptor.
 	**/
-	word ComHeaderDirectory::getMinorRuntimeVersion() const
+	std::uint16_t ComHeaderDirectory::getMinorRuntimeVersion() const
 	{
 		return m_ichComHeader.MinorRuntimeVersion;
 	}
@@ -156,7 +156,7 @@ namespace PeLib
 	/**
 	* @return MetaData (Virtual Address) value of the current COM+ descriptor.
 	**/
-	dword ComHeaderDirectory::getMetaDataVa() const
+	std::uint32_t ComHeaderDirectory::getMetaDataVa() const
 	{
 		return m_ichComHeader.MetaData.VirtualAddress;
 	}
@@ -164,7 +164,7 @@ namespace PeLib
 	/**
 	* @return MetaData (Size) value of the current COM+ descriptor.
 	**/
-	dword ComHeaderDirectory::getMetaDataSize() const
+	std::uint32_t ComHeaderDirectory::getMetaDataSize() const
 	{
 		return m_ichComHeader.MetaData.Size;
 	}
@@ -172,7 +172,7 @@ namespace PeLib
 	/**
 	* @return Flags value of the current COM+ descriptor.
 	**/
-	dword ComHeaderDirectory::getFlags() const
+	std::uint32_t ComHeaderDirectory::getFlags() const
 	{
 		return m_ichComHeader.Flags;
 	}
@@ -180,7 +180,7 @@ namespace PeLib
 	/**
 	* @return EntryPointToken value of the current COM+ descriptor.
 	**/
-	dword ComHeaderDirectory::getEntryPointToken() const
+	std::uint32_t ComHeaderDirectory::getEntryPointToken() const
 	{
 		return m_ichComHeader.EntryPointToken;
 	}
@@ -188,7 +188,7 @@ namespace PeLib
 	/**
 	* @return Resources (Virtual Address) value of the current COM+ descriptor.
 	**/
-	dword ComHeaderDirectory::getResourcesVa() const
+	std::uint32_t ComHeaderDirectory::getResourcesVa() const
 	{
 		return m_ichComHeader.Resources.VirtualAddress;
 	}
@@ -196,7 +196,7 @@ namespace PeLib
 	/**
 	* @return Resources (Size) value of the current COM+ descriptor.
 	**/
-	dword ComHeaderDirectory::getResourcesSize() const
+	std::uint32_t ComHeaderDirectory::getResourcesSize() const
 	{
 		return m_ichComHeader.Resources.Size;
 	}
@@ -204,7 +204,7 @@ namespace PeLib
 	/**
 	* @return StrongNameSignature (Virtual Address) value of the current COM+ descriptor.
 	**/
-	dword ComHeaderDirectory::getStrongNameSignatureVa() const
+	std::uint32_t ComHeaderDirectory::getStrongNameSignatureVa() const
 	{
 		return m_ichComHeader.StrongNameSignature.VirtualAddress;
 	}
@@ -212,7 +212,7 @@ namespace PeLib
 	/**
 	* @return StrongNameSignature (Size) value of the current COM+ descriptor.
 	**/
-	dword ComHeaderDirectory::getStrongNameSignatureSize() const
+	std::uint32_t ComHeaderDirectory::getStrongNameSignatureSize() const
 	{
 		return m_ichComHeader.StrongNameSignature.Size;
 	}
@@ -220,7 +220,7 @@ namespace PeLib
 	/**
 	* @return CodeManagerTable (Virtual Address) value of the current COM+ descriptor.
 	**/
-	dword ComHeaderDirectory::getCodeManagerTableVa() const
+	std::uint32_t ComHeaderDirectory::getCodeManagerTableVa() const
 	{
 		return m_ichComHeader.CodeManagerTable.VirtualAddress;
 	}
@@ -228,7 +228,7 @@ namespace PeLib
 	/**
 	* @return CodeManagerTable (Size) value of the current COM+ descriptor.
 	**/
-	dword ComHeaderDirectory::getCodeManagerTableSize() const
+	std::uint32_t ComHeaderDirectory::getCodeManagerTableSize() const
 	{
 		return m_ichComHeader.CodeManagerTable.Size;
 	}
@@ -236,7 +236,7 @@ namespace PeLib
 	/**
 	* @return VTableFixups (Virtual Address) value of the current COM+ descriptor.
 	**/
-	dword ComHeaderDirectory::getVTableFixupsVa() const
+	std::uint32_t ComHeaderDirectory::getVTableFixupsVa() const
 	{
 		return m_ichComHeader.VTableFixups.VirtualAddress;
 	}
@@ -244,7 +244,7 @@ namespace PeLib
 	/**
 	* @return VTableFixups (Size) value of the current COM+ descriptor.
 	**/
-	dword ComHeaderDirectory::getVTableFixupsSize() const
+	std::uint32_t ComHeaderDirectory::getVTableFixupsSize() const
 	{
 		return m_ichComHeader.VTableFixups.Size;
 	}
@@ -252,7 +252,7 @@ namespace PeLib
 	/**
 	* @return ExportAddressTableJumps (Virtual Address) value of the current COM+ descriptor.
 	**/
-	dword ComHeaderDirectory::getExportAddressTableJumpsVa() const
+	std::uint32_t ComHeaderDirectory::getExportAddressTableJumpsVa() const
 	{
 		return m_ichComHeader.ExportAddressTableJumps.VirtualAddress;
 	}
@@ -260,7 +260,7 @@ namespace PeLib
 	/**
 	* @return ExportAddressTableJumps (Size) value of the current COM+ descriptor.
 	**/
-	dword ComHeaderDirectory::getExportAddressTableJumpsSize() const
+	std::uint32_t ComHeaderDirectory::getExportAddressTableJumpsSize() const
 	{
 		return m_ichComHeader.ExportAddressTableJumps.Size;
 	}
@@ -268,7 +268,7 @@ namespace PeLib
 	/**
 	* @return ManagedNativeHeader (Virtual Address) value of the current COM+ descriptor.
 	**/
-	dword ComHeaderDirectory::getManagedNativeHeaderVa() const
+	std::uint32_t ComHeaderDirectory::getManagedNativeHeaderVa() const
 	{
 		return m_ichComHeader.ManagedNativeHeader.VirtualAddress;
 	}
@@ -276,7 +276,7 @@ namespace PeLib
 	/**
 	* @return ManagedNativeHeader (Size) value of the current COM+ descriptor.
 	**/
-	dword ComHeaderDirectory::getManagedNativeHeaderSize() const
+	std::uint32_t ComHeaderDirectory::getManagedNativeHeaderSize() const
 	{
 		return m_ichComHeader.ManagedNativeHeader.Size;
 	}
@@ -284,7 +284,7 @@ namespace PeLib
 	/**
 	* @param dwValue New value for the current SizeOfHeader (cb) value.
 	**/
-	void ComHeaderDirectory::setSizeOfHeader(dword dwValue)
+	void ComHeaderDirectory::setSizeOfHeader(std::uint32_t dwValue)
 	{
 		m_ichComHeader.cb = dwValue;
 	}
@@ -292,7 +292,7 @@ namespace PeLib
 	/**
 	* @param wValue New value for the current MajorRuntimeVersion value.
 	**/
-	void ComHeaderDirectory::setMajorRuntimeVersion(word wValue)
+	void ComHeaderDirectory::setMajorRuntimeVersion(std::uint16_t wValue)
 	{
 		m_ichComHeader.MajorRuntimeVersion = wValue;
 	}
@@ -300,7 +300,7 @@ namespace PeLib
 	/**
 	* @param wValue New value for the current MinorRuntimeVersion value.
 	**/
-	void ComHeaderDirectory::setMinorRuntimeVersion(word wValue)
+	void ComHeaderDirectory::setMinorRuntimeVersion(std::uint16_t wValue)
 	{
 		m_ichComHeader.MinorRuntimeVersion = wValue;
 	}
@@ -308,7 +308,7 @@ namespace PeLib
 	/**
 	* @param dwValue New value for the current MetaData (VirtualAddress) value.
 	**/
-	void ComHeaderDirectory::setMetaDataVa(dword dwValue)
+	void ComHeaderDirectory::setMetaDataVa(std::uint32_t dwValue)
 	{
 		m_ichComHeader.MetaData.VirtualAddress = dwValue;
 	}
@@ -316,7 +316,7 @@ namespace PeLib
 	/**
 	* @param dwValue New value for the current MetaData (Size) value.
 	**/
-	void ComHeaderDirectory::setMetaDataSize(dword dwValue)
+	void ComHeaderDirectory::setMetaDataSize(std::uint32_t dwValue)
 	{
 		m_ichComHeader.MetaData.Size = dwValue;
 	}
@@ -324,7 +324,7 @@ namespace PeLib
 	/**
 	* @param dwValue New value for the current Flags value.
 	**/
-	void ComHeaderDirectory::setFlags(dword dwValue)
+	void ComHeaderDirectory::setFlags(std::uint32_t dwValue)
 	{
 		m_ichComHeader.Flags = dwValue;
 	}
@@ -332,7 +332,7 @@ namespace PeLib
 	/**
 	* @param dwValue New value for the current EntryPointToken value.
 	**/
-	void ComHeaderDirectory::setEntryPointToken(dword dwValue)
+	void ComHeaderDirectory::setEntryPointToken(std::uint32_t dwValue)
 	{
 		m_ichComHeader.EntryPointToken = dwValue;
 	}
@@ -340,7 +340,7 @@ namespace PeLib
 	/**
 	* @param dwValue New value for the current Resources (VirtualAddress) value.
 	**/
-	void ComHeaderDirectory::setResourcesVa(dword dwValue)
+	void ComHeaderDirectory::setResourcesVa(std::uint32_t dwValue)
 	{
 		m_ichComHeader.Resources.VirtualAddress = dwValue;
 	}
@@ -348,7 +348,7 @@ namespace PeLib
 	/**
 	* @param dwValue New value for the current Resources (Size) value.
 	**/
-	void ComHeaderDirectory::setResourcesSize(dword dwValue)
+	void ComHeaderDirectory::setResourcesSize(std::uint32_t dwValue)
 	{
 		m_ichComHeader.Resources.Size = dwValue;
 	}
@@ -356,7 +356,7 @@ namespace PeLib
 	/**
 	* @param dwValue New value for the current StrongNameSignature (VirtualAddress) value.
 	**/
-	void ComHeaderDirectory::setStrongNameSignatureVa(dword dwValue)
+	void ComHeaderDirectory::setStrongNameSignatureVa(std::uint32_t dwValue)
 	{
 		m_ichComHeader.StrongNameSignature.VirtualAddress = dwValue;
 	}
@@ -364,7 +364,7 @@ namespace PeLib
 	/**
 	* @param dwValue New value for the current StrongNameSignature (Size) value.
 	**/
-	void ComHeaderDirectory::setStrongNameSignagureSize(dword dwValue)
+	void ComHeaderDirectory::setStrongNameSignagureSize(std::uint32_t dwValue)
 	{
 		m_ichComHeader.StrongNameSignature.Size = dwValue;
 	}
@@ -372,7 +372,7 @@ namespace PeLib
 	/**
 	* @param dwValue New value for the current CodeManagerTable (VirtualAddress) value.
 	**/
-	void ComHeaderDirectory::setCodeManagerTableVa(dword dwValue)
+	void ComHeaderDirectory::setCodeManagerTableVa(std::uint32_t dwValue)
 	{
 		m_ichComHeader.CodeManagerTable.VirtualAddress = dwValue;
 	}
@@ -380,7 +380,7 @@ namespace PeLib
 	/**
 	* @param dwValue New value for the current CodeManagerTable (Size) value.
 	**/
-	void ComHeaderDirectory::setCodeManagerTableSize(dword dwValue)
+	void ComHeaderDirectory::setCodeManagerTableSize(std::uint32_t dwValue)
 	{
 		m_ichComHeader.CodeManagerTable.Size = dwValue;
 	}
@@ -388,7 +388,7 @@ namespace PeLib
 	/**
 	* @param dwValue New value for the current VTableFixups (VirtualAddress) value.
 	**/
-	void ComHeaderDirectory::setVTableFixupsVa(dword dwValue)
+	void ComHeaderDirectory::setVTableFixupsVa(std::uint32_t dwValue)
 	{
 		m_ichComHeader.VTableFixups.VirtualAddress = dwValue;
 	}
@@ -396,7 +396,7 @@ namespace PeLib
 	/**
 	* @param dwValue New value for the current VTableFixups (Size) value.
 	**/
-	void ComHeaderDirectory::setVTableFixupsSize(dword dwValue)
+	void ComHeaderDirectory::setVTableFixupsSize(std::uint32_t dwValue)
 	{
 		m_ichComHeader.VTableFixups.Size = dwValue;
 	}
@@ -404,7 +404,7 @@ namespace PeLib
 	/**
 	* @param dwValue New value for the current ExportAddressTableJumps (VirtualAddress) value.
 	**/
-	void ComHeaderDirectory::setExportAddressTableJumpsVa(dword dwValue)
+	void ComHeaderDirectory::setExportAddressTableJumpsVa(std::uint32_t dwValue)
 	{
 		m_ichComHeader.ExportAddressTableJumps.VirtualAddress = dwValue;
 	}
@@ -412,7 +412,7 @@ namespace PeLib
 	/**
 	* @param dwValue New value for the current ExportAddressTableJumps (Size) value.
 	**/
-	void ComHeaderDirectory::setExportAddressTableJumpsSize(dword dwValue)
+	void ComHeaderDirectory::setExportAddressTableJumpsSize(std::uint32_t dwValue)
 	{
 		m_ichComHeader.ExportAddressTableJumps.Size = dwValue;
 	}
@@ -420,7 +420,7 @@ namespace PeLib
 	/**
 	* @param dwValue New value for the current ManagedNativeHeader (VirtualAddress) value.
 	**/
-	void ComHeaderDirectory::setManagedNativeHeaderVa(dword dwValue)
+	void ComHeaderDirectory::setManagedNativeHeaderVa(std::uint32_t dwValue)
 	{
 		m_ichComHeader.ManagedNativeHeader.VirtualAddress = dwValue;
 	}
@@ -428,7 +428,7 @@ namespace PeLib
 	/**
 	* @param dwValue New value for the current ManagedNativeHeader (Size) value.
 	**/
-	void ComHeaderDirectory::setManagedNativeHeaderSize(dword dwValue)
+	void ComHeaderDirectory::setManagedNativeHeaderSize(std::uint32_t dwValue)
 	{
 		m_ichComHeader.ManagedNativeHeader.Size = dwValue;
 	}

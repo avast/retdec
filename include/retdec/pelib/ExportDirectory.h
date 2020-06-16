@@ -34,13 +34,13 @@ namespace PeLib
 		  virtual ~ExportDirectory() = default;
 
 		  /// Add another function to be exported.
-		  void addFunction(const std::string& strFuncname, dword dwFuncAddr); // EXPORT
+		  void addFunction(const std::string& strFuncname, std::uint32_t dwFuncAddr); // EXPORT
 		  unsigned int calcNumberOfFunctions() const; // EXPORT
 		  void clear(); // EXPORT
 		  /// Identifies a function through it's name.
 		  int getFunctionIndex(const std::string& strFunctionName) const; // EXPORT
 		  /// Rebuild the current export directory.
-		  void rebuild(std::vector<byte>& vBuffer, dword dwRva) const; // EXPORT
+		  void rebuild(std::vector<std::uint8_t>& vBuffer, std::uint32_t dwRva) const; // EXPORT
 		  void removeFunction(unsigned int index); // EXPORT
 		  /// Returns the size of the current export directory.
 		  unsigned int size() const; // EXPORT
@@ -54,82 +54,82 @@ namespace PeLib
 		  /// Get the name of an exported function.
 		  std::string getFunctionName(std::size_t index) const; // EXPORT
 		  /// Get the ordinal of an exported function.
-		  word getFunctionOrdinal(std::size_t index) const; // EXPORT
+		  std::uint16_t getFunctionOrdinal(std::size_t index) const; // EXPORT
 		  /// Get the address of the name of an exported function.
-		  dword getAddressOfName(std::size_t index) const; // EXPORT
+		  std::uint32_t getAddressOfName(std::size_t index) const; // EXPORT
 		  /// Get the address of an exported function.
-		  dword getAddressOfFunction(std::size_t index) const; // EXPORT
+		  std::uint32_t getAddressOfFunction(std::size_t index) const; // EXPORT
 
 		  /// Change the name of an exported function.
 		  void setFunctionName(std::size_t index, const std::string& strName); // EXPORT
 		  /// Change the ordinal of an exported function.
-		  void setFunctionOrdinal(std::size_t index, word wValue); // EXPORT
+		  void setFunctionOrdinal(std::size_t index, std::uint16_t wValue); // EXPORT
 		  /// Change the address of the name of an exported function.
-		  void setAddressOfName(std::size_t index, dword dwValue); // EXPORT
+		  void setAddressOfName(std::size_t index, std::uint32_t dwValue); // EXPORT
 		  /// Change the address of an exported function.
-		  void setAddressOfFunction(std::size_t index, dword dwValue); // EXPORT
+		  void setAddressOfFunction(std::size_t index, std::uint32_t dwValue); // EXPORT
 
 		  /*
-		  word getFunctionOrdinal(std::string strFuncname) const;
-		  dword getAddressOfName(std::string strFuncname) const;
-		  dword getAddressOfFunction(std::string strFuncname) const;
+		  std::uint16_t getFunctionOrdinal(std::string strFuncname) const;
+		  std::uint32_t getAddressOfName(std::string strFuncname) const;
+		  std::uint32_t getAddressOfFunction(std::string strFuncname) const;
 
-		  void setFunctionOrdinal(std::string strFuncname, word wValue);
-		  void setAddressOfName(std::string strFuncname, dword dwValue);
-		  void setAddressOfFunction(std::string strFuncname, dword dwValue);
+		  void setFunctionOrdinal(std::string strFuncname, std::uint16_t wValue);
+		  void setAddressOfName(std::string strFuncname, std::uint32_t dwValue);
+		  void setAddressOfFunction(std::string strFuncname, std::uint32_t dwValue);
 		  */
 
 		  /// Return the Base value of the export directory.
-		  dword getBase() const; // EXPORT
+		  std::uint32_t getBase() const; // EXPORT
 		  /// Return the Characteristics value of the export directory.
-		  dword getCharacteristics() const; // EXPORT
+		  std::uint32_t getCharacteristics() const; // EXPORT
 		  /// Return the TimeDateStamp value of the export directory.
-		  dword getTimeDateStamp() const; // EXPORT
+		  std::uint32_t getTimeDateStamp() const; // EXPORT
 		  /// Return the MajorVersion value of the export directory.
-		  word getMajorVersion() const; // EXPORT
+		  std::uint16_t getMajorVersion() const; // EXPORT
 		  /// Return the MinorVersion value of the export directory.
-		  word getMinorVersion() const; // EXPORT
+		  std::uint16_t getMinorVersion() const; // EXPORT
 		  /// Return the Name value of the export directory.
-		  dword getName() const; // EXPORT
+		  std::uint32_t getName() const; // EXPORT
 		  /// Return the NumberOfFunctions value of the export directory.
-		  dword getNumberOfFunctions() const; // EXPORT
+		  std::uint32_t getNumberOfFunctions() const; // EXPORT
 		  /// Return the NumberOfNames value of the export directory.
-		  dword getNumberOfNames() const; // EXPORT
+		  std::uint32_t getNumberOfNames() const; // EXPORT
 		  /// Return the AddressOfFunctions value of the export directory.
-		  dword getAddressOfFunctions() const; // EXPORT
+		  std::uint32_t getAddressOfFunctions() const; // EXPORT
 		  /// Return the AddressOfNames value of the export directory.
-		  dword getAddressOfNames() const; // EXPORT
+		  std::uint32_t getAddressOfNames() const; // EXPORT
 		  /// Returns the AddressOfNameOrdinals value.
-		  dword getAddressOfNameOrdinals() const; // EXPORT
+		  std::uint32_t getAddressOfNameOrdinals() const; // EXPORT
 
 /*		  /// Returns the number of NameOrdinals.
-		  dword getNumberOfNameOrdinals() const; // EXPORT
+		  std::uint32_t getNumberOfNameOrdinals() const; // EXPORT
 		  /// Returns the number of AddressOfFunctionNames values.
-		  dword getNumberOfAddressOfFunctionNames() const; // EXPORT
+		  std::uint32_t getNumberOfAddressOfFunctionNames() const; // EXPORT
 		  /// Returns the number of AddressOfFunction values.
-		  dword getNumberOfAddressOfFunctions() const; // EXPORT
+		  std::uint32_t getNumberOfAddressOfFunctions() const; // EXPORT
 */
 		  /// Set the Base value of the export directory.
-		  void setBase(dword dwValue); // EXPORT
+		  void setBase(std::uint32_t dwValue); // EXPORT
 		  /// Set the Characteristics value of the export directory.
-		  void setCharacteristics(dword dwValue); // EXPORT
+		  void setCharacteristics(std::uint32_t dwValue); // EXPORT
 		  /// Set the TimeDateStamp value of the export directory.
-		  void setTimeDateStamp(dword dwValue); // EXPORT
+		  void setTimeDateStamp(std::uint32_t dwValue); // EXPORT
 		  /// Set the MajorVersion value of the export directory.
-		  void setMajorVersion(word wValue); // EXPORT
+		  void setMajorVersion(std::uint16_t wValue); // EXPORT
 		  /// Set the MinorVersion value of the export directory.
-		  void setMinorVersion(word wValue); // EXPORT
+		  void setMinorVersion(std::uint16_t wValue); // EXPORT
 		  /// Set the Name value of the export directory.
-		  void setName(dword dwValue); // EXPORT
+		  void setName(std::uint32_t dwValue); // EXPORT
 		  /// Set the NumberOfFunctions value of the export directory.
-		  void setNumberOfFunctions(dword dwValue); // EXPORT
+		  void setNumberOfFunctions(std::uint32_t dwValue); // EXPORT
 		  /// Set the NumberOfNames value of the export directory.
-		  void setNumberOfNames(dword dwValue); // EXPORT
+		  void setNumberOfNames(std::uint32_t dwValue); // EXPORT
 		  /// Set the AddressOfFunctions value of the export directory.
-		  void setAddressOfFunctions(dword dwValue); // EXPORT
+		  void setAddressOfFunctions(std::uint32_t dwValue); // EXPORT
 		  /// Set the AddressOfNames value of the export directory.
-		  void setAddressOfNames(dword dwValue); // EXPORT
-		  void setAddressOfNameOrdinals(dword value); // EXPORT
+		  void setAddressOfNames(std::uint32_t dwValue); // EXPORT
+		  void setAddressOfNameOrdinals(std::uint32_t value); // EXPORT
 
 		  const std::vector<std::pair<unsigned int, unsigned int>>& getOccupiedAddresses() const;
 	};
@@ -236,7 +236,7 @@ namespace PeLib
 			if (offset >= ulFileSize)
 				return ERROR_INVALID_FILE;
 			inStream_w.seekg(offset, std::ios::beg);
-			word ordinal;
+			std::uint16_t ordinal;
 			inStream_w.read(reinterpret_cast<char*>(&ordinal), sizeof(ordinal));
 			m_occupiedAddresses.emplace_back(
 					iedCurr.ied.AddressOfNameOrdinals + i*sizeof(efiCurr.ordinal),
