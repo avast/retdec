@@ -60,9 +60,13 @@ bool LlvmIrWriter::runOnModule(Module& M)
 {
 	auto* c = ConfigProvider::getConfig(&M);
 
-	std::unique_ptr<ToolOutputFile> llOut = createAssemblyOutputFile(
-			c->getConfig().parameters.getOutputLlvmirFile()
-	);
+	auto out = c->getConfig().parameters.getOutputLlvmirFile();
+	if (out.empty())
+	{
+		return false;
+	}
+
+	std::unique_ptr<ToolOutputFile> llOut = createAssemblyOutputFile(out);
 	raw_ostream* llOs = &llOut->os();
 	bool ShouldPreserveUseListOrder = true;
 	M.print(*llOs, nullptr, ShouldPreserveUseListOrder);

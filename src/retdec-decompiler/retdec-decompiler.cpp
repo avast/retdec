@@ -960,7 +960,6 @@ int main(int argc, char **argv)
 	{
 		config = retdec::config::Config::fromFile(configPath.getPath());
 		config.parameters.fixRelativePaths(configPath.getParentPath());
-		config.parameters.setOutputConfigFile("");
 	}
 
 	// Parse program arguments.

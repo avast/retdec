@@ -31,7 +31,7 @@ class Config
 	public:
 		/// @name Config named constructors.
 		/// @{
-		static Config empty(const std::string& path = "");
+		static Config empty();
 		static Config fromFile(const std::string& path);
 		static Config fromJsonString(const std::string& json);
 		/// @}

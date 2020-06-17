@@ -51,10 +51,9 @@ const std::string JSON_patterns          = "patterns";
 namespace retdec {
 namespace config {
 
-Config Config::empty(const std::string& path)
+Config Config::empty()
 {
 	Config config;
-	config.parameters.setOutputConfigFile(path);
 	return config;
 }
 
@@ -85,7 +84,6 @@ void Config::readJsonFile(const std::string& input)
 	std::ifstream jsonFile(input, std::ios::in | std::ios::binary);
 	if (!jsonFile)
 	{
-		parameters.setOutputConfigFile(std::string());
 		std::string msg = "Input file \"" + input + "\" can not be opened.";
 		throw FileNotFoundException(msg);
 	}
@@ -98,7 +96,6 @@ void Config::readJsonFile(const std::string& input)
 	jsonFile.close();
 
 	readJsonString(jsonContent);
-	parameters.setOutputConfigFile(input);
 }
 
 /**

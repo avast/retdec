@@ -60,9 +60,13 @@ bool BitcodeWriter::runOnModule(Module& M)
 {
 	auto* c = ConfigProvider::getConfig(&M);
 
-	std::unique_ptr<ToolOutputFile> bcOut = createBitcodeOutputFile(
-			c->getConfig().parameters.getOutputBitcodeFile()
-	);
+	auto out = c->getConfig().parameters.getOutputBitcodeFile();
+	if (out.empty())
+	{
+		return false;
+	}
+
+	std::unique_ptr<ToolOutputFile> bcOut = createBitcodeOutputFile(out);
 	raw_ostream* bcOs = &bcOut->os();
 	bool ShouldPreserveUseListOrder = true;
 	WriteBitcodeToFile(M, *bcOs, ShouldPreserveUseListOrder);

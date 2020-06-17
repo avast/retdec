@@ -55,18 +55,10 @@ bool DsmWriter::runOnModule(llvm::Module& m)
 	}
 	_abi = AbiProvider::getAbi(_module);
 
-	// New output name.
-	//
-	auto out = _config->getConfig().parameters.getOutputFile();
-	if (out.empty())
+	std::string dsmOut = _config->getConfig().parameters.getOutputAsmFile();
+	if (dsmOut.empty())
 	{
 		return false;
-	}
-	std::string dsmOut = out + ".dsm";
-	auto lastDot = out.find_last_of('.');
-	if (lastDot != std::string::npos)
-	{
-		dsmOut = out.substr(0, lastDot) + ".dsm";
 	}
 
 	std::ofstream outFile(dsmOut, std::ofstream::out);
