@@ -28,13 +28,11 @@ namespace PeLib
 		protected:
 		  std::vector<std::uint32_t> m_vIat; ///< Stores the individual IAT fields.
 
-		  int read(InputBuffer& inputBuffer, unsigned int dwOffset, unsigned int dwFileSize);
-
 		public:
 		  virtual ~IatDirectory() = default;
 
 		  /// Reads the Import Address Table from a PE file.
-		  int read(unsigned char* buffer, unsigned int buffersize); // EXPORT
+		  int read(const void * buffer, std::size_t buffersize); // EXPORT
 		  /// Reads the Import Address Table from an image loader
 		  int read(PeLib::ImageLoader & imageLoader); // EXPORT
 		  /// Returns the number of fields in the IAT.

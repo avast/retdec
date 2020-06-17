@@ -14,61 +14,72 @@
 
 namespace PeLib
 {
-	int IatDirectory::read(InputBuffer& inputBuffer, unsigned int dwOffset, unsigned int dwFileSize)
+	/**
+	* Reads the Import Address table from an image
+	* @param buffer Pointer to the IAT data
+	* @param buffersize Length of the data pointed by 'buffer'
+	**/
+	int IatDirectory::read(const void * buffer, std::size_t buffersize)
 	{
-		std::uint32_t dwAddr;
+		const std::uint32_t * itemArray = reinterpret_cast<const std::uint32_t *>(buffer);
 
-		std::vector<std::uint32_t> vIat;
+		// Resize the IAT vector to contain all items
+		std::size_t itemCount = buffersize / sizeof(std::uint8_t);
+		m_vIat.clear();
 
-		unsigned int dwCurrentOffset = dwOffset;
-		while (dwCurrentOffset < dwFileSize)
+		// Read the items, one-by-one, until we find a zero value
+		for(std::size_t i = 0; i < itemCount; i++)
 		{
-			inputBuffer >> dwAddr;
-			if (dwAddr == 0)
+			// Insert that item
+			m_vIat.push_back(itemArray[i]);
+			
+			// Zero is considered terminator
+			if(itemArray[i] == 0)
 				break;
-
-			vIat.push_back(dwAddr);
-			dwCurrentOffset += sizeof(dwAddr);
 		}
-
-		std::swap(vIat, m_vIat);
 
 		return ERROR_NONE;
 	}
 
-	int IatDirectory::read(unsigned char* buffer, unsigned int buffersize)
-	{
-		std::vector<std::uint8_t> vBuffer(buffer, buffer + buffersize);
-		InputBuffer inpBuffer(vBuffer);
-		return read(inpBuffer, 0, buffersize);
-	}
-
 	/**
-	* Reads the Import Address table from a file.
-	* @param inStream Input stream.
-	* @param peHeader A valid PE header which is necessary because some RVA calculations need to be done.
+	* Reads the Import Address table from an image
+	* @param imageLoader Initialized image loader
 	**/
 	int IatDirectory::read(ImageLoader & imageLoader)
 	{
+		std::uint8_t * iatArray;
 		std::uint32_t iatRva = imageLoader.getDataDirRva(PELIB_IMAGE_DIRECTORY_ENTRY_IAT);
 		std::uint32_t iatSize = imageLoader.getDataDirSize(PELIB_IMAGE_DIRECTORY_ENTRY_IAT);
-		std::uint32_t sizeofImage = imageLoader.getSizeOfImage();
+		std::uint32_t sizeOfImage = imageLoader.getSizeOfImage();
+		int fileError = ERROR_NONE;
 
 		// Check whether the IAT is outside the image
-		if(iatRva >= sizeofImage)
+		if(iatRva >= sizeOfImage)
 		{
 			return ERROR_INVALID_FILE;
 		}
 
-		// Read the IAT from the image
-		std::uint32_t dwSize = std::min(sizeofImage - iatRva, iatSize);
-		std::vector<std::uint8_t> vBuffer(dwSize);
-		imageLoader.readImage(reinterpret_cast<char*>(vBuffer.data()), iatRva, dwSize);
+		// Trim the array size to the size of image
+		if((iatRva + iatSize) > sizeOfImage)
+			iatSize = sizeOfImage - iatRva;
 
-		InputBuffer inpBuffer{vBuffer};
-		return IatDirectory::read(inpBuffer, 0, dwSize);
+		// Allocate array for the entire IAT
+		if((iatArray = new std::uint8_t[iatSize]) != nullptr)
+		{
+			// Read the entire IAT to the memory
+			iatSize = imageLoader.readImage(iatArray, iatRva, iatSize);
+
+			// Insert the IAT array to the internal IAT vector
+			fileError = read(iatArray, iatSize);
+			delete [] iatArray;
+		}
+		else
+		{
+			fileError = ERROR_NOT_ENOUGH_SPACE;
+		}
+
+		return fileError;
 	}
-
 
 	/**
 	* Returns the number of fields in the IAT. This is equivalent to the number of
