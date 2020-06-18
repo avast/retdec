@@ -35,7 +35,8 @@ class JsonOutputManager : public OutputManager
 		virtual void space(const std::string& space = " ") override;
 		virtual void punctuation(char p) override;
 		virtual void operatorX(const std::string& op) override;
-		virtual void variableId(const std::string& id) override;
+		virtual void globalVariableId(const std::string& id) override;
+		virtual void localVariableId(const std::string& id) override;
 		virtual void memberId(const std::string& id) override;
 		virtual void labelId(const std::string& id) override;
 		virtual void functionId(const std::string& id) override;

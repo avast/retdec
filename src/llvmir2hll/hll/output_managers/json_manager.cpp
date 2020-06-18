@@ -22,7 +22,8 @@ const std::string JSON_TOKEN_NEWLINE       = "nl";
 const std::string JSON_TOKEN_SPACE         = "ws";
 const std::string JSON_TOKEN_PUNCTUATION   = "punc";
 const std::string JSON_TOKEN_OPERATOR      = "op";
-const std::string JSON_TOKEN_ID_VAR        = "i_var";
+const std::string JSON_TOKEN_ID_GVAR       = "i_gvar";
+const std::string JSON_TOKEN_ID_LVAR       = "i_lvar";
 const std::string JSON_TOKEN_ID_MEMBER     = "i_mem";
 const std::string JSON_TOKEN_ID_LABEL      = "i_lab";
 const std::string JSON_TOKEN_ID_FUNCTION   = "i_fnc";
@@ -121,10 +122,17 @@ void JsonOutputManager<Writer>::operatorX(const std::string& op)
 }
 
 template <typename Writer>
-void JsonOutputManager<Writer>::variableId(const std::string& id)
+void JsonOutputManager<Writer>::globalVariableId(const std::string& id)
 {
 	HANDLE_COMMENT_MODIFIER(id);
-	jsonToken(JSON_TOKEN_ID_VAR, id);
+	jsonToken(JSON_TOKEN_ID_GVAR, id);
+}
+
+template <typename Writer>
+void JsonOutputManager<Writer>::localVariableId(const std::string& id)
+{
+	HANDLE_COMMENT_MODIFIER(id);
+	jsonToken(JSON_TOKEN_ID_LVAR, id);
 }
 
 template <typename Writer>

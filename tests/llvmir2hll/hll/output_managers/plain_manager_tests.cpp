@@ -69,9 +69,15 @@ TEST_F(PlainOutputManagerTests, token_operatorX)
 	EXPECT_EQ("++", emitCode());
 }
 
-TEST_F(PlainOutputManagerTests, token_variableId)
+TEST_F(PlainOutputManagerTests, token_globalVariableId)
 {
-	manager->variableId("var");
+	manager->globalVariableId("var");
+	EXPECT_EQ("var", emitCode());
+}
+
+TEST_F(PlainOutputManagerTests, token_localVariableId)
+{
+	manager->localVariableId("var");
 	EXPECT_EQ("var", emitCode());
 }
 
@@ -172,7 +178,7 @@ TEST_F(PlainOutputManagerTests, token_comment)
 TEST_F(PlainOutputManagerTests, commentModifier_creates_comment_until_end_of_line)
 {
 	manager->commentModifier();
-	manager->variableId("hello");
+	manager->localVariableId("hello");
 	manager->space();
 	manager->operatorX("=");
 	manager->space();
@@ -192,7 +198,7 @@ TEST_F(PlainOutputManagerTests, commentModifier_creates_comment_until_end_of_lin
 TEST_F(PlainOutputManagerTests, address_push_and_pop_do_nothing)
 {
 	manager->addressPush(0x1000);
-	manager->variableId("hello");
+	manager->localVariableId("hello");
 	manager->addressPush(0x1234);
 	manager->space();
 	manager->operatorX("=");

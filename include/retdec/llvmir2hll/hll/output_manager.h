@@ -45,7 +45,8 @@ class OutputManager
 		// e.g. == - + * -> .
 		virtual void operatorX(const std::string& op) = 0;
 		// identifiers
-		virtual void variableId(const std::string& id) = 0;
+		virtual void globalVariableId(const std::string& id) = 0;
+		virtual void localVariableId(const std::string& id) = 0;
 		virtual void memberId(const std::string& id) = 0;
 		virtual void labelId(const std::string& id) = 0;
 		virtual void functionId(const std::string& id) = 0;

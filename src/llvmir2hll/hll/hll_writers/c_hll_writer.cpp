@@ -567,7 +567,18 @@ bool CHLLWriter::emitTargetCode(ShPtr<Module> module) {
 
 void CHLLWriter::visit(ShPtr<Variable> var) {
 	if (var->getAddress().isDefined()) out->addressPush(var->getAddress());
-	out->variableId(var->getName());
+	if (module->isGlobalVar(var))
+	{
+		out->globalVariableId(var->getName());
+	}
+	else if (module->correspondsToFunc(var))
+	{
+		out->functionId(var->getName());
+	}
+	else
+	{
+		out->localVariableId(var->getName());
+	}
 	if (var->getAddress().isDefined()) out->addressPop();
 }
 
@@ -707,15 +718,7 @@ void CHLLWriter::visit(ShPtr<BitShrOpExpr> expr) {
 
 void CHLLWriter::visit(ShPtr<CallExpr> expr) {
 	// Called expression.
-	auto var = cast<Variable>(expr->getCalledExpr());
-	if (var && module->getFuncByName(var->getName()))
-	{
-		out->functionId(var->getName());
-	}
-	else
-	{
-		emitExprWithBracketsIfNeeded(expr->getCalledExpr());
-	}
+	emitExprWithBracketsIfNeeded(expr->getCalledExpr());
 
 	// Arguments.
 	out->punctuation('(');

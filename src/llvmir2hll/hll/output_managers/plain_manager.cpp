@@ -36,7 +36,12 @@ void PlainOutputManager::operatorX(const std::string& op)
 	_out << op;
 }
 
-void PlainOutputManager::variableId(const std::string& id)
+void PlainOutputManager::globalVariableId(const std::string& id)
+{
+	_out << id;
+}
+
+void PlainOutputManager::localVariableId(const std::string& id)
 {
 	_out << id;
 }

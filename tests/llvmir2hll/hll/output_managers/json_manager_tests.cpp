@@ -101,10 +101,16 @@ TEST_F(JsonOutputManagerTests, token_operatorX)
 	EXPECT_EQ(R"({"kind":"op","val":"++"})", emitSingleToken());
 }
 
-TEST_F(JsonOutputManagerTests, token_variableId)
+TEST_F(JsonOutputManagerTests, token_globalVariableId)
 {
-	manager->variableId("var");
-	EXPECT_EQ(R"({"kind":"i_var","val":"var"})", emitSingleToken());
+	manager->globalVariableId("var");
+	EXPECT_EQ(R"({"kind":"i_gvar","val":"var"})", emitSingleToken());
+}
+
+TEST_F(JsonOutputManagerTests, token_lovalVariableId)
+{
+	manager->localVariableId("var");
+	EXPECT_EQ(R"({"kind":"i_lvar","val":"var"})", emitSingleToken());
 }
 
 TEST_F(JsonOutputManagerTests, token_memberId)
@@ -207,7 +213,7 @@ TEST_F(JsonOutputManagerTests, token_comment)
 TEST_F(JsonOutputManagerTests, commentModifier_creates_comment_until_end_of_line)
 {
 	manager->commentModifier();
-	manager->variableId("hello");
+	manager->localVariableId("hello");
 	manager->space();
 	manager->operatorX("=");
 	manager->space();
@@ -229,15 +235,15 @@ TEST_F(JsonOutputManagerTests, commentModifier_creates_comment_until_end_of_line
 TEST_F(JsonOutputManagerTests, address_push_and_pop_do_nothing)
 {
 	manager->addressPush(0x1000);
-	manager->variableId("v1"); // addr "0x1000"
+	manager->localVariableId("v1"); // addr "0x1000"
 	manager->addressPush(Address::Undefined);
 	manager->functionId("f"); // addr ""
 	manager->addressPop();
-	manager->variableId("v2"); // addr "0x1000"
+	manager->localVariableId("v2"); // addr "0x1000"
 	manager->addressPop();
 
 	EXPECT_EQ(
-		R"({"addr":"0x1000"},{"kind":"i_var","val":"v1"},{"addr":""},{"kind":"i_fnc","val":"f"},{"addr":"0x1000"},{"kind":"i_var","val":"v2"})",
+		R"({"addr":"0x1000"},{"kind":"i_lvar","val":"v1"},{"addr":""},{"kind":"i_fnc","val":"f"},{"addr":"0x1000"},{"kind":"i_lvar","val":"v2"})",
 		emitSingleToken());
 }
 
