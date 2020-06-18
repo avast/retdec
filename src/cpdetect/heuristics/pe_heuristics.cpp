@@ -2101,7 +2101,8 @@ void PeHeuristics::getPeSectionHeuristics()
 	}
 	if (noOfSections > 2)
 	{
-		if (firstName == "UPX0" && secondName == "UPX1")
+		if (firstName == "UPX0" && secondName == "UPX1"
+				&& sections[0]->getSizeInFile() == 0)
 		{
 			addPacker(source, strength, "UPX");
 		}
