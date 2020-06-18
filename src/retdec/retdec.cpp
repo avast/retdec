@@ -430,7 +430,7 @@ static inline void addPass(
 
 }
 
-bool decompile(retdec::config::Config& config)
+bool decompile(retdec::config::Config& config, std::string* outString)
 {
 	llvm_support::printPhase("Initialization");
 	auto& passRegistry = initializeLlvmPasses();
@@ -471,6 +471,7 @@ bool decompile(retdec::config::Config& config)
 			{
 				auto* p = static_cast<llvmir2hll::LlvmIr2Hll*>(pass);
 				p->setConfig(&config);
+				p->setOutputString(outString);
 			}
 		}
 		else

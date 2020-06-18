@@ -110,6 +110,7 @@ public:
 	virtual bool runOnModule(llvm::Module &m) override;
 
 	void setConfig(retdec::config::Config* c);
+	void setOutputString(std::string* outString);
 
 private:
 	bool initialize(llvm::Module &m);
@@ -176,8 +177,11 @@ private:
 	/// The used renamer of variables.
 	ShPtr<llvmir2hll::VarRenamer> varRenamer;
 
-	/// Output.
-	std::unique_ptr<llvm::ToolOutputFile> out;
+	/// Output file stream.
+	std::unique_ptr<llvm::ToolOutputFile> outFile;
+
+	/// Output string stream.
+	std::unique_ptr<llvm::raw_string_ostream> outStringStream;
 };
 
 } // namespace llvmir2hll

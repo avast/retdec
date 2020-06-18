@@ -135,6 +135,14 @@ void LlvmIr2Hll::setConfig(retdec::config::Config* c)
 	globalConfig = c;
 }
 
+void LlvmIr2Hll::setOutputString(std::string* outString)
+{
+	if (outString)
+	{
+		outStringStream = std::make_unique<raw_string_ostream>(*outString);
+	}
+}
+
 void LlvmIr2Hll::getAnalysisUsage(llvm::AnalysisUsage &au) const
 {
 	au.addRequired<llvm::LoopInfoWrapperPass>();
@@ -281,13 +289,6 @@ bool LlvmIr2Hll::initialize(llvm::Module &m)
 	{
 		return false;
 	}
-	// Output stream into which the generated code will be emitted.
-	out = getOutputStream(globalConfig->parameters.getOutputFile());
-	if (!out)
-	{
-		return false;
-	}
-	raw_pwrite_stream &os(out->os());
 
 	// Instantiate the requested HLL writer and make sure it exists. We need to
 	// explicitly specify template parameters because raw_pwrite_stream has
@@ -296,8 +297,25 @@ bool LlvmIr2Hll::initialize(llvm::Module &m)
 			"creating the used HLL writer [" + TargetHLL + "]",
 			Debug
 	);
-	hllWriter = llvmir2hll::HLLWriterFactory::getInstance().createObject<
-		raw_pwrite_stream &>(TargetHLL, os, globalConfig->parameters.getOutputFormat());
+
+	// Output stream into which the generated code will be emitted.
+	if (outStringStream)
+	{
+		hllWriter = llvmir2hll::HLLWriterFactory::getInstance().createObject<
+		raw_string_ostream &>(TargetHLL, *outStringStream, globalConfig->parameters.getOutputFormat());
+	}
+	else
+	{
+		outFile = getOutputStream(globalConfig->parameters.getOutputFile());
+		if (!outFile)
+		{
+			return false;
+		}
+
+		hllWriter = llvmir2hll::HLLWriterFactory::getInstance().createObject<
+		raw_pwrite_stream &>(TargetHLL, outFile->os(), globalConfig->parameters.getOutputFormat());
+	}
+
 	if (!hllWriter)
 	{
 		printErrorUnsupportedObject<llvmir2hll::HLLWriterFactory>(
@@ -696,7 +714,7 @@ void LlvmIr2Hll::emitTargetHLLCode()
 void LlvmIr2Hll::finalize()
 {
 	saveConfig();
-	out->keep();
+	if (outFile) outFile->keep();
 }
 
 /**

@@ -42,9 +42,14 @@ LlvmModuleContextPair disassemble(
 );
 
 /**
- *
+ * Run a decompilation according to a \p config configuration.
+ * If \p outString is set, decompilation output will be returned
+ * in this string. Otherwise, output file is expected to be set in \p config.
  */
-bool decompile(retdec::config::Config& config);
+bool decompile(
+		retdec::config::Config& config,
+		std::string* outString = nullptr
+);
 
 } // namespace retdec
 
