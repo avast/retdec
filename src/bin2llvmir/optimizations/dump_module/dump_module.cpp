@@ -31,7 +31,10 @@ DumpModule::DumpModule() :
 bool DumpModule::runOnModule(Module& M)
 {
 	auto* c = ConfigProvider::getConfig(&M);
-	dumpModuleToFile(&M, c->getOutputDirectory());
+	if (c && c->getOutputDirectory().exists())
+	{
+		dumpModuleToFile(&M, c->getOutputDirectory());
+	}
 	return false;
 }
 

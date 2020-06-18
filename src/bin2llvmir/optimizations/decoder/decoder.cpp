@@ -112,7 +112,7 @@ bool Decoder::run()
 
 	decode();
 
-	if (debug_enabled)
+	if (debug_enabled && _config->getOutputDirectory().exists())
 	{
 		dumpModuleToFile(_module, _config->getOutputDirectory());
 	}
@@ -121,7 +121,7 @@ bool Decoder::run()
 	patternsRecognize();
 	finalizePseudoCalls();
 
-	if (debug_enabled)
+	if (debug_enabled && _config->getOutputDirectory().exists())
 	{
 		dumpControFlowToJson(_module, _config->getOutputDirectory());
 		dumpModuleToFile(_module, _config->getOutputDirectory());
@@ -129,7 +129,7 @@ bool Decoder::run()
 
 	initConfigFunctions();
 
-	if (debug_enabled)
+	if (debug_enabled && _config->getOutputDirectory().exists())
 	{
 		dumpModuleToFile(_module, _config->getOutputDirectory());
 	}

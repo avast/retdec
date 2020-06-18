@@ -718,6 +718,14 @@ void LlvmIr2Hll::cleanup()
 */
 void LlvmIr2Hll::emitCFGs()
 {
+	if (globalConfig->parameters.getOutputFile().empty())
+	{
+		llvm_support::printErrorMessage(
+				"Output file not set, cannot generate output CFG files."
+		);
+		return;
+	}
+
 	// Make sure that the requested CFG writer exists.
 	llvmir2hll::StringVector availCFGWriters(
 		llvmir2hll::CFGWriterFactory::getInstance().getRegisteredObjects());
@@ -780,6 +788,14 @@ void LlvmIr2Hll::emitCFGs()
 */
 void LlvmIr2Hll::emitCG()
 {
+	if (globalConfig->parameters.getOutputFile().empty())
+	{
+		llvm_support::printErrorMessage(
+				"Output file not set, cannot generate output CG file."
+		);
+		return;
+	}
+
 	// Make sure that the requested CG writer exists.
 	auto& inst = llvmir2hll::CGWriterFactory::getInstance();
 	llvmir2hll::StringVector availCGWriters(
