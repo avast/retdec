@@ -302,75 +302,48 @@ namespace PeLib
 
 	/**
 	* Reads the next resource leaf from the input file.
-	* @param inStream An input stream.
-	* @param uiRsrcOffset Offset of resource directory in the file.
+	* @param imageLoader An image loaded into the ImageLoader parser
+	* @param uiRsrcRva RVA of the beginning of the resource directory.
 	* @param uiOffset Offset of the resource leaf that's to be read.
-	* @param uiRva RVA of the beginning of the resource directory.
-	* @param uiFileSize Size of the input file.
 	* @param uiSizeOfImage Size of the image.
 	* @param resDir Resource directory.
 	**/
 	int ResourceLeaf::read(
-			std::istream& inStream,
-			unsigned int uiRsrcOffset,
-			unsigned int uiOffset,
-			unsigned int uiRva,
-			unsigned int uiFileSize,
-			unsigned int /* uiSizeOfImage */,
+			ImageLoader & imageLoader,
+			std::uint32_t uiRsrcRva,
+			std::uint32_t uiOffset,
+			std::uint32_t sizeOfImage,
 			ResourceDirectory* resDir)
 	{
-		IStreamWrapper inStream_w(inStream);
-
 		// Invalid leaf.
-		if (uiRsrcOffset + uiOffset + PELIB_IMAGE_RESOURCE_DATA_ENTRY::size() > fileSize(inStream_w))
+		std::uint32_t uiRva = uiRsrcRva + uiOffset;
+		if(uiRva > sizeOfImage)
 		{
 			return ERROR_INVALID_FILE;
 		}
 
-		uiElementRva = uiOffset + uiRva;
+		// Load the resource data entry
+		imageLoader.readImage(&entry, uiRva, sizeof(PELIB_IMAGE_RESOURCE_DATA_ENTRY));
+		resDir->addOccupiedAddressRange(uiRva, uiRva + PELIB_IMAGE_RESOURCE_DATA_ENTRY::size() - 1);
 
-		std::vector<unsigned char> vResourceDataEntry(PELIB_IMAGE_RESOURCE_DATA_ENTRY::size());
-		inStream_w.seekg(uiRsrcOffset + uiOffset, std::ios_base::beg);
-		inStream_w.read(reinterpret_cast<char*>(vResourceDataEntry.data()), PELIB_IMAGE_RESOURCE_DATA_ENTRY::size());
-
-		InputBuffer inpBuffer(vResourceDataEntry);
-
-		inpBuffer >> entry.OffsetToData;
-		inpBuffer >> entry.Size;
-		inpBuffer >> entry.CodePage;
-		inpBuffer >> entry.Reserved;
-
-		resDir->addOccupiedAddressRange(uiElementRva, uiElementRva + PELIB_IMAGE_RESOURCE_DATA_ENTRY::size() - 1);
-
+		// Clear the resource data
 		m_data.clear();
 
-		unsigned int uiEntrySize = std::min(entry.Size, uiFileSize);
-
-		// No data.
-		if (!(entry.OffsetToData - uiRva + entry.Size))
-		{
+		// No data or invalid leaf
+		if(entry.OffsetToData >= sizeOfImage || entry.OffsetToData + entry.Size > sizeOfImage)
 			return ERROR_NONE;
-		}
-		// Invalid leaf.
-		else if (uiRsrcOffset + (entry.OffsetToData - uiRva) + uiEntrySize > uiFileSize)
-		{
+
+		// Data pointing before resource directory?
+		if((uiRsrcRva + entry.OffsetToData) < uiRsrcRva)
 			return ERROR_NONE;
-		}
-		else if (entry.OffsetToData < uiRva)
-		{
-			return ERROR_NONE;
-		}
 
-		m_data.resize(uiEntrySize);
+		// Load the resource data
+		m_data.resize(entry.Size);
+		imageLoader.readImage(m_data.data(), entry.OffsetToData, entry.Size);
 
-		inStream_w.seekg(uiRsrcOffset + (entry.OffsetToData - uiRva), std::ios_base::beg);
-		inStream_w.read(reinterpret_cast<char*>(m_data.data()), uiEntrySize);
-
-		if (uiEntrySize > 0)
-		{
-			resDir->addOccupiedAddressRange(entry.OffsetToData, entry.OffsetToData + uiEntrySize - 1);
-		}
-
+		// Add the data range to the occupied map
+		if(entry.Size > 0)
+			resDir->addOccupiedAddressRange(entry.OffsetToData, entry.OffsetToData + entry.Size - 1);
 		return ERROR_NONE;
 	}
 
@@ -648,90 +621,66 @@ namespace PeLib
 
 	/**
 	* Reads the next resource node from the input file.
-	* @param inStream An input stream.
-	* @param uiRsrcOffset Offset of resource directory in the file.
+	* @param imageLoader An input stream.
+	* @param uiRsrcRva RVA of the beginning of the resource directory.
 	* @param uiOffset Offset of the resource node that's to be read.
-	* @param uiRva RVA of the beginning of the resource directory.
-	* @param uiFileSize Size of the input file.
 	* @param uiSizeOfImage Size of the image.
 	* @param resDir Resource directory.
 	**/
 	int ResourceNode::read(
-			std::istream& inStream,
-			unsigned int uiRsrcOffset,
-			unsigned int uiOffset,
-			unsigned int uiRva,
-			unsigned int uiFileSize,
-			unsigned int uiSizeOfImage,
+			ImageLoader & imageLoader,
+			std::uint32_t uiRsrcRva,
+			std::uint32_t uiOffset,
+			std::uint32_t sizeOfImage,
 			ResourceDirectory* resDir)
 	{
-		IStreamWrapper inStream_w(inStream);
-
-		// Not enough space to be a valid node.
-		if (!resDir || uiRsrcOffset + uiOffset + PELIB_IMAGE_RESOURCE_DIRECTORY::size() > fileSize(inStream_w))
+		// Enough space to be a valid node?
+		std::uint32_t uiRva = uiRsrcRva + uiOffset;
+		if(uiRva > sizeOfImage)
 		{
 			return ERROR_INVALID_FILE;
 		}
 
-		uiElementRva = uiOffset + uiRva;
+		// Read the resource node header
+		imageLoader.readImage(&header, uiRva, PELIB_IMAGE_RESOURCE_DIRECTORY::size());
 
-		std::vector<unsigned char> vResourceDirectory(PELIB_IMAGE_RESOURCE_DIRECTORY::size());
-		inStream_w.seekg(uiRsrcOffset + uiOffset, std::ios_base::beg);
-		inStream_w.read(reinterpret_cast<char*>(vResourceDirectory.data()), PELIB_IMAGE_RESOURCE_DIRECTORY::size());
-
-		InputBuffer inpBuffer(vResourceDirectory);
-
-		inpBuffer >> header.Characteristics;
-		inpBuffer >> header.TimeDateStamp;
-		inpBuffer >> header.MajorVersion;
-		inpBuffer >> header.MinorVersion;
-		inpBuffer >> header.NumberOfNamedEntries;
-		inpBuffer >> header.NumberOfIdEntries;
-
+		// Add the total number of entries to the occupied range
 		unsigned int uiNumberOfEntries = header.NumberOfNamedEntries + header.NumberOfIdEntries;
-
-		resDir->addOccupiedAddressRange(uiElementRva, uiElementRva + PELIB_IMAGE_RESOURCE_DIRECTORY::size() - 1);
+		resDir->addOccupiedAddressRange(uiRva, uiRva + PELIB_IMAGE_RESOURCE_DIRECTORY::size() - 1);
+		uiRva += PELIB_IMAGE_RESOURCE_DIRECTORY::size();
 
 		// Windows loader check (PspLocateInPEManifest -> LdrpResGetResourceDirectory):
 		// If the total number of resource entries goes beyond the image, the file is refused to run
 		// Sample: 6318b0a1b57fc70bce5314aefb6cb06c90b7991afeae4e91ffc05ee0c88947d7
-		// However, such sample can still be executed in Windows XP - based emulator
-		if ((uiRva + (uiNumberOfEntries * PELIB_IMAGE_RESOURCE_DIRECTORY_ENTRY::size())) > uiSizeOfImage)
+		// However, such sample can still be executed in WinXP-based emulator
+		if ((uiRva + (uiNumberOfEntries * PELIB_IMAGE_RESOURCE_DIRECTORY_ENTRY::size())) > sizeOfImage)
 		{
 			resDir->setLoaderError(LDR_ERROR_RSRC_OVER_END_OF_IMAGE);
 			return ERROR_NONE;
 		}
 
-		// Not enough space to be a valid node.
-		if (uiRsrcOffset + uiOffset + PELIB_IMAGE_RESOURCE_DIRECTORY::size() + uiNumberOfEntries * PELIB_IMAGE_RESOURCE_DIRECTORY_ENTRY::size() > fileSize(inStream_w))
-		{
-			return ERROR_INVALID_FILE;
-		}
-
-		std::vector<unsigned char> vResourceChildren(uiNumberOfEntries * PELIB_IMAGE_RESOURCE_DIRECTORY_ENTRY::size());
-		inStream_w.read(reinterpret_cast<char*>(vResourceChildren.data()), uiNumberOfEntries * PELIB_IMAGE_RESOURCE_DIRECTORY_ENTRY::size());
-		InputBuffer childInpBuffer(vResourceChildren);
-
+		// Load all entries to the vector
+		std::vector<PELIB_IMAGE_RESOURCE_DIRECTORY_ENTRY> vResourceChildren(uiNumberOfEntries);
 		resDir->insertNodeOffset(uiOffset);
+
 		if (uiNumberOfEntries > 0)
 		{
-			resDir->addOccupiedAddressRange(
-					uiElementRva + PELIB_IMAGE_RESOURCE_DIRECTORY::size(),
-					uiElementRva + PELIB_IMAGE_RESOURCE_DIRECTORY::size() + uiNumberOfEntries * PELIB_IMAGE_RESOURCE_DIRECTORY_ENTRY::size() - 1
-				);
+			resDir->addOccupiedAddressRange(uiRva, uiRva + uiNumberOfEntries * PELIB_IMAGE_RESOURCE_DIRECTORY_ENTRY::size() - 1);
 		}
 
-		for (unsigned int i = 0; i < uiNumberOfEntries; ++i)
+		for (unsigned int i = 0; i < uiNumberOfEntries; i++)
 		{
 			ResourceChild rc;
-			childInpBuffer >> rc.entry.irde.Name;
-			childInpBuffer >> rc.entry.irde.OffsetToData;
+			int childError;
 
-			// If the resource entry goes out of the image, then the image is claimed as corrupt by
+			imageLoader.readImage(&rc.entry.irde, uiRva, PELIB_IMAGE_RESOURCE_DIRECTORY_ENTRY::size());
+			uiRva += PELIB_IMAGE_RESOURCE_DIRECTORY_ENTRY::size();
+
+			// If the resource name goes out of the image, then the image is claimed as corrupt by
 			// Windows loader check (PspLocateInPEManifest -> LdrpResGetResourceDirectory)
-			if(rc.entry.irde.Name & 0x80000000)
+			if(rc.entry.irde.Name & PELIB_IMAGE_RESOURCE_NAME_IS_STRING)
 			{
-				if((rc.entry.irde.Name & 0x7FFFFFFF) > uiSizeOfImage)
+				if((rc.entry.irde.Name & PELIB_IMAGE_RESOURCE_RVA_MASK) > sizeOfImage)
 				{
 					resDir->setLoaderError(LDR_ERROR_RSRC_NAME_OUT_OF_IMAGE);
 				}
@@ -739,10 +688,10 @@ namespace PeLib
 
 			// Check whether the resource data/subdirectory goes out of the image
 			{
-				if((rc.entry.irde.OffsetToData & 0x7FFFFFFF) > uiSizeOfImage)
+				if((rc.entry.irde.OffsetToData & PELIB_IMAGE_RESOURCE_RVA_MASK) > sizeOfImage)
 				{
 					// Is it a subdirectory?
-					if(rc.entry.irde.OffsetToData & 0x80000000)
+					if(rc.entry.irde.OffsetToData & PELIB_IMAGE_RESOURCE_DATA_IS_DIRECTORY)
 					{
 						resDir->setLoaderError(LDR_ERROR_RSRC_SUBDIR_OUT_OF_IMAGE);
 						return ERROR_NONE;
@@ -754,47 +703,25 @@ namespace PeLib
 				}
 			}
 
-			unsigned int lastPos = inStream_w.tellg();
-
 			if (rc.entry.irde.Name & PELIB_IMAGE_RESOURCE_NAME_IS_STRING)
 			{
 				// Enough space to read string length?
-				if ((rc.entry.irde.Name & ~PELIB_IMAGE_RESOURCE_NAME_IS_STRING) + 2 < fileSize(inStream_w))
+				if ((rc.entry.irde.Name & PELIB_IMAGE_RESOURCE_RVA_MASK) + 2 < sizeOfImage)
 				{
-					unsigned int uiNameOffset = rc.entry.irde.Name & ~PELIB_IMAGE_RESOURCE_NAME_IS_STRING;
-					if (uiRsrcOffset + uiNameOffset + sizeof(std::uint16_t) > fileSize(inStream_w))
+					// Check whether we have enough space to read at least one character
+					unsigned int uiNameOffset = rc.entry.irde.Name & PELIB_IMAGE_RESOURCE_RVA_MASK;
+					if (uiRva + uiNameOffset + sizeof(std::uint16_t) > sizeOfImage)
 					{
 						return ERROR_INVALID_FILE;
 					}
 
-					inStream_w.seekg(uiRsrcOffset + uiNameOffset, std::ios_base::beg);
-
-					std::uint16_t len;
-					inStream_w.read(reinterpret_cast<char*>(&len), sizeof(std::uint16_t));
-
-					// Enough space to read string?
-					if (uiRsrcOffset + uiNameOffset + 2 * len > fileSize(inStream_w))
-					{
-						return ERROR_INVALID_FILE;
-					}
-
-					// jk: This construction is incorrect on 64bit systems
-					// wchar_t c;
-					std::uint16_t c;
-					for (std::uint16_t ii=0; ii<len; ++ii)
-					{
-						inStream_w.read(reinterpret_cast<char*>(&c), sizeof(std::uint16_t));
-						rc.entry.wstrName += c;
-					}
+					// Read the resource name
+					imageLoader.readStringRc(rc.entry.wstrName, uiRsrcRva + uiNameOffset); 
 				}
-
-				inStream_w.seekg(lastPos, std::ios_base::beg);
 			}
 
-			const auto value = (rc.entry.irde.OffsetToData & PELIB_IMAGE_RESOURCE_DATA_IS_DIRECTORY) ?
-				(rc.entry.irde.OffsetToData & ~PELIB_IMAGE_RESOURCE_DATA_IS_DIRECTORY) : rc.entry.irde.OffsetToData;
 			// Detect cycles to prevent infinite recursion.
-			if (resDir->hasNodeOffset(value))
+			if (resDir->hasNodeOffset(rc.entry.irde.OffsetToData & PELIB_IMAGE_RESOURCE_RVA_MASK))
 			{
 				return ERROR_NONE;
 			}
@@ -808,13 +735,14 @@ namespace PeLib
 				rc.child = new ResourceLeaf;
 			}
 
-			if (rc.child->read(inStream_w, uiRsrcOffset, value, uiRva, uiFileSize, uiSizeOfImage, resDir) != ERROR_NONE)
+			// Read the child node
+			childError = rc.child->read(imageLoader, uiRsrcRva, rc.entry.irde.OffsetToData & PELIB_IMAGE_RESOURCE_RVA_MASK, sizeOfImage, resDir);
+			if (childError != ERROR_NONE)
 			{
-				return ERROR_INVALID_FILE;
+				return childError;
 			}
 
 			children.push_back(rc);
-			inStream_w.seekg(lastPos, std::ios_base::beg);
 		}
 
 		return ERROR_NONE;
@@ -1082,6 +1010,23 @@ namespace PeLib
 	ResourceNode* ResourceDirectory::getRoot()
 	{
 		return &m_rnRoot;
+	}
+
+	/**
+	* Reads the resource directory from a file.
+	* @param imageLoader image loader
+	**/
+	int ResourceDirectory::read(ImageLoader & imageLoader)
+	{
+		std::uint32_t resDirRva = imageLoader.getDataDirRva(PELIB_IMAGE_DIRECTORY_ENTRY_RESOURCE);
+		std::uint32_t sizeOfImage = imageLoader.getSizeOfImage();
+
+		if(resDirRva >= sizeOfImage)
+		{
+			return ERROR_INVALID_FILE;
+		}
+
+		return m_rnRoot.read(imageLoader, resDirRva, 0, sizeOfImage, this);
 	}
 
 	/**

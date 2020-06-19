@@ -139,6 +139,8 @@ class ImageLoader
 	std::uint32_t readPointer(std::uint32_t rva, std::uint64_t & pointerValue);
 	std::uint32_t getPointerSize() const;
 
+	std::uint32_t readStringRc(std::string & str, std::uint32_t rva);
+
 	std::uint32_t dumpImage(const char * fileName);
 
 	std::uint32_t getImageBitability() const;
@@ -229,6 +231,7 @@ class ImageLoader
 	std::uint32_t maxSectionCount;
 	bool ntHeadersSizeCheck;                            // If true, the loader requires minimum size of NT headers
 	bool sizeofImageMustMatch;                          // If true, the SizeOfImage must match virtual end of the last section
+	//bool copyWholeHeaderPage;                           // If true, then the image header is copied up to Section Alignment
 	bool appContainerCheck;                             // If true, app container flag is tested in the optional header
 	bool strictMode;                                    // If true, the loader refuses corrupt images like Windows loader would do
 };

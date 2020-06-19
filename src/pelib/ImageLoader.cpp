@@ -61,6 +61,7 @@ PeLib::ImageLoader::ImageLoader(uint32_t loaderFlags)
 
 	// By default, set the most benevolent settings
 	sizeofImageMustMatch = false;
+	//copyWholeHeaderPage = false;
 	ntHeadersSizeCheck = false;
 	appContainerCheck = false;
 	maxSectionCount = 255;
@@ -71,6 +72,7 @@ PeLib::ImageLoader::ImageLoader(uint32_t loaderFlags)
 		case LoaderModeWindowsXP:
 			maxSectionCount = PE_MAX_SECTION_COUNT_XP;
 			sizeofImageMustMatch = true;
+			//copyWholeHeaderPage = true;
 			break;
 
 		case LoaderModeWindows7:
@@ -244,7 +246,33 @@ uint32_t PeLib::ImageLoader::getPointerSize()  const
 {
 	return getImageBitability() / 8;
 }
-					
+
+uint32_t PeLib::ImageLoader::readStringRc(std::string & str, std::uint32_t rva)
+{
+	std::vector<uint16_t> wideString;
+	uint32_t bytesToRead;
+	uint32_t charsRead;
+	uint16_t length = 0;
+
+	// Read the length of the string from the image
+	readImage(&length, rva, sizeof(uint16_t));
+	rva += sizeof(uint16_t);
+
+	// Allocate enough space
+	bytesToRead = length * sizeof(uint16_t);
+	wideString.resize(length);
+
+	// Read the entire string from the image
+	charsRead = readImage(wideString.data(), rva, bytesToRead) / sizeof(uint16_t);
+	str.resize(charsRead);
+
+	// Convert the UTF-16 string to ANSI. Note that this is not the proper way to do it,
+	// but it's the same way how retdec-fileinfo.exe always did it, so we keep it that way
+	for(uint32_t i = 0; i < charsRead; i++)
+		str[i] = wideString[i];
+	return charsRead;
+}
+
 uint32_t PeLib::ImageLoader::dumpImage(const char * fileName)
 {
 	// Create the file for dumping
@@ -1056,6 +1084,7 @@ int PeLib::ImageLoader::captureSectionHeaders(std::vector<uint8_t> & fileData)
 int PeLib::ImageLoader::captureImageSections(std::vector<uint8_t> & fileData)
 {
 	uint32_t virtualAddress = 0;
+	uint32_t sizeOfHeaders = optionalHeader.SizeOfHeaders;
 	uint32_t sizeOfImage;
 
 	// Reserve the image size, aligned up to the page size
@@ -1065,8 +1094,16 @@ int PeLib::ImageLoader::captureImageSections(std::vector<uint8_t> & fileData)
 	// Section-based mapping / file-based mapping
 	if(optionalHeader.SectionAlignment >= PELIB_PAGE_SIZE)
 	{
+		// Note: Under Windows XP, the sample below contained the whole PAGE_SIZE
+		// in the mapped image header. SizeOfHeaders = 0xC00. I haven't figured our why.
+		// Doesn't happen in Windows 7+ and it's not subject to low-memory or heavy-load,
+		// aka also happens when just a single image is loaded.
+		// Sample: 1669f0220f1f74523390fe5b61ea09d6e2e4e798ab294c93d0a20900a3c5a52a
+		//if(copyWholeHeaderPage)
+		//	sizeOfHeaders = AlignToSize(sizeOfHeaders, optionalHeader.SectionAlignment);
+
 		// Capture the file header
-		virtualAddress = captureImageSection(fileData, virtualAddress, optionalHeader.SizeOfHeaders, 0, optionalHeader.SizeOfHeaders, PELIB_IMAGE_SCN_MEM_READ, true);
+		virtualAddress = captureImageSection(fileData, virtualAddress, sizeOfHeaders, 0, sizeOfHeaders, PELIB_IMAGE_SCN_MEM_READ, true);
 		if(virtualAddress == 0)
 			return ERROR_INVALID_FILE;
 
@@ -1569,10 +1606,9 @@ void PeLib::ImageLoader::compareWithWindowsMappedImage(PELIB_IMAGE_COMPARE & Ima
 				// Read the image page
 				readImage(singlePage, rva, sizeof(singlePage));
 
-				// Check for difference
-				// Note that if this is done in a debugger (e.g. Visual Studio) and PDB is available,
-				// it might place breakpoint to the position of __crt_debugger_hook, which will cause
-				// this memcmp return difference.
+				// Windows: Under low memory condition and heavy load, there may be STATUS_IN_PAGE_ERROR
+				// exception thrown when touching the mapped image. For that reason,
+				// this function must be framed by __try/__except in caller
 				if(memcmp(winImageData, singlePage, PELIB_PAGE_SIZE))
 				{
 					mismatchOffset = getMismatchOffset(winImageData, singlePage, rva, PELIB_PAGE_SIZE);

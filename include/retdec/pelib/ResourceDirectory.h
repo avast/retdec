@@ -17,12 +17,12 @@
 
 #include "retdec/pelib/PeLibInc.h"
 #include "retdec/pelib/PeHeader.h"
+#include "retdec/pelib/ImageLoader.h"
 
 namespace PeLib
 {
 	class ResourceElement;
 	class ResourceDirectory;
-	template <int bits> class ResourceDirectoryT;
 
 	/// The class ResourceChild is used to store information about a resource node.
 	class ResourceChild
@@ -31,7 +31,7 @@ namespace PeLib
 		friend class ResourceDirectory;
 		friend class ResourceNode;
 		friend class ResourceLeaf;
-		template <int bits> friend class ResourceDirectoryT;
+		friend class ResourceDirectory;
 
 		/// Stores name and offset of a resource node.
 		PELIB_IMG_RES_DIR_ENTRY entry;
@@ -105,7 +105,7 @@ namespace PeLib
 		  unsigned int uiElementRva;
 
 		  /// Reads the next resource element from the InputBuffer.
-		  virtual int read(std::istream&, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, ResourceDirectory* resDir) = 0;
+		  virtual int read(ImageLoader & imageLoader, std::uint32_t, std::uint32_t, std::uint32_t, ResourceDirectory* resDir) = 0;
 		  /// Writes the next resource element into the OutputBuffer.
 		  virtual void rebuild(OutputBuffer&, unsigned int, unsigned int, const std::string&) const = 0;
 		  /// Recalculates the tree for different RVA.
@@ -132,7 +132,7 @@ namespace PeLib
 		friend class ResourceChild;
 		friend class ResourceDirectory;
 		template <typename T> friend struct fixNumberOfEntries;
-		template <int bits> friend class ResourceDirectoryT;
+		friend class ResourceDirectory;
 
 		private:
 		  /// The resource data.
@@ -141,7 +141,7 @@ namespace PeLib
 		  PELIB_IMAGE_RESOURCE_DATA_ENTRY entry;
 
 		protected:
-		  int read(std::istream& inStream, unsigned int uiRsrcOffset, unsigned int uiOffset, unsigned int uiRva, unsigned int uiFileSize, unsigned int uiSizeOfImage, ResourceDirectory* resDir);
+		  int read(ImageLoader & imageLoader, std::uint32_t uiRsrcRva, std::uint32_t uiOffset, std::uint32_t sizeOfImage, ResourceDirectory* resDir);
 		  /// Writes the next resource leaf into the OutputBuffer.
 		  void rebuild(OutputBuffer&, unsigned int uiOffset, unsigned int uiRva, const std::string&) const;
 		  /// Recalculates the tree for different RVA.
@@ -190,7 +190,7 @@ namespace PeLib
 		friend class ResourceChild;
 		friend class ResourceDirectory;
 		template <typename T> friend struct fixNumberOfEntries;
-		template <int bits> friend class ResourceDirectoryT;
+		friend class ResourceDirectory;
 
 		/// The node's children.
 		std::vector<ResourceChild> children;
@@ -199,7 +199,7 @@ namespace PeLib
 
 		protected:
 		  /// Reads the next resource node.
-		  int read(std::istream& inStream, unsigned int uiRsrcOffset, unsigned int uiOffset, unsigned int uiRva, unsigned int uiFileSize, unsigned int uiSizeOfImage, ResourceDirectory* resDir);
+		  int read(ImageLoader & imageLoader, std::uint32_t uiRsrcRva, std::uint32_t uiOffset, std::uint32_t sizeOfImage, ResourceDirectory* resDir);
 		  /// Writes the next resource node into the OutputBuffer.
 		  void rebuild(OutputBuffer&, unsigned int uiOffset, unsigned int uiRva, const std::string&) const;
 		  /// Recalculates the tree for different RVA.
@@ -400,6 +400,9 @@ namespace PeLib
 		  ResourceDirectory();
 		  /// Destructor
 		  virtual ~ResourceDirectory() = default;
+
+		  /// Reads the resource directory from a file.
+		  int read(ImageLoader & imageLoader);
 
 		  ResourceNode* getRoot();
 		  const ResourceNode* getRoot() const;
@@ -775,53 +778,6 @@ namespace PeLib
 		ResIter->entry.wstrName = strNewResName;
 
 		return ERROR_NONE;
-	}
-
-	template <int bits>
-	class ResourceDirectoryT : public ResourceDirectory
-	{
-		public:
-		  /// Reads the resource directory from a file.
-		  int read(std::istream& inStream, const PeHeaderT<bits>& peHeader);
-	};
-
-	/**
-	* Reads the resource directory from a file.
-	* @param inStream Input stream.
-	* @param peHeader A valid PE header which is necessary because some RVA
-	* calculations need to be done.
-	**/
-	template <int bits>
-	int ResourceDirectoryT<bits>::read(
-			std::istream& inStream,
-			const PeHeaderT<bits>& peHeader)
-	{
-		unsigned int uiResDirRva = peHeader.getIddResourceRva();
-		unsigned int uiOffset = peHeader.rvaToOffset(uiResDirRva);
-
-		m_resourceNodeOffsets.clear();
-		m_readOffset = uiOffset;
-		if (!uiOffset)
-		{
-			return ERROR_INVALID_FILE;
-		}
-
-		IStreamWrapper inStream_w(inStream);
-
-		if (!inStream_w)
-		{
-			return ERROR_OPENING_FILE;
-		}
-
-		std::uint64_t ulFileSize = fileSize(inStream_w);
-		if (ulFileSize < uiOffset)
-		{
-			return ERROR_INVALID_FILE;
-		}
-
-		inStream_w.seekg(uiOffset, std::ios::beg);
-
-		return m_rnRoot.read(inStream_w, uiOffset, 0, uiResDirRva, ulFileSize, peHeader.getSizeOfImage(), this);
 	}
 }
 

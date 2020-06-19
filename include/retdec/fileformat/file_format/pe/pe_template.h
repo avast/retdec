@@ -714,7 +714,7 @@ inline bool peDebugEntryPointerToRawData(const PeLib::DebugDirectory &debug, uns
  * @param resources Parser of PE resource directory
  * @return Directory file offset
  */
-template<int bits> unsigned long long peResourceDirectoryOffset(const PeLib::ResourceDirectoryT<bits> &resources)
+inline unsigned long long peResourceDirectoryOffset(const PeLib::ResourceDirectory &resources)
 {
 	return resources.getOffset();
 }
@@ -724,7 +724,7 @@ template<int bits> unsigned long long peResourceDirectoryOffset(const PeLib::Res
  * @param resources Parser of PE resource directory
  * @return Directory tree root node
  */
-template<int bits> const PeLib::ResourceNode* peResourceTreeRoot(const PeLib::ResourceDirectoryT<bits> &resources)
+inline const PeLib::ResourceNode* peResourceTreeRoot(const PeLib::ResourceDirectory &resources)
 {
 	return resources.getRoot();
 }
@@ -954,7 +954,7 @@ inline retdec::common::RangeContainer<std::uint64_t> peDebugDirectoryOccupiedAdd
  * @param peResources Parser of PE resource directory
  * @return Occupied address ranges
  */
-template<int bits> retdec::common::RangeContainer<std::uint64_t> peResourceDirectoryOccupiedAddresses(const PeLib::ResourceDirectoryT<bits> &peResources)
+inline retdec::common::RangeContainer<std::uint64_t> peResourceDirectoryOccupiedAddresses(const PeLib::ResourceDirectory &peResources)
 {
 	retdec::common::RangeContainer<std::uint64_t> result;
 	for (const auto& addresses : peResources.getOccupiedAddresses())

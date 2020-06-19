@@ -166,7 +166,7 @@ namespace PeLib
 		  ExportDirectory m_expdir;                         ///< Export directory of the current file.
 		  ImportDirectory m_impdir;                         ///< Import directory of the current file.
 		  BoundImportDirectory m_boundimpdir;               ///< BoundImportDirectory of the current file.
-		  ResourceDirectoryT<bits> m_resdir;                ///< ResourceDirectory of the current file.
+		  ResourceDirectory m_resdir;                       ///< ResourceDirectory of the current file.
 		  RelocationsDirectoryT<bits> m_relocs;             ///< Relocations directory of the current file.
 		  ComHeaderDirectoryT<bits> m_comdesc;              ///< COM+ descriptor directory of the current file.
 		  IatDirectory m_iat;                               ///< Import address table of the current file.
@@ -255,9 +255,9 @@ namespace PeLib
 		  BoundImportDirectory & boundImpDir(); // EXPORT
 
 		  /// Accessor function for the resource directory.
-		  const ResourceDirectoryT<bits>& resDir() const;
+		  const ResourceDirectory & resDir() const;
 		  /// Accessor function for the resource directory.
-		  ResourceDirectoryT<bits>& resDir(); // EXPORT
+		  ResourceDirectory & resDir(); // EXPORT
 
 		  /// Accessor function for the relocations directory.
 		  const RelocationsDirectoryT<bits>& relocDir() const;
@@ -462,7 +462,7 @@ namespace PeLib
 	* @return A reference to the file's resource directory.
 	**/
 	template <int bits>
-	const ResourceDirectoryT<bits>& PeFileT<bits>::resDir() const
+	const ResourceDirectory & PeFileT<bits>::resDir() const
 	{
 		return m_resdir;
 	}
@@ -471,7 +471,7 @@ namespace PeLib
 	* @return A reference to the file's resource directory.
 	**/
 	template <int bits>
-	ResourceDirectoryT<bits>& PeFileT<bits>::resDir()
+	ResourceDirectory & PeFileT<bits>::resDir()
 	{
 		return m_resdir;
 	}
@@ -616,10 +616,9 @@ namespace PeLib
 	template<int bits>
 	int PeFileT<bits>::readResourceDirectory()
 	{
-		if (peHeader().calcNumberOfRvaAndSizes() >= 3
-			&& peHeader().getIddResourceRva())
+		if(m_imageLoader.getDataDirRva(PELIB_IMAGE_DIRECTORY_ENTRY_RESOURCE))
 		{
-			return resDir().read(m_iStream, peHeader());
+			return resDir().read(m_imageLoader);
 		}
 		return ERROR_DIRECTORY_DOES_NOT_EXIST;
 	}
