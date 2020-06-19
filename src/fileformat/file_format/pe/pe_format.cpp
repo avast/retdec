@@ -610,7 +610,7 @@ void PeFormat::initStructures(const std::string & dllListFile)
 			// Fill-in the loader error info from PE file
 			initLoaderErrorInfo();
 
-			mzHeader = file->mzHeader();
+			//mzHeader = file->mzHeader();
 
 			if (auto *f32 = isPe32())
 			{

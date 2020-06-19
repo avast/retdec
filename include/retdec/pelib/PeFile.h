@@ -73,6 +73,7 @@ namespace PeLib
 		protected:
 		  std::string m_filename; ///< Name of the current file.
 		  MzHeader m_mzh; ///< MZ header of the current file.
+		  ImageLoader m_imageLoader;
 		  RichHeader m_richheader; ///< Rich header of the current file.
 		  CoffSymbolTable m_coffsymtab; ///< Symbol table of the current file.
 		  SecurityDirectory m_secdir; ///< Security directory of the current file.
@@ -128,6 +129,11 @@ namespace PeLib
 		  /// Accessor function for the MZ header.
 		  MzHeader& mzHeader(); // EXPORT
 
+		  /// Accessor function for the image loader
+		  const ImageLoader & imageLoader() const;
+		  /// Accessor function for the MZ header.
+		  ImageLoader & imageLoader(); // EXPORT
+
 		  /// Accessor function for the Rich header.
 		  const RichHeader& richHeader() const;
 		  /// Accessor function for the Rich header.
@@ -156,17 +162,16 @@ namespace PeLib
 	      std::ifstream m_ifStream;
 	      std::istream& m_iStream;
 
-		  ImageLoader m_imageLoader;
 		  PeHeader32_64 m_peh;                              ///< PE header of the current file.
-		  ExportDirectoryT<bits> m_expdir;                  ///< Export directory of the current file.
+		  ExportDirectory m_expdir;                  ///< Export directory of the current file.
 		  ImportDirectory m_impdir;                         ///< Import directory of the current file.
-		  BoundImportDirectoryT<bits> m_boundimpdir;        ///< BoundImportDirectory of the current file.
+		  BoundImportDirectory m_boundimpdir;               ///< BoundImportDirectory of the current file.
 		  ResourceDirectoryT<bits> m_resdir;                ///< ResourceDirectory of the current file.
 		  RelocationsDirectoryT<bits> m_relocs;             ///< Relocations directory of the current file.
 		  ComHeaderDirectoryT<bits> m_comdesc;              ///< COM+ descriptor directory of the current file.
 		  IatDirectory m_iat;                               ///< Import address table of the current file.
-		  DebugDirectoryT<bits> m_debugdir;                 ///< Debug directory of the current file.
-		  DelayImportDirectory<bits> m_delayimpdir;         ///< Delay import directory of the current file.
+		  DebugDirectory m_debugdir;                 ///< Debug directory of the current file.
+		  DelayImportDirectory m_delayimpdir;         ///< Delay import directory of the current file.
 		  TlsDirectory<bits> m_tlsdir;                      ///< TLS directory of the current file.
 
 		public:
@@ -235,9 +240,9 @@ namespace PeLib
 		  PeHeader32_64& peHeader();
 
 		  /// Accessor function for the export directory.
-		  const ExportDirectoryT<bits>& expDir() const;
+		  const ExportDirectory & expDir() const;
 		  /// Accessor function for the export directory.
-		  ExportDirectoryT<bits>& expDir(); // EXPORT
+		  ExportDirectory & expDir(); // EXPORT
 
 		  /// Accessor function for the import directory.
 		  const ImportDirectory & impDir() const;
@@ -245,9 +250,9 @@ namespace PeLib
 		  ImportDirectory & impDir();
 
 		  /// Accessor function for the bound import directory.
-		  const BoundImportDirectoryT<bits>& boundImpDir() const;
+		  const BoundImportDirectory & boundImpDir() const;
 		  /// Accessor function for the bound import directory.
-		  BoundImportDirectoryT<bits>& boundImpDir(); // EXPORT
+		  BoundImportDirectory & boundImpDir(); // EXPORT
 
 		  /// Accessor function for the resource directory.
 		  const ResourceDirectoryT<bits>& resDir() const;
@@ -270,14 +275,14 @@ namespace PeLib
 		  IatDirectory & iatDir(); // EXPORT
 
 		  /// Accessor function for the debug directory.
-		  const DebugDirectoryT<bits>& debugDir() const;
+		  const DebugDirectory & debugDir() const;
 		  /// Accessor function for the debug directory.
-		  DebugDirectoryT<bits>& debugDir(); // EXPORT
+		  DebugDirectory & debugDir(); // EXPORT
 
 		  /// Accessor function for the delay import directory.
-		  const DelayImportDirectory<bits>& delayImports() const;
+		  const DelayImportDirectory & delayImports() const;
 		  /// Accessor function for the delay import directory.
-		  DelayImportDirectory<bits>& delayImports(); // EXPORT
+		  DelayImportDirectory & delayImports(); // EXPORT
 
 		  /// Accessor function for the TLS directory.
 		  const TlsDirectory<bits>& tlsDir() const;
@@ -323,7 +328,7 @@ namespace PeLib
 	**/
 	template<int bits>
 	PeFileT<bits>::PeFileT(const std::string& strFilename) :
-			m_iStream(m_ifStream), m_imageLoader(0)
+			m_iStream(m_ifStream)
 	{
 		m_filename = strFilename;
 		m_ifStream.open(m_filename, std::ifstream::binary);
@@ -335,13 +340,13 @@ namespace PeLib
 
 	template<int bits>
 	PeFileT<bits>::PeFileT(std::istream& stream) :
-			m_iStream(stream), m_imageLoader(0)
+			m_iStream(stream)
 	{
  	}
 
 	template<int bits>
 	PeFileT<bits>::PeFileT() :
-			m_iStream(m_ifStream), m_imageLoader(0)
+			m_iStream(m_ifStream)
 	{
 	}
 
@@ -403,7 +408,7 @@ namespace PeLib
 	* @return A reference to the file's delay import directory.
 	**/
 	template<int bits>
-	const DelayImportDirectory<bits>& PeFileT<bits>::delayImports() const
+	const DelayImportDirectory & PeFileT<bits>::delayImports() const
 	{
 		return m_delayimpdir;
 	}
@@ -412,7 +417,7 @@ namespace PeLib
 	* @return A reference to the file's delay import directory.
 	**/
 	template<int bits>
-	DelayImportDirectory<bits>& PeFileT<bits>::delayImports()
+	DelayImportDirectory & PeFileT<bits>::delayImports()
 	{
 		return m_delayimpdir;
 	}
@@ -421,7 +426,7 @@ namespace PeLib
 	* @return A reference to the file's export directory.
 	**/
 	template <int bits>
-	const ExportDirectoryT<bits>& PeFileT<bits>::expDir() const
+	const ExportDirectory & PeFileT<bits>::expDir() const
 	{
 		return m_expdir;
 	}
@@ -430,7 +435,7 @@ namespace PeLib
 	* @return A reference to the file's export directory.
 	**/
 	template <int bits>
-	ExportDirectoryT<bits>& PeFileT<bits>::expDir()
+	ExportDirectory & PeFileT<bits>::expDir()
 	{
 		return m_expdir;
 	}
@@ -439,7 +444,7 @@ namespace PeLib
 	* @return A reference to the file's bound import directory.
 	**/
 	template <int bits>
-	const BoundImportDirectoryT<bits>& PeFileT<bits>::boundImpDir() const
+	const BoundImportDirectory & PeFileT<bits>::boundImpDir() const
 	{
 		return m_boundimpdir;
 	}
@@ -448,7 +453,7 @@ namespace PeLib
 	* @return A reference to the file's bound import directory.
 	**/
 	template <int bits>
-	BoundImportDirectoryT<bits>& PeFileT<bits>::boundImpDir()
+	BoundImportDirectory & PeFileT<bits>::boundImpDir()
 	{
 		return m_boundimpdir;
 	}
@@ -520,13 +525,13 @@ namespace PeLib
 	}
 
 	template <int bits>
-	const DebugDirectoryT<bits>& PeFileT<bits>::debugDir() const
+	const DebugDirectory & PeFileT<bits>::debugDir() const
 	{
 		return m_debugdir;
 	}
 
 	template <int bits>
-	DebugDirectoryT<bits>& PeFileT<bits>::debugDir()
+	DebugDirectory & PeFileT<bits>::debugDir()
 	{
 		return m_debugdir;
 	}
@@ -591,10 +596,9 @@ namespace PeLib
 	template<int bits>
 	int PeFileT<bits>::readExportDirectory()
 	{
-		if (peHeader().calcNumberOfRvaAndSizes() >= 1
-			&& peHeader().getIddExportRva())
+		if(m_imageLoader.getDataDirRva(PELIB_IMAGE_DIRECTORY_ENTRY_EXPORT))
 		{
-			return expDir().read(m_iStream, peHeader());
+			return expDir().read(m_imageLoader);
 		}
 		return ERROR_DIRECTORY_DOES_NOT_EXIST;
 	}
@@ -649,10 +653,9 @@ namespace PeLib
 	template<int bits>
 	int PeFileT<bits>::readDebugDirectory()
 	{
-		if (peHeader().calcNumberOfRvaAndSizes() >= 7
-			&& peHeader().getIddDebugRva() && peHeader().getIddDebugSize())
+		if(m_imageLoader.getDataDirRva(PELIB_IMAGE_DIRECTORY_ENTRY_DEBUG))
 		{
-			return debugDir().read(m_iStream, peHeader());
+			return debugDir().read(m_iStream, m_imageLoader);
 		}
 		return ERROR_DIRECTORY_DOES_NOT_EXIST;
 	}
@@ -671,10 +674,9 @@ namespace PeLib
 	template<int bits>
 	int PeFileT<bits>::readBoundImportDirectory()
 	{
-		if (peHeader().calcNumberOfRvaAndSizes() >= 12
-			&& peHeader().getIddBoundImportRva() && peHeader().getIddBoundImportSize())
+		if(m_imageLoader.getDataDirRva(PELIB_IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT))
 		{
-			return boundImpDir().read(m_iStream, peHeader());
+			return boundImpDir().read(m_imageLoader);
 		}
 		return ERROR_DIRECTORY_DOES_NOT_EXIST;
 	}
@@ -693,9 +695,9 @@ namespace PeLib
 	int PeFileT<bits>::readDelayImportDirectory()
 	{
 		// Note: Delay imports can have arbitrary size and Windows loader will still load them
-		if (peHeader().calcNumberOfRvaAndSizes() >= 14 && peHeader().getIddDelayImportRva() /* && peHeader().getIddDelayImportSize() */)
+		if(m_imageLoader.getDataDirRva(PELIB_IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT))
 		{
-			return delayImports().read(m_iStream, peHeader());
+			return delayImports().read(m_imageLoader);
 		}
 		return ERROR_DIRECTORY_DOES_NOT_EXIST;
 	}
@@ -714,27 +716,25 @@ namespace PeLib
 	template<int bits>
 	LoaderError PeFileT<bits>::checkEntryPointErrors() const
 	{
-		unsigned int uiEntryPointRva = peHeader().getAddressOfEntryPoint();
-		std::uint64_t uiOffset = peHeader().rvaToOffset(uiEntryPointRva);
-		// Initialize to anything not zero, because later we check if zero.
-		std::uint64_t entryPointCode[2] = {1, 1};
+		ImageLoader & imgLoader = const_cast<ImageLoader &>(m_imageLoader);
+		std::uint32_t addressOfEntryPoint = m_imageLoader.getAddressOfEntryPoint();
+		std::uint32_t sizeOfImage = m_imageLoader.getSizeOfImage();
 
-		// No point of reading entry point that is beyond the file size
-		std::uint64_t ulFileSize = fileSize(m_iStream);
-		if (uiOffset > ulFileSize)
+		if(addressOfEntryPoint >= sizeOfImage)
 		{
 			return LDR_ERROR_ENTRY_POINT_OUT_OF_IMAGE;
 		}
 
 		// Only check PE files compiled for i386 or x64 processors.
-		if (peHeader().getMachine() == PELIB_IMAGE_FILE_MACHINE_I386 || peHeader().getMachine() == PELIB_IMAGE_FILE_MACHINE_AMD64)
+		if (m_imageLoader.getMachine() == PELIB_IMAGE_FILE_MACHINE_I386 || m_imageLoader.getMachine() == PELIB_IMAGE_FILE_MACHINE_AMD64)
 		{
+			std::uint64_t entryPointCode[2] = {0, 0};
+
 			// Check if 16 bytes of code are available in the file
-			if ((uiOffset + sizeof(entryPointCode)) < ulFileSize)
+			if ((addressOfEntryPoint + sizeof(entryPointCode)) < sizeOfImage)
 			{
 				// Read the entry point code
-				m_iStream.seekg(uiOffset, std::ios::beg);
-				m_iStream.read((char *)entryPointCode, sizeof(entryPointCode));
+				imgLoader.readImage(entryPointCode, addressOfEntryPoint, sizeof(entryPointCode));
 
 				// Zeroed instructions at entry point map either to "add [eax], al" (i386) or "add [rax], al" (AMD64).
 				// Neither of these instructions makes sense on the entry point. We check 16 bytes of the entry point,
@@ -791,12 +791,8 @@ namespace PeLib
 	template<int bits>
 	LoaderError PeFileT<bits>::loaderError() const
 	{
-		// Check for problems in DOS header
-		LoaderError ldrError = mzHeader().loaderError();
-
-		// Was there a problem in the NT headers?
-		if (ldrError == LDR_ERROR_NONE)
-			ldrError = peHeader().loaderError();
+		// Check for problems in image loader
+		LoaderError ldrError = imageLoader().loaderError();
 
 		// Check the loader error
 		if (ldrError == LDR_ERROR_NONE)

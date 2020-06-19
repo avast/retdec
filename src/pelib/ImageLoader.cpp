@@ -184,7 +184,7 @@ uint32_t PeLib::ImageLoader::stringLength(uint32_t rva, uint32_t maxLength) cons
 				{
 					if(page.buffer[rva & (PELIB_PAGE_SIZE - 1)] == 0)
 					{
-						return rva;
+						return (rva - rvaBegin);
 					}
 				}
 
@@ -204,7 +204,7 @@ uint32_t PeLib::ImageLoader::readString(std::string & str, uint32_t rva, uint32_
 	uint32_t length = stringLength(rva, maxLength);
 
 	// Allocate needeed size in the string
-	str.resize(length + 1);
+	str.resize(length);
 
 	// Read the string from the image
 	readImage((void *)str.data(), rva, length);
@@ -215,7 +215,7 @@ uint32_t PeLib::ImageLoader::readPointer(uint32_t rva, uint64_t & pointerValue)
 {
 	uint32_t bytesRead = 0;
 
-	switch(getPeFileBitability())
+	switch(getImageBitability())
 	{
 		case 64:
 			if(readImage(&pointerValue, rva, sizeof(uint64_t)) == sizeof(uint64_t))
@@ -240,9 +240,9 @@ uint32_t PeLib::ImageLoader::readPointer(uint32_t rva, uint64_t & pointerValue)
 	return 0;
 }
 
-uint32_t PeLib::ImageLoader::pointerSize()  const
+uint32_t PeLib::ImageLoader::getPointerSize()  const
 {
-	return getPeFileBitability() / 8;
+	return getImageBitability() / 8;
 }
 					
 uint32_t PeLib::ImageLoader::dumpImage(const char * fileName)
@@ -269,7 +269,7 @@ uint32_t PeLib::ImageLoader::dumpImage(const char * fileName)
 	return bytesWritten;
 }
 
-uint32_t PeLib::ImageLoader::getPeFileBitability() const
+uint32_t PeLib::ImageLoader::getImageBitability() const
 {
 	if(fileHeader.Machine == PELIB_IMAGE_FILE_MACHINE_AMD64 || fileHeader.Machine == PELIB_IMAGE_FILE_MACHINE_IA64)
 		return 64;
@@ -280,9 +280,19 @@ uint32_t PeLib::ImageLoader::getPeFileBitability() const
 	return 0;
 }
 
+std::uint64_t PeLib::ImageLoader::getOrdinalMask() const
+{
+	return (std::uint64_t)1 << (getImageBitability() - 1);
+}
+
 uint32_t PeLib::ImageLoader::getNtSignature() const
 {
 	return ntSignature;
+}
+
+uint32_t PeLib::ImageLoader::getMachine() const
+{
+	return fileHeader.Machine;
 }
 
 uint32_t PeLib::ImageLoader::getPointerToSymbolTable() const
@@ -298,6 +308,11 @@ uint32_t PeLib::ImageLoader::getNumberOfSymbols() const
 uint64_t PeLib::ImageLoader::getImageBase() const
 {
 	return optionalHeader.ImageBase;
+}
+
+std::uint32_t PeLib::ImageLoader::getAddressOfEntryPoint() const
+{
+	return optionalHeader.AddressOfEntryPoint;
 }
 
 uint32_t PeLib::ImageLoader::getSizeOfHeaders() const
@@ -390,7 +405,7 @@ int PeLib::ImageLoader::setLoaderError(PeLib::LoaderError ldrErr)
 	return ERROR_NONE;
 }
 
-PeLib::LoaderError PeLib::ImageLoader::loaderError()
+PeLib::LoaderError PeLib::ImageLoader::loaderError() const
 {
 	return ldrError;
 }
@@ -485,8 +500,7 @@ int PeLib::ImageLoader::Load(std::istream & fs, std::streamoff fileOffset, bool 
 	// Read the entire file to memory. Note that under Windows
 	// and under low memory condition, the underlying OS call (NtReadFile)
 	// can fail on low memory. When that happens, fs.read will read less than
-	// required. We need to verify the number of bytes read
-	//  and set the low memory condition flag
+	// required. We need to verify the number of bytes read and return the apropriate error code.
 	fs.seekg(fileOffset);
 	fs.read(reinterpret_cast<char*>(fileData.data()), fileSize2);
 	if(fs.gcount() < (fileSize - fileOffset))

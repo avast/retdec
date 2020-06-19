@@ -137,15 +137,18 @@ class ImageLoader
 	std::uint32_t stringLength(std::uint32_t rva, std::uint32_t maxLength = 65535) const;
 
 	std::uint32_t readPointer(std::uint32_t rva, std::uint64_t & pointerValue);
-	std::uint32_t pointerSize() const;
+	std::uint32_t getPointerSize() const;
 
 	std::uint32_t dumpImage(const char * fileName);
 
-	std::uint32_t getPeFileBitability() const;
+	std::uint32_t getImageBitability() const;
+	std::uint64_t getOrdinalMask() const;
 	std::uint32_t getNtSignature() const;
+	std::uint32_t getMachine() const;
 	std::uint32_t getPointerToSymbolTable() const;
 	std::uint32_t getNumberOfSymbols() const;
 	std::uint64_t getImageBase() const;
+	std::uint32_t getAddressOfEntryPoint() const;
 	std::uint32_t getSizeOfHeaders() const;
 	std::uint32_t getSizeOfImage() const;
 	std::uint32_t getSizeOfImageAligned() const;
@@ -155,7 +158,7 @@ class ImageLoader
 	std::uint32_t getImageProtection(std::uint32_t characteristics) const;
 
 	int setLoaderError(LoaderError ldrErr);
-	LoaderError loaderError();
+	LoaderError loaderError() const;
 
 	// Testing function
 	void compareWithWindowsMappedImage(PELIB_IMAGE_COMPARE & ImageCompare, void * imageData, std::uint32_t imageSize);

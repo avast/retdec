@@ -339,7 +339,7 @@ inline unsigned long long peNumberOfImportedLibraries(const PeLib::ImportDirecto
  * @param delay Parser of PE delay import directory
  * @return Number of delay imported libraries
  */
-template<int bits> unsigned long long peNumberOfDelayImportedLibraries(const PeLib::DelayImportDirectory<bits> &delay)
+inline unsigned long long peNumberOfDelayImportedLibraries(const PeLib::DelayImportDirectory &delay)
 {
 	return delay.getNumberOfFiles();
 }
@@ -507,7 +507,7 @@ inline bool peImportedLibraryFileName(
  *
  * If function returns @c false, @a fileName is left unchanged.
  */
-template<int bits> bool peDelayImportedLibraryFileName(const PeLib::DelayImportDirectory<bits> &delay, std::string &fileName, unsigned long long index)
+inline bool peDelayImportedLibraryFileName(const PeLib::DelayImportDirectory &delay, std::string &fileName, unsigned long long index)
 {
 	const auto *library = delay.getFile(index);
 	if(!library)
@@ -586,7 +586,7 @@ template<int bits> std::unique_ptr<PeImport> peImport(const PeLib::PeHeaderT<bit
  * If function returns info about delayed import, or @c nullptr if invalid import is requested.
  */
 template<int bits> std::unique_ptr<PeImport> peDelayImport(const PeLib::PeHeaderT<bits> &peHeader,
-	const PeLib::DelayImportDirectory<bits> &delay,
+	const PeLib::DelayImportDirectory &delay,
 	unsigned long long fileIndex, unsigned long long importIndex)
 {
 	const auto *library = delay.getFile(fileIndex);
@@ -603,7 +603,7 @@ template<int bits> std::unique_ptr<PeImport> peDelayImport(const PeLib::PeHeader
 
 	auto import = std::make_unique<PeImport>(PeImportFlag::Delayed);
 	import->setName(function->fname);
-	import->setAddress(peImageBase(peHeader) + function->address.Value);
+	import->setAddress(peImageBase(peHeader) + function->address);
 	import->setLibraryIndex(fileIndex);
 	import->invalidateOrdinalNumber();
 	if(library->ordinalNumbersAreValid() && function->hint != 0)
@@ -619,7 +619,7 @@ template<int bits> std::unique_ptr<PeImport> peDelayImport(const PeLib::PeHeader
  * @param exports Parser of PE export directory
  * @return Number of exported functions
  */
-template<int bits> unsigned long long peNumberOfExportedFunctions(const PeLib::ExportDirectoryT<bits> &exports)
+inline unsigned long long peNumberOfExportedFunctions(const PeLib::ExportDirectory &exports)
 {
 	return exports.calcNumberOfFunctions();
 }
@@ -632,7 +632,7 @@ template<int bits> unsigned long long peNumberOfExportedFunctions(const PeLib::E
  * @param exportedFunction Exported function to fill
  * @return @c false if index is out of bounds, otherwise @c true
  */
-template<int bits> bool peExportedFunction(const PeLib::PeHeaderT<bits> &peHeader, const PeLib::ExportDirectoryT<bits> &exports, unsigned long long index, Export& exportedFunction)
+template<int bits> bool peExportedFunction(const PeLib::PeHeaderT<bits> &peHeader, const PeLib::ExportDirectory &exports, unsigned long long index, Export& exportedFunction)
 {
 	if (index >= peNumberOfExportedFunctions(exports))
 	{
@@ -650,7 +650,7 @@ template<int bits> bool peExportedFunction(const PeLib::PeHeaderT<bits> &peHeade
  * @param debug Parser of PE debug directory
  * @return Number of debug entries
  */
-template<int bits> unsigned long long peNumberOfDebugEntries(const PeLib::DebugDirectoryT<bits> &debug)
+inline unsigned long long peNumberOfDebugEntries(const PeLib::DebugDirectory &debug)
 {
 	return debug.calcNumberOfEntries();
 }
@@ -662,7 +662,7 @@ template<int bits> unsigned long long peNumberOfDebugEntries(const PeLib::DebugD
  * @param data Data to fill
  * @return @c false if index is out of bounds, otherwise @c true
  */
-template<int bits> bool peDebugEntryData(const PeLib::DebugDirectoryT<bits> &debug, unsigned long long index, std::vector<std::uint8_t>& data)
+inline bool peDebugEntryData(const PeLib::DebugDirectory &debug, unsigned long long index, std::vector<std::uint8_t>& data)
 {
 	if (index >= peNumberOfDebugEntries(debug))
 	{
@@ -680,7 +680,7 @@ template<int bits> bool peDebugEntryData(const PeLib::DebugDirectoryT<bits> &deb
  * @param timeDateStamp Timestamp to fill
  * @return @c false if index is out of bounds, otherwise @c true
  */
-template<int bits> bool peDebugEntryTimeDateStamp(const PeLib::DebugDirectoryT<bits> &debug, unsigned long long index, unsigned long long& timeDateStamp)
+inline bool peDebugEntryTimeDateStamp(const PeLib::DebugDirectory &debug, unsigned long long index, unsigned long long& timeDateStamp)
 {
 	if (index >= peNumberOfDebugEntries(debug))
 	{
@@ -698,7 +698,7 @@ template<int bits> bool peDebugEntryTimeDateStamp(const PeLib::DebugDirectoryT<b
  * @param pointerToRawData Pointer to raw data to fill
  * @return @c false if index is out of bounds, otherwise @c true
  */
-template<int bits> bool peDebugEntryPointerToRawData(const PeLib::DebugDirectoryT<bits> &debug, unsigned long long index, unsigned long long& pointerToRawData)
+inline bool peDebugEntryPointerToRawData(const PeLib::DebugDirectory &debug, unsigned long long index, unsigned long long& pointerToRawData)
 {
 	if (index >= peNumberOfDebugEntries(debug))
 	{
@@ -908,7 +908,7 @@ inline retdec::common::RangeContainer<std::uint64_t> peImportDirectoryOccupiedAd
  * @param peExports Parser of PE export directory
  * @return Occupied address ranges
  */
-template<int bits> retdec::common::RangeContainer<std::uint64_t> peExportDirectoryOccupiedAddresses(const PeLib::ExportDirectoryT<bits> &peExports)
+inline retdec::common::RangeContainer<std::uint64_t> peExportDirectoryOccupiedAddresses(const PeLib::ExportDirectory &peExports)
 {
 	retdec::common::RangeContainer<std::uint64_t> result;
 	for (const auto& addresses : peExports.getOccupiedAddresses())
@@ -931,7 +931,7 @@ template<int bits> retdec::common::RangeContainer<std::uint64_t> peExportDirecto
  * @param peDebug Parser of PE debug directory
  * @return Occupied address ranges
  */
-template<int bits> retdec::common::RangeContainer<std::uint64_t> peDebugDirectoryOccupiedAddresses(const PeLib::DebugDirectoryT<bits> &peDebug)
+inline retdec::common::RangeContainer<std::uint64_t> peDebugDirectoryOccupiedAddresses(const PeLib::DebugDirectory &peDebug)
 {
 	retdec::common::RangeContainer<std::uint64_t> result;
 	for (const auto& addresses : peDebug.getOccupiedAddresses())

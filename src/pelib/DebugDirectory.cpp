@@ -15,58 +15,82 @@
 
 namespace PeLib
 {
-	void DebugDirectory::clear()
+	/**
+	* @param inStream Input stream.
+	* @param peHeader A valid PE header which is necessary because some RVA calculations need to be done.
+	**/
+
+	int DebugDirectory::read(std::istream& inStream, ImageLoader & imageLoader)
 	{
-		m_vDebugInfo.clear();
-	}
-
-	std::vector<PELIB_IMG_DEBUG_DIRECTORY> DebugDirectory::read(InputBuffer& ibBuffer, unsigned int uiRva, unsigned int uiSize)
-	{
-		std::vector<PELIB_IMG_DEBUG_DIRECTORY> currDebugInfo;
-
-		PELIB_IMG_DEBUG_DIRECTORY iddCurr;
-
-		unsigned int uiEntryCount = uiSize / PELIB_IMAGE_DEBUG_DIRECTORY::size();
-		for (unsigned int i = 0; i < uiEntryCount; i++)
+		std::vector<PELIB_IMG_DEBUG_DIRECTORY> debugInfo;
+		std::uint64_t ulFileSize = fileSize(inStream);
+		std::size_t rva = imageLoader.getDataDirRva(PELIB_IMAGE_DIRECTORY_ENTRY_DEBUG);
+		std::size_t size = imageLoader.getDataDirSize(PELIB_IMAGE_DIRECTORY_ENTRY_DEBUG);
+		std::size_t sizeOfImage = imageLoader.getSizeOfImage();
+		if ((rva + size) > sizeOfImage)
 		{
-
-			ibBuffer >> iddCurr.idd.Characteristics;
-			ibBuffer >> iddCurr.idd.TimeDateStamp;
-			ibBuffer >> iddCurr.idd.MajorVersion;
-			ibBuffer >> iddCurr.idd.MinorVersion;
-			ibBuffer >> iddCurr.idd.Type;
-			ibBuffer >> iddCurr.idd.SizeOfData;
-			ibBuffer >> iddCurr.idd.AddressOfRawData;
-			ibBuffer >> iddCurr.idd.PointerToRawData;
-
-			currDebugInfo.push_back(iddCurr);
+			return ERROR_INVALID_FILE;
 		}
 
-		if (!currDebugInfo.empty())
+		// Read the array of debug directories
+		read(imageLoader, debugInfo, rva, size);
+
+		// For each debug directory, also read its data
+		for(auto & debugEntry : debugInfo)
+		{
+			if ((debugEntry.idd.PointerToRawData >= ulFileSize) ||
+				(debugEntry.idd.PointerToRawData + debugEntry.idd.SizeOfData >= ulFileSize))
+			{
+				return ERROR_INVALID_FILE;
+			}
+
+			// Load the debug info data from the file, not from the image.
+			// Some samples may have debug info part of the overlay
+			debugEntry.data.resize(debugEntry.idd.SizeOfData);
+			inStream.seekg(debugEntry.idd.PointerToRawData);
+			inStream.read(reinterpret_cast<char*>(debugEntry.data.data()), debugEntry.idd.SizeOfData);
+
+			// Verify the number of bytes read
+			if(inStream.gcount() != debugEntry.idd.SizeOfData)
+				return ERROR_INVALID_FILE;
+
+			if (debugEntry.idd.SizeOfData > 0)
+			{
+				m_occupiedAddresses.push_back(
+					std::make_pair(
+					debugEntry.idd.AddressOfRawData,
+					debugEntry.idd.AddressOfRawData + debugEntry.idd.SizeOfData - 1
+				));
+			}
+		}
+
+		std::swap(debugInfo, m_vDebugInfo);
+		return ERROR_NONE;
+	}
+
+	void DebugDirectory::read(ImageLoader & imageLoader, std::vector<PELIB_IMG_DEBUG_DIRECTORY> & debugInfo, std::uint32_t rva, std::uint32_t size)
+	{
+		PELIB_IMG_DEBUG_DIRECTORY iddCurr;
+		std::size_t entryCount = size / PELIB_IMAGE_DEBUG_DIRECTORY::size();
+		std::uint32_t bytesRead;
+
+		for (std::size_t i = 0; i < entryCount; i++)
+		{
+			bytesRead = imageLoader.readImage(&iddCurr.idd, rva, sizeof(PELIB_IMAGE_DEBUG_DIRECTORY));
+			if(bytesRead != sizeof(PELIB_IMAGE_DEBUG_DIRECTORY))
+				break;
+
+			debugInfo.push_back(iddCurr);
+			rva += sizeof(PELIB_IMAGE_DEBUG_DIRECTORY);
+		}
+
+		if (!debugInfo.empty())
 		{
 			m_occupiedAddresses.emplace_back(
-						uiRva,
-						uiRva + uiEntryCount * PELIB_IMAGE_DEBUG_DIRECTORY::size() - 1
+						rva,
+						rva + entryCount * PELIB_IMAGE_DEBUG_DIRECTORY::size() - 1
 					);
 		}
-
-		return currDebugInfo;
-	}
-
-	int DebugDirectory::read(unsigned char* buffer, unsigned int buffersize)
-	{
-		// XXX: Note, debug data is not read at all. This might or might not change
-		//      in the future.
-
-		std::vector<std::uint8_t> vDebugDirectory(buffer, buffer + buffersize);
-
-		InputBuffer ibBuffer(vDebugDirectory);
-
-		std::vector<PELIB_IMG_DEBUG_DIRECTORY> currDebugInfo = read(ibBuffer, 0, buffersize);
-
-		std::swap(currDebugInfo, m_vDebugInfo);
-
-		return ERROR_NONE;
 	}
 
 	/**

@@ -156,6 +156,29 @@ namespace PeLib
 		return read(inpBuffer, vBimpDir.data(), uiSize);
 	}
 
+	/**
+	* Reads the BoundImport directory from a PE file.
+	* @param inStream Input stream.
+	* @param peHeader A valid PE header which is necessary because some RVA calculations need to be done.
+	**/
+	int BoundImportDirectory::read(ImageLoader & imageLoader)
+	{
+		std::uint32_t importRva = imageLoader.getDataDirRva(PELIB_IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT);
+		std::uint32_t importSize = imageLoader.getDataDirSize(PELIB_IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT);
+		std::uint32_t sizeOfImage = imageLoader.getSizeOfImage();
+
+		if(importRva > sizeOfImage || (importRva > importSize) > sizeOfImage)
+		{
+			return ERROR_INVALID_FILE;
+		}
+
+		std::vector<unsigned char> vBimpDir(importSize);
+		imageLoader.readImage(reinterpret_cast<char*>(vBimpDir.data()), importRva, importSize);
+
+		InputBuffer inpBuffer{vBimpDir};
+		return BoundImportDirectory::read(inpBuffer, vBimpDir.data(), importSize);
+	}
+
 	unsigned int BoundImportDirectory::totalModules() const
 	{
 		unsigned int modules = static_cast<unsigned int>(m_vIbd.size());

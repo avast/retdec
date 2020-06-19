@@ -13,7 +13,7 @@
 #ifndef EXPORTDIRECTORY_H
 #define EXPORTDIRECTORY_H
 
-#include "retdec/pelib/PeHeader.h"
+#include "retdec/pelib/ImageLoader.h"
 
 namespace PeLib
 {
@@ -30,8 +30,13 @@ namespace PeLib
 		  /// Stores RVAs which are occupied by this export directory.
 		  std::vector<std::pair<unsigned int, unsigned int>> m_occupiedAddresses;
 
+		  void addOccupiedAddress(const std::string & str, std::uint32_t rva);
+
 		public:
 		  virtual ~ExportDirectory() = default;
+
+		  /// Load the export directory from the image loader
+		  int read(ImageLoader & imageLoader);
 
 		  /// Add another function to be exported.
 		  void addFunction(const std::string& strFuncname, std::uint32_t dwFuncAddr); // EXPORT
@@ -133,164 +138,5 @@ namespace PeLib
 
 		  const std::vector<std::pair<unsigned int, unsigned int>>& getOccupiedAddresses() const;
 	};
-
-	template <int bits>
-	class ExportDirectoryT : public ExportDirectory
-	{
-		public:
-		  /// Read a file's export directory.
-		  int read(std::istream& inStream, const PeHeaderT<bits>& peHeader); // EXPORT
-	};
-
-	/**
-	* @param inStream Input stream.
-	* @param peHeader A valid PE header which is necessary because some RVA calculations need to be done.
-	* \todo: Proper use of InputBuffer
-	**/
-	template <int bits>
-	int ExportDirectoryT<bits>::read(
-			std::istream& inStream,
-			const PeHeaderT<bits>& peHeader)
-	{
-		IStreamWrapper inStream_w(inStream);
-
-		if (!inStream_w)
-		{
-			return ERROR_OPENING_FILE;
-		}
-
-		std::uint64_t ulFileSize = fileSize(inStream_w);
-		unsigned int dirRva = peHeader.getIddExportRva();
-		unsigned int dirOffset = peHeader.rvaToOffset(dirRva);
-		if (ulFileSize < dirOffset + PELIB_IMAGE_EXPORT_DIRECTORY::size())
-		{
-			return ERROR_INVALID_FILE;
-		}
-		inStream_w.seekg(dirOffset, std::ios::beg);
-
-		std::vector<unsigned char> vExportDirectory(PELIB_IMAGE_EXPORT_DIRECTORY::size());
-		inStream_w.read(reinterpret_cast<char*>(vExportDirectory.data()), PELIB_IMAGE_EXPORT_DIRECTORY::size());
-
-		InputBuffer inpBuffer(vExportDirectory);
-
-		PELIB_IMAGE_EXP_DIRECTORY iedCurr;
-		inpBuffer >> iedCurr.ied.Characteristics;
-		inpBuffer >> iedCurr.ied.TimeDateStamp;
-		inpBuffer >> iedCurr.ied.MajorVersion;
-		inpBuffer >> iedCurr.ied.MinorVersion;
-		inpBuffer >> iedCurr.ied.Name;
-		inpBuffer >> iedCurr.ied.Base;
-		inpBuffer >> iedCurr.ied.NumberOfFunctions;
-		inpBuffer >> iedCurr.ied.NumberOfNames;
-		inpBuffer >> iedCurr.ied.AddressOfFunctions;
-		inpBuffer >> iedCurr.ied.AddressOfNames;
-		inpBuffer >> iedCurr.ied.AddressOfNameOrdinals;
-		m_occupiedAddresses.emplace_back(dirRva, dirRva + PELIB_IMAGE_EXPORT_DIRECTORY::size() - 1);
-
-		// Verify the export directory. Do not allow more functions than the limit
-		// Sample: CCE461B6EB23728BA3B8A97B9BE84C0FB9175DB31B9949E64144198AB3F702CE
-		if (iedCurr.ied.NumberOfFunctions > PELIB_MAX_EXPORTED_FUNCTIONS || iedCurr.ied.NumberOfNames > PELIB_MAX_EXPORTED_FUNCTIONS)
-			return ERROR_INVALID_FILE;
-
-		unsigned int offset = peHeader.rvaToOffset(iedCurr.ied.Name);
-		if (offset >= ulFileSize)
-			return ERROR_INVALID_FILE;
-		inStream_w.seekg(offset, std::ios::beg);
-
-		char c = 0;
-		std::string strFname = "";
-		do
-		{
-			inStream_w.read(reinterpret_cast<char*>(&c), sizeof(c));
-			if (!inStream_w) return ERROR_INVALID_FILE;
-			if (c) strFname += c;
-		}
-		while (c != 0);
-		iedCurr.name = strFname;
-		m_occupiedAddresses.push_back(std::make_pair(iedCurr.ied.Name, iedCurr.ied.Name + strFname.length() + 1));
-
-		PELIB_EXP_FUNC_INFORMATION efiCurr;
-		efiCurr.ordinal = 0; efiCurr.addroffunc = 0; efiCurr.addrofname = 0;
-		for (unsigned int i=0;i<iedCurr.ied.NumberOfFunctions;i++)
-		{
-			unsigned int offset = peHeader.rvaToOffset(iedCurr.ied.AddressOfFunctions) + i * sizeof(efiCurr.addroffunc);
-			if (offset >= ulFileSize)
-				return ERROR_INVALID_FILE;
-			inStream_w.seekg(offset, std::ios::beg);
-			inStream_w.read(reinterpret_cast<char*>(&efiCurr.addroffunc), sizeof(efiCurr.addroffunc));
-			if (!inStream_w)
-				return ERROR_INVALID_FILE;
-
-			efiCurr.ordinal = iedCurr.ied.Base + i;
-			iedCurr.functions.push_back(efiCurr);
-
-			m_occupiedAddresses.emplace_back(
-					iedCurr.ied.AddressOfFunctions + i*sizeof(efiCurr.addroffunc),
-					iedCurr.ied.AddressOfFunctions + i*sizeof(efiCurr.addroffunc) + sizeof(efiCurr.addroffunc) - 1
-				);
-		}
-
-		for (unsigned int i=0;i<iedCurr.ied.NumberOfNames;i++)
-		{
-			unsigned int offset = peHeader.rvaToOffset(iedCurr.ied.AddressOfNameOrdinals) + i*sizeof(efiCurr.ordinal);
-			if (offset >= ulFileSize)
-				return ERROR_INVALID_FILE;
-			inStream_w.seekg(offset, std::ios::beg);
-			std::uint16_t ordinal;
-			inStream_w.read(reinterpret_cast<char*>(&ordinal), sizeof(ordinal));
-			m_occupiedAddresses.emplace_back(
-					iedCurr.ied.AddressOfNameOrdinals + i*sizeof(efiCurr.ordinal),
-					iedCurr.ied.AddressOfNameOrdinals + i*sizeof(efiCurr.ordinal) + sizeof(efiCurr.ordinal) - 1
-				);
-
-			if (!inStream_w)
-				return ERROR_INVALID_FILE;
-			else if (ordinal >= iedCurr.functions.size())
-				continue;
-
-			iedCurr.functions[ordinal].ordinal = iedCurr.ied.Base + ordinal;
-
-			offset = peHeader.rvaToOffset(iedCurr.ied.AddressOfNames) + i*sizeof(efiCurr.addrofname);
-			if (offset >= ulFileSize)
-				return ERROR_INVALID_FILE;
-			inStream_w.seekg(offset, std::ios::beg);
-			inStream_w.read(reinterpret_cast<char*>(&iedCurr.functions[ordinal].addrofname), sizeof(iedCurr.functions[ordinal].addrofname));
-			if (!inStream_w)
-				return ERROR_INVALID_FILE;
-			m_occupiedAddresses.emplace_back(
-					iedCurr.ied.AddressOfNames + i*sizeof(efiCurr.addrofname),
-					iedCurr.ied.AddressOfNames + i*sizeof(efiCurr.addrofname) + sizeof(iedCurr.functions[ordinal].addrofname) - 1
-				);
-
-			offset = peHeader.rvaToOffset(iedCurr.functions[ordinal].addrofname);
-			if (offset >= ulFileSize)
-				return ERROR_INVALID_FILE;
-			inStream_w.seekg(offset, std::ios::beg);
-
-			char cc = 0;
-			std::string strFname2 = "";
-			do
-			{
-				inStream_w.read(reinterpret_cast<char*>(&cc), sizeof(cc));
-
-				if (!inStream_w)
-					return ERROR_INVALID_FILE;
-
-				if (cc) strFname2 += cc;
-			}
-			while (cc != 0);
-
-			iedCurr.functions[ordinal].funcname = strFname2;
-
-			m_occupiedAddresses.emplace_back(
-					iedCurr.functions[ordinal].addrofname,
-					iedCurr.functions[ordinal].addrofname + strFname2.length() + 1
-				);
-		}
-
-		std::swap(m_ied, iedCurr);
-
-		return ERROR_NONE;
-	}
 }
 #endif

@@ -60,6 +60,24 @@ namespace PeLib
 		return m_mzh;
 	}
 
+	/**
+	* @return A reference to the file's image loader.
+	**/
+
+	const ImageLoader & PeFile::imageLoader() const
+	{
+		return m_imageLoader;
+	}
+
+	/**
+	* @return A reference to the file's image loader.
+	**/
+
+	ImageLoader & PeFile::imageLoader()
+	{
+		return m_imageLoader;
+	}
+
 	const RichHeader& PeFile::richHeader() const
 	{
 		return m_richheader;

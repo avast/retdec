@@ -1082,10 +1082,9 @@ namespace PeLib
 		}
 	};
 
-	template<int bits>
 	struct PELIB_DELAY_IMPORT
 	{
-		PELIB_VAR_SIZE<bits> address;
+		std::uint64_t address;
 		std::uint16_t hint;
 		std::string fname;
 
@@ -1289,28 +1288,32 @@ namespace PeLib
 		}
 	};
 
-	const unsigned int PELIB_IMAGE_SIZEOF_DELAY_IMPORT_DIRECTORY_RECORD = 32;
+	// This structure is defined in the "delayimp.h" header file as ImgDelayDescrV1 or ImgDelayDescrV2.
+	// Fields suffixed with "Rva" are direct virtual addresses in the "V1" version of the structure.
+	struct PELIB_IMAGE_DELAY_LOAD_DESCRIPTOR
+	{
+		std::uint32_t Attributes;                           // Attributes. See PELIB_DELAY_ATTRIBUTE_XXX for more info
+		std::uint32_t NameRva;                              // RVA to dll name
+		std::uint32_t ModuleHandleRva;                      // RVA of module handle
+		std::uint32_t DelayImportAddressTableRva;           // RVA of the IAT
+		std::uint32_t DelayImportNameTableRva;              // RVA of the INT
+		std::uint32_t BoundDelayImportTableRva;             // RVA of the optional bound IAT
+		std::uint32_t UnloadDelayImportTableRva;            // RVA of optional copy of original IAT
+		std::uint32_t TimeStamp;                            // 0 if not bound, O.W. date/time stamp of DLL bound to (Old BIND)
+	};
 
-	template<int bits>
+	const std::uint32_t PELIB_DELAY_ATTRIBUTE_V2 = 0x01;	// If this bit is set, then the structure is version 2
+
 	struct PELIB_IMAGE_DELAY_IMPORT_DIRECTORY_RECORD
 	{
 		private:
-			typedef typename std::vector<PELIB_DELAY_IMPORT<bits>>::const_iterator DelayImportIterator;
+			typedef typename std::vector<PELIB_DELAY_IMPORT>::const_iterator DelayImportIterator;
 			bool hasOrdinalNumbers;
-			std::vector<PELIB_DELAY_IMPORT<bits>> Functions;
+			std::vector<PELIB_DELAY_IMPORT> Functions;
 
 		public:
-			std::uint32_t Attributes;
-			std::uint32_t NameRva;
+			PELIB_IMAGE_DELAY_LOAD_DESCRIPTOR delayedImport;
 			std::string Name;
-			std::uint32_t ModuleHandleRva;
-			std::uint32_t DelayImportAddressTableRva;
-			std::uint32_t DelayImportNameTableRva;
-			std::uint32_t BoundDelayImportTableRva;
-			std::uint32_t UnloadDelayImportTableRva;
-			std::uint32_t TimeStamp;
-			std::uint32_t DelayImportAddressTableOffset;
-			std::uint32_t DelayImportNameTableOffset;
 
 			PELIB_IMAGE_DELAY_IMPORT_DIRECTORY_RECORD()
 			{
@@ -1324,22 +1327,13 @@ namespace PeLib
 
 			void init()
 			{
+				memset(&delayedImport, 0, sizeof(PELIB_IMAGE_DELAY_LOAD_DESCRIPTOR));
 				hasOrdinalNumbers = false;
 				Functions.clear();
-				Attributes = 0;
-				NameRva = 0;
 				Name.clear();
-				ModuleHandleRva = 0;
-				DelayImportAddressTableRva = 0;
-				DelayImportNameTableRva = 0;
-				BoundDelayImportTableRva = 0;
-				UnloadDelayImportTableRva = 0;
-				TimeStamp = 0;
-				DelayImportAddressTableOffset = 0;
-				DelayImportNameTableOffset = 0;
 			}
 
-			void addFunction(const PELIB_DELAY_IMPORT<bits> &function)
+			void addFunction(const PELIB_DELAY_IMPORT &function)
 			{
 				Functions.push_back(function);
 				if(function.hint)
@@ -1358,12 +1352,12 @@ namespace PeLib
 				return Functions.size();
 			}
 
-			const PELIB_DELAY_IMPORT<bits> *getFunction(std::size_t index) const
+			const PELIB_DELAY_IMPORT *getFunction(std::size_t index) const
 			{
 				return index < getNumberOfFunctions() ? &Functions[index] : nullptr;
 			}
 
-			PELIB_DELAY_IMPORT<bits> *getFunction(std::size_t index)
+			PELIB_DELAY_IMPORT *getFunction(std::size_t index)
 			{
 				return index < getNumberOfFunctions() ? &Functions[index] : nullptr;
 			}

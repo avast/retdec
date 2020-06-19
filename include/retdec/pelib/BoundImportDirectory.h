@@ -15,6 +15,7 @@
 
 #include "retdec/pelib/PeHeader.h"
 #include "retdec/pelib/PeLibAux.h"
+#include "retdec/pelib/ImageLoader.h"
 
 namespace PeLib
 {
@@ -32,6 +33,8 @@ namespace PeLib
 		public:
 		  virtual ~BoundImportDirectory() = default;
 
+		  /// Reads the BoundImport directory table from a PE file.
+		  int read(ImageLoader & imageLoader); // EXPORT
 		  /// Adds another bound import.
 		  int addBoundImport(const std::string& strModuleName, std::uint32_t dwTds, std::uint16_t dwOmn, std::uint16_t wWfr); // EXPORT
 		  /// Identifies a module through it's name.
@@ -83,47 +86,6 @@ namespace PeLib
 		  void addForwardedModule(std::uint32_t dwBidnr, const std::string& name, std::uint32_t timeStamp = 0, std::uint16_t offsetModuleName = 0, std::uint16_t forwardedModules = 0); // EXPORT
 		  void removeForwardedModule(std::uint32_t dwBidnr, std::uint16_t forwardedModule); // EXPORT
 	};
-
-	template <int bits>
-	class BoundImportDirectoryT : public BoundImportDirectory
-	{
-		public:
-		  /// Reads the BoundImport directory table from a PE file.
-		  int read(std::istream& inStream, const PeHeaderT<bits>& peHeader); // EXPORT
-	};
-
-	/**
-	* Reads the BoundImport directory from a PE file.
-	* @param inStream Input stream.
-	* @param peHeader A valid PE header which is necessary because some RVA calculations need to be done.
-	**/
-	template <int bits>
-	int BoundImportDirectoryT<bits>::read(
-			std::istream& inStream,
-			const PeHeaderT<bits>& peHeader)
-	{
-		IStreamWrapper inStream_w(inStream);
-
-		if (!inStream_w)
-		{
-			return ERROR_OPENING_FILE;
-		}
-
-		std::uint32_t dwOffset = peHeader.rvaToOffset(peHeader.getIddBoundImportRva());
-		unsigned int uiSize = peHeader.getIddBoundImportSize();
-
-		if (fileSize(inStream_w) < dwOffset + uiSize)
-		{
-			return ERROR_INVALID_FILE;
-		}
-
-		std::vector<unsigned char> vBimpDir(uiSize);
-		inStream_w.seekg(dwOffset, std::ios::beg);
-		inStream_w.read(reinterpret_cast<char*>(vBimpDir.data()), uiSize);
-
-		InputBuffer inpBuffer{vBimpDir};
-		return BoundImportDirectory::read(inpBuffer, vBimpDir.data(), uiSize);
-	}
 }
 
 #endif

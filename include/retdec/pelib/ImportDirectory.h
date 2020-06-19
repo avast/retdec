@@ -526,13 +526,13 @@ namespace PeLib
 	inline
 	int ImportDirectory::read(ImageLoader & imageLoader)
 	{
-		std::uint64_t OrdinalMask = ((std::uint64_t)1 << (imageLoader.getPeFileBitability() - 1));
+		std::uint64_t OrdinalMask = imageLoader.getOrdinalMask();
 		std::uint32_t SizeOfImage = imageLoader.getSizeOfImage();
 		std::uint32_t uiIndex;
 		std::uint32_t rvaBegin = imageLoader.getDataDirRva(PELIB_IMAGE_DIRECTORY_ENTRY_IMPORT);
 		std::uint32_t rva = rvaBegin;
 
-		m_thunkSize = imageLoader.getPeFileBitability() / 8;
+		m_thunkSize = imageLoader.getPointerSize();
 		m_ldrError = LDR_ERROR_NONE;
 
 		// Verify whether the import directory is within the image

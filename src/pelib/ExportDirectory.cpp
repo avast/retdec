@@ -16,6 +16,113 @@
 namespace PeLib
 {
 	/**
+	* @param str Value of the ASCIIZ string.
+	* @param rva RVA of the begin of the string
+	**/
+	void ExportDirectory::addOccupiedAddress(const std::string & str, std::uint32_t rva)
+	{
+		std::uint32_t rvaEnd = rva + str.length() + 1;
+
+		m_occupiedAddresses.push_back(std::make_pair(rva, rvaEnd));
+	}
+
+	/**
+	* @param imageLoader Initialized image loader
+	* \todo: Proper use of InputBuffer
+	**/
+	int ExportDirectory::read(ImageLoader & imageLoader)
+	{
+		PELIB_IMAGE_EXP_DIRECTORY iedCurr;
+		std::uint32_t exportRva = imageLoader.getDataDirRva(PELIB_IMAGE_DIRECTORY_ENTRY_EXPORT);
+		std::uint32_t sizeofImage = imageLoader.getSizeOfImage();
+		std::uint32_t bytesRead;
+
+		if(exportRva >= sizeofImage)
+		{
+			return ERROR_INVALID_FILE;
+		}
+
+		// Load the export directory from the image
+		bytesRead = imageLoader.readImage(&iedCurr.ied, exportRva, sizeof(PELIB_IMAGE_EXPORT_DIRECTORY));
+		if(bytesRead != sizeof(PELIB_IMAGE_EXPORT_DIRECTORY))
+		{
+			return ERROR_INVALID_FILE;
+		}
+
+		m_occupiedAddresses.emplace_back(exportRva, exportRva + sizeof(PELIB_IMAGE_EXPORT_DIRECTORY) - 1);
+
+		// Verify the export directory. Do not allow more functions than the limit
+		// Sample: CCE461B6EB23728BA3B8A97B9BE84C0FB9175DB31B9949E64144198AB3F702CE
+		if (iedCurr.ied.NumberOfFunctions > PELIB_MAX_EXPORTED_FUNCTIONS || iedCurr.ied.NumberOfNames > PELIB_MAX_EXPORTED_FUNCTIONS)
+			return ERROR_INVALID_FILE;
+
+		// Read the name of the export
+		imageLoader.readString(iedCurr.name, iedCurr.ied.Name);
+		addOccupiedAddress(iedCurr.name, iedCurr.ied.Name);
+
+		// Read the array of functions
+		for (std::uint32_t i = 0; i < iedCurr.ied.NumberOfFunctions; i++)
+		{
+			PELIB_EXP_FUNC_INFORMATION efiCurr;
+			std::uint32_t rva = iedCurr.ied.AddressOfFunctions + i * sizeof(efiCurr.addroffunc);
+
+			bytesRead = imageLoader.readImage(&efiCurr.addroffunc, rva, sizeof(efiCurr.addroffunc));
+			if(bytesRead != sizeof(efiCurr.addroffunc))
+				return ERROR_INVALID_FILE;
+
+			efiCurr.ordinal = iedCurr.ied.Base + i;
+			iedCurr.functions.push_back(efiCurr);
+
+			m_occupiedAddresses.emplace_back(
+				iedCurr.ied.AddressOfFunctions + i*sizeof(efiCurr.addroffunc),
+				iedCurr.ied.AddressOfFunctions + i*sizeof(efiCurr.addroffunc) + sizeof(efiCurr.addroffunc) - 1
+			);
+		}
+
+		for (std::uint32_t i = 0; i < iedCurr.ied.NumberOfNames; i++)
+		{
+			PELIB_EXP_FUNC_INFORMATION efiCurr;
+			std::uint16_t ordinal;
+			std::uint32_t rva = iedCurr.ied.AddressOfNameOrdinals + i * sizeof(efiCurr.ordinal);
+
+			// Read the ordinal
+			bytesRead = imageLoader.readImage(&ordinal, rva, sizeof(ordinal));
+			if(bytesRead != sizeof(ordinal))
+				return ERROR_INVALID_FILE;
+
+			m_occupiedAddresses.emplace_back(
+				iedCurr.ied.AddressOfNameOrdinals + i*sizeof(efiCurr.ordinal),
+				iedCurr.ied.AddressOfNameOrdinals + i*sizeof(efiCurr.ordinal) + sizeof(efiCurr.ordinal) - 1
+			);
+
+			if (ordinal >= iedCurr.functions.size())
+				continue;
+
+			iedCurr.functions[ordinal].ordinal = iedCurr.ied.Base + ordinal;
+
+			rva = iedCurr.ied.AddressOfNames + i * sizeof(efiCurr.addrofname);
+			if(rva >= sizeofImage)
+				return ERROR_INVALID_FILE;
+
+			bytesRead = imageLoader.readImage(&iedCurr.functions[ordinal].addrofname, rva, sizeof(std::uint32_t));
+			if(bytesRead != sizeof(std::uint32_t))
+				return ERROR_INVALID_FILE;
+
+			m_occupiedAddresses.emplace_back(
+				iedCurr.ied.AddressOfNames + i*sizeof(efiCurr.addrofname),
+				iedCurr.ied.AddressOfNames + i*sizeof(efiCurr.addrofname) + sizeof(iedCurr.functions[ordinal].addrofname) - 1
+			);
+
+			// Read the function name
+			imageLoader.readString(iedCurr.functions[ordinal].funcname, iedCurr.functions[ordinal].addrofname);
+			addOccupiedAddress(iedCurr.functions[ordinal].funcname, iedCurr.functions[ordinal].addrofname);
+		}
+
+		std::swap(m_ied, iedCurr);
+		return ERROR_NONE;
+	}
+
+	/**
 	* @param strFuncname Name of the function.
 	* @param dwFuncAddr RVA of the function.
 	**/
