@@ -1171,17 +1171,26 @@ namespace PeLib
 		std::vector<std::uint8_t> data;
 	};
 
-	template<int bits>
-	struct PELIB_IMAGE_TLS_DIRECTORY_BASE
+	struct PELIB_IMAGE_TLS_DIRECTORY32
 	{
-		typename FieldSizes<bits>::VAR4_8 StartAddressOfRawData;
-		typename FieldSizes<bits>::VAR4_8 EndAddressOfRawData;
-		typename FieldSizes<bits>::VAR4_8 AddressOfIndex;
-		typename FieldSizes<bits>::VAR4_8 AddressOfCallBacks;
+		std::uint32_t StartAddressOfRawData;
+		std::uint32_t EndAddressOfRawData;
+		std::uint32_t AddressOfIndex;
+		std::uint32_t AddressOfCallBacks;
+		std::uint32_t SizeOfZeroFill;
+		std::uint32_t Characteristics;
+	};
+
+	struct PELIB_IMAGE_TLS_DIRECTORY
+	{
+		std::uint64_t StartAddressOfRawData;
+		std::uint64_t EndAddressOfRawData;
+		std::uint64_t AddressOfIndex;
+		std::uint64_t AddressOfCallBacks;
 		std::uint32_t SizeOfZeroFill;
 		std::uint32_t Characteristics;
 
-		PELIB_IMAGE_TLS_DIRECTORY_BASE()
+		PELIB_IMAGE_TLS_DIRECTORY()
 		{
 			StartAddressOfRawData = 0;
 			EndAddressOfRawData = 0;
@@ -1190,23 +1199,6 @@ namespace PeLib
 			SizeOfZeroFill = 0;
 			Characteristics = 0;
 		}
-	};
-
-	template<int bits>
-	struct PELIB_IMAGE_TLS_DIRECTORY;// : public PELIB_IMAGE_TLS_DIRECTORY_BASE<bits>
-
-	template<>
-	struct PELIB_IMAGE_TLS_DIRECTORY<32> : public PELIB_IMAGE_TLS_DIRECTORY_BASE<32>
-	{
-//		enum {size = 24};
-		static unsigned int size(){return 24;}
-	};
-
-	template<>
-	struct PELIB_IMAGE_TLS_DIRECTORY<64> : public PELIB_IMAGE_TLS_DIRECTORY_BASE<64>
-	{
-//		enum {size = 40};
-		static unsigned int size(){return 40;}
 	};
 
 	std::uint32_t BytesToPages(std::uint32_t ByteSize);

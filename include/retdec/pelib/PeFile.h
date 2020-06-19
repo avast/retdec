@@ -163,16 +163,16 @@ namespace PeLib
 	      std::istream& m_iStream;
 
 		  PeHeader32_64 m_peh;                              ///< PE header of the current file.
-		  ExportDirectory m_expdir;                  ///< Export directory of the current file.
+		  ExportDirectory m_expdir;                         ///< Export directory of the current file.
 		  ImportDirectory m_impdir;                         ///< Import directory of the current file.
 		  BoundImportDirectory m_boundimpdir;               ///< BoundImportDirectory of the current file.
 		  ResourceDirectoryT<bits> m_resdir;                ///< ResourceDirectory of the current file.
 		  RelocationsDirectoryT<bits> m_relocs;             ///< Relocations directory of the current file.
 		  ComHeaderDirectoryT<bits> m_comdesc;              ///< COM+ descriptor directory of the current file.
 		  IatDirectory m_iat;                               ///< Import address table of the current file.
-		  DebugDirectory m_debugdir;                 ///< Debug directory of the current file.
-		  DelayImportDirectory m_delayimpdir;         ///< Delay import directory of the current file.
-		  TlsDirectory<bits> m_tlsdir;                      ///< TLS directory of the current file.
+		  DebugDirectory m_debugdir;                        ///< Debug directory of the current file.
+		  DelayImportDirectory m_delayimpdir;               ///< Delay import directory of the current file.
+		  TlsDirectory m_tlsdir;                            ///< TLS directory of the current file.
 
 		public:
 		  /// Default constructor which exists only for the sake of allowing to construct files without filenames.
@@ -285,9 +285,9 @@ namespace PeLib
 		  DelayImportDirectory & delayImports(); // EXPORT
 
 		  /// Accessor function for the TLS directory.
-		  const TlsDirectory<bits>& tlsDir() const;
+		  const TlsDirectory & tlsDir() const;
 		  /// Accessor function for the TLS directory.
-		  TlsDirectory<bits>& tlsDir();
+		  TlsDirectory & tlsDir();
 	};
 
 	/**
@@ -393,13 +393,13 @@ namespace PeLib
 	}
 
 	template<int bits>
-	const TlsDirectory<bits>& PeFileT<bits>::tlsDir() const
+	const TlsDirectory & PeFileT<bits>::tlsDir() const
 	{
 		return m_tlsdir;
 	}
 
 	template<int bits>
-	TlsDirectory<bits>& PeFileT<bits>::tlsDir()
+	TlsDirectory & PeFileT<bits>::tlsDir()
 	{
 		return m_tlsdir;
 	}
@@ -663,10 +663,9 @@ namespace PeLib
 	template<int bits>
 	int PeFileT<bits>::readTlsDirectory()
 	{
-		if (peHeader().calcNumberOfRvaAndSizes() >= 10
-			&& peHeader().getIddTlsRva() && peHeader().getIddTlsSize())
+		if(m_imageLoader.getDataDirRva(PELIB_IMAGE_DIRECTORY_ENTRY_TLS))
 		{
-			return tlsDir().read(m_iStream, peHeader());
+			return tlsDir().read(m_imageLoader);
 		}
 		return ERROR_DIRECTORY_DOES_NOT_EXIST;
 	}
