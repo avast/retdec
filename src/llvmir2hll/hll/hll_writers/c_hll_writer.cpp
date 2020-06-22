@@ -508,8 +508,8 @@ void CHLLWriter::visit(ShPtr<GlobalVarDef> varDef) {
 	ShPtr<Variable> var(varDef->getVar());
 	ShPtr<Expression> init(varDef->getInitializer());
 
-	out->space(getCurrentIndent());
 	out->addressPush(varDef->getAddress());
+	out->space(getCurrentIndent());
 	emitVarWithType(var);
 
 	// Initializer.
