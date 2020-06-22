@@ -15,44 +15,28 @@
 
 namespace PeLib
 {
-	void ComHeaderDirectory::read(InputBuffer& inputbuffer)
+	/**
+	* Reads a file's COM+ descriptor.
+	* @param inStream Input stream.
+	* @param peHeader A valid PE header which is necessary because some RVA calculations need to be done.
+	**/
+
+	int ComHeaderDirectory::read(ImageLoader & imageLoader)
 	{
-		PELIB_IMAGE_COR20_HEADER ichCurr;
-
-		inputbuffer >> ichCurr.cb;
-		inputbuffer >> ichCurr.MajorRuntimeVersion;
-		inputbuffer >> ichCurr.MinorRuntimeVersion;
-		inputbuffer >> ichCurr.MetaData.VirtualAddress;
-		inputbuffer >> ichCurr.MetaData.Size;
-		inputbuffer >> ichCurr.Flags;
-		inputbuffer >> ichCurr.EntryPointToken;
-		inputbuffer >> ichCurr.Resources.VirtualAddress;
-		inputbuffer >> ichCurr.Resources.Size;
-		inputbuffer >> ichCurr.StrongNameSignature.VirtualAddress;
-		inputbuffer >> ichCurr.StrongNameSignature.Size;
-		inputbuffer >> ichCurr.CodeManagerTable.VirtualAddress;
-		inputbuffer >> ichCurr.CodeManagerTable.Size;
-		inputbuffer >> ichCurr.VTableFixups.VirtualAddress;
-		inputbuffer >> ichCurr.VTableFixups.Size;
-		inputbuffer >> ichCurr.ExportAddressTableJumps.VirtualAddress;
-		inputbuffer >> ichCurr.ExportAddressTableJumps.Size;
-		inputbuffer >> ichCurr.ManagedNativeHeader.VirtualAddress;
-		inputbuffer >> ichCurr.ManagedNativeHeader.Size;
-
-		std::swap(ichCurr, m_ichComHeader);
-	}
-
-	int ComHeaderDirectory::read(unsigned char* buffer, unsigned int buffersize)
-	{
-		if (buffersize < PELIB_IMAGE_COR20_HEADER::size())
+		std::uint32_t rva = imageLoader.getDataDirRva(PELIB_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
+		std::uint32_t size = imageLoader.getDataDirSize(PELIB_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
+		std::uint32_t sizeOfImage = imageLoader.getSizeOfImage();
+		if(rva >= sizeOfImage || (rva + size) > sizeOfImage)
 		{
 			return ERROR_INVALID_FILE;
 		}
 
-		std::vector<std::uint8_t> vComDescDirectory(buffer, buffer + buffersize);
+		// Read the COM header as-is
+		if(imageLoader.readImage(&m_ichComHeader, rva, size) != size)
+		{
+			return ERROR_INVALID_FILE;
+		}
 
-		InputBuffer ibBuffer(vComDescDirectory);
-		read(ibBuffer);
 		return ERROR_NONE;
 	}
 

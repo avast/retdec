@@ -358,6 +358,16 @@ uint32_t PeLib::ImageLoader::getSizeOfImageAligned() const
 	return AlignToSize(optionalHeader.SizeOfImage, PELIB_PAGE_SIZE);
 }
 
+uint32_t PeLib::ImageLoader::getSectionAlignment() const
+{
+	return optionalHeader.SectionAlignment;
+}
+
+uint32_t PeLib::ImageLoader::getFileAlignment() const
+{
+	return optionalHeader.FileAlignment;
+}
+
 uint32_t PeLib::ImageLoader::getDataDirRva(size_t dataDirIndex) const
 {
     // The data directory must be present there

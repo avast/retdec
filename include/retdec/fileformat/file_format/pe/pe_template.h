@@ -794,7 +794,7 @@ inline unsigned long long peTlsCharacteristics(const PeLib::TlsDirectory &tls)
  * @param comHeader Parser of PE COM/CLR directory
  * @return Parsed CLR header
  */
-template<int bits> std::unique_ptr<CLRHeader> peGetClrHeader(const PeLib::ComHeaderDirectoryT<bits> &comHeader)
+inline std::unique_ptr<CLRHeader> peGetClrHeader(const PeLib::ComHeaderDirectory &comHeader)
 {
 	auto clrHeader = std::make_unique<CLRHeader>();
 	clrHeader->setHeaderSize(comHeader.getSizeOfHeader());
@@ -824,7 +824,7 @@ template<int bits> std::unique_ptr<CLRHeader> peGetClrHeader(const PeLib::ComHea
  * @param relocs Parser of PE relocation directory
  * @return Number of relocations
  */
-template<int bits> unsigned long long peNumberOfRelocations(const PeLib::RelocationsDirectoryT<bits> &relocs)
+inline unsigned long long peNumberOfRelocations(const PeLib::RelocationsDirectory &relocs)
 {
 	return relocs.calcNumberOfRelocations();
 }
@@ -835,7 +835,7 @@ template<int bits> unsigned long long peNumberOfRelocations(const PeLib::Relocat
  * @param index Relocation data index
  * @return Number of relocation data
  */
-template<int bits> unsigned long long peNumberOfRelocationData(const PeLib::RelocationsDirectoryT<bits> &relocs, unsigned long long index)
+inline unsigned long long peNumberOfRelocationData(const PeLib::RelocationsDirectory &relocs, unsigned long long index)
 {
 	return relocs.calcNumberOfRelocationData(index);
 }

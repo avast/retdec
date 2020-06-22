@@ -13,7 +13,7 @@
 #ifndef COMHEADERDIRECTORY_H
 #define COMHEADERDIRECTORY_H
 
-#include "retdec/pelib/PeHeader.h"
+#include "retdec/pelib/ImageLoader.h"
 
 namespace PeLib
 {
@@ -27,13 +27,11 @@ namespace PeLib
 		protected:
 		  PELIB_IMAGE_COR20_HEADER m_ichComHeader; ///< The COM+ descriptor.
 
-		  void read(InputBuffer& inputbuffer);
-
 		public:
 		  virtual ~ComHeaderDirectory() = default;
 
 		  /// Read a file's COM+ runtime descriptor directory.
-		  int read(unsigned char* buffer, unsigned int buffersize); // EXPORT
+		  int read(ImageLoader & imageLoader); // EXPORT
 		  /// Rebuild the COM+ descriptor.
 		  void rebuild(std::vector<std::uint8_t>& vBuffer) const; // EXPORT
 		  /// Returns the size of the current COM+ descriptor.
@@ -119,48 +117,5 @@ namespace PeLib
 		  /// Change the COM+ descriptor's ManagedNativeHeader (Size) value.
 		  void setManagedNativeHeaderSize(std::uint32_t dwValue); // EXPORT
 	};
-
-	template <int bits>
-	class ComHeaderDirectoryT : public ComHeaderDirectory
-	{
-		public:
-		  /// Read a file's COM+ runtime descriptor directory.
-		  int read(std::istream& inStream, const PeHeaderT<bits>& peHeader); // EXPORT
-	};
-
-	/**
-	* Reads a file's COM+ descriptor.
-	* @param inStream Input stream.
-	* @param peHeader A valid PE header which is necessary because some RVA calculations need to be done.
-	**/
-	template <int bits>
-	int ComHeaderDirectoryT<bits>::read(std::istream& inStream, const PeHeaderT<bits>& peHeader)
-	{
-		IStreamWrapper inStream_w(inStream);
-
-		if (!inStream_w)
-		{
-			return ERROR_OPENING_FILE;
-		}
-
-		std::uint64_t ulFileSize = fileSize(inStream_w);
-
-		unsigned int uiOffset = peHeader.rvaToOffset(peHeader.getIddComHeaderRva());
-		unsigned int uiSize = peHeader.getIddComHeaderSize();
-
-		if (ulFileSize < uiOffset + uiSize)
-		{
-			return ERROR_INVALID_FILE;
-		}
-
-		inStream_w.seekg(uiOffset, std::ios::beg);
-
-		std::vector<std::uint8_t> vComDescDirectory(uiSize);
-		inStream_w.read(reinterpret_cast<char*>(vComDescDirectory.data()), uiSize);
-
-		InputBuffer ibBuffer{vComDescDirectory};
-		ComHeaderDirectory::read(ibBuffer);
-		return ERROR_NONE;
-	}
 }
 #endif

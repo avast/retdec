@@ -154,6 +154,8 @@ class ImageLoader
 	std::uint32_t getSizeOfHeaders() const;
 	std::uint32_t getSizeOfImage() const;
 	std::uint32_t getSizeOfImageAligned() const;
+	std::uint32_t getSectionAlignment() const;
+	std::uint32_t getFileAlignment() const;
 	std::uint32_t getDataDirRva(std::size_t dataDirIndex) const;
 	std::uint32_t getDataDirSize(std::size_t dataDirIndex) const;
 	std::uint32_t getFileOffsetFromRva(std::uint32_t rva) const;

@@ -610,8 +610,14 @@ void PeFormat::initStructures(const std::string & dllListFile)
 			// Fill-in the loader error info from PE file
 			initLoaderErrorInfo();
 
-			//mzHeader = file->mzHeader();
+			// Create an instance of PeFormatParser32/PeFormatParser64
+			if(file->imageLoader().getImageBitability() == 64)
+				formatParser = new PeFormatParser64(this, static_cast<PeFileT<64>*>(file));
+			else
+				formatParser = new PeFormatParser32(this, static_cast<PeFileT<32>*>(file));
 
+			/*
+			//mzHeader = file->mzHeader();
 			if (auto *f32 = isPe32())
 			{
 				peHeader32 = &(f32->peHeader());
@@ -620,8 +626,8 @@ void PeFormat::initStructures(const std::string & dllListFile)
 			else if (auto *f64 = isPe64())
 			{
 				peHeader64 = &(f64->peHeader());
-				formatParser = new PeFormatParser64(this, static_cast<PeFileT<64>*>(file));
 			}
+			*/
 		}
 		catch(...)
 		{}

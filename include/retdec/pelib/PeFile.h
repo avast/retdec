@@ -167,8 +167,8 @@ namespace PeLib
 		  ImportDirectory m_impdir;                         ///< Import directory of the current file.
 		  BoundImportDirectory m_boundimpdir;               ///< BoundImportDirectory of the current file.
 		  ResourceDirectory m_resdir;                       ///< ResourceDirectory of the current file.
-		  RelocationsDirectoryT<bits> m_relocs;             ///< Relocations directory of the current file.
-		  ComHeaderDirectoryT<bits> m_comdesc;              ///< COM+ descriptor directory of the current file.
+		  RelocationsDirectory m_relocs;                    ///< Relocations directory of the current file.
+		  ComHeaderDirectory m_comdesc;                     ///< COM+ descriptor directory of the current file.
 		  IatDirectory m_iat;                               ///< Import address table of the current file.
 		  DebugDirectory m_debugdir;                        ///< Debug directory of the current file.
 		  DelayImportDirectory m_delayimpdir;               ///< Delay import directory of the current file.
@@ -260,14 +260,14 @@ namespace PeLib
 		  ResourceDirectory & resDir(); // EXPORT
 
 		  /// Accessor function for the relocations directory.
-		  const RelocationsDirectoryT<bits>& relocDir() const;
+		  const RelocationsDirectory & relocDir() const;
 		  /// Accessor function for the relocations directory.
-		  RelocationsDirectoryT<bits>& relocDir(); // EXPORT
+		  RelocationsDirectory & relocDir(); // EXPORT
 
 		  /// Accessor function for the COM+ descriptor directory.
-		  const ComHeaderDirectoryT<bits>& comDir() const;
+		  const ComHeaderDirectory & comDir() const;
 		  /// Accessor function for the COM+ descriptor directory.
-		  ComHeaderDirectoryT<bits>& comDir(); // EXPORT
+		  ComHeaderDirectory & comDir(); // EXPORT
 
 		  /// Accessor function for the IAT directory.
 		  const IatDirectory & iatDir() const;
@@ -480,7 +480,7 @@ namespace PeLib
 	* @return A reference to the file's relocations directory.
 	**/
 	template <int bits>
-	const RelocationsDirectoryT<bits>& PeFileT<bits>::relocDir() const
+	const RelocationsDirectory & PeFileT<bits>::relocDir() const
 	{
 		return m_relocs;
 	}
@@ -489,7 +489,7 @@ namespace PeLib
 	* @return A reference to the file's relocations directory.
 	**/
 	template <int bits>
-	RelocationsDirectoryT<bits>& PeFileT<bits>::relocDir()
+	RelocationsDirectory & PeFileT<bits>::relocDir()
 	{
 		return m_relocs;
 	}
@@ -498,7 +498,7 @@ namespace PeLib
 	* @return A reference to the file's COM+ descriptor directory.
 	**/
 	template <int bits>
-	const ComHeaderDirectoryT<bits>& PeFileT<bits>::comDir() const
+	const ComHeaderDirectory & PeFileT<bits>::comDir() const
 	{
 		return m_comdesc;
 	}
@@ -507,7 +507,7 @@ namespace PeLib
 	* @return A reference to the file's COM+ descriptor directory.
 	**/
 	template <int bits>
-	ComHeaderDirectoryT<bits>& PeFileT<bits>::comDir()
+	ComHeaderDirectory & PeFileT<bits>::comDir()
 	{
 		return m_comdesc;
 	}
@@ -626,14 +626,11 @@ namespace PeLib
 	template<int bits>
 	int PeFileT<bits>::readSecurityDirectory()
 	{
-		if (peHeader().calcNumberOfRvaAndSizes() >= 5
-			&& peHeader().getIddSecurityRva()
-			&& peHeader().getIddSecuritySize())
+		if(m_imageLoader.getDataDirRva(PELIB_IMAGE_DIRECTORY_ENTRY_SECURITY))
 		{
-			return securityDir().read(
-					m_iStream,
-					peHeader().getIddSecurityRva(),
-					peHeader().getIddSecuritySize());
+			return securityDir().read(m_iStream, 
+									  m_imageLoader.getDataDirRva(PELIB_IMAGE_DIRECTORY_ENTRY_SECURITY),
+									  m_imageLoader.getDataDirSize(PELIB_IMAGE_DIRECTORY_ENTRY_SECURITY));
 		}
 		return ERROR_DIRECTORY_DOES_NOT_EXIST;
 	}
@@ -641,10 +638,9 @@ namespace PeLib
 	template<int bits>
 	int PeFileT<bits>::readRelocationsDirectory()
 	{
-		if (peHeader().calcNumberOfRvaAndSizes() >= 6
-			&& peHeader().getIddBaseRelocRva() && peHeader().getIddBaseRelocSize())
+		if(m_imageLoader.getDataDirRva(PELIB_IMAGE_DIRECTORY_ENTRY_BASERELOC))
 		{
-			return relocDir().read(m_iStream, peHeader());
+			return relocDir().read(m_imageLoader);
 		}
 		return ERROR_DIRECTORY_DOES_NOT_EXIST;
 	}
@@ -703,10 +699,10 @@ namespace PeLib
 	template<int bits>
 	int PeFileT<bits>::readComHeaderDirectory()
 	{
-		if (peHeader().calcNumberOfRvaAndSizes() >= 15
-			&& peHeader().getIddComHeaderRva() && peHeader().getIddComHeaderSize())
+		if(m_imageLoader.getDataDirRva(PELIB_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR) &&
+		   m_imageLoader.getDataDirSize(PELIB_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR))
 		{
-			return comDir().read(m_iStream, peHeader());
+			return comDir().read(m_imageLoader);
 		}
 		return ERROR_DIRECTORY_DOES_NOT_EXIST;
 	}
@@ -751,14 +747,14 @@ namespace PeLib
 	LoaderError PeFileT<bits>::checkForInMemoryLayout(LoaderError ldrError) const
 	{
 		std::uint64_t ulFileSize = fileSize(m_iStream);
-		std::uint64_t sizeOfImage = peHeader().getSizeOfImage();
+		std::uint64_t sizeOfImage = m_imageLoader.getSizeOfImage();
 
 		// The file size must be greater or equal to SizeOfImage
 		if(ulFileSize >= sizeOfImage)
 		{
-			std::uint32_t sectionAlignment = peHeader().getSectionAlignment();
-			std::uint32_t fileAlignment = peHeader().getFileAlignment();
-			std::uint32_t sizeOfHeaders = peHeader().getSizeOfHeaders();
+			std::uint32_t sectionAlignment = m_imageLoader.getSectionAlignment();
+			std::uint32_t fileAlignment = m_imageLoader.getFileAlignment();
+			std::uint32_t sizeOfHeaders = m_imageLoader.getSizeOfHeaders();
 
 			// SectionAlignment must be greater than file alignment
 			if(sectionAlignment >= PELIB_PAGE_SIZE && sectionAlignment > fileAlignment)
@@ -770,7 +766,7 @@ namespace PeLib
 
 					// Read the entire after-header-data
 					ByteBuffer headerData(headerDataSize);
-					m_iStream.seekg(peHeader().getSizeOfHeaders(), std::ios::beg);
+					m_iStream.seekg(sizeOfHeaders, std::ios::beg);
 					m_iStream.read(reinterpret_cast<char *>(headerData.data()), headerDataSize);
 
 					// Check whether there are zeros only. If yes, we consider
