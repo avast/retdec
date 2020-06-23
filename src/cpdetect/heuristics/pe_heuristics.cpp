@@ -1981,10 +1981,6 @@ void PeHeuristics::getPeSectionHeuristics()
 	{
 		addPacker(source, strength, "LameCrypt");
 	}
-	if (lastName == ".rmnet")
-	{
-		addPacker(source, strength, "Ramnit");
-	}
 	if (firstName == ".Upack" || firstName == ".ByDwing")
 	{
 		addPacker(source, strength, "Upack");
