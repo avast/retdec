@@ -940,7 +940,7 @@ void PeHeuristics::getUpxHeuristics()
 	// format: x.xx'\0'UPX!
 	const std::size_t minPos = 5, verLen = 4;
 	pos = content.find("UPX!");
-	if (pos >= minPos && pos < 0x500)
+	if (pos >= minPos && pos < 0x500 && pos < sections[0]->getOffset())
 	{
 		std::string version;
 		std::size_t num;
