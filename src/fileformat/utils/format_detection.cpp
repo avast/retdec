@@ -128,44 +128,9 @@ bool isPe(std::istream& stream)
 {
 	// Create instance of the ImageLoader with most benevolent flags
 	ImageLoader imgLoader(0);
-	bool bIsPe = false;
 
 	// Load the image from stream. Only load headers.
-	if(imgLoader.Load(stream, 0, true) == ERROR_NONE)
-		bIsPe = (imgLoader.getNtSignature() == PELIB_IMAGE_NT_SIGNATURE);
-	return bIsPe;
-
-/*
-	resetStream(stream);
-
-	std::unique_ptr<PeFile> file(openPeFile(stream));
-	if(!file)
-	{
-		return false;
-	}
-
-	std::uint32_t signature = 0;
-	try
-	{
-		file->readMzHeader();
-		file->readPeHeader();
-		switch(getFileType(stream))
-		{
-			case PEFILE32:
-				signature = static_cast<PeFileT<32>*>(file.get())->peHeader().getNtSignature();
-				break;
-			case PEFILE64:
-				signature = static_cast<PeFileT<64>*>(file.get())->peHeader().getNtSignature();
-				break;
-			default:;
-		}
-	} catch(...)
-	{
-		return false;
-	}
-
-	return signature == 0x4550 || signature == 0x50450000;
-*/
+	return (imgLoader.Load(stream, 0, true) == ERROR_NONE);
 }
 
 /**

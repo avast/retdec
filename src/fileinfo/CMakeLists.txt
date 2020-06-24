@@ -100,10 +100,7 @@ add_executable(fileinfo
 	file_wrapper/coff_wrapper.cpp
 	file_wrapper/elf_wrapper.cpp
 	file_wrapper/macho_wrapper.cpp
-	file_wrapper/pe/pe_wrapper.cpp
-	file_wrapper/pe/pe_wrapper_parser/pe_wrapper_parser.cpp
-	file_wrapper/pe/pe_wrapper_parser/pe_wrapper_parser32.cpp
-	file_wrapper/pe/pe_wrapper_parser/pe_wrapper_parser64.cpp
+	file_wrapper/pe_wrapper.cpp
 	fileinfo.cpp
 	pattern_detector/pattern_detector.cpp
 )

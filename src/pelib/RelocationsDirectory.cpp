@@ -28,7 +28,7 @@ namespace PeLib
 		std::uint32_t sizeOfImage = imageLoader.getSizeOfImage();
 
 		// Check for relocations out of image
-		if(rva >= sizeOfImage || (rva + size) > sizeOfImage)
+		if(rva >= sizeOfImage || (rva + size) < rva || (rva + size) > sizeOfImage)
 		{
 			RelocationsDirectory::setLoaderError(LDR_ERROR_RELOCATIONS_OUT_OF_IMAGE);
 			return ERROR_INVALID_FILE;

@@ -504,11 +504,11 @@ void PeHeuristics::getMorphineHeuristics()
  */
 void PeHeuristics::getStarForceHeuristics()
 {
-	const PeLib::MzHeader & mzHeader = peParser.getMzHeader();
+	const PeLib::ImageLoader & imageLoader = peParser.getImageLoader();
 	const auto epSection = toolInfo.epSection.getIndex();
-	uint32_t e_lfanew = mzHeader.getAddressOfPeHeader();
-	uint16_t e_cblp = mzHeader.getBytesOnLastPage();
-	uint16_t e_cp = mzHeader.getPagesInFile();
+	uint32_t e_lfanew = imageLoader.getDosHeader().e_lfanew;
+	uint16_t e_cblp = imageLoader.getDosHeader().e_cblp;
+	uint16_t e_cp = imageLoader.getDosHeader().e_cp;
 
 	if (noOfSections >= 4)
 	{

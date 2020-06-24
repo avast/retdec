@@ -89,7 +89,7 @@ private:
 	void copySectionFromOriginalFile(std::uint32_t origSectIndex, const std::string& newFileName, std::uint32_t newSectIndex);
 
 	std::unique_ptr<retdec::loader::Image> _file;
-	PeLib::PeFile32* _peFile;
+	PeLib::PeFileT * _peFile;
 	MpressUnpackerStub _unpackerStub;
 	MpressFixStub _fixStub;
 	const retdec::loader::Segment* _packedContentSect;

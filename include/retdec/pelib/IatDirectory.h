@@ -14,7 +14,6 @@
 #define IATDIRECTORY_H
 
 #include "retdec/pelib/PeLibInc.h"
-#include "retdec/pelib/PeHeader.h"
 #include "retdec/pelib/ImageLoader.h"
 
 namespace PeLib

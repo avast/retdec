@@ -69,7 +69,7 @@ template <int /*bits*/> struct PeUpxStubTraits {};
 template <> struct PeUpxStubTraits<32>
 {
 	using AddressType = std::uint32_t; ///< Type with default word size.
-	using PeLibFileType = PeLib::PeFile32;
+	using PeLibFileType = PeLib::PeFileT;
 
 	static const std::uint16_t HeaderMagic = PeLib::PELIB_IMAGE_NT_OPTIONAL_HDR32_MAGIC; ///< PE magic header.
 	static const std::uint32_t NumberOfRvaAndSizesOffset = 0x74; ///< Offset in PE header to directories count.
@@ -89,7 +89,7 @@ template <> struct PeUpxStubTraits<32>
 template <> struct PeUpxStubTraits<64>
 {
 	using AddressType = std::uint32_t; ///< Type with default word size.
-	using PeLibFileType = PeLib::PeFile64; ///< Type of PE file.
+	using PeLibFileType = PeLib::PeFileT; ///< Type of PE file.
 
 	static const std::uint16_t HeaderMagic = PeLib::PELIB_IMAGE_NT_OPTIONAL_HDR64_MAGIC; ///< PE magic header.
 	static const std::uint32_t NumberOfRvaAndSizesOffset = 0x84; ///< Offset in PE header to directories count.

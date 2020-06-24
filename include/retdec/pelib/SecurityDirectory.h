@@ -7,8 +7,6 @@
 #ifndef SECURITYDIRECTORY_H
 #define SECURITYDIRECTORY_H
 
-#include "retdec/pelib/PeHeader.h"
-
 namespace PeLib
 {
 	class SecurityDirectory

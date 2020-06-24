@@ -182,7 +182,7 @@ template <int bits> void PeUpxStub<bits>::unpack(const std::string& outputFile)
 
 	// Detect auxiliary stubs
 	detectUnfilter(unpackingStub);
-
+/*
 	std::string inputFilePath = _file->getFileFormat()->getPathToFile();
 	PeLib::PeFile* peFile = PeLib::openPeFile(inputFilePath);
 	_newPeFile = static_cast<PeLibFileType*>(peFile);
@@ -250,6 +250,7 @@ template <int bits> void PeUpxStub<bits>::unpack(const std::string& outputFile)
 
 	// Save the output to the file
 	saveFile(outputFile, unpackedData);
+	*/
 }
 
 /**
@@ -425,6 +426,7 @@ template <int bits> void PeUpxStub<bits>::unpackData(DynamicBuffer& unpackedData
  */
 template <int bits> void PeUpxStub<bits>::readPackedFileILT(DynamicBuffer& ilt)
 {
+/*
 	// We don't use PeLib for reading ILT because it is going to populate impDir(), but we want to it to build it all ourselves manually
 	std::vector<std::uint8_t> iltBytes;
 	const retdec::loader::Segment* importsSection = _file->getSegmentFromAddress(_newPeFile->peHeader().getIddImportRva() + _newPeFile->peHeader().getImageBase());
@@ -437,6 +439,7 @@ template <int bits> void PeUpxStub<bits>::readPackedFileILT(DynamicBuffer& ilt)
 			_newPeFile->peHeader().getIddImportSize());
 
 	ilt = DynamicBuffer(iltBytes, _file->getFileFormat()->getEndianness());
+	*/
 }
 
 /**
@@ -448,6 +451,7 @@ template <int bits> void PeUpxStub<bits>::readPackedFileILT(DynamicBuffer& ilt)
  */
 template <int bits> void PeUpxStub<bits>::fixSizeOfSections(const DynamicBuffer& unpackedData)
 {
+	/*
 	// Always make sure that UPX0 points to same raw pointer as UPX1 before we process sections
 	// This allows us to use much more simpler algorithm, than calculating with all possible positions of UPX0
 	_newPeFile->peHeader().setPointerToRawData(0, _newPeFile->peHeader().getPointerToRawData(1));
@@ -491,6 +495,7 @@ template <int bits> void PeUpxStub<bits>::fixSizeOfSections(const DynamicBuffer&
 
 	_newPeFile->peHeader().removeSection(_file->getEpSegment()->getSecSeg()->getIndex());
 	_newPeFile->peHeader().makeValid(_newPeFile->mzHeader().size());
+	*/
 }
 
 /**
@@ -559,7 +564,7 @@ template <int bits> UpxExtraData PeUpxStub<bits>::parseExtraData(DynamicBuffer& 
 	std::uint32_t sizeOfOptionalHeader = (bits == 64) ? sizeof(PeLib::PELIB_IMAGE_OPTIONAL_HEADER64) : sizeof(PeLib::PELIB_IMAGE_OPTIONAL_HEADER32);
 	std::uint32_t dataDirectoriesStart = sizeof(PeLib::PELIB_IMAGE_NT_SIGNATURE) + PeLib::PELIB_IMAGE_FILE_HEADER::size() + sizeOfOptionalHeader;
 	std::uint32_t sectionHeadersStart = dataDirectoriesStart + numberOfDirectories * PeLib::PELIB_IMAGE_DATA_DIRECTORY::size();
-	std::uint32_t sectionHeadersEnd = sectionHeadersStart + PeLib::PELIB_IMAGE_SECTION_HEADER::size() * numberOfSections;
+	std::uint32_t sectionHeadersEnd = sectionHeadersStart + sizeof(PeLib::PELIB_IMAGE_SECTION_HEADER) * numberOfSections;
 
 	// Check overflow
 	if (originalHeaderOffset + sectionHeadersEnd < originalHeaderOffset)
@@ -613,8 +618,8 @@ template <int bits> void PeUpxStub<bits>::fixPeHeader(const DynamicBuffer& origi
 	std::uint32_t sizeOfCode = originalHeader.read<std::uint32_t>(sizeof(PeLib::PELIB_IMAGE_NT_SIGNATURE) + PeLib::PELIB_IMAGE_FILE_HEADER::size() + 0x04);
 	std::uint32_t baseOfCode = originalHeader.read<std::uint32_t>(sizeof(PeLib::PELIB_IMAGE_NT_SIGNATURE) + PeLib::PELIB_IMAGE_FILE_HEADER::size() + 0x14);
 
-	_newPeFile->peHeader().setSizeOfCode(sizeOfCode);
-	_newPeFile->peHeader().setBaseOfCode(baseOfCode);
+	//_newPeFile->peHeader().setSizeOfCode(sizeOfCode);
+	//_newPeFile->peHeader().setBaseOfCode(baseOfCode);
 }
 
 /**
@@ -624,11 +629,13 @@ template <int bits> void PeUpxStub<bits>::fixPeHeader(const DynamicBuffer& origi
  */
 template <int bits> void PeUpxStub<bits>::unfilterData(DynamicBuffer& unpackedData)
 {
+	/*
 	std::uint32_t startOffset = _newPeFile->peHeader().getBaseOfCode() - _newPeFile->peHeader().getVirtualAddress(0);
 	std::uint32_t size = _newPeFile->peHeader().getSizeOfCode();
 
 	if (!Unfilter::run(unpackedData, _filterId, _filterParam, _filterCount, startOffset, size))
 		throw UnsupportedFilterException(_filterId);
+	*/
 }
 
 /**
@@ -640,6 +647,7 @@ template <int bits> void PeUpxStub<bits>::unfilterData(DynamicBuffer& unpackedDa
  */
 template <int bits> void PeUpxStub<bits>::fixImports(const DynamicBuffer& unpackedData, const UpxExtraData& extraData, const DynamicBuffer& ilt)
 {
+	/*
 	if (extraData.getImportsOffset() == 0)
 	{
 		_newPeFile->peHeader().setIddImportRva(0);
@@ -716,6 +724,7 @@ template <int bits> void PeUpxStub<bits>::fixImports(const DynamicBuffer& unpack
 	_newPeFile->peHeader().setIddIatRva(lowestFirstThunk);
 	_newPeFile->peHeader().setIddIatSize(4); // @todo Probably set proper size???
 	_newPeFile->peHeader().makeValid(_newPeFile->mzHeader().size());
+	*/
 }
 
 /**
@@ -730,6 +739,7 @@ template <int bits> void PeUpxStub<bits>::fixImports(const DynamicBuffer& unpack
  */
 template <int bits> void PeUpxStub<bits>::fixRelocations(DynamicBuffer& unpackedData, const UpxExtraData& extraData)
 {
+	/*
 	if (extraData.getRelocationsOffset() == 0)
 		return;
 
@@ -769,6 +779,7 @@ template <int bits> void PeUpxStub<bits>::fixRelocations(DynamicBuffer& unpacked
 		// Rewrite the relocated address
 		unpackedData.write<std::uint32_t>(relocAddr, addr);
 	}
+	*/
 }
 
 /**
@@ -779,6 +790,7 @@ template <int bits> void PeUpxStub<bits>::fixRelocations(DynamicBuffer& unpacked
  */
 template <int bits> void PeUpxStub<bits>::fixTls(const DynamicBuffer& originalHeader)
 {
+	/*
 	// Make sure there is enough data directories
 	_newPeFile->peHeader().setNumberOfRvaAndSizes(std::max(_newPeFile->peHeader().calcNumberOfRvaAndSizes(), static_cast<std::uint32_t>(PeLib::PELIB_IMAGE_DIRECTORY_ENTRY_TLS) + 1));
 	_newPeFile->peHeader().makeValid(_newPeFile->mzHeader().size());
@@ -797,6 +809,7 @@ template <int bits> void PeUpxStub<bits>::fixTls(const DynamicBuffer& originalHe
 		throw InvalidDataDirectoryException("TLS");
 
 	upx_plugin->log("Original TLS directory found at RVA 0x", std::hex, tlsRva, " with size 0x", tlsSize, std::dec, ".");
+	*/
 }
 
 /**
@@ -809,10 +822,10 @@ template <int bits> void PeUpxStub<bits>::fixOep(const DynamicBuffer& originalHe
 	// At the oepOffset is operand of JMP instruction, so the address is relative to the jump instruction
 	// We need to take the address of the JMP instruction + its size and add this relative address
 	// Everything needs to be calculated in virtual addresses, not RVAs since we don't want to get into negative numbers
-	_newPeFile->peHeader().setAddressOfEntryPoint(originalHeader.read<std::uint32_t>(0x28));
-	_newPeFile->peHeader().makeValid(_newPeFile->mzHeader().size());
+	//_newPeFile->peHeader().setAddressOfEntryPoint(originalHeader.read<std::uint32_t>(0x28));
+	//_newPeFile->peHeader().makeValid(_newPeFile->mzHeader().size());
 
-	upx_plugin->log("Original entry point address set to 0x", std::hex, _newPeFile->peHeader().getAddressOfEntryPoint(), std::dec, ".");
+	//upx_plugin->log("Original entry point address set to 0x", std::hex, _newPeFile->peHeader().getAddressOfEntryPoint(), std::dec, ".");
 }
 
 /**
@@ -823,6 +836,8 @@ template <int bits> void PeUpxStub<bits>::fixOep(const DynamicBuffer& originalHe
  */
 template <int bits> void PeUpxStub<bits>::fixExports(const DynamicBuffer& originalHeader)
 {
+	/*
+
 	// Assumption is that exports are compressed
 	_exportsCompressed = true;
 
@@ -907,6 +922,7 @@ template <int bits> void PeUpxStub<bits>::fixExports(const DynamicBuffer& origin
 		_newPeFile->expDir().addFunction(name, exportsData.read<std::uint32_t>(exportsAddressesOffset + i * 4));
 		_newPeFile->expDir().setFunctionOrdinal(i, exportsData.read<std::uint16_t>(exportsOrdinalsOffset + i * 2));
 	}
+	*/
 }
 
 /**
@@ -917,6 +933,7 @@ template <int bits> void PeUpxStub<bits>::fixExports(const DynamicBuffer& origin
  */
 template <int bits> void PeUpxStub<bits>::fixLoadConfiguration(const DynamicBuffer& originalHeader)
 {
+	/*
 	// Make sure there is enough data directories
 	_newPeFile->peHeader().setNumberOfRvaAndSizes(std::max(_newPeFile->peHeader().calcNumberOfRvaAndSizes(), static_cast<std::uint32_t>(PeLib::PELIB_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG) + 1));
 	_newPeFile->peHeader().makeValid(_newPeFile->mzHeader().size());
@@ -935,6 +952,7 @@ template <int bits> void PeUpxStub<bits>::fixLoadConfiguration(const DynamicBuff
 		throw InvalidDataDirectoryException("Load configuration");
 
 	upx_plugin->log("Original load configuration directory found at RVA 0x", std::hex, loadConfigRva, " with size 0x", loadConfigSize, std::dec, ".");
+	*/
 }
 
 /**
@@ -948,6 +966,7 @@ template <int bits> void PeUpxStub<bits>::fixLoadConfiguration(const DynamicBuff
  */
 template <int bits> void PeUpxStub<bits>::fixResources(const DynamicBuffer& unpackedData, const DynamicBuffer& originalHeader)
 {
+/*
 	// Make sure there is enough data directories
 	_newPeFile->peHeader().setNumberOfRvaAndSizes(std::max(_newPeFile->peHeader().calcNumberOfRvaAndSizes(), static_cast<std::uint32_t>(PeLib::PELIB_IMAGE_DIRECTORY_ENTRY_RESOURCE) + 1));
 	_newPeFile->peHeader().makeValid(_newPeFile->mzHeader().size());
@@ -1000,6 +1019,7 @@ template <int bits> void PeUpxStub<bits>::fixResources(const DynamicBuffer& unpa
 	_newPeFile->peHeader().setIddResourceRva(newRsrcRva);
 	_newPeFile->peHeader().setIddResourceSize(newRsrcRva);
 	_newPeFile->peHeader().makeValid(_newPeFile->mzHeader().size());
+	*/
 }
 
 /**
@@ -1010,6 +1030,7 @@ template <int bits> void PeUpxStub<bits>::fixResources(const DynamicBuffer& unpa
  */
 template <int bits> void PeUpxStub<bits>::fixSectionHeaders(const DynamicBuffer& originalHeader)
 {
+	/*
 	std::uint16_t numberOfSections = originalHeader.read<std::uint16_t>(6);
 	std::uint32_t numberOfDirectories = originalHeader.read<std::uint32_t>(PeUpxStubTraits<bits>::NumberOfRvaAndSizesOffset);
 	std::uint32_t sectionHeadersOffset = PeUpxStubTraits<bits>::ExportsDirectoryRvaOffset + numberOfDirectories * 8;
@@ -1082,6 +1103,7 @@ template <int bits> void PeUpxStub<bits>::fixSectionHeaders(const DynamicBuffer&
 			_newPeFile->peHeader().makeValid(_newPeFile->mzHeader().size());
 		}
 	}
+	*/
 }
 
 /**
@@ -1090,6 +1112,7 @@ template <int bits> void PeUpxStub<bits>::fixSectionHeaders(const DynamicBuffer&
  */
 template <int bits> void PeUpxStub<bits>::fixCoffSymbolTable()
 {
+/*
 	_coffSymbolTable.clear();
 
 	// MinGW files use COFF symbols even though it shouldn't be used for EXEs
@@ -1119,6 +1142,7 @@ template <int bits> void PeUpxStub<bits>::fixCoffSymbolTable()
 		else
 			upx_plugin->log("Packed file seems to be truncated. Not copying DWARF debug info.");
 	}
+	*/
 }
 
 /**
@@ -1126,6 +1150,7 @@ template <int bits> void PeUpxStub<bits>::fixCoffSymbolTable()
  */
 template <int bits> void PeUpxStub<bits>::fixCertificates()
 {
+	/*
 	// Make sure there is enough data directories
 	_newPeFile->peHeader().setNumberOfRvaAndSizes(std::max(_newPeFile->peHeader().calcNumberOfRvaAndSizes(), static_cast<std::uint32_t>(PeLib::PELIB_IMAGE_DIRECTORY_ENTRY_SECURITY) + 1));
 	_newPeFile->peHeader().makeValid(_newPeFile->mzHeader().size());
@@ -1155,6 +1180,7 @@ template <int bits> void PeUpxStub<bits>::fixCertificates()
 	}
 
 	_newPeFile->peHeader().setIddSecurityRva(securityOffset);
+	*/
 }
 
 /**
@@ -1188,6 +1214,7 @@ template <int bits> void PeUpxStub<bits>::cutHintsData(DynamicBuffer& unpackedDa
  */
 template <int bits> void PeUpxStub<bits>::saveFile(const std::string& outputFile, DynamicBuffer& unpackedData)
 {
+	/*
 	// Remove the file if it already exists
 	std::remove(outputFile.c_str());
 
@@ -1247,6 +1274,7 @@ template <int bits> void PeUpxStub<bits>::saveFile(const std::string& outputFile
 		outputFileHandle.seekp(0, std::ios::end);
 		retdec::utils::writeFile(outputFileHandle, overlay, outputFileHandle.tellp());
 	}
+	*/
 }
 
 /**
@@ -1360,14 +1388,14 @@ template <int bits> void PeUpxStub<bits>::loadResources(PeLib::ResourceNode* roo
 			std::vector<std::uint8_t> data;
 			if (leaf->getOffsetToData() < uncompressedRsrcRva)
 			{
-				std::uint32_t dataOffset = leaf->getOffsetToData() - _newPeFile->peHeader().vaToRva(_file->getSegment(0)->getAddress());
-				if (dataOffset >= unpackedData.getRealDataSize())
-					throw InvalidDataDirectoryException("Resources");
+				//std::uint32_t dataOffset = leaf->getOffsetToData() - _newPeFile->peHeader().vaToRva(_file->getSegment(0)->getAddress());
+				//if (dataOffset >= unpackedData.getRealDataSize())
+				//	throw InvalidDataDirectoryException("Resources");
 
-				if (dataOffset + leaf->getSize() >= unpackedData.getRealDataSize())
-					throw InvalidDataDirectoryException("Resources");
+				//if (dataOffset + leaf->getSize() >= unpackedData.getRealDataSize())
+				//	throw InvalidDataDirectoryException("Resources");
 
-				data = DynamicBuffer(unpackedData, dataOffset, leaf->getSize()).getBuffer();
+				//data = DynamicBuffer(unpackedData, dataOffset, leaf->getSize()).getBuffer();
 			}
 			else
 			{

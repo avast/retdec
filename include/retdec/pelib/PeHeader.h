@@ -19,6 +19,8 @@
 #include "retdec/pelib/PeLibAux.h"
 #include "retdec/pelib/MzHeader.h"
 
+#error Bla
+
 namespace PeLib
 {
 	class PeHeader

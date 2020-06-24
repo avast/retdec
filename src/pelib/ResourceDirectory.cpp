@@ -637,12 +637,11 @@ namespace PeLib
 		// Enough space to be a valid node?
 		std::uint32_t uiRva = uiRsrcRva + uiOffset;
 		if(uiRva > sizeOfImage)
-		{
 			return ERROR_INVALID_FILE;
-		}
 
 		// Read the resource node header
-		imageLoader.readImage(&header, uiRva, PELIB_IMAGE_RESOURCE_DIRECTORY::size());
+		if(imageLoader.readImage(&header, uiRva, PELIB_IMAGE_RESOURCE_DIRECTORY::size()) != PELIB_IMAGE_RESOURCE_DIRECTORY::size())
+			return ERROR_INVALID_FILE;
 
 		// Add the total number of entries to the occupied range
 		unsigned int uiNumberOfEntries = header.NumberOfNamedEntries + header.NumberOfIdEntries;

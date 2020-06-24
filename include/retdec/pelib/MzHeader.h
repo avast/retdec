@@ -13,6 +13,8 @@
 #ifndef MZHEADER_H
 #define MZHEADER_H
 
+#error Bla
+
 #include "retdec/pelib/PeLibInc.h"
 
 namespace PeLib

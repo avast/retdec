@@ -121,21 +121,6 @@ namespace PeLib
 		return all.end();
 	}
 
-	bool PELIB_IMAGE_SECTION_HEADER::biggerFileOffset(const PELIB_IMAGE_SECTION_HEADER& ish) const
-	{
-		return PointerToRawData < ish.PointerToRawData;
-	}
-
-	bool PELIB_IMAGE_SECTION_HEADER::biggerVirtualAddress(const PELIB_IMAGE_SECTION_HEADER& ish) const
-	{
-		return VirtualAddress < ish.VirtualAddress;
-	}
-
-	bool PELIB_IMAGE_SECTION_HEADER::isFullNameSet() const
-	{
-		return !StringTableName.empty();
-	}
-
 	unsigned int alignOffset(unsigned int uiOffset, unsigned int uiAlignment)
 	{
 		if (!uiAlignment) return uiAlignment;
@@ -406,105 +391,6 @@ namespace PeLib
 	bool PELIB_EXP_FUNC_INFORMATION::equal(const std::string strFunctionName) const
 	{
 		return isEqualNc(this->funcname, strFunctionName);
-	}
-
-	unsigned int getFileType(PeFile32& pef)
-	{
-		// Attempt to read the DOS file header.
-		if (pef.readMzHeader() != ERROR_NONE)
-		{
-			return PEFILE_UNKNOWN;
-		}
-
-		// Verify the DOS header
-		if (!pef.mzHeader().isValid())
-		{
-			return PEFILE_UNKNOWN;
-		}
-
-		// Read PE header. Note that at this point, we read the header as if
-		// it was 32-bit PE file.
-		if (pef.readPeHeader() != ERROR_NONE)
-		{
-			return PEFILE_UNKNOWN;
-		}
-
-		std::uint16_t machine = pef.peHeader().getMachine();
-		std::uint16_t magic = pef.peHeader().getMagic();
-
-		// jk2012-02-20: make the PEFILE32 be the default return value
-		if ((machine == PELIB_IMAGE_FILE_MACHINE_AMD64
-					|| machine == PELIB_IMAGE_FILE_MACHINE_IA64)
-				&& magic == PELIB_IMAGE_NT_OPTIONAL_HDR64_MAGIC)
-		{
-			return PEFILE64;
-		}
-		else
-		{
-			return PEFILE32;
-		}
-	}
-
-	/**
-	* @param strFilename Name of a file.
-	* @return Either PEFILE32, PEFILE64 or PEFILE_UNKNOWN
-	**/
-	unsigned int getFileType(const std::string strFilename)
-	{
-		PeFile32 pef(strFilename);
-		return getFileType(pef);
-	}
-
-	/**
-	* @param stream Input stream.
-	* @return Either PEFILE32, PEFILE64 or PEFILE_UNKNOWN
-	**/
-	unsigned int getFileType(std::istream& stream)
-	{
-		PeFile32 pef(stream);
-		return getFileType(pef);
-	}
-
-	/**
-	* Opens a PE file. The return type is either PeFile32 or PeFile64 object. If an error occurs the return
-	* value is 0.
-	* @param strFilename Name of a file.
-	* @return Either a PeFile32 object, a PeFil64 object or 0.
-	**/
-	PeFile* openPeFile(const std::string& strFilename)
-	{
-		unsigned int type = getFileType(strFilename);
-
-		if (type == PEFILE32)
-		{
-			return new PeFile32(strFilename);
-		}
-		else if (type == PEFILE64)
-		{
-			return new PeFile64(strFilename);
-		}
-		else
-		{
-			return nullptr;
-		}
-	}
-
-	PeFile* openPeFile(std::istream& stream)
-	{
-		unsigned int type = getFileType(stream);
-
-		if (type == PEFILE32)
-		{
-			return new PeFile32(stream);
-		}
-		else if (type == PEFILE64)
-		{
-			return new PeFile64(stream);
-		}
-		else
-		{
-			return nullptr;
-		}
 	}
 
 	std::size_t PELIB_IMAGE_BOUND_DIRECTORY::size() const

@@ -13,7 +13,6 @@
 #ifndef BOUNDIMPORTDIRECTORY_H
 #define BOUNDIMPORTDIRECTORY_H
 
-#include "retdec/pelib/PeHeader.h"
 #include "retdec/pelib/PeLibAux.h"
 #include "retdec/pelib/ImageLoader.h"
 

@@ -20,6 +20,8 @@
 #include "retdec/fileformat/types/sec_seg/pe_coff_section.h"
 #include "retdec/fileformat/types/sec_seg/section.h"
 
+#error Removed. Do not use.
+
 namespace retdec {
 namespace fileformat {
 
@@ -382,7 +384,7 @@ template<int bits> unsigned long long peEpOffset(const PeLib::PeHeaderT<bits> &p
  * @param sectionIndex Index of section (indexed from 0)
  * @return @c true if section index is valid and section is detected, @c false otherwise
  */
-template<int bits> bool peSectionWithIndex(const FileFormat *inputFile, const PeLib::PeHeaderT<bits> &peHeader, PeCoffSection &section, unsigned long long sectionIndex)
+inline bool peSectionWithIndex(const FileFormat *inputFile, const PeLib::PeHeaderT &peHeader, PeCoffSection &section, unsigned long long sectionIndex)
 {
 	std::string sectionName;
 	PeCoffSection::Type sectionType;
@@ -433,9 +435,9 @@ template<int bits> bool peDllFlags(const PeLib::PeHeaderT<bits> &peHeader, unsig
  *
  * If method returns @c false, @a relAddr and @a size are left unchanged.
  */
-template<int bits> bool peDataDirectoryRelative(const PeLib::PeHeaderT<bits> &peHeader, unsigned long long &relAddr, unsigned long long &size, unsigned long long index)
+inline bool peDataDirectoryRelative(const ImageLoader & imageLoader, unsigned long long &relAddr, unsigned long long &size, unsigned long long index)
 {
-	if(index >= peNumberOfStoredDataDirectories(peHeader))
+	if(index >= imageLoader.getOptionalHeader().NumberOfRvaAndSizes)
 	{
 		return false;
 	}
@@ -459,14 +461,9 @@ template<int bits> bool peDataDirectoryRelative(const PeLib::PeHeaderT<bits> &pe
  *
  * If function returns @c false, @a absAddr and @a size are left unchanged.
  */
-template<int bits> bool peDataDirectoryAbsolute(const PeLib::PeHeaderT<bits> &peHeader, unsigned long long &absAddr, unsigned long long &size, unsigned long long index)
+template<int bits> bool peDataDirectoryAbsolute(const ImageLoader & imageLoader, unsigned long long &absAddr, unsigned long long &size, unsigned long long index)
 {
-	if(index >= peNumberOfStoredDataDirectories(peHeader))
-	{
-		return false;
-	}
-
-	absAddr = peHeader.getImageDataDirectoryRva(index);
+	absAddr = imageLoader.getDataDirRva(index);
 	if(absAddr)
 	{
 		absAddr += peHeader.getImageBase();

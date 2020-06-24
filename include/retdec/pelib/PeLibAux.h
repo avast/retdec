@@ -131,9 +131,12 @@ namespace PeLib
 
 	typedef std::vector<std::uint8_t> ByteBuffer;
 
-	enum {PEFILE32 = 32,
+	enum
+	{
+		PEFILE32 = 32,
 		PEFILE64 = 64,
-		PEFILE_UNKNOWN = 0};
+		PEFILE_UNKNOWN = 0
+	};
 
 	const std::uint16_t PELIB_IMAGE_DOS_SIGNATURE = 0x5A4D;
 
@@ -802,7 +805,7 @@ namespace PeLib
 	const unsigned int PELIB_IMAGE_SIZEOF_SHORT_NAME  = 8;
 	const unsigned int PELIB_IMAGE_SIZEOF_MAX_NAME    = 1024;
 
-	struct PELIB_IMAGE_SECTION_HEADER_BASE
+	struct PELIB_IMAGE_SECTION_HEADER
 	{
 		std::uint8_t  Name[PELIB_IMAGE_SIZEOF_SHORT_NAME];
 		std::uint32_t VirtualSize;
@@ -816,31 +819,19 @@ namespace PeLib
 		std::uint32_t Characteristics;
 	};
 
-
-	struct PELIB_IMAGE_SECTION_HEADER : public PELIB_IMAGE_SECTION_HEADER_BASE
+	struct PELIB_SECTION_HEADER : public PELIB_IMAGE_SECTION_HEADER
 	{
-		std::string StringTableName;
-
-		PELIB_IMAGE_SECTION_HEADER()
+		const std::string & getName() const
 		{
-			memset(Name, 0, sizeof(Name));
-			VirtualSize = 0;
-			VirtualAddress = 0;
-			SizeOfRawData = 0;
-			PointerToRawData = 0;
-			PointerToRelocations = 0;
-			PointerToLinenumbers = 0;
-			NumberOfRelocations = 0;
-			NumberOfLinenumbers = 0;
-			Characteristics = 0;
-			StringTableName = "";
+			return sectionName;
 		}
 
-		static inline std::size_t size() { return sizeof(PELIB_IMAGE_SECTION_HEADER); }
+		static const std::size_t size()
+		{
+			return sizeof(PELIB_IMAGE_SECTION_HEADER);
+		}
 
-		bool biggerFileOffset(const PELIB_IMAGE_SECTION_HEADER& ish) const;
-		bool biggerVirtualAddress(const PELIB_IMAGE_SECTION_HEADER& ish) const;
-		bool isFullNameSet() const;
+		std::string sectionName;
 	};
 
 	struct PELIB_IMAGE_THUNK_DATA
@@ -850,17 +841,6 @@ namespace PeLib
 		PELIB_IMAGE_THUNK_DATA()
 		{
 			Ordinal = 0;
-		}
-	};
-
-	template<int bits>
-	struct PELIB_VAR_SIZE
-	{
-		typename FieldSizes<bits>::VAR4_8 Value;
-
-		PELIB_VAR_SIZE()
-		{
-			Value = 0;
 		}
 	};
 
@@ -1219,14 +1199,6 @@ namespace PeLib
 
 	const char * getLoaderErrorString(LoaderError ldrError, bool userFriendly = false);
 	bool getLoaderErrorLoadableAnyway(LoaderError ldrError);
-
-	/// Determines if a file is a 32bit or 64bit PE file.
-	unsigned int getFileType(const std::string strFilename);
-	unsigned int getFileType(std::istream& stream);
-
-	/// Opens a PE file.
-	PeFile* openPeFile(const std::string& strFilename);
-	PeFile* openPeFile(std::istream& stream);
 
   /*  enum MzHeader_Field {e_magic, e_cblp, e_cp, e_crlc, e_cparhdr, e_minalloc, e_maxalloc,
 						e_ss, e_sp, e_csum, e_ip, e_cs, e_lfarlc, e_ovno, e_res, e_oemid,

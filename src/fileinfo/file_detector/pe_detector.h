@@ -8,7 +8,7 @@
 #define FILEINFO_FILE_DETECTOR_PE_DETECTOR_H
 
 #include "fileinfo/file_detector/file_detector.h"
-#include "fileinfo/file_wrapper/pe/pe_wrapper.h"
+#include "fileinfo/file_wrapper/pe_wrapper.h"
 
 namespace retdec {
 namespace fileinfo {

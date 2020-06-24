@@ -8,10 +8,8 @@ add_library(pelib STATIC
 	IatDirectory.cpp
 	ImageLoader.cpp
 	InputBuffer.cpp
-	MzHeader.cpp
 	OutputBuffer.cpp
 	PeFile.cpp
-	PeHeader.cpp
 	PeLibAux.cpp
 	RelocationsDirectory.cpp
 	ResourceDirectory.cpp

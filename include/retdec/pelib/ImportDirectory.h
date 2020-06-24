@@ -16,7 +16,7 @@
 #include <set>
 
 #include "retdec/pelib/PeLibAux.h"
-#include "retdec/pelib/PeHeader.h"
+#include "retdec/pelib/ImageLoader.h"
 
 namespace PeLib
 {
@@ -500,8 +500,9 @@ namespace PeLib
 	inline
 	std::uint32_t ImportDirectory::getNumberOfFiles(currdir cdDir) const
 	{
-		if (cdDir == OLDDIR) return static_cast<std::uint32_t>(m_vOldiid.size());
-		else return static_cast<std::uint32_t>(m_vNewiid.size());
+		std::size_t numFiles = (cdDir == OLDDIR) ? m_vOldiid.size() : m_vNewiid.size();
+
+		return static_cast<std::uint32_t>(numFiles);
 	}
 
 	/**

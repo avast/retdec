@@ -32,7 +32,7 @@ namespace PeLib
 		}
 
 		// Read the COM header as-is
-		if(imageLoader.readImage(&m_ichComHeader, rva, size) != size)
+		if(imageLoader.readImage(&m_ichComHeader, rva, sizeof(PELIB_IMAGE_COR20_HEADER)) != size)
 		{
 			return ERROR_INVALID_FILE;
 		}

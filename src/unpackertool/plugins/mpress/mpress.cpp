@@ -18,6 +18,7 @@
 #include "unpackertool/plugins/mpress/mpress_exceptions.h"
 
 #include "retdec/fileformat/fileformat.h"
+#include "retdec/pelib/PeFile.h"
 
 using namespace retdec::utils;
 using namespace retdec::unpacker;
@@ -78,19 +79,16 @@ void MpressPlugin::prepare()
 	if (!_file)
 		throw UnsupportedFileException();
 
-	if (!_file->getFileFormat()->isPe())
+	_peFile = new PeLib::PeFileT(getStartupArguments()->inputFile);
+	if(_peFile->loadPeHeaders() != PeLib::ERROR_NONE)
 		throw UnsupportedFileException();
 
 	// We currently don't support PE32+ as the decompiler doesn't support them anyways
-	if (!static_cast<retdec::fileformat::PeFormat*>(_file->getFileFormat())->isPe32())
+	if (_peFile->imageLoader().getImageBitability() != 32)
 		throw UnsupportedFileException();
 
 	if (!_file->getEpSegment())
 		throw NoEntryPointException();
-
-	_peFile = static_cast<PeLib::PeFile32*>(PeLib::openPeFile(getStartupArguments()->inputFile));
-	_peFile->readMzHeader();
-	_peFile->readPeHeader();
 
 	// Detect the version of the used MPRESS packer and the compression used
 	if (detectUnpackerStubVersion() == MPRESS_UNPACKER_STUB_UNKNOWN)
@@ -268,6 +266,7 @@ void MpressPlugin::fixJumpsAndCalls(DynamicBuffer& buffer)
 
 void MpressPlugin::fixImportsAndEp(DynamicBuffer& buffer)
 {
+	/*
 	// At the offset from EP is written EIP relative offset of fix import stub
 	// Fix import stub is then located at the <EP Address> + offset + <loaded offset>
 	// This stub was packed together with code and data in .MPRESS1 section and also contains hints for import table rebuild
@@ -278,7 +277,7 @@ void MpressPlugin::fixImportsAndEp(DynamicBuffer& buffer)
 	std::uint32_t importHints = fixStubAddr + mpressFixStubData[_fixStub].importHintsOffset + buffer.read<std::uint32_t>(fixStubAddr + mpressFixStubData[_fixStub].importHintsOffset);
 
 	// Go through MPRESS import hints and fill the import directory
-	std::int32_t destOffset = _peFile->peHeader().getVirtualAddress(_packedContentSect->getSecSeg()->getIndex()) + importHints;
+	std::int32_t destOffset = _peFile->imageLoader().getVirtualAddress(_packedContentSect->getSecSeg()->getIndex()) + importHints;
 	std::int32_t lowestDestOffset = std::numeric_limits<std::int32_t>::max();
 	std::int32_t highestDestOffset = 0;
 	std::int32_t destOffsetDiff;
@@ -333,27 +332,26 @@ void MpressPlugin::fixImportsAndEp(DynamicBuffer& buffer)
 	// Fix the import directory and import address directory addresses
 	// Since ILT is lost we need to make them from scratch in the whole new section
 	// Ensure the .imports section will be large enough, resize if there are more data
-	std::uint32_t importSectSize = _peFile->impDir().size() & ~(_peFile->peHeader().getFileAlignment() - 1);
-	if (_peFile->impDir().size() & (_peFile->peHeader().getFileAlignment() - 1))
-		importSectSize += _peFile->peHeader().getFileAlignment();
-	_peFile->peHeader().addSection(".imports", importSectSize);
-	_peFile->peHeader().setCharacteristics(_peFile->peHeader().calcNumberOfSections() - 1, PeLib::PELIB_IMAGE_SCN_MEM_READ | PeLib::PELIB_IMAGE_SCN_CNT_INITIALIZED_DATA);
-	_peFile->peHeader().setIddImportRva(_peFile->peHeader().getVirtualAddress(_peFile->peHeader().calcNumberOfSections() - 1));
-	_peFile->peHeader().setIddImportSize(importSectSize);
-	_peFile->peHeader().makeValid(_peFile->mzHeader().size());
+	std::uint32_t fileAlignment = _peFile->imageLoader().getFileAlignment();
+	std::uint32_t importSectSize = _peFile->impDir().size() & ~(fileAlignment - 1);
+	std::uint32_t newSectionIndex;
+
+	if (_peFile->impDir().size() & (fileAlignment - 1))
+		importSectSize += fileAlignment;
+	//PeLib::PELIB_SECTION_HEADER & newSection = _peFile->imageLoader().addSection(".imports", importSectSize);
+
+	//newSection.Characteristics = PeLib::PELIB_IMAGE_SCN_MEM_READ | PeLib::PELIB_IMAGE_SCN_CNT_INITIALIZED_DATA;
+	_peFile->imageLoader().setDataDirectory(PeLib::PELIB_IMAGE_DIRECTORY_ENTRY_IMPORT, _peFile->imageLoader().getVirtualAddress(newSectionIndex), importSectSize);
 
 	// IAT needs to be put at the desired offset
 	std::uint32_t iatOffset = lowestDestOffset;
-	_peFile->peHeader().setIddIatRva(iatOffset);
-	_peFile->peHeader().setIddIatSize(highestDestOffset + 4 - lowestDestOffset);
-	_peFile->peHeader().makeValid(_peFile->mzHeader().size());
+	_peFile->imageLoader().setDataDirectory(PeLib::PELIB_IMAGE_DIRECTORY_ENTRY_IAT, iatOffset, highestDestOffset + 4 - lowestDestOffset);
 
 	// Offset to OEP is stored at the offset from the <Fix Import Stub Address>
 	// This offset is addressed from the <Fix Import Stub Address> + offset
-	std::uint32_t oepOffset = _peFile->peHeader().getVirtualAddress(_packedContentSect->getSecSeg()->getIndex()) + fixStubAddr +
+	std::uint32_t oepOffset = _peFile->imageLoader().getVirtualAddress(_packedContentSect->getSecSeg()->getIndex()) + fixStubAddr +
 			mpressFixStubData[_fixStub].importHintsOffset + buffer.read<std::uint32_t>(fixStubAddr + mpressFixStubData[_fixStub].oepOffset);
-	_peFile->peHeader().setAddressOfEntryPoint(oepOffset);
-	_peFile->peHeader().makeValid(_peFile->mzHeader().size());
+	//_peFile->imageLoader().setAddressOfEntryPoint(oepOffset);
 
 	// Finally, get rid of the fix imports stub as it is going to mess up frontend analysis in the unpacked section
 	// At the end we add 16 because of 4 bytes directly belonging to the importHintsOffset and additional 12 bytes used
@@ -365,6 +363,7 @@ void MpressPlugin::fixImportsAndEp(DynamicBuffer& buffer)
 	_iatSize = highestDestOffset + 4 - lowestDestOffset;
 	_oepVa = oepOffset;
 	_importHintsOffset = importHints;
+	*/
 }
 
 void MpressPlugin::offsetAnalysis(const DynamicBuffer& buffer)
@@ -372,7 +371,7 @@ void MpressPlugin::offsetAnalysis(const DynamicBuffer& buffer)
 	std::uint32_t fixStubOffset = getFixStub();
 	std::uint32_t dataFlags = PeLib::PELIB_IMAGE_SCN_MEM_WRITE | PeLib::PELIB_IMAGE_SCN_MEM_READ | PeLib::PELIB_IMAGE_SCN_CNT_INITIALIZED_DATA;
 	std::uint32_t codeFlags = dataFlags | PeLib::PELIB_IMAGE_SCN_CNT_CODE | PeLib::PELIB_IMAGE_SCN_MEM_EXECUTE;
-
+	/*
 	// Remove the .MPRESS2 section as the getEpSection()->getIndex() will be shifted by newly created
 	// sections and we can do it safely here
 	//_peFile->peHeader().removeSection(_file->getEpSection()->getIndex());
@@ -484,10 +483,12 @@ void MpressPlugin::offsetAnalysis(const DynamicBuffer& buffer)
 	}
 
 	_peFile->peHeader().makeValid(_peFile->mzHeader().size());
+	*/
 }
 
 void MpressPlugin::trailingBytesAnalysis(const DynamicBuffer& buffer)
 {
+	/*
 	// Analysis of the trailing bytes of the section
 	// 64 bytes at the every section alignment multiple are checked, if they are all 0, the new section is probably here so it is created
 	// Only code section left after this function is the one containing the OEP, the code will execute even if some of the code is in data sections
@@ -555,6 +556,7 @@ void MpressPlugin::trailingBytesAnalysis(const DynamicBuffer& buffer)
 		section++;
 		startOffset = offset;
 	}
+	*/
 }
 
 void MpressPlugin::fixRelocations()
@@ -583,9 +585,9 @@ void MpressPlugin::fixRelocations()
 	// Set the base relocation directory in the new file
 	// All relocations are here undamaged so we are good with this
 	std::uint32_t relocRva = relocRvaBuffer.read<std::uint32_t>(0);
-	_peFile->peHeader().setIddBaseRelocRva(relocRva);
-	_peFile->peHeader().setIddBaseRelocSize(relocSize);
-	_peFile->peHeader().makeValid(_peFile->mzHeader().size());
+	//_peFile->peHeader().setIddBaseRelocRva(relocRva);
+	//_peFile->peHeader().setIddBaseRelocSize(relocSize);
+	//_peFile->peHeader().makeValid(_peFile->mzHeader().size());
 }
 
 MpressUnpackerStub MpressPlugin::detectUnpackerStubVersion()
@@ -635,6 +637,7 @@ MpressFixStub MpressPlugin::detectFixStubVersion(DynamicBuffer& unpackedContent)
 
 void MpressPlugin::saveFile(const std::string& fileName, DynamicBuffer& content)
 {
+	/*
 	// Removes the file if it already exists
 	std::remove(fileName.c_str());
 
@@ -679,6 +682,7 @@ void MpressPlugin::saveFile(const std::string& fileName, DynamicBuffer& content)
 	outputFile.seekp(_peFile->peHeader().getPointerToRawData(_packedContentSect->getSecSeg()->getIndex()), std::ios_base::beg);
 	outputFile.write(reinterpret_cast<const char*>(content.getRawBuffer()), content.getRealDataSize());
 	outputFile.close();
+	*/
 }
 
 void MpressPlugin::copySectionFromOriginalFile(std::uint32_t origSectIndex, const std::string& newFileName, std::uint32_t newSectIndex)
@@ -686,7 +690,7 @@ void MpressPlugin::copySectionFromOriginalFile(std::uint32_t origSectIndex, cons
 	const retdec::loader::Segment* seg = _file->getSegment(origSectIndex);
 	std::vector<std::uint8_t> bytes;
 	seg->getBytes(bytes);
-	_peFile->peHeader().writeSectionData(newFileName, newSectIndex, bytes);
+	//_peFile->peHeader().writeSectionData(newFileName, newSectIndex, bytes);
 }
 
 } // namespace mpress
