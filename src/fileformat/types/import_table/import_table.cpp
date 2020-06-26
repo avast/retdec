@@ -802,10 +802,17 @@ void ImportTable::computeHashes()
 			impHashBytes.push_back(static_cast<std::uint8_t>(','));
 		}
 
-		for(const auto c : std::string(libName + "." + funcName))
-		{
-			impHashBytes.push_back(static_cast<std::uint8_t>(c));
-		}
+		// Append the bytes of the import name to the hash bytes vector
+		// Note that this is faster than the previous char-to-char concatenating
+		std::string libAndFunc = libName + "." + funcName;
+		std::size_t oldSize = impHashBytes.size();
+		impHashBytes.resize(oldSize + libAndFunc.size());
+		memcpy(impHashBytes.data() + oldSize, libAndFunc.data(), libAndFunc.size());
+
+		//for(const auto c : std::string())
+		//{
+		//	impHashBytes.push_back(static_cast<std::uint8_t>(c));
+		//}
 	}
 
 	if (impHashBytes.size() == 0)

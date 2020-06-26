@@ -82,7 +82,7 @@ void PeDetector::getFileFlags()
 											"aggressively trim working set",
 											"application can handle addresses larger than 2 GB",
 											"reversed endianness",
-											"computer supports 32-bit std::uint16_ts",
+											"computer supports 32-bit words",
 											"debugging information was removed",
 											"copy image from removable media",
 											"copy image from network",

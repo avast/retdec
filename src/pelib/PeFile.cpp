@@ -429,7 +429,7 @@ namespace PeLib
 		std::uint64_t sizeOfImage = m_imageLoader.getSizeOfImage();
 
 		// The file size must be greater or equal to SizeOfImage
-		if(ulFileSize >= sizeOfImage)
+		if(ulFileSize >= sizeOfImage && m_imageLoader.getNumberOfSections() != 0)
 		{
 			std::uint32_t sectionAlignment = m_imageLoader.getSectionAlignment();
 			std::uint32_t fileAlignment = m_imageLoader.getFileAlignment();

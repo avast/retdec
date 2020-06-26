@@ -29,8 +29,7 @@ enum : std::uint32_t
 	LoaderModeWindows7  = 0x61,          // Behavior equal to Windows 7
 	LoaderModeWindows10 = 0xA0,          // Behavior equal to Windows 10
 	WindowsVerMask = 0x0FFF,             // Mask for extracting the operating system
-	StrictMode = 0x1000,                 // Strict mode. Refuse to load images that are cut
-	SecImageNoExecute = 0x2000,          // As if the image was loaded with SEC_IMAGE_NO_EXECUTE
+	LoaderMode64BitWindows = 0x1000,     // Emulate 64-bit system
 };
 
 //-----------------------------------------------------------------------------
@@ -135,13 +134,11 @@ class ImageLoader
 
 	std::uint32_t readString(std::string & str, std::uint32_t rva, std::uint32_t maxLength = 65535);
 	std::uint32_t readStringRc(std::string & str, std::uint32_t rva);
-	std::uint32_t readStringRaw(std::vector<std::uint8_t> & fileData, std::string & str, std::size_t offset);
+	std::uint32_t readStringRaw(std::vector<std::uint8_t> & fileData, std::string & str, std::size_t offset, std::size_t maxLength = 65535);
 	std::uint32_t stringLength(std::uint32_t rva, std::uint32_t maxLength = 65535) const;
 
 	std::uint32_t readPointer(std::uint32_t rva, std::uint64_t & pointerValue);
 	std::uint32_t getPointerSize() const;
-
-	bool getSectionName(std::size_t sectionIndex, std::string & sectionName);
 
 	std::uint32_t dumpImage(const char * fileName);
 
@@ -208,6 +205,11 @@ class ImageLoader
 		return fileHeader.NumberOfSections;
 	}
 
+	std::uint32_t getCharacteristics() const
+	{
+		return fileHeader.Characteristics;
+	}
+
 	std::uint32_t getNumberOfSections() const
 	{
 		return sections.size();
@@ -253,11 +255,6 @@ class ImageLoader
 		return optionalHeader.FileAlignment;
 	}
 
-	std::uint32_t getCharacteristics() const
-	{
-		return optionalHeader.DllCharacteristics;
-	}
-
 	std::uint32_t getChecksumFileOffset() const
 	{
 		return checkSumFileOffset;
@@ -296,6 +293,7 @@ class ImageLoader
 	std::uint32_t readWriteImage(void * buffer, std::uint32_t rva, std::uint32_t bytesToRead, READWRITE ReadWrite);
 	std::uint32_t readWriteImageFile(void * buffer, std::uint32_t rva, std::uint32_t bytesToRead, bool bReadOperation);
 
+	bool processImageRelocation_IA64_IMM64(std::uint32_t fixupAddress, std::uint64_t difference);
 	bool processImageRelocations(std::uint64_t oldImageBase, std::uint64_t getImageBase, std::uint32_t VirtualAddress, std::uint32_t Size);
 	void writeNewImageBase(std::uint64_t newImageBase);
 
@@ -312,9 +310,6 @@ class ImageLoader
 
 	int loadImageAsIs(std::vector<std::uint8_t> & fileData);
 
-	// Use sizeof(PELIB_OPTIONAL_HEADER32) or sizeof(PELIB_OPTIONAL_HEADER64) as parameter
-	std::uint32_t getRealSizeOfOptionalHeader(std::uint32_t nominalSize);
-
 	std::uint32_t captureImageSection(std::vector<std::uint8_t> & fileData,
 									  std::uint32_t virtualAddress,
 									  std::uint32_t virtualSize,
@@ -329,13 +324,16 @@ class ImageLoader
 
 	bool isRvaOfSectionHeaderPointerToRawData(uint32_t rva);
 	bool isLegacyImageArchitecture(std::uint16_t Machine);
+	bool checkForValid64BitMachine();
+	bool checkForValid32BitMachine();
 	bool checkForBadAppContainer();
 	
 	// isImageLoadable returns true if the image is OK and can be mapped by NtCreateSection(SEC_IMAGE).
 	// This does NOT mean that the image is executable by CreateProcess - more checks are done,
 	// like resource integrity or relocation table correctness.
-	bool isImageLoadable();
-	bool isImageMappedOk();
+	bool isImageLoadable() const;
+	bool isImageMappedOk() const;
+	bool isValidImageBlock(std::uint32_t Rva, std::uint32_t Size)  const;
 
 	static std::uint32_t AlignToSize(std::uint32_t ByteSize, std::uint32_t AlignSize)
 	{
@@ -364,6 +362,8 @@ class ImageLoader
 	bool ntHeadersSizeCheck;                            // If true, the loader requires minimum size of NT headers
 	bool sizeofImageMustMatch;                          // If true, the SizeOfImage must match virtual end of the last section
 	bool appContainerCheck;                             // If true, app container flag is tested in the optional header
+	bool is64BitWindows;                                // If true, we simulate 64-bit Windows
+	bool loadArmImages;                                 // If true, image loader will load ARM binaries
 };
 
 }	// namespace PeLib

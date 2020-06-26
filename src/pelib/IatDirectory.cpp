@@ -24,7 +24,7 @@ namespace PeLib
 		const std::uint32_t * itemArray = reinterpret_cast<const std::uint32_t *>(buffer);
 
 		// Resize the IAT vector to contain all items
-		std::size_t itemCount = buffersize / sizeof(std::uint8_t);
+		std::size_t itemCount = buffersize / sizeof(std::uint32_t);
 		m_vIat.clear();
 
 		// Read the items, one-by-one, until we find a zero value

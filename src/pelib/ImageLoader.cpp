@@ -49,6 +49,15 @@ uint8_t PeLib::ImageLoader::ImageProtectionArray[16] =
 };
 
 //-----------------------------------------------------------------------------
+// Returns the fixed size of optional header (without Data Directories)
+
+template <typename OPT_HDR>
+std::uint32_t getCopySizeOfOptionalHeader()
+{
+	return offsetof(OPT_HDR, DataDirectory);
+}
+
+//-----------------------------------------------------------------------------
 // Constructor and destructor
 
 PeLib::ImageLoader::ImageLoader(uint32_t loaderFlags)
@@ -66,6 +75,8 @@ PeLib::ImageLoader::ImageLoader(uint32_t loaderFlags)
 	ntHeadersSizeCheck = false;
 	appContainerCheck = false;
 	maxSectionCount = 255;
+	is64BitWindows = (loaderFlags & LoaderMode64BitWindows) ? true : false;
+	loadArmImages = true;
 
 	// Resolve os-specific restrictions
 	switch(loaderMode = (loaderFlags & WindowsVerMask))
@@ -73,19 +84,21 @@ PeLib::ImageLoader::ImageLoader(uint32_t loaderFlags)
 		case LoaderModeWindowsXP:
 			maxSectionCount = PE_MAX_SECTION_COUNT_XP;
 			sizeofImageMustMatch = true;
-			//copyWholeHeaderPage = true;
+			loadArmImages = false;
 			break;
 
 		case LoaderModeWindows7:
 			maxSectionCount = PE_MAX_SECTION_COUNT_7;
 			ntHeadersSizeCheck = true;
 			sizeofImageMustMatch = true;
+			loadArmImages = false;
 			break;
 
 		case LoaderModeWindows10:
 			maxSectionCount = PE_MAX_SECTION_COUNT_7;
 			ntHeadersSizeCheck = true;
 			appContainerCheck = true;
+			loadArmImages = true;
 			break;
 	}
 }
@@ -105,7 +118,11 @@ bool PeLib::ImageLoader::relocateImage(uint64_t newImageBase)
 	// Only relocate the image if the image base is different
 	if(newImageBase != optionalHeader.ImageBase)
 	{
-		// If relocations are stripped, there is no relocation
+		// If the image was not properly mapped, don't even try.
+		if(pages.size() == 0)
+			return false;
+
+		// If relocations are stripped, do nothing
 		if(fileHeader.Characteristics & PELIB_IMAGE_FILE_RELOCS_STRIPPED)
 			return false;
 
@@ -131,9 +148,9 @@ bool PeLib::ImageLoader::relocateImage(uint64_t newImageBase)
 		if(VirtualAddress == 0 || Size == 0)
 			return false;
 
-		// Resolve case when the reloc block is too big
-		if((VirtualAddress + Size) > getSizeOfImage())
-			Size = getSizeOfImage() - VirtualAddress;
+		// Do not relocate images with weird or invalid relocation table
+		if(!isValidImageBlock(VirtualAddress, Size))
+			return false;
 
 		// Perform relocations
 		result = processImageRelocations(optionalHeader.ImageBase, newImageBase, VirtualAddress, Size);
@@ -171,49 +188,71 @@ uint32_t PeLib::ImageLoader::stringLength(uint32_t rva, uint32_t maxLength) cons
 {
 	uint32_t rvaBegin = rva;
 	uint32_t rvaEnd = rva + maxLength;
+	uint32_t length = 0;
 
-	// Check the last possible address where we read
-	if(rvaEnd > getSizeOfImageAligned())
-		rvaEnd = getSizeOfImageAligned();
-
-	// Is the offset within the image?
-	if(rva < rvaEnd)
+	// Is the image mapped OK?
+	if(pages.size())
 	{
-		size_t pageIndex = rva / PELIB_PAGE_SIZE;
+		// Check the last possible address where we read
+		if(rvaEnd > getSizeOfImageAligned())
+			rvaEnd = getSizeOfImageAligned();
 
-		// The page index must be in range
-		if(pageIndex < pages.size())
+		// Is the offset within the image?
+		if(rva < rvaEnd)
 		{
-			while(rva < rvaEnd)
+			size_t pageIndex = rva / PELIB_PAGE_SIZE;
+
+			// The page index must be in range
+			if(pageIndex < pages.size())
 			{
-				const PELIB_FILE_PAGE & page = pages[pageIndex];
-				uint32_t rvaEndPage = (pageIndex + 1) * PELIB_PAGE_SIZE;
-
-				// If zero page, means we found an RVA with zero
-				if(page.buffer.empty())
-					return rva;
-
-				// Perhaps the last page loaded?
-				if(rvaEndPage > rvaEnd)
-					rvaEndPage = rvaEnd;
-
-				// Try to find the zero byte on the page
-				for(; rva < rvaEndPage; rva++)
+				while(rva < rvaEnd)
 				{
-					if(page.buffer[rva & (PELIB_PAGE_SIZE - 1)] == 0)
-					{
-						return (rva - rvaBegin);
-					}
-				}
+					const PELIB_FILE_PAGE & page = pages[pageIndex];
+					const uint8_t * dataBegin; 
+					const uint8_t * dataPtr; 
+					uint32_t rvaEndPage = (pageIndex + 1) * PELIB_PAGE_SIZE;
 
-				// Move pointers
-				pageIndex++;
+					// If zero page, means we found an RVA with zero
+					if(page.buffer.empty())
+						return rva;
+					dataBegin = dataPtr = page.buffer.data() + (rva & (PELIB_PAGE_SIZE - 1));
+
+					// Perhaps the last page loaded?
+					if(rvaEndPage > rvaEnd)
+						rvaEndPage = rvaEnd;
+
+					// Try to find the zero byte on the page
+					dataPtr = (const uint8_t *)memchr(dataPtr, 0, (rvaEndPage - rva));
+					if(dataPtr != nullptr)
+						return rva + (dataPtr - dataBegin) - rvaBegin;
+					rva = rvaEndPage;
+
+					// Move pointers
+					pageIndex++;
+				}
 			}
+		}
+
+		// Return the length of the string
+		length = (rva - rvaBegin);
+	}
+	else
+	{
+		// Recalc the file offset to RVA
+		if((rva = getFileOffsetFromRva(rva)) < rawFileData.size())
+		{
+			const uint8_t * stringPtr = rawFileData.data() + rva;
+			const uint8_t * stringEnd;
+			
+			length = rawFileData.size() - rva;
+
+			stringEnd = (const uint8_t *)memchr(stringPtr, 0, length);
+			if(stringEnd != nullptr)
+				length = stringEnd - stringPtr;
 		}
 	}
 
-	// Return the offset of the zero byte on the page
-	return rva - rvaBegin;
+	return length;
 }
 
 uint32_t PeLib::ImageLoader::readString(std::string & str, uint32_t rva, uint32_t maxLength)
@@ -289,18 +328,30 @@ uint32_t PeLib::ImageLoader::readStringRc(std::string & str, uint32_t rva)
 	return charsRead;
 }
 
-uint32_t PeLib::ImageLoader::readStringRaw(std::vector<std::uint8_t> & fileData, std::string & str, size_t offset)
+uint32_t PeLib::ImageLoader::readStringRaw(std::vector<uint8_t> & fileData, std::string & str, size_t offset, size_t maxLength)
 {
-	uint32_t length = 0;
+	size_t length = 0;
 
 	if(offset < fileData.size())
 	{
-		// Prepare buffer for string
-		length = strlen(reinterpret_cast<char *>(fileData.data() + offset));
-		str.resize(length);
+		uint8_t * stringBegin = fileData.data() + offset;
+		uint8_t * stringEnd;
+
+		// Make sure we won't read past the end of the buffer
+		if((offset + maxLength) > fileData.size())
+			maxLength = fileData.size() - offset;
+
+		// Get the length of the string. Do not go beyond the maximum length
+		// Note that there is no guaratee that the string is zero terminated, so can't use strlen
+		// retdec-regression-tests\tools\fileinfo\bugs\issue-451-strange-section-names\4383fe67fec6ea6e44d2c7d075b9693610817edc68e8b2a76b2246b53b9186a1-unpacked
+		stringEnd = (uint8_t *)memchr(stringBegin, 0, maxLength);
+		if(stringEnd == nullptr)
+			stringEnd = stringBegin + maxLength;
+		length = stringEnd - stringBegin;
 
 		// Copy the string
-		memcpy(const_cast<char *>(str.data()), fileData.data() + offset, length);
+		str.resize(length);
+		memcpy(const_cast<char *>(str.data()), stringBegin, length);
 	}
 
 	return length;
@@ -332,10 +383,10 @@ uint32_t PeLib::ImageLoader::dumpImage(const char * fileName)
 
 uint32_t PeLib::ImageLoader::getImageBitability() const
 {
-	if(fileHeader.Machine == PELIB_IMAGE_FILE_MACHINE_AMD64 || fileHeader.Machine == PELIB_IMAGE_FILE_MACHINE_IA64)
+	if(optionalHeader.Magic == PELIB_IMAGE_NT_OPTIONAL_HDR64_MAGIC)
 		return 64;
 
-	if(fileHeader.Machine == PELIB_IMAGE_FILE_MACHINE_I386)
+	if(optionalHeader.Magic == PELIB_IMAGE_NT_OPTIONAL_HDR32_MAGIC)
 		return 32;
 
 	return 0;
@@ -632,6 +683,151 @@ uint32_t PeLib::ImageLoader::readWriteImageFile(void * buffer, std::uint32_t rva
 	return bytesToRead;
 }
 
+//----------------------------------------------------------------------------- 
+// Processes relocation entry for IA64 relocation bundle
+
+#define EMARCH_ENC_I17_IMM7B_INST_WORD_X         3
+#define EMARCH_ENC_I17_IMM7B_SIZE_X              7
+#define EMARCH_ENC_I17_IMM7B_INST_WORD_POS_X     4
+#define EMARCH_ENC_I17_IMM7B_VAL_POS_X           0
+
+#define EMARCH_ENC_I17_IMM9D_INST_WORD_X         3
+#define EMARCH_ENC_I17_IMM9D_SIZE_X              9
+#define EMARCH_ENC_I17_IMM9D_INST_WORD_POS_X     18
+#define EMARCH_ENC_I17_IMM9D_VAL_POS_X           7
+
+#define EMARCH_ENC_I17_IMM5C_INST_WORD_X         3
+#define EMARCH_ENC_I17_IMM5C_SIZE_X              5
+#define EMARCH_ENC_I17_IMM5C_INST_WORD_POS_X     13
+#define EMARCH_ENC_I17_IMM5C_VAL_POS_X           16
+
+#define EMARCH_ENC_I17_IC_INST_WORD_X            3
+#define EMARCH_ENC_I17_IC_SIZE_X                 1
+#define EMARCH_ENC_I17_IC_INST_WORD_POS_X        12
+#define EMARCH_ENC_I17_IC_VAL_POS_X              21
+
+#define EMARCH_ENC_I17_IMM41a_INST_WORD_X        1
+#define EMARCH_ENC_I17_IMM41a_SIZE_X             10
+#define EMARCH_ENC_I17_IMM41a_INST_WORD_POS_X    14
+#define EMARCH_ENC_I17_IMM41a_VAL_POS_X          22
+
+#define EMARCH_ENC_I17_IMM41b_INST_WORD_X        1
+#define EMARCH_ENC_I17_IMM41b_SIZE_X             8
+#define EMARCH_ENC_I17_IMM41b_INST_WORD_POS_X    24
+#define EMARCH_ENC_I17_IMM41b_VAL_POS_X          32
+
+#define EMARCH_ENC_I17_IMM41c_INST_WORD_X        2
+#define EMARCH_ENC_I17_IMM41c_SIZE_X             23
+#define EMARCH_ENC_I17_IMM41c_INST_WORD_POS_X    0
+#define EMARCH_ENC_I17_IMM41c_VAL_POS_X          40
+
+#define EMARCH_ENC_I17_SIGN_INST_WORD_X          3
+#define EMARCH_ENC_I17_SIGN_SIZE_X               1
+#define EMARCH_ENC_I17_SIGN_INST_WORD_POS_X      27
+#define EMARCH_ENC_I17_SIGN_VAL_POS_X            63
+
+#define EXT_IMM64(Value, SourceValue32, Size, InstPos, ValPos)   \
+    Value |= (((uint64_t)((SourceValue32 >> InstPos) & (((uint64_t)1 << Size) - 1))) << ValPos)
+
+#define INS_IMM64(Value, TargetValue32, Size, InstPos, ValPos)   \
+    TargetValue32 = (TargetValue32 & ~(((1 << Size) - 1) << InstPos)) |  \
+          ((uint32_t)((((uint64_t)Value >> ValPos) & (((uint64_t)1 << Size) - 1))) << InstPos)
+
+bool PeLib::ImageLoader::processImageRelocation_IA64_IMM64(uint32_t fixupAddress, uint64_t difference)
+{
+	uint64_t Value64 = 0;
+	uint32_t BundleBlock[4];
+
+	// Align the fixup address to bundle address
+	fixupAddress = fixupAddress & ~0x0F;
+
+	// Load the 4 32-bit values from the target
+	if(readImage(BundleBlock, fixupAddress, sizeof(BundleBlock)) != sizeof(BundleBlock))
+		return false;
+
+	//
+	// Extract the IMM64 from bundle
+	//
+
+	EXT_IMM64(Value64, BundleBlock[EMARCH_ENC_I17_IMM7B_INST_WORD_X], 
+			  EMARCH_ENC_I17_IMM7B_SIZE_X,
+			  EMARCH_ENC_I17_IMM7B_INST_WORD_POS_X,
+			  EMARCH_ENC_I17_IMM7B_VAL_POS_X);
+	EXT_IMM64(Value64, BundleBlock[EMARCH_ENC_I17_IMM9D_INST_WORD_X],
+			  EMARCH_ENC_I17_IMM9D_SIZE_X,
+			  EMARCH_ENC_I17_IMM9D_INST_WORD_POS_X,
+			  EMARCH_ENC_I17_IMM9D_VAL_POS_X);
+	EXT_IMM64(Value64, BundleBlock[EMARCH_ENC_I17_IMM5C_INST_WORD_X],
+			  EMARCH_ENC_I17_IMM5C_SIZE_X,
+			  EMARCH_ENC_I17_IMM5C_INST_WORD_POS_X,
+			  EMARCH_ENC_I17_IMM5C_VAL_POS_X);
+	EXT_IMM64(Value64, BundleBlock[EMARCH_ENC_I17_IC_INST_WORD_X],
+			  EMARCH_ENC_I17_IC_SIZE_X,
+			  EMARCH_ENC_I17_IC_INST_WORD_POS_X,
+			  EMARCH_ENC_I17_IC_VAL_POS_X);
+	EXT_IMM64(Value64, BundleBlock[EMARCH_ENC_I17_IMM41a_INST_WORD_X],
+			  EMARCH_ENC_I17_IMM41a_SIZE_X,
+			  EMARCH_ENC_I17_IMM41a_INST_WORD_POS_X,
+			  EMARCH_ENC_I17_IMM41a_VAL_POS_X);
+	EXT_IMM64(Value64, BundleBlock[EMARCH_ENC_I17_IMM41b_INST_WORD_X],
+			  EMARCH_ENC_I17_IMM41b_SIZE_X,
+			  EMARCH_ENC_I17_IMM41b_INST_WORD_POS_X,
+			  EMARCH_ENC_I17_IMM41b_VAL_POS_X);
+	EXT_IMM64(Value64, BundleBlock[EMARCH_ENC_I17_IMM41c_INST_WORD_X],
+			  EMARCH_ENC_I17_IMM41c_SIZE_X,
+			  EMARCH_ENC_I17_IMM41c_INST_WORD_POS_X,
+			  EMARCH_ENC_I17_IMM41c_VAL_POS_X);
+	EXT_IMM64(Value64, BundleBlock[EMARCH_ENC_I17_SIGN_INST_WORD_X],
+			  EMARCH_ENC_I17_SIGN_SIZE_X,
+			  EMARCH_ENC_I17_SIGN_INST_WORD_POS_X,
+			  EMARCH_ENC_I17_SIGN_VAL_POS_X);
+	//
+	// Update 64-bit address
+	//
+
+	Value64 += difference;
+
+	//
+	// Insert IMM64 into bundle
+	//
+
+	INS_IMM64(Value64, BundleBlock[EMARCH_ENC_I17_IMM7B_INST_WORD_X],
+			  EMARCH_ENC_I17_IMM7B_SIZE_X,
+			  EMARCH_ENC_I17_IMM7B_INST_WORD_POS_X,
+			  EMARCH_ENC_I17_IMM7B_VAL_POS_X);
+	INS_IMM64(Value64, BundleBlock[EMARCH_ENC_I17_IMM9D_INST_WORD_X],
+			  EMARCH_ENC_I17_IMM9D_SIZE_X,
+			  EMARCH_ENC_I17_IMM9D_INST_WORD_POS_X,
+			  EMARCH_ENC_I17_IMM9D_VAL_POS_X);
+	INS_IMM64(Value64, BundleBlock[EMARCH_ENC_I17_IMM5C_INST_WORD_X],
+			  EMARCH_ENC_I17_IMM5C_SIZE_X,
+			  EMARCH_ENC_I17_IMM5C_INST_WORD_POS_X,
+			  EMARCH_ENC_I17_IMM5C_VAL_POS_X);
+	INS_IMM64(Value64, BundleBlock[EMARCH_ENC_I17_IC_INST_WORD_X],
+			  EMARCH_ENC_I17_IC_SIZE_X,
+			  EMARCH_ENC_I17_IC_INST_WORD_POS_X,
+			  EMARCH_ENC_I17_IC_VAL_POS_X);
+	INS_IMM64(Value64, BundleBlock[EMARCH_ENC_I17_IMM41a_INST_WORD_X],
+			  EMARCH_ENC_I17_IMM41a_SIZE_X,
+			  EMARCH_ENC_I17_IMM41a_INST_WORD_POS_X,
+			  EMARCH_ENC_I17_IMM41a_VAL_POS_X);
+	INS_IMM64(Value64, BundleBlock[EMARCH_ENC_I17_IMM41b_INST_WORD_X],
+			  EMARCH_ENC_I17_IMM41b_SIZE_X,
+			  EMARCH_ENC_I17_IMM41b_INST_WORD_POS_X,
+			  EMARCH_ENC_I17_IMM41b_VAL_POS_X);
+	INS_IMM64(Value64, BundleBlock[EMARCH_ENC_I17_IMM41c_INST_WORD_X],
+			  EMARCH_ENC_I17_IMM41c_SIZE_X,
+			  EMARCH_ENC_I17_IMM41c_INST_WORD_POS_X,
+			  EMARCH_ENC_I17_IMM41c_VAL_POS_X);
+	INS_IMM64(Value64, BundleBlock[EMARCH_ENC_I17_SIGN_INST_WORD_X],
+			  EMARCH_ENC_I17_SIGN_SIZE_X,
+			  EMARCH_ENC_I17_SIGN_INST_WORD_POS_X,
+			  EMARCH_ENC_I17_SIGN_VAL_POS_X);
+
+	// Write the bundle block back to the image
+	return (writeImage(BundleBlock, fixupAddress, sizeof(BundleBlock)) == sizeof(BundleBlock));
+}
+
 bool PeLib::ImageLoader::processImageRelocations(uint64_t oldImageBase, uint64_t newImageBase, uint32_t VirtualAddress, uint32_t Size)
 {
 	uint64_t difference = (newImageBase - oldImageBase);
@@ -640,7 +836,8 @@ bool PeLib::ImageLoader::processImageRelocations(uint64_t oldImageBase, uint64_t
 	uint8_t * buffer;
 
 	// No not accept anything less than size of relocation block
-	if(Size < sizeof(PELIB_IMAGE_BASE_RELOCATION))
+	// Also refuse to process suspiciously large relocation blocks
+	if(Size < sizeof(PELIB_IMAGE_BASE_RELOCATION) || Size > PELIB_SIZE_10MB)
 		return false;
 
 	// Allocate and read the relocation block
@@ -657,6 +854,10 @@ bool PeLib::ImageLoader::processImageRelocations(uint64_t oldImageBase, uint64_t
 			uint16_t * typeAndOffset = (uint16_t * )(pRelocBlock + 1);
 			uint32_t numRelocations;
 
+			// Skip relocation blocks that have invalid values
+			if(!isValidImageBlock(pRelocBlock->VirtualAddress, pRelocBlock->SizeOfBlock))
+				break;
+
 			// Skip relocation blocks which have invalid size in the header
 			if(pRelocBlock->SizeOfBlock <= sizeof(PELIB_IMAGE_BASE_RELOCATION))
 			{
@@ -664,7 +865,7 @@ bool PeLib::ImageLoader::processImageRelocations(uint64_t oldImageBase, uint64_t
 				continue;
 			}
 
-			// Windows loader seems to skip relocation blocks that go into a zero page
+			// Windows loader seems to skip relocation blocks that go into the 0-th page (the header)
 			// Sample: e380e6968f1b431e245f811f94cef6a5b6e17fd7c90ef283338fa1959eb3c536
 			if(isZeroPage(pRelocBlock->VirtualAddress))
 			{
@@ -759,6 +960,10 @@ bool PeLib::ImageLoader::processImageRelocations(uint64_t oldImageBase, uint64_t
 						break;
 					}
 
+					case PELIB_IMAGE_REL_BASED_IA64_IMM64:
+						processImageRelocation_IA64_IMM64(fixupAddress, difference);
+						break;
+
 					case PELIB_IMAGE_REL_BASED_ABSOLUTE:      // Absolute - no fixup required. 
 						break;
 
@@ -786,7 +991,7 @@ void PeLib::ImageLoader::writeNewImageBase(uint64_t newImageBase)
 	if(optionalHeader.Magic == PELIB_IMAGE_NT_OPTIONAL_HDR64_MAGIC)
 	{
 		PELIB_IMAGE_OPTIONAL_HEADER64 header64{};
-		uint32_t sizeOfOptionalHeader = getRealSizeOfOptionalHeader(sizeof(PELIB_IMAGE_OPTIONAL_HEADER64));
+		uint32_t sizeOfOptionalHeader = getCopySizeOfOptionalHeader<PELIB_IMAGE_OPTIONAL_HEADER64>();
 
 		readImage(&header64, offset, sizeOfOptionalHeader);
 		header64.ImageBase = newImageBase;
@@ -797,7 +1002,7 @@ void PeLib::ImageLoader::writeNewImageBase(uint64_t newImageBase)
 	if(optionalHeader.Magic == PELIB_IMAGE_NT_OPTIONAL_HDR32_MAGIC)
 	{
 		PELIB_IMAGE_OPTIONAL_HEADER32 header32{};
-		uint32_t sizeOfOptionalHeader = getRealSizeOfOptionalHeader(sizeof(PELIB_IMAGE_OPTIONAL_HEADER32));
+		uint32_t sizeOfOptionalHeader = getCopySizeOfOptionalHeader<PELIB_IMAGE_OPTIONAL_HEADER32>();
 
 		readImage(&header32, offset, sizeOfOptionalHeader);
 		header32.ImageBase = (uint32_t)newImageBase;
@@ -839,18 +1044,24 @@ int PeLib::ImageLoader::captureNtHeaders(std::vector<uint8_t> & fileData)
 
 	// Capture the NT signature
 	if((filePtr + sizeof(uint32_t)) >= fileEnd)
+	{
 		setLoaderError(LDR_ERROR_NTHEADER_OUT_OF_FILE);
-	ntSignature = *(uint32_t *)(filePtr);
+		return ERROR_INVALID_FILE;
+	}
 
 	// Check the NT signature
-	if(ntSignature != PELIB_IMAGE_NT_SIGNATURE)
+	if((ntSignature = *(uint32_t *)(filePtr)) != PELIB_IMAGE_NT_SIGNATURE)
+	{
 		setLoaderError(LDR_ERROR_NO_NT_SIGNATURE);
+		return ERROR_INVALID_FILE;
+	}
 	filePtr += sizeof(uint32_t);
 
 	// Capture the file header
-	if((filePtr + sizeof(PELIB_IMAGE_FILE_HEADER)) >= fileEnd)
+	if((filePtr + sizeof(PELIB_IMAGE_FILE_HEADER)) < fileEnd)
+		memcpy(&fileHeader, filePtr, sizeof(PELIB_IMAGE_FILE_HEADER));
+	else
 		setLoaderError(LDR_ERROR_NTHEADER_OUT_OF_FILE);
-	memcpy(&fileHeader, filePtr, sizeof(PELIB_IMAGE_FILE_HEADER));
 
 	// 7baebc6d9f2185fafa760c875ab1386f385a0b3fecf2e6ae339abb4d9ac58f3e
 	if (fileHeader.Machine == 0 && fileHeader.SizeOfOptionalHeader == 0)
@@ -871,90 +1082,89 @@ int PeLib::ImageLoader::captureNtHeaders(std::vector<uint8_t> & fileData)
 
 	// Capture optional header. Note that we need to parse it
 	// according to IMAGE_OPTIONAL_HEADER::Magic
-	if((filePtr + sizeof(uint16_t)) < fileEnd)
-		optionalHeaderMagic = *(uint16_t *)(filePtr);
-	if(optionalHeaderMagic == PELIB_IMAGE_NT_OPTIONAL_HDR64_MAGIC)
-		captureOptionalHeader64(fileBegin, filePtr, fileEnd);
-	else
-		captureOptionalHeader32(fileBegin, filePtr, fileEnd);
+if((filePtr + sizeof(uint16_t)) < fileEnd)
+	optionalHeaderMagic = *(uint16_t *)(filePtr);
+if(optionalHeaderMagic == PELIB_IMAGE_NT_OPTIONAL_HDR64_MAGIC)
+captureOptionalHeader64(fileBegin, filePtr, fileEnd);
+else
+captureOptionalHeader32(fileBegin, filePtr, fileEnd);
 
-	// Performed by Windows 10 (nt!MiVerifyImageHeader):
-	// Sample: 04d3577d1b6309a0032d4c4c1252c55416a09bb617aebafe512fffbdd4f08f18
-	if(appContainerCheck && checkForBadAppContainer())
-		setLoaderError(LDR_ERROR_IMAGE_NON_EXECUTABLE);
+// Performed by Windows 10 (nt!MiVerifyImageHeader):
+// Sample: 04d3577d1b6309a0032d4c4c1252c55416a09bb617aebafe512fffbdd4f08f18
+if(appContainerCheck && checkForBadAppContainer())
+setLoaderError(LDR_ERROR_IMAGE_NON_EXECUTABLE);
 
-	// SizeOfHeaders must be nonzero if not a single subsection
-	if(optionalHeader.SectionAlignment >= PELIB_PAGE_SIZE && optionalHeader.SizeOfHeaders == 0)
-		setLoaderError(LDR_ERROR_SIZE_OF_HEADERS_ZERO);
+// SizeOfHeaders must be nonzero if not a single subsection
+if(optionalHeader.SectionAlignment >= PELIB_PAGE_SIZE && optionalHeader.SizeOfHeaders == 0)
+setLoaderError(LDR_ERROR_SIZE_OF_HEADERS_ZERO);
 
-	// File alignment must not be 0
-	if(optionalHeader.FileAlignment == 0)
-		setLoaderError(LDR_ERROR_FILE_ALIGNMENT_ZERO);
+// File alignment must not be 0
+if(optionalHeader.FileAlignment == 0)
+setLoaderError(LDR_ERROR_FILE_ALIGNMENT_ZERO);
 
-	// File alignment must be a power of 2
-	if(optionalHeader.FileAlignment & (optionalHeader.FileAlignment-1))
-		setLoaderError(LDR_ERROR_FILE_ALIGNMENT_NOT_POW2);
+// File alignment must be a power of 2
+if(optionalHeader.FileAlignment & (optionalHeader.FileAlignment-1))
+setLoaderError(LDR_ERROR_FILE_ALIGNMENT_NOT_POW2);
 
-	// Section alignment must not be 0
-	if (optionalHeader.SectionAlignment == 0)
-		setLoaderError(LDR_ERROR_SECTION_ALIGNMENT_ZERO);
+// Section alignment must not be 0
+if(optionalHeader.SectionAlignment == 0)
+setLoaderError(LDR_ERROR_SECTION_ALIGNMENT_ZERO);
 
-	// Section alignment must be a power of 2
-	if (optionalHeader.SectionAlignment & (optionalHeader.SectionAlignment - 1))
-		setLoaderError(LDR_ERROR_SECTION_ALIGNMENT_NOT_POW2);
+// Section alignment must be a power of 2
+if(optionalHeader.SectionAlignment & (optionalHeader.SectionAlignment - 1))
+setLoaderError(LDR_ERROR_SECTION_ALIGNMENT_NOT_POW2);
 
-	if (optionalHeader.SectionAlignment < optionalHeader.FileAlignment)
-		setLoaderError(LDR_ERROR_SECTION_ALIGNMENT_TOO_SMALL);
+if(optionalHeader.SectionAlignment < optionalHeader.FileAlignment)
+	setLoaderError(LDR_ERROR_SECTION_ALIGNMENT_TOO_SMALL);
 
-	// Check for images with "super-section": FileAlignment must be equal to SectionAlignment
-	if ((optionalHeader.FileAlignment & 511) && (optionalHeader.SectionAlignment != optionalHeader.FileAlignment))
-		setLoaderError(LDR_ERROR_SECTION_ALIGNMENT_INVALID);
+// Check for images with "super-section": FileAlignment must be equal to SectionAlignment
+if((optionalHeader.FileAlignment & 511) && (optionalHeader.SectionAlignment != optionalHeader.FileAlignment))
+setLoaderError(LDR_ERROR_SECTION_ALIGNMENT_INVALID);
 
-	// Check for largest image
-	if(optionalHeader.SizeOfImage > PELIB_MM_SIZE_OF_LARGEST_IMAGE)
-		setLoaderError(LDR_ERROR_SIZE_OF_IMAGE_TOO_BIG);
+// Check for largest image
+if(optionalHeader.SizeOfImage > PELIB_MM_SIZE_OF_LARGEST_IMAGE)
+setLoaderError(LDR_ERROR_SIZE_OF_IMAGE_TOO_BIG);
 
-	// Check for 32-bit images
-	if (optionalHeader.Magic == PELIB_IMAGE_NT_OPTIONAL_HDR32_MAGIC && fileHeader.Machine != PELIB_IMAGE_FILE_MACHINE_I386)
-		setLoaderError(LDR_ERROR_INVALID_MACHINE32);
+// Check for 32-bit images
+if(optionalHeader.Magic == PELIB_IMAGE_NT_OPTIONAL_HDR32_MAGIC && checkForValid32BitMachine() == false)
+setLoaderError(LDR_ERROR_INVALID_MACHINE32);
 
-	// Check for 64-bit images
-	if (optionalHeader.Magic == PELIB_IMAGE_NT_OPTIONAL_HDR64_MAGIC)
-	{
-		if (fileHeader.Machine != PELIB_IMAGE_FILE_MACHINE_AMD64 && fileHeader.Machine != PELIB_IMAGE_FILE_MACHINE_IA64)
-			setLoaderError(LDR_ERROR_INVALID_MACHINE64);
-	}
+// Check for 64-bit images
+if(optionalHeader.Magic == PELIB_IMAGE_NT_OPTIONAL_HDR64_MAGIC && checkForValid64BitMachine() == false)
+setLoaderError(LDR_ERROR_INVALID_MACHINE64);
 
-	// Check the size of image
-	if(optionalHeader.SizeOfHeaders > optionalHeader.SizeOfImage)
-		setLoaderError(LDR_ERROR_SIZE_OF_HEADERS_INVALID);
+// Check the size of image
+if(optionalHeader.SizeOfHeaders > optionalHeader.SizeOfImage)
+setLoaderError(LDR_ERROR_SIZE_OF_HEADERS_INVALID);
 
-	// On 64-bit Windows, size of optional header must be properly aligned to 8-byte boundary
-	if (fileHeader.SizeOfOptionalHeader & (sizeof(uint64_t) - 1))
-		setLoaderError(LDR_ERROR_SIZE_OF_OPTHDR_NOT_ALIGNED);
+// On 64-bit Windows, size of optional header must be properly aligned to 8-byte boundary
+if(is64BitWindows && (fileHeader.SizeOfOptionalHeader & 0x07))
+setLoaderError(LDR_ERROR_SIZE_OF_OPTHDR_NOT_ALIGNED);
 
-	// Set the size of image
-	if(BytesToPages(optionalHeader.SizeOfImage) == 0)
-		setLoaderError(LDR_ERROR_SIZE_OF_IMAGE_ZERO);
+// Set the size of image
+if(BytesToPages(optionalHeader.SizeOfImage) == 0)
+setLoaderError(LDR_ERROR_SIZE_OF_IMAGE_ZERO);
 
-	// Check for proper alignment of the image base
-	if(optionalHeader.ImageBase & (PELIB_SIZE_64KB - 1))
-		setLoaderError(LDR_ERROR_IMAGE_BASE_NOT_ALIGNED);
+// Check for proper alignment of the image base
+if(optionalHeader.ImageBase & (PELIB_SIZE_64KB - 1))
+setLoaderError(LDR_ERROR_IMAGE_BASE_NOT_ALIGNED);
 
-	return ERROR_NONE;
+return ERROR_NONE;
 }
 
-int PeLib::ImageLoader::captureSectionName(std::vector<std::uint8_t> & fileData, std::string & sectionName, const std::uint8_t * Name)
+int PeLib::ImageLoader::captureSectionName(std::vector<uint8_t> & fileData, std::string & sectionName, const std::uint8_t * Name)
 {
-	uint32_t stringTableOffset;
-	uint32_t stringTableIndex = 0;
+	size_t length = 0;
 
 	// If the section name is in format of "/12345", then the section name is actually in the symbol table
 	// Sample: 2e9c671b8a0411f2b397544b368c44d7f095eb395779de0ad1ac946914dfa34c
+	// Since retdec's regression tests doesn't like these, we skip this feature
+	/*
 	if(fileHeader.PointerToSymbolTable != 0 && Name[0] == '/')
 	{
 		// Get the offset of the string table
-		stringTableOffset = fileHeader.PointerToSymbolTable + fileHeader.NumberOfSymbols * PELIB_IMAGE_SIZEOF_COFF_SYMBOL;
+		uint32_t stringTableOffset = fileHeader.PointerToSymbolTable + fileHeader.NumberOfSymbols * PELIB_IMAGE_SIZEOF_COFF_SYMBOL;
+		uint32_t stringTableIndex = 0;
 
 		// Convert the index from string to number
 		for (size_t i = 1; i < PELIB_IMAGE_SIZEOF_SHORT_NAME && isdigit(Name[i]); i++)
@@ -962,21 +1172,22 @@ int PeLib::ImageLoader::captureSectionName(std::vector<std::uint8_t> & fileData,
 
 		// Get the section name
 		readStringRaw(fileData, sectionName, stringTableOffset + stringTableIndex);
+		return ERROR_NONE;
 	}
-	else
+	*/
+
+	// The section name is directly in the section header.
+	// It has fixed length and must not be necessarily terminated with zero.
+	// Historically, PELIB copies the name of the section WITHOUT zero chars,
+	// even if the zero chars are in the middle. Aka ".text\0\0X" results in ".textX"
+	sectionName.clear();
+	for(size_t i = 0; i < PELIB_IMAGE_SIZEOF_SHORT_NAME; i++)
 	{
-		// We do not want the trailing zeros to be included in the section name.
-		size_t length;
-
-		// Calculate the length of the section name. It is not zero terminated and has maximum size of 8.
-		for(length = 0; length < PELIB_IMAGE_SIZEOF_SHORT_NAME && Name[length] != 0; length++);
-
-		// The section name is directly in the section header.
-		// It has fixed length and must not be necessarily terminated with zero.
-		sectionName.resize(length);
-		memcpy(const_cast<char *>(sectionName.data()), Name, length);
+		if(Name[i])
+		{
+			sectionName += Name[i];
+		}
 	}
-
 	return ERROR_NONE;
 }
 
@@ -1266,7 +1477,7 @@ int PeLib::ImageLoader::verifyDosHeader(std::istream & fs, std::streamoff fileOf
 	return (ldrError == LDR_ERROR_E_LFANEW_OUT_OF_FILE) ? ERROR_INVALID_FILE : ERROR_NONE;
 }
 
-int PeLib::ImageLoader::loadImageAsIs(std::vector<std::uint8_t> & fileData)
+int PeLib::ImageLoader::loadImageAsIs(std::vector<uint8_t> & fileData)
 {
 	rawFileData = fileData;
 	return ERROR_NONE;
@@ -1275,13 +1486,13 @@ int PeLib::ImageLoader::loadImageAsIs(std::vector<std::uint8_t> & fileData)
 int PeLib::ImageLoader::captureOptionalHeader64(uint8_t * fileBegin, uint8_t * filePtr, uint8_t * fileEnd)
 {
 	PELIB_IMAGE_OPTIONAL_HEADER64 optionalHeader64{};
-	uint32_t sizeOfOptionalHeader = getRealSizeOfOptionalHeader(sizeof(PELIB_IMAGE_OPTIONAL_HEADER64));
+	uint32_t sizeOfOptionalHeader = sizeof(PELIB_IMAGE_OPTIONAL_HEADER64);
 	uint32_t numberOfRvaAndSizes;
 
 	// Capture optional header. Note that IMAGE_FILE_HEADER::SizeOfOptionalHeader
-	// is not used by the Windows loader to actually verify its size
+	// is not taken into account by the Windows loader - it simply assumes that the entire optional header is present
 	if((filePtr + sizeOfOptionalHeader) > fileEnd)
-		return setLoaderError(LDR_ERROR_NTHEADER_OUT_OF_FILE);
+		sizeOfOptionalHeader = (uint32_t)(fileEnd - filePtr);
 	memcpy(&optionalHeader64, filePtr, sizeOfOptionalHeader);
 
 	// Verify whether it's 64-bit optional header
@@ -1333,13 +1544,13 @@ int PeLib::ImageLoader::captureOptionalHeader64(uint8_t * fileBegin, uint8_t * f
 int PeLib::ImageLoader::captureOptionalHeader32(uint8_t * fileBegin, uint8_t * filePtr, uint8_t * fileEnd)
 {
 	PELIB_IMAGE_OPTIONAL_HEADER32 optionalHeader32{};
-	uint32_t sizeOfOptionalHeader = getRealSizeOfOptionalHeader(sizeof(PELIB_IMAGE_OPTIONAL_HEADER32));
+	uint32_t sizeOfOptionalHeader = sizeof(PELIB_IMAGE_OPTIONAL_HEADER32);
 	uint32_t numberOfRvaAndSizes;
 
 	// Capture optional header. Note that IMAGE_FILE_HEADER::SizeOfOptionalHeader
-	// is not used by the Windows loader to actually verify its size
+	// is not taken into account by the Windows loader - it simply assumes that the entire optional header is present
 	if((filePtr + sizeOfOptionalHeader) > fileEnd)
-		return setLoaderError(LDR_ERROR_NTHEADER_OUT_OF_FILE);
+		sizeOfOptionalHeader = (uint32_t)(fileEnd - filePtr);
 	memcpy(&optionalHeader32, filePtr, sizeOfOptionalHeader);
 
 	// Verify whether it's 32-bit optional header
@@ -1387,13 +1598,6 @@ int PeLib::ImageLoader::captureOptionalHeader32(uint8_t * fileBegin, uint8_t * f
 	checkSumFileOffset = (filePtr - fileBegin) + offsetof(PELIB_IMAGE_OPTIONAL_HEADER32, CheckSum);
 	securityDirFileOffset = (filePtr - fileBegin) + offsetof(PELIB_IMAGE_OPTIONAL_HEADER32, DataDirectory) + (sizeof(PELIB_IMAGE_DATA_DIRECTORY) * PELIB_IMAGE_DIRECTORY_ENTRY_SECURITY);
 	return ERROR_NONE;
-}
-
-std::uint32_t PeLib::ImageLoader::getRealSizeOfOptionalHeader(std::uint32_t nominalSize)
-{
-	if(0 < fileHeader.SizeOfOptionalHeader && fileHeader.SizeOfOptionalHeader < nominalSize)
-		nominalSize = fileHeader.SizeOfOptionalHeader;
-	return nominalSize;
 }
 
 uint32_t PeLib::ImageLoader::captureImageSection(
@@ -1533,18 +1737,14 @@ bool PeLib::ImageLoader::isGoodMappedPage(uint32_t rva)
 {
 	uint32_t pageIndex = (rva / PELIB_PAGE_SIZE);
 
-	if(pageIndex > pages.size())
-		return false;
-	return (pages[pageIndex].isInvalidPage == false);
+	return (pageIndex < pages.size()) ? !pages[pageIndex].isInvalidPage : false;
 }
 
 bool PeLib::ImageLoader::isZeroPage(uint32_t rva)
 {
 	uint32_t pageIndex = (rva / PELIB_PAGE_SIZE);
 
-	if(pageIndex > pages.size())
-		return false;
-	return (pages[pageIndex].isZeroPage);
+	return (pageIndex < pages.size()) ? pages[pageIndex].isZeroPage : false;
 }
 
 bool PeLib::ImageLoader::isRvaOfSectionHeaderPointerToRawData(uint32_t rva)
@@ -1586,6 +1786,22 @@ bool PeLib::ImageLoader::isLegacyImageArchitecture(uint16_t Machine)
 	return false;
 }
 
+bool PeLib::ImageLoader::checkForValid64BitMachine()
+{
+	// Since Windows 10, image loader will load 64-bit ARM images
+	if(loadArmImages && fileHeader.Machine == PELIB_IMAGE_FILE_MACHINE_ARM64)
+		return true;
+	return (fileHeader.Machine == PELIB_IMAGE_FILE_MACHINE_AMD64 || fileHeader.Machine == PELIB_IMAGE_FILE_MACHINE_IA64);
+}
+
+bool PeLib::ImageLoader::checkForValid32BitMachine()
+{
+	// Since Windows 10, image loader will load 32-bit ARM images
+	if(loadArmImages && fileHeader.Machine == PELIB_IMAGE_FILE_MACHINE_ARMNT)
+		return true;
+	return (fileHeader.Machine == PELIB_IMAGE_FILE_MACHINE_I386);
+}
+
 // Windows 10: For IMAGE_FILE_MACHINE_I386 and IMAGE_FILE_MACHINE_AMD64,
 // if (Characteristics & IMAGE_FILE_RELOCS_STRIPPED) and (DllCharacteristics & IMAGE_DLLCHARACTERISTICS_APPCONTAINER),
 // MiVerifyImageHeader returns STATUS_INVALID_IMAGE_FORMAT.
@@ -1608,17 +1824,28 @@ bool PeLib::ImageLoader::checkForBadAppContainer()
 // Returns true if the image is OK and can be mapped by NtCreateSection(SEC_IMAGE).
 // This does NOT mean that the image is executable by CreateProcess - more checks are done,
 // like resource integrity or relocation table correctness.
-bool PeLib::ImageLoader::isImageLoadable()
+bool PeLib::ImageLoader::isImageLoadable() const
 {
 	return (ldrError == LDR_ERROR_NONE || ldrError == LDR_ERROR_FILE_IS_CUT_LOADABLE);
 }
 
-bool PeLib::ImageLoader::isImageMappedOk()
+bool PeLib::ImageLoader::isImageMappedOk() const
 {
 	// If there was loader error, we didn't map the image
 	if(!isImageLoadable())
 		return false;
 	if(pages.size() == 0)
+		return false;
+	return true;
+}
+
+bool PeLib::ImageLoader::isValidImageBlock(std::uint32_t Rva, std::uint32_t Size) const
+{
+	if(Rva >= optionalHeader.SizeOfImage || Size >= optionalHeader.SizeOfImage)
+		return false;
+	if((Rva + Size) < Rva)
+		return false;
+	if((Rva + Size) > optionalHeader.SizeOfImage)
 		return false;
 	return true;
 }

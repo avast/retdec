@@ -131,7 +131,7 @@ namespace PeLib
 						case PELIB_IMAGE_REL_BASED_LOW:
 						case PELIB_IMAGE_REL_BASED_HIGHLOW:
 						case PELIB_IMAGE_REL_BASED_MIPS_JMPADDR:
-						case PELIB_IMAGE_REL_BASED_MIPS_JMPADDR16:
+						case PELIB_IMAGE_REL_BASED_IA64_IMM64:
 						case PELIB_IMAGE_REL_BASED_DIR64:
 
 							// This is a correct relocation entry. Lower 12 bits contains
