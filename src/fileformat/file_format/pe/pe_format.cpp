@@ -1806,8 +1806,8 @@ void PeFormat::loadCertificates()
 		return;
 	}
 
-	// Make sure that the PKCS7 data is valid
-	if(!PKCS7_type_is_data(p7))
+	//// Make sure that the PKCS7 data is valid
+	if(!PKCS7_type_is_signed(p7))
 	{
 		PKCS7_free(p7);
 		return;
