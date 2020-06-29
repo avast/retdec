@@ -1387,7 +1387,7 @@ void PeFormat::loadSections()
  */
 void PeFormat::loadSymbols()
 {
-	const auto symTab = file->coffSymTab();
+	const auto & symTab = file->coffSymTab();
 	auto *table = new SymbolTable();
 
 	for(std::size_t i = 0, e = symTab.getNumberOfStoredSymbols(); i < e; ++i)
@@ -1783,35 +1783,40 @@ void PeFormat::loadCertificates()
 
 	// We always take the first one, there are no additional certificate tables in PE
 	auto certBytes = securityDir.getCertificate(0);
+	auto certSize = certBytes.size();
+	PKCS7 *p7 = NULL;
+	BIO *bio;
 
-	BIO *bio = BIO_new(BIO_s_mem());
-	if(!bio)
+	// Create the BIO object and extract certificate from it
+	if((bio = BIO_new(BIO_s_mem())) != NULL)
 	{
-		return;
-	}
-
-	if(BIO_reset(bio) != 1)
-	{
+		if(BIO_reset(bio) == 1)
+		{
+			if(BIO_write(bio, certBytes.data(), certSize) == certSize)
+			{
+				p7 = d2i_PKCS7_bio(bio, nullptr);
+			}
+		}
 		BIO_free(bio);
-		return;
 	}
 
-	if(BIO_write(bio, certBytes.data(), static_cast<int>(certBytes.size())) != static_cast<std::int64_t>(certBytes.size()))
-	{
-		BIO_free(bio);
-		return;
-	}
-
-	PKCS7 *p7 = d2i_PKCS7_bio(bio, nullptr);
+	// Make sure that the PKCS7 structure is valid
 	if(!p7)
 	{
-		BIO_free(bio);
+		return;
+	}
+
+	// Make sure that the PKCS7 data is valid
+	if(!PKCS7_type_is_data(p7))
+	{
+		PKCS7_free(p7);
 		return;
 	}
 
 	// Find signer of the application and store its serial number.
 	X509 *signerCert = nullptr;
 	X509 *counterSignerCert = nullptr;
+
 	STACK_OF(X509) *certs = p7->d.sign->cert;
 	STACK_OF(X509) *signers = PKCS7_get0_signers(p7, certs, 0);
 
@@ -1849,7 +1854,6 @@ void PeFormat::loadCertificates()
 	// If we have no signer and countersigner, there must be something really bad
 	if(!signerCert && !counterSignerCert)
 	{
-		BIO_free(bio);
 		return;
 	}
 
@@ -1934,7 +1938,6 @@ void PeFormat::loadCertificates()
 	}
 
 	PKCS7_free(p7);
-	BIO_free(bio);
 }
 
 /**
@@ -1958,25 +1961,7 @@ void PeFormat::loadTlsInformation()
 	auto callBacksAddr = formatParser->getTlsAddressOfCallBacks();
 	tlsInfo->setCallBacksAddr(callBacksAddr);
 
-	const auto &allBytes = getBytes();
-	DynamicBuffer structContent(allBytes);
-
-	unsigned long long callBacksOffset;
-	if (getOffsetFromAddress(callBacksOffset, callBacksAddr))
-	{
-		while (allBytes.size() >= callBacksOffset + sizeof(std::uint32_t))
-		{
-			auto cbAddr = structContent.read<std::uint32_t>(callBacksOffset);
-			callBacksOffset += sizeof(std::uint32_t);
-
-			if (cbAddr == 0)
-			{
-				break;
-			}
-
-			tlsInfo->addCallBack(cbAddr);
-		}
-	}
+	tlsInfo->setCallBacks(formatParser->getCallbacks());
 }
 
 /**
@@ -3185,6 +3170,19 @@ std::size_t PeFormat::getPeHeaderOffset() const
 {
 	return formatParser->getPeHeaderOffset();
 }
+
+/**
+* Get image bitability
+* @return 32=32-bit image, 64=64-bit image
+*
+* In some cases (e.g. FSG packer), offset of PE signature may be inside MZ header and
+* therefore this method may return lesser number that method @a getMzHeaderSize().
+*/
+std::size_t PeFormat::getImageBitability() const
+{
+	return formatParser->getImageBitability();
+}
+
 
 /**
  * Get offset of COFF symbol table

@@ -93,8 +93,8 @@ class Symbol
 
 		/// @name Setters
 		/// @{
-		void setName(std::string symbolName);
-		void setOriginalName(std::string symbolOriginalName);
+		void setName(const std::string & symbolName);
+		void setOriginalName(const std::string & symbolOriginalName);
 		void setType(Symbol::Type symbolType);
 		void setUsageType(Symbol::UsageType symbolUsageType);
 		void setIndex(unsigned long long symbolIndex);

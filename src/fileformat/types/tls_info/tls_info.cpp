@@ -151,6 +151,15 @@ void TlsInfo::setCallBacksAddr(std::uint64_t cbAddr)
 }
 
 /**
+* Set array of callbacks
+* @param cbAddr address of callbacks to set
+*/
+void TlsInfo::setCallBacks(const std::vector<uint64_t> & callbacks)
+{
+	callBacks = callbacks;
+}
+
+/**
  * Set zero fill size
  * @param zFill zero fill size to set
  */

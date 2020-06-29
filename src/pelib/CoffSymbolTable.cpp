@@ -156,7 +156,7 @@ namespace PeLib
 		return symbolTable[ulSymbol].Index;
 	}
 
-	std::string CoffSymbolTable::getSymbolName(std::size_t ulSymbol) const
+	const std::string & CoffSymbolTable::getSymbolName(std::size_t ulSymbol) const
 	{
 		return symbolTable[ulSymbol].Name;
 	}

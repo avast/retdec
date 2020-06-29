@@ -518,6 +518,27 @@ namespace PeLib
 		else return static_cast<unsigned int>(m_vNewiid[dwFilenr].firstthunk.size());
 	}
 
+	inline bool isInvalidOrdinal(std::uint64_t ordinal, std::uint64_t ordinalMask, std::uint64_t sizeOfImage)
+	{
+		// Check for invalid name
+		if((ordinal & ordinalMask) == 0)
+		{
+			// Any name RVA that goes out of image is considered invalid
+			if(ordinal >= sizeOfImage)
+			{
+				return true;
+			}
+		}
+		else
+		{
+			// Mask out the ordinal bit. Then, any ordinal must not be larger than 0xFFFF
+			ordinal = ordinal & ~ordinalMask;
+			return (ordinal >> 0x10) != 0;
+		}
+
+		return false;
+	}
+
 	/**
 	* Read an import directory from a file.
 	* \todo Check if streams failed.
@@ -648,7 +669,9 @@ namespace PeLib
 
 				// Check samples that have import name out of the image
 				// Sample: CCE461B6EB23728BA3B8A97B9BE84C0FB9175DB31B9949E64144198AB3F702CE
-				if ((tdCurr.itd.Ordinal & OrdinalMask) == 0 && (tdCurr.itd.Ordinal >= SizeOfImage))
+				// Import by ordinal must be lower-word only; any ordinal that is greater than 0xFFFF is invalid.
+				// Sample: 7CE5BB5CA99B3570514AF03782545D41213A77A0F93D4AAC8269823A8D3A58EF
+				if(isInvalidOrdinal(tdCurr.itd.Ordinal, OrdinalMask, SizeOfImage))
 				{
 					setLoaderError(LDR_ERROR_IMPDIR_NAME_RVA_INVALID);
 					break;
@@ -709,7 +732,7 @@ namespace PeLib
 
 				// Check samples that have import name out of the image
 				// Sample: CCE461B6EB23728BA3B8A97B9BE84C0FB9175DB31B9949E64144198AB3F702CE
-				//	if ((tdCurr.itd.Ordinal & OrdinalMask) == 0 && (tdCurr.itd.Ordinal >= SizeOfImage))
+				//if(isInvalidOrdinal(tdCurr.itd.Ordinal, OrdinalMask, SizeOfImage))
 				//	break;
 
 				vOldIidCurr[i].firstthunk.push_back(tdCurr);

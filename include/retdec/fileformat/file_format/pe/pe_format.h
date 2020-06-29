@@ -163,6 +163,7 @@ class PeFormat : public FileFormat
 		std::size_t getMzHeaderSize() const;
 		std::size_t getOptionalHeaderSize() const;
 		std::size_t getPeHeaderOffset() const;
+		std::size_t getImageBitability() const;
 		std::size_t getCoffSymbolTableOffset() const;
 		std::size_t getNumberOfCoffSymbols() const;
 		std::size_t getSizeOfStringTable() const;

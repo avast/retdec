@@ -25,6 +25,7 @@ namespace PeLib
 	{
 		private:
 		  PELIB_IMAGE_TLS_DIRECTORY m_tls; ///< Structure that holds all information about the directory.
+		  std::vector<uint64_t> m_Callbacks;
 		  std::size_t pointerSize;
 
 		public:
@@ -37,6 +38,8 @@ namespace PeLib
 		  /// Writes the TLS directory to a file.
 		  int write(const std::string& strFilename, unsigned int dwOffset) const; // EXPORT
 
+		  /// Returns vector of TLS callbacks
+		  const std::vector<std::uint64_t> & getCallbacks() const;
 		  /// Returns the StartAddressOfRawData value of the TLS header.
 		  std::uint64_t getStartAddressOfRawData() const; // EXPORT
 		  /// Returns the EndAddressOfRawData value of the TLS header.
@@ -72,10 +75,12 @@ namespace PeLib
 	inline
 	int TlsDirectory::read(ImageLoader & imageLoader)
 	{
+		std::uint64_t imageBase = imageLoader.getImageBase();
 		std::uint32_t rva = imageLoader.getDataDirRva(PELIB_IMAGE_DIRECTORY_ENTRY_TLS);
 		std::uint32_t size = imageLoader.getDataDirSize(PELIB_IMAGE_DIRECTORY_ENTRY_TLS);
 		std::uint32_t sizeOfImage = imageLoader.getSizeOfImage();
 		std::uint32_t bytesRead;
+
 		if((rva + size) >= sizeOfImage)
 			return ERROR_INVALID_FILE;
 
@@ -106,6 +111,26 @@ namespace PeLib
 			bytesRead = imageLoader.readImage(&m_tls, rva, sizeof(PELIB_IMAGE_TLS_DIRECTORY));
 			if(bytesRead != sizeof(PELIB_IMAGE_TLS_DIRECTORY))
 				return ERROR_INVALID_FILE;
+		}
+
+		// If there is non-zero address of callbacks, we try to read at least one pointer to know
+		// if there are TLS callbacks
+		if(imageBase < m_tls.AddressOfCallBacks && m_tls.AddressOfCallBacks < (imageBase + sizeOfImage))
+		{
+			std::uint32_t rva = (std::uint32_t)(m_tls.AddressOfCallBacks - imageBase);
+
+			for(std::uint32_t i = 0; i < PELIB_MAX_TLS_CALLBACKS; i++)
+			{
+				std::uint64_t AddressOfCallBack = 0;
+
+				if(imageLoader.readPointer(rva, AddressOfCallBack) == 0)
+					break;
+				if(AddressOfCallBack == 0)
+					break;
+
+				m_Callbacks.push_back(AddressOfCallBack);
+				rva += pointerSize;
+			}
 		}
 
 		return ERROR_NONE;
@@ -185,6 +210,15 @@ namespace PeLib
 		ofFile.close();
 
 		return ERROR_NONE;
+	}
+
+	/**
+	* @return The vector of TLS callbacks
+	**/
+	inline
+	const std::vector<std::uint64_t> & TlsDirectory::getCallbacks() const
+	{
+		return m_Callbacks;
 	}
 
 	/**

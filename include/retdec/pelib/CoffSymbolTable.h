@@ -36,7 +36,7 @@ namespace PeLib
 			std::size_t getSizeOfStringTable() const;
 			std::size_t getNumberOfStoredSymbols() const;
 			std::uint32_t getSymbolIndex(std::size_t ulSymbol) const;
-			std::string getSymbolName(std::size_t ulSymbol) const;
+			const std::string & getSymbolName(std::size_t ulSymbol) const;
 			std::uint32_t getSymbolValue(std::size_t ulSymbol) const;
 			std::uint16_t getSymbolSectionNumber(std::size_t ulSymbol) const;
 			std::uint8_t getSymbolTypeComplex(std::size_t ulSymbol) const;

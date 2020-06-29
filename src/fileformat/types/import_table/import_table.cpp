@@ -8,6 +8,7 @@
 #include "retdec/utils/conversion.h"
 #include "retdec/utils/string.h"
 #include "retdec/fileformat/utils/crypto.h"
+#include "retdec/pelib/PeLibAux.h"
 #include "retdec/fileformat/types/import_table/import_table.h"
 
 using namespace retdec::utils;
@@ -762,7 +763,13 @@ ImportTable::importsIterator ImportTable::end() const
  */
 void ImportTable::computeHashes()
 {
-	std::vector<std::uint8_t> impHashBytes;
+	std::string impHashBytes;
+
+	// Prevent endless reallocations by reserving space in the import data blob
+	// The blob format is DllName1.SymbolName1[,DllName2.SymbolName2[,DllName3.SymbolName3]]
+	impHashBytes.reserve(imports.size() * (PeLib::IMPORT_LIBRARY_MAX_LENGTH + PeLib::IMPORT_LIBRARY_MAX_LENGTH + 2));
+
+	// Enumerate imports and append them to the import data blob
 	for (const auto& import : imports)
 	{
 		if(!import->isUsedForImphash())
@@ -770,6 +777,7 @@ void ImportTable::computeHashes()
 			continue;
 		}
 
+		// Get library name and import name
 		auto libName = toLower(getLibrary(import->getLibraryIndex()));
 		auto funcName = toLower(import->getName());
 
@@ -798,16 +806,13 @@ void ImportTable::computeHashes()
 
 		// Yara adds comma if there are multiple imports
 		if(!impHashBytes.empty())
-		{
-			impHashBytes.push_back(static_cast<std::uint8_t>(','));
-		}
+			impHashBytes.append(1, ',');
 
 		// Append the bytes of the import name to the hash bytes vector
 		// Note that this is faster than the previous char-to-char concatenating
-		std::string libAndFunc = libName + "." + funcName;
-		std::size_t oldSize = impHashBytes.size();
-		impHashBytes.resize(oldSize + libAndFunc.size());
-		memcpy(impHashBytes.data() + oldSize, libAndFunc.data(), libAndFunc.size());
+		impHashBytes.append(libName);
+		impHashBytes.append(1, '.');
+		impHashBytes.append(funcName);
 
 		//for(const auto c : std::string())
 		//{
@@ -815,14 +820,12 @@ void ImportTable::computeHashes()
 		//}
 	}
 
-	if (impHashBytes.size() == 0)
+	if (impHashBytes.size())
 	{
-		return;
+		impHashCrc32 = retdec::crypto::getCrc32((const uint8_t *)impHashBytes.data(), impHashBytes.size());
+		impHashMd5 = retdec::crypto::getMd5((const uint8_t *)impHashBytes.data(), impHashBytes.size());
+		impHashSha256 = retdec::crypto::getSha256((const uint8_t *)impHashBytes.data(), impHashBytes.size());
 	}
-
-	impHashCrc32 = getCrc32(impHashBytes.data(), impHashBytes.size());
-	impHashMd5 = getMd5(impHashBytes.data(), impHashBytes.size());
-	impHashSha256 = getSha256(impHashBytes.data(), impHashBytes.size());
 }
 
 /**

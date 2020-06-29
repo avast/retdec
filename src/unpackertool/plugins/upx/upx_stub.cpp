@@ -286,10 +286,10 @@ std::shared_ptr<UpxStub> UpxStub::_createStubImpl(retdec::loader::Image* file, c
 		}
 		case retdec::fileformat::Format::PE:
 		{
-			//if (static_cast<retdec::fileformat::PeFormat*>(file->getFileFormat())->isPe32())
-			//	stub = new PeUpxStub<32>(file, stubData, capturedData, std::move(decompressor), metadata);
-			//else
-			//	stub = new PeUpxStub<64>(file, stubData, capturedData, std::move(decompressor), metadata);
+			if (static_cast<retdec::fileformat::PeFormat*>(file->getFileFormat())->getImageBitability() == 32)
+				stub = new PeUpxStub<32>(file, stubData, capturedData, std::move(decompressor), metadata);
+			else
+				stub = new PeUpxStub<64>(file, stubData, capturedData, std::move(decompressor), metadata);
 			break;
 		}
 		case retdec::fileformat::Format::MACHO:

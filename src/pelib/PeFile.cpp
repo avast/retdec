@@ -402,20 +402,24 @@ namespace PeLib
 		// Only check PE files compiled for i386 or x64 processors.
 		if (m_imageLoader.getMachine() == PELIB_IMAGE_FILE_MACHINE_I386 || m_imageLoader.getMachine() == PELIB_IMAGE_FILE_MACHINE_AMD64)
 		{
-			std::uint64_t entryPointCode[2] = {0, 0};
-
-			// Check if 16 bytes of code are available in the file
-			if ((addressOfEntryPoint + sizeof(entryPointCode)) < sizeOfImage)
+			// Only if there are no TLS callbacks
+			if(m_tlsdir.getCallbacks().size() == 0)
 			{
-				// Read the entry point code
-				imgLoader.readImage(entryPointCode, addressOfEntryPoint, sizeof(entryPointCode));
+				std::uint64_t entryPointCode[2] = {0, 0};
 
-				// Zeroed instructions at entry point map either to "add [eax], al" (i386) or "add [rax], al" (AMD64).
-				// Neither of these instructions makes sense on the entry point. We check 16 bytes of the entry point,
-				// in order to make sure it's really a corruption.
-				if ((entryPointCode[0] | entryPointCode[1]) == 0)
+				// Check if 16 bytes of code are available in the file
+				if ((addressOfEntryPoint + sizeof(entryPointCode)) < sizeOfImage)
 				{
-					return LDR_ERROR_ENTRY_POINT_ZEROED;
+					// Read the entry point code
+					imgLoader.readImage(entryPointCode, addressOfEntryPoint, sizeof(entryPointCode));
+
+					// Zeroed instructions at entry point map either to "add [eax], al" (i386) or "add [rax], al" (AMD64).
+					// Neither of these instructions makes sense on the entry point. We check 16 bytes of the entry point,
+					// in order to make sure it's really a corruption.
+					if ((entryPointCode[0] | entryPointCode[1]) == 0)
+					{
+						return LDR_ERROR_ENTRY_POINT_ZEROED;
+					}
 				}
 			}
 		}

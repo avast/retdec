@@ -45,6 +45,11 @@ class PeFormatParser
 		return peFile->imageLoader().getPeHeaderOffset();
 	}
 
+	std::uint32_t getImageBitability() const
+	{
+		return peFile->imageLoader().getImageBitability();
+	}
+
 	std::uint32_t getDeclaredNumberOfSections() const
 	{
 		return peFile->imageLoader().getFileHeader().NumberOfSections;
@@ -484,6 +489,11 @@ class PeFormatParser
 	std::uint64_t getTlsAddressOfIndex() const
 	{
 		return peFile->tlsDir().getAddressOfIndex();
+	}
+
+	const std::vector<uint64_t> & getCallbacks() const
+	{
+		return peFile->tlsDir().getCallbacks();
 	}
 
 	std::uint64_t getTlsAddressOfCallBacks() const

@@ -152,6 +152,7 @@ namespace PeLib
 
 	const std::uint32_t PELIB_MM_SIZE_OF_LARGEST_IMAGE = 0x77000000;
 
+	const std::uint32_t PELIB_MAX_TLS_CALLBACKS      = 0x100;           // Maximum number of processed TLS callbacks
 	const std::uint32_t PELIB_MAX_IMPORT_DLLS        = 0x100;           // Maximum number of imported DLLs we consider OK
 	const std::uint32_t PELIB_MAX_IMPORTED_FUNCTIONS = 0x1000;          // Maximum number of exported functions (per DLL) that we support
 	const std::uint32_t PELIB_MAX_EXPORTED_FUNCTIONS = 0x1000;          // Maximum number of exported functions that we support
