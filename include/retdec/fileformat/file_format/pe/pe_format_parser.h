@@ -180,8 +180,7 @@ class PeFormatParser
 
 	std::uint32_t getStoredNumberOfDataDirectories() const
 	{
-		std::uint32_t numberOfRvaAndSizes = peFile->imageLoader().getOptionalHeader().NumberOfRvaAndSizes;
-		return std::min(numberOfRvaAndSizes, PeLib::PELIB_IMAGE_NUMBEROF_DIRECTORY_ENTRIES);
+		return peFile->imageLoader().getRealNumberOfDataDirectories();
 	}
 
 	std::uint32_t getNumberOfImportedLibraries() const
@@ -204,16 +203,17 @@ class PeFormatParser
 		std::uint64_t imageBase = peFile->imageLoader().getImageBase();
 		std::uint32_t entryPoint = peFile->imageLoader().getOptionalHeader().AddressOfEntryPoint;
 
+		// Do not report zero entry point on DLLs
 		epAddress = imageBase + entryPoint;
-		return true;
+		return (entryPoint != 0 || isDll() == false);
 	}
 
 	bool getEpOffset(std::uint64_t & epOffset) const
 	{
 		std::uint32_t entryPoint = peFile->imageLoader().getOptionalHeader().AddressOfEntryPoint;
-		epOffset = peFile->imageLoader().getFileOffsetFromRva(entryPoint);
 
-		return (epOffset != UINT32_MAX);
+		epOffset = peFile->imageLoader().getFileOffsetFromRva(entryPoint);
+		return (entryPoint != 0 || isDll() == false) && (epOffset != UINT32_MAX);
 	}
 
 	bool getSectionType(const PeLib::PELIB_SECTION_HEADER * pSectionHeader, PeCoffSection::Type & secType) const
@@ -265,6 +265,7 @@ class PeFormatParser
 		section.setType(sectionType);
 		section.setIndex(secIndex);
 		section.setOffset(imageLoader.getRealPointerToRawData(secIndex));
+		section.setUnfixedOffset(pSectionHeader->PointerToRawData);
 		section.setSizeInFile(pSectionHeader->SizeOfRawData);
 		section.setSizeInMemory(pSectionHeader->VirtualSize);
 		section.setAddress(pSectionHeader->VirtualAddress ? imageLoader.getImageBase() + pSectionHeader->VirtualAddress : 0);
@@ -278,7 +279,7 @@ class PeFormatParser
 	{
 		if(peFile->imageLoader().getCharacteristics() & PeLib::PELIB_IMAGE_FILE_DLL)
 		{
-			dllFlags = peFile->imageLoader().getCharacteristics();
+			dllFlags = peFile->imageLoader().getOptionalHeader().DllCharacteristics;
 			return true;
 		}
 

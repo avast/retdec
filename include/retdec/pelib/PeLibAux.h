@@ -16,6 +16,7 @@
 #include <numeric>
 #include <limits>
 #include <unordered_map>
+#include <string.h>
 
 #ifdef _MSC_VER						// Reduces number of warnings under MS Visual Studio from ~100000 to zero
 #pragma warning(disable:4267)		// C4267: 'initializing': conversion from 'size_t' to '_Ty2', possible loss of data

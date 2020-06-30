@@ -3644,7 +3644,9 @@ void PeFormat::scanForSectionAnomalies(unsigned anamaliesLimit)
 {
 	std::size_t nSecs = getDeclaredNumberOfSections();
 
+	unsigned long long imageBase;
 	unsigned long long epAddr;
+
 	if (getEpAddress(epAddr))
 	{
 		auto *epSec = dynamic_cast<const PeCoffSection*>(getEpSection());
@@ -3670,9 +3672,7 @@ void PeFormat::scanForSectionAnomalies(unsigned anamaliesLimit)
 		else
 		{
 			// scan EP outside mapped sections
-			anomalies.emplace_back(
-				"EpOutsideSections", "Entry point is outside of mapped sections"
-			);
+			anomalies.emplace_back("EpOutsideSections", "Entry point is outside of mapped sections");
 		}
 	}
 

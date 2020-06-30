@@ -114,7 +114,7 @@ namespace PeLib
 
 		if (stringTableSize > ulFileSize || uiOffset + stringTableSize > ulFileSize)
 		{
-			stringTableSize = (ulFileSize - uiOffset);
+			stringTableSize = (ulFileSize - uiOffset) + 4;
 		}
 
 		// read string table

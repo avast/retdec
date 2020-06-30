@@ -260,6 +260,11 @@ class ImageLoader
 		return checkSumFileOffset;
 	}
 
+	std::uint32_t getRealNumberOfDataDirectories() const
+	{
+		return realNumberOfRvaAndSizes;
+	}
+
 	std::uint32_t getSecurityDirFileOffset() const
 	{
 		return securityDirFileOffset;
@@ -275,6 +280,15 @@ class ImageLoader
 	{
 		// The data directory must be present there
 		return (optionalHeader.NumberOfRvaAndSizes > dataDirIndex) ? optionalHeader.DataDirectory[dataDirIndex].Size : 0;
+	}
+
+	std::uint64_t getVirtualAddressMasked(std::uint32_t rva)
+	{
+		std::uint64_t virtualAddress = getImageBase() + rva;
+
+		if(getImageBitability() == 32)
+			virtualAddress = virtualAddress & 0xFFFFFFFF;
+		return virtualAddress;
 	}
 
 	int setLoaderError(LoaderError ldrErr);
@@ -345,6 +359,11 @@ class ImageLoader
 		return (ByteSize >> PELIB_PAGE_SIZE_SHIFT) + ((ByteSize & (PELIB_PAGE_SIZE - 1)) != 0);
 	}
 
+	static std::uint64_t signExtend32To64(std::uint32_t value32)
+	{
+		return (std::uint64_t)(std::int64_t)(std::int32_t)value32;
+	}
+
 	static uint8_t ImageProtectionArray[16];
 
 	std::vector<PELIB_SECTION_HEADER> sections;         // Vector of section headers
@@ -357,6 +376,7 @@ class ImageLoader
 	std::uint32_t ntSignature;
 	std::uint32_t loaderMode;
 	std::uint32_t maxSectionCount;
+	std::uint32_t realNumberOfRvaAndSizes;              // Real present number of RVA and sizes
 	std::uint32_t checkSumFileOffset;                   // File offset of the image checksum
 	std::uint32_t securityDirFileOffset;                // File offset of security directory
 	bool ntHeadersSizeCheck;                            // If true, the loader requires minimum size of NT headers

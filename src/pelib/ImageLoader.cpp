@@ -67,6 +67,7 @@ PeLib::ImageLoader::ImageLoader(uint32_t loaderFlags)
 	memset(&optionalHeader, 0, sizeof(PELIB_IMAGE_OPTIONAL_HEADER));
 	checkSumFileOffset = 0;
 	securityDirFileOffset = 0;
+	realNumberOfRvaAndSizes = 0;
 	ntSignature = 0;
 	ldrError = LDR_ERROR_NONE;
 
@@ -395,7 +396,7 @@ uint32_t PeLib::ImageLoader::getImageBitability() const
 uint32_t PeLib::ImageLoader::getFileOffsetFromRva(uint32_t rva) const
 {
 	// If we have sections loaded, then we calculate the file offset from section headers
-	if(sections.size())
+	if(sections.size() && optionalHeader.SectionAlignment >= PELIB_PAGE_SIZE)
 	{
 		// Check whether the rva goes into any section
 		for(auto & sectHdr : sections)
@@ -403,14 +404,15 @@ uint32_t PeLib::ImageLoader::getFileOffsetFromRva(uint32_t rva) const
 			// Only if the pointer to raw data is not zero
 			if(sectHdr.PointerToRawData != 0 && sectHdr.SizeOfRawData != 0)
 			{
-				uint32_t sectionRvaStart = sectHdr.VirtualAddress;
+				uint32_t realPointerToRawData = sectHdr.PointerToRawData & ~(PELIB_SECTOR_SIZE - 1);
+				uint32_t sectionRvaStart = AlignToSize(sectHdr.VirtualAddress, optionalHeader.SectionAlignment);
 				uint32_t virtualSize = (sectHdr.VirtualSize != 0) ? sectHdr.VirtualSize : sectHdr.SizeOfRawData;
 
 				if(sectionRvaStart <= rva && rva < (sectionRvaStart + virtualSize))
 				{
 					// Make sure we round the pointer to raw data down to PELIB_SECTOR_SIZE.
 					// In case when PointerToRawData is less than 0x200, it maps to the header!
-					return (sectHdr.PointerToRawData & ~(PELIB_SECTOR_SIZE - 1)) + (rva - sectionRvaStart);
+					return realPointerToRawData + (rva - sectionRvaStart);
 				}
 			}
 		}
@@ -439,6 +441,8 @@ std::uint32_t PeLib::ImageLoader::getRealPointerToRawData(std::size_t sectionInd
 {
 	if(sectionIndex >= sections.size())
 		return UINT32_MAX;
+	if(optionalHeader.SectionAlignment < PELIB_PAGE_SIZE)
+		return sections[sectionIndex].PointerToRawData;
 
 	return sections[sectionIndex].PointerToRawData & ~(PELIB_SECTOR_SIZE - 1);
 }
@@ -1064,9 +1068,9 @@ int PeLib::ImageLoader::captureNtHeaders(std::vector<uint8_t> & fileData)
 		setLoaderError(LDR_ERROR_NTHEADER_OUT_OF_FILE);
 
 	// 7baebc6d9f2185fafa760c875ab1386f385a0b3fecf2e6ae339abb4d9ac58f3e
-	if (fileHeader.Machine == 0 && fileHeader.SizeOfOptionalHeader == 0)
+	if(fileHeader.Machine == 0 && fileHeader.SizeOfOptionalHeader == 0)
 		setLoaderError(LDR_ERROR_FILE_HEADER_INVALID);
-	if (!(fileHeader.Characteristics & PELIB_IMAGE_FILE_EXECUTABLE_IMAGE))
+	if(!(fileHeader.Characteristics & PELIB_IMAGE_FILE_EXECUTABLE_IMAGE))
 		setLoaderError(LDR_ERROR_IMAGE_NON_EXECUTABLE);
 	filePtr += sizeof(PELIB_IMAGE_FILE_HEADER);
 
@@ -1082,74 +1086,74 @@ int PeLib::ImageLoader::captureNtHeaders(std::vector<uint8_t> & fileData)
 
 	// Capture optional header. Note that we need to parse it
 	// according to IMAGE_OPTIONAL_HEADER::Magic
-if((filePtr + sizeof(uint16_t)) < fileEnd)
-	optionalHeaderMagic = *(uint16_t *)(filePtr);
-if(optionalHeaderMagic == PELIB_IMAGE_NT_OPTIONAL_HDR64_MAGIC)
-captureOptionalHeader64(fileBegin, filePtr, fileEnd);
-else
-captureOptionalHeader32(fileBegin, filePtr, fileEnd);
+	if((filePtr + sizeof(uint16_t)) < fileEnd)
+		optionalHeaderMagic = *(uint16_t *)(filePtr);
+	if(optionalHeaderMagic == PELIB_IMAGE_NT_OPTIONAL_HDR64_MAGIC)
+		captureOptionalHeader64(fileBegin, filePtr, fileEnd);
+	else
+		captureOptionalHeader32(fileBegin, filePtr, fileEnd);
 
-// Performed by Windows 10 (nt!MiVerifyImageHeader):
-// Sample: 04d3577d1b6309a0032d4c4c1252c55416a09bb617aebafe512fffbdd4f08f18
-if(appContainerCheck && checkForBadAppContainer())
-setLoaderError(LDR_ERROR_IMAGE_NON_EXECUTABLE);
+	// Performed by Windows 10 (nt!MiVerifyImageHeader):
+	// Sample: 04d3577d1b6309a0032d4c4c1252c55416a09bb617aebafe512fffbdd4f08f18
+	if(appContainerCheck && checkForBadAppContainer())
+		setLoaderError(LDR_ERROR_IMAGE_NON_EXECUTABLE);
 
-// SizeOfHeaders must be nonzero if not a single subsection
-if(optionalHeader.SectionAlignment >= PELIB_PAGE_SIZE && optionalHeader.SizeOfHeaders == 0)
-setLoaderError(LDR_ERROR_SIZE_OF_HEADERS_ZERO);
+	// SizeOfHeaders must be nonzero if not a single subsection
+	if(optionalHeader.SectionAlignment >= PELIB_PAGE_SIZE && optionalHeader.SizeOfHeaders == 0)
+		setLoaderError(LDR_ERROR_SIZE_OF_HEADERS_ZERO);
 
-// File alignment must not be 0
-if(optionalHeader.FileAlignment == 0)
-setLoaderError(LDR_ERROR_FILE_ALIGNMENT_ZERO);
+	// File alignment must not be 0
+	if(optionalHeader.FileAlignment == 0)
+		setLoaderError(LDR_ERROR_FILE_ALIGNMENT_ZERO);
 
-// File alignment must be a power of 2
-if(optionalHeader.FileAlignment & (optionalHeader.FileAlignment-1))
-setLoaderError(LDR_ERROR_FILE_ALIGNMENT_NOT_POW2);
+	// File alignment must be a power of 2
+	if(optionalHeader.FileAlignment & (optionalHeader.FileAlignment-1))
+		setLoaderError(LDR_ERROR_FILE_ALIGNMENT_NOT_POW2);
 
-// Section alignment must not be 0
-if(optionalHeader.SectionAlignment == 0)
-setLoaderError(LDR_ERROR_SECTION_ALIGNMENT_ZERO);
+	// Section alignment must not be 0
+	if(optionalHeader.SectionAlignment == 0)
+		setLoaderError(LDR_ERROR_SECTION_ALIGNMENT_ZERO);
 
-// Section alignment must be a power of 2
-if(optionalHeader.SectionAlignment & (optionalHeader.SectionAlignment - 1))
-setLoaderError(LDR_ERROR_SECTION_ALIGNMENT_NOT_POW2);
+	// Section alignment must be a power of 2
+	if(optionalHeader.SectionAlignment & (optionalHeader.SectionAlignment - 1))
+		setLoaderError(LDR_ERROR_SECTION_ALIGNMENT_NOT_POW2);
 
-if(optionalHeader.SectionAlignment < optionalHeader.FileAlignment)
-	setLoaderError(LDR_ERROR_SECTION_ALIGNMENT_TOO_SMALL);
+	if(optionalHeader.SectionAlignment < optionalHeader.FileAlignment)
+		setLoaderError(LDR_ERROR_SECTION_ALIGNMENT_TOO_SMALL);
 
-// Check for images with "super-section": FileAlignment must be equal to SectionAlignment
-if((optionalHeader.FileAlignment & 511) && (optionalHeader.SectionAlignment != optionalHeader.FileAlignment))
-setLoaderError(LDR_ERROR_SECTION_ALIGNMENT_INVALID);
+	// Check for images with "super-section": FileAlignment must be equal to SectionAlignment
+	if((optionalHeader.FileAlignment & 511) && (optionalHeader.SectionAlignment != optionalHeader.FileAlignment))
+		setLoaderError(LDR_ERROR_SECTION_ALIGNMENT_INVALID);
 
-// Check for largest image
-if(optionalHeader.SizeOfImage > PELIB_MM_SIZE_OF_LARGEST_IMAGE)
-setLoaderError(LDR_ERROR_SIZE_OF_IMAGE_TOO_BIG);
+	// Check for largest image
+	if(optionalHeader.SizeOfImage > PELIB_MM_SIZE_OF_LARGEST_IMAGE)
+		setLoaderError(LDR_ERROR_SIZE_OF_IMAGE_TOO_BIG);
 
-// Check for 32-bit images
-if(optionalHeader.Magic == PELIB_IMAGE_NT_OPTIONAL_HDR32_MAGIC && checkForValid32BitMachine() == false)
-setLoaderError(LDR_ERROR_INVALID_MACHINE32);
+	// Check for 32-bit images
+	if(optionalHeader.Magic == PELIB_IMAGE_NT_OPTIONAL_HDR32_MAGIC && checkForValid32BitMachine() == false)
+		setLoaderError(LDR_ERROR_INVALID_MACHINE32);
 
-// Check for 64-bit images
-if(optionalHeader.Magic == PELIB_IMAGE_NT_OPTIONAL_HDR64_MAGIC && checkForValid64BitMachine() == false)
-setLoaderError(LDR_ERROR_INVALID_MACHINE64);
+	// Check for 64-bit images
+	if(optionalHeader.Magic == PELIB_IMAGE_NT_OPTIONAL_HDR64_MAGIC && checkForValid64BitMachine() == false)
+		setLoaderError(LDR_ERROR_INVALID_MACHINE64);
 
-// Check the size of image
-if(optionalHeader.SizeOfHeaders > optionalHeader.SizeOfImage)
-setLoaderError(LDR_ERROR_SIZE_OF_HEADERS_INVALID);
+	// Check the size of image
+	if(optionalHeader.SizeOfHeaders > optionalHeader.SizeOfImage)
+		setLoaderError(LDR_ERROR_SIZE_OF_HEADERS_INVALID);
 
-// On 64-bit Windows, size of optional header must be properly aligned to 8-byte boundary
-if(is64BitWindows && (fileHeader.SizeOfOptionalHeader & 0x07))
-setLoaderError(LDR_ERROR_SIZE_OF_OPTHDR_NOT_ALIGNED);
+	// On 64-bit Windows, size of optional header must be properly aligned to 8-byte boundary
+	if(is64BitWindows && (fileHeader.SizeOfOptionalHeader & 0x07))
+		setLoaderError(LDR_ERROR_SIZE_OF_OPTHDR_NOT_ALIGNED);
 
-// Set the size of image
-if(BytesToPages(optionalHeader.SizeOfImage) == 0)
-setLoaderError(LDR_ERROR_SIZE_OF_IMAGE_ZERO);
+	// Set the size of image
+	if(BytesToPages(optionalHeader.SizeOfImage) == 0)
+		setLoaderError(LDR_ERROR_SIZE_OF_IMAGE_ZERO);
 
-// Check for proper alignment of the image base
-if(optionalHeader.ImageBase & (PELIB_SIZE_64KB - 1))
-setLoaderError(LDR_ERROR_IMAGE_BASE_NOT_ALIGNED);
+	// Check for proper alignment of the image base
+	if(optionalHeader.ImageBase & (PELIB_SIZE_64KB - 1))
+		setLoaderError(LDR_ERROR_IMAGE_BASE_NOT_ALIGNED);
 
-return ERROR_NONE;
+	return ERROR_NONE;
 }
 
 int PeLib::ImageLoader::captureSectionName(std::vector<uint8_t> & fileData, std::string & sectionName, const std::uint8_t * Name)
@@ -1486,6 +1490,7 @@ int PeLib::ImageLoader::loadImageAsIs(std::vector<uint8_t> & fileData)
 int PeLib::ImageLoader::captureOptionalHeader64(uint8_t * fileBegin, uint8_t * filePtr, uint8_t * fileEnd)
 {
 	PELIB_IMAGE_OPTIONAL_HEADER64 optionalHeader64{};
+	uint8_t * dataDirectoryPtr;
 	uint32_t sizeOfOptionalHeader = sizeof(PELIB_IMAGE_OPTIONAL_HEADER64);
 	uint32_t numberOfRvaAndSizes;
 
@@ -1535,6 +1540,15 @@ int PeLib::ImageLoader::captureOptionalHeader64(uint8_t * fileBegin, uint8_t * f
 		numberOfRvaAndSizes = PELIB_IMAGE_NUMBEROF_DIRECTORY_ENTRIES;
 	memcpy(optionalHeader.DataDirectory, optionalHeader64.DataDirectory, sizeof(PELIB_IMAGE_DATA_DIRECTORY) * numberOfRvaAndSizes);
 
+	// Cut the real number of data directory entries by the file size
+	dataDirectoryPtr = filePtr + offsetof(PELIB_IMAGE_OPTIONAL_HEADER64, DataDirectory);
+	if(dataDirectoryPtr < fileEnd)
+	{
+		if((dataDirectoryPtr + numberOfRvaAndSizes * sizeof(PELIB_IMAGE_DATA_DIRECTORY)) > fileEnd)
+			numberOfRvaAndSizes = (fileEnd - dataDirectoryPtr + sizeof(PELIB_IMAGE_DATA_DIRECTORY) - 1) / sizeof(PELIB_IMAGE_DATA_DIRECTORY);
+	}
+	realNumberOfRvaAndSizes = numberOfRvaAndSizes;
+
 	// Remember the offset of the checksum field
 	checkSumFileOffset = (filePtr - fileBegin) + offsetof(PELIB_IMAGE_OPTIONAL_HEADER64, CheckSum);
 	securityDirFileOffset = (filePtr - fileBegin) + offsetof(PELIB_IMAGE_OPTIONAL_HEADER64, DataDirectory) + (sizeof(PELIB_IMAGE_DATA_DIRECTORY) * PELIB_IMAGE_DIRECTORY_ENTRY_SECURITY);
@@ -1544,6 +1558,7 @@ int PeLib::ImageLoader::captureOptionalHeader64(uint8_t * fileBegin, uint8_t * f
 int PeLib::ImageLoader::captureOptionalHeader32(uint8_t * fileBegin, uint8_t * filePtr, uint8_t * fileEnd)
 {
 	PELIB_IMAGE_OPTIONAL_HEADER32 optionalHeader32{};
+	uint8_t * dataDirectoryPtr;
 	uint32_t sizeOfOptionalHeader = sizeof(PELIB_IMAGE_OPTIONAL_HEADER32);
 	uint32_t numberOfRvaAndSizes;
 
@@ -1593,6 +1608,15 @@ int PeLib::ImageLoader::captureOptionalHeader32(uint8_t * fileBegin, uint8_t * f
 	if((numberOfRvaAndSizes = optionalHeader32.NumberOfRvaAndSizes) > PELIB_IMAGE_NUMBEROF_DIRECTORY_ENTRIES)
 		numberOfRvaAndSizes = PELIB_IMAGE_NUMBEROF_DIRECTORY_ENTRIES;
 	memcpy(optionalHeader.DataDirectory, optionalHeader32.DataDirectory, sizeof(PELIB_IMAGE_DATA_DIRECTORY) * numberOfRvaAndSizes);
+
+	// Cut the real number of data directory entries by the file size
+	dataDirectoryPtr = filePtr + offsetof(PELIB_IMAGE_OPTIONAL_HEADER32, DataDirectory);
+	if(dataDirectoryPtr < fileEnd)
+	{
+		if((dataDirectoryPtr + numberOfRvaAndSizes * sizeof(PELIB_IMAGE_DATA_DIRECTORY)) > fileEnd)
+			numberOfRvaAndSizes = (fileEnd - dataDirectoryPtr + sizeof(PELIB_IMAGE_DATA_DIRECTORY) - 1) / sizeof(PELIB_IMAGE_DATA_DIRECTORY);
+	}
+	realNumberOfRvaAndSizes = numberOfRvaAndSizes;
 
 	// Remember the offset of the checksum field
 	checkSumFileOffset = (filePtr - fileBegin) + offsetof(PELIB_IMAGE_OPTIONAL_HEADER32, CheckSum);

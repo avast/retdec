@@ -202,9 +202,9 @@ namespace PeLib
 						}
 
 						// Convert function address to RVA, if needed
-						if((rec.delayedImport.Attributes & PELIB_DELAY_ATTRIBUTE_V2) == 0)
-							funcAddress = normalizeDelayImportValue(imageBase, funcAddress);
-						function.address = normalizeDelayImportValue(imageBase, funcAddress);
+						if(imageBase <= funcAddress && funcAddress < imageBase + sizeOfImage)
+							funcAddress -= imageBase;
+						function.address = funcAddress;
 
 						// Insert the function to the list
 						rec.addFunction(function);
