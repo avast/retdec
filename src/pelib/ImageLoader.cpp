@@ -329,7 +329,7 @@ uint32_t PeLib::ImageLoader::readStringRc(std::string & str, uint32_t rva)
 	return charsRead;
 }
 
-uint32_t PeLib::ImageLoader::readStringRaw(std::vector<uint8_t> & fileData, std::string & str, size_t offset, size_t maxLength)
+uint32_t PeLib::ImageLoader::readStringRaw(std::vector<uint8_t> & fileData, std::string & str, size_t offset, size_t maxLength, bool mustBePrintable, bool mustNotBeTooLong)
 {
 	size_t length = 0;
 
@@ -347,12 +347,30 @@ uint32_t PeLib::ImageLoader::readStringRaw(std::vector<uint8_t> & fileData, std:
 		// retdec-regression-tests\tools\fileinfo\bugs\issue-451-strange-section-names\4383fe67fec6ea6e44d2c7d075b9693610817edc68e8b2a76b2246b53b9186a1-unpacked
 		stringEnd = (uint8_t *)memchr(stringBegin, 0, maxLength);
 		if(stringEnd == nullptr)
+		{
+			// No zero terminator means that the string is limited by max length
+			if(mustNotBeTooLong)
+				return 0;
 			stringEnd = stringBegin + maxLength;
-		length = stringEnd - stringBegin;
+		}
 
 		// Copy the string
+		length = stringEnd - stringBegin;
 		str.resize(length);
 		memcpy(const_cast<char *>(str.data()), stringBegin, length);
+
+		// Ignore strings that contain non-printable chars
+		if(mustBePrintable)
+		{
+			for(auto oneChar : str)
+			{
+				if(isPrintableChar(oneChar) == false)
+				{
+					str.clear();
+					return 0;
+				}
+			}
+		}
 	}
 
 	return length;
@@ -387,16 +405,14 @@ uint32_t PeLib::ImageLoader::getImageBitability() const
 	if(optionalHeader.Magic == PELIB_IMAGE_NT_OPTIONAL_HDR64_MAGIC)
 		return 64;
 
-	if(optionalHeader.Magic == PELIB_IMAGE_NT_OPTIONAL_HDR32_MAGIC)
-		return 32;
-
-	return 0;
+	// Default: 32-bit image
+	return 32;
 }
 
 uint32_t PeLib::ImageLoader::getFileOffsetFromRva(uint32_t rva) const
 {
 	// If we have sections loaded, then we calculate the file offset from section headers
-	if(sections.size() && optionalHeader.SectionAlignment >= PELIB_PAGE_SIZE)
+	if(sections.size())
 	{
 		// Check whether the rva goes into any section
 		for(auto & sectHdr : sections)
@@ -404,10 +420,17 @@ uint32_t PeLib::ImageLoader::getFileOffsetFromRva(uint32_t rva) const
 			// Only if the pointer to raw data is not zero
 			if(sectHdr.PointerToRawData != 0 && sectHdr.SizeOfRawData != 0)
 			{
-				uint32_t realPointerToRawData = sectHdr.PointerToRawData & ~(PELIB_SECTOR_SIZE - 1);
-				uint32_t sectionRvaStart = AlignToSize(sectHdr.VirtualAddress, optionalHeader.SectionAlignment);
+				uint32_t realPointerToRawData = sectHdr.PointerToRawData;
+				uint32_t sectionRvaStart = sectHdr.VirtualAddress;
 				uint32_t virtualSize = (sectHdr.VirtualSize != 0) ? sectHdr.VirtualSize : sectHdr.SizeOfRawData;
 
+				// For multi-section images, real pointer to raw data is aligned down to sector size
+				if(optionalHeader.SectionAlignment >= PELIB_PAGE_SIZE)
+					realPointerToRawData = realPointerToRawData & ~(PELIB_SECTOR_SIZE - 1);
+				if(optionalHeader.SectionAlignment != 0)
+					sectionRvaStart = AlignToSize(sectHdr.VirtualAddress, optionalHeader.SectionAlignment);
+
+				// Is the RVA inside that section?
 				if(sectionRvaStart <= rva && rva < (sectionRvaStart + virtualSize))
 				{
 					// Make sure we round the pointer to raw data down to PELIB_SECTOR_SIZE.
@@ -1162,8 +1185,6 @@ int PeLib::ImageLoader::captureSectionName(std::vector<uint8_t> & fileData, std:
 
 	// If the section name is in format of "/12345", then the section name is actually in the symbol table
 	// Sample: 2e9c671b8a0411f2b397544b368c44d7f095eb395779de0ad1ac946914dfa34c
-	// Since retdec's regression tests doesn't like these, we skip this feature
-	/*
 	if(fileHeader.PointerToSymbolTable != 0 && Name[0] == '/')
 	{
 		// Get the offset of the string table
@@ -1175,10 +1196,9 @@ int PeLib::ImageLoader::captureSectionName(std::vector<uint8_t> & fileData, std:
 			stringTableIndex = (stringTableIndex * 10) + (Name[i] - '0');
 
 		// Get the section name
-		readStringRaw(fileData, sectionName, stringTableOffset + stringTableIndex);
-		return ERROR_NONE;
+		if(readStringRaw(fileData, sectionName, stringTableOffset + stringTableIndex, PELIB_IMAGE_SIZEOF_MAX_NAME, true, true) != 0)
+			return ERROR_NONE;
 	}
-	*/
 
 	// The section name is directly in the section header.
 	// It has fixed length and must not be necessarily terminated with zero.
@@ -1568,9 +1588,9 @@ int PeLib::ImageLoader::captureOptionalHeader32(uint8_t * fileBegin, uint8_t * f
 		sizeOfOptionalHeader = (uint32_t)(fileEnd - filePtr);
 	memcpy(&optionalHeader32, filePtr, sizeOfOptionalHeader);
 
-	// Verify whether it's 32-bit optional header
+	// Note: Do not fail if there's no magic value for 32-bit optional header
 	if(optionalHeader32.Magic != PELIB_IMAGE_NT_OPTIONAL_HDR32_MAGIC)
-		return setLoaderError(LDR_ERROR_NO_OPTHDR_MAGIC);
+		setLoaderError(LDR_ERROR_NO_OPTHDR_MAGIC);
 
 	// Convert 32-bit optional header to common optional header
 	optionalHeader.Magic                       = optionalHeader32.Magic;

@@ -64,12 +64,12 @@ namespace PeLib
 		{"LDR_ERROR_FILE_IS_CUT_LOADABLE",         "The PE file is cut, but loadable", true},
 
 		// Import directory detected errors
-		{"LDR_ERROR_IMPDIR_OUT_OF_FILE",           "Offset of the import directory is out of the file" },
-		{"LDR_ERROR_IMPDIR_CUT",                   "Import directory is cut" },
-		{"LDR_ERROR_IMPDIR_COUNT_EXCEEDED",        "Number of import descriptors exceeds maximum" },
-		{"LDR_ERROR_IMPDIR_NAME_RVA_INVALID",      "RVA of the import name is invalid" },
-		{"LDR_ERROR_IMPDIR_THUNK_RVA_INVALID",     "RVA of the import thunk is invalid" },
-		{"LDR_ERROR_IMPDIR_IMPORT_COUNT_EXCEEDED", "Number of imported functions exceeds maximum" },
+		{"LDR_ERROR_IMPDIR_OUT_OF_FILE",           "Offset of the import directory is out of the file", true },
+		{"LDR_ERROR_IMPDIR_CUT",                   "Import directory is cut", true },
+		{"LDR_ERROR_IMPDIR_COUNT_EXCEEDED",        "Number of import descriptors exceeds maximum", true },
+		{"LDR_ERROR_IMPDIR_NAME_RVA_INVALID",      "RVA of the import name is invalid", true },
+		{"LDR_ERROR_IMPDIR_THUNK_RVA_INVALID",     "RVA of the import thunk is invalid", true },
+		{"LDR_ERROR_IMPDIR_IMPORT_COUNT_EXCEEDED", "Number of imported functions exceeds maximum", true },
 
 		// Resource directory detected errors
 		{"LDR_ERROR_RSRC_OVER_END_OF_IMAGE",       "Array of resource directory entries goes beyond end of the image", true },

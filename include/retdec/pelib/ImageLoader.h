@@ -134,7 +134,7 @@ class ImageLoader
 
 	std::uint32_t readString(std::string & str, std::uint32_t rva, std::uint32_t maxLength = 65535);
 	std::uint32_t readStringRc(std::string & str, std::uint32_t rva);
-	std::uint32_t readStringRaw(std::vector<std::uint8_t> & fileData, std::string & str, std::size_t offset, std::size_t maxLength = 65535);
+	std::uint32_t readStringRaw(std::vector<std::uint8_t> & fileData, std::string & str, std::size_t offset, std::size_t maxLength = 65535, bool mustBePrintable = false, bool mustNotBeTooLong = false);
 	std::uint32_t stringLength(std::uint32_t rva, std::uint32_t maxLength = 65535) const;
 
 	std::uint32_t readPointer(std::uint32_t rva, std::uint64_t & pointerValue);
@@ -362,6 +362,13 @@ class ImageLoader
 	static std::uint64_t signExtend32To64(std::uint32_t value32)
 	{
 		return (std::uint64_t)(std::int64_t)(std::int32_t)value32;
+	}
+
+	// Anti-assert feature. Debug version of isprint in MS Visual C++ asserts
+	// when the character is not EOF or is >= 255
+	bool isPrintableChar(int ch)
+	{
+		return ((EOF <= ch) && (ch <= 255)) ? isprint(ch) : false;
 	}
 
 	static uint8_t ImageProtectionArray[16];
