@@ -3060,12 +3060,28 @@ bool PeFormat::getImageBaseAddress(unsigned long long &imageBase) const
 
 bool PeFormat::getEpAddress(unsigned long long &result) const
 {
-	return formatParser->getEpAddress(result);
+	std::uint64_t tempResult = 0;
+
+	if(formatParser->getEpAddress(tempResult))
+	{
+		result = tempResult;
+		return true;
+	}
+
+	return false;
 }
 
 bool PeFormat::getEpOffset(unsigned long long &epOffset) const
 {
-	return formatParser->getEpOffset(epOffset);
+	std::uint64_t tempResult = 0;
+
+	if(formatParser->getEpOffset(tempResult))
+	{
+		epOffset = tempResult;
+		return true;
+	}
+
+	return false;
 }
 
 Architecture PeFormat::getTargetArchitecture() const
