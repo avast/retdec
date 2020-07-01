@@ -45,8 +45,8 @@ enum PELIB_COMPARE_RESULT : std::uint32_t
 	ImagesDifferentPageValue,                   // There is a different value at a certain offset
 };
 
-typedef bool (_cdecl * PFN_VERIFY_ADDRESS)(void * ptr, size_t length);
-typedef bool (_cdecl * PFN_COMPARE_CALLBACK)(size_t BytesCompared, size_t BytesTotal);
+typedef bool (*PFN_VERIFY_ADDRESS)(void * ptr, size_t length);
+typedef bool (*PFN_COMPARE_CALLBACK)(size_t BytesCompared, size_t BytesTotal);
 
 struct PELIB_IMAGE_COMPARE
 {
