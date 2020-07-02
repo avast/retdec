@@ -14,17 +14,12 @@
 #define PELIBAUX_H
 
 #include <numeric>
-#include <limits>
-#include <unordered_map>
 #include <string.h>
 
 #ifdef _MSC_VER						// Reduces number of warnings under MS Visual Studio from ~100000 to zero
 #pragma warning(disable:4267)		// C4267: 'initializing': conversion from 'size_t' to '_Ty2', possible loss of data
 #pragma warning(disable:4244)		// C4244: 'argument': conversion from 'uint64_t' to 'unsigned int', possible loss of data
 #endif
-
-#include "retdec/pelib/OutputBuffer.h"
-#include "retdec/pelib/InputBuffer.h"
 
 //get rid of duplicate windows.h definitions
 #ifdef ERROR_NONE

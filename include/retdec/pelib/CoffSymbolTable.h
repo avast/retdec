@@ -7,7 +7,7 @@
 #ifndef COFFSYMBOLTABLE_H
 #define COFFSYMBOLTABLE_H
 
-#include <vector>
+#include "retdec/pelib/PeLibInc.h"
 
 namespace PeLib
 {

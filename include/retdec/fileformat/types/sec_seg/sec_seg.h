@@ -43,7 +43,6 @@ class SecSeg
 		Type type = Type::UNDEFINED_SEC_SEG;  ///< type
 		unsigned long long index = 0;         ///< index
 		unsigned long long offset = 0;        ///< start offset in file
-		unsigned long long unfixedOffset = 0; ///< start offset in file (from section header, unfixed)
 		unsigned long long fileSize = 0;      ///< size in file
 		unsigned long long address = 0;       ///< start address in memory
 		unsigned long long memorySize = 0;    ///< size in memory
@@ -91,7 +90,6 @@ class SecSeg
 		SecSeg::Type getType() const;
 		unsigned long long getIndex() const;
 		unsigned long long getOffset() const;
-		unsigned long long getUnfixedOffset() const;
 		unsigned long long getEndOffset() const;
 		unsigned long long getSizeInFile() const;
 		unsigned long long getLoadedSize() const;
@@ -136,7 +134,6 @@ class SecSeg
 		void setType(SecSeg::Type sType);
 		void setIndex(unsigned long long sIndex);
 		void setOffset(unsigned long long sOffset);
-		void setUnfixedOffset(unsigned long long sUnfixedOffset);
 		void setSizeInFile(unsigned long long sFileSize);
 		void setAddress(unsigned long long sAddress);
 		void setSizeInMemory(unsigned long long sMemorySize);

@@ -262,15 +262,6 @@ unsigned long long SecSeg::getOffset() const
 }
 
 /**
-* Get unfixed, original-from-section-header offset
-* @return Offset
-*/
-unsigned long long SecSeg::getUnfixedOffset() const
-{
-	return unfixedOffset;
-}
-
-/**
  * Get end offset
  * @return End offset of section or segment in file
  */
@@ -477,16 +468,7 @@ void SecSeg::setIndex(unsigned long long sIndex)
  */
 void SecSeg::setOffset(unsigned long long sOffset)
 {
-	unfixedOffset = offset = sOffset;
-}
-
-/**
-* Set real (unfixed) offset to the raw section data
-* @param sRealOffset Offset
-*/
-void SecSeg::setUnfixedOffset(unsigned long long sUnfixedOffset)
-{
-	unfixedOffset = sUnfixedOffset;
+	offset = sOffset;
 }
 
 /**

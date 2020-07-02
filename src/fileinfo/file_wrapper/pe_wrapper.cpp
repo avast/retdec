@@ -6,7 +6,7 @@
 
 #include "retdec/utils/array.h"
 #include "retdec/utils/conversion.h"
-#include "retdec/pelib/pefile.h"
+#include "retdec/pelib/PeFile.h"
 #include "fileinfo/file_wrapper/pe_wrapper.h"
 
 using namespace retdec::utils;

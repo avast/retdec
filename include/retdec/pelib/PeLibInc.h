@@ -21,6 +21,8 @@
 #include <vector>
 #include <functional>
 
+#include "retdec/pelib/InputBuffer.h"
+#include "retdec/pelib/OutputBuffer.h"
 #include "retdec/pelib/PeLibAux.h"
 
 #endif

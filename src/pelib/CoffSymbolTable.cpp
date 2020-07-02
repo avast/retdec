@@ -4,8 +4,6 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include <algorithm>
-
 #include "retdec/pelib/PeLibInc.h"
 #include "retdec/pelib/CoffSymbolTable.h"
 

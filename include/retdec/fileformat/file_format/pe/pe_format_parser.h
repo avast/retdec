@@ -265,7 +265,6 @@ class PeFormatParser
 		section.setType(sectionType);
 		section.setIndex(secIndex);
 		section.setOffset(imageLoader.getRealPointerToRawData(secIndex));
-		section.setUnfixedOffset(pSectionHeader->PointerToRawData);
 		section.setSizeInFile(pSectionHeader->SizeOfRawData);
 		section.setSizeInMemory(pSectionHeader->VirtualSize);
 		section.setAddress(pSectionHeader->VirtualAddress ? imageLoader.getImageBase() + pSectionHeader->VirtualAddress : 0);
