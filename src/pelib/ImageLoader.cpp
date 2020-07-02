@@ -1181,8 +1181,6 @@ int PeLib::ImageLoader::captureNtHeaders(std::vector<uint8_t> & fileData)
 
 int PeLib::ImageLoader::captureSectionName(std::vector<uint8_t> & fileData, std::string & sectionName, const std::uint8_t * Name)
 {
-	size_t length = 0;
-
 	// If the section name is in format of "/12345", then the section name is actually in the symbol table
 	// Sample: 2e9c671b8a0411f2b397544b368c44d7f095eb395779de0ad1ac946914dfa34c
 	if(fileHeader.PointerToSymbolTable != 0 && Name[0] == '/')
