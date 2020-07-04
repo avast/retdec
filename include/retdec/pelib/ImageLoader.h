@@ -46,15 +46,17 @@ enum PELIB_COMPARE_RESULT : std::uint32_t
 };
 
 typedef bool (*PFN_VERIFY_ADDRESS)(void * ptr, size_t length);
-typedef bool (*PFN_COMPARE_CALLBACK)(size_t BytesCompared, size_t BytesTotal);
+typedef bool (*PFN_COMPARE_CALLBACK)(struct PELIB_IMAGE_COMPARE * pImgCompare, size_t BytesCompared, size_t BytesTotal);
 
 struct PELIB_IMAGE_COMPARE
 {
-	PFN_VERIFY_ADDRESS PfnVerifyAddress;       // Custom function for verifying memory address
-	PFN_COMPARE_CALLBACK PfnCompareCallback;   // Custom function for calling compare callback
+	PFN_VERIFY_ADDRESS PfnVerifyAddress;        // Custom function for verifying memory address
+	PFN_COMPARE_CALLBACK PfnCompareCallback;    // Custom function for calling compare callback
 	PELIB_COMPARE_RESULT compareResult;
-	const char * dumpIfNotEqual;               // If non-NULL, the image will be dumped into that file
-	std::uint32_t differenceOffset;
+	const char * szFileName;                    // Current file being compared (plain name)
+	const char * dumpIfNotEqual;                // If non-NULL, the image will be dumped into that file if different
+	std::uint32_t differenceOffset;             // If compareResult is ImagesDifferentPageValue, this contains offset of the difference 
+	std::uint32_t startTickCount;               // GetTickCount value at the start of image testing
 };
 
 //-----------------------------------------------------------------------------
@@ -340,6 +342,7 @@ class ImageLoader
 	bool isLegacyImageArchitecture(std::uint16_t Machine);
 	bool checkForValid64BitMachine();
 	bool checkForValid32BitMachine();
+	bool checkForSectionTablesWithinHeader(std::uint32_t e_lfanew);
 	bool checkForBadAppContainer();
 	
 	// isImageLoadable returns true if the image is OK and can be mapped by NtCreateSection(SEC_IMAGE).
@@ -390,6 +393,7 @@ class ImageLoader
 	bool sizeofImageMustMatch;                          // If true, the SizeOfImage must match virtual end of the last section
 	bool appContainerCheck;                             // If true, app container flag is tested in the optional header
 	bool is64BitWindows;                                // If true, we simulate 64-bit Windows
+	bool headerSizeCheck;                               // If true, image loader will imitate Windows XP header size check
 	bool loadArmImages;                                 // If true, image loader will load ARM binaries
 };
 

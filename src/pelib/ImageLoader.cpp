@@ -77,6 +77,7 @@ PeLib::ImageLoader::ImageLoader(uint32_t loaderFlags)
 	appContainerCheck = false;
 	maxSectionCount = 255;
 	is64BitWindows = (loaderFlags & LoaderMode64BitWindows) ? true : false;
+	headerSizeCheck = false;
 	loadArmImages = true;
 
 	// Resolve os-specific restrictions
@@ -85,6 +86,7 @@ PeLib::ImageLoader::ImageLoader(uint32_t loaderFlags)
 		case LoaderModeWindowsXP:
 			maxSectionCount = PE_MAX_SECTION_COUNT_XP;
 			sizeofImageMustMatch = true;
+			headerSizeCheck = true;
 			loadArmImages = false;
 			break;
 
@@ -406,7 +408,7 @@ uint32_t PeLib::ImageLoader::getImageBitability() const
 		return 64;
 
 	// Default: 32-bit image
-	return 32;
+		return 32;
 }
 
 uint32_t PeLib::ImageLoader::getFileOffsetFromRva(uint32_t rva) const
@@ -1195,7 +1197,7 @@ int PeLib::ImageLoader::captureSectionName(std::vector<uint8_t> & fileData, std:
 
 		// Get the section name
 		if(readStringRaw(fileData, sectionName, stringTableOffset + stringTableIndex, PELIB_IMAGE_SIZEOF_MAX_NAME, true, true) != 0)
-			return ERROR_NONE;
+		    return ERROR_NONE;
 	}
 
 	// The section name is directly in the section header.
@@ -1392,13 +1394,13 @@ int PeLib::ImageLoader::captureImageSections(std::vector<uint8_t> & fileData)
 	// Section-based mapping / file-based mapping
 	if(optionalHeader.SectionAlignment >= PELIB_PAGE_SIZE)
 	{
-		// Note: Under Windows XP, the sample below contained the whole PAGE_SIZE
-		// in the mapped image header. SizeOfHeaders = 0xC00. I haven't figured our why.
-		// Doesn't happen in Windows 7+ and it's not subject to low-memory or heavy-load,
-		// aka also happens when just a single image is loaded.
+		// Note: Under Windows XP, the loader maps the entire page of the image header
+		// if the condition in checkForSectionTablesWithinHeader() turns out to be true.
+		// Windows 7+ uses correct size check.
 		// Sample: 1669f0220f1f74523390fe5b61ea09d6e2e4e798ab294c93d0a20900a3c5a52a
-		//if(copyWholeHeaderPage)
-		//	sizeOfHeaders = AlignToSize(sizeOfHeaders, optionalHeader.SectionAlignment);
+		// (Any sample with 4 sections and IMAGE_DOS_HEADER::e_lfanew >= 0x724 will do)
+		if(headerSizeCheck && checkForSectionTablesWithinHeader(dosHeader.e_lfanew))
+			sizeOfHeaders = AlignToSize(sizeOfHeaders, optionalHeader.SectionAlignment);
 
 		// Capture the file header
 		virtualAddress = captureImageSection(fileData, virtualAddress, sizeOfHeaders, 0, sizeOfHeaders, PELIB_IMAGE_SCN_MEM_READ, true);
@@ -1863,6 +1865,21 @@ bool PeLib::ImageLoader::checkForBadAppContainer()
 	return false;
 }
 
+// Weirdly incorrect check performed by Windows XP's MiCreateImageFileMap.
+bool PeLib::ImageLoader::checkForSectionTablesWithinHeader(uint32_t e_lfanew)
+{
+	uint32_t OffsetToSectionTable = sizeof(uint32_t) + sizeof(PELIB_IMAGE_FILE_HEADER) + fileHeader.SizeOfOptionalHeader;
+	uint32_t NumberOfSubsections = fileHeader.NumberOfSections;
+	uint32_t NtHeaderSize = PELIB_PAGE_SIZE - e_lfanew;
+
+	// If this condition is true, then the image header contains data up fo SizeofHeaders
+	// If not, the image header contains the entire page.
+	if((e_lfanew + OffsetToSectionTable + (NumberOfSubsections + 1) * sizeof(PELIB_IMAGE_SECTION_HEADER)) <= NtHeaderSize)
+		return false;
+
+	return true;
+}
+
 // Returns true if the image is OK and can be mapped by NtCreateSection(SEC_IMAGE).
 // This does NOT mean that the image is executable by CreateProcess - more checks are done,
 // like resource integrity or relocation table correctness.
@@ -1950,7 +1967,7 @@ void PeLib::ImageLoader::compareWithWindowsMappedImage(PELIB_IMAGE_COMPARE & Ima
 			// If we have a compare callback, call it
 			if(ImageCompare.PfnCompareCallback != nullptr)
 			{
-				ImageCompare.PfnCompareCallback(rva, imageSize);
+				ImageCompare.PfnCompareCallback(&ImageCompare, rva, imageSize);
 			}
 
 			// Both are accessible -> Compare the page
