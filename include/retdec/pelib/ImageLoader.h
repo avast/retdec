@@ -33,6 +33,16 @@ enum : std::uint32_t
 };
 
 //-----------------------------------------------------------------------------
+// Enum for ImageLoader::getFieldOffset()
+
+enum PELIB_MEMBER_TYPE : std::uint32_t
+{
+	OPTHDR_sizeof,
+	OPTHDR_NumberOfRvaAndSizes,
+	OPTHDR_DataDirectory,
+};
+
+//-----------------------------------------------------------------------------
 // Support structure for one PE image compare result
 
 enum PELIB_COMPARE_RESULT : std::uint32_t
@@ -150,6 +160,8 @@ class ImageLoader
 	std::uint32_t getRealPointerToRawData(std::size_t sectionIndex) const;
 	std::uint32_t getImageProtection(std::uint32_t characteristics) const;
 
+	std::uint32_t getFieldOffset(PELIB_MEMBER_TYPE field) const;
+
 	bool setDataDirectory(std::uint32_t index, std::uint32_t rva, std::uint32_t size);
 
 	const PELIB_IMAGE_DOS_HEADER & getDosHeader() const
@@ -180,6 +192,11 @@ class ImageLoader
 	std::uint32_t getPeHeaderOffset() const
 	{
 		return dosHeader.e_lfanew;
+	}
+
+	void setPeHeaderOffset(std::uint32_t new_e_lfanew)
+	{
+		dosHeader.e_lfanew = new_e_lfanew;
 	}
 
 	std::uint32_t getNtSignature() const
@@ -293,6 +310,13 @@ class ImageLoader
 		return virtualAddress;
 	}
 
+	// Image manipulation
+	void setSizeOfCode(std::uint32_t sizeOfCode, std::uint32_t baseOfCode = UINT32_MAX);
+	void setSectionVirtualData(std::size_t sectionIndex, std::uint32_t VirtualAddress, std::uint32_t VirtualSize = UINT32_MAX);
+	void setSectionRawData(std::size_t sectionIndex, std::uint32_t PointerToRawData, std::uint32_t SizeOfRawData = UINT32_MAX);
+	int  removeSection(std::size_t sectionIndex);
+	void makeValid();
+
 	int setLoaderError(LoaderError ldrErr);
 	LoaderError loaderError() const;
 
@@ -309,6 +333,7 @@ class ImageLoader
 	std::uint32_t readWriteImage(void * buffer, std::uint32_t rva, std::uint32_t bytesToRead, READWRITE ReadWrite);
 	std::uint32_t readWriteImageFile(void * buffer, std::uint32_t rva, std::uint32_t bytesToRead, bool bReadOperation);
 
+	void processSectionHeader(PELIB_IMAGE_SECTION_HEADER * pSectionHeader);
 	bool processImageRelocation_IA64_IMM64(std::uint32_t fixupAddress, std::uint64_t difference);
 	bool processImageRelocations(std::uint64_t oldImageBase, std::uint64_t getImageBase, std::uint32_t VirtualAddress, std::uint32_t Size);
 	void writeNewImageBase(std::uint64_t newImageBase);
@@ -338,13 +363,13 @@ class ImageLoader
 	bool isGoodMappedPage(std::uint32_t rva);
 	bool isZeroPage(std::uint32_t rva);
 
-	bool isRvaOfSectionHeaderPointerToRawData(uint32_t rva);
+	bool isSectionHeaderPointerToRawData(uint32_t rva);
 	bool isLegacyImageArchitecture(std::uint16_t Machine);
 	bool checkForValid64BitMachine();
 	bool checkForValid32BitMachine();
 	bool checkForSectionTablesWithinHeader(std::uint32_t e_lfanew);
 	bool checkForBadAppContainer();
-	
+
 	// isImageLoadable returns true if the image is OK and can be mapped by NtCreateSection(SEC_IMAGE).
 	// This does NOT mean that the image is executable by CreateProcess - more checks are done,
 	// like resource integrity or relocation table correctness.
@@ -389,6 +414,7 @@ class ImageLoader
 	std::uint32_t realNumberOfRvaAndSizes;              // Real present number of RVA and sizes
 	std::uint32_t checkSumFileOffset;                   // File offset of the image checksum
 	std::uint32_t securityDirFileOffset;                // File offset of security directory
+	std::uint32_t ssiImageAlignment32;                  // Alignment of signle-section images under 32-bit OS
 	bool ntHeadersSizeCheck;                            // If true, the loader requires minimum size of NT headers
 	bool sizeofImageMustMatch;                          // If true, the SizeOfImage must match virtual end of the last section
 	bool appContainerCheck;                             // If true, app container flag is tested in the optional header

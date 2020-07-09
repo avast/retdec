@@ -523,5 +523,5 @@ int main(int argc, char* argv[])
 	}
 
 	delete fileDetector;
-	return isFatalError(res) ? static_cast<int>(res) : static_cast<int>(ReturnCode::OK);
+    return isFatalError(res) ? static_cast<int>(res) : static_cast<int>(ReturnCode::OK);
 }

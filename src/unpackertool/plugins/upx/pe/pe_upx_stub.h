@@ -155,7 +155,7 @@ private:
 			const DynamicBuffer& uncompressedRsrcs, const DynamicBuffer& unpackedData, std::unordered_set<std::uint32_t>& visitedNodes);
 	std::uint8_t getPackingMethod(bool trustMetadata) const;
 
-	PeLibFileType* _newPeFile;      ///< Unpacked output file.
+	PeLib::PeFileT * _newPeFile;    ///< Unpacked output file.
 	std::uint32_t _rvaShift;        ///< Size of sections UPX1 and UPX2 which are deleted and virtual addresses are shifted.
 	bool _exportsCompressed;        ///< True if the exports are compressed in the packed file, otherwise false
 	std::vector<std::uint8_t> _coffSymbolTable; ///< COFF symbol table data if any exists.

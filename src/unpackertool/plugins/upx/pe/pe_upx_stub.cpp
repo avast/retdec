@@ -182,17 +182,16 @@ template <int bits> void PeUpxStub<bits>::unpack(const std::string& outputFile)
 
 	// Detect auxiliary stubs
 	detectUnfilter(unpackingStub);
-/*
+
+	// Create new instance of a PeFileT class
 	std::string inputFilePath = _file->getFileFormat()->getPathToFile();
-	PeLib::PeFile* peFile = PeLib::openPeFile(inputFilePath);
-	_newPeFile = static_cast<PeLibFileType*>(peFile);
+	_newPeFile = new PeLib::PeFileT(inputFilePath);
 
 	// Read MZ & PE headers
-	_newPeFile->readMzHeader();
-	_newPeFile->readPeHeader();
+	_newPeFile->loadPeHeaders();
 
 	// We won't copy the DOS program so let's just set the pointer to PE header right after MZ header
-	_newPeFile->mzHeader().setAddressOfPeHeader(_newPeFile->mzHeader().size());
+	_newPeFile->imageLoader().setPeHeaderOffset(sizeof(PeLib::PELIB_IMAGE_DOS_HEADER));
 
 	// Perform unpacking
 	DynamicBuffer unpackedData(_file->getFileFormat()->getEndianness());
@@ -250,7 +249,6 @@ template <int bits> void PeUpxStub<bits>::unpack(const std::string& outputFile)
 
 	// Save the output to the file
 	saveFile(outputFile, unpackedData);
-	*/
 }
 
 /**
@@ -426,20 +424,20 @@ template <int bits> void PeUpxStub<bits>::unpackData(DynamicBuffer& unpackedData
  */
 template <int bits> void PeUpxStub<bits>::readPackedFileILT(DynamicBuffer& ilt)
 {
-/*
+	const PeLib::ImageLoader imageLoader = _newPeFile->imageLoader();
+	std::uint32_t importRva = imageLoader.getDataDirRva(PeLib::PELIB_IMAGE_DIRECTORY_ENTRY_IMPORT);
+	std::uint32_t importSize = imageLoader.getDataDirSize(PeLib::PELIB_IMAGE_DIRECTORY_ENTRY_IMPORT);
+
 	// We don't use PeLib for reading ILT because it is going to populate impDir(), but we want to it to build it all ourselves manually
 	std::vector<std::uint8_t> iltBytes;
-	const retdec::loader::Segment* importsSection = _file->getSegmentFromAddress(_newPeFile->peHeader().getIddImportRva() + _newPeFile->peHeader().getImageBase());
+	const retdec::loader::Segment* importsSection = _file->getSegmentFromAddress(importRva + imageLoader.getImageBase());
 
 	if (importsSection == nullptr)
 		throw ImportNamesNotFoundException();
 
-	importsSection->getBytes(iltBytes,
-			_newPeFile->peHeader().rvaToOffset(_newPeFile->peHeader().getIddImportRva()) - importsSection->getSecSeg()->getOffset(),
-			_newPeFile->peHeader().getIddImportSize());
+	importsSection->getBytes(iltBytes, imageLoader.getFileOffsetFromRva(importRva) - importsSection->getSecSeg()->getOffset(), importSize);
 
 	ilt = DynamicBuffer(iltBytes, _file->getFileFormat()->getEndianness());
-	*/
 }
 
 /**
@@ -451,33 +449,37 @@ template <int bits> void PeUpxStub<bits>::readPackedFileILT(DynamicBuffer& ilt)
  */
 template <int bits> void PeUpxStub<bits>::fixSizeOfSections(const DynamicBuffer& unpackedData)
 {
-	/*
+	const PeLib::PELIB_IMAGE_SECTION_HEADER * pSectionHeader1;
+	const PeLib::PELIB_IMAGE_SECTION_HEADER * pSectionHeader;
+	PeLib::ImageLoader & imageLoader = _newPeFile->imageLoader();
+	std::uint32_t sectionIndex = _upx0Sect->getSecSeg()->getIndex();
+
 	// Always make sure that UPX0 points to same raw pointer as UPX1 before we process sections
 	// This allows us to use much more simpler algorithm, than calculating with all possible positions of UPX0
-	_newPeFile->peHeader().setPointerToRawData(0, _newPeFile->peHeader().getPointerToRawData(1));
+	pSectionHeader = imageLoader.getSectionHeader(1);
+	imageLoader.setSectionRawData(0, pSectionHeader->PointerToRawData);
 
 	// Set the proper raw size for UPX0 section, thus moving pointer to raw data of all following sections
-	std::uint32_t diff = _newPeFile->peHeader().getVirtualSize(_upx0Sect->getSecSeg()->getIndex()) - _newPeFile->peHeader().getSizeOfRawData(_upx0Sect->getSecSeg()->getIndex());
-	_newPeFile->peHeader().setSizeOfRawData(_upx0Sect->getSecSeg()->getIndex(), _newPeFile->peHeader().getVirtualSize(_upx0Sect->getSecSeg()->getIndex()));
-	for (std::uint32_t i = _upx0Sect->getSecSeg()->getIndex() + 1; i < _newPeFile->peHeader().calcNumberOfSections(); ++i)
-		_newPeFile->peHeader().setPointerToRawData(i, _newPeFile->peHeader().getPointerToRawData(i) + diff);
+	pSectionHeader = imageLoader.getSectionHeader(sectionIndex);
+	std::uint32_t diff = pSectionHeader->VirtualSize - pSectionHeader->SizeOfRawData;
+	imageLoader.setSectionRawData(sectionIndex, UINT32_MAX, pSectionHeader->VirtualSize);
+	for (std::uint32_t i = sectionIndex + 1; i < imageLoader.getNumberOfSections(); ++i)
+		imageLoader.setSectionRawData(i, imageLoader.getSectionHeader(i)->PointerToRawData + diff);
 
 	// If the section UPX0 is lesser than all the unpacked data, we need to move boundaries of UPX0/UPX1 section
 	// Since UPX0 and UPX1 have continuous address space, we can just resize UPX0 and shrink UPX1
-	if (_newPeFile->peHeader().getVirtualSize(_upx0Sect->getSecSeg()->getIndex()) < unpackedData.getRealDataSize())
+	if (pSectionHeader->VirtualSize < unpackedData.getRealDataSize())
 	{
 		// Make sure the new size is section aligned
-		std::uint32_t newSize = retdec::utils::alignUp(unpackedData.getRealDataSize(), _newPeFile->peHeader().getSectionAlignment());
+		std::uint32_t newSize = retdec::utils::alignUp(unpackedData.getRealDataSize(), imageLoader.getSectionAlignment());
+		diff = newSize - pSectionHeader->VirtualSize;
 
-		diff = newSize - _newPeFile->peHeader().getVirtualSize(_upx0Sect->getSecSeg()->getIndex());
+		imageLoader.setSectionVirtualData(sectionIndex, UINT32_MAX, pSectionHeader->VirtualSize + diff);
+		imageLoader.setSectionRawData(sectionIndex, UINT32_MAX, pSectionHeader->SizeOfRawData + diff);
 
-		_newPeFile->peHeader().setVirtualSize(_upx0Sect->getSecSeg()->getIndex(), _newPeFile->peHeader().getVirtualSize(_upx0Sect->getSecSeg()->getIndex()) + diff);
-		_newPeFile->peHeader().setSizeOfRawData(_upx0Sect->getSecSeg()->getIndex(), _newPeFile->peHeader().getSizeOfRawData(_upx0Sect->getSecSeg()->getIndex()) + diff);
-
-		_newPeFile->peHeader().setVirtualAddress(_upx0Sect->getSecSeg()->getIndex() + 1, _newPeFile->peHeader().getVirtualAddress(_upx0Sect->getSecSeg()->getIndex() + 1) + diff);
-		_newPeFile->peHeader().setVirtualSize(_upx0Sect->getSecSeg()->getIndex() + 1, _newPeFile->peHeader().getVirtualSize(_upx0Sect->getSecSeg()->getIndex() + 1) - diff);
-		_newPeFile->peHeader().setPointerToRawData(_upx0Sect->getSecSeg()->getIndex() + 1, _newPeFile->peHeader().getPointerToRawData(_upx0Sect->getSecSeg()->getIndex() + 1) + diff);
-		_newPeFile->peHeader().setSizeOfRawData(_upx0Sect->getSecSeg()->getIndex() + 1, _newPeFile->peHeader().getSizeOfRawData(_upx0Sect->getSecSeg()->getIndex() + 1) - diff);
+		pSectionHeader1 = imageLoader.getSectionHeader(sectionIndex + 1);
+		imageLoader.setSectionVirtualData(sectionIndex + 1, pSectionHeader1->VirtualAddress + diff, pSectionHeader1->VirtualSize - diff);
+		imageLoader.setSectionRawData(sectionIndex + 1, pSectionHeader1->PointerToRawData + diff, pSectionHeader1->SizeOfRawData - diff);
 	}
 
 	// Remove UPX1 section
@@ -490,12 +492,11 @@ template <int bits> void PeUpxStub<bits>::fixSizeOfSections(const DynamicBuffer&
 		unsigned long long upx2Size = _file->getSegment(_file->getEpSegment()->getSecSeg()->getIndex() + 1)->getSize();
 		_rvaShift += upx2Size;
 
-		_newPeFile->peHeader().removeSection(_file->getEpSegment()->getSecSeg()->getIndex() + 1);
+		imageLoader.removeSection(_file->getEpSegment()->getSecSeg()->getIndex() + 1);
 	}
 
-	_newPeFile->peHeader().removeSection(_file->getEpSegment()->getSecSeg()->getIndex());
-	_newPeFile->peHeader().makeValid(_newPeFile->mzHeader().size());
-	*/
+	imageLoader.removeSection(_file->getEpSegment()->getSecSeg()->getIndex());
+	imageLoader.makeValid();
 }
 
 /**
@@ -509,21 +510,24 @@ template <int bits> void PeUpxStub<bits>::fixSizeOfSections(const DynamicBuffer&
  */
 template <int bits> UpxExtraData PeUpxStub<bits>::parseExtraData(DynamicBuffer& unpackedData, DynamicBuffer& originalHeader)
 {
+	std::uint32_t originalHeaderOffset = 0;
+	std::uint32_t optionalHeaderOffset = 0;
+	std::uint16_t expectedMagic = _newPeFile->imageLoader().getOptionalHeader().Magic;
+
 	// First we need to find original PE header. If we have metadata, we can easily find it using unpacked data size.
 	// However, if we don't have, we need to use heuristic that looks in the last 1024 bytes (should be more than enough)
 	// of the unpacked data and try to find PE header signature.
-	std::uint32_t originalHeaderOffset = 0;
 	if (getUpxMetadata()->isDefined())
 	{
 		originalHeaderOffset = unpackedData.read<std::uint32_t>(getUpxMetadata()->getUnpackedDataSize() - 4);
+		optionalHeaderOffset = originalHeaderOffset + sizeof(PeLib::PELIB_IMAGE_NT_SIGNATURE) + PeLib::PELIB_IMAGE_FILE_HEADER::size();
 
 		// Check whether metadata are OK
 		if (unpackedData.read<std::uint32_t>(originalHeaderOffset) != PeLib::PELIB_IMAGE_NT_SIGNATURE)
 			originalHeaderOffset = 0;
 
 		// Check if we found PE header magic
-		if (unpackedData.read<std::uint16_t>(originalHeaderOffset + sizeof(PeLib::PELIB_IMAGE_NT_SIGNATURE) + PeLib::PELIB_IMAGE_FILE_HEADER::size())
-				!= PeUpxStubTraits<bits>::HeaderMagic)
+		if (unpackedData.read<std::uint16_t>(optionalHeaderOffset) != expectedMagic)
 			originalHeaderOffset = 0;
 	}
 
@@ -537,8 +541,7 @@ template <int bits> UpxExtraData PeUpxStub<bits>::parseExtraData(DynamicBuffer& 
 				continue;
 
 			// Check if we found PE header magic
-			if (unpackedData.read<std::uint16_t>(i + sizeof(PeLib::PELIB_IMAGE_NT_SIGNATURE) + PeLib::PELIB_IMAGE_FILE_HEADER::size())
-					!= PeUpxStubTraits<bits>::HeaderMagic)
+			if (unpackedData.read<std::uint16_t>(i + sizeof(PeLib::PELIB_IMAGE_NT_SIGNATURE) + PeLib::PELIB_IMAGE_FILE_HEADER::size()) != expectedMagic)
 				continue;
 
 			originalHeaderOffset = i;
@@ -549,20 +552,20 @@ template <int bits> UpxExtraData PeUpxStub<bits>::parseExtraData(DynamicBuffer& 
 	// No original PE header found
 	if (originalHeaderOffset == 0)
 		throw OriginalHeaderNotFoundException();
+	optionalHeaderOffset = originalHeaderOffset + sizeof(PeLib::PELIB_IMAGE_NT_SIGNATURE) + PeLib::PELIB_IMAGE_FILE_HEADER::size();
 
 	// No signature present
 	if (unpackedData.read<std::uint32_t>(originalHeaderOffset) != PeLib::PELIB_IMAGE_NT_SIGNATURE)
 		throw OriginalHeaderCorruptedException();
 
 	// Check if we found PE header magic
-	if (unpackedData.read<std::uint16_t>(originalHeaderOffset + sizeof(PeLib::PELIB_IMAGE_NT_SIGNATURE) + PeLib::PELIB_IMAGE_FILE_HEADER::size())
-			!= PeUpxStubTraits<bits>::HeaderMagic)
+	if (unpackedData.read<std::uint16_t>(optionalHeaderOffset) != expectedMagic)
 		throw OriginalHeaderCorruptedException();
 
+	const PeLib::ImageLoader & imageLoader = _newPeFile->imageLoader();
 	std::uint16_t numberOfSections = unpackedData.read<std::uint16_t>(originalHeaderOffset + sizeof(PeLib::PELIB_IMAGE_NT_SIGNATURE) + 0x2);
-	std::uint32_t numberOfDirectories = unpackedData.read<std::uint32_t>(originalHeaderOffset + PeUpxStubTraits<bits>::NumberOfRvaAndSizesOffset);
-	std::uint32_t sizeOfOptionalHeader = (bits == 64) ? sizeof(PeLib::PELIB_IMAGE_OPTIONAL_HEADER64) : sizeof(PeLib::PELIB_IMAGE_OPTIONAL_HEADER32);
-	std::uint32_t dataDirectoriesStart = sizeof(PeLib::PELIB_IMAGE_NT_SIGNATURE) + PeLib::PELIB_IMAGE_FILE_HEADER::size() + sizeOfOptionalHeader;
+	std::uint32_t numberOfDirectories = unpackedData.read<std::uint32_t>(originalHeaderOffset + imageLoader.getFieldOffset(PeLib::OPTHDR_NumberOfRvaAndSizes));
+	std::uint32_t dataDirectoriesStart = imageLoader.getFieldOffset(PeLib::OPTHDR_DataDirectory);
 	std::uint32_t sectionHeadersStart = dataDirectoriesStart + numberOfDirectories * PeLib::PELIB_IMAGE_DATA_DIRECTORY::size();
 	std::uint32_t sectionHeadersEnd = sectionHeadersStart + sizeof(PeLib::PELIB_IMAGE_SECTION_HEADER) * numberOfSections;
 
@@ -618,8 +621,7 @@ template <int bits> void PeUpxStub<bits>::fixPeHeader(const DynamicBuffer& origi
 	std::uint32_t sizeOfCode = originalHeader.read<std::uint32_t>(sizeof(PeLib::PELIB_IMAGE_NT_SIGNATURE) + PeLib::PELIB_IMAGE_FILE_HEADER::size() + 0x04);
 	std::uint32_t baseOfCode = originalHeader.read<std::uint32_t>(sizeof(PeLib::PELIB_IMAGE_NT_SIGNATURE) + PeLib::PELIB_IMAGE_FILE_HEADER::size() + 0x14);
 
-	//_newPeFile->peHeader().setSizeOfCode(sizeOfCode);
-	//_newPeFile->peHeader().setBaseOfCode(baseOfCode);
+	_newPeFile->imageLoader().setSizeOfCode(sizeOfCode, baseOfCode);
 }
 
 /**
@@ -629,13 +631,13 @@ template <int bits> void PeUpxStub<bits>::fixPeHeader(const DynamicBuffer& origi
  */
 template <int bits> void PeUpxStub<bits>::unfilterData(DynamicBuffer& unpackedData)
 {
-	/*
-	std::uint32_t startOffset = _newPeFile->peHeader().getBaseOfCode() - _newPeFile->peHeader().getVirtualAddress(0);
-	std::uint32_t size = _newPeFile->peHeader().getSizeOfCode();
+	const PeLib::ImageLoader & imageLoader = _newPeFile->imageLoader();
+	const PeLib::PELIB_SECTION_HEADER * pSectionHeader = imageLoader.getSectionHeader(0);
+	std::uint32_t startOffset = imageLoader.getOptionalHeader().BaseOfCode - pSectionHeader->VirtualAddress;
+	std::uint32_t size = imageLoader.getOptionalHeader().SizeOfCode;
 
 	if (!Unfilter::run(unpackedData, _filterId, _filterParam, _filterCount, startOffset, size))
 		throw UnsupportedFilterException(_filterId);
-	*/
 }
 
 /**
