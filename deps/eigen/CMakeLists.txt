@@ -1,37 +1,23 @@
-
-include(ExternalProject)
-
-if(CMAKE_C_COMPILER)
-	set(CMAKE_C_COMPILER_OPTION "-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}")
-endif()
-if(CMAKE_CXX_COMPILER)
-	set(CMAKE_CXX_COMPILER_OPTION "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")
-endif()
-
-ExternalProject_Add(eigen_project
-	URL ${EIGEN_URL}
-	URL_HASH SHA256=${EIGEN_ARCHIVE_SHA256}
-	DOWNLOAD_NAME "eigen.zip"
-	CMAKE_ARGS
-		"${CMAKE_C_COMPILER_OPTION}"
-		"${CMAKE_CXX_COMPILER_OPTION}"
-		-DCMAKE_POSITION_INDEPENDENT_CODE=${CMAKE_POSITION_INDEPENDENT_CODE}
-	# Disable the install step.
-	INSTALL_COMMAND ""
-)
-
 add_library(eigen INTERFACE)
 add_library(retdec::deps::eigen ALIAS eigen)
-add_dependencies(eigen eigen_project)
 
-ExternalProject_Get_Property(eigen_project source_dir)
+target_include_directories(eigen
+	SYSTEM INTERFACE
+		$<BUILD_INTERFACE:${RETDEC_DEPS_DIR}/eigen>
+		$<INSTALL_INTERFACE:${RETDEC_INSTALL_DEPS_INCLUDE_DIR}>
+)
 
-set(EIGEN_INCLUDE_DIR "${source_dir}/Eigen")
+# Install includes.
+install(
+	DIRECTORY ${RETDEC_DEPS_DIR}/eigen/Eigen
+	DESTINATION ${RETDEC_INSTALL_DEPS_INCLUDE_DIR}
+)
 
-target_include_directories(eigen INTERFACE $<BUILD_INTERFACE:${EIGEN_INCLUDE_DIR}>)
-
+# Install libs.
 install(TARGETS eigen
 	EXPORT eigen-targets
+	ARCHIVE DESTINATION ${RETDEC_INSTALL_LIB_DIR}
+	LIBRARY DESTINATION ${RETDEC_INSTALL_LIB_DIR}
 )
 
 # Export targets.
@@ -39,4 +25,12 @@ install(EXPORT eigen-targets
 	FILE "retdec-eigen-targets.cmake"
 	NAMESPACE retdec::deps::
 	DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
+)
+
+# Install CMake files.
+install(
+	FILES
+		"${CMAKE_CURRENT_LIST_DIR}/retdec-eigen-config.cmake"
+	DESTINATION
+		"${RETDEC_INSTALL_CMAKE_DIR}"
 )

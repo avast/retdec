@@ -12,8 +12,7 @@
 #include <llvm/IR/Module.h>
 #include <llvm/Pass.h>
 
-//eigen lib
-#include "Dense"
+#include <Eigen/Core>
 
 #include "retdec/bin2llvmir/analyses/symbolic_tree.h"
 #include "retdec/bin2llvmir/providers/abi/abi.h"
@@ -87,7 +86,6 @@ class X87FpuAnalysis : public llvm::ModulePass
 				int& outTop);
 	std::list<FunctionAnalyzeMetadata> getFunctions2Analyze();
 
-	void printBlocksAnalyzeResult();
 	/**
 	 * Replace all FPU pseudo load and store function by load and store with concrete FPU registers.
 	 */

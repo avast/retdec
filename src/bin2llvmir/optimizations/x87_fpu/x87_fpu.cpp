@@ -8,6 +8,8 @@
 #include <llvm/IR/InstIterator.h>
 #include <llvm/IR/Operator.h>
 
+#include <Eigen/QR>
+
 #include "retdec/bin2llvmir/optimizations/x87_fpu/x87_fpu.h"
 #include "retdec/utils/string.h"
 #include "retdec/bin2llvmir/providers/asm_instruction.h"
@@ -241,26 +243,6 @@ bool X87FpuAnalysis::run()
 	}
 
 	return optimizeAnalyzedFpuInstruction();
-}
-
-void X87FpuAnalysis::printBlocksAnalyzeResult()
-{
-	std::cerr << "A*x=B\n";
-	for (auto& funMd: analyzedFunctionsMetadata)
-	{
-		std::cerr << funMd.function.getName().str() <<std::endl;
-		std::cerr << "A=\n" << funMd.A << "\nx=\n" << funMd.x << "\nB=\n" << funMd.B << "\n";
-		for (Function::iterator functionI=funMd.function.begin(),
-			e = funMd.function.end(); functionI != e; ++functionI)
-		{
-			BasicBlock* bb = functionI.operator->();
-			int inputIndex = funMd.indexes[bb][funMd.inIndex];
-			int outputIndex = funMd.indexes[bb][funMd.outIndex];
-			std::cerr << bb->getName().str()<<":";
-			std::cerr << " (in=" << funMd.x(inputIndex, 0);;
-			std::cerr << ",out=" << funMd.x(outputIndex, 0) << ")\n";
-		}
-	}
 }
 
 std::list<FunctionAnalyzeMetadata>::iterator X87FpuAnalysis::getFunMd(llvm::Function* fun)
