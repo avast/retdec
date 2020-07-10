@@ -14571,18 +14571,6 @@ rule telock_096 {
 		$1 at pe.entry_point
 }
 
-rule telock_098_10 {
-	meta:
-		tool = "P"
-		name = "tElock"
-		version = "0.98 - 1.0"
-		pattern = "E9????FFFF000000??????????????000000000000000000"
-	strings:
-		$1 = { E9 ?? ?? FF FF 00 00 00 ?? ?? ?? ?? ?? ?? ?? 00 00 00 00 00 00 00 00 00 }
-	condition:
-		$1 at pe.entry_point
-}
-
 rule telock_098_special_build {
 	meta:
 		tool = "P"
