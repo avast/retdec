@@ -146,7 +146,7 @@ namespace PeLib
 		  /// Remove a function from the import directory.
 		  int removeFunction(const std::string& strFilename, std::uint16_t wHint); // EXPORT _byHint
 		  /// Returns the size of the current import directory.
-		  unsigned int size() const; // EXPORT
+		  unsigned int calculateSize(std::uint32_t pointerSize) const; // EXPORT
 		  /// Writes the import directory to a file.
 		  int write(const std::string& strFilename, unsigned int uiOffset, unsigned int uiRva); // EXPORT
 
@@ -1035,15 +1035,18 @@ namespace PeLib
 	}
 
 	/**
-	* Returns the size of the import directory.
+	* Calculates size of import directory that would be written to a PE file.
 	* @return Size of the import directory.
 	**/
 	inline
-	unsigned int ImportDirectory::size() const
+	std::uint32_t ImportDirectory::calculateSize(std::uint32_t pointerSize) const
 	{
+		std::uint32_t totalSize = 0;
+
 		// Only the descriptors of m_vOldiid must be rebuilt, not the data they point to.
-		return std::accumulate(m_vNewiid.begin(), m_vNewiid.end(), 0, accumulate<PELIB_IMAGE_IMPORT_DIRECTORY>)
-		+ (m_vOldiid.size() + 1) * PELIB_IMAGE_IMPORT_DESCRIPTOR::size();
+		for(const auto & element : m_vNewiid)
+			totalSize += element.calculateSize(pointerSize);
+		return totalSize + (m_vOldiid.size() + 1) * PELIB_IMAGE_IMPORT_DESCRIPTOR::size();
 	}
 
 	/**

@@ -806,6 +806,20 @@ namespace PeLib
 
 	struct PELIB_IMAGE_SECTION_HEADER
 	{
+		PELIB_IMAGE_SECTION_HEADER()
+		{
+			memset(Name, 0, sizeof(Name));
+			VirtualSize = 0;
+			VirtualAddress = 0;
+			SizeOfRawData = 0;
+			PointerToRawData = 0;
+			PointerToRelocations = 0;
+			PointerToLinenumbers = 0;
+			NumberOfRelocations = 0;
+			NumberOfLinenumbers = 0;
+			Characteristics = 0;
+		}
+
 		std::uint8_t  Name[PELIB_IMAGE_SIZEOF_SHORT_NAME];
 		std::uint32_t VirtualSize;
 		std::uint32_t VirtualAddress;
@@ -820,9 +834,40 @@ namespace PeLib
 
 	struct PELIB_SECTION_HEADER : public PELIB_IMAGE_SECTION_HEADER
 	{
+		void setName(const char * newName)
+		{
+			// Copy the name to the fixed_length name
+			memset(Name, 0, PELIB_IMAGE_SIZEOF_SHORT_NAME);
+			for(std::size_t i = 0; i < PELIB_IMAGE_SIZEOF_SHORT_NAME; i++)
+			{
+				if(newName[i] == 0)
+					break;
+				Name[i] = newName[i];
+			}
+
+			// Also put it to the string
+			sectionName = newName;
+		}
+
 		const std::string & getName() const
 		{
 			return sectionName;
+		}
+
+		void setVirtualRange(std::uint32_t newVirtualAddress, std::uint32_t newVirtualSize)
+		{
+			if(newVirtualAddress != UINT32_MAX)
+				VirtualAddress = newVirtualAddress;
+			if(newVirtualSize != UINT32_MAX)
+				VirtualSize = newVirtualSize;
+		}
+
+		void setRawDataRange(std::uint32_t newPointerToRawData, std::uint32_t newSizeOfRawData)
+		{
+			if(newPointerToRawData != UINT32_MAX)
+				PointerToRawData = newPointerToRawData;
+			if(newSizeOfRawData != UINT32_MAX)
+				SizeOfRawData = newSizeOfRawData;
 		}
 
 		static const std::size_t size()
@@ -1059,6 +1104,11 @@ namespace PeLib
 		{
 			return isEqualNc(fname, strFunctionName);
 		}
+
+		std::uint32_t calculateSize(std::uint32_t pointerSize) const
+		{
+			return pointerSize + fname.size() + 1 + sizeof(hint);
+		}
 	};
 
 	struct PELIB_DELAY_IMPORT
@@ -1086,14 +1136,14 @@ namespace PeLib
 		/// All first thunk value of an imported DLL.
 		std::vector<PELIB_THUNK_DATA> firstthunk;
 
-		inline std::size_t size() const
+		inline std::uint32_t calculateSize(std::uint32_t pointerSize) const
 		{
-			return sizeof(PELIB_IMAGE_IMPORT_DESCRIPTOR) +                // descriptor
-				   name.size() + 1 +                                      // dllname
-				   sizeof(PELIB_THUNK_DATA) * originalfirstthunk.size() + // thunks (PeLib uses only one thunk)
-				   sizeof(PELIB_IMAGE_THUNK_DATA);                        // zero-termination
-		}
+			std::uint32_t totalSize = sizeof(PELIB_IMAGE_IMPORT_DESCRIPTOR) + name.size() + 1;  // descriptor + dllname
 
+			for(const auto & element : originalfirstthunk)
+				totalSize += element.calculateSize(pointerSize);
+			return totalSize + pointerSize;                            // Add zero-termination
+		}
 
 		bool operator==(std::string strFilename) const
 		{

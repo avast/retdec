@@ -40,6 +40,9 @@ enum PELIB_MEMBER_TYPE : std::uint32_t
 	OPTHDR_sizeof,
 	OPTHDR_NumberOfRvaAndSizes,
 	OPTHDR_DataDirectory,
+	OPTHDR_DataDirectory_EXPORT_Rva,
+	OPTHDR_DataDirectory_RSRC_Rva,
+	OPTHDR_DataDirectory_CONFIG_Rva,
 };
 
 //-----------------------------------------------------------------------------
@@ -162,8 +165,6 @@ class ImageLoader
 
 	std::uint32_t getFieldOffset(PELIB_MEMBER_TYPE field) const;
 
-	bool setDataDirectory(std::uint32_t index, std::uint32_t rva, std::uint32_t size);
-
 	const PELIB_IMAGE_DOS_HEADER & getDosHeader() const
 	{
 		return dosHeader;
@@ -180,6 +181,11 @@ class ImageLoader
 	}
 
 	const PELIB_SECTION_HEADER * getSectionHeader(std::size_t sectionIndex) const
+	{
+		return (sectionIndex < sections.size()) ? &sections[sectionIndex] : nullptr;
+	}
+
+	PELIB_SECTION_HEADER * getSectionHeader(std::size_t sectionIndex)
 	{
 		return (sectionIndex < sections.size()) ? &sections[sectionIndex] : nullptr;
 	}
@@ -311,10 +317,21 @@ class ImageLoader
 	}
 
 	// Image manipulation
+	void setPointerToSymbolTable(std::uint32_t pointerToSymbolTable);
+	void setCharacteristics(std::uint32_t characteristics);
+	void setAddressOfEntryPoint(std::uint32_t addressOfEntryPoint);
 	void setSizeOfCode(std::uint32_t sizeOfCode, std::uint32_t baseOfCode = UINT32_MAX);
-	void setSectionVirtualData(std::size_t sectionIndex, std::uint32_t VirtualAddress, std::uint32_t VirtualSize = UINT32_MAX);
-	void setSectionRawData(std::size_t sectionIndex, std::uint32_t PointerToRawData, std::uint32_t SizeOfRawData = UINT32_MAX);
-	int  removeSection(std::size_t sectionIndex);
+	void setDataDirectory(std::uint32_t entryIndex, std::uint32_t VirtualAddress, std::uint32_t Size = UINT32_MAX);
+
+	PELIB_IMAGE_SECTION_HEADER * addSection(const char * name, std::uint32_t size);
+	void calcNewSectionAddresses(std::uint32_t & Rva, std::uint32_t & RawOffset);
+	void setSectionName(std::size_t sectionIndex, const char * newName);
+	void setSectionVirtualRange(std::size_t sectionIndex, std::uint32_t VirtualAddress, std::uint32_t VirtualSize = UINT32_MAX);
+	void setSectionRawDataRange(std::size_t sectionIndex, std::uint32_t PointerToRawData, std::uint32_t SizeOfRawData = UINT32_MAX);
+	void setSectionCharacteristics(std::size_t sectionIndex, std::uint32_t Characteristics);
+	int  splitSection(std::size_t sectionIndex, const std::string & prevSectName, const std::string & nextSectName, std::uint32_t splitOffset);
+	void enlargeLastSection(std::uint32_t sectionSize);
+	int  removeSection(std::size_t sizeIncrement);
 	void makeValid();
 
 	int setLoaderError(LoaderError ldrErr);
