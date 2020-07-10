@@ -9,7 +9,6 @@ RUN apt-get -y update && \
 	build-essential                                     \
 	cmake                                               \
 	git                                                 \
-	perl                                                \
 	python3                                             \
 	doxygen                                             \
 	graphviz                                            \

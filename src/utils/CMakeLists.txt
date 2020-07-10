@@ -4,6 +4,7 @@ add_library(utils STATIC
 	byte_value_storage.cpp
 	binary_path.cpp
 	conversion.cpp
+	crc32.cpp
 	dynamic_buffer.cpp
 	file_io.cpp
 	filesystem_path.cpp

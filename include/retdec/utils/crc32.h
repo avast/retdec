@@ -9,8 +9,8 @@
 // and conform to the coding standards of the RetDec project.
 // !!!
 
-#ifndef RETDEC_CRYPTO_CRC32_H
-#define RETDEC_CRYPTO_CRC32_H
+#ifndef RETDEC_UTILS_CRC32_H
+#define RETDEC_UTILS_CRC32_H
 
 //#include "hash.h"
 #include <string>
@@ -24,6 +24,9 @@ using uint32_t = unsigned __int32;
 // GCC
 #include <cstdint>
 #endif
+
+namespace retdec {
+namespace utils {
 
 /// compute CRC32 hash, based on Intel's Slicing-by-8 algorithm
 /** Usage:
@@ -72,5 +75,8 @@ private:
 	/// hash
 	uint32_t m_hash;
 };
+
+} // namespace utils
+} // namespace retdec
 
 #endif

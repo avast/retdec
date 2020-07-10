@@ -35,16 +35,6 @@ set(LLVM_ARCHIVE_SHA256
     CACHE INTERNAL ""
 )
 
-# Commit for tag 1.1.1c
-set(OPENSSL_URL
-    "https://github.com/openssl/openssl/archive/97ace46e11dba4c4c2b7cb67140b6ec152cfaaf4.zip"
-    CACHE INTERNAL "URL of OpenSSL archive to use."
-)
-set(OPENSSL_ARCHIVE_SHA256
-    "f093df5cfd7521d8f6a09f250d7e69159d1001c47419130e806488de8a6312d8"
-    CACHE INTERNAL ""
-)
-
 set(YARA_URL
     "https://github.com/VirusTotal/yara/archive/v4.0.1.zip"
     CACHE INTERNAL "URL of Yara archive to use."

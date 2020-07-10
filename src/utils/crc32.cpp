@@ -9,7 +9,10 @@
 // and conform to the coding standards of the RetDec project.
 // !!!
 
-#include "retdec/crypto/crc32.h"
+#include "retdec/utils/crc32.h"
+
+namespace retdec {
+namespace utils {
 
 /// same as reset()
 CRC32::CRC32()
@@ -423,3 +426,6 @@ std::string CRC32::operator()(const std::string& text)
 	add(text.c_str(), text.size());
 	return getHash();
 }
+
+} // namespace utils
+} // namespace retdec
