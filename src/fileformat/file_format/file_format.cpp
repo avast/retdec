@@ -12,7 +12,6 @@
 #include <iostream>
 #include <sstream>
 
-#include "retdec/crypto/crypto.h"
 #include "retdec/utils/conversion.h"
 #include "retdec/utils/file_io.h"
 #include "retdec/utils/string.h"
@@ -23,6 +22,7 @@
 #include "retdec/fileformat/file_format/raw_data/raw_data_format.h"
 #include "retdec/fileformat/types/strings/character_iterator.h"
 #include "retdec/fileformat/utils/conversions.h"
+#include "retdec/fileformat/utils/crypto.h"
 #include "retdec/fileformat/utils/file_io.h"
 #include "retdec/fileformat/utils/other.h"
 #include "retdec/pelib/PeLibInc.h"
@@ -197,9 +197,9 @@ void FileFormat::init()
 	}
 	else
 	{
-		crc32 = retdec::crypto::getCrc32(bytes.data(), bytes.size());
-		md5 = retdec::crypto::getMd5(bytes.data(), bytes.size());
-		sha256 = retdec::crypto::getSha256(bytes.data(), bytes.size());
+		crc32 = retdec::fileformat::getCrc32(bytes.data(), bytes.size());
+		md5 = retdec::fileformat::getMd5(bytes.data(), bytes.size());
+		sha256 = retdec::fileformat::getSha256(bytes.data(), bytes.size());
 	}
 	initStream();
 }
@@ -314,9 +314,9 @@ void FileFormat::computeSectionTableHashes()
 
 	if(!data.empty())
 	{
-		sectionCrc32 = retdec::crypto::getCrc32(data.data(), data.size());
-		sectionMd5 = retdec::crypto::getMd5(data.data(), data.size());
-		sectionSha256 = retdec::crypto::getSha256(data.data(), data.size());
+		sectionCrc32 = retdec::fileformat::getCrc32(data.data(), data.size());
+		sectionMd5 = retdec::fileformat::getMd5(data.data(), data.size());
+		sectionSha256 = retdec::fileformat::getSha256(data.data(), data.size());
 	}
 }
 

@@ -4,10 +4,10 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "retdec/crypto/crypto.h"
 #include "retdec/utils/container.h"
 #include "retdec/utils/conversion.h"
 #include "retdec/utils/string.h"
+#include "retdec/fileformat/utils/crypto.h"
 #include "retdec/fileformat/types/import_table/import_table.h"
 
 using namespace retdec::utils;
@@ -813,9 +813,9 @@ void ImportTable::computeHashes()
 		return;
 	}
 
-	impHashCrc32 = retdec::crypto::getCrc32(impHashBytes.data(), impHashBytes.size());
-	impHashMd5 = retdec::crypto::getMd5(impHashBytes.data(), impHashBytes.size());
-	impHashSha256 = retdec::crypto::getSha256(impHashBytes.data(), impHashBytes.size());
+	impHashCrc32 = getCrc32(impHashBytes.data(), impHashBytes.size());
+	impHashMd5 = getMd5(impHashBytes.data(), impHashBytes.size());
+	impHashSha256 = getSha256(impHashBytes.data(), impHashBytes.size());
 }
 
 /**

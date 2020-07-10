@@ -1,8 +1,11 @@
 
+find_package(OpenSSL 1.0.1 REQUIRED)
+
 add_library(fileformat STATIC
 	utils/format_detection.cpp
 	utils/byte_array_buffer.cpp
 	utils/conversions.cpp
+	utils/crypto.cpp
 	utils/other.cpp
 	utils/asn1.cpp
 	utils/file_io.cpp
@@ -87,12 +90,13 @@ target_include_directories(fileformat
 
 target_link_libraries(fileformat
 	PUBLIC
-		retdec::crypto
 		retdec::common
 		retdec::utils
 		retdec::pelib
 		retdec::deps::elfio
 		retdec::deps::llvm
+	PRIVATE
+		OpenSSL::Crypto
 )
 
 set_target_properties(fileformat
