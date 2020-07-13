@@ -15526,6 +15526,18 @@ rule upack_039f_02 {
 		$1 at pe.entry_point
 }
 
+rule upack_039f_03 {
+	meta:
+		tool = "P"
+		name = "Upack"
+		version = "0.39f"
+		pattern = "BEB011????AD50FF7634EB7C4801????0B014C6F61644C6962726172794100001810000010000000????????0000????001000000002000004000000000039"
+	strings:
+		$1 = { BE B0 11 ?? ?? AD 50 FF 76 34 EB 7C 48 01 ?? ?? 0B 01 4C 6F 61 64 4C 69 62 72 61 72 79 41 00 00 18 10 00 00 10 00 00 00 ?? ?? ?? ?? 00 00 ?? ?? 00 10 00 00 00 02 00 00 04 00 00 00 00 00 39 }
+	condition:
+		$1 at pe.entry_point
+}
+
 rule upack_039 {
 	meta:
 		tool = "P"
@@ -17694,18 +17706,6 @@ rule winkript_10 {
 		pattern = "33C08BB800??????8B9004??????85FF741B33C950EB0C8A0439C0C804341B880439413BCA72F058"
 	strings:
 		$1 = { 33 C0 8B B8 00 ?? ?? ?? 8B 90 04 ?? ?? ?? 85 FF 74 1B 33 C9 50 EB 0C 8A 04 39 C0 C8 04 34 1B 88 04 39 41 3B CA 72 F0 58 }
-	condition:
-		$1 at pe.entry_point
-}
-
-rule winupack_039f {
-	meta:
-		tool = "P"
-		name = "WinUpack"
-		version = "0.39f"
-		pattern = "BEB011????AD50FF7634EB7C4801????0B014C6F61644C6962726172794100001810000010000000????????0000????001000000002000004000000000039"
-	strings:
-		$1 = { BE B0 11 ?? ?? AD 50 FF 76 34 EB 7C 48 01 ?? ?? 0B 01 4C 6F 61 64 4C 69 62 72 61 72 79 41 00 00 18 10 00 00 10 00 00 00 ?? ?? ?? ?? 00 00 ?? ?? 00 10 00 00 00 02 00 00 04 00 00 00 00 00 39 }
 	condition:
 		$1 at pe.entry_point
 }
