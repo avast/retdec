@@ -1987,7 +1987,7 @@ void PeHeuristics::getPeSectionHeuristics()
 	}
 	if (lastName == "yC" || lastName == ".y0da" || lastName == ".yP")
 	{
-		addPacker(source, strength, "yoda's Crypter");
+		addPacker(source, strength, "yoda's Protector");
 	}
 	if (findSectionName(".petite") == 1)
 	{
