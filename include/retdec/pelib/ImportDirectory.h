@@ -137,6 +137,8 @@ namespace PeLib
 		  std::uint32_t getNumberOfFunctions(std::uint32_t dwFilenr, currdir cdDir) const; // EXPORT
 		  /// Read a file's import directory.
 		  int read(ImageLoader & imageLoader); // EXPORT
+		  /// Writes pointer to the buffer (32-bit or 64-bit)
+		  void writePointer(OutputBuffer & obBuffer, std::uint64_t pointerValue);
 		  /// Rebuild the import directory.
 		  void rebuild(std::vector<std::uint8_t>& vBuffer, std::uint32_t dwRva, bool fixEntries = true); // EXPORT
 		  /// Remove a file from the import directory.
@@ -148,22 +150,24 @@ namespace PeLib
 		  /// Returns the size of the current import directory.
 		  unsigned int calculateSize(std::uint32_t pointerSize) const; // EXPORT
 		  /// Writes the import directory to a file.
-		  int write(const std::string& strFilename, unsigned int uiOffset, unsigned int uiRva); // EXPORT
+		  int write(const std::string& strFilename, std::uint32_t uiOffset, std::uint32_t uiRva, std::uint32_t pointerSize); // EXPORT
+		  /// Updates the pointer size for the import directory
+		  void setPointerSize(std::uint32_t pointerSize);
 
 		  /// Returns the FirstThunk value of a function.
-		  std::uint64_t getFirstThunk(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, currdir cdDir) const; // EXPORT _byNumber
-		  void setFirstThunk(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, currdir cdDir, std::uint64_t value); // EXPORT _byNumber
+		  std::uint32_t getFirstThunk(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, currdir cdDir) const; // EXPORT _byNumber
+		  void setFirstThunk(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, currdir cdDir, std::uint32_t value); // EXPORT _byNumber
 		  /// Returns the OriginalFirstThunk value of a function.
-		  std::uint64_t getOriginalFirstThunk(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, currdir cdDir) const; // EXPORT _byNumber
-		  void setOriginalFirstThunk(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, currdir cdDir, std::uint64_t value); // EXPORT
+		  std::uint32_t getOriginalFirstThunk(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, currdir cdDir) const; // EXPORT _byNumber
+		  void setOriginalFirstThunk(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, currdir cdDir, std::uint32_t value); // EXPORT
 
 //		  std::uint64_t getFirstThunk(const std::string& strFilename, const std::string& strFuncname, currdir cdDir) const throw (PeLibException);
 //		  std::uint64_t getOriginalFirstThunk(const std::string& strFilename, const std::string& strFuncname, currdir cdDir) const throw (PeLibException);
 
 		  /// Returns the FirstThunk value of a file.
-		  std::uint64_t getFirstThunk(const std::string& strFilename, currdir cdDir) const; // EXPORT _byName
+		  std::uint32_t getFirstThunk(const std::string& strFilename, currdir cdDir) const; // EXPORT _byName
 		  /// Returns the OriginalFirstThunk value of a file.
-		  std::uint64_t getOriginalFirstThunk(const std::string& strFilename, currdir cdDir) const; // EXPORT _byName
+		  std::uint32_t getOriginalFirstThunk(const std::string& strFilename, currdir cdDir) const; // EXPORT _byName
 		  /// Returns the ForwarderChain value of a file.
 		  std::uint32_t getForwarderChain(const std::string& strFilename, currdir cdDir) const; // EXPORT _byName
 		  std::uint32_t getRvaOfName(const std::string& strFilename, currdir cdDir) const; // EXPORT _byName
@@ -171,11 +175,11 @@ namespace PeLib
 		  std::uint32_t getTimeDateStamp(const std::string& strFilename, currdir cdDir) const; // EXPORT _byName
 
 		  /// Returns the FirstThunk value of a file.
-		  std::uint64_t getFirstThunk(std::uint32_t dwFilenr, currdir cdDir) const; // EXPORT
-		  void setFirstThunk(std::uint32_t dwFilenr, currdir cdDir, std::uint64_t value); // EXPORT _byNumber_function
+		  std::uint32_t getFirstThunk(std::uint32_t dwFilenr, currdir cdDir) const; // EXPORT
+		  void setFirstThunk(std::uint32_t dwFilenr, currdir cdDir, std::uint32_t value); // EXPORT _byNumber_function
 		  /// Returns the OriginalFirstThunk value of a file.
-		  std::uint64_t getOriginalFirstThunk(std::uint32_t dwFilenr, currdir cdDir) const; // EXPORT
-		  void setOriginalFirstThunk(std::uint32_t dwFilenr, currdir cdDir, std::uint64_t value); // EXPORT _byNumber_function
+		  std::uint32_t getOriginalFirstThunk(std::uint32_t dwFilenr, currdir cdDir) const; // EXPORT
+		  void setOriginalFirstThunk(std::uint32_t dwFilenr, currdir cdDir, std::uint32_t value); // EXPORT _byNumber_function
 		  /// Returns the ForwarderChain value of a file.
 		  std::uint32_t getForwarderChain(std::uint32_t dwFilenr, currdir cdDir) const; // EXPORT _byNumber
 		  void setForwarderChain(std::uint32_t dwFilenr, currdir cdDir, std::uint32_t value); // EXPORT _byNumber_function
@@ -540,6 +544,18 @@ namespace PeLib
 	}
 
 	/**
+	* Updates pointer size for import directory
+	* @param inStream Input stream.
+	* @param peHeader A valid PE header.
+	**/
+
+	inline void ImportDirectory::setPointerSize(std::uint32_t pointerSize)
+	{
+		m_thunkSize = pointerSize;
+		m_ordinalMask = (uint64_t)1 << ((pointerSize * 8) - 1);
+	}
+
+	/**
 	* Read an import directory from a file.
 	* \todo Check if streams failed.
 	* @param inStream Input stream.
@@ -554,8 +570,7 @@ namespace PeLib
 		std::uint32_t rvaBegin = imageLoader.getDataDirRva(PELIB_IMAGE_DIRECTORY_ENTRY_IMPORT);
 		std::uint32_t rva = rvaBegin;
 
-		m_ordinalMask = imageLoader.getOrdinalMask();
-		m_thunkSize = imageLoader.getPointerSize();
+		setPointerSize(imageLoader.getPointerSize());
 		m_ldrError = LDR_ERROR_NONE;
 
 		// Verify whether the import directory is within the image
@@ -787,6 +802,19 @@ namespace PeLib
 		return ERROR_NONE;
 	}
 
+	inline void ImportDirectory::writePointer(OutputBuffer & obBuffer, std::uint64_t pointerValue)
+	{
+		if(m_thunkSize == sizeof(std::uint32_t))
+		{
+			std::uint32_t pointerValue32 = (std::uint32_t)pointerValue;
+			obBuffer << pointerValue32;
+		}
+		else
+		{
+			obBuffer << pointerValue;
+		}
+	}
+
 	/**
 	* Rebuilds the import directory.
 	* @param vBuffer Buffer the rebuilt import directory will be written to.
@@ -869,28 +897,30 @@ namespace PeLib
 		std::uint64_t uiPfunc = uiSizeofdescriptors + uiSizeofoft + uiSizeofdllnames + uiImprva;
 
 		// Rebuild original first thunk
-		for (unsigned int i=0;i<m_vNewiid.size();i++)
+		for (std::size_t i = 0;i<m_vNewiid.size();i++)
 		{
-			for (unsigned int j=0;j<m_vNewiid[i].originalfirstthunk.size();j++)
+			for (std::size_t j = 0;j<m_vNewiid[i].originalfirstthunk.size();j++)
 			{
-				if (m_vNewiid[i].originalfirstthunk[j].itd.Ordinal & m_ordinalMask
-					|| fixEntries == false)
+				if((m_vNewiid[i].originalfirstthunk[j].itd.Ordinal & m_ordinalMask) || fixEntries == false)
 				{
-					obBuffer << m_vNewiid[i].originalfirstthunk[j].itd.Ordinal;
+					writePointer(obBuffer, m_vNewiid[i].originalfirstthunk[j].itd.Ordinal);
+					//obBuffer << m_vNewiid[i].originalfirstthunk[j].itd.Ordinal;
 				}
 				else
 				{
-					obBuffer << uiPfunc;
+					writePointer(obBuffer, uiPfunc);
+					//obBuffer << uiPfunc;
 					// store the offset in Ordinal, they cannot overlay thanks to PELIB_IMAGE_ORDINAL_FLAG
 					m_vNewiid[i].originalfirstthunk[j].itd.Ordinal = uiPfunc;
 				}
 				uiPfunc += static_cast<std::uint64_t>(m_vNewiid[i].originalfirstthunk[j].fname.size()) + 3;
 			}
-			obBuffer << static_cast<std::uint64_t>(0);
+			writePointer(obBuffer, 0);
+			//obBuffer << static_cast<std::uint64_t>(0);
 		}
 
 		// Write dllnames into import directory
-		for (unsigned int i=0;i<m_vNewiid.size();i++)
+		for (std::size_t i = 0; i < m_vNewiid.size(); i++)
 		{
 			obBuffer.add(m_vNewiid[i].name.c_str(), static_cast<unsigned int>(m_vNewiid[i].name.size())+1);
 		}
@@ -999,7 +1029,7 @@ namespace PeLib
 	* @param uiRva RVA which belongs to that file offset.
 	**/
 	inline
-	int ImportDirectory::write(const std::string& strFilename, unsigned int uiOffset, unsigned int uiRva)
+	int ImportDirectory::write(const std::string& strFilename, std::uint32_t uiOffset, std::uint32_t uiRva, std::uint32_t pointerSize)
 	{
 		std::fstream ofFile(strFilename.c_str(), std::ios_base::in);
 
@@ -1023,6 +1053,7 @@ namespace PeLib
 
 		std::vector<std::uint8_t> vBuffer;
 
+		setPointerSize(pointerSize);
 		rebuild(vBuffer, uiRva);
 
 		ofFile.write(reinterpret_cast<const char*>(vBuffer.data()), vBuffer.size());
@@ -1055,7 +1086,7 @@ namespace PeLib
 	* @return FirstThunk value of an imported file.
 	**/
 	inline
-	std::uint64_t ImportDirectory::getFirstThunk(const std::string& strFilename, currdir cdDir) const
+	std::uint32_t ImportDirectory::getFirstThunk(const std::string& strFilename, currdir cdDir) const
 	{
 		if (cdDir == OLDDIR)
 		{
@@ -1073,7 +1104,7 @@ namespace PeLib
 	* @return OriginalFirstThunk value of an imported file.
 	**/
 	inline
-	std::uint64_t ImportDirectory::getOriginalFirstThunk(const std::string& strFilename, currdir cdDir) const
+	std::uint32_t ImportDirectory::getOriginalFirstThunk(const std::string& strFilename, currdir cdDir) const
 	{
 		if (cdDir == OLDDIR)
 		{
@@ -1140,7 +1171,7 @@ namespace PeLib
 	* @return FirstThunk value of an imported file.
 	**/
 	inline
-	std::uint64_t ImportDirectory::getFirstThunk(std::uint32_t dwFilenr, currdir cdDir) const
+	std::uint32_t ImportDirectory::getFirstThunk(std::uint32_t dwFilenr, currdir cdDir) const
 	{
 		if (cdDir == OLDDIR)
 		{
@@ -1153,7 +1184,7 @@ namespace PeLib
 	}
 
 	inline
-	void ImportDirectory::setFirstThunk(std::uint32_t dwFilenr, currdir cdDir, std::uint64_t value)
+	void ImportDirectory::setFirstThunk(std::uint32_t dwFilenr, currdir cdDir, std::uint32_t value)
 	{
 		if (cdDir == OLDDIR)
 		{
@@ -1171,7 +1202,7 @@ namespace PeLib
 	* @return OriginalFirstThunk value of an imported file.
 	**/
 	inline
-	std::uint64_t ImportDirectory::getOriginalFirstThunk(std::uint32_t dwFilenr, currdir cdDir) const
+	std::uint32_t ImportDirectory::getOriginalFirstThunk(std::uint32_t dwFilenr, currdir cdDir) const
 	{
 		if (cdDir == OLDDIR)
 		{
@@ -1184,7 +1215,7 @@ namespace PeLib
 	}
 
 	inline
-	void ImportDirectory::setOriginalFirstThunk(std::uint32_t dwFilenr, currdir cdDir, std::uint64_t value)
+	void ImportDirectory::setOriginalFirstThunk(std::uint32_t dwFilenr, currdir cdDir, std::uint32_t value)
 	{
 		if (cdDir == OLDDIR)
 		{
@@ -1292,14 +1323,14 @@ namespace PeLib
 	* @return FirstThunk value of an imported function.
 	**/
 	inline
-	std::uint64_t ImportDirectory::getFirstThunk(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, currdir cdDir) const
+	std::uint32_t ImportDirectory::getFirstThunk(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, currdir cdDir) const
 	{
 		if (cdDir == OLDDIR) return m_vOldiid[dwFilenr].firstthunk[dwFuncnr].itd.Ordinal;
 		else return m_vNewiid[dwFilenr].firstthunk[dwFuncnr].itd.Ordinal;
 	}
 
 	inline
-	void ImportDirectory::setFirstThunk(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, currdir cdDir, std::uint64_t value)
+	void ImportDirectory::setFirstThunk(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, currdir cdDir, std::uint32_t value)
 	{
 		if (cdDir == OLDDIR) m_vOldiid[dwFilenr].firstthunk[dwFuncnr].itd.Ordinal = value;
 		else m_vNewiid[dwFilenr].firstthunk[dwFuncnr].itd.Ordinal = value;
@@ -1312,7 +1343,7 @@ namespace PeLib
 	* @return OriginalFirstThunk value of an imported function.
 	**/
 	inline
-	std::uint64_t ImportDirectory::getOriginalFirstThunk(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, currdir cdDir) const
+	std::uint32_t ImportDirectory::getOriginalFirstThunk(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, currdir cdDir) const
 	{
 		if (cdDir == OLDDIR)
 		{
@@ -1332,7 +1363,7 @@ namespace PeLib
 	}
 
 	inline
-	void ImportDirectory::setOriginalFirstThunk(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, currdir cdDir, std::uint64_t value)
+	void ImportDirectory::setOriginalFirstThunk(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, currdir cdDir, std::uint32_t value)
 	{
 		if (cdDir == OLDDIR) m_vOldiid[dwFilenr].originalfirstthunk[dwFuncnr].itd.Ordinal = value;
 		else m_vNewiid[dwFilenr].originalfirstthunk[dwFuncnr].itd.Ordinal = value;

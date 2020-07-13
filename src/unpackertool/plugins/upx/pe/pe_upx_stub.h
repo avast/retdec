@@ -38,7 +38,7 @@ class UpxExtraData
 public:
 	UpxExtraData() : _importsOffset(0), _relocsOffset(0), _originalHeaderOffset(0), _relocsBigEndian(false) {}
 	UpxExtraData(const UpxExtraData& extraData)
-		: _importsOffset(extraData._importsOffset), _relocsOffset(extraData._relocsOffset), _relocsBigEndian(extraData._relocsBigEndian) {}
+		: _importsOffset(extraData._importsOffset), _relocsOffset(extraData._relocsOffset), _originalHeaderOffset(extraData._originalHeaderOffset), _relocsBigEndian(extraData._relocsBigEndian) {}
 
 	std::uint32_t getImportsOffset() const { return _importsOffset; }
 	void setImportsOffset(std::uint32_t importsOffset) { _importsOffset = importsOffset; }

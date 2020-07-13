@@ -38,6 +38,7 @@ enum : std::uint32_t
 enum PELIB_MEMBER_TYPE : std::uint32_t
 {
 	OPTHDR_sizeof,
+	OPTHDR_sizeof_fixed,
 	OPTHDR_NumberOfRvaAndSizes,
 	OPTHDR_DataDirectory,
 	OPTHDR_DataDirectory_EXPORT_Rva,
@@ -142,6 +143,9 @@ class ImageLoader
 	int Load(std::istream & fs, std::streamoff fileOffset = 0, bool loadHeadersOnly = false);
 	int Load(const char * fileName, bool loadHeadersOnly = false);
 
+	int Save(std::ostream & fs, std::streamoff fileOffset = 0, bool saveHeadersOnly = false);
+	int Save(const char * fileName, bool saveHeadersOnly = false);
+
 	bool relocateImage(std::uint64_t newImageBase);
 
 	std::uint32_t readImage(void * buffer, std::uint32_t rva, std::uint32_t bytesToRead);
@@ -159,6 +163,7 @@ class ImageLoader
 
 	std::uint32_t getImageBitability() const;
 
+	std::uint32_t vaToRva(std::uint64_t VirtualAddress) const;
 	std::uint32_t getFileOffsetFromRva(std::uint32_t rva) const;
 	std::uint32_t getRealPointerToRawData(std::size_t sectionIndex) const;
 	std::uint32_t getImageProtection(std::uint32_t characteristics) const;
@@ -356,9 +361,12 @@ class ImageLoader
 	void writeNewImageBase(std::uint64_t newImageBase);
 
 	int captureDosHeader(std::vector<std::uint8_t> & fileData);
+	int saveDosHeader(std::ostream & fs, std::streamoff fileOffset);
 	int captureNtHeaders(std::vector<std::uint8_t> & fileData);
+	int saveNtHeaders(std::ostream & fs, std::streamoff fileOffset);
 	int captureSectionName(std::vector<std::uint8_t> & fileData, std::string & sectionName, const std::uint8_t * name);
 	int captureSectionHeaders(std::vector<std::uint8_t> & fileData);
+	int saveSectionHeaders(std::ostream & fs, std::streamoff fileOffset);
 	int captureImageSections(std::vector<std::uint8_t> & fileData);
 	int captureOptionalHeader32(std::uint8_t * fileData, std::uint8_t * filePtr, std::uint8_t * fileEnd);
 	int captureOptionalHeader64(std::uint8_t * fileData, std::uint8_t * filePtr, std::uint8_t * fileEnd);

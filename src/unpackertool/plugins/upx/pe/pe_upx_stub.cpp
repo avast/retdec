@@ -1196,29 +1196,34 @@ template <int bits> void PeUpxStub<bits>::cutHintsData(DynamicBuffer& unpackedDa
  */
 template <int bits> void PeUpxStub<bits>::saveFile(const std::string& outputFile, DynamicBuffer& unpackedData)
 {
-	/*
+	PeLib::PELIB_IMAGE_SECTION_HEADER * pSectionHeader;
+	PeLib::ImageLoader & imageLoader = _newPeFile->imageLoader();
+	std::uint32_t Rva;
+
 	// Remove the file if it already exists
 	std::remove(outputFile.c_str());
 
-	_newPeFile->mzHeader().write(outputFile, 0);
-	_newPeFile->peHeader().write(outputFile, _newPeFile->mzHeader().size());
-	_newPeFile->peHeader().writeSections(outputFile);
+	// Write the DOS header, PE headers and section headers
+	pSectionHeader = imageLoader.getSectionHeader(_upx0Sect->getSecSeg()->getIndex());
+	imageLoader.Save(outputFile.c_str());
 
-	if (_newPeFile->peHeader().getIddImportRva() != 0)
+	// Save the import directory
+	if((Rva = imageLoader.getDataDirRva(PeLib::PELIB_IMAGE_DIRECTORY_ENTRY_IMPORT)) != 0)
 	{
-		_newPeFile->impDir().write(outputFile, _newPeFile->peHeader().rvaToOffset(_newPeFile->peHeader().getIddImportRva()), _newPeFile->peHeader().getIddImportRva());
+		std::uint32_t VirtualAddress = pSectionHeader->VirtualAddress;
+
+		_newPeFile->impDir().write(outputFile, imageLoader.getFileOffsetFromRva(Rva), Rva, imageLoader.getPointerSize());
 
 		// OrignalFirstThunk-s are known only after the impDir is written into the file
 		// We then need to read it function by function and set the contents of IAT to be same as ILT
 		// If it isn't, the windows loader refuses to load the executable file
-		for (std::uint32_t fileIndex = 0; fileIndex < _newPeFile->impDir().getNumberOfFiles(PeLib::OLDDIR); ++fileIndex)
+		for(std::uint32_t fileIndex = 0; fileIndex < _newPeFile->impDir().getNumberOfFiles(PeLib::OLDDIR); ++fileIndex)
 		{
-			AddressType destOffset = _newPeFile->impDir().getFirstThunk(fileIndex, PeLib::OLDDIR) -
-				_newPeFile->peHeader().getVirtualAddress(_upx0Sect->getSecSeg()->getIndex());
+			std::uint32_t destOffset = _newPeFile->impDir().getFirstThunk(fileIndex, PeLib::OLDDIR) - VirtualAddress;
 
-			for (std::uint32_t funcIndex = 0; funcIndex < _newPeFile->impDir().getNumberOfFunctions(fileIndex, PeLib::OLDDIR); ++funcIndex, destOffset += 4)
+			for(std::uint32_t funcIndex = 0; funcIndex < _newPeFile->impDir().getNumberOfFunctions(fileIndex, PeLib::OLDDIR); ++funcIndex, destOffset += 4)
 			{
-				unpackedData.write<AddressType>(_newPeFile->impDir().getOriginalFirstThunk(fileIndex, funcIndex, PeLib::OLDDIR), destOffset);
+				unpackedData.write<std::uint32_t>(_newPeFile->impDir().getOriginalFirstThunk(fileIndex, funcIndex, PeLib::OLDDIR), destOffset);
 			}
 		}
 	}
@@ -1226,20 +1231,21 @@ template <int bits> void PeUpxStub<bits>::saveFile(const std::string& outputFile
 	// Write the unpacked content to the packed content section
 	// Use regular file as we will write more sections at once
 	std::fstream outputFileHandle(outputFile, std::ios::binary | std::ios::out | std::ios::in);
-	retdec::utils::writeFile(outputFileHandle, unpackedData.getBuffer(), _newPeFile->peHeader().getPointerToRawData(_upx0Sect->getSecSeg()->getIndex()));
+	retdec::utils::writeFile(outputFileHandle, unpackedData.getBuffer(), pSectionHeader->PointerToRawData);
+
 	// If there were COFF symbols in the original file, write them also to the new one
 	if (!_coffSymbolTable.empty())
-		retdec::utils::writeFile(outputFileHandle, _coffSymbolTable, _newPeFile->peHeader().getPointerToSymbolTable());
+		retdec::utils::writeFile(outputFileHandle, _coffSymbolTable, imageLoader.getPointerToSymbolTable());
 	outputFileHandle.close();
-
+	
 	// Write resources at the end, because they would be rewritten by unpackedData which have them zeroed
-	if (_newPeFile->peHeader().getIddResourceRva() != 0)
-		_newPeFile->resDir().write(outputFile, _newPeFile->peHeader().rvaToOffset(_newPeFile->peHeader().getIddResourceRva()), _newPeFile->peHeader().getIddResourceRva());
+	if((Rva = imageLoader.getDataDirRva(PeLib::PELIB_IMAGE_DIRECTORY_ENTRY_RESOURCE)) != 0)
+		_newPeFile->resDir().write(outputFile, imageLoader.getFileOffsetFromRva(Rva), Rva);
 
-	// Write exportss at the end, because they would be rewritten by unpackedData which have them zeroed
+	// Write exports at the end, because they would be rewritten by unpackedData which have them zeroed
 	// Write them only when exports are not compressed
-	if ((_newPeFile->peHeader().getIddExportRva() != 0) && !_exportsCompressed)
-		_newPeFile->expDir().write(outputFile, _newPeFile->peHeader().rvaToOffset(_newPeFile->peHeader().getIddExportRva()), _newPeFile->peHeader().getIddExportRva());
+	if((Rva = imageLoader.getDataDirRva(PeLib::PELIB_IMAGE_DIRECTORY_ENTRY_EXPORT)) != 0 && !_exportsCompressed)
+		_newPeFile->expDir().write(outputFile, imageLoader.getFileOffsetFromRva(Rva), Rva);
 
 	// Copy file overlay if any
 	if (_file->getFileFormat()->getDeclaredFileLength() < _file->getFileFormat()->getLoadedFileLength())
@@ -1256,7 +1262,6 @@ template <int bits> void PeUpxStub<bits>::saveFile(const std::string& outputFile
 		outputFileHandle.seekp(0, std::ios::end);
 		retdec::utils::writeFile(outputFileHandle, overlay, outputFileHandle.tellp());
 	}
-	*/
 }
 
 /**
@@ -1370,14 +1375,15 @@ template <int bits> void PeUpxStub<bits>::loadResources(PeLib::ResourceNode* roo
 			std::vector<std::uint8_t> data;
 			if (leaf->getOffsetToData() < uncompressedRsrcRva)
 			{
-				//std::uint32_t dataOffset = leaf->getOffsetToData() - _newPeFile->peHeader().vaToRva(_file->getSegment(0)->getAddress());
-				//if (dataOffset >= unpackedData.getRealDataSize())
-				//	throw InvalidDataDirectoryException("Resources");
+				PeLib::ImageLoader & imageLoader = _newPeFile->imageLoader();
+				std::uint32_t dataOffset = leaf->getOffsetToData() - imageLoader.vaToRva(_file->getSegment(0)->getAddress());
+				if (dataOffset >= unpackedData.getRealDataSize())
+					throw InvalidDataDirectoryException("Resources");
 
-				//if (dataOffset + leaf->getSize() >= unpackedData.getRealDataSize())
-				//	throw InvalidDataDirectoryException("Resources");
+				if (dataOffset + leaf->getSize() >= unpackedData.getRealDataSize())
+					throw InvalidDataDirectoryException("Resources");
 
-				//data = DynamicBuffer(unpackedData, dataOffset, leaf->getSize()).getBuffer();
+				data = DynamicBuffer(unpackedData, dataOffset, leaf->getSize()).getBuffer();
 			}
 			else
 			{
