@@ -8,6 +8,7 @@
 #include <sstream>
 #include <iomanip>
 #include <array>
+#include <unordered_map>
 
 #include "retdec/pelib/PeLibInc.h"
 #include "retdec/pelib/RichHeader.h"
