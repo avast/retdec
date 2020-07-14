@@ -79,6 +79,8 @@ class Name
 			//
 			DEBUG_FUNCTION,
 			DEBUG_GLOBAL,
+			//
+			LTI_FUNCTION,
 			// Stuff from file image.
 			IMPORT,
 			EXPORT,
@@ -116,7 +118,6 @@ class Name
 	private:
 		std::string _name;
 		eType _type = eType::INVALID;
-		bool _inLti = false;
 };
 
 /**

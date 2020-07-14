@@ -89,7 +89,10 @@ Name::Name(Config* c, const std::string& name, eType type, Lti* lti) :
 
 	fixPostfix();
 
-	_inLti = lti->getLtiFunction(_name) != nullptr;
+	if (lti && _type > eType::LTI_FUNCTION && lti->getLtiFunction(_name))
+	{
+		_type = eType::LTI_FUNCTION;
+	}
 }
 
 Name::operator std::string() const
@@ -106,33 +109,17 @@ bool Name::operator<(const Name& o) const
 {
 	if (_type == o._type)
 	{
-		// Can this even happen? Maybe it should not.
-		//
-		if (_name.empty())
-		{
-			return false;
-		}
-		else if (o._name.empty())
-		{
-			return true;
-		}
-		else if (_inLti)
-		{
-			return true;
-		}
-		else if (o._inLti)
-		{
-			return false;
-		}
 		// E.g. real case symbol table:
 		// 0x407748 @ .text
 		// 0x407748 @ _printf
 		//
-		else if (_name.front() == '.')
+		if (!_name.empty() && _name.front() == '.'
+				&& !o._name.empty() && o._name.front() != '.')
 		{
 			return false;
 		}
-		else if (o._name.front() == '.')
+		else if (!_name.empty() && _name.front() != '.'
+				&& !o._name.empty() && o._name.front() == '.')
 		{
 			return true;
 		}

@@ -19,6 +19,7 @@ add_executable(tests-bin2llvmir
 	providers/demangler_tests.cpp
 	providers/fileimage_tests.cpp
 	providers/lti_tests.cpp
+	providers/names.cpp
 	utils/ctypes2llvm_type_tests.cpp
 	utils/instcombine_tests.cpp
 	utils/ir_modifier_tests.cpp
