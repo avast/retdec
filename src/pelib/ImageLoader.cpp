@@ -1999,7 +1999,7 @@ int PeLib::ImageLoader::verifyDosHeader(PELIB_IMAGE_DOS_HEADER & hdr, std::size_
 	return ERROR_NONE;
 }
 
-int PeLib::ImageLoader::verifyDosHeader(std::istream & fs, std::streamoff fileOffset, size_t fileSize)
+int PeLib::ImageLoader::verifyDosHeader(std::istream & fs, std::streamoff fileOffset, std::size_t fileSize)
 {
 	PELIB_IMAGE_DOS_HEADER tempDosHeader;
 	int fileError;

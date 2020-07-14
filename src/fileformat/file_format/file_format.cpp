@@ -2061,8 +2061,8 @@ bool FileFormat::get8ByteOffset(std::uint64_t offset, std::uint64_t &res, retdec
 
 /**
  * Get long double from the specified offset
- * If system has 80-bit (10-std::uint8_t) long double, copy data directly.
- * Else convert 80-bit (10-std::uint8_t) long double into 64-bit (8-std::uint8_t) double.
+ * If system has 80-bit (10 - uint8_t) long double, copy data directly.
+ * Else convert 80-bit (10 - uint8_t) long double into 64-bit (8 - uint8_t) double.
  * @param offset Offset to get double from
  * @param res Result double
  * @return Status of operation (@c true if all is OK, @c false otherwise)

@@ -546,8 +546,7 @@ namespace PeLib
 
 	/**
 	* Updates pointer size for import directory
-	* @param inStream Input stream.
-	* @param peHeader A valid PE header.
+	* @param pointerSize Size of the pointer (4 or 8 bytes).
 	**/
 
 	inline void ImportDirectory::setPointerSize(std::uint32_t pointerSize)
@@ -1027,6 +1026,7 @@ namespace PeLib
 	* @param strFilename Name of the file.
 	* @param uiOffset File Offset of the new import directory.
 	* @param uiRva RVA which belongs to that file offset.
+	* @param pointerSize Size of the pointer (4 bytes or 8 bytes)
 	**/
 	inline
 	int ImportDirectory::write(const std::string& strFilename, std::uint32_t uiOffset, std::uint32_t uiRva, std::uint32_t pointerSize)

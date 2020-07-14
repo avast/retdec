@@ -1,5 +1,5 @@
 /**
- * @file src/fileinfo/file_wrapper/pe/pe_wrapper.cpp
+ * @file src/fileinfo/file_wrapper/pe_wrapper.cpp
  * @brief Methods of PeWrapper class.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */

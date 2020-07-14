@@ -1,5 +1,5 @@
 /**
- * @file src/fileinfo/file_wrapper/pe/pe_wrapper.h
+ * @file src/fileinfo/file_wrapper/pe_wrapper.h
  * @brief Definition of PeWrapper class.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */

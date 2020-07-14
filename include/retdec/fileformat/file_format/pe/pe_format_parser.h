@@ -1,5 +1,5 @@
 /**
- * @file include/retdec/fileformat/file_format/pe/pe_format_parser/pe_format_parser.h
+ * @file include/retdec/fileformat/file_format/pe/pe_format_parser.h
  * @brief Definition of PeFormatParser class.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
