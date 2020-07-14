@@ -19,8 +19,6 @@ namespace fileinfo {
  * Wrapper for parsing PE files
  */
 
-class PeLib::PeFileT;
-
 class PeWrapper : public retdec::fileformat::PeFormat
 {
 	public:

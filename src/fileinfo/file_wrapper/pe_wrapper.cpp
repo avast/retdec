@@ -124,7 +124,7 @@ std::string PeWrapper::getPeType() const
 {
 	switch(file->imageLoader().getMagic())
 	{
-		case PELIB_IMAGE_NT_OPTIONAL_HDR32_MAGIC: 
+		case PELIB_IMAGE_NT_OPTIONAL_HDR32_MAGIC:
 			return "PE32";
 		case PELIB_IMAGE_ROM_OPTIONAL_HDR_MAGIC:
 			return "ROM image";
