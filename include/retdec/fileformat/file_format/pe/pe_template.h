@@ -427,7 +427,7 @@ template<int bits> bool peDllFlags(const PeLib::PeHeaderT<bits> &peHeader, unsig
 
 /**
  * Get information about data directory
- * @param peHeader Parser of PE header
+ * @param imageLoader Reference to a valid PE image loader
  * @param relAddr Into this parameter is stored relative virtual address of directory
  * @param size Into this parameter is stored size of directory
  * @param index Index of selected directory
@@ -449,7 +449,7 @@ inline bool peDataDirectoryRelative(const ImageLoader & imageLoader, unsigned lo
 
 /**
  * Get information about data directory
- * @param peHeader Parser of PE header
+ * @param imageLoader Reference to a valid PE image loader
  * @param absAddr Into this parameter is stored absolute virtual address of directory
  * @param size Into this parameter is stored size of directory
  * @param index Index of selected directory

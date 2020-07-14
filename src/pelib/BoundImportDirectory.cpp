@@ -77,6 +77,13 @@ namespace PeLib
 		return static_cast<unsigned int>(m_vIbd.size());
 	}
 
+	/**
+	* Searches for the first instance of a module with the given modulename.
+	* @param inpBuffer Reference to the input buffer
+	* @param data source data
+	* @param dwSize length of the source data
+	* @return ERROR_NONE if success, otherwise an error code.
+	**/
 	int BoundImportDirectory::read(InputBuffer& inpBuffer, unsigned char* data, unsigned int dwSize)
 	{
 		std::vector<PELIB_IMAGE_BOUND_DIRECTORY> currentDirectory;
@@ -158,8 +165,7 @@ namespace PeLib
 
 	/**
 	* Reads the BoundImport directory from a PE file.
-	* @param inStream Input stream.
-	* @param peHeader A valid PE header which is necessary because some RVA calculations need to be done.
+	* @param imageLoader Reference to the image loader
 	**/
 	int BoundImportDirectory::read(ImageLoader & imageLoader)
 	{

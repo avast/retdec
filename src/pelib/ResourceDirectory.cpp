@@ -305,7 +305,7 @@ namespace PeLib
 	* @param imageLoader An image loaded into the ImageLoader parser
 	* @param uiRsrcRva RVA of the beginning of the resource directory.
 	* @param uiOffset Offset of the resource leaf that's to be read.
-	* @param uiSizeOfImage Size of the image.
+	* @param sizeOfImage Size of the image.
 	* @param resDir Resource directory.
 	**/
 	int ResourceLeaf::read(
@@ -621,10 +621,10 @@ namespace PeLib
 
 	/**
 	* Reads the next resource node from the input file.
-	* @param imageLoader An input stream.
+	* @param imageLoader An image loaded into the ImageLoader parser
 	* @param uiRsrcRva RVA of the beginning of the resource directory.
 	* @param uiOffset Offset of the resource node that's to be read.
-	* @param uiSizeOfImage Size of the image.
+	* @param sizeOfImage Size of the image.
 	* @param resDir Resource directory.
 	**/
 	int ResourceNode::read(

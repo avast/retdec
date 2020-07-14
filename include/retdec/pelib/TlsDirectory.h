@@ -69,8 +69,7 @@ namespace PeLib
 
 	/**
 	* Reads a file's TLS directory.
-	* @param inStream Input stream.
-	* @param peHeader A valid PE header.
+	* @param imageLoader Referenve to a valid PE image loader.
 	**/
 	inline
 	int TlsDirectory::read(ImageLoader & imageLoader)
@@ -276,7 +275,7 @@ namespace PeLib
 	}
 
 	/**
-	* @param dwValue The new StartAddressOfRawData value of the TLS directory.
+	* @param value The new StartAddressOfRawData value of the TLS directory.
 	**/
 	inline
 	void TlsDirectory::setStartAddressOfRawData(std::uint64_t value)
@@ -285,7 +284,7 @@ namespace PeLib
 	}
 
 	/**
-	* @param dwValue The new EndAddressOfRawData value of the TLS directory.
+	* @param value The new EndAddressOfRawData value of the TLS directory.
 	**/
 	inline
 	void TlsDirectory::setEndAddressOfRawData(std::uint64_t value)
@@ -294,7 +293,7 @@ namespace PeLib
 	}
 
 	/**
-	* @param dwValue The new AddressOfIndex value of the TLS directory.
+	* @param value The new AddressOfIndex value of the TLS directory.
 	**/
 	inline
 	void TlsDirectory::setAddressOfIndex(std::uint64_t value)
@@ -303,7 +302,7 @@ namespace PeLib
 	}
 
 	/**
-	* @param dwValue The new AddressOfCallBacks value of the TLS directory.
+	* @param value The new AddressOfCallBacks value of the TLS directory.
 	**/
 	inline
 	void TlsDirectory::setAddressOfCallBacks(std::uint64_t value)

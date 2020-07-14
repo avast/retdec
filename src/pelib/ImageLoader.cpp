@@ -588,8 +588,8 @@ PeLib::PELIB_IMAGE_SECTION_HEADER * PeLib::ImageLoader::addSection(const char * 
 		return nullptr;
 
 	// Calculate the new RVA and file offset
-	std::uint32_t Rva = 0;
-	std::uint32_t Raw = 0;
+	uint32_t Rva = 0;
+	uint32_t Raw = 0;
 	calcNewSectionAddresses(Rva, Raw);
 
 	// Create new section
@@ -604,7 +604,7 @@ PeLib::PELIB_IMAGE_SECTION_HEADER * PeLib::ImageLoader::addSection(const char * 
 	return getSectionHeader(sections.size() - 1);
 }
 
-void PeLib::ImageLoader::calcNewSectionAddresses(uint32_t & Rva, std::uint32_t & RawOffset)
+void PeLib::ImageLoader::calcNewSectionAddresses(uint32_t & Rva, uint32_t & RawOffset)
 {
 	uint32_t NewRawOffset = optionalHeader.SizeOfHeaders;
 	uint32_t NewRva = optionalHeader.SizeOfHeaders;
@@ -793,7 +793,7 @@ PeLib::LoaderError PeLib::ImageLoader::loaderError() const
 //-----------------------------------------------------------------------------
 // Interface for loading files
 
-int PeLib::ImageLoader::Load(std::vector<uint8_t> & fileData, bool loadHeadersOnly)
+int PeLib::ImageLoader::Load(std::vector<std::uint8_t> & fileData, bool loadHeadersOnly)
 {
 	int fileError;
 
@@ -1987,7 +1987,7 @@ int PeLib::ImageLoader::captureImageSections(std::vector<uint8_t> & fileData)
 	return ERROR_NONE;
 }
 
-int PeLib::ImageLoader::verifyDosHeader(PELIB_IMAGE_DOS_HEADER & hdr, size_t fileSize)
+int PeLib::ImageLoader::verifyDosHeader(PELIB_IMAGE_DOS_HEADER & hdr, std::size_t fileSize)
 {
 	if(hdr.e_magic != PELIB_IMAGE_DOS_SIGNATURE)
 		return ERROR_INVALID_FILE;

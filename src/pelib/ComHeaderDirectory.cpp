@@ -17,8 +17,7 @@ namespace PeLib
 {
 	/**
 	* Reads a file's COM+ descriptor.
-	* @param inStream Input stream.
-	* @param peHeader A valid PE header which is necessary because some RVA calculations need to be done.
+	* @param imageLoader Reference to the valid PE image loader
 	**/
 
 	int ComHeaderDirectory::read(ImageLoader & imageLoader)

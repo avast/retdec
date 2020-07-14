@@ -199,7 +199,7 @@ namespace PeLib
 	 * OriginalFirstThunk is valid if it has value higher than file alignment and its RVA can be translated to some offset in the file.
 	 *
 	 * @param impDesc Import descriptor.
-	 * @param peHeader PE header.
+	 * @param imageLoader Reference to image loader.
 	 *
 	 * @return True if valid, otherwise false.
 	 */
@@ -558,8 +558,7 @@ namespace PeLib
 	/**
 	* Read an import directory from a file.
 	* \todo Check if streams failed.
-	* @param inStream Input stream.
-	* @param peHeader A valid PE header.
+	* @param imageLoader A valid PE loader.
 	**/
 	inline
 	int ImportDirectory::read(ImageLoader & imageLoader)

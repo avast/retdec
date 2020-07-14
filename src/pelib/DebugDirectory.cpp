@@ -17,7 +17,7 @@ namespace PeLib
 {
 	/**
 	* @param inStream Input stream.
-	* @param peHeader A valid PE header which is necessary because some RVA calculations need to be done.
+	* @param imageLoader A valid image loader reference which is necessary because some RVA calculations need to be done.
 	**/
 
 	int DebugDirectory::read(std::istream& inStream, ImageLoader & imageLoader)
