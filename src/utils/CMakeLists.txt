@@ -6,7 +6,6 @@ add_library(utils STATIC
 	conversion.cpp
 	dynamic_buffer.cpp
 	file_io.cpp
-	filesystem_path.cpp
 	math.cpp
 	memory.cpp
 	string.cpp
@@ -27,6 +26,18 @@ target_link_libraries(utils
 	PRIVATE
 		retdec::deps::whereami
 )
+
+# We may need to link filesystem library manually.
+find_library(STD_CPP_FS stdc++fs)
+if (STD_CPP_FS)
+	message("-- Linking with ${STD_CPP_FS} library")
+	target_link_libraries(utils
+		PRIVATE
+			stdc++fs
+	)
+else()
+	message("-- Library stdc++fs NOT FOUND -> linking utils without stdc++fs library")
+endif()
 
 # Disable the min() and max() macros to prevent errors when using e.g.
 # std::numeric_limits<...>::max()

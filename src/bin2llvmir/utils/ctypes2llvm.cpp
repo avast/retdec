@@ -2,6 +2,7 @@
 #include "retdec/bin2llvmir/providers/lti.h"
 #include "retdec/bin2llvmir/utils/ctypes2llvm.h"
 #include "retdec/ctypes/ctypes.h"
+#include "retdec/utils/string.h"
 
 using namespace llvm;
 

@@ -6,7 +6,6 @@
 
 #include "retdec/bin2llvmir/optimizations/param_return/collector/pic32.h"
 
-using namespace retdec::utils;
 using namespace llvm;
 
 namespace retdec {

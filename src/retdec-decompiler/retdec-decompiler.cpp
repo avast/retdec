@@ -45,7 +45,7 @@
 #include "retdec/macho-extractor/break_fat.h"
 #include "retdec/unpackertool/unpackertool.h"
 #include "retdec/utils/binary_path.h"
-#include "retdec/utils/filesystem_path.h"
+#include "retdec/utils/filesystem.h"
 #include "retdec/utils/string.h"
 #include "retdec/utils/memory.h"
 
@@ -596,12 +596,11 @@ std::string ProgramOptions::checkFile(
 		const std::string& path,
 		const std::string& errorMsgPrefix)
 {
-	retdec::utils::FilesystemPath fs(path);
-	if (!fs.exists() || !fs.isFile())
+	if (!fs::is_regular_file(path))
 	{
 		throw std::runtime_error(errorMsgPrefix + " bad file: " + path);
 	}
-	return fs.getAbsolutePath();
+	return fs::absolute(path);
 }
 
 void ProgramOptions::printHelpAndDie()
@@ -952,14 +951,14 @@ int main(int argc, char **argv)
 	//
 	retdec::config::Config config;
 	auto binpath = retdec::utils::getThisBinaryDirectoryPath();
-	retdec::utils::FilesystemPath configPath(binpath.getParentPath());
+	fs::path configPath(fs::canonical(binpath).parent_path());
 	configPath.append("share");
 	configPath.append("retdec");
 	configPath.append("decompiler-config.json");
-	if (configPath.exists())
+	if (fs::exists(configPath))
 	{
-		config = retdec::config::Config::fromFile(configPath.getPath());
-		config.parameters.fixRelativePaths(configPath.getParentPath());
+		config = retdec::config::Config::fromFile(configPath.string());
+		config.parameters.fixRelativePaths(fs::canonical(configPath).parent_path());
 	}
 
 	// Parse program arguments.

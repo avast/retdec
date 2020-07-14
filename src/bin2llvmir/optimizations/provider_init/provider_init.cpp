@@ -21,6 +21,7 @@
 #include "retdec/bin2llvmir/providers/lti.h"
 #include "retdec/bin2llvmir/providers/names.h"
 #include "retdec/cpdetect/cpdetect.h"
+#include "retdec/utils/string.h"
 #include "retdec/yaracpp/yara_detector.h"
 
 using namespace llvm;

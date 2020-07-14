@@ -6,6 +6,7 @@
 
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_distribution_getter/elf_core_map_plain_getter.h"
 #include "retdec/utils/conversion.h"
+#include "retdec/utils/string.h"
 
 using namespace retdec::utils;
 using namespace retdec::fileformat;

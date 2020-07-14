@@ -47,12 +47,12 @@ namespace utils {
  *
  * @return absolute path
  */
-FilesystemPath getThisBinaryPath()
+fs::path getThisBinaryPath()
 {
 	std::size_t dirPathSize = 0;
 	std::string path = getStringThisBinaryPath(dirPathSize);
 
-	return FilesystemPath(path);
+	return path;
 }
 
 /**
@@ -60,7 +60,7 @@ FilesystemPath getThisBinaryPath()
  *
  * @return absolute path
  */
-FilesystemPath getThisBinaryDirectoryPath()
+fs::path getThisBinaryDirectoryPath()
 {
 	std::size_t dirPathSize = 0;
 	std::string path = getStringThisBinaryPath(dirPathSize);
@@ -70,7 +70,7 @@ FilesystemPath getThisBinaryDirectoryPath()
 		path.erase(dirPathSize + 1);
 	}
 
-	return FilesystemPath(path);
+	return path;
 }
 
 } // namespace utils

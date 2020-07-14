@@ -12,7 +12,7 @@
 #include "retdec/loader/loader/image.h"
 #include "retdec/stacofin/stacofin.h"
 #include "retdec/utils/string.h"
-#include "retdec/utils/filesystem_path.h"
+#include "retdec/utils/filesystem.h"
 #include "retdec/yaracpp/yara_detector.h"
 
 /**
@@ -77,25 +77,25 @@ void selectSignaturesWithNames(
 }
 
 void getAllSignatureFiles(
-		const retdec::utils::FilesystemPath& fp,
+		const fs::path& fp,
 		std::set<std::string>& signFiles,
 		const std::set<std::string>& suffixes = {".yar", ".yara", ".yarac"})
 {
-	if (fp.isFile()
+	if (fs::is_regular_file(fp)
 			&& std::any_of(suffixes.begin(), suffixes.end(),
 			[&] (const auto &suffix)
 			{
-				return endsWith(fp.getPath(), suffix);
+				return endsWith(fp.string(), suffix);
 			}
 		))
 	{
-		signFiles.insert(fp.getAbsolutePath());
+		signFiles.insert(fs::absolute(fp));
 	}
-	else if (fp.isDirectory())
+	else if (fs::is_directory(fp))
 	{
-		for (auto* s : fp)
+		for (auto& s : fs::directory_iterator(fp))
 		{
-			getAllSignatureFiles(*s, signFiles);
+			getAllSignatureFiles(s, signFiles);
 		}
 	}
 }
@@ -109,7 +109,7 @@ std::set<std::string> selectSignaturePaths(
 	std::set<std::string> sigs;
 	for (auto& p : c.parameters.userStaticSignaturePaths)
 	{
-		getAllSignatureFiles(utils::FilesystemPath(p), sigs);
+		getAllSignatureFiles(fs::path(p), sigs);
 	}
 
 	// Select only specific signatures from retdec's database.
@@ -117,7 +117,7 @@ std::set<std::string> selectSignaturePaths(
 	std::set<std::string> allSigs;
 	for (auto& p : c.parameters.staticSignaturePaths)
 	{
-		getAllSignatureFiles(utils::FilesystemPath(p), allSigs);
+		getAllSignatureFiles(fs::path(p), allSigs);
 	}
 
 	std::string archSize = std::to_string(image.getWordLength());

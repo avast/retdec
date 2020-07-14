@@ -15,7 +15,7 @@
 #include <llvm/IR/Module.h>
 
 #include "retdec/common/address.h"
-#include "retdec/utils/filesystem_path.h"
+#include "retdec/utils/filesystem.h"
 
 namespace retdec {
 namespace bin2llvmir {
@@ -169,7 +169,7 @@ class Config
 		// Other
 		//
 		llvm::GlobalVariable* getGlobalDummy();
-		utils::FilesystemPath getOutputDirectory();
+		fs::path getOutputDirectory();
 		bool getCryptoPattern(
 				retdec::common::Address addr,
 				std::string& name,

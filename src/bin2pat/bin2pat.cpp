@@ -10,7 +10,7 @@
 #include <ostream>
 #include <vector>
 
-#include "retdec/utils/filesystem_path.h"
+#include "retdec/utils/filesystem.h"
 #include "retdec/patterngen/pattern_extractor/pattern_extractor.h"
 #include "yaramod/yaramod.h"
 
@@ -21,7 +21,6 @@
  * Output is set of yara rules (http://yara.readthedocs.io/en/v3.5.0/).
  */
 
-using namespace retdec::utils;
 using namespace retdec::patterngen;
 
 void printUsage(
@@ -102,7 +101,7 @@ void processArgs(
 			// Read LIST_FILE until EOF
 			while (std::getline(inputObjects, object)) {
 				// Ensure file exists before proceeding
-				if(!FilesystemPath(object).isFile()) {
+				if(!fs::is_regular_file(object)) {
 					printErrorAndDie("argument '" + args[i]
 						+ "' contains the filename '" + object
 						+ "' which is not a valid file");
@@ -115,7 +114,7 @@ void processArgs(
 		}
 		else {
 			// Input file. Check file on system level.
-			if(!FilesystemPath(args[i]).isFile()) {
+			if(!fs::is_regular_file(args[i])) {
 				printErrorAndDie("argument '" + args[i]
 					+ "' is neither valid file nor argument");
 				return;

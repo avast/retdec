@@ -54,7 +54,7 @@ std::string llvmObjToString(const llvm::Module* t)
 
 void dumpModuleToFile(
 		const llvm::Module* m,
-		utils::FilesystemPath dirName,
+		fs::path dirName,
 		const std::string& fileName)
 {
 	static unsigned cntr = 0;
@@ -64,7 +64,7 @@ void dumpModuleToFile(
 
 	dirName.append(n);
 
-	std::ofstream myfile(dirName.getPath());
+	std::ofstream myfile(dirName.string());
 	myfile << llvmObjToString(m) << std::endl;
 }
 
@@ -327,12 +327,12 @@ void dumpControFlowToJsonFunction(
 
 void dumpControFlowToJson(
 		llvm::Module* m,
-		utils::FilesystemPath dirName,
+		fs::path dirName,
 		const std::string& fileName)
 {
 	dirName.append(fileName);
 
-	std::ofstream json(dirName.getPath());
+	std::ofstream json(dirName.string());
 	if (!json.is_open())
 	{
 		return;
