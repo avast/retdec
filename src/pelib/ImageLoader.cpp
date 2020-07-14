@@ -482,6 +482,10 @@ uint32_t PeLib::ImageLoader::getFieldOffset(PELIB_MEMBER_TYPE field) const
 			fieldOffset = (imageBitability == 64) ? offsetof(PELIB_IMAGE_OPTIONAL_HEADER64, DataDirectory) : offsetof(PELIB_IMAGE_OPTIONAL_HEADER32, DataDirectory);
 			return sizeof(PELIB_IMAGE_NT_SIGNATURE) + sizeof(PELIB_IMAGE_FILE_HEADER) + fieldOffset + PELIB_IMAGE_DIRECTORY_ENTRY_RESOURCE * sizeof(PELIB_IMAGE_DATA_DIRECTORY);
 
+		case OPTHDR_DataDirectory_TLS_Rva:
+			fieldOffset = (imageBitability == 64) ? offsetof(PELIB_IMAGE_OPTIONAL_HEADER64, DataDirectory) : offsetof(PELIB_IMAGE_OPTIONAL_HEADER32, DataDirectory);
+			return sizeof(PELIB_IMAGE_NT_SIGNATURE) + sizeof(PELIB_IMAGE_FILE_HEADER) + fieldOffset + PELIB_IMAGE_DIRECTORY_ENTRY_TLS * sizeof(PELIB_IMAGE_DATA_DIRECTORY);
+
 		case OPTHDR_DataDirectory_CONFIG_Rva:
 			fieldOffset = (imageBitability == 64) ? offsetof(PELIB_IMAGE_OPTIONAL_HEADER64, DataDirectory) : offsetof(PELIB_IMAGE_OPTIONAL_HEADER32, DataDirectory);
 			return sizeof(PELIB_IMAGE_NT_SIGNATURE) + sizeof(PELIB_IMAGE_FILE_HEADER) + fieldOffset + PELIB_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG * sizeof(PELIB_IMAGE_DATA_DIRECTORY);
@@ -517,6 +521,20 @@ uint32_t PeLib::ImageLoader::getImageProtection(uint32_t sectionCharacteristics)
 		Index |= 8;
 
 	return ImageProtectionArray[Index];
+}
+
+size_t PeLib::ImageLoader::getSectionIndexByRva(uint32_t Rva) const
+{
+	std::size_t sectionIndex = 0;
+
+	for(const auto & section : sections)
+	{
+		if(section.VirtualAddress <= Rva && Rva < AlignToSize(section.VirtualAddress + section.VirtualSize, optionalHeader.SectionAlignment))
+			return sectionIndex;
+		sectionIndex++;
+	}
+
+	return SIZE_MAX;
 }
 
 //-----------------------------------------------------------------------------

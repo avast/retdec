@@ -794,10 +794,11 @@ template <int bits> void PeUpxStub<bits>::fixRelocations(DynamicBuffer& unpacked
 template <int bits> void PeUpxStub<bits>::fixTls(const DynamicBuffer& originalHeader)
 {
 	PeLib::ImageLoader & imageLoader = _newPeFile->imageLoader();
+	std::uint32_t tlsDirOffset = imageLoader.getFieldOffset(PeLib::OPTHDR_DataDirectory_TLS_Rva);
 
 	// Read original TLS data directory
-	std::uint32_t tlsRva = originalHeader.read<std::uint32_t>(PeUpxStubTraits<bits>::TlsDirectoryRvaOffset);
-	std::uint32_t tlsSize = originalHeader.read<std::uint32_t>(PeUpxStubTraits<bits>::TlsDirectorySizeOffset);
+	std::uint32_t tlsRva = originalHeader.read<std::uint32_t>(tlsDirOffset);
+	std::uint32_t tlsSize = originalHeader.read<std::uint32_t>(tlsDirOffset + 4);
 
 	imageLoader.setDataDirectory(PeLib::PELIB_IMAGE_DIRECTORY_ENTRY_TLS, tlsRva, tlsSize);
 

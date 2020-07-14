@@ -43,6 +43,7 @@ enum PELIB_MEMBER_TYPE : std::uint32_t
 	OPTHDR_DataDirectory,
 	OPTHDR_DataDirectory_EXPORT_Rva,
 	OPTHDR_DataDirectory_RSRC_Rva,
+	OPTHDR_DataDirectory_TLS_Rva,
 	OPTHDR_DataDirectory_CONFIG_Rva,
 };
 
@@ -167,6 +168,7 @@ class ImageLoader
 	std::uint32_t getFileOffsetFromRva(std::uint32_t rva) const;
 	std::uint32_t getRealPointerToRawData(std::size_t sectionIndex) const;
 	std::uint32_t getImageProtection(std::uint32_t characteristics) const;
+	std::size_t   getSectionIndexByRva(std::uint32_t Rva) const;
 
 	std::uint32_t getFieldOffset(PELIB_MEMBER_TYPE field) const;
 

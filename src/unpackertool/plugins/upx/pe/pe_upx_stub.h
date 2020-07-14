@@ -59,59 +59,12 @@ private:
 };
 
 /**
- * Base PE UPX traits structure.
- */
-template <int /*bits*/> struct PeUpxStubTraits {};
-
-/**
- * Specialized traits for PE32.
- */
-template <> struct PeUpxStubTraits<32>
-{
-	using AddressType = std::uint32_t; ///< Type with default word size.
-	using PeLibFileType = PeLib::PeFileT;
-
-	static const std::uint16_t HeaderMagic = PeLib::PELIB_IMAGE_NT_OPTIONAL_HDR32_MAGIC; ///< PE magic header.
-	static const std::uint32_t NumberOfRvaAndSizesOffset = 0x74; ///< Offset in PE header to directories count.
-	static const std::uint32_t TlsDirectoryRvaOffset = 0xC0; ///< Offset to TLS RVA.
-	static const std::uint32_t TlsDirectorySizeOffset = 0xC4; ///< Offset to TLS size.
-	static const std::uint32_t ExportsDirectoryRvaOffset = 0x78; ///< Offset to exports RVA.
-	static const std::uint32_t ExportsDirectorySizeOffset = 0x7C; ///< Offset to exports size.
-	static const std::uint32_t LoadConfigDirectoryRvaOffset = 0xC8; ///< Offset to load configuration RVA.
-	static const std::uint32_t LoadConfigDirectorySizeOffset = 0xCC; ///< Offset to load configuration size.
-	static const std::uint32_t RsrcsDirectoryRvaOffset = 0x88; ///< Offset to resources RVA.
-	static const std::uint32_t RsrcsDirectorySizeOffset = 0x8C; ///< Offset to resources size.
-};
-
-/**
- * Specialized traits for PE32+.
- */
-template <> struct PeUpxStubTraits<64>
-{
-	using AddressType = std::uint32_t; ///< Type with default word size.
-	using PeLibFileType = PeLib::PeFileT; ///< Type of PE file.
-
-	static const std::uint16_t HeaderMagic = PeLib::PELIB_IMAGE_NT_OPTIONAL_HDR64_MAGIC; ///< PE magic header.
-	static const std::uint32_t NumberOfRvaAndSizesOffset = 0x84; ///< Offset in PE header to directories count.
-	static const std::uint32_t TlsDirectoryRvaOffset = 0xD0; ///< Offset to TLS RVA.
-	static const std::uint32_t TlsDirectorySizeOffset = 0xD4; ///< Offset to TLS size.
-	static const std::uint32_t ExportsDirectoryRvaOffset = 0x88; ///< Offset to exports RVA.
-	static const std::uint32_t ExportsDirectorySizeOffset = 0x8C; ///< Offset to exports size.
-	static const std::uint32_t LoadConfigDirectoryRvaOffset = 0xD8; ///< Offset to load configuration RVA.
-	static const std::uint32_t LoadConfigDirectorySizeOffset = 0xDC; ///< Offset to load configuration size.
-	static const std::uint32_t RsrcsDirectoryRvaOffset = 0x98; ///< Offset to resources RVA.
-	static const std::uint32_t RsrcsDirectorySizeOffset = 0x9C; ///< Offset to resources size.
-};
-
-/**
  * Basic unpacking stub class for unpacking files in PE format.
  */
 template <int bits> class PeUpxStub : public UpxStub
 {
-	using AddressType = typename PeUpxStubTraits<bits>::AddressType;
-	using PeLibFileType = typename PeUpxStubTraits<bits>::PeLibFileType;
+	public:
 
-public:
 	PeUpxStub(retdec::loader::Image* inputFile, const UpxStubData* stubData, const DynamicBuffer& stubCapturedData,
 			std::unique_ptr<Decompressor> decompressor, const UpxMetadata& metadata);
 
