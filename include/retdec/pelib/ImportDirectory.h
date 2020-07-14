@@ -14,6 +14,7 @@
 #define IMPORTDIRECTORY_H
 
 #include <set>
+#include <unordered_map>
 
 #include "retdec/pelib/PeLibAux.h"
 #include "retdec/pelib/ImageLoader.h"
