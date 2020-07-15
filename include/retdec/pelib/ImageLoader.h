@@ -21,15 +21,15 @@
 namespace PeLib {
 
 //-----------------------------------------------------------------------------
-// Enum for Windows loader emulation
+// Enum for Windows build numbers
 
 enum : std::uint32_t
 {
-	LoaderModeWindowsXP = 0x51,          // Behavior equal to Windows XP
-	LoaderModeWindows7  = 0x61,          // Behavior equal to Windows 7
-	LoaderModeWindows10 = 0xA0,          // Behavior equal to Windows 10
-	WindowsVerMask = 0x0FFF,             // Mask for extracting the operating system
-	LoaderMode64BitWindows = 0x1000,     // Emulate 64-bit system
+	BuildNumberXP       = 2600,          // Behavior equal to Windows XP
+	BuildNumber7        = 7601,          // Behavior equal to Windows 7
+	BuildNumber10       = 10240,         // Behavior equal to Windows 10
+	BuildNumberMask     = 0x0FFFF,       // Mask for extracting the operating system
+	BuildNumber64Bit    = 0x10000,       // Emulate 64-bit system
 };
 
 //-----------------------------------------------------------------------------
@@ -436,7 +436,7 @@ class ImageLoader
 	PELIB_IMAGE_OPTIONAL_HEADER optionalHeader;         // 32/64-bit optional header
 	LoaderError ldrError;
 	std::uint32_t ntSignature;
-	std::uint32_t loaderMode;
+	std::uint32_t windowsBuildNumber;
 	std::uint32_t maxSectionCount;
 	std::uint32_t realNumberOfRvaAndSizes;              // Real present number of RVA and sizes
 	std::uint32_t checkSumFileOffset;                   // File offset of the image checksum

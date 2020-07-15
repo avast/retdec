@@ -51,7 +51,7 @@ uint8_t PeLib::ImageLoader::ImageProtectionArray[16] =
 //-----------------------------------------------------------------------------
 // Constructor and destructor
 
-PeLib::ImageLoader::ImageLoader(uint32_t loaderFlags)
+PeLib::ImageLoader::ImageLoader(uint32_t versionInfo)
 {
 	memset(&dosHeader, 0, sizeof(PELIB_IMAGE_DOS_HEADER));
 	memset(&fileHeader, 0, sizeof(PELIB_IMAGE_FILE_HEADER));
@@ -68,36 +68,40 @@ PeLib::ImageLoader::ImageLoader(uint32_t loaderFlags)
 	ntHeadersSizeCheck = false;
 	appContainerCheck = false;
 	maxSectionCount = 255;
-	is64BitWindows = (loaderFlags & LoaderMode64BitWindows) ? true : false;
+	is64BitWindows = (versionInfo & BuildNumber64Bit) ? true : false;
+	windowsBuildNumber = (versionInfo & BuildNumberMask);
 	headerSizeCheck = false;
 	loadArmImages = true;
 
-	// Resolve version-specific restrictions
-	switch(loaderMode = (loaderFlags & WindowsVerMask))
+	// Windows XP specific behaviors
+	if(BuildNumberXP <= windowsBuildNumber && windowsBuildNumber < BuildNumber7)
 	{
-		case LoaderModeWindowsXP:
-			ssiImageAlignment32 = PELIB_SECTOR_SIZE;
-			maxSectionCount = PE_MAX_SECTION_COUNT_XP;
-			sizeofImageMustMatch = true;
-			headerSizeCheck = true;
-			loadArmImages = false;
-			break;
+		ssiImageAlignment32 = PELIB_SECTOR_SIZE;
+		maxSectionCount = PE_MAX_SECTION_COUNT_XP;
+		sizeofImageMustMatch = true;
+		headerSizeCheck = true;
+		loadArmImages = false;
+	}
 
-		case LoaderModeWindows7:
-			ssiImageAlignment32 = 1;                        // SECTOR_SIZE when the image is loaded from network media
-			maxSectionCount = PE_MAX_SECTION_COUNT_7;
-			ntHeadersSizeCheck = true;
-			sizeofImageMustMatch = true;
-			loadArmImages = false;
-			break;
+	// Windows 7 specific behaviors
+	else if(BuildNumber7 <= windowsBuildNumber && windowsBuildNumber < BuildNumber10)
+	{
+		ssiImageAlignment32 = 1;                        // SECTOR_SIZE when the image is loaded from network media
+		maxSectionCount = PE_MAX_SECTION_COUNT_7;
+		ntHeadersSizeCheck = true;
+		sizeofImageMustMatch = true;
+		loadArmImages = false;
+	}
 
-		case LoaderModeWindows10:
-			ssiImageAlignment32 = 1;
-			maxSectionCount = PE_MAX_SECTION_COUNT_7;
-			ntHeadersSizeCheck = true;
-			appContainerCheck = true;
-			loadArmImages = true;
-			break;
+	// Windows 10 specific behaviors
+	else if(BuildNumber10 <= windowsBuildNumber)
+	{
+		sizeofImageMustMatch = (windowsBuildNumber <= 17134);
+		ssiImageAlignment32 = 1;
+		maxSectionCount = PE_MAX_SECTION_COUNT_7;
+		ntHeadersSizeCheck = true;
+		appContainerCheck = true;
+		loadArmImages = true;
 	}
 }
 
@@ -675,7 +679,7 @@ int PeLib::ImageLoader::splitSection(size_t sectionIndex, const std::string & pr
 
 	// Move every section located after the inserted section by one position
 	sections.resize(sections.size() + 1);
-	for(int i = sections.size() - 2; i >= sectionIndex + 1; --i)
+	for(size_t i = sections.size() - 2; i >= sectionIndex + 1; --i)
 		sections[i + 1] = sections[i];
 
 	uint32_t originalSize = getSectionHeader(sectionIndex)->SizeOfRawData;
@@ -793,7 +797,7 @@ PeLib::LoaderError PeLib::ImageLoader::loaderError() const
 //-----------------------------------------------------------------------------
 // Interface for loading files
 
-int PeLib::ImageLoader::Load(std::vector<std::uint8_t> & fileData, bool loadHeadersOnly)
+int PeLib::ImageLoader::Load(std::vector<uint8_t> & fileData, bool loadHeadersOnly)
 {
 	int fileError;
 
@@ -1081,7 +1085,7 @@ void PeLib::ImageLoader::processSectionHeader(PELIB_IMAGE_SECTION_HEADER * pSect
 {
 	// Note: Retdec's regression tests don't like it, because they require section headers to have original data
 	// Also signature verification stops working if we modify the original data
-	if(loaderMode != 0)
+	if(windowsBuildNumber != 0)
 	{
 		// Fix the section header. Note that this will modify the data in the on-disk version
 		// of the image. Any section that will become mapped to this section header
@@ -1987,7 +1991,7 @@ int PeLib::ImageLoader::captureImageSections(std::vector<uint8_t> & fileData)
 	return ERROR_NONE;
 }
 
-int PeLib::ImageLoader::verifyDosHeader(PELIB_IMAGE_DOS_HEADER & hdr, std::size_t fileSize)
+int PeLib::ImageLoader::verifyDosHeader(PELIB_IMAGE_DOS_HEADER & hdr, size_t fileSize)
 {
 	if(hdr.e_magic != PELIB_IMAGE_DOS_SIGNATURE)
 		return ERROR_INVALID_FILE;
@@ -1999,7 +2003,7 @@ int PeLib::ImageLoader::verifyDosHeader(PELIB_IMAGE_DOS_HEADER & hdr, std::size_
 	return ERROR_NONE;
 }
 
-int PeLib::ImageLoader::verifyDosHeader(std::istream & fs, std::streamoff fileOffset, std::size_t fileSize)
+int PeLib::ImageLoader::verifyDosHeader(std::istream & fs, std::streamoff fileOffset, size_t fileSize)
 {
 	PELIB_IMAGE_DOS_HEADER tempDosHeader;
 	int fileError;
