@@ -73,35 +73,30 @@ PeLib::ImageLoader::ImageLoader(uint32_t versionInfo)
 	headerSizeCheck = false;
 	loadArmImages = true;
 
-	// Windows XP specific behaviors
-	if(BuildNumberXP <= windowsBuildNumber && windowsBuildNumber < BuildNumberVista)
+	// If the caller specified a Windows build, then we configure version-specific behavior
+	if(windowsBuildNumber != 0)
 	{
-		ssiImageAlignment32 = PELIB_SECTOR_SIZE;
-		maxSectionCount = PE_MAX_SECTION_COUNT_XP;
-		sizeofImageMustMatch = true;
-		headerSizeCheck = true;
-		loadArmImages = false;
-	}
+		// Single-section images are aligned to zector in Windows XP
+		// Note that Windows 8-10 do this somewhat randomly; the same image is mapped differently when in different folders
+		ssiImageAlignment32 = (BuildNumberXP <= windowsBuildNumber && windowsBuildNumber < BuildNumberVista) ? PELIB_SECTOR_SIZE : 1;
 
-	// Windows 7 specific behaviors
-	else if(BuildNumberVista <= windowsBuildNumber && windowsBuildNumber < BuildNumber10)
-	{
-		ssiImageAlignment32 = 1;                        // SECTOR_SIZE when the image is loaded from network media
-		maxSectionCount = PE_MAX_SECTION_COUNT_7;
-		ntHeadersSizeCheck = true;
-		sizeofImageMustMatch = true;
-		loadArmImages = false;
-	}
+		// Max section count is smaller in Windows XP
+		maxSectionCount = (BuildNumberXP <= windowsBuildNumber && windowsBuildNumber < BuildNumberVista) ? PE_MAX_SECTION_COUNT_XP : PE_MAX_SECTION_COUNT_7;
 
-	// Windows 10 specific behaviors
-	else if(BuildNumber10 <= windowsBuildNumber)
-	{
+		// Weird check in Windows XP: See checkForSectionTablesWithinHeader
+		headerSizeCheck = (BuildNumberXP <= windowsBuildNumber && windowsBuildNumber < BuildNumberVista);
+
+		// Beginning with Windows Vista, the file size must be >= sizeof(IMAGE_NT_HEADERS)
+		ntHeadersSizeCheck = (BuildNumberVista <= windowsBuildNumber);
+
+		// Beginning with Windows 8, ARM images can also be loader
+		loadArmImages = (windowsBuildNumber >= BuildNumber8);
+
+		// Windows 10 perform check for bad app container apps
+		appContainerCheck = (windowsBuildNumber >= BuildNumber10);
+
+		// After build 17134, SizeOfImage can also be greater than virtual end of the last section
 		sizeofImageMustMatch = (windowsBuildNumber <= 17134);
-		ssiImageAlignment32 = 1;
-		maxSectionCount = PE_MAX_SECTION_COUNT_7;
-		ntHeadersSizeCheck = true;
-		appContainerCheck = true;
-		loadArmImages = true;
 	}
 }
 
@@ -1725,6 +1720,10 @@ int PeLib::ImageLoader::captureSectionHeaders(std::vector<uint8_t> & fileData)
 	uint8_t * filePtr;
 	uint8_t * fileEnd = fileBegin + fileData.size();
 	bool bRawDataBeyondEOF = false;
+
+	// If there are no sections, then we're done
+	if(fileHeader.NumberOfSections == 0)
+		return ERROR_NONE;
 
 	// Check whether the sections are within the file
 	filePtr = fileBegin + dosHeader.e_lfanew + sizeof(uint32_t) + sizeof(PELIB_IMAGE_FILE_HEADER) + fileHeader.SizeOfOptionalHeader;
