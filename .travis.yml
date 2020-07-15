@@ -49,6 +49,7 @@ script:
   # We use "-O0" to speed up the build.
   # "-O0" causes segfaults in LLVM if we do not use "-DNDEBUG" as well.
   - cmake -DCMAKE_CXX_FLAGS_RELEASE="-O0 -DNDEBUG" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$(pwd)/install" -DRETDEC_COMPILE_YARA=OFF ..
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then cmake -DCMAKE_LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/7/ .. ; fi
   - time make install -j $NPROC
   # Check that install is movable and that it does not need the build directory.
   - mv install ../retdec-install
