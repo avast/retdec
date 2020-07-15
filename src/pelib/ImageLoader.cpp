@@ -74,7 +74,7 @@ PeLib::ImageLoader::ImageLoader(uint32_t versionInfo)
 	loadArmImages = true;
 
 	// Windows XP specific behaviors
-	if(BuildNumberXP <= windowsBuildNumber && windowsBuildNumber < BuildNumber7)
+	if(BuildNumberXP <= windowsBuildNumber && windowsBuildNumber < BuildNumberVista)
 	{
 		ssiImageAlignment32 = PELIB_SECTOR_SIZE;
 		maxSectionCount = PE_MAX_SECTION_COUNT_XP;
@@ -84,7 +84,7 @@ PeLib::ImageLoader::ImageLoader(uint32_t versionInfo)
 	}
 
 	// Windows 7 specific behaviors
-	else if(BuildNumber7 <= windowsBuildNumber && windowsBuildNumber < BuildNumber10)
+	else if(BuildNumberVista <= windowsBuildNumber && windowsBuildNumber < BuildNumber10)
 	{
 		ssiImageAlignment32 = 1;                        // SECTOR_SIZE when the image is loaded from network media
 		maxSectionCount = PE_MAX_SECTION_COUNT_7;
@@ -529,7 +529,7 @@ uint32_t PeLib::ImageLoader::getImageProtection(uint32_t sectionCharacteristics)
 
 size_t PeLib::ImageLoader::getSectionIndexByRva(uint32_t Rva) const
 {
-	std::size_t sectionIndex = 0;
+	size_t sectionIndex = 0;
 
 	for(const auto & section : sections)
 	{
