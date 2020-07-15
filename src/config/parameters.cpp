@@ -434,7 +434,7 @@ void fixPath(std::string& path, fs::path root)
 	fs::path p(path);
 	if (p.is_relative())
 	{
-		path = root / path;
+		path = (root / path).string();
 	}
 }
 

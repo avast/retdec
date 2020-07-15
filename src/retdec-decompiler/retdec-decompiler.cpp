@@ -600,7 +600,7 @@ std::string ProgramOptions::checkFile(
 	{
 		throw std::runtime_error(errorMsgPrefix + " bad file: " + path);
 	}
-	return fs::absolute(path);
+	return fs::absolute(path).string();
 }
 
 void ProgramOptions::printHelpAndDie()
@@ -958,7 +958,7 @@ int main(int argc, char **argv)
 	if (fs::exists(configPath))
 	{
 		config = retdec::config::Config::fromFile(configPath.string());
-		config.parameters.fixRelativePaths(fs::canonical(configPath).parent_path());
+		config.parameters.fixRelativePaths(fs::canonical(configPath).parent_path().string());
 	}
 
 	// Parse program arguments.

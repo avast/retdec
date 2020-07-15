@@ -89,7 +89,7 @@ void getAllSignatureFiles(
 			}
 		))
 	{
-		signFiles.insert(fs::absolute(fp));
+		signFiles.insert(fs::absolute(fp).string());
 	}
 	else if (fs::is_directory(fp))
 	{
