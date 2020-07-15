@@ -26,7 +26,8 @@ namespace PeLib {
 enum : std::uint32_t
 {
 	BuildNumberXP       = 2600,          // Behavior equal to Windows XP
-	BuildNumber7        = 7601,          // Behavior equal to Windows 7
+	BuildNumberVista    = 6000,          // Behavior equal to Windows Vista (SP0 = 6000, SP1 = 6001, SP2 = 6002)
+	BuildNumber7        = 7600,          // Behavior equal to Windows 7 (SP0 = 7600, SP1 = 7601)
 	BuildNumber10       = 10240,         // Behavior equal to Windows 10
 	BuildNumberMask     = 0x0FFFF,       // Mask for extracting the operating system
 	BuildNumber64Bit    = 0x10000,       // Emulate 64-bit system
