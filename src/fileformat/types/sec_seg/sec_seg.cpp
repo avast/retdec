@@ -6,7 +6,6 @@
 
 #include <sstream>
 
-#include "retdec/crypto/crypto.h"
 #include "retdec/utils/conversion.h"
 #include "retdec/utils/string.h"
 #include "retdec/fileformat/file_format/file_format.h"
@@ -14,6 +13,7 @@
 #include "retdec/fileformat/utils/conversions.h"
 #include "retdec/fileformat/utils/file_io.h"
 #include "retdec/fileformat/utils/other.h"
+#include "retdec/fileformat/utils/crypto.h"
 
 using namespace retdec::utils;
 using namespace llvm;
@@ -27,9 +27,9 @@ namespace fileformat {
 void SecSeg::computeHashes()
 {
 	const auto *hashData = reinterpret_cast<const unsigned char*>(bytes.data());
-	crc32 = retdec::crypto::getCrc32(hashData, bytes.size());
-	md5 = retdec::crypto::getMd5(hashData, bytes.size());
-	sha256 = retdec::crypto::getSha256(hashData, bytes.size());
+	crc32 = retdec::fileformat::getCrc32(hashData, bytes.size());
+	md5 = retdec::fileformat::getMd5(hashData, bytes.size());
+	sha256 = retdec::fileformat::getSha256(hashData, bytes.size());
 }
 
 /**

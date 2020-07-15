@@ -7,7 +7,6 @@
 #ifndef RETDEC_FILEFORMAT_FILE_FORMAT_PE_PE_FORMAT_H
 #define RETDEC_FILEFORMAT_FILE_FORMAT_PE_PE_FORMAT_H
 
-#include "retdec/crypto/hash_context.h"
 #include "retdec/fileformat/file_format/file_format.h"
 #include "retdec/fileformat/file_format/pe/pe_format_parser/pe_format_parser.h"
 #include "retdec/fileformat/types/dotnet_headers/blob_stream.h"
@@ -21,6 +20,7 @@
 
 // Forward declare OpenSSL structures used in this header.
 typedef struct pkcs7_st PKCS7;
+typedef struct evp_md_st EVP_MD;
 
 namespace retdec {
 namespace fileformat {
@@ -86,7 +86,7 @@ class PeFormat : public FileFormat
 		/// @{
 		bool verifySignature(PKCS7 *p7);
 		std::vector<std::tuple<const std::uint8_t*, std::size_t>> getDigestRanges() const;
-		std::string calculateDigest(retdec::crypto::HashAlgorithm hashType) const;
+		std::string calculateDigest(const EVP_MD* algorithm) const;
 		/// @}
 
 		/// @name .NET methods

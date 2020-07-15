@@ -14,6 +14,7 @@
 
 #include <openssl/asn1.h>
 #include <openssl/x509.h>
+#include <openssl/evp.h>
 
 #include "retdec/utils/container.h"
 #include "retdec/utils/conversion.h"
@@ -28,8 +29,8 @@
 #include "retdec/fileformat/types/visual_basic/visual_basic_structures.h"
 #include "retdec/fileformat/utils/asn1.h"
 #include "retdec/fileformat/utils/conversions.h"
+#include "retdec/fileformat/utils/crypto.h"
 #include "retdec/fileformat/utils/file_io.h"
-#include "retdec/crypto/crypto.h"
 
 using namespace retdec::utils;
 using namespace PeLib;
@@ -2147,13 +2148,13 @@ bool PeFormat::verifySignature(PKCS7 *p7)
 
 	auto digestAlgoOIDStr = std::static_pointer_cast<Asn1Object>(digestAlgoOID)->getIdentifier();
 
-	retdec::crypto::HashAlgorithm algorithm;
+	const EVP_MD* algorithm = nullptr;
 	if (digestAlgoOIDStr == DigestAlgorithmOID_Sha1)
-		algorithm = retdec::crypto::HashAlgorithm::Sha1;
+		algorithm = EVP_sha1();
 	else if (digestAlgoOIDStr == DigestAlgorithmOID_Sha256)
-		algorithm = retdec::crypto::HashAlgorithm::Sha256;
+		algorithm = EVP_sha256();
 	else if (digestAlgoOIDStr == DigestAlgorithmOID_Md5)
-		algorithm = retdec::crypto::HashAlgorithm::Md5;
+		algorithm = EVP_md5();
 	else
 	{
 		EVP_cleanup();
@@ -2234,14 +2235,17 @@ std::vector<std::tuple<const std::uint8_t*, std::size_t>> PeFormat::getDigestRan
 
 /**
  * Calculates the digest using selected hash algorithm.
- * @param hashType Algorithm to use.
+ * @param algorithm Algorithm to use.
  * @return Hex string of hash.
  */
-std::string PeFormat::calculateDigest(retdec::crypto::HashAlgorithm hashType) const
+std::string PeFormat::calculateDigest(const EVP_MD* algorithm) const
 {
-	retdec::crypto::HashContext hashCtx;
-	if (!hashCtx.init(hashType))
+	EVP_MD_CTX* ctx = EVP_MD_CTX_create();
+
+	if (EVP_DigestInit(ctx, algorithm) != 1) // 1 == success
+	{
 		return {};
+	}
 
 	auto digestRanges = getDigestRanges();
 	for (const auto& range : digestRanges)
@@ -2249,11 +2253,23 @@ std::string PeFormat::calculateDigest(retdec::crypto::HashAlgorithm hashType) co
 		const std::uint8_t* data = std::get<0>(range);
 		std::size_t size = std::get<1>(range);
 
-		if (!hashCtx.addData(data, size))
+		if (EVP_DigestUpdate(ctx, data, size) != 1) // 1 == success
+		{
 			return {};
+		}
 	}
 
-	return hashCtx.getHash();
+	std::vector<std::uint8_t> hash(EVP_MD_size(algorithm));
+	if (EVP_DigestFinal(ctx, hash.data(), nullptr) != 1)
+	{
+		return {};
+	}
+
+	EVP_MD_CTX_destroy(ctx);
+
+	std::string ret;
+	retdec::utils::bytesToHexString(hash, ret);
+	return ret;
 }
 
 /**
@@ -2933,9 +2949,9 @@ void PeFormat::computeTypeRefHashes()
 		}
 	}
 
-	typeRefHashCrc32 = retdec::crypto::getCrc32(typeRefHashBytes.data(), typeRefHashBytes.size());
-	typeRefHashMd5 = retdec::crypto::getMd5(typeRefHashBytes.data(), typeRefHashBytes.size());
-	typeRefHashSha256 = retdec::crypto::getSha256(typeRefHashBytes.data(), typeRefHashBytes.size());
+	typeRefHashCrc32 = retdec::fileformat::getCrc32(typeRefHashBytes.data(), typeRefHashBytes.size());
+	typeRefHashMd5 = retdec::fileformat::getMd5(typeRefHashBytes.data(), typeRefHashBytes.size());
+	typeRefHashSha256 = retdec::fileformat::getSha256(typeRefHashBytes.data(), typeRefHashBytes.size());
 }
 
 retdec::utils::Endianness PeFormat::getEndianness() const

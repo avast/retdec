@@ -776,9 +776,6 @@ void PeHeuristics::getActiveMarkHeuristics()
 void PeHeuristics::getRLPackHeuristics()
 {
 	if (search.exactComparison(
-			"B800000000600BC07458E8000000005805430000008038E9750361EB35E800000000582500F0FFFF33FF66BB195A6683C33466391875120FB7503C03D0BBE944",
-			toolInfo.epOffset)
-		|| search.exactComparison(
 			"57C7C772AFB4DF8D3D5FBA581AFFCF0FACF7F20FBDFEF7C75CDC30270FBAF7330FBBF70FCFBF64A909DB85F681DFAC194648F7DF0FA3F7C7C741BC79A085F7D1",
 			toolInfo.epOffset))
 	{
@@ -940,7 +937,7 @@ void PeHeuristics::getUpxHeuristics()
 	// format: x.xx'\0'UPX!
 	const std::size_t minPos = 5, verLen = 4;
 	pos = content.find("UPX!");
-	if (pos >= minPos && pos < 0x500)
+	if (pos >= minPos && pos < 0x500 && pos < sections[0]->getOffset())
 	{
 		std::string version;
 		std::size_t num;
@@ -1981,17 +1978,13 @@ void PeHeuristics::getPeSectionHeuristics()
 	{
 		addPacker(source, strength, "LameCrypt");
 	}
-	if (lastName == ".rmnet")
-	{
-		addPacker(source, strength, "Ramnit");
-	}
 	if (firstName == ".Upack" || firstName == ".ByDwing")
 	{
 		addPacker(source, strength, "Upack");
 	}
 	if (lastName == "yC" || lastName == ".y0da" || lastName == ".yP")
 	{
-		addPacker(source, strength, "yoda's Crypter");
+		addPacker(source, strength, "yoda's Protector");
 	}
 	if (findSectionName(".petite") == 1)
 	{
@@ -2101,7 +2094,8 @@ void PeHeuristics::getPeSectionHeuristics()
 	}
 	if (noOfSections > 2)
 	{
-		if (firstName == "UPX0" && secondName == "UPX1")
+		if (firstName == "UPX0" && secondName == "UPX1"
+				&& sections[0]->getSizeInFile() == 0)
 		{
 			addPacker(source, strength, "UPX");
 		}

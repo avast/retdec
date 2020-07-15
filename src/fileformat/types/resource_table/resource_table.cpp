@@ -7,11 +7,11 @@
 #include <sstream>
 #include <iostream>
 
-#include "retdec/crypto/crypto.h"
 #include "retdec/utils/conversion.h"
 #include "retdec/utils/dynamic_buffer.h"
 #include "retdec/utils/string.h"
 #include "retdec/utils/alignment.h"
+#include "retdec/fileformat/utils/crypto.h"
 #include "retdec/fileformat/utils/other.h"
 #include "retdec/fileformat/types/resource_table/resource_table.h"
 #include "retdec/fileformat/types/resource_table/bitmap_image.h"
@@ -411,9 +411,9 @@ void ResourceTable::computeIconHashes()
 		return;
 	}
 
-	iconHashCrc32 = retdec::crypto::getCrc32(iconHashBytes.data(), iconHashBytes.size());
-	iconHashMd5 = retdec::crypto::getMd5(iconHashBytes.data(), iconHashBytes.size());
-	iconHashSha256 = retdec::crypto::getSha256(iconHashBytes.data(), iconHashBytes.size());
+	iconHashCrc32 = getCrc32(iconHashBytes.data(), iconHashBytes.size());
+	iconHashMd5 = getMd5(iconHashBytes.data(), iconHashBytes.size());
+	iconHashSha256 = getSha256(iconHashBytes.data(), iconHashBytes.size());
 	iconPerceptualAvgHash = computePerceptualAvgHash(*priorIcon);
 }
 
