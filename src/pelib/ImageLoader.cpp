@@ -797,7 +797,7 @@ PeLib::LoaderError PeLib::ImageLoader::loaderError() const
 //-----------------------------------------------------------------------------
 // Interface for loading files
 
-int PeLib::ImageLoader::Load(std::vector<uint8_t> & fileData, bool loadHeadersOnly)
+int PeLib::ImageLoader::Load(std::vector<std::uint8_t> & fileData, bool loadHeadersOnly)
 {
 	int fileError;
 
@@ -1991,7 +1991,7 @@ int PeLib::ImageLoader::captureImageSections(std::vector<uint8_t> & fileData)
 	return ERROR_NONE;
 }
 
-int PeLib::ImageLoader::verifyDosHeader(PELIB_IMAGE_DOS_HEADER & hdr, size_t fileSize)
+int PeLib::ImageLoader::verifyDosHeader(PELIB_IMAGE_DOS_HEADER & hdr, std::size_t fileSize)
 {
 	if(hdr.e_magic != PELIB_IMAGE_DOS_SIGNATURE)
 		return ERROR_INVALID_FILE;
@@ -2003,7 +2003,7 @@ int PeLib::ImageLoader::verifyDosHeader(PELIB_IMAGE_DOS_HEADER & hdr, size_t fil
 	return ERROR_NONE;
 }
 
-int PeLib::ImageLoader::verifyDosHeader(std::istream & fs, std::streamoff fileOffset, size_t fileSize)
+int PeLib::ImageLoader::verifyDosHeader(std::istream & fs, std::streamoff fileOffset, std::size_t fileSize)
 {
 	PELIB_IMAGE_DOS_HEADER tempDosHeader;
 	int fileError;
