@@ -8388,6 +8388,28 @@ rule molebox_uv {
 		$1 at pe.entry_point
 }
 
+rule molebox_uv_01 {
+	meta:
+		tool = "P"
+		name = "MoleBox"
+		pattern = "558BEC6AFF6800000000680000000064A1000000005064892500000000"
+	strings:
+		$1 = { 55 8B EC 6A FF 68 00 00 00 00 68 00 00 00 00 64 A1 00 00 00 00 50 64 89 25 00 00 00 00 }
+	condition:
+		$1 at pe.entry_point
+}
+
+rule molebox_uv_02 {
+	meta:
+		tool = "P"
+		name = "MoleBox"
+		pattern = "584F4A554D414E4A"
+	strings:
+		$1 = { 58 4F 4A 55 4D 41 4E 4A }
+	condition:
+		$1 in (pe.overlay.offset .. pe.overlay.offset + pe.overlay.size)
+}
+
 rule molebox_20 {
 	meta:
 		tool = "P"
