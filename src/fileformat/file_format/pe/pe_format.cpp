@@ -30,7 +30,6 @@
 #include "retdec/fileformat/utils/conversions.h"
 #include "retdec/fileformat/utils/crypto.h"
 #include "retdec/fileformat/utils/file_io.h"
-#include "retdec/crypto/crypto.h"
 #include "retdec/pelib/ImageLoader.h"
 
 using namespace retdec::utils;

@@ -822,9 +822,9 @@ void ImportTable::computeHashes()
 
 	if (impHashBytes.size())
 	{
-		impHashCrc32 = retdec::crypto::getCrc32((const uint8_t *)impHashBytes.data(), impHashBytes.size());
-		impHashMd5 = retdec::crypto::getMd5((const uint8_t *)impHashBytes.data(), impHashBytes.size());
-		impHashSha256 = retdec::crypto::getSha256((const uint8_t *)impHashBytes.data(), impHashBytes.size());
+		impHashCrc32 = getCrc32((const uint8_t *)impHashBytes.data(), impHashBytes.size());
+		impHashMd5 = getMd5((const uint8_t *)impHashBytes.data(), impHashBytes.size());
+		impHashSha256 = getSha256((const uint8_t *)impHashBytes.data(), impHashBytes.size());
 	}
 }
 
