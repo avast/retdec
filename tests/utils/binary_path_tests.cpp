@@ -25,8 +25,8 @@ class ThisBinaryPathTests: public Test {};
 
 TEST_F(ThisBinaryPathTests,
 CorrectBinaryPathDetection) {
-	EXPECT_TRUE(getThisBinaryPath().exists());
-	EXPECT_TRUE(getThisBinaryPath().isFile());
+	EXPECT_TRUE(fs::exists(getThisBinaryPath()));
+	EXPECT_TRUE(fs::is_regular_file(getThisBinaryPath()));
 }
 
 //
@@ -35,8 +35,8 @@ CorrectBinaryPathDetection) {
 
 TEST_F(ThisBinaryPathTests,
 CorrectBinaryDirPathDetection) {
-	EXPECT_TRUE(getThisBinaryDirectoryPath().exists());
-	EXPECT_TRUE(getThisBinaryDirectoryPath().isDirectory());
+	EXPECT_TRUE(fs::exists(getThisBinaryDirectoryPath()));
+	EXPECT_TRUE(fs::is_directory(getThisBinaryDirectoryPath()));
 }
 
 } // namespace tests

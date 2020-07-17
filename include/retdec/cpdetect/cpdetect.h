@@ -7,7 +7,7 @@
 #ifndef RETDEC_CPDETECT_CPDETECT_H
 #define RETDEC_CPDETECT_CPDETECT_H
 
-#include "retdec/utils/filesystem_path.h"
+#include "retdec/utils/filesystem.h"
 #include "retdec/utils/non_copyable.h"
 #include "retdec/cpdetect/cptypes.h"
 #include "retdec/cpdetect/errors.h"
@@ -47,7 +47,7 @@ class CompilerDetector : private retdec::utils::NonCopyable
 
 	protected:
 		void populateInternalPaths(
-				const retdec::utils::FilesystemPath& dir,
+				const fs::path& dir,
 				const std::set<std::string>& formats,
 				const std::set<std::string>& archs);
 
@@ -62,7 +62,7 @@ class CompilerDetector : private retdec::utils::NonCopyable
 		/// internal rule database files
 		std::vector<std::string> internalPaths;
 		/// path to shared folder
-		retdec::utils::FilesystemPath pathToShared;
+		fs::path pathToShared;
 		/// external database file suffixes
 		std::set<std::string> externalSuffixes;
 

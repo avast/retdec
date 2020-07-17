@@ -7,7 +7,7 @@
 #include "retdec/utils/conversion.h"
 #include "retdec/utils/binary_path.h"
 #include "retdec/utils/equality.h"
-#include "retdec/utils/filesystem_path.h"
+#include "retdec/utils/filesystem.h"
 #include "retdec/utils/string.h"
 #include "retdec/cpdetect/cpdetect.h"
 #include "retdec/cpdetect/heuristics/elf_heuristics.h"
@@ -217,7 +217,7 @@ CompilerDetector::CompilerDetector(
 	externalSuffixes = EXTERNAL_DATABASE_SUFFIXES;
 
 	bool isFat = false;
-	retdec::utils::FilesystemPath path(pathToShared);
+	fs::path path(pathToShared);
 	path.append(YARA_RULES_PATH);
 	std::set<std::string> formats;
 	std::set<std::string> archs;
@@ -334,22 +334,22 @@ CompilerDetector::CompilerDetector(
  */
 bool CompilerDetector::getExternalDatabases()
 {
-	auto thisDir = FilesystemPath(".");
 	auto result = false;
 
 	// iterating over all files in directory
-	for (const auto *subpath : thisDir)
+	for(auto& subpathIt: fs::directory_iterator("."))
 	{
-		if (subpath->isFile()
+		auto subpath = subpathIt.path();
+		if (fs::is_regular_file(subpath)
 				&& std::any_of(externalSuffixes.begin(), externalSuffixes.end(),
 			[&] (const auto &suffix)
 			{
-				return endsWith(subpath->getPath(), suffix);
+				return endsWith(subpath.string(), suffix);
 			}
 		))
 		{
 			result = true;
-			externalDatabase.push_back(subpath->getPath());
+			externalDatabase.push_back(subpath.string());
 		}
 	}
 
@@ -441,38 +441,41 @@ void CompilerDetector::removeUnusedCompilers()
  * Expects @p dir structure like this: formats/archs/files
  */
 void CompilerDetector::populateInternalPaths(
-		const retdec::utils::FilesystemPath& dir,
+		const fs::path& dir,
 		const std::set<std::string>& formats,
 		const std::set<std::string>& archs)
 {
-	if (!dir.isDirectory())
+	if (!fs::is_directory(dir))
 	{
 		return;
 	}
 
-	for (const auto *sub1 : dir)
+	for(auto& sub1It: fs::directory_iterator(dir))
 	{
-		if (!(sub1->isDirectory() && endsWith(sub1->getPath(), formats)))
+		auto sub1 = sub1It.path();
+		if (!(fs::is_directory(sub1) && endsWith(sub1.string(), formats)))
 		{
 			continue;
 		}
 
-		for (const auto *sub2 : *sub1)
+		for(auto& sub2It: fs::directory_iterator(sub1))
 		{
-			if (!(sub2->isDirectory()
-					&& (archs.empty() || endsWith(sub2->getPath(), archs))))
+			auto sub2 = sub2It.path();
+			if (!(fs::is_directory(sub2)
+					&& (archs.empty() || endsWith(sub2.string(), archs))))
 			{
 				continue;
 			}
 
-			for (const auto *sub3 : *sub2)
+			for(auto& sub3It: fs::directory_iterator(sub2))
 			{
-				if (!(sub3->isFile() && endsWith(sub3->getPath(), externalSuffixes)))
+				auto sub3 = sub3It.path();
+				if (!(fs::is_regular_file(sub3) && endsWith(sub3.string(), externalSuffixes)))
 				{
 					continue;
 				}
 
-				internalPaths.push_back(sub3->getPath());
+				internalPaths.push_back(sub3.string());
 			}
 		}
 	}

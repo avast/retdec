@@ -8,7 +8,7 @@
 #include <iostream>
 #include <ostream>
 
-#include "retdec/utils/filesystem_path.h"
+#include "retdec/utils/filesystem.h"
 #include "pat2yara/processing.h"
 #include "yaramod/builder/yara_file_builder.h"
 #include "yaramod/builder/yara_rule_builder.h"
@@ -18,7 +18,6 @@
  * Application for further processing of raw yara rules from bin2pat.
  */
 
-using namespace retdec::utils;
 using namespace yaramod;
 
 /**
@@ -159,7 +158,7 @@ int processArguments(std::vector<std::string> &args)
 			}
 		}
 		else {
-			if (FilesystemPath(args[i]).isFile()) {
+			if (fs::is_regular_file(args[i])) {
 				options.input.push_back(args[i]);
 			}
 			else {

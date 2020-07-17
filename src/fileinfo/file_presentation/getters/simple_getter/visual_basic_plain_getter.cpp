@@ -5,6 +5,7 @@
  */
 
 #include "retdec/fileformat/utils/conversions.h"
+#include "retdec/utils/string.h"
 #include "fileinfo/file_presentation/getters/simple_getter/visual_basic_plain_getter.h"
 
 using namespace retdec::utils;

@@ -10,7 +10,7 @@
 #include "retdec/config/parameters.h"
 #include "retdec/serdes/address.h"
 #include "retdec/serdes/std.h"
-#include "retdec/utils/filesystem_path.h"
+#include "retdec/utils/filesystem.h"
 
 namespace {
 
@@ -429,17 +429,16 @@ const std::string& Parameters::getBackendVarRenamer() const
 	return _backendVarRenamer;
 }
 
-void fixPath(std::string& path, utils::FilesystemPath root)
+void fixPath(std::string& path, fs::path root)
 {
-	utils::FilesystemPath p(path);
-	if (p.isRelative())
+	fs::path p(path);
+	if (p.is_relative())
 	{
-		root.append(p.getPath());
-		path = root.getAbsolutePath();
+		path = (root / path).string();
 	}
 }
 
-void fixPaths(std::set<std::string>& set, utils::FilesystemPath root)
+void fixPaths(std::set<std::string>& set, fs::path root)
 {
 	std::set<std::string> nset;
 
@@ -454,7 +453,7 @@ void fixPaths(std::set<std::string>& set, utils::FilesystemPath root)
 
 void Parameters::fixRelativePaths(const std::string& configPath)
 {
-	utils::FilesystemPath c(configPath);
+	fs::path c(configPath);
 
 	fixPaths(userStaticSignaturePaths, c);
 	fixPaths(staticSignaturePaths, c);

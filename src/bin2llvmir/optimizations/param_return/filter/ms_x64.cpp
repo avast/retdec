@@ -8,7 +8,6 @@
 
 #include "retdec/bin2llvmir/optimizations/param_return/filter/ms_x64.h"
 
-using namespace retdec::utils;
 using namespace llvm;
 
 namespace retdec {

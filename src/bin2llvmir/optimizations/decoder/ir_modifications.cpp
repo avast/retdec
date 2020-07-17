@@ -600,7 +600,7 @@ llvm::Function* Decoder::splitFunctionOn(
 		for (auto* s : successors(&b))
 		{
 			if (b.getParent() != s->getParent()
-					&& _config->getOutputDirectory().exists())
+					&& fs::exists(_config->getOutputDirectory()))
 			{
 				dumpModuleToFile(_module, _config->getOutputDirectory());
 			}

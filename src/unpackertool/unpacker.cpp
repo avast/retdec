@@ -9,7 +9,7 @@
 #include <memory>
 
 #include "retdec/utils/conversion.h"
-#include "retdec/utils/filesystem_path.h"
+#include "retdec/utils/filesystem.h"
 #include "retdec/utils/memory.h"
 #include "retdec/cpdetect/cpdetect.h"
 #include "retdec/fileformat/fileformat.h"

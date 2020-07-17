@@ -6,6 +6,7 @@
 
 #include "retdec/utils/array.h"
 #include "retdec/utils/conversion.h"
+#include "retdec/utils/string.h"
 #include "retdec/fileformat/types/symbol_table/elf_symbol.h"
 #include "retdec/fileformat/utils/other.h"
 #include "fileinfo/file_detector/elf_detector.h"

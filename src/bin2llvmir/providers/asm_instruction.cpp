@@ -8,6 +8,7 @@
 #include <llvm/IR/InstIterator.h>
 
 #include "retdec/utils/container.h"
+#include "retdec/utils/string.h"
 #include "retdec/bin2llvmir/providers/asm_instruction.h"
 #include "retdec/bin2llvmir/providers/names.h"
 #include "retdec/bin2llvmir/utils/debug.h"

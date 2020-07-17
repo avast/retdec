@@ -7,13 +7,13 @@
 #ifndef RETDEC_UTILS_BINARY_PATH_H
 #define RETDEC_UTILS_BINARY_PATH_H
 
-#include "retdec/utils/filesystem_path.h"
+#include "retdec/utils/filesystem.h"
 
 namespace retdec {
 namespace utils {
 
-FilesystemPath getThisBinaryPath();
-FilesystemPath getThisBinaryDirectoryPath();
+fs::path getThisBinaryPath();
+fs::path getThisBinaryDirectoryPath();
 
 } // namespace utils
 } // namespace retdec

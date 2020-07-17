@@ -14,8 +14,8 @@
 #include "retdec/bin2llvmir/providers/demangler.h"
 #include "retdec/bin2llvmir/utils/debug.h"
 #include "retdec/bin2llvmir/utils/llvm.h"
+#include "retdec/utils/string.h"
 
-using namespace retdec::utils;
 using namespace llvm;
 
 namespace retdec {
@@ -456,10 +456,10 @@ llvm::GlobalVariable* Config::getGlobalDummy()
 	return _globalDummy;
 }
 
-utils::FilesystemPath Config::getOutputDirectory()
+fs::path Config::getOutputDirectory()
 {
-	FilesystemPath fsp(getConfig().parameters.getOutputFile());
-	return fsp.getParentPath();
+	fs::path fsp(getConfig().parameters.getOutputFile());
+	return fs::canonical(fsp).parent_path();
 }
 
 void Config::setLlvmCallPseudoFunction(llvm::Function* f)
