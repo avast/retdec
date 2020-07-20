@@ -430,8 +430,29 @@ static inline void addPass(
 
 }
 
+
+/**
+ * TODO: this function has exact copy located in retdec-decompiler.cpp.
+ * The reason for this is that right now creation of correct interface that
+ * would hold this function is much more time expensive than hard copy.
+ *
+ * Before merging these two methods (providing them suitable interface)
+ * each change in one of them must be reflected to both.
+ */
+void setLogsFrom(const retdec::config::Parameters& params)
+{
+	auto verbose = params.isVerboseOutput();
+
+	Logger::Ptr outLog = nullptr;
+	outLog.reset(new Logger(std::cout, verbose));
+
+	Log::set(Log::Type::Info, std::move(outLog));
+}
+
 bool decompile(retdec::config::Config& config, std::string* outString)
 {
+	setLogsFrom(config.parameters);
+
 	Log::phase("Initialization");
 	auto& passRegistry = initializeLlvmPasses();
 

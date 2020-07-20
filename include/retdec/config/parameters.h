@@ -136,7 +136,7 @@ class Parameters
 	private:
 		/// Decompilation will verbosely inform about the
 		/// decompilation process.
-		bool _verboseOutput = false;
+		bool _verboseOutput = true;
 
 		/// Keep all functions in the decompiler's output.
 		/// Otherwise, only functions reachable from main are kept.

@@ -514,6 +514,10 @@ void ProgramOptions::loadOption(std::list<std::string>::iterator& i)
 			);
 		}
 	}
+	else if (isParam(i, "-s", "--silent"))
+	{
+		params.setIsVerboseOutput(false);
+	}
 	// Input file is the only argument that does not have -x or --xyz
 	// before it. But only one input is expected.
 	else if (params.getInputFile().empty())
@@ -612,6 +616,7 @@ Mandatory arguments:
 	INPUT_FILE File to decompile.
 General arguments:
 	[-o|--output FILE] Output file (default: INPUT_FILE.c if OUTPUT_FORMAT is plain, INPUT_FILE.c.json if OUTPUT_FORMAT is json|json-human).
+	[-s|--silent] Turns off informative output of the decompilation.
 	[-f|--output-format OUTPUT_FORMAT] Output format [plain|json|json-human] (default: plain).
 	[-m|--mode MODE] Force the type of decompilation mode [bin|raw] (default: bin).
 	[-p|--pdb FILE] File with PDB debug information.
@@ -752,8 +757,31 @@ void limitMaximalMemoryIfRequested(const retdec::config::Parameters& params)
 //==============================================================================
 //
 
+/**
+ * TODO: this function is exact copy of the function located in retdec/retdec.cpp.
+ * The reason for this is that right now creation of correct interface that
+ * would hold this function is much more time expensive than hard copy.
+ *
+ * This function should be located in utils/io/log.{cpp,h}. For that it should
+ * now retdec::config::Parameters object. Inclusion of this object would be,
+ * however, only possible after linking rapidjson library to the retdec::utils.
+ * This is not wanted. Best solution would be making Parameters unaware of
+ * rapidjson.
+ */
+void setLogsFrom(const retdec::config::Parameters& params)
+{
+	auto verbose = params.isVerboseOutput();
+
+	Logger::Ptr outLog = nullptr;
+	outLog.reset(new Logger(std::cout, verbose));
+
+	Log::set(Log::Type::Info, std::move(outLog));
+}
+
 int decompile(retdec::config::Config& config, ProgramOptions& po)
 {
+	setLogsFrom(config.parameters);
+
 	// Macho-O extraction.
 	//
 	retdec::macho_extractor::BreakMachOUniversal fat(
