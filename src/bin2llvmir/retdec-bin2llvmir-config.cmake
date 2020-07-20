@@ -15,7 +15,6 @@ if(NOT TARGET retdec::bin2llvmir)
             ctypesparser
             common
             utils
-            llvm-support
             llvm
     )
 
