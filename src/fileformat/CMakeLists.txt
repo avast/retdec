@@ -103,6 +103,15 @@ target_link_libraries(fileformat
 		OpenSSL::Crypto
 )
 
+# Needed when OpenSSL is linked statically on Windows.
+if(WIN32)
+	target_link_libraries(fileformat
+		PRIVATE
+			Crypt32
+			ws2_32
+	)
+endif()
+
 set_target_properties(fileformat
 	PROPERTIES
 		OUTPUT_NAME "retdec-fileformat"
