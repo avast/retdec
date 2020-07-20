@@ -770,12 +770,23 @@ void limitMaximalMemoryIfRequested(const retdec::config::Parameters& params)
  */
 void setLogsFrom(const retdec::config::Parameters& params)
 {
+	auto logFile = params.getLogFile();
+	auto errFile = params.getErrFile();
 	auto verbose = params.isVerboseOutput();
 
 	Logger::Ptr outLog = nullptr;
-	outLog.reset(new Logger(std::cout, verbose));
+
+	outLog.reset(
+		logFile.empty()
+			? new Logger(std::cout, verbose)
+			: new FileLogger(logFile, verbose)
+	);
 
 	Log::set(Log::Type::Info, std::move(outLog));
+
+	if (!errFile.empty()) {
+		Log::set(Log::Type::Error, Logger::Ptr(new FileLogger(errFile)));
+	}
 }
 
 int decompile(retdec::config::Config& config, ProgramOptions& po)
