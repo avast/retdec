@@ -1,4 +1,8 @@
 
+if(WIN32)
+	set(OPENSSL_USE_STATIC_LIBS TRUE)
+	set(OPENSSL_MSVC_STATIC_RT TRUE)
+endif()
 find_package(OpenSSL 1.0.1 REQUIRED)
 
 add_library(fileformat STATIC
