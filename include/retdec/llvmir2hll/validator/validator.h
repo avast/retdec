@@ -47,8 +47,7 @@ protected:
 	/**
 	* @brief Function to be called when there is a validation error.
 	*/
-	template<typename... Args>
-	void validationError(const std::string &warningMessage, Args &&... args) {
+	void validationError(const std::string &warningMessage) {
 		moduleIsCorrect = false;
 		if (printMessageOnError) {
 			Log::error() << Log::Warning << warningMessage << std::endl;
