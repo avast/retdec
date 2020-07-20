@@ -43,7 +43,7 @@ void printErrorAndDie(
 	const std::string &message)
 {
 	Log::error() << Log::Error << message << ".\n";
-	printUsage(Log::error());
+	printUsage(Log::get(Log::Type::Error));
 	std::exit(1);
 }
 
@@ -62,7 +62,7 @@ void processArgs(
 
 	for (std::size_t i = 0, e = args.size(); i < e; ++i) {
 		if (args[i] == "--help" || args[i] == "-h") {
-			printUsage(Log::info());
+			printUsage(Log::get(Log::Type::Info));
 			return;
 		}
 		else if (args[i] == "-o" || args[i] == "--output") {

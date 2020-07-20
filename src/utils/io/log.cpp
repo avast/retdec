@@ -31,27 +31,24 @@ void Log::set(const Log::Type& lt, Logger::Ptr&& logger)
 	}
 }
 
-Logger& Log::info()
+Logger Log::info()
 {
 	return get(Log::Type::Info);
 }
 
-Logger& Log::phase(const std::string& phase, const Log::Action& action)
+void Log::phase(const std::string& phase, const Log::Action& action)
 {
-	return Log::info() << Log::Color::Yellow << action
-		<< phase << Log::ElapsedTime
-		<< Log::Color::Default
-		<< std::endl;
+	Log::info() << action << phase << Log::ElapsedTime << std::endl;
 }
 
-Logger& Log::debug()
+Logger Log::debug()
 {
-	return get(Log::Type::Debug);
+	return Logger(get(Log::Type::Debug));
 }
 
-Logger& Log::error()
+Logger Log::error()
 {
-	return get(Log::Type::Error);
+	return Logger(get(Log::Type::Error));
 }
 
 }

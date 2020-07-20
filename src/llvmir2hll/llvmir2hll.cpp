@@ -920,7 +920,7 @@ LlvmIr2Hll::instantiatePatternFinderRunner() const
 	if (Debug)
 	{
 		return ShPtr<llvmir2hll::PatternFinderRunner>(
-			new llvmir2hll::CLIPatternFinderRunner(Log::error()));
+			new llvmir2hll::CLIPatternFinderRunner(Log::get(Log::Type::Error)));
 	}
 	return ShPtr<llvmir2hll::PatternFinderRunner>(
 		new llvmir2hll::NoActionPatternFinderRunner()

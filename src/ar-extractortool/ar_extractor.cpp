@@ -213,7 +213,7 @@ int processArguments(
 		const auto &arg = args[i];
 
 		if (arg == "-h" || arg == "--help") {
-			printUsage(Log::info());
+			printUsage(Log::get(Log::Type::Info));
 			return 0;
 		}
 		else if (arg == "-o" || arg == "--output") {

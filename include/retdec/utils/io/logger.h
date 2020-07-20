@@ -45,6 +45,8 @@ protected:
 
 public:
 	Logger(std::ostream& stream, bool verbose = true);
+	Logger(const Logger& logger);
+	~Logger();
 
 	template <typename T>
 	Logger& operator << (const T& p);
@@ -53,16 +55,14 @@ public:
 	Logger& operator << (const Log::Action& ia);
 	Logger& operator << (const Log::Color& lc);
 
-	std::string buffer() const;
-
 private:
 	bool isRedirected(const std::ostream& stream) const;
 
 protected:
 	std::ostream& _out;
-	std::stringstream _buffer;
 
 	bool _verbose = true;
+	Log::Color _currentBrush = Log::Color::Default;
 };
 
 class FileLogger : public Logger {

@@ -26,28 +26,33 @@ Logger& get(const Type& logType);
 void set(const Type& logType, Logger::Ptr&& logger);
 
 /**
- * Shortcut for Log::get(Log::Type::Info).
- */
-Logger& info();
-
-/**
- * Shortcut for printing phase:
+ * Shortcut for Logger(Log::get(Log::Type::Info)).
  *
- * Log::info() << Log::Color::Yellow << action
- *             << phase << Log::ElapsedTime
- *             << LogL::Color::Default << std::endl;;
+ * Creates temporary copy of Info logger. This is particulart
+ * useful when changing color of the output. On destruction
+ * color is changed to default.
  */
-Logger& phase(const std::string& phase, const Log::Action& action = Log::Phase);
+Logger info();
 
 /**
- * Shortcut for Log::get(Log::Type::Debug).
+ * Shortcut for Logger(Log::get(Log::Type::Debug)).
+ *
+ * Creates temporary copy of Debug logger. This is particulart
+ * useful when changing color of the output. On destruction
+ * color is changed to default.
  */
-Logger& debug();
+Logger debug();
 
 /**
- * Shortcut for Log::get(Log::Type::Error).
+ * Shortcut for Logger(Log::get(Log::Type::Error)).
+ *
+ * Creates temporary copy of Error logger. This is particulart
+ * useful when changing color of the output. On destruction
+ * color is changed to default.
  */
-Logger& error();
+Logger error();
+
+void phase(const std::string& phaseId, const Log::Action& action = Log::Phase);
 
 };
 

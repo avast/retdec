@@ -31,19 +31,31 @@ Logger::Logger(std::ostream& stream, bool verbose):
 {
 }
 
+Logger::Logger(const Logger& from):
+	Logger(from._out, from._verbose)
+{
+	_currentBrush = from._currentBrush;
+}
+
+Logger::~Logger()
+{
+	if (_currentBrush != Log::Color::Default)
+		*this << Log::Color::Default;
+}
+
 Logger& Logger::operator << (const Log::Action& p)
 {
 	if (p == Log::Phase) {
-		return *this << "Running phase: ";
+		return *this << Log::Color::Yellow << "Running phase: ";
 	}
 	if (p == Log::SubPhase) {
-		return *this << " -> ";
+		return *this << Log::Color::Yellow << " -> ";
 	}
 	if (p == Log::SubSubPhase) {
-		return *this << "     -> ";
+		return *this << Log::Color::Yellow << "     -> ";
 	}
 	if (p == Log::SubSubPhase) {
-		return *this << "         -> ";
+		return *this << Log::Color::Yellow << "         -> ";
 	}
 	if (p == Log::Error) {
 		return *this << "Error: ";
@@ -74,6 +86,7 @@ Logger& Logger::operator << (const Log::Color& lc)
 	if (isRedirected(_out))
 		return *this;
 
+	_currentBrush = lc;
 	return *this << ansiMap[static_cast<int>(lc)];
 }
 
@@ -87,11 +100,6 @@ bool Logger::isRedirected(const std::ostream& stream) const
 	}
 
 	return true;
-}
-
-std::string Logger::buffer() const
-{
-	return _buffer.str();
 }
 
 //////////

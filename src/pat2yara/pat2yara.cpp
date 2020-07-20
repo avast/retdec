@@ -113,7 +113,7 @@ int processArguments(std::vector<std::string> &args)
 
 	for (std::size_t i = 0; i < args.size(); ++i) {
 		if (args[i] == "--help" || args[i] == "-h") {
-			printUsage(Log::info());
+			printUsage(Log::get(Log::Type::Info));
 			return 0;
 		}
 		else if (args[i] == "--delphi") {

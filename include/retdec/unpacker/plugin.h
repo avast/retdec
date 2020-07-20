@@ -173,7 +173,7 @@ public:
 	 */
 	template <typename... Args> void log(const Args&... args)
 	{
-		Plugin::logImpl(Log::info(), "[", getInfo()->name, "] ", args...);
+		Plugin::logImpl(Log::get(Log::Type::Info), "[", getInfo()->name, "] ", args...);
 	}
 
 	/**
@@ -186,7 +186,7 @@ public:
 	 */
 	template <typename... Args> void error(const Args&... args)
 	{
-		Plugin::logImpl(Log::error(), "[ERROR] [", getInfo()->name, "] ", args...);
+		Plugin::logImpl(Log::get(Log::Type::Error), "[ERROR] [", getInfo()->name, "] ", args...);
 	}
 
 	/**
