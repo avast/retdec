@@ -27,7 +27,7 @@ RUN git clone https://github.com/avast/retdec && \
 	cd retdec && \
 	mkdir build && \
 	cd build && \
-	cmake .. -DCMAKE_INSTALL_PREFIX=/home/retdec/retdec-install && \
+	cmake .. -DCMAKE_INSTALL_PREFIX=/home/retdec/retdec-install -DCMAKE_LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/7/ && \
 	make -j$(nproc) && \
 	make install
 
