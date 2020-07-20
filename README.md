@@ -155,13 +155,13 @@ This section describes a local build and installation of RetDec. Instructions fo
 On Debian-based distributions (e.g. Ubuntu), the required packages can be installed with `apt-get`:
 
 ```sh
-sudo apt-get install build-essential cmake git openssl python3 autoconf automake libtool pkg-config m4 zlib1g-dev upx doxygen graphviz
+sudo apt-get install build-essential cmake git openssl libssl-dev python3 autoconf automake libtool pkg-config m4 zlib1g-dev upx doxygen graphviz
 ```
 
 On RPM-based distributions (e.g. Fedora), the required packages can be installed with `dnf`:
 
 ```sh
-sudo dnf install gcc gcc-c++ cmake make git openssl python3 autoconf automake libtool pkg-config m4 zlib-devel upx doxygen graphviz
+sudo dnf install gcc gcc-c++ cmake make git openssl openssl-devel python3 autoconf automake libtool pkg-config m4 zlib-devel upx doxygen graphviz
 ```
 
 On Arch Linux, the required packages can be installed with `pacman`:
