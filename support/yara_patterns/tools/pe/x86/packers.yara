@@ -8460,6 +8460,18 @@ rule molebox_pro_255 {
 		$1 at pe.entry_point
 }
 
+rule molebox_42321 {
+	meta:
+		tool = "P"
+		name = "MoleBox"
+		version = "4.2321"
+		pattern = "6A286870204000E8740200003?FF57FF15????????6681384D5A75"
+	strings:
+		$1 = { 6A 28 68 70 20 40 00 E8 74 02 00 00 3? FF 57 FF 15 ?? ?? ?? ?? 66 81 38 4D 5A }
+	condition:
+		$1 at pe.entry_point
+}
+
 rule molebox_pro_43018 {
 	meta:
 		tool = "P"
