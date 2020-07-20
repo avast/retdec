@@ -40,6 +40,8 @@ const std::string JSON_outputLlFile             = "outputLlFile";
 const std::string JSON_outputConfigFile         = "outputConfigFile";
 const std::string JSON_outputUnpackedFile       = "outputUnpackedFile";
 const std::string JSON_outputFormat             = "outputFormat";
+const std::string JSON_logFile                  = "logFile";
+const std::string JSON_errFile                  = "errFile";
 
 const std::string JSON_detectStaticCode         = "detectStaticCode";
 const std::string JSON_backendDisabledOpts      = "backendDisabledOpts";
@@ -215,6 +217,16 @@ void Parameters::setOutputFormat(const std::string& format)
 	_outputFormat = format;
 }
 
+void Parameters::setLogFile(const std::string &file)
+{
+	_logFile = file;
+}
+
+void Parameters::setErrFile(const std::string &file)
+{
+	_errFile = file;
+}
+
 void Parameters::setOrdinalNumbersDirectory(const std::string& n)
 {
 	_ordinalNumbersDirectory = n;
@@ -384,6 +396,16 @@ const std::string& Parameters::getOutputFormat() const
 	return _outputFormat;
 }
 
+const std::string& Parameters::getLogFile() const
+{
+	return _logFile;
+}
+
+const std::string& Parameters::getErrFile() const
+{
+	return _errFile;
+}
+
 uint64_t Parameters::getMaxMemoryLimit() const
 {
 	return _maxMemoryLimit;
@@ -486,6 +508,8 @@ void Parameters::serialize(Writer& writer) const
 	serdes::serializeString(writer, JSON_outputConfigFile, getOutputConfigFile());
 	serdes::serializeString(writer, JSON_outputUnpackedFile, getOutputUnpackedFile());
 	serdes::serializeString(writer, JSON_outputFormat, getOutputFormat());
+	serdes::serializeString(writer, JSON_logFile, getLogFile());
+	serdes::serializeString(writer, JSON_errFile, getErrFile());
 
 	serdes::serializeString(writer, JSON_backendDisabledOpts, getBackendDisabledOpts());
 	serdes::serializeString(writer, JSON_backendEnabledOpts, getBackendEnabledOpts());
@@ -553,6 +577,8 @@ void Parameters::deserialize(const rapidjson::Value& val)
 	setOutputConfigFile( serdes::deserializeString(val, JSON_outputConfigFile) );
 	setOutputUnpackedFile( serdes::deserializeString(val, JSON_outputUnpackedFile) );
 	setOutputFormat( serdes::deserializeString(val, JSON_outputFormat) );
+	setLogFile( serdes::deserializeString(val, JSON_logFile) );
+	setErrFile( serdes::deserializeString(val, JSON_errFile) );
 
 	setIsDetectStaticCode( serdes::deserializeBool(val, JSON_detectStaticCode, true) );
 	setBackendDisabledOpts( serdes::deserializeString(val, JSON_backendDisabledOpts) );

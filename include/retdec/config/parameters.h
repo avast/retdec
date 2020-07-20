@@ -60,6 +60,8 @@ class Parameters
 		void setOutputConfigFile(const std::string& file);
 		void setOutputUnpackedFile(const std::string& file);
 		void setOutputFormat(const std::string& format);
+		void setLogFile(const std::string& file);
+		void setErrFile(const std::string& file);
 		void setMaxMemoryLimit(uint64_t limit);
 		void setIsMaxMemoryLimitHalfRam(bool f);
 		void setTimeout(uint64_t seconds);
@@ -95,6 +97,8 @@ class Parameters
 		const std::string& getOutputConfigFile() const;
 		const std::string& getOutputUnpackedFile() const;
 		const std::string& getOutputFormat() const;
+		const std::string& getLogFile() const;
+		const std::string& getErrFile() const;
 		uint64_t getMaxMemoryLimit() const;
 		uint64_t getTimeout() const;
 		retdec::common::Address getEntryPoint() const;
@@ -158,6 +162,8 @@ class Parameters
 		std::string _outputConfigFile;
 		std::string _outputUnpackedFile;
 		std::string _outputFormat;
+		std::string _logFile;
+		std::string _errFile;
 		uint64_t _maxMemoryLimit = 0;
 		bool _maxMemoryLimitHalfRam = true;
 		uint64_t _timeout = 0;
