@@ -11,7 +11,9 @@
 
 #include "retdec/llvmir2hll/support/smart_ptr.h"
 #include "retdec/llvmir2hll/support/visitors/ordered_all_visitor.h"
-#include "retdec/llvm-support/diagnostics.h"
+#include "retdec/utils/io/log.h"
+
+using namespace retdec::utils::io;
 
 namespace retdec {
 namespace llvmir2hll {
@@ -49,8 +51,7 @@ protected:
 	void validationError(const std::string &warningMessage, Args &&... args) {
 		moduleIsCorrect = false;
 		if (printMessageOnError) {
-			retdec::llvm_support::printWarningMessage(warningMessage,
-				std::forward<Args>(args)...);
+			Log::error() << Log::Warning << warningMessage << std::endl;
 		}
 	}
 

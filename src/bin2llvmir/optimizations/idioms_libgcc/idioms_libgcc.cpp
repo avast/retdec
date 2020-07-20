@@ -4,7 +4,6 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-#include <iostream>
 #include <functional>
 
 #include <llvm/IR/InstIterator.h>

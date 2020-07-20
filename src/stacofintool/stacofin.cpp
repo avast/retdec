@@ -5,15 +5,16 @@
  */
 
 #include <iomanip>
-#include <iostream>
 #include <string>
 #include <vector>
 
 #include "retdec/utils/filesystem.h"
+#include "retdec/utils/io/log.h"
 #include "retdec/stacofin/stacofin.h"
 #include "retdec/loader/image_factory.h"
 
 using namespace retdec::utils;
+using namespace retdec::utils::io;
 using namespace retdec::stacofin;
 using namespace retdec::loader;
 
@@ -22,7 +23,7 @@ using namespace retdec::loader;
  */
 void printUsage()
 {
-	std::cout << "\nStatic code detection tool.\n"
+	Log::info() << "\nStatic code detection tool.\n"
 		<< "Usage: stacofin -b BINARY_FILE YARA_FILE [YARA_FILE ...]\n\n";
 }
 
@@ -35,7 +36,7 @@ void printUsage()
 int printError(
 	const std::string &errorMessage)
 {
-	std::cerr << "Error: " << errorMessage << "\n";
+	Log::error() << Log::Error << errorMessage << "\n";
 	return 1;
 }
 
@@ -69,16 +70,16 @@ void printDetectionsDebug(
 		auto& detected = p.second;
 		if (detected.getAddress() == lastAddress) {
 			for (const auto &name : detected.names) {
-				std::cout << "or " << name << "\n";
+				Log::info() << "or " << name << "\n";
 			}
 			continue;
 		}
 		lastAddress = detected.getAddress();
 
-		std::cout << "0x" << std::setfill('0') << std::setw(8) << std::hex
+		Log::info() << "0x" << std::setfill('0') << std::setw(8) << std::hex
 			<< detected.getAddress() << " " << detected.names[0] << "\n";
 		for (std::size_t i = 1; i < detected.names.size(); ++i) {
-			std::cout << "or " << detected.names[i] << "\n";
+			Log::info() << "or " << detected.names[i] << "\n";
 		}
 	}
 }
@@ -96,18 +97,18 @@ void printDetections(
 		auto& detected = p.second;
 		if (detected.getAddress() == lastAddress) {
 			for (const auto &name : detected.names) {
-				std::cout << "\t\t\t" << name << " "
+				Log::info() << "\t\t\t" << name << " "
 					<< referencesToString(detected.references) << "\n";;
 			}
 			continue;
 		}
 		lastAddress = detected.getAddress();
 
-		std::cout << "0x" << std::hex << detected.getAddress() << " \t"
+		Log::info() << "0x" << std::hex << detected.getAddress() << " \t"
 			<< std::dec << detected.size << "\t" << detected.names[0] << " "
 			<< referencesToString(detected.references) << "\n";
 		for (std::size_t i = 1; i < detected.names.size(); ++i) {
-			std::cout << "\t\t\t" << detected.names[i] << " "
+			Log::info() << "\t\t\t" << detected.names[i] << " "
 				<< referencesToString(detected.references) << "\n";;
 		}
 	}
@@ -173,7 +174,7 @@ int doActions(
 	for (auto it = coverage.begin(), e = coverage.end(); it != e; ++it) {
 		totalCoverage += it->getSize();
 	}
-	std::cout << "\nTotal code coverage is " << totalCoverage << " bytes.\n";
+	Log::info() << "\nTotal code coverage is " << totalCoverage << " bytes.\n";
 	return 0;
 }
 

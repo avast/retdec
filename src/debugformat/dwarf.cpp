@@ -6,8 +6,6 @@
 
 #define LOG_ENABLED false
 
-#include <iostream>
-
 #include <llvm/DebugInfo/DWARF/DWARFExpression.h>
 
 #include "retdec/demangler/demangler.h"

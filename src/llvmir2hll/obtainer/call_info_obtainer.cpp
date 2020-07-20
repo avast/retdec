@@ -14,11 +14,10 @@
 #include "retdec/llvmir2hll/ir/variable.h"
 #include "retdec/llvmir2hll/obtainer/call_info_obtainer.h"
 #include "retdec/llvmir2hll/support/debug.h"
-#include "retdec/llvm-support/diagnostics.h"
 #include "retdec/utils/container.h"
+#include "retdec/utils/io/log.h"
 
-using namespace retdec::llvm_support;
-
+using namespace retdec::utils::io;
 using retdec::utils::hasItem;
 using retdec::utils::setDifference;
 using retdec::utils::setUnion;
@@ -256,7 +255,7 @@ CallInfoObtainer::SCCWithRepresent CallInfoObtainer::findNextSCC(
 	}
 
 	// TODO Can this happen?
-	printWarningMessage("[SCCComputer] No viable SCC has been found.");
+	Log::error() << Log::Warning << "[SCCComputer] No viable SCC has been found." << std::endl;
 	FuncSet scc;
 	ShPtr<Function> func(*(remainingFuncs.begin()));
 	scc.insert(func);

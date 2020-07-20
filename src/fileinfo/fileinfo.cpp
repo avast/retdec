@@ -4,13 +4,13 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include <iostream>
 #include <regex>
 
 #include <llvm/Support/ErrorHandling.h>
 
 #include "retdec/utils/conversion.h"
 #include "retdec/utils/memory.h"
+#include "retdec/utils/io/log.h"
 #include "retdec/utils/string.h"
 #include "retdec/ar-extractor/detection.h"
 #include "retdec/cpdetect/errors.h"
@@ -25,6 +25,7 @@
 #include "fileinfo/pattern_detector/pattern_detector.h"
 
 using namespace retdec::utils;
+using namespace retdec::utils::io;
 using namespace retdec::ar_extractor;
 using namespace retdec::cpdetect;
 using namespace retdec::fileformat;
@@ -108,7 +109,7 @@ void fatalErrorHandler(void *user_data, const std::string& /*reason*/, bool /*ge
  */
 void printHelp()
 {
-	std::cout << "fileinfo - dumper of information about executable file\n\n"
+	Log::info() << "fileinfo - dumper of information about executable file\n\n"
 				<< "For compiler detection, program looks in the input file for YARA patterns.\n"
 				<< "According to them, it determines compiler or packer used for file creation.\n"
 				<< "Supported file formats are: " + joinStrings(getSupportedFileFormats()) + ".\n\n"
@@ -188,7 +189,7 @@ std::string getParamOrDie(std::vector<std::string> &argv, std::size_t &i)
 	}
 	else
 	{
-		std::cerr << getErrorMessage(ReturnCode::ARG) << "\n\n";
+		Log::error() << getErrorMessage(ReturnCode::ARG) << "\n\n";
 		printHelp();
 		exit(static_cast<int>(ReturnCode::ARG));
 	}
@@ -413,7 +414,7 @@ int main(int argc, char* argv[])
 	ProgParams params;
 	if(!doParams(argc, argv, params))
 	{
-		std::cerr << getErrorMessage(ReturnCode::ARG) << "\n\n";
+		Log::error() << getErrorMessage(ReturnCode::ARG) << "\n\n";
 		printHelp();
 		return static_cast<int>(ReturnCode::ARG);
 	}
@@ -517,7 +518,7 @@ int main(int argc, char* argv[])
 		auto config = ConfigPresentation(fileinfo, params.configFile);
 		if(!config.present())
 		{
-			std::cerr << "Error: loading of config failed: " << config.getErrorMessage() << "\n";
+			Log::error() << "Error: loading of config failed: " << config.getErrorMessage() << "\n";
 			res = ReturnCode::FILE_PROBLEM;
 		}
 	}

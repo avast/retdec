@@ -5,7 +5,6 @@
  */
 
 #include <sstream>
-#include <iostream>
 
 #include "retdec/utils/conversion.h"
 #include "retdec/utils/dynamic_buffer.h"

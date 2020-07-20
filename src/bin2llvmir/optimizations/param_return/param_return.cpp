@@ -6,7 +6,6 @@
 
 #include <cassert>
 #include <iomanip>
-#include <iostream>
 #include <limits>
 
 #include <llvm/IR/CFG.h>

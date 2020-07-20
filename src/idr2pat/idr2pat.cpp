@@ -7,18 +7,19 @@
 #include <cstdint>
 #include <fstream>
 #include <iomanip>
-#include <iostream>
 #include <istream>
 #include <map>
 #include <set>
 #include <vector>
 
 #include "retdec/utils/conversion.h"
+#include "retdec/utils/io/log.h"
 #include "yaramod/builder/yara_expression_builder.h"
 #include "yaramod/builder/yara_hex_string_builder.h"
 #include "yaramod/builder/yara_rule_builder.h"
 
 using namespace retdec::utils;
+using namespace retdec::utils::io;
 using namespace yaramod;
 
 /**
@@ -217,7 +218,7 @@ void readFunction(
 	ruleBuilder.withHexString("$1", hexBuilder.get());
 	ruleBuilder.withCondition(stringRef("$1").get());
 
-	std::cout << ruleBuilder.get()->getText() << "\n";
+	Log::info() << ruleBuilder.get()->getText() << "\n";
 }
 
 /**
@@ -298,7 +299,7 @@ bool readDatabase(
  */
 int printError(const std::string &message)
 {
-	std::cerr << "Error: " << message << ".\n";
+	Log::error() << Log::Error << message << ".\n";
 	return 1;
 }
 

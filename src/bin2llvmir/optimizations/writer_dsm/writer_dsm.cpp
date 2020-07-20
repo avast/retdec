@@ -8,7 +8,6 @@
 #include <cctype>
 #include <fstream>
 #include <iomanip>
-#include <iostream>
 #include <sstream>
 
 #include <llvm/IR/Instruction.h>

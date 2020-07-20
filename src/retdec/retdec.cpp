@@ -4,8 +4,6 @@
  * @copyright (c) 2019 Avast Software, licensed under the MIT license
  */
 
-#include <iostream>
-
 #include <llvm/ADT/Triple.h>
 #include <llvm/Analysis/CallGraph.h>
 #include <llvm/Analysis/CallGraphSCCPass.h>
@@ -50,9 +48,11 @@
 #include "retdec/llvmir2hll/llvmir2hll.h"
 
 #include "retdec/config/config.h"
-#include "retdec/llvm-support/diagnostics.h"
 #include "retdec/retdec/retdec.h"
 #include "retdec/utils/memory.h"
+#include "retdec/utils/io/log.h"
+
+using namespace retdec::utils::io;
 
 // extern llvm::cl::opt<bool> PrintAfterAll;
 
@@ -376,7 +376,7 @@ class ModulePassPrinter : public ModulePass
 		{
 			if (utils::startsWith(PhaseArg, "retdec"))
 			{
-				llvm_support::printPhase(PhaseName);
+				Log::phase(PhaseName);
 				LastPhase = PhaseArg;
 			}
 			else
@@ -384,12 +384,12 @@ class ModulePassPrinter : public ModulePass
 				// aggregate LLVM
 				if (LastPhase != LlvmAggregatePhaseName)
 				{
-					llvm_support::printPhase(LlvmAggregatePhaseName);
+					Log::phase(LlvmAggregatePhaseName);
 					LastPhase = LlvmAggregatePhaseName;
 				}
 
 				// print all
-				// llvm_support::printPhase(PhaseName);
+				// Log::phase(PhaseName);
 				// LastPhase = PhaseArg;
 			}
 			return false;
@@ -432,7 +432,7 @@ static inline void addPass(
 
 bool decompile(retdec::config::Config& config, std::string* outString)
 {
-	llvm_support::printPhase("Initialization");
+	Log::phase("Initialization");
 	auto& passRegistry = initializeLlvmPasses();
 
 	// limitMaximalMemoryIfRequested(params);

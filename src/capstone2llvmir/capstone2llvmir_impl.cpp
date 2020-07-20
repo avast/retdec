@@ -6,7 +6,6 @@
  */
 
 #include <iomanip>
-#include <iostream>
 
 #include "capstone2llvmir/capstone2llvmir_impl.h"
 

@@ -28,11 +28,10 @@
 #include "retdec/llvmir2hll/support/debug.h"
 #include "retdec/llvmir2hll/support/expression_negater.h"
 #include "retdec/llvmir2hll/utils/ir.h"
-#include "retdec/llvm-support/diagnostics.h"
 #include "retdec/utils/container.h"
+#include "retdec/utils/io/log.h"
 
-using namespace retdec::llvm_support;
-
+using namespace retdec::utils::io;
 using retdec::utils::clear;
 
 namespace retdec {
@@ -392,8 +391,8 @@ void NonRecursiveCFGBuilder::addEdgeFromVector(const EdgeToAdd &edge) {
 
 		// TODO This is the same problem as in the TODO below.
 		if (i == emptyStmtToNodeMap.end()) {
-			printWarningMessage("[NonRecursiveCFGBuilder] there is no node for"
-				" an edge to `", edge.succStmt, "` -> skipping this edge");
+			Log::error() << Log::Warning << "[NonRecursiveCFGBuilder] there is no node for"
+				" an edge to `" << edge.succStmt << "` -> skipping this edge" << std::endl;
 			return;
 		}
 
@@ -431,8 +430,8 @@ void NonRecursiveCFGBuilder::addEdgeFromVector(const EdgeToAdd &edge) {
 		//  - binaries-suite/arm-elf/O2/gnuarm-elf-gcc-O2--gzip
 		//
 		if (!targetNode) {
-			printWarningMessage("[NonRecursiveCFGBuilder] there is no node for"
-				" an edge to `", edge.succStmt, "` -> skipping this edge");
+			Log::error() << Log::Warning << "[NonRecursiveCFGBuilder] there is no node for"
+				" an edge to `" << edge.succStmt << "` -> skipping this edge" << std::endl;
 			return;
 		}
 

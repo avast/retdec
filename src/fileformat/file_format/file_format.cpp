@@ -9,13 +9,13 @@
 #include <climits>
 #include <cstring>
 #include <functional>
-#include <iostream>
 #include <sstream>
 
 #include "retdec/utils/conversion.h"
 #include "retdec/utils/file_io.h"
 #include "retdec/utils/string.h"
 #include "retdec/utils/system.h"
+#include "retdec/utils/io/log.h"
 #include "retdec/fileformat/file_format/file_format.h"
 #include "retdec/fileformat/utils/byte_array_buffer.h"
 #include "retdec/fileformat/file_format/intel_hex/intel_hex_format.h"
@@ -28,6 +28,7 @@
 #include "retdec/pelib/PeLibInc.h"
 
 using namespace retdec::utils;
+using namespace retdec::utils::io;
 using namespace PeLib;
 
 namespace retdec {
@@ -2336,7 +2337,7 @@ void FileFormat::dump()
 {
 	std::string output;
 	dump(output);
-	std::cout << output;
+	Log::info() << output;
 }
 
 /**
@@ -2561,7 +2562,7 @@ void FileFormat::dumpRegionsValidity()
 {
 	std::string output;
 	dumpRegionsValidity(output);
-	std::cout << output;
+	Log::info() << output;
 }
 
 /**
@@ -2603,7 +2604,7 @@ void FileFormat::dumpResourceTree()
 {
 	std::string output;
 	dumpResourceTree(output);
-	std::cout << output;
+	Log::info() << output;
 }
 
 void FileFormat::dumpResourceTree(std::string &dumpStr)

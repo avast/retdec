@@ -6,11 +6,11 @@
 
 #include <cstdlib>
 #include <fstream>
-#include <iostream>
 #include <ostream>
 #include <vector>
 
 #include "retdec/utils/filesystem.h"
+#include "retdec/utils/io/log.h"
 #include "retdec/patterngen/pattern_extractor/pattern_extractor.h"
 #include "yaramod/yaramod.h"
 
@@ -21,12 +21,12 @@
  * Output is set of yara rules (http://yara.readthedocs.io/en/v3.5.0/).
  */
 
+using namespace retdec::utils::io;
 using namespace retdec::patterngen;
 
-void printUsage(
-	std::ostream &outputStream)
+void printUsage(Logger &log)
 {
-	outputStream << "Usage: bin2pat [-o OUTPUT_FILE] [-n NOTE]"
+	log << "Usage: bin2pat [-o OUTPUT_FILE] [-n NOTE]"
 		<< " <INPUT_FILE [INPUT_FILE...] | -l LIST_FILE>\n\n"
 		<< "-o --output OUTPUT_FILE\n"
 		<< "    Output file path (if not given, stdout is used).\n"
@@ -42,8 +42,8 @@ void printUsage(
 void printErrorAndDie(
 	const std::string &message)
 {
-	std::cerr << "Error: " << message << ".\n";
-	printUsage(std::cerr);
+	Log::error() << Log::Error << message << ".\n";
+	printUsage(Log::error());
 	std::exit(1);
 }
 
@@ -62,7 +62,7 @@ void processArgs(
 
 	for (std::size_t i = 0, e = args.size(); i < e; ++i) {
 		if (args[i] == "--help" || args[i] == "-h") {
-			printUsage(std::cout);
+			printUsage(Log::info());
 			return;
 		}
 		else if (args[i] == "-o" || args[i] == "--output") {
@@ -143,8 +143,8 @@ void processArgs(
 		if (!extractor.isValid()) {
 			// Sometimes, non-supported files are present in archives. We will
 			// only print warning if such a file is encountered.
-			std::cerr << "Error: file '" << path << "' was not processed.\n";
-			std::cerr << "Problem: " << extractor.getErrorMessage() << ".\n\n";
+			Log::error() << Log::Error << "file '" << path << "' was not processed.\n";
+			Log::error() << "Problem: " << extractor.getErrorMessage() << ".\n\n";
 			continue;
 		}
 		else {
@@ -154,11 +154,11 @@ void processArgs(
 			// Print warnings if any.
 			const auto &warnings = extractor.getWarnings();
 			if (!warnings.empty()) {
-				std::cerr << "Warning: problems with file '" << path << "'\n";
+				Log::error() << Log::Warning << "problems with file '" << path << "'\n";
 				for (const auto &warning : warnings) {
-					std::cerr << "Problem: " << warning << ".\n";
+					Log::error() << "Problem: " << warning << ".\n";
 				}
-				std::cerr << "\n";
+				Log::error() << "\n";
 			}
 		}
 	}
@@ -179,7 +179,7 @@ void processArgs(
 		outputFile << builder.get(false)->getText() << "\n";
 	}
 	else {
-		std::cout << builder.get(false)->getText() << "\n";
+		Log::info() << builder.get(false)->getText() << "\n";
 	}
 }
 

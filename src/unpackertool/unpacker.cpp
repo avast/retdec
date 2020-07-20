@@ -5,11 +5,11 @@
  */
 
 #include <cstddef>
-#include <iostream>
 #include <memory>
 
 #include "retdec/utils/conversion.h"
 #include "retdec/utils/filesystem.h"
+#include "retdec/utils/io/log.h"
 #include "retdec/utils/memory.h"
 #include "retdec/cpdetect/cpdetect.h"
 #include "retdec/fileformat/fileformat.h"
@@ -19,6 +19,7 @@
 #include "plugin_mgr.h"
 
 using namespace retdec::utils;
+using namespace retdec::utils::io;
 using namespace retdec::unpacker;
 using namespace retdec::unpackertool;
 
@@ -48,17 +49,17 @@ bool detectPackers(const std::string& inputFile, std::vector<retdec::cpdetect::D
 	switch (detectFileFormat(inputFile))
 	{
 		case Format::UNDETECTABLE:
-			std::cerr << "Input file '" << inputFile << "' doesn't exist!" << std::endl;
+			Log::error() << "Input file '" << inputFile << "' doesn't exist!" << std::endl;
 			return false;
 		case Format::UNKNOWN:
-			std::cerr << "Input file '" << inputFile << "' is in unknown format!" << std::endl;
+			Log::error() << "Input file '" << inputFile << "' is in unknown format!" << std::endl;
 			return false;
 		default:
 		{
 			auto fileParser = createFileFormat(inputFile);
 			if (!fileParser)
 			{
-				std::cerr << "Error while detecting format of file '" << inputFile << "'! Please, report this." << std::endl;
+				Log::error() << "Error while detecting format of file '" << inputFile << "'! Please, report this." << std::endl;
 				return false;
 			}
 
@@ -69,7 +70,7 @@ bool detectPackers(const std::string& inputFile, std::vector<retdec::cpdetect::D
 			);
 			if (!compilerDetector)
 			{
-				std::cerr << "No compiler detector was found! Please, report this." << std::endl;
+				Log::error() << "No compiler detector was found! Please, report this." << std::endl;
 				return false;
 			}
 
@@ -93,10 +94,10 @@ ExitCode unpackFile(const std::string& inputFile, const std::string& outputFile,
 
 		if (plugins.empty())
 		{
-			std::cerr << "No matching plugins found for '" << detectedPacker.name;
+			Log::error() << "No matching plugins found for '" << detectedPacker.name;
 			if (detectedPacker.versionInfo != WILDCARD_ALL_VERSIONS)
-				std::cerr << " " << detectedPacker.versionInfo;
-			std::cerr << "'" << std::endl;
+				Log::error() << " " << detectedPacker.versionInfo;
+			Log::error() << "'" << std::endl;
 			continue;
 		}
 
@@ -121,7 +122,7 @@ ExitCode processArgs(ArgHandler& handler, char argc, char** argv)
 	// In case of failed parsing just print the help
 	if (!handler.parse(argc, argv))
 	{
-		std::cout << handler << std::endl;
+		Log::info() << handler << std::endl;
 		return EXIT_CODE_OK;
 	}
 
@@ -136,7 +137,7 @@ ExitCode processArgs(ArgHandler& handler, char argc, char** argv)
 		auto conversionSucceeded = strToNum(maxMemoryLimitStr, maxMemoryLimit);
 		if (!conversionSucceeded)
 		{
-			std::cerr << "Invalid value for --max-memory: '"
+			Log::error() << "Invalid value for --max-memory: '"
 				<< maxMemoryLimitStr << "'!\n";
 			return EXIT_CODE_MEMORY_LIMIT_ERROR;
 		}
@@ -144,7 +145,7 @@ ExitCode processArgs(ArgHandler& handler, char argc, char** argv)
 		auto limitingSucceeded = limitSystemMemory(maxMemoryLimit);
 		if (!limitingSucceeded)
 		{
-			std::cerr << "Failed to limit memory to "
+			Log::error() << "Failed to limit memory to "
 				<< maxMemoryLimitStr << " bytes!\n";
 			return EXIT_CODE_MEMORY_LIMIT_ERROR;
 		}
@@ -155,7 +156,7 @@ ExitCode processArgs(ArgHandler& handler, char argc, char** argv)
 		auto limitingSucceeded = limitSystemMemoryToHalfOfTotalSystemMemory();
 		if (!limitingSucceeded)
 		{
-			std::cerr << "Failed to limit memory to half of system RAM!\n";
+			Log::error() << "Failed to limit memory to half of system RAM!\n";
 			return EXIT_CODE_MEMORY_LIMIT_ERROR;
 		}
 	}
@@ -163,17 +164,17 @@ ExitCode processArgs(ArgHandler& handler, char argc, char** argv)
 	// -h|--help
 	if (handler["help"]->used)
 	{
-		std::cout << handler << std::endl;
+		Log::info() << handler << std::endl;
 	}
 	// -p|--plugins
 	else if (handler["plugins"]->used)
 	{
-		std::cout << "List of available plugins:" << std::endl;
+		Log::info() << "List of available plugins:" << std::endl;
 
 		for (const auto& plugin : PluginMgr::plugins)
 		{
 			const Plugin::Info* info = plugin->getInfo();
-			std::cout << info->name << " " << info->pluginVersion
+			Log::info() << info->name << " " << info->pluginVersion
 				<< " for packer '" << info->name << " " << info->packerVersion
 				<< "' (" << info->author << ")" << std::endl;
 		}
@@ -192,7 +193,7 @@ ExitCode processArgs(ArgHandler& handler, char argc, char** argv)
 	}
 	// Nothing else, just print the help
 	else
-		std::cout << handler << std::endl;
+		Log::info() << handler << std::endl;
 
 	return EXIT_CODE_OK;
 }

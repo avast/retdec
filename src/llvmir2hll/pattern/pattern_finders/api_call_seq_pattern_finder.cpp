@@ -25,9 +25,9 @@
 #include "retdec/llvmir2hll/pattern/patterns/stmts_pattern.h"
 #include "retdec/llvmir2hll/support/debug.h"
 #include "retdec/llvmir2hll/utils/ir.h"
-#include "retdec/llvm-support/diagnostics.h"
+#include "retdec/utils/io/log.h"
 
-using namespace retdec::llvm_support;
+using namespace retdec::utils::io;
 
 namespace retdec {
 namespace llvmir2hll {
@@ -57,9 +57,9 @@ void parseAndAddAPICallInfoSeqToMap(APICallInfoSeqMap &map,
 	if (seq) {
 		map.insert(std::make_pair(funcName, seq.value()));
 	} else {
-		printErrorMessage(
-			"APICallInfoSeqParser failed to parse the following pattern: ",
-			seqTextRepr);
+		Log::error() << Log::Error
+			<< "APICallInfoSeqParser failed to parse the following pattern: "
+			<< seqTextRepr;
 	}
 }
 

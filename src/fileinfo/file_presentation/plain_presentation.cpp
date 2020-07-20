@@ -4,15 +4,15 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include <iostream>
-
 #include "retdec/utils/string.h"
+#include "retdec/utils/io/log.h"
 #include "retdec/fileformat/utils/conversions.h"
 #include "fileinfo/file_presentation/getters/format.h"
 #include "fileinfo/file_presentation/getters/plain_getters.h"
 #include "fileinfo/file_presentation/plain_presentation.h"
 
 using namespace retdec::utils;
+using namespace retdec::utils::io;
 using namespace retdec::cpdetect;
 using namespace retdec::fileformat;
 
@@ -33,7 +33,7 @@ void presentTitle(const std::string &title)
 	const auto pos = title.find_first_not_of(" ");
 	if(pos != std::string::npos)
 	{
-		std::cout << "\n\n" << title << "\n" << std::string(pos, ' ') << std::string(title.length() - pos, '-') << "\n";
+		Log::info() << "\n\n" << title << "\n" << std::string(pos, ' ') << std::string(title.length() - pos, '-') << "\n";
 	}
 }
 
@@ -62,10 +62,10 @@ void presentSimple(const std::vector<std::string> &desc, const std::vector<std::
 		{
 			if(space)
 			{
-				std::cout << "\n";
+				Log::info() << "\n";
 				space = false;
 			}
-			std::cout << desc[i] << info[i] << "\n";
+			Log::info() << desc[i] << info[i] << "\n";
 		}
 	}
 }
@@ -145,7 +145,7 @@ void presentIterativeDistributionHeader(const IterativeDistributionGetter &gette
 	std::string header, separator;
 	getter.getHeader(structIndex, header);
 	const auto wSpaces = getIterativeDistributionSeparator(getter, separator, structIndex);
-	std::cout << "\n" << header << "\n" << separator << "\n";
+	Log::info() << "\n" << header << "\n" << separator << "\n";
 	if(!explanatory)
 	{
 		return;
@@ -166,11 +166,11 @@ void presentIterativeDistributionHeader(const IterativeDistributionGetter &gette
 	{
 		if(abbv[i].find_first_not_of(" ") != std::string::npos && desc[i].find_first_not_of(" ") != std::string::npos)
 		{
-			std::cout << std::string(wSpaces, ' ') << abbv[i] << std::string(maxLen - lens[i], ' ') << " - " << desc[i] << "\n";
+			Log::info() << std::string(wSpaces, ' ') << abbv[i] << std::string(maxLen - lens[i], ' ') << " - " << desc[i] << "\n";
 		}
 	}
 
-	std::cout << separator << "\n" << header << "\n" << separator << "\n";
+	Log::info() << separator << "\n" << header << "\n" << separator << "\n";
 }
 
 /**
@@ -200,7 +200,7 @@ void presentIterativeDistributionStructure(const IterativeDistributionGetter &ge
 	{
 		if(!desc[i].empty() && !info[i].empty())
 		{
-			std::cout << desc[i] << info[i] << "\n";
+			Log::info() << desc[i] << info[i] << "\n";
 		}
 	}
 
@@ -241,14 +241,14 @@ void presentIterativeDistributionStructure(const IterativeDistributionGetter &ge
 			}
 			else
 			{
-				std::cout << line << value << "\n";
+				Log::info() << line << value << "\n";
 				line = std::string(line.length() + distribution[j], ' ');
 			}
 		}
 
 		if(line != std::string(line.length(), ' '))
 		{
-			std::cout << line << "\n";
+			Log::info() << line << "\n";
 		}
 	}
 
@@ -260,11 +260,11 @@ void presentIterativeDistributionStructure(const IterativeDistributionGetter &ge
 	if((len = info.size()))
 	{
 		getIterativeDistributionSeparator(getter, line, structIndex);
-		std::cout << line << "\nFlags:\n";
+		Log::info() << line << "\nFlags:\n";
 
 		for(std::size_t i = 0; i < len; ++i)
 		{
-			std::cout << "  " << info[i] << " - " << desc[i] << "\n";
+			Log::info() << "  " << info[i] << " - " << desc[i] << "\n";
 		}
 	}
 }
@@ -308,7 +308,7 @@ void presentIterativeSimpleStructure(const IterativeSimpleGetter &getter, std::s
 	{
 		if(!desc[i].empty() && !info[i].empty())
 		{
-			std::cout << desc[i] << info[i] << "\n";
+			Log::info() << desc[i] << info[i] << "\n";
 		}
 	}
 
@@ -321,7 +321,7 @@ void presentIterativeSimpleStructure(const IterativeSimpleGetter &getter, std::s
 
 	for(std::size_t i = 0; getter.getRecord(structIndex, i, info); ++i)
 	{
-		std::cout << '\n' << elemHeader << " #" << i << std::endl;
+		Log::info() << '\n' << elemHeader << " #" << i << std::endl;
 		presentSimple(desc, info, false);
 	}
 }
@@ -358,29 +358,29 @@ void PlainPresentation::presentCompiler() const
 	{
 		const DetectResult& tool = fileinfo.toolInfo.detectedTools[i];
 
-		std::cout << "Detected tool            : " << tool.name;
+		Log::info() << "Detected tool            : " << tool.name;
 		if (!tool.versionInfo.empty())
 		{
-			std::cout << " (" << tool.versionInfo << ")";
+			Log::info() << " (" << tool.versionInfo << ")";
 		}
 		if (!tool.additionalInfo.empty())
 		{
-			std::cout << " " << tool.additionalInfo;
+			Log::info() << " " << tool.additionalInfo;
 		}
-		std::cout << " (" << toolTypeToString(tool.type) << ")";
+		Log::info() << " (" << toolTypeToString(tool.type) << ")";
 		if (tool.source == DetectionMethod::SIGNATURE)
 		{
 			std::string nibbles = tool.impCount ? "nibbles" : "nibble";
 			auto ratio = static_cast<double>(tool.agreeCount) / tool.impCount * 100;
 
-			std::cout << ", " << tool.agreeCount << " from " << tool.impCount << " significant " << nibbles;
-			std::cout << " (" << ratio << "%)";
+			Log::info() << ", " << tool.agreeCount << " from " << tool.impCount << " significant " << nibbles;
+			Log::info() << " (" << ratio << "%)";
 		}
 		else
 		{
-			std::cout << ", " << detectionMetodToString(tool.source);
+			Log::info() << ", " << detectionMetodToString(tool.source);
 		}
-		std::cout << "\n";
+		Log::info() << "\n";
 	}
 }
 
@@ -394,26 +394,26 @@ void PlainPresentation::presentLanguages() const
 	{
 		return;
 	}
-	std::cout << "Original language        : ";
+	Log::info() << "Original language        : ";
 
 	for(std::size_t i = 0; i < noOfLanguages; )
 	{
-		std::cout << fileinfo.toolInfo.detectedLanguages[i].name;
+		Log::info() << fileinfo.toolInfo.detectedLanguages[i].name;
 		if(fileinfo.toolInfo.detectedLanguages[i].additionalInfo.length())
 		{
-			std::cout << " (" << fileinfo.toolInfo.detectedLanguages[i].additionalInfo << ")";
+			Log::info() << " (" << fileinfo.toolInfo.detectedLanguages[i].additionalInfo << ")";
 		}
 		if(fileinfo.toolInfo.detectedLanguages[i].bytecode)
 		{
-			std::cout << " (bytecode)";
+			Log::info() << " (bytecode)";
 		}
 		if(++i < noOfLanguages)
 		{
-			std::cout << ", ";
+			Log::info() << ", ";
 		}
 	}
 
-	std::cout << "\n";
+	Log::info() << "\n";
 }
 
 /**
@@ -426,11 +426,11 @@ void PlainPresentation::presentRichHeader() const
 	const auto sig = toLower(fileinfo.getRichHeaderSignature());
 	if(!offset.empty())
 	{
-		std::cout << "Rich header offset       : " << offset << "\n";
+		Log::info() << "Rich header offset       : " << offset << "\n";
 	}
 	if(!key.empty())
 	{
-		std::cout << "Rich header key          : " << key << "\n";
+		Log::info() << "Rich header key          : " << key << "\n";
 	}
 	if(!sig.empty())
 	{
@@ -441,7 +441,7 @@ void PlainPresentation::presentRichHeader() const
 
 		for(std::size_t i = 0, e = sig.length(); i < e; i += signLineLen)
 		{
-			std::cout << (i ? std::string(signDesc.length(), ' ') : signDesc) << sig.substr(i, signLineLen) << "\n";
+			Log::info() << (i ? std::string(signDesc.length(), ' ') : signDesc) << sig.substr(i, signLineLen) << "\n";
 		}
 	}
 }
@@ -456,15 +456,15 @@ void PlainPresentation::presentOverlay() const
 	const auto entropy = fileinfo.getOverlayEntropyStr(truncFloat);
 	if(!offset.empty())
 	{
-		std::cout << "Overlay offset           : " << offset << "\n";
+		Log::info() << "Overlay offset           : " << offset << "\n";
 	}
 	if(!size.empty())
 	{
-		std::cout << "Overlay size             : " << size << "\n";
+		Log::info() << "Overlay size             : " << size << "\n";
 	}
 	if(!entropy.empty())
 	{
-		std::cout << "Overlay entropy          : " << entropy << "\n";
+		Log::info() << "Overlay entropy          : " << entropy << "\n";
 	}
 }
 
@@ -474,7 +474,7 @@ void PlainPresentation::presentOverlay() const
 void PlainPresentation::presentPackingInfo() const
 {
 	const auto packed = fileinfo.toolInfo.isPacked();
-	std::cout << "Packed                   : " << packedToString(packed) << "\n";
+	Log::info() << "Packed                   : " << packedToString(packed) << "\n";
 }
 
 /**
@@ -491,18 +491,18 @@ void PlainPresentation::presentSimpleFlags(const std::string &title, const std::
 		return;
 	}
 
-	std::cout << title << flags;
+	Log::info() << title << flags;
 	const std::string abbreviations = abbvSerialization(abbv);
 	if(!abbreviations.empty())
 	{
-		flags.empty() ? std::cout << abbreviations : std::cout << " (" << abbreviations << ")";
+		flags.empty() ? Log::info() << abbreviations : Log::info() << " (" << abbreviations << ")";
 	}
-	std::cout << "\n";
+	Log::info() << "\n";
 	if(explanatory)
 	{
 		for(std::size_t i = 0, e = abbv.size(); i < e; ++i)
 		{
-			std::cout << "  " << abbv[i] << " - " << desc[i] << "\n";
+			Log::info() << "  " << abbv[i] << " - " << desc[i] << "\n";
 		}
 	}
 }
@@ -520,31 +520,31 @@ void PlainPresentation::presentPatterns(const std::string &title, const std::vec
 	}
 
 	presentTitle(title);
-	std::cout << "Number of detected patterns: " << patterns.size() << "\n\n";
+	Log::info() << "Number of detected patterns: " << patterns.size() << "\n\n";
 
 	for(std::size_t i = 0, e = patterns.size(); i < e; ++i)
 	{
-		std::cout << patterns[i].getYaraRuleName() << "\n";
+		Log::info() << patterns[i].getYaraRuleName() << "\n";
 		const auto description = patterns[i].getDescription();
 		if(!description.empty())
 		{
-			std::cout << "  description: " << description << "\n";
+			Log::info() << "  description: " << description << "\n";
 		}
 		if(patterns[i].isLittle() || patterns[i].isBig())
 		{
 			const std::string end = patterns[i].isLittle() ? "little" : "big";
-			std::cout << "  endianness: " << end << "\n";
+			Log::info() << "  endianness: " << end << "\n";
 		}
-		std::cout << "  number of matches: " << patterns[i].getNumberOfMatches();
+		Log::info() << "  number of matches: " << patterns[i].getNumberOfMatches();
 		const auto &matches = patterns[i].getMatches();
 		presentIterativeDistribution(PatternMatchesPlainGetter(fileinfo, matches), explanatory);
 		if(matches.empty())
 		{
-			std::cout << "\n";
+			Log::info() << "\n";
 		}
 		if(i + 1 != e)
 		{
-			std::cout << "\n";
+			Log::info() << "\n";
 		}
 	}
 }
@@ -555,10 +555,10 @@ void PlainPresentation::presentDotnetClasses() const
 	if (classes.empty())
 		return;
 
-	std::cout << '\n';
+	Log::info() << '\n';
 	for (const auto& dotnetClass : classes)
 	{
-		std::cout << dotnetClass->getVisibilityString() << ' '
+		Log::info() << dotnetClass->getVisibilityString() << ' '
 			<< (dotnetClass->isAbstract() ? "abstract " : "")
 			<< (dotnetClass->isSealed() ? "sealed " : "")
 			<< dotnetClass->getTypeString() << ' '
@@ -566,23 +566,23 @@ void PlainPresentation::presentDotnetClasses() const
 
 		if (!dotnetClass->getBaseTypes().empty())
 		{
-			std::cout << " : ";
+			Log::info() << " : ";
 			for (auto itr = dotnetClass->getBaseTypes().begin(), end = dotnetClass->getBaseTypes().end(); itr != end; ++itr)
 			{
-				std::cout << (*itr)->getText();
+				Log::info() << (*itr)->getText();
 				if (itr + 1 != end)
-					std::cout << ", ";
+					Log::info() << ", ";
 			}
 		}
 
-		std::cout << '\n';
+		Log::info() << '\n';
 
 		if (!dotnetClass->getMethods().empty())
-			std::cout << "    // Methods\n";
+			Log::info() << "    // Methods\n";
 
 		for (const auto& dotnetMethod : dotnetClass->getMethods())
 		{
-			std::cout << "    " << dotnetMethod->getVisibilityString() << ' '
+			Log::info() << "    " << dotnetMethod->getVisibilityString() << ' '
 				<< (dotnetMethod->isStatic() ? "static " : "")
 				<< (dotnetMethod->isVirtual() ? "virtual " : "")
 				<< (dotnetMethod->isFinal() ? "sealed " : "")
@@ -593,31 +593,31 @@ void PlainPresentation::presentDotnetClasses() const
 
 			for (auto itr = dotnetMethod->getParameters().begin(), end = dotnetMethod->getParameters().end(); itr != end; ++itr)
 			{
-				std::cout << (*itr)->getDataType()->getText() << ' ' << (*itr)->getName();
+				Log::info() << (*itr)->getDataType()->getText() << ' ' << (*itr)->getName();
 				if (itr + 1 != end)
-					std::cout << ", ";
+					Log::info() << ", ";
 			}
 
-			std::cout << ")\n";
+			Log::info() << ")\n";
 		}
 
 		if (!dotnetClass->getFields().empty())
-			std::cout << "    // Fields\n";
+			Log::info() << "    // Fields\n";
 
 		for (const auto& dotnetField : dotnetClass->getFields())
 		{
-			std::cout << "    " << dotnetField->getVisibilityString() << ' '
+			Log::info() << "    " << dotnetField->getVisibilityString() << ' '
 				<< dotnetField->getDataType()->getText() << ' '
 				<< dotnetField->getName()
 				<< '\n';
 		}
 
 		if (!dotnetClass->getProperties().empty())
-			std::cout << "    // Properties\n";
+			Log::info() << "    // Properties\n";
 
 		for (const auto& dotnetProperty : dotnetClass->getProperties())
 		{
-			std::cout << "    " << dotnetProperty->getVisibilityString() << ' '
+			Log::info() << "    " << dotnetProperty->getVisibilityString() << ' '
 				<< dotnetProperty->getDataType()->getText() << ' '
 				<< dotnetProperty->getName()
 				<< '\n';
@@ -634,14 +634,14 @@ void PlainPresentation::presentVisualBasicObjects() const
 		return;
 	}
 
-	std::cout << "\n";
-	std::cout << "Visual Basic Object table" << "\n";
-	std::cout << "-------------------------" << "\n";
-	std::cout << "CRC32            : " << fileinfo.getVisualBasicObjectTableHashCrc32() << "\n";
-	std::cout << "MD5              : " << fileinfo.getVisualBasicObjectTableHashMd5() << "\n";
-	std::cout << "SHA256           : " << fileinfo.getVisualBasicObjectTableHashSha256() << "\n";
-	std::cout << "GUID             : " << guid << "\n";
-	std::cout << "\n";
+	Log::info() << "\n";
+	Log::info() << "Visual Basic Object table" << "\n";
+	Log::info() << "-------------------------" << "\n";
+	Log::info() << "CRC32            : " << fileinfo.getVisualBasicObjectTableHashCrc32() << "\n";
+	Log::info() << "MD5              : " << fileinfo.getVisualBasicObjectTableHashMd5() << "\n";
+	Log::info() << "SHA256           : " << fileinfo.getVisualBasicObjectTableHashSha256() << "\n";
+	Log::info() << "GUID             : " << guid << "\n";
+	Log::info() << "\n";
 
 	std::size_t cnt = 0;
 	for (std::size_t i = 0; i < nObjs; i++)
@@ -656,10 +656,10 @@ void PlainPresentation::presentVisualBasicObjects() const
 		{
 			continue;
 		}
-		std::cout << cnt << ". " << "object name: " << objName << "\n";
+		Log::info() << cnt << ". " << "object name: " << objName << "\n";
 		for (const auto &m : obj->getMethods())
 		{
-			std::cout << "    method name: " << m << "\n";
+			Log::info() << "    method name: " << m << "\n";
 		}
 		cnt++;
 	}
@@ -698,7 +698,7 @@ void PlainPresentation::presentCore() const
 
 bool PlainPresentation::present()
 {
-	std::cout << "Input file               : " << fileinfo.getPathToFile() << "\n";
+	Log::info() << "Input file               : " << fileinfo.getPathToFile() << "\n";
 	presentSimple(BasicPlainGetter(fileinfo), false);
 	presentCompiler();
 	presentLanguages();
@@ -706,12 +706,12 @@ bool PlainPresentation::present()
 	presentOverlay();
 	if(returnCode != ReturnCode::OK)
 	{
-		std::cerr << getErrorMessage(returnCode, fileinfo.getFileFormatEnum()) << "\n";
+		Log::error() << getErrorMessage(returnCode, fileinfo.getFileFormatEnum()) << "\n";
 	}
 
 	for(std::size_t i = 0, e = fileinfo.messages.size(); i < e; ++i)
 	{
-		std::cerr << fileinfo.messages[i] << "\n";
+		Log::error() << fileinfo.messages[i] << "\n";
 	}
 
 	if(verbose)
@@ -721,13 +721,13 @@ bool PlainPresentation::present()
 		errorMessage = fileinfo.getLoaderStatusMessage();
 		if(!errorMessage.empty())
 		{
-			std::cerr << "Warning: " << errorMessage << "\n";
+			Log::error() << Log::Warning << errorMessage << "\n";
 		}
 
 		errorMessage = fileinfo.getDepsListFailedToLoad();
 		if (!errorMessage.empty())
 		{
-			std::cerr << "Warning: Failed to load the dependency list (\"" << errorMessage << "\")\n";
+			Log::error() << Log::Warning << "Failed to load the dependency list (\"" << errorMessage << "\")\n";
 		}
 
 		std::string flags, title;
@@ -768,13 +768,13 @@ bool PlainPresentation::present()
 			presentTitle("Manifest");
 			if(manifest[0] != '\n')
 			{
-				std::cout << "\n";
+				Log::info() << "\n";
 			}
 			if(manifest[manifest.length() - 1] != '\n')
 			{
 				manifest += '\n';
 			}
-			std::cout << replaceNonasciiChars(manifest);
+			Log::info() << replaceNonasciiChars(manifest);
 		}
 
 		presentIterativeSimple(CertificateTablePlainGetter(fileinfo));

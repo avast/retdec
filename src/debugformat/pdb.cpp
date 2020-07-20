@@ -6,8 +6,6 @@
 
 #define LOG_ENABLED false
 
-#include <iostream>
-
 #include "retdec/debugformat/debugformat.h"
 
 namespace retdec {

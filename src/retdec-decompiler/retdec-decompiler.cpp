@@ -4,7 +4,6 @@
  * @copyright (c) 2020 Avast Software, licensed under the MIT license
  */
 
-#include <iostream>
 #include <fstream>
 #include <future>
 #include <chrono>
@@ -40,7 +39,6 @@
 #include "retdec/ar-extractor/archive_wrapper.h"
 #include "retdec/ar-extractor/detection.h"
 #include "retdec/config/config.h"
-#include "retdec/llvm-support/diagnostics.h"
 #include "retdec/retdec/retdec.h"
 #include "retdec/macho-extractor/break_fat.h"
 #include "retdec/unpackertool/unpackertool.h"
@@ -48,6 +46,10 @@
 #include "retdec/utils/filesystem.h"
 #include "retdec/utils/string.h"
 #include "retdec/utils/memory.h"
+
+#include "retdec/utils/io/log.h"
+
+using namespace retdec::utils::io;
 
 const int EXIT_TIMEOUT = 137;
 const int EXIT_BAD_ALLOC = 135;
@@ -605,7 +607,7 @@ std::string ProgramOptions::checkFile(
 
 void ProgramOptions::printHelpAndDie()
 {
-	std::cout << programName << R"(:
+	Log::info() << programName << R"(:
 Mandatory arguments:
 	INPUT_FILE File to decompile.
 General arguments:
@@ -759,7 +761,7 @@ int decompile(retdec::config::Config& config, ProgramOptions& po)
 	);
 	if (fat.isValid())
 	{
-		retdec::llvm_support::printPhase("Mach-O extraction");
+		Log::phase("Mach-O extraction");
 
 		auto extractedFile = po.arExtractPath + "_m";
 
@@ -797,7 +799,7 @@ int decompile(retdec::config::Config& config, ProgramOptions& po)
 	//
 	if (po.arIdx || !po.arName.empty())
 	{
-		retdec::llvm_support::printPhase("Archive extraction");
+		Log::phase("Archive extraction");
 
 		bool ok = true;
 		std::string errMsg;
@@ -855,39 +857,40 @@ int decompile(retdec::config::Config& config, ProgramOptions& po)
 		);
 		if (ok && arw.isThinArchive())
 		{
-			std::cerr << "This file is an archive!" << std::endl;
-			std::cerr << "Error: File is a thin archive and cannot be decompiled." << std::endl;
+			Log::error() << "This file is an archive!" << std::endl;
+			Log::error() << "Error: File is a thin archive and cannot be decompiled." << std::endl;
 			return EXIT_FAILURE;
 		}
 		else if (ok && arw.isEmptyArchive())
 		{
-			std::cerr << "This file is an archive!" << std::endl;
-			std::cerr << "Error: The input archive is empty." << std::endl;
+			Log::error() << "This file is an archive!" << std::endl;
+			Log::error() << "Error: The input archive is empty." << std::endl;
 			return EXIT_FAILURE;
 		}
 		else if (ok)
 		{
-			std::cerr << "This file is an archive!" << std::endl;
+			Log::error() << "This file is an archive!" << std::endl;
 
 			std::string result;
 			if (arw.getPlainTextList(result, errMsg, false, true))
 			{
-				std::cerr << result << std::endl;
+				Log::error() << result << std::endl;
 			}
 			return EXIT_FAILURE;
 		}
 
 		if (!ok && retdec::ar_extractor::isArchive(config.parameters.getInputFile()))
 		{
-			std::cerr << "This file is an archive!" << std::endl;
-			std::cerr << "Error: The input archive has invalid format." << std::endl;
+			Log::error() << "This file is an archive!" << std::endl;
+			Log::error() << "Error: The input archive has invalid format." << std::endl;
 			return EXIT_FAILURE;
 		}
 	}
 
 	// Unpacking
 	//
-	retdec::llvm_support::printPhase("Unpacking");
+
+	Log::phase("Unpacking");
 	std::vector<std::string> unpackArgs;
 	unpackArgs.push_back("whatever_program_name");
 	unpackArgs.push_back(config.parameters.getInputFile());
@@ -970,7 +973,7 @@ int main(int argc, char **argv)
 	}
 	catch (const std::runtime_error& e)
 	{
-		std::cerr << "Error: " << e.what() << std::endl;
+		Log::error() << Log::Error << e.what() << std::endl;
 		return EXIT_FAILURE;
 	}
 
@@ -1001,7 +1004,7 @@ int main(int argc, char **argv)
 			else
 			{
 				thr.detach(); // we leave the thread still running
-				std::cerr << "timeout after: " << config.parameters.getTimeout()
+				Log::error() << "timeout after: " << config.parameters.getTimeout()
 						<< " seconds" << std::endl;
 				ret = EXIT_TIMEOUT;
 			}
@@ -1013,12 +1016,12 @@ int main(int argc, char **argv)
 	}
 	catch (const std::runtime_error& e)
 	{
-		std::cerr << "Error: " << e.what() << std::endl;
+		Log::error() << Log::Error << e.what() << std::endl;
 		ret = EXIT_FAILURE;
 	}
 	catch (const std::bad_alloc& e)
 	{
-		std::cerr << "catched std::bad_alloc" << std::endl;
+		Log::error() << "catched std::bad_alloc" << std::endl;
 		ret = EXIT_BAD_ALLOC;
 	}
 

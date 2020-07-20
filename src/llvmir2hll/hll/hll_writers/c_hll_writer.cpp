@@ -100,11 +100,8 @@
 #include "retdec/llvmir2hll/support/struct_types_sorter.h"
 #include "retdec/llvmir2hll/support/types.h"
 #include "retdec/llvmir2hll/utils/ir.h"
-#include "retdec/llvm-support/diagnostics.h"
 #include "retdec/utils/container.h"
 #include "retdec/utils/conversion.h"
-
-using namespace retdec::llvm_support;
 
 using retdec::utils::addToSet;
 

@@ -6,7 +6,6 @@
 
 #define LOG_ENABLED false
 
-#include <iostream>
 #include <sstream>
 
 #include "retdec/utils/debug.h"
