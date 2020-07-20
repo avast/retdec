@@ -3741,17 +3741,6 @@ rule beroexepacker_uv_01 {
 		beroexepacker_uv_prologue and 1 of them
 }
 
-rule bitarts {
-	meta:
-		tool = "P"
-		name = "BITARTS"
-		pattern = "55E8000000005D83ED068BC5556089AD????00002B85????00008985????000055BB????000003DD536467FF36000064678926000080BD????0000007509C685"
-	strings:
-		$1 = { 55 E8 00 00 00 00 5D 83 ED 06 8B C5 55 60 89 AD ?? ?? 00 00 2B 85 ?? ?? 00 00 89 85 ?? ?? 00 00 55 BB ?? ?? 00 00 03 DD 53 64 67 FF 36 00 00 64 67 89 26 00 00 80 BD ?? ?? 00 00 00 75 09 C6 85 }
-	condition:
-		$1 at pe.entry_point
-}
-
 rule blackenergy_ddos_bot_crypter {
 	meta:
 		tool = "P"
