@@ -10,8 +10,8 @@
 * of PeLib.
 */
 
-#ifndef OUTPUTBUFFER_H
-#define OUTPUTBUFFER_H
+#ifndef RETDEC_PELIB_OUTPUTBUFFER_H
+#define RETDEC_PELIB_OUTPUTBUFFER_H
 
 #include <vector>
 #include <iterator>

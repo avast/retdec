@@ -1,12 +1,8 @@
-/*****************************************************************************/
-/* ImageLoader.cpp                        Copyright (c) Ladislav Zezula 2020 */
-/*---------------------------------------------------------------------------*/
-/* Implementation of PE image loader                                         */
-/*---------------------------------------------------------------------------*/
-/*   Date    Ver   Who  Comment                                              */
-/* --------  ----  ---  -------                                              */
-/* 30.05.20  1.00  Lad  Created                                              */
-/*****************************************************************************/
+/**
+ * @file src/pelib/ImageLoader.cpp
+ * @brief Implementation of image 
+ * @copyright (c) 2020 Avast Software, licensed under the MIT license
+ */
 
 #include <iostream>
 #include <fstream>
@@ -100,9 +96,6 @@ PeLib::ImageLoader::ImageLoader(uint32_t versionInfo)
 	}
 }
 
-PeLib::ImageLoader::~ImageLoader()
-{}
-
 //-----------------------------------------------------------------------------
 // Public functions
 
@@ -156,7 +149,10 @@ bool PeLib::ImageLoader::relocateImage(uint64_t newImageBase)
 	return result;
 }
 
-uint32_t PeLib::ImageLoader::readImage(void * buffer, uint32_t rva, uint32_t bytesToRead)
+uint32_t PeLib::ImageLoader::readImage(
+	void * buffer,
+	uint32_t rva,
+	uint32_t bytesToRead)
 {
 	// If the image was properly mapped, perform an image-read operation
 	if(rawFileData.size() == 0)
@@ -170,7 +166,10 @@ uint32_t PeLib::ImageLoader::readImage(void * buffer, uint32_t rva, uint32_t byt
 	return readWriteImageFile(buffer, rva, bytesToRead, true);
 }
 
-uint32_t PeLib::ImageLoader::writeImage(void * buffer, uint32_t rva, uint32_t bytesToRead)
+uint32_t PeLib::ImageLoader::writeImage(
+	void * buffer,
+	uint32_t rva,
+	uint32_t bytesToRead)
 {
 	// If the image was properly mapped, perform an image-read operation
 	if(rawFileData.size() == 0)
@@ -181,7 +180,9 @@ uint32_t PeLib::ImageLoader::writeImage(void * buffer, uint32_t rva, uint32_t by
 	return readWriteImageFile(buffer, rva, bytesToRead, false);
 }
 
-uint32_t PeLib::ImageLoader::stringLength(uint32_t rva, uint32_t maxLength) const
+uint32_t PeLib::ImageLoader::stringLength(
+	uint32_t rva,
+	uint32_t maxLength) const
 {
 	uint32_t rvaBegin = rva;
 	uint32_t rvaEnd = rva + maxLength;
@@ -252,7 +253,10 @@ uint32_t PeLib::ImageLoader::stringLength(uint32_t rva, uint32_t maxLength) cons
 	return length;
 }
 
-uint32_t PeLib::ImageLoader::readString(std::string & str, uint32_t rva, uint32_t maxLength)
+uint32_t PeLib::ImageLoader::readString(
+	std::string & str,
+	uint32_t rva,
+	uint32_t maxLength)
 {
 	// Check the length of the string at the rva
 	uint32_t length = stringLength(rva, maxLength);
@@ -265,7 +269,9 @@ uint32_t PeLib::ImageLoader::readString(std::string & str, uint32_t rva, uint32_
 	return length;
 }
 
-uint32_t PeLib::ImageLoader::readPointer(uint32_t rva, uint64_t & pointerValue)
+uint32_t PeLib::ImageLoader::readPointer(
+	uint32_t rva,
+	uint64_t & pointerValue)
 {
 	uint32_t bytesRead = 0;
 
@@ -299,7 +305,9 @@ uint32_t PeLib::ImageLoader::getPointerSize()  const
 	return getImageBitability() / 8;
 }
 
-uint32_t PeLib::ImageLoader::readStringRc(std::string & str, uint32_t rva)
+uint32_t PeLib::ImageLoader::readStringRc(
+	std::string & str,
+	uint32_t rva)
 {
 	std::vector<uint16_t> wideString;
 	uint32_t bytesToRead;
@@ -325,7 +333,13 @@ uint32_t PeLib::ImageLoader::readStringRc(std::string & str, uint32_t rva)
 	return charsRead;
 }
 
-uint32_t PeLib::ImageLoader::readStringRaw(std::vector<uint8_t> & fileData, std::string & str, size_t offset, size_t maxLength, bool mustBePrintable, bool mustNotBeTooLong)
+uint32_t PeLib::ImageLoader::readStringRaw(
+	ByteBuffer & fileData,
+	std::string & str,
+	size_t offset,
+	size_t maxLength,
+	bool mustBePrintable,
+	bool mustNotBeTooLong)
 {
 	size_t length = 0;
 
@@ -459,35 +473,54 @@ uint32_t PeLib::ImageLoader::getFieldOffset(PELIB_MEMBER_TYPE field) const
 
 	switch (field)
 	{
-		case OPTHDR_sizeof:
+		case PELIB_MEMBER_TYPE::OPTHDR_sizeof:
 			return (imageBitability == 64) ? sizeof(PELIB_IMAGE_OPTIONAL_HEADER64) : sizeof(PELIB_IMAGE_OPTIONAL_HEADER32);
 
-		case OPTHDR_sizeof_fixed:
-			return (imageBitability == 64) ? offsetof(PELIB_IMAGE_OPTIONAL_HEADER64, DataDirectory) : offsetof(PELIB_IMAGE_OPTIONAL_HEADER32, DataDirectory);
+		case PELIB_MEMBER_TYPE::OPTHDR_sizeof_fixed:
+			return (imageBitability == 64) ? offsetof(PELIB_IMAGE_OPTIONAL_HEADER64, DataDirectory)
+				                           : offsetof(PELIB_IMAGE_OPTIONAL_HEADER32, DataDirectory);
 
-		case OPTHDR_NumberOfRvaAndSizes:
-			fieldOffset = (imageBitability == 64) ? offsetof(PELIB_IMAGE_OPTIONAL_HEADER64, NumberOfRvaAndSizes) : offsetof(PELIB_IMAGE_OPTIONAL_HEADER32, NumberOfRvaAndSizes);
+		case PELIB_MEMBER_TYPE::OPTHDR_NumberOfRvaAndSizes:
+			fieldOffset = (imageBitability == 64) ? offsetof(PELIB_IMAGE_OPTIONAL_HEADER64, NumberOfRvaAndSizes)
+				                                  : offsetof(PELIB_IMAGE_OPTIONAL_HEADER32, NumberOfRvaAndSizes);
 			return sizeof(PELIB_IMAGE_NT_SIGNATURE) + sizeof(PELIB_IMAGE_FILE_HEADER) + fieldOffset;
 
-		case OPTHDR_DataDirectory:
-			fieldOffset = (imageBitability == 64) ? offsetof(PELIB_IMAGE_OPTIONAL_HEADER64, DataDirectory) : offsetof(PELIB_IMAGE_OPTIONAL_HEADER32, DataDirectory);
+		case PELIB_MEMBER_TYPE::OPTHDR_DataDirectory:
+			fieldOffset = (imageBitability == 64) ? offsetof(PELIB_IMAGE_OPTIONAL_HEADER64, DataDirectory)
+				                                  : offsetof(PELIB_IMAGE_OPTIONAL_HEADER32, DataDirectory);
 			return sizeof(PELIB_IMAGE_NT_SIGNATURE) + sizeof(PELIB_IMAGE_FILE_HEADER) + fieldOffset;
 
-		case OPTHDR_DataDirectory_EXPORT_Rva:
-			fieldOffset = (imageBitability == 64) ? offsetof(PELIB_IMAGE_OPTIONAL_HEADER64, DataDirectory) : offsetof(PELIB_IMAGE_OPTIONAL_HEADER32, DataDirectory);
-			return sizeof(PELIB_IMAGE_NT_SIGNATURE) + sizeof(PELIB_IMAGE_FILE_HEADER) + fieldOffset + PELIB_IMAGE_DIRECTORY_ENTRY_EXPORT * sizeof(PELIB_IMAGE_DATA_DIRECTORY);
+		case PELIB_MEMBER_TYPE::OPTHDR_DataDirectory_EXPORT_Rva:
+			fieldOffset = (imageBitability == 64) ? offsetof(PELIB_IMAGE_OPTIONAL_HEADER64, DataDirectory)
+				                                  : offsetof(PELIB_IMAGE_OPTIONAL_HEADER32, DataDirectory);
+			return sizeof(PELIB_IMAGE_NT_SIGNATURE) +
+				   sizeof(PELIB_IMAGE_FILE_HEADER) +
+				   fieldOffset +
+				   PELIB_IMAGE_DIRECTORY_ENTRY_EXPORT * sizeof(PELIB_IMAGE_DATA_DIRECTORY);
 
-		case OPTHDR_DataDirectory_RSRC_Rva:
-			fieldOffset = (imageBitability == 64) ? offsetof(PELIB_IMAGE_OPTIONAL_HEADER64, DataDirectory) : offsetof(PELIB_IMAGE_OPTIONAL_HEADER32, DataDirectory);
-			return sizeof(PELIB_IMAGE_NT_SIGNATURE) + sizeof(PELIB_IMAGE_FILE_HEADER) + fieldOffset + PELIB_IMAGE_DIRECTORY_ENTRY_RESOURCE * sizeof(PELIB_IMAGE_DATA_DIRECTORY);
+		case PELIB_MEMBER_TYPE::OPTHDR_DataDirectory_RSRC_Rva:
+			fieldOffset = (imageBitability == 64) ? offsetof(PELIB_IMAGE_OPTIONAL_HEADER64, DataDirectory)
+				                                  : offsetof(PELIB_IMAGE_OPTIONAL_HEADER32, DataDirectory);
+			return sizeof(PELIB_IMAGE_NT_SIGNATURE) +
+				   sizeof(PELIB_IMAGE_FILE_HEADER) +
+				   fieldOffset +
+				   PELIB_IMAGE_DIRECTORY_ENTRY_RESOURCE * sizeof(PELIB_IMAGE_DATA_DIRECTORY);
 
-		case OPTHDR_DataDirectory_TLS_Rva:
-			fieldOffset = (imageBitability == 64) ? offsetof(PELIB_IMAGE_OPTIONAL_HEADER64, DataDirectory) : offsetof(PELIB_IMAGE_OPTIONAL_HEADER32, DataDirectory);
-			return sizeof(PELIB_IMAGE_NT_SIGNATURE) + sizeof(PELIB_IMAGE_FILE_HEADER) + fieldOffset + PELIB_IMAGE_DIRECTORY_ENTRY_TLS * sizeof(PELIB_IMAGE_DATA_DIRECTORY);
+		case PELIB_MEMBER_TYPE::OPTHDR_DataDirectory_TLS_Rva:
+			fieldOffset = (imageBitability == 64) ? offsetof(PELIB_IMAGE_OPTIONAL_HEADER64, DataDirectory)
+				                                  : offsetof(PELIB_IMAGE_OPTIONAL_HEADER32, DataDirectory);
+			return sizeof(PELIB_IMAGE_NT_SIGNATURE) +
+				   sizeof(PELIB_IMAGE_FILE_HEADER) +
+				   fieldOffset +
+				   PELIB_IMAGE_DIRECTORY_ENTRY_TLS * sizeof(PELIB_IMAGE_DATA_DIRECTORY);
 
-		case OPTHDR_DataDirectory_CONFIG_Rva:
-			fieldOffset = (imageBitability == 64) ? offsetof(PELIB_IMAGE_OPTIONAL_HEADER64, DataDirectory) : offsetof(PELIB_IMAGE_OPTIONAL_HEADER32, DataDirectory);
-			return sizeof(PELIB_IMAGE_NT_SIGNATURE) + sizeof(PELIB_IMAGE_FILE_HEADER) + fieldOffset + PELIB_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG * sizeof(PELIB_IMAGE_DATA_DIRECTORY);
+		case PELIB_MEMBER_TYPE::OPTHDR_DataDirectory_CONFIG_Rva:
+			fieldOffset = (imageBitability == 64) ? offsetof(PELIB_IMAGE_OPTIONAL_HEADER64, DataDirectory)
+				                                  : offsetof(PELIB_IMAGE_OPTIONAL_HEADER32, DataDirectory);
+			return sizeof(PELIB_IMAGE_NT_SIGNATURE) +
+				   sizeof(PELIB_IMAGE_FILE_HEADER) +
+				   fieldOffset +
+				   PELIB_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG * sizeof(PELIB_IMAGE_DATA_DIRECTORY);
 	}
 
 	return UINT32_MAX;
@@ -554,7 +587,9 @@ void PeLib::ImageLoader::setAddressOfEntryPoint(uint32_t addressOfEntryPoint)
 	optionalHeader.AddressOfEntryPoint = addressOfEntryPoint;
 }
 
-void PeLib::ImageLoader::setSizeOfCode(uint32_t sizeOfCode, uint32_t baseOfCode)
+void PeLib::ImageLoader::setSizeOfCode(
+	uint32_t sizeOfCode,
+	uint32_t baseOfCode)
 {
 	if(sizeOfCode != UINT32_MAX)
 		optionalHeader.SizeOfCode = sizeOfCode;
@@ -562,7 +597,10 @@ void PeLib::ImageLoader::setSizeOfCode(uint32_t sizeOfCode, uint32_t baseOfCode)
 		optionalHeader.BaseOfCode = baseOfCode;
 }
 
-void PeLib::ImageLoader::setDataDirectory(uint32_t entryIndex, uint32_t VirtualAddress, uint32_t Size)
+void PeLib::ImageLoader::setDataDirectory(
+	uint32_t entryIndex,
+	uint32_t VirtualAddress,
+	uint32_t Size)
 {
 	if(entryIndex < PELIB_IMAGE_NUMBEROF_DIRECTORY_ENTRIES)
 	{
@@ -577,7 +615,9 @@ void PeLib::ImageLoader::setDataDirectory(uint32_t entryIndex, uint32_t VirtualA
 	}
 }
 
-PeLib::PELIB_IMAGE_SECTION_HEADER * PeLib::ImageLoader::addSection(const char * name, uint32_t sectionSize)
+PeLib::PELIB_IMAGE_SECTION_HEADER * PeLib::ImageLoader::addSection(
+	const char * name,
+	uint32_t sectionSize)
 {
 	if(optionalHeader.FileAlignment == 0)
 		return nullptr;
@@ -603,7 +643,9 @@ PeLib::PELIB_IMAGE_SECTION_HEADER * PeLib::ImageLoader::addSection(const char * 
 	return getSectionHeader(sections.size() - 1);
 }
 
-void PeLib::ImageLoader::calcNewSectionAddresses(uint32_t & Rva, uint32_t & RawOffset)
+void PeLib::ImageLoader::calcNewSectionAddresses(
+	uint32_t & Rva,
+	uint32_t & RawOffset)
 {
 	uint32_t NewRawOffset = optionalHeader.SizeOfHeaders;
 	uint32_t NewRva = optionalHeader.SizeOfHeaders;
@@ -620,7 +662,9 @@ void PeLib::ImageLoader::calcNewSectionAddresses(uint32_t & Rva, uint32_t & RawO
 	Rva = AlignToSize(NewRva, optionalHeader.SectionAlignment);
 }
 
-void PeLib::ImageLoader::setSectionName(std::size_t sectionIndex, const char * newName)
+void PeLib::ImageLoader::setSectionName(
+	std::size_t sectionIndex,
+	const char * newName)
 {
 	if(sectionIndex < sections.size())
 	{
@@ -628,7 +672,10 @@ void PeLib::ImageLoader::setSectionName(std::size_t sectionIndex, const char * n
 	}
 }
 
-void PeLib::ImageLoader::setSectionVirtualRange(size_t sectionIndex, uint32_t VirtualAddress, uint32_t VirtualSize)
+void PeLib::ImageLoader::setSectionVirtualRange(
+	size_t sectionIndex,
+	uint32_t VirtualAddress,
+	uint32_t VirtualSize)
 {
 	if(sectionIndex < sections.size())
 	{
@@ -636,7 +683,10 @@ void PeLib::ImageLoader::setSectionVirtualRange(size_t sectionIndex, uint32_t Vi
 	}
 }
 
-void PeLib::ImageLoader::setSectionRawDataRange(size_t sectionIndex, uint32_t PointerToRawData, uint32_t SizeOfRawData)
+void PeLib::ImageLoader::setSectionRawDataRange(
+	size_t sectionIndex,
+	uint32_t PointerToRawData,
+	uint32_t SizeOfRawData)
 {
 	if(sectionIndex < sections.size())
 	{
@@ -644,7 +694,9 @@ void PeLib::ImageLoader::setSectionRawDataRange(size_t sectionIndex, uint32_t Po
 	}
 }
 
-void PeLib::ImageLoader::setSectionCharacteristics(size_t sectionIndex, uint32_t Characteristics)
+void PeLib::ImageLoader::setSectionCharacteristics(
+	size_t sectionIndex,
+	uint32_t Characteristics)
 {
 	if(sectionIndex < sections.size())
 	{
@@ -652,7 +704,11 @@ void PeLib::ImageLoader::setSectionCharacteristics(size_t sectionIndex, uint32_t
 	}
 }
 
-int PeLib::ImageLoader::splitSection(size_t sectionIndex, const std::string & prevSectName, const std::string & nextSectName, uint32_t splitOffset)
+int PeLib::ImageLoader::splitSection(
+	size_t sectionIndex,
+	const std::string & prevSectName,
+	const std::string & nextSectName,
+	uint32_t splitOffset)
 {
 	if(!optionalHeader.FileAlignment)
 		return PeLib::ERROR_NO_FILE_ALIGNMENT;
@@ -738,7 +794,7 @@ void PeLib::ImageLoader::makeValid()
 	// Fix the IMAGE_FILE_HEADER
 	fileHeader.Machine = (imageBitability == 64) ? PELIB_IMAGE_FILE_MACHINE_AMD64 : PELIB_IMAGE_FILE_MACHINE_I386;
 	fileHeader.NumberOfSections = (uint16_t)sections.size();
-	fileHeader.SizeOfOptionalHeader = getFieldOffset(OPTHDR_sizeof);
+	fileHeader.SizeOfOptionalHeader = getFieldOffset(PELIB_MEMBER_TYPE::OPTHDR_sizeof);
 	fileHeader.Characteristics = (fileHeader.Characteristics != 0) ? fileHeader.Characteristics : PELIB_IMAGE_FILE_EXECUTABLE_IMAGE | PELIB_IMAGE_FILE_32BIT_MACHINE;
 
 	// Fix the IMAGE_OPTIONAL_HEADER
@@ -792,7 +848,9 @@ PeLib::LoaderError PeLib::ImageLoader::loaderError() const
 //-----------------------------------------------------------------------------
 // Interface for loading files
 
-int PeLib::ImageLoader::Load(std::vector<std::uint8_t> & fileData, bool loadHeadersOnly)
+int PeLib::ImageLoader::Load(
+	ByteBuffer & fileData,
+	bool loadHeadersOnly)
 {
 	int fileError;
 
@@ -840,9 +898,12 @@ int PeLib::ImageLoader::Load(std::vector<std::uint8_t> & fileData, bool loadHead
 	return fileError;
 }
 
-int PeLib::ImageLoader::Load(std::istream & fs, std::streamoff fileOffset, bool loadHeadersOnly)
+int PeLib::ImageLoader::Load(
+	std::istream & fs,
+	std::streamoff fileOffset,
+	bool loadHeadersOnly)
 {
-	std::vector<uint8_t> fileData;
+	ByteBuffer fileData;
 	std::streampos fileSize;
 	size_t fileSize2;
 	int fileError;
@@ -895,7 +956,9 @@ int PeLib::ImageLoader::Load(std::istream & fs, std::streamoff fileOffset, bool 
 	return Load(fileData, loadHeadersOnly);
 }
 
-int PeLib::ImageLoader::Load(const char * fileName, bool loadHeadersOnly)
+int PeLib::ImageLoader::Load(
+	const char * fileName,
+	bool loadHeadersOnly)
 {
 	std::ifstream fs(fileName, std::ifstream::in | std::ifstream::binary);
 	if(!fs.is_open())
@@ -907,7 +970,10 @@ int PeLib::ImageLoader::Load(const char * fileName, bool loadHeadersOnly)
 //-----------------------------------------------------------------------------
 // Interface for saving to file
 
-int PeLib::ImageLoader::Save(std::ostream & fs, std::streamoff fileOffset, bool saveHeadersOnly)
+int PeLib::ImageLoader::Save(
+	std::ostream & fs,
+	std::streamoff fileOffset,
+	bool saveHeadersOnly)
 {
 	std::streamoff fileSize;
 	int fileError;
@@ -958,7 +1024,9 @@ int PeLib::ImageLoader::Save(std::ostream & fs, std::streamoff fileOffset, bool 
 	return ERROR_NONE;
 }
 
-int PeLib::ImageLoader::Save(const char * fileName, bool saveHeadersOnly)
+int PeLib::ImageLoader::Save(
+	const char * fileName,
+	bool saveHeadersOnly)
 {
     std::ofstream fs(fileName, std::ifstream::out | std::ifstream::binary);
     if(!fs.is_open())
@@ -970,7 +1038,11 @@ int PeLib::ImageLoader::Save(const char * fileName, bool saveHeadersOnly)
 //-----------------------------------------------------------------------------
 // Protected functions
 
-void PeLib::ImageLoader::readFromPage(PELIB_FILE_PAGE & page, void * buffer, size_t offsetInPage, size_t bytesInPage)
+void PeLib::ImageLoader::readFromPage(
+	PELIB_FILE_PAGE & page,
+	void * buffer,
+	size_t offsetInPage,
+	size_t bytesInPage)
 {
 	// Is it a page with actual data?
 	if(page.buffer.size())
@@ -983,13 +1055,21 @@ void PeLib::ImageLoader::readFromPage(PELIB_FILE_PAGE & page, void * buffer, siz
 	}
 }
 
-void PeLib::ImageLoader::writeToPage(PELIB_FILE_PAGE & page, void * buffer, size_t offsetInPage, size_t bytesInPage)
+void PeLib::ImageLoader::writeToPage(
+	PELIB_FILE_PAGE & page,
+	void * buffer,
+	size_t offsetInPage,
+	size_t bytesInPage)
 {
 	// Write the data to the page
 	page.writeToPage(buffer, offsetInPage, bytesInPage);
 }
 
-uint32_t PeLib::ImageLoader::readWriteImage(void * buffer, uint32_t rva, uint32_t bytesToRead, READWRITE ReadWrite)
+uint32_t PeLib::ImageLoader::readWriteImage(
+	void * buffer,
+	uint32_t rva,
+	uint32_t bytesToRead,
+	READWRITE ReadWrite)
 {
 	uint32_t bytesRead = 0;
 	uint32_t rvaEnd = rva + bytesToRead;
@@ -1032,7 +1112,11 @@ uint32_t PeLib::ImageLoader::readWriteImage(void * buffer, uint32_t rva, uint32_
 	return bytesRead;
 }
 
-uint32_t PeLib::ImageLoader::readWriteImageFile(void * buffer, uint32_t rva, uint32_t bytesToRead, bool bReadOperation)
+uint32_t PeLib::ImageLoader::readWriteImageFile(
+	void * buffer,
+	uint32_t rva,
+	uint32_t bytesToRead,
+	bool bReadOperation)
 {
 	uint32_t fileOffset = getFileOffsetFromRva(rva);
 
@@ -1076,7 +1160,8 @@ uint32_t PeLib::ImageLoader::readWriteImageFile(void * buffer, uint32_t rva, uin
 //  }
 //
 
-void PeLib::ImageLoader::processSectionHeader(PELIB_IMAGE_SECTION_HEADER * pSectionHeader)
+void PeLib::ImageLoader::processSectionHeader(
+	PELIB_IMAGE_SECTION_HEADER * pSectionHeader)
 {
 	// Note: Retdec's regression tests don't like it, because they require section headers to have original data
 	// Also signature verification stops working if we modify the original data
@@ -1142,7 +1227,9 @@ void PeLib::ImageLoader::processSectionHeader(PELIB_IMAGE_SECTION_HEADER * pSect
     TargetValue32 = (TargetValue32 & ~(((1 << Size) - 1) << InstPos)) |  \
           ((uint32_t)((((uint64_t)Value >> ValPos) & (((uint64_t)1 << Size) - 1))) << InstPos)
 
-bool PeLib::ImageLoader::processImageRelocation_IA64_IMM64(uint32_t fixupAddress, uint64_t difference)
+bool PeLib::ImageLoader::processImageRelocation_IA64_IMM64(
+	uint32_t fixupAddress,
+	uint64_t difference)
 {
 	uint64_t Value64 = 0;
 	uint32_t BundleBlock[4];
@@ -1237,7 +1324,11 @@ bool PeLib::ImageLoader::processImageRelocation_IA64_IMM64(uint32_t fixupAddress
 	return (writeImage(BundleBlock, fixupAddress, sizeof(BundleBlock)) == sizeof(BundleBlock));
 }
 
-bool PeLib::ImageLoader::processImageRelocations(uint64_t oldImageBase, uint64_t newImageBase, uint32_t VirtualAddress, uint32_t Size)
+bool PeLib::ImageLoader::processImageRelocations(
+	uint64_t oldImageBase,
+	uint64_t newImageBase,
+	uint32_t VirtualAddress,
+	uint32_t Size)
 {
 	uint64_t difference = (newImageBase - oldImageBase);
 	uint8_t * bufferEnd;
@@ -1295,7 +1386,8 @@ bool PeLib::ImageLoader::processImageRelocations(uint64_t oldImageBase, uint64_t
 
 				switch(typeAndOffset[i] >> 12)
 				{
-					case PELIB_IMAGE_REL_BASED_DIR64:         // The base relocation applies the difference to the 64-bit field at offset.
+					// The base relocation applies the difference to the 64-bit field at offset.	
+					case PELIB_IMAGE_REL_BASED_DIR64:
 					{
 						int64_t fixupValue = 0;
 
@@ -1306,7 +1398,8 @@ bool PeLib::ImageLoader::processImageRelocations(uint64_t oldImageBase, uint64_t
 						break;
 					}
 
-					case PELIB_IMAGE_REL_BASED_HIGHLOW:       // The base relocation applies all 32 bits of the difference to the 32-bit field at offset.
+					// The base relocation applies all 32 bits of the difference to the 32-bit field at offset.
+					case PELIB_IMAGE_REL_BASED_HIGHLOW:
 					{
 						int32_t fixupValue = 0;
 
@@ -1317,7 +1410,8 @@ bool PeLib::ImageLoader::processImageRelocations(uint64_t oldImageBase, uint64_t
 						break;
 					}
 
-					case PELIB_IMAGE_REL_BASED_HIGH:          // The base relocation adds the high 16 bits of the difference to the 16-bit field at offset.
+					// The base relocation adds the high 16 bits of the difference to the 16-bit field at offset.
+					case PELIB_IMAGE_REL_BASED_HIGH:
 					{
 						int16_t fixupValue = 0;
 
@@ -1330,7 +1424,8 @@ bool PeLib::ImageLoader::processImageRelocations(uint64_t oldImageBase, uint64_t
 						break;
 					}
 
-					case PELIB_IMAGE_REL_BASED_HIGHADJ:       // The base relocation adds the high 16 bits of the difference to the 16-bit field at offset.
+					// The base relocation adds the high 16 bits of the difference to the 16-bit field at offset.
+					case PELIB_IMAGE_REL_BASED_HIGHADJ:
 					{
 						int16_t fixupValue = 0;
 
@@ -1345,7 +1440,8 @@ bool PeLib::ImageLoader::processImageRelocations(uint64_t oldImageBase, uint64_t
 						break;
 					}
 
-					case PELIB_IMAGE_REL_BASED_LOW:           // The base relocation adds the low 16 bits of the difference to the 16-bit field at offset.
+					// The base relocation adds the low 16 bits of the difference to the 16-bit field at offset.
+					case PELIB_IMAGE_REL_BASED_LOW:
 					{
 						int16_t fixupValue = 0;
 
@@ -1356,7 +1452,8 @@ bool PeLib::ImageLoader::processImageRelocations(uint64_t oldImageBase, uint64_t
 						break;
 					}
 
-					case PELIB_IMAGE_REL_BASED_MIPS_JMPADDR:  // Relocate a MIPS jump address.
+					// Relocate a MIPS jump address.
+					case PELIB_IMAGE_REL_BASED_MIPS_JMPADDR:
 					{
 						uint32_t fixupValue = 0;
 
@@ -1373,7 +1470,8 @@ bool PeLib::ImageLoader::processImageRelocations(uint64_t oldImageBase, uint64_t
 						processImageRelocation_IA64_IMM64(fixupAddress, difference);
 						break;
 
-					case PELIB_IMAGE_REL_BASED_ABSOLUTE:      // Absolute - no fixup required.
+					// Absolute - no fixup required.
+					case PELIB_IMAGE_REL_BASED_ABSOLUTE:
 						break;
 
 					default:
@@ -1419,7 +1517,7 @@ void PeLib::ImageLoader::writeNewImageBase(uint64_t newImageBase)
 	}
 }
 
-int PeLib::ImageLoader::captureDosHeader(std::vector<uint8_t> & fileData)
+int PeLib::ImageLoader::captureDosHeader(ByteBuffer & fileData)
 {
 	uint8_t * fileBegin = fileData.data();
 	uint8_t * fileEnd = fileBegin + fileData.size();
@@ -1433,7 +1531,9 @@ int PeLib::ImageLoader::captureDosHeader(std::vector<uint8_t> & fileData)
 	return verifyDosHeader(dosHeader, fileData.size());
 }
 
-int PeLib::ImageLoader::saveDosHeader(std::ostream & fs, std::streamoff fileOffset)
+int PeLib::ImageLoader::saveDosHeader(
+	std::ostream & fs,
+	std::streamoff fileOffset)
 {
 	// Move to the required file offset
 	fs.seekp(fileOffset, std::ios::beg);
@@ -1443,7 +1543,7 @@ int PeLib::ImageLoader::saveDosHeader(std::ostream & fs, std::streamoff fileOffs
 	return ERROR_NONE;
 }
 
-int PeLib::ImageLoader::captureNtHeaders(std::vector<uint8_t> & fileData)
+int PeLib::ImageLoader::captureNtHeaders(ByteBuffer & fileData)
 {
 	uint8_t * fileBegin = fileData.data();
 	uint8_t * filePtr = fileBegin + dosHeader.e_lfanew;
@@ -1571,11 +1671,13 @@ int PeLib::ImageLoader::captureNtHeaders(std::vector<uint8_t> & fileData)
 	return ERROR_NONE;
 }
 
-int PeLib::ImageLoader::saveNtHeaders(std::ostream & fs, std::streamoff fileOffset)
+int PeLib::ImageLoader::saveNtHeaders(
+	std::ostream & fs,
+	std::streamoff fileOffset)
 {
 	// Calculate the size of the optional header. Any version of PE file,
 	// 32 or 64-bit, must have this field set to a correct value.
-	uint32_t sizeOfOptionalHeader = getFieldOffset(OPTHDR_sizeof_fixed) + optionalHeader.NumberOfRvaAndSizes * sizeof(PELIB_IMAGE_DATA_DIRECTORY);
+	uint32_t sizeOfOptionalHeader = getFieldOffset(PELIB_MEMBER_TYPE::OPTHDR_sizeof_fixed) + optionalHeader.NumberOfRvaAndSizes * sizeof(PELIB_IMAGE_DATA_DIRECTORY);
 
 	// Move to the required file offset
 	fs.seekp(fileOffset, std::ios::beg);
@@ -1680,7 +1782,10 @@ int PeLib::ImageLoader::saveNtHeaders(std::ostream & fs, std::streamoff fileOffs
 	return ERROR_NONE;
 }
 
-int PeLib::ImageLoader::captureSectionName(std::vector<uint8_t> & fileData, std::string & sectionName, const uint8_t * Name)
+int PeLib::ImageLoader::captureSectionName(
+	ByteBuffer & fileData,
+	std::string & sectionName,
+	const uint8_t * Name)
 {
 	// If the section name is in format of "/12345", then the section name is actually in the symbol table
 	// Sample: 2e9c671b8a0411f2b397544b368c44d7f095eb395779de0ad1ac946914dfa34c
@@ -1714,7 +1819,7 @@ int PeLib::ImageLoader::captureSectionName(std::vector<uint8_t> & fileData, std:
 	return ERROR_NONE;
 }
 
-int PeLib::ImageLoader::captureSectionHeaders(std::vector<uint8_t> & fileData)
+int PeLib::ImageLoader::captureSectionHeaders(ByteBuffer & fileData)
 {
 	uint8_t * fileBegin = fileData.data();
 	uint8_t * filePtr;
@@ -1888,7 +1993,9 @@ int PeLib::ImageLoader::captureSectionHeaders(std::vector<uint8_t> & fileData)
 	return ERROR_NONE;
 }
 
-int PeLib::ImageLoader::saveSectionHeaders(std::ostream & fs, std::streamoff fileOffset)
+int PeLib::ImageLoader::saveSectionHeaders(
+	std::ostream & fs,
+	std::streamoff fileOffset)
 {
 	PELIB_IMAGE_SECTION_HEADER * pHeaders;
 	size_t sectionCount = sections.size();
@@ -1912,7 +2019,7 @@ int PeLib::ImageLoader::saveSectionHeaders(std::ostream & fs, std::streamoff fil
 	return ERROR_NONE;
 }
 
-int PeLib::ImageLoader::captureImageSections(std::vector<uint8_t> & fileData)
+int PeLib::ImageLoader::captureImageSections(ByteBuffer & fileData)
 {
 	uint32_t virtualAddress = 0;
 	uint32_t sizeOfHeaders = optionalHeader.SizeOfHeaders;
@@ -1990,7 +2097,9 @@ int PeLib::ImageLoader::captureImageSections(std::vector<uint8_t> & fileData)
 	return ERROR_NONE;
 }
 
-int PeLib::ImageLoader::verifyDosHeader(PELIB_IMAGE_DOS_HEADER & hdr, std::size_t fileSize)
+int PeLib::ImageLoader::verifyDosHeader(
+	PELIB_IMAGE_DOS_HEADER & hdr,
+	std::size_t fileSize)
 {
 	if(hdr.e_magic != PELIB_IMAGE_DOS_SIGNATURE)
 		return ERROR_INVALID_FILE;
@@ -2002,7 +2111,10 @@ int PeLib::ImageLoader::verifyDosHeader(PELIB_IMAGE_DOS_HEADER & hdr, std::size_
 	return ERROR_NONE;
 }
 
-int PeLib::ImageLoader::verifyDosHeader(std::istream & fs, std::streamoff fileOffset, std::size_t fileSize)
+int PeLib::ImageLoader::verifyDosHeader(
+	std::istream & fs,
+	std::streamoff fileOffset,
+	std::size_t fileSize)
 {
 	PELIB_IMAGE_DOS_HEADER tempDosHeader;
 	int fileError;
@@ -2024,13 +2136,16 @@ int PeLib::ImageLoader::verifyDosHeader(std::istream & fs, std::streamoff fileOf
 	return (ldrError == LDR_ERROR_E_LFANEW_OUT_OF_FILE) ? ERROR_INVALID_FILE : ERROR_NONE;
 }
 
-int PeLib::ImageLoader::loadImageAsIs(std::vector<uint8_t> & fileData)
+int PeLib::ImageLoader::loadImageAsIs(ByteBuffer & fileData)
 {
 	rawFileData = fileData;
 	return ERROR_NONE;
 }
 
-int PeLib::ImageLoader::captureOptionalHeader64(uint8_t * fileBegin, uint8_t * filePtr, uint8_t * fileEnd)
+int PeLib::ImageLoader::captureOptionalHeader64(
+	uint8_t * fileBegin,
+	uint8_t * filePtr,
+	uint8_t * fileEnd)
 {
 	PELIB_IMAGE_OPTIONAL_HEADER64 optionalHeader64{};
 	uint8_t * dataDirectoryPtr;
@@ -2098,7 +2213,10 @@ int PeLib::ImageLoader::captureOptionalHeader64(uint8_t * fileBegin, uint8_t * f
 	return ERROR_NONE;
 }
 
-int PeLib::ImageLoader::captureOptionalHeader32(uint8_t * fileBegin, uint8_t * filePtr, uint8_t * fileEnd)
+int PeLib::ImageLoader::captureOptionalHeader32(
+	uint8_t * fileBegin,
+	uint8_t * filePtr,
+	uint8_t * fileEnd)
 {
 	PELIB_IMAGE_OPTIONAL_HEADER32 optionalHeader32{};
 	uint8_t * dataDirectoryPtr;
@@ -2168,7 +2286,7 @@ int PeLib::ImageLoader::captureOptionalHeader32(uint8_t * fileBegin, uint8_t * f
 }
 
 uint32_t PeLib::ImageLoader::captureImageSection(
-	std::vector<uint8_t> & fileData,
+	ByteBuffer & fileData,
 	uint32_t virtualAddress,
 	uint32_t virtualSize,
 	uint32_t pointerToRawData,
@@ -2275,7 +2393,9 @@ uint32_t PeLib::ImageLoader::captureImageSection(
 	return virtualAddress + sizeOfSection;
 }
 
-bool PeLib::ImageLoader::isGoodPagePointer(PFN_VERIFY_ADDRESS PfnVerifyAddress, void * pagePtr)
+bool PeLib::ImageLoader::isGoodPagePointer(
+	PFN_VERIFY_ADDRESS PfnVerifyAddress,
+	void * pagePtr)
 {
 	// If the caller didn't supply a verification procedure, use default one
 	// The verification procedure can possibly be system-specific, like IsBadReadPtr on Windows
@@ -2431,7 +2551,11 @@ bool PeLib::ImageLoader::isValidImageBlock(uint32_t Rva, uint32_t Size) const
 //-----------------------------------------------------------------------------
 // Testing functions
 
-size_t PeLib::ImageLoader::getMismatchOffset(void * buffer1, void * buffer2, uint32_t rva, size_t length)
+size_t PeLib::ImageLoader::getMismatchOffset(
+	void * buffer1,
+	void * buffer2,
+	uint32_t rva,
+	size_t length)
 {
 	uint8_t * byteBuffer1 = reinterpret_cast<uint8_t *>(buffer1);
 	uint8_t * byteBuffer2 = reinterpret_cast<uint8_t *>(buffer2);
@@ -2456,7 +2580,10 @@ size_t PeLib::ImageLoader::getMismatchOffset(void * buffer1, void * buffer2, uin
 	return (size_t)(-1);
 }
 
-void PeLib::ImageLoader::compareWithWindowsMappedImage(PELIB_IMAGE_COMPARE & ImageCompare, void * imageDataPtr, uint32_t imageSize)
+void PeLib::ImageLoader::compareWithWindowsMappedImage(
+	PELIB_IMAGE_COMPARE & ImageCompare,
+	void * imageDataPtr,
+	uint32_t imageSize)
 {
 	uint8_t * winImageData = reinterpret_cast<uint8_t *>(imageDataPtr);
 	uint8_t * winImageEnd = winImageData + imageSize;
@@ -2470,7 +2597,7 @@ void PeLib::ImageLoader::compareWithWindowsMappedImage(PELIB_IMAGE_COMPARE & Ima
 		// Check whether the image size is the same
 		if(imageSize != getSizeOfImageAligned())
 		{
-			ImageCompare.compareResult = ImagesDifferentSize;
+			ImageCompare.compareResult = PELIB_COMPARE_RESULT::ImagesDifferentSize;
 			ImageCompare.differenceOffset = 0;
 			return;
 		}
@@ -2502,7 +2629,7 @@ void PeLib::ImageLoader::compareWithWindowsMappedImage(PELIB_IMAGE_COMPARE & Ima
 					mismatchOffset = getMismatchOffset(winImageData, singlePage, rva, PELIB_PAGE_SIZE);
 					if(mismatchOffset != (size_t)(-1))
 					{
-						ImageCompare.compareResult = ImagesDifferentPageValue;
+						ImageCompare.compareResult = PELIB_COMPARE_RESULT::ImagesDifferentPageValue;
 						ImageCompare.differenceOffset = rva + mismatchOffset;
 						return;
 					}
@@ -2513,7 +2640,7 @@ void PeLib::ImageLoader::compareWithWindowsMappedImage(PELIB_IMAGE_COMPARE & Ima
 				// Accessible vs inacessible?
 				if(isGoodPageWin != isGoodPageMy)
 				{
-					ImageCompare.compareResult = ImagesDifferentPageAccess;
+					ImageCompare.compareResult = PELIB_COMPARE_RESULT::ImagesDifferentPageAccess;
 					ImageCompare.differenceOffset = rva;
 					return;
 				}
@@ -2531,7 +2658,7 @@ void PeLib::ImageLoader::compareWithWindowsMappedImage(PELIB_IMAGE_COMPARE & Ima
 		// Windows didn't map the image
 		if(winImageData == nullptr)
 		{
-			ImageCompare.compareResult = ImagesWindowsDidntLoadWeDid;
+			ImageCompare.compareResult = PELIB_COMPARE_RESULT::ImagesWindowsDidntLoadWeDid;
 			return;
 		}
 	}
@@ -2540,12 +2667,12 @@ void PeLib::ImageLoader::compareWithWindowsMappedImage(PELIB_IMAGE_COMPARE & Ima
 		// Windows mapped the image
 		if(winImageData != nullptr)
 		{
-			ImageCompare.compareResult = ImagesWindowsLoadedWeDidnt;
+			ImageCompare.compareResult = PELIB_COMPARE_RESULT::ImagesWindowsLoadedWeDidnt;
 			return;
 		}
 	}
 
 	// Both Windows and our image are the same
-	ImageCompare.compareResult = ImagesEqual;
+	ImageCompare.compareResult = PELIB_COMPARE_RESULT::ImagesEqual;
 	ImageCompare.differenceOffset = 0;
 }

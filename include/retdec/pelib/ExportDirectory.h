@@ -10,8 +10,8 @@
 * of PeLib.
 */
 
-#ifndef EXPORTDIRECTORY_H
-#define EXPORTDIRECTORY_H
+#ifndef RETDEC_PELIB_EXPORTDIRECTORY_H
+#define RETDEC_PELIB_EXPORTDIRECTORY_H
 
 #include "retdec/pelib/ImageLoader.h"
 

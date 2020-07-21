@@ -477,7 +477,7 @@ void PeDetector::detectArchitecture()
 			result = "Matsushita AM33";
 			break;
 		case PELIB_IMAGE_FILE_MACHINE_EBC:
-			result = "EFI std::uint8_t code";
+			result = "EFI byte code";
 			break;
 		case PELIB_IMAGE_FILE_MACHINE_MSIL:
 			result = "MSIL - Microsoft Intermediate Language (aka CIL - Common Intermediate Language)";

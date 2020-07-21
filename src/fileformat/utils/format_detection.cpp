@@ -16,7 +16,7 @@
 #include "retdec/utils/string.h"
 #include "retdec/fileformat/utils/byte_array_buffer.h"
 #include "retdec/fileformat/utils/format_detection.h"
-#include "retdec/pelib/PeLib.h"
+#include "retdec/pelib/PeFile.h"
 #include "retdec/pelib/ImageLoader.h"
 
 using namespace retdec::utils;

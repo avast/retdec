@@ -10,8 +10,8 @@
 * of PeLib.
 */
 
-#ifndef IMPORTDIRECTORY_H
-#define IMPORTDIRECTORY_H
+#ifndef RETDEC_PELIB_IMPORTDIRECTORY_H
+#define RETDEC_PELIB_IMPORTDIRECTORY_H
 
 #include <set>
 #include <unordered_map>

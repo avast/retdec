@@ -10,8 +10,8 @@
 * of PeLib.
 */
 
-#ifndef PEFILE_H
-#define PEFILE_H
+#ifndef RETDEC_PELIB_PEFILE_H
+#define RETDEC_PELIB_PEFILE_H
 
 #include "retdec/pelib/PeLibInc.h"
 #include "retdec/pelib/ImageLoader.h"

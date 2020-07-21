@@ -10,8 +10,8 @@
 * of PeLib.
 */
 
-#ifndef STD_H
-#define STD_H
+#ifndef RETDEC_PELIB_PELIBINC_H
+#define RETDEC_PELIB_PELIBINC_H
 
 #include <algorithm>
 #include <climits>

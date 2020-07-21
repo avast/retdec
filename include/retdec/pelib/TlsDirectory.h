@@ -10,8 +10,8 @@
 * of PeLib.
 */
 
-#ifndef TLSDIRECTORY_H
-#define TLSDIRECTORY_H
+#ifndef RETDEC_PELIB_TLSDIRECTORY_H
+#define RETDEC_PELIB_TLSDIRECTORY_H
 
 #include "retdec/pelib/ImageLoader.h"
 

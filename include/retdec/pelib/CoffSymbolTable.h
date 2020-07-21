@@ -4,8 +4,8 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#ifndef COFFSYMBOLTABLE_H
-#define COFFSYMBOLTABLE_H
+#ifndef RETDEC_PELIB_COFFSYMBOLTABLE_H
+#define RETDEC_PELIB_COFFSYMBOLTABLE_H
 
 #include "retdec/pelib/PeLibInc.h"
 

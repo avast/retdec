@@ -10,8 +10,8 @@
 * of PeLib.
 */
 
-#ifndef COMHEADERDIRECTORY_H
-#define COMHEADERDIRECTORY_H
+#ifndef RETDEC_PELIB_COMHEADERDIRECTORY_H
+#define RETDEC_PELIB_COMHEADERDIRECTORY_H
 
 #include "retdec/pelib/ImageLoader.h"
 

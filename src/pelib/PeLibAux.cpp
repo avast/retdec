@@ -22,8 +22,6 @@
 
 namespace PeLib
 {
-	const std::uint64_t PELIB_IMAGE_ORDINAL_FLAGS<64>::PELIB_IMAGE_ORDINAL_FLAG = 0x8000000000000000ULL;
-
 	// Keep in sync with PeLib::LoaderError!!!
 	static const std::vector<LoaderErrorInfo> LdrErrStrings =
 	{

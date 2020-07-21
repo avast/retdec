@@ -102,12 +102,6 @@ PeWrapper::PeWrapper(
 {}
 
 /**
- * Destructor
- */
-PeWrapper::~PeWrapper()
-{}
-
-/**
  * Get type of binary file
  * @return Type of binary file (e.g. DLL)
  */

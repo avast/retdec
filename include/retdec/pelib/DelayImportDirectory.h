@@ -4,8 +4,8 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#ifndef DELAY_IMPORT_DIRECTORY_H
-#define DELAY_IMPORT_DIRECTORY_H
+#ifndef RETDEC_PELIB_DELAY_IMPORT_DIRECTORY_H
+#define RETDEC_PELIB_DELAY_IMPORT_DIRECTORY_H
 
 #include "retdec/pelib/PeLibInc.h"
 #include "retdec/pelib/ImageLoader.h"

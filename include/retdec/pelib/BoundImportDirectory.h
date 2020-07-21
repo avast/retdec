@@ -10,8 +10,8 @@
 * of PeLib.
 */
 
-#ifndef BOUNDIMPORTDIRECTORY_H
-#define BOUNDIMPORTDIRECTORY_H
+#ifndef RETDEC_PELIB_BOUNDIMPORTDIRECTORY_H
+#define RETDEC_PELIB_BOUNDIMPORTDIRECTORY_H
 
 #include "retdec/pelib/PeLibInc.h"
 #include "retdec/pelib/PeLibAux.h"

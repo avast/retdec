@@ -10,8 +10,8 @@
 * of PeLib.
 */
 
-#ifndef IATDIRECTORY_H
-#define IATDIRECTORY_H
+#ifndef RETDEC_PELIB_IATDIRECTORY_H
+#define RETDEC_PELIB_IATDIRECTORY_H
 
 #include "retdec/pelib/PeLibInc.h"
 #include "retdec/pelib/ImageLoader.h"

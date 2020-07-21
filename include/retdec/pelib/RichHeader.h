@@ -4,8 +4,8 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#ifndef RICHHEADER_H
-#define RICHHEADER_H
+#ifndef RETDEC_PELIB_RICHHEADER_H
+#define RETDEC_PELIB_RICHHEADER_H
 
 #include <cstdint>
 #include <vector>

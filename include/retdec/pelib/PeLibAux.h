@@ -10,8 +10,8 @@
 * of PeLib.
 */
 
-#ifndef PELIBAUX_H
-#define PELIBAUX_H
+#ifndef RETDEC_PELIB_PELIBAUX_H
+#define RETDEC_PELIB_PELIBAUX_H
 
 #include <numeric>
 #include <string.h>
@@ -163,22 +163,7 @@ namespace PeLib
 	const std::uint32_t PELIB_IMAGE_RESOURCE_NAME_IS_STRING = 0x80000000;
 	const std::uint32_t PELIB_IMAGE_RESOURCE_RVA_MASK = 0x7FFFFFFF;
 
-	template<int bits>
-	struct PELIB_IMAGE_ORDINAL_FLAGS;
-
-	template<>
-	struct PELIB_IMAGE_ORDINAL_FLAGS<32>
-	{
-		static const std::uint32_t PELIB_IMAGE_ORDINAL_FLAG = 0x80000000;
-	};
-
-	template<>
-	struct PELIB_IMAGE_ORDINAL_FLAGS<64>
-	{
-		static const std::uint64_t PELIB_IMAGE_ORDINAL_FLAG;
-	};
-
-	enum
+	enum : std::uint32_t
 	{
 		PELIB_IMAGE_DIRECTORY_ENTRY_EXPORT,		// OK
 		PELIB_IMAGE_DIRECTORY_ENTRY_IMPORT,		// OK
@@ -250,7 +235,7 @@ namespace PeLib
 		PELIB_IMAGE_SCN_MEM_WRITE		  = 0x80000000U
 	};
 
-	enum PELIB_IMAGE_FILE_MACHINE
+	enum PELIB_IMAGE_FILE_MACHINE : std::uint16_t
 	{
 		PELIB_IMAGE_FILE_MACHINE_UNKNOWN		= 0,
 		PELIB_IMAGE_FILE_MACHINE_I386			= 0x014C,
@@ -289,7 +274,7 @@ namespace PeLib
 		PELIB_IMAGE_FILE_MACHINE_MSIL			= 0xC0EE
 	};
 
-	enum
+	enum : std::uint32_t
 	{
 		PELIB_IMAGE_FILE_RELOCS_STRIPPED	   = 0x0001,
 		PELIB_IMAGE_FILE_EXECUTABLE_IMAGE	  = 0x0002,
@@ -308,7 +293,7 @@ namespace PeLib
 		PELIB_IMAGE_FILE_BYTES_REVERSED_HI	 = 0x8000
 	};
 
-	enum
+	enum : std::uint16_t
 	{
 		PELIB_IMAGE_DLLCHARACTERISTICS_DYNAMIC_BASE            = 0x0040,
 		PELIB_IMAGE_DLLCHARACTERISTICS_FORCE_INTEGRITY         = 0x0080,
@@ -322,14 +307,14 @@ namespace PeLib
 		PELIB_IMAGE_DLLCHARACTERISTICS_TERMINAL_SERVER_AWARE   = 0x8000
 	};
 
-	enum
+	enum : std::uint16_t
 	{
 		PELIB_IMAGE_NT_OPTIONAL_HDR32_MAGIC      = 0x10b,
 		PELIB_IMAGE_NT_OPTIONAL_HDR64_MAGIC      = 0x20b,
 		PELIB_IMAGE_ROM_OPTIONAL_HDR_MAGIC       = 0x107
 	};
 
-	enum
+	enum : std::uint16_t
 	{
 		PELIB_IMAGE_SUBSYSTEM_UNKNOWN	      = 0,
 		PELIB_IMAGE_SUBSYSTEM_NATIVE	       = 1,
@@ -353,7 +338,7 @@ namespace PeLib
 		PELIB_IMAGE_REL_BASED_DIR64           = 10
 	};
 
-	enum
+	enum : std::uint32_t
 	{
 		PELIB_RT_CURSOR = 1,		// 1
 		PELIB_RT_BITMAP,			// 2
@@ -380,7 +365,7 @@ namespace PeLib
 		PELIB_RT_TOOLBAR
 	};
 
-	enum
+	enum : std::uint16_t
 	{
 		PELIB_LANG_NEUTRAL = 0x00,
 		PELIB_LANG_ARABIC = 0x01,

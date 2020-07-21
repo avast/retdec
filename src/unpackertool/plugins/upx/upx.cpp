@@ -12,7 +12,7 @@
 #include "unpackertool/plugins/upx/upx.h"
 #include "unpackertool/plugins/upx/upx_exceptions.h"
 #include "unpackertool/plugins/upx/upx_stub_signatures.h"
-#include "retdec/pelib/PeLib.h"
+#include "retdec/pelib/PeFile.h"
 #include "retdec/unpacker/unpacker_exception.h"
 
 using namespace retdec::unpacker;

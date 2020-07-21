@@ -10,8 +10,8 @@
 * of PeLib.
 */
 
-#ifndef RELOCATIONSDIRECTORY_H
-#define RELOCATIONSDIRECTORY_H
+#ifndef RETDEC_PELIB_RELOCATIONSDIRECTORY_H
+#define RETDEC_PELIB_RELOCATIONSDIRECTORY_H
 
 #include "retdec/pelib/ImageLoader.h"
 

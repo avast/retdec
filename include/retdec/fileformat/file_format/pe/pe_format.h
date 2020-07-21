@@ -16,7 +16,7 @@
 #include "retdec/fileformat/types/dotnet_headers/user_string_stream.h"
 #include "retdec/fileformat/types/dotnet_types/dotnet_class.h"
 #include "retdec/fileformat/types/visual_basic/visual_basic_info.h"
-#include "retdec/pelib/PeLib.h"
+#include "retdec/pelib/PeFile.h"
 
 // Forward declare OpenSSL structures used in this header.
 typedef struct pkcs7_st PKCS7;

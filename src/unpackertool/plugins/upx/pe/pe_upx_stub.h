@@ -10,7 +10,7 @@
 #include <unordered_set>
 
 #include "unpackertool/plugins/upx/upx_stub.h"
-#include "retdec/pelib/PeLib.h"
+#include "retdec/pelib/PeFile.h"
 #include "retdec/utils/dynamic_buffer.h"
 #include "retdec/unpacker/signature.h"
 

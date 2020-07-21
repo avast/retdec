@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <cstring>
 
-#include "retdec/pelib/PeLib.h"
+#include "retdec/pelib/PeFile.h"
 #include "retdec/utils/alignment.h"
 #include "retdec/utils/file_io.h"
 #include "unpackertool/plugins/upx/decompressors/decompressors.h"
@@ -565,8 +565,8 @@ template <int bits> UpxExtraData PeUpxStub<bits>::parseExtraData(DynamicBuffer& 
 
 	const PeLib::ImageLoader & imageLoader = _newPeFile->imageLoader();
 	std::uint16_t numberOfSections = unpackedData.read<std::uint16_t>(originalHeaderOffset + sizeof(PeLib::PELIB_IMAGE_NT_SIGNATURE) + 0x2);
-	std::uint32_t numberOfDirectories = unpackedData.read<std::uint32_t>(originalHeaderOffset + imageLoader.getFieldOffset(PeLib::OPTHDR_NumberOfRvaAndSizes));
-	std::uint32_t dataDirectoriesStart = imageLoader.getFieldOffset(PeLib::OPTHDR_DataDirectory);
+	std::uint32_t numberOfDirectories = unpackedData.read<std::uint32_t>(originalHeaderOffset + imageLoader.getFieldOffset(PeLib::PELIB_MEMBER_TYPE::OPTHDR_NumberOfRvaAndSizes));
+	std::uint32_t dataDirectoriesStart = imageLoader.getFieldOffset(PeLib::PELIB_MEMBER_TYPE::OPTHDR_DataDirectory);
 	std::uint32_t sectionHeadersStart = dataDirectoriesStart + numberOfDirectories * PeLib::PELIB_IMAGE_DATA_DIRECTORY::size();
 	std::uint32_t sectionHeadersEnd = sectionHeadersStart + sizeof(PeLib::PELIB_IMAGE_SECTION_HEADER) * numberOfSections;
 
@@ -794,7 +794,7 @@ template <int bits> void PeUpxStub<bits>::fixRelocations(DynamicBuffer& unpacked
 template <int bits> void PeUpxStub<bits>::fixTls(const DynamicBuffer& originalHeader)
 {
 	PeLib::ImageLoader & imageLoader = _newPeFile->imageLoader();
-	std::uint32_t tlsDirOffset = imageLoader.getFieldOffset(PeLib::OPTHDR_DataDirectory_TLS_Rva);
+	std::uint32_t tlsDirOffset = imageLoader.getFieldOffset(PeLib::PELIB_MEMBER_TYPE::OPTHDR_DataDirectory_TLS_Rva);
 
 	// Read original TLS data directory
 	std::uint32_t tlsRva = originalHeader.read<std::uint32_t>(tlsDirOffset);
@@ -836,7 +836,7 @@ template <int bits> void PeUpxStub<bits>::fixOep(const DynamicBuffer& originalHe
 template <int bits> void PeUpxStub<bits>::fixExports(const DynamicBuffer& originalHeader)
 {
 	PeLib::ImageLoader & imageLoader = _newPeFile->imageLoader();
-	std::uint32_t exportDirOffset = imageLoader.getFieldOffset(PeLib::OPTHDR_DataDirectory_EXPORT_Rva);
+	std::uint32_t exportDirOffset = imageLoader.getFieldOffset(PeLib::PELIB_MEMBER_TYPE::OPTHDR_DataDirectory_EXPORT_Rva);
 
 	// Assumption is that exports are compressed
 	_exportsCompressed = true;
@@ -927,7 +927,7 @@ template <int bits> void PeUpxStub<bits>::fixExports(const DynamicBuffer& origin
 template <int bits> void PeUpxStub<bits>::fixLoadConfiguration(const DynamicBuffer& originalHeader)
 {
 	PeLib::ImageLoader & imageLoader = _newPeFile->imageLoader();
-	std::uint32_t configDirOffset = imageLoader.getFieldOffset(PeLib::OPTHDR_DataDirectory_CONFIG_Rva);
+	std::uint32_t configDirOffset = imageLoader.getFieldOffset(PeLib::PELIB_MEMBER_TYPE::OPTHDR_DataDirectory_CONFIG_Rva);
 
 	// Read original Load Configuration data directory
 	std::uint32_t loadConfigRva = originalHeader.read<std::uint32_t>(configDirOffset);
@@ -956,7 +956,7 @@ template <int bits> void PeUpxStub<bits>::fixResources(const DynamicBuffer& unpa
 {
 	PeLib::PELIB_IMAGE_SECTION_HEADER * pSectionHeader;
 	PeLib::ImageLoader & imageLoader = _newPeFile->imageLoader();
-	std::uint32_t rsrcDirOffset = imageLoader.getFieldOffset(PeLib::OPTHDR_DataDirectory_RSRC_Rva);
+	std::uint32_t rsrcDirOffset = imageLoader.getFieldOffset(PeLib::PELIB_MEMBER_TYPE::OPTHDR_DataDirectory_RSRC_Rva);
 
 	// Check whether file contains resources
 	std::uint32_t uncompressedRsrcRva = imageLoader.getDataDirRva(PeLib::PELIB_IMAGE_DIRECTORY_ENTRY_RESOURCE);
@@ -1020,8 +1020,8 @@ template <int bits> void PeUpxStub<bits>::fixSectionHeaders(const DynamicBuffer&
 {
 	PeLib::ImageLoader & imageLoader = _newPeFile->imageLoader();
 	std::uint16_t numberOfSections = originalHeader.read<std::uint16_t>(6);
-	std::uint32_t numberOfDirectories = originalHeader.read<std::uint32_t>(imageLoader.getFieldOffset(PeLib::OPTHDR_NumberOfRvaAndSizes));
-	std::uint32_t sectionHeadersOffset = imageLoader.getFieldOffset(PeLib::OPTHDR_DataDirectory_EXPORT_Rva) + numberOfDirectories * 8;
+	std::uint32_t numberOfDirectories = originalHeader.read<std::uint32_t>(imageLoader.getFieldOffset(PeLib::PELIB_MEMBER_TYPE::OPTHDR_NumberOfRvaAndSizes));
+	std::uint32_t sectionHeadersOffset = imageLoader.getFieldOffset(PeLib::PELIB_MEMBER_TYPE::OPTHDR_DataDirectory_EXPORT_Rva) + numberOfDirectories * 8;
 	std::uint32_t sectionHeadersEnd = sectionHeadersOffset + sizeof(PeLib::PELIB_IMAGE_SECTION_HEADER) * numberOfSections;
 
 	std::uint32_t readPos = sectionHeadersOffset;

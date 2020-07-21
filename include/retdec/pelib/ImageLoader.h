@@ -10,8 +10,8 @@
 * of PeLib.
 */
 
-#ifndef IMAGE_LOADER_H
-#define IMAGE_LOADER_H
+#ifndef RETDEC_PELIB_IMAGE_LOADER_H
+#define RETDEC_PELIB_IMAGE_LOADER_H
 
 #include <string>
 #include <vector>
@@ -21,23 +21,9 @@
 namespace PeLib {
 
 //-----------------------------------------------------------------------------
-// Enum for Windows build numbers
-
-enum : std::uint32_t
-{
-	BuildNumberXP       = 2600,          // Behavior equal to Windows XP
-	BuildNumberVista    = 6000,          // Behavior equal to Windows Vista (SP0 = 6000, SP1 = 6001, SP2 = 6002)
-	BuildNumber7        = 7600,          // Behavior equal to Windows 7 (SP0 = 7600, SP1 = 7601)
-	BuildNumber8        = 9200,          // Behavior equal to Windows 8
-	BuildNumber10       = 10240,         // Behavior equal to Windows 10
-	BuildNumberMask     = 0x0FFFF,       // Mask for extracting the operating system
-	BuildNumber64Bit    = 0x10000,       // Emulate 64-bit system
-};
-
-//-----------------------------------------------------------------------------
 // Enum for ImageLoader::getFieldOffset()
 
-enum PELIB_MEMBER_TYPE : std::uint32_t
+enum struct PELIB_MEMBER_TYPE : std::uint32_t
 {
 	OPTHDR_sizeof,
 	OPTHDR_sizeof_fixed,
@@ -52,28 +38,43 @@ enum PELIB_MEMBER_TYPE : std::uint32_t
 //-----------------------------------------------------------------------------
 // Support structure for one PE image compare result
 
-enum PELIB_COMPARE_RESULT : std::uint32_t
+enum struct PELIB_COMPARE_RESULT : std::uint32_t
 {
-	ImagesEqual,                                // The images are equal
-	ImagesWindowsLoadedWeDidnt,                 // 
-	ImagesWindowsDidntLoadWeDid,                // 
-	ImagesDifferentSize,                        // The images have different size
-	ImagesDifferentPageAccess,                  // An image page is different (accessible vs non-accessible)
-	ImagesDifferentPageValue,                   // There is a different value at a certain offset
+	ImagesEqual,                                    // The images are equal
+	ImagesWindowsLoadedWeDidnt,                     // 
+	ImagesWindowsDidntLoadWeDid,                    // 
+	ImagesDifferentSize,                            // The images have different size
+	ImagesDifferentPageAccess,                      // An image page is different (accessible vs non-accessible)
+	ImagesDifferentPageValue,                       // There is a different value at a certain offset
+	ImagesCompareInvalid,
 };
+
+//-----------------------------------------------------------------------------
+// Windows build numbers
+
+const std::uint32_t	BuildNumberXP = 2600;           // Behavior equal to Windows XP
+const std::uint32_t BuildNumberVista = 6000;        // Behavior equal to Windows Vista (SP0 = 6000, SP1 = 6001, SP2 = 6002)
+const std::uint32_t BuildNumber7 = 7600;            // Behavior equal to Windows 7 (SP0 = 7600, SP1 = 7601)
+const std::uint32_t BuildNumber8 = 9200;            // Behavior equal to Windows 8
+const std::uint32_t BuildNumber10 = 10240;          // Behavior equal to Windows 10
+const std::uint32_t BuildNumberMask = 0x0FFFF;      // Mask for extracting the operating system
+const std::uint32_t BuildNumber64Bit = 0x10000;     // Emulate 64-bit system
+
+//-----------------------------------------------------------------------------
+// Structure for comparison with Windows mapped images
 
 typedef bool (*PFN_VERIFY_ADDRESS)(void * ptr, size_t length);
 typedef bool (*PFN_COMPARE_CALLBACK)(struct PELIB_IMAGE_COMPARE * pImgCompare, size_t BytesCompared, size_t BytesTotal);
 
 struct PELIB_IMAGE_COMPARE
 {
-	PFN_VERIFY_ADDRESS PfnVerifyAddress;        // Custom function for verifying memory address
-	PFN_COMPARE_CALLBACK PfnCompareCallback;    // Custom function for calling compare callback
-	PELIB_COMPARE_RESULT compareResult;
-	const char * szFileName;                    // Current file being compared (plain name)
-	const char * dumpIfNotEqual;                // If non-NULL, the image will be dumped into that file if different
-	std::uint32_t differenceOffset;             // If compareResult is ImagesDifferentPageValue, this contains offset of the difference 
-	std::uint32_t startTickCount;               // GetTickCount value at the start of image testing
+	PFN_VERIFY_ADDRESS PfnVerifyAddress = nullptr;  // Custom function for verifying memory address
+	PFN_COMPARE_CALLBACK PfnCompareCallback = nullptr; // Custom function for calling compare callback
+	PELIB_COMPARE_RESULT compareResult = PELIB_COMPARE_RESULT::ImagesCompareInvalid;
+	const char * szFileName = nullptr;              // Current file being compared (plain name)
+	const char * dumpIfNotEqual = nullptr;          // If non-NULL, the image will be dumped into that file if different
+	std::uint32_t differenceOffset = 0;             // If compareResult is ImagesDifferentPageValue, this contains offset of the difference 
+	std::uint32_t startTickCount = 0;               // GetTickCount value at the start of image testing
 };
 
 //-----------------------------------------------------------------------------
@@ -86,9 +87,6 @@ struct PELIB_FILE_PAGE
 		isInvalidPage = true;
 		isZeroPage = false;
 	}
-
-	~PELIB_FILE_PAGE()
-	{}
 
 	// Initializes the page with a valid data
 	bool setValidPage(const void * data, size_t length)
@@ -127,7 +125,7 @@ struct PELIB_FILE_PAGE
 		}
 	}
 
-	std::vector<std::uint8_t> buffer;     // A page-sized buffer, holding one image page. Empty if isInvalidPage
+	ByteBuffer buffer;                    // A page-sized buffer, holding one image page. Empty if isInvalidPage
 	bool isInvalidPage;                   // For invalid pages within image (SectionAlignment > 0x1000)
 	bool isZeroPage;                      // For sections with VirtualSize != 0, RawSize = 0
 };
@@ -140,9 +138,8 @@ class ImageLoader
 	public:
 
 	ImageLoader(std::uint32_t loaderFlags = 0);
-	~ImageLoader();
 
-	int Load(std::vector<std::uint8_t> & fileData, bool loadHeadersOnly = false);
+	int Load(ByteBuffer & fileData, bool loadHeadersOnly = false);
 	int Load(std::istream & fs, std::streamoff fileOffset = 0, bool loadHeadersOnly = false);
 	int Load(const char * fileName, bool loadHeadersOnly = false);
 
@@ -156,7 +153,12 @@ class ImageLoader
 
 	std::uint32_t readString(std::string & str, std::uint32_t rva, std::uint32_t maxLength = 65535);
 	std::uint32_t readStringRc(std::string & str, std::uint32_t rva);
-	std::uint32_t readStringRaw(std::vector<std::uint8_t> & fileData, std::string & str, std::size_t offset, std::size_t maxLength = 65535, bool mustBePrintable = false, bool mustNotBeTooLong = false);
+	std::uint32_t readStringRaw(ByteBuffer & fileData,
+		                        std::string & str,
+		                        std::size_t offset,
+		                        std::size_t maxLength = 65535,
+		                        bool mustBePrintable = false,
+		                        bool mustNotBeTooLong = false);
 	std::uint32_t stringLength(std::uint32_t rva, std::uint32_t maxLength = 65535) const;
 
 	std::uint32_t readPointer(std::uint32_t rva, std::uint64_t & pointerValue);
@@ -364,23 +366,23 @@ class ImageLoader
 	bool processImageRelocations(std::uint64_t oldImageBase, std::uint64_t getImageBase, std::uint32_t VirtualAddress, std::uint32_t Size);
 	void writeNewImageBase(std::uint64_t newImageBase);
 
-	int captureDosHeader(std::vector<std::uint8_t> & fileData);
+	int captureDosHeader(ByteBuffer & fileData);
 	int saveDosHeader(std::ostream & fs, std::streamoff fileOffset);
-	int captureNtHeaders(std::vector<std::uint8_t> & fileData);
+	int captureNtHeaders(ByteBuffer & fileData);
 	int saveNtHeaders(std::ostream & fs, std::streamoff fileOffset);
-	int captureSectionName(std::vector<std::uint8_t> & fileData, std::string & sectionName, const std::uint8_t * name);
-	int captureSectionHeaders(std::vector<std::uint8_t> & fileData);
+	int captureSectionName(ByteBuffer & fileData, std::string & sectionName, const std::uint8_t * name);
+	int captureSectionHeaders(ByteBuffer & fileData);
 	int saveSectionHeaders(std::ostream & fs, std::streamoff fileOffset);
-	int captureImageSections(std::vector<std::uint8_t> & fileData);
+	int captureImageSections(ByteBuffer & fileData);
 	int captureOptionalHeader32(std::uint8_t * fileData, std::uint8_t * filePtr, std::uint8_t * fileEnd);
 	int captureOptionalHeader64(std::uint8_t * fileData, std::uint8_t * filePtr, std::uint8_t * fileEnd);
 
 	int verifyDosHeader(PELIB_IMAGE_DOS_HEADER & hdr, std::size_t fileSize);
 	int verifyDosHeader(std::istream & fs, std::streamoff fileOffset, std::size_t fileSize);
 
-	int loadImageAsIs(std::vector<std::uint8_t> & fileData);
+	int loadImageAsIs(ByteBuffer & fileData);
 
-	std::uint32_t captureImageSection(std::vector<std::uint8_t> & fileData,
+	std::uint32_t captureImageSection(ByteBuffer & fileData,
 									  std::uint32_t virtualAddress,
 									  std::uint32_t virtualSize,
 									  std::uint32_t pointerToRawData,
@@ -432,13 +434,13 @@ class ImageLoader
 
 	std::vector<PELIB_SECTION_HEADER> sections;         // Vector of section headers
 	std::vector<PELIB_FILE_PAGE> pages;                 // PE file pages as if mapped
-	std::vector<std::uint8_t> rawFileData;              // Loaded content of the image in case it couldn't have been mapped
 	PELIB_IMAGE_DOS_HEADER  dosHeader;                  // Loaded DOS header
 	PELIB_IMAGE_FILE_HEADER fileHeader;                 // Loaded NT file header
 	PELIB_IMAGE_OPTIONAL_HEADER optionalHeader;         // 32/64-bit optional header
+	ByteBuffer rawFileData;                             // Loaded content of the image in case it couldn't have been mapped
 	LoaderError ldrError;
-	std::uint32_t ntSignature;
 	std::uint32_t windowsBuildNumber;
+	std::uint32_t ntSignature;
 	std::uint32_t maxSectionCount;
 	std::uint32_t realNumberOfRvaAndSizes;              // Real present number of RVA and sizes
 	std::uint32_t checkSumFileOffset;                   // File offset of the image checksum
@@ -454,4 +456,4 @@ class ImageLoader
 
 }	// namespace PeLib
 
-#endif	// IMAGE_LOADER_H
+#endif	// RETDEC_PELIB_IMAGE_LOADER_H

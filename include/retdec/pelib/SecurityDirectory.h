@@ -4,8 +4,8 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#ifndef SECURITYDIRECTORY_H
-#define SECURITYDIRECTORY_H
+#ifndef RETDEC_PELIB_SECURITYDIRECTORY_H
+#define RETDEC_PELIB_SECURITYDIRECTORY_H
 
 namespace PeLib
 {

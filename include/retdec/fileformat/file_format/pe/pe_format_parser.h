@@ -4,14 +4,14 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#ifndef RETDEC_FILEFORMAT_FILE_FORMAT_PE_PE_FORMAT_PARSER_PE_FORMAT_PARSER_H
-#define RETDEC_FILEFORMAT_FILE_FORMAT_PE_PE_FORMAT_PARSER_PE_FORMAT_PARSER_H
+#ifndef RETDEC_FILEFORMAT_PE_FORMAT_PARSER_H
+#define RETDEC_FILEFORMAT_PE_FORMAT_PARSER_H
 
 #include "retdec/common/range.h"
 #include "retdec/utils/alignment.h"
 #include "retdec/utils/string.h"
 #include "retdec/fileformat/fftypes.h"
-#include "retdec/pelib/PeLib.h"
+#include "retdec/pelib/PeFile.h"
 
 namespace retdec {
 namespace fileformat {
@@ -22,8 +22,8 @@ class PeFormatParser
 {
 	protected:
 
-	const FileFormat *inputFile; ///< pointer to input file
-	PeLib::PeFileT *peFile;      ///< 32-bit PE file
+	const FileFormat *inputFile = nullptr;  ///< pointer to input file
+	PeLib::PeFileT *peFile = nullptr;       ///< 32-bit PE file
 
 	public:
 

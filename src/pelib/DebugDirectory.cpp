@@ -68,7 +68,10 @@ namespace PeLib
 		return ERROR_NONE;
 	}
 
-	void DebugDirectory::read(ImageLoader & imageLoader, std::vector<PELIB_IMG_DEBUG_DIRECTORY> & debugInfo, std::uint32_t rva, std::uint32_t size)
+	void DebugDirectory::read(ImageLoader & imageLoader,
+		                      std::vector<PELIB_IMG_DEBUG_DIRECTORY> & debugInfo,
+		                      std::uint32_t rva,
+		                      std::uint32_t size)
 	{
 		PELIB_IMG_DEBUG_DIRECTORY iddCurr;
 		std::size_t entryCount = size / PELIB_IMAGE_DEBUG_DIRECTORY::size();

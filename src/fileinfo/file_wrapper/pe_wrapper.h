@@ -23,7 +23,6 @@ class PeWrapper : public retdec::fileformat::PeFormat
 {
 	public:
 		PeWrapper(const std::string & pathToFile, const std::string & dllListFile, retdec::fileformat::LoadFlags loadFlags);
-		virtual ~PeWrapper() override;
 
 		std::uint32_t getBits()
 		{
