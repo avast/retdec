@@ -1,3 +1,9 @@
+/**
+* @file include/retdec/utils/io/logger.h
+* @brief Implementation of a logging class.
+* @copyright (c) 2020 Avast Software, licensed under the MIT license
+*/
+
 #ifndef RETDEC_UTILS_IO_LOGGER_H
 #define RETDEC_UTILS_IO_LOGGER_H
 

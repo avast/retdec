@@ -1,3 +1,9 @@
+/**
+* @file include/retdec/utils/io/logger.h
+* @brief Provides unified logging interface.
+* @copyright (c) 2020 Avast Software, licensed under the MIT license
+*/
+
 #ifndef RETDEC_UTILS_IO_LOG_H
 #define RETDEC_UTILS_IO_LOG_H
 
@@ -27,7 +33,15 @@ public:
 	/**
 	 * Returns corresponding initialized logger for logType provided
 	 * as parameter. At the beginning all the logger types are initialized
-	 * to undefined logger.
+	 * to default logger.
+	 *
+	 * For debug/info:
+	 *  - verbose
+	 *  - logs to std::out
+	 *
+	 * For error:
+	 *  - verbose
+	 *  - logs to std::err
 	 */
 	static Logger& get(const Type& logType);
 
@@ -39,7 +53,7 @@ public:
 	/**
 	 * Shortcut for Logger(Log::get(Log::Type::Info)).
 	 *
-	 * Creates temporary copy of Info logger. This is particulart
+	 * Creates temporary copy of Info logger. This is particularly
 	 * useful when changing color of the output. On destruction
 	 * color is changed to default.
 	 */
@@ -48,7 +62,7 @@ public:
 	/**
 	 * Shortcut for Logger(Log::get(Log::Type::Debug)).
 	 *
-	 * Creates temporary copy of Debug logger. This is particulart
+	 * Creates temporary copy of Debug logger. This is particularly
 	 * useful when changing color of the output. On destruction
 	 * color is changed to default.
 	 */
@@ -57,13 +71,18 @@ public:
 	/**
 	 * Shortcut for Logger(Log::get(Log::Type::Error)).
 	 *
-	 * Creates temporary copy of Error logger. This is particulart
+	 * Creates temporary copy of Error logger. This is particularly
 	 * useful when changing color of the output. On destruction
 	 * color is changed to default.
 	 */
 	static Logger error();
 
-	static void phase(const std::string& phaseId, const Log::Action& action = Log::Action::Phase);
+	/**
+	 * Shortcut for Log::info() << action << phaseId << Log::Action::ElapsedTime << std::endl.
+	 */
+	static void phase(
+		const std::string& phaseId,
+		const Log::Action& action = Log::Action::Phase);
 
 public:
 	/**
@@ -107,6 +126,11 @@ private:
 	 * Structure containing initialized/default loggers.
 	 */
 	static Logger::Ptr writers[static_cast<int>(Type::Undefined)+1];
+
+	/**
+	 * Fallback logger. In case of bad initialization of the writers
+	 * this logger is used as fallback to log (calling set with nullptr).
+	 */
 	static Logger defaultLogger;
 };
 

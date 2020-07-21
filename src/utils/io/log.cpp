@@ -1,12 +1,16 @@
+/**
+* @file src/utils/io/logger.cpp
+* @brief Provides unified logging interface.
+* @copyright (c) 2020 Avast Software, licensed under the MIT license
+*/
+
 #include "retdec/utils/io/log.h"
 
 namespace retdec {
 namespace utils {
 namespace io {
 
-/*
- * Initalization of Shorctuts
- */
+// Initialization of shortcuts
 const Log::Action Log::Error = Log::Action::Error;
 const Log::Action Log::Warning = Log::Action::Warning;
 const Log::Action Log::Phase = Log::Action::Phase;
@@ -25,17 +29,24 @@ Logger Log::defaultLogger(std::cout, true);
 
 Logger& Log::get(const Log::Type& logType)
 {
+	// This can happen only after adding new Log::Type
+	// after Log::Type::Undefined in Log::Type enum.
+	assert(static_cast<int>(lt) <= static_cast<int>(Log::Type::Undefined));
+
 	if (auto logger = writers[static_cast<int>(logType)].get())
 		return *logger;
 
+	// Fallback usage of logger.
 	return defaultLogger;
 }
 
 void Log::set(const Log::Type& lt, Logger::Ptr&& logger)
 {
-	if (lt != Log::Type::Undefined) {
-		writers[static_cast<int>(lt)] = std::move(logger);
-	}
+	// This can happen only after adding new Log::Type
+	// after Log::Type::Undefined in Log::Type enum.
+	assert(static_cast<int>(lt) <= static_cast<int>(Log::Type::Undefined));
+
+	writers[static_cast<int>(lt)] = std::move(logger);
 }
 
 Logger Log::info()

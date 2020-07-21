@@ -1,3 +1,9 @@
+/**
+* @file src/utils/io/logger.cpp
+* @brief Implementation of a logging class.
+* @copyright (c) 2020 Avast Software, licensed under the MIT license
+*/
+
 #include <iomanip>
 #include <map>
 #include <sstream>
