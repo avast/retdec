@@ -459,7 +459,6 @@ bool decompile(retdec::config::Config& config, std::string* outString)
 	{
 		if (auto* info = passRegistry.getPassInfo(p))
 		{
-	std::cout << "+++ " << info->getPassName().str() << std::endl;
 			auto* pass = info->createPass();
 			addPass(pm, pass, info);
 
