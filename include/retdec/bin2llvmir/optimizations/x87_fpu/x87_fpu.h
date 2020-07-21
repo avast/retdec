@@ -12,8 +12,6 @@
 #include <llvm/IR/Module.h>
 #include <llvm/Pass.h>
 
-#include <Eigen/Core>
-
 #include "retdec/bin2llvmir/analyses/symbolic_tree.h"
 #include "retdec/bin2llvmir/providers/abi/abi.h"
 #include "retdec/bin2llvmir/providers/config.h"
@@ -29,39 +27,7 @@
 namespace retdec {
 namespace bin2llvmir {
 
-class FunctionAnalyzeMetadata
-{
-	public:
-
-		bool analyzeSuccess = true;
-		enum IndexType {
-			inIndex, outIndex
-		};
-
-		llvm::Function& function;
-		std::map<llvm::BasicBlock*, std::map<IndexType,unsigned >> indexes;
-
-		std::list<llvm::BasicBlock*> terminatingBasicBlocks;
-		// A * x = B
-		Eigen::MatrixXd A;
-		Eigen::MatrixXd B;
-		Eigen::MatrixXd x;
-
-		int numberOfEquations = 0;
-
-		// 1. index to register, 2.pseudo instruction
-		std::list<std::pair<uint32_t ,llvm::Instruction*>> pseudoCalls;
-		std::map<llvm::Value*, int> topVals;
-
-		int expectedTop = 0;
-		bool expectedTopAnalyzed = false;
-		std::set<llvm::Function*> calledFunctions;
-
-	void initSystem();
-	void addEquation(const std::list<std::tuple<llvm::BasicBlock&,int,IndexType >>& vars, int result);
-	FunctionAnalyzeMetadata(llvm::Function &function1) : function(function1) {};
-
-};
+class FunctionAnalyzeMetadata;
 
 class X87FpuAnalysis : public llvm::ModulePass
 {
@@ -77,21 +43,24 @@ class X87FpuAnalysis : public llvm::ModulePass
 	private:
 		bool run();
 		bool analyzeBasicBlock(
+				std::list<FunctionAnalyzeMetadata>& analyzedFunctionsMetadata,
 				FunctionAnalyzeMetadata& funMd,
 				llvm::BasicBlock* bb,
 				int& outTop);
 		bool analyzeInstruction(
+				std::list<FunctionAnalyzeMetadata>& analyzedFunctionsMetadata,
 				FunctionAnalyzeMetadata& funMd,
 				llvm::Instruction* i,
 				int& outTop);
-	std::list<FunctionAnalyzeMetadata> getFunctions2Analyze();
 
 	/**
 	 * Replace all FPU pseudo load and store function by load and store with concrete FPU registers.
 	 */
-	bool optimizeAnalyzedFpuInstruction();
-	int expectedTopBasedOnRestOfBlock(llvm::Instruction& analyzedInstr);
-	int augmentedRank(Eigen::MatrixXd &A, Eigen::MatrixXd &B);
+	bool optimizeAnalyzedFpuInstruction(
+			std::list<FunctionAnalyzeMetadata>& analyzedFunctionsMetadata);
+	int expectedTopBasedOnRestOfBlock(
+			std::list<FunctionAnalyzeMetadata>& analyzedFunctionsMetadata,
+			llvm::Instruction& analyzedInstr);
 	bool checkArchAndCallConvException(llvm::Function* fun);
 	bool isValidRegisterIndex(int index);
 
@@ -102,9 +71,9 @@ class X87FpuAnalysis : public llvm::ModulePass
 		Abi* _abi = nullptr;
 		llvm::GlobalVariable* top = nullptr;
 
-		std::list<FunctionAnalyzeMetadata> analyzedFunctionsMetadata; //functions where detected FPU stack access
-		std::list<FunctionAnalyzeMetadata>::iterator getFunMd(llvm::Function* fun);
-
+		std::list<FunctionAnalyzeMetadata>::iterator getFunMd(
+				std::list<FunctionAnalyzeMetadata>& analyzedFunctionsMetadata,
+				llvm::Function* fun);
 };
 
 } // namespace bin2llvmir

@@ -8,6 +8,7 @@
 #include <llvm/IR/InstIterator.h>
 #include <llvm/IR/Operator.h>
 
+#include <Eigen/Core>
 #include <Eigen/QR>
 
 #include "retdec/bin2llvmir/optimizations/x87_fpu/x87_fpu.h"
@@ -25,6 +26,52 @@ using namespace retdec::bin2llvmir::llvm_utils;
 
 namespace retdec {
 namespace bin2llvmir {
+
+int augmentedRank(Eigen::MatrixXd &A, Eigen::MatrixXd &B)
+{
+	A.conservativeResize(Eigen::NoChange, A.cols()+1);
+	A.col(A.cols()-1) = B;
+
+	int rankAugmentedA = A.colPivHouseholderQr().rank();
+
+	A.conservativeResize(Eigen::NoChange, A.cols()-1);
+
+	return rankAugmentedA;
+}
+
+class FunctionAnalyzeMetadata
+{
+	public:
+
+		bool analyzeSuccess = true;
+		enum IndexType {
+			inIndex, outIndex
+		};
+
+		llvm::Function& function;
+		std::map<llvm::BasicBlock*, std::map<IndexType,unsigned >> indexes;
+
+		std::list<llvm::BasicBlock*> terminatingBasicBlocks;
+		// A * x = B
+		Eigen::MatrixXd A;
+		Eigen::MatrixXd B;
+		Eigen::MatrixXd x;
+
+		int numberOfEquations = 0;
+
+		// 1. index to register, 2.pseudo instruction
+		std::list<std::pair<uint32_t ,llvm::Instruction*>> pseudoCalls;
+		std::map<llvm::Value*, int> topVals;
+
+		int expectedTop = 0;
+		bool expectedTopAnalyzed = false;
+		std::set<llvm::Function*> calledFunctions;
+
+	void initSystem();
+	void addEquation(const std::list<std::tuple<llvm::BasicBlock&,int,IndexType >>& vars, int result);
+	FunctionAnalyzeMetadata(llvm::Function &function1) : function(function1) {};
+
+};
 
 char X87FpuAnalysis::ID = 0;
 
@@ -60,7 +107,7 @@ bool X87FpuAnalysis::runOnModuleCustom(
 	return run();
 }
 
-std::list<FunctionAnalyzeMetadata> X87FpuAnalysis::getFunctions2Analyze()
+std::list<FunctionAnalyzeMetadata> getFunctions2Analyze(llvm::GlobalVariable* top)
 {
 	std::list<Function*> functions;
 	for (Value::use_iterator k = top->use_begin(); k != top->use_end(); ++k)
@@ -94,18 +141,6 @@ std::list<FunctionAnalyzeMetadata> X87FpuAnalysis::getFunctions2Analyze()
 	}
 
 	return functionsMetadata;
-}
-
-int X87FpuAnalysis::augmentedRank(Eigen::MatrixXd &A, Eigen::MatrixXd &B)
-{
-	A.conservativeResize(Eigen::NoChange, A.cols()+1);
-	A.col(A.cols()-1) = B;
-
-	int rankAugmentedA = A.colPivHouseholderQr().rank();
-
-	A.conservativeResize(Eigen::NoChange, A.cols()-1);
-
-	return rankAugmentedA;
 }
 
 void FunctionAnalyzeMetadata::initSystem()
@@ -182,7 +217,7 @@ bool X87FpuAnalysis::run()
 		return ANALYZE_FAIL;
 	}
 
-	analyzedFunctionsMetadata = getFunctions2Analyze();
+	auto analyzedFunctionsMetadata = getFunctions2Analyze(top);
 
 	for (auto& funMd: analyzedFunctionsMetadata)
 	{
@@ -196,7 +231,7 @@ bool X87FpuAnalysis::run()
 			BasicBlock* bb = bbIt.operator->();
 			int relativeOutBbTop = 0;
 
-			if (!analyzeBasicBlock(funMd, bb, relativeOutBbTop))
+			if (!analyzeBasicBlock(analyzedFunctionsMetadata, funMd, bb, relativeOutBbTop))
 			{
 				funMd.analyzeSuccess = false;
 			}
@@ -242,10 +277,12 @@ bool X87FpuAnalysis::run()
 		}
 	}
 
-	return optimizeAnalyzedFpuInstruction();
+	return optimizeAnalyzedFpuInstruction(analyzedFunctionsMetadata);
 }
 
-std::list<FunctionAnalyzeMetadata>::iterator X87FpuAnalysis::getFunMd(llvm::Function* fun)
+std::list<FunctionAnalyzeMetadata>::iterator X87FpuAnalysis::getFunMd(
+		std::list<FunctionAnalyzeMetadata>& analyzedFunctionsMetadata,
+		llvm::Function* fun)
 {
 	std::list<FunctionAnalyzeMetadata>::iterator it;
 	for (it = analyzedFunctionsMetadata.begin(); it != analyzedFunctionsMetadata.end(); ++it)
@@ -261,9 +298,10 @@ std::list<FunctionAnalyzeMetadata>::iterator X87FpuAnalysis::getFunMd(llvm::Func
 }
 
 bool X87FpuAnalysis::analyzeInstruction(
-	FunctionAnalyzeMetadata& funMd,
-	Instruction* i,
-	int& outTop)
+		std::list<FunctionAnalyzeMetadata>& analyzedFunctionsMetadata,
+		FunctionAnalyzeMetadata& funMd,
+		Instruction* i,
+		int& outTop)
 {
 	auto *callFunction = dyn_cast<CallInst>(i);
 	auto *loadFpuTop = dyn_cast<LoadInst>(i);
@@ -286,7 +324,10 @@ bool X87FpuAnalysis::analyzeInstruction(
 	// function call -> possible change value of fpu top
 	else if (callFunction && !callStore && !callLoad && !callFunction->getCalledFunction()->isIntrinsic())
 	{
-		auto it = getFunMd(callFunction->getCalledFunction());
+		auto it = getFunMd(
+				analyzedFunctionsMetadata,
+				callFunction->getCalledFunction()
+		);
 
 		if (it != analyzedFunctionsMetadata.end())
 		{
@@ -297,12 +338,12 @@ bool X87FpuAnalysis::analyzeInstruction(
 			}
 			else
 			{
-				outTop += expectedTopBasedOnRestOfBlock(*i);
+				outTop += expectedTopBasedOnRestOfBlock(analyzedFunctionsMetadata, *i);
 			}
 		}
 		else // some library function e.g "roundf()"
 		{
-			outTop += expectedTopBasedOnRestOfBlock(*i);
+			outTop += expectedTopBasedOnRestOfBlock(analyzedFunctionsMetadata, *i);
 		}
 	}
 	// increment fpu top
@@ -347,7 +388,9 @@ bool X87FpuAnalysis::analyzeInstruction(
 	return ANALYZE_SUCCESS;
 }
 
-int X87FpuAnalysis::expectedTopBasedOnRestOfBlock(llvm::Instruction& analyzedInstr)
+int X87FpuAnalysis::expectedTopBasedOnRestOfBlock(
+		std::list<FunctionAnalyzeMetadata>& analyzedFunctionsMetadata,
+		llvm::Instruction& analyzedInstr)
 {
 	if (!checkArchAndCallConvException(analyzedInstr.getParent()->getParent()))
 	{
@@ -386,7 +429,10 @@ int X87FpuAnalysis::expectedTopBasedOnRestOfBlock(llvm::Instruction& analyzedIns
 		else if (callLoad && topVals.find(callLoad->getArgOperand(0)) != topVals.end())
 		{
 			auto *callFunction = dyn_cast<CallInst>(&analyzedInstr);
-			auto it = getFunMd(callFunction->getCalledFunction());
+			auto it = getFunMd(
+					analyzedFunctionsMetadata,
+					callFunction->getCalledFunction()
+			);
 			if (it != analyzedFunctionsMetadata.end())
 			{
 				auto& fun = it.operator*();
@@ -401,6 +447,7 @@ int X87FpuAnalysis::expectedTopBasedOnRestOfBlock(llvm::Instruction& analyzedIns
 }
 
 bool X87FpuAnalysis::analyzeBasicBlock(
+	std::list<FunctionAnalyzeMetadata>& analyzedFunctionsMetadata,
 	FunctionAnalyzeMetadata& funMd,
 	llvm::BasicBlock* bb,
 	int& outTop)
@@ -409,7 +456,7 @@ bool X87FpuAnalysis::analyzeBasicBlock(
 	for (BasicBlock::iterator it = bb->begin(), e = bb->end(); it != e; ++it)
 	{
 		Instruction* inst = it.operator->();
-		if (!analyzeInstruction(funMd, inst, outTop))
+		if (!analyzeInstruction(analyzedFunctionsMetadata, funMd, inst, outTop))
 		{
 			return ANALYZE_FAIL;
 		}
@@ -423,7 +470,8 @@ bool X87FpuAnalysis::isValidRegisterIndex(int index)
 	return (X86_REG_ST0 <= index && index <= X86_REG_ST7);
 }
 
-bool X87FpuAnalysis::optimizeAnalyzedFpuInstruction()
+bool X87FpuAnalysis::optimizeAnalyzedFpuInstruction(
+		std::list<FunctionAnalyzeMetadata>& analyzedFunctionsMetadata)
 {
 	bool analyzeSucces = true;
 	for (auto& funMd : analyzedFunctionsMetadata)

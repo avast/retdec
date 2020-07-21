@@ -118,6 +118,8 @@ target_include_directories(bin2llvmir
 	PUBLIC
 		$<BUILD_INTERFACE:${RETDEC_INCLUDE_DIR}>
 		$<INSTALL_INTERFACE:${RETDEC_INSTALL_INCLUDE_DIR}>
+	PRIVATE
+		$<BUILD_INTERFACE:${RETDEC_DEPS_DIR}/eigen>
 )
 
 target_link_libraries(bin2llvmir
@@ -136,7 +138,6 @@ target_link_libraries(bin2llvmir
 		retdec::utils
 		retdec::llvm-support
 		retdec::deps::llvm
-		retdec::deps::eigen
 )
 
 set_target_properties(bin2llvmir
