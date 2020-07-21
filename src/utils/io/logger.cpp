@@ -2,14 +2,10 @@
 #include <map>
 #include <sstream>
 
-#if __has_include(<unistd.h>)
-#include <unistd.h>
-auto isConsole = isatty;
-auto fileDescriptor = fileno;
-#else
+#if __has_include(<io.h>)
 #include <io.h>
-auto isConsole = _isatty;
-auto fileDescriptor = _fileno;
+#else
+#include <unistd.h>
 #endif
 
 #include "retdec/utils/time.h"
@@ -39,31 +35,31 @@ Logger::Logger(const Logger& from):
 
 Logger::~Logger()
 {
-	if (_currentBrush != Log::Color::Default)
-		*this << Log::Color::Default;
+	if (_currentBrush != Color::Default)
+		*this << Color::Default;
 }
 
-Logger& Logger::operator << (const Log::Action& p)
+Logger& Logger::operator << (const Action& p)
 {
-	if (p == Log::Phase) {
-		return *this << Log::Color::Yellow << "Running phase: ";
+	if (p == Phase) {
+		return *this << Color::Yellow << "Running phase: ";
 	}
-	if (p == Log::SubPhase) {
-		return *this << Log::Color::Yellow << " -> ";
+	if (p == SubPhase) {
+		return *this << Color::Yellow << " -> ";
 	}
-	if (p == Log::SubSubPhase) {
-		return *this << Log::Color::Yellow << "     -> ";
+	if (p == SubSubPhase) {
+		return *this << Color::Yellow << "     -> ";
 	}
-	if (p == Log::SubSubPhase) {
-		return *this << Log::Color::Yellow << "         -> ";
+	if (p == SubSubPhase) {
+		return *this << Color::Yellow << "         -> ";
 	}
-	if (p == Log::Error) {
+	if (p == Error) {
 		return *this << "Error: ";
 	}
-	if (p == Log::Warning) {
-		return *this << Log::Color::DarkCyan << "Warning: ";
+	if (p == Warning) {
+		return *this << Color::DarkCyan << "Warning: ";
 	}
-	if (p == Log::ElapsedTime) {
+	if (p == ElapsedTime) {
 		std::stringstream formatted;
 		formatted << std::fixed << std::setprecision(2) << getElapsedTime();
 		return *this << " ( " << formatted.str() << "s )";
@@ -72,15 +68,15 @@ Logger& Logger::operator << (const Log::Action& p)
 	return *this;
 }
 
-Logger& Logger::operator << (const Log::Color& lc)
+Logger& Logger::operator << (const Color& lc)
 {
-	static std::string ansiMap[static_cast<int>(Log::Color::Default)+1] = {
-		/*Log::Color::Red*/     "\u001b[0;1;31m",
-		/*Log::Color::Green*/   "\u001b[0;1;32m",
-		/*Log::Color::Blue*/    "\u001b[0;1;34m",
-		/*Log::Color::Yellow*/  "\u001b[0;1;33m",
-		/*Log::Color::DarkCyan*/"\u001b[0;1;36m",
-		/*Log::Color::Default*/ "\u001b[0m"
+	static std::string ansiMap[static_cast<int>(Color::Default)+1] = {
+		/*Color::Red*/     "\u001b[0;1;31m",
+		/*Color::Green*/   "\u001b[0;1;32m",
+		/*Color::Blue*/    "\u001b[0;1;34m",
+		/*Color::Yellow*/  "\u001b[0;1;33m",
+		/*Color::DarkCyan*/"\u001b[0;1;36m",
+		/*Color::Default*/ "\u001b[0m"
 	};
 
 	if (isRedirected(_out))
@@ -92,6 +88,16 @@ Logger& Logger::operator << (const Log::Color& lc)
 
 bool Logger::isRedirected(const std::ostream& stream) const
 {
+#if __has_include(<io.h>)
+	// On windows POSIX functions isatty and fileno
+	// generate Warning.
+	auto isConsole = _isatty;
+	auto fileDescriptor = _fileno;
+#else
+	auto isConsole = isatty;
+	auto fileDescriptor = fileno;
+#endif
+
 	if (stream.rdbuf() == std::cout.rdbuf()) {
 		return isConsole(fileDescriptor(stdout)) == 0;
 	}

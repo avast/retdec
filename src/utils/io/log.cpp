@@ -4,21 +4,28 @@ namespace retdec {
 namespace utils {
 namespace io {
 
-/**
- * Structure containing initialized/default loggers.
+/*
+ * Initalization of Shorctuts
  */
-static Logger::Ptr loggers[static_cast<int>(Log::Type::Undefined)+1] = {
+const Log::Action Log::Error = Log::Action::Error;
+const Log::Action Log::Warning = Log::Action::Warning;
+const Log::Action Log::Phase = Log::Action::Phase;
+const Log::Action Log::SubPhase = Log::Action::SubPhase;
+const Log::Action Log::SubSubPhase = Log::Action::SubSubPhase;
+const Log::Action Log::ElapsedTime = Log::Action::ElapsedTime;
+
+Logger::Ptr Log::writers[] = {
 	/*Info*/      /*default*/ nullptr,
 	/*Debug*/     /*default*/ nullptr,
 	/*Error*/     Logger::Ptr(new Logger(std::cerr)),
 	/*Undefined*/ Logger::Ptr(new Logger(std::cout, false))
 };
 
-static Logger defaultLogger(std::cout, true);
+Logger Log::defaultLogger(std::cout, true);
 
 Logger& Log::get(const Log::Type& logType)
 {
-	if (auto logger = loggers[static_cast<int>(logType)].get())
+	if (auto logger = writers[static_cast<int>(logType)].get())
 		return *logger;
 
 	return defaultLogger;
@@ -27,7 +34,7 @@ Logger& Log::get(const Log::Type& logType)
 void Log::set(const Log::Type& lt, Logger::Ptr&& logger)
 {
 	if (lt != Log::Type::Undefined) {
-		loggers[static_cast<int>(lt)] = std::move(logger);
+		writers[static_cast<int>(lt)] = std::move(logger);
 	}
 }
 

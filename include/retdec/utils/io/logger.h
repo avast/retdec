@@ -10,35 +10,32 @@ namespace retdec {
 namespace utils {
 namespace io {
 
-namespace Log {
-
-enum Action: int {
-	Phase,
-	SubPhase,
-	SubSubPhase,
-	ElapsedTime,
-	Error,
-	Warning,
-	NoAction
-};
-
-enum class Color: int {
-	Red,
-	Green,
-	Blue,
-	Yellow,
-	DarkCyan,
-	Default
-};
-
-}
-
 /**
  * @brief Provides Logger inteface that is used for logging events during decompilation.
  */
 class Logger {
 public:
 	using Ptr = std::unique_ptr<Logger>;
+
+public:
+	enum Action: int {
+		Phase,
+		SubPhase,
+		SubSubPhase,
+		ElapsedTime,
+		Error,
+		Warning,
+		NoAction
+	};
+
+	enum class Color: int {
+		Red,
+		Green,
+		Blue,
+		Yellow,
+		DarkCyan,
+		Default
+	};
 
 protected:
 	typedef std::ostream& (*StreamManipulator) (std::ostream&);
@@ -52,8 +49,8 @@ public:
 	Logger& operator << (const T& p);
 
 	Logger& operator << (const StreamManipulator& manip);
-	Logger& operator << (const Log::Action& ia);
-	Logger& operator << (const Log::Color& lc);
+	Logger& operator << (const Action& ia);
+	Logger& operator << (const Color& lc);
 
 private:
 	bool isRedirected(const std::ostream& stream) const;
@@ -62,7 +59,7 @@ protected:
 	std::ostream& _out;
 
 	bool _verbose = true;
-	Log::Color _currentBrush = Log::Color::Default;
+	Color _currentBrush = Color::Default;
 };
 
 class FileLogger : public Logger {
