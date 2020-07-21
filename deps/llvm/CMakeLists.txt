@@ -232,7 +232,7 @@ foreach(LLVM_LIB ${LLVM_LIB_LIST})
 	set(LLVM_LIB       ${binary_dir}/${MSVC_CONFIG}lib/${LLVM_LIB_NAME})
 
 	target_link_libraries(llvm INTERFACE
-		${LLVM_LIB}
+		$<BUILD_INTERFACE:${LLVM_LIB}>
 	)
 
 	# Install libs.
