@@ -4,6 +4,8 @@
 * @copyright (c) 2020 Avast Software, licensed under the MIT license
 */
 
+#include <cassert>
+
 #include "retdec/utils/io/log.h"
 
 namespace retdec {
@@ -31,7 +33,7 @@ Logger& Log::get(const Log::Type& logType)
 {
 	// This can happen only after adding new Log::Type
 	// after Log::Type::Undefined in Log::Type enum.
-	assert(static_cast<int>(lt) <= static_cast<int>(Log::Type::Undefined));
+	assert(static_cast<int>(logType) <= static_cast<int>(Log::Type::Undefined));
 
 	if (auto logger = writers[static_cast<int>(logType)].get())
 		return *logger;
