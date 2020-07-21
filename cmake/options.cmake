@@ -498,9 +498,6 @@ set_if_at_least_one_set(RETDEC_ENABLE_TINYXML2
 set_if_at_least_one_set(RETDEC_ENABLE_VARIANT
 		RETDEC_ENABLE_UTILS)
 
-set_if_at_least_one_set(RETDEC_ENABLE_WHEREAMI
-		RETDEC_ENABLE_UTILS)
-
 set_if_at_least_one_set(RETDEC_ENABLE_YARA
 		RETDEC_ENABLE_YARACPP)
 

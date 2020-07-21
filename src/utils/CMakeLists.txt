@@ -12,6 +12,7 @@ add_library(utils STATIC
 	string.cpp
 	system.cpp
 	time.cpp
+	${RETDEC_DEPS_DIR}/whereami/whereami/whereami.c
 )
 add_library(retdec::utils ALIAS utils)
 
@@ -21,11 +22,8 @@ target_include_directories(utils
 	PUBLIC
 		$<BUILD_INTERFACE:${RETDEC_INCLUDE_DIR}>
 		$<INSTALL_INTERFACE:${RETDEC_INSTALL_INCLUDE_DIR}>
-)
-
-target_link_libraries(utils
 	PRIVATE
-		retdec::deps::whereami
+		$<BUILD_INTERFACE:${RETDEC_DEPS_DIR}/whereami>
 )
 
 # We may need to link filesystem library manually.
