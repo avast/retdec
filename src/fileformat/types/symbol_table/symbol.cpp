@@ -272,7 +272,7 @@ bool Symbol::getLinkToSection(unsigned long long &sectionIndex) const
  * Set symbol name
  * @param symbolName Symbol name
  */
-void Symbol::setName(std::string symbolName)
+void Symbol::setName(const std::string & symbolName)
 {
 	name = symbolName;
 }
@@ -281,7 +281,7 @@ void Symbol::setName(std::string symbolName)
  * Set original name of symbol
  * @param symbolOriginalName Original name of symbol
  */
-void Symbol::setOriginalName(std::string symbolOriginalName)
+void Symbol::setOriginalName(const std::string & symbolOriginalName)
 {
 	originalName = symbolOriginalName;
 }

@@ -77,7 +77,7 @@ class FileSection
 
 		/// @name Setters
 		/// @{
-		void setName(std::string name);
+		void setName(const std::string & name);
 		void setType(std::string type);
 		void setCrc32(std::string sectionCrc32);
 		void setMd5(std::string sectionMd5);

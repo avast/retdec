@@ -10,10 +10,10 @@
 * of PeLib.
 */
 
-#ifndef TLSDIRECTORY_H
-#define TLSDIRECTORY_H
+#ifndef RETDEC_PELIB_TLSDIRECTORY_H
+#define RETDEC_PELIB_TLSDIRECTORY_H
 
-#include "retdec/pelib/PeHeader.h"
+#include "retdec/pelib/ImageLoader.h"
 
 namespace PeLib
 {
@@ -21,114 +21,117 @@ namespace PeLib
 	/**
 	* This class handles the TLS (Thread Local Storage) directory.
 	**/
-	template<int bits>
 	class TlsDirectory
 	{
 		private:
-		  PELIB_IMAGE_TLS_DIRECTORY<bits> m_tls; ///< Structure that holds all information about the directory.
-
-		  void read(InputBuffer& inputbuffer);
+		  PELIB_IMAGE_TLS_DIRECTORY m_tls; ///< Structure that holds all information about the directory.
+		  std::vector<uint64_t> m_Callbacks;
+		  std::size_t pointerSize;
 
 		public:
 		  /// Reads a file's TLS directory.
-		  int read(std::istream& inStream, const PeHeaderT<bits> &peHeader); // EXPORT
-		  int read(unsigned char* buffer, unsigned int buffersize); // EXPORT
+		  int read(ImageLoader & imageLoader); // EXPORT
 		  /// Rebuilds the TLS directory.
-		  void rebuild(std::vector<byte>& vBuffer) const; // EXPORT
+		  void rebuild(std::vector<std::uint8_t>& vBuffer) const; // EXPORT
 		  /// Returns the size of the TLS Directory.
 		  unsigned int size() const; // EXPORT
 		  /// Writes the TLS directory to a file.
 		  int write(const std::string& strFilename, unsigned int dwOffset) const; // EXPORT
 
+		  /// Returns vector of TLS callbacks
+		  const std::vector<std::uint64_t> & getCallbacks() const;
 		  /// Returns the StartAddressOfRawData value of the TLS header.
-		  typename FieldSizes<bits>::VAR4_8 getStartAddressOfRawData() const; // EXPORT
+		  std::uint64_t getStartAddressOfRawData() const; // EXPORT
 		  /// Returns the EndAddressOfRawData value of the TLS header.
-		  typename FieldSizes<bits>::VAR4_8 getEndAddressOfRawData() const; // EXPORT
+		  std::uint64_t getEndAddressOfRawData() const; // EXPORT
 		  /// Returns the AddressOfIndex value of the TLS header.
-		  typename FieldSizes<bits>::VAR4_8 getAddressOfIndex() const; // EXPORT
+		  std::uint64_t getAddressOfIndex() const; // EXPORT
 		  /// Returns the AddressOfCallBacks value of the TLS header.
-		  typename FieldSizes<bits>::VAR4_8 getAddressOfCallBacks() const; // EXPORT
+		  std::uint64_t getAddressOfCallBacks() const; // EXPORT
 		  /// Returns the SizeOfZeroFill value of the TLS header.
-		  dword getSizeOfZeroFill() const; // EXPORT
+		  std::uint32_t getSizeOfZeroFill() const; // EXPORT
 		  /// Returns the Characteristics value of the TLS header.
-		  dword getCharacteristics() const; // EXPORT
+		  std::uint32_t getCharacteristics() const; // EXPORT
 
 		  /// Sets the StartAddressOfRawData value of the TLS header.
-		  void setStartAddressOfRawData(dword dwValue); // EXPORT
+		  void setStartAddressOfRawData(std::uint64_t value); // EXPORT
 		  /// Sets the EndAddressOfRawData value of the TLS header.
-		  void setEndAddressOfRawData(dword dwValue); // EXPORT
+		  void setEndAddressOfRawData(std::uint64_t value); // EXPORT
 		  /// Sets the AddressOfIndex value of the TLS header.
-		  void setAddressOfIndex(dword dwValue); // EXPORT
+		  void setAddressOfIndex(std::uint64_t value); // EXPORT
 		  /// Sets the AddressOfCallBacks value of the TLS header.
-		  void setAddressOfCallBacks(dword dwValue); // EXPORT
+		  void setAddressOfCallBacks(std::uint64_t value); // EXPORT
 		  /// Sets the SizeOfZeroFill value of the TLS header.
-		  void setSizeOfZeroFill(dword dwValue); // EXPORT
+		  void setSizeOfZeroFill(std::uint32_t dwValue); // EXPORT
 		  /// Sets the Characteristics value of the TLS header.
-		  void setCharacteristics(dword dwValue); // EXPORT
+		  void setCharacteristics(std::uint32_t dwValue); // EXPORT
 	};
-
-	template<int bits>
-	void TlsDirectory<bits>::read(InputBuffer& inputBuffer)
-	{
-		PELIB_IMAGE_TLS_DIRECTORY<bits> itdCurr;
-
-		inputBuffer >> itdCurr.StartAddressOfRawData;
-		inputBuffer >> itdCurr.EndAddressOfRawData;
-		inputBuffer >> itdCurr.AddressOfIndex;
-		inputBuffer >> itdCurr.AddressOfCallBacks;
-		inputBuffer >> itdCurr.SizeOfZeroFill;
-		inputBuffer >> itdCurr.Characteristics;
-
-		std::swap(itdCurr, m_tls);
-	}
-
-	template<int bits>
-	int TlsDirectory<bits>::read(unsigned char* buffer, unsigned int buffersize)
-	{
-		if (buffersize < PELIB_IMAGE_TLS_DIRECTORY<bits>::size())
-		{
-			return ERROR_INVALID_FILE;
-		}
-
-		std::vector<byte> vTlsDirectory(buffer, buffer + buffersize);
-
-		InputBuffer ibBuffer(vTlsDirectory);
-		read(ibBuffer);
-		return ERROR_NONE;
-	}
 
 	/**
 	* Reads a file's TLS directory.
-	* @param inStream Input stream.
-	* @param peHeader A valid PE header.
+	* @param imageLoader Referenve to a valid PE image loader.
 	**/
-	template<int bits>
-	int TlsDirectory<bits>::read(std::istream& inStream, const PeHeaderT<bits> &peHeader)
+	inline
+	int TlsDirectory::read(ImageLoader & imageLoader)
 	{
-		IStreamWrapper inStream_w(inStream);
+		std::uint64_t imageBase = imageLoader.getImageBase();
+		std::uint32_t rva = imageLoader.getDataDirRva(PELIB_IMAGE_DIRECTORY_ENTRY_TLS);
+		std::uint32_t size = imageLoader.getDataDirSize(PELIB_IMAGE_DIRECTORY_ENTRY_TLS);
+		std::uint32_t sizeOfImage = imageLoader.getSizeOfImage();
+		std::uint32_t bytesRead;
 
-		if (!inStream_w)
-		{
-			return ERROR_OPENING_FILE;
-		}
-
-		std::uint64_t ulFileSize = fileSize(inStream_w);
-
-		std::uint64_t uiOffset = peHeader.rvaToOffset(peHeader.getIddTlsRva());
-		unsigned int uiSize = peHeader.getIddTlsSize();
-
-		if (ulFileSize < uiOffset + uiSize)
-		{
+		if((rva + size) >= sizeOfImage)
 			return ERROR_INVALID_FILE;
+
+		// Remember the pointer size
+		pointerSize = imageLoader.getPointerSize();
+
+		// Read the TLS directory from the image. Differentiate between 32-bit and 64-bit
+		if(imageLoader.getImageBitability() == 32)
+		{
+			PELIB_IMAGE_TLS_DIRECTORY32 TlsDirectory32;
+
+			// Read the 32-bit TLS directory structure
+			bytesRead = imageLoader.readImage(&TlsDirectory32, rva, sizeof(PELIB_IMAGE_TLS_DIRECTORY32));
+			if(bytesRead != sizeof(PELIB_IMAGE_TLS_DIRECTORY32))
+				return ERROR_INVALID_FILE;
+
+			// Convert to 64-bit structure
+			m_tls.StartAddressOfRawData = TlsDirectory32.StartAddressOfRawData;
+			m_tls.EndAddressOfRawData = TlsDirectory32.EndAddressOfRawData;
+			m_tls.AddressOfIndex = TlsDirectory32.AddressOfIndex;
+			m_tls.AddressOfCallBacks = TlsDirectory32.AddressOfCallBacks;
+			m_tls.SizeOfZeroFill = TlsDirectory32.SizeOfZeroFill;
+			m_tls.Characteristics = TlsDirectory32.Characteristics;
+		}
+		else
+		{
+			// Read the 32-bit TLS directory structure
+			bytesRead = imageLoader.readImage(&m_tls, rva, sizeof(PELIB_IMAGE_TLS_DIRECTORY));
+			if(bytesRead != sizeof(PELIB_IMAGE_TLS_DIRECTORY))
+				return ERROR_INVALID_FILE;
 		}
 
-		inStream_w.seekg(uiOffset, std::ios::beg);
+		// If there is non-zero address of callbacks, we try to read at least one pointer to know
+		// if there are TLS callbacks
+		if(imageBase < m_tls.AddressOfCallBacks && m_tls.AddressOfCallBacks < (imageBase + sizeOfImage))
+		{
+			std::uint32_t rva = (std::uint32_t)(m_tls.AddressOfCallBacks - imageBase);
 
-		std::vector<byte> vTlsDirectory(uiSize);
-		inStream_w.read(reinterpret_cast<char*>(vTlsDirectory.data()), uiSize);
+			for(std::uint32_t i = 0; i < PELIB_MAX_TLS_CALLBACKS; i++)
+			{
+				std::uint64_t AddressOfCallBack = 0;
 
-		InputBuffer ibBuffer{vTlsDirectory};
-		read(ibBuffer);
+				if(imageLoader.readPointer(rva, AddressOfCallBack) == 0)
+					break;
+				if(AddressOfCallBack == 0)
+					break;
+
+				m_Callbacks.push_back(AddressOfCallBack);
+				rva += pointerSize;
+			}
+		}
+
 		return ERROR_NONE;
 	}
 
@@ -136,17 +139,28 @@ namespace PeLib
 	* Rebuilds the current TLS Directory.
 	* @param vBuffer Buffer where the TLS directory will be written to.
 	**/
-	template<int bits>
-	void TlsDirectory<bits>::rebuild(std::vector<byte>& vBuffer) const
+	inline
+	void TlsDirectory::rebuild(std::vector<std::uint8_t>& vBuffer) const
 	{
-		OutputBuffer obBuffer(vBuffer);
+		if(pointerSize == 32)
+		{
+			PELIB_IMAGE_TLS_DIRECTORY32 TlsDirectory32;
 
-		obBuffer << m_tls.StartAddressOfRawData;
-		obBuffer << m_tls.EndAddressOfRawData;
-		obBuffer << m_tls.AddressOfIndex;
-		obBuffer << m_tls.AddressOfCallBacks;
-		obBuffer << m_tls.SizeOfZeroFill;
-		obBuffer << m_tls.Characteristics;
+			TlsDirectory32.StartAddressOfRawData = (std::uint32_t)m_tls.StartAddressOfRawData;
+			TlsDirectory32.EndAddressOfRawData   = (std::uint32_t)m_tls.EndAddressOfRawData;
+			TlsDirectory32.AddressOfIndex        = (std::uint32_t)m_tls.AddressOfIndex;
+			TlsDirectory32.AddressOfCallBacks    = (std::uint32_t)m_tls.AddressOfCallBacks;
+			TlsDirectory32.SizeOfZeroFill        = m_tls.SizeOfZeroFill;
+			TlsDirectory32.Characteristics       = m_tls.Characteristics;
+
+			vBuffer.resize(sizeof(PELIB_IMAGE_TLS_DIRECTORY32));
+			memcpy(vBuffer.data(), &TlsDirectory32, sizeof(PELIB_IMAGE_TLS_DIRECTORY32));
+		}
+		else
+		{
+			vBuffer.resize(sizeof(PELIB_IMAGE_TLS_DIRECTORY));
+			memcpy(vBuffer.data(), &m_tls, sizeof(PELIB_IMAGE_TLS_DIRECTORY));
+		}
 	}
 
 	/**
@@ -154,18 +168,18 @@ namespace PeLib
 	* will always be 24.
 	* @return Size in bytes.
 	**/
-	template<int bits>
-	unsigned int TlsDirectory<bits>::size() const
+	inline
+	unsigned int TlsDirectory::size() const
 	{
-		return PELIB_IMAGE_TLS_DIRECTORY<bits>::size();
+		return (pointerSize == 32) ? sizeof(PELIB_IMAGE_TLS_DIRECTORY32) : sizeof(PELIB_IMAGE_TLS_DIRECTORY);
 	}
 
 	/**
 	* @param strFilename Name of the file.
 	* @param dwOffset File offset the TLS Directory will be written to.
 	**/
-	template<int bits>
-	int TlsDirectory<bits>::write(const std::string& strFilename, unsigned int dwOffset) const
+	inline
+	int TlsDirectory::write(const std::string& strFilename, unsigned int dwOffset) const
 	{
 		std::fstream ofFile(strFilename.c_str(), std::ios_base::in);
 
@@ -198,10 +212,19 @@ namespace PeLib
 	}
 
 	/**
+	* @return The vector of TLS callbacks
+	**/
+	inline
+	const std::vector<std::uint64_t> & TlsDirectory::getCallbacks() const
+	{
+		return m_Callbacks;
+	}
+
+	/**
 	* @return The StartAddressOfRawData value of the TLS directory.
 	**/
-	template<int bits>
-	typename FieldSizes<bits>::VAR4_8 TlsDirectory<bits>::getStartAddressOfRawData() const
+	inline
+	std::uint64_t TlsDirectory::getStartAddressOfRawData() const
 	{
 		return m_tls.StartAddressOfRawData;
 	}
@@ -209,8 +232,8 @@ namespace PeLib
 	/**
 	* @return The EndAddressOfRawData value of the TLS directory.
 	**/
-	template<int bits>
-	typename FieldSizes<bits>::VAR4_8 TlsDirectory<bits>::getEndAddressOfRawData() const
+	inline
+	std::uint64_t TlsDirectory::getEndAddressOfRawData() const
 	{
 		return m_tls.EndAddressOfRawData;
 	}
@@ -218,8 +241,8 @@ namespace PeLib
 	/**
 	* @return The AddressOfIndex value of the TLS directory.
 	**/
-	template<int bits>
-	typename FieldSizes<bits>::VAR4_8 TlsDirectory<bits>::getAddressOfIndex() const
+	inline
+	std::uint64_t TlsDirectory::getAddressOfIndex() const
 	{
 		return m_tls.AddressOfIndex;
 	}
@@ -227,8 +250,8 @@ namespace PeLib
 	/**
 	* @return The AddressOfCallBacks value of the TLS directory.
 	**/
-	template<int bits>
-	typename FieldSizes<bits>::VAR4_8 TlsDirectory<bits>::getAddressOfCallBacks() const
+	inline
+	std::uint64_t TlsDirectory::getAddressOfCallBacks() const
 	{
 		return m_tls.AddressOfCallBacks;
 	}
@@ -236,8 +259,8 @@ namespace PeLib
 	/**
 	* @return The SizeOfZeroFill value of the TLS directory.
 	**/
-	template<int bits>
-	dword TlsDirectory<bits>::getSizeOfZeroFill() const
+	inline
+	std::uint32_t TlsDirectory::getSizeOfZeroFill() const
 	{
 		return m_tls.SizeOfZeroFill;
 	}
@@ -245,53 +268,53 @@ namespace PeLib
 	/**
 	* @return The Characteristics value of the TLS directory.
 	**/
-	template<int bits>
-	dword TlsDirectory<bits>::getCharacteristics() const
+	inline
+	std::uint32_t TlsDirectory::getCharacteristics() const
 	{
 		return m_tls.Characteristics;
 	}
 
 	/**
-	* @param dwValue The new StartAddressOfRawData value of the TLS directory.
+	* @param value The new StartAddressOfRawData value of the TLS directory.
 	**/
-	template<int bits>
-	void TlsDirectory<bits>::setStartAddressOfRawData(dword dwValue)
+	inline
+	void TlsDirectory::setStartAddressOfRawData(std::uint64_t value)
 	{
-		m_tls.StartAddressOfRawData = dwValue;
+		m_tls.StartAddressOfRawData = value;
 	}
 
 	/**
-	* @param dwValue The new EndAddressOfRawData value of the TLS directory.
+	* @param value The new EndAddressOfRawData value of the TLS directory.
 	**/
-	template<int bits>
-	void TlsDirectory<bits>::setEndAddressOfRawData(dword dwValue)
+	inline
+	void TlsDirectory::setEndAddressOfRawData(std::uint64_t value)
 	{
-		m_tls.EndAddressOfRawData = dwValue;
+		m_tls.EndAddressOfRawData = value;
 	}
 
 	/**
-	* @param dwValue The new AddressOfIndex value of the TLS directory.
+	* @param value The new AddressOfIndex value of the TLS directory.
 	**/
-	template<int bits>
-	void TlsDirectory<bits>::setAddressOfIndex(dword dwValue)
+	inline
+	void TlsDirectory::setAddressOfIndex(std::uint64_t value)
 	{
-		m_tls.AddressOfIndex = dwValue;
+		m_tls.AddressOfIndex = value;
 	}
 
 	/**
-	* @param dwValue The new AddressOfCallBacks value of the TLS directory.
+	* @param value The new AddressOfCallBacks value of the TLS directory.
 	**/
-	template<int bits>
-	void TlsDirectory<bits>::setAddressOfCallBacks(dword dwValue)
+	inline
+	void TlsDirectory::setAddressOfCallBacks(std::uint64_t value)
 	{
-		m_tls.AddressOfCallBacks = dwValue;
+		m_tls.AddressOfCallBacks = value;
 	}
 
 	/**
 	* @param dwValue The new SizeOfZeroFill value of the TLS directory.
 	**/
-	template<int bits>
-	void TlsDirectory<bits>::setSizeOfZeroFill(dword dwValue)
+	inline
+	void TlsDirectory::setSizeOfZeroFill(std::uint32_t dwValue)
 	{
 		m_tls.SizeOfZeroFill = dwValue;
 	}
@@ -299,8 +322,8 @@ namespace PeLib
 	/**
 	* @param dwValue The new Characteristics value of the TLS directory.
 	**/
-	template<int bits>
-	void TlsDirectory<bits>::setCharacteristics(dword dwValue)
+	inline
+	void TlsDirectory::setCharacteristics(std::uint32_t dwValue)
 	{
 		m_tls.Characteristics = dwValue;
 	}

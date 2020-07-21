@@ -258,7 +258,7 @@ void FileSection::getFlagsDescriptors(std::vector<std::string> &desc, std::vecto
  * Set section name
  * @param name Section name
  */
-void FileSection::setName(std::string name)
+void FileSection::setName(const std::string & name)
 {
 	sectionName = name;
 }

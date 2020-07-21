@@ -16,7 +16,8 @@
 #include "retdec/utils/string.h"
 #include "retdec/fileformat/utils/byte_array_buffer.h"
 #include "retdec/fileformat/utils/format_detection.h"
-#include "retdec/pelib/PeLib.h"
+#include "retdec/pelib/PeFile.h"
+#include "retdec/pelib/ImageLoader.h"
 
 using namespace retdec::utils;
 using namespace llvm;
@@ -125,35 +126,11 @@ std::uint64_t streamSize(std::istream& stream)
  */
 bool isPe(std::istream& stream)
 {
-	resetStream(stream);
+	// Create instance of the ImageLoader with most benevolent flags
+	ImageLoader imgLoader(0);
 
-	std::unique_ptr<PeFile> file(openPeFile(stream));
-	if(!file)
-	{
-		return false;
-	}
-
-	dword signature = 0;
-	try
-	{
-		file->readMzHeader();
-		file->readPeHeader();
-		switch(getFileType(stream))
-		{
-			case PEFILE32:
-				signature = static_cast<PeFileT<32>*>(file.get())->peHeader().getNtSignature();
-				break;
-			case PEFILE64:
-				signature = static_cast<PeFileT<64>*>(file.get())->peHeader().getNtSignature();
-				break;
-			default:;
-		}
-	} catch(...)
-	{
-		return false;
-	}
-
-	return signature == 0x4550 || signature == 0x50450000;
+	// Load the image from stream. Only load headers.
+	return (imgLoader.Load(stream, 0, true) == ERROR_NONE);
 }
 
 /**
@@ -181,7 +158,7 @@ bool isJava(std::istream& stream)
 
 		if (sys::IsLittleEndianHost)
 		{
-			// Both are in big endian byte order
+			// Both are in big endian std::uint8_t order
 			fatCount = sys::SwapByteOrder_32(fatCount);
 		}
 
@@ -212,7 +189,7 @@ bool isStrangeFeedface(std::istream& stream)
 
 	if (sys::IsBigEndianHost)
 	{
-		// All such files found were in little endian byte order
+		// All such files found were in little endian std::uint8_t order
 		for (int i = 0; i < 4; ++i)
 		{
 			ints[i] = sys::SwapByteOrder_32(ints[i]);

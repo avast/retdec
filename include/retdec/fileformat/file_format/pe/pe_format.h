@@ -8,7 +8,7 @@
 #define RETDEC_FILEFORMAT_FILE_FORMAT_PE_PE_FORMAT_H
 
 #include "retdec/fileformat/file_format/file_format.h"
-#include "retdec/fileformat/file_format/pe/pe_format_parser/pe_format_parser.h"
+#include "retdec/fileformat/file_format/pe/pe_format_parser.h"
 #include "retdec/fileformat/types/dotnet_headers/blob_stream.h"
 #include "retdec/fileformat/types/dotnet_headers/guid_stream.h"
 #include "retdec/fileformat/types/dotnet_headers/metadata_stream.h"
@@ -16,7 +16,7 @@
 #include "retdec/fileformat/types/dotnet_headers/user_string_stream.h"
 #include "retdec/fileformat/types/dotnet_types/dotnet_class.h"
 #include "retdec/fileformat/types/visual_basic/visual_basic_info.h"
-#include "retdec/pelib/PeLib.h"
+#include "retdec/pelib/PeFile.h"
 
 // Forward declare OpenSSL structures used in this header.
 typedef struct pkcs7_st PKCS7;
@@ -32,7 +32,6 @@ class PeFormat : public FileFormat
 {
 	private:
 		PeFormatParser *formatParser;                              ///< parser of PE file
-		PeLib::MzHeader mzHeader;                                  ///< MZ header
 		std::unique_ptr<CLRHeader> clrHeader;                      ///< .NET CLR header
 		std::unique_ptr<MetadataHeader> metadataHeader;            ///< .NET metadata header
 		std::unique_ptr<MetadataStream> metadataStream;            ///< .NET metadata stream
@@ -123,9 +122,7 @@ class PeFormat : public FileFormat
 		void scanForOptHeaderAnomalies();
 		/// @}
 	protected:
-		PeLib::PeFile *file;              ///< PeLib representation of PE file
-		PeLib::PeHeaderT<32> *peHeader32; ///< header of 32-bit PE file
-		PeLib::PeHeaderT<64> *peHeader64; ///< header of 64-bit PE file
+		PeLib::PeFileT *file;              ///< PeLib representation of PE file
 	public:
 		PeFormat(const std::string & pathToFile, const std::string & dllListFile, LoadFlags loadFlags = LoadFlags::NONE);
 		PeFormat(std::istream &inputStream, LoadFlags loadFlags = LoadFlags::NONE);
@@ -162,10 +159,11 @@ class PeFormat : public FileFormat
 
 		/// @name Detection methods
 		/// @{
-		const PeLib::MzHeader & getMzHeader() const;
+		const PeLib::ImageLoader & getImageLoader() const;
 		std::size_t getMzHeaderSize() const;
 		std::size_t getOptionalHeaderSize() const;
 		std::size_t getPeHeaderOffset() const;
+		std::size_t getImageBitability() const;
 		std::size_t getCoffSymbolTableOffset() const;
 		std::size_t getNumberOfCoffSymbols() const;
 		std::size_t getSizeOfStringTable() const;
@@ -191,8 +189,6 @@ class PeFormat : public FileFormat
 		bool dllListFailedToLoad() const;
 		bool initDllList(const std::string & dllListFile);
 
-		PeLib::PeFile32* isPe32() const;
-		PeLib::PeFile64* isPe64() const;
 		bool isDotNet() const;
 		bool isPackedDotNet() const;
 		bool isVisualBasic(unsigned long long &version) const;

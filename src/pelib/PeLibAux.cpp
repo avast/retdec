@@ -22,8 +22,6 @@
 
 namespace PeLib
 {
-	const qword PELIB_IMAGE_ORDINAL_FLAGS<64>::PELIB_IMAGE_ORDINAL_FLAG = 0x8000000000000000ULL;
-
 	// Keep in sync with PeLib::LoaderError!!!
 	static const std::vector<LoaderErrorInfo> LdrErrStrings =
 	{
@@ -64,12 +62,12 @@ namespace PeLib
 		{"LDR_ERROR_FILE_IS_CUT_LOADABLE",         "The PE file is cut, but loadable", true},
 
 		// Import directory detected errors
-		{"LDR_ERROR_IMPDIR_OUT_OF_FILE",           "Offset of the import directory is out of the file" },
-		{"LDR_ERROR_IMPDIR_CUT",                   "Import directory is cut" },
-		{"LDR_ERROR_IMPDIR_COUNT_EXCEEDED",        "Number of import descriptors exceeds maximum" },
-		{"LDR_ERROR_IMPDIR_NAME_RVA_INVALID",      "RVA of the import name is invalid" },
-		{"LDR_ERROR_IMPDIR_THUNK_RVA_INVALID",     "RVA of the import thunk is invalid" },
-		{"LDR_ERROR_IMPDIR_IMPORT_COUNT_EXCEEDED", "Number of imported functions exceeds maximum" },
+		{"LDR_ERROR_IMPDIR_OUT_OF_FILE",           "Offset of the import directory is out of the file", true },
+		{"LDR_ERROR_IMPDIR_CUT",                   "Import directory is cut", true },
+		{"LDR_ERROR_IMPDIR_COUNT_EXCEEDED",        "Number of import descriptors exceeds maximum", true },
+		{"LDR_ERROR_IMPDIR_NAME_RVA_INVALID",      "RVA of the import name is invalid", true },
+		{"LDR_ERROR_IMPDIR_THUNK_RVA_INVALID",     "RVA of the import thunk is invalid", true },
+		{"LDR_ERROR_IMPDIR_IMPORT_COUNT_EXCEEDED", "Number of imported functions exceeds maximum", true },
 
 		// Resource directory detected errors
 		{"LDR_ERROR_RSRC_OVER_END_OF_IMAGE",       "Array of resource directory entries goes beyond end of the image", true },
@@ -119,21 +117,6 @@ namespace PeLib
 	PELIB_IMAGE_FILE_MACHINE_ITERATOR::imageFileMachineIterator PELIB_IMAGE_FILE_MACHINE_ITERATOR::end() const
 	{
 		return all.end();
-	}
-
-	bool PELIB_IMAGE_SECTION_HEADER::biggerFileOffset(const PELIB_IMAGE_SECTION_HEADER& ish) const
-	{
-		return PointerToRawData < ish.PointerToRawData;
-	}
-
-	bool PELIB_IMAGE_SECTION_HEADER::biggerVirtualAddress(const PELIB_IMAGE_SECTION_HEADER& ish) const
-	{
-		return VirtualAddress < ish.VirtualAddress;
-	}
-
-	bool PELIB_IMAGE_SECTION_HEADER::isFullNameSet() const
-	{
-		return !StringTableName.empty();
 	}
 
 	unsigned int alignOffset(unsigned int uiOffset, unsigned int uiAlignment)
@@ -302,39 +285,6 @@ namespace PeLib
 		return t1 == t2;
 	}
 
-	PELIB_IMAGE_DOS_HEADER::PELIB_IMAGE_DOS_HEADER()
-	{
-		e_magic = 0;
-		e_cblp = 0;
-		e_cp = 0;
-		e_crlc = 0;
-		e_cparhdr = 0;
-		e_minalloc = 0;
-		e_maxalloc = 0;
-		e_ss = 0;
-		e_sp = 0;
-		e_csum = 0;
-		e_ip = 0;
-		e_cs = 0;
-		e_lfarlc = 0;
-		e_ovno = 0;
-
-		for (unsigned int i = 0; i < sizeof(e_res) / sizeof(e_res[0]); i++)
-		{
-			e_res[i] = 0;
-		}
-
-		e_oemid = 0;
-		e_oeminfo = 0;
-
-		for (unsigned int i = 0; i < sizeof(e_res2) / sizeof(e_res2[0]); i++)
-		{
-			e_res2[i] = 0;
-		}
-
-		e_lfanew = 0;
-	}
-
 	PELIB_EXP_FUNC_INFORMATION::PELIB_EXP_FUNC_INFORMATION()
 	{
 		addroffunc = 0;
@@ -441,106 +391,7 @@ namespace PeLib
 		return isEqualNc(this->funcname, strFunctionName);
 	}
 
-	unsigned int getFileType(PeFile32& pef)
-	{
-		// Attempt to read the DOS file header.
-		if (pef.readMzHeader() != ERROR_NONE)
-		{
-			return PEFILE_UNKNOWN;
-		}
-
-		// Verify the DOS header
-		if (!pef.mzHeader().isValid())
-		{
-			return PEFILE_UNKNOWN;
-		}
-
-		// Read PE header. Note that at this point, we read the header as if
-		// it was 32-bit PE file.
-		if (pef.readPeHeader() != ERROR_NONE)
-		{
-			return PEFILE_UNKNOWN;
-		}
-
-		word machine = pef.peHeader().getMachine();
-		word magic = pef.peHeader().getMagic();
-
-		// jk2012-02-20: make the PEFILE32 be the default return value
-		if ((machine == PELIB_IMAGE_FILE_MACHINE_AMD64
-					|| machine == PELIB_IMAGE_FILE_MACHINE_IA64)
-				&& magic == PELIB_IMAGE_NT_OPTIONAL_HDR64_MAGIC)
-		{
-			return PEFILE64;
-		}
-		else
-		{
-			return PEFILE32;
-		}
-	}
-
-	/**
-	* @param strFilename Name of a file.
-	* @return Either PEFILE32, PEFILE64 or PEFILE_UNKNOWN
-	**/
-	unsigned int getFileType(const std::string strFilename)
-	{
-		PeFile32 pef(strFilename);
-		return getFileType(pef);
-	}
-
-	/**
-	* @param stream Input stream.
-	* @return Either PEFILE32, PEFILE64 or PEFILE_UNKNOWN
-	**/
-	unsigned int getFileType(std::istream& stream)
-	{
-		PeFile32 pef(stream);
-		return getFileType(pef);
-	}
-
-	/**
-	* Opens a PE file. The return type is either PeFile32 or PeFile64 object. If an error occurs the return
-	* value is 0.
-	* @param strFilename Name of a file.
-	* @return Either a PeFile32 object, a PeFil64 object or 0.
-	**/
-	PeFile* openPeFile(const std::string& strFilename)
-	{
-		unsigned int type = getFileType(strFilename);
-
-		if (type == PEFILE32)
-		{
-			return new PeFile32(strFilename);
-		}
-		else if (type == PEFILE64)
-		{
-			return new PeFile64(strFilename);
-		}
-		else
-		{
-			return nullptr;
-		}
-	}
-
-	PeFile* openPeFile(std::istream& stream)
-	{
-		unsigned int type = getFileType(stream);
-
-		if (type == PEFILE32)
-		{
-			return new PeFile32(stream);
-		}
-		else if (type == PEFILE64)
-		{
-			return new PeFile64(stream);
-		}
-		else
-		{
-			return nullptr;
-		}
-	}
-
-	unsigned int PELIB_IMAGE_BOUND_DIRECTORY::size() const
+	std::size_t PELIB_IMAGE_BOUND_DIRECTORY::size() const
 	{
 		unsigned int size = 0;
 		for (unsigned int i = 0; i < moduleForwarders.size(); ++i)

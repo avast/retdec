@@ -10,10 +10,10 @@
 * of PeLib.
 */
 
-#ifndef DEBUGDIRECTORY_H
-#define DEBUGDIRECTORY_H
+#ifndef RETDEC_PELIB_DEBUGDIRECTORY_H
+#define RETDEC_PELIB_DEBUGDIRECTORY_H
 
-#include "retdec/pelib/PeHeader.h"
+#include "retdec/pelib/ImageLoader.h"
 
 namespace PeLib
 {
@@ -26,16 +26,17 @@ namespace PeLib
 		  /// Stores RVAs which are occupied by this debug directory.
 		  std::vector<std::pair<unsigned int, unsigned int>> m_occupiedAddresses;
 
-		  std::vector<PELIB_IMG_DEBUG_DIRECTORY> read(InputBuffer& ibBuffer, unsigned int uiRva, unsigned int uiSize);
+		  void read(ImageLoader & imageLoader, std::vector<PELIB_IMG_DEBUG_DIRECTORY> & debugInfo, std::uint32_t rva, std::uint32_t size);
 
 		public:
 		  virtual ~DebugDirectory() = default;
 
-		  void clear(); // EXPORT
 		  /// Reads the Debug directory from a file.
-		  int read(unsigned char* buffer, unsigned int buffersize);
+		  int read(std::istream& inStream, ImageLoader & imageLoader);
+		  ///
+		  void clear(); // EXPORT
 		  /// Rebuilds the current Debug directory.
-		  void rebuild(std::vector<byte>& obBuffer) const; // EXPORT
+		  void rebuild(std::vector<std::uint8_t>& obBuffer) const; // EXPORT
 		  /// Returns the size the current Debug directory needs after rebuilding.
 		  unsigned int size() const;
 		  /// Writes the current Debug directory back to a file.
@@ -50,112 +51,42 @@ namespace PeLib
 		  void removeEntry(std::size_t uiIndex); // EXPORT
 
 		  /// Returns the Characteristics value of a debug structure.
-		  dword getCharacteristics(std::size_t uiIndex) const; // EXPORT
+		  std::uint32_t getCharacteristics(std::size_t uiIndex) const; // EXPORT
 		  /// Returns the TimeDateStamp value of a debug structure.
-		  dword getTimeDateStamp(std::size_t uiIndex) const; // EXPORT
+		  std::uint32_t getTimeDateStamp(std::size_t uiIndex) const; // EXPORT
 		  /// Returns the MajorVersion value of a debug structure.
-		  word getMajorVersion(std::size_t uiIndex) const; // EXPORT
+		  std::uint16_t getMajorVersion(std::size_t uiIndex) const; // EXPORT
 		  /// Returns the MinorVersion value of a debug structure.
-		  word getMinorVersion(std::size_t uiIndex) const; // EXPORT
+		  std::uint16_t getMinorVersion(std::size_t uiIndex) const; // EXPORT
 		  /// Returns the Type value of a debug structure.
-		  dword getType(std::size_t uiIndex) const; // EXPORT
+		  std::uint32_t getType(std::size_t uiIndex) const; // EXPORT
 		  /// Returns the SizeOfData value of a debug structure.
-		  dword getSizeOfData(std::size_t uiIndex) const; // EXPORT
+		  std::uint32_t getSizeOfData(std::size_t uiIndex) const; // EXPORT
 		  /// Returns the AddressOfRawData value of a debug structure.
-		  dword getAddressOfRawData(std::size_t uiIndex) const; // EXPORT
+		  std::uint32_t getAddressOfRawData(std::size_t uiIndex) const; // EXPORT
 		  /// Returns the PointerToRawData value of a debug structure.
-		  dword getPointerToRawData(std::size_t uiIndex) const; // EXPORT
-		  std::vector<byte> getData(std::size_t index) const; // EXPORT
+		  std::uint32_t getPointerToRawData(std::size_t uiIndex) const; // EXPORT
+		  std::vector<std::uint8_t> getData(std::size_t index) const; // EXPORT
 
 		  /// Sets the Characteristics value of a debug structure.
-		  void setCharacteristics(std::size_t uiIndex, dword dwValue); // EXPORT
+		  void setCharacteristics(std::size_t uiIndex, std::uint32_t dwValue); // EXPORT
 		  /// Sets the TimeDateStamp value of a debug structure.
-		  void setTimeDateStamp(std::size_t uiIndex, dword dwValue); // EXPORT
+		  void setTimeDateStamp(std::size_t uiIndex, std::uint32_t dwValue); // EXPORT
 		  /// Sets the MajorVersion value of a debug structure.
-		  void setMajorVersion(std::size_t uiIndex, word wValue); // EXPORT
+		  void setMajorVersion(std::size_t uiIndex, std::uint16_t wValue); // EXPORT
 		  /// Sets the MinorVersion value of a debug structure.
-		  void setMinorVersion(std::size_t uiIndex, word wValue); // EXPORT
+		  void setMinorVersion(std::size_t uiIndex, std::uint16_t wValue); // EXPORT
 		  /// Sets the Type value of a debug structure.
-		  void setType(std::size_t uiIndex, dword dwValue); // EXPORT
+		  void setType(std::size_t uiIndex, std::uint32_t dwValue); // EXPORT
 		  /// Sets the SizeOfData value of a debug structure.
-		  void setSizeOfData(std::size_t uiIndex, dword dwValue); // EXPORT
+		  void setSizeOfData(std::size_t uiIndex, std::uint32_t dwValue); // EXPORT
 		  /// Sets the AddressOfRawData value of a debug structure.
-		  void setAddressOfRawData(std::size_t uiIndex, dword dwValue); // EXPORT
+		  void setAddressOfRawData(std::size_t uiIndex, std::uint32_t dwValue); // EXPORT
 		  /// Sets the PointerToRawData value of a debug structure.
-		  void setPointerToRawData(std::size_t uiIndex, dword dwValue); // EXPORT
-		  void setData(std::size_t index, const std::vector<byte>& data); // EXPORT
+		  void setPointerToRawData(std::size_t uiIndex, std::uint32_t dwValue); // EXPORT
+		  void setData(std::size_t index, const std::vector<std::uint8_t>& data); // EXPORT
 
 		  const std::vector<std::pair<unsigned int, unsigned int>>& getOccupiedAddresses() const;
 	};
-
-	template <int bits>
-	class DebugDirectoryT : public DebugDirectory
-	{
-		public:
-		  /// Reads the Debug directory from a file.
-		  int read(std::istream& inStream, const PeHeaderT<bits>& peHeader);
-	};
-
-	/**
-	* @param inStream Input stream.
-	* @param peHeader A valid PE header which is necessary because some RVA calculations need to be done.
-	**/
-	template <int bits>
-	int DebugDirectoryT<bits>::read(std::istream& inStream, const PeHeaderT<bits>& peHeader)
-	{
-		IStreamWrapper inStream_w(inStream);
-
-		if (!inStream_w)
-		{
-			return ERROR_OPENING_FILE;
-		}
-
-		std::uint64_t ulFileSize = fileSize(inStream_w);
-
-		unsigned int uiRva = peHeader.getIddDebugRva();
-		unsigned int uiOffset = peHeader.rvaToOffset(uiRva);
-		unsigned int uiSize = peHeader.getIddDebugSize();
-
-		if (ulFileSize < uiOffset + uiSize)
-		{
-			return ERROR_INVALID_FILE;
-		}
-
-		inStream_w.seekg(uiOffset, std::ios::beg);
-
-		std::vector<byte> vDebugDirectory(uiSize);
-		inStream_w.read(reinterpret_cast<char*>(vDebugDirectory.data()), uiSize);
-
-		InputBuffer ibBuffer{vDebugDirectory};
-
-		std::vector<PELIB_IMG_DEBUG_DIRECTORY> currDebugInfo = DebugDirectory::read(ibBuffer, uiRva, uiSize);
-
-		for (unsigned int i=0;i<currDebugInfo.size();i++)
-		{
-			if ((currDebugInfo[i].idd.PointerToRawData >= ulFileSize) ||
-				(currDebugInfo[i].idd.PointerToRawData + currDebugInfo[i].idd.SizeOfData >= ulFileSize))
-			{
-				return ERROR_INVALID_FILE;
-			}
-
-			inStream_w.seekg(currDebugInfo[i].idd.PointerToRawData, std::ios::beg);
-			currDebugInfo[i].data.resize(currDebugInfo[i].idd.SizeOfData);
-			inStream_w.read(reinterpret_cast<char*>(currDebugInfo[i].data.data()), currDebugInfo[i].idd.SizeOfData);
-			if (!inStream_w) return ERROR_INVALID_FILE;
-
-			if (currDebugInfo[i].idd.SizeOfData > 0)
-			{
-				m_occupiedAddresses.push_back(
-						std::make_pair(
-							currDebugInfo[i].idd.AddressOfRawData,
-							currDebugInfo[i].idd.AddressOfRawData + currDebugInfo[i].idd.SizeOfData - 1
-						));
-			}
-		}
-
-		std::swap(currDebugInfo, m_vDebugInfo);
-
-		return ERROR_NONE;
-	}
 }
 #endif

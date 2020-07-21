@@ -10,8 +10,8 @@
 * of PeLib.
 */
 
-#ifndef INPUTBUFFER_H
-#define INPUTBUFFER_H
+#ifndef RETDEC_PELIB_INPUTBUFFER_H
+#define RETDEC_PELIB_INPUTBUFFER_H
 
 #include <vector>
 #include <iterator>

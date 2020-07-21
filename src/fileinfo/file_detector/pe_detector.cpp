@@ -355,13 +355,15 @@ void PeDetector::getVisualBasicInfo()
 
 void PeDetector::detectFileClass()
 {
-	if (peParser->isPe32())
+	switch(peParser->getBits())
 	{
-		fileInfo.setFileClass("32-bit");
-	}
-	else if (peParser->isPe64())
-	{
-		fileInfo.setFileClass("64-bit");
+		case 64:
+			fileInfo.setFileClass("64-bit");
+			break;
+
+		case 32:
+			fileInfo.setFileClass("32-bit");
+			break;
 	}
 }
 

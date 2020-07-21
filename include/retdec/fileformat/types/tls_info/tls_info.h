@@ -52,6 +52,7 @@ class TlsInfo
 		void setCallBacksAddr(std::uint64_t cbAddr);
 		void setZeroFillSize(std::uint32_t zFill);
 		void setCharacteristics(std::uint32_t chars);
+		void setCallBacks(const std::vector<uint64_t> & callbacks);
 		/// @}
 
 		/// @name Other methods

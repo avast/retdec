@@ -86,7 +86,7 @@ namespace PeLib
 	* @param dwId ID of a resource.
 	* @return True, if the resource child's id equals the parameter.
 	**/
-	bool ResourceChild::equalId(dword dwId) const
+	bool ResourceChild::equalId(std::uint32_t dwId) const
 	{
 		return entry.irde.Name == dwId;
 	}
@@ -220,7 +220,7 @@ namespace PeLib
 	 *
 	 * @return Name value of the node.
 	 */
-	dword ResourceChild::getOffsetToName() const
+	std::uint32_t ResourceChild::getOffsetToName() const
 	{
 		return entry.irde.Name;
 	}
@@ -230,7 +230,7 @@ namespace PeLib
 	 *
 	 * @return OffsetToData value of the node.
 	 */
-	dword ResourceChild::getOffsetToData() const
+	std::uint32_t ResourceChild::getOffsetToData() const
 	{
 		return entry.irde.OffsetToData;
 	}
@@ -250,7 +250,7 @@ namespace PeLib
 	 *
 	 * @param dwNewOffset Name value to set.
 	 */
-	void ResourceChild::setOffsetToName(dword dwNewOffset)
+	void ResourceChild::setOffsetToName(std::uint32_t dwNewOffset)
 	{
 		entry.irde.Name = dwNewOffset;
 	}
@@ -260,7 +260,7 @@ namespace PeLib
 	 *
 	 * @param dwNewOffset OffsetToData value to set.
 	 */
-	void ResourceChild::setOffsetToData(dword dwNewOffset)
+	void ResourceChild::setOffsetToData(std::uint32_t dwNewOffset)
 	{
 		entry.irde.OffsetToData = dwNewOffset;
 	}
@@ -302,75 +302,48 @@ namespace PeLib
 
 	/**
 	* Reads the next resource leaf from the input file.
-	* @param inStream An input stream.
-	* @param uiRsrcOffset Offset of resource directory in the file.
+	* @param imageLoader An image loaded into the ImageLoader parser
+	* @param uiRsrcRva RVA of the beginning of the resource directory.
 	* @param uiOffset Offset of the resource leaf that's to be read.
-	* @param uiRva RVA of the beginning of the resource directory.
-	* @param uiFileSize Size of the input file.
-	* @param uiSizeOfImage Size of the image.
+	* @param sizeOfImage Size of the image.
 	* @param resDir Resource directory.
 	**/
 	int ResourceLeaf::read(
-			std::istream& inStream,
-			unsigned int uiRsrcOffset,
-			unsigned int uiOffset,
-			unsigned int uiRva,
-			unsigned int uiFileSize,
-			unsigned int /* uiSizeOfImage */,
+			ImageLoader & imageLoader,
+			std::uint32_t uiRsrcRva,
+			std::uint32_t uiOffset,
+			std::uint32_t sizeOfImage,
 			ResourceDirectory* resDir)
 	{
-		IStreamWrapper inStream_w(inStream);
-
 		// Invalid leaf.
-		if (uiRsrcOffset + uiOffset + PELIB_IMAGE_RESOURCE_DATA_ENTRY::size() > fileSize(inStream_w))
+		std::uint32_t uiRva = uiRsrcRva + uiOffset;
+		if(uiRva > sizeOfImage)
 		{
 			return ERROR_INVALID_FILE;
 		}
 
-		uiElementRva = uiOffset + uiRva;
+		// Load the resource data entry
+		imageLoader.readImage(&entry, uiRva, sizeof(PELIB_IMAGE_RESOURCE_DATA_ENTRY));
+		resDir->addOccupiedAddressRange(uiRva, uiRva + PELIB_IMAGE_RESOURCE_DATA_ENTRY::size() - 1);
 
-		std::vector<unsigned char> vResourceDataEntry(PELIB_IMAGE_RESOURCE_DATA_ENTRY::size());
-		inStream_w.seekg(uiRsrcOffset + uiOffset, std::ios_base::beg);
-		inStream_w.read(reinterpret_cast<char*>(vResourceDataEntry.data()), PELIB_IMAGE_RESOURCE_DATA_ENTRY::size());
-
-		InputBuffer inpBuffer(vResourceDataEntry);
-
-		inpBuffer >> entry.OffsetToData;
-		inpBuffer >> entry.Size;
-		inpBuffer >> entry.CodePage;
-		inpBuffer >> entry.Reserved;
-
-		resDir->addOccupiedAddressRange(uiElementRva, uiElementRva + PELIB_IMAGE_RESOURCE_DATA_ENTRY::size() - 1);
-
+		// Clear the resource data
 		m_data.clear();
 
-		unsigned int uiEntrySize = std::min(entry.Size, uiFileSize);
-
-		// No data.
-		if (!(entry.OffsetToData - uiRva + entry.Size))
-		{
+		// No data or invalid leaf
+		if(entry.OffsetToData >= sizeOfImage || entry.OffsetToData + entry.Size > sizeOfImage)
 			return ERROR_NONE;
-		}
-		// Invalid leaf.
-		else if (uiRsrcOffset + (entry.OffsetToData - uiRva) + uiEntrySize > uiFileSize)
-		{
+
+		// Data pointing before resource directory?
+		if((uiRsrcRva + entry.OffsetToData) < uiRsrcRva)
 			return ERROR_NONE;
-		}
-		else if (entry.OffsetToData < uiRva)
-		{
-			return ERROR_NONE;
-		}
 
-		m_data.resize(uiEntrySize);
+		// Load the resource data
+		m_data.resize(entry.Size);
+		imageLoader.readImage(m_data.data(), entry.OffsetToData, entry.Size);
 
-		inStream_w.seekg(uiRsrcOffset + (entry.OffsetToData - uiRva), std::ios_base::beg);
-		inStream_w.read(reinterpret_cast<char*>(m_data.data()), uiEntrySize);
-
-		if (uiEntrySize > 0)
-		{
-			resDir->addOccupiedAddressRange(entry.OffsetToData, entry.OffsetToData + uiEntrySize - 1);
-		}
-
+		// Add the data range to the occupied map
+		if(entry.Size > 0)
+			resDir->addOccupiedAddressRange(entry.OffsetToData, entry.OffsetToData + entry.Size - 1);
 		return ERROR_NONE;
 	}
 
@@ -433,7 +406,7 @@ namespace PeLib
 	* Returns a vector that contains the raw data of a resource leaf.
 	* @return Raw data of the resource.
 	**/
-	std::vector<byte> ResourceLeaf::getData() const
+	std::vector<std::uint8_t> ResourceLeaf::getData() const
 	{
 		return m_data;
 	}
@@ -442,7 +415,7 @@ namespace PeLib
 	* Overwrites the raw data of a resource.
 	* @param vData New data of the resource.
 	**/
-	void ResourceLeaf::setData(const std::vector<byte>& vData)
+	void ResourceLeaf::setData(const std::vector<std::uint8_t>& vData)
 	{
 		m_data = vData;
 	}
@@ -452,7 +425,7 @@ namespace PeLib
 	* can be found.
 	* @return The leaf's OffsetToData value.
 	**/
-	dword ResourceLeaf::getOffsetToData() const
+	std::uint32_t ResourceLeaf::getOffsetToData() const
 	{
 		return entry.OffsetToData;
 	}
@@ -461,7 +434,7 @@ namespace PeLib
 	* Returns the leaf's Size value. That's the size of the raw data of the resource.
 	* @return The leaf's Size value.
 	**/
-	dword ResourceLeaf::getSize() const
+	std::uint32_t ResourceLeaf::getSize() const
 	{
 		return entry.Size;
 	}
@@ -470,7 +443,7 @@ namespace PeLib
 	* Returns the leaf's CodePage value.
 	* @return The leaf's CodePage value.
 	**/
-	dword ResourceLeaf::getCodePage() const
+	std::uint32_t ResourceLeaf::getCodePage() const
 	{
 		return entry.CodePage;
 	}
@@ -479,7 +452,7 @@ namespace PeLib
 	* Returns the leaf's Reserved value.
 	* @return The leaf's Reserved value.
 	**/
-	dword ResourceLeaf::getReserved() const
+	std::uint32_t ResourceLeaf::getReserved() const
 	{
 		return entry.Reserved;
 	}
@@ -488,7 +461,7 @@ namespace PeLib
 	* Sets the leaf's OffsetToData value.
 	* @param dwValue The leaf's new OffsetToData value.
 	**/
-	void ResourceLeaf::setOffsetToData(dword dwValue)
+	void ResourceLeaf::setOffsetToData(std::uint32_t dwValue)
 	{
 		entry.OffsetToData = dwValue;
 	}
@@ -497,7 +470,7 @@ namespace PeLib
 	* Sets the leaf's Size value.
 	* @param dwValue The leaf's new Size value.
 	**/
-	void ResourceLeaf::setSize(dword dwValue)
+	void ResourceLeaf::setSize(std::uint32_t dwValue)
 	{
 		entry.Size = dwValue;
 	}
@@ -506,7 +479,7 @@ namespace PeLib
 	* Sets the leaf's CodePage value.
 	* @param dwValue The leaf's new CodePage value.
 	**/
-	void ResourceLeaf::setCodePage(dword dwValue)
+	void ResourceLeaf::setCodePage(std::uint32_t dwValue)
 	{
 		entry.CodePage = dwValue;
 	}
@@ -515,7 +488,7 @@ namespace PeLib
 	* Sets the leaf's Reserved value.
 	* @param dwValue The leaf's new Reserved value.
 	**/
-	void ResourceLeaf::setReserved(dword dwValue)
+	void ResourceLeaf::setReserved(std::uint32_t dwValue)
 	{
 		entry.Reserved = dwValue;
 	}
@@ -547,7 +520,7 @@ namespace PeLib
 	void ResourceNode::makeValid()
 	{
 		std::sort(children.begin(), children.end());
-		header.NumberOfNamedEntries = static_cast<PeLib::word>(std::count_if(
+		header.NumberOfNamedEntries = static_cast<std::uint16_t>(std::count_if(
 				children.begin(),
 				children.end(),
 				[](const auto& i) { return i.isNamedResource(); }
@@ -594,12 +567,12 @@ namespace PeLib
 			if (children[i].entry.irde.Name & PELIB_IMAGE_RESOURCE_NAME_IS_STRING)
 			{
 				unsigned int uiNameOffset = children[i].entry.irde.Name & ~PELIB_IMAGE_RESOURCE_NAME_IS_STRING;
-				obBuffer.insert(uiNameOffset, (word)children[i].entry.wstrName.size());
+				obBuffer.insert(uiNameOffset, (std::uint16_t)children[i].entry.wstrName.size());
 				uiNameOffset += 2;
 
 				for (unsigned int j = 0; j < children[i].entry.wstrName.size(); ++j)
 				{
-					obBuffer.insert(uiNameOffset, (word)children[i].entry.wstrName[j]);
+					obBuffer.insert(uiNameOffset, (std::uint16_t)children[i].entry.wstrName[j]);
 					uiNameOffset += 2;
 				}
 			}
@@ -621,7 +594,7 @@ namespace PeLib
 	{
 		// There is always directory and its entries at the beginning
 		uiCurrentOffset += PELIB_IMAGE_RESOURCE_DIRECTORY::size();
-		uiCurrentOffset += (PeLib::PELIB_IMAGE_RESOURCE_DIRECTORY_ENTRY::size() * getNumberOfChildren());
+		uiCurrentOffset += (PELIB_IMAGE_RESOURCE_DIRECTORY_ENTRY::size() * getNumberOfChildren());
 
 		for (unsigned int i = 0; i < getNumberOfChildren(); ++i)
 		{
@@ -648,90 +621,65 @@ namespace PeLib
 
 	/**
 	* Reads the next resource node from the input file.
-	* @param inStream An input stream.
-	* @param uiRsrcOffset Offset of resource directory in the file.
+	* @param imageLoader An image loaded into the ImageLoader parser
+	* @param uiRsrcRva RVA of the beginning of the resource directory.
 	* @param uiOffset Offset of the resource node that's to be read.
-	* @param uiRva RVA of the beginning of the resource directory.
-	* @param uiFileSize Size of the input file.
-	* @param uiSizeOfImage Size of the image.
+	* @param sizeOfImage Size of the image.
 	* @param resDir Resource directory.
 	**/
 	int ResourceNode::read(
-			std::istream& inStream,
-			unsigned int uiRsrcOffset,
-			unsigned int uiOffset,
-			unsigned int uiRva,
-			unsigned int uiFileSize,
-			unsigned int uiSizeOfImage,
+			ImageLoader & imageLoader,
+			std::uint32_t uiRsrcRva,
+			std::uint32_t uiOffset,
+			std::uint32_t sizeOfImage,
 			ResourceDirectory* resDir)
 	{
-		IStreamWrapper inStream_w(inStream);
-
-		// Not enough space to be a valid node.
-		if (!resDir || uiRsrcOffset + uiOffset + PELIB_IMAGE_RESOURCE_DIRECTORY::size() > fileSize(inStream_w))
-		{
+		// Enough space to be a valid node?
+		std::uint32_t uiRva = uiRsrcRva + uiOffset;
+		if(uiRva > sizeOfImage)
 			return ERROR_INVALID_FILE;
-		}
 
-		uiElementRva = uiOffset + uiRva;
+		// Read the resource node header
+		if(imageLoader.readImage(&header, uiRva, PELIB_IMAGE_RESOURCE_DIRECTORY::size()) != PELIB_IMAGE_RESOURCE_DIRECTORY::size())
+			return ERROR_INVALID_FILE;
 
-		std::vector<unsigned char> vResourceDirectory(PELIB_IMAGE_RESOURCE_DIRECTORY::size());
-		inStream_w.seekg(uiRsrcOffset + uiOffset, std::ios_base::beg);
-		inStream_w.read(reinterpret_cast<char*>(vResourceDirectory.data()), PELIB_IMAGE_RESOURCE_DIRECTORY::size());
-
-		InputBuffer inpBuffer(vResourceDirectory);
-
-		inpBuffer >> header.Characteristics;
-		inpBuffer >> header.TimeDateStamp;
-		inpBuffer >> header.MajorVersion;
-		inpBuffer >> header.MinorVersion;
-		inpBuffer >> header.NumberOfNamedEntries;
-		inpBuffer >> header.NumberOfIdEntries;
-
+		// Add the total number of entries to the occupied range
 		unsigned int uiNumberOfEntries = header.NumberOfNamedEntries + header.NumberOfIdEntries;
-
-		resDir->addOccupiedAddressRange(uiElementRva, uiElementRva + PELIB_IMAGE_RESOURCE_DIRECTORY::size() - 1);
+		resDir->addOccupiedAddressRange(uiRva, uiRva + PELIB_IMAGE_RESOURCE_DIRECTORY::size() - 1);
+		uiRva += PELIB_IMAGE_RESOURCE_DIRECTORY::size();
 
 		// Windows loader check (PspLocateInPEManifest -> LdrpResGetResourceDirectory):
 		// If the total number of resource entries goes beyond the image, the file is refused to run
 		// Sample: 6318b0a1b57fc70bce5314aefb6cb06c90b7991afeae4e91ffc05ee0c88947d7
-		// However, such sample can still be executed in Windows XP - based emulator
-		if ((uiRva + (uiNumberOfEntries * PELIB_IMAGE_RESOURCE_DIRECTORY_ENTRY::size())) > uiSizeOfImage)
+		// However, such sample can still be executed in WinXP-based emulator
+		if ((uiRva + (uiNumberOfEntries * PELIB_IMAGE_RESOURCE_DIRECTORY_ENTRY::size())) > sizeOfImage)
 		{
 			resDir->setLoaderError(LDR_ERROR_RSRC_OVER_END_OF_IMAGE);
 			return ERROR_NONE;
 		}
 
-		// Not enough space to be a valid node.
-		if (uiRsrcOffset + uiOffset + PELIB_IMAGE_RESOURCE_DIRECTORY::size() + uiNumberOfEntries * PELIB_IMAGE_RESOURCE_DIRECTORY_ENTRY::size() > fileSize(inStream_w))
-		{
-			return ERROR_INVALID_FILE;
-		}
-
-		std::vector<unsigned char> vResourceChildren(uiNumberOfEntries * PELIB_IMAGE_RESOURCE_DIRECTORY_ENTRY::size());
-		inStream_w.read(reinterpret_cast<char*>(vResourceChildren.data()), uiNumberOfEntries * PELIB_IMAGE_RESOURCE_DIRECTORY_ENTRY::size());
-		InputBuffer childInpBuffer(vResourceChildren);
-
+		// Load all entries to the vector
+		std::vector<PELIB_IMAGE_RESOURCE_DIRECTORY_ENTRY> vResourceChildren(uiNumberOfEntries);
 		resDir->insertNodeOffset(uiOffset);
+
 		if (uiNumberOfEntries > 0)
 		{
-			resDir->addOccupiedAddressRange(
-					uiElementRva + PELIB_IMAGE_RESOURCE_DIRECTORY::size(),
-					uiElementRva + PELIB_IMAGE_RESOURCE_DIRECTORY::size() + uiNumberOfEntries * PELIB_IMAGE_RESOURCE_DIRECTORY_ENTRY::size() - 1
-				);
+			resDir->addOccupiedAddressRange(uiRva, uiRva + uiNumberOfEntries * PELIB_IMAGE_RESOURCE_DIRECTORY_ENTRY::size() - 1);
 		}
 
-		for (unsigned int i = 0; i < uiNumberOfEntries; ++i)
+		for (unsigned int i = 0; i < uiNumberOfEntries; i++)
 		{
 			ResourceChild rc;
-			childInpBuffer >> rc.entry.irde.Name;
-			childInpBuffer >> rc.entry.irde.OffsetToData;
+			int childError;
 
-			// If the resource entry goes out of the image, then the image is claimed as corrupt by
+			imageLoader.readImage(&rc.entry.irde, uiRva, PELIB_IMAGE_RESOURCE_DIRECTORY_ENTRY::size());
+			uiRva += PELIB_IMAGE_RESOURCE_DIRECTORY_ENTRY::size();
+
+			// If the resource name goes out of the image, then the image is claimed as corrupt by
 			// Windows loader check (PspLocateInPEManifest -> LdrpResGetResourceDirectory)
-			if(rc.entry.irde.Name & 0x80000000)
+			if(rc.entry.irde.Name & PELIB_IMAGE_RESOURCE_NAME_IS_STRING)
 			{
-				if((rc.entry.irde.Name & 0x7FFFFFFF) > uiSizeOfImage)
+				if((rc.entry.irde.Name & PELIB_IMAGE_RESOURCE_RVA_MASK) > sizeOfImage)
 				{
 					resDir->setLoaderError(LDR_ERROR_RSRC_NAME_OUT_OF_IMAGE);
 				}
@@ -739,10 +687,10 @@ namespace PeLib
 
 			// Check whether the resource data/subdirectory goes out of the image
 			{
-				if((rc.entry.irde.OffsetToData & 0x7FFFFFFF) > uiSizeOfImage)
+				if((rc.entry.irde.OffsetToData & PELIB_IMAGE_RESOURCE_RVA_MASK) > sizeOfImage)
 				{
 					// Is it a subdirectory?
-					if(rc.entry.irde.OffsetToData & 0x80000000)
+					if(rc.entry.irde.OffsetToData & PELIB_IMAGE_RESOURCE_DATA_IS_DIRECTORY)
 					{
 						resDir->setLoaderError(LDR_ERROR_RSRC_SUBDIR_OUT_OF_IMAGE);
 						return ERROR_NONE;
@@ -754,47 +702,25 @@ namespace PeLib
 				}
 			}
 
-			unsigned int lastPos = inStream_w.tellg();
-
 			if (rc.entry.irde.Name & PELIB_IMAGE_RESOURCE_NAME_IS_STRING)
 			{
 				// Enough space to read string length?
-				if ((rc.entry.irde.Name & ~PELIB_IMAGE_RESOURCE_NAME_IS_STRING) + 2 < fileSize(inStream_w))
+				if ((rc.entry.irde.Name & PELIB_IMAGE_RESOURCE_RVA_MASK) + 2 < sizeOfImage)
 				{
-					unsigned int uiNameOffset = rc.entry.irde.Name & ~PELIB_IMAGE_RESOURCE_NAME_IS_STRING;
-					if (uiRsrcOffset + uiNameOffset + sizeof(word) > fileSize(inStream_w))
+					// Check whether we have enough space to read at least one character
+					unsigned int uiNameOffset = rc.entry.irde.Name & PELIB_IMAGE_RESOURCE_RVA_MASK;
+					if (uiRva + uiNameOffset + sizeof(std::uint16_t) > sizeOfImage)
 					{
 						return ERROR_INVALID_FILE;
 					}
 
-					inStream_w.seekg(uiRsrcOffset + uiNameOffset, std::ios_base::beg);
-
-					word len;
-					inStream_w.read(reinterpret_cast<char*>(&len), sizeof(word));
-
-					// Enough space to read string?
-					if (uiRsrcOffset + uiNameOffset + 2 * len > fileSize(inStream_w))
-					{
-						return ERROR_INVALID_FILE;
-					}
-
-					// jk: This construction is incorrect on 64bit systems
-					// wchar_t c;
-					word c;
-					for (word ii=0; ii<len; ++ii)
-					{
-						inStream_w.read(reinterpret_cast<char*>(&c), sizeof(word));
-						rc.entry.wstrName += c;
-					}
+					// Read the resource name
+					imageLoader.readStringRc(rc.entry.wstrName, uiRsrcRva + uiNameOffset); 
 				}
-
-				inStream_w.seekg(lastPos, std::ios_base::beg);
 			}
 
-			const auto value = (rc.entry.irde.OffsetToData & PELIB_IMAGE_RESOURCE_DATA_IS_DIRECTORY) ?
-				(rc.entry.irde.OffsetToData & ~PELIB_IMAGE_RESOURCE_DATA_IS_DIRECTORY) : rc.entry.irde.OffsetToData;
 			// Detect cycles to prevent infinite recursion.
-			if (resDir->hasNodeOffset(value))
+			if (resDir->hasNodeOffset(rc.entry.irde.OffsetToData & PELIB_IMAGE_RESOURCE_RVA_MASK))
 			{
 				return ERROR_NONE;
 			}
@@ -808,13 +734,14 @@ namespace PeLib
 				rc.child = new ResourceLeaf;
 			}
 
-			if (rc.child->read(inStream_w, uiRsrcOffset, value, uiRva, uiFileSize, uiSizeOfImage, resDir) != ERROR_NONE)
+			// Read the child node
+			childError = rc.child->read(imageLoader, uiRsrcRva, rc.entry.irde.OffsetToData & PELIB_IMAGE_RESOURCE_RVA_MASK, sizeOfImage, resDir);
+			if (childError != ERROR_NONE)
 			{
-				return ERROR_INVALID_FILE;
+				return childError;
 			}
 
 			children.push_back(rc);
-			inStream_w.seekg(lastPos, std::ios_base::beg);
 		}
 
 		return ERROR_NONE;
@@ -886,7 +813,7 @@ namespace PeLib
 	* @param uiIndex Index of the child.
 	* @return Name value of a child.
 	**/
-	dword ResourceNode::getOffsetToChildName(unsigned int uiIndex) const
+	std::uint32_t ResourceNode::getOffsetToChildName(unsigned int uiIndex) const
 	{
 		return children[uiIndex].getOffsetToName();
 	}
@@ -896,7 +823,7 @@ namespace PeLib
 	* @param uiIndex Index of the child.
 	* @return OffsetToData value of a child.
 	**/
-	dword ResourceNode::getOffsetToChildData(unsigned int uiIndex) const
+	std::uint32_t ResourceNode::getOffsetToChildData(unsigned int uiIndex) const
 	{
 		return children[uiIndex].getOffsetToData();
 	}
@@ -916,7 +843,7 @@ namespace PeLib
 	* @param uiIndex Index of the child.
 	* @param dwNewOffset New Name value of the resource.
 	**/
-	void ResourceNode::setOffsetToChildName(unsigned int uiIndex, dword dwNewOffset)
+	void ResourceNode::setOffsetToChildName(unsigned int uiIndex, std::uint32_t dwNewOffset)
 	{
 		children[uiIndex].setOffsetToName(dwNewOffset);
 	}
@@ -926,7 +853,7 @@ namespace PeLib
 	* @param uiIndex Index of the child.
 	* @param dwNewOffset New OffsetToData value of the resource.
 	**/
-	void ResourceNode::setOffsetToChildData(unsigned int uiIndex, dword dwNewOffset)
+	void ResourceNode::setOffsetToChildData(unsigned int uiIndex, std::uint32_t dwNewOffset)
 	{
 		children[uiIndex].setOffsetToData(dwNewOffset);
 	}
@@ -935,7 +862,7 @@ namespace PeLib
 	* Returns the Characteristics value of the node.
 	* @return Characteristics value of the node.
 	**/
-	dword ResourceNode::getCharacteristics() const
+	std::uint32_t ResourceNode::getCharacteristics() const
 	{
 		return header.Characteristics;
 	}
@@ -944,7 +871,7 @@ namespace PeLib
 	* Returns the TimeDateStamp value of the node.
 	* @return TimeDateStamp value of the node.
 	**/
-	dword ResourceNode::getTimeDateStamp() const
+	std::uint32_t ResourceNode::getTimeDateStamp() const
 	{
 		return header.TimeDateStamp;
 	}
@@ -953,7 +880,7 @@ namespace PeLib
 	* Returns the MajorVersion value of the node.
 	* @return MajorVersion value of the node.
 	**/
-	word ResourceNode::getMajorVersion() const
+	std::uint16_t ResourceNode::getMajorVersion() const
 	{
 		return header.MajorVersion;
 	}
@@ -962,7 +889,7 @@ namespace PeLib
 	* Returns the MinorVersion value of the node.
 	* @return MinorVersion value of the node.
 	**/
-	word ResourceNode::getMinorVersion() const
+	std::uint16_t ResourceNode::getMinorVersion() const
 	{
 		return header.MinorVersion;
 	}
@@ -971,7 +898,7 @@ namespace PeLib
 	* Returns the NumberOfNamedEntries value of the node.
 	* @return NumberOfNamedEntries value of the node.
 	**/
-	word ResourceNode::getNumberOfNamedEntries() const
+	std::uint16_t ResourceNode::getNumberOfNamedEntries() const
 	{
 		return header.NumberOfNamedEntries;
 	}
@@ -980,7 +907,7 @@ namespace PeLib
 	* Returns the NumberOfIdEntries value of the node.
 	* @return NumberOfIdEntries value of the node.
 	**/
-	word ResourceNode::getNumberOfIdEntries() const
+	std::uint16_t ResourceNode::getNumberOfIdEntries() const
 	{
 		return header.NumberOfIdEntries;
 	}
@@ -989,7 +916,7 @@ namespace PeLib
 	* Sets the Characteristics value of the node.
 	* @param value New Characteristics value of the node.
 	**/
-	void ResourceNode::setCharacteristics(dword value)
+	void ResourceNode::setCharacteristics(std::uint32_t value)
 	{
 		header.Characteristics = value;
 	}
@@ -998,7 +925,7 @@ namespace PeLib
 	* Sets the TimeDateStamp value of the node.
 	* @param value New TimeDateStamp value of the node.
 	**/
-	void ResourceNode::setTimeDateStamp(dword value)
+	void ResourceNode::setTimeDateStamp(std::uint32_t value)
 	{
 		header.TimeDateStamp = value;
 	}
@@ -1007,7 +934,7 @@ namespace PeLib
 	* Sets the MajorVersion value of the node.
 	* @param value New MajorVersion value of the node.
 	**/
-	void ResourceNode::setMajorVersion(word value)
+	void ResourceNode::setMajorVersion(std::uint16_t value)
 	{
 		header.MajorVersion = value;
 	}
@@ -1016,7 +943,7 @@ namespace PeLib
 	* Sets the MinorVersion value of the node.
 	* @param value New MinorVersion value of the node.
 	**/
-	void ResourceNode::setMinorVersion(word value)
+	void ResourceNode::setMinorVersion(std::uint16_t value)
 	{
 		header.MinorVersion = value;
 	}
@@ -1025,7 +952,7 @@ namespace PeLib
 	* Sets the NumberOfNamedEntries value of the node.
 	* @param value New NumberOfNamedEntries value of the node.
 	**/
-	void ResourceNode::setNumberOfNamedEntries(word value)
+	void ResourceNode::setNumberOfNamedEntries(std::uint16_t value)
 	{
 		header.NumberOfNamedEntries = value;
 	}
@@ -1034,7 +961,7 @@ namespace PeLib
 	* Sets the NumberOfIdEntries value of the node.
 	* @param value New NumberOfIdEntries value of the node.
 	**/
-	void ResourceNode::setNumberOfIdEntries(word value)
+	void ResourceNode::setNumberOfIdEntries(std::uint16_t value)
 	{
 		header.NumberOfIdEntries = value;
 	}
@@ -1085,6 +1012,23 @@ namespace PeLib
 	}
 
 	/**
+	* Reads the resource directory from a file.
+	* @param imageLoader image loader
+	**/
+	int ResourceDirectory::read(ImageLoader & imageLoader)
+	{
+		std::uint32_t resDirRva = imageLoader.getDataDirRva(PELIB_IMAGE_DIRECTORY_ENTRY_RESOURCE);
+		std::uint32_t sizeOfImage = imageLoader.getSizeOfImage();
+
+		if(resDirRva >= sizeOfImage)
+		{
+			return ERROR_INVALID_FILE;
+		}
+
+		return m_rnRoot.read(imageLoader, resDirRva, 0, sizeOfImage, this);
+	}
+
+	/**
 	* Returns the root node of the resource directory.
 	* @return Root node of the resource directory.
 	**/
@@ -1124,7 +1068,7 @@ namespace PeLib
 	* @param vBuffer Buffer the source directory will be written to.
 	* @param uiRva RVA of the resource directory.
 	**/
-	void ResourceDirectory::rebuild(std::vector<byte>& vBuffer, unsigned int uiRva) const
+	void ResourceDirectory::rebuild(std::vector<std::uint8_t>& vBuffer, unsigned int uiRva) const
 	{
 		OutputBuffer obBuffer(vBuffer);
 		unsigned int offs = 0;
@@ -1195,7 +1139,7 @@ namespace PeLib
 	* Adds another resource type. The new resource type is identified by the ID dwResTypeId.
 	* @param dwResTypeId ID which identifies the resource type.
 	**/
-	int ResourceDirectory::addResourceType(dword dwResTypeId)
+	int ResourceDirectory::addResourceType(std::uint32_t dwResTypeId)
 	{
 		std::vector<ResourceChild>::iterator Iter = std::find_if(
 				m_rnRoot.children.begin(),
@@ -1245,7 +1189,7 @@ namespace PeLib
 	* Removes the resource type identified by the ID dwResTypeId.
 	* @param dwResTypeId ID which identifies the resource type.
 	**/
-	int ResourceDirectory::removeResourceType(dword dwResTypeId)
+	int ResourceDirectory::removeResourceType(std::uint32_t dwResTypeId)
 	{
 		auto Iter = std::find_if(
 				m_rnRoot.children.begin(),
@@ -1263,8 +1207,8 @@ namespace PeLib
 
 		m_rnRoot.children.erase(Iter);
 
-		if (isNamed) m_rnRoot.header.NumberOfNamedEntries = static_cast<PeLib::word>(m_rnRoot.children.size());
-		else m_rnRoot.header.NumberOfIdEntries = static_cast<PeLib::word>(m_rnRoot.children.size());
+		if (isNamed) m_rnRoot.header.NumberOfNamedEntries = static_cast<std::uint16_t>(m_rnRoot.children.size());
+		else m_rnRoot.header.NumberOfIdEntries = static_cast<std::uint16_t>(m_rnRoot.children.size());
 
 		return ERROR_NONE;
 	}
@@ -1291,8 +1235,8 @@ namespace PeLib
 
 		m_rnRoot.children.erase(Iter);
 
-		if (isNamed) m_rnRoot.header.NumberOfNamedEntries = static_cast<PeLib::word>(m_rnRoot.children.size());
-		else m_rnRoot.header.NumberOfIdEntries = static_cast<PeLib::word>(m_rnRoot.children.size());
+		if (isNamed) m_rnRoot.header.NumberOfNamedEntries = static_cast<std::uint16_t>(m_rnRoot.children.size());
+		else m_rnRoot.header.NumberOfIdEntries = static_cast<std::uint16_t>(m_rnRoot.children.size());
 
 		return ERROR_NONE;
 	}
@@ -1308,8 +1252,8 @@ namespace PeLib
 
 		m_rnRoot.children.erase(m_rnRoot.children.begin() + uiIndex);
 
-		if (isNamed) m_rnRoot.header.NumberOfNamedEntries = static_cast<PeLib::word>(m_rnRoot.children.size());
-		else m_rnRoot.header.NumberOfIdEntries = static_cast<PeLib::word>(m_rnRoot.children.size());
+		if (isNamed) m_rnRoot.header.NumberOfNamedEntries = static_cast<std::uint16_t>(m_rnRoot.children.size());
+		else m_rnRoot.header.NumberOfIdEntries = static_cast<std::uint16_t>(m_rnRoot.children.size());
 
 		return ERROR_NONE;
 	}
@@ -1320,7 +1264,7 @@ namespace PeLib
 	* @param dwResTypeId ID of the resource type.
 	* @param dwResId ID of the resource.
 	**/
-	int ResourceDirectory::addResource(dword dwResTypeId, dword dwResId)
+	int ResourceDirectory::addResource(std::uint32_t dwResTypeId, std::uint32_t dwResId)
 	{
 		ResourceChild rcCurr;
 		rcCurr.entry.irde.Name = dwResId;
@@ -1333,7 +1277,7 @@ namespace PeLib
 	* @param dwResTypeId ID of the resource type.
 	* @param strResName Name of the resource.
 	**/
-	int ResourceDirectory::addResource(dword dwResTypeId, const std::string& strResName)
+	int ResourceDirectory::addResource(std::uint32_t dwResTypeId, const std::string& strResName)
 	{
 		ResourceChild rcCurr;
 		rcCurr.entry.wstrName = strResName;
@@ -1346,7 +1290,7 @@ namespace PeLib
 	* @param strResTypeName Name of the resource type.
 	* @param dwResId ID of the resource.
 	**/
-	int ResourceDirectory::addResource(const std::string& strResTypeName, dword dwResId)
+	int ResourceDirectory::addResource(const std::string& strResTypeName, std::uint32_t dwResId)
 	{
 		ResourceChild rcCurr;
 		rcCurr.entry.irde.Name = dwResId;
@@ -1372,7 +1316,7 @@ namespace PeLib
 	* @param dwResTypeIndex ID of the resource type.
 	* @param dwResId ID of the resource.
 	**/
-	int ResourceDirectory::removeResource(dword dwResTypeIndex, dword dwResId)
+	int ResourceDirectory::removeResource(std::uint32_t dwResTypeIndex, std::uint32_t dwResId)
 	{
 		return removeResourceT(dwResTypeIndex, dwResId);
 	}
@@ -1383,7 +1327,7 @@ namespace PeLib
 	* @param dwResTypeIndex ID of the resource type.
 	* @param strResName Name of the resource.
 	**/
-	int ResourceDirectory::removeResource(dword dwResTypeIndex, const std::string& strResName)
+	int ResourceDirectory::removeResource(std::uint32_t dwResTypeIndex, const std::string& strResName)
 	{
 		return removeResourceT(dwResTypeIndex, strResName);
 	}
@@ -1394,7 +1338,7 @@ namespace PeLib
 	* @param strResTypeName Name of the resource type.
 	* @param dwResId ID of the resource.
 	**/
-	int ResourceDirectory::removeResource(const std::string& strResTypeName, dword dwResId)
+	int ResourceDirectory::removeResource(const std::string& strResTypeName, std::uint32_t dwResId)
 	{
 		return removeResourceT(strResTypeName, dwResId);
 	}
@@ -1433,7 +1377,7 @@ namespace PeLib
 	* @param uiIndex Index which identifies a resource type.
 	* @return The ID of the specified resource type.
 	**/
-	dword ResourceDirectory::getResourceTypeIdByIndex(unsigned int uiIndex) const
+	std::uint32_t ResourceDirectory::getResourceTypeIdByIndex(unsigned int uiIndex) const
 	{
 		return m_rnRoot.children[uiIndex].entry.irde.Name;
 	}
@@ -1455,7 +1399,7 @@ namespace PeLib
 	* @param dwResTypeId ID of the resource type.
 	* @return Index of that resource type.
 	**/
-	int ResourceDirectory::resourceTypeIdToIndex(dword dwResTypeId) const
+	int ResourceDirectory::resourceTypeIdToIndex(std::uint32_t dwResTypeId) const
 	{
 		auto Iter = std::find_if(
 				m_rnRoot.children.begin(),
@@ -1487,7 +1431,7 @@ namespace PeLib
 	* @param dwId ID of the resource type.
 	* @return Number of resources of resource type dwId.
 	**/
-	unsigned int ResourceDirectory::getNumberOfResources(dword dwId) const
+	unsigned int ResourceDirectory::getNumberOfResources(std::uint32_t dwId) const
 	{
 //		std::vector<ResourceChild>::const_iterator IterD = m_rnRoot.children.begin();
 //		std::cout << dwId << std::endl;
@@ -1555,7 +1499,7 @@ namespace PeLib
 	* @param dwResId Identifies the resource.
 	* @param data Vector where the data is stored.
 	**/
-	void ResourceDirectory::getResourceData(dword dwResTypeId, dword dwResId, std::vector<byte>& data) const
+	void ResourceDirectory::getResourceData(std::uint32_t dwResTypeId, std::uint32_t dwResId, std::vector<std::uint8_t>& data) const
 	{
 		getResourceDataT(dwResTypeId, dwResId, data);
 	}
@@ -1566,7 +1510,7 @@ namespace PeLib
 	* @param strResName Identifies the resource.
 	* @param data Vector where the data is stored.
 	**/
-	void ResourceDirectory::getResourceData(dword dwResTypeId, const std::string& strResName, std::vector<byte>& data) const
+	void ResourceDirectory::getResourceData(std::uint32_t dwResTypeId, const std::string& strResName, std::vector<std::uint8_t>& data) const
 	{
 		getResourceDataT(dwResTypeId, strResName, data);
 	}
@@ -1577,7 +1521,7 @@ namespace PeLib
 	* @param dwResId Identifies the resource.
 	* @param data Vector where the data is stored.
 	**/
-	void ResourceDirectory::getResourceData(const std::string& strResTypeName, dword dwResId, std::vector<byte>& data) const
+	void ResourceDirectory::getResourceData(const std::string& strResTypeName, std::uint32_t dwResId, std::vector<std::uint8_t>& data) const
 	{
 		getResourceDataT(strResTypeName, dwResId, data);
 	}
@@ -1588,7 +1532,7 @@ namespace PeLib
 	* @param strResName Identifies the resource.
 	* @param data Vector where the data is stored.
 	**/
-	void ResourceDirectory::getResourceData(const std::string& strResTypeName, const std::string& strResName, std::vector<byte>& data) const
+	void ResourceDirectory::getResourceData(const std::string& strResTypeName, const std::string& strResName, std::vector<std::uint8_t>& data) const
 	{
 		getResourceDataT(strResTypeName, strResName, data);
 	}
@@ -1602,7 +1546,7 @@ namespace PeLib
 	* @param uiResIndex Identifies the resource.
 	* @param data Vector where the data is stored.
 	**/
-	void ResourceDirectory::getResourceDataByIndex(unsigned int uiResTypeIndex, unsigned int uiResIndex, std::vector<byte>& data) const
+	void ResourceDirectory::getResourceDataByIndex(unsigned int uiResTypeIndex, unsigned int uiResIndex, std::vector<std::uint8_t>& data) const
 	{
 		ResourceNode* currNode = static_cast<ResourceNode*>(m_rnRoot.children[uiResTypeIndex].child);
 		currNode = static_cast<ResourceNode*>(currNode->children[uiResIndex].child);
@@ -1617,7 +1561,7 @@ namespace PeLib
 	* @param dwResId Identifies the resource.
 	* @param data The new resource data.
 	**/
-	void ResourceDirectory::setResourceData(dword dwResTypeId, dword dwResId, std::vector<byte>& data)
+	void ResourceDirectory::setResourceData(std::uint32_t dwResTypeId, std::uint32_t dwResId, std::vector<std::uint8_t>& data)
 	{
 		setResourceDataT(dwResTypeId, dwResId, data);
 	}
@@ -1628,7 +1572,7 @@ namespace PeLib
 	* @param strResName Identifies the resource.
 	* @param data The new resource data.
 	**/
-	void ResourceDirectory::setResourceData(dword dwResTypeId, const std::string& strResName, std::vector<byte>& data)
+	void ResourceDirectory::setResourceData(std::uint32_t dwResTypeId, const std::string& strResName, std::vector<std::uint8_t>& data)
 	{
 		setResourceDataT(dwResTypeId, strResName, data);
 	}
@@ -1639,7 +1583,7 @@ namespace PeLib
 	* @param dwResId Identifies the resource.
 	* @param data The new resource data.
 	**/
-	void ResourceDirectory::setResourceData(const std::string& strResTypeName, dword dwResId, std::vector<byte>& data)
+	void ResourceDirectory::setResourceData(const std::string& strResTypeName, std::uint32_t dwResId, std::vector<std::uint8_t>& data)
 	{
 		setResourceDataT(strResTypeName, dwResId, data);
 	}
@@ -1650,7 +1594,7 @@ namespace PeLib
 	* @param strResName Identifies the resource.
 	* @param data The new resource data.
 	**/
-	void ResourceDirectory::setResourceData(const std::string& strResTypeName, const std::string& strResName, std::vector<byte>& data)
+	void ResourceDirectory::setResourceData(const std::string& strResTypeName, const std::string& strResName, std::vector<std::uint8_t>& data)
 	{
 		setResourceDataT(strResTypeName, strResName, data);
 	}
@@ -1664,7 +1608,7 @@ namespace PeLib
 	* @param uiResIndex Identifies the resource.
 	* @param data The new resource data.
 	**/
-	void ResourceDirectory::setResourceDataByIndex(unsigned int uiResTypeIndex, unsigned int uiResIndex, std::vector<byte>& data)
+	void ResourceDirectory::setResourceDataByIndex(unsigned int uiResTypeIndex, unsigned int uiResIndex, std::vector<std::uint8_t>& data)
 	{
 		ResourceNode* currNode = static_cast<ResourceNode*>(m_rnRoot.children[uiResTypeIndex].child);
 		currNode = static_cast<ResourceNode*>(currNode->children[uiResIndex].child);
@@ -1678,7 +1622,7 @@ namespace PeLib
 	* @param strResName Identifies the resource.
 	* @return ID of the specified resource.
 	**/
-	dword ResourceDirectory::getResourceId(dword dwResTypeId, const std::string& strResName) const
+	std::uint32_t ResourceDirectory::getResourceId(std::uint32_t dwResTypeId, const std::string& strResName) const
 	{
 		return getResourceIdT(dwResTypeId, strResName);
 	}
@@ -1689,7 +1633,7 @@ namespace PeLib
 	* @param strResName Identifies the resource.
 	* @return ID of the specified resource.
 	**/
-	dword ResourceDirectory::getResourceId(const std::string& strResTypeName, const std::string& strResName) const
+	std::uint32_t ResourceDirectory::getResourceId(const std::string& strResTypeName, const std::string& strResName) const
 	{
 		return getResourceIdT(strResTypeName, strResName);
 	}
@@ -1700,7 +1644,7 @@ namespace PeLib
 	* @param uiResIndex Identifies the resource.
 	* @return ID of the specified resource.
 	**/
-	dword ResourceDirectory::getResourceIdByIndex(unsigned int uiResTypeIndex, unsigned int uiResIndex) const
+	std::uint32_t ResourceDirectory::getResourceIdByIndex(unsigned int uiResTypeIndex, unsigned int uiResIndex) const
 	{
 		ResourceNode* currNode = static_cast<ResourceNode*>(m_rnRoot.children[uiResTypeIndex].child);
 		return currNode->children[uiResIndex].entry.irde.Name;
@@ -1712,7 +1656,7 @@ namespace PeLib
 	* @param dwResId Identifies the resource.
 	* @param dwNewResId New ID of the resource.
 	**/
-	void ResourceDirectory::setResourceId(dword dwResTypeId, dword dwResId, dword dwNewResId)
+	void ResourceDirectory::setResourceId(std::uint32_t dwResTypeId, std::uint32_t dwResId, std::uint32_t dwNewResId)
 	{
 		setResourceIdT(dwResTypeId, dwResId, dwNewResId);
 	}
@@ -1723,7 +1667,7 @@ namespace PeLib
 	* @param strResName Identifies the resource.
 	* @param dwNewResId New ID of the resource.
 	**/
-	void ResourceDirectory::setResourceId(dword dwResTypeId, const std::string& strResName, dword dwNewResId)
+	void ResourceDirectory::setResourceId(std::uint32_t dwResTypeId, const std::string& strResName, std::uint32_t dwNewResId)
 	{
 		setResourceIdT(dwResTypeId, strResName, dwNewResId);
 	}
@@ -1734,7 +1678,7 @@ namespace PeLib
 	* @param dwResId Identifies the resource.
 	* @param dwNewResId New ID of the resource.
 	**/
-	void ResourceDirectory::setResourceId(const std::string& strResTypeName, dword dwResId, dword dwNewResId)
+	void ResourceDirectory::setResourceId(const std::string& strResTypeName, std::uint32_t dwResId, std::uint32_t dwNewResId)
 	{
 		setResourceIdT(strResTypeName, dwResId, dwNewResId);
 	}
@@ -1745,7 +1689,7 @@ namespace PeLib
 	* @param strResName Identifies the resource.
 	* @param dwNewResId New ID of the resource.
 	**/
-	void ResourceDirectory::setResourceId(const std::string& strResTypeName, const std::string& strResName, dword dwNewResId)
+	void ResourceDirectory::setResourceId(const std::string& strResTypeName, const std::string& strResName, std::uint32_t dwNewResId)
 	{
 		setResourceIdT(strResTypeName, strResName, dwNewResId);
 	}
@@ -1756,7 +1700,7 @@ namespace PeLib
 	* @param uiResIndex Identifies the resource.
 	* @param dwNewResId New ID of the specified resource.
 	**/
-	void ResourceDirectory::setResourceIdByIndex(unsigned int uiResTypeIndex, unsigned int uiResIndex, dword dwNewResId)
+	void ResourceDirectory::setResourceIdByIndex(unsigned int uiResTypeIndex, unsigned int uiResIndex, std::uint32_t dwNewResId)
 	{
 		ResourceNode* currNode = static_cast<ResourceNode*>(m_rnRoot.children[uiResTypeIndex].child);
 		currNode->children[uiResIndex].entry.irde.Name = dwNewResId;
@@ -1768,7 +1712,7 @@ namespace PeLib
 	* @param dwResId Identifies the resource.
 	* @return Name of the specified resource.
 	**/
-	std::string ResourceDirectory::getResourceName(dword dwResTypeId, dword dwResId) const
+	std::string ResourceDirectory::getResourceName(std::uint32_t dwResTypeId, std::uint32_t dwResId) const
 	{
 		return getResourceNameT(dwResTypeId, dwResId);
 	}
@@ -1779,7 +1723,7 @@ namespace PeLib
 	* @param dwResId Identifies the resource.
 	* @return Name of the specified resource.
 	**/
-	std::string ResourceDirectory::getResourceName(const std::string& strResTypeName, dword dwResId) const
+	std::string ResourceDirectory::getResourceName(const std::string& strResTypeName, std::uint32_t dwResId) const
 	{
 		return getResourceNameT(strResTypeName, dwResId);
 	}
@@ -1802,7 +1746,7 @@ namespace PeLib
 	* @param dwResId Identifies the resource.
 	* @param strNewResName New name of the specified resource.
 	**/
-	void ResourceDirectory::setResourceName(dword dwResTypeId, dword dwResId, const std::string& strNewResName)
+	void ResourceDirectory::setResourceName(std::uint32_t dwResTypeId, std::uint32_t dwResId, const std::string& strNewResName)
 	{
 		setResourceNameT(dwResTypeId, dwResId, strNewResName);
 	}
@@ -1813,7 +1757,7 @@ namespace PeLib
 	* @param strResName Identifies the resource.
 	* @param strNewResName New name of the specified resource.
 	**/
-	void ResourceDirectory::setResourceName(dword dwResTypeId, const std::string& strResName, const std::string& strNewResName)
+	void ResourceDirectory::setResourceName(std::uint32_t dwResTypeId, const std::string& strResName, const std::string& strNewResName)
 	{
 		setResourceNameT(dwResTypeId, strResName, strNewResName);
 	}
@@ -1824,7 +1768,7 @@ namespace PeLib
 	* @param dwResId Identifies the resource.
 	* @param strNewResName New name of the specified resource.
 	**/
-	void ResourceDirectory::setResourceName(const std::string& strResTypeName, dword dwResId, const std::string& strNewResName)
+	void ResourceDirectory::setResourceName(const std::string& strResTypeName, std::uint32_t dwResId, const std::string& strNewResName)
 	{
 		setResourceNameT(strResTypeName, dwResId, strNewResName);
 	}

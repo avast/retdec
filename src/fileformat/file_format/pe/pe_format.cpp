@@ -22,8 +22,7 @@
 #include "retdec/utils/string.h"
 #include "retdec/utils/dynamic_buffer.h"
 #include "retdec/fileformat/file_format/pe/pe_format.h"
-#include "retdec/fileformat/file_format/pe/pe_format_parser/pe_format_parser32.h"
-#include "retdec/fileformat/file_format/pe/pe_format_parser/pe_format_parser64.h"
+#include "retdec/fileformat/file_format/pe/pe_format_parser.h"
 #include "retdec/fileformat/types/dotnet_headers/metadata_tables.h"
 #include "retdec/fileformat/types/dotnet_types/dotnet_type_reconstructor.h"
 #include "retdec/fileformat/types/visual_basic/visual_basic_structures.h"
@@ -31,6 +30,7 @@
 #include "retdec/fileformat/utils/conversions.h"
 #include "retdec/fileformat/utils/crypto.h"
 #include "retdec/fileformat/utils/file_io.h"
+#include "retdec/pelib/ImageLoader.h"
 
 using namespace retdec::utils;
 using namespace PeLib;
@@ -460,13 +460,13 @@ std::size_t findDosStub(const std::string &plainFile)
  * @param storageClass PE symbol storage class
  * @return Type of symbol
  */
-Symbol::Type getSymbolType(word link, dword value, byte storageClass)
+Symbol::Type getSymbolType(std::uint16_t link, std::uint16_t value, std::uint8_t storageClass)
 {
 	if(!link)
 	{
 		return value ? Symbol::Type::COMMON : Symbol::Type::EXTERN;
 	}
-	else if(link == std::numeric_limits<word>::max() || link == std::numeric_limits<word>::max() - 1)
+	else if(link == std::numeric_limits<std::uint16_t>::max() || link == std::numeric_limits<std::uint16_t>::max() - 1)
 	{
 		return Symbol::Type::ABSOLUTE_SYM;
 	}
@@ -488,7 +488,7 @@ Symbol::Type getSymbolType(word link, dword value, byte storageClass)
  * @param complexType PE symbol type
  * @return Usage type of symbol
  */
-Symbol::UsageType getSymbolUsageType(byte storageClass, byte complexType)
+Symbol::UsageType getSymbolUsageType(std::uint8_t storageClass, std::uint8_t complexType)
 {
 	if(complexType >= 0x20 && complexType < 0x30)
 	{
@@ -574,22 +574,21 @@ void PeFormat::initLoaderErrorInfo()
 void PeFormat::initStructures(const std::string & dllListFile)
 {
 	formatParser = nullptr;
-	peHeader32 = nullptr;
-	peHeader64 = nullptr;
 	errorLoadingDllList = false;
 
 	// If we got an override list of dependency DLLs, we load them into the map
 	initDllList(dllListFile);
+	stateIsValid = false;
 
-	file = openPeFile(fileStream);
+	file = new PeFileT(fileStream);
 	if (file)
 	{
-		stateIsValid = true;
 		try
 		{
-			file->readMzHeader();
-			file->readPeHeader();
-			file->readCoffSymbolTable();
+			if(file->loadPeHeaders(bytes) == ERROR_NONE)
+				stateIsValid = true;
+
+			file->readCoffSymbolTable(bytes);
 			file->readImportDirectory();
 			file->readIatDirectory();
 			file->readBoundImportDirectory();
@@ -605,31 +604,11 @@ void PeFormat::initStructures(const std::string & dllListFile)
 			// Fill-in the loader error info from PE file
 			initLoaderErrorInfo();
 
-			mzHeader = file->mzHeader();
-
-			if (auto *f32 = isPe32())
-			{
-				peHeader32 = &(f32->peHeader());
-				formatParser = new PeFormatParser32(this, static_cast<PeFileT<32>*>(file));
-			}
-			else if (auto *f64 = isPe64())
-			{
-				peHeader64 = &(f64->peHeader());
-				formatParser = new PeFormatParser64(this, static_cast<PeFileT<64>*>(file));
-			}
-			else
-			{
-				stateIsValid = false;
-			}
+			// Create an instance of PeFormatParser32/PeFormatParser64
+			formatParser = new PeFormatParser(this, file);
 		}
 		catch(...)
-		{
-			stateIsValid = false;
-		}
-	}
-	else
-	{
-		stateIsValid = false;
+		{}
 	}
 
 	if(stateIsValid)
@@ -1407,14 +1386,14 @@ void PeFormat::loadSections()
  */
 void PeFormat::loadSymbols()
 {
-	const auto symTab = file->coffSymTab();
+	const auto & symTab = file->coffSymTab();
 	auto *table = new SymbolTable();
 
 	for(std::size_t i = 0, e = symTab.getNumberOfStoredSymbols(); i < e; ++i)
 	{
 		auto symbol = std::make_shared<Symbol>();
-		const word link = symTab.getSymbolSectionNumber(i);
-		if(!link || link == std::numeric_limits<word>::max() || link == std::numeric_limits<word>::max() - 1)
+		const std::uint16_t link = symTab.getSymbolSectionNumber(i);
+		if(!link || link == std::numeric_limits<std::uint16_t>::max() || link == std::numeric_limits<std::uint16_t>::max() - 1)
 		{
 			symbol->invalidateLinkToSection();
 			symbol->invalidateAddress();
@@ -1803,35 +1782,40 @@ void PeFormat::loadCertificates()
 
 	// We always take the first one, there are no additional certificate tables in PE
 	auto certBytes = securityDir.getCertificate(0);
+	auto certSize = certBytes.size();
+	PKCS7 *p7 = NULL;
+	BIO *bio;
 
-	BIO *bio = BIO_new(BIO_s_mem());
-	if(!bio)
+	// Create the BIO object and extract certificate from it
+	if((bio = BIO_new(BIO_s_mem())) != NULL)
 	{
-		return;
-	}
-
-	if(BIO_reset(bio) != 1)
-	{
+		if(BIO_reset(bio) == 1)
+		{
+			if(BIO_write(bio, certBytes.data(), certSize) == certSize)
+			{
+				p7 = d2i_PKCS7_bio(bio, nullptr);
+			}
+		}
 		BIO_free(bio);
-		return;
 	}
 
-	if(BIO_write(bio, certBytes.data(), static_cast<int>(certBytes.size())) != static_cast<std::int64_t>(certBytes.size()))
-	{
-		BIO_free(bio);
-		return;
-	}
-
-	PKCS7 *p7 = d2i_PKCS7_bio(bio, nullptr);
+	// Make sure that the PKCS7 structure is valid
 	if(!p7)
 	{
-		BIO_free(bio);
+		return;
+	}
+
+	//// Make sure that the PKCS7 data is valid
+	if(!PKCS7_type_is_signed(p7))
+	{
+		PKCS7_free(p7);
 		return;
 	}
 
 	// Find signer of the application and store its serial number.
 	X509 *signerCert = nullptr;
 	X509 *counterSignerCert = nullptr;
+
 	STACK_OF(X509) *certs = p7->d.sign->cert;
 	STACK_OF(X509) *signers = PKCS7_get0_signers(p7, certs, 0);
 
@@ -1869,7 +1853,6 @@ void PeFormat::loadCertificates()
 	// If we have no signer and countersigner, there must be something really bad
 	if(!signerCert && !counterSignerCert)
 	{
-		BIO_free(bio);
 		return;
 	}
 
@@ -1954,7 +1937,6 @@ void PeFormat::loadCertificates()
 	}
 
 	PKCS7_free(p7);
-	BIO_free(bio);
 }
 
 /**
@@ -1978,25 +1960,7 @@ void PeFormat::loadTlsInformation()
 	auto callBacksAddr = formatParser->getTlsAddressOfCallBacks();
 	tlsInfo->setCallBacksAddr(callBacksAddr);
 
-	const auto &allBytes = getBytes();
-	DynamicBuffer structContent(allBytes);
-
-	unsigned long long callBacksOffset;
-	if (getOffsetFromAddress(callBacksOffset, callBacksAddr))
-	{
-		while (allBytes.size() >= callBacksOffset + sizeof(std::uint32_t))
-		{
-			auto cbAddr = structContent.read<std::uint32_t>(callBacksOffset);
-			callBacksOffset += sizeof(std::uint32_t);
-
-			if (cbAddr == 0)
-			{
-				break;
-			}
-
-			tlsInfo->addCallBack(cbAddr);
-		}
-	}
+	tlsInfo->setCallBacks(formatParser->getCallbacks());
 }
 
 /**
@@ -2302,7 +2266,7 @@ void PeFormat::parseMetadataStream(std::uint64_t baseAddress, std::uint64_t offs
 	metadataStream->setMajorVersion(majorVersion);
 	metadataStream->setMinorVersion(minorVersion);
 
-	// 'heapOffsetSizes' define whether we should use word or dword for indexes into different streams
+	// 'heapOffsetSizes' define whether we should use std::uint16_t or dstd::uint16_t for indexes into different streams
 	metadataStream->setStringStreamIndexSize(heapOffsetSizes & 0x01 ? 4 : 2);
 	metadataStream->setGuidStreamIndexSize(heapOffsetSizes & 0x02 ? 4 : 2);
 	metadataStream->setBlobStreamIndexSize(heapOffsetSizes & 0x04 ? 4 : 2);
@@ -2494,14 +2458,14 @@ void PeFormat::parseBlobStream(std::uint64_t baseAddress, std::uint64_t offset, 
 	std::size_t inStreamOffset = 0;
 	while (inStreamOffset < size)
 	{
-		// First byte is length of next element in the blob
+		// First std::uint8_t is length of next element in the blob
 		lengthSize = 1;
 		if (!get1Byte(address + inStreamOffset, length))
 		{
 			return;
 		}
 
-		// 2-byte length encoding if the length is 10xxxxxx
+		// 2-std::uint8_t length encoding if the length is 10xxxxxx
 		if ((length & 0xC0) == 0x80)
 		{
 			if (!get2Byte(address + inStreamOffset, length, Endianness::BIG))
@@ -2512,7 +2476,7 @@ void PeFormat::parseBlobStream(std::uint64_t baseAddress, std::uint64_t offset, 
 			length &= ~0xC000;
 			lengthSize = 2;
 		}
-		// 4-byte length encoding if the length is 110xxxxx
+		// 4-std::uint8_t length encoding if the length is 110xxxxx
 		else if ((length & 0xE0) == 0xC0)
 		{
 			if (!get4Byte(address + inStreamOffset, length, Endianness::BIG))
@@ -2724,7 +2688,7 @@ void PeFormat::detectTypeLibId()
 				continue;
 			}
 
-			// Custom attributes contain one word 0x0001 at the beginning so we skip it,
+			// Custom attributes contain one std::uint16_t 0x0001 at the beginning so we skip it,
 			// followed by length of the string, which is GUID we are looking for
 			auto length = typeLibData[2];
 			typeLibId = retdec::utils::toLower(std::string(reinterpret_cast<const char*>(typeLibData.data() + 3), length));
@@ -3002,7 +2966,7 @@ std::size_t PeFormat::getBytesPerWord() const
 		case PELIB_IMAGE_FILE_MACHINE_R3000_LITTLE:
 			return 4;
 		case PELIB_IMAGE_FILE_MACHINE_R4000:
-			return (isPe64() ? 8 : 4);
+			return formatParser->getPointerSize();
 		case PELIB_IMAGE_FILE_MACHINE_R10000:
 			return 8;
 		case PELIB_IMAGE_FILE_MACHINE_WCEMIPSV2:
@@ -3025,7 +2989,7 @@ std::size_t PeFormat::getBytesPerWord() const
 		// Architecture::POWERPC
 		case PELIB_IMAGE_FILE_MACHINE_POWERPC:
 		case PELIB_IMAGE_FILE_MACHINE_POWERPCFP:
-			return (isPe64() ? 8 : 4);
+			return formatParser->getPointerSize();
 
 		// unsupported architecture
 		default:
@@ -3095,12 +3059,28 @@ bool PeFormat::getImageBaseAddress(unsigned long long &imageBase) const
 
 bool PeFormat::getEpAddress(unsigned long long &result) const
 {
-	return formatParser->getEpAddress(result);
+	std::uint64_t tempResult = 0;
+
+	if(formatParser->getEpAddress(tempResult))
+	{
+		result = tempResult;
+		return true;
+	}
+
+	return false;
 }
 
 bool PeFormat::getEpOffset(unsigned long long &epOffset) const
 {
-	return formatParser->getEpOffset(epOffset);
+	std::uint64_t tempResult = 0;
+
+	if(formatParser->getEpOffset(tempResult))
+	{
+		epOffset = tempResult;
+		return true;
+	}
+
+	return false;
 }
 
 Architecture PeFormat::getTargetArchitecture() const
@@ -3158,7 +3138,7 @@ std::size_t PeFormat::getSectionTableOffset() const
 
 std::size_t PeFormat::getSectionTableEntrySize() const
 {
-	return PELIB_IMAGE_SECTION_HEADER::size();
+	return sizeof(PELIB_IMAGE_SECTION_HEADER);
 }
 
 std::size_t PeFormat::getSegmentTableOffset() const
@@ -3171,13 +3151,9 @@ std::size_t PeFormat::getSegmentTableEntrySize() const
 	return 0;
 }
 
-/**
- * Get reference to MZ header
- * @return Reference to MZ header
- */
-const PeLib::MzHeader & PeFormat::getMzHeader() const
+const PeLib::ImageLoader & PeFormat::getImageLoader() const
 {
-	return mzHeader;
+	return file->imageLoader();
 }
 
 /**
@@ -3186,7 +3162,7 @@ const PeLib::MzHeader & PeFormat::getMzHeader() const
  */
 std::size_t PeFormat::getMzHeaderSize() const
 {
-	return mzHeader.size();
+	return sizeof(PELIB_IMAGE_DOS_HEADER);
 }
 
 /**
@@ -3207,8 +3183,21 @@ std::size_t PeFormat::getOptionalHeaderSize() const
  */
 std::size_t PeFormat::getPeHeaderOffset() const
 {
-	return mzHeader.getAddressOfPeHeader();
+	return formatParser->getPeHeaderOffset();
 }
+
+/**
+* Get image bitability
+* @return 32=32-bit image, 64=64-bit image
+*
+* In some cases (e.g. FSG packer), offset of PE signature may be inside MZ header and
+* therefore this method may return lesser number that method @a getMzHeaderSize().
+*/
+std::size_t PeFormat::getImageBitability() const
+{
+	return formatParser->getImageBitability();
+}
+
 
 /**
  * Get offset of COFF symbol table
@@ -3423,16 +3412,6 @@ bool PeFormat::initDllList(const std::string & dllListFile)
 	// Sanity check
 //	assert(isMissingDependency("kernel32.dll") == false);
 	return true;
-}
-
-PeLib::PeFile32* PeFormat::isPe32() const
-{
-	return dynamic_cast<PeFile32*>(file);
-}
-
-PeLib::PeFile64* PeFormat::isPe64() const
-{
-	return dynamic_cast<PeFile64*>(file);
 }
 
 /**
@@ -3680,7 +3659,9 @@ void PeFormat::scanForSectionAnomalies(unsigned anamaliesLimit)
 {
 	std::size_t nSecs = getDeclaredNumberOfSections();
 
+	unsigned long long imageBase;
 	unsigned long long epAddr;
+
 	if (getEpAddress(epAddr))
 	{
 		auto *epSec = dynamic_cast<const PeCoffSection*>(getEpSection());
@@ -3706,9 +3687,7 @@ void PeFormat::scanForSectionAnomalies(unsigned anamaliesLimit)
 		else
 		{
 			// scan EP outside mapped sections
-			anomalies.emplace_back(
-				"EpOutsideSections", "Entry point is outside of mapped sections"
-			);
+			anomalies.emplace_back("EpOutsideSections", "Entry point is outside of mapped sections");
 		}
 	}
 

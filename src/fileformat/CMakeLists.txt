@@ -68,9 +68,6 @@ add_library(fileformat STATIC
 	types/note_section/elf_notes.cpp
 	types/note_section/elf_core.cpp
 	types/tls_info/tls_info.cpp
-	file_format/pe/pe_format_parser/pe_format_parser64.cpp
-	file_format/pe/pe_format_parser/pe_format_parser.cpp
-	file_format/pe/pe_format_parser/pe_format_parser32.cpp
 	file_format/pe/pe_format.cpp
 	file_format/pe/pe_dll_list.cpp
 	file_format/coff/coff_format.cpp

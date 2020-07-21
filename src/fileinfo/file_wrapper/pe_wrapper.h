@@ -1,5 +1,5 @@
 /**
- * @file src/fileinfo/file_wrapper/pe/pe_wrapper.h
+ * @file src/fileinfo/file_wrapper/pe_wrapper.h
  * @brief Definition of PeWrapper class.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
@@ -9,7 +9,8 @@
 
 #include "retdec/fileformat/file_format/pe/pe_format.h"
 #include "fileinfo/file_information/file_information_types/symbol_table/symbol.h"
-#include "fileinfo/file_wrapper/pe/pe_wrapper_parser/pe_wrapper_parser.h"
+#include "fileinfo/file_information/file_information_types/data_directory.h"
+#include "fileinfo/file_information/file_information_types/file_section.h"
 
 namespace retdec {
 namespace fileinfo {
@@ -17,13 +18,16 @@ namespace fileinfo {
 /**
  * Wrapper for parsing PE files
  */
+
 class PeWrapper : public retdec::fileformat::PeFormat
 {
-	private:
-		PeWrapperParser *wrapperParser = nullptr; ///< parser of PE file
 	public:
 		PeWrapper(const std::string & pathToFile, const std::string & dllListFile, retdec::fileformat::LoadFlags loadFlags);
-		virtual ~PeWrapper() override;
+
+		std::uint32_t getBits()
+		{
+			return file->getBits();
+		}
 
 		/// @name Detection methods
 		/// {

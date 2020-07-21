@@ -10,8 +10,8 @@
 * of PeLib.
 */
 
-#ifndef STD_H
-#define STD_H
+#ifndef RETDEC_PELIB_PELIBINC_H
+#define RETDEC_PELIB_PELIBINC_H
 
 #include <algorithm>
 #include <climits>
@@ -21,6 +21,8 @@
 #include <vector>
 #include <functional>
 
+#include "retdec/pelib/InputBuffer.h"
+#include "retdec/pelib/OutputBuffer.h"
 #include "retdec/pelib/PeLibAux.h"
 
 #endif

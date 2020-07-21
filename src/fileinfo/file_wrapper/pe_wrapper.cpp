@@ -1,14 +1,13 @@
 /**
- * @file src/fileinfo/file_wrapper/pe/pe_wrapper.cpp
+ * @file src/fileinfo/file_wrapper/pe_wrapper.cpp
  * @brief Methods of PeWrapper class.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
 #include "retdec/utils/array.h"
 #include "retdec/utils/conversion.h"
-#include "fileinfo/file_wrapper/pe/pe_wrapper.h"
-#include "fileinfo/file_wrapper/pe/pe_wrapper_parser/pe_wrapper_parser32.h"
-#include "fileinfo/file_wrapper/pe/pe_wrapper_parser/pe_wrapper_parser64.h"
+#include "retdec/pelib/PeFile.h"
+#include "fileinfo/file_wrapper/pe_wrapper.h"
 
 using namespace retdec::utils;
 using namespace PeLib;
@@ -42,17 +41,17 @@ std::string getDirectoryType(unsigned long long dirIndex)
  * @param link Link to section in number representation
  * @return Link to section in string representation
  */
-std::string getSymbolLinkToSection(word link)
+std::string getSymbolLinkToSection(std::uint16_t link)
 {
 	if(!link)
 	{
 		return "UNDEFINED";
 	}
-	else if(link == std::numeric_limits<word>::max())
+	else if(link == std::numeric_limits<std::uint16_t>::max())
 	{
 		return "ABSOLUTE";
 	}
-	else if(link == std::numeric_limits<word>::max() - 1)
+	else if(link == std::numeric_limits<std::uint16_t>::max() - 1)
 	{
 		return "DEBUG";
 	}
@@ -65,7 +64,7 @@ std::string getSymbolLinkToSection(word link)
  * @param type Type of symbol in number representation
  * @return Type of symbol in string representation
  */
-std::string getSymbolType(byte type)
+std::string getSymbolType(std::uint8_t type)
 {
 	if(type < 0x10)
 	{
@@ -99,30 +98,8 @@ PeWrapper::PeWrapper(
 		const std::string & pathToFile,
 		const std::string & dllListFile,
 		retdec::fileformat::LoadFlags loadFlags)
-		: PeFormat(pathToFile, dllListFile, loadFlags), wrapperParser(nullptr)
-{
-	if (isPe32())
-	{
-		wrapperParser = new PeWrapperParser32(*peHeader32);
-	}
-	else if (isPe64())
-	{
-		wrapperParser = new PeWrapperParser64(*peHeader64);
-	}
-	else
-	{
-		stateIsValid = false;
-		return;
-	}
-}
-
-/**
- * Destructor
- */
-PeWrapper::~PeWrapper()
-{
-	delete wrapperParser;
-}
+		: PeFormat(pathToFile, dllListFile, loadFlags)
+{}
 
 /**
  * Get type of binary file
@@ -139,7 +116,17 @@ std::string PeWrapper::getTypeOfFile() const
  */
 std::string PeWrapper::getPeType() const
 {
-	return wrapperParser->getPeType();
+	switch(file->imageLoader().getMagic())
+	{
+		case PELIB_IMAGE_NT_OPTIONAL_HDR32_MAGIC:
+			return "PE32";
+		case PELIB_IMAGE_ROM_OPTIONAL_HDR_MAGIC:
+			return "ROM image";
+		case PELIB_IMAGE_NT_OPTIONAL_HDR64_MAGIC:
+			return "PE32+";
+		default:
+			return "";
+	}
 }
 
 /**
@@ -150,14 +137,16 @@ std::string PeWrapper::getPeType() const
  */
 bool PeWrapper::getDataDirectory(unsigned long long dirIndex, DataDirectory &directory) const
 {
-	unsigned long long absAddr, size;
-	if(!getDataDirectoryAbsolute(dirIndex, absAddr, size))
-	{
-		return false;
-	}
+	ImageLoader & imageLoader = file->imageLoader();
+	std::uint64_t virtualAddress;
 
-	directory.setAddress(absAddr);
-	directory.setSize(size);
+	if(dirIndex >= imageLoader.getOptionalHeader().NumberOfRvaAndSizes)
+		return false;
+
+	if((virtualAddress = imageLoader.getDataDirRva(dirIndex)) != 0)
+		virtualAddress += imageLoader.getImageBase();
+	directory.setAddress(virtualAddress);
+	directory.setSize(imageLoader.getDataDirSize(dirIndex));
 	directory.setType(getDirectoryType(dirIndex));
 	return true;
 }
@@ -170,28 +159,47 @@ bool PeWrapper::getDataDirectory(unsigned long long dirIndex, DataDirectory &dir
  */
 bool PeWrapper::getFileSection(unsigned long long secIndex, FileSection &section) const
 {
-	auto result = wrapperParser->getSection(secIndex, section);
+	const PELIB_SECTION_HEADER * pSectionHeader;
+	ImageLoader & imageLoader = file->imageLoader();
+	std::string sectionName;
+
+	// Retrieve the section header. If the function returns nullptr, then there is no such section
+	if((pSectionHeader = imageLoader.getSectionHeader(secIndex)) == nullptr)
+		return false;
+
+	section.setIndex(secIndex);
+	section.setName(pSectionHeader->getName());
+	section.setStartAddress(imageLoader.getVirtualAddressMasked(pSectionHeader->VirtualAddress));
+	section.setSizeInMemory(pSectionHeader->VirtualSize);
+	section.setOffset(imageLoader.getRealPointerToRawData(secIndex));
+	section.setSizeInFile(pSectionHeader->SizeOfRawData);
+	section.setRelocationsOffset(pSectionHeader->PointerToRelocations);
+	section.setNumberOfRelocations(pSectionHeader->NumberOfRelocations);
+	section.setLineNumbersOffset(pSectionHeader->PointerToLinenumbers);
+	section.setNumberOfLineNumbers(pSectionHeader->NumberOfLinenumbers);
+	section.setFlagsSize(0x20);
+	section.setFlags(pSectionHeader->Characteristics);
+	section.clearFlagsDescriptors();
+
 	section.setCrc32("");
 	section.setMd5("");
 	section.setSha256("");
 	unsigned long long index;
-	if(strToNum(section.getIndexStr(), index))
+
+	const auto *auxSec = getSection(secIndex);
+	if(auxSec)
 	{
-		const auto *auxSec = getSection(index);
-		if(auxSec)
+		double entropy;
+		if(auxSec->getEntropy(entropy))
 		{
-			double entropy;
-			if(auxSec->getEntropy(entropy))
-			{
-				section.setEntropy(entropy);
-			}
-			section.setCrc32(auxSec->getCrc32());
-			section.setMd5(auxSec->getMd5());
-			section.setSha256(auxSec->getSha256());
+			section.setEntropy(entropy);
 		}
+		section.setCrc32(auxSec->getCrc32());
+		section.setMd5(auxSec->getMd5());
+		section.setSha256(auxSec->getSha256());
 	}
 
-	return result;
+	return true;
 }
 
 /**

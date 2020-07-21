@@ -14,33 +14,71 @@
 
 namespace PeLib
 {
-	int IatDirectory::read(InputBuffer& inputBuffer, unsigned int dwOffset, unsigned int dwFileSize)
+	/**
+	* Reads the Import Address table from an image
+	* @param buffer Pointer to the IAT data
+	* @param buffersize Length of the data pointed by 'buffer'
+	**/
+	int IatDirectory::read(const void * buffer, std::size_t buffersize)
 	{
-		dword dwAddr;
+		const std::uint32_t * itemArray = reinterpret_cast<const std::uint32_t *>(buffer);
 
-		std::vector<dword> vIat;
+		// Resize the IAT vector to contain all items
+		std::size_t itemCount = buffersize / sizeof(std::uint32_t);
+		m_vIat.clear();
 
-		unsigned int dwCurrentOffset = dwOffset;
-		while (dwCurrentOffset < dwFileSize)
+		// Read the items, one-by-one, until we find a zero value
+		for(std::size_t i = 0; i < itemCount; i++)
 		{
-			inputBuffer >> dwAddr;
-			if (dwAddr == 0)
+			// Insert that item
+			m_vIat.push_back(itemArray[i]);
+			
+			// Zero is considered terminator
+			if(itemArray[i] == 0)
 				break;
-
-			vIat.push_back(dwAddr);
-			dwCurrentOffset += sizeof(dwAddr);
 		}
-
-		std::swap(vIat, m_vIat);
 
 		return ERROR_NONE;
 	}
 
-	int IatDirectory::read(unsigned char* buffer, unsigned int buffersize)
+	/**
+	* Reads the Import Address table from an image
+	* @param imageLoader Initialized image loader
+	**/
+	int IatDirectory::read(ImageLoader & imageLoader)
 	{
-		std::vector<byte> vBuffer(buffer, buffer + buffersize);
-		InputBuffer inpBuffer(vBuffer);
-		return read(inpBuffer, 0, buffersize);
+		std::uint8_t * iatArray;
+		std::uint32_t iatRva = imageLoader.getDataDirRva(PELIB_IMAGE_DIRECTORY_ENTRY_IAT);
+		std::uint32_t iatSize = imageLoader.getDataDirSize(PELIB_IMAGE_DIRECTORY_ENTRY_IAT);
+		std::uint32_t sizeOfImage = imageLoader.getSizeOfImage();
+		int fileError = ERROR_NONE;
+
+		// Check whether the IAT is outside the image
+		if(iatRva >= sizeOfImage)
+		{
+			return ERROR_INVALID_FILE;
+		}
+
+		// Trim the array size to the size of image
+		if((iatRva + iatSize) > sizeOfImage)
+			iatSize = sizeOfImage - iatRva;
+
+		// Allocate array for the entire IAT
+		if((iatArray = new std::uint8_t[iatSize]) != nullptr)
+		{
+			// Read the entire IAT to the memory
+			iatSize = imageLoader.readImage(iatArray, iatRva, iatSize);
+
+			// Insert the IAT array to the internal IAT vector
+			fileError = read(iatArray, iatSize);
+			delete [] iatArray;
+		}
+		else
+		{
+			fileError = ERROR_NOT_ENOUGH_SPACE;
+		}
+
+		return fileError;
 	}
 
 	/**
@@ -58,7 +96,7 @@ namespace PeLib
 	* @param index Number identifying the field.
 	* @return dwValue of the field.
 	**/
-	dword IatDirectory::getAddress(unsigned int index) const
+	std::uint32_t IatDirectory::getAddress(unsigned int index) const
 	{
 		return m_vIat[index];
 	}
@@ -68,7 +106,7 @@ namespace PeLib
 	* @param dwAddrnr Number identifying the field.
 	* @param dwValue New dwValue of the field.
 	**/
-	void IatDirectory::setAddress(dword dwAddrnr, dword dwValue)
+	void IatDirectory::setAddress(std::uint32_t dwAddrnr, std::uint32_t dwValue)
 	{
 		m_vIat[dwAddrnr] = dwValue;
 	}
@@ -77,7 +115,7 @@ namespace PeLib
 	* Adds another field to the IAT.
 	* @param dwValue dwValue of the new field.
 	**/
-	void IatDirectory::addAddress(dword dwValue)
+	void IatDirectory::addAddress(std::uint32_t dwValue)
 	{
 		m_vIat.push_back(dwValue);
 	}
@@ -88,7 +126,7 @@ namespace PeLib
 	**/
 	void IatDirectory::removeAddress(unsigned int index)
 	{
-		std::vector<dword>::iterator pos = m_vIat.begin() + index;
+		std::vector<std::uint32_t>::iterator pos = m_vIat.begin() + index;
 		m_vIat.erase(pos);
 	}
 
@@ -104,7 +142,7 @@ namespace PeLib
 	* Rebuilds the complete Import Address Table.
 	* @param vBuffer Buffer where the rebuilt IAT will be stored.
 	**/
-	void IatDirectory::rebuild(std::vector<byte>& vBuffer) const
+	void IatDirectory::rebuild(std::vector<std::uint8_t>& vBuffer) const
 	{
 		vBuffer.resize(size());
 		OutputBuffer obBuffer(vBuffer);
@@ -117,7 +155,7 @@ namespace PeLib
 
 	unsigned int IatDirectory::size() const
 	{
-		return static_cast<unsigned int>(m_vIat.size())* sizeof(dword);
+		return static_cast<unsigned int>(m_vIat.size())* sizeof(std::uint32_t);
 	}
 
 	/// Writes the current IAT to a file.

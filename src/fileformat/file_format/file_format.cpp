@@ -333,7 +333,7 @@ void FileFormat::setLoadedBytes(std::vector<unsigned char> *lBytes)
 
 /**
  * If fileformat is Intel HEX or raw binary then it does not contain
- * critical information like architecture, endianness or word size.
+ * critical information like architecture, endianness or std::uint16_t size.
  * However, fileformat users expect it to contain this information.
  * Therefore, this method needs to be called to set these critical information.
  */
@@ -2061,8 +2061,8 @@ bool FileFormat::get8ByteOffset(std::uint64_t offset, std::uint64_t &res, retdec
 
 /**
  * Get long double from the specified offset
- * If system has 80-bit (10-byte) long double, copy data directly.
- * Else convert 80-bit (10-byte) long double into 64-bit (8-byte) double.
+ * If system has 80-bit (10 - byte) long double, copy data directly.
+ * Else convert 80-bit (10 - byte) long double into 64-bit (8 - uint8_t) double.
  * @param offset Offset to get double from
  * @param res Result double
  * @return Status of operation (@c true if all is OK, @c false otherwise)
