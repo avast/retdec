@@ -66,6 +66,8 @@ protected:
 
 	bool _verbose = true;
 	Color _currentBrush = Color::Default;
+
+	bool _modifiedTerminalProperty = false;
 };
 
 class FileLogger : public Logger {

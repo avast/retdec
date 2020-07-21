@@ -8,8 +8,9 @@
 #include <map>
 #include <sstream>
 
-#if __has_include(<io.h>)
+#if __has_include(<windows.h>)
 #include <io.h>
+#include <windows.h>
 #else
 #include <unistd.h>
 #endif
@@ -31,6 +32,23 @@ Logger::Logger(std::ostream& stream, bool verbose):
 	_out(stream),
 	_verbose(verbose)
 {
+#if __has_include(<windows.h>)
+	// On windows we need to try to set ENABLE_VIRTUAL_TERMINAL_PROCESSING.
+	// This will enable ANSI support in terminal. This is best effort
+	// implementation approach.
+	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+	if (hOut == INVALID_HANDLE_VALUE)
+		return;
+
+	DWORD dwMode = 0;
+	if (!GetConsoleMode(hOut, &dwMode))
+		return;
+
+	_modifiedTerminalProperty = dwMode & ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+	dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+	if (!SetConsoleMode(hOut, dwMode))
+		return;
+#endif
 }
 
 Logger::Logger(const Logger& from):
