@@ -8,15 +8,16 @@
 #include <map>
 #include <sstream>
 
-#if __has_include(<windows.h>)
+#include "retdec/utils/io/logger.h"
+#include "retdec/utils/os.h"
+#include "retdec/utils/time.h"
+
+#ifdef OS_WINDOWS
 #include <io.h>
 #include <windows.h>
 #else
 #include <unistd.h>
 #endif
-
-#include "retdec/utils/time.h"
-#include "retdec/utils/io/logger.h"
 
 namespace retdec {
 namespace utils {
@@ -32,10 +33,12 @@ Logger::Logger(std::ostream& stream, bool verbose):
 	_out(stream),
 	_verbose(verbose)
 {
-#if __has_include(<windows.h>)
+#ifdef OS_WINDOWS
 	// On windows we need to try to set ENABLE_VIRTUAL_TERMINAL_PROCESSING.
 	// This will enable ANSI support in terminal. This is best effort
 	// implementation approach.
+	//
+	// Source: https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences
 	_terminalNotSupported = true;
 	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
 	if (hOut == INVALID_HANDLE_VALUE)
@@ -115,7 +118,7 @@ Logger& Logger::operator << (const Color& lc)
 
 bool Logger::isRedirected(const std::ostream& stream) const
 {
-#if __has_include(<io.h>)
+#ifdef OS_WINDOWS
 	// On windows POSIX functions isatty and fileno
 	// generate Warning.
 	auto isConsole = _isatty;
