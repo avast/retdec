@@ -210,9 +210,9 @@ uint32_t PeLib::ImageLoader::stringLength(
 					const uint8_t * dataPtr;
 					uint32_t rvaEndPage = (pageIndex + 1) * PELIB_PAGE_SIZE;
 
-					// If zero page, means we found an RVA with zero
+					// If zero page, means this is a zeroed page. This is the end of the string.
 					if(page.buffer.empty())
-						return rva;
+						break;
 					dataBegin = dataPtr = page.buffer.data() + (rva & (PELIB_PAGE_SIZE - 1));
 
 					// Perhaps the last page loaded?
