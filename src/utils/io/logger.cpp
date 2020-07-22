@@ -36,6 +36,7 @@ Logger::Logger(std::ostream& stream, bool verbose):
 	// On windows we need to try to set ENABLE_VIRTUAL_TERMINAL_PROCESSING.
 	// This will enable ANSI support in terminal. This is best effort
 	// implementation approach.
+	_terminalNotSupported = true;
 	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
 	if (hOut == INVALID_HANDLE_VALUE)
 		return;
@@ -48,6 +49,8 @@ Logger::Logger(std::ostream& stream, bool verbose):
 	dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
 	if (!SetConsoleMode(hOut, dwMode))
 		return;
+
+	_terminalNotSupported = false;
 #endif
 }
 
@@ -103,7 +106,7 @@ Logger& Logger::operator << (const Color& lc)
 		/*Color::Default*/ "\u001b[0m"
 	};
 
-	if (isRedirected(_out))
+	if (_terminalNotSupported || isRedirected(_out))
 		return *this;
 
 	_currentBrush = lc;

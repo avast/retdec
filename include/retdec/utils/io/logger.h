@@ -68,6 +68,7 @@ protected:
 	Color _currentBrush = Color::Default;
 
 	bool _modifiedTerminalProperty = false;
+	bool _terminalNotSupported = false;
 };
 
 class FileLogger : public Logger {
