@@ -502,6 +502,132 @@ Symbol::UsageType getSymbolUsageType(std::uint8_t storageClass, std::uint8_t com
 	return Symbol::UsageType::UNKNOWN;
 }
 
+/**
+ * Calculates the digest using selected hash algorithm.
+ * @param peFile PE file with the signature.
+ * @param algorithm Algorithm to use.
+ * @return Hex string of hash.
+ */
+std::string calculateDigest(
+		const retdec::fileformat::PeFormat* peFile,
+		const EVP_MD* algorithm)
+{
+	EVP_MD_CTX* ctx = EVP_MD_CTX_create();
+
+	if (EVP_DigestInit(ctx, algorithm) != 1) // 1 == success
+	{
+		return {};
+	}
+
+	auto digestRanges = peFile->getDigestRanges();
+	for (const auto& range : digestRanges)
+	{
+		const std::uint8_t* data = std::get<0>(range);
+		std::size_t size = std::get<1>(range);
+
+		if (EVP_DigestUpdate(ctx, data, size) != 1) // 1 == success
+		{
+			return {};
+		}
+	}
+
+	std::vector<std::uint8_t> hash(EVP_MD_size(algorithm));
+	if (EVP_DigestFinal(ctx, hash.data(), nullptr) != 1)
+	{
+		return {};
+	}
+
+	EVP_MD_CTX_destroy(ctx);
+
+	std::string ret;
+	retdec::utils::bytesToHexString(hash, ret);
+	return ret;
+}
+
+/**
+ * Verifies signature of PE file using PKCS7.
+ * @param peFile PE file with the signature.
+ * @param p7 PKCS7 structure.
+ * @return @c true if signature is valid, otherwise @c false.
+ */
+bool verifySignature(const retdec::fileformat::PeFormat* peFile, PKCS7 *p7)
+{
+	// At first, verify that there are data in place where Microsoft Code
+	// Signing should be present
+	if (!p7->d.sign->contents->d.other)
+		return false;
+
+	// We need this because PKCS7_verify() looks up algorithms and without this,
+	// tables are empty
+	OpenSSL_add_all_algorithms();
+	SCOPE_EXIT {
+		EVP_cleanup();
+	};
+
+	// First, check whether the hash written in ContentInfo matches the hash of the whole file
+	auto contentInfoPtr = p7->d.sign->contents->d.other->value.sequence->data;
+	auto contentInfoLen = p7->d.sign->contents->d.other->value.sequence->length;
+	std::vector<std::uint8_t> contentInfoData(contentInfoPtr, contentInfoPtr + contentInfoLen);
+	auto contentInfo = Asn1Item::parse(contentInfoData);
+	if (contentInfo == nullptr)
+		return false;
+	if (!contentInfo->isSequence())
+		return false;
+
+	auto digest = std::static_pointer_cast<Asn1Sequence>(contentInfo)->getElement(1);
+	if (digest == nullptr || !digest->isSequence())
+		return false;
+
+	auto digestSeq = std::static_pointer_cast<Asn1Sequence>(digest);
+	if (digestSeq->getNumberOfElements() != 2)
+		return false;
+
+	auto digestAlgo = digestSeq->getElement(0);
+	auto digestValue = digestSeq->getElement(1);
+	if (!digestAlgo->isSequence() || !digestValue->isOctetString())
+		return false;
+
+	auto digestAlgoSeq = std::static_pointer_cast<Asn1Sequence>(digestAlgo);
+	if (digestAlgoSeq->getNumberOfElements() == 0)
+		return false;
+
+	auto digestAlgoOID = digestAlgoSeq->getElement(0);
+	if (!digestAlgoOID->isObject())
+		return false;
+
+	auto digestAlgoOIDStr = std::static_pointer_cast<Asn1Object>(digestAlgoOID)->getIdentifier();
+
+	const EVP_MD* algorithm = nullptr;
+	if (digestAlgoOIDStr == DigestAlgorithmOID_Sha1)
+		algorithm = EVP_sha1();
+	else if (digestAlgoOIDStr == DigestAlgorithmOID_Sha256)
+		algorithm = EVP_sha256();
+	else if (digestAlgoOIDStr == DigestAlgorithmOID_Md5)
+		algorithm = EVP_md5();
+	else
+	{
+		EVP_cleanup();
+		return false;
+	}
+
+	auto storedHash = std::static_pointer_cast<Asn1OctetString>(digestValue)->getString();
+	auto calculatedHash = calculateDigest(peFile, algorithm);
+	if (storedHash != calculatedHash)
+	{
+		EVP_cleanup();
+		return false;
+	}
+
+	auto contentData = contentInfo->getContentData();
+	auto contentBio = std::unique_ptr<BIO, decltype(&BIO_free)>(
+			BIO_new_mem_buf(contentData.data(), contentData.size()), &BIO_free);
+	auto emptyTrustStore = std::unique_ptr<X509_STORE, decltype(&X509_STORE_free)>(X509_STORE_new(), &X509_STORE_free);
+	if (PKCS7_verify(p7, p7->d.sign->cert, emptyTrustStore.get(), contentBio.get(), nullptr, PKCS7_NOVERIFY) == 0)
+		return false;
+
+	return true;
+}
+
 } // anonymous namespace
 
 /**
@@ -1860,7 +1986,7 @@ void PeFormat::loadCertificates()
 	// verify the signature. Do not try to verify the signature before
 	// verifying that there is at least a signer or counter-signer as 'p7' is
 	// empty in that case (#87).
-	signatureVerified = verifySignature(p7);
+	signatureVerified = verifySignature(this, p7);
 
 	// Create hash table with key-value pair as subject-X509 certificate so we can easily lookup certificates by their subject name
 	std::unordered_map<std::string, X509*> subjectToCert;
@@ -2063,88 +2189,10 @@ void PeFormat::loadDotnetHeaders()
 }
 
 /**
- * Verifies signature of PE file using PKCS7.
- * @param p7 PKCS7 structure.
- * @return @c true if signature is valid, otherwise @c false.
- */
-bool PeFormat::verifySignature(PKCS7 *p7)
-{
-	// At first, verify that there are data in place where Microsoft Code Signing should be present
-	if (!p7->d.sign->contents->d.other)
-		return false;
-
-	// We need this because PKCS7_verify() looks up algorithms and without this, tables are empty
-	OpenSSL_add_all_algorithms();
-	SCOPE_EXIT {
-		EVP_cleanup();
-	};
-
-	// First, check whether the hash written in ContentInfo matches the hash of the whole file
-	auto contentInfoPtr = p7->d.sign->contents->d.other->value.sequence->data;
-	auto contentInfoLen = p7->d.sign->contents->d.other->value.sequence->length;
-	std::vector<std::uint8_t> contentInfoData(contentInfoPtr, contentInfoPtr + contentInfoLen);
-	auto contentInfo = Asn1Item::parse(contentInfoData);
-	if (contentInfo == nullptr)
-		return false;
-	if (!contentInfo->isSequence())
-		return false;
-
-	auto digest = std::static_pointer_cast<Asn1Sequence>(contentInfo)->getElement(1);
-	if (digest == nullptr || !digest->isSequence())
-		return false;
-
-	auto digestSeq = std::static_pointer_cast<Asn1Sequence>(digest);
-	if (digestSeq->getNumberOfElements() != 2)
-		return false;
-
-	auto digestAlgo = digestSeq->getElement(0);
-	auto digestValue = digestSeq->getElement(1);
-	if (!digestAlgo->isSequence() || !digestValue->isOctetString())
-		return false;
-
-	auto digestAlgoSeq = std::static_pointer_cast<Asn1Sequence>(digestAlgo);
-	if (digestAlgoSeq->getNumberOfElements() == 0)
-		return false;
-
-	auto digestAlgoOID = digestAlgoSeq->getElement(0);
-	if (!digestAlgoOID->isObject())
-		return false;
-
-	auto digestAlgoOIDStr = std::static_pointer_cast<Asn1Object>(digestAlgoOID)->getIdentifier();
-
-	const EVP_MD* algorithm = nullptr;
-	if (digestAlgoOIDStr == DigestAlgorithmOID_Sha1)
-		algorithm = EVP_sha1();
-	else if (digestAlgoOIDStr == DigestAlgorithmOID_Sha256)
-		algorithm = EVP_sha256();
-	else if (digestAlgoOIDStr == DigestAlgorithmOID_Md5)
-		algorithm = EVP_md5();
-	else
-	{
-		EVP_cleanup();
-		return false;
-	}
-
-	auto storedHash = std::static_pointer_cast<Asn1OctetString>(digestValue)->getString();
-	auto calculatedHash = calculateDigest(algorithm);
-	if (storedHash != calculatedHash)
-	{
-		EVP_cleanup();
-		return false;
-	}
-
-	auto contentData = contentInfo->getContentData();
-	auto contentBio = std::unique_ptr<BIO, decltype(&BIO_free)>(BIO_new_mem_buf(contentData.data(), contentData.size()), &BIO_free);
-	auto emptyTrustStore = std::unique_ptr<X509_STORE, decltype(&X509_STORE_free)>(X509_STORE_new(), &X509_STORE_free);
-	if (PKCS7_verify(p7, p7->d.sign->cert, emptyTrustStore.get(), contentBio.get(), nullptr, PKCS7_NOVERIFY) == 0)
-		return false;
-
-	return true;
-}
-
-/**
- * Returns ranges that are used for digest calculation. This digest is used for signature verification.
- * Range is represented in form of tuple where first element is pointer to the beginning of the range and second is size of the range.
+ * Returns ranges that are used for digest calculation.
+ * This digest is used for signature verification.
+ * Range is represented in form of tuple where first element is pointer
+ * to the beginning of the range and second is size of the range.
  * @return Ranges used for digest process.
  */
 std::vector<std::tuple<const std::uint8_t*, std::size_t>> PeFormat::getDigestRanges() const
@@ -2195,45 +2243,6 @@ std::vector<std::tuple<const std::uint8_t*, std::size_t>> PeFormat::getDigestRan
 		result.emplace_back(bytes.data() + lastOffset, bytes.size() - lastOffset);
 
 	return result;
-}
-
-/**
- * Calculates the digest using selected hash algorithm.
- * @param algorithm Algorithm to use.
- * @return Hex string of hash.
- */
-std::string PeFormat::calculateDigest(const EVP_MD* algorithm) const
-{
-	EVP_MD_CTX* ctx = EVP_MD_CTX_create();
-
-	if (EVP_DigestInit(ctx, algorithm) != 1) // 1 == success
-	{
-		return {};
-	}
-
-	auto digestRanges = getDigestRanges();
-	for (const auto& range : digestRanges)
-	{
-		const std::uint8_t* data = std::get<0>(range);
-		std::size_t size = std::get<1>(range);
-
-		if (EVP_DigestUpdate(ctx, data, size) != 1) // 1 == success
-		{
-			return {};
-		}
-	}
-
-	std::vector<std::uint8_t> hash(EVP_MD_size(algorithm));
-	if (EVP_DigestFinal(ctx, hash.data(), nullptr) != 1)
-	{
-		return {};
-	}
-
-	EVP_MD_CTX_destroy(ctx);
-
-	std::string ret;
-	retdec::utils::bytesToHexString(hash, ret);
-	return ret;
 }
 
 /**

@@ -18,10 +18,6 @@
 #include "retdec/fileformat/types/visual_basic/visual_basic_info.h"
 #include "retdec/pelib/PeFile.h"
 
-// Forward declare OpenSSL structures used in this header.
-typedef struct pkcs7_st PKCS7;
-typedef struct evp_md_st EVP_MD;
-
 namespace retdec {
 namespace fileformat {
 
@@ -79,13 +75,6 @@ class PeFormat : public FileFormat
 		void loadResources();
 		void loadCertificates();
 		void loadTlsInformation();
-		/// @}
-
-		/// @name Signature verification methods
-		/// @{
-		bool verifySignature(PKCS7 *p7);
-		std::vector<std::tuple<const std::uint8_t*, std::size_t>> getDigestRanges() const;
-		std::string calculateDigest(const EVP_MD* algorithm) const;
 		/// @}
 
 		/// @name .NET methods
@@ -188,6 +177,7 @@ class PeFormat : public FileFormat
 		bool isMissingDependency(std::string dllname) const;
 		bool dllListFailedToLoad() const;
 		bool initDllList(const std::string & dllListFile);
+		/// @}
 
 		bool isDotNet() const;
 		bool isPackedDotNet() const;
@@ -214,7 +204,7 @@ class PeFormat : public FileFormat
 		const std::string& getTypeRefhashMd5() const;
 		const std::string& getTypeRefhashSha256() const;
 		const VisualBasicInfo* getVisualBasicInfo() const;
-		/// @}
+		std::vector<std::tuple<const std::uint8_t*, std::size_t>> getDigestRanges() const;
 
 		/// @name Scanning methods
 		/// @{
