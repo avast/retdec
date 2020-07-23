@@ -4,8 +4,6 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
-// #include <iostream>
-
 #include <llvm/IR/BasicBlock.h>
 
 #include "retdec/llvmir2hll/ir/statement.h"

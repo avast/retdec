@@ -5,9 +5,12 @@
  */
 
 #include <iomanip>
-#include <iostream>
+
+#include "retdec/utils/io/log.h"
 
 #include "capstone2llvmir/arm64/arm64_impl.h"
+
+using namespace retdec::utils::io;
 
 namespace retdec {
 namespace capstone2llvmir {
@@ -704,7 +707,7 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::loadRegister(
 		// If we dont find the register type, try to recover from this returning at
 		// least the number of register
 		// Maybe solve this better
-		std::cerr << e.what() << std::endl;
+		Log::error() << e.what() << std::endl;
 		return llvm::ConstantInt::get(dstType ? dstType : getDefaultType(), r);
 	}
 
@@ -818,7 +821,7 @@ llvm::Instruction* Capstone2LlvmIrTranslatorArm64_impl::storeRegister(
 	if (llvmReg == nullptr)
 	{
 		// Maybe return xchg eax, eax?
-		std::cerr << "storeRegister() unhandled reg." << std::endl;
+		Log::error() << "storeRegister() unhandled reg." << std::endl;
 		return nullptr;
 	}
 

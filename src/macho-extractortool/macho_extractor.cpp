@@ -4,7 +4,6 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include <iostream>
 #include <set>
 
 #include <llvm/Support/FileSystem.h>
@@ -13,8 +12,10 @@
 
 #include "retdec/utils/conversion.h"
 #include "retdec/utils/string.h"
+#include "retdec/utils/io/log.h"
 #include "retdec/macho-extractor/break_fat.h"
 
+using namespace retdec::utils::io;
 using namespace retdec::macho_extractor;
 using namespace rapidjson;
 
@@ -24,7 +25,7 @@ enum class Mode { All, Best, Arch, Family, Index };
 
 void printUsage()
 {
-	std::cerr <<
+	Log::error() <<
 	"\nExtract objects from Mach-O Universal Binaries.\n"
 	"Usage: retdec-macho-extractor [OPTIONS] FILE\n\n"
 	"Extraction options:\n\n"
@@ -73,7 +74,7 @@ std::string getParamOrDie(
 	}
 	else
 	{
-		std::cerr << "Error: missing argument value.\n\n";
+		Log::error() << Log::Error << "missing argument value.\n\n";
 		printUsage();
 		exit(1);
 	}
@@ -98,11 +99,11 @@ void printError(
 		StringBuffer outBuffer;
 		PrettyWriter<StringBuffer> outWriter(outBuffer);
 		outDoc.Accept(outWriter);
-		std::cout << outBuffer.GetString();
+		Log::info() << outBuffer.GetString();
 	}
 	else
 	{
-		std::cerr << "Error: " << message << ".\n";
+		Log::error() << Log::Error << message << ".\n";
 	}
 }
 
@@ -117,7 +118,7 @@ int handleArguments(
 	if(args.size() < 1)
 	{
 		printUsage();
-		std::cerr << "Error: not enough arguments!\n";
+		Log::error() << Log::Error << "not enough arguments!\n";
 		return 1;
 	}
 
@@ -254,25 +255,31 @@ int handleArguments(
 	{
 		if(binary.isStaticLibrary())
 		{
-			std::cout << "Input file is a static library.\n";
+			Log::info() << "Input file is a static library.\n";
 			return 0;
 		}
 
-		std::cout << "Input file is NOT a static library.\n";
+		Log::info() << "Input file is NOT a static library.\n";
 		return 3;
 	}
 
 	// List mode
 	if(listOnly)
 	{
+		std::stringstream ss;
+		bool ret;
+
 		if(jsonOut)
 		{
-			return binary.listArchitecturesJson(std::cout, addObjects) ? 0 : 1;
+			ret = binary.listArchitecturesJson(ss, addObjects) ? 0 : 1;
 		}
 		else
 		{
-			return binary.listArchitectures(std::cout, addObjects) ? 0 : 1;
+			ret = binary.listArchitectures(ss, addObjects) ? 0 : 1;
 		}
+
+		Log::info() << ss.str();
+		return ret;
 	}
 
 	// Set default name if no name was given

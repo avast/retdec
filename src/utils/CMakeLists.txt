@@ -13,6 +13,8 @@ add_library(utils STATIC
 	system.cpp
 	time.cpp
 	${RETDEC_DEPS_DIR}/whereami/whereami/whereami.c
+	io/log.cpp
+	io/logger.cpp
 )
 add_library(retdec::utils ALIAS utils)
 

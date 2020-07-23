@@ -13,12 +13,14 @@
 #include "retdec/llvmir2hll/ir/variable.h"
 #include "retdec/llvmir2hll/obtainer/call_info_obtainer_factory.h"
 #include "retdec/llvmir2hll/obtainer/call_info_obtainers/optim_call_info_obtainer.h"
-#include "retdec/llvmir2hll/support/debug.h"
 #include "retdec/utils/container.h"
+#include "retdec/llvmir2hll/support/debug.h"
+#include "retdec/utils/io/log.h"
 
 using retdec::utils::addToSet;
 using retdec::utils::hasItem;
 using retdec::utils::setIntersection;
+using namespace retdec::utils::io;
 
 namespace retdec {
 namespace llvmir2hll {
@@ -38,33 +40,33 @@ OptimCallInfo::OptimCallInfo(ShPtr<CallExpr> call): CallInfo(call) {}
 * Only for debugging purposes.
 */
 void OptimCallInfo::debugPrint() {
-	llvm::errs() << "[OptimCallInfo] Debug info for '" << call << "':\n";
+	Log::error() << "[OptimCallInfo] Debug info for '" << call << "':\n";
 
-	llvm::errs() << "  neverReadVars:      ";
+	Log::error() << "  neverReadVars:      ";
 	dump(neverReadVars, dumpFuncGetName<ShPtr<Variable>>);
 
-	llvm::errs() << "  mayBeReadVars:      ";
+	Log::error() << "  mayBeReadVars:      ";
 	dump(mayBeReadVars, dumpFuncGetName<ShPtr<Variable>>);
 
-	llvm::errs() << "  alwaysReadVars:     ";
+	Log::error() << "  alwaysReadVars:     ";
 	dump(alwaysReadVars, dumpFuncGetName<ShPtr<Variable>>);
 
-	llvm::errs() << "  neverModifiedVars:  ";
+	Log::error() << "  neverModifiedVars:  ";
 	dump(neverModifiedVars, dumpFuncGetName<ShPtr<Variable>>);
 
-	llvm::errs() << "  mayBeModifiedVars:  ";
+	Log::error() << "  mayBeModifiedVars:  ";
 	dump(mayBeModifiedVars, dumpFuncGetName<ShPtr<Variable>>);
 
-	llvm::errs() << "  alwaysModifiedVars: ";
+	Log::error() << "  alwaysModifiedVars: ";
 	dump(alwaysModifiedVars, dumpFuncGetName<ShPtr<Variable>>);
 
-	llvm::errs() << "  varsWithNeverChangedValue: ";
+	Log::error() << "  varsWithNeverChangedValue: ";
 	dump(varsWithNeverChangedValue, dumpFuncGetName<ShPtr<Variable>>);
 
-	llvm::errs() << "  varsAlwaysModifiedBeforeRead: ";
+	Log::error() << "  varsAlwaysModifiedBeforeRead: ";
 	dump(varsAlwaysModifiedBeforeRead, dumpFuncGetName<ShPtr<Variable>>);
 
-	llvm::errs() << "\n";
+	Log::error() << "\n";
 }
 
 bool OptimCallInfo::isNeverRead(ShPtr<Variable> var) const {
@@ -111,33 +113,33 @@ OptimFuncInfo::OptimFuncInfo(ShPtr<Function> func): FuncInfo(func) {}
 * Only for debugging purposes.
 */
 void OptimFuncInfo::debugPrint() {
-	llvm::errs() << "[OptimFuncInfo] Debug info for function '" << func->getName() << "':\n";
+	Log::error() << "[OptimFuncInfo] Debug info for function '" << func->getName() << "':\n";
 
-	llvm::errs() << "  neverReadVars:      ";
+	Log::error() << "  neverReadVars:      ";
 	dump(neverReadVars, dumpFuncGetName<ShPtr<Variable>>);
 
-	llvm::errs() << "  mayBeReadVars:      ";
+	Log::error() << "  mayBeReadVars:      ";
 	dump(mayBeReadVars, dumpFuncGetName<ShPtr<Variable>>);
 
-	llvm::errs() << "  alwaysReadVars:     ";
+	Log::error() << "  alwaysReadVars:     ";
 	dump(alwaysReadVars, dumpFuncGetName<ShPtr<Variable>>);
 
-	llvm::errs() << "  neverModifiedVars:  ";
+	Log::error() << "  neverModifiedVars:  ";
 	dump(neverModifiedVars, dumpFuncGetName<ShPtr<Variable>>);
 
-	llvm::errs() << "  mayBeModifiedVars:  ";
+	Log::error() << "  mayBeModifiedVars:  ";
 	dump(mayBeModifiedVars, dumpFuncGetName<ShPtr<Variable>>);
 
-	llvm::errs() << "  alwaysModifiedVars: ";
+	Log::error() << "  alwaysModifiedVars: ";
 	dump(alwaysModifiedVars, dumpFuncGetName<ShPtr<Variable>>);
 
-	llvm::errs() << "  varsWithNeverChangedValue: ";
+	Log::error() << "  varsWithNeverChangedValue: ";
 	dump(varsWithNeverChangedValue, dumpFuncGetName<ShPtr<Variable>>);
 
-	llvm::errs() << "  varsAlwaysModifiedBeforeRead: ";
+	Log::error() << "  varsAlwaysModifiedBeforeRead: ";
 	dump(varsAlwaysModifiedBeforeRead, dumpFuncGetName<ShPtr<Variable>>);
 
-	llvm::errs() << "\n";
+	Log::error() << "\n";
 }
 
 bool OptimFuncInfo::isNeverRead(ShPtr<Variable> var) const {

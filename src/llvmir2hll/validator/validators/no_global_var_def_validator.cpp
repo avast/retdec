@@ -35,9 +35,11 @@ std::string NoGlobalVarDefValidator::getId() const {
 
 void NoGlobalVarDefValidator::visit(ShPtr<VarDefStmt> stmt) {
 	// The left-hand side of a VarDefStmt cannot be a global variable.
+	std::ostringstream stmtStr;
+	stmtStr << stmt;
 	if (module->isGlobalVar(stmt->getVar())) {
-		validationError("In ", func->getName(), "(), found a VarDefStmt `",
-			stmt, "` that defines a global variable.");
+		validationError("In "+func->getName()+"(), found a VarDefStmt `"+
+			stmtStr.str()+"` that defines a global variable.");
 	}
 	OrderedAllVisitor::visit(stmt);
 }

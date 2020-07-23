@@ -4,8 +4,6 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include <iostream>
-
 #include <llvm/IR/InstIterator.h>
 
 #include "retdec/utils/string.h"

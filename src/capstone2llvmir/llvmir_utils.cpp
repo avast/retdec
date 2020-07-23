@@ -4,8 +4,6 @@
  * @copyright (c) 2018 Avast Software, licensed under the MIT license
  */
 
-#include <iostream>
-
 #include "capstone2llvmir/llvmir_utils.h"
 #include "retdec/capstone2llvmir/exceptions.h"
 

@@ -136,7 +136,6 @@ target_link_libraries(bin2llvmir
 		retdec::ctypesparser
 		retdec::common
 		retdec::utils
-		retdec::llvm-support
 		retdec::deps::llvm
 )
 

@@ -73,7 +73,6 @@
 #include "retdec/llvmir2hll/var_name_gen/var_name_gens/num_var_name_gen.h"
 #include "retdec/llvmir2hll/var_renamer/var_renamer.h"
 #include "retdec/llvmir2hll/var_renamer/var_renamer_factory.h"
-#include "retdec/llvm-support/diagnostics.h"
 #include "retdec/utils/container.h"
 #include "retdec/utils/conversion.h"
 #include "retdec/utils/memory.h"

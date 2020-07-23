@@ -310,7 +310,6 @@ target_link_libraries(llvmir2hll
 	PUBLIC
 		retdec::config
 		retdec::utils
-		retdec::llvm-support
 		retdec::deps::rapidjson
 		retdec::deps::llvm
 )

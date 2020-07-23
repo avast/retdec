@@ -5,9 +5,11 @@
  */
 
 #include <cstdlib>
-#include <iostream>
 
 #include "retdec/retdec/retdec.h"
+#include "retdec/utils/io/log.h"
+
+using namespace retdec::utils::io;
 
 class ProgramOptions
 {
@@ -53,14 +55,14 @@ class ProgramOptions
 
 		void dump()
 		{
-			std::cout << std::endl;
-			std::cout << "Program Options:" << std::endl;
-			std::cout << "\t" << "input file : " << inputFile << std::endl;
+			Log::info() << std::endl;
+			Log::info() << "Program Options:" << std::endl;
+			Log::info() << "\t" << "input file : " << inputFile << std::endl;
 		}
 
 		void printHelpAndDie()
 		{
-			std::cout << _programName << ":\n"
+			Log::info() << _programName << ":\n"
 					<< "\t-i inputFile\n";
 
 			exit(EXIT_SUCCESS);
@@ -83,52 +85,52 @@ int main(int argc, char **argv)
 
 	for (auto& f : fs)
 	{
-		std::cout << std::endl;
-		std::cout << f.getName() << " @ " << f << std::endl;
+		Log::info() << std::endl;
+		Log::info() << f.getName() << " @ " << f << std::endl;
 
-		std::cout << std::endl;
-		std::cout << "\t" << "code refs (insns referencing this function):"
+		Log::info() << std::endl;
+		Log::info() << "\t" << "code refs (insns referencing this function):"
 			<< std::endl;
 		for (auto& r : f.codeReferences)
 		{
 			auto* f = fs.getRange(r);
-			std::cout << "\t\t" << r
+			Log::info() << "\t\t" << r
 				<< " ( @ " << (f ? f->getName() : "unknown") << " )"
 				<< std::endl;
 		}
 
 		for (auto& bb : f.basicBlocks)
 		{
-			std::cout << std::endl;
-			std::cout << "\t" << "bb @ " << bb << std::endl;
+			Log::info() << std::endl;
+			Log::info() << "\t" << "bb @ " << bb << std::endl;
 
-			std::cout << "\t\t" << "preds:" << std::endl;
+			Log::info() << "\t\t" << "preds:" << std::endl;
 			for (auto p : bb.preds)
 			{
-				std::cout << "\t\t\t" << p << std::endl;
+				Log::info() << "\t\t\t" << p << std::endl;
 			}
 
-			std::cout << "\t\t" << "succs:" << std::endl;
+			Log::info() << "\t\t" << "succs:" << std::endl;
 			for (auto s : bb.succs)
 			{
-				std::cout << "\t\t\t" << s << std::endl;
+				Log::info() << "\t\t\t" << s << std::endl;
 			}
 
-			std::cout << "\t\t" << "calls:" << std::endl;
+			Log::info() << "\t\t" << "calls:" << std::endl;
 			for (auto c : bb.calls)
 			{
 				auto* f = fs.getRange(c.targetAddr);
-				std::cout << "\t\t\t" << c.srcAddr << "  ->  " << c.targetAddr
+				Log::info() << "\t\t\t" << c.srcAddr << "  ->  " << c.targetAddr
 					<< " ( @ " << (f ? f->getName() : "unknown") << " )"
 					<< std::endl;
 			}
 
 			// These are not only text entries!!!
 			// There is a full Capstone representation for every instruction.
-			std::cout << "\t\t" << "instructions:" << std::endl;
+			Log::info() << "\t\t" << "instructions:" << std::endl;
 			for (auto* insn : bb.instructions)
 			{
-				std::cout << "\t\t\t" << retdec::common::Address(insn->address)
+				Log::info() << "\t\t\t" << retdec::common::Address(insn->address)
 					<< " @ " << insn->mnemonic << " " << insn->op_str
 					<< std::endl;
 			}

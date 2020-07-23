@@ -11,6 +11,7 @@
 #include <Eigen/Core>
 #include <Eigen/QR>
 
+#include "retdec/utils/io/log.h"
 #include "retdec/bin2llvmir/optimizations/x87_fpu/x87_fpu.h"
 #include "retdec/utils/string.h"
 #include "retdec/bin2llvmir/providers/asm_instruction.h"
@@ -23,6 +24,7 @@
 
 using namespace llvm;
 using namespace retdec::bin2llvmir::llvm_utils;
+using namespace retdec::utils::io;
 
 namespace retdec {
 namespace bin2llvmir {

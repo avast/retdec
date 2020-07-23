@@ -4,11 +4,11 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include <iostream>
 #include <regex>
 
 #include <llvm/Support/CommandLine.h>
 
+#include "retdec/utils/io/log.h"
 #include "retdec/bin2llvmir/analyses/symbolic_tree.h"
 #include "retdec/bin2llvmir/optimizations/provider_init/provider_init.h"
 #include "retdec/bin2llvmir/providers/abi/abi.h"
@@ -25,6 +25,7 @@
 #include "retdec/yaracpp/yara_detector.h"
 
 using namespace llvm;
+using namespace retdec::utils::io;
 
 namespace retdec {
 namespace bin2llvmir {
@@ -340,7 +341,7 @@ bool ProviderInitialization::runOnModule(Module& m)
 		{
 			if (l.bytecode)
 			{
-				std::cerr << "Warning: Detected " << l.name
+				Log::error() << Log::Warning << "Detected " << l.name
 						<< " bytecode, which cannot be decompiled by our "
 						"machine-code decompiler. "
 						"The decompilation result may be inaccurate.";

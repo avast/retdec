@@ -50,8 +50,9 @@
 #include "retdec/utils/container.h"
 #include "retdec/utils/string.h"
 #include "retdec/utils/system.h"
+#include "retdec/utils/io/log.h"
 
-using namespace retdec::llvm_support;
+using namespace retdec::utils::io;
 using namespace std::string_literals;
 
 using retdec::utils::hasItem;
@@ -309,7 +310,7 @@ void OptimizerManager::runOptimizerProvidedItShouldBeRun(ShPtr<Optimizer> optimi
 		try {
 			optimizer->optimize();
 		} catch (const std::bad_alloc &) {
-			printWarningMessage("out of memory; trying to recover");
+			Log::error() << Log::Warning << "out of memory; trying to recover" << std::endl;
 			std::this_thread::sleep_for(std::chrono::seconds(1));
 		}
 	} else {
@@ -328,7 +329,7 @@ void OptimizerManager::runOptimizerProvidedItShouldBeRun(ShPtr<Optimizer> optimi
 */
 void OptimizerManager::printOptimization(const std::string &optId) const {
 	if (enableDebug) {
-		printSubPhase("running "s + optId + OPT_SUFFIX);
+		Log::phase("running "s + optId + OPT_SUFFIX, Log::SubPhase);
 	}
 }
 

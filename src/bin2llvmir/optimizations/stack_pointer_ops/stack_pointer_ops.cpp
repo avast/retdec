@@ -6,7 +6,6 @@
 
 #include <cassert>
 #include <iomanip>
-#include <iostream>
 
 #include <llvm/IR/InstIterator.h>
 #include <llvm/IR/Instruction.h>

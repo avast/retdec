@@ -9,6 +9,10 @@
 
 #include "retdec/demangler/demangler.h"
 
+#include "retdec/utils/io/log.h"
+
+using namespace retdec::utils::io;
+
 using ItaniumDemangler = retdec::demangler::ItaniumDemangler;
 using MicrosoftDemangler = retdec::demangler::MicrosoftDemangler;
 using BorlandDemangler = retdec::demangler::BorlandDemangler;
@@ -35,7 +39,7 @@ int main(int argc, char *argv[])
 	std::string demangledBorland;
 
 	if (argc <= 1 || strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "--help") == 0) {
-		std::cout << helpmsg;
+		Log::info() << helpmsg;
 		return 0;
 	}
 
@@ -47,13 +51,13 @@ int main(int argc, char *argv[])
 		demangledBorland = dem_borland->demangleToString(argv[i]);
 
 		if (!demangledGcc.empty()) {
-			std::cout << "gcc: " << demangledGcc << std::endl;
+			Log::info() << "gcc: " << demangledGcc << std::endl;
 		}
 		if (!demangledMs.empty()) {
-			std::cout << "ms: " << demangledMs << std::endl;
+			Log::info() << "ms: " << demangledMs << std::endl;
 		}
 		if (!demangledBorland.empty()) {
-			std::cout << "borland: " << demangledBorland << std::endl;
+			Log::info() << "borland: " << demangledBorland << std::endl;
 		}
 	}
 

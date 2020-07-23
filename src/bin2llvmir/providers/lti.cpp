@@ -5,7 +5,6 @@
  */
 
 #include <fstream>
-#include <iostream>
 
 #include "retdec/ctypes/floating_point_type.h"
 #include "retdec/ctypes/function_type.h"

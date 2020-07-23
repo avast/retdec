@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "retdec/llvmir2hll/pattern/pattern_finder_runner.h"
+#include "retdec/utils/io/log.h"
 
 namespace retdec {
 namespace llvmir2hll {
@@ -23,7 +24,7 @@ namespace llvmir2hll {
 */
 class CLIPatternFinderRunner: public PatternFinderRunner {
 public:
-	CLIPatternFinderRunner(llvm::raw_ostream &os);
+	CLIPatternFinderRunner(utils::io::Logger &os);
 
 private:
 	virtual void doActionsBeforePatternFinderRuns(ShPtr<PatternFinder> pf) override;
@@ -34,7 +35,7 @@ private:
 
 private:
 	/// Output stream, into which the patterns will be emitted.
-	llvm::raw_ostream &os;
+	utils::io::Logger &os;
 };
 
 } // namespace llvmir2hll

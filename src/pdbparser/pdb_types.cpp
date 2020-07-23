@@ -9,7 +9,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <iostream>
 #include <sstream>
 
 #include "retdec/pdbparser/pdb_types.h"

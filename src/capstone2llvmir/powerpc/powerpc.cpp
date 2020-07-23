@@ -5,7 +5,6 @@
  */
 
 #include <iomanip>
-#include <iostream>
 
 #include "capstone2llvmir/powerpc/powerpc_impl.h"
 

@@ -10,7 +10,6 @@
 #include "retdec/llvmir2hll/optimizer/optimizer.h"
 #include "retdec/llvmir2hll/support/smart_ptr.h"
 #include "retdec/llvmir2hll/support/types.h"
-#include "retdec/llvm-support/diagnostics.h"
 #include "retdec/utils/non_copyable.h"
 
 namespace retdec {

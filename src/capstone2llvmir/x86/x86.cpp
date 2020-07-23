@@ -5,7 +5,6 @@
  */
 
 #include <iomanip>
-#include <iostream>
 
 #include "capstone2llvmir/x86/x86_impl.h"
 

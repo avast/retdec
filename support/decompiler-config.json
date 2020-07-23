@@ -1,6 +1,6 @@
 {
     "decompParams": {
-        "verboseOut": false,
+        "verboseOut": true,
         "outputFormat": "plain",
         "keepAllFuncs": false,
         "selectedDecodeOnly": false,

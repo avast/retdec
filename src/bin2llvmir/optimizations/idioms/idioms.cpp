@@ -4,8 +4,6 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include <iostream>
-
 #include "retdec/bin2llvmir/optimizations/idioms/idioms.h"
 #include "retdec/bin2llvmir/optimizations/idioms/idioms_borland.h"
 #include "retdec/bin2llvmir/optimizations/idioms/idioms_common.h"

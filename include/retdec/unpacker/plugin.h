@@ -7,14 +7,16 @@
 #ifndef RETDEC_UNPACKER_PLUGIN_H
 #define RETDEC_UNPACKER_PLUGIN_H
 
-#include <iostream>
 #include <memory>
 #include <sstream>
 #include <string>
 
+#include "retdec/utils/io/log.h"
 #include "retdec/unpacker/unpacker_exception.h"
 
 #define plugin(T) retdec::unpackertool::Plugin::instance<T>()
+
+using namespace retdec::utils::io;
 
 namespace retdec {
 namespace unpackertool {
@@ -171,7 +173,7 @@ public:
 	 */
 	template <typename... Args> void log(const Args&... args)
 	{
-		Plugin::logImpl(std::cout, "[", getInfo()->name, "] ", args...);
+		Plugin::logImpl(Log::get(Log::Type::Info), "[", getInfo()->name, "] ", args...);
 	}
 
 	/**
@@ -184,7 +186,7 @@ public:
 	 */
 	template <typename... Args> void error(const Args&... args)
 	{
-		Plugin::logImpl(std::cerr, "[ERROR] [", getInfo()->name, "] ", args...);
+		Plugin::logImpl(Log::get(Log::Type::Error), "[ERROR] [", getInfo()->name, "] ", args...);
 	}
 
 	/**
@@ -211,13 +213,13 @@ protected:
 private:
 	PluginExitCode _cachedExitCode; ///< Cached exit code of the plugin for the unpacked file.
 
-	template <typename T, typename... Args> static void logImpl(std::ostream& out, const T& data, const Args&... args)
+	template <typename T, typename... Args> static void logImpl(Logger& out, const T& data, const Args&... args)
 	{
 		out << data;
 		logImpl(out, args...);
 	}
 
-	static void logImpl(std::ostream& out)
+	static void logImpl(Logger& out)
 	{
 		out << std::endl;
 	}

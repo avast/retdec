@@ -9,6 +9,7 @@
 
 #include "retdec/utils/conversion.h"
 #include "retdec/utils/string.h"
+#include "retdec/utils/io/log.h"
 #include "retdec/bin2llvmir/optimizations/decoder/decoder.h"
 #include "retdec/bin2llvmir/utils/llvm.h"
 #include "retdec/bin2llvmir/utils/capstone.h"
@@ -17,6 +18,7 @@ using namespace retdec::capstone2llvmir;
 using namespace retdec::common;
 using namespace retdec::bin2llvmir::st_match;
 using namespace retdec::fileformat;
+using namespace retdec::utils::io;
 
 namespace retdec {
 namespace bin2llvmir {
@@ -88,7 +90,7 @@ bool Decoder::runCatcher()
 	}
 	catch (const BaseError& e)
 	{
-		std::cerr << "[capstone2llvmir]: " << e.what() << std::endl;
+		Log::error() << "[capstone2llvmir]: " << e.what() << std::endl;
 		exit(1);
 	}
 }

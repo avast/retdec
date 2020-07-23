@@ -4,8 +4,6 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include <iostream>
-
 #include "retdec/bin2llvmir/utils/llvm.h"
 #include "retdec/bin2llvmir/optimizations/class_hierarchy/hierarchy_analysis.h"
 #include "retdec/bin2llvmir/utils/debug.h"

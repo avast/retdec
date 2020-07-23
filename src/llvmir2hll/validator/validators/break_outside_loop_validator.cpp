@@ -35,8 +35,10 @@ void BreakOutsideLoopValidator::visit(ShPtr<BreakStmt> stmt) {
 	// this end, get the innermost loop or switch.
 	ShPtr<Statement> innLoopOrSwitch(getInnermostLoopOrSwitch(stmt));
 	if (!innLoopOrSwitch) {
-		validationError("In ", func->getName(), "(), found `", stmt,
-			"` outside of a loop or a switch statement.");
+		std::ostringstream stmtStr;
+		stmtStr << stmt;
+		validationError("In " + func->getName() + "(), found `" + stmtStr.str()
+			+ "` outside of a loop or a switch statement.");
 	}
 	OrderedAllVisitor::visit(stmt);
 }
@@ -46,8 +48,10 @@ void BreakOutsideLoopValidator::visit(ShPtr<ContinueStmt> stmt) {
 	// innermost loop.
 	ShPtr<Statement> innLoop(getInnermostLoop(stmt));
 	if (!innLoop) {
-		validationError("In ", func->getName(), "(), found `", stmt,
-			"` outside of a loop.");
+		std::ostringstream stmtStr;
+		stmtStr << stmt;
+		validationError("In " + func->getName() + "(), found `" + stmtStr.str()
+			+"` outside of a loop.");
 	}
 	OrderedAllVisitor::visit(stmt);
 }

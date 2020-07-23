@@ -4,8 +4,6 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include <iostream>
-
 #include <llvm/IR/PatternMatch.h>
 
 #include "retdec/bin2llvmir/optimizations/idioms/idioms_magicdivmod.h"

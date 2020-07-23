@@ -355,7 +355,7 @@ namespace PeLib
 	**/
 	void ResourceLeaf::rebuild(OutputBuffer& obBuffer, unsigned int uiOffset, unsigned int uiRva, const std::string&) const
 	{
-//		std::cout << std::hex << pad << "Leaf: " << uiOffset << std::endl;
+//		Log::debug() << std::hex << pad << "Leaf: " << uiOffset << std::endl;
 
 //		obBuffer << entry.OffsetToData;
 //		obBuffer << uiOffset;
@@ -374,7 +374,7 @@ namespace PeLib
 
 			obBuffer.insert(entry.OffsetToData - uiRva + i, m_data[i]);
 		}
-//		std::cout << "LeafChild: " << std::endl;
+//		Log::debug() << "LeafChild: " << std::endl;
 	}
 
 	/**
@@ -537,20 +537,20 @@ namespace PeLib
 	**/
 	void ResourceNode::rebuild(OutputBuffer& obBuffer, unsigned int uiOffset, unsigned int uiRva, const std::string& pad) const
 	{
-/*		std::cout << std::hex << pad << uiOffset << std::endl;
+/*		Log::debug() << std::hex << pad << uiOffset << std::endl;
 
-		std::cout << std::hex << pad << "header.Characteristics: " << header.Characteristics << std::endl;
-		std::cout << std::hex << pad << "header.TimeDateStamp: " << header.TimeDateStamp << std::endl;
-		std::cout << std::hex << pad << "header.MajorVersion: "  << header.MajorVersion << std::endl;
-		std::cout << std::hex << pad << "header.MinorVersion: "  << header.MinorVersion << std::endl;
-		std::cout << std::hex << pad << "header.NumberOfNamedEntries: "  << header.NumberOfNamedEntries << std::endl;
-		std::cout << std::hex << pad << "header.NumberOfIdEntries: "  << header.NumberOfIdEntries << std::endl;
+		Log::debug() << std::hex << pad << "header.Characteristics: " << header.Characteristics << std::endl;
+		Log::debug() << std::hex << pad << "header.TimeDateStamp: " << header.TimeDateStamp << std::endl;
+		Log::debug() << std::hex << pad << "header.MajorVersion: "  << header.MajorVersion << std::endl;
+		Log::debug() << std::hex << pad << "header.MinorVersion: "  << header.MinorVersion << std::endl;
+		Log::debug() << std::hex << pad << "header.NumberOfNamedEntries: "  << header.NumberOfNamedEntries << std::endl;
+		Log::debug() << std::hex << pad << "header.NumberOfIdEntries: "  << header.NumberOfIdEntries << std::endl;
 */
 		obBuffer.insert(uiOffset, header.Characteristics);
 		obBuffer.insert(uiOffset + 4, header.TimeDateStamp);
 		obBuffer.insert(uiOffset + 8, header.MajorVersion);
 		obBuffer.insert(uiOffset + 10, header.MinorVersion);
-		//std::cout << pad << "Children: " << children.size() << std::endl;
+		//Log::debug() << pad << "Children: " << children.size() << std::endl;
 		obBuffer.insert(uiOffset + 12, header.NumberOfNamedEntries);
 		obBuffer.insert(uiOffset + 14, header.NumberOfIdEntries);
 
@@ -971,7 +971,7 @@ namespace PeLib
 	{
 		if (children.size())
 		{
-			std::cout << std::accumulate(children.begin(), children.end(), 0, accumulate<ResourceChild>) << std::endl;
+			Log::debug() << std::accumulate(children.begin(), children.end(), 0, accumulate<ResourceChild>) << std::endl;
 			return PELIB_IMAGE_RESOURCE_DIRECTORY::size()
 					 + std::accumulate(children.begin(), children.end(), 0, accumulate<ResourceChild>);
 		}
@@ -1072,7 +1072,7 @@ namespace PeLib
 	{
 		OutputBuffer obBuffer(vBuffer);
 		unsigned int offs = 0;
-//		std::cout << "Root: " << m_rnRoot.children.size() << std::endl;
+//		Log::debug() << "Root: " << m_rnRoot.children.size() << std::endl;
 		m_rnRoot.rebuild(obBuffer, offs, uiRva, "");
 	}
 
@@ -1434,10 +1434,10 @@ namespace PeLib
 	unsigned int ResourceDirectory::getNumberOfResources(std::uint32_t dwId) const
 	{
 //		std::vector<ResourceChild>::const_iterator IterD = m_rnRoot.children.begin();
-//		std::cout << dwId << std::endl;
+//		Log::debug() << dwId << std::endl;
 //		while (IterD != m_rnRoot.children.end())
 //		{
-//			std::cout << IterD->entry.irde.Name << std::endl;
+//			Log::debug() << IterD->entry.irde.Name << std::endl;
 //			++IterD;
 //		}
 

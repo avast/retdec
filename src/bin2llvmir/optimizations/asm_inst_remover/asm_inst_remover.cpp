@@ -5,8 +5,6 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include <iostream>
-
 #include "retdec/bin2llvmir/optimizations/asm_inst_remover/asm_inst_remover.h"
 #include "retdec/bin2llvmir/providers/asm_instruction.h"
 #include "retdec/bin2llvmir/providers/names.h"

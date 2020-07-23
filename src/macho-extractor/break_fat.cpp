@@ -4,7 +4,6 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include <iostream>
 #include <fstream>
 
 #include <llvm/Support/Path.h>
@@ -13,6 +12,7 @@
 
 #include "retdec/macho-extractor/break_fat.h"
 #include "retdec/utils/conversion.h"
+#include "retdec/utils/io/log.h"
 #include "retdec/utils/string.h"
 
 using namespace llvm;
@@ -21,6 +21,7 @@ using namespace llvm::object;
 using namespace llvm::sys;
 using namespace rapidjson;
 using namespace retdec::utils;
+using namespace retdec::utils::io;
 
 namespace {
 
@@ -337,7 +338,7 @@ bool BreakMachOUniversal::listArchitectures(
 	// Write warning when --object option is used on non-archive target.
 	if(!isStatic && withObjects)
 	{
-		std::cerr << "Warning: input file is not an archive! (--objects)\n";
+		Log::error() << Log::Warning << "input file is not an archive! (--objects)\n";
 	}
 
 	return output.good();

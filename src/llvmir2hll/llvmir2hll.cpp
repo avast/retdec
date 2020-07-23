@@ -1,13 +1,13 @@
 
 #include <algorithm>
-#include <iostream>
 #include <fstream>
 #include <memory>
 
 #include "retdec/llvmir2hll/llvmir2hll.h"
-#include "retdec/llvm-support/diagnostics.h"
+#include "retdec/utils/io/log.h"
 
 using namespace llvm;
+using namespace retdec::utils::io;
 using retdec::llvmir2hll::ShPtr;
 using retdec::utils::hasItem;
 using retdec::utils::joinStrings;
@@ -50,7 +50,7 @@ std::unique_ptr<llvm::ToolOutputFile> getOutputStream(
 	);
 	if (ec)
 	{
-		errs() << ec.message() << '\n';
+		Log::error() << ec.message() << '\n';
 		return {};
 	}
 	return out;
@@ -90,21 +90,18 @@ void printErrorUnsupportedObject(
 	std::string supportedObjects(getListOfSupportedObjects<FactoryType>());
 	if (!supportedObjects.empty())
 	{
-		retdec::llvm_support::printErrorMessage(
-				"Invalid name of the ",
-				typeOfObjectsSingular,
-				" (supported names are: ",
-				supportedObjects,
-				")."
-		);
+		Log::error() << Log::Error
+			<< "Invalid name of the " << typeOfObjectsSingular
+			<< " (supported names are: " << supportedObjects << ")."
+			<< std::endl;
 	}
 	else
 	{
-		retdec::llvm_support::printErrorMessage(
-				"There are no available ",
-				typeOfObjectsPlural,
-				". Please SHIT, recompile the backend and try it again."
-		);
+		Log::error() << Log::Error
+				<< "There are no available "
+				<< typeOfObjectsPlural
+				<< ". Please SHIT, recompile the backend and try it again."
+			<< std::endl;
 	}
 }
 
@@ -152,7 +149,7 @@ void LlvmIr2Hll::getAnalysisUsage(llvm::AnalysisUsage &au) const
 
 bool LlvmIr2Hll::runOnModule(llvm::Module &m)
 {
-	llvm_support::printPhase("initialization", Debug);
+	Log::phase("initialization");
 
 	bool decompilationShouldContinue = initialize(m);
 	if (!decompilationShouldContinue)
@@ -160,7 +157,7 @@ bool LlvmIr2Hll::runOnModule(llvm::Module &m)
 		return false;
 	}
 
-	llvm_support::printPhase("conversion of LLVM IR into BIR", Debug);
+	Log::phase("conversion of LLVM IR into BIR");
 	decompilationShouldContinue = convertLLVMIRToBIR();
 	if (!decompilationShouldContinue)
 	{
@@ -169,10 +166,7 @@ bool LlvmIr2Hll::runOnModule(llvm::Module &m)
 
 	if (!globalConfig->parameters.isBackendKeepLibraryFuncs())
 	{
-		llvm_support::printPhase(
-				"removing functions from standard libraries",
-				Debug
-		);
+		Log::phase("removing functions from standard libraries");
 		removeLibraryFuncs();
 	}
 
@@ -181,94 +175,73 @@ bool LlvmIr2Hll::runOnModule(llvm::Module &m)
 	// the conversion of LLVM IR to BIR is not perfect, so it may introduce
 	// unreachable code. This causes problems later during optimizations
 	// because the code exists in BIR, but not in a CFG.
-	llvm_support::printPhase(
-			"removing code that is not reachable in a CFG",
-			Debug
-	);
+	Log::phase("removing code that is not reachable in a CFG");
 	removeCodeUnreachableInCFG();
 
-	llvm_support::printPhase("signed/unsigned types fixing", Debug);
+	Log::phase("signed/unsigned types fixing");
 	fixSignedUnsignedTypes();
 
-	llvm_support::printPhase(
-			"converting LLVM intrinsic functions to standard functions",
-			Debug
-	);
+	Log::phase("converting LLVM intrinsic functions to standard functions");
 	convertLLVMIntrinsicFunctions();
 
 	if (resModule->isDebugInfoAvailable())
 	{
-		llvm_support::printPhase("obtaining debug information", Debug);
+		Log::phase("obtaining debug information");
 		obtainDebugInfo();
 	}
 
 	if (!globalConfig->parameters.isBackendNoOpts())
 	{
-		llvm_support::printPhase(
-				"alias analysis [" + aliasAnalysis->getId() + "]",
-				Debug
-		);
+		Log::phase("alias analysis [" + aliasAnalysis->getId() + "]");
 		initAliasAnalysis();
 
-		llvm_support::printPhase(
-				"optimizations [" + getTypeOfRunOptimizations()	+ "]",
-				Debug
-		);
+		Log::phase("optimizations [" + getTypeOfRunOptimizations()	+ "]");
 		runOptimizations();
 	}
 
 	if (!globalConfig->parameters.isBackendNoVarRenaming())
 	{
-		llvm_support::printPhase(
-				"variable renaming [" + varRenamer->getId() + "]",
-				Debug
-		);
+		Log::phase("variable renaming [" + varRenamer->getId() + "]");
 		renameVariables();
 	}
 
 	if (!globalConfig->parameters.isBackendNoSymbolicNames())
 	{
-		llvm_support::printPhase(
-				"converting constants to symbolic names",
-				Debug
-		);
+		Log::phase("converting constants to symbolic names");
 		convertConstantsToSymbolicNames();
 	}
 
 	if (ValidateModule)
 	{
-		llvm_support::printPhase("module validation", Debug);
+		Log::phase("module validation");
 		validateResultingModule();
 	}
 
 	if (!FindPatterns.empty())
 	{
-		llvm_support::printPhase("finding patterns", Debug);
+		Log::phase("finding patterns");
 		findPatterns();
 	}
 
 	if (globalConfig->parameters.isBackendEmitCfg())
 	{
-		llvm_support::printPhase("emission of control-flow graphs", Debug);
+		Log::phase("emission of control-flow graphs");
 		emitCFGs();
 	}
 
 	if (globalConfig->parameters.isBackendEmitCg())
 	{
-		llvm_support::printPhase("emission of a call graph", Debug);
+		Log::phase("emission of a call graph");
 		emitCG();
 	}
 
-	llvm_support::printPhase(
-			"emission of the target code [" + hllWriter->getId() + "]",
-			Debug
-	);
+	Log::phase("emission of the target code [" + hllWriter->getId() + "]");
 	emitTargetHLLCode();
 
-	llvm_support::printPhase("finalization", Debug);
+	Log::phase("finalization");
 	finalize();
 
-	llvm_support::printPhase("cleanup", Debug);
+	Log::phase("cleanup");
 	cleanup();
 
 	return false;
@@ -293,9 +266,9 @@ bool LlvmIr2Hll::initialize(llvm::Module &m)
 	// Instantiate the requested HLL writer and make sure it exists. We need to
 	// explicitly specify template parameters because raw_pwrite_stream has
 	// a private copy constructor, so it needs to be passed by reference.
-	llvm_support::printSubPhase(
-			"creating the used HLL writer [" + TargetHLL + "]",
-			Debug
+	Log::phase(
+		"creating the used HLL writer [" + TargetHLL + "]",
+		Log::SubPhase
 	);
 
 	// Output stream into which the generated code will be emitted.
@@ -325,9 +298,9 @@ bool LlvmIr2Hll::initialize(llvm::Module &m)
 	}
 
 	// Instantiate the requested alias analysis and make sure it exists.
-	llvm_support::printSubPhase(
-			"creating the used alias analysis [" + oAliasAnalysis + "]",
-			Debug
+	Log::phase(
+		"creating the used alias analysis [" + oAliasAnalysis + "]",
+		Log::SubPhase
 	);
 	aliasAnalysis = llvmir2hll::AliasAnalysisFactory::getInstance().createObject(
 		oAliasAnalysis
@@ -342,10 +315,10 @@ bool LlvmIr2Hll::initialize(llvm::Module &m)
 
 	// Instantiate the requested obtainer of information about function
 	// calls and make sure it exists.
-	llvm_support::printSubPhase(
-			"creating the used call info obtainer ["
-			+ globalConfig->parameters.getBackendCallInfoObtainer() + "]",
-			Debug
+	Log::phase(
+		"creating the used call info obtainer ["
+		+ globalConfig->parameters.getBackendCallInfoObtainer() + "]",
+		Log::SubPhase
 	);
 	cio = llvmir2hll::CallInfoObtainerFactory::getInstance().createObject(
 		globalConfig->parameters.getBackendCallInfoObtainer()
@@ -360,10 +333,10 @@ bool LlvmIr2Hll::initialize(llvm::Module &m)
 
 	// Instantiate the requested evaluator of arithmetical expressions and make
 	// sure it exists.
-	llvm_support::printSubPhase(
-			"creating the used evaluator of arithmetical expressions [" +
-			oArithmExprEvaluator + "]",
-			Debug
+	Log::phase(
+		"creating the used evaluator of arithmetical expressions [" +
+		oArithmExprEvaluator + "]",
+		Log::SubPhase
 	);
 	auto& aeef = llvmir2hll::ArithmExprEvaluatorFactory::getInstance();
 	arithmExprEvaluator = aeef.createObject(oArithmExprEvaluator);
@@ -378,9 +351,9 @@ bool LlvmIr2Hll::initialize(llvm::Module &m)
 
 	// Instantiate the requested variable names generator and make sure it
 	// exists.
-	llvm_support::printSubPhase(
-			"creating the used variable names generator [" + oVarNameGen + "]",
-			Debug
+	Log::phase(
+		"creating the used variable names generator [" + oVarNameGen + "]",
+		Log::SubPhase
 	);
 	varNameGen = llvmir2hll::VarNameGenFactory::getInstance().createObject(
 		oVarNameGen,
@@ -395,10 +368,10 @@ bool LlvmIr2Hll::initialize(llvm::Module &m)
 	}
 
 	// Instantiate the requested variable renamer and make sure it exists.
-	llvm_support::printSubPhase(
-			"creating the used variable renamer ["
-			+ globalConfig->parameters.getBackendVarRenamer() + "]",
-			Debug
+	Log::phase(
+		"creating the used variable renamer ["
+		+ globalConfig->parameters.getBackendVarRenamer() + "]",
+		Log::SubPhase
 	);
 	varRenamer = llvmir2hll::VarRenamerFactory::getInstance().createObject(
 			globalConfig->parameters.getBackendVarRenamer(),
@@ -445,18 +418,18 @@ void LlvmIr2Hll::createSemanticsFromParameter()
 	if (oSemantics.empty() || oSemantics == "-")
 	{
 		// Do no use any semantics.
-		llvm_support::printSubPhase(
-				"creating the used semantics [none]",
-				Debug
+		Log::phase(
+			"creating the used semantics [none]",
+			Log::SubPhase
 		);
 		semantics = llvmir2hll::DefaultSemantics::create();
 	}
 	else
 	{
 		// Use the given semantics.
-		llvm_support::printSubPhase(
-				"creating the used semantics [" + oSemantics + "]",
-				Debug
+		Log::phase(
+			"creating the used semantics [" + oSemantics + "]",
+			Log::SubPhase
 		);
 		semantics = llvmir2hll::CompoundSemanticsBuilder::build(
 				split(oSemantics, ',')
@@ -474,9 +447,9 @@ void LlvmIr2Hll::createSemanticsFromLLVMIR()
 	std::string usedSemantics("libc,gcc-general,win-api");
 
 	// Use the list to create the semantics.
-	llvm_support::printSubPhase(
-			"creating the used semantics [" + usedSemantics + "]",
-			Debug
+	Log::phase(
+		"creating the used semantics [" + usedSemantics + "]",
+		Log::SubPhase
 	);
 	semantics = llvmir2hll::CompoundSemanticsBuilder::build(
 			split(usedSemantics, ',')
@@ -493,12 +466,12 @@ bool LlvmIr2Hll::loadConfig()
 	// Currently, we always use the JSON config.
 	if (globalConfig == nullptr)
 	{
-		llvm_support::printSubPhase("creating a new config", Debug);
+		Log::phase("creating a new config", Log::SubPhase);
 		config = llvmir2hll::JSONConfig::empty();
 		return true;
 	}
 
-	llvm_support::printSubPhase("loading the input config", Debug);
+	Log::phase("loading the input config", Log::SubPhase);
 	try
 	{
 		config = llvmir2hll::JSONConfig::fromString(
@@ -508,9 +481,9 @@ bool LlvmIr2Hll::loadConfig()
 	}
 	catch (const llvmir2hll::ConfigError &ex)
 	{
-		llvm_support::printErrorMessage(
-			"Loading of the config failed: " + ex.getMessage() + "."
-		);
+		Log::error() << Log::Error
+			<< "Loading of the config failed: " << ex.getMessage() << "."
+			<< std::endl;
 		return false;
 	}
 }
@@ -570,7 +543,7 @@ void LlvmIr2Hll::removeLibraryFuncs()
 		llvmir2hll::sortByName(removedFuncs);
 		for (const auto &func : removedFuncs)
 		{
-			llvm_support::printSubPhase("removing " + func->getName() + "()");
+			Log::phase("removing " + func->getName() + "()");
 		}
 	}
 }
@@ -667,7 +640,7 @@ void LlvmIr2Hll::validateResultingModule()
 	std::sort(regValidatorIDs.begin(), regValidatorIDs.end());
 	for (const auto &id : regValidatorIDs)
 	{
-		llvm_support::printSubPhase("running " + id + "Validator", Debug);
+		Log::phase("running " + id + "Validator", Log::SubPhase);
 		ShPtr<llvmir2hll::Validator> validator(
 				llvmir2hll::ValidatorFactory::getInstance().createObject(id)
 		);
@@ -738,9 +711,10 @@ void LlvmIr2Hll::emitCFGs()
 {
 	if (globalConfig->parameters.getOutputFile().empty())
 	{
-		llvm_support::printErrorMessage(
-				"Output file not set, cannot generate output CFG files."
-		);
+		Log::error() << Log::Error
+			<< "Output file not set, cannot generate output CFG files."
+			<< std::endl;
+
 		return;
 	}
 
@@ -777,9 +751,9 @@ void LlvmIr2Hll::emitCFGs()
 		std::ofstream out(fileName.c_str());
 		if (!out)
 		{
-			llvm_support::printErrorMessage(
-					"Cannot open " + fileName + " for writing."
-			);
+			Log::error() << Log::Error
+				<< "Cannot open " + fileName + " for writing."
+				<< std::endl;
 			return;
 		}
 		// Create a CFG for the current function and emit it into the opened
@@ -808,9 +782,9 @@ void LlvmIr2Hll::emitCG()
 {
 	if (globalConfig->parameters.getOutputFile().empty())
 	{
-		llvm_support::printErrorMessage(
-				"Output file not set, cannot generate output CG file."
-		);
+		Log::error() << Log::Error
+			<< "Output file not set, cannot generate output CG file."
+			<< std::endl;
 		return;
 	}
 
@@ -838,9 +812,9 @@ void LlvmIr2Hll::emitCG()
 	std::ofstream out(fileName.c_str());
 	if (!out)
 	{
-		llvm_support::printErrorMessage(
-				"Cannot open " + fileName + " for writing."
-		);
+		Log::error() << Log::Error
+			<< "Cannot open " + fileName + " for writing."
+			<< std::endl;
 		return;
 	}
 
@@ -925,8 +899,9 @@ LlvmIr2Hll::instantiatePatternFinders(
 		);
 		if (!pf && Debug)
 		{
-			llvm_support::printWarningMessage(
-				"the requested pattern finder '" + pfId + "' does not exist");
+			Log::error() << Log::Warning
+				<< "the requested pattern finder '" + pfId + "' does not exist"
+				<< std::endl;
 		}
 		else
 		{
@@ -945,7 +920,7 @@ LlvmIr2Hll::instantiatePatternFinderRunner() const
 	if (Debug)
 	{
 		return ShPtr<llvmir2hll::PatternFinderRunner>(
-			new llvmir2hll::CLIPatternFinderRunner(llvm::errs()));
+			new llvmir2hll::CLIPatternFinderRunner(Log::get(Log::Type::Error)));
 	}
 	return ShPtr<llvmir2hll::PatternFinderRunner>(
 		new llvmir2hll::NoActionPatternFinderRunner()

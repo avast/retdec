@@ -5,22 +5,23 @@
  */
 
 #include <cctype>
-#include <iostream>
 #include <vector>
 
 #include "retdec/fileformat/format_factory.h"
 #include "retdec/utils/conversion.h"
 #include "retdec/utils/string.h"
+#include "retdec/utils/io/log.h"
 
 using namespace retdec::fileformat;
 using namespace retdec::utils;
+using namespace retdec::utils::io;
 
 /**
  * Print usage.
  */
 void printUsage()
 {
-	std::cout <<
+	Log::info() <<
 	"getsig - generator of YARA tool signatures\n\n"
 	"Program takes executable files, compares their content at given\n"
 	"offset and prints signature representing contents of all files.\n\n"
@@ -93,7 +94,7 @@ struct Options
 int printError(
 		const std::string& message)
 {
-	std::cerr << "Error: " << message << ".\n";
+	Log::error() << Log::Error << message << ".\n";
 	return 1;
 }
 
@@ -104,7 +105,7 @@ int printError(
 void printWarning(
 		const std::string& message)
 {
-	std::cerr << "Warning: " << message << ".\n";
+	Log::error() << Log::Warning << message << ".\n";
 }
 
 /**
@@ -121,7 +122,7 @@ std::string getParamOrDie(std::vector<std::string> &argv, std::size_t &i)
 	}
 	else
 	{
-		std::cerr << "Error: missing argument value.\n\n";
+		Log::error() << Log::Error << "missing argument value.\n\n";
 		printUsage();
 		exit(1);
 	}
@@ -512,7 +513,7 @@ int main(int argc, char** argv) {
 
 	// create detection rule
 	const auto rule = getYaraRule(signature, format, options);
-	std::cout << rule;
+	Log::info() << rule;
 
 	if (!options.outputFile.empty())
 	{

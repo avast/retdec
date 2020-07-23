@@ -4,10 +4,9 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include <iostream>
-
 #include "retdec/utils/conversion.h"
 #include "retdec/utils/string.h"
+#include "retdec/utils/io/log.h"
 #include "retdec/fileformat/utils/conversions.h"
 #include "retdec/serdes/pattern.h"
 #include "retdec/serdes/std.h"
@@ -17,6 +16,7 @@
 
 using namespace retdec;
 using namespace retdec::utils;
+using namespace retdec::utils::io;
 using namespace retdec::cpdetect;
 using namespace retdec::fileformat;
 
@@ -1285,7 +1285,7 @@ bool JsonPresentation::present()
 	presentIterativeSubtitle(writer, StringsJsonGetter(fileinfo));
 
 	writer.EndObject();
-	std::cout << sb.GetString() << std::endl;
+	Log::info() << sb.GetString() << std::endl;
 
 	return true;
 }

@@ -5,7 +5,6 @@ if(NOT TARGET retdec::llvmir2hll)
         COMPONENTS
             config
             utils
-            llvm-support
             rapidjson
             llvm
     )

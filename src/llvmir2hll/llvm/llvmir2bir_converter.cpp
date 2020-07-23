@@ -6,7 +6,6 @@
 
 #include <llvm/IR/Module.h>
 
-#include "retdec/llvm-support/diagnostics.h"
 #include "retdec/llvmir2hll/config/config.h"
 #include "retdec/llvmir2hll/ir/expression.h"
 #include "retdec/llvmir2hll/ir/function.h"
@@ -20,8 +19,9 @@
 #include "retdec/llvmir2hll/support/debug.h"
 #include "retdec/llvmir2hll/utils/ir.h"
 #include "retdec/llvmir2hll/utils/string.h"
+#include "retdec/utils/io/log.h"
 
-using namespace retdec::llvm_support;
+using namespace retdec::utils::io;
 
 namespace retdec {
 namespace llvmir2hll {
@@ -148,7 +148,7 @@ ShPtr<Expression> LLVMIR2BIRConverter::convertGlobalVariableInitializer(
 */
 void LLVMIR2BIRConverter::convertAndAddGlobalVariables() {
 	if (enableDebug) {
-		printSubPhase("converting global variables");
+		Log::phase("converting global variables", Log::SubPhase);
 	}
 
 	for (auto &globVar: llvmModule->globals()) {
@@ -198,7 +198,7 @@ ShPtr<Function> LLVMIR2BIRConverter::convertFuncDeclaration(
 void LLVMIR2BIRConverter::updateFuncToDefinition(llvm::Function &func) {
 	auto name = func.getName();
 	if (enableDebug) {
-		printSubPhase("converting function " + name.str());
+		Log::phase("converting function " + name.str(), Log::SubPhase);
 	}
 
 	auto birFunc = resModule->getFuncByName(name);

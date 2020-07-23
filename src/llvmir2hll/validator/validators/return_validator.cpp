@@ -37,14 +37,18 @@ std::string ReturnValidator::getId() const {
 void ReturnValidator::visit(ShPtr<ReturnStmt> stmt) {
 	// If the function is non-void, there has to be a return value.
 	if (!isa<VoidType>(func->getRetType()) && !stmt->getRetVal()) {
-		validationError("In ", func->getName(), "(), which is non-void, ",
-			"found a ReturnStmt `", stmt, "` without a return value.");
+		std::ostringstream stmtStr;
+		stmtStr << stmt;
+		validationError("In "+func->getName()+"(), which is non-void, "
+			"found a ReturnStmt `"+stmtStr.str()+"` without a return value.");
 	}
 
 	// If the function is void, there cannot be a return value.
 	if (isa<VoidType>(func->getRetType()) && stmt->getRetVal()) {
-		validationError("In ", func->getName(), "(), which returns void, ",
-			"found a ReturnStmt `", stmt, "` with a return value.");
+		std::ostringstream stmtStr;
+		stmtStr << stmt;
+		validationError("In "+func->getName()+"(), which returns void, "
+			"found a ReturnStmt `"+stmtStr.str()+"` with a return value.");
 	}
 
 	OrderedAllVisitor::visit(stmt);
