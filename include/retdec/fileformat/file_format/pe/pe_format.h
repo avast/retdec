@@ -17,10 +17,7 @@
 #include "retdec/fileformat/types/dotnet_types/dotnet_class.h"
 #include "retdec/fileformat/types/visual_basic/visual_basic_info.h"
 #include "retdec/pelib/PeFile.h"
-
-// Forward declare OpenSSL structures used in this header.
-typedef struct pkcs7_st PKCS7;
-typedef struct evp_md_st EVP_MD;
+#include "openssl/pkcs7.h"
 
 namespace retdec {
 namespace fileformat {
