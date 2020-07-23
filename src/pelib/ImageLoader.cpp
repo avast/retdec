@@ -445,8 +445,6 @@ uint32_t PeLib::ImageLoader::getFileOffsetFromRva(uint32_t rva) const
 				// For multi-section images, real pointer to raw data is aligned down to sector size
 				if(optionalHeader.SectionAlignment >= PELIB_PAGE_SIZE)
 					realPointerToRawData = realPointerToRawData & ~(PELIB_SECTOR_SIZE - 1);
-				if(optionalHeader.SectionAlignment != 0)
-					sectionRvaStart = AlignToSize(sectHdr.VirtualAddress, optionalHeader.SectionAlignment);
 
 				// Is the RVA inside that section?
 				if(sectionRvaStart <= rva && rva < (sectionRvaStart + virtualSize))
