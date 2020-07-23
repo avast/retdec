@@ -113,10 +113,6 @@ namespace PeLib
 					if(!imageLoader.readImage(&rec.delayedImport, rva + i, sizeof(PELIB_IMAGE_DELAY_LOAD_DESCRIPTOR)))
 						break;
 
-					// Valid delayed import entry starts either with 0 or 0x01
-					if(rec.delayedImport.Attributes & 0xFFFF0000)
-						break;
-
 					// Check for the termination entry
 					if(isTerminationEntry(rec.delayedImport))
 						break;
@@ -127,6 +123,10 @@ namespace PeLib
 					if(imageLoader.getImageBitability() == 32 && (rec.delayedImport.Attributes & PELIB_DELAY_ATTRIBUTE_V2) == 0)
 						normalize32BitDelayImport(rec.delayedImport, (std::uint32_t)imageBase);
 
+					// Stop on blatantly invalid delay import entries (old PELIB behavior)
+					if(rec.delayedImport.DelayImportNameTableRva >= sizeOfImage || rec.delayedImport.DelayImportAddressTableRva >= sizeOfImage)
+						return ERROR_INVALID_FILE;
+
 					// Get name of library
 					imageLoader.readString(rec.Name, rec.delayedImport.NameRva, IMPORT_LIBRARY_MAX_LENGTH);
 
@@ -135,16 +135,16 @@ namespace PeLib
 					//
 
 					std::vector<uint64_t> nameAddresses;
-					std::uint32_t rva = rec.delayedImport.DelayImportNameTableRva;
+					std::uint32_t rva2 = rec.delayedImport.DelayImportNameTableRva;
 
 					for(;;)
 					{
 						std::uint64_t nameAddress;
 
-						// Read single name address
-						if(imageLoader.readPointer(rva, nameAddress) != pointerSize)
-							break;
-						rva += pointerSize;
+						// Read single name address. Also stop processing if the RVA gets out of image
+						if(imageLoader.readPointer(rva2, nameAddress) != pointerSize)
+							return ERROR_INVALID_FILE;
+						rva2 += pointerSize;
 
 						// Value of zero means that this is the end of the bound import name table
 						if(nameAddress == 0)
@@ -157,17 +157,17 @@ namespace PeLib
 					//
 
 					std::vector<uint64_t> funcAddresses;
-					rva = rec.delayedImport.DelayImportAddressTableRva;
+					rva2 = rec.delayedImport.DelayImportAddressTableRva;
 
 					// Read all (VAs) of import names
 					for (std::size_t i = 0; i < nameAddresses.size(); i++)
 					{
 						std::uint64_t funcAddress;
 
-						// Read single name address
-						if(imageLoader.readPointer(rva, funcAddress) != pointerSize)
-							break;
-						rva += pointerSize;
+						// Read single name address. Also stop processing if the RVA gets out of image
+						if(imageLoader.readPointer(rva2, funcAddress) != pointerSize)
+							return ERROR_INVALID_FILE;
+						rva2 += pointerSize;
 
 						// Value of zero means that this is the end of the bound import name table
 						if(funcAddress == 0)

@@ -173,7 +173,7 @@ namespace PeLib
 		std::uint32_t importSize = imageLoader.getDataDirSize(PELIB_IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT);
 		std::uint32_t sizeOfImage = imageLoader.getSizeOfImage();
 
-		if(importRva > sizeOfImage || (importRva > importSize) > sizeOfImage)
+		if(importRva >= sizeOfImage || (importRva + importSize) >= sizeOfImage)
 		{
 			return ERROR_INVALID_FILE;
 		}

@@ -330,11 +330,13 @@ namespace PeLib
 		m_data.clear();
 
 		// No data or invalid leaf
-		if(entry.OffsetToData >= sizeOfImage || entry.OffsetToData + entry.Size > sizeOfImage)
+		if(entry.OffsetToData > sizeOfImage || entry.Size > sizeOfImage)
+			return ERROR_NONE;
+		if((uiRsrcRva + entry.OffsetToData) >= sizeOfImage || (uiRsrcRva + entry.OffsetToData + entry.Size) > sizeOfImage)
 			return ERROR_NONE;
 
-		// Data pointing before resource directory?
-		if((uiRsrcRva + entry.OffsetToData) < uiRsrcRva)
+		// Data range overflow?
+		if((uiRsrcRva + entry.OffsetToData) < uiRsrcRva || (uiRsrcRva + entry.OffsetToData + entry.Size) < uiRsrcRva)
 			return ERROR_NONE;
 
 		// Load the resource data
