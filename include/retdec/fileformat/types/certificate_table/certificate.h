@@ -9,9 +9,6 @@
 
 #include <string>
 
-// Forward declare OpenSSL structures used in this header.
-typedef struct x509_st X509;
-
 namespace retdec {
 namespace fileformat {
 
@@ -39,8 +36,7 @@ class Certificate
 			std::string generationQualifier;
 			std::string emailAddress;
 		};
-	private:
-		X509 *certImpl;
+	public:
 		std::string validSince;
 		std::string validUntil;
 		std::string publicKey;
@@ -54,16 +50,7 @@ class Certificate
 		Attributes subject;
 		Attributes issuer;
 
-		void load();
-		void loadValidity();
-		void loadPublicKey();
-		void loadSignatureAlgorithm();
-		void loadSerialNumber();
-		void loadIssuerAndSubject();
-		void calculateHashes();
 	public:
-		Certificate(X509 *cert);
-
 		/// @name Getters
 		/// @{
 		const std::string& getValidSince() const;

@@ -13,8 +13,9 @@
 #include <unordered_set>
 
 #include <openssl/asn1.h>
-#include <openssl/x509.h>
 #include <openssl/evp.h>
+#include <openssl/pem.h>
+#include <openssl/x509.h>
 
 #include "retdec/utils/container.h"
 #include "retdec/utils/conversion.h"
@@ -626,6 +627,171 @@ bool verifySignature(const retdec::fileformat::PeFormat* peFile, PKCS7 *p7)
 		return false;
 
 	return true;
+}
+
+template <typename T, typename Deleter>
+decltype(auto) managedPtr(T* ptr, Deleter deleter)
+{
+	return std::unique_ptr<T, Deleter>(ptr, deleter);
+}
+
+std::string parseDateTime(ASN1_TIME* dateTime)
+{
+	if (ASN1_TIME_check(dateTime) == 0)
+		return {};
+
+	auto memBio = managedPtr(BIO_new(BIO_s_mem()), &BIO_free);
+	ASN1_TIME_print(memBio.get(), dateTime);
+
+	BUF_MEM* bioMemPtr;
+	BIO_ctrl(memBio.get(), BIO_C_GET_BUF_MEM_PTR, 0, reinterpret_cast<char*>(&bioMemPtr));
+
+	return std::string(bioMemPtr->data, bioMemPtr->length);
+}
+
+std::string parsePublicKey(BIO *bio)
+{
+	std::string key;
+	std::vector<char> tmp(100);
+
+	BIO_gets(bio, tmp.data(), 100);
+	if(std::string(tmp.data()) != "-----BEGIN PUBLIC KEY-----\n")
+	{
+		return key;
+	}
+
+	while(true)
+	{
+		BIO_gets(bio, tmp.data(), 100);
+		if(std::string(tmp.data()) == "-----END PUBLIC KEY-----\n")
+		{
+			break;
+		}
+
+		key += tmp.data();
+		key.erase(key.length() - 1, 1); // Remove last character (whitespace)
+	}
+
+	return key;
+}
+
+void parseAttributes(Certificate::Attributes *attributes, X509_NAME *raw)
+{
+	std::size_t numEntries = X509_NAME_entry_count(raw);
+	for(std::size_t i = 0; i < numEntries; ++i)
+	{
+		auto nameEntry = X509_NAME_get_entry(raw, int(i));
+		auto valueObj = X509_NAME_ENTRY_get_data(nameEntry);
+
+		std::string key = OBJ_nid2sn(
+				OBJ_obj2nid(X509_NAME_ENTRY_get_object(nameEntry))
+		);
+		std::string value = std::string(
+				reinterpret_cast<const char*>(valueObj->data),
+				valueObj->length
+		);
+
+		if (key == "C") attributes->country = value;
+		else if (key == "O") attributes->organization = value;
+		else if (key == "OU") attributes->organizationalUnit = value;
+		else if (key == "dnQualifier") attributes->nameQualifier = value;
+		else if (key == "ST") attributes->state = value;
+		else if (key == "CN") attributes->commonName = value;
+		else if (key == "serialNumber") attributes->serialNumber = value;
+		else if (key == "L") attributes->locality = value;
+		else if (key == "title") attributes->title = value;
+		else if (key == "SN") attributes->surname = value;
+		else if (key == "GN") attributes->givenName = value;
+		else if (key == "initials") attributes->initials = value;
+		else if (key == "pseudonym") attributes->pseudonym = value;
+		else if (key == "generationQualifier") attributes->generationQualifier = value;
+		else if (key == "emailAddress") attributes->emailAddress = value;
+	}
+}
+
+retdec::fileformat::Certificate x509toCert(X509* cert)
+{
+	Certificate c;
+
+	c.validSince = parseDateTime(X509_get_notBefore(cert));
+	c.validUntil = parseDateTime(X509_get_notAfter(cert));
+
+	if (auto pubKey = managedPtr(X509_get_pubkey(cert), &EVP_PKEY_free))
+	{
+		auto memBio = managedPtr(BIO_new(BIO_s_mem()), &BIO_free);
+		PEM_write_bio_PUBKEY(memBio.get(), pubKey.get());
+		c.publicKey = parsePublicKey(memBio.get());
+		c.publicKeyAlgo = OBJ_nid2sn(EVP_PKEY_base_id(pubKey.get()));
+	}
+
+	c.signatureAlgo = OBJ_nid2sn(X509_get_signature_nid(cert));
+
+	if (auto sn = X509_get_serialNumber(cert))
+	{
+		retdec::utils::bytesToHexString(
+				sn->data,
+				sn->length,
+				c.serialNumber,
+				0,
+				0,
+				false
+		);
+	}
+
+	if (auto subjectName = X509_get_subject_name(cert))
+	{
+		auto subjectNameOneline = managedPtr(
+				X509_NAME_oneline(subjectName, nullptr, 0),
+				&free
+		);
+		c.subjectRaw = subjectNameOneline.get();
+
+		parseAttributes(&c.subject, subjectName);
+	}
+
+	if (auto issuerName = X509_get_issuer_name(cert))
+	{
+		auto issuerNameOneline = managedPtr(
+				X509_NAME_oneline(issuerName, nullptr, 0),
+				&free
+		);
+		c.issuerRaw = issuerNameOneline.get();
+
+		parseAttributes(&c.issuer, issuerName);
+	}
+
+	std::vector<char> tmp(0x2000);
+	auto memBio = managedPtr(BIO_new(BIO_s_mem()), &BIO_free);
+
+	i2d_X509_bio(memBio.get(), cert);
+	std::size_t certLen = BIO_read(memBio.get(), tmp.data(), int(tmp.size()));
+	tmp.resize(certLen);
+
+	std::vector<std::uint8_t> sha1Bytes(
+			SHA_DIGEST_LENGTH),
+			sha256Bytes(SHA256_DIGEST_LENGTH
+	);
+	SHA1(reinterpret_cast<const unsigned char*>(
+			tmp.data()),
+			tmp.size(),
+			sha1Bytes.data()
+	);
+	SHA256(reinterpret_cast<const unsigned char*>(
+			tmp.data()),
+			tmp.size(),
+			sha256Bytes.data()
+	);
+
+	retdec::utils::bytesToHexString(sha1Bytes, c.sha1Digest, 0, 0, false);
+	retdec::utils::bytesToHexString(
+			sha256Bytes,
+			c.sha256Digest,
+			0,
+			0,
+			false
+	);
+
+	return c;
 }
 
 } // anonymous namespace
@@ -2045,7 +2211,7 @@ void PeFormat::loadCertificates()
 			certificateTable = new CertificateTable();
 		}
 
-		Certificate cert(xcert);
+		Certificate cert = x509toCert(xcert);
 		certificateTable->addCertificate(cert);
 
 		// Check if we are at signer or counter-signer certificate and let the certificate table known indices.
