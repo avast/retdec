@@ -173,10 +173,13 @@ namespace PeLib
 		std::uint32_t importSize = imageLoader.getDataDirSize(PELIB_IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT);
 		std::uint32_t sizeOfImage = imageLoader.getSizeOfImage();
 
-		if(importRva >= sizeOfImage || (importRva + importSize) >= sizeOfImage)
-		{
+		// Refuse to load blatantly invalid bound import directory
+		if(importSize & 0xFF000000)
 			return ERROR_INVALID_FILE;
-		}
+
+		// Refuse to load too large import directories
+		if((importRva + importSize) < importRva || importRva >= sizeOfImage || (importRva + importSize) >= sizeOfImage)
+			return ERROR_INVALID_FILE;
 
 		std::vector<unsigned char> vBimpDir(importSize);
 		imageLoader.readImage(reinterpret_cast<char*>(vBimpDir.data()), importRva, importSize);

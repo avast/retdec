@@ -53,11 +53,13 @@ namespace PeLib
 		std::uint32_t sizeOfImage = imageLoader.getSizeOfImage();
 		int fileError = ERROR_NONE;
 
-		// Check whether the IAT is outside the image
-		if(iatRva >= sizeOfImage)
-		{
+		// Refuse to load blatantly invalid IAT
+		if(iatSize & 0xFF000000)
 			return ERROR_INVALID_FILE;
-		}
+
+		// Refuse to load too large IAT directories
+		if((iatRva + iatSize) < iatRva || iatRva >= sizeOfImage || (iatRva + iatSize) >= sizeOfImage)
+			return ERROR_INVALID_FILE;
 
 		// Trim the array size to the size of image
 		if((iatRva + iatSize) > sizeOfImage)

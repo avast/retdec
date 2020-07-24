@@ -623,21 +623,6 @@ namespace PeLib
 		static inline std::size_t size() {return 8;}
 	};
 
-	template<int>
-	struct FieldSizes;
-
-	template<>
-	struct FieldSizes<32>
-	{
-		typedef std::uint32_t VAR4_8;
-	};
-
-	template<>
-	struct FieldSizes<64>
-	{
-		typedef std::uint64_t VAR4_8;
-	};
-
 	struct PELIB_IMAGE_OPTIONAL_HEADER32
 	{
 		std::uint16_t Magic;
