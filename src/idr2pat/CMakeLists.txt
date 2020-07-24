@@ -12,7 +12,7 @@ target_link_libraries(idr2pat
 
 set_target_properties(idr2pat
 	PROPERTIES
-		OUTPUT_NAME "retdec-idb2pat"
+		OUTPUT_NAME "retdec-idr2pat"
 )
 
 install(TARGETS idr2pat
