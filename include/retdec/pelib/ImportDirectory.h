@@ -648,7 +648,7 @@ namespace PeLib
 				m_occupiedAddresses.back().second += 1;
 
 			// Push the import descriptor into the vector
-			vOldIidCurr.push_back(iidCurr);
+			vOldIidCurr.push_back(std::move(iidCurr));
 		}
 
 		// Space occupied by import descriptors

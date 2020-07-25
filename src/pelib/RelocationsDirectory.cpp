@@ -149,7 +149,7 @@ namespace PeLib
 				}
 
 				// Push the data to the relocations vector
-				m_vRelocations.push_back(ibrCurr);
+				m_vRelocations.push_back(std::move(ibrCurr));
 			}
 		}
 	}
