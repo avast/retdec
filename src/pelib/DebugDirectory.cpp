@@ -27,7 +27,7 @@ namespace PeLib
 		std::size_t rva = imageLoader.getDataDirRva(PELIB_IMAGE_DIRECTORY_ENTRY_DEBUG);
 		std::size_t size = imageLoader.getDataDirSize(PELIB_IMAGE_DIRECTORY_ENTRY_DEBUG);
 		std::size_t sizeOfImage = imageLoader.getSizeOfImage();
-		if ((rva + size) > sizeOfImage)
+		if ((rva + size) < rva || (rva + size) > sizeOfImage)
 		{
 			return ERROR_INVALID_FILE;
 		}
@@ -38,7 +38,8 @@ namespace PeLib
 		// For each debug directory, also read its data
 		for(auto & debugEntry : debugInfo)
 		{
-			if ((debugEntry.idd.PointerToRawData >= ulFileSize) ||
+			if ((debugEntry.idd.PointerToRawData + debugEntry.idd.SizeOfData) < debugEntry.idd.PointerToRawData ||
+				(debugEntry.idd.PointerToRawData >= ulFileSize) ||
 				(debugEntry.idd.PointerToRawData + debugEntry.idd.SizeOfData >= ulFileSize))
 			{
 				return ERROR_INVALID_FILE;
