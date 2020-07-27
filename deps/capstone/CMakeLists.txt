@@ -1,91 +1,64 @@
 
+set(CAPSTONE_INSTALL_DIR ${CMAKE_BINARY_DIR}/deps/install/capstone)
+
+set(CAPSTONE_LIB_NAME  ${CMAKE_STATIC_LIBRARY_PREFIX}capstone${CMAKE_STATIC_LIBRARY_SUFFIX})
+set(CAPSTONE_LIB_PNAME ${CMAKE_STATIC_LIBRARY_PREFIX}retdec-capstone${CMAKE_STATIC_LIBRARY_SUFFIX})
+set(CAPSTONE_LIB       ${CAPSTONE_INSTALL_DIR}/lib64/${CAPSTONE_LIB_NAME})
+
 if(CAPSTONE_LOCAL_DIR)
 	message(STATUS "Capstone: using local Capstone directory.")
-
-	ExternalProject_Add(capstone-project
-		DOWNLOAD_COMMAND ""
-		SOURCE_DIR "${CAPSTONE_LOCAL_DIR}"
-		CMAKE_ARGS
-			# This does not work on MSVC, but may be useful on Linux.
-			-DCMAKE_BUILD_TYPE=Release
-			-DCAPSTONE_BUILD_STATIC=ON
-			-DCAPSTONE_BUILD_SHARED=OFF
-			-DCAPSTONE_BUILD_STATIC_RUNTIME=${RETDEC_MSVC_STATIC_RUNTIME}
-			-DCAPSTONE_BUILD_TESTS=OFF
-			-DCAPSTONE_X86_ATT_DISABLE=OFF
-			# Enabled architectures.
-			-DCAPSTONE_ARM_SUPPORT=ON
-			-DCAPSTONE_MIPS_SUPPORT=ON
-			-DCAPSTONE_PPC_SUPPORT=ON
-			-DCAPSTONE_X86_SUPPORT=ON
-			# Disabled architectures.
-			-DCAPSTONE_ARM64_SUPPORT=OFF
-			-DCAPSTONE_M68K_SUPPORT=OFF
-			-DCAPSTONE_SPARC_SUPPORT=OFF
-			-DCAPSTONE_SYSZ_SUPPORT=OFF
-			-DCAPSTONE_XCORE_SUPPORT=OFF
-			-DCAPSTONE_TMS320C64X_SUPPORT=OFF
-			-DCAPSTONE_M680X_SUPPORT=OFF
-			# Force the use of the same compiler as used to build the top-level
-			# project. Otherwise, the external project may pick up a different
-			# compiler, which may result in link errors.
-			"${CMAKE_C_COMPILER_OPTION}"
-			"${CMAKE_CXX_COMPILER_OPTION}"
-			-DCMAKE_POSITION_INDEPENDENT_CODE=${CMAKE_POSITION_INDEPENDENT_CODE}
-		# Patch the Capstone sources.
-		PATCH_COMMAND
-			${CMAKE_COMMAND} -Dcapstone_path=<SOURCE_DIR> -P ${CMAKE_CURRENT_SOURCE_DIR}/patch.cmake
-		# Disable the update step.
-		UPDATE_COMMAND ""
-		# Disable the install step.
-		INSTALL_COMMAND ""
-	)
-	force_configure_step(capstone-project)
+	set(CAPSTONE_SOURCE_DIR "${CAPSTONE_LOCAL_DIR}")
+	set(_CAPSTONE_URL "")
 else()
 	message(STATUS "Capstone: using remote Capstone revision.")
+	set(CAPSTONE_SOURCE_DIR "")
+	set(_CAPSTONE_URL "${CAPSTONE_URL}")
+endif()
 
-	ExternalProject_Add(capstone-project
-		URL ${CAPSTONE_URL}
-		URL_HASH SHA256=${CAPSTONE_ARCHIVE_SHA256}
-		DOWNLOAD_NAME capstone.zip
-		CMAKE_ARGS
-			# This does not work on MSVC, but may be useful on Linux.
-			-DCMAKE_BUILD_TYPE=Release
-			-DCAPSTONE_BUILD_STATIC=ON
-			-DCAPSTONE_BUILD_SHARED=OFF
-			-DCAPSTONE_BUILD_STATIC_RUNTIME=${RETDEC_MSVC_STATIC_RUNTIME}
-			-DCAPSTONE_BUILD_TESTS=OFF
-			-DCAPSTONE_X86_ATT_DISABLE=OFF
-			# Enabled architectures.
-			-DCAPSTONE_ARM_SUPPORT=ON
-			-DCAPSTONE_MIPS_SUPPORT=ON
-			-DCAPSTONE_PPC_SUPPORT=ON
-			-DCAPSTONE_X86_SUPPORT=ON
-			-DCAPSTONE_ARM64_SUPPORT=ON
-			# Disabled architectures.
-			-DCAPSTONE_M68K_SUPPORT=OFF
-			-DCAPSTONE_SPARC_SUPPORT=OFF
-			-DCAPSTONE_SYSZ_SUPPORT=OFF
-			-DCAPSTONE_XCORE_SUPPORT=OFF
-			-DCAPSTONE_TMS320C64X_SUPPORT=OFF
-			-DCAPSTONE_M680X_SUPPORT=OFF
-			# Force the use of the same compiler as used to build the top-level
-			# project. Otherwise, the external project may pick up a different
-			# compiler, which may result in link errors.
-			"${CMAKE_C_COMPILER_OPTION}"
-			"${CMAKE_CXX_COMPILER_OPTION}"
-			-DCMAKE_POSITION_INDEPENDENT_CODE=${CMAKE_POSITION_INDEPENDENT_CODE}
-		# Patch the Capstone sources.
-		PATCH_COMMAND
-			${CMAKE_COMMAND} -Dcapstone_path=<SOURCE_DIR> -P ${CMAKE_CURRENT_SOURCE_DIR}/patch.cmake
-		# Disable the update step.
-		UPDATE_COMMAND ""
-		# Disable the install step.
-		INSTALL_COMMAND ""
-		LOG_DOWNLOAD ON
-		LOG_CONFIGURE ON
-		LOG_BUILD ON
-	)
+ExternalProject_Add(capstone-project
+	SOURCE_DIR ${CAPSTONE_SOURCE_DIR}
+	URL ${_CAPSTONE_URL}
+	URL_HASH SHA256=${CAPSTONE_ARCHIVE_SHA256}
+	DOWNLOAD_NAME capstone.zip
+	CMAKE_ARGS
+		-DCMAKE_INSTALL_PREFIX=${CAPSTONE_INSTALL_DIR}
+		# This does not work on MSVC, but may be useful on Linux.
+		-DCMAKE_BUILD_TYPE=Release
+		-DCAPSTONE_BUILD_STATIC=ON
+		-DCAPSTONE_BUILD_SHARED=OFF
+		-DCAPSTONE_BUILD_STATIC_RUNTIME=${RETDEC_MSVC_STATIC_RUNTIME}
+		-DCAPSTONE_BUILD_TESTS=OFF
+		-DCAPSTONE_X86_ATT_DISABLE=OFF
+		# Enabled architectures.
+		-DCAPSTONE_ARM_SUPPORT=ON
+		-DCAPSTONE_MIPS_SUPPORT=ON
+		-DCAPSTONE_PPC_SUPPORT=ON
+		-DCAPSTONE_X86_SUPPORT=ON
+		-DCAPSTONE_ARM64_SUPPORT=ON
+		# Disabled architectures.
+		-DCAPSTONE_M68K_SUPPORT=OFF
+		-DCAPSTONE_SPARC_SUPPORT=OFF
+		-DCAPSTONE_SYSZ_SUPPORT=OFF
+		-DCAPSTONE_XCORE_SUPPORT=OFF
+		-DCAPSTONE_TMS320C64X_SUPPORT=OFF
+		-DCAPSTONE_M680X_SUPPORT=OFF
+		# Force the use of the same compiler as used to build the top-level
+		# project. Otherwise, the external project may pick up a different
+		# compiler, which may result in link errors.
+		"${CMAKE_C_COMPILER_OPTION}"
+		"${CMAKE_CXX_COMPILER_OPTION}"
+		-DCMAKE_POSITION_INDEPENDENT_CODE=${CMAKE_POSITION_INDEPENDENT_CODE}
+	# Patch the Capstone sources.
+	PATCH_COMMAND
+		${CMAKE_COMMAND} -Dcapstone_path=<SOURCE_DIR> -P ${CMAKE_CURRENT_SOURCE_DIR}/patch.cmake
+	LOG_DOWNLOAD ON
+	LOG_CONFIGURE ON
+	LOG_BUILD ON
+	BUILD_BYPRODUCTS
+		${CAPSTONE_LIB}
+)
+if(CAPSTONE_LOCAL_DIR)
+	force_configure_step(capstone-project)
 endif()
 
 check_if_variable_changed(CAPSTONE_LOCAL_DIR CHANGED)
@@ -96,11 +69,6 @@ if(CHANGED)
 endif()
 
 ExternalProject_Get_Property(capstone-project source_dir)
-ExternalProject_Get_Property(capstone-project binary_dir)
-
-set(CAPSTONE_LIB_NAME  ${CMAKE_STATIC_LIBRARY_PREFIX}capstone${CMAKE_STATIC_LIBRARY_SUFFIX})
-set(CAPSTONE_LIB_PNAME ${CMAKE_STATIC_LIBRARY_PREFIX}retdec-capstone${CMAKE_STATIC_LIBRARY_SUFFIX})
-set(CAPSTONE_LIB       ${binary_dir}/${MSVC_CONFIG}${CAPSTONE_LIB_NAME})
 
 # Create target.
 add_library(capstone INTERFACE)
@@ -109,8 +77,8 @@ add_dependencies(capstone capstone-project)
 
 target_include_directories(capstone
 	SYSTEM INTERFACE
-		$<BUILD_INTERFACE:${source_dir}/include>
 		$<BUILD_INTERFACE:${source_dir}/arch>
+		$<BUILD_INTERFACE:${CAPSTONE_INSTALL_DIR}/include>
 		$<INSTALL_INTERFACE:${RETDEC_INSTALL_DEPS_INCLUDE_DIR}>
 )
 
@@ -121,7 +89,7 @@ target_link_libraries(capstone INTERFACE
 
 # Install includes.
 install(
-	DIRECTORY   ${source_dir}/include/
+	DIRECTORY   ${CAPSTONE_INSTALL_DIR}/include/
 	DESTINATION ${RETDEC_INSTALL_DEPS_INCLUDE_DIR}
 )
 

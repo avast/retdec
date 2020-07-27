@@ -7,59 +7,54 @@ else()
 	set(FORCE_SHARED_RUNTIME ON)
 endif()
 
+set(GOOGLETEST_INSTALL_DIR ${CMAKE_BINARY_DIR}/deps/install/googletest)
+
+#gtest${MSVC_DEBUG_LIB_SUFFIX}
+set(GTEST_LIB      ${GOOGLETEST_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}gtest${CMAKE_STATIC_LIBRARY_SUFFIX})
+set(GTEST_MAIN_LIB ${GOOGLETEST_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}gtest_main${CMAKE_STATIC_LIBRARY_SUFFIX})
+set(GMOCK_LIB      ${GOOGLETEST_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}gmock${CMAKE_STATIC_LIBRARY_SUFFIX})
+set(GMOCK_MAIN_LIB ${GOOGLETEST_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}gmock_main${CMAKE_STATIC_LIBRARY_SUFFIX})
+
 if(GOOGLETEST_LOCAL_DIR)
 	message(STATUS "Googletest: using local Googletest directory.")
-
-	ExternalProject_Add(googletest
-		DOWNLOAD_COMMAND ""
-		SOURCE_DIR "${GOOGLETEST_LOCAL_DIR}"
-		CMAKE_ARGS
-			# This does not work on MSVC, but is useful on Linux.
-			-DCMAKE_BUILD_TYPE=Release
-			# Without this, googletest's CMakeLists.txt replaces "/MD" (dynamic run-time) with "-MT" (static runtime).
-			# Default config for most applications is "/MD", so this will cause problems if linked with "-MT" googletest.
-			# https://msdn.microsoft.com/en-us/library/2kzt1wy3.aspx
-			-Dgtest_force_shared_crt=${FORCE_SHARED_RUNTIME}
-			# Force the use of the same compiler as used to build the top-level
-			# project. Otherwise, the external project may pick up a different
-			# compiler, which may result in link errors.
-			"${CMAKE_C_COMPILER_OPTION}"
-			"${CMAKE_CXX_COMPILER_OPTION}"
-			-DCMAKE_POSITION_INDEPENDENT_CODE=${CMAKE_POSITION_INDEPENDENT_CODE}
-		# Disable the update step.
-		UPDATE_COMMAND ""
-		# Disable the install step.
-		INSTALL_COMMAND ""
-	)
-	force_configure_step(googletest)
+	set(GOOGLETEST_SOURCE_DIR "${GOOGLETEST_LOCAL_DIR}")
+	set(_GOOGLETEST_URL "")
 else()
 	message(STATUS "Googletest: using remote Googletest revision.")
+	set(GOOGLETEST_SOURCE_DIR "")
+	set(_GOOGLETEST_URL "${GOOGLETEST_URL}")
+endif()
 
-	ExternalProject_Add(googletest
-		URL ${GOOGLETEST_URL}
-		URL_HASH SHA256=${GOOGLETEST_ARCHIVE_SHA256}
-		DOWNLOAD_NAME googletest.zip
-		CMAKE_ARGS
-			# This does not work on MSVC, but is useful on Linux.
-			-DCMAKE_BUILD_TYPE=Release
-			# Without this, googletest's CMakeLists.txt replaces "/MD" (dynamic run-time) with "-MT" (static runtime).
-			# Default config for most applications is "/MD", so this will cause problems if linked with "-MT" googletest.
-			# https://msdn.microsoft.com/en-us/library/2kzt1wy3.aspx
-			-Dgtest_force_shared_crt=${FORCE_SHARED_RUNTIME}
-			# Force the use of the same compiler as used to build the top-level
-			# project. Otherwise, the external project may pick up a different
-			# compiler, which may result in link errors.
-			"${CMAKE_C_COMPILER_OPTION}"
-			"${CMAKE_CXX_COMPILER_OPTION}"
-			-DCMAKE_POSITION_INDEPENDENT_CODE=${CMAKE_POSITION_INDEPENDENT_CODE}
-		# Disable the update step.
-		UPDATE_COMMAND ""
-		# Disable the install step.
-		INSTALL_COMMAND ""
-		LOG_DOWNLOAD ON
-		LOG_CONFIGURE ON
-		LOG_BUILD ON
-	)
+ExternalProject_Add(googletest
+	SOURCE_DIR ${GOOGLETEST_SOURCE_DIR}
+	URL ${_GOOGLETEST_URL}
+	URL_HASH SHA256=${GOOGLETEST_ARCHIVE_SHA256}
+	DOWNLOAD_NAME googletest.zip
+	CMAKE_ARGS
+		-DCMAKE_INSTALL_PREFIX=${GOOGLETEST_INSTALL_DIR}
+		# This does not work on MSVC, but is useful on Linux.
+		-DCMAKE_BUILD_TYPE=Release
+		# Without this, googletest's CMakeLists.txt replaces "/MD" (dynamic run-time) with "-MT" (static runtime).
+		# Default config for most applications is "/MD", so this will cause problems if linked with "-MT" googletest.
+		# https://msdn.microsoft.com/en-us/library/2kzt1wy3.aspx
+		-Dgtest_force_shared_crt=${FORCE_SHARED_RUNTIME}
+		# Force the use of the same compiler as used to build the top-level
+		# project. Otherwise, the external project may pick up a different
+		# compiler, which may result in link errors.
+		"${CMAKE_C_COMPILER_OPTION}"
+		"${CMAKE_CXX_COMPILER_OPTION}"
+		-DCMAKE_POSITION_INDEPENDENT_CODE=${CMAKE_POSITION_INDEPENDENT_CODE}
+	LOG_DOWNLOAD ON
+	LOG_CONFIGURE ON
+	LOG_BUILD ON
+	BUILD_BYPRODUCTS
+		${GTEST_LIB}
+		${GTEST_MAIN_LIB}
+		${GMOCK_LIB}
+		${GMOCK_MAIN_LIB}
+)
+if(GOOGLETEST_LOCAL_DIR)
+	force_configure_step(googletest)
 endif()
 
 check_if_variable_changed(GOOGLETEST_LOCAL_DIR CHANGED)
@@ -69,11 +64,8 @@ if(CHANGED)
 	clean_cmake_files(${binary_dir})
 endif()
 
-ExternalProject_Get_Property(googletest source_dir)
-ExternalProject_Get_Property(googletest binary_dir)
-
-set(GTEST_INCLUDE_DIR ${source_dir}/googletest/include)
-set(GMOCK_INCLUDE_DIR ${source_dir}/googlemock/include)
+set(GTEST_INCLUDE_DIR ${GOOGLETEST_INSTALL_DIR}/googletest/include)
+set(GMOCK_INCLUDE_DIR ${GOOGLETEST_INSTALL_DIR}/googlemock/include)
 
 # Create targets.
 
@@ -84,7 +76,7 @@ add_library(gtest INTERFACE)
 add_library(retdec::deps::gtest ALIAS gtest)
 add_dependencies(gtest googletest)
 target_link_libraries(gtest INTERFACE
-	${binary_dir}/lib/${MSVC_CONFIG}${CMAKE_STATIC_LIBRARY_PREFIX}gtest${MSVC_DEBUG_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}
+	${GTEST_LIB}
 	Threads::Threads
 )
 target_include_directories(gtest
@@ -96,7 +88,7 @@ target_include_directories(gtest
 add_library(gtest_main INTERFACE)
 add_library(retdec::deps::gtest_main ALIAS gtest_main)
 target_link_libraries(gtest_main INTERFACE
-	${binary_dir}/lib/${MSVC_CONFIG}${CMAKE_STATIC_LIBRARY_PREFIX}gtest_main${MSVC_DEBUG_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}
+	${GTEST_MAIN_LIB}
 	gtest
 )
 
@@ -104,7 +96,7 @@ target_link_libraries(gtest_main INTERFACE
 add_library(gmock INTERFACE)
 add_library(retdec::deps::gmock ALIAS gmock)
 target_link_libraries(gmock INTERFACE
-	${binary_dir}/lib/${MSVC_CONFIG}${CMAKE_STATIC_LIBRARY_PREFIX}gmock${MSVC_DEBUG_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}
+	${GMOCK_LIB}
 	gtest
 )
 target_include_directories(gmock
@@ -116,6 +108,6 @@ target_include_directories(gmock
 add_library(gmock_main INTERFACE)
 add_library(retdec::deps::gmock_main ALIAS gmock_main)
 target_link_libraries(gmock_main INTERFACE
-	${binary_dir}/lib/${MSVC_CONFIG}${CMAKE_STATIC_LIBRARY_PREFIX}gmock_main${MSVC_DEBUG_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}
+	${GMOCK_MAIN_LIB}
 	gmock
 )
