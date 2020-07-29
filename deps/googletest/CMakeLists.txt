@@ -64,8 +64,8 @@ if(CHANGED)
 	clean_cmake_files(${binary_dir})
 endif()
 
-set(GTEST_INCLUDE_DIR ${GOOGLETEST_INSTALL_DIR}/googletest/include)
-set(GMOCK_INCLUDE_DIR ${GOOGLETEST_INSTALL_DIR}/googlemock/include)
+set(GTEST_INCLUDE_DIR ${GOOGLETEST_INSTALL_DIR}/include)
+set(GMOCK_INCLUDE_DIR ${GOOGLETEST_INSTALL_DIR}/include)
 
 # Create targets.
 
