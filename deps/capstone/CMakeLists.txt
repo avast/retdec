@@ -3,7 +3,7 @@ set(CAPSTONE_INSTALL_DIR ${CMAKE_BINARY_DIR}/deps/install/capstone)
 
 set(CAPSTONE_LIB_NAME  ${CMAKE_STATIC_LIBRARY_PREFIX}capstone${CMAKE_STATIC_LIBRARY_SUFFIX})
 set(CAPSTONE_LIB_PNAME ${CMAKE_STATIC_LIBRARY_PREFIX}retdec-capstone${CMAKE_STATIC_LIBRARY_SUFFIX})
-set(CAPSTONE_LIB       ${CAPSTONE_INSTALL_DIR}/lib64/${CAPSTONE_LIB_NAME})
+set(CAPSTONE_LIB       ${CAPSTONE_INSTALL_DIR}/lib/${CAPSTONE_LIB_NAME})
 
 if(CAPSTONE_LOCAL_DIR)
 	message(STATUS "Capstone: using local Capstone directory.")
@@ -60,6 +60,16 @@ ExternalProject_Add(capstone-project
 if(CAPSTONE_LOCAL_DIR)
 	force_configure_step(capstone-project)
 endif()
+ExternalProject_Add_Step(capstone-project movelib64
+	WORKING_DIRECTORY ${CAPSTONE_INSTALL_DIR}
+	DEPENDEES install
+	# We cannot copy non-existing directory - it fails.
+	# So we try to create it, if it already does exist, nothing happens.
+	COMMAND ${CMAKE_COMMAND} -E make_directory lib64
+	# If lib was created by Capstone install, and lib64 by us, lib64 is empty
+	# and this should not replace lib content (i.e. capstone lib).
+	COMMAND ${CMAKE_COMMAND} -E copy_directory lib64 lib
+)
 
 check_if_variable_changed(CAPSTONE_LOCAL_DIR CHANGED)
 if(CHANGED)
