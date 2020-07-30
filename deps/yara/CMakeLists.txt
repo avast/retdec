@@ -84,9 +84,11 @@ else()
 	set(_YARA_URL "${YARA_URL}")
 endif()
 
+set(YARA_INSTALL_DIR ${CMAKE_BINARY_DIR}/deps/install/yara)
 set(YARA_LIB_NAME  ${YARA_LIBRARY_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX})
 set(YARA_LIB_NAMEP libretdec-yara${CMAKE_STATIC_LIBRARY_SUFFIX})
-set(YARA_LIB       ${YARA_LIBRARY_DIR}/${YARA_LIB_NAME})
+set(YARA_LIB_B     ${YARA_LIBRARY_DIR}/${YARA_LIB_NAME})
+set(YARA_LIB       ${YARA_INSTALL_DIR}/lib/${YARA_LIB_NAME})
 
 ExternalProject_Add(yara
 	SOURCE_DIR ${YARA_SOURCE_DIR}
@@ -128,6 +130,17 @@ else()
 		COMMAND ${YARA_CLEAN_COMMAND}
 	)
 endif()
+
+# Install the library file manually.
+# We need it to get rif of MSVC's Release/Debug, because gen exprs cannot be
+# used in BUILD_BYPRODUCTS.
+# We could install YARA using YARA_INSTALL_DIR, but it would not work on MSVC.
+ExternalProject_Add_Step(yara move-install
+	WORKING_DIRECTORY ${YARA_DIR}
+	DEPENDEES install
+	COMMAND ${CMAKE_COMMAND} -E make_directory ${YARA_INSTALL_DIR}/lib
+	COMMAND ${CMAKE_COMMAND} -E copy ${YARA_LIB_B} ${YARA_LIB}
+)
 
 # Create target.
 add_library(libyara INTERFACE)
