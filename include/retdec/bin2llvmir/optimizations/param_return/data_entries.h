@@ -165,6 +165,9 @@ class DataFlowEntry : public FunctionEntry
 
 		void setCalledValue(llvm::Value* called);
 
+		std::size_t numberOfCalls() const;
+		bool hasBranches() const;
+
 	// Usage data.
 	//
 	public:

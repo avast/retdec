@@ -174,6 +174,10 @@ void Filter::filterCalls(DataFlowEntry* de) const
 		retTempl = callRets.front();
 	}
 
+	/* When there is definition available we should
+	 * use arguments from there. This is more reliable than
+	 * constructing intersations of used arguments in file.
+	 */
 	if (de->hasDefinition())
 	{
 		FilterableLayout defArgs;
@@ -191,12 +195,16 @@ void Filter::filterCalls(DataFlowEntry* de) const
 			// below.
 			filterArgsByKnownTypes(defArgs);
 		}
-		else if (de->args().empty())
+		else if (de->args().empty() && de->numberOfCalls() == 1 && !de->hasBranches())
 		{
+			// In this case it might be wrapper that
+			// takes arguments from call and do not modify them
+			// in definition.
 			filterCallArgsByDefLayout(defArgs, argTempl);
 			de->setArgs(createGroupedArgValues(defArgs));
 		}
-		else if (argTempl.stacks.size() > defArgs.stacks.size())
+		else if (argTempl.stacks.size() > defArgs.stacks.size()
+				&& de->numberOfCalls() == 1 && !de->hasBranches())
 		{
 			if (argTempl.gpRegisters.size() == defArgs.gpRegisters.size()
 				&& argTempl.fpRegisters.size() == defArgs.fpRegisters.size()

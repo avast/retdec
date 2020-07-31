@@ -421,6 +421,38 @@ void DataFlowEntry::setCalledValue(llvm::Value* called)
 	_calledValue = called;
 }
 
+std::size_t DataFlowEntry::numberOfCalls() const
+{
+	auto fnc = getFunction();
+	if (fnc == nullptr)
+		return 0;
+
+	std::size_t calls = 0;
+	for (auto& bb: *fnc)
+		for (auto& i: bb)
+			if (auto call = dyn_cast<CallInst>(&i)) {
+				auto* calledFnc = call->getCalledFunction();
+				if (calledFnc && !calledFnc->isIntrinsic())
+					calls++;
+			}
+
+	return calls;
+}
+
+bool DataFlowEntry::hasBranches() const
+{
+	auto fnc = getFunction();
+	if (fnc == nullptr)
+		return false;
+
+	for (auto& bb: *fnc)
+		for (auto& i: bb)
+			if (isa<BranchInst>(i))
+				return true;
+
+	return false;
+}
+
 CallEntry* DataFlowEntry::createCallEntry(CallInst* call)
 {
 	_calls.push_back(CallEntry(call, this));
