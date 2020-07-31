@@ -2117,7 +2117,7 @@ void PeHeuristics::getPeSectionHeuristics()
 		}
 		if (secondLastName == ".gentee")
 		{
-			addPacker(source, strength, "Gentee");
+			addCompiler(source, strength, "Gentee");
 		}
 	}
 	if (firstName == "pec1"
