@@ -134,7 +134,7 @@ std::string Config::generateJsonFile(const std::string& outputFilePath) const
 std::string Config::generateJsonString() const
 {
 	rapidjson::StringBuffer sb;
-	rapidjson::PrettyWriter<rapidjson::StringBuffer, rapidjson::ASCII<>> writer(sb);
+	rapidjson::PrettyWriter<rapidjson::StringBuffer, rapidjson::UTF8<>> writer(sb);
 
 	writer.StartObject();
 
