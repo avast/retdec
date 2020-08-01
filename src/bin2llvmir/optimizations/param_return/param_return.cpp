@@ -190,6 +190,13 @@ void ParamReturn::collectExtraData(DataFlowEntry* dataflow) const
 		return;
 	}
 
+	auto& config = _config->getConfig();
+	if (config.parameters.isSelectedDecodeOnly()) {
+		auto rdFnc = _config->getFunctionAddress(fnc);
+		auto isDecoded = config.parameters.selectedRanges.contains(rdFnc);
+		dataflow->setIsFullyDecoded(isDecoded);
+	}
+
 	// LTI info.
 	//
 	auto* cf = _config->getConfigFunction(fnc);
@@ -581,6 +588,7 @@ void ParamReturn::dumpInfo(const DataFlowEntry& de) const
 	LOG << "\t>|wrapp c  : " << llvmObjToString(wrappedCall) << std::endl;
 	LOG << "\t>|calls cnt: " << de.numberOfCalls() << std::endl;
 	LOG << "\t>|sto stack: " << de.storesOnRawStack(*_abi) << std::endl;
+	LOG << "\t>|is decode: " << de.isFullyDecoded() << std::endl;
 	LOG << "\t>|type set : " << !de.argTypes().empty() << std::endl;
 	LOG << "\t>|ret type : " << llvmObjToString(de.getRetType()) << std::endl;
 	LOG << "\t>|ret value: " << llvmObjToString(de.getRetValue()) << std::endl;

@@ -200,6 +200,9 @@ void Filter::filterCalls(DataFlowEntry* de) const
 				(de->numberOfCalls() == 1 && !de->hasBranches())
 				// Possible error in stack analysis.
 				|| (de->storesOnRawStack(*_abi))
+				// Selective decompilation. Definition exists
+				// but is empty -> we do not trust it.
+				|| (!de->isFullyDecoded())
 			))
 		{
 			// In this case it might be wrapper that

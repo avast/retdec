@@ -402,6 +402,16 @@ bool DataFlowEntry::isValue() const
 	return _calledValue && !isFunction();
 }
 
+void DataFlowEntry::setIsFullyDecoded(bool res)
+{
+	_decoded = res;
+}
+
+bool DataFlowEntry::isFullyDecoded() const
+{
+	return _decoded;
+}
+
 bool DataFlowEntry::hasDefinition() const
 {
 	return isFunction() && !getFunction()->empty();

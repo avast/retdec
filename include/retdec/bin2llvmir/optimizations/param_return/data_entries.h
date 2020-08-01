@@ -169,6 +169,9 @@ class DataFlowEntry : public FunctionEntry
 		bool hasBranches() const;
 		bool storesOnRawStack(const Abi& abi) const;
 
+		void setIsFullyDecoded(bool res = true);
+		bool isFullyDecoded() const;
+
 	// Usage data.
 	//
 	public:
@@ -180,6 +183,7 @@ class DataFlowEntry : public FunctionEntry
 		llvm::Value* _calledValue = nullptr;
 
 		std::vector<CallEntry> _calls;
+		bool _decoded = true;
 };
 
 } // namespace bin2llvmir
