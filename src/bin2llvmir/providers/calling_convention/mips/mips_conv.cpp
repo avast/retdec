@@ -36,6 +36,9 @@ MipsCallingConvention::MipsCallingConvention(const Abi* a) :
 	_returnRegs = {
 		MIPS_REG_V0
 	};
+	_returnFPRegs = {
+		MIPS_REG_F0
+	};
 
 	_numOfRegsPerParam = 2;
 	_largeObjectsPassedByReference = true;

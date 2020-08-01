@@ -39,10 +39,10 @@ MipsPSPCallingConvention::MipsPSPCallingConvention(const Abi* a) :
 		MIPS_REG_V0
 	};
 	_returnFPRegs = {
-		MIPS_REG_V0
+		MIPS_REG_F0
 	};
 	_returnDoubleRegs = {
-		MIPS_REG_V0
+		MIPS_REG_F0
 	};
 
 	_numOfRegsPerParam = 2;
