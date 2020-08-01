@@ -167,6 +167,7 @@ class DataFlowEntry : public FunctionEntry
 
 		std::size_t numberOfCalls() const;
 		bool hasBranches() const;
+		bool storesOnRawStack(const Abi& abi) const;
 
 	// Usage data.
 	//

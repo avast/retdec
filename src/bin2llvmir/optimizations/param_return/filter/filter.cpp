@@ -195,7 +195,12 @@ void Filter::filterCalls(DataFlowEntry* de) const
 			// below.
 			filterArgsByKnownTypes(defArgs);
 		}
-		else if (de->args().empty() && de->numberOfCalls() == 1 && !de->hasBranches())
+		else if (de->args().empty() && (
+				// possible wrapper
+				(de->numberOfCalls() == 1 && !de->hasBranches())
+				// Possible error in stack analysis.
+				|| (de->storesOnRawStack(*_abi))
+			))
 		{
 			// In this case it might be wrapper that
 			// takes arguments from call and do not modify them

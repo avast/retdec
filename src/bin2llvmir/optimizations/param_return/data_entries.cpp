@@ -7,6 +7,7 @@
 #include <set>
 
 #include "retdec/bin2llvmir/optimizations/param_return/data_entries.h"
+#include "retdec/bin2llvmir/providers/abi/abi.h"
 
 using namespace llvm;
 
@@ -449,6 +450,32 @@ bool DataFlowEntry::hasBranches() const
 		for (auto& i: bb)
 			if (isa<BranchInst>(i))
 				return true;
+
+	return false;
+}
+
+bool DataFlowEntry::storesOnRawStack(const Abi& abi) const
+{
+	auto fnc = getFunction();
+	if (fnc == nullptr)
+		return false;
+
+	for (auto& bb: *fnc) {
+		for (auto& i: bb) {
+			if (auto store = dyn_cast<StoreInst>(&i)) {
+				auto operand = store->getValueOperand();
+				auto storage = store->getPointerOperand();
+				if (abi.isStackPointerRegister(storage)) {
+					if (auto* pi = dyn_cast<PtrToIntInst>(operand)) {
+						if (abi.isStackVariable(pi->getPointerOperand()))
+							continue;
+					}
+
+					return true;
+				}
+			}
+		}
+	}
 
 	return false;
 }

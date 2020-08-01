@@ -580,6 +580,7 @@ void ParamReturn::dumpInfo(const DataFlowEntry& de) const
 	LOG << "\t>|debug f  : " << (dbgFnc != nullptr) << std::endl;
 	LOG << "\t>|wrapp c  : " << llvmObjToString(wrappedCall) << std::endl;
 	LOG << "\t>|calls cnt: " << de.numberOfCalls() << std::endl;
+	LOG << "\t>|sto stack: " << de.storesOnRawStack(*_abi) << std::endl;
 	LOG << "\t>|type set : " << !de.argTypes().empty() << std::endl;
 	LOG << "\t>|ret type : " << llvmObjToString(de.getRetType()) << std::endl;
 	LOG << "\t>|ret value: " << llvmObjToString(de.getRetValue()) << std::endl;
