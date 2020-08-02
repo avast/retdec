@@ -540,6 +540,57 @@ bool loadFromBitcastPointer(llvm::Instruction* insn)
 }
 
 /**
+ * Finds sequence where first is call on address and after that
+ * is called pop.
+ */
+bool callAndPopSequence(llvm::Instruction* inst)
+{
+	auto instCount1 = inst->getNextNode();
+	if (instCount1 == nullptr)
+		return false;
+
+	auto instCount2 = instCount1->getNextNode();
+	if (instCount2 == nullptr)
+		return false;
+
+	auto instLoad = instCount2->getNextNode();
+	if (instLoad == nullptr)
+		return false;
+
+	ConstantInt *ci, *ripValue;
+	Value *rip1, *val, *rip2, *stack1, *stack2;
+	if (!(match(inst, m_Store(m_PtrToInt(m_Value(val)), m_Value(stack1)))
+		&& match(instCount1, m_Store(m_ConstantInt(ci), m_Value(rip1)))
+		&& match(instCount2, m_Store(m_ConstantInt(ripValue), m_Value(rip2)))
+		&& match(instLoad, m_Load(m_Value(stack2))))) {
+			return false;
+	}
+
+	if (rip1 != rip2 || rip1 == stack1 || !isa<GlobalVariable>(rip1))
+		return false;
+
+	if (!isa<GlobalVariable>(stack1))
+		return false;
+
+	if (!isa<AllocaInst>(stack2) || stack2 != val)
+		return false;
+
+	PointerType* stackPtrType = dyn_cast<PointerType>(stack2->getType());
+
+	if (stackPtrType == nullptr)
+		return false;
+
+	IntegerType* stackType = dyn_cast<IntegerType>(stackPtrType->getElementType());
+	if (stackType == nullptr)
+		return false;
+
+	auto* cast = BitCastInst::CreateIntegerCast(ripValue, stackType, false, "", instLoad);
+	new StoreInst(cast, stack2, instLoad);
+
+	return true;
+}
+
+/**
  * Order here is important.
  * More specific patterns must go first, more general later.
  */
@@ -558,6 +609,7 @@ std::vector<bool (*)(llvm::Instruction*)> optimizations =
 		&castSequenceWrapper,
 		&storeToBitcastPointer,
 		&loadFromBitcastPointer,
+		&callAndPopSequence,
 };
 
 bool optimize(llvm::Instruction* insn)

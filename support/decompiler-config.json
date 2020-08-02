@@ -49,6 +49,7 @@
             "retdec-cond-branch-opt",
             "retdec-syscalls",
             "retdec-stack",
+            "retdec-inst-opt",
             "retdec-constants",
             "retdec-param-return",
             "retdec-inst-opt-rda",
