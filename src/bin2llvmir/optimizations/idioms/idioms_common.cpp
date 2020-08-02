@@ -191,29 +191,6 @@ Instruction * IdiomsCommon::exchangeBitShiftSDiv1(BasicBlock::iterator iter) con
 }
 
 /**
- * Exchange shift right with a division.
- *
- * @param iter value to visit
- * @return replaced Instruction, otherwise nullptr
- */
-Instruction * IdiomsCommon::exchangeBitShiftSDiv2(BasicBlock::iterator iter) const {
-	Instruction & val = (*iter);
-	Value * op0 = nullptr;
-	ConstantInt * cnst = nullptr;
-
-	// X s>> C --> X / 2^C
-	if (match(&val, m_AShr(m_Value(op0), m_ConstantInt(cnst))) &&
-			isPowerOfTwoRepresentable(cnst)) {
-		Constant *NewCst = ConstantInt::get(cnst->getType(),
-						pow(2, *cnst->getValue().getRawData()));
-		BinaryOperator *div = BinaryOperator::CreateSDiv(op0, NewCst);
-		return div;
-	}
-
-	return nullptr;
-}
-
-/**
  * Exchange shift left by with a multiplication
  *
  * @param iter value to visit
