@@ -1059,8 +1059,32 @@ void ParamReturn::connectWrappers(const DataFlowEntry& de)
 	unsigned i = 0;
 	for (auto& a : fnc->args())
 	{
-		auto* conv = IrModifier::convertValueToType(&a, wrappedCall->getArgOperand(i)->getType(), wrappedCall);
-		wrappedCall->setArgOperand(i++, conv);
+		auto iarg = wrappedCall->getArgOperand(i);
+		bool shouldSkip = false;
+		if (auto* load = dyn_cast<LoadInst>(llvm_utils::skipCasts(iarg))) {
+			auto oldarg = load->getPointerOperand();
+
+			std::vector<StoreInst*> users;
+			for (const auto& U : oldarg->users())
+			{
+				if (auto* store = dyn_cast<StoreInst>(U)) {
+					if (store->getFunction() == fnc)
+						users.push_back(store);
+				}
+			}
+			for (auto store: users) {
+				if (llvm_utils::skipCasts(store->getValueOperand()) == &a)
+					continue;
+
+				shouldSkip = true;
+			}
+		}
+
+		if (!shouldSkip) {
+			auto* conv = IrModifier::convertValueToType(&a, wrappedCall->getArgOperand(i)->getType(), wrappedCall);
+			wrappedCall->setArgOperand(i, conv);
+		}
+		i++;
 	}
 
 	//
