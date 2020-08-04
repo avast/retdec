@@ -2,6 +2,7 @@
 
 # dev
 
+* Fix: Arithmetic shift is no longer converted to signed division as these operations provide different output with negative numbers. ([#724](https://github.com/avast/retdec/issues/724)).
 * Fix: Fixed analyzed calling convention on MIPS architecture. Register F0 is used for floating point function return ([#656](https://github.com/avast/retdec/issues/656)).
 * Fix: Fixed filtration to better handle functions with no arguments and therefore to reduce noise in output ([#155](https://github.com/avast/retdec/issues/155)).
 * Enhancement: Unified logging on stdout/stderr. Added option `--silent`. Printed text is colored only when output is a terminal ([#791](https://github.com/avast/retdec/issues/791).
