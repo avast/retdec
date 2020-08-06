@@ -44,7 +44,6 @@ class PeFormat : public FileFormat
 		std::string typeRefHashSha256;                             ///< .NET typeref table hash as SHA256
 		VisualBasicInfo visualBasicInfo;                           ///< visual basic header information
 
-		static const std::unordered_set<std::string> defDllList;   ///< Default set of DLLs for checking dependency missing
 		std::unordered_set<std::string> dllList;                   ///< Override set of DLLs for checking dependency missing
 		bool errorLoadingDllList;                                  ///< If true, then an error happened while loading DLL list
 
@@ -75,6 +74,7 @@ class PeFormat : public FileFormat
 		void loadResources();
 		void loadCertificates();
 		void loadTlsInformation();
+		static bool checkDefaultList(std::string_view);
 		/// @}
 
 		/// @name .NET methods
