@@ -3549,9 +3549,9 @@ bool PeFormat::isMissingDependency(std::string dllName) const
 	// If we have overriden set, use that one.
 	// Otherwise, use the default DLL set
 	if (std::empty(dllList)) {
-		return checkDefaultList(dllName);
+		return checkDefaultList(dllName) == false;
 	} else {
-		return dllList.find(dllName) != dllList.end();
+		return dllList.find(dllName) == dllList.end();
 	}
 }
 
