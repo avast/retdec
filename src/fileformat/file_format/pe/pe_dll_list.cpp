@@ -4086,6 +4086,27 @@ constexpr static std::string_view defDllList[] = {
 	"ztrace_maps.dll",
 };
 
+
+// utility to check the list is really sorted (I can't use C++ algorithms here, as C++17 doesn't have constexpr version of this)
+template <typename T> constexpr bool isSorted(T && arr) {
+	auto first = std::begin(arr);
+	auto last = std::end(arr);
+	
+	if (first != last) {
+		auto next = first;
+		while (++next != last) {
+			if (std::less{}(*next, *first)) {
+				return false;
+			}
+			first = next;
+		}
+	}
+	return true;
+}
+
+static_assert(isSorted(defDllList), "The List of DLLs must be sorted!");
+
+
 namespace retdec {
 namespace fileformat {
 
