@@ -12,8 +12,8 @@ string(REPLACE
 )
 
 if("${new_content}" STREQUAL "${content}")
-    message("-- Patching: ${full_path} skipped")
+    message(STATUS "-- Patching: ${full_path} skipped")
 else()
-    message("-- Patching: ${full_path} patched")
+    message(STATUS "-- Patching: ${full_path} patched")
     file(WRITE "${full_path}" "${new_content}")
 endif()

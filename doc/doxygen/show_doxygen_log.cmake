@@ -3,4 +3,4 @@ file(READ
 	DOXYGEN_LOG_CONTENT
 )
 
-message("${DOXYGEN_LOG_CONTENT}")
+message(STATUS "${DOXYGEN_LOG_CONTENT}")

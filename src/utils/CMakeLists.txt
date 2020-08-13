@@ -31,13 +31,13 @@ target_include_directories(utils
 # We may need to link filesystem library manually.
 find_library(STD_CPP_FS stdc++fs)
 if (STD_CPP_FS)
-	message("-- Linking with ${STD_CPP_FS} library")
+	message(STATUS "-- Linking with ${STD_CPP_FS} library")
 	target_link_libraries(utils
 		PRIVATE
 			stdc++fs
 	)
 else()
-	message("-- Library stdc++fs NOT FOUND -> linking utils without stdc++fs library")
+	message(STATUS "-- Library stdc++fs NOT FOUND -> linking utils without stdc++fs library")
 endif()
 
 # Disable the min() and max() macros to prevent errors when using e.g.
