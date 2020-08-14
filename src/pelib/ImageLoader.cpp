@@ -1575,10 +1575,12 @@ int PeLib::ImageLoader::captureNtHeaders(ByteBuffer & fileData)
 	filePtr += sizeof(uint32_t);
 
 	// Capture the file header
-	if((filePtr + sizeof(PELIB_IMAGE_FILE_HEADER)) < fileEnd)
-		memcpy(&fileHeader, filePtr, sizeof(PELIB_IMAGE_FILE_HEADER));
-	else
+	if ((filePtr + sizeof(PELIB_IMAGE_FILE_HEADER)) >= fileEnd)
+	{
 		setLoaderError(LDR_ERROR_NTHEADER_OUT_OF_FILE);
+		return ERROR_INVALID_FILE;
+	}
+	memcpy(&fileHeader, filePtr, sizeof(PELIB_IMAGE_FILE_HEADER));
 
 	// 7baebc6d9f2185fafa760c875ab1386f385a0b3fecf2e6ae339abb4d9ac58f3e
 	if(fileHeader.Machine == 0 && fileHeader.SizeOfOptionalHeader == 0)
