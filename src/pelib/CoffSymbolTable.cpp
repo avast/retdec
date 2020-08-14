@@ -94,11 +94,9 @@ namespace PeLib
 		// Read size of string table
 		if (ulFileSize >= stringTableOffset + 4)
 		{
-			stringTable.push_back(fileData[stringTableOffset]);
-			stringTable.push_back(fileData[stringTableOffset + 1]);
-			stringTable.push_back(fileData[stringTableOffset + 2]);
-			stringTable.push_back(fileData[stringTableOffset + 3]);
-			memcpy(&stringTableSize, stringTable.data(), sizeof(uint32_t));
+			stringTable.resize(sizeof(std::uint32_t));
+			memcpy(&stringTableSize, fileData.data() + stringTableOffset, sizeof(uint32_t));
+			*reinterpret_cast<std::uint32_t *>(stringTable.data()) = stringTableSize;
 			uiOffset = stringTableOffset + sizeof(uint32_t);
 		}
 
