@@ -525,6 +525,12 @@ bool MainDetection::applyResult(retdec::common::Address mainAddr)
 	_config->getConfig().parameters.setMainAddress(mainAddr);
 	if (auto* f = _config->getLlvmFunction(mainAddr))
 	{
+		auto* cf = _config->getConfigFunction(f);
+		if (cf && cf->isUserDefined())
+		{
+			return false;
+		}
+
 		std::string n = f->getName();
 		// TODO: better, we want to know it is main, but we do not want to
 		// rename it if it is from IDA (and maybe never).
