@@ -283,7 +283,6 @@ TEST_F(LlvmUtilsTests, stringToLlvmTypeReturnNullWhenTypeStringToParseIsBad)
 	EXPECT_EQ(nullptr, stringToLlvmType(context, "123"));
 	EXPECT_EQ(nullptr, stringToLlvmType(context, "hello"));
 	EXPECT_EQ(nullptr, stringToLlvmType(context, "%hello")); // unknown structure
-	EXPECT_EQ(nullptr, stringToLlvmType(context, "abc*"));
 
 	EXPECT_EQ(nullptr, stringToLlvmType(context, "[a x i32]"));
 	EXPECT_EQ(nullptr, stringToLlvmType(context, "[10 x [i32]"));
@@ -301,8 +300,6 @@ TEST_F(LlvmUtilsTests, stringToLlvmTypeReturnNullWhenTypeStringToParseIsBad)
 
 TEST_F(LlvmUtilsTests, stringToLlvmTypeReturnNullWhenInvalidElementTypesAreUsed)
 {
-	EXPECT_EQ(nullptr, stringToLlvmType(context, "label*"));
-
 	EXPECT_EQ(nullptr, stringToLlvmType(context, "<10 x [10 x i32]>"));
 
 	EXPECT_EQ(nullptr, stringToLlvmType(context, "[10 x i32(i32)]"));
