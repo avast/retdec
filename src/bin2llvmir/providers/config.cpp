@@ -46,6 +46,13 @@ Config Config::fromConfig(llvm::Module* m, retdec::config::Config& c)
 	Config config(c);
 	config._module = m;
 
+	// Create all structures defined in the config.
+	//
+	for (auto& s : config.getConfig().structures)
+	{
+		llvm_utils::stringToLlvmType(m->getContext(), s.getLlvmIr());
+	}
+
 	// TODO: needed?
 	if (config.getConfig().tools.isPic32())
 	{

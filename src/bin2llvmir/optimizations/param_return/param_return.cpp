@@ -333,7 +333,7 @@ void ParamReturn::collectExtraData(DataFlowEntry* dataflow) const
 		std::vector<std::string> argNames;
 		for (auto& a : configFnc->parameters)
 		{
-			argTypes.push_back(nullptr);
+			argTypes.push_back(_abi->getDefaultType());
 			argNames.push_back(a.getName());
 		}
 		if (configFnc->parameters.size())
