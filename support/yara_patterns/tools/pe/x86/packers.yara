@@ -6,6 +6,42 @@
 import "pe"
 import "dotnet"
 
+rule blizzard_protector {
+	meta:
+		tool = "P"
+		name = "!EP"
+		version = "1.0"
+		extra = "BlizzardProtector"
+	condition:
+		filesize > 5MB and
+		(pe.sections[4].name == "_RDATA" or pe.sections[5].name == "_RDATA" or pe.sections[6].name == "_RDATA" or pe.sections[7].name == "_RDATA") and
+		(pe.data_directories[pe.IMAGE_DIRECTORY_ENTRY_TLS].virtual_address != 0) and
+		(
+			(
+				pe.machine == pe.MACHINE_I386 and
+				pe.data_directories[pe.IMAGE_DIRECTORY_ENTRY_TLS].size == 0x18
+			)
+			or
+			(
+				pe.machine == pe.MACHINE_AMD64 and
+				pe.data_directories[pe.IMAGE_DIRECTORY_ENTRY_TLS].size == 0x28
+			)
+		)
+		and
+		(
+			(
+				pe.number_of_imports <= 2 and
+				(pe.data_directories[pe.IMAGE_DIRECTORY_ENTRY_IMPORT].size & 0xFFF00000) != 0 and
+				pe.imports("user32.dll", "MessageBoxW")
+			)
+			or
+			(
+				uint32(pe.sections[2].raw_data_offset + pe.data_directories[pe.IMAGE_DIRECTORY_ENTRY_EXPORT].virtual_address - pe.sections[2].virtual_address) == 0 and
+				uint32(pe.sections[2].raw_data_offset + pe.data_directories[pe.IMAGE_DIRECTORY_ENTRY_EXPORT].virtual_address - pe.sections[2].virtual_address + 4) == 0xFFFFFFFF
+			)
+		)
+}
+
 rule ep_exepack_10 {
 	meta:
 		tool = "P"
