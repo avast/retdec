@@ -30,14 +30,23 @@ target_include_directories(utils
 
 # We may need to link filesystem library manually.
 find_library(STD_CPP_FS stdc++fs)
+# Library found -> link against it.
 if (STD_CPP_FS)
-	message(STATUS "-- Linking with ${STD_CPP_FS} library")
+	message(STATUS "-- Library stdc++fs found -> Linking with ${STD_CPP_FS}")
 	target_link_libraries(utils
 		PRIVATE
 			stdc++fs
 	)
+# Library not found & (Linux, BSD, Solaris, Minix) & GCC
+elseif(UNIX AND (NOT APPLE) AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+	message(STATUS "-- Library stdc++fs NOT found & Linux+GCC -> Linking with stdc++fs")
+	target_link_libraries(utils
+		PRIVATE
+			stdc++fs
+	)
+# Library not found -> hope compiler does not need it.
 else()
-	message(STATUS "-- Library stdc++fs NOT FOUND -> linking utils without stdc++fs library")
+	message(STATUS "-- Library stdc++fs NOT found -> linking utils without stdc++fs library")
 endif()
 
 # Disable the min() and max() macros to prevent errors when using e.g.
