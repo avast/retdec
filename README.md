@@ -219,8 +219,6 @@ Note: Although RetDec now supports a system-wide installation ([#94](https://git
   * `cmake .. -DCMAKE_INSTALL_PREFIX=<path>`
   * `make -jN` (`N` is the number of processes to use for parallel build, typically number of cores + 1 gives fastest compilation time)
   * `make install`
-  * _Note_: RetDec requires [filesystem](https://en.cppreference.com/w/cpp/filesystem) library. CMake will try to find the library in the system but on GCC 7 it might fail to do so. In that case you must specify a path to the library:
-    * `-DCMAKE_LIBRARY_PATH=${PATH_TO_FILESTSTEM_DIR}`, e.g. on GCC 7 `stdc++fs` is in `-DCMAKE_LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/7/`.
 * Windows:
   * Open a command prompt (e.g. `cmd.exe`)
   * `cd retdec`
