@@ -17,7 +17,7 @@
 #include <openssl/pem.h>
 #include <openssl/x509.h>
 
-#include "sig_parser.h"
+#include "sig_parser.hpp"
 #include "retdec/utils/container.h"
 #include "retdec/utils/conversion.h"
 #include "retdec/utils/scope_exit.h"
@@ -2152,7 +2152,7 @@ void PeFormat::loadCertificates()
 		}
 	}
 
-	// If we have no signer and countersigner, there must be something really bad
+	// If we have no signer and countersigner, there must be something really bad	
 	if(!signerCert && !counterSignerCert)
 	{
 		return;

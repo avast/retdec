@@ -71,6 +71,7 @@ add_library(fileformat STATIC
 	file_format/pe/pe_format.cpp
 	file_format/pe/pe_dll_list.cpp
 	file_format/pe/sig_parser.cpp
+	file_format/pe/authenticode_structs.cpp
 	file_format/coff/coff_format.cpp
 	file_format/intel_hex/intel_hex_parser/intel_hex_tokenizer.cpp
 	file_format/intel_hex/intel_hex_parser/intel_hex_parser.cpp
