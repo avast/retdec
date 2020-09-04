@@ -10,11 +10,13 @@
 #include <openssl/pkcs7.h>
 #include <openssl/ts.h>
 #include <openssl/x509.h>
+#include <openssl/pem.h>
 
 #include <vector>
 #include <string>
 #include <cstdint>
 #include <iostream> /* remove */
+#include <ctime>
 
 enum class HashType
 {
@@ -53,8 +55,12 @@ private:
 	void parse_certificates (PKCS7_SIGNER_INFO *info);
 public:
 	Pkcs7 (std::vector<unsigned char> input);
-	HashType get_digest_algorithm() const;
+	const char *get_digest_algorithm() const;
+	STACK_OF(X509) *get_certificates();
+	STACK_OF(X509) *get_signers();
+	std::string get_signed_digest() const;
 	void print();
+
 	STACK_OF(X509) *certificates;
 	STACK_OF(X509) *signers;
 	STACK_OF(PKCS7_SIGNER_INFO) *signer_infos;
@@ -66,14 +72,23 @@ public:
 };
 
 
-class Certificate {
+class Certificate { /* X509 */
 private:
 	X509 *cert;
+	template <typename Getter>
+	std::string get_oneline_string(Getter&& getter) const;
 public:
-	std::string issuer_name();
-	std::string serial();
-	std::string signature_algorithm();
-	std::string subject_name();
+	Certificate (X509 *cert);
+	std::string get_subject_string() const;
+	std::string get_issuer_string() const;
+	std::string get_serial_number() const;
+	std::string get_signature_algorithm() const;
+	EVP_PKEY *get_public_key() const;
+	std::time_t get_not_before() const;
+	std::time_t get_not_after() const;
+	std::string get_pem() const;
+	ASN1_INTEGER* get_serial_number_asn1() const;
+	X509* get_x509() const;
 };
 
 #endif
