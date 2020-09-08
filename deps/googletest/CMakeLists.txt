@@ -9,11 +9,32 @@ endif()
 
 set(GOOGLETEST_INSTALL_DIR ${CMAKE_BINARY_DIR}/deps/install/googletest)
 
-#gtest${MSVC_DEBUG_LIB_SUFFIX}
-set(GTEST_LIB      ${GOOGLETEST_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}gtest${CMAKE_STATIC_LIBRARY_SUFFIX})
-set(GTEST_MAIN_LIB ${GOOGLETEST_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}gtest_main${CMAKE_STATIC_LIBRARY_SUFFIX})
-set(GMOCK_LIB      ${GOOGLETEST_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}gmock${CMAKE_STATIC_LIBRARY_SUFFIX})
-set(GMOCK_MAIN_LIB ${GOOGLETEST_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}gmock_main${CMAKE_STATIC_LIBRARY_SUFFIX})
+if (MSVC)
+	# Generator expressions screw up Ninja build, use them only for MSVC.
+	# Googletest adds "d" suffix for MSVC debug build.
+	# It does not seem this can be controlled from the outside.
+	set(MSVC_DEBUG_LIB_SUFFIX $<$<AND:${MSVC_GE},$<CONFIG:Debug>>:d>)
+else()
+	set(MSVC_DEBUG_LIB_SUFFIX "")
+endif()
+set(GTEST_LIB      ${GOOGLETEST_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}gtest${MSVC_DEBUG_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX})
+set(GTEST_MAIN_LIB ${GOOGLETEST_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}gtest_main${MSVC_DEBUG_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX})
+set(GMOCK_LIB      ${GOOGLETEST_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}gmock${MSVC_DEBUG_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX})
+set(GMOCK_MAIN_LIB ${GOOGLETEST_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}gmock_main${MSVC_DEBUG_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX})
+
+# Generator expressions (possibly in MSVC_DEBUG_LIB_SUFFIX)
+# cannot be in BUILD_BYPRODUCTS, do not set byproducts in MSVC
+# (it is good only for Ninja build).
+if (MSVC)
+	set(GTEST_BYPRODUCTS "")
+else()
+	set(GTEST_BYPRODUCTS
+		${GTEST_LIB}
+		${GTEST_MAIN_LIB}
+		${GMOCK_LIB}
+		${GMOCK_MAIN_LIB}
+	)
+endif()
 
 if(GOOGLETEST_LOCAL_DIR)
 	message(STATUS "Googletest: using local Googletest directory.")
@@ -48,10 +69,7 @@ ExternalProject_Add(googletest
 	LOG_CONFIGURE ON
 	LOG_BUILD ON
 	BUILD_BYPRODUCTS
-		${GTEST_LIB}
-		${GTEST_MAIN_LIB}
-		${GMOCK_LIB}
-		${GMOCK_MAIN_LIB}
+		${GTEST_BYPRODUCTS}
 )
 if(GOOGLETEST_LOCAL_DIR)
 	force_configure_step(googletest)
@@ -68,8 +86,6 @@ set(GTEST_INCLUDE_DIR ${GOOGLETEST_INSTALL_DIR}/include)
 set(GMOCK_INCLUDE_DIR ${GOOGLETEST_INSTALL_DIR}/include)
 
 # Create targets.
-
-set(MSVC_DEBUG_LIB_SUFFIX $<$<AND:${MSVC_GE},$<CONFIG:Debug>>:d>)
 
 # gtest
 add_library(gtest INTERFACE)
