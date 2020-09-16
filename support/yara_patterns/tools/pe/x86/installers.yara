@@ -51,6 +51,21 @@ rule astrum_uv_02 {
 		$1 and astrum_strings
 }
 
+rule create_install {
+	meta:
+		tool = "I"
+		name = "CreateInstall"
+	strings:
+		$s01 = "Gentee Launcher"
+	condition:
+		pe.sections[pe.number_of_sections - 2].name == ".gentee" and
+		pe.overlay.size != 0 and
+		pe.resources[pe.number_of_resources-1].type == pe.RESOURCE_TYPE_MANIFEST and
+		pe.resources[pe.number_of_resources-2].name_string == "S\x00E\x00T\x00U\x00P\x00_\x00I\x00C\x00O\x00N\x00" and   // "SETUP_ICON"
+		pe.resources[pe.number_of_resources-3].name_string == "S\x00E\x00T\x00U\x00P\x00_\x00T\x00E\x00M\x00P\x00" and   // "SETUP_TEMP"
+		all of them
+}
+
 rule kgb_sfx {
 	meta:
 		tool = "I"
