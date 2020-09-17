@@ -17,7 +17,7 @@
 #include <openssl/pem.h>
 #include <openssl/x509.h>
 
-#include "sig_parser.hpp"
+#include "authenticode/authenticode_parser.hpp"
 #include "retdec/utils/container.h"
 #include "retdec/utils/conversion.h"
 #include "retdec/utils/scope_exit.h"
@@ -2082,7 +2082,7 @@ void PeFormat::loadCertificates()
 	// Create the BIO object and extract certificate from it
 	if((bio = BIO_new(BIO_s_mem())) != NULL)
 	Pkcs7 temp {certBytes};
-	
+	temp.print();
 	BIO *bio = BIO_new(BIO_s_mem());
 	if(!bio)
 	{
