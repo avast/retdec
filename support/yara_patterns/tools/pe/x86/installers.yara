@@ -78,6 +78,20 @@ rule fly_studio {
 		pe.overlay.offset == filesize - uint32(pe.overlay.offset + pe.overlay.size - 8) - 0x08
 }
 
+rule gentee_installer {
+	meta:
+		tool = "I"
+		name = "GenteeInstaller"
+	strings:
+		$s01 = "Gentee installer"
+	condition:
+		pe.overlay.size > 16 and
+		uint32(0x3F0) == pe.overlay.offset and
+		(uint32(0x3F4) + uint32(0x3F8)) <= pe.overlay.size and
+		(uint32(pe.overlay.offset) == uint32(0x3F8)) and
+		$s01 at pe.sections[2].raw_data_offset
+}
+
 rule kgb_sfx {
 	meta:
 		tool = "I"
