@@ -66,6 +66,18 @@ rule create_install {
 		all of them
 }
 
+rule fly_studio {
+	meta:
+		tool = "I"
+		name = "FlyStudio"
+	condition:
+		pe.overlay.size > 16 and
+		uint32(pe.overlay.offset) == 0x829ab7a5 and
+		uint32(pe.overlay.offset + 4) == 0x04 and
+		uint32(pe.overlay.offset + pe.overlay.size - 4) == 0x829ab7a5 and
+		pe.overlay.offset == filesize - uint32(pe.overlay.offset + pe.overlay.size - 8) - 0x08
+}
+
 rule kgb_sfx {
 	meta:
 		tool = "I"
