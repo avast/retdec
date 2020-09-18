@@ -2076,20 +2076,15 @@ void PeFormat::loadCertificates()
 	// We always take the first one, there are no additional certificate tables in PE
 	auto certBytes = securityDir.getCertificate(0);
 	auto certSize = certBytes.size();
+
+	Pkcs7 temp {certBytes};
+	temp.print();
+
 	PKCS7 *p7 = NULL;
 	BIO *bio;
 
 	// Create the BIO object and extract certificate from it
 	if((bio = BIO_new(BIO_s_mem())) != NULL)
-	Pkcs7 temp {certBytes};
-	temp.print();
-	BIO *bio = BIO_new(BIO_s_mem());
-	if(!bio)
-	{
-		return;
-	}
-
-	if(BIO_reset(bio) != 1)
 	{
 		if(BIO_reset(bio) == 1)
 		{
