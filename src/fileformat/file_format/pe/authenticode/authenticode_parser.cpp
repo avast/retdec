@@ -198,6 +198,9 @@ void Pkcs7::print() {
 		}
 	}
 	
+	for (auto &&nested_sig : nested_signatures) {
+		nested_sig.print();
+	}
 }
 
 Pkcs9::Pkcs9(std::vector<unsigned char> data, STACK_OF(X509) *certificates) {
