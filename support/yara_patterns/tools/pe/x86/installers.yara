@@ -92,6 +92,26 @@ rule gentee_installer {
 		$s01 at pe.sections[2].raw_data_offset
 }
 
+rule ghost_installer {
+	meta:
+		tool = "I"
+		name = "GhostInstaller"
+	strings:
+		$s01 = "GIPENDMSCF"
+	condition:
+		pe.number_of_sections == 3 and
+		pe.sections[0].name == "UPX0" and
+		pe.sections[1].name == "UPX1" and
+		pe.overlay.offset != 0 and
+		pe.overlay.size != 0 and
+		uint32(pe.overlay.offset) == 0x4643534D and
+		pe.resources[4].type == pe.RESOURCE_TYPE_DIALOG and
+		pe.resources[4].name_string == "D\x00L\x00G\x00_\x00I\x00N\x00P\x00U\x00T\x00Q\x00U\x00E\x00R\x00Y\x00S\x00T\x00R\x00" and
+		pe.resources[5].type == pe.RESOURCE_TYPE_DIALOG and
+  		pe.resources[5].name_string == "D\x00L\x00G\x00_\x00P\x00R\x00E\x00S\x00E\x00T\x00U\x00P\x00" and
+		all of them
+}
+
 rule kgb_sfx {
 	meta:
 		tool = "I"
