@@ -1059,6 +1059,25 @@ rule inno_13x_4
 		$1 at pe.entry_point
 }
 
+rule inno_overlay
+{
+	meta:
+		tool = "I"
+		name = "Inno Setup"
+		version = "1.3.x"
+		source = "Made by Retdec Team"
+	strings:
+		$1 = { 55 8B EC 83 C4 ?? 53 56 57 33 C0 89 45 ?? 89 45 }
+	condition:
+		$1 at pe.entry_point and
+		pe.overlay.offset != 0 and
+		pe.overlay.size > 0x10 and
+		uint32(pe.overlay.offset) == 0x6B736469 and
+		uint32(pe.overlay.offset+0x04) == 0x1A323361 and
+		uint32(pe.overlay.offset+0x08) < filesize and
+		uint32(pe.overlay.offset+0x0C) == 0x1A626C7A
+}
+
 rule inno_2xx
 {
 	meta:
