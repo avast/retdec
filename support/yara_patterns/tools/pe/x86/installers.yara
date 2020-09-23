@@ -112,6 +112,21 @@ rule ghost_installer {
 		all of them
 }
 
+rule install_creator {
+	meta:
+		tool = "I"
+		name = "InstallCreator"
+	strings:
+		$s01 = { 77 77 67 54 29 48 }
+	condition:
+		pe.number_of_sections == 3 and
+		pe.sections[0].name == "UPX0" and
+		pe.sections[1].name == "UPX1" and
+		pe.overlay.offset != 0 and
+		pe.overlay.size != 0 and
+		$s01 at pe.overlay.offset
+}
+
 rule kgb_sfx {
 	meta:
 		tool = "I"
