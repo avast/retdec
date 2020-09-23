@@ -92,6 +92,26 @@ rule gentee_installer {
 		$s01 at pe.sections[2].raw_data_offset
 }
 
+rule ghost_installer {
+	meta:
+		tool = "I"
+		name = "GhostInstaller"
+	strings:
+		$s01 = "GIPENDMSCF"
+	condition:
+		pe.number_of_sections == 3 and
+		pe.sections[0].name == "UPX0" and
+		pe.sections[1].name == "UPX1" and
+		pe.overlay.offset != 0 and
+		pe.overlay.size != 0 and
+		uint32(pe.overlay.offset) == 0x4643534D and
+		pe.resources[4].type == pe.RESOURCE_TYPE_DIALOG and
+		pe.resources[4].name_string == "D\x00L\x00G\x00_\x00I\x00N\x00P\x00U\x00T\x00Q\x00U\x00E\x00R\x00Y\x00S\x00T\x00R\x00" and
+		pe.resources[5].type == pe.RESOURCE_TYPE_DIALOG and
+  		pe.resources[5].name_string == "D\x00L\x00G\x00_\x00P\x00R\x00E\x00S\x00E\x00T\x00U\x00P\x00" and
+		all of them
+}
+
 rule kgb_sfx {
 	meta:
 		tool = "I"
@@ -983,60 +1003,40 @@ rule inno_12x {
 		$1 at pe.entry_point
 }
 
-rule inno_13x_1
+rule inno_13x
 {
 	meta:
 		tool = "I"
 		name = "Inno Setup"
 		version = "1.3.x"
 		source = "Made by Retdec Team"
-		pattern = "558BEC83C4C053565733C08945F08945C48945C0E84373FFFFE8F287FFFFE8E1A9FFFFE8A4F6FFFFE823FCFFFFBEF8FE400033C0556865C2400064FF3064892033D2556824C2400064FF326489228D55F033C0E8CCF3FFFF8B55F0B85CFC4000E80374FF"
-		strings:
-		$1 = { 55 8B EC 83 C4 C0 53 56 57 33 C0 89 45 F0 89 45 C4 89 45 C0 E8 43 73 FF FF E8 F2 87 FF FF E8 E1 A9 FF FF E8 A4 F6 FF FF E8 23 FC FF FF BE F8 FE 40 00 33 C0 55 68 65 C2 40 00 64 FF 30 64 89 20 33 D2 55 68 24 C2 40 00 64 FF 32 64 89 22 8D 55 F0 33 C0 E8 CC F3 FF FF 8B 55 F0 B8 5C FC 40 00 E8 03 74 FF }
+	strings:
+		$1 = { 55 8B EC 83 C4 C0 53 56 57 33 C0 89 45 F0 89 45 C4 89 45 C0 E8 43 73 FF FF E8 F2 87 FF FF E8 E1 A9 FF FF E8 A4 F6 FF FF E8 23 FC FF FF BE ?? FE 40 00 33 C0 55 68 65 C2 40 00 64 FF 30 64 89 20 33 D2 55 68 24 C2 40 00 64 FF 32 64 89 22 8D 55 F0 33 C0 E8 CC F3 FF FF 8B 55 F0 B8 ?? ?? 40 00 E8 03 74 FF }
+		$2 = { 55 8B EC 83 C4 B8 53 56 57 33 C0 89 45 F0 89 45 BC 89 45 B8 E8 C3 71 FF FF E8 72 86 FF FF E8 89 A8 FF FF E8 4C F5 FF FF E8 CB FA FF FF BE 78 FE 40 00 33 C0 55 68 51 C4 40 00 64 FF 30 64 89 20 33 D2 55 68 10 C4 40 00 64 FF 32 64 89 22 8D 55 F0 33 C0 E8 74 F2 FF FF 8B 55 F0 B8 DC FB 40 00 E8 83 72 FF }
+		$3 = { 55 8B EC 83 C4 C0 53 56 57 33 C0 89 45 F0 89 45 C4 89 45 C0 E8 43 73 FF FF E8 F2 87 FF FF E8 E1 A9 FF FF E8 A4 F6 FF FF E8 23 FC FF FF BE 74 FE 40 00 33 C0 55 68 65 C2 40 00 64 FF 30 64 89 20 33 D2 55 68 24 C2 40 00 64 FF 32 64 89 22 8D 55 F0 33 C0 E8 CC F3 FF FF 8B 55 F0 B8 D8 FB 40 00 E8 03 74 FF }
 	condition:
-		$1 at pe.entry_point
+		$1 at pe.entry_point or
+		$2 at pe.entry_point or
+		$3 at pe.entry_point
 }
 
-rule inno_13x_2
+rule inno_overlay
 {
 	meta:
 		tool = "I"
 		name = "Inno Setup"
-		version = "1.3.x"
+		version = "1.3.x overlay"
 		source = "Made by Retdec Team"
-		pattern = "558BEC83C4B853565733C08945F08945BC8945B8E8C371FFFFE87286FFFFE889A8FFFFE84CF5FFFFE8CBFAFFFFBE78FE400033C0556851C4400064FF3064892033D2556810C4400064FF326489228D55F033C0E874F2FFFF8B55F0B8DCFB4000E88372FF"
-		strings:
-		$1 = { 55 8B EC 83 C4 C0 53 56 57 33 C0 89 45 F0 89 45 C4 89 45 C0 E8 43 73 FF FF E8 F2 87 FF FF E8 E1 A9 FF FF E8 A4 F6 FF FF E8 23 FC FF FF BE 74 FE 40 00 33 C0 55 68 65 C2 40 00 64 FF 30 64 89 20 33 D2 55 68 24 C2 40 00 64 FF 32 64 89 22 8D 55 F0 33 C0 E8 CC F3 FF FF 8B 55 F0 B8 D8 FB 40 00 E8 03 74 FF }
+	strings:
+		$1 = { 55 8B EC 83 C4 ?? 53 56 57 33 C0 89 45 ?? 89 45 }
 	condition:
-		$1 at pe.entry_point
-}
-
-rule inno_13x_3
-{
-	meta:
-		tool = "I"
-		name = "Inno Setup"
-		version = "1.3.x"
-		source = "Made by Retdec Team"
-		pattern = "558BEC83C4B853565733C08945F08945BC8945B8E8C371FFFFE87286FFFFE889A8FFFFE84CF5FFFFE8CBFAFFFFBE78FE400033C0556851C4400064FF3064892033D2556810C4400064FF326489228D55F033C0E874F2FFFF8B55F0B8DCFB4000E88372FF"
-		strings:
-		$1 = { 55 8B EC 83 C4 B8 53 56 57 33 C0 89 45 F0 89 45 BC 89 45 B8 E8 C3 71 FF FF E8 72 86 FF FF E8 89 A8 FF FF E8 4C F5 FF FF E8 CB FA FF FF BE 78 FE 40 00 33 C0 55 68 51 C4 40 00 64 FF 30 64 89 20 33 D2 55 68 10 C4 40 00 64 FF 32 64 89 22 8D 55 F0 33 C0 E8 74 F2 FF FF 8B 55 F0 B8 DC FB 40 00 E8 83 72 FF }
-	condition:
-		$1 at pe.entry_point
-}
-
-rule inno_13x_4
-{
-	meta:
-		tool = "I"
-		name = "Inno Setup"
-		version = "1.3.x"
-		source = "Made by Retdec Team"
-		pattern = "558BEC83C4C053565733C08945F08945C48945C0E84373FFFFE8F287FFFFE8E1A9FFFFE8A4F6FFFFE823FCFFFFBE74FE400033C0556865C2400064FF3064892033D2556824C2400064FF326489228D55F033C0E8CCF3FFFF8B55F0B8D8FB4000E80374FF"
-		strings:
-		$1 = { 55 8B EC 83 C4 C0 53 56 57 33 C0 89 45 F0 89 45 C4 89 45 C0 E8 43 73 FF FF E8 F2 87 FF FF E8 E1 A9 FF FF E8 A4 F6 FF FF E8 23 FC FF FF BE 74 FE 40 00 33 C0 55 68 65 C2 40 00 64 FF 30 64 89 20 33 D2 55 68 24 C2 40 00 64 FF 32 64 89 22 8D 55 F0 33 C0 E8 CC F3 FF FF 8B 55 F0 B8 D8 FB 40 00 E8 03 74 FF }
-	condition:
-		$1 at pe.entry_point
+		$1 at pe.entry_point and
+		pe.overlay.offset != 0 and
+		pe.overlay.size > 0x10 and
+		uint32(pe.overlay.offset) == 0x6B736469 and
+		uint32(pe.overlay.offset+0x04) == 0x1A323361 and
+		uint32(pe.overlay.offset+0x08) < filesize and
+		uint32(pe.overlay.offset+0x0C) == 0x1A626C7A
 }
 
 rule inno_2xx
