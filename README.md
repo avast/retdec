@@ -41,11 +41,11 @@ We currently support Windows (7 or later), Linux, macOS, and (experimentally) Fr
 
 ## Use
 
-Please, ensure that you reading instructions corresponding to the used RetDec build.
+Please, ensure that you reading instructions corresponding to the used RetDec version. If unsure, refer to the `retdec/share/retdec/README.md` file in the installation.
 
 ### Windows
 
-1. After installing RetDec, install [Microsoft Visual C++ Redistributable for Visual Studio 2017](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads).
+1. After [installing RetDec](#installation), install [Microsoft Visual C++ Redistributable for Visual Studio 2017](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads).
 
 2. Install the following programs:
 
@@ -62,7 +62,7 @@ Please, ensure that you reading instructions corresponding to the used RetDec bu
 
 ### Linux
 
-1. After installing RetDec, install the following packages via your distribution's package manager:
+1. After [installing RetDec](#installation), install the following packages via your distribution's package manager:
 
     * [UPX](https://upx.github.io/) (Optional: if you want to use UPX unpacker in the preprocessing stage)
     * [Graphviz](http://www.graphviz.org/) (Optional: if you want to generate call or control flow graphs)
@@ -77,7 +77,7 @@ Please, ensure that you reading instructions corresponding to the used RetDec bu
 
 ### macOS
 
-1. After installing RetDec, install the following packages:
+1. After [installing RetDec](#installation), install the following packages:
 
     * [UPX](https://upx.github.io/) (Optional: if you want to use UPX unpacker in the preprocessing stage)
     * [Graphviz](http://www.graphviz.org/) (Optional: if you want to generate call or control flow graphs)
