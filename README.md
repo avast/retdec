@@ -31,22 +31,28 @@ For more information, check out our
 * REcon Montreal 2018 talk: [slides](https://retdec.com/static/publications/retdec-slides-recon-2018.pdf)
 * [Publications](https://retdec.com/publications/)
 
-## Installation and Use
+## Installation
 
-Currently, we support Windows (7 or later), Linux, macOS, and (experimentally) FreeBSD. An installed version of RetDec requires approximately 5 to 6 GB of free disk space.
+There are two ways of obtaining and installing RetDec:
+1. Download and unpack a pre-built [stable](https://github.com/avast/retdec/releases) or [bleeding-edge](https://github.com/avast/retdec#automated-teamcity-builds) package and follow instructions in the _Use_ section of its `retdec/share/retdec/README.md` file after unpacking.
+2. Build RetDec by yourself from sources by following the [Build and Installation](#build-and-installation) section. After installation, follow instructions below.
+
+We currently support Windows (7 or later), Linux, macOS, and (experimentally) FreeBSD. An installed version of RetDec requires approximately 5 to 6 GB of free disk space.
+
+## Use
+
+Please, ensure that you reading instructions corresponding to the used RetDec build.
 
 ### Windows
 
-1. Either download and unpack a [pre-built package](https://github.com/avast/retdec/releases), or build and install the decompiler by yourself (the process is described below).
+1. After installing RetDec, install [Microsoft Visual C++ Redistributable for Visual Studio 2017](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads).
 
-2. Install [Microsoft Visual C++ Redistributable for Visual Studio 2017](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads).
-
-3. Install the following programs:
+2. Install the following programs:
 
     * [UPX](https://upx.github.io/) (Optional: if you want to use UPX unpacker in the preprocessing stage)
     * [Graphviz](https://graphviz.gitlab.io/_pages/Download/windows/graphviz-2.38.msi) (Optional: if you want to generate call or control flow graphs)
 
-4. Now, you are all set to run the decompiler. To decompile a binary file named `test.exe`, run
+3. To decompile a binary file named `test.exe`, run
 
     ```
     $RETDEC_INSTALL_DIR/bin/retdec-decompiler.exe test.exe
@@ -56,14 +62,12 @@ Currently, we support Windows (7 or later), Linux, macOS, and (experimentally) F
 
 ### Linux
 
-1. Either download and unpack a [pre-built package](https://github.com/avast/retdec/releases), or build and install the decompiler by yourself (the process is described below).
-
-2. After you have built the decompiler, you will need to install the following packages via your distribution's package manager:
+1. After installing RetDec, install the following packages via your distribution's package manager:
 
     * [UPX](https://upx.github.io/) (Optional: if you want to use UPX unpacker in the preprocessing stage)
     * [Graphviz](http://www.graphviz.org/) (Optional: if you want to generate call or control flow graphs)
 
-3. Now, you are all set to run the decompiler. To decompile a binary file named `test.exe`, run
+2. To decompile a binary file named `test.exe`, run
 
     ```
     $RETDEC_INSTALL_DIR/bin/retdec-decompiler test.exe
@@ -73,14 +77,12 @@ Currently, we support Windows (7 or later), Linux, macOS, and (experimentally) F
 
 ### macOS
 
-1. Either download and unpack a [pre-built package](https://github.com/avast/retdec/releases), or build and install the decompiler by yourself (the process is described below).
-
-2. After you have built the decompiler, you will need to install the following packages:
+1. After installing RetDec, install the following packages:
 
     * [UPX](https://upx.github.io/) (Optional: if you want to use UPX unpacker in the preprocessing stage)
     * [Graphviz](http://www.graphviz.org/) (Optional: if you want to generate call or control flow graphs)
 
-3. Now, you are all set to run the decompiler. To decompile a binary file named `test.exe`, run
+2. To decompile a binary file named `test.exe`, run
 
     ```
     $RETDEC_INSTALL_DIR/bin/retdec-decompiler test.exe
@@ -92,7 +94,7 @@ Currently, we support Windows (7 or later), Linux, macOS, and (experimentally) F
 
 1. There are currently no pre-built "ports" packages for FreeBSD. You will have to build and install the decompiler by yourself. The process is described below.
 
-2. Now, you are all set to run the decompiler. To decompile a binary file named `test.exe`, run
+2. To decompile a binary file named `test.exe`, run
 
     ```
     $RETDEC_INSTALL_DIR/bin/retdec-decompiler test.exe
