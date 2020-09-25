@@ -55,7 +55,7 @@ Please, ensure that you reading instructions corresponding to the used RetDec ve
 3. To decompile a binary file named `test.exe`, run
 
     ```
-    $RETDEC_INSTALL_DIR/bin/retdec-decompiler.exe test.exe
+    $RETDEC_INSTALL_DIR\bin\retdec-decompiler.exe test.exe
     ```
 
    For more information, run `retdec-decompiler.exe` with `--help`.
