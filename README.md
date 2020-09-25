@@ -49,10 +49,10 @@ Currently, we support Windows (7 or later), Linux, macOS, and (experimentally) F
 4. Now, you are all set to run the decompiler. To decompile a binary file named `test.exe`, run
 
     ```
-    $RETDEC_INSTALL_DIR/bin/retdec-decompiler test.exe
+    $RETDEC_INSTALL_DIR/bin/retdec-decompiler.exe test.exe
     ```
 
-   For more information, run `retdec-decompiler` with `--help`.
+   For more information, run `retdec-decompiler.exe` with `--help`.
 
 ### Linux
 
