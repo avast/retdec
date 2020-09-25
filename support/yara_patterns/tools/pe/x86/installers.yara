@@ -662,16 +662,16 @@ rule nsis_overlay_data {
 		name = "Nullsoft Install System"
 	strings:
 		$s01 = { EF BE AD DE 6E 73 69 73 69 6E 73 74 61 6C 6C 00 }
-        $s02 = { ED BE AD DE 4E 75 6C 6C 53 6F 66 74 49 6E 73 74 }
-        $s03 = { 0? 00 00 00 EF BE AD DE 4E 75 6C 6C (53|73) 6F 66 74 49 6E 73 74 }
+		$s02 = { ED BE AD DE 4E 75 6C 6C 53 6F 66 74 49 6E 73 74 }
+		$s03 = { 0? 00 00 00 EF BE AD DE 4E 75 6C 6C (53|73) 6F 66 74 49 6E 73 74 }
 	condition:
-        pe.number_of_sections > 3 and
+		pe.number_of_sections > 3 and
 		pe.overlay.size != 0 and
-        (
-            @s01 >= pe.overlay.offset or
-            @s02 >= pe.overlay.offset or
-            @s03 >= pe.overlay.offset
-        )
+		(
+			@s01 >= pe.overlay.offset or
+			@s02 >= pe.overlay.offset or
+			@s03 >= pe.overlay.offset
+		)
 }
 
 rule nsis_13x_pimp {
