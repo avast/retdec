@@ -112,6 +112,21 @@ rule ghost_installer {
 		all of them
 }
 
+rule install_creator {
+	meta:
+		tool = "I"
+		name = "InstallCreator"
+	strings:
+		$s01 = { 77 77 67 54 29 48 }
+	condition:
+		pe.number_of_sections == 3 and
+		pe.sections[0].name == "UPX0" and
+		pe.sections[1].name == "UPX1" and
+		pe.overlay.offset != 0 and
+		pe.overlay.size != 0 and
+		$s01 at pe.overlay.offset
+}
+
 rule kgb_sfx {
 	meta:
 		tool = "I"
@@ -639,6 +654,24 @@ rule nsis_1xx_pimp {
 		$1 = { 83 EC 5C 53 55 56 57 FF 15 ?? ?? ?? 00 }
 	condition:
 		$1 at pe.entry_point
+}
+
+rule nsis_overlay_data {
+	meta:
+		tool = "I"
+		name = "Nullsoft Install System"
+	strings:
+		$s01 = { EF BE AD DE 6E 73 69 73 69 6E 73 74 61 6C 6C 00 }
+        $s02 = { ED BE AD DE 4E 75 6C 6C 53 6F 66 74 49 6E 73 74 }
+        $s03 = { 0? 00 00 00 EF BE AD DE 4E 75 6C 6C (53|73) 6F 66 74 49 6E 73 74 }
+	condition:
+        pe.number_of_sections > 3 and
+		pe.overlay.size != 0 and
+        (
+            @s01 >= pe.overlay.offset or
+            @s02 >= pe.overlay.offset or
+            @s03 >= pe.overlay.offset
+        )
 }
 
 rule nsis_13x_pimp {
