@@ -17,7 +17,7 @@
 #include <openssl/pem.h>
 #include <openssl/x509.h>
 
-#include "authenticode/authenticode_parser.hpp"
+#include "authenticode/authenticode.hpp"
 #include "retdec/utils/container.h"
 #include "retdec/utils/conversion.h"
 #include "retdec/utils/scope_exit.h"

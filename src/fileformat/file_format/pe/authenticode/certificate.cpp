@@ -97,13 +97,18 @@ X509* Certificate::get_x509() const
 }
 
 void Certificate::print() {
-	std::cout << "      subject: " << get_subject_string () << std::endl;
-	std::cout << "      issuer: " << get_issuer_string () << std::endl;
-	std::cout << "      serial_number: " << get_serial_number () << std::endl;
-	std::cout << "      signature_algorithm: " << get_signature_algorithm () << std::endl;
+	std::time_t not_before = get_not_before ();
+	std::time_t not_after = get_not_after ();
+
+	std::cout << "   Certificate" << "\n";
+	std::cout << "      Subject              : " << get_subject_string () << "\n";
+	std::cout << "      Issuer               : " << get_issuer_string () << "\n";
+	std::cout << "      Serial number        : " << get_serial_number () << "\n";
+	std::cout << "      Public key algorithm : " << "\n";
+	std::cout << "      Signature algorithm  : " << get_signature_algorithm () << "\n";
+	std::cout << "      Not before           : " << std::put_time (std::gmtime (&not_before), "%c %Z") << "\n";
+	std::cout << "      Not after            : " << std::put_time (std::gmtime (&not_after), "%c %Z") << "\n\n";
 	// std::cout << "pem: " << get_pem () << std::endl;
-	std::cout << "      not_before: " << get_not_before () << std::endl;
-	std::cout << "      not_after: " << get_not_after () << "\n\n" <<std::endl;	
 }
 
 /* Chain is processed by callbacks set in the CertProcessor constructor */

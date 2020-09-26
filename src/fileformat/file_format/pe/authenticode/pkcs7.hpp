@@ -1,8 +1,8 @@
-#ifndef SIG_PARSER_H
-#define SIG_PARSER_H
+#pragma once
 
 #include "authenticode_structs.hpp"
 #include "certificate.hpp"
+#include "pkcs9.hpp"
 
 #include <openssl/bn.h>
 #include <openssl/bio.h>
@@ -18,25 +18,6 @@
 #include <cstdint>
 #include <iostream> /* remove */
 #include <ctime>
-
-enum class HashType
-{
-	MD5,
-	SHA1,
-	SHA256,
-	SHA384,
-	SHA512
-};
-
-class Pkcs9
-{
-public:
-	Pkcs9(std::vector<unsigned char> data, STACK_OF(X509) *certificates);
-	void print();
-	X509 *certificate;
-private:
-	PKCS7_SIGNER_INFO *countersign_info;
-};
 
 class Pkcs7 {
 private:
@@ -64,6 +45,3 @@ public:
 	// std::vector<MsCounterSignature> ms_counter_signatures;
 	
 };
-
-
-#endif

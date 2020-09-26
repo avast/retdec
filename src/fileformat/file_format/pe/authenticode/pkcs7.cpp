@@ -1,24 +1,27 @@
-#include "authenticode_parser.hpp"
+#include "pkcs7.hpp"
 
-#include <filesystem>
-
-const char *hash_name_from_asn1(ASN1_OBJECT *obj) {
+static const char *hash_name_from_asn1(ASN1_OBJECT *obj) {
 	switch (OBJ_obj2nid(obj)) {
 	case NID_md5:
-	case NID_md5WithRSAEncryption:
 		return "MD5";
+	case NID_md5WithRSAEncryption:
+		return "MD5WithRSA";
 	case NID_sha1:
-	case NID_sha1WithRSAEncryption:
 		return "SHA1";
+	case NID_sha1WithRSAEncryption:
+		return "SHA1WithRSA";
 	case NID_sha256:
-	case NID_sha256WithRSAEncryption:
 		return "SHA256";
+	case NID_sha256WithRSAEncryption:
+		return "SHA256WithRSA";
 	case NID_sha384:
-	case NID_sha384WithRSAEncryption:
 		return "SHA384";
+	case NID_sha384WithRSAEncryption:
+		return "SHA384WithRSA";
 	case NID_sha512:
-	case NID_sha512WithRSAEncryption:
 		return "SHA512";
+	case NID_sha512WithRSAEncryption:
+		return "SHA512WithRSA";
 	default:
 		throw std::runtime_error("Invalid digest algorithm in indirect data content");
 	}
@@ -40,6 +43,7 @@ static PKCS7 *get_pkcs7_from_bytes(std::vector<unsigned char> input) {
 	}
 	return pkcs7;
 }
+
 
 /**
  * @brief Parses out bytes into a PKCS7 and other objects that are stored inside (countersignatures etc.)
@@ -169,28 +173,22 @@ std::string Pkcs7::get_signed_digest() const {
 	return std::string ((char *)spc_content->messageDigest->digest->data, spc_content->messageDigest->digest->length);
 }
 
-void Pkcs9::print() {
-	Certificate (certificate).print();
-}
-
-
 void Pkcs7::print() {
 	std::cout << "** Signature: **\n " << std::endl;
-	std::cout << "  File hash algoritm, " << get_digest_algorithm () << std::endl;
-	std::cout << "  Signed hash, " << get_signed_digest () << std::endl; /* fix - TODO decode*/
+	std::cout << "File hash algoritm :" << get_digest_algorithm () << std::endl;
+	std::cout << "Signed hash        : " << get_signed_digest () << std::endl; /* fix - TODO decode*/
 
 	for (auto &&cert : signers) {
-		std::cout << "    Signature chain" << std::endl;
+		std::cout << "   Signature:" << std::endl;
 		CertificateProcessor processor;
 		auto chain = processor.get_chain (cert.get_x509 (), get_certificates ());
 		for (auto &&c : chain) {
 			c.print();
 		}
-		
 	}
 
 	for (auto &&sig : counter_signatures) {
-		std::cout << "    Counter Signature " << std::endl;
+		std::cout << "   Counter Signature " << std::endl;
 		CertificateProcessor processor;
 		auto chain = processor.get_chain (sig.certificate, get_certificates ());
 		for (auto &&c : chain) {
@@ -201,40 +199,4 @@ void Pkcs7::print() {
 	for (auto &&nested_sig : nested_signatures) {
 		nested_sig.print();
 	}
-}
-
-Pkcs9::Pkcs9(std::vector<unsigned char> data, STACK_OF(X509) *certificates) {
-	const auto *data_ptr = data.data ();
-	countersign_info = d2i_PKCS7_SIGNER_INFO (nullptr, &data_ptr, data.size ());
-	if (!countersign_info) {
-		throw std::exception();
-	}
-
-	certificate = X509_find_by_issuer_and_serial(certificates, countersign_info->issuer_and_serial->issuer, countersign_info->issuer_and_serial->serial);
-	if (!certificate) {
-		throw std::runtime_error("Unable to find PKCS9 countersignature certificate");
-	}
-
-	for (int i = 0; i < sk_X509_ATTRIBUTE_num(countersign_info->auth_attr); ++i) {
-		auto attribute = sk_X509_ATTRIBUTE_value(countersign_info->auth_attr, i);
-		auto attribute_object = X509_ATTRIBUTE_get0_object(attribute);
-		std::vector<unsigned char> countersignature;
-		if (OBJ_obj2nid(attribute_object) == NID_pkcs9_messageDigest)
-		{
-			auto attr_type = X509_ATTRIBUTE_get0_type(attribute, 0);
-			countersignature = std::vector<unsigned char> (attr_type->value.octet_string->data,
-				attr_type->value.octet_string->data + attr_type->value.octet_string->length);
-			break;
-		}
-
-		// if (countersignature.empty())
-			// throw std::runtime_error("Countersignature without message digest attribute");
-	}
-	/* get chain
-	X509_STORE_CTX_init(_ctx.get(), _trust_store.get(), cert.get_x509(), untrusted_certs.get_stack_of_x509());
-	X509_verify_cert(_ctx.get());
-
-	The chain is built up by looking up the issuers certificate of the current certificate.
-	If a certificate is found which is its own issuer it is assumed to be the root CA 	.
-	*/
 }
