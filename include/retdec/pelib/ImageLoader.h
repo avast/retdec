@@ -46,6 +46,7 @@ enum struct PELIB_COMPARE_RESULT : std::uint32_t
 	ImagesDifferentSize,                            // The images have different size
 	ImagesDifferentPageAccess,                      // An image page is different (accessible vs non-accessible)
 	ImagesDifferentPageValue,                       // There is a different value at a certain offset
+	ImagesInvalidPageInImage,                       // A page in the image mapped by Windows is invalid
 	ImagesCompareInvalid,
 };
 
@@ -398,8 +399,14 @@ class ImageLoader
 	bool isLegacyImageArchitecture(std::uint16_t Machine);
 	bool checkForValid64BitMachine();
 	bool checkForValid32BitMachine();
+	bool isValidMachineForCodeIntegrifyCheck(std::uint32_t Bits);
 	bool checkForSectionTablesWithinHeader(std::uint32_t e_lfanew);
-	bool checkForBadAppContainer();
+	bool checkForBadCodeIntegrityImages(ByteBuffer & fileData);
+	bool checkForBadArchitectureSpecific();
+	bool checkForImageAfterMapping();
+
+	template <typename LOAD_CONFIG>
+	bool checkForBadLoadConfigXX(std::uint32_t loadConfigRva, std::uint32_t loadConfigSize);
 
 	// isImageLoadable returns true if the image is OK and can be mapped by NtCreateSection(SEC_IMAGE).
 	// This does NOT mean that the image is executable by CreateProcess - more checks are done,
@@ -446,12 +453,18 @@ class ImageLoader
 	std::uint32_t checkSumFileOffset;                   // File offset of the image checksum
 	std::uint32_t securityDirFileOffset;                // File offset of security directory
 	std::uint32_t ssiImageAlignment32;                  // Alignment of signle-section images under 32-bit OS
+	bool is64BitWindows;                                // If true, we simulate 64-bit Windows
 	bool ntHeadersSizeCheck;                            // If true, the loader requires minimum size of NT headers
 	bool sizeofImageMustMatch;                          // If true, the SizeOfImage must match virtual end of the last section
-	bool appContainerCheck;                             // If true, app container flag is tested in the optional header
-	bool is64BitWindows;                                // If true, we simulate 64-bit Windows
+	bool architectureSpecificChecks;                    // If true, architecture-specific checks are also performed
 	bool headerSizeCheck;                               // If true, image loader will imitate Windows XP header size check
 	bool loadArmImages;                                 // If true, image loader will load ARM binaries
+	bool loadArm64Images;                               // If true, image loader will load ARM64 binaries
+	bool loadItaniumImages;                             // If true, image loader will load IA64 binaries
+	bool forceIntegrityCheckEnabled;                    // If true, extra checks will be done if IMAGE_DLLCHARACTERISTICS_FORCE_INTEGRITY is set
+	bool forceIntegrityCheckCertificate;                // If true, extra check for certificate will be provided
+	bool checkNonLegacyDllCharacteristics;              // If true, extra checks will be performed on DllCharacteristics
+	bool checkImagePostMapping;                         // If true, extra checks will be performed after the image is mapped
 };
 
 }	// namespace PeLib

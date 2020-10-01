@@ -328,12 +328,6 @@ namespace PeLib
 		}
 	}
 
-	PELIB_IMAGE_BASE_RELOCATION::PELIB_IMAGE_BASE_RELOCATION()
-	{
-		VirtualAddress = 0;
-		SizeOfBlock = 0;
-	}
-
 	PELIB_IMAGE_COR20_HEADER::PELIB_IMAGE_COR20_HEADER()
 	{
 		cb = 0;
