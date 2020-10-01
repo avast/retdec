@@ -1007,7 +1007,12 @@ namespace PeLib
 		std::uint32_t	VirtualAddress;
 		std::uint32_t	SizeOfBlock;
 
-		PELIB_IMAGE_BASE_RELOCATION();
+		PELIB_IMAGE_BASE_RELOCATION()
+		{
+			VirtualAddress = 0;
+			SizeOfBlock = 0;
+		}
+
 		static inline std::size_t size() {return 72;}
 	};
 
@@ -1269,6 +1274,111 @@ namespace PeLib
 		{
 
 		}
+	};
+
+	struct PELIB_IMAGE_LOAD_CONFIG_CODE_INTEGRITY
+	{
+		std::uint16_t Flags;                         // Flags to indicate if CI information is available, etc.
+		std::uint16_t Catalog;                       // 0xFFFF means not available
+		std::uint32_t CatalogOffset;
+		std::uint32_t Reserved;                      // Additional bitmask to be defined later
+	};
+
+	// Load config directory
+	struct PELIB_IMAGE_LOAD_CONFIG_DIRECTORY32
+	{
+		std::uint32_t Size;
+		std::uint32_t TimeDateStamp;
+		std::uint16_t MajorVersion;
+		std::uint16_t MinorVersion;
+		std::uint32_t GlobalFlagsClear;
+		std::uint32_t GlobalFlagsSet;
+		std::uint32_t CriticalSectionDefaultTimeout;
+		std::uint32_t DeCommitFreeBlockThreshold;
+		std::uint32_t DeCommitTotalFreeThreshold;
+		std::uint32_t LockPrefixTable;
+		std::uint32_t MaximumAllocationSize;
+		std::uint32_t VirtualMemoryThreshold;
+		std::uint32_t ProcessHeapFlags;
+		std::uint32_t ProcessAffinityMask;
+		std::uint16_t CSDVersion;
+		std::uint16_t DependentLoadFlags;
+		std::uint32_t EditList;
+		std::uint32_t SecurityCookie;
+		std::uint32_t SEHandlerTable;
+		std::uint32_t SEHandlerCount;
+		std::uint32_t GuardCFCheckFunctionPointer;
+		std::uint32_t GuardCFDispatchFunctionPointer;
+		std::uint32_t GuardCFFunctionTable;
+		std::uint32_t GuardCFFunctionCount;
+		std::uint32_t GuardFlags;
+		PELIB_IMAGE_LOAD_CONFIG_CODE_INTEGRITY CodeIntegrity;
+		std::uint32_t GuardAddressTakenIatEntryTable;
+		std::uint32_t GuardAddressTakenIatEntryCount;
+		std::uint32_t GuardLongJumpTargetTable;
+		std::uint32_t GuardLongJumpTargetCount;
+		std::uint32_t DynamicValueRelocTable;
+		std::uint32_t CHPEMetadataPointer;
+		std::uint32_t GuardRFFailureRoutine;
+		std::uint32_t GuardRFFailureRoutineFunctionPointer;
+		std::uint32_t DynamicValueRelocTableOffset;
+		std::uint16_t DynamicValueRelocTableSection;
+		std::uint16_t Reserved2;
+		std::uint32_t GuardRFVerifyStackPointerFunctionPointer;
+		std::uint32_t HotPatchTableOffset;
+		std::uint32_t Reserved3;
+		std::uint32_t EnclaveConfigurationPointer;
+		std::uint32_t VolatileMetadataPointer;
+		std::uint32_t GuardEHContinuationTable;
+		std::uint32_t GuardEHContinuationCount;
+	};
+
+	struct PELIB_IMAGE_LOAD_CONFIG_DIRECTORY64
+	{
+		std::uint32_t Size;
+		std::uint32_t TimeDateStamp;
+		std::uint16_t MajorVersion;
+		std::uint16_t MinorVersion;
+		std::uint32_t GlobalFlagsClear;
+		std::uint32_t GlobalFlagsSet;
+		std::uint32_t CriticalSectionDefaultTimeout;
+		std::uint64_t DeCommitFreeBlockThreshold;
+		std::uint64_t DeCommitTotalFreeThreshold;
+		std::uint64_t LockPrefixTable;
+		std::uint64_t MaximumAllocationSize;
+		std::uint64_t VirtualMemoryThreshold;
+		std::uint64_t ProcessAffinityMask;
+		std::uint32_t ProcessHeapFlags;
+		std::uint16_t CSDVersion;
+		std::uint16_t DependentLoadFlags;
+		std::uint64_t EditList;
+		std::uint64_t SecurityCookie;
+		std::uint64_t SEHandlerTable;
+		std::uint64_t SEHandlerCount;
+		std::uint64_t GuardCFCheckFunctionPointer;
+		std::uint64_t GuardCFDispatchFunctionPointer;
+		std::uint64_t GuardCFFunctionTable;
+		std::uint64_t GuardCFFunctionCount;
+		std::uint32_t GuardFlags;
+		PELIB_IMAGE_LOAD_CONFIG_CODE_INTEGRITY CodeIntegrity;
+		std::uint64_t GuardAddressTakenIatEntryTable;
+		std::uint64_t GuardAddressTakenIatEntryCount;
+		std::uint64_t GuardLongJumpTargetTable;
+		std::uint64_t GuardLongJumpTargetCount;
+		std::uint64_t DynamicValueRelocTable;
+		std::uint64_t CHPEMetadataPointer;
+		std::uint64_t GuardRFFailureRoutine;
+		std::uint64_t GuardRFFailureRoutineFunctionPointer;
+		std::uint32_t DynamicValueRelocTableOffset;
+		std::uint16_t DynamicValueRelocTableSection;
+		std::uint16_t Reserved2;
+		std::uint64_t GuardRFVerifyStackPointerFunctionPointer;
+		std::uint32_t HotPatchTableOffset;
+		std::uint32_t Reserved3;
+		std::uint64_t EnclaveConfigurationPointer;
+		std::uint64_t VolatileMetadataPointer;
+		std::uint64_t GuardEHContinuationTable;
+		std::uint64_t GuardEHContinuationCount;
 	};
 
 	// This structure is defined in the "delayimp.h" header file as ImgDelayDescrV1 or ImgDelayDescrV2.
