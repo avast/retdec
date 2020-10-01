@@ -23,8 +23,8 @@ class Pkcs7 {
 private:
 	PKCS7 *pkcs7;
 	SpcIndirectDataContent *spc_content;
-	std::vector<unsigned char> bytes;
-	void parse_signer_info (PKCS7_SIGNER_INFO *si_info, STACK_OF(X509 *) certs);
+	std::uint64_t version;
+	void parse_signer_info (PKCS7_SIGNER_INFO *si_info);
 	void parse_certificates (PKCS7_SIGNER_INFO *info);
 public:
 	Pkcs7 (std::vector<unsigned char> input);
@@ -32,11 +32,9 @@ public:
 	STACK_OF(X509) *get_certificates() const;
 	STACK_OF(X509) *get_signers();
 	std::string get_signed_digest() const;
+	PKCS7_SIGNED *get_signed_data() const;
+	std::uint64_t get_version() const;
 	void print();
-
-	std::uint64_t version;
-	// STACK_OF(X509) *certificates; useless because get_certificates()
-	STACK_OF(PKCS7_SIGNER_INFO) *signer_infos;
 
 	std::vector<Certificate> signers;
 	std::vector<Certificate> certificates;

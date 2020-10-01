@@ -1,8 +1,15 @@
+// Author #Metthal
 #pragma once
 
 #include <openssl/asn1.h>
 #include <openssl/asn1t.h>
 #include <openssl/x509v3.h>
+
+/* 
+   These are types from "Windows Authenticode Portable Executable Signature Format"
+   https://download.microsoft.com/download/9/c/5/9c5b2167-8017-4bae-9fde-d599bac8184a/Authenticode_PE.docx
+   Some of them are changed a little bit because the documentation did not reflect the reality
+*/
 
 struct SpcString
 {

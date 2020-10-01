@@ -111,7 +111,8 @@ void Certificate::print() {
 	// std::cout << "pem: " << get_pem () << std::endl;
 }
 
-/* Chain is processed by callbacks set in the CertProcessor constructor */
+/* Chain is processed by callbacks set in the CertProcessor constructor 
+   !! The order of the certificates is not guaranteed to be corret right now */
 std::vector<Certificate> CertificateProcessor::get_chain (X509 *cert, STACK_OF(X509) *all_certs) {
 	X509_STORE_CTX_init(ctx, trust_store, cert, all_certs);
 	X509_verify_cert(ctx);
@@ -151,26 +152,23 @@ static STACK_OF(X509_CRL)* lookup_crl_callback(X509_STORE_CTX* ctx, X509_NAME* /
 
 
 CertificateProcessor::CertificateProcessor() {
-	trust_store = X509_STORE_new();
-	ctx = X509_STORE_CTX_new();
+	trust_store = X509_STORE_new ();
+	ctx = X509_STORE_CTX_new ();
 
-	if (auto ca_dir = getenv("CA_DIR"); ca_dir)
-	{
+	if (auto ca_dir = getenv ("CA_DIR"); ca_dir) {
 		namespace fs = std::filesystem;
 
-		if (fs::is_directory(ca_dir))
-		{
-			for (auto& p : fs::recursive_directory_iterator(ca_dir))
-			{
-				auto ext = p.path().extension();
+		if (fs::is_directory (ca_dir)) {
+			for (auto &p : fs::recursive_directory_iterator (ca_dir)) {
+				auto ext = p.path ().extension ();
 				if (ext == ".crt" || ext == ".pem" || ext == ".cer")
-					X509_STORE_load_locations(trust_store, p.path().c_str(), nullptr);
+					X509_STORE_load_locations (trust_store, p.path ().c_str (), nullptr);
 			}
 		}
 	}
 
-	X509_STORE_set_flags(trust_store, X509_V_FLAG_CRL_CHECK | X509_V_FLAG_CRL_CHECK_ALL);
-	X509_STORE_set_verify_cb(trust_store, &verify_callback);
+	X509_STORE_set_flags (trust_store, X509_V_FLAG_CRL_CHECK | X509_V_FLAG_CRL_CHECK_ALL);
+	X509_STORE_set_verify_cb (trust_store, &verify_callback);
 	// X509_STORE_set_lookup_crls(trust_store, &lookup_crl_callback);
-	X509_STORE_set_ex_data(trust_store, 0, static_cast<void*>(this));
+	X509_STORE_set_ex_data (trust_store, 0, static_cast<void *> (this));
 }

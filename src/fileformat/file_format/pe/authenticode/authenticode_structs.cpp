@@ -1,3 +1,4 @@
+// Author #Metthal
 #include "authenticode_structs.hpp"
 
 /* 
