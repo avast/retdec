@@ -2674,8 +2674,8 @@ bool PeLib::ImageLoader::checkForBadArchitectureSpecific()
 		// If the image has stripped relocations, it can't be an app container
 		if((fileHeader.Characteristics & PELIB_IMAGE_FILE_RELOCS_STRIPPED) == 0)
 		{
-		if(optionalHeader.DllCharacteristics & PELIB_IMAGE_DLLCHARACTERISTICS_APPCONTAINER)
-		{
+			if(optionalHeader.DllCharacteristics & PELIB_IMAGE_DLLCHARACTERISTICS_APPCONTAINER)
+			{
 				return true;
 			}
 		}
