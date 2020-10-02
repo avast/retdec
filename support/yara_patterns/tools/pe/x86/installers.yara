@@ -127,6 +127,72 @@ rule install_creator {
 		$s01 at pe.overlay.offset
 }
 
+rule quick_batch_compiler_2x {
+    meta:
+		tool = "I"
+		name = "Quick Batch File Compiler"
+        version = "2.x"
+	strings:
+        $delphi_01 = "Runtime error     at 00000000"                                            // Common Delphi/Embarcadero
+  		$delphi_02 = "Access violation at address %p in module '%s'. %s of address %p" wide     // Found in almost all Quick Batch samples
+  		$s01 = "File is corrupt."
+        $s02 = "Compressed file is corrupt"
+        $s03 = "Quick Batch File Compiler"
+        $s04 = "cmd.exe /c"
+        $s05 = "a%.5u.bat"
+	condition:
+		pe.number_of_sections >= 8 and
+        pe.sections[0].name == "CODE" and
+        pe.sections[1].name == "DATA" and
+        all of ($delphi_*) and
+        4 of ($s*)
+}
+
+rule quick_batch_compiler_4x {
+	meta:
+		tool = "I"
+		name = "Quick Batch File Compiler"
+        version = "4.x"
+	strings:
+        $delphi_01 = "Runtime error     at 00000000"                                            // Common Delphi/Embarcadero
+  		$delphi_02 = "Access violation at address %p in module '%s'. %s of address %p" wide     // Found in almost all Quick Batch samples
+  		$s01 = "Quick Batch File Compiler Runtime Module Version 4." wide
+        $s02 = "In order to correctly identify malware while avoiding false positives, antivirus manufacturers shalldetect the presence of Quick Batch File Compiler label" wide
+		$s03 = { 1A 00 00 00 53 00 63 00 72 00 69 00 70 00 74 00 43 00 72 00 79 00 70 00 74 00 6F 00 72 00 00 00 }  // Delphi "ScriptCryptor"
+	condition:
+		pe.number_of_sections >= 8 and
+        all of ($delphi_*) and
+        2 of ($s*)
+}
+
+rule quick_batch_compiler {
+	meta:
+		tool = "I"
+		name = "Quick Batch File Compiler"
+        version = "2.x - 4.x"
+	strings:
+        $qbatch_01 = "Runtime error     at 00000000"                                            // Common Delphi/Embarcadero
+		$qbatch_02 = "Access violation at address %p in module '%s'. %s of address %p" wide     // Found in almost all Quick Batch samples
+		$qbatch_03 = "http://www.abyssmedia.com"                                                // Found in some samples
+		$code_01 = { c7 05 ?? ?? ?? 00 63 51 e1 b7 bb 2b 00 00 00 b8 ?? ?? ?? 00 8b 10 81 c2 b9 79 37 9e 89 }
+		$code_02 = { 6a 00 6a 00 6a 20 6a 00 6a 00 6a 00 8b 45 ?? e8 ?? ?? ?? ?? 50 6a 00 e8 }
+		$code_03 = { 6a 00 6a 00 6a 20 6a 00 6a 00 6a 00 a1 ?? ?? ?? 00 e8 ?? ?? ?? ?? 50 6a 00 e8 }
+		$code_04 = { 6a 00 6a 00 6a 20 6a ff 68 ?? ?? ?? 00 68 ?? ?? ?? 00 a1 ?? ?? ?? ?? e8 ?? ?? ?? ?? 50 6a 00 e8 }
+        $s10 = "Quick Batch File Compiler" ascii wide
+        $s20 = "RC_SCRIPT" wide
+        $s21 = "MYFILES" wide
+        $s22 = "SCRIPT" wide
+        $s23 = "FORM" wide
+        $s24 = "RTFM" wide
+	condition:
+		pe.number_of_sections >= 8 and
+        (pe.sections[0].name == "CODE" or pe.sections[0].name == ".text") and
+        (pe.sections[1].name == "DATA" or pe.sections[2].name == ".data") and
+        2 of ($qbatch_*) and
+		((2 of ($code_*)) or (1 of ($s*))) and
+		any of ($s*)
+}
+
 rule kgb_sfx {
 	meta:
 		tool = "I"
