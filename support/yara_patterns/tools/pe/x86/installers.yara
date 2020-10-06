@@ -679,11 +679,48 @@ rule wise_installer_uv_04 {
 	meta:
 		tool = "I"
 		name = "Wise Installer"
-		pattern = "558BEC81EC780500005356BE04010000578D8594FDFFFF5633DB5053FF15342040008D8594FDFFFF56508D8594FDFFFF50FF15302040008B3D2C20400053536A03536A018D8594FDFFFF680000008050FFD783F8FF8945FC0F847B0100008D8590FCFFFF5056FF15282040008D8598FEFFFF50538D8590FCFFFF681030400050FF15242040005368800000006A0253538D8598FEFFFF680000004050FFD783F8FF8945F40F842F"
 	strings:
-		$1 = { 55 8B EC 81 EC 78 05 00 00 53 56 BE 04 01 00 00 57 8D 85 94 FD FF FF 56 33 DB 50 53 FF 15 34 20 40 00 8D 85 94 FD FF FF 56 50 8D 85 94 FD FF FF 50 FF 15 30 20 40 00 8B 3D 2C 20 40 00 53 53 6A 03 53 6A 01 8D 85 94 FD FF FF 68 00 00 00 80 50 FF D7 83 F8 FF 89 45 FC 0F 84 7B 01 00 00 8D 85 90 FC FF FF 50 56 FF 15 28 20 40 00 8D 85 98 FE FF FF 50 53 8D 85 90 FC FF FF 68 10 30 40 00 50 FF 15 24 20 40 00 53 68 80 00 00 00 6A 02 53 53 8D 85 98 FE FF FF 68 00 00 00 40 50 FF D7 83 F8 FF 89 45 F4 0F 84 2F }
+		$1 = { 55 8B EC 81 EC 78 05 00 00 53 56 BE 04 01 00 00 57 8D 85 94 FD FF FF 56 33 DB 50 53 FF 15 3? 20 40 00 8D 85 94 FD FF FF 56 50 8D 85 94 FD FF FF 50 FF 15 3? 20 40 00 8B 3D ?? 20 40 00 53 53 6A }
+		$2 = { 55 8b ec 81 ec 74 05 00 00 53 8d 85 98 fd ff ff 56 33 db 57 be 04 01 00 00 56 50 53 ff 15 b4 40 40 00 56 8d 85 98 fd ff ff 50 50 ff 15 8c 40 40 00 53 8d 8d 98 fd ff ff 53 6a 03 53 6a 01 68 00 }
+		$3 = { 55 8b ec 81 ec 7c 05 00 00 53 56 57 be 04 01 00 00 56 8d 85 90 fd ff ff 33 db 50 53 89 5d f4 ff 15 38 20 40 00 56 8d 85 90 fd ff ff 50 50 ff 15 34 20 40 00 8b 3d 30 20 40 00 53 53 6a 03 53 6a }
 	condition:
-		$1 at pe.entry_point
+		$1 at pe.entry_point or
+		$2 at pe.entry_point or
+		$3 at pe.entry_point
+}
+
+rule wise_installer_uv_05 {
+	meta:
+		tool = "I"
+		name = "Wise Installer"
+	strings:
+		$s01 = "WISE_SETUP_EXE_PATH=\"%s\""
+		$s02 = "Wise Installation"
+		$s03 = "WiseInitLangAlwaysPrompt"
+		$s04 = "Initializing Wise Installation Wizard..."
+	condition:
+		pe.number_of_sections == 5 and
+		pe.sections[3].name == ".WISE" and
+		all of them
+}
+
+rule wise_installer_uv_06 {
+	meta:
+		tool = "I"
+		name = "Wise Installer"
+	strings:
+		$h01 = { 64 a1 00 00 00 00 55 8b ec 6a ff 68 ?? ?? ?? ?? 68 ?? ?? ?? ?? 50 64 89 25 00 00 00 00 83 ec }
+		$h02 = { 55 8b ec 6a ff 68 ?? ?? ?? ?? 68 ?? ?? ?? ?? 64 a1 00 00 00 00 50 64 89 25 00 00 00 00 83 ec }
+		$s01 = "GLBSInstall"
+		$s02 = "System DLLs corrupt or missing."
+		$s03 = "Could not locate installer DLL."
+		$s04 = "WiseMain"
+		$s05 = "Corrupt installation detected."
+		$s06 = "The installation file may be corrupt."
+	condition:
+		pe.number_of_sections >= 4 and
+		($h01 at pe.entry_point or $h02 at pe.entry_point) and
+		4 of ($s*)
 }
 
 rule wise_installer_110 {
