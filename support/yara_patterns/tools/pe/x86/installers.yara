@@ -642,6 +642,16 @@ rule thinstall_3348_3350_vs {
 		$1 at pe.entry_point
 }
 
+rule viseman {
+	meta:
+		tool = "I"
+		name = "Viseman Installer"
+	condition:
+		pe.overlay.offset != 0 and
+		pe.overlay.size > 4 and
+		uint32(pe.overlay.offset) == 0x56495345     // Reversed "VISE"
+}
+
 rule wise_installer_uv_01 {
 	meta:
 		tool = "I"
