@@ -451,16 +451,57 @@ rule sentinel_641_superpro_automatic_protection {
 		$1 at pe.entry_point
 }
 
-rule setup_factory_6003 {
+rule setup_factory_install_package {
 	meta:
 		tool = "I"
 		name = "Setup Factory"
-		version = "6.0.0.3 Setup Launcher"
-		pattern = "558BEC6AFF689061400068703B400064A100000000506489250000000083EC585356578965E8FF151461400033D28AD489155C8940008BC881E1FF000000890D58894000C1E10803CA890D54894000C1E810A35089400033F656E8E00000005985C075086A1CE8B0000000598975FCE8E60F0000FF1510614000A3408E4000E8A40E0000A390894000E84D0C0000E88F0B0000E822FEFFFF8975D08D45A450FF150C614000E820"
+		version = "Installer Package"
 	strings:
-		$1 = { 55 8B EC 6A FF 68 90 61 40 00 68 70 3B 40 00 64 A1 00 00 00 00 50 64 89 25 00 00 00 00 83 EC 58 53 56 57 89 65 E8 FF 15 14 61 40 00 33 D2 8A D4 89 15 5C 89 40 00 8B C8 81 E1 FF 00 00 00 89 0D 58 89 40 00 C1 E1 08 03 CA 89 0D 54 89 40 00 C1 E8 10 A3 50 89 40 00 33 F6 56 E8 E0 00 00 00 59 85 C0 75 08 6A 1C E8 B0 00 00 00 59 89 75 FC E8 E6 0F 00 00 FF 15 10 61 40 00 A3 40 8E 40 00 E8 A4 0E 00 00 A3 90 89 40 00 E8 4D 0C 00 00 E8 8F 0B 00 00 E8 22 FE FF FF 89 75 D0 8D 45 A4 50 FF 15 0C 61 40 00 E8 20 }
+		$s1 = { E0 E1 E2 E3 E4 E5 E6 E7 }
+		$s2 = { E0 E0 E1 E1 E2 E2 E3 E3 E4 E4 E5 E5 E6 E6 E7 E7 }
 	condition:
-		$1 at pe.entry_point
+		pe.overlay.size > 0x10 and
+		($s1 at pe.overlay.offset or $s2 at pe.overlay.offset)
+}
+
+rule setup_factory_install_app {
+	meta:
+		tool = "I"
+		name = "Setup Factory"
+		version = "Setup Launcher"
+	strings:
+		$s1 = "PKWARE Data Compression Library for Win32"
+		$s3 = "irsetup.dat"
+		$s4 = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\SharedDLLs"
+		$s5 = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\"
+	condition:
+		(
+			pe.version_info["CompanyName"] == "Indigo Rose Corporation" or
+			pe.version_info["LegalTrademarks"] == "Setup Factory is a trademark of Indigo Rose Corporation"
+		)
+		and
+		(
+			pe.version_info["FileDescription"] contains "Setup Factory 4." or
+			pe.version_info["ProductName"] contains "Setup Factory 5." or
+			pe.version_info["ProductName"] contains "Setup Factory 6." or
+			pe.version_info["ProductName"] contains "Setup Factory 8."
+		)
+		and
+		(
+			all of them
+		)
+}
+
+rule setup_factory_install_app_upx {
+	meta:
+		tool = "I"
+		name = "Setup Factory"
+		version = "Setup Launcher 7.0"
+	condition:
+		pe.number_of_sections == 3 and
+		pe.sections[0].name == "UPX0" and
+		pe.version_info["Comments"] == "Created with Setup Factory 7.0" and
+		pe.version_info["ProductName"] == "Setup Factory 7.0 Runtime"
 }
 
 rule setup2go {
