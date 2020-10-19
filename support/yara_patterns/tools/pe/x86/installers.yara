@@ -515,6 +515,42 @@ rule setup2go {
 		$1 at pe.entry_point
 }
 
+rule smart_install_maker_v4 {
+	meta:
+		tool = "I"
+		name = "Smart Install Maker"
+		version = "4.x"
+	strings:
+		$s01 = "Smart Install Maker" nocase
+		$s02 = "SMART INSTALL MAKER" nocase
+		$s03 = "c:\\delphi7\\Lib\\km\\KOL.pas"
+		$s04 = "TLZMADecompressor"
+		$s05 = "Can not create DIB section, error:"
+	condition:
+		pe.number_of_sections == 8 and
+		pe.sections[0].name == "CODE" and           // Delphi
+		pe.sections[1].name == "DATA" and
+		pe.overlay.size != 0 and
+		all of them
+}
+
+rule smart_install_maker_v5 {
+	meta:
+		tool = "I"
+		name = "Smart Install Maker"
+		version = "5.x"
+	strings:
+		$s01 = "Smart Install Maker" nocase
+		$s02 = "SMART INSTALL MAKER" nocase
+	condition:
+		pe.number_of_sections == 8 and
+		pe.sections[0].name == "CODE" and           // Delphi
+		pe.sections[1].name == "DATA" and
+		pe.overlay.size != 0 and
+		$s01 at pe.overlay.offset and
+		all of them
+}
+
 rule thinstall_uv {
 	meta:
 		tool = "I"
