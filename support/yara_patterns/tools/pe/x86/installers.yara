@@ -3496,3 +3496,19 @@ rule wix_toolset_311
 	condition:
 		$1 at pe.entry_point
 }
+
+rule xt_app_launcher
+{
+	meta:
+	  tool = "I"
+		name = "Xenocode Application Launcher"
+		source = "Made by RetDec Team"
+	strings:
+		$h00 = { 8b 4f 3c 03 cf 0f b7 51 14 56 8d 74 0a 18 0f b7 51 06 33 c0 85 d2 76 16 8d 4e 10 8b 31 85 f6 74 07 8b 41 04 03 c6 03 c7 83 c1 28 4a 75 ed 2b c7 5e c3 }
+		$h01 = { 55 8b ec 51 8b 4f 3c 03 cf 0f b7 51 14 53 0f b7 59 06 33 c0 8d 54 0a 18 89 45 fc 3b d8 76 29 83 c2 14 56 8b 72 fc 85 f6 74 12 8b 0a 8d 04 0e 83 e1 11 }
+	condition:
+		pe.number_of_sections == 6 and
+		pe.sections[2].name == ".xcpad" and
+		pe.overlay.size != 0 and
+		any of them
+}
