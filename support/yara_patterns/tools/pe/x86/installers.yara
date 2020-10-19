@@ -3366,7 +3366,7 @@ rule winrar_sfx_console_531
 rule winrar_sfx_console_540
 {
 	meta:
-	  tool = "I"
+		tool = "I"
 		name = "WinRAR SFX"
 		version = "5.40"
 		extra = "console version"
@@ -3396,7 +3396,7 @@ rule winrar_sfx_console_550
 rule wix_toolset_36
 {
 	meta:
-	  tool = "I"
+		tool = "I"
 		name = "WiX Toolset"
 		version = "3.6"
 		source = "Made by RetDec Team"
@@ -3410,7 +3410,7 @@ rule wix_toolset_36
 rule wix_toolset_37
 {
 	meta:
-	  tool = "I"
+		tool = "I"
 		name = "WiX Toolset"
 		version = "3.7"
 		source = "Made by RetDec Team"
@@ -3424,7 +3424,7 @@ rule wix_toolset_37
 rule wix_toolset_38
 {
 	meta:
-	  tool = "I"
+		tool = "I"
 		name = "WiX Toolset"
 		version = "3.8"
 		source = "Made by RetDec Team"
@@ -3438,7 +3438,7 @@ rule wix_toolset_38
 rule wix_toolset_39
 {
 	meta:
-	  tool = "I"
+		tool = "I"
 		name = "WiX Toolset"
 		version = "3.9"
 		source = "Made by RetDec Team"
@@ -3452,7 +3452,7 @@ rule wix_toolset_39
 rule wix_toolset_39r2
 {
 	meta:
-	  tool = "I"
+		tool = "I"
 		name = "WiX Toolset"
 		version = "3.9r2"
 		source = "Made by RetDec Team"
@@ -3466,7 +3466,7 @@ rule wix_toolset_39r2
 rule wix_toolset_310
 {
 	meta:
-	  tool = "I"
+		tool = "I"
 		name = "WiX Toolset"
 		version = "3.10"
 		source = "Made by RetDec Team"
@@ -3480,7 +3480,7 @@ rule wix_toolset_310
 rule wix_toolset_3101
 {
 	meta:
-	  tool = "I"
+		tool = "I"
 		name = "WiX Toolset"
 		version = "3.10.1"
 		source = "Made by RetDec Team"
@@ -3494,7 +3494,7 @@ rule wix_toolset_3101
 rule wix_toolset_3102
 {
 	meta:
-	  tool = "I"
+		tool = "I"
 		name = "WiX Toolset"
 		version = "3.10.2"
 		source = "Made by RetDec Team"
@@ -3508,7 +3508,7 @@ rule wix_toolset_3102
 rule wix_toolset_3103
 {
 	meta:
-	  tool = "I"
+		tool = "I"
 		name = "WiX Toolset"
 		version = "3.10.3"
 		source = "Made by RetDec Team"
@@ -3522,7 +3522,7 @@ rule wix_toolset_3103
 rule wix_toolset_311
 {
 	meta:
-	  tool = "I"
+		tool = "I"
 		name = "WiX Toolset"
 		version = "3.11"
 		source = "Made by RetDec Team"
@@ -3536,7 +3536,7 @@ rule wix_toolset_311
 rule xt_app_launcher
 {
 	meta:
-	  tool = "I"
+		tool = "I"
 		name = "Xenocode Application Launcher"
 		source = "Made by RetDec Team"
 	strings:
