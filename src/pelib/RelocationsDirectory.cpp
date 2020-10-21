@@ -26,6 +26,7 @@ namespace PeLib
 		std::uint32_t rva = imageLoader.getDataDirRva(PELIB_IMAGE_DIRECTORY_ENTRY_BASERELOC);
 		std::uint32_t size = imageLoader.getDataDirSize(PELIB_IMAGE_DIRECTORY_ENTRY_BASERELOC);
 		std::uint32_t sizeOfImage = imageLoader.getSizeOfImage();
+		std::uint64_t sizeOfFile = imageLoader.getSizeOfFile();
 
 		// Check for relocations out of image
 		if(rva >= sizeOfImage || (rva + size) < rva || (rva + size) > sizeOfImage)
@@ -34,9 +35,17 @@ namespace PeLib
 			return ERROR_INVALID_FILE;
 		}
 
+		// Check for relocations out of file
+		if(size > sizeOfFile)
+		{
+			RelocationsDirectory::setLoaderError(LDR_ERROR_RELOCATIONS_OUT_OF_IMAGE);
+			return ERROR_INVALID_FILE;
+		}
+
 		// Read the entire relocation directory from the image
 		std::vector<std::uint8_t> vRelocDirectory(size);
-		imageLoader.readImage(vRelocDirectory.data(), rva, size);
+		if(imageLoader.readImage(vRelocDirectory.data(), rva, size) != size)
+			return ERROR_INVALID_FILE;
 
 		// Parse the relocations directory
 		read(vRelocDirectory.data(), size, sizeOfImage);

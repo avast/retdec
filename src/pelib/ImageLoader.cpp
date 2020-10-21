@@ -871,6 +871,9 @@ int PeLib::ImageLoader::Load(
 {
 	int fileError;
 
+	// Remember the size of the file for later use
+	fileSize = fileData.size();
+
 	// Check and capture DOS header
 	fileError = captureDosHeader(fileData);
 	if(fileError != ERROR_NONE)
