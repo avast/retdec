@@ -17,6 +17,7 @@
 * Fix: Fixed filtration to better handle functions with no arguments and therefore to reduce noise in output ([#155](https://github.com/avast/retdec/issues/155)).
 * Fix: Fixed build on some systems by adding missing includes of `<limits>` into `retdec-fileinfo` ([#745](https://github.com/avast/retdec/pull/745)).
 * Fix: Fixed two type errors in `scripts/retdec-archive-decompiler.py` ([#759](https://github.com/avast/retdec/pull/759)).
+* Fix: Fixed runtime and memory use of `retdec-fileinfo` on PE samples having corrupted relocations ([#872](https://github.com/avast/retdec/issues/872), [#873](https://github.com/avast/retdec/pull/873)).
 
 # v4.0 (2020-04-07)
 
