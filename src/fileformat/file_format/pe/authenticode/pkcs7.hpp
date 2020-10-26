@@ -26,20 +26,20 @@ private:
 	std::uint64_t version;
 	void parse_signer_info (PKCS7_SIGNER_INFO *si_info);
 	void parse_certificates (PKCS7_SIGNER_INFO *info);
-public:
-	Pkcs7 (std::vector<unsigned char> input);
-	const char *get_digest_algorithm() const;
 	STACK_OF(X509) *get_certificates() const;
 	STACK_OF(X509) *get_signers();
-	std::string get_signed_digest() const;
 	PKCS7_SIGNED *get_signed_data() const;
-	std::uint64_t get_version() const;
-	void print();
-
+public:
 	std::vector<Certificate> signers;
 	std::vector<Certificate> certificates;
 	std::vector<Pkcs7> nested_signatures;
 	std::vector<Pkcs9> counter_signatures;
+
+	Pkcs7 (std::vector<unsigned char> input);
+	const char *get_digest_algorithm() const;
+	std::string get_signed_digest() const;
+	std::uint64_t get_version() const;
+	void print();
 	// std::vector<MsCounterSignature> ms_counter_signatures;
 	
 };

@@ -5,18 +5,15 @@ Certificate::Certificate(X509 *cert) {
 	this->cert = cert;
 }
 
-static std::time_t asn1_time_to_timestamp(const ASN1_TIME* asn1_time)
-{
+static std::time_t asn1_time_to_timestamp(const ASN1_TIME* asn1_time) {
 	struct tm timepoint;
 	ASN1_TIME_to_tm(asn1_time, &timepoint);
 	return mktime(&timepoint);
 }
 
-template <typename Getter>
-std::string Certificate::get_oneline_string(Getter&& getter) const
-{
+std::string Certificate::get_x509_name(X509_NAME *name) const {
 	BIO *bio = BIO_new(BIO_s_mem());
-	X509_NAME_print_ex(bio, getter(cert), 0, XN_FLAG_RFC2253);
+	X509_NAME_print_ex(bio, name, 0, XN_FLAG_RFC2253);
 	auto str_size = BIO_number_written(bio);
 
 	std::string result(str_size, '\0');
@@ -24,22 +21,15 @@ std::string Certificate::get_oneline_string(Getter&& getter) const
 	return result;
 }
 
-std::string Certificate::get_subject_string() const
-{
-	return get_oneline_string([](X509* cert) {
-		return X509_get_subject_name(cert);
-	});
+std::string Certificate::get_subject_string() const {
+	return get_x509_name(X509_get_subject_name(cert));
 }
 
-std::string Certificate::get_issuer_string() const
-{
-	return get_oneline_string([](X509* cert) {
-		return X509_get_issuer_name(cert);
-	});
+std::string Certificate::get_issuer_string() const {
+	return get_x509_name(X509_get_issuer_name(cert));
 }
 
-std::string Certificate::get_serial_number() const
-{
+std::string Certificate::get_serial_number() const {
 	auto serial_number_asn1 = get_serial_number_asn1();
 	BIGNUM *bignum = ASN1_INTEGER_to_BN(serial_number_asn1, nullptr);
 
@@ -52,31 +42,26 @@ std::string Certificate::get_serial_number() const
 	return { result.begin(), result.end() };
 }
 
-std::string Certificate::get_signature_algorithm() const
-{
+std::string Certificate::get_signature_algorithm() const {
 	auto algo = X509_get0_tbs_sigalg(cert);
 	char name[256] = { '\0' };
 	OBJ_obj2txt(name, 255, algo->algorithm, 0);
 	return name;
 }
 
-EVP_PKEY *Certificate::get_public_key() const
-{
+EVP_PKEY *Certificate::get_public_key() const {
 	return X509_get0_pubkey(cert);
 }
 
-std::time_t Certificate::get_not_before() const
-{
+std::time_t Certificate::get_not_before() const {
 	return asn1_time_to_timestamp(X509_get0_notBefore(cert));
 }
 
-std::time_t Certificate::get_not_after() const
-{
+std::time_t Certificate::get_not_after() const {
 	return asn1_time_to_timestamp(X509_get0_notAfter(cert));
 }
 
-std::string Certificate::get_pem() const
-{
+std::string Certificate::get_pem() const {
 	BIO *bio = BIO_new(BIO_s_mem());
 	PEM_write_bio_X509(bio, cert);
 	auto data_len = BIO_number_written(bio);
@@ -86,13 +71,11 @@ std::string Certificate::get_pem() const
 	return { result.begin(), result.end() };
 }
 
-ASN1_INTEGER* Certificate::get_serial_number_asn1() const
-{
+ASN1_INTEGER* Certificate::get_serial_number_asn1() const {
 	return X509_get_serialNumber(cert);
 }
 
-X509* Certificate::get_x509() const
-{
+X509* Certificate::get_x509() const {
 	return cert;
 }
 

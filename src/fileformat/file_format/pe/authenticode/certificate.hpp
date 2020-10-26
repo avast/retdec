@@ -18,8 +18,7 @@
 class Certificate { /* X509, can't name it X509 due to the collisions */
 private:
 	X509 *cert;
-	template <typename Getter>
-	std::string get_oneline_string(Getter&& getter) const;
+	std::string get_x509_name(X509_NAME *name) const;
 public:
 	Certificate (X509 *cert);
 	std::string get_subject_string() const;
