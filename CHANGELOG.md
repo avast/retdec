@@ -13,6 +13,7 @@
 * Enhancement: Added support for Ninja CMake generator ([#8](https://github.com/avast/retdec/issues/8), [#830](https://github.com/avast/retdec/issues/8)).
 * Enhancement: Removed copyrights from RetDec's outputs ([#843](https://github.com/avast/retdec/pull/843)).
 * Fix: Arithmetic shift is no longer converted to signed division as these operations provide different output with negative numbers. ([#724](https://github.com/avast/retdec/issues/724)).
+* Fix: Fixed infinite looping during the copy-propagation optimization in `llvmir2hll` ([#876](https://github.com/avast/retdec/pull/876)).
 * Fix: Fixed analyzed calling convention on MIPS architecture. Register F0 is used for floating point function return ([#656](https://github.com/avast/retdec/issues/656)).
 * Fix: Fixed filtration to better handle functions with no arguments and therefore to reduce noise in output ([#155](https://github.com/avast/retdec/issues/155)).
 * Fix: Fixed build on some systems by adding missing includes of `<limits>` into `retdec-fileinfo` ([#745](https://github.com/avast/retdec/pull/745)).
