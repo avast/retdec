@@ -843,7 +843,7 @@ void CopyPropagationOptimizer::handleCaseInductionVariable(
 	bool ok = false;
 	std::set<ShPtr<Statement>> visited;
 	for (auto prev = commonOtherDef->getUniquePredecessor(); prev && visited.insert(prev).second;
-		prev = prev->getUniquePredecessor()) {
+			prev = prev->getUniquePredecessor()) {
 		auto vds = cast<VarDefStmt>(prev);
 		if (vds && vds->getVar() == otherValue && vds->getInitializer() == nullptr) {
 			ok = true;
@@ -1045,7 +1045,7 @@ void CopyPropagationOptimizer::handleCaseInductionVariable2(
 	bool ok = false;
 	std::set<ShPtr<Statement>> visited;
 	for (auto prev = xZero->getUniquePredecessor(); prev && visited.insert(prev).second;
-		prev = prev->getUniquePredecessor()) {
+			prev = prev->getUniquePredecessor()) {
 		auto vds = cast<VarDefStmt>(prev);
 		if (vds && vds->getVar() == y) {
 			ok = (vds->getInitializer() == nullptr);
