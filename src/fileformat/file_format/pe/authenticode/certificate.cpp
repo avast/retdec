@@ -1,5 +1,6 @@
-#include "certificate.hpp"
+#include "certificate.h"
 
+namespace authenticode {
 
 Certificate::Certificate(X509 *cert) {
 	this->cert = cert;
@@ -154,4 +155,6 @@ CertificateProcessor::CertificateProcessor() {
 	X509_STORE_set_verify_cb (trust_store, &verify_callback);
 	// X509_STORE_set_lookup_crls(trust_store, &lookup_crl_callback);
 	X509_STORE_set_ex_data (trust_store, 0, static_cast<void *> (this));
+}
+
 }

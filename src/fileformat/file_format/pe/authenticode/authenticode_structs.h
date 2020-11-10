@@ -1,4 +1,5 @@
-// Author #Metthal
+/* Author #Metthal */
+
 #pragma once
 
 #include <openssl/asn1.h>

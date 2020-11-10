@@ -1,8 +1,9 @@
 #pragma once
 
-#include "authenticode_structs.hpp"
-#include "certificate.hpp"
-#include "pkcs7.hpp"
+#include "authenticode_structs.h"
+#include "certificate.h"
+#include "signature.h"
+#include "pkcs7.h"
 
 #include <openssl/bn.h>
 #include <openssl/bio.h>
@@ -19,9 +20,14 @@
 #include <iostream> /* remove */
 #include <ctime>
 
+namespace authenticode {
+
 class Authenticode {
-private:
-	Pkcs7 pkcs7;
-public:
-	Authenticode(std::vector<unsigned char> data);
+	private:
+		Pkcs7 pkcs7;
+
+	public:
+		Authenticode (std::vector<unsigned char> data);
+		std::vector<Signature> getSignatures () { return pkcs7.get_signatures (); }
 };
+} // namespace authenticode

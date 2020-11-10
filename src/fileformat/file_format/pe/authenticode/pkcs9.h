@@ -1,7 +1,7 @@
 #pragma once
 
-#include "authenticode_structs.hpp"
-#include "certificate.hpp"
+#include "authenticode_structs.h"
+#include "certificate.h"
 
 #include <openssl/bn.h>
 #include <openssl/bio.h>
@@ -18,6 +18,7 @@
 #include <iostream> /* remove */
 #include <ctime>
 
+namespace authenticode {
 
 class Pkcs9
 {
@@ -28,3 +29,5 @@ public:
 private:
 	PKCS7_SIGNER_INFO *countersign_info;
 };
+
+}

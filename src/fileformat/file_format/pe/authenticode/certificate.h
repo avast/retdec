@@ -15,6 +15,8 @@
 #include <iostream>
 #include <filesystem>
 
+namespace authenticode {
+
 class Certificate { /* X509, can't name it X509 due to the collisions */
 private:
 	X509 *cert;
@@ -43,3 +45,5 @@ public:
 	CertificateProcessor();
 	std::vector<Certificate> get_chain(X509 *cert, STACK_OF(X509) *all_certs);
 };
+
+}

@@ -1,5 +1,6 @@
-// Author #Metthal
-#include "authenticode_structs.hpp"
+/* Author #Metthal */
+
+#include "authenticode_structs.h"
 
 /* 
    These are types from "Windows Authenticode Portable Executable Signature Format"

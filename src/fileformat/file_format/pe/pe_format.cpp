@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <cassert>
 #include <map>
+#include <new>
 #include <regex>
 #include <tuple>
 #include <unordered_map>
@@ -17,7 +18,8 @@
 #include <openssl/pem.h>
 #include <openssl/x509.h>
 
-#include "authenticode/authenticode.hpp"
+#include "authenticode/authenticode.h"
+#include "retdec/fileformat/types/certificate_table/certificate_table.h"
 #include "retdec/utils/container.h"
 #include "retdec/utils/conversion.h"
 #include "retdec/utils/scope_exit.h"
@@ -2072,168 +2074,9 @@ void PeFormat::loadCertificates()
 	{
 		return;
 	}
-
 	// We always take the first one, there are no additional certificate tables in PE
 	auto certBytes = securityDir.getCertificate(0);
-	auto certSize = certBytes.size();
-
-	Pkcs7 temp {certBytes};
-	temp.print();
-
-	PKCS7 *p7 = NULL;
-	BIO *bio;
-
-	// Create the BIO object and extract certificate from it
-	if((bio = BIO_new(BIO_s_mem())) != NULL)
-	{
-		if(BIO_reset(bio) == 1)
-		{
-			if(BIO_write(bio, certBytes.data(), certSize) == certSize)
-			{
-				p7 = d2i_PKCS7_bio(bio, nullptr);
-			}
-		}
-		BIO_free(bio);
-	}
-
-	// Make sure that the PKCS7 structure is valid
-	if(!p7)
-	{
-		return;
-	}
-
-	//// Make sure that the PKCS7 data is valid
-	if(!PKCS7_type_is_signed(p7))
-	{
-		PKCS7_free(p7);
-		return;
-	}
-
-	// Find signer of the application and store its serial number.
-	X509 *signerCert = nullptr;
-	X509 *counterSignerCert = nullptr;
-
-	STACK_OF(X509) *certs = p7->d.sign->cert;
-	STACK_OF(X509) *signers = PKCS7_get0_signers(p7, certs, 0);
-
-	SCOPE_EXIT {
-		if (signers != nullptr)
-			sk_X509_free(signers);
-	};
-
-	if(sk_X509_num(signers) > 0)
-	{
-		signerCert = sk_X509_value(signers, 0);
-	}
-
-	// Try to find countersigner if it exists and store its serial number.
-	STACK_OF(PKCS7_SIGNER_INFO) *sinfos = PKCS7_get_signer_info(p7);
-	if(sk_PKCS7_SIGNER_INFO_num(sinfos) > 0)
-	{
-		PKCS7_SIGNER_INFO *sinfo = sk_PKCS7_SIGNER_INFO_value(sinfos, 0);
-
-		// Counter-signer is stored as unsigned attribute and there is no other way to get it but manual parsing
-		ASN1_TYPE *counterSig = PKCS7_get_attribute(sinfo, NID_pkcs9_countersignature);
-		if(counterSig)
-		{
-			auto bio = std::unique_ptr<BIO, decltype(&BIO_free)>(BIO_new_mem_buf(counterSig->value.sequence->data, counterSig->value.sequence->length), &BIO_free);
-			PKCS7_SIGNER_INFO *counterSinfo = reinterpret_cast<PKCS7_SIGNER_INFO*>(ASN1_item_d2i_bio(ASN1_ITEM_rptr(PKCS7_SIGNER_INFO), bio.get(), nullptr));
-			if(counterSinfo)
-			{
-				// From SignerInfo, we get only issuer, but we can lookup by issuer in all certificates and get original counter-signer
-				counterSignerCert = X509_find_by_issuer_and_serial(certs, counterSinfo->issuer_and_serial->issuer, counterSinfo->issuer_and_serial->serial);
-			}
-			ASN1_item_free(reinterpret_cast<ASN1_VALUE*>(counterSinfo), ASN1_ITEM_rptr(PKCS7_SIGNER_INFO));
-		}
-	}
-
-	// If we have no signer and countersigner, there must be something really bad	
-	if(!signerCert && !counterSignerCert)
-	{
-		return;
-	}
-
-	// Now that we know there is at least a signer or counter-signer, we can
-	// verify the signature. Do not try to verify the signature before
-	// verifying that there is at least a signer or counter-signer as 'p7' is
-	// empty in that case (#87).
-	signatureVerified = verifySignature(this, p7);
-
-	// Create hash table with key-value pair as subject-X509 certificate so we can easily lookup certificates by their subject name
-	std::unordered_map<std::string, X509*> subjectToCert;
-	for(int j = 0; j < sk_X509_num(certs); ++j)
-	{
-		X509 *xcert = sk_X509_value(certs, j);
-		auto subjectPtr = X509_NAME_oneline(X509_get_subject_name(xcert), nullptr, 0);
-		std::string subject = subjectPtr;
-		subjectToCert[subject] = xcert;
-		OPENSSL_free(subjectPtr);
-	}
-
-	// Start with signer certificate which will be always first and continue with its issuer name and use previously constructed hash table to
-	// reconstruct chain of certificates
-	// When we hit the last certificate in the chain and there is counter-signer, try to reconstruct its chain
-	X509* xcert = nullptr;
-	bool counterChain = false;
-	std::string nextIssuer;
-	if(signerCert)
-	{
-		auto nextIssuerPtr = X509_NAME_oneline(X509_get_subject_name(signerCert), nullptr, 0);
-		nextIssuer = nextIssuerPtr;
-		OPENSSL_free(nextIssuerPtr);
-	}
-
-	// Continue while we have next issuer to process, or there is counter-signer certificate and we haven't processed him yet
-	while(!nextIssuer.empty() || (!counterChain && counterSignerCert))
-	{
-		// Find next issuer in the hash table
-		auto itr = subjectToCert.find(nextIssuer);
-		if(itr == subjectToCert.end())
-		{
-			// If we haven't processed counter-signer chain yet and there is counter-signer certificate
-			if(!counterChain && counterSignerCert)
-			{
-				auto nextIssuerPtr = X509_NAME_oneline(X509_get_subject_name(counterSignerCert), nullptr, 0);
-				nextIssuer = nextIssuerPtr;
-				counterChain = true;
-				OPENSSL_free(nextIssuerPtr);
-				continue;
-			}
-			else
-			{
-				break;
-			}
-		}
-		// Remove certificate from the hash table so we can't get into infinite loops
-		else
-		{
-			xcert = itr->second;
-			subjectToCert.erase(itr);
-		}
-
-		if(!certificateTable)
-		{
-			certificateTable = new CertificateTable();
-		}
-
-		Certificate cert = x509toCert(xcert);
-		certificateTable->addCertificate(cert);
-
-		// Check if we are at signer or counter-signer certificate and let the certificate table known indices.
-		if(xcert == signerCert)
-		{
-			certificateTable->setSignerCertificateIndex(certificateTable->getNumberOfCertificates() - 1);
-		}
-		else if(xcert == counterSignerCert)
-		{
-			certificateTable->setCounterSignerCertificateIndex(certificateTable->getNumberOfCertificates() - 1);
-		}
-
-		// Continue with next issuer
-		nextIssuer = cert.getRawIssuer();
-	}
-
-	PKCS7_free(p7);
+	certificateTable = new CertificateTable(authenticode::Authenticode(certBytes));
 }
 
 /**

@@ -1,4 +1,10 @@
-#include "pkcs7.hpp"
+#include "pkcs7.h"
+
+#include <cstdint>
+#include <exception>
+#include <openssl/pkcs7.h>
+
+namespace authenticode {
 
 static const int NID_spc_nested_signature = 
 	OBJ_create ("1.3.6.1.4.1.311.2.4.1", "spcNestedSignature", "SPC_NESTED_SIGNATURE (Authenticode)");
@@ -112,14 +118,18 @@ Pkcs7::Pkcs7(std::vector<unsigned char> input) {
 		certificates.push_back (cert);
 	}
 
-	/*  */
+
 	STACK_OF (X509) *raw_signers = PKCS7_get0_signers (pkcs7, certs, 0);
 	if (raw_signers) {
 		int signers_count = sk_X509_num (raw_signers);
-		for (size_t i = 0; i < signers_count; i++) {
-			Certificate cert (sk_X509_value (raw_signers, i));
-			signers.push_back (cert);
+		/* "Because Authenticode signatures support only one signer,"
+		https://www.symbolcrash.com/wp-content/uploads/2019/02/Authenticode_PE-1.pdf page 7 */
+		if (signers_count != 1) {
+			throw std::exception();
 		}
+		signer = Certificate (sk_X509_value (raw_signers, 0));
+	} else {
+		throw std::exception(); // ??
 	}
 }
 
@@ -169,8 +179,8 @@ const char *Pkcs7::get_digest_algorithm() const {
 	return hash_name_from_asn1 (spc_content->messageDigest->digestAlgorithm->algorithm);
 }
 
-std::string Pkcs7::get_signed_digest() const {
-	return std::string ((char *)spc_content->messageDigest->digest->data, spc_content->messageDigest->digest->length);
+std::vector<std::uint8_t> Pkcs7::get_signed_digest() const {
+	return std::vector<std::uint8_t> (spc_content->messageDigest->digest->data, spc_content->messageDigest->digest->data + spc_content->messageDigest->digest->length);
 }
 
 PKCS7_SIGNED *Pkcs7::get_signed_data() const {
@@ -181,35 +191,30 @@ std::uint64_t Pkcs7::get_version() const {
 	return version;
 }
 
-void Pkcs7::print() {
-	std::cout << "** Signature: **\n " << std::endl;
-	std::cout << "Hash algoritm :" << get_digest_algorithm () << std::endl;
-	char buff[1000] = {0};// TODO fix this hotfix trash
-	auto signed_digest = get_signed_digest ();
-	for (size_t i = 0; i < signed_digest.length (); i++) {
-		sprintf (buff + 2 * i, "%02hhx", signed_digest[i]);
-	}
-	std::cout << "Signed hash        : " << buff << std::endl; /* fix - TODO decode*/
+std::vector<Signature> Pkcs7::get_signatures () {
+	std::vector<Signature> signatures;
 
-	for (auto &&cert : signers) {
-		std::cout << "   Signature:" << std::endl;
+	CertificateProcessor processor;
+	Signature signature {
+		.signed_digest = get_signed_digest (),
+		.digest_algorithm = get_digest_algorithm (),
+		.signer = Signer { .chain = processor.get_chain (signer.value().get_x509 (), get_certificates ()) }
+	};
+
+	for (auto &&counter_sig : counter_signatures) {
 		CertificateProcessor processor;
-		auto chain = processor.get_chain (cert.get_x509 (), get_certificates ());
-		for (auto &&c : chain) {
-			c.print ();
-		}
+		auto chain = processor.get_chain (counter_sig.certificate, get_certificates ());
+		signature.signer.counter_signers.push_back (CounterSigner{ .chain = chain });
 	}
+	/* TODO deal with the naming weird stuff when we have pkcs7 and signatures as separate interfaces */
+	for (auto &&nested_pkcs7 : nested_signatures) {
+		auto nested_sigs = nested_pkcs7.get_signatures ();
+		signatures.insert (signatures.end (), nested_sigs.begin (), nested_sigs.end ());
+	}
+}
 
-	for (auto &&sig : counter_signatures) {
-		std::cout << "   Counter Signature " << std::endl;
-		CertificateProcessor processor;
-		auto chain = processor.get_chain (sig.certificate, get_certificates ());
-		for (auto &&c : chain) {
-			c.print ();
-		}
-	}
+Pkcs7::~Pkcs7() {
+	PKCS7_free(pkcs7);
+}
 
-	for (auto &&nested_sig : nested_signatures) {
-		nested_sig.print ();
-	}
 }

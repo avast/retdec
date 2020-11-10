@@ -1,4 +1,6 @@
-#include "pkcs9.hpp"
+#include "pkcs9.h"
+
+namespace authenticode {
 
 void Pkcs9::print() {
 	Certificate (certificate).print ();
@@ -29,4 +31,6 @@ Pkcs9::Pkcs9(std::vector<unsigned char> data, STACK_OF(X509) *certificates) {
 			break;
 		}
 	}
+}
+
 }

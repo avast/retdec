@@ -10,55 +10,43 @@
 #include <vector>
 
 #include "retdec/fileformat/types/certificate_table/certificate.h"
+#include "../src/fileformat//file_format/pe/authenticode/authenticode.h"
 
 namespace retdec {
 namespace fileformat {
 
+
+struct CounterSigner {
+	std::vector<Certificate> chain;
+	std::vector<CounterSigner> counter_signers;
+};
+
+struct Signer {
+	std::vector<Certificate> chain;
+	std::vector<CounterSigner> counter_signers;
+};
+
+struct Signature 
+{
+	std::vector<std::uint8_t> signed_digest;
+	std::string digest_algorithm;
+
+	std::vector<Signer> signers;
+};
+
+
 /**
  * Table of certificates
+ * TODO need to refactor this quite a bit to support Authenticode
  */
 class CertificateTable
 {
 	private:
-		using certificatesIterator = std::vector<Certificate>::const_iterator;
-		/// flag indicating whether signer is present
-		bool hasSigner = false;
-		/// flag indicating whether counter signer is present
-		bool hasCounterSigner = false;
-		/// index of certificate of the signer
-		std::size_t signerIndex = 0;
-		/// index of certificate of the counter-signer
-		std::size_t counterSignerIndex = 0;
-		/// stored certificates
-		std::vector<Certificate> certificates;
+		std::vector<Signature> signatures;
+
 	public:
-		/// @name Getters
-		/// @{
-		std::size_t getNumberOfCertificates() const;
-		std::size_t getSignerCertificateIndex() const;
-		std::size_t getCounterSignerCertificateIndex() const;
-		const Certificate* getCertificate(std::size_t certIndex) const;
-		/// @}
-
-		/// @name Setters
-		/// @{
-		void setSignerCertificateIndex(std::size_t certIndex);
-		void setCounterSignerCertificateIndex(std::size_t certIndex);
-		/// @}
-
-		/// @name Iterators
-		/// @{
-		certificatesIterator begin() const;
-		certificatesIterator end() const;
-		/// @}
-
-		/// @name Other methods
-		/// @{
-		bool hasSignerCertificate() const;
-		bool hasCounterSignerCertificate() const;
-		void addCertificate(const Certificate &certificate);
+		CertificateTable(authenticode::Authenticode authenticode);
 		bool empty() const;
-		/// @}
 };
 
 } // namespace fileformat

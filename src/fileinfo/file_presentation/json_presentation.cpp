@@ -372,6 +372,7 @@ void JsonPresentation::presentLoaderInfo(Writer& writer) const
  */
 void JsonPresentation::presentCertificates(Writer& writer) const
 {
+	/*
 	if(!fileinfo.hasCertificateTableRecords())
 	{
 		return;
@@ -499,6 +500,7 @@ void JsonPresentation::presentCertificates(Writer& writer) const
 	writer.EndArray();
 
 	writer.EndObject();
+	*/
 }
 
 /**
