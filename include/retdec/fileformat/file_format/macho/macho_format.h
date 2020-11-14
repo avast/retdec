@@ -105,6 +105,7 @@ class MachOFormat : public FileFormat
 		Architecture getTargetArchitecture(std::uint32_t cpuType) const;
 		std::vector<std::string> getMachOUniversalArchitectures() const;
 		const char* getBufferStart() const;
+		const char* getBufferEnd() const;
 		void clearCommands();
 		/// @}
 	protected:

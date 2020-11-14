@@ -503,15 +503,27 @@ void MachOFormat::loadSectionRelocations(std::size_t offset, std::size_t count)
 {
 	if (count)
 	{
+		auto *buffPtr = getBufferStart() + offset;
+		auto *buffEnd = getBufferEnd();
+		if (buffPtr >= buffEnd)
+		{
+			return;
+		}
+
 		auto *tabPtr = new RelocationTable;
 		tabPtr->setLinkToSymbolTable(0);
 		// Load relocations
-		auto *buffPtr = getBufferStart() + offset;
 		for (std::size_t i = 0; i < count; ++i)
 		{
 			// Load relocation info struct as 2 times 4 bytes and swap endianness if necessary
 			std::int32_t rInfo[2];
-			memcpy(rInfo, buffPtr + i * 8, 8);
+			auto *src = buffPtr + i * 8;
+			std::size_t sz = 8;
+			if (src + sz >= buffEnd)
+			{
+				break;
+			}
+			memcpy(rInfo, src, sz);
 			if(isLittle != sys::IsLittleEndianHost)
 			{
 				sys::swapByteOrder(rInfo[0]);
@@ -1291,6 +1303,15 @@ std::vector<std::string> MachOFormat::getMachOUniversalArchitectures() const
 const char *MachOFormat::getBufferStart() const
 {
 	return fileBuffer.get()->getBufferStart();
+}
+
+/**
+ * Get pointer to the end of LLVM buffer with file content.
+ * @return Pointer to buffer
+ */
+const char *MachOFormat::getBufferEnd() const
+{
+	return fileBuffer.get()->getBufferEnd();
 }
 
 /**

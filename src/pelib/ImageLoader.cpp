@@ -62,12 +62,18 @@ PeLib::ImageLoader::ImageLoader(uint32_t versionInfo)
 	ssiImageAlignment32 = PELIB_PAGE_SIZE;
 	sizeofImageMustMatch = false;
 	ntHeadersSizeCheck = false;
-	appContainerCheck = false;
+	architectureSpecificChecks = false;
 	maxSectionCount = 255;
 	is64BitWindows = (versionInfo & BuildNumber64Bit) ? true : false;
 	windowsBuildNumber = (versionInfo & BuildNumberMask);
 	headerSizeCheck = false;
 	loadArmImages = true;
+	loadArm64Images = true;
+	loadItaniumImages = true;
+	forceIntegrityCheckEnabled = false;
+	forceIntegrityCheckCertificate = false;
+	checkNonLegacyDllCharacteristics = false;
+	checkImagePostMapping = false;
 
 	// If the caller specified a Windows build, then we configure version-specific behavior
 	if(windowsBuildNumber != 0)
@@ -85,14 +91,31 @@ PeLib::ImageLoader::ImageLoader(uint32_t versionInfo)
 		// Beginning with Windows Vista, the file size must be >= sizeof(IMAGE_NT_HEADERS)
 		ntHeadersSizeCheck = (BuildNumberVista <= windowsBuildNumber);
 
+		// Beginning with Vista, IMAGE_DLLCHARACTERISTICS_FORCE_INTEGRITY actually does something
+		forceIntegrityCheckEnabled = (windowsBuildNumber >= BuildNumberVista);
+		forceIntegrityCheckCertificate = (windowsBuildNumber >= BuildNumber8);
+
 		// Beginning with Windows 8, ARM images can also be loader
 		loadArmImages = (windowsBuildNumber >= BuildNumber8);
 
-		// Windows 10 perform check for bad app container apps
-		appContainerCheck = (windowsBuildNumber >= BuildNumber10);
+		// ARM64 images are only loaded from Windows 10 up
+		loadArm64Images = (windowsBuildNumber >= BuildNumber10);
+
+		// From Windows XP to Windows 7, 64-bit Windows will load Itanium images
+		if(is64BitWindows && windowsBuildNumber >= BuildNumber8)
+			loadItaniumImages = false;
+
+		// Windows 8+ perform check for bad app container apps
+		architectureSpecificChecks = (windowsBuildNumber >= BuildNumber8);
 
 		// After build 17134, SizeOfImage can also be greater than virtual end of the last section
 		sizeofImageMustMatch = (windowsBuildNumber <= 17134);
+
+		// Since build 17134, Load Config is checked within nt!MiRelocateImage
+		checkImagePostMapping = (windowsBuildNumber >= 17134);
+
+		// Since build 18362, extra checks are performed on non-intel platforms
+		checkNonLegacyDllCharacteristics = (windowsBuildNumber >= 18362);
 	}
 }
 
@@ -114,10 +137,6 @@ bool PeLib::ImageLoader::relocateImage(uint64_t newImageBase)
 
 		// If relocations are stripped, do nothing
 		if(fileHeader.Characteristics & PELIB_IMAGE_FILE_RELOCS_STRIPPED)
-			return false;
-
-		// Windows 10 (built 10240) performs this check
-		if(appContainerCheck && checkForBadAppContainer())
 			return false;
 
 		// Don't relocate 32-bit images to an address greater than 32bits
@@ -852,6 +871,9 @@ int PeLib::ImageLoader::Load(
 {
 	int fileError;
 
+	// Remember the size of the file for later use
+	fileSize = fileData.size();
+
 	// Check and capture DOS header
 	fileError = captureDosHeader(fileData);
 	if(fileError != ERROR_NONE)
@@ -867,6 +889,10 @@ int PeLib::ImageLoader::Load(
 	if(fileError != ERROR_NONE)
 		return fileError;
 
+	// Performed by Vista+
+	if(forceIntegrityCheckEnabled && checkForBadCodeIntegrityImages(fileData))
+		setLoaderError(LDR_ERROR_IMAGE_NON_EXECUTABLE);
+
 	// Shall we map the image content?
 	if(loadHeadersOnly == false)
 	{
@@ -878,6 +904,13 @@ int PeLib::ImageLoader::Load(
 			if(isImageLoadable())
 			{
 				fileError = captureImageSections(fileData);
+
+				// If needed, also perform image load config directory check
+				if(fileError == ERROR_NONE)
+				{
+					if(checkImagePostMapping && checkForImageAfterMapping())
+						setLoaderError(LDR_ERROR_IMAGE_NON_EXECUTABLE);
+				}
 			}
 
 			// If there was any kind of error that prevents the image from being mapped,
@@ -1555,7 +1588,7 @@ int PeLib::ImageLoader::captureNtHeaders(ByteBuffer & fileData)
 	{
 		uint32_t minFileSize = dosHeader.e_lfanew + sizeof(uint32_t) + sizeof(PELIB_IMAGE_FILE_HEADER) + sizeof(PELIB_IMAGE_OPTIONAL_HEADER32);
 
-		if((filePtr + minFileSize) > fileEnd)
+		if((fileBegin + minFileSize) > fileEnd)
 			return setLoaderError(LDR_ERROR_NTHEADER_OUT_OF_FILE);
 	}
 
@@ -1575,7 +1608,7 @@ int PeLib::ImageLoader::captureNtHeaders(ByteBuffer & fileData)
 	filePtr += sizeof(uint32_t);
 
 	// Capture the file header
-	if ((filePtr + sizeof(PELIB_IMAGE_FILE_HEADER)) >= fileEnd)
+	if((filePtr + sizeof(PELIB_IMAGE_FILE_HEADER)) >= fileEnd)
 	{
 		setLoaderError(LDR_ERROR_NTHEADER_OUT_OF_FILE);
 		return ERROR_INVALID_FILE;
@@ -1608,9 +1641,11 @@ int PeLib::ImageLoader::captureNtHeaders(ByteBuffer & fileData)
 	else
 		captureOptionalHeader32(fileBegin, filePtr, fileEnd);
 
-	// Performed by Windows 10 (nt!MiVerifyImageHeader):
+	// Performed by Windows 8+ (nt!MiRelocateImage). If check fails,
+	// NtCreateSection returns STATUS_INVALID_IMAGE_FORMAT (0xC000007B)
+	// In Windows 10 (since build 10240), this check is only performed for "legacy" images (I386 or AMD64)
 	// Sample: 04d3577d1b6309a0032d4c4c1252c55416a09bb617aebafe512fffbdd4f08f18
-	if(appContainerCheck && checkForBadAppContainer())
+	if(architectureSpecificChecks && checkForBadArchitectureSpecific())
 		setLoaderError(LDR_ERROR_IMAGE_NON_EXECUTABLE);
 
 	// SizeOfHeaders must be nonzero if not a single subsection
@@ -1889,7 +1924,7 @@ int PeLib::ImageLoader::captureSectionHeaders(ByteBuffer & fileData)
 		{
 			// If the image is mapped as single subsection,
 			// then the virtual values must match raw values
-			if((sectHdr.VirtualAddress != PointerToRawData) || sectHdr.SizeOfRawData < VirtualSize)
+			if((sectHdr.VirtualAddress != sectHdr.PointerToRawData) || sectHdr.SizeOfRawData < VirtualSize)
 				setLoaderError(LDR_ERROR_SECTION_SIZE_MISMATCH);
 		}
 		else
@@ -2471,32 +2506,286 @@ bool PeLib::ImageLoader::isLegacyImageArchitecture(uint16_t Machine)
 
 bool PeLib::ImageLoader::checkForValid64BitMachine()
 {
-	// Since Windows 10, image loader will load 64-bit ARM images
-	if(loadArmImages && fileHeader.Machine == PELIB_IMAGE_FILE_MACHINE_ARM64)
+	if(loadItaniumImages && fileHeader.Machine == PELIB_IMAGE_FILE_MACHINE_IA64)
 		return true;
-	return (fileHeader.Machine == PELIB_IMAGE_FILE_MACHINE_AMD64 || fileHeader.Machine == PELIB_IMAGE_FILE_MACHINE_IA64);
+	if(loadArm64Images && fileHeader.Machine == PELIB_IMAGE_FILE_MACHINE_ARM64)
+		return true;
+	return (fileHeader.Machine == PELIB_IMAGE_FILE_MACHINE_AMD64);
 }
 
 bool PeLib::ImageLoader::checkForValid32BitMachine()
 {
-	// Since Windows 10, image loader will load 32-bit ARM images
 	if(loadArmImages && fileHeader.Machine == PELIB_IMAGE_FILE_MACHINE_ARMNT)
 		return true;
 	return (fileHeader.Machine == PELIB_IMAGE_FILE_MACHINE_I386);
 }
 
+bool PeLib::ImageLoader::isValidMachineForCodeIntegrifyCheck(uint32_t Bits)
+{
+	if(Bits & 64)
+	{
+		// AMD64 is always allowed
+		if(fileHeader.Machine == PELIB_IMAGE_FILE_MACHINE_AMD64)
+			return true;
+
+		// Returns STATUS_INVALID_IMAGE_FORMAT due to page size being 0x2000
+		if(fileHeader.Machine == PELIB_IMAGE_FILE_MACHINE_IA64)
+			return true;
+
+		if(fileHeader.Machine == PELIB_IMAGE_FILE_MACHINE_ARM64)
+			return true;
+	}
+
+	if(Bits & 32)
+	{
+		// Any of these is allowed
+		if(fileHeader.Machine == PELIB_IMAGE_FILE_MACHINE_I386 || fileHeader.Machine == PELIB_IMAGE_FILE_MACHINE_ARM)
+			return true;
+
+		// Since Windows 8, IMAGE_FILE_MACHINE_ARMNT is alowed here as well
+		if(loadArmImages && fileHeader.Machine == PELIB_IMAGE_FILE_MACHINE_ARMNT)
+			return true;
+	}
+
+	return false;
+}
+
+// Windows Vista+: If IMAGE_DLLCHARACTERISTICS_FORCE_INTEGRITY is set,
+// there are some more checks implemented by CI!HashpParsePEHeader
+// (nt!SeValidateImageHeader -> CI!CiValidateImageHeader -> ... -> CI!HashpParsePEHeader in Win7)
+// This function does the same checks like CI!HashpParsePEHeader
+bool PeLib::ImageLoader::checkForBadCodeIntegrityImages(ByteBuffer & fileData)
+{
+	if(optionalHeader.DllCharacteristics & PELIB_IMAGE_DLLCHARACTERISTICS_FORCE_INTEGRITY)
+	{
+		PELIB_IMAGE_DATA_DIRECTORY & SecurityDir = optionalHeader.DataDirectory[PELIB_IMAGE_DIRECTORY_ENTRY_SECURITY];
+		uint32_t sizeOfNtHeaders = sizeof(uint32_t) + sizeof(PELIB_IMAGE_FILE_HEADER) + sizeof(PELIB_IMAGE_OPTIONAL_HEADER32);
+		uint32_t endOfRawData;
+		size_t peFileSize = fileData.size();
+
+		if(dosHeader.e_lfanew < sizeof(PELIB_IMAGE_DOS_HEADER))
+			return true;
+		if(dosHeader.e_lfanew > optionalHeader.SectionAlignment)
+			return true;
+		if((optionalHeader.SectionAlignment - dosHeader.e_lfanew) <= dosHeader.e_lfanew)
+			return true;
+		if((dosHeader.e_lfanew + sizeOfNtHeaders) > optionalHeader.SectionAlignment)
+			return true;
+
+		if(ntSignature != PELIB_IMAGE_NT_SIGNATURE)
+			return true;
+		if(fileHeader.SizeOfOptionalHeader == 0)
+			return true;
+
+		if(!isValidMachineForCodeIntegrifyCheck(32 | 64))
+			return true;
+
+		if(optionalHeader.MajorLinkerVersion < 3 && optionalHeader.MajorLinkerVersion < 5)
+			return true;
+		if(optionalHeader.Magic != PELIB_IMAGE_NT_OPTIONAL_HDR32_MAGIC && optionalHeader.Magic != PELIB_IMAGE_NT_OPTIONAL_HDR64_MAGIC)
+			return true;
+
+		// Check whether there is match between bitness of the optional header and machine
+		if(optionalHeader.Magic == PELIB_IMAGE_NT_OPTIONAL_HDR32_MAGIC && !isValidMachineForCodeIntegrifyCheck(32))
+			return true;
+		if(optionalHeader.Magic == PELIB_IMAGE_NT_OPTIONAL_HDR64_MAGIC && !isValidMachineForCodeIntegrifyCheck(64))
+			return true;
+
+		if(optionalHeader.SizeOfHeaders == 0 || optionalHeader.SizeOfHeaders > peFileSize)
+			return true;
+		if(optionalHeader.FileAlignment == 0 || (optionalHeader.FileAlignment & (optionalHeader.FileAlignment - 1)))
+			return true;
+		if(optionalHeader.SectionAlignment & (optionalHeader.SectionAlignment - 1))
+			return true;
+		if(optionalHeader.FileAlignment > optionalHeader.SectionAlignment)
+			return true;
+		if((optionalHeader.FileAlignment & (PELIB_SECTOR_SIZE - 1)) && (optionalHeader.FileAlignment != optionalHeader.SectionAlignment))
+			return true;
+
+		// End of headers altogether must fit in the first page
+		endOfRawData = dosHeader.e_lfanew + sizeof(uint32_t) + sizeof(PELIB_IMAGE_FILE_HEADER) + fileHeader.SizeOfOptionalHeader;
+		endOfRawData += (fileHeader.NumberOfSections * sizeof(PELIB_IMAGE_SECTION_HEADER));
+		if(endOfRawData >= PELIB_PAGE_SIZE)
+			return true;
+
+		for(auto & section : sections)
+		{
+			// Windows's ci!CipImageGetImageHash wants start of any section past SizeOfHeaders
+			// TODO: This check doesn't seem to hapeen for 32-bit images. Need confirm/deny this
+			// Sample: 0E2EEAC29F7BAD81C67F0283541A050FAED973C114F46CF5F270355623A7BA8A
+			if(optionalHeader.Magic == PELIB_IMAGE_NT_OPTIONAL_HDR64_MAGIC)
+			{
+				if(section.PointerToRawData && section.SizeOfRawData && section.PointerToRawData < optionalHeader.SizeOfHeaders)
+				{
+					return true;
+				}
+			}
+
+			if(section.PointerToRawData != 0 && section.PointerToRawData < endOfRawData)
+				return true;
+			if((section.PointerToRawData + section.SizeOfRawData) < section.PointerToRawData)
+				return true;
+			if((section.PointerToRawData + section.SizeOfRawData) > peFileSize)
+				return true;
+			if((section.VirtualAddress + section.SizeOfRawData - 1) < section.SizeOfRawData)
+				return true;
+
+			if(section.SizeOfRawData != 0 && (section.PointerToRawData + section.SizeOfRawData) > endOfRawData)
+				endOfRawData = (section.PointerToRawData + section.SizeOfRawData);
+		}
+
+		// Verify the position and range of the digital signature
+		if(SecurityDir.VirtualAddress && SecurityDir.Size)
+		{
+			if(SecurityDir.VirtualAddress < endOfRawData || SecurityDir.VirtualAddress > peFileSize)
+				return true;
+			if((SecurityDir.VirtualAddress + SecurityDir.Size) != peFileSize)
+				return true;
+			if((SecurityDir.VirtualAddress + SecurityDir.Size) < endOfRawData)
+				return true;
+			if(SecurityDir.VirtualAddress < optionalHeader.SizeOfHeaders)
+				return true;
+			if(SecurityDir.VirtualAddress & 0x03)
+				return true;
+		}
+
+		// Windows 8+ fails to load the image if the certificate is zeroed
+		// We don't want to parse and verify the certificate here,
+		// just check for the most blatantly corrupt certificates
+		if(forceIntegrityCheckCertificate)
+		{
+			uint8_t * certPtr = fileData.data() + SecurityDir.VirtualAddress;
+			if(SecurityDir.Size > 2 && certPtr[0] == 0 && certPtr[1] == 0)
+				return true;
+		}
+	}
+
+	// All checks passed.
+	return false;
+}
+
 // Windows 10: For IMAGE_FILE_MACHINE_I386 and IMAGE_FILE_MACHINE_AMD64,
 // if(Characteristics & IMAGE_FILE_RELOCS_STRIPPED) and (DllCharacteristics & IMAGE_DLLCHARACTERISTICS_APPCONTAINER),
-// MiVerifyImageHeader returns STATUS_INVALID_IMAGE_FORMAT.
-bool PeLib::ImageLoader::checkForBadAppContainer()
+// MiRelocateImage returns STATUS_INVALID_IMAGE_FORMAT.
+bool PeLib::ImageLoader::checkForBadArchitectureSpecific()
 {
+	// In Windows 10, this check is only performed on "legacy" images
+	// (IMAGE_FILE_MACHINE_I386 or IMAGE_FILE_MACHINE_AMD64)
+	// Performed by nt!MiRelocateImage -> nt!MiLegacyImageArchitecture
 	if(isLegacyImageArchitecture(fileHeader.Machine))
 	{
-		if(optionalHeader.DllCharacteristics & PELIB_IMAGE_DLLCHARACTERISTICS_APPCONTAINER)
+		// If the image has stripped relocations, it can't be an app container
+		if((fileHeader.Characteristics & PELIB_IMAGE_FILE_RELOCS_STRIPPED) == 0)
 		{
-			if(fileHeader.Characteristics & PELIB_IMAGE_FILE_RELOCS_STRIPPED)
+			if(optionalHeader.DllCharacteristics & PELIB_IMAGE_DLLCHARACTERISTICS_APPCONTAINER)
 			{
 				return true;
+			}
+		}
+	}
+	else
+	{
+		if(checkNonLegacyDllCharacteristics)
+		{
+			// Check images that do NOT have stripped relocations
+			if((fileHeader.Characteristics & PELIB_IMAGE_FILE_RELOCS_STRIPPED) == 0)
+			{
+				#define MUST_HAVE_FLAGS (PELIB_IMAGE_DLLCHARACTERISTICS_DYNAMIC_BASE | PELIB_IMAGE_DLLCHARACTERISTICS_NX_COMPAT)
+
+				if((optionalHeader.DllCharacteristics & MUST_HAVE_FLAGS) != MUST_HAVE_FLAGS)
+				{
+					return true;
+				}
+			}
+		}
+	}
+
+	return false;
+}
+
+template <typename LOAD_CONFIG>
+bool PeLib::ImageLoader::checkForBadLoadConfigXX(uint32_t loadConfigRva, uint32_t loadConfigSize)
+{
+	LOAD_CONFIG LoadConfig = {0};
+
+	// Don't overflow the read
+	if(loadConfigSize > sizeof(LOAD_CONFIG))
+		loadConfigSize = sizeof(LOAD_CONFIG);
+
+	// Load the load config directory
+	if(readImage(&LoadConfig, loadConfigRva, loadConfigSize) == loadConfigSize)
+	{
+		if(LoadConfig.DynamicValueRelocTableSection >= fileHeader.NumberOfSections)
+			return true;
+
+		if(LoadConfig.GuardCFFunctionTable > 0)
+		{
+			if(LoadConfig.GuardCFFunctionTable < optionalHeader.ImageBase)
+				return true;
+			if(LoadConfig.GuardCFFunctionCount == 0)
+				return true;
+		}
+	}
+
+	// The load config is OK
+	return false;
+}
+
+bool PeLib::ImageLoader::checkForImageAfterMapping()
+{
+	uint32_t loadConfigRva = optionalHeader.DataDirectory[PELIB_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG].VirtualAddress;
+	uint32_t loadConfigSize = optionalHeader.DataDirectory[PELIB_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG].Size;
+
+	// Perform the checks of IMAGE_LOAD_CONFIG_DIRECTORY
+	// Performed by nt!MiRelocateImage -> nt!MiParseImageLoadConfig, only in case
+	// when IMAGE_DLLCHARACTERISTICS_DYNAMIC_BASE in IMAGE_OPTIONAL_HEADER::DllCharacteristics is set
+	if(optionalHeader.DllCharacteristics & PELIB_IMAGE_DLLCHARACTERISTICS_DYNAMIC_BASE)
+	{
+		if(loadConfigRva && loadConfigSize)
+		{
+			if(optionalHeader.Magic == PELIB_IMAGE_NT_OPTIONAL_HDR32_MAGIC)
+			{
+				if(checkForBadLoadConfigXX<PELIB_IMAGE_LOAD_CONFIG_DIRECTORY32>(loadConfigRva, loadConfigSize))
+					return true;
+			}
+
+			if(optionalHeader.Magic == PELIB_IMAGE_NT_OPTIONAL_HDR64_MAGIC)
+			{
+				if(checkForBadLoadConfigXX<PELIB_IMAGE_LOAD_CONFIG_DIRECTORY64>(loadConfigRva, loadConfigSize))
+					return true;
+			}
+		}
+	}
+
+	// Perform extra checks of relocations (performed by nt!MiRelocateImage)
+	// Image loading will fail if the architecture is not intel and relocations are screwed
+	if(!isLegacyImageArchitecture(fileHeader.Machine))
+	{
+		PELIB_IMAGE_BASE_RELOCATION BaseReloc;
+		uint32_t baseRelocRVA = optionalHeader.DataDirectory[PELIB_IMAGE_DIRECTORY_ENTRY_BASERELOC].VirtualAddress;
+		uint32_t baseRelocSize = optionalHeader.DataDirectory[PELIB_IMAGE_DIRECTORY_ENTRY_BASERELOC].Size;
+
+		if(baseRelocRVA && baseRelocSize > sizeof(PELIB_IMAGE_BASE_RELOCATION))
+		{
+			if(readImage(&BaseReloc, baseRelocRVA, sizeof(PELIB_IMAGE_BASE_RELOCATION)) == sizeof(PELIB_IMAGE_BASE_RELOCATION))
+			{
+				if(baseRelocSize >= sizeof(PELIB_IMAGE_BASE_RELOCATION) + sizeof(uint16_t))
+				{
+					if(BaseReloc.SizeOfBlock > baseRelocSize)
+						return true;
+					if(BaseReloc.SizeOfBlock & 0x01)
+						return true;
+					if(BaseReloc.SizeOfBlock < sizeof(PELIB_IMAGE_BASE_RELOCATION))
+						return true;
+				}
+				else
+				{
+					if(baseRelocSize != sizeof(PELIB_IMAGE_BASE_RELOCATION))
+					{
+						return true;
+					}
+				}
+
 			}
 		}
 	}
@@ -2571,6 +2860,11 @@ size_t PeLib::ImageLoader::getMismatchOffset(
 			if(isSectionHeaderPointerToRawData(fileOffset + i))
 				continue;
 
+			// If under debugger, Microsoft Visual Studio may place a breakpoint
+			// at the beginning of __crt_debugger_hook. Ignore such differences
+			if(byteBuffer1[i] == 0xCC)
+				continue;
+
 			//for(int j = i & 0xFFFFFFF0; j < 0xD00; j++)
 			//	printf("byteBuffer1[j]: %02x, byteBuffer2[j]: %02x\n", byteBuffer1[j], byteBuffer2[j]);
 			return i;
@@ -2601,6 +2895,15 @@ void PeLib::ImageLoader::compareWithWindowsMappedImage(
 			ImageCompare.differenceOffset = 0;
 			return;
 		}
+
+		// Images with extreme value of SizeOfImage take very long time
+		// (even hours) to compare under older Windows (7 or older). We skip them
+		//if(imageSize & 0xF0000000)
+		//{
+		//	ImageCompare.compareResult = PELIB_COMPARE_RESULT::ImagesEqual;
+		//	ImageCompare.differenceOffset = 0;
+		//	return;
+		//}
 
 		// Compare images page-by-page
 		while(winImageData < winImageEnd)

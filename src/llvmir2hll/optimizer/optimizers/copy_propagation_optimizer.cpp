@@ -841,14 +841,14 @@ void CopyPropagationOptimizer::handleCaseInductionVariable(
 
 	// Other value is undefined before the other definition.
 	bool ok = false;
-	auto prev = commonOtherDef->getUniquePredecessor();
-	while (prev) {
+	std::set<ShPtr<Statement>> visited;
+	for (auto prev = commonOtherDef->getUniquePredecessor(); prev && visited.insert(prev).second;
+			prev = prev->getUniquePredecessor()) {
 		auto vds = cast<VarDefStmt>(prev);
 		if (vds && vds->getVar() == otherValue && vds->getInitializer() == nullptr) {
 			ok = true;
 			break;
 		}
-		prev = prev->getUniquePredecessor();
 	}
 	// Other value may be in another BB.
 	// In such a case, check for very specific and restrictive pattern.
@@ -1043,8 +1043,9 @@ void CopyPropagationOptimizer::handleCaseInductionVariable2(
 	// y is undefined before xZero.
 	// y = undef
 	bool ok = false;
-	auto prev = xZero->getUniquePredecessor();
-	while (prev) {
+	std::set<ShPtr<Statement>> visited;
+	for (auto prev = xZero->getUniquePredecessor(); prev && visited.insert(prev).second;
+			prev = prev->getUniquePredecessor()) {
 		auto vds = cast<VarDefStmt>(prev);
 		if (vds && vds->getVar() == y) {
 			ok = (vds->getInitializer() == nullptr);
@@ -1054,7 +1055,6 @@ void CopyPropagationOptimizer::handleCaseInductionVariable2(
 		if (as && as->getLhs() == y) {
 			break;
 		}
-		prev = prev->getUniquePredecessor();
 	}
 	if (!ok) {
 		LOG << "\t" << "end 10" << std::endl;
