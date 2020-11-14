@@ -1,9 +1,10 @@
 #pragma once
 
 #include "authenticode_structs.h"
-#include "certificate.h"
-#include "signature.h"
+#include "x509_certificate.h"
 #include "pkcs9.h"
+
+#include "retdec/fileformat/types/certificate_table/certificate_table.h"
 
 #include <openssl/bn.h>
 #include <openssl/bio.h>
@@ -13,6 +14,7 @@
 #include <openssl/ts.h>
 #include <openssl/x509.h>
 #include <openssl/pem.h>
+#include <openssl/pkcs7.h>
 
 #include <array>
 #include <vector>
@@ -21,6 +23,8 @@
 #include <iostream> /* remove */
 #include <ctime>
 #include <optional>
+#include <cstdint>
+#include <exception>
 
 namespace authenticode {
 
@@ -34,9 +38,10 @@ private:
 	STACK_OF(X509) *get_certificates() const;
 	STACK_OF(X509) *get_signers();
 	PKCS7_SIGNED *get_signed_data() const;
+	retdec::fileformat::Certificate convert_certificate(X509Certificate cert);
 public:
-	std::optional<Certificate> signer;
-	std::vector<Certificate> certificates;
+	std::optional<X509Certificate> signer;
+	std::vector<X509Certificate> certificates;
 	std::vector<Pkcs7> nested_signatures;
 	std::vector<Pkcs9> counter_signatures;
 
@@ -45,7 +50,7 @@ public:
 	const char *get_digest_algorithm() const;
 	std::vector<std::uint8_t> get_signed_digest() const;
 	std::uint64_t get_version() const;
-	std::vector<Signature> get_signatures();
+	std::vector<retdec::fileformat::Signature> get_signatures();
 	// std::vector<MsCounterSignature> ms_counter_signatures;
 };
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "authenticode_structs.h"
-#include "certificate.h"
+#include "x509_certificate.h"
 
 #include <openssl/bn.h>
 #include <openssl/bio.h>

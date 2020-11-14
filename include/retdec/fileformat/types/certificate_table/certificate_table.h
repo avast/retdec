@@ -10,7 +10,6 @@
 #include <vector>
 
 #include "retdec/fileformat/types/certificate_table/certificate.h"
-#include "../src/fileformat//file_format/pe/authenticode/authenticode.h"
 
 namespace retdec {
 namespace fileformat {
@@ -45,7 +44,7 @@ class CertificateTable
 		std::vector<Signature> signatures;
 
 	public:
-		CertificateTable(authenticode::Authenticode authenticode);
+		CertificateTable(std::vector<Signature> signatures);
 		bool empty() const;
 };
 

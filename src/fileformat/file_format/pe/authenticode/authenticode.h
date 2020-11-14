@@ -1,8 +1,9 @@
 #pragma once
 
+#include "retdec/fileformat/types/certificate_table/certificate_table.h"
+
 #include "authenticode_structs.h"
-#include "certificate.h"
-#include "signature.h"
+#include "x509_certificate.h"
 #include "pkcs7.h"
 
 #include <openssl/bn.h>
@@ -19,6 +20,8 @@
 #include <cstdint>
 #include <iostream> /* remove */
 #include <ctime>
+
+using retdec::fileformat::Signature;
 
 namespace authenticode {
 

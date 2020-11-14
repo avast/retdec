@@ -1,8 +1,6 @@
 #include "pkcs7.h"
 
-#include <cstdint>
-#include <exception>
-#include <openssl/pkcs7.h>
+using namespace retdec::fileformat;
 
 namespace authenticode {
 
@@ -114,7 +112,7 @@ Pkcs7::Pkcs7(std::vector<unsigned char> input) {
 	/* Process certificates now */
 	int cert_count = sk_X509_num (certs);
 	for (size_t i = 0; i < cert_count; i++) {
-		Certificate cert (sk_X509_value (certs, i));
+		X509Certificate cert (sk_X509_value (certs, i));
 		certificates.push_back (cert);
 	}
 
@@ -127,7 +125,7 @@ Pkcs7::Pkcs7(std::vector<unsigned char> input) {
 		if (signers_count != 1) {
 			throw std::exception();
 		}
-		signer = Certificate (sk_X509_value (raw_signers, 0));
+		signer = X509Certificate (sk_X509_value (raw_signers, 0));
 	} else {
 		throw std::exception(); // ??
 	}
@@ -191,20 +189,63 @@ std::uint64_t Pkcs7::get_version() const {
 	return version;
 }
 
+void parseAttributes(Certificate::Attributes *attributes, X509_NAME *raw)
+{
+	std::size_t numEntries = X509_NAME_entry_count(raw);
+	for(std::size_t i = 0; i < numEntries; ++i)
+	{
+		auto nameEntry = X509_NAME_get_entry(raw, int(i));
+		auto valueObj = X509_NAME_ENTRY_get_data(nameEntry);
+
+		std::string key = OBJ_nid2sn(
+				OBJ_obj2nid(X509_NAME_ENTRY_get_object(nameEntry))
+		);
+		std::string value = std::string(
+				reinterpret_cast<const char*>(valueObj->data),
+				valueObj->length
+		);
+
+		if (key == "C") attributes->country = value;
+		else if (key == "O") attributes->organization = value;
+		else if (key == "OU") attributes->organizationalUnit = value;
+		else if (key == "dnQualifier") attributes->nameQualifier = value;
+		else if (key == "ST") attributes->state = value;
+		else if (key == "CN") attributes->commonName = value;
+		else if (key == "serialNumber") attributes->serialNumber = value;
+		else if (key == "L") attributes->locality = value;
+		else if (key == "title") attributes->title = value;
+		else if (key == "SN") attributes->surname = value;
+		else if (key == "GN") attributes->givenName = value;
+		else if (key == "initials") attributes->initials = value;
+		else if (key == "pseudonym") attributes->pseudonym = value;
+		else if (key == "generationQualifier") attributes->generationQualifier = value;
+		else if (key == "emailAddress") attributes->emailAddress = value;
+	}
+}
+
+
+std::vector<Certificate> create_fileformat_chain(std::vector<X509Certificate> chain) {
+	std::vector<Certificate> fileformat_chain;
+	for (auto &&cert : chain) {
+		fileformat_chain.push_back (cert.createCertificate());
+	}
+	return fileformat_chain;
+}
+
 std::vector<Signature> Pkcs7::get_signatures () {
 	std::vector<Signature> signatures;
 
 	CertificateProcessor processor;
+	std::vector<X509Certificate> chain = processor.get_chain (signer.value().get_x509 (), get_certificates ());
 	Signature signature {
 		.signed_digest = get_signed_digest (),
-		.digest_algorithm = get_digest_algorithm (),
-		.signer = Signer { .chain = processor.get_chain (signer.value().get_x509 (), get_certificates ()) }
+		.digest_algorithm = get_digest_algorithm ()
 	};
 
 	for (auto &&counter_sig : counter_signatures) {
 		CertificateProcessor processor;
 		auto chain = processor.get_chain (counter_sig.certificate, get_certificates ());
-		signature.signer.counter_signers.push_back (CounterSigner{ .chain = chain });
+		signature.signer.counter_signers.push_back (CounterSigner{ .chain = create_fileformat_chain (chain) });
 	}
 	/* TODO deal with the naming weird stuff when we have pkcs7 and signatures as separate interfaces */
 	for (auto &&nested_pkcs7 : nested_signatures) {
