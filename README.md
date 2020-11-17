@@ -146,7 +146,7 @@ This section describes a local build and installation of RetDec. Instructions fo
 * A C++ compiler and standard C++ library supporting C++17 (e.g. GCC >= 7)
 * [CMake](https://cmake.org/) (version >= 3.6)
 * [Git](https://git-scm.com/)
-* [OpenSSL](https://www.openssl.org/) (version >= 1.0.1)
+* [OpenSSL](https://www.openssl.org/) (version >= 1.1.1)
 * [Python](https://www.python.org/) (version >= 3.4)
 * [autotools](https://en.wikipedia.org/wiki/GNU_Build_System) ([autoconf](https://www.gnu.org/software/autoconf/autoconf.html), [automake](https://www.gnu.org/software/automake/), and [libtool](https://www.gnu.org/software/libtool/))
 * [pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config/)
@@ -177,7 +177,7 @@ sudo pacman --needed -S base-devel cmake git openssl python3 autoconf automake l
 * Microsoft Visual C++ (version >= Visual Studio 2017 version 15.7)
 * [CMake](https://cmake.org/) (version >= 3.6)
 * [Git](https://git-scm.com/)
-* [OpenSSL](https://www.openssl.org/) (version >= 1.0.1)
+* [OpenSSL](https://www.openssl.org/) (version >= 1.1.1)
 * [Python](https://www.python.org/) (version >= 3.4)
 * Optional: [Doxygen](http://ftp.stack.nl/pub/users/dimitri/doxygen-1.8.13-setup.exe) and [Graphviz](https://graphviz.gitlab.io/_pages/Download/windows/graphviz-2.38.msi) for generating API documentation
 
@@ -189,7 +189,7 @@ Packages should be preferably installed via [Homebrew](https://brew.sh).
 * Full Xcode installation ([including command-line tools](https://github.com/frida/frida/issues/338#issuecomment-426777849), see [#425](https://github.com/avast/retdec/issues/425) and [#433](https://github.com/avast/retdec/issues/433))
 * [CMake](https://cmake.org/) (version >= 3.6)
 * [Git](https://git-scm.com/)
-* [OpenSSL](https://www.openssl.org/) (version >= 1.0.1)
+* [OpenSSL](https://www.openssl.org/) (version >= 1.1.1)
 * [Python](https://www.python.org/) (version >= 3.4)
 * [autotools](https://en.wikipedia.org/wiki/GNU_Build_System) ([autoconf](https://www.gnu.org/software/autoconf/autoconf.html), [automake](https://www.gnu.org/software/automake/), and [libtool](https://www.gnu.org/software/libtool/))
 * Optional: [Doxygen](http://www.stack.nl/~dimitri/doxygen/) and [Graphviz](http://www.graphviz.org/) for generating API documentation
