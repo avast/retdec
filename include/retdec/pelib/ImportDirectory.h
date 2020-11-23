@@ -103,7 +103,7 @@ namespace PeLib
 		  /// Constructor
 		  ImportDirectory() : m_ldrError(LDR_ERROR_NONE)
 		  {
-			  m_ordinalMask = 0x80000000; 
+			  m_ordinalMask = 0x80000000;
 			  m_thunkSize = 4;
 		  }
 
@@ -769,7 +769,7 @@ namespace PeLib
 		// Names
 		for (unsigned int i=0;i<vOldIidCurr.size();i++)
 		{
-			std::vector<PELIB_THUNK_DATA> & thunkVector = hasValidOriginalFirstThunk(vOldIidCurr[i].impdesc, imageLoader) ? 
+			std::vector<PELIB_THUNK_DATA> & thunkVector = hasValidOriginalFirstThunk(vOldIidCurr[i].impdesc, imageLoader) ?
 														  vOldIidCurr[i].originalfirstthunk :
 														  vOldIidCurr[i].firstthunk;
 			for (auto & thunkData : thunkVector)
@@ -781,7 +781,10 @@ namespace PeLib
 				}
 
 				if(imageLoader.readImage(&thunkData.hint, thunkData.itd.Ordinal, sizeof(std::uint16_t)) != sizeof(std::uint16_t))
+				{
+					setLoaderError(LDR_ERROR_IMPDIR_THUNK_RVA_INVALID);
 					return ERROR_INVALID_FILE;
+				}
 
 				imageLoader.readString(thunkData.fname, thunkData.itd.Ordinal + sizeof(std::uint16_t), IMPORT_SYMBOL_MAX_LENGTH);
 
