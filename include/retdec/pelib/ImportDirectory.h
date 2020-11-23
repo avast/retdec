@@ -711,6 +711,7 @@ namespace PeLib
 
 			if (thunkRva >= imageLoader.getSizeOfImage())
 			{
+				setLoaderError(LDR_ERROR_IMPDIR_THUNK_RVA_INVALID);
 				return ERROR_INVALID_FILE;
 			}
 			if (seenOffsets.count(thunkRva))
