@@ -10,21 +10,7 @@ namespace retdec {
 namespace fileformat {
 
 
-CertificateTable::CertificateTable(authenticode::Authenticode authenticode) {
-	std::vector<authenticode::Signature> sigs = authenticode.getSignatures();
-	for (auto &&sig: sigs) {
-		Signature signature {
-			.signed_digest = sig.signed_digest, 
-			.digest_algorithm = sig.digest_algorithm,
-		};
-		/* Authenticode has single signer */
-		/* Signer signer {
-			.counter_signers = sig.signer.counter_signers;
-			.
-		} */
-		// signature.signers.push_back(sig.signer);
-	}
-}
+CertificateTable::CertificateTable(std::vector<DigitalSignature> signatures) : signatures(signatures) {}
 
 /**
  * Check if certificate table is empty

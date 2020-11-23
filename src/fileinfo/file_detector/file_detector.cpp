@@ -211,7 +211,7 @@ void FileDetector::getCertificates()
 {
 	if (fileParser->isSignaturePresent())
 		fileInfo.setSignatureVerified(fileParser->isSignatureVerified());
-	fileInfo.setCertificateTable(fileParser->getCertificateTable());
+	fileInfo.setCertificateTable(*(fileParser->getCertificateTable()));
 }
 
 /**

@@ -2076,7 +2076,8 @@ void PeFormat::loadCertificates()
 	}
 	// We always take the first one, there are no additional certificate tables in PE
 	auto certBytes = securityDir.getCertificate(0);
-	certificateTable = new CertificateTable(authenticode::Authenticode(certBytes));
+	auto authenticode = authenticode::Authenticode(certBytes);
+	certificateTable = new CertificateTable(authenticode.getSignatures());
 }
 
 /**

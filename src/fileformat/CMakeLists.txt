@@ -73,7 +73,7 @@ add_library(fileformat STATIC
 	file_format/pe/authenticode/authenticode.cpp
 	file_format/pe/authenticode/pkcs9.cpp
 	file_format/pe/authenticode/pkcs7.cpp
-	file_format/pe/authenticode/certificate.cpp
+	file_format/pe/authenticode/x509_certificate.cpp
 	file_format/pe/authenticode/authenticode_structs.cpp
 	file_format/coff/coff_format.cpp
 	file_format/intel_hex/intel_hex_parser/intel_hex_tokenizer.cpp

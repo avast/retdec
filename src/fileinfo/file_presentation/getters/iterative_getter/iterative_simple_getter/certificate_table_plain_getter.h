@@ -21,6 +21,7 @@ class CertificateTablePlainGetter : public IterativeSimpleGetter
 		CertificateTablePlainGetter(FileInformation &fileInfo);
 
 		virtual std::size_t getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const override;
+		/* record will be signature */
 		virtual bool getRecord(std::size_t structIndex, std::size_t recIndex, std::vector<std::string> &record) const override;
 		virtual bool getFlags(std::size_t structIndex, std::size_t recIndex, std::string &flagsValue, std::vector<std::string> &desc) const override;
 };

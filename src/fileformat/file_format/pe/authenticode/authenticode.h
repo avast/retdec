@@ -21,7 +21,7 @@
 #include <iostream> /* remove */
 #include <ctime>
 
-using retdec::fileformat::Signature;
+using retdec::fileformat::DigitalSignature;
 
 namespace authenticode {
 
@@ -31,6 +31,6 @@ class Authenticode {
 
 	public:
 		Authenticode (std::vector<unsigned char> data);
-		std::vector<Signature> getSignatures () { return pkcs7.get_signatures (); }
+		std::vector<DigitalSignature> getSignatures () const;
 };
 } // namespace authenticode

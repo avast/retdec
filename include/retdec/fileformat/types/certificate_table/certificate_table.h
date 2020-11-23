@@ -14,18 +14,20 @@
 namespace retdec {
 namespace fileformat {
 
-
-struct CounterSigner {
+struct Signer
+{
 	std::vector<Certificate> chain;
-	std::vector<CounterSigner> counter_signers;
+	/*
+	Note 2 - A countersignature, since it has type SignerInfo, can itself
+	contain a countersignature attribute.  Thus it is possible to
+	construct arbitrarily long series of countersignatures.
+	https://tools.ietf.org/html/rfc2985
+	*/
+	std::vector<Signer> counter_signers;
 };
 
-struct Signer {
-	std::vector<Certificate> chain;
-	std::vector<CounterSigner> counter_signers;
-};
-
-struct Signature 
+/* naming - simply Signature was already taken by unpackers */
+struct DigitalSignature
 {
 	std::vector<std::uint8_t> signed_digest;
 	std::string digest_algorithm;
@@ -33,19 +35,18 @@ struct Signature
 	std::vector<Signer> signers;
 };
 
-
 /**
  * Table of certificates
  * TODO need to refactor this quite a bit to support Authenticode
  */
 class CertificateTable
 {
-	private:
-		std::vector<Signature> signatures;
+public:
+	std::vector<DigitalSignature> signatures;
 
-	public:
-		CertificateTable(std::vector<Signature> signatures);
-		bool empty() const;
+	CertificateTable(std::vector<DigitalSignature> signatures);
+	CertificateTable() = default;
+	bool empty() const;
 };
 
 } // namespace fileformat

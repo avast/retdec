@@ -1,4 +1,6 @@
 #include "pkcs7.h"
+#include "retdec/fileformat/types/certificate_table/certificate_table.h"
+#include <openssl/safestack.h>
 
 using namespace retdec::fileformat;
 
@@ -189,40 +191,6 @@ std::uint64_t Pkcs7::get_version() const {
 	return version;
 }
 
-void parseAttributes(Certificate::Attributes *attributes, X509_NAME *raw)
-{
-	std::size_t numEntries = X509_NAME_entry_count(raw);
-	for(std::size_t i = 0; i < numEntries; ++i)
-	{
-		auto nameEntry = X509_NAME_get_entry(raw, int(i));
-		auto valueObj = X509_NAME_ENTRY_get_data(nameEntry);
-
-		std::string key = OBJ_nid2sn(
-				OBJ_obj2nid(X509_NAME_ENTRY_get_object(nameEntry))
-		);
-		std::string value = std::string(
-				reinterpret_cast<const char*>(valueObj->data),
-				valueObj->length
-		);
-
-		if (key == "C") attributes->country = value;
-		else if (key == "O") attributes->organization = value;
-		else if (key == "OU") attributes->organizationalUnit = value;
-		else if (key == "dnQualifier") attributes->nameQualifier = value;
-		else if (key == "ST") attributes->state = value;
-		else if (key == "CN") attributes->commonName = value;
-		else if (key == "serialNumber") attributes->serialNumber = value;
-		else if (key == "L") attributes->locality = value;
-		else if (key == "title") attributes->title = value;
-		else if (key == "SN") attributes->surname = value;
-		else if (key == "GN") attributes->givenName = value;
-		else if (key == "initials") attributes->initials = value;
-		else if (key == "pseudonym") attributes->pseudonym = value;
-		else if (key == "generationQualifier") attributes->generationQualifier = value;
-		else if (key == "emailAddress") attributes->emailAddress = value;
-	}
-}
-
 
 std::vector<Certificate> create_fileformat_chain(std::vector<X509Certificate> chain) {
 	std::vector<Certificate> fileformat_chain;
@@ -232,30 +200,55 @@ std::vector<Certificate> create_fileformat_chain(std::vector<X509Certificate> ch
 	return fileformat_chain;
 }
 
-std::vector<Signature> Pkcs7::get_signatures () {
-	std::vector<Signature> signatures;
+std::vector<DigitalSignature> Pkcs7::get_signatures() const 
+{
+	std::vector<DigitalSignature> signatures;
 
 	CertificateProcessor processor;
-	std::vector<X509Certificate> chain = processor.get_chain (signer.value().get_x509 (), get_certificates ());
-	Signature signature {
-		.signed_digest = get_signed_digest (),
-		.digest_algorithm = get_digest_algorithm ()
-	};
 
+	DigitalSignature signature {
+		.signed_digest = get_signed_digest (),
+		.digest_algorithm = get_digest_algorithm (),
+	};
+	/* X
+	DANGER! nested signatures doesn't have to have their own certificates,
+	I didn't know how to figure out if nested signatures can have their own 
+	certificates, because I didn't know how to get the information thatD
+	the pkcs7 has no certificates as pkcs7->d.sign->cert doesn't have to be NULL
+	probably just gonna check openssl source?
+	*/
+	STACK_OF (X509) *certs = get_certificates();
+
+	std::vector<X509Certificate> chain = processor.get_chain (signer.value().get_x509 (), certs);
+	auto fileformat_chain = create_fileformat_chain(chain);
+
+	/* Authenticode has a single signer */
+	signature.signers.push_back(Signer {
+		.chain = fileformat_chain
+	});
+
+	/* Are further counter signers signers of the previous counter signer????? */
 	for (auto &&counter_sig : counter_signatures) {
 		CertificateProcessor processor;
-		auto chain = processor.get_chain (counter_sig.certificate, get_certificates ());
-		signature.signer.counter_signers.push_back (CounterSigner{ .chain = create_fileformat_chain (chain) });
+		auto chain = processor.get_chain (counter_sig.certificate, certs);
+		auto fileformat_chain = create_fileformat_chain(chain);
+		signature.signers[0].counter_signers.push_back(Signer {.chain = fileformat_chain});
 	}
+	signatures.push_back(signature);
+
 	/* TODO deal with the naming weird stuff when we have pkcs7 and signatures as separate interfaces */
 	for (auto &&nested_pkcs7 : nested_signatures) {
 		auto nested_sigs = nested_pkcs7.get_signatures ();
 		signatures.insert (signatures.end (), nested_sigs.begin (), nested_sigs.end ());
 	}
+
+	return signatures;
 }
 
 Pkcs7::~Pkcs7() {
-	PKCS7_free(pkcs7);
+	// you can't free it as the data is used outside and is not copied ?
+	// figure how to handle it (probably just copy it)
+	// PKCS7_free(pkcs7);
 }
 
 }

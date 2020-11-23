@@ -9,6 +9,7 @@
 
 #include <optional>
 
+#include "fileinfo/file_information/file_information_types/certificate_table.h"
 #include "retdec/cpdetect/cpdetect.h"
 #include "fileinfo/file_information/file_information_types/file_information_types.h"
 
@@ -48,7 +49,7 @@ class FileInformation
 		ImportTable importTable;                       ///< information about imports
 		ExportTable exportTable;                       ///< information about exports
 		ResourceTable resourceTable;                   ///< information about resources in input file
-		CertificateTable certificateTable;             ///< information about certificates
+		// retdec::fileformat::CertificateTable certificateTable;             ///< information about certificates
 		TlsInfo tlsInfo;                               ///< information about thread-local storage
 		ElfCore elfCoreInfo;                           ///< information about ELF core files
 		LoaderInfo loaderInfo;                         ///< information about loaded image
@@ -69,6 +70,8 @@ class FileInformation
 		std::vector<std::pair<std::string,std::string>> anomalies;     ///< detected anomalies
 
 	public:
+		// public now for dev reasons
+		retdec::fileformat::CertificateTable certificateTable;             ///< information about certificates
 		retdec::cpdetect::ToolInformation toolInfo; ///< detected tools
 		std::vector<std::string> messages;   ///< error, warning and other messages
 
@@ -275,52 +278,52 @@ class FileInformation
 
 		/// @name Getters of @a certificateTable
 		/// @{
-		std::size_t getNumberOfStoredCertificates() const;
-		std::size_t getCertificateTableSignerCertificateIndex() const;
-		std::size_t getCertificateTableCounterSignerCertificateIndex() const;
-		std::string getCertificateValidSince(std::size_t index) const;
-		std::string getCertificateValidUntil(std::size_t index) const;
-		std::string getCertificatePublicKey(std::size_t index) const;
-		std::string getCertificatePublicKeyAlgorithm(std::size_t index) const;
-		std::string getCertificateSignatureAlgorithm(std::size_t index) const;
-		std::string getCertificateSerialNumber(std::size_t index) const;
-		std::string getCertificateSha1Digest(std::size_t index) const;
-		std::string getCertificateSha256Digest(std::size_t index) const;
-		std::string getCertificateIssuerRawStr(std::size_t index) const;
-		std::string getCertificateSubjectRawStr(std::size_t index) const;
-		std::string getCertificateIssuerCountry(std::size_t index) const;
-		std::string getCertificateIssuerOrganization(std::size_t index) const;
-		std::string getCertificateIssuerOrganizationalUnit(std::size_t index) const;
-		std::string getCertificateIssuerNameQualifier(std::size_t index) const;
-		std::string getCertificateIssuerState(std::size_t index) const;
-		std::string getCertificateIssuerCommonName(std::size_t index) const;
-		std::string getCertificateIssuerSerialNumber(std::size_t index) const;
-		std::string getCertificateIssuerLocality(std::size_t index) const;
-		std::string getCertificateIssuerTitle(std::size_t index) const;
-		std::string getCertificateIssuerSurname(std::size_t index) const;
-		std::string getCertificateIssuerGivenName(std::size_t index) const;
-		std::string getCertificateIssuerInitials(std::size_t index) const;
-		std::string getCertificateIssuerPseudonym(std::size_t index) const;
-		std::string getCertificateIssuerGenerationQualifier(std::size_t index) const;
-		std::string getCertificateIssuerEmailAddress(std::size_t index) const;
-		std::string getCertificateSubjectCountry(std::size_t index) const;
-		std::string getCertificateSubjectOrganization(std::size_t index) const;
-		std::string getCertificateSubjectOrganizationalUnit(std::size_t index) const;
-		std::string getCertificateSubjectNameQualifier(std::size_t index) const;
-		std::string getCertificateSubjectState(std::size_t index) const;
-		std::string getCertificateSubjectCommonName(std::size_t index) const;
-		std::string getCertificateSubjectSerialNumber(std::size_t index) const;
-		std::string getCertificateSubjectLocality(std::size_t index) const;
-		std::string getCertificateSubjectTitle(std::size_t index) const;
-		std::string getCertificateSubjectSurname(std::size_t index) const;
-		std::string getCertificateSubjectGivenName(std::size_t index) const;
-		std::string getCertificateSubjectInitials(std::size_t index) const;
-		std::string getCertificateSubjectPseudonym(std::size_t index) const;
-		std::string getCertificateSubjectGenerationQualifier(std::size_t index) const;
-		std::string getCertificateSubjectEmailAddress(std::size_t index) const;
-		bool hasCertificateTableRecords() const;
-		bool hasCertificateTableSignerCertificate() const;
-		bool hasCertificateTableCounterSignerCertificate() const;
+		// std::size_t getNumberOfStoredCertificates() const;
+		// std::size_t getCertificateTableSignerCertificateIndex() const;
+		// std::size_t getCertificateTableCounterSignerCertificateIndex() const;
+		// std::string getCertificateValidSince(std::size_t index) const;
+		// std::string getCertificateValidUntil(std::size_t index) const;
+		// std::string getCertificatePublicKey(std::size_t index) const;
+		// std::string getCertificatePublicKeyAlgorithm(std::size_t index) const;
+		// std::string getCertificateSignatureAlgorithm(std::size_t index) const;
+		// std::string getCertificateSerialNumber(std::size_t index) const;
+		// std::string getCertificateSha1Digest(std::size_t index) const;
+		// std::string getCertificateSha256Digest(std::size_t index) const;
+		// std::string getCertificateIssuerRawStr(std::size_t index) const;
+		// std::string getCertificateSubjectRawStr(std::size_t index) const;
+		// std::string getCertificateIssuerCountry(std::size_t index) const;
+		// std::string getCertificateIssuerOrganization(std::size_t index) const;
+		// std::string getCertificateIssuerOrganizationalUnit(std::size_t index) const;
+		// std::string getCertificateIssuerNameQualifier(std::size_t index) const;
+		// std::string getCertificateIssuerState(std::size_t index) const;
+		// std::string getCertificateIssuerCommonName(std::size_t index) const;
+		// std::string getCertificateIssuerSerialNumber(std::size_t index) const;
+		// std::string getCertificateIssuerLocality(std::size_t index) const;
+		// std::string getCertificateIssuerTitle(std::size_t index) const;
+		// std::string getCertificateIssuerSurname(std::size_t index) const;
+		// std::string getCertificateIssuerGivenName(std::size_t index) const;
+		// std::string getCertificateIssuerInitials(std::size_t index) const;
+		// std::string getCertificateIssuerPseudonym(std::size_t index) const;
+		// std::string getCertificateIssuerGenerationQualifier(std::size_t index) const;
+		// std::string getCertificateIssuerEmailAddress(std::size_t index) const;
+		// std::string getCertificateSubjectCountry(std::size_t index) const;
+		// std::string getCertificateSubjectOrganization(std::size_t index) const;
+		// std::string getCertificateSubjectOrganizationalUnit(std::size_t index) const;
+		// std::string getCertificateSubjectNameQualifier(std::size_t index) const;
+		// std::string getCertificateSubjectState(std::size_t index) const;
+		// std::string getCertificateSubjectCommonName(std::size_t index) const;
+		// std::string getCertificateSubjectSerialNumber(std::size_t index) const;
+		// std::string getCertificateSubjectLocality(std::size_t index) const;
+		// std::string getCertificateSubjectTitle(std::size_t index) const;
+		// std::string getCertificateSubjectSurname(std::size_t index) const;
+		// std::string getCertificateSubjectGivenName(std::size_t index) const;
+		// std::string getCertificateSubjectInitials(std::size_t index) const;
+		// std::string getCertificateSubjectPseudonym(std::size_t index) const;
+		// std::string getCertificateSubjectGenerationQualifier(std::size_t index) const;
+		// std::string getCertificateSubjectEmailAddress(std::size_t index) const;
+		// bool hasCertificateTableRecords() const;
+		// bool hasCertificateTableSignerCertificate() const;
+		// bool hasCertificateTableCounterSignerCertificate() const;
 		/// @}
 
 		/// @name Getters of @a TLS information
@@ -605,7 +608,7 @@ class FileInformation
 		void setExportTable(const retdec::fileformat::ExportTable *sTable);
 		void setResourceTable(const retdec::fileformat::ResourceTable *sTable);
 		void setStrings(const std::vector<retdec::fileformat::String> *sStrings);
-		void setCertificateTable(const retdec::fileformat::CertificateTable *sTable);
+		void setCertificateTable(const retdec::fileformat::CertificateTable sTable);
 		void setTlsInfo(const retdec::fileformat::TlsInfo *info);
 		void setSignatureVerified(bool verified);
 		void setLoadedBaseAddress(unsigned long long baseAddress);
