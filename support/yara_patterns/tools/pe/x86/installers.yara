@@ -2126,6 +2126,24 @@ rule inno_unicode_559
 		$1 at pe.entry_point
 }
 
+rule inno_unicode_600
+{
+	meta:
+		tool = "I"
+		name = "Inno Setup"
+		version = "6.0.0"
+		extra = "unicode version"
+		source = "Made by Retdec Team"
+		pattern = "558BEC83C4A453565733C08945C48945C08945A48945D08945C88945CC8945D48945D88945ECB8D8104B00E8B072F5FF33C05568DE654B0064FF3064892033D2"
+	strings:
+		$s01 = { 55 8b ec 83 c4 a4 53 56 57 33 c0 89 45 c4 89 45 c0 89 45 a4 89 45 d0 89 45 c8 89 45 cc 89 45 d4 89 45 d8 89 45 ec b8 d8 10 4b 00 e8 b0 72 f5 ff 33 c0 55 68 de 65 4b 00 64 ff 30 64 89 20 33 d2 }
+		$s10 = "Inno Setup Setup Data (6.0.0) (u)"
+		$s11 = "Inno Setup Messages (6.0.0) (u)"
+	condition:
+		$s01 at pe.entry_point and
+		all of ($s1*)
+}
+
 rule sevenzip_sfx_3xx_01
 {
 	meta:
