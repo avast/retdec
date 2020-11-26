@@ -1,7 +1,7 @@
 /**
  * @file src/fileformat/types/certificate_table/certificate_table.cpp
  * @brief Class for certificate table.
- * @copyright (c) 2017 Avast Software, licensed under the MIT license
+ * @copyright (c) 2020 Avast Software, licensed under the MIT license
  */
 
 #include "retdec/fileformat/types/certificate_table/certificate_table.h"
@@ -9,8 +9,8 @@
 namespace retdec {
 namespace fileformat {
 
-
-CertificateTable::CertificateTable(std::vector<DigitalSignature> signatures) : signatures(signatures) {}
+CertificateTable::CertificateTable(std::vector<DigitalSignature> signatures)
+	: signatures(signatures) {}
 
 /**
  * Check if certificate table is empty

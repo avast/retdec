@@ -44,8 +44,8 @@ std::string X509Certificate::getRawIssuer() const
 
 std::string X509Certificate::getSerialNumber() const
 {
-	auto serial_number_asn1 = get_serial_number_asn1();
-	BIGNUM* bignum          = ASN1_INTEGER_to_BN(serial_number_asn1, nullptr);
+	ASN1_INTEGER* serial_number_asn1 = X509_get_serialNumber(cert);
+	BIGNUM* bignum = ASN1_INTEGER_to_BN(serial_number_asn1, nullptr);
 
 	BIO* bio = BIO_new(BIO_s_mem());
 	BN_print(bio, bignum);
@@ -58,15 +58,10 @@ std::string X509Certificate::getSerialNumber() const
 
 std::string X509Certificate::getSignatureAlgorithm() const
 {
-	auto algo      = X509_get0_tbs_sigalg(cert);
+	auto algo = X509_get0_tbs_sigalg(cert);
 	char name[256] = { '\0' };
 	OBJ_obj2txt(name, 255, algo->algorithm, 0);
 	return name;
-}
-
-EVP_PKEY* X509Certificate::get_public_key() const
-{
-	return X509_get0_pubkey(cert);
 }
 
 std::string X509Certificate::getValidSince() const
@@ -94,11 +89,6 @@ std::string X509Certificate::getPem() const
 	std::vector<char> result(data_len);
 	BIO_read(bio, static_cast<void*>(result.data()), data_len);
 	return { result.begin(), result.end() };
-}
-
-ASN1_INTEGER* X509Certificate::get_serial_number_asn1() const
-{
-	return X509_get_serialNumber(cert);
 }
 
 X509* X509Certificate::get_x509() const
@@ -152,9 +142,9 @@ static STACK_OF(X509_CRL)* lookup_crl_callback(X509_STORE_CTX* ctx, X509_NAME* /
 CertificateProcessor::CertificateProcessor()
 {
 	trust_store = X509_STORE_new();
-	ctx         = X509_STORE_CTX_new();
+	ctx = X509_STORE_CTX_new();
 
-	if (auto ca_dir = getenv("CA_DIR"); ca_dir)
+	if (char* ca_dir = getenv("CA_DIR"); ca_dir)
 	{
 		namespace fs = std::filesystem;
 
@@ -183,7 +173,7 @@ Certificate::Attributes parseAttributes(X509_NAME* raw)
 	for (std::size_t i = 0; i < numEntries; ++i)
 	{
 		auto nameEntry = X509_NAME_get_entry(raw, int(i));
-		auto valueObj  = X509_NAME_ENTRY_get_data(nameEntry);
+		auto valueObj = X509_NAME_ENTRY_get_data(nameEntry);
 
 		std::string key = OBJ_nid2sn(
 			OBJ_obj2nid(X509_NAME_ENTRY_get_object(nameEntry)));
@@ -247,18 +237,18 @@ std::string X509Certificate::getPublicKeyAlgorithm() const
 Certificate X509Certificate::createCertificate() const
 {
 	Certificate out_cert;
-	out_cert.issuerRaw     = getRawIssuer();
-	out_cert.subjectRaw    = getRawSubject();
-	out_cert.issuer        = getIssuer();
-	out_cert.subject       = getSubject();
-	out_cert.publicKey     = getPublicKey();
+	out_cert.issuerRaw = getRawIssuer();
+	out_cert.subjectRaw = getRawSubject();
+	out_cert.issuer = getIssuer();
+	out_cert.subject = getSubject();
+	out_cert.publicKey = getPublicKey();
 	out_cert.publicKeyAlgo = getPublicKeyAlgorithm();
 	out_cert.signatureAlgo = getSignatureAlgorithm();
-	out_cert.serialNumber  = getSerialNumber();
-	out_cert.sha1Digest    = "";
-	out_cert.sha256Digest  = "";
-	out_cert.validSince    = getValidSince();
-	out_cert.validUntil    = getValidUntil();
+	out_cert.serialNumber = getSerialNumber();
+	out_cert.sha1Digest = "";
+	out_cert.sha256Digest = "";
+	out_cert.validSince = getValidSince();
+	out_cert.validUntil = getValidUntil();
 	return out_cert;
 }
 

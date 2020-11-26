@@ -16,4 +16,5 @@ std::vector<DigitalSignature> Authenticode::getSignatures() const
 {
 	return pkcs7.get_signatures();
 }
+
 } // namespace authenticode

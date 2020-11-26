@@ -1,7 +1,7 @@
 /**
  * @file include/retdec/fileformat/types/certificate_table/certificate.h
  * @brief Class for one certificate.
- * @copyright (c) 2017 Avast Software, licensed under the MIT license
+ * @copyright (c) 2020 Avast Software, licensed under the MIT license
  */
 
 #ifndef RETDEC_FILEFORMAT_TYPES_CERTIFICATE_TABLE_CERTIFICATE_H

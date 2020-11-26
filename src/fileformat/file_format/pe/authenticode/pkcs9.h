@@ -21,20 +21,19 @@
 #include <vector>
 #include <string>
 #include <cstdint>
-#include <iostream> /* remove */
 #include <ctime>
 
 namespace authenticode {
 
 class Pkcs9
 {
-public:
-	Pkcs9(std::vector<unsigned char> data, STACK_OF(X509)* certificates);
-	void print();
-	X509* certificate;
 
 private:
 	PKCS7_SIGNER_INFO* countersign_info;
+	X509* signer_cert;
+public:
+	Pkcs9(std::vector<unsigned char> data, STACK_OF(X509)* certificates);
+	X509* getX509() const;
 };
 
 } // namespace authenticode

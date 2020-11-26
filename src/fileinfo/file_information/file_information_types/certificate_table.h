@@ -14,6 +14,7 @@ namespace fileinfo {
 
 /**
  * Class for certificate table
+ * TODO remove this? Unnecessary wrapper above fileformat::CertificateTable
  */
 class CertificateTable
 {

@@ -26,7 +26,6 @@
 #include <vector>
 #include <string>
 #include <cstdint>
-#include <iostream> /* remove */
 #include <ctime>
 #include <optional>
 #include <cstdint>
@@ -34,8 +33,6 @@
 
 namespace authenticode {
 
-/* Idea to name this Authenticode as Authenticode itself seems useless
-	and Authenticode really is just Pkcs7 will specific constraints */
 class Pkcs7
 {
 private:
@@ -46,22 +43,21 @@ private:
 	void parse_certificates(PKCS7_SIGNER_INFO* info);
 	STACK_OF(X509)* get_certificates() const;
 	STACK_OF(X509)* get_signers();
-	PKCS7_SIGNED* get_signed_data() const;
-	retdec::fileformat::Certificate convert_certificate(X509Certificate cert);
 
 public:
 	std::optional<X509Certificate> signer;
 	std::vector<X509Certificate> certificates;
 	std::vector<Pkcs7> nested_signatures;
+	/* add ms counter signetures TODO */
 	std::vector<Pkcs9> counter_signatures;
+
+	std::uint64_t get_version() const;
+	std::string get_digest_algorithm() const;
+	std::vector<std::uint8_t> get_signed_digest() const;
+	std::vector<retdec::fileformat::DigitalSignature> get_signatures() const;
 
 	Pkcs7(std::vector<unsigned char> input);
 	~Pkcs7();
-	const char* get_digest_algorithm() const;
-	std::vector<std::uint8_t> get_signed_digest() const;
-	std::uint64_t get_version() const;
-	std::vector<retdec::fileformat::DigitalSignature> get_signatures() const;
-	// std::vector<MsCounterSignature> ms_counter_signatures;
 };
 
 } // namespace authenticode

@@ -1,7 +1,7 @@
 /**
  * @file include/retdec/fileformat/types/certificate_table/certificate_table.h
  * @brief Class for certificate table.
- * @copyright (c) 2017 Avast Software, licensed under the MIT license
+ * @copyright (c) 2020 Avast Software, licensed under the MIT license
  */
 
 #ifndef RETDEC_FILEFORMAT_TYPES_CERTIFICATE_TABLE_CERTIFICATE_TABLE_H
@@ -18,10 +18,10 @@ struct Signer
 {
 	std::vector<Certificate> chain;
 	/*
-	regarding pkcs9 option
-	Note 2 - A countersignature, since it has type SignerInfo, can itself
+	regarding pkcs9
+	"A countersignature, since it has type SignerInfo, can itself
 	contain a countersignature attribute.  Thus it is possible to
-	construct arbitrarily long series of countersignatures.
+	construct arbitrarily long series of countersignatures.""
 	https://tools.ietf.org/html/rfc2985
 	*/
 	std::vector<Signer> counter_signers;
@@ -38,7 +38,6 @@ struct DigitalSignature
 
 /**
  * Table of certificates
- * TODO need to refactor this quite a bit to support Authenticode
  */
 class CertificateTable
 {
