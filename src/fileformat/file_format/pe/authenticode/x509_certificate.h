@@ -21,7 +21,6 @@
 #include <string>
 #include <vector>
 #include <ctime>
-#include <iostream>
 #include <filesystem>
 
 using retdec::fileformat::Certificate;
@@ -36,9 +35,8 @@ private:
 
 public:
 	X509Certificate(X509* cert);
-	EVP_PKEY* get_public_key() const;
-	ASN1_INTEGER* get_serial_number_asn1() const;
 
+	X509* get_x509() const;
 	std::string getValidUntil() const;
 	std::string getValidSince() const;
 	std::string getRawSubject() const;
@@ -50,8 +48,8 @@ public:
 	std::string getPem() const;
 	Certificate::Attributes getSubject() const;
 	Certificate::Attributes getIssuer() const;
+	/* create the generic Certificate class out of this */
 	Certificate createCertificate() const;
-	X509* get_x509() const;
 };
 
 class CertificateProcessor

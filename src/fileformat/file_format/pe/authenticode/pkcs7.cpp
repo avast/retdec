@@ -6,12 +6,14 @@
 
 #include "pkcs7.h"
 #include "retdec/fileformat/types/certificate_table/certificate_table.h"
+#include <exception>
 #include <openssl/safestack.h>
 
 using namespace retdec::fileformat;
 
 namespace authenticode {
 
+/* move this elsewhere probably */
 static const int NID_spc_nested_signature =
 	OBJ_create("1.3.6.1.4.1.311.2.4.1", "spcNestedSignature", "SPC_NESTED_SIGNATURE (Authenticode)");
 static const int NID_spc_ms_countersignature =
@@ -36,24 +38,34 @@ static const char* hash_name_from_asn1(ASN1_OBJECT* obj)
 	}
 }
 
-/* If PKCS7 cannot be create throws otherwise returns valid pointer */
+/* If PKCS7 cannot be created it throws otherwise returns valid pointer */
 static PKCS7* get_pkcs7_from_bytes(std::vector<unsigned char> input)
 {
 	BIO* bio = BIO_new(BIO_s_mem());
 	if (!bio || BIO_reset(bio) != 1 ||
-	    BIO_write(bio, input.data(), static_cast<int>(input.size())) != static_cast<std::int64_t>(input.size()))
+		BIO_write(bio, input.data(), static_cast<int>(input.size())) != static_cast<std::int64_t>(input.size()))
 	{
 		BIO_free(bio);
-		throw std::exception();
+		return NULL;
 	}
 
 	PKCS7* pkcs7 = d2i_PKCS7_bio(bio, nullptr);
 	if (!pkcs7)
 	{
 		BIO_free(bio);
-		throw std::exception();
+		return NULL;
 	}
 	return pkcs7;
+}
+
+static std::vector<Certificate> create_fileformat_chain(std::vector<X509Certificate> chain)
+{
+	std::vector<Certificate> fileformat_chain;
+	for (auto&& cert : chain)
+	{
+		fileformat_chain.push_back(cert.createCertificate());
+	}
+	return fileformat_chain;
 }
 
 /**
@@ -92,8 +104,11 @@ Pkcs7::Pkcs7(std::vector<unsigned char> input)
 		- unauthenticatedAttributes
 	*/
 	pkcs7 = get_pkcs7_from_bytes(input);
-
-	size_t signed_data_len               = pkcs7->d.sign->contents->d.other->value.sequence->length;
+	if (!pkcs7)
+	{
+		throw std::exception();
+	}
+	size_t signed_data_len = pkcs7->d.sign->contents->d.other->value.sequence->length;
 	const unsigned char* signed_data_raw = pkcs7->d.sign->contents->d.other->value.sequence->data;
 
 	/* Authenticode specific PKCS #7 contentInfo member content 
@@ -122,10 +137,9 @@ Pkcs7::Pkcs7(std::vector<unsigned char> input)
 
 	STACK_OF(X509)* certs = get_certificates();
 
-	/* Parse the signer info part */
 	parse_signer_info(sk_PKCS7_SIGNER_INFO_value(signer_infos, 0));
 
-	/* Process certificates now */
+	/* Wrap the raw certificates now */
 	int cert_count = sk_X509_num(certs);
 	for (size_t i = 0; i < cert_count; i++)
 	{
@@ -164,8 +178,8 @@ void Pkcs7::parse_signer_info(PKCS7_SIGNER_INFO* si_info)
 
 	for (int j = 0; j < sk_X509_ATTRIBUTE_num(si_info->unauth_attr); ++j)
 	{
-		X509_ATTRIBUTE* attr     = sk_X509_ATTRIBUTE_value(si_info->unauth_attr, j);
-		ASN1_TYPE* attr_type     = X509_ATTRIBUTE_get0_type(attr, 0);
+		X509_ATTRIBUTE* attr = sk_X509_ATTRIBUTE_value(si_info->unauth_attr, j);
+		ASN1_TYPE* attr_type = X509_ATTRIBUTE_get0_type(attr, 0);
 		ASN1_OBJECT* attr_object = X509_ATTRIBUTE_get0_object(attr);
 		if (!attr_object)
 		{
@@ -177,7 +191,7 @@ void Pkcs7::parse_signer_info(PKCS7_SIGNER_INFO* si_info)
 		if (attr_object_nid == NID_spc_nested_signature)
 		{
 			std::vector<unsigned char> nested_sig_data(attr_type->value.sequence->data,
-			                                           attr_type->value.sequence->data + attr_type->value.sequence->length);
+				attr_type->value.sequence->data + attr_type->value.sequence->length);
 			nested_signatures.push_back(Pkcs7(nested_sig_data));
 		}
 		else if (attr_object_nid == NID_pkcs9_countersignature /* ||
@@ -185,7 +199,7 @@ void Pkcs7::parse_signer_info(PKCS7_SIGNER_INFO* si_info)
 		)
 		{
 			std::vector<unsigned char> countersig_data(attr_type->value.sequence->data,
-			                                           attr_type->value.sequence->data + attr_type->value.sequence->length);
+				attr_type->value.sequence->data + attr_type->value.sequence->length);
 			counter_signatures.push_back(Pkcs9(countersig_data, get_certificates()));
 		}
 	}
@@ -201,7 +215,7 @@ STACK_OF(X509)* Pkcs7::get_certificates() const
 	return pkcs7->d.sign->cert;
 }
 
-const char* Pkcs7::get_digest_algorithm() const
+std::string Pkcs7::get_digest_algorithm() const
 {
 	return hash_name_from_asn1(spc_content->messageDigest->digestAlgorithm->algorithm);
 }
@@ -211,24 +225,9 @@ std::vector<std::uint8_t> Pkcs7::get_signed_digest() const
 	return std::vector<std::uint8_t>(spc_content->messageDigest->digest->data, spc_content->messageDigest->digest->data + spc_content->messageDigest->digest->length);
 }
 
-PKCS7_SIGNED* Pkcs7::get_signed_data() const
-{
-	return pkcs7->d.sign;
-}
-
 std::uint64_t Pkcs7::get_version() const
 {
 	return version;
-}
-
-std::vector<Certificate> create_fileformat_chain(std::vector<X509Certificate> chain)
-{
-	std::vector<Certificate> fileformat_chain;
-	for (auto&& cert : chain)
-	{
-		fileformat_chain.push_back(cert.createCertificate());
-	}
-	return fileformat_chain;
 }
 
 std::vector<DigitalSignature> Pkcs7::get_signatures() const
@@ -238,31 +237,24 @@ std::vector<DigitalSignature> Pkcs7::get_signatures() const
 	CertificateProcessor processor;
 
 	DigitalSignature signature{
-		.signed_digest    = get_signed_digest(),
+		.signed_digest = get_signed_digest(),
 		.digest_algorithm = get_digest_algorithm(),
 	};
-	/* X
-	DANGER! nested signatures doesn't have to have their own certificates,
-	I didn't know how to figure out if nested signatures can have their own 
-	certificates, because I didn't know how to get the information thatD
-	the pkcs7 has no certificates as pkcs7->d.sign->cert doesn't have to be NULL
-	probably just gonna check openssl source?
-	*/
+
 	STACK_OF(X509)* certs = get_certificates();
 
 	std::vector<X509Certificate> chain = processor.get_chain(signer.value().get_x509(), certs);
-	auto fileformat_chain              = create_fileformat_chain(chain);
+	auto fileformat_chain = create_fileformat_chain(chain);
 
 	/* Authenticode has a single signer */
 	signature.signers.push_back(Signer{
 		.chain = fileformat_chain });
 
-	/* Are further counter signers signers of the previous counter signer????? */
 	for (auto&& counter_sig : counter_signatures)
 	{
 		CertificateProcessor processor;
 		// TODO fix chain creation it's wrongly ordered probably
-		auto chain            = processor.get_chain(counter_sig.certificate, certs);
+		auto chain = processor.get_chain(counter_sig.getX509(), certs);
 		auto fileformat_chain = create_fileformat_chain(chain);
 		signature.signers[0].counter_signers.push_back(Signer{ .chain = fileformat_chain });
 	}
