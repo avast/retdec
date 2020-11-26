@@ -1,3 +1,9 @@
+/**
+ * @file src/fileformat/file_format/pe/authenticode/x509_certificate.h
+ * @brief Class that wraps openssl x509 certificate information.
+ * @copyright (c) 2020 Avast Software, licensed under the MIT license
+ */
+
 #pragma once
 
 #include "retdec/fileformat/types/certificate_table/certificate.h"

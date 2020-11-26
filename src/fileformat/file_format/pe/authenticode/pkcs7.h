@@ -1,3 +1,9 @@
+/**
+ * @file src/fileformat/file_format/pe/authenticode/pkcs7.h
+ * @brief Class wrapper above openssl Pkcs7
+ * @copyright (c) 2020 Avast Software, licensed under the MIT license
+ */
+
 #pragma once
 
 #include "authenticode_structs.h"

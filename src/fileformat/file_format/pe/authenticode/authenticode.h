@@ -1,3 +1,9 @@
+/**
+ * @file src/fileformat/file_format/pe/authenticode/authenticode.h
+ * @brief Class that parses PE Authenticode data
+ * @copyright (c) 2020 Avast Software, licensed under the MIT license
+ */
+
 #pragma once
 
 #include "retdec/fileformat/types/certificate_table/certificate_table.h"

@@ -1,3 +1,9 @@
+/**
+ * @file src/fileformat/file_format/pe/authenticode/pkcs7.cpp
+ * @brief Class wrapper above openssl Pkcs7
+ * @copyright (c) 2020 Avast Software, licensed under the MIT license
+ */
+
 #include "pkcs7.h"
 #include "retdec/fileformat/types/certificate_table/certificate_table.h"
 #include <openssl/safestack.h>

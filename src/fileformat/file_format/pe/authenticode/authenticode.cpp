@@ -1,3 +1,9 @@
+/**
+ * @file src/fileformat/file_format/pe/authenticode/authenticode.cpp
+ * @brief Class that parses PE Authenticode data
+ * @copyright (c) 2020 Avast Software, licensed under the MIT license
+ */
+
 #include "authenticode.h"
 
 namespace authenticode {

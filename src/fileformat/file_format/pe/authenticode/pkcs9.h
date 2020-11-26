@@ -1,3 +1,9 @@
+/**
+ * @file src/fileformat/file_format/pe/authenticode/pkcs9.h
+ * @brief Class that wraps openssl pkcs9 information.
+ * @copyright (c) 2020 Avast Software, licensed under the MIT license
+ */
+
 #pragma once
 
 #include "authenticode_structs.h"
