@@ -22,15 +22,16 @@ using retdec::fileformat::Certificate;
 
 namespace authenticode {
 
-class X509Certificate { /* X509, can't name it X509 due to the collisions */
+class X509Certificate
+{ /* X509, can't name it X509 due to the collisions */
 private:
-	X509 *cert;
-	std::string get_x509_name(X509_NAME *name) const;
+	X509* cert;
+	std::string get_x509_name(X509_NAME* name) const;
+
 public:
-	X509Certificate(X509 *cert);
-	EVP_PKEY *get_public_key() const;
+	X509Certificate(X509* cert);
+	EVP_PKEY* get_public_key() const;
 	ASN1_INTEGER* get_serial_number_asn1() const;
-	void print();
 
 	std::string getValidUntil() const;
 	std::string getValidSince() const;
@@ -47,14 +48,16 @@ public:
 	X509* get_x509() const;
 };
 
-class CertificateProcessor {
+class CertificateProcessor
+{
 private:
-	X509_STORE *trust_store;
-	X509_STORE_CTX *ctx;
+	X509_STORE* trust_store;
+	X509_STORE_CTX* ctx;
+
 public:
 	std::vector<X509Certificate> chain;
 	CertificateProcessor();
-	std::vector<X509Certificate> get_chain(X509 *cert, STACK_OF(X509) *all_certs);
+	std::vector<X509Certificate> get_chain(X509* cert, STACK_OF(X509)* all_certs);
 };
 
-}
+} // namespace authenticode

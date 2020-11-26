@@ -8,6 +8,7 @@
 #include "retdec/utils/string.h"
 #include "retdec/fileformat/utils/conversions.h"
 #include "fileinfo/file_presentation/getters/iterative_getter/iterative_simple_getter/certificate_table_plain_getter.h"
+#include <string>
 
 using namespace retdec::utils;
 using namespace retdec::fileformat;
@@ -19,12 +20,13 @@ namespace fileinfo {
  * Constructor
  * @param fileInfo Information about file
  */
-CertificateTablePlainGetter::CertificateTablePlainGetter(FileInformation &fileInfo) : IterativeSimpleGetter(fileInfo)
+CertificateTablePlainGetter::CertificateTablePlainGetter(FileInformation& fileInfo)
+	: IterativeSimpleGetter(fileInfo)
 {
-	// numberOfStructures = 1;
-	// numberOfStoredRecords.push_back(fileinfo.getNumberOfStoredCertificates());
-	// numberOfExtraElements.push_back(0);
-	// title = "Certificate table";
+	numberOfStructures = 1;
+	numberOfStoredRecords.push_back(fileInfo.certificateTable.signatureCount());
+	numberOfExtraElements.push_back(0);
+	title = "Certificate table";
 	// elementHeader = "Certificate";
 	// commonHeaderElements.push_back("Subject name        : ");
 	// commonHeaderElements.push_back("Subject organization: ");
@@ -41,42 +43,23 @@ CertificateTablePlainGetter::CertificateTablePlainGetter(FileInformation &fileIn
 	// commonHeaderElements.push_back("SHA256              : ");
 }
 
-std::size_t CertificateTablePlainGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string> &desc, std::vector<std::string> &info) const
+std::size_t CertificateTablePlainGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string>& desc, std::vector<std::string>& info) const
 {
-	return 0;
-	// if(structIndex >= numberOfStructures || !fileinfo.hasCertificateTableRecords())
-	// {
-	// 	return 0;
-	// }
+	if (structIndex >= numberOfStructures || fileinfo.certificateTable.empty())
+	{
+		return 0;
+	}
 
-	// desc.clear();
-	// info.clear();
+	desc.clear();
+	info.clear();
 
-	// desc.push_back("Number of certificates          : ");
-	// desc.push_back("Signer certificate index        : ");
-	// desc.push_back("Counter-signer certificate index: ");
-	// info.push_back(std::to_string(fileinfo.getNumberOfStoredCertificates()));
-	// if(fileinfo.hasCertificateTableSignerCertificate())
-	// {
-	// 	info.push_back(std::to_string(fileinfo.getCertificateTableSignerCertificateIndex()));
-	// }
-	// else
-	// {
-	// 	info.push_back("");
-	// }
-	// if(fileinfo.hasCertificateTableCounterSignerCertificate())
-	// {
-	// 	info.push_back(std::to_string(fileinfo.getCertificateTableCounterSignerCertificateIndex()));
-	// }
-	// else
-	// {
-	// 	info.push_back("");
-	// }
+	desc.push_back("Number of signatures          : ");
+	info.push_back(std::to_string(fileinfo.certificateTable.signatureCount()));
 
-	// return info.size();
+	return info.size();
 }
 
-bool CertificateTablePlainGetter::getRecord(std::size_t structIndex, std::size_t recIndex, std::vector<std::string> &record) const
+bool CertificateTablePlainGetter::getRecord(std::size_t structIndex, std::size_t recIndex, std::vector<std::string>& record) const
 {
 	return false;
 	// if(structIndex >= numberOfStructures || recIndex >= numberOfStoredRecords[structIndex])
@@ -102,7 +85,7 @@ bool CertificateTablePlainGetter::getRecord(std::size_t structIndex, std::size_t
 	return true;
 }
 
-bool CertificateTablePlainGetter::getFlags(std::size_t structIndex, std::size_t recIndex, std::string &flagsValue, std::vector<std::string> &desc) const
+bool CertificateTablePlainGetter::getFlags(std::size_t structIndex, std::size_t recIndex, std::string& flagsValue, std::vector<std::string>& desc) const
 {
 	return false;
 	// if(structIndex >= numberOfStructures || recIndex >= numberOfStoredRecords[structIndex])

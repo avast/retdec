@@ -26,37 +26,36 @@
 #include <cstdint>
 #include <exception>
 
-namespace authenticode
-{
+namespace authenticode {
 
 /* Idea to name this Authenticode as Authenticode itself seems useless
 	and Authenticode really is just Pkcs7 will specific constraints */
 class Pkcs7
 {
-	private:
-		PKCS7* pkcs7;
-		SpcIndirectDataContent* spc_content;
-		std::uint64_t version;
-		void parse_signer_info(PKCS7_SIGNER_INFO* si_info);
-		void parse_certificates(PKCS7_SIGNER_INFO* info);
-		STACK_OF(X509)* get_certificates() const;
-		STACK_OF(X509)* get_signers();
-		PKCS7_SIGNED* get_signed_data() const;
-		retdec::fileformat::Certificate convert_certificate(X509Certificate cert);
+private:
+	PKCS7* pkcs7;
+	SpcIndirectDataContent* spc_content;
+	std::uint64_t version;
+	void parse_signer_info(PKCS7_SIGNER_INFO* si_info);
+	void parse_certificates(PKCS7_SIGNER_INFO* info);
+	STACK_OF(X509)* get_certificates() const;
+	STACK_OF(X509)* get_signers();
+	PKCS7_SIGNED* get_signed_data() const;
+	retdec::fileformat::Certificate convert_certificate(X509Certificate cert);
 
-	public:
-		std::optional<X509Certificate> signer;
-		std::vector<X509Certificate> certificates;
-		std::vector<Pkcs7> nested_signatures;
-		std::vector<Pkcs9> counter_signatures;
+public:
+	std::optional<X509Certificate> signer;
+	std::vector<X509Certificate> certificates;
+	std::vector<Pkcs7> nested_signatures;
+	std::vector<Pkcs9> counter_signatures;
 
-		Pkcs7(std::vector<unsigned char> input);
-		~Pkcs7();
-		const char* get_digest_algorithm() const;
-		std::vector<std::uint8_t> get_signed_digest() const;
-		std::uint64_t get_version() const;
-		std::vector<retdec::fileformat::DigitalSignature> get_signatures() const;
-		// std::vector<MsCounterSignature> ms_counter_signatures;
+	Pkcs7(std::vector<unsigned char> input);
+	~Pkcs7();
+	const char* get_digest_algorithm() const;
+	std::vector<std::uint8_t> get_signed_digest() const;
+	std::uint64_t get_version() const;
+	std::vector<retdec::fileformat::DigitalSignature> get_signatures() const;
+	// std::vector<MsCounterSignature> ms_counter_signatures;
 };
 
 } // namespace authenticode

@@ -3,7 +3,6 @@
 #include "retdec/fileformat/types/certificate_table/certificate_table.h"
 
 #include "authenticode_structs.h"
-#include "x509_certificate.h"
 #include "pkcs7.h"
 
 #include <openssl/bn.h>
@@ -25,12 +24,14 @@ using retdec::fileformat::DigitalSignature;
 
 namespace authenticode {
 
-class Authenticode {
-	private:
-		Pkcs7 pkcs7;
+/* Basically a PKCS7 with specific contraints */
+class Authenticode
+{
+private:
+	Pkcs7 pkcs7;
 
-	public:
-		Authenticode (std::vector<unsigned char> data);
-		std::vector<DigitalSignature> getSignatures () const;
+public:
+	Authenticode(std::vector<unsigned char> data);
+	std::vector<DigitalSignature> getSignatures() const;
 };
 } // namespace authenticode

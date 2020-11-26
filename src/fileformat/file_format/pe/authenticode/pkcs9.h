@@ -23,11 +23,12 @@ namespace authenticode {
 class Pkcs9
 {
 public:
-	Pkcs9(std::vector<unsigned char> data, STACK_OF(X509) *certificates);
+	Pkcs9(std::vector<unsigned char> data, STACK_OF(X509)* certificates);
 	void print();
-	X509 *certificate;
+	X509* certificate;
+
 private:
-	PKCS7_SIGNER_INFO *countersign_info;
+	PKCS7_SIGNER_INFO* countersign_info;
 };
 
-}
+} // namespace authenticode

@@ -18,6 +18,7 @@ struct Signer
 {
 	std::vector<Certificate> chain;
 	/*
+	regarding pkcs9 option
 	Note 2 - A countersignature, since it has type SignerInfo, can itself
 	contain a countersignature attribute.  Thus it is possible to
 	construct arbitrarily long series of countersignatures.
@@ -26,7 +27,7 @@ struct Signer
 	std::vector<Signer> counter_signers;
 };
 
-/* naming - simply Signature was already taken by unpackers */
+/* naming - "Signature" was already taken by unpackers */
 struct DigitalSignature
 {
 	std::vector<std::uint8_t> signed_digest;
@@ -46,6 +47,7 @@ public:
 
 	CertificateTable(std::vector<DigitalSignature> signatures);
 	CertificateTable() = default;
+	std::size_t signatureCount() { return signatures.size(); }
 	bool empty() const;
 };
 

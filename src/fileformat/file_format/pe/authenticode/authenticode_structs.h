@@ -15,8 +15,7 @@
 struct SpcString
 {
 	int type;
-	union
-	{
+	union {
 		ASN1_BMPSTRING* unicode;
 		ASN1_IA5STRING* ascii;
 	} value;
@@ -31,8 +30,7 @@ struct SpcSerializedObject
 struct SpcLink
 {
 	int type;
-	union
-	{
+	union {
 		ASN1_IA5STRING* url;
 		SpcSerializedObject* moniker;
 		SpcString* file;
