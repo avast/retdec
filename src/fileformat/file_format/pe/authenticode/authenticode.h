@@ -40,4 +40,5 @@ public:
 	Authenticode(std::vector<unsigned char> data);
 	std::vector<DigitalSignature> getSignatures() const;
 };
+
 } // namespace authenticode

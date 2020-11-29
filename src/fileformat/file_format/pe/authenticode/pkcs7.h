@@ -37,24 +37,23 @@ class Pkcs7
 {
 private:
 	PKCS7* pkcs7;
-	SpcIndirectDataContent* spc_content;
+	SpcIndirectDataContent* spcContent;
 	std::uint64_t version;
-	void parse_signer_info(PKCS7_SIGNER_INFO* si_info);
-	void parse_certificates(PKCS7_SIGNER_INFO* info);
-	STACK_OF(X509)* get_certificates() const;
-	STACK_OF(X509)* get_signers();
-
+	void parseSignerInfo(PKCS7_SIGNER_INFO* si_info);
+	void parseCertificates(PKCS7_SIGNER_INFO* info);
+	STACK_OF(X509)* getCertificates() const;
+	STACK_OF(X509)* getSigners();
 public:
 	std::optional<X509Certificate> signer;
 	std::vector<X509Certificate> certificates;
-	std::vector<Pkcs7> nested_signatures;
+	std::vector<Pkcs7> nestedSignatures;
 	/* add ms counter signetures TODO */
-	std::vector<Pkcs9> counter_signatures;
+	std::vector<Pkcs9> counterSignatures;
 
-	std::uint64_t get_version() const;
-	std::string get_digest_algorithm() const;
-	std::vector<std::uint8_t> get_signed_digest() const;
-	std::vector<retdec::fileformat::DigitalSignature> get_signatures() const;
+	std::uint64_t getVersion() const;
+	std::string getDigestAlgorithm() const;
+	std::vector<std::uint8_t> getSignedDigest() const;
+	std::vector<retdec::fileformat::DigitalSignature> getSignatures() const;
 
 	Pkcs7(std::vector<unsigned char> input);
 	~Pkcs7();

@@ -21,7 +21,7 @@ static std::time_t asn1_time_to_timestamp(const ASN1_TIME* asn1_time)
 	return mktime(&timepoint);
 }
 
-std::string X509Certificate::get_x509_name(X509_NAME* name) const
+std::string X509Certificate::getX509Name(X509_NAME* name) const
 {
 	BIO* bio = BIO_new(BIO_s_mem());
 	X509_NAME_print_ex(bio, name, 0, XN_FLAG_RFC2253);
@@ -34,12 +34,12 @@ std::string X509Certificate::get_x509_name(X509_NAME* name) const
 
 std::string X509Certificate::getRawSubject() const
 {
-	return get_x509_name(X509_get_subject_name(cert));
+	return getX509Name(X509_get_subject_name(cert));
 }
 
 std::string X509Certificate::getRawIssuer() const
 {
-	return get_x509_name(X509_get_issuer_name(cert));
+	return getX509Name(X509_get_issuer_name(cert));
 }
 
 std::string X509Certificate::getSerialNumber() const
@@ -91,14 +91,14 @@ std::string X509Certificate::getPem() const
 	return { result.begin(), result.end() };
 }
 
-X509* X509Certificate::get_x509() const
+X509* X509Certificate::getX509() const
 {
 	return cert;
 }
 
 /* TODO Chain is processed by callbacks set in the CertProcessor constructor 
    !! The order of the certificates is not guaranteed to be corret right now */
-std::vector<X509Certificate> CertificateProcessor::get_chain(X509* cert, STACK_OF(X509)* all_certs)
+std::vector<X509Certificate> CertificateProcessor::getChain(X509* cert, STACK_OF(X509)* all_certs)
 {
 	X509_STORE_CTX_init(ctx, trust_store, cert, all_certs);
 	X509_verify_cert(ctx);

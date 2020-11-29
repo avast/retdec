@@ -114,8 +114,8 @@ Pkcs7::Pkcs7(std::vector<unsigned char> input)
 	/* Authenticode specific PKCS #7 contentInfo member content 
 	   contains file's hash avalue, page hash values, file description and
 	   optional + legacy ASN.1 fields */
-	spc_content = d2i_SpcIndirectDataContent(nullptr, &signed_data_raw, signed_data_len);
-	if (!spc_content)
+	spcContent = d2i_SpcIndirectDataContent(nullptr, &signed_data_raw, signed_data_len);
+	if (!spcContent)
 	{
 		throw std::exception();
 	}
@@ -135,9 +135,9 @@ Pkcs7::Pkcs7(std::vector<unsigned char> input)
 	/* Version has to be equal to 1, but don't validate for now? */
 	ASN1_INTEGER_get_uint64(&version, pkcs7->d.sign->version);
 
-	STACK_OF(X509)* certs = get_certificates();
+	STACK_OF(X509)* certs = getCertificates();
 
-	parse_signer_info(sk_PKCS7_SIGNER_INFO_value(signer_infos, 0));
+	parseSignerInfo(sk_PKCS7_SIGNER_INFO_value(signer_infos, 0));
 
 	/* Wrap the raw certificates now */
 	int cert_count = sk_X509_num(certs);
@@ -165,7 +165,7 @@ Pkcs7::Pkcs7(std::vector<unsigned char> input)
 	}
 }
 
-void Pkcs7::parse_signer_info(PKCS7_SIGNER_INFO* si_info)
+void Pkcs7::parseSignerInfo(PKCS7_SIGNER_INFO* si_info)
 {
 	/* SignerInfo contains
 	* version == 1
@@ -192,7 +192,7 @@ void Pkcs7::parse_signer_info(PKCS7_SIGNER_INFO* si_info)
 		{
 			std::vector<unsigned char> nested_sig_data(attr_type->value.sequence->data,
 				attr_type->value.sequence->data + attr_type->value.sequence->length);
-			nested_signatures.push_back(Pkcs7(nested_sig_data));
+			nestedSignatures.push_back(Pkcs7(nested_sig_data));
 		}
 		else if (attr_object_nid == NID_pkcs9_countersignature /* ||
 			/* attr_object_nid == NID_spc_ms_countersignature TODO */
@@ -200,70 +200,69 @@ void Pkcs7::parse_signer_info(PKCS7_SIGNER_INFO* si_info)
 		{
 			std::vector<unsigned char> countersig_data(attr_type->value.sequence->data,
 				attr_type->value.sequence->data + attr_type->value.sequence->length);
-			counter_signatures.push_back(Pkcs9(countersig_data, get_certificates()));
+			counterSignatures.push_back(Pkcs9(countersig_data, getCertificates()));
 		}
 	}
 }
 
-STACK_OF(X509)* Pkcs7::get_signers()
+STACK_OF(X509)* Pkcs7::getSigners()
 {
 	return PKCS7_get0_signers(pkcs7, pkcs7->d.sign->cert, 0);
 }
 
-STACK_OF(X509)* Pkcs7::get_certificates() const
+STACK_OF(X509)* Pkcs7::getCertificates() const
 {
 	return pkcs7->d.sign->cert;
 }
 
-std::string Pkcs7::get_digest_algorithm() const
+std::string Pkcs7::getDigestAlgorithm() const
 {
-	return hash_name_from_asn1(spc_content->messageDigest->digestAlgorithm->algorithm);
+	return hash_name_from_asn1(spcContent->messageDigest->digestAlgorithm->algorithm);
 }
 
-std::vector<std::uint8_t> Pkcs7::get_signed_digest() const
+std::vector<std::uint8_t> Pkcs7::getSignedDigest() const
 {
-	return std::vector<std::uint8_t>(spc_content->messageDigest->digest->data, spc_content->messageDigest->digest->data + spc_content->messageDigest->digest->length);
+	return std::vector<std::uint8_t>(spcContent->messageDigest->digest->data, spcContent->messageDigest->digest->data + spcContent->messageDigest->digest->length);
 }
 
-std::uint64_t Pkcs7::get_version() const
+std::uint64_t Pkcs7::getVersion() const
 {
 	return version;
 }
 
-std::vector<DigitalSignature> Pkcs7::get_signatures() const
+std::vector<DigitalSignature> Pkcs7::getSignatures() const
 {
 	std::vector<DigitalSignature> signatures;
 
 	CertificateProcessor processor;
 
 	DigitalSignature signature{
-		.signed_digest = get_signed_digest(),
-		.digest_algorithm = get_digest_algorithm(),
+		.signed_digest = getSignedDigest(),
+		.digest_algorithm = getDigestAlgorithm(),
 	};
 
-	STACK_OF(X509)* certs = get_certificates();
+	STACK_OF(X509)* certs = getCertificates();
 
-	std::vector<X509Certificate> chain = processor.get_chain(signer.value().get_x509(), certs);
+	std::vector<X509Certificate> chain = processor.getChain(signer.value().getX509(), certs);
 	auto fileformat_chain = create_fileformat_chain(chain);
 
 	/* Authenticode has a single signer */
 	signature.signers.push_back(Signer{
 		.chain = fileformat_chain });
 
-	for (auto&& counter_sig : counter_signatures)
+	for (auto&& counter_sig : counterSignatures)
 	{
 		CertificateProcessor processor;
 		// TODO fix chain creation it's wrongly ordered probably
-		auto chain = processor.get_chain(counter_sig.getX509(), certs);
+		auto chain = processor.getChain(counter_sig.getX509(), certs);
 		auto fileformat_chain = create_fileformat_chain(chain);
 		signature.signers[0].counter_signers.push_back(Signer{ .chain = fileformat_chain });
 	}
 	signatures.push_back(signature);
 
-	/* TODO deal with the naming weird stuff when we have pkcs7 and signatures as separate interfaces */
-	for (auto&& nested_pkcs7 : nested_signatures)
+	for (auto&& nested_pkcs7 : nestedSignatures)
 	{
-		auto nested_sigs = nested_pkcs7.get_signatures();
+		auto nested_sigs = nested_pkcs7.getSignatures();
 		signatures.insert(signatures.end(), nested_sigs.begin(), nested_sigs.end());
 	}
 

@@ -28,15 +28,15 @@ using retdec::fileformat::Certificate;
 namespace authenticode {
 
 class X509Certificate
-{ /* X509, can't name it X509 due to the collisions */
+{ /* X509, can't name it X509 due to the collisions with openssl*/
 private:
 	X509* cert;
-	std::string get_x509_name(X509_NAME* name) const;
+	std::string getX509Name(X509_NAME* name) const;
 
 public:
 	X509Certificate(X509* cert);
 
-	X509* get_x509() const;
+	X509* getX509() const;
 	std::string getValidUntil() const;
 	std::string getValidSince() const;
 	std::string getRawSubject() const;
@@ -48,7 +48,6 @@ public:
 	std::string getPem() const;
 	Certificate::Attributes getSubject() const;
 	Certificate::Attributes getIssuer() const;
-	/* create the generic Certificate class out of this */
 	Certificate createCertificate() const;
 };
 
@@ -61,7 +60,7 @@ private:
 public:
 	std::vector<X509Certificate> chain;
 	CertificateProcessor();
-	std::vector<X509Certificate> get_chain(X509* cert, STACK_OF(X509)* all_certs);
+	std::vector<X509Certificate> getChain(X509* cert, STACK_OF(X509)* all_certs);
 };
 
 } // namespace authenticode

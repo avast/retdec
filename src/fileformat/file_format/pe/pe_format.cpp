@@ -368,7 +368,7 @@ const std::unordered_set<std::string> usualPackerSections
 	".vmp1",
 	".vmp2",
 	".winapi",
-	".y0da"
+	".y0da",
 	".yP",
 	"ASPack",
 	"BitArts",

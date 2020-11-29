@@ -13,23 +13,23 @@ namespace authenticode {
 Pkcs9::Pkcs9(std::vector<unsigned char> data, STACK_OF(X509)* certificates)
 {
 	const unsigned char* data_ptr = data.data();
-	countersign_info = d2i_PKCS7_SIGNER_INFO(nullptr, &data_ptr, data.size());
-	if (!countersign_info)
+	countersignInfo = d2i_PKCS7_SIGNER_INFO(nullptr, &data_ptr, data.size());
+	if (!countersignInfo)
 	{
 		throw std::exception();
 	}
 	/* get the signer certificate of this counter signatures */
-	signer_cert = X509_find_by_issuer_and_serial(certificates,
-		countersign_info->issuer_and_serial->issuer, countersign_info->issuer_and_serial->serial);
+	signerCert = X509_find_by_issuer_and_serial(certificates,
+		countersignInfo->issuer_and_serial->issuer, countersignInfo->issuer_and_serial->serial);
 
-	if (!signer_cert)
+	if (!signerCert)
 	{
 		throw std::runtime_error("Unable to find PKCS9 countersignature certificate");
 	}
 
-	for (int i = 0; i < sk_X509_ATTRIBUTE_num(countersign_info->auth_attr); ++i)
+	for (int i = 0; i < sk_X509_ATTRIBUTE_num(countersignInfo->auth_attr); ++i)
 	{
-		X509_ATTRIBUTE* attribute = sk_X509_ATTRIBUTE_value(countersign_info->auth_attr, i);
+		X509_ATTRIBUTE* attribute = sk_X509_ATTRIBUTE_value(countersignInfo->auth_attr, i);
 		ASN1_OBJECT* attribute_object = X509_ATTRIBUTE_get0_object(attribute);
 		std::vector<unsigned char> countersignature;
 
@@ -44,7 +44,7 @@ Pkcs9::Pkcs9(std::vector<unsigned char> data, STACK_OF(X509)* certificates)
 }
 
 X509* Pkcs9::getX509() const {
-	return signer_cert;
+	return signerCert;
 }
 
 }// namespace authenticode

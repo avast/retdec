@@ -14,7 +14,7 @@ Authenticode::Authenticode(std::vector<unsigned char> data)
 
 std::vector<DigitalSignature> Authenticode::getSignatures() const
 {
-	return pkcs7.get_signatures();
+	return pkcs7.getSignatures();
 }
 
 } // namespace authenticode

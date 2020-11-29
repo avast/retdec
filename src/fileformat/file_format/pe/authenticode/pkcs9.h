@@ -27,10 +27,10 @@ namespace authenticode {
 
 class Pkcs9
 {
-
 private:
-	PKCS7_SIGNER_INFO* countersign_info;
-	X509* signer_cert;
+	PKCS7_SIGNER_INFO* countersignInfo;
+	X509* signerCert;
+
 public:
 	Pkcs9(std::vector<unsigned char> data, STACK_OF(X509)* certificates);
 	X509* getX509() const;
