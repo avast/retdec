@@ -19,7 +19,7 @@ static const int NID_spc_nested_signature =
 static const int NID_spc_ms_countersignature =
 	OBJ_create("1.3.6.1.4.1.311.3.3.1", "spcMsCountersignature", "SPC_MICROSOFT_COUNTERSIGNATURE (Authenticode)");
 
-static const char* hash_name_from_asn1(ASN1_OBJECT* obj)
+static const char* hashNameFromAsn1(ASN1_OBJECT* obj)
 {
 	switch (OBJ_obj2nid(obj))
 	{
@@ -39,7 +39,7 @@ static const char* hash_name_from_asn1(ASN1_OBJECT* obj)
 }
 
 /* If PKCS7 cannot be created it throws otherwise returns valid pointer */
-static PKCS7* get_pkcs7_from_bytes(std::vector<unsigned char> input)
+static PKCS7* getPkcs7(std::vector<unsigned char> input)
 {
 	BIO* bio = BIO_new(BIO_s_mem());
 	if (!bio || BIO_reset(bio) != 1 ||
@@ -103,7 +103,7 @@ Pkcs7::Pkcs7(std::vector<unsigned char> input)
 		- encryptedDigest - signature by the signing certificate private key
 		- unauthenticatedAttributes
 	*/
-	pkcs7 = get_pkcs7_from_bytes(input);
+	pkcs7 = getPkcs7(input);
 	if (!pkcs7)
 	{
 		throw std::exception();
@@ -217,7 +217,7 @@ STACK_OF(X509)* Pkcs7::getCertificates() const
 
 std::string Pkcs7::getDigestAlgorithm() const
 {
-	return hash_name_from_asn1(spcContent->messageDigest->digestAlgorithm->algorithm);
+	return hashNameFromAsn1(spcContent->messageDigest->digestAlgorithm->algorithm);
 }
 
 std::vector<std::uint8_t> Pkcs7::getSignedDigest() const

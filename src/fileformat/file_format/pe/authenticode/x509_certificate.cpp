@@ -5,7 +5,6 @@
  */
 
 #include "x509_certificate.h"
-#include <openssl/x509.h>
 
 namespace authenticode {
 
@@ -14,7 +13,7 @@ X509Certificate::X509Certificate(X509* cert)
 	this->cert = cert;
 }
 
-static std::time_t asn1_time_to_timestamp(const ASN1_TIME* asn1_time)
+static std::time_t asn1TimeToTimestamp(const ASN1_TIME* asn1_time)
 {
 	struct tm timepoint;
 	ASN1_TIME_to_tm(asn1_time, &timepoint);
@@ -66,7 +65,7 @@ std::string X509Certificate::getSignatureAlgorithm() const
 
 std::string X509Certificate::getValidSince() const
 {
-	std::time_t timestamp = asn1_time_to_timestamp(X509_get0_notBefore(cert));
+	std::time_t timestamp = asn1TimeToTimestamp(X509_get0_notBefore(cert));
 	std::stringstream buffer;
 	buffer << std::put_time(std::gmtime(&timestamp), "%c %Z");
 	return buffer.str();
@@ -74,7 +73,7 @@ std::string X509Certificate::getValidSince() const
 
 std::string X509Certificate::getValidUntil() const
 {
-	std::time_t timestamp = asn1_time_to_timestamp(X509_get0_notAfter(cert));
+	std::time_t timestamp = asn1TimeToTimestamp(X509_get0_notAfter(cert));
 	std::stringstream buffer;
 	buffer << std::put_time(std::gmtime(&timestamp), "%c %Z");
 	return buffer.str();
@@ -110,9 +109,9 @@ static CertificateProcessor* get_processor(X509_STORE_CTX* ctx)
 	return static_cast<CertificateProcessor*>(X509_STORE_get_ex_data(X509_STORE_CTX_get0_store(ctx), 0));
 }
 
-static void get_or_create_certificate_verification_result(X509_STORE_CTX* ctx, const X509Certificate& cert)
+static void addCertificateToChain(X509_STORE_CTX* ctx, const X509Certificate& cert)
 {
-	auto depth = X509_STORE_CTX_get_error_depth(ctx);
+	auto depth = X509_STORE_CTX_get_error_depth(ctx); // use this?
 	void* data = X509_STORE_CTX_get_ex_data(ctx, depth);
 	if (data == nullptr)
 	{
@@ -125,18 +124,8 @@ static void get_or_create_certificate_verification_result(X509_STORE_CTX* ctx, c
 static int verify_callback(int /*ok*/, X509_STORE_CTX* ctx)
 {
 	auto cert = X509_STORE_CTX_get_current_cert(ctx);
-	get_or_create_certificate_verification_result(ctx, cert);
-	// auto error_code = X509_STORE_CTX_get_error (ctx);
-	// X509_STORE_CTX_set_error(ctx, X509_V_OK);
+	addCertificateToChain(ctx, cert);
 	return 1;
-}
-
-static STACK_OF(X509_CRL)* lookup_crl_callback(X509_STORE_CTX* ctx, X509_NAME* /*name*/)
-{
-	auto crls = sk_X509_CRL_new_null();
-	auto cert = X509_STORE_CTX_get_current_cert(ctx);
-	get_or_create_certificate_verification_result(ctx, cert);
-	return crls;
 }
 
 CertificateProcessor::CertificateProcessor()
@@ -144,24 +133,7 @@ CertificateProcessor::CertificateProcessor()
 	trust_store = X509_STORE_new();
 	ctx = X509_STORE_CTX_new();
 
-	if (char* ca_dir = getenv("CA_DIR"); ca_dir)
-	{
-		namespace fs = std::filesystem;
-
-		if (fs::is_directory(ca_dir))
-		{
-			for (auto& p : fs::recursive_directory_iterator(ca_dir))
-			{
-				auto ext = p.path().extension();
-				if (ext == ".crt" || ext == ".pem" || ext == ".cer")
-					X509_STORE_load_locations(trust_store, p.path().c_str(), nullptr);
-			}
-		}
-	}
-
-	X509_STORE_set_flags(trust_store, X509_V_FLAG_CRL_CHECK | X509_V_FLAG_CRL_CHECK_ALL);
 	X509_STORE_set_verify_cb(trust_store, &verify_callback);
-	// X509_STORE_set_lookup_crls(trust_store, &lookup_crl_callback);
 	X509_STORE_set_ex_data(trust_store, 0, static_cast<void*>(this));
 }
 
@@ -225,10 +197,12 @@ Certificate::Attributes X509Certificate::getIssuer() const
 	return parseAttributes(X509_get_issuer_name(cert));
 }
 
+// TODO
 std::string X509Certificate::getPublicKey() const
 {
 	return "";
 }
+// TODO
 std::string X509Certificate::getPublicKeyAlgorithm() const
 {
 	return "";
