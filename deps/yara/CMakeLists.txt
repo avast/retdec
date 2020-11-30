@@ -1,7 +1,12 @@
 
 find_package(Threads REQUIRED)
 
-set(YARA_DIR          ${CMAKE_CURRENT_BINARY_DIR}/yara/src/yara)
+if(YARA_LOCAL_DIR)
+	set(YARA_DIR          ${YARA_LOCAL_DIR})
+else()
+	set(YARA_DIR          ${CMAKE_CURRENT_BINARY_DIR}/yara/src/yara)
+endif()
+
 set(YARA_INCLUDE_DIR  ${YARA_DIR}/libyara/include)
 set(YARA_LIBRARY_NAME "libyara")
 
