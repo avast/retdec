@@ -147,9 +147,9 @@ endif()
 
 add_subdirectory(deps)
 cond_add_subdirectory(doc RETDEC_DOC)
-cond_add_subdirectory(scripts RETDEC_ENABLE_SCRIPTS)
+add_subdirectory(scripts)
 add_subdirectory(src)
-cond_add_subdirectory(support RETDEC_ENABLE_SUPPORT)
+add_subdirectory(support)
 add_subdirectory(tests)
 
 # Create config version file.
