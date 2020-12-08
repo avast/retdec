@@ -234,7 +234,7 @@ std::uint32_t MpressPlugin::getFixStub()
 void MpressPlugin::fixJumpsAndCalls(DynamicBuffer& buffer)
 {
 	std::uint32_t pos = 0;
-	std::uint32_t maxAddr = buffer.getRealDataSize() - 0x1000;
+	std::uint32_t maxAddr = std::max(0, static_cast<std::int32_t>(buffer.getRealDataSize()) - 0x1000);
 	while (pos < maxAddr)
 	{
 		std::uint32_t moveOffset = pos;
