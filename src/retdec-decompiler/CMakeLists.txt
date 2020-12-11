@@ -58,3 +58,8 @@ set_target_properties(retdec-decompiler
 install(TARGETS retdec-decompiler
 	RUNTIME DESTINATION ${RETDEC_INSTALL_BIN_DIR}
 )
+
+install(
+	FILES       "decompiler-config.json"
+	DESTINATION ${RETDEC_INSTALL_DATA_DIR}
+)
