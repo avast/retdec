@@ -5161,14 +5161,14 @@ void Capstone2LlvmIrTranslatorX86_impl::translateFxtract(cs_insn* i, cs_x86* xi,
 
 	// call of pseudo function witch parse mantissa and exponent from st(0) because llvm can not
 	// simply represent this operation by native
-	auto* pseudoGetSignificand = llvm::Function::Create(
+	static auto* pseudoGetSignificand = llvm::Function::Create(
 			llvm::FunctionType::get(op0->getType(), llvm::ArrayRef<llvm::Type*>{op0->getType()}, false),
 			llvm::GlobalValue::LinkageTypes::ExternalLinkage,
 			"__pseudo_get_significand",
 			_module);
 	auto* mantissa = irb.CreateCall(pseudoGetSignificand, llvm::ArrayRef<llvm::Value*>{op0});
 
-	auto* pseudoGetExponent = llvm::Function::Create(
+	static auto* pseudoGetExponent = llvm::Function::Create(
 		llvm::FunctionType::get(op0->getType(), llvm::ArrayRef<llvm::Type*>{op0->getType()}, false),
 		llvm::GlobalValue::LinkageTypes::ExternalLinkage,
 		"__pseudo_get_exponent",
