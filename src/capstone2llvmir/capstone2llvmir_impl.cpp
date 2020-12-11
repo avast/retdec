@@ -1564,14 +1564,15 @@ llvm::Function* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::getPseudoAsmFunc
 		llvm::FunctionType* type,
 		const std::string& name)
 {
-	auto p = std::make_pair(insn->id, type);
+	auto n = name.empty() ? getPseudoAsmFunctionName(insn) : name;
+	auto p = std::make_pair(n, type);
 	auto fIt = _insn2asmFunctions.find(p);
 	if (fIt == _insn2asmFunctions.end())
 	{
 		auto* fnc = llvm::Function::Create(
 				type,
 				llvm::GlobalValue::LinkageTypes::ExternalLinkage,
-				name.empty() ? getPseudoAsmFunctionName(insn) : name,
+				n,
 				_module);
 		_insn2asmFunctions[p] = fnc;
 		_asmFunctions.insert(fnc);

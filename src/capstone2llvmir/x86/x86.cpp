@@ -2635,7 +2635,7 @@ void Capstone2LlvmIrTranslatorX86_impl::translateNeg(cs_insn* i, cs_x86* xi, llv
  * SMSW, CLTS, INVD, LOCK, RSM, RDMSR, WRMSR, RDPMC, SYSENTER,
  * SYSEXIT, XGETBV, LAR, LSL, INVPCID, SLDT, LLDT, SGDT, SIDT, LGDT, LIDT,
  * XSAVE, XRSTOR, XSAVEOPT, INVLPG, FLDENV, ARPL,
- * STR, FXTRACT,
+ * STR,
  * FWAIT, FNOP
  */
 void Capstone2LlvmIrTranslatorX86_impl::translateNop(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb)
@@ -5159,18 +5159,20 @@ void Capstone2LlvmIrTranslatorX86_impl::translateFxtract(cs_insn* i, cs_x86* xi,
 
 	// call of pseudo function witch parse mantissa and exponent from st(0) because llvm can not
 	// simply represent this operation by native
-	static auto* pseudoGetSignificand = llvm::Function::Create(
-			llvm::FunctionType::get(op0->getType(), llvm::ArrayRef<llvm::Type*>{op0->getType()}, false),
-			llvm::GlobalValue::LinkageTypes::ExternalLinkage,
-			"__pseudo_get_significand",
-			_module);
+	llvm::Function* pseudoGetSignificand = getPseudoAsmFunction(
+			i,
+			op0->getType(),
+			llvm::ArrayRef<llvm::Type*>{op0->getType()},
+			"__pseudo_get_significand"
+	);
 	auto* mantissa = irb.CreateCall(pseudoGetSignificand, llvm::ArrayRef<llvm::Value*>{op0});
 
-	static auto* pseudoGetExponent = llvm::Function::Create(
-		llvm::FunctionType::get(op0->getType(), llvm::ArrayRef<llvm::Type*>{op0->getType()}, false),
-		llvm::GlobalValue::LinkageTypes::ExternalLinkage,
-		"__pseudo_get_exponent",
-		_module);
+	llvm::Function* pseudoGetExponent = getPseudoAsmFunction(
+			i,
+			op0->getType(),
+			llvm::ArrayRef<llvm::Type*>{op0->getType()},
+			"__pseudo_get_exponent"
+	);
 	auto* exponent = irb.CreateCall(pseudoGetExponent, llvm::ArrayRef<llvm::Value*>{op0});
 
 	storeX87DataReg(irb, top, exponent);
