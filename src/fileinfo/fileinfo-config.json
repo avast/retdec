@@ -1,0 +1,22 @@
+{
+    // plain|json
+    "outputFormat": "plain",
+    // exact|similarity|sim-list
+    "yaraMatchingType": "exect",
+    "useInternalSignatureDb": true,
+    "useExternalSignatureDb": false,
+    "externalMalwareYaraRules": [
+    ],
+    "externalCryptoYaraRules": [
+    ],
+    "externalOtherYaraRules": [
+    ],
+    "loadStrings": false,
+    "hashes": ???,
+    "epBytes": 50,
+    "verbose": false,
+    "explanatory": false,
+    "maxMemory":0,
+    "maxMemoryHalf": true,
+    "dlls": ???
+}

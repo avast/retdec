@@ -134,3 +134,8 @@ set_target_properties(fileinfo
 install(TARGETS fileinfo
 	RUNTIME DESTINATION ${RETDEC_INSTALL_BIN_DIR}
 )
+
+install(
+	FILES       "fileinfo-config.json"
+	DESTINATION ${RETDEC_INSTALL_DATA_DIR}
+)
