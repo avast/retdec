@@ -144,7 +144,7 @@ class PDBFile
 
 		// Action methods
 		PDBFileState load_pdb_file(const char *filename);
-		void initialize(int image_base = 0);
+		void initialize(uint64_t image_base = 0);
 		bool save_streams_to_files(void);
 
 		// Getting methods
@@ -202,7 +202,7 @@ class PDBFile
 		PDBFileState load_pdb_v200(void);
 		PDBFileState load_pdb_v700(void);
 		void parse_modules(void);
-		void parse_sections(int image_base);
+		void parse_sections(uint64_t image_base);
 
 		// Variables
 		bool pdb_loaded;

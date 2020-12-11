@@ -46,7 +46,7 @@ typedef struct _PDBLocalVariable
 typedef struct _PDBFunctionData
 {
 		char * name;  // Name
-		int address;  // Virtual address (image base + section address + offset)
+		uint64_t address;  // Virtual address (image base + section address + offset)
 		int offset;  // Offset
 		int section;  // Segment
 		unsigned int type_index;  // Type index
@@ -63,24 +63,22 @@ typedef struct _PDBLineInfo
 class PDBFunction
 {
 	public:
-		char * name;  // Function name
-		int overload_index;  // Function is overloaded (number of function's occurrence)
-		int address;  // Virtual address (image base + section address + offset)
-		int offset;  // Function offset
-		int section;  // And section
-		int module_index;  // In which module the function is
-		int length;  // Function length
-		unsigned int type_index;  // Type index
-		PDBTypeFunction * type_def;  // Type definition
+		char * name = nullptr;  // Function name
+		int overload_index = 0;  // Function is overloaded (number of function's occurrence)
+		uint64_t address = 0;  // Virtual address (image base + section address + offset)
+		int offset = 0;  // Function offset
+		int section = 0;  // And section
+		int module_index = 0;  // In which module the function is
+		int length = 0;  // Function length
+		unsigned int type_index = 0;  // Type index
+		PDBTypeFunction * type_def = nullptr;  // Type definition
 		std::vector<PDBLocalVariable> arguments;  // List of function arguments
 		std::vector<PDBLocalVariable> loc_variables;  // List of local variables
 		std::vector<int> blocks;  // List of code blocks (value is offset)
 		std::vector<PDBFunctionData> data;  // List of data objects stored in function's code
 		std::vector<PDBLineInfo> lines;  // Line number information
 
-		PDBFunction(int cur_module) :
-				name(nullptr), overload_index(0), address(0), offset(0), section(0), module_index(cur_module), length(0), type_index(
-				        0), type_def(nullptr), args_remain(0), cur_block(0), depth(0)
+		PDBFunction(int cur_module) : module_index(cur_module)
 		{
 		}
 		;  // Constructor
@@ -89,13 +87,13 @@ class PDBFunction
 		void parse_line_info(LineInfoHeader *hdr);  // Parse line information
 		std::string getNameWithOverloadIndex() const;
 	private:
-		int args_remain;  // Number of arguments remaining to add
-		int cur_block;  // Number of current block
-		int depth;  // Depth of blocks
+		int args_remain = 0;  // Number of arguments remaining to add
+		int cur_block = 0;  // Number of current block
+		int depth = 0;  // Depth of blocks
 };
 
 // PDB function map (key is address)
-typedef std::map<int, PDBFunction *> PDBFunctionAddressMap;
+typedef std::map<uint64_t, PDBFunction *> PDBFunctionAddressMap;
 
 // =================================================================
 // GLOBAL VARIABLE STRUCTURES
@@ -105,7 +103,7 @@ typedef std::map<int, PDBFunction *> PDBFunctionAddressMap;
 typedef struct _PDBGlobalVariable
 {
 		char * name;  // Name
-		int address;  // Virtual address (image base + section address + offset)
+		uint64_t address;  // Virtual address (image base + section address + offset)
 		int offset;  // Offset (ignored for register)
 		int section;  // Segment
 		int module_index;  // In which module the variable is
@@ -114,7 +112,7 @@ typedef struct _PDBGlobalVariable
 } PDBGlobalVariable;
 
 // PDB global variable map (key is segment+offset (in int32 : SSOOOOOO))
-typedef std::map<int, PDBGlobalVariable> PDBGlobalVarAddressMap;
+typedef std::map<uint64_t, PDBGlobalVariable> PDBGlobalVarAddressMap;
 
 // =================================================================
 // MAIN CLASS PDBSymbols
@@ -154,7 +152,7 @@ class PDBSymbols
 		/**
 		 * Get virtual address from section index and offset of symbol
 		 */
-		int get_virtual_address(unsigned int section, unsigned int offset)
+		uint64_t get_virtual_address(unsigned int section, unsigned int offset)
 		{
 			if (sections.size() > section)
 				return sections[section].virtual_address + offset;
@@ -166,7 +164,7 @@ class PDBSymbols
 		/**
 		 *
 		 */
-		int get_file_address(unsigned int section, unsigned int offset)
+		uint64_t get_file_address(unsigned int section, unsigned int offset)
 		{
 			if (sections.size() > section)
 				return sections[section].file_address + offset;
