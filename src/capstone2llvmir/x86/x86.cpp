@@ -4773,13 +4773,11 @@ void Capstone2LlvmIrTranslatorX86_impl::translateFatan(cs_insn* i, cs_x86* xi, l
 
 	std::tie(op0, op1, top, idx) = loadOpFloatingBinaryTop(i, xi, irb);
 
-	auto div = irb.CreateFDiv(op1, op0);
-
 	llvm::Function* fnc = getPseudoAsmFunction(
 			i,
-			div->getType(),
-			llvm::ArrayRef<llvm::Type*>{div->getType()});
-	auto* atan = irb.CreateCall(fnc, llvm::ArrayRef<llvm::Value*>{div});
+			op0->getType(),
+			llvm::ArrayRef<llvm::Type*>{op1->getType(), op0->getType()});
+	auto* atan = irb.CreateCall(fnc, llvm::ArrayRef<llvm::Value*>{op1, op0});
 
 	storeX87DataReg(irb, idx, atan);
 
