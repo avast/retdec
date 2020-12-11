@@ -385,7 +385,7 @@ template <int bits> std::uint32_t ElfUpxStub<bits>::getFirstBlockOffset()
 			itr != end;
 			++itr)
 	{
-		if (baseOffset == (*itr)->getOffset())
+		if (baseOffset == (*itr)->getOffset() && (*itr)->getSizeInFile() > 0)
 		{
 			baseOffset += (*itr)->getSizeInFile();
 			// Reset back to the beginning, we need to find whether there are
