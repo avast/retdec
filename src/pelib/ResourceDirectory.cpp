@@ -645,8 +645,17 @@ namespace PeLib
 		if(imageLoader.readImage(&header, uiRva, PELIB_IMAGE_RESOURCE_DIRECTORY::size()) != PELIB_IMAGE_RESOURCE_DIRECTORY::size())
 			return ERROR_INVALID_FILE;
 
-		// Add the total number of entries to the occupied range
+		// FE015EB24B7EEA2907698A6D7142198644A757066DA4EB8D3A4B63900008CF5E: Invalid root resource directory
+		// We artificially limit the allowed number of resource entries
+		if((header.NumberOfNamedEntries > PELIB_MAX_RESOURCE_ENTRIES) || (header.NumberOfIdEntries > PELIB_MAX_RESOURCE_ENTRIES))
+			return ERROR_INVALID_FILE;
+		
+		// More checks for number of entries
 		unsigned int uiNumberOfEntries = header.NumberOfNamedEntries + header.NumberOfIdEntries;
+		if(uiNumberOfEntries > PELIB_MAX_RESOURCE_ENTRIES)
+			return ERROR_INVALID_FILE;
+
+		// Add the total number of entries to the occupied range
 		resDir->addOccupiedAddressRange(uiRva, uiRva + PELIB_IMAGE_RESOURCE_DIRECTORY::size() - 1);
 		uiRva += PELIB_IMAGE_RESOURCE_DIRECTORY::size();
 
