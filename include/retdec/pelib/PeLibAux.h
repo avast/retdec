@@ -162,6 +162,7 @@ namespace PeLib
 	const std::uint32_t PELIB_IMAGE_RESOURCE_DATA_IS_DIRECTORY = 0x80000000;
 	const std::uint32_t PELIB_IMAGE_RESOURCE_NAME_IS_STRING = 0x80000000;
 	const std::uint32_t PELIB_IMAGE_RESOURCE_RVA_MASK = 0x7FFFFFFF;
+	const std::uint16_t PELIB_MAX_RESOURCE_ENTRIES = 0xC000;            // Maximum number of resource directory entries we consider OK
 
 	enum : std::uint32_t
 	{
