@@ -204,7 +204,7 @@ class ImageLoader
 
 	std::uint64_t getSizeOfFile() const
 	{
-		return fileSize;
+		return savedFileSize;
 	}
 
 	std::uint64_t getOrdinalMask() const
@@ -451,7 +451,7 @@ class ImageLoader
 	PELIB_IMAGE_OPTIONAL_HEADER optionalHeader;         // 32/64-bit optional header
 	ByteBuffer rawFileData;                             // Loaded content of the image in case it couldn't have been mapped
 	LoaderError ldrError;
-	std::uint64_t fileSize;                             // Size of the raw file
+	std::uint64_t savedFileSize;                        // Size of the raw file
 	std::uint32_t windowsBuildNumber;
 	std::uint32_t ntSignature;
 	std::uint32_t maxSectionCount;
