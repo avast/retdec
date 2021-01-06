@@ -318,9 +318,7 @@ namespace PeLib
 		// Invalid leaf.
 		std::uint32_t uiRva = uiRsrcRva + uiOffset;
 		if(uiRva > sizeOfImage)
-		{
 			return ERROR_INVALID_FILE;
-		}
 
 		// Load the resource data entry
 		imageLoader.readImage(&entry, uiRva, sizeof(PELIB_IMAGE_RESOURCE_DATA_ENTRY));
@@ -330,6 +328,8 @@ namespace PeLib
 		m_data.clear();
 
 		// No data or invalid leaf
+		if(entry.OffsetToData == 0 && entry.Size == 0)
+			return ERROR_INVALID_FILE;
 		if(entry.OffsetToData > sizeOfImage || entry.Size > sizeOfImage)
 			return ERROR_NONE;
 		if((uiRsrcRva + entry.OffsetToData) >= sizeOfImage || (uiRsrcRva + entry.OffsetToData + entry.Size) > sizeOfImage)
@@ -1030,11 +1030,6 @@ namespace PeLib
 	{
 		std::uint32_t resDirRva = imageLoader.getDataDirRva(PELIB_IMAGE_DIRECTORY_ENTRY_RESOURCE);
 		std::uint32_t sizeOfImage = imageLoader.getSizeOfImage();
-
-		if(resDirRva >= sizeOfImage)
-		{
-			return ERROR_INVALID_FILE;
-		}
 
 		return m_rnRoot.read(imageLoader, resDirRva, 0, sizeOfImage, this);
 	}
