@@ -658,17 +658,18 @@ void MpressPlugin::saveFile(const std::string& fileName, DynamicBuffer& content)
 	// Headers
 	imageLoader.Save(fileName.c_str());
 
+	std::fstream outputFile(fileName, std::ios::binary | std::ios::out | std::ios::in);
 	// Copy the section bytes from original file for the sections preceding the packed section
 	for (std::uint32_t index = 0; index < _packedContentSect->getSecSeg()->getIndex(); ++index)
-		copySectionFromOriginalFile(index, fileName, index);
+		copySectionFromOriginalFile(index, outputFile, index);
 
 	// Copy the section bytes in between packed section and EP section
 	for (std::uint32_t index = _packedContentSect->getSecSeg()->getIndex() + _addedSectionCount; index < _file->getEpSegment()->getSecSeg()->getIndex(); ++index)
-		copySectionFromOriginalFile(index, fileName, index + _addedSectionCount);
+		copySectionFromOriginalFile(index, outputFile, index + _addedSectionCount);
 
 	// Copy the section bytes from original file for sections after EP section excluded
 	for (std::uint32_t index = _file->getEpSegment()->getSecSeg()->getIndex() + 1; index < _file->getNumberOfSegments(); ++index)
-		copySectionFromOriginalFile(index, fileName, index + _addedSectionCount);
+		copySectionFromOriginalFile(index, outputFile, index + _addedSectionCount);
 
 	// Write content of new import section
 	std::uint32_t Rva = imageLoader.getDataDirRva(PeLib::PELIB_IMAGE_DIRECTORY_ENTRY_IMPORT);
@@ -691,18 +692,22 @@ void MpressPlugin::saveFile(const std::string& fileName, DynamicBuffer& content)
 
 	// Write the unpacked content to the packed content section
 	// Use regular file as we will write more sections at once
-	std::fstream outputFile(fileName, std::ios::binary | std::ios::out | std::ios::in);
 	outputFile.seekp(imageLoader.getSectionHeader(_packedContentSect->getSecSeg()->getIndex())->PointerToRawData, std::ios_base::beg);
 	outputFile.write(reinterpret_cast<const char*>(content.getRawBuffer()), content.getRealDataSize());
 	outputFile.close();
 }
 
-void MpressPlugin::copySectionFromOriginalFile(std::uint32_t origSectIndex, const std::string& newFileName, std::uint32_t newSectIndex)
+void MpressPlugin::copySectionFromOriginalFile(std::uint32_t origSectIndex, std::ostream& outputFile, std::uint32_t newSectIndex)
 {
 	const retdec::loader::Segment* seg = _file->getSegment(origSectIndex);
 	std::vector<std::uint8_t> bytes;
 	seg->getBytes(bytes);
-	//_peFile->peHeader().writeSectionData(newFileName, newSectIndex, bytes);
+
+	PeLib::ImageLoader & imageLoader = _peFile->imageLoader();
+	const auto* newSect = imageLoader.getSectionHeader(newSectIndex);
+	outputFile.seekp(newSect->PointerToRawData, std::ios_base::beg);
+	outputFile.write(reinterpret_cast<const char*>(bytes.data()), std::min(static_cast<std::uint32_t>(bytes.size()), newSect->SizeOfRawData));
+
 }
 
 } // namespace mpress

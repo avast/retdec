@@ -1238,7 +1238,7 @@ template <int bits> void PeUpxStub<bits>::saveFile(const std::string& outputFile
 	if (!_coffSymbolTable.empty())
 		retdec::utils::writeFile(outputFileHandle, _coffSymbolTable, imageLoader.getPointerToSymbolTable());
 	outputFileHandle.close();
-	
+
 	// Write resources at the end, because they would be rewritten by unpackedData which have them zeroed
 	if((Rva = imageLoader.getDataDirRva(PeLib::PELIB_IMAGE_DIRECTORY_ENTRY_RESOURCE)) != 0)
 		_newPeFile->resDir().write(outputFile, imageLoader.getFileOffsetFromRva(Rva), Rva);
