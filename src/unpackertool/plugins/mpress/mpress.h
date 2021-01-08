@@ -86,7 +86,7 @@ private:
 	MpressUnpackerStub detectUnpackerStubVersion();
 	MpressFixStub detectFixStubVersion(retdec::utils::DynamicBuffer& unpackedContent);
 	void saveFile(const std::string& fileName, retdec::utils::DynamicBuffer& content);
-	void copySectionFromOriginalFile(std::uint32_t origSectIndex, const std::string& newFileName, std::uint32_t newSectIndex);
+	void copySectionFromOriginalFile(std::uint32_t origSectIndex, std::ostream& outputFile, std::uint32_t newSectIndex);
 
 	std::unique_ptr<retdec::loader::Image> _file;
 	PeLib::PeFileT * _peFile;
