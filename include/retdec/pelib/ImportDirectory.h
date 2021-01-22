@@ -564,7 +564,8 @@ namespace PeLib
 			return true;
 		
 		// The first character of the name must not be an invalid ASCII char
-		if((theFirstChar = importName[0]) >= 0x80)
+		theFirstChar = importName[0];
+		if(theFirstChar <= 0x20 || theFirstChar >= 0x80)
 			return true;
 
 		// Any string that is an array of equal chars is considered invalid.
@@ -651,8 +652,11 @@ namespace PeLib
 			// Sample: 0BBA9D483A5E26932C1BA5904EA8FA2E063E0419C7B8A6342814266E96E1CEA2
 			// 4 imports all invalid names. We stop parsing the imports at an invalid entry,
 			// but we won't say that the file is invalid
-			if(isBadImportName(iidCurr.name))
+			if (isBadImportName(iidCurr.name))
+			{
+				setLoaderError(LDR_ERROR_IMPDIR_NAME_RVA_INVALID);
 				break;
+			}
 
 			// Ignore too large import directories
 			// Sample: CCE461B6EB23728BA3B8A97B9BE84C0FB9175DB31B9949E64144198AB3F702CE, # of impdesc 0x6253 (invalid)
