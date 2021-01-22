@@ -555,6 +555,30 @@ namespace PeLib
 		m_ordinalMask = (uint64_t)1 << ((pointerSize * 8) - 1);
 	}
 
+	inline bool isBadImportName(const std::string & importName)
+	{
+		unsigned char theFirstChar;
+
+		// The name must have some characters
+		if(importName.size() == 0)
+			return true;
+		
+		// The first character of the name must not be an invalid ASCII char
+		if((theFirstChar = importName[0]) >= 0x80)
+			return true;
+
+		// Any string that is an array of equal chars is considered invalid.
+		// Sample: retdec-regression-tests\tools\fileinfo\features\malformed-imports-exports\7CE5BB5CA99B3570514AF03782545D41213A77A0F93D4AAC8269823A8D3A58EF.dat 
+		for(unsigned char oneChar : importName)
+		{
+			if(oneChar != theFirstChar)
+				return false;
+		}
+
+		// If all the characters are equal, we consider this an invalid import directory
+		return true;
+	}
+
 	/**
 	* Read an import directory from a file.
 	* \todo Check if streams failed.
@@ -623,6 +647,12 @@ namespace PeLib
 
 			// Retrieve the library name from the image as ASCIIZ string
 			imageLoader.readString(iidCurr.name, iidCurr.impdesc.Name, IMPORT_LIBRARY_MAX_LENGTH);
+
+			// Sample: 0BBA9D483A5E26932C1BA5904EA8FA2E063E0419C7B8A6342814266E96E1CEA2
+			// 4 imports all invalid names. We stop parsing the imports at an invalid entry,
+			// but we won't say that the file is invalid
+			if(isBadImportName(iidCurr.name))
+				break;
 
 			// Ignore too large import directories
 			// Sample: CCE461B6EB23728BA3B8A97B9BE84C0FB9175DB31B9949E64144198AB3F702CE, # of impdesc 0x6253 (invalid)
@@ -742,7 +772,7 @@ namespace PeLib
 				if(uiIndex >= PELIB_MAX_IMPORTED_FUNCTIONS)
 				{
 					setLoaderError(LDR_ERROR_IMPDIR_IMPORT_COUNT_EXCEEDED);
-					break;
+					return ERROR_INVALID_FILE;
 				}
 
 				// Check samples that have import name out of the image
