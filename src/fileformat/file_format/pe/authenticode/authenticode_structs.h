@@ -12,6 +12,31 @@
    Some of them are changed a little bit because the documentation did not reflect the reality
 */
 
+// static const int NID_spc_nested_signature =
+// 	OBJ_create("1.3.6.1.4.1.311.2.4.1", "spcNestedSignature", "SPC_NESTED_SIGNATURE (Authenticode)");
+
+// static const int NID_spc_ms_countersignature =
+// 	OBJ_create("1.3.6.1.4.1.311.3.3.1", "spcMsCountersignature", "SPC_MICROSOFT_COUNTERSIGNATURE (Authenticode)");
+
+// static const int NID_spc_indirect_data = OBJ_create("1.3.6.1.4.1.311.2.1.4", "spcIndirectData", "SPC_INDIRECT_DATA (Authenticode)");
+
+/* All hash and digest encryption algorithms */
+enum class Algorithms
+{
+	MD5 = NID_md5,
+	SHA1 = NID_sha1,
+	SHA224 = NID_sha224,
+	SHA256 = NID_sha256,
+	SHA384 = NID_sha384,
+	SHA512 = NID_sha512,
+	MD5_RSA = NID_md5WithRSAEncryption,
+	SHA1_RSA = NID_sha1WithRSAEncryption,
+	SHA224_RSA = NID_sha224WithRSAEncryption,
+	SHA256_RSA = NID_sha256WithRSAEncryption,
+	SHA384_RSA = NID_sha384WithRSAEncryption,
+	SHA512_RSA = NID_sha512WithRSAEncryption
+};
+
 struct SpcString
 {
 	int type;
@@ -67,6 +92,11 @@ struct SpcIndirectDataContent
 	DigestInfo* messageDigest;
 };
 
+struct SpcContentInfo
+{
+	ASN1_OBJECT* contentType;
+	SpcIndirectDataContent* content;
+};
 struct SpcSpOpusInfo
 {
 	SpcString* programName;
@@ -117,6 +147,7 @@ DECLARE_ASN1_FUNCTIONS(AlgorithmIdentifier)
 DECLARE_ASN1_FUNCTIONS(DigestInfo)
 DECLARE_ASN1_FUNCTIONS(SpcIndirectDataContent)
 DECLARE_ASN1_FUNCTIONS(SpcSpOpusInfo)
+DECLARE_ASN1_FUNCTIONS(SpcContentInfo)
 DECLARE_ASN1_FUNCTIONS(CtlEntryAttribute)
 DECLARE_ASN1_FUNCTIONS(CtlEntry)
 DECLARE_ASN1_FUNCTIONS(CtlUsage)
