@@ -8,6 +8,7 @@
 #include "authenticode_structs.h"
 #include "retdec/fileformat/types/certificate_table/certificate_table.h"
 #include <exception>
+#include <openssl/asn1.h>
 #include <openssl/objects.h>
 #include <openssl/pkcs7.h>
 #include <openssl/safestack.h>
@@ -104,7 +105,7 @@ static PKCS7* getPkcs7(std::vector<unsigned char> input)
 	return pkcs7;
 }
 
-static std::vector<Certificate> create_fileformat_chain(std::vector<X509Certificate> chain)
+static std::vector<Certificate> createFileformatChain(std::vector<X509Certificate> chain)
 {
 	std::vector<Certificate> fileformat_chain;
 	for (auto&& cert : chain)
@@ -114,10 +115,20 @@ static std::vector<Certificate> create_fileformat_chain(std::vector<X509Certific
 	return fileformat_chain;
 }
 
-ContentInfo::ContentInfo(const unsigned char* data, size_t length)
+ContentInfo::ContentInfo(PKCS7* pkcs7)
 	: contentType("SpcIndirectDataContent")
 {
-	spcContent = d2i_SpcIndirectDataContent(nullptr, &data, length);
+	/* SignedData contentType must be set to SPC_INDIRECT_DATA_OBJID (1.3.6.1.4.1.311.2.1.4) */
+	if (OBJ_obj2nid(pkcs7->d.sign->contents->type) != NID_spc_indirect_data)
+	{
+		throw std::runtime_error("Invalid Authenticode Content Info type");
+	}
+
+	size_t len = pkcs7->d.sign->contents->d.other->value.sequence->length;
+	const unsigned char* data = pkcs7->d.sign->contents->d.other->value.sequence->data;
+
+	spcContent = d2i_SpcIndirectDataContent(nullptr, &data, len);
+
 	if (!spcContent)
 	{
 		throw std::runtime_error("Couldn't parse the ContentInfo");
@@ -137,8 +148,31 @@ ContentInfo::ContentInfo(const unsigned char* data, size_t length)
  */
 Pkcs7::Pkcs7(std::vector<unsigned char> input)
 {
-	/* Source for the parsing constraints is in the MS Authenticode spec
-	   https://www.symbolcrash.com/wp-content/uploads/2019/02/Authenticode_PE-1.pdf
+	/* 
+	SignedData ::= SEQUENCE {
+	    version Version, (Must be 1)
+	    digestAlgorithms DigestAlgorithmIdentifiers,
+	    contentInfo ContentInfo,
+	    certificates
+	        [0] IMPLICIT ExtendedCertificatesAndCertificates
+	        OPTIONAL,
+	    Crls
+	        [1] IMPLICIT CertificateRevocationLists OPTIONAL, (Not used in AC)
+	    signerInfos SignerInfos }
+	
+	    DigestAlgorithmIdentifiers ::=  (1 structure for each signer)
+	         SET OF DigestAlgorithmIdentifier
+	
+	    ContentInfo ::= SEQUENCE {
+	        contentType ContentType,
+	        content (Must be SpcIndirectDataContent)
+	            [0] EXPLICIT ANY DEFINED BY contentType OPTIONAL }
+
+	   ContentType ::= OBJECT IDENTIFIER
+	   SignerInfos ::= SET OF SignerInfo (Only one signer is supported)
+	
+	Source for the parsing constraints is in the MS Authenticode spec
+	https://www.symbolcrash.com/wp-content/uploads/2019/02/Authenticode_PE-1.pdf
 	*/
 	pkcs7 = getPkcs7(input);
 	if (!pkcs7)
@@ -152,31 +186,29 @@ Pkcs7::Pkcs7(std::vector<unsigned char> input)
 		throw std::runtime_error("Invalid Authenticode PKCS#7 type");
 	}
 
-	size_t data_len = pkcs7->d.sign->contents->d.other->value.sequence->length;
-	const unsigned char* data_raw = pkcs7->d.sign->contents->d.other->value.sequence->data;
-
-	/* SignedData contentType must be set to SPC_INDIRECT_DATA_OBJID (1.3.6.1.4.1.311.2.1.4) */
-	if (OBJ_obj2nid(pkcs7->d.sign->contents->type) != NID_spc_indirect_data)
+	STACK_OF(X509_ALGOR)* algos = pkcs7->d.sign->md_algs;
+	/* Must be exactly 1 signer and for each signer there is one algorithm */
+	if (sk_X509_ALGOR_num(algos) != 1)
 	{
-		throw std::runtime_error("Invalid Authenticode PKCS#7 type");
+		throw std::runtime_error("Invalid number of DigestAlgorithmIdentifiers");
 	}
-	
-	/* Parse the content info */
-	contentInfo = ContentInfo(data_raw, data_len);
+	X509_ALGOR *contentAlgo = sk_X509_ALGOR_value(algos, 0);
+	contentDigestAlgorithm = asn1ToAlgorithm(contentAlgo->algorithm);
 
-	/* Version has to be equal to 1, but don't validate for now? */
+	/* Parse the content info */
+	contentInfo = ContentInfo(pkcs7);
+
 	ASN1_INTEGER_get_uint64(&version, pkcs7->d.sign->version);
+	/* Version has to be equal to 1 */
+	if (version != 1)
+	{
+		throw std::runtime_error("Invalid Authenticode version");
+	}
 
 	STACK_OF(PKCS7_SIGNER_INFO)* signer_infos = PKCS7_get_signer_info(pkcs7);
 	if (!signer_infos)
 	{
-		throw std::exception();
-	}
-
-	/* Must contains single signerInfo by the specification, don't validate, just store for now*/
-	if (sk_PKCS7_SIGNER_INFO_num(signer_infos) != 1)
-	{
-		throw std::exception();
+		throw std::runtime_error("Couldn't parse signers");
 	}
 
 	/* Parse the certificate data into internal structures */
@@ -214,7 +246,7 @@ Pkcs7::Pkcs7(std::vector<unsigned char> input)
 	}
 	else
 	{
-		throw std::runtime_error("Couldn't parse any signers");
+		throw std::runtime_error("Couldn't find any signers");
 	}
 }
 
@@ -281,8 +313,8 @@ std::vector<DigitalSignature> Pkcs7::getSignatures() const
 
 	STACK_OF(X509)* certs = getCertificates();
 
-	std::vector<X509Certificate> chain = processor.getChain(signer.value().getX509(), certs);
-	auto fileformat_chain = create_fileformat_chain(chain);
+	std::vector<X509Certificate> chain = processor.getChain(signer.getX509(), certs);
+	auto fileformat_chain = createFileformatChain(chain);
 
 	/* Authenticode has a single signer */
 	signature.signers.push_back(Signer{
@@ -293,7 +325,7 @@ std::vector<DigitalSignature> Pkcs7::getSignatures() const
 		CertificateProcessor processor;
 		// TODO fix chain creation it's wrongly ordered probably
 		auto chain = processor.getChain(counter_sig.getX509(), certs);
-		auto fileformat_chain = create_fileformat_chain(chain);
+		auto fileformat_chain = createFileformatChain(chain);
 		signature.signers[0].counter_signers.push_back(Signer{ .chain = fileformat_chain });
 	}
 	signatures.push_back(signature);

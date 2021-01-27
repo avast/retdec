@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <exception>
 #include <map>
 #include <new>
 #include <regex>
@@ -2076,8 +2077,16 @@ void PeFormat::loadCertificates()
 	}
 	// We always take the first one, there are no additional certificate tables in PE
 	auto certBytes = securityDir.getCertificate(0);
-	auto authenticode = authenticode::Authenticode(certBytes);
-	certificateTable = new CertificateTable(authenticode.getSignatures());
+	try
+	{
+		auto authenticode = authenticode::Authenticode(certBytes);
+		certificateTable = new CertificateTable(authenticode.getSignatures());
+	}
+	catch (const std::exception&)
+	{
+		delete certificateTable;
+		certificateTable = nullptr;
+	}
 }
 
 /**

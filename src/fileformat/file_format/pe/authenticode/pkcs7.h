@@ -43,7 +43,7 @@ public:
 	Algorithms digestAlgorithm;
 
 	ContentInfo() = default;
-	ContentInfo(const unsigned char* data, size_t length);
+	ContentInfo(PKCS7* pkcs7);
 };
 
 class Pkcs7
@@ -51,7 +51,7 @@ class Pkcs7
 private:
 	PKCS7* pkcs7;
 	SpcIndirectDataContent* spcContent;
-	std::optional<X509Certificate> signer;
+	X509Certificate signer;
 
 	STACK_OF(X509)* getCertificates() const;
 	STACK_OF(X509)* getSigners();
@@ -62,6 +62,7 @@ private:
 public:
 	std::uint64_t version;
 	ContentInfo contentInfo;
+	Algorithms contentDigestAlgorithm; // must match SignerInfo digestAlgorithm
 
 	std::vector<X509Certificate> certificates;
 	std::vector<Pkcs7> nestedSignatures;

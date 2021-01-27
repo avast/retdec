@@ -35,6 +35,7 @@ private:
 
 public:
 	X509Certificate(X509* cert);
+	X509Certificate() = default;
 
 	X509* getX509() const;
 	std::string getValidUntil() const;
