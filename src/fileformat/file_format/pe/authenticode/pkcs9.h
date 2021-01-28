@@ -32,7 +32,7 @@ private:
 	X509* signerCert;
 
 public:
-	Pkcs9(std::vector<unsigned char> data, STACK_OF(X509)* certificates);
+	Pkcs9(std::vector<unsigned char>& data, STACK_OF(X509)* certificates);
 	X509* getX509() const;
 };
 

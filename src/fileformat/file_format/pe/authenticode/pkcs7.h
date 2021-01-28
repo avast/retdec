@@ -33,25 +33,53 @@
 
 namespace authenticode {
 
-class ContentInfo
-{
-	SpcIndirectDataContent* spcContent;
-	SpcContentInfo *contentInfo;
-public:
-	std::string contentType;
-	std::vector<std::uint8_t> digest;
-	Algorithms digestAlgorithm;
-
-	ContentInfo() = default;
-	ContentInfo(PKCS7* pkcs7);
-};
-
 class Pkcs7
 {
+	class ContentInfo
+	{
+	private:
+		SpcIndirectDataContent* spcContent;
+		SpcContentInfo* contentInfo;
+
+	public:
+		std::string contentType;
+		std::vector<std::uint8_t> digest;
+		Algorithms digestAlgorithm;
+
+		ContentInfo() = default;
+		ContentInfo(const PKCS7* pkcs7);
+	};
+	class SignerInfo
+	{
+	private:
+		void parseUnauthAttrs(PKCS7_SIGNER_INFO* si_info, STACK_OF(X509)* raw_certs);
+		void parseAuthAttrs(PKCS7_SIGNER_INFO* si_info);
+		X509* signerCert;
+		SpcSpOpusInfo *spcInfo; /* TODO decide what to do with this information as it's only optional */
+	public:
+		std::uint64_t version;
+
+		std::string serial;
+		std::string issuer;
+		std::string contentType; /* TODO decide if we should store oid or name repre? */
+		std::string messageDigest;
+
+		Algorithms digestAlgorithm; /* Must be identical to SignedData::digestAlgorithm */
+		Algorithms digestEncryptAlgorithm;
+
+		std::vector<std::uint8_t> encryptDigest;
+		std::vector<Pkcs7> nestedSignatures;
+		std::vector<Pkcs9> counterSignatures;
+		/* TODO add ms counter signatures */
+		X509* getSignerCert() const;
+
+		SignerInfo() = default;
+		SignerInfo(PKCS7* pkcs7, STACK_OF(X509)* raw_certs);
+	};
+
 private:
 	PKCS7* pkcs7;
 	SpcIndirectDataContent* spcContent;
-	X509Certificate signer;
 
 	STACK_OF(X509)* getCertificates() const;
 	STACK_OF(X509)* getSigners();
@@ -62,16 +90,13 @@ private:
 public:
 	std::uint64_t version;
 	ContentInfo contentInfo;
+	SignerInfo signerInfo;
 	Algorithms contentDigestAlgorithm; // must match SignerInfo digestAlgorithm
-
 	std::vector<X509Certificate> certificates;
-	std::vector<Pkcs7> nestedSignatures;
-	std::vector<Pkcs9> counterSignatures;
-	/* TODO add ms counter signatures */
 
 	std::vector<retdec::fileformat::DigitalSignature> getSignatures() const;
 
-	Pkcs7(std::vector<unsigned char> input);
+	Pkcs7(std::vector<std::uint8_t>& input);
 	~Pkcs7();
 };
 

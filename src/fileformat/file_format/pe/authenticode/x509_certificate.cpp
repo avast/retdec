@@ -27,7 +27,7 @@ std::string X509Certificate::getX509Name(X509_NAME* name) const
 	auto str_size = BIO_number_written(bio);
 
 	std::string result(str_size, '\0');
-	BIO_read(bio, result.data(), result.size());
+	BIO_read(bio, (void *)result.data(), result.size());
 	return result;
 }
 

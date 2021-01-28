@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <cassert>
 #include <exception>
+#include <iostream>
 #include <map>
 #include <new>
 #include <regex>
@@ -2082,10 +2083,11 @@ void PeFormat::loadCertificates()
 		auto authenticode = authenticode::Authenticode(certBytes);
 		certificateTable = new CertificateTable(authenticode.getSignatures());
 	}
-	catch (const std::exception&)
+	catch (const std::exception& e)
 	{
 		delete certificateTable;
 		certificateTable = nullptr;
+		std::cerr << e.what() << std::endl; // debug purpose now
 	}
 }
 

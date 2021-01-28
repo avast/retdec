@@ -4,6 +4,7 @@
 
 #include <openssl/asn1.h>
 #include <openssl/asn1t.h>
+#include <openssl/ossl_typ.h>
 #include <openssl/x509v3.h>
 
 /* 
@@ -34,7 +35,9 @@ enum class Algorithms
 	SHA224_RSA = NID_sha224WithRSAEncryption,
 	SHA256_RSA = NID_sha256WithRSAEncryption,
 	SHA384_RSA = NID_sha384WithRSAEncryption,
-	SHA512_RSA = NID_sha512WithRSAEncryption
+	SHA512_RSA = NID_sha512WithRSAEncryption,
+	RSA = NID_rsaEncryption,
+	DSA = NID_dsa
 };
 
 struct SpcString
