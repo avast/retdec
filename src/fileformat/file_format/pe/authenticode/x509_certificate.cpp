@@ -6,19 +6,58 @@
 
 #include "x509_certificate.h"
 #include <cstdint>
+#include <cstdlib>
 #include <openssl/bio.h>
 #include <openssl/evp.h>
 #include <openssl/ossl_typ.h>
+#include <openssl/pem.h>
 #include <openssl/x509.h>
+#include <string>
 
 namespace authenticode {
 
-static std::time_t asn1TimeToTimestamp(const ASN1_TIME* asn1_time)
+static std::string parseDateTime(ASN1_TIME* dateTime)
 {
-	struct tm timepoint;
-	ASN1_TIME_to_tm(asn1_time, &timepoint);
-	return mktime(&timepoint);
+	if (ASN1_TIME_check(dateTime) == 0)
+		return {};
+
+	BIO* memBio = BIO_new(BIO_s_mem());
+	ASN1_TIME_print(memBio, dateTime);
+
+	BUF_MEM* bioMemPtr;
+	BIO_ctrl(memBio, BIO_C_GET_BUF_MEM_PTR, 0, reinterpret_cast<char*>(&bioMemPtr));
+
+	std::string result(bioMemPtr->data, bioMemPtr->length);
+	BIO_free_all(memBio);
+	return result;
 }
+
+static std::string parsePublicKey(BIO *bio)
+{
+	std::string key;
+	std::vector<char> tmp(100);
+
+	BIO_gets(bio, tmp.data(), 100);
+	if(std::string(tmp.data()) != "-----BEGIN PUBLIC KEY-----\n")
+	{
+		return key;
+	}
+
+	while(true)
+	{
+		BIO_gets(bio, tmp.data(), 100);
+		if(std::string(tmp.data()) == "-----END PUBLIC KEY-----\n")
+		{
+			break;
+		}
+
+		key += tmp.data();
+		key.erase(key.length() - 1, 1); // Remove last character (whitespace)
+	}
+
+	return key;
+}
+
 /* Calculates md digest type from data, result is a written into 
    digest that has to be large enough to accomodate whole digest */
 static void calculateDigest(const EVP_MD* md, std::uint8_t* data, int len, std::uint8_t* digest)
@@ -81,18 +120,12 @@ std::string X509Certificate::getSignatureAlgorithm() const
 
 std::string X509Certificate::getValidSince() const
 {
-	std::time_t timestamp = asn1TimeToTimestamp(X509_get0_notBefore(cert));
-	std::stringstream buffer;
-	buffer << std::put_time(std::gmtime(&timestamp), "%c %Z");
-	return buffer.str();
+	return parseDateTime(X509_get_notBefore(cert));
 }
 
 std::string X509Certificate::getValidUntil() const
 {
-	std::time_t timestamp = asn1TimeToTimestamp(X509_get0_notAfter(cert));
-	std::stringstream buffer;
-	buffer << std::put_time(std::gmtime(&timestamp), "%c %Z");
-	return buffer.str();
+	return parseDateTime(X509_get_notAfter(cert));
 }
 
 std::string X509Certificate::getPem() const
@@ -172,17 +205,20 @@ Certificate::Attributes X509Certificate::getIssuer() const
 
 std::string X509Certificate::getPublicKey() const
 {
-	return "";
+	std::uint8_t* data = nullptr;
+	EVP_PKEY* pkey = X509_get0_pubkey(cert);
+	BIO* memBio = BIO_new(BIO_s_mem());
+	PEM_write_bio_PUBKEY(memBio, pkey);
+	
+	std::string result(parsePublicKey(memBio));
+	BIO_free_all(memBio);
+
+	return result;
 }
 
 std::string X509Certificate::getPublicKeyAlgorithm() const
 {
-	return "";
-}
-
-std::string X509Certificate::getSignature() const
-{
-	return "";
+	return OBJ_nid2sn(EVP_PKEY_base_id(X509_get0_pubkey(cert)));
 }
 
 std::string X509Certificate::getSha1() const
@@ -195,6 +231,8 @@ std::string X509Certificate::getSha1() const
 
 	const EVP_MD* md = EVP_sha1();
 	calculateDigest(md, data, len, sha1_bytes);
+
+	free(data);
 	return bytesToHexString(sha1_bytes, sha1_length);
 }
 std::string X509Certificate::getSha256() const
@@ -207,7 +245,8 @@ std::string X509Certificate::getSha256() const
 
 	const EVP_MD* md = EVP_sha256();
 	calculateDigest(md, data, len, sha256_bytes);
-
+	
+	free(data);
 	return bytesToHexString(sha256_bytes, sha256_length);
 }
 
