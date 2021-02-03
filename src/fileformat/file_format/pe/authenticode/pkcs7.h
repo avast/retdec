@@ -92,7 +92,7 @@ public:
 	ContentInfo contentInfo;
 	SignerInfo signerInfo;
 	Algorithms contentDigestAlgorithm; // must match SignerInfo digestAlgorithm
-	std::vector<X509Certificate> certificates;
+	std::vector<X509Certificate> certificates; /* typically no root certificates, timestamp may include root one */
 
 	std::vector<retdec::fileformat::DigitalSignature> getSignatures() const;
 

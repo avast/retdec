@@ -28,7 +28,7 @@ using retdec::fileformat::Certificate;
 namespace authenticode {
 
 class X509Certificate
-{ /* X509, can't name it X509 due to the collisions with openssl*/
+{ /* Can't name it X509 due to the collisions with openssl*/
 private:
 	X509* cert;
 	std::string getX509Name(X509_NAME* name) const;
@@ -38,6 +38,7 @@ public:
 	X509Certificate() = default;
 
 	X509* getX509() const;
+	int getVersion() const;
 	std::string getValidUntil() const;
 	std::string getValidSince() const;
 	std::string getRawSubject() const;
@@ -47,6 +48,9 @@ public:
 	std::string getPublicKey() const;
 	std::string getPublicKeyAlgorithm() const;
 	std::string getPem() const;
+	std::string getSignature() const;
+	std::string getSha1() const; /* returns thumbprint of the complete certificate data */
+	std::string getSha256() const;
 	Certificate::Attributes getSubject() const;
 	Certificate::Attributes getIssuer() const;
 	Certificate createCertificate() const;

@@ -31,6 +31,7 @@ static const int NID_spc_sp_opus_info_objid =
 
 namespace authenticode {
 
+/* This translating functions could be replaced by OBJ_nid2ln() ? */
 static std::string algorithmToString(Algorithms alg)
 {
 	switch (alg) {
@@ -300,7 +301,7 @@ Pkcs7::SignerInfo::SignerInfo(PKCS7* pkcs7, STACK_OF(X509)* raw_certs)
 
 	serial = serialToString(si_info->issuer_and_serial->serial);
 	issuer = X509NameToString(si_info->issuer_and_serial->issuer);
-
+	
 	parseUnauthAttrs(si_info, raw_certs);
 	parseAuthAttrs(si_info);
 }
@@ -317,12 +318,16 @@ void Pkcs7::SignerInfo::parseAuthAttrs(PKCS7_SIGNER_INFO* si_info)
 		auto attr_object_nid = OBJ_obj2nid(attr_object);
 		char buf[100]; /* 100 should be more than enough for any oid - openssl docs */
 		if (attr_object_nid == NID_pkcs9_contentType) {
-			/*  ContentType ::= OBJECT IDENTIFIER */
+			/* 
+			 ContentType ::= OBJECT IDENTIFIER 
+			*/
 			OBJ_obj2txt(buf, 100, attr_type->value.object, 0);
 			contentType = std::string(buf, buf + strlen(buf));
 		} 
 		else if (attr_object_nid == NID_pkcs9_messageDigest) {
-			/* MessageDigest ::= OCTET STRING */
+			/*
+			 MessageDigest ::= OCTET STRING
+			*/
 			messageDigest = std::string(attr_type->value.asn1_string->data,
 					attr_type->value.asn1_string->data + attr_type->value.asn1_string->length);
 		}
@@ -356,13 +361,15 @@ void Pkcs7::SignerInfo::parseUnauthAttrs(PKCS7_SIGNER_INFO* si_info, STACK_OF(X5
 
 			nestedSignatures.push_back(Pkcs7(nested_sig_data));
 		}
-		/* attr_object_nid == NID_spc_ms_countersignature TODO */
 		else if (attr_object_nid == NID_pkcs9_countersignature) {
 			std::vector<unsigned char> countersig_data(attr_type->value.sequence->data,
 					attr_type->value.sequence->data + attr_type->value.sequence->length);
 
 			counterSignatures.push_back(Pkcs9(countersig_data, raw_certs));
 		}
+		// else if (attr_object_nid == NID_spc_ms_countersignature) {
+
+		// }
 	}
 }
 
