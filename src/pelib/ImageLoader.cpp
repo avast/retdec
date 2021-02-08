@@ -879,9 +879,10 @@ int PeLib::ImageLoader::Load(
 	if(fileError != ERROR_NONE)
 		return fileError;
 
-	// Check and capture NT headers
+	// Check and capture NT headers. Don't go any fuhrter than here if the NT headers were detected as bad.
+	// Sample: retdec-regression-tests\tools\fileinfo\features\pe-loader-corruptions\001-pe-header-cut-001.ex_
 	fileError = captureNtHeaders(fileData);
-	if(fileError != ERROR_NONE)
+	if(fileError != ERROR_NONE || ldrError == LDR_ERROR_NTHEADER_OUT_OF_FILE)
 		return fileError;
 
 	// Check and capture section headers
@@ -1607,11 +1608,11 @@ int PeLib::ImageLoader::captureNtHeaders(ByteBuffer & fileData)
 	}
 	filePtr += sizeof(uint32_t);
 
-	// Capture the file header
+	// Capture the file header. Note that if the NT header is cut, we still want to recognize the file as PE
 	if((filePtr + sizeof(PELIB_IMAGE_FILE_HEADER)) >= fileEnd)
 	{
 		setLoaderError(LDR_ERROR_NTHEADER_OUT_OF_FILE);
-		return ERROR_INVALID_FILE;
+		return ERROR_NONE;
 	}
 	memcpy(&fileHeader, filePtr, sizeof(PELIB_IMAGE_FILE_HEADER));
 
