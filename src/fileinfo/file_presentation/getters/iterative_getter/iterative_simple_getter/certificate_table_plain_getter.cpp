@@ -24,7 +24,7 @@ CertificateTablePlainGetter::CertificateTablePlainGetter(FileInformation& fileIn
 	: IterativeSimpleGetter(fileInfo)
 {
 	numberOfStructures = 1;
-	numberOfStoredRecords.push_back(fileInfo.certificateTable.signatureCount());
+	numberOfStoredRecords.push_back(fileInfo.certificateTable->signatureCount());
 	numberOfExtraElements.push_back(0);
 	title = "Certificate table";
 	// elementHeader = "Certificate";
@@ -45,7 +45,7 @@ CertificateTablePlainGetter::CertificateTablePlainGetter(FileInformation& fileIn
 
 std::size_t CertificateTablePlainGetter::getBasicInfo(std::size_t structIndex, std::vector<std::string>& desc, std::vector<std::string>& info) const
 {
-	if (structIndex >= numberOfStructures || fileinfo.certificateTable.empty())
+	if (structIndex >= numberOfStructures || !fileinfo.certificateTable)
 	{
 		return 0;
 	}
@@ -54,7 +54,7 @@ std::size_t CertificateTablePlainGetter::getBasicInfo(std::size_t structIndex, s
 	info.clear();
 
 	desc.push_back("Number of signatures          : ");
-	info.push_back(std::to_string(fileinfo.certificateTable.signatureCount()));
+	info.push_back(std::to_string(fileinfo.certificateTable->signatureCount()));
 
 	return info.size();
 }

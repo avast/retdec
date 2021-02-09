@@ -2081,7 +2081,8 @@ void PeFormat::loadCertificates()
 	try
 	{
 		auto authenticode = authenticode::Authenticode(certBytes);
-		certificateTable = new CertificateTable(authenticode.getSignatures());
+		auto signatures = authenticode.getSignatures();
+		certificateTable = new CertificateTable(signatures);
 	}
 	catch (const std::exception& e)
 	{

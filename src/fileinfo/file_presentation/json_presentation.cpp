@@ -380,7 +380,7 @@ std::string to_hex_string(std::vector<uint8_t> bytes)
 	return ss.str();
 }
 
-void WriteCertificateChain(JsonPresentation::Writer& writer, std::vector<Certificate>& chain)
+void WriteCertificateChain(JsonPresentation::Writer& writer, const std::vector<Certificate>& chain)
 {
 	writer.String("chain");
 	writer.StartArray();
@@ -444,7 +444,7 @@ void WriteCertificateChain(JsonPresentation::Writer& writer, std::vector<Certifi
 	writer.EndArray();
 }
 
-void WriteSigner(JsonPresentation::Writer& writer, Signer& signer)
+void WriteSigner(JsonPresentation::Writer& writer, const Signer& signer)
 {
 	writer.StartObject();
 	WriteCertificateChain(writer, signer.chain);
@@ -457,7 +457,7 @@ void WriteSigner(JsonPresentation::Writer& writer, Signer& signer)
 	writer.EndObject();
 }
 
-void WriteSignature(JsonPresentation::Writer& writer, DigitalSignature& signature)
+void WriteSignature(JsonPresentation::Writer& writer, const DigitalSignature& signature)
 {
 	writer.StartObject();
 
@@ -483,18 +483,18 @@ void WriteSignature(JsonPresentation::Writer& writer, DigitalSignature& signatur
 void JsonPresentation::presentCertificates(Writer& writer) const
 {
 
-	// if(fileinfo.certificateTable.empty())
-	// {
-	// 	return;
-	// }
+	if(!fileinfo.certificateTable)
+	{
+		return;
+	}
 
 	writer.String("certificateTable");
 	writer.StartObject();
 	writer.Key("numberOfSignatures");
-	writer.Int64(fileinfo.certificateTable.signatures.size());
+	writer.Int64(fileinfo.certificateTable->signatures.size());
 	writer.String("signatures");
 	writer.StartArray();
-	for (auto&& signature : fileinfo.certificateTable.signatures)
+	for (auto&& signature : fileinfo.certificateTable->signatures)
 	{
 		WriteSignature(writer, signature);
 	}

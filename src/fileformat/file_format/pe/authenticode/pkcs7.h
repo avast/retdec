@@ -12,6 +12,7 @@
 
 #include "retdec/fileformat/types/certificate_table/certificate_table.h"
 
+#include <algorithm>
 #include <openssl/bn.h>
 #include <openssl/bio.h>
 #include <openssl/evp.h>
@@ -38,8 +39,6 @@ class Pkcs7
 	class ContentInfo
 	{
 	private:
-		SpcIndirectDataContent* spcContent;
-		SpcContentInfo* contentInfo;
 
 	public:
 		std::string contentType;
@@ -54,8 +53,10 @@ class Pkcs7
 	private:
 		void parseUnauthAttrs(PKCS7_SIGNER_INFO* si_info, STACK_OF(X509)* raw_certs);
 		void parseAuthAttrs(PKCS7_SIGNER_INFO* si_info);
-		X509* signerCert;
-		SpcSpOpusInfo *spcInfo; /* TODO decide what to do with this information as it's only optional */
+
+		STACK_OF(X509)* raw_signers;
+		X509* signerCert = nullptr;
+		SpcSpOpusInfo *spcInfo = nullptr; /* TODO decide what to do with this information as it's only optional */
 	public:
 		std::uint64_t version;
 
@@ -73,12 +74,17 @@ class Pkcs7
 		/* TODO add ms counter signatures */
 		X509* getSignerCert() const;
 
-		SignerInfo() = default;
+		auto operator=(const SignerInfo&) = delete;
+		SignerInfo(const SignerInfo&) = delete;
+
+		SignerInfo& operator=(SignerInfo&&) noexcept = default;
+		SignerInfo(SignerInfo&&) noexcept = default;
+
 		SignerInfo(PKCS7* pkcs7, STACK_OF(X509)* raw_certs);
 	};
 
 private:
-	PKCS7* pkcs7;
+	std::unique_ptr<PKCS7, decltype(&PKCS7_free)> pkcs7;
 	SpcIndirectDataContent* spcContent;
 
 	STACK_OF(X509)* getCertificates() const;
@@ -90,14 +96,28 @@ private:
 public:
 	std::uint64_t version;
 	ContentInfo contentInfo;
-	SignerInfo signerInfo;
+	std::optional<SignerInfo> signerInfo;
+	// SignerInfo* signerInfo;
+
 	Algorithms contentDigestAlgorithm; // must match SignerInfo digestAlgorithm
 	std::vector<X509Certificate> certificates; /* typically no root certificates, timestamp may include root one */
 
 	std::vector<retdec::fileformat::DigitalSignature> getSignatures() const;
 
-	Pkcs7(std::vector<std::uint8_t>& input);
-	~Pkcs7();
+	// Pkcs7() = delete;
+	// Pkcs7& operator=(Pkcs7& other) = delete;
+	// Pkcs7& operator=(Pkcs7&& other) = default;
+
+	// Pkcs7(const Pkcs7&) = delete;
+	// Pkcs7(Pkcs7&& other) = default;
+
+	auto operator=(const Pkcs7&) = delete;
+	Pkcs7(const Pkcs7&) = delete;
+
+	Pkcs7& operator=(Pkcs7&&) noexcept = default;
+	Pkcs7(Pkcs7&&) noexcept = default;
+
+	Pkcs7(const std::vector<std::uint8_t>& input);
 };
 
 } // namespace authenticode

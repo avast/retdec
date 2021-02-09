@@ -46,7 +46,7 @@ public:
 
 	CertificateTable(std::vector<DigitalSignature> signatures);
 	CertificateTable() = default;
-	std::size_t signatureCount() { return signatures.size(); }
+	std::size_t signatureCount() const { return signatures.size(); }
 	bool empty() const;
 };
 

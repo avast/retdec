@@ -64,7 +64,10 @@ private:
 
 public:
 	std::vector<X509Certificate> chain;
+
 	CertificateProcessor();
+	~CertificateProcessor();
+	
 	std::vector<X509Certificate> getChain(X509* cert, STACK_OF(X509)* all_certs);
 };
 

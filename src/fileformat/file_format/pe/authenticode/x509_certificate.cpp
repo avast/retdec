@@ -8,10 +8,12 @@
 #include <cstdint>
 #include <cstdlib>
 #include <openssl/bio.h>
+#include <openssl/bn.h>
 #include <openssl/evp.h>
 #include <openssl/ossl_typ.h>
 #include <openssl/pem.h>
 #include <openssl/x509.h>
+#include <openssl/x509_vfy.h>
 #include <string>
 
 namespace authenticode {
@@ -107,6 +109,7 @@ std::string X509Certificate::getSerialNumber() const
 	std::vector<char> result(data_len);
 	BIO_read(bio, static_cast<void*>(result.data()), data_len);
 	BIO_free_all(bio);
+	BN_free(bignum);
 	return { result.begin(), result.end() };
 }
 
@@ -322,6 +325,12 @@ CertificateProcessor::CertificateProcessor()
 
 	X509_STORE_set_verify_cb(trust_store, &verify_callback);
 	X509_STORE_set_ex_data(trust_store, 0, static_cast<void*>(this));
+}
+
+CertificateProcessor::~CertificateProcessor()
+{
+	X509_STORE_free(trust_store);
+	X509_STORE_CTX_free(ctx);
 }
 
 } // namespace authenticode

@@ -5,6 +5,7 @@
  */
 
 #include <algorithm>
+#include <memory>
 
 #include "fileinfo/file_information/file_information_types/certificate_table.h"
 #include "retdec/common/address.h"
@@ -4265,7 +4266,7 @@ void FileInformation::setStrings(const std::vector<retdec::fileformat::String> *
  * Set certificate table
  * @param sTable Information about certificate table
  */
-void FileInformation::setCertificateTable(const retdec::fileformat::CertificateTable sTable)
+void FileInformation::setCertificateTable(const retdec::fileformat::CertificateTable*  sTable)
 {
 	certificateTable = sTable;
 }
