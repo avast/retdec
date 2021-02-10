@@ -15,7 +15,7 @@ namespace authenticode {
 Pkcs9::Pkcs9(std::vector<unsigned char>& data, STACK_OF(X509)* certificates)
 {
 	const unsigned char* data_ptr = data.data();
-	countersignInfo = d2i_PKCS7_SIGNER_INFO(nullptr, &data_ptr, data.size());
+	PKCS7_SIGNER_INFO* countersignInfo = d2i_PKCS7_SIGNER_INFO(nullptr, &data_ptr, data.size());
 	if (!countersignInfo) {
 		throw std::runtime_error("SignerInfo allocation failed");
 	}
@@ -39,7 +39,7 @@ Pkcs9::Pkcs9(std::vector<unsigned char>& data, STACK_OF(X509)* certificates)
 			break;
 		}
 	}
-	// PKCS7_SIGNER_INFO_free(countersignInfo);
+	PKCS7_SIGNER_INFO_free(countersignInfo);
 }
 
 X509* Pkcs9::getX509() const

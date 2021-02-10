@@ -17,6 +17,7 @@
 #include <openssl/pkcs7.h>
 #include <openssl/safestack.h>
 #include <openssl/ts.h>
+#include <openssl/x509.h>
 #include <stdexcept>
 #include <cstring>
 
@@ -254,7 +255,7 @@ static std::string X509NameToString(X509_NAME* name)
 	return result;
 }
 
-Pkcs7::SignerInfo::SignerInfo(PKCS7* pkcs7, STACK_OF(X509)* raw_certs)
+Pkcs7::SignerInfo::SignerInfo(PKCS7* pkcs7, STACK_OF(X509)* raw_certs) : raw_signers(nullptr, sk_X509_free)
 {
 	/*
 	SignerInfo ::= SEQUENCE {
@@ -296,20 +297,20 @@ Pkcs7::SignerInfo::SignerInfo(PKCS7* pkcs7, STACK_OF(X509)* raw_certs)
 	digestEncryptAlgorithm = asn1ToAlgorithm(digestEncryptAlgo->algorithm);
 
 	/* Get the signer certificate */
-	raw_signers = PKCS7_get0_signers(pkcs7, raw_certs, 0);
+	raw_signers.reset(PKCS7_get0_signers(pkcs7, raw_certs, 0));
 
 	/* TODO maybe don't throw on no signers? And just leave the signatures empty? */
 	if (!raw_signers) {
 		throw std::runtime_error("Couldn't parse any signers");
 	}
 
-	int signers_count = sk_X509_num(raw_signers);
+	int signers_count = sk_X509_num(raw_signers.get());
 	/* This by logic shouldn't happen as above we established there is single SignerInfo,
 	   but I am not completely sure so I'll keep it here for a while */
 	if (signers_count != 1) {
 		throw std::runtime_error("Invalid number of Signers - Authenticode supports single Signer");
 	}
-	signerCert = sk_X509_value(raw_signers, 0);
+	signerCert = sk_X509_value(raw_signers.get(), 0);
 
 	encryptDigest = std::vector<std::uint8_t>(si_info->enc_digest->data,
 			si_info->enc_digest->data + si_info->enc_digest->length);
@@ -354,10 +355,10 @@ void Pkcs7::SignerInfo::parseAuthAttrs(PKCS7_SIGNER_INFO* si_info)
 			    programName [0] EXPLICIT SpcString OPTIONAL,
 			    moreInfo    [1] EXPLICIT SpcLink OPTIONAL,
 		    } --#public--
-			 */
+			*/
 			spcInfo = SpcSpOpusInfo_new();
-			d2i_SpcSpOpusInfo(&spcInfo,
-					(const unsigned char**)&attr_type->value.sequence->data,
+			const unsigned char *ptr = (const unsigned char*)attr_type->value.sequence->data;
+			d2i_SpcSpOpusInfo(&spcInfo, &ptr,
 					attr_type->value.sequence->length);
 			SpcSpOpusInfo_free(spcInfo);
 		}
@@ -419,13 +420,17 @@ std::vector<DigitalSignature> Pkcs7::getSignatures() const
 		.signed_digest = contentInfo.digest,
 		.digest_algorithm = algorithmToString(contentInfo.digestAlgorithm),
 	};
-	const SignerInfo& signInfo = *signerInfo;
+
+	if (!signerInfo.has_value()) {
+		throw std::runtime_error("There is no signer in SignerInfos");
+	}
+	const SignerInfo& signInfo = signerInfo.value();
+
 	STACK_OF(X509)* certs = getCertificates();
 	X509* signer_cert = signInfo.getSignerCert();
 	if (!signer_cert) {
 		throw std::runtime_error("There is no signer certificate in SignerInfo");
 	}
-	return signatures; //
 	std::vector<X509Certificate> chain = processor.getChain(signer_cert, certs);
 	auto fileformat_chain = createFileformatChain(chain);
 

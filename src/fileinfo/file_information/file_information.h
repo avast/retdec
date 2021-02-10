@@ -71,7 +71,7 @@ private:
 
 public:
 	// public now for dev reasons
-	const retdec::fileformat::CertificateTable* certificateTable; ///< information about certificates, non owning pointer
+	const retdec::fileformat::CertificateTable* certificateTable = nullptr; ///< information about certificates
 
 	retdec::cpdetect::ToolInformation toolInfo; ///< detected tools
 	std::vector<std::string> messages; ///< error, warning and other messages

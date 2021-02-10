@@ -13,6 +13,7 @@
 #include "retdec/fileformat/types/certificate_table/certificate_table.h"
 
 #include <algorithm>
+#include <memory>
 #include <openssl/bn.h>
 #include <openssl/bio.h>
 #include <openssl/evp.h>
@@ -54,7 +55,7 @@ class Pkcs7
 		void parseUnauthAttrs(PKCS7_SIGNER_INFO* si_info, STACK_OF(X509)* raw_certs);
 		void parseAuthAttrs(PKCS7_SIGNER_INFO* si_info);
 
-		STACK_OF(X509)* raw_signers;
+		std::unique_ptr<STACK_OF(X509), decltype(&sk_X509_free)> raw_signers;
 		X509* signerCert = nullptr;
 		SpcSpOpusInfo *spcInfo = nullptr; /* TODO decide what to do with this information as it's only optional */
 	public:
@@ -85,7 +86,6 @@ class Pkcs7
 
 private:
 	std::unique_ptr<PKCS7, decltype(&PKCS7_free)> pkcs7;
-	SpcIndirectDataContent* spcContent;
 
 	STACK_OF(X509)* getCertificates() const;
 	STACK_OF(X509)* getSigners();
@@ -97,7 +97,6 @@ public:
 	std::uint64_t version;
 	ContentInfo contentInfo;
 	std::optional<SignerInfo> signerInfo;
-	// SignerInfo* signerInfo;
 
 	Algorithms contentDigestAlgorithm; // must match SignerInfo digestAlgorithm
 	std::vector<X509Certificate> certificates; /* typically no root certificates, timestamp may include root one */

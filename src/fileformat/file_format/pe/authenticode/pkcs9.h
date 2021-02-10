@@ -28,7 +28,6 @@ namespace authenticode {
 class Pkcs9
 {
 private:
-	PKCS7_SIGNER_INFO* countersignInfo;
 	X509* signerCert;
 
 public:
