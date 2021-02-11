@@ -19,6 +19,7 @@
 #include "retdec/cpdetect/settings.h"
 #include "retdec/fileformat/utils/format_detection.h"
 #include "retdec/fileformat/utils/other.h"
+#include "retdec/serdes/std.h"
 #include "fileinfo/file_detector/detector_factory.h"
 #include "fileinfo/file_detector/macho_detector.h"
 #include "fileinfo/file_presentation/config_presentation.h"
@@ -256,47 +257,6 @@ std::string fixRelativePath(const std::string& path, const std::string& config)
 	}
 }
 
-template <typename T>
-bool jsonGetUint64(
-		rapidjson::Document& root,
-		const std::string& name,
-		T& val)
-{
-	if (root.HasMember(name))
-	{
-		if (root[name].IsUint64())
-		{
-			val = root[name].GetUint64();
-		}
-		else
-		{
-			std::cerr << "JSON config: \"" << name << "\" has bad value!\n";
-			return false;
-		}
-	}
-	return true;
-}
-
-bool jsonGetBool(
-		rapidjson::Document& root,
-		const std::string& name,
-		bool& val)
-{
-	if (root.HasMember(name))
-	{
-		if (root[name].IsBool())
-		{
-			val = root[name].GetBool();
-		}
-		else
-		{
-			std::cerr << "JSON config: \"" << name << "\" has bad value!\n";
-			return false;
-		}
-	}
-	return true;
-}
-
 bool jsonGetPathArray(
 		rapidjson::Document& root,
 		const std::string& name,
@@ -411,11 +371,11 @@ bool doConfigString(
 	if (!jsonGetPathArray(root, "externalCryptoYaraRules", params.yaraCryptoPaths, configPath)) return false;
 	if (!jsonGetPathArray(root, "externalOtherYaraRules", params.yaraOtherPaths, configPath)) return false;
 
-	if (!jsonGetBool(root, "useInternalSignatureDb", params.internalDatabase)) return false;
-	if (!jsonGetBool(root, "useExternalSignatureDb", params.externalDatabase)) return false;
-	if (!jsonGetBool(root, "verbose", params.verbose)) return false;
-	if (!jsonGetBool(root, "explanatory", params.explanatory)) return false;
-	if (!jsonGetBool(root, "maxMemoryHalf", params.maxMemoryHalfRAM)) return false;
+	params.internalDatabase = retdec::serdes::deserializeBool(root, "useInternalSignatureDb", params.internalDatabase);
+	params.externalDatabase = retdec::serdes::deserializeBool(root, "useExternalSignatureDb", params.externalDatabase);
+	params.verbose = retdec::serdes::deserializeBool(root, "verbose", params.verbose);
+	params.explanatory = retdec::serdes::deserializeBool(root, "explanatory", params.explanatory);
+	params.maxMemoryHalfRAM = retdec::serdes::deserializeBool(root, "maxMemoryHalf", params.maxMemoryHalfRAM);
 
 	if (root.HasMember("loadStrings"))
 	{
@@ -451,8 +411,8 @@ bool doConfigString(
 		}
 	}
 
-	if (!jsonGetUint64(root, "epBytes", params.epBytesCount)) return false;
-	if (!jsonGetUint64(root, "maxMemory", params.maxMemory)) return false;
+	params.epBytesCount = retdec::serdes::deserializeUint64(root, "epBytes", params.epBytesCount);
+	params.maxMemory = retdec::serdes::deserializeUint64(root, "maxMemory", params.maxMemory);
 
 	return true;
 }
