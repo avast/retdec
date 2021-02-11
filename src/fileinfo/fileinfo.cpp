@@ -279,14 +279,16 @@ bool jsonGetPathArray(
 				}
 				else
 				{
-					std::cerr << "JSON config: \"" << name << "\" has bad value!\n";
+					Log::error() << Log::Error << "JSON config: \"" << name
+							<< "\" has bad value!\n";
 					return false;
 				}
 			}
 		}
 		else
 		{
-			std::cerr << "JSON config: \"" << name << "\" has bad value!\n";
+			Log::error() << Log::Error << "JSON config: \"" << name
+					<< "\" has bad value!\n";
 			return false;
 		}
 	}
@@ -309,7 +311,7 @@ bool doConfigString(
 	rapidjson::ParseResult ok = root.Parse<rapidjson::kParseCommentsFlag>(json);
 	if (!ok)
 	{
-		std::cerr << "Failed to parse fileinfo JSON configuration!\n";
+		Log::error() << Log::Error << "Failed to parse fileinfo JSON configuration!\n";
 		return false;
 	}
 
@@ -321,7 +323,7 @@ bool doConfigString(
 		else if (val == "json") params.plainText = false;
 		else
 		{
-			std::cerr << "JSON config: \"outputFormat\" has bad value!\n";
+			Log::error() << Log::Error << "JSON config: \"outputFormat\" has bad value!\n";
 			return false;
 		}
 	}
@@ -335,7 +337,7 @@ bool doConfigString(
 		else if (val == "sim-list") params.searchMode = SearchType::SIM_LIST;
 		else
 		{
-			std::cerr << "JSON config: \"yaraMatchingType\" has bad value!\n";
+			Log::error() << Log::Error << "JSON config: \"yaraMatchingType\" has bad value!\n";
 			return false;
 		}
 	}
@@ -362,7 +364,7 @@ bool doConfigString(
 		}
 		else
 		{
-			std::cerr << "JSON config: \"noHashes\" has bad value!\n";
+			Log::error() << Log::Error << "JSON config: \"noHashes\" has bad value!\n";
 			return false;
 		}
 	}
@@ -390,7 +392,7 @@ bool doConfigString(
 		}
 		else
 		{
-			std::cerr << "JSON config: \"loadStrings\" has bad value!\n";
+			Log::error() << Log::Error << "JSON config: \"loadStrings\" has bad value!\n";
 			return false;
 		}
 	}
@@ -406,7 +408,7 @@ bool doConfigString(
 		}
 		else
 		{
-			std::cerr << "JSON config: \"dlls\" has bad value!\n";
+			Log::error() << Log::Error << "JSON config: \"dlls\" has bad value!\n";
 			return false;
 		}
 	}
