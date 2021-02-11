@@ -879,7 +879,7 @@ int PeLib::ImageLoader::Load(
 	if(fileError != ERROR_NONE)
 		return fileError;
 
-	// Check and capture NT headers. Don't go any fuhrter than here if the NT headers were detected as bad.
+	// Check and capture NT headers. Don't go any further than here if the NT headers were detected as bad.
 	// Sample: retdec-regression-tests\tools\fileinfo\features\pe-loader-corruptions\001-pe-header-cut-001.ex_
 	fileError = captureNtHeaders(fileData);
 	if(fileError != ERROR_NONE || ldrError == LDR_ERROR_NTHEADER_OUT_OF_FILE)
