@@ -20,6 +20,7 @@
 * Fix: Fixed two type errors in `scripts/retdec-archive-decompiler.py` ([#759](https://github.com/avast/retdec/pull/759)).
 * Fix: Fixed runtime and memory use of `retdec-fileinfo` on PE samples having corrupted relocations ([#872](https://github.com/avast/retdec/issues/872), [#873](https://github.com/avast/retdec/pull/873)).
 * Fix: Fixed a corruption check for PE samples with invalid import thunks ([#897](https://github.com/avast/retdec/pull/897), [#917](https://github.com/avast/retdec/pull/917)).
+* Fix: Fixed recognition of very corrupted PE samples ([#921](https://github.com/avast/retdec/issues/921)).
 * Fix: Fixed parsing of corrupted resources in `retdec-fileinfo` ([#907](https://github.com/avast/retdec/pull/907), [#911](https://github.com/avast/retdec/issues/911)).
 * Fix: MPRESS unpacker will now correctly copy resources, exports and other non-packed sections correctly.
 * Fix: `retdec-fileinfo.py` is now usable even when decompiler is not installed.
