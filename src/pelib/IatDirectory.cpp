@@ -32,7 +32,7 @@ namespace PeLib
 		{
 			// Insert that item
 			m_vIat.push_back(itemArray[i]);
-			
+
 			// Zero is considered terminator
 			if(itemArray[i] == 0)
 				break;

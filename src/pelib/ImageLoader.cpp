@@ -1,6 +1,6 @@
 /**
  * @file src/pelib/ImageLoader.cpp
- * @brief Implementation of image 
+ * @brief Implementation of image
  * @copyright (c) 2020 Avast Software, licensed under the MIT license
  */
 
@@ -820,10 +820,10 @@ void PeLib::ImageLoader::makeValid()
 
 	alignment = AlignToSize(optionalHeader.SectionAlignment, PELIB_PAGE_SIZE);
 	optionalHeader.SectionAlignment = (alignment != 0) ? alignment : PELIB_PAGE_SIZE;
-	
+
 	alignment = AlignToSize(optionalHeader.FileAlignment, PELIB_SECTOR_SIZE);
 	optionalHeader.FileAlignment = (alignment != 0) ? alignment : PELIB_SECTOR_SIZE;
-	
+
 	sizeOfHeaders = dosHeader.e_lfanew + sizeof(PELIB_IMAGE_NT_SIGNATURE) + sizeof(PELIB_IMAGE_FILE_HEADER) + fileHeader.SizeOfOptionalHeader + fileHeader.NumberOfSections * sizeof(PELIB_IMAGE_SECTION_HEADER);
 	optionalHeader.SizeOfHeaders = sizeOfHeaders = AlignToSize(sizeOfHeaders, optionalHeader.FileAlignment);
 
@@ -832,7 +832,7 @@ void PeLib::ImageLoader::makeValid()
 	for(uint16_t i = 0; i < fileHeader.NumberOfSections; i++)
 	{
 		const PELIB_SECTION_HEADER * pSectionHeader = getSectionHeader(i);
-		
+
 		sizeOfImage += AlignToSize(pSectionHeader->VirtualSize, optionalHeader.SectionAlignment);
 
 		// If the size of headers changed, we need to move all section data further
@@ -1171,7 +1171,7 @@ uint32_t PeLib::ImageLoader::readWriteImageFile(
 	return bytesToRead;
 }
 
-// 
+//
 // There is a specific piece of code in MiParseImageSectionHeaders (see below).
 // Note that this is done on the raw image data *BEFORE* the image is mapped to sections
 // Causes map difference on this sample: 2e26926a701df980fb56e5905a93bf2d7ba6981ccabc81cf251b3c0ed6afdc26
@@ -1418,7 +1418,7 @@ bool PeLib::ImageLoader::processImageRelocations(
 
 				switch(typeAndOffset[i] >> 12)
 				{
-					// The base relocation applies the difference to the 64-bit field at offset.	
+					// The base relocation applies the difference to the 64-bit field at offset.
 					case PELIB_IMAGE_REL_BASED_DIR64:
 					{
 						int64_t fixupValue = 0;
@@ -2112,7 +2112,7 @@ int PeLib::ImageLoader::captureImageSections(ByteBuffer & fileData)
 	else
 	{
 		// 64-bit Windows always align single-section images to page size.
-		// 32-bit Windows: 
+		// 32-bit Windows:
 		// * Windows XP: sector size
 		// * Windows 7 : sector size (network files) or no align (local files)
 		// * Windows 10: no align
