@@ -129,7 +129,7 @@ bool isPe(std::istream& stream)
 	// Create instance of the ImageLoader with most benevolent flags
 	ImageLoader imgLoader(0);
 
-	// Load the image from stream. Only load headers.
+	// Load the image from stream. Only load headers
 	return (imgLoader.Load(stream, 0, true) == ERROR_NONE);
 }
 
