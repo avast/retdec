@@ -271,10 +271,16 @@ bool jsonGetPathArray(
 			{
 				if (v.IsString())
 				{
-					auto path = fixRelativePath(v.GetString(), configPath);
-					if (!fs::exists(path))
+					if (v.GetStringLength())
 					{
-						val.insert(path);
+						auto path = fixRelativePath(
+								v.GetString(),
+								configPath
+						);
+						if (fs::exists(path))
+						{
+							val.insert(path);
+						}
 					}
 				}
 				else
@@ -405,10 +411,17 @@ bool doConfigString(
 	{
 		if (root["dlls"].IsString())
 		{
-			params.dllListFile = fixRelativePath(
-					root["dlls"].GetString(),
-					configPath
-			);
+			if (root["dlls"].GetStringLength())
+			{
+				auto path = fixRelativePath(
+						root["dlls"].GetString(),
+						configPath
+				);
+				if (fs::exists(path))
+				{
+					params.dllListFile = path;
+				}
+			}
 		}
 		else
 		{
