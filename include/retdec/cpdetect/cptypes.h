@@ -42,6 +42,16 @@ enum class SearchType
 	MOST_SIMILAR,  ///< the most similar signature
 	SIM_LIST       ///< list of similar signatures
 };
+inline std::ostream& operator<<(std::ostream& os, const SearchType& st)
+{
+	switch (st)
+	{
+		case SearchType::EXACT_MATCH: os << "EXACT_MATCH"; break;
+		case SearchType::MOST_SIMILAR: os << "MOST_SIMILAR"; break;
+		case SearchType::SIM_LIST: os << "SIM_LIST"; break;
+	}
+	return os;
+}
 
 /**
  * Source from which result was obtained

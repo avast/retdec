@@ -54,7 +54,7 @@ bool deserializeBool(
 			: defaultValue;
 }
 
-bool deserializeDouble(
+double deserializeDouble(
 	const rapidjson::Value& val,
 	const std::string& key,
 	double defaultValue)
