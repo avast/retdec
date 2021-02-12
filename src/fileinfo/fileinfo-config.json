@@ -22,6 +22,6 @@
     "verbose": false,
     "explanatory": false,
     "maxMemory":0,
-    "maxMemoryHalf": true,
+    "maxMemoryHalf": false,
     "dlls": ""
 }
