@@ -16,8 +16,8 @@
     "externalOtherYaraRules": [
     ],
     "loadStrings": false,
-    // all|file|verbose
-    "noHashes": "all",
+    // default|all|file|verbose
+    "noHashes": "default",
     "epBytes": 50,
     "verbose": false,
     "explanatory": false,

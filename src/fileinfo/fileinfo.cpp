@@ -346,7 +346,11 @@ bool doConfigString(
 	{
 		auto val = root["noHashes"].IsString()
 				? root["noHashes"].GetString() : std::string();
-		if (val == "all")
+		if (val == "default")
+		{
+			params.loadFlags = LoadFlags::NONE;
+		}
+		else if (val == "all")
 		{
 			params.loadFlags = static_cast<LoadFlags>(params.loadFlags
 					| LoadFlags::NO_FILE_HASHES
