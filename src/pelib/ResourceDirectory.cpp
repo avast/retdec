@@ -649,7 +649,7 @@ namespace PeLib
 		// We artificially limit the allowed number of resource entries
 		if((header.NumberOfNamedEntries > PELIB_MAX_RESOURCE_ENTRIES) || (header.NumberOfIdEntries > PELIB_MAX_RESOURCE_ENTRIES))
 			return ERROR_INVALID_FILE;
-		
+
 		// More checks for number of entries
 		unsigned int uiNumberOfEntries = header.NumberOfNamedEntries + header.NumberOfIdEntries;
 		if(uiNumberOfEntries > PELIB_MAX_RESOURCE_ENTRIES)
@@ -726,7 +726,7 @@ namespace PeLib
 					}
 
 					// Read the resource name
-					imageLoader.readStringRc(rc.entry.wstrName, uiRsrcRva + uiNameOffset); 
+					imageLoader.readStringRc(rc.entry.wstrName, uiRsrcRva + uiNameOffset);
 				}
 			}
 

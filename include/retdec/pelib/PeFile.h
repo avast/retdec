@@ -132,7 +132,7 @@ namespace PeLib
 
 		/// Load the PE file using the already-open stream
 		int loadPeHeaders(bool loadHeadersOnly = false);
-		
+
 		/// Alternate load - can be used when the data are already loaded to memory to prevent duplicating large buffers
 		int loadPeHeaders(ByteBuffer & fileData, bool loadHeadersOnly = false);
 

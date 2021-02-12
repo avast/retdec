@@ -976,7 +976,7 @@ namespace PeLib
 		std::uint16_t	MinorVersion;
 		std::uint16_t	NumberOfNamedEntries;
 		std::uint16_t	NumberOfIdEntries;
-		
+
 		PELIB_IMAGE_RESOURCE_DIRECTORY();
 
 		static inline std::size_t size() {return 16;}

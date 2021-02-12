@@ -560,14 +560,14 @@ namespace PeLib
 		// The name be of nonzero length
 		if(importName.size() == 0)
 			return true;
-		
+
 		// We don't accept space as the first character, but we accept space in the middle
-		// retdec-regression-tests\tools\fileinfo\bugs\issue-460-hash-from-empty-string\000b1f22029c979c27c7310712cae66b8ade37378023487277ad7c86d59a34f6 
+		// retdec-regression-tests\tools\fileinfo\bugs\issue-460-hash-from-empty-string\000b1f22029c979c27c7310712cae66b8ade37378023487277ad7c86d59a34f6
 		if(importName[0] <= 0x20)
 			return true;
-		
+
 		// All characters of the name must be a valid (printable) ASCII char
-		// Sample: retdec-regression-tests\tools\fileinfo\features\malformed-imports-exports\7CE5BB5CA99B3570514AF03782545D41213A77A0F93D4AAC8269823A8D3A58EF.dat 
+		// Sample: retdec-regression-tests\tools\fileinfo\features\malformed-imports-exports\7CE5BB5CA99B3570514AF03782545D41213A77A0F93D4AAC8269823A8D3A58EF.dat
 		for(unsigned char singleChar : importName)
 		{
 			if(singleChar < 0x20 || singleChar >= 0x7f)
