@@ -10,6 +10,7 @@
 
 #include "retdec/utils/filesystem.h"
 #include "retdec/utils/io/log.h"
+#include "retdec/utils/version.h"
 #include "retdec/stacofin/stacofin.h"
 #include "retdec/loader/image_factory.h"
 
@@ -129,6 +130,11 @@ int doActions(
 	for (std::size_t i = 0; i < args.size(); ++i) {
 		if (args[i] == "-h" || args[i] == "--help") {
 			printUsage();
+			return 0;
+		}
+		else if (args[i] == "--version") {
+			Log::info() << retdec::utils::version::getVersionStringLong()
+					<< "\n";
 			return 0;
 		}
 		else if (args[i] == "-d" || args[i] == "--debug") {

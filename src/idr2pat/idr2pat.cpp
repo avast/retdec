@@ -14,10 +14,12 @@
 
 #include "retdec/utils/conversion.h"
 #include "retdec/utils/io/log.h"
+#include "retdec/utils/version.h"
 #include "yaramod/builder/yara_expression_builder.h"
 #include "yaramod/builder/yara_hex_string_builder.h"
 #include "yaramod/builder/yara_rule_builder.h"
 
+using namespace std::string_literals;
 using namespace retdec::utils;
 using namespace retdec::utils::io;
 using namespace yaramod;
@@ -307,6 +309,11 @@ int main(int argc, char** argv)
 {
 	if (argc != 2) {
 		return printError("need one argument - KB path");
+	}
+
+	if ("--version"s == argv[1]) {
+		Log::info() << version::getVersionStringLong() << "\n";
+		return 0;
 	}
 
 	std::ifstream inputFile(argv[1], std::ios::binary);

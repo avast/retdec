@@ -11,6 +11,7 @@
 #include "retdec/utils/filesystem.h"
 #include "retdec/utils/io/log.h"
 #include "retdec/utils/memory.h"
+#include "retdec/utils/version.h"
 #include "retdec/cpdetect/cpdetect.h"
 #include "retdec/fileformat/fileformat.h"
 #include "arg_handler.h"
@@ -166,6 +167,11 @@ ExitCode processArgs(ArgHandler& handler, char argc, char** argv)
 	{
 		Log::info() << handler << std::endl;
 	}
+	// --version
+	else if (handler["version"]->used)
+	{
+		Log::info() << utils::version::getVersionStringLong() << std::endl;
+	}
 	// -p|--plugins
 	else if (handler["plugins"]->used)
 	{
@@ -209,15 +215,16 @@ int _main(int argc, char** argv)
 			"\n"
 			"The command-line arguments, which doesn't belong to any group can be used alongside any group.\n"
 			"\n"
-			"Help group:\n"
-			"   -h|--help              Prints this help message.\n"
+			"General group:\n"
+			"   -h|--help              Show this help message.\n"
+			"   -v|--version           Show RetDec version.\n"
 			"\n"
 			"Listing group:\n"
-			"   -p|--plugins           Prints the list of all available plugins.\n"
+			"   -p|--plugins           Show the list of all available plugins.\n"
 			"\n"
 			"Unpacking group:\n"
-			"   PACKED_FILE            Specifies the packed file, which is needed to be unpacked.\n"
-			"   -o|--output FILE       Optional. Specifies the output file of unpacking as FILE.\n"
+			"   PACKED_FILE            Specify the packed file, which is needed to be unpacked.\n"
+			"   -o|--output FILE       Optional. Specify the output file of unpacking as FILE.\n"
 			"                          Default value is 'PACKED_FILE-unpacked'.\n"
 			"\n"
 			"Non-group optional arguments:\n"
@@ -228,6 +235,7 @@ int _main(int argc, char** argv)
 	);
 
 	handler.registerArg('h', "help", false);
+	handler.registerArg('v', "version", false);
 	handler.registerArg('o', "output", true);
 	handler.registerArg('p', "plugins", false);
 	handler.registerArg('b', "brute", false);
