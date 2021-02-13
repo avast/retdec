@@ -12,6 +12,7 @@ add_executable(tests-utils
 	scope_exit_tests.cpp
 	string_tests.cpp
 	time_tests.cpp
+	version_tests.cpp
 )
 
 target_link_libraries(tests-utils

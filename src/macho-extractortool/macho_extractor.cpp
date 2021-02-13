@@ -13,6 +13,7 @@
 #include "retdec/utils/conversion.h"
 #include "retdec/utils/string.h"
 #include "retdec/utils/io/log.h"
+#include "retdec/utils/version.h"
 #include "retdec/macho-extractor/break_fat.h"
 
 using namespace retdec::utils::io;
@@ -55,7 +56,12 @@ void printUsage()
 	"    ignores --json option.\n\n"
 	"Output options:\n\n"
 	"  -o --out PATH\n"
-	"    Output will be written to the PATH.\n\n";
+	"    Output will be written to the PATH.\n\n"
+	"Other options:\n\n"
+	"  -h --help\n"
+	"    Show this help.\n\n"
+	"  --version\n"
+	"    Show RetDec version.\n\n";
 }
 
 /**
@@ -173,6 +179,12 @@ int handleArguments(
 		if(c == "-h" || c == "--help")
 		{
 			printUsage();
+			return 0;
+		}
+		else if (c == "--version")
+		{
+			Log::info() << retdec::utils::version::getVersionStringLong()
+					<< "\n";
 			return 0;
 		}
 		else if(c == "--check-archive")

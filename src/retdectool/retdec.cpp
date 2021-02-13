@@ -8,6 +8,7 @@
 
 #include "retdec/retdec/retdec.h"
 #include "retdec/utils/io/log.h"
+#include "retdec/utils/version.h"
 
 using namespace retdec::utils::io;
 
@@ -29,9 +30,15 @@ class ProgramOptions
 				{
 					inputFile = getParamOrDie(argc, argv, i);
 				}
-				else if (c == "-h")
+				else if (c == "-h" || c == "--help")
 				{
 					printHelpAndDie();
+				}
+				else if (c == "--version")
+				{
+					Log::info() << retdec::utils::version::getVersionStringLong()
+							<< "\n";
+					exit(EXIT_SUCCESS);
 				}
 				else
 				{
@@ -63,6 +70,8 @@ class ProgramOptions
 		void printHelpAndDie()
 		{
 			Log::info() << _programName << ":\n"
+					<< "\t-h|--help Show this help.\n"
+					<< "\t--version Show RetDec version.\n"
 					<< "\t-i inputFile\n";
 
 			exit(EXIT_SUCCESS);

@@ -9,6 +9,7 @@
 
 #include "retdec/utils/filesystem.h"
 #include "retdec/utils/io/log.h"
+#include "retdec/utils/version.h"
 #include "pat2yara/processing.h"
 #include "yaramod/builder/yara_file_builder.h"
 #include "yaramod/builder/yara_rule_builder.h"
@@ -47,7 +48,11 @@ void printUsage(Logger& log)
 	"--ignore-nops OPCODE\n"
 	"    Ignore NOPs with OPCODE when computing (pure) size.\n\n"
 	"--delphi\n"
-	"    Set special Delphi processing on.\n\n";
+	"    Set special Delphi processing on.\n"
+	"-h --help\n"
+	"    Show this help.\n"
+	"--version\n"
+	"    Show RetDec version.\n";
 }
 
 /**
@@ -114,6 +119,11 @@ int processArguments(std::vector<std::string> &args)
 	for (std::size_t i = 0; i < args.size(); ++i) {
 		if (args[i] == "--help" || args[i] == "-h") {
 			printUsage(Log::get(Log::Type::Info));
+			return 0;
+		}
+		else if (args[i] == "--version") {
+			Log::info() << retdec::utils::version::getVersionStringLong()
+					<< "\n";
 			return 0;
 		}
 		else if (args[i] == "--delphi") {

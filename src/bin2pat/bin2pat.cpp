@@ -11,6 +11,7 @@
 
 #include "retdec/utils/filesystem.h"
 #include "retdec/utils/io/log.h"
+#include "retdec/utils/version.h"
 #include "retdec/patterngen/pattern_extractor/pattern_extractor.h"
 #include "yaramod/yaramod.h"
 
@@ -21,6 +22,7 @@
  * Output is set of yara rules (http://yara.readthedocs.io/en/v3.5.0/).
  */
 
+using namespace retdec::utils;
 using namespace retdec::utils::io;
 using namespace retdec::patterngen;
 
@@ -28,6 +30,10 @@ void printUsage(Logger &log)
 {
 	log << "Usage: bin2pat [-o OUTPUT_FILE] [-n NOTE]"
 		<< " <INPUT_FILE [INPUT_FILE...] | -l LIST_FILE>\n\n"
+		<< "-h --help\n"
+		<< "    Show this help.\n\n"
+		<< "--version\n"
+		<< "    Show RetDec version.\n\n	"
 		<< "-o --output OUTPUT_FILE\n"
 		<< "    Output file path (if not given, stdout is used).\n"
 		<< "    If multiple paths are given, only last one is used.\n\n"
@@ -53,8 +59,7 @@ void needValue(
 	printErrorAndDie("argument " + arg + " requires value");
 }
 
-void processArgs(
-	const std::vector<std::string> &args)
+void processArgs(const std::vector<std::string> &args)
 {
 	std::string note;
 	std::string outPath;
@@ -63,6 +68,11 @@ void processArgs(
 	for (std::size_t i = 0, e = args.size(); i < e; ++i) {
 		if (args[i] == "--help" || args[i] == "-h") {
 			printUsage(Log::get(Log::Type::Info));
+			return;
+		}
+		else if (args[i] == "--version")
+		{
+			Log::info() << version::getVersionStringLong() << "\n";
 			return;
 		}
 		else if (args[i] == "-o" || args[i] == "--output") {

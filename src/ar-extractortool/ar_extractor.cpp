@@ -12,6 +12,7 @@
 
 #include "retdec/utils/filesystem.h"
 #include "retdec/utils/io/log.h"
+#include "retdec/utils/version.h"
 #include "retdec/ar-extractor/archive_wrapper.h"
 #include "retdec/ar-extractor/detection.h"
 
@@ -51,6 +52,10 @@ void printUsage(Logger& log)
 
 	log << "Usage: ar_extractor [OPTIONS] FILE\n\n"
 	"Options:\n\n"
+	"-h --help\n"
+	"    Show this help.\n\n"
+	"--version\n"
+	"    Show RetDec version.\n\n"
 	"--arch-magic\n"
 	"    Check if file starts with archive magic constants.\n"
 	"    Exit code = 0 if archive magic, 1 otherwise.\n\n"
@@ -214,6 +219,10 @@ int processArguments(
 
 		if (arg == "-h" || arg == "--help") {
 			printUsage(Log::get(Log::Type::Info));
+			return 0;
+		}
+		else if (arg == "--version") {
+			Log::info() << version::getVersionStringLong() << "\n";
 			return 0;
 		}
 		else if (arg == "-o" || arg == "--output") {

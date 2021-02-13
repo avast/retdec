@@ -14,6 +14,7 @@
 #include "retdec/utils/memory.h"
 #include "retdec/utils/io/log.h"
 #include "retdec/utils/string.h"
+#include "retdec/utils/version.h"
 #include "retdec/ar-extractor/detection.h"
 #include "retdec/cpdetect/errors.h"
 #include "retdec/cpdetect/settings.h"
@@ -155,6 +156,7 @@ void printHelp()
 				<< "Usage: fileinfo [options] file\n\n"
 				<< "Options list:\n"
 				<< "    --help, -h            Display this help.\n"
+				<< "    --version             Display program's version.\n"
 				<< "\n"
 				<< "Options specifying type of YARA patterns matching for detection of used compiler\n"
 				<< "or packer:\n"
@@ -559,6 +561,11 @@ bool doParams(int argc, char **_argv, ProgParams &params)
 		if (c == "-h" || c == "--help")
 		{
 			printHelp();
+			exit(EXIT_SUCCESS);
+		}
+		else if (c == "--version")
+		{
+			Log::info() << version::getVersionStringLong() << "\n";
 			exit(EXIT_SUCCESS);
 		}
 		else if (c == "-x" || c == "--exact")

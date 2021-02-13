@@ -44,10 +44,10 @@
 #include "retdec/unpackertool/unpackertool.h"
 #include "retdec/utils/binary_path.h"
 #include "retdec/utils/filesystem.h"
-#include "retdec/utils/string.h"
-#include "retdec/utils/memory.h"
-
 #include "retdec/utils/io/log.h"
+#include "retdec/utils/memory.h"
+#include "retdec/utils/string.h"
+#include "retdec/utils/version.h"
 
 using namespace retdec::utils::io;
 
@@ -171,6 +171,11 @@ void ProgramOptions::loadOption(std::list<std::string>::iterator& i)
 	if (isParam(i, "-h", "--help"))
 	{
 		printHelpAndDie();
+	}
+	else if (isParam(i, "", "--version"))
+	{
+		Log::info() << retdec::utils::version::getVersionStringLong() << "\n";
+		exit(EXIT_SUCCESS);
 	}
 	else if (isParam(i, "", "--print-after-all"))
 	{
@@ -664,7 +669,8 @@ LLVM IR debug arguments:
 	[--print-after-all] Dump LLVM IR to stderr after every LLVM pass.
 	[--print-before-all] Dump LLVM IR to stderr before every LLVM pass.
 Other arguments:
-	[-h|--help] Print this help.
+	[-h|--help] Show this help.
+	[--version] Show RetDec version.
 )";
 
 	exit(EXIT_SUCCESS);
