@@ -32,6 +32,7 @@ class JsonPresentation : public FilePresentation
 
 		/// @name Auxiliary presentation methods
 		/// @{
+		void presentFileinfoVersion(Writer& writer) const;
 		void presentErrors(Writer& writer) const;
 		void presentLoaderError(Writer& writer) const;
 		void presentCompiler(Writer& writer) const;

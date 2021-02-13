@@ -7,6 +7,7 @@
 #include "retdec/utils/conversion.h"
 #include "retdec/utils/string.h"
 #include "retdec/utils/io/log.h"
+#include "retdec/utils/version.h"
 #include "retdec/fileformat/utils/conversions.h"
 #include "retdec/serdes/pattern.h"
 #include "retdec/serdes/std.h"
@@ -99,6 +100,16 @@ JsonPresentation::JsonPresentation(FileInformation &fileinfo_, bool verbose_)
 		, verbose(verbose_)
 {
 
+}
+
+void JsonPresentation::presentFileinfoVersion(Writer& writer) const
+{
+	writer.String("fileinfoVersion");
+	writer.StartObject();
+	serializeString(writer, "commitHash", utils::version::getCommitHash());
+	serializeString(writer, "versionTag", utils::version::getVersionTag());
+	serializeString(writer, "buildDate", utils::version::getBuildDate());
+	writer.EndObject();
 }
 
 /**
@@ -1224,6 +1235,11 @@ bool JsonPresentation::present()
 	rapidjson::StringBuffer sb;
 	Writer writer(sb);
 	writer.StartObject();
+
+	if(verbose)
+	{
+		presentFileinfoVersion(writer);
+	}
 
 	serializeString(writer, "inputFile", fileinfo.getPathToFile());
 

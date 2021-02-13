@@ -6,6 +6,7 @@
 
 #include "retdec/utils/string.h"
 #include "retdec/utils/io/log.h"
+#include "retdec/utils/version.h"
 #include "retdec/fileformat/utils/conversions.h"
 #include "fileinfo/file_presentation/getters/format.h"
 #include "fileinfo/file_presentation/getters/plain_getters.h"
@@ -698,6 +699,11 @@ void PlainPresentation::presentCore() const
 
 bool PlainPresentation::present()
 {
+	if(verbose)
+	{
+		Log::info() << "RetDec Fileinfo version  : "
+				<< utils::version::getVersionStringShort() << "\n";
+	}
 	Log::info() << "Input file               : " << fileinfo.getPathToFile() << "\n";
 	presentSimple(BasicPlainGetter(fileinfo), false);
 	presentCompiler();
