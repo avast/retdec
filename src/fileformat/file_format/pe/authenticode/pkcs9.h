@@ -28,11 +28,14 @@ namespace authenticode {
 class Pkcs9
 {
 private:
-	X509* signerCert;
-
+	const X509* signerCert;
 public:
-	Pkcs9(std::vector<unsigned char>& data, STACK_OF(X509)* certificates);
-	X509* getX509() const;
+	std::vector<Pkcs9> counterSignatures;
+	std::string signingTime;
+
+	const X509* getX509() const;
+	
+	Pkcs9(std::vector<std::uint8_t>& data, STACK_OF(X509)* certificates);
 };
 
 } // namespace authenticode

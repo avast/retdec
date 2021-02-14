@@ -68,7 +68,7 @@ public:
 	CertificateProcessor();
 	~CertificateProcessor();
 	
-	std::vector<X509Certificate> getChain(X509* cert, STACK_OF(X509)* all_certs);
+	std::vector<X509Certificate> getChain(const X509* cert, const STACK_OF(X509)* all_certs);
 };
 
 } // namespace authenticode

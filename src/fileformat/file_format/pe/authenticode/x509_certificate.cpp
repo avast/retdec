@@ -286,32 +286,32 @@ Certificate X509Certificate::createCertificate() const
 	return out_cert;
 }
 
-/* TODO Chain is processed by callbacks set in the CertProcessor constructor 
-   !! The order of the certificates is not guaranteed to be corret right now */
-std::vector<X509Certificate> CertificateProcessor::getChain(X509* cert, STACK_OF(X509)* all_certs)
+/* It's assumed that the certificates are processed in correct
+   order by callbacks set in the CertProcessor constructor */
+std::vector<X509Certificate> CertificateProcessor::getChain(const X509* cert, const STACK_OF(X509)* all_certs)
 {
-	X509_STORE_CTX_init(ctx, trust_store, cert, all_certs);
+	X509_STORE_CTX_init(ctx, trust_store, const_cast<X509*>(cert), const_cast<STACK_OF(X509)*>(all_certs));
 	X509_verify_cert(ctx);
 	return chain;
 }
 
-static CertificateProcessor* get_processor(X509_STORE_CTX* ctx)
+static CertificateProcessor* getProcessor(X509_STORE_CTX* ctx)
 {
 	return static_cast<CertificateProcessor*>(X509_STORE_get_ex_data(X509_STORE_CTX_get0_store(ctx), 0));
 }
 
 static void addCertificateToChain(X509_STORE_CTX* ctx, const X509Certificate& cert)
 {
-	auto depth = X509_STORE_CTX_get_error_depth(ctx); // use this?
+	auto depth = X509_STORE_CTX_get_error_depth(ctx);
 	void* data = X509_STORE_CTX_get_ex_data(ctx, depth);
 	if (data == nullptr) {
-		CertificateProcessor* processor = get_processor(ctx);
+		CertificateProcessor* processor = getProcessor(ctx);
 		processor->chain.push_back(cert);
-		X509_STORE_CTX_set_ex_data(ctx, depth, (void*)processor); // set random pointer for now
+		X509_STORE_CTX_set_ex_data(ctx, depth, (void*)processor);
 	}
 }
 
-static int verify_callback(int /*ok*/, X509_STORE_CTX* ctx)
+static int verifyCallback(int /*ok*/, X509_STORE_CTX* ctx)
 {
 	auto cert = X509_STORE_CTX_get_current_cert(ctx);
 	addCertificateToChain(ctx, cert);
@@ -323,7 +323,7 @@ CertificateProcessor::CertificateProcessor()
 	trust_store = X509_STORE_new();
 	ctx = X509_STORE_CTX_new();
 
-	X509_STORE_set_verify_cb(trust_store, &verify_callback);
+	X509_STORE_set_verify_cb(trust_store, &verifyCallback);
 	X509_STORE_set_ex_data(trust_store, 0, static_cast<void*>(this));
 }
 

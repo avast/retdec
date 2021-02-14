@@ -20,6 +20,7 @@
 #include <openssl/x509.h>
 #include <stdexcept>
 #include <cstring>
+#include <string>
 
 using namespace retdec::fileformat;
 
@@ -73,6 +74,7 @@ static std::string algorithmToString(Algorithms alg)
 
 static Algorithms asn1ToAlgorithm(ASN1_OBJECT* obj)
 {
+	/* maybe just have Algorithms as a typedef to nid ? */
 	int nid = OBJ_obj2nid(obj);
 	switch (nid) {
 	case static_cast<int>(Algorithms::MD5):
@@ -96,7 +98,7 @@ static Algorithms asn1ToAlgorithm(ASN1_OBJECT* obj)
 }
 
 /* If PKCS7 cannot be created it throws otherwise returns valid pointer */
-static PKCS7* getPkcs7(std::vector<unsigned char> input)
+static PKCS7* getPkcs7(const std::vector<unsigned char>& input)
 {
 	BIO* bio = BIO_new(BIO_s_mem());
 	if (!bio || BIO_reset(bio) != 1 ||
@@ -115,7 +117,8 @@ static PKCS7* getPkcs7(std::vector<unsigned char> input)
 	return pkcs7;
 }
 
-static std::vector<Certificate> createFileformatChain(std::vector<X509Certificate> chain)
+/* naming is hard */
+static std::vector<Certificate> convertToFileformatCertChain(std::vector<X509Certificate> chain)
 {
 	std::vector<Certificate> fileformat_chain;
 	for (auto&& cert : chain) {
@@ -159,7 +162,7 @@ Pkcs7::ContentInfo::ContentInfo(const PKCS7* pkcs7)
  * 
  * @param input 
  */
-Pkcs7::Pkcs7(const std::vector<unsigned char>& input)
+Pkcs7::Pkcs7(const std::vector<unsigned char>& input) noexcept
 	: pkcs7(nullptr, PKCS7_free)
 {
 	/* 
@@ -191,19 +194,21 @@ Pkcs7::Pkcs7(const std::vector<unsigned char>& input)
 	pkcs7.reset(getPkcs7(input));
 
 	if (!pkcs7) {
-		throw std::runtime_error("Couldn't parse the data as PKCS#7");
+		warnings.emplace_back("Couldn't parse the data as PKCS#7");
+		return;
 	}
 
 	/* Authenticode uses SignedData Pkcs7 type, check if that complies */
 	if (!PKCS7_type_is_signed(pkcs7)) {
-		throw std::runtime_error("Invalid Authenticode PKCS#7 type");
+		warnings.emplace_back("Invalid Authenticode PKCS#7 type");
 	}
 
 	STACK_OF(X509_ALGOR)* algos = pkcs7->d.sign->md_algs;
 	/* Must be exactly 1 signer and for each signer there is one algorithm */
 	if (sk_X509_ALGOR_num(algos) != 1) {
-		throw std::runtime_error("Invalid number of DigestAlgorithmIdentifiers");
+		warnings.emplace_back("Invalid number of DigestAlgorithmIdentifiers: " + std::to_string(sk_X509_ALGOR_num(algos)) + " - should be 1.");
 	}
+
 	X509_ALGOR* contentAlgo = sk_X509_ALGOR_value(algos, 0);
 	contentDigestAlgorithm = asn1ToAlgorithm(contentAlgo->algorithm);
 
@@ -213,7 +218,7 @@ Pkcs7::Pkcs7(const std::vector<unsigned char>& input)
 	ASN1_INTEGER_get_uint64(&version, pkcs7->d.sign->version);
 	/* Version has to be equal to 1 */
 	if (version != 1) {
-		throw std::runtime_error("Invalid Authenticode version");
+		warnings.emplace_back("Invalid Pkcs7 version: " + std::to_string(version) + " - should be 1.");
 	}
 
 	/* Parse the certificate data into internal structures */
@@ -255,7 +260,8 @@ static std::string X509NameToString(X509_NAME* name)
 	return result;
 }
 
-Pkcs7::SignerInfo::SignerInfo(PKCS7* pkcs7, STACK_OF(X509)* raw_certs) : raw_signers(nullptr, sk_X509_free)
+Pkcs7::SignerInfo::SignerInfo(PKCS7* pkcs7, STACK_OF(X509)* raw_certs)
+	: raw_signers(nullptr, sk_X509_free)
 {
 	/*
 	SignerInfo ::= SEQUENCE {
@@ -356,15 +362,24 @@ void Pkcs7::SignerInfo::parseAuthAttrs(PKCS7_SIGNER_INFO* si_info)
 			    moreInfo    [1] EXPLICIT SpcLink OPTIONAL,
 		    } --#public--
 			*/
-			spcInfo = SpcSpOpusInfo_new();
-			const unsigned char *ptr = (const unsigned char*)attr_type->value.sequence->data;
-			d2i_SpcSpOpusInfo(&spcInfo, &ptr,
-					attr_type->value.sequence->length);
-			SpcSpOpusInfo_free(spcInfo);
+			// spcInfo = SpcSpOpusInfo((const unsigned char*)attr_type->value.sequence->data, attr_type->value.sequence->length);
 		}
 	}
 }
 
+Pkcs7::SpcSpOpusInfo::SpcSpOpusInfo(const unsigned char* data, int len) noexcept
+{
+	// TODO
+	/*
+	SpcSpOpusInfo ::= SEQUENCE {
+		programName [0] EXPLICIT SpcString OPTIONAL,
+		moreInfo    [1] EXPLICIT SpcLink OPTIONAL,
+	} --#public--
+	*/
+	::SpcSpOpusInfo* spcInfo = SpcSpOpusInfo_new();
+	d2i_SpcSpOpusInfo(&spcInfo, &data, len);
+	SpcSpOpusInfo_free(spcInfo);
+}
 
 void Pkcs7::SignerInfo::parseUnauthAttrs(PKCS7_SIGNER_INFO* si_info, STACK_OF(X509)* raw_certs)
 {
@@ -384,14 +399,17 @@ void Pkcs7::SignerInfo::parseUnauthAttrs(PKCS7_SIGNER_INFO* si_info, STACK_OF(X5
 			nestedSignatures.emplace_back(nested_sig_data);
 		}
 		else if (attr_object_nid == NID_pkcs9_countersignature) {
-			std::vector<unsigned char> countersig_data(attr_type->value.sequence->data,
+			std::vector<std::uint8_t> countersig_data(attr_type->value.sequence->data,
 					attr_type->value.sequence->data + attr_type->value.sequence->length);
 
 			counterSignatures.emplace_back(countersig_data, raw_certs);
 		}
-		// else if (attr_object_nid == NID_spc_ms_countersignature) {
+		else if (attr_object_nid == NID_spc_ms_countersignature) {
+			std::vector<std::uint8_t> countersig_data(attr_type->value.sequence->data,
+					attr_type->value.sequence->data + attr_type->value.sequence->length);
 
-		// }
+			msSignatures.emplace_back(countersig_data);
+		}
 	}
 }
 
@@ -410,46 +428,56 @@ STACK_OF(X509)* Pkcs7::getCertificates() const
 	return pkcs7->d.sign->cert;
 }
 
+/* TODO move all the processing into ctor? */
 std::vector<DigitalSignature> Pkcs7::getSignatures() const
 {
 	std::vector<DigitalSignature> signatures;
 
 	CertificateProcessor processor;
 
-	DigitalSignature signature{
-		.signed_digest = contentInfo.digest,
-		.digest_algorithm = algorithmToString(contentInfo.digestAlgorithm),
-	};
-
 	if (!signerInfo.has_value()) {
-		throw std::runtime_error("There is no signer in SignerInfos");
+		// warnings.emplace_back("There is no signer in SignerInfos");
 	}
 	const SignerInfo& signInfo = signerInfo.value();
 
 	STACK_OF(X509)* certs = getCertificates();
 	X509* signer_cert = signInfo.getSignerCert();
 	if (!signer_cert) {
-		throw std::runtime_error("There is no signer certificate in SignerInfo");
+		// warnings.emplace_back("T1here is no signer certificate in SignerInfo");
 	}
+
 	std::vector<X509Certificate> chain = processor.getChain(signer_cert, certs);
-	auto fileformat_chain = createFileformatChain(chain);
+	auto fileformat_chain = convertToFileformatCertChain(chain);
+
+	DigitalSignature signature{
+		.signedDigest = contentInfo.digest,
+		.digestAlgorithm = algorithmToString(contentInfo.digestAlgorithm),
+		.warnings = warnings,
+	};
 
 	/* Authenticode has a single signer */
-	signature.signers.push_back(Signer{
-			.chain = fileformat_chain });
-	Signer sigs;
-	for (auto&& counter_sig : signInfo.counterSignatures) {
+	signature.signers.push_back(Signer{ .chain = fileformat_chain });
+
+	for (auto&& counterSig : signInfo.counterSignatures) {
 		CertificateProcessor processor;
-		// TODO fix chain creation it's wrongly ordered probably
-		auto chain = processor.getChain(counter_sig.getX509(), certs);
-		auto fileformat_chain = createFileformatChain(chain);
-		signature.signers[0].counter_signers.push_back(Signer{ .chain = fileformat_chain });
+		auto certChain = processor.getChain(counterSig.getX509(), certs);
+		auto fileformatCertChain = convertToFileformatCertChain(certChain);
+
+		signature.signers[0].counterSigners.push_back(Signer{ .chain = fileformatCertChain, .signingTime = counterSig.signingTime });
 	}
+	for (auto&& msCounterSig : signInfo.msSignatures) {
+		CertificateProcessor processor;
+		auto certChain = processor.getChain(msCounterSig.signCert, msCounterSig.certs);
+		auto fileformatCertChain = convertToFileformatCertChain(certChain);
+
+		signature.signers[0].counterSigners.push_back(Signer{ .chain = fileformatCertChain, .signingTime = msCounterSig.signTime });
+	}
+
 	signatures.push_back(signature);
 
-	for (auto&& nested_pkcs7 : signInfo.nestedSignatures) {
-		auto nested_sigs = nested_pkcs7.getSignatures();
-		signatures.insert(signatures.end(), nested_sigs.begin(), nested_sigs.end());
+	for (auto&& nestedPkcs7 : signInfo.nestedSignatures) {
+		auto nestedSigs = nestedPkcs7.getSignatures();
+		signatures.insert(signatures.end(), nestedSigs.begin(), nestedSigs.end());
 	}
 
 	return signatures;

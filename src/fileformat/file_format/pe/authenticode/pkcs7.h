@@ -9,6 +9,7 @@
 #include "authenticode_structs.h"
 #include "x509_certificate.h"
 #include "pkcs9.h"
+#include "ms_counter_signature.h"
 
 #include "retdec/fileformat/types/certificate_table/certificate_table.h"
 
@@ -37,6 +38,10 @@ namespace authenticode {
 
 class Pkcs7
 {
+	struct SpcSpOpusInfo
+	{
+		SpcSpOpusInfo(const unsigned char* data, int len) noexcept;
+	};
 	class ContentInfo
 	{
 	private:
@@ -57,7 +62,7 @@ class Pkcs7
 
 		std::unique_ptr<STACK_OF(X509), decltype(&sk_X509_free)> raw_signers;
 		X509* signerCert = nullptr;
-		SpcSpOpusInfo *spcInfo = nullptr; /* TODO decide what to do with this information as it's only optional */
+		// SpcSpOpusInfo spcInfo; /* TODO decide what to do with this information as it's only optional */
 	public:
 		std::uint64_t version;
 
@@ -72,7 +77,9 @@ class Pkcs7
 		std::vector<std::uint8_t> encryptDigest;
 		std::vector<Pkcs7> nestedSignatures;
 		std::vector<Pkcs9> counterSignatures;
+		std::vector<MsNestedSignature> msSignatures;
 		/* TODO add ms counter signatures */
+
 		X509* getSignerCert() const;
 
 		auto operator=(const SignerInfo&) = delete;
@@ -102,21 +109,15 @@ public:
 	std::vector<X509Certificate> certificates; /* typically no root certificates, timestamp may include root one */
 
 	std::vector<retdec::fileformat::DigitalSignature> getSignatures() const;
+	std::vector<std::string> warnings;
 
-	// Pkcs7() = delete;
-	// Pkcs7& operator=(Pkcs7& other) = delete;
-	// Pkcs7& operator=(Pkcs7&& other) = default;
-
-	// Pkcs7(const Pkcs7&) = delete;
-	// Pkcs7(Pkcs7&& other) = default;
-
-	auto operator=(const Pkcs7&) = delete;
+	Pkcs7& operator=(const Pkcs7&) = delete;
 	Pkcs7(const Pkcs7&) = delete;
 
 	Pkcs7& operator=(Pkcs7&&) noexcept = default;
 	Pkcs7(Pkcs7&&) noexcept = default;
 
-	Pkcs7(const std::vector<std::uint8_t>& input);
+	Pkcs7(const std::vector<std::uint8_t>& input) noexcept;
 };
 
 } // namespace authenticode

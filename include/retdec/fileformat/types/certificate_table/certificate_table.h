@@ -18,21 +18,22 @@ struct Signer
 {
 	std::vector<Certificate> chain;
 	/*
-	regarding pkcs9
 	"A countersignature, since it has type SignerInfo, can itself
 	contain a countersignature attribute.  Thus it is possible to
 	construct arbitrarily long series of countersignatures.""
 	https://tools.ietf.org/html/rfc2985
 	*/
-	std::vector<Signer> counter_signers;
+	std::vector<Signer> counterSigners;
+	std::string signingTime; /* Timestamp counter signatures will have this set */
 };
 
 /* naming - "Signature" was already taken by unpackers */
 struct DigitalSignature
 {
-	std::vector<std::uint8_t> signed_digest;
-	std::string digest_algorithm;
+	std::vector<std::uint8_t> signedDigest;
+	std::string digestAlgorithm;
 
+	std::vector<std::string> warnings; /* warning messages about the contents */
 	std::vector<Signer> signers;
 };
 

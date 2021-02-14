@@ -450,7 +450,7 @@ void WriteSigner(JsonPresentation::Writer& writer, const Signer& signer)
 	WriteCertificateChain(writer, signer.chain);
 	writer.String("counterSigners");
 	writer.StartArray();
-	for (auto&& csigner : signer.counter_signers) {
+	for (auto&& csigner : signer.counterSigners) {
 		WriteSigner(writer, csigner);
 	}
 	writer.EndArray();
@@ -462,10 +462,10 @@ void WriteSignature(JsonPresentation::Writer& writer, const DigitalSignature& si
 	writer.StartObject();
 
 	writer.String("digestAlgorithm");
-	writer.String(signature.digest_algorithm);
+	writer.String(signature.digestAlgorithm);
 
 	writer.String("signedDigest");
-	writer.String(to_hex_string(signature.signed_digest));
+	writer.String(to_hex_string(signature.signedDigest));
 
 	writer.String("signers");
 	writer.StartArray();
