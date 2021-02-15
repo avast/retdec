@@ -34,6 +34,7 @@ class PlainPresentation : public FilePresentation
 		void presentVisualBasicObjects() const;
 		void presentNotes() const;
 		void presentCore() const;
+		void presentSignatures() const;
 		/// @}
 	public:
 		PlainPresentation(FileInformation &fileinfo_, bool verbose_, bool explanatory_);

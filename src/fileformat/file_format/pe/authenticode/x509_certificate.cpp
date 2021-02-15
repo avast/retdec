@@ -18,68 +18,6 @@
 
 namespace authenticode {
 
-static std::string parseDateTime(ASN1_TIME* dateTime)
-{
-	if (ASN1_TIME_check(dateTime) == 0)
-		return {};
-
-	BIO* memBio = BIO_new(BIO_s_mem());
-	ASN1_TIME_print(memBio, dateTime);
-
-	BUF_MEM* bioMemPtr;
-	BIO_ctrl(memBio, BIO_C_GET_BUF_MEM_PTR, 0, reinterpret_cast<char*>(&bioMemPtr));
-
-	std::string result(bioMemPtr->data, bioMemPtr->length);
-	BIO_free_all(memBio);
-	return result;
-}
-
-static std::string parsePublicKey(BIO *bio)
-{
-	std::string key;
-	std::vector<char> tmp(100);
-
-	BIO_gets(bio, tmp.data(), 100);
-	if(std::string(tmp.data()) != "-----BEGIN PUBLIC KEY-----\n")
-	{
-		return key;
-	}
-
-	while(true)
-	{
-		BIO_gets(bio, tmp.data(), 100);
-		if(std::string(tmp.data()) == "-----END PUBLIC KEY-----\n")
-		{
-			break;
-		}
-
-		key += tmp.data();
-		key.erase(key.length() - 1, 1); // Remove last character (whitespace)
-	}
-
-	return key;
-}
-
-/* Calculates md digest type from data, result is a written into 
-   digest that has to be large enough to accomodate whole digest */
-static void calculateDigest(const EVP_MD* md, std::uint8_t* data, int len, std::uint8_t* digest)
-{
-	EVP_MD_CTX* mdctx = EVP_MD_CTX_new();
-	EVP_DigestInit_ex(mdctx, md, NULL);
-	EVP_DigestUpdate(mdctx, data, len);
-	EVP_DigestFinal_ex(mdctx, digest, NULL);
-	EVP_MD_CTX_free(mdctx);
-}
-
-static std::string bytesToHexString(const std::uint8_t* in, int len)
-{
-	const std::uint8_t* end = in + len;
-	std::ostringstream oss;
-	for (; in != end; ++in)
-		oss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(*in);
-	return oss.str();
-}
-
 X509Certificate::X509Certificate(X509* cert)
 {
 	this->cert = cert;
@@ -212,7 +150,7 @@ std::string X509Certificate::getPublicKey() const
 	EVP_PKEY* pkey = X509_get0_pubkey(cert);
 	BIO* memBio = BIO_new(BIO_s_mem());
 	PEM_write_bio_PUBKEY(memBio, pkey);
-	
+
 	std::string result(parsePublicKey(memBio));
 	BIO_free_all(memBio);
 
@@ -248,7 +186,7 @@ std::string X509Certificate::getSha256() const
 
 	const EVP_MD* md = EVP_sha256();
 	calculateDigest(md, data, len, sha256_bytes);
-	
+
 	free(data);
 	return bytesToHexString(sha256_bytes, sha256_length);
 }
@@ -288,12 +226,6 @@ Certificate X509Certificate::createCertificate() const
 
 /* It's assumed that the certificates are processed in correct
    order by callbacks set in the CertProcessor constructor */
-std::vector<X509Certificate> CertificateProcessor::getChain(const X509* cert, const STACK_OF(X509)* all_certs)
-{
-	X509_STORE_CTX_init(ctx, trust_store, const_cast<X509*>(cert), const_cast<STACK_OF(X509)*>(all_certs));
-	X509_verify_cert(ctx);
-	return chain;
-}
 
 static CertificateProcessor* getProcessor(X509_STORE_CTX* ctx)
 {
@@ -316,6 +248,13 @@ static int verifyCallback(int /*ok*/, X509_STORE_CTX* ctx)
 	auto cert = X509_STORE_CTX_get_current_cert(ctx);
 	addCertificateToChain(ctx, cert);
 	return 1;
+}
+
+std::vector<X509Certificate> CertificateProcessor::getChain(const X509* cert, const STACK_OF(X509)* all_certs)
+{
+	X509_STORE_CTX_init(ctx, trust_store, const_cast<X509*>(cert), const_cast<STACK_OF(X509)*>(all_certs));
+	X509_verify_cert(ctx);
+	return chain;
 }
 
 CertificateProcessor::CertificateProcessor()

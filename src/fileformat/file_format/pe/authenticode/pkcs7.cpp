@@ -5,22 +5,7 @@
  */
 
 #include "pkcs7.h"
-#include "authenticode_structs.h"
-#include "retdec/fileformat/types/certificate_table/certificate_table.h"
-#include <cstdint>
-#include <exception>
-#include <openssl/asn1.h>
-#include <openssl/bio.h>
-#include <openssl/evp.h>
-#include <openssl/objects.h>
-#include <openssl/ossl_typ.h>
-#include <openssl/pkcs7.h>
-#include <openssl/safestack.h>
-#include <openssl/ts.h>
-#include <openssl/x509.h>
-#include <stdexcept>
-#include <cstring>
-#include <string>
+#include "helper.h"
 
 using namespace retdec::fileformat;
 
@@ -34,88 +19,6 @@ static const int NID_spc_sp_opus_info_objid =
 		OBJ_create("1.3.6.1.4.1.311.2.1.12)", "SPC_SP_OPUS_INFO_OBJID", "SPC_SP_OPUS_INFO_OBJID (Authenticode)");
 
 namespace authenticode {
-
-/* This translating functions could be replaced by OBJ_nid2ln() ? */
-static std::string algorithmToString(Algorithms alg)
-{
-	switch (alg) {
-	case Algorithms::MD5:
-		return LN_md5;
-	case Algorithms::SHA1:
-		return LN_sha1;
-	case Algorithms::SHA224:
-		return LN_sha224;
-	case Algorithms::SHA256:
-		return LN_sha256;
-	case Algorithms::SHA384:
-		return LN_sha384;
-	case Algorithms::SHA512:
-		return LN_sha512;
-	case Algorithms::MD5_RSA:
-		return LN_md5WithRSAEncryption;
-	case Algorithms::SHA1_RSA:
-		return LN_sha1WithRSAEncryption;
-	case Algorithms::SHA224_RSA:
-		return LN_sha224WithRSAEncryption;
-	case Algorithms::SHA256_RSA:
-		return LN_sha256WithRSAEncryption;
-	case Algorithms::SHA384_RSA:
-		return LN_sha384WithRSAEncryption;
-	case Algorithms::SHA512_RSA:
-		return LN_sha512WithRSAEncryption;
-	case Algorithms::RSA:
-		return LN_rsaEncryption;
-	case Algorithms::DSA:
-		return LN_dsa;
-	default:
-		throw std::runtime_error("Unsupported algorithm");
-	}
-}
-
-static Algorithms asn1ToAlgorithm(ASN1_OBJECT* obj)
-{
-	/* maybe just have Algorithms as a typedef to nid ? */
-	int nid = OBJ_obj2nid(obj);
-	switch (nid) {
-	case static_cast<int>(Algorithms::MD5):
-	case static_cast<int>(Algorithms::SHA1):
-	case static_cast<int>(Algorithms::SHA224):
-	case static_cast<int>(Algorithms::SHA256):
-	case static_cast<int>(Algorithms::SHA384):
-	case static_cast<int>(Algorithms::SHA512):
-	case static_cast<int>(Algorithms::MD5_RSA):
-	case static_cast<int>(Algorithms::SHA1_RSA):
-	case static_cast<int>(Algorithms::SHA224_RSA):
-	case static_cast<int>(Algorithms::SHA256_RSA):
-	case static_cast<int>(Algorithms::SHA384_RSA):
-	case static_cast<int>(Algorithms::SHA512_RSA):
-	case static_cast<int>(Algorithms::RSA):
-	case static_cast<int>(Algorithms::DSA):
-		return static_cast<Algorithms>(nid);
-	default:
-		throw std::runtime_error("Unsupported digest algorithm in indirect data content");
-	}
-}
-
-/* If PKCS7 cannot be created it throws otherwise returns valid pointer */
-static PKCS7* getPkcs7(const std::vector<unsigned char>& input)
-{
-	BIO* bio = BIO_new(BIO_s_mem());
-	if (!bio || BIO_reset(bio) != 1 ||
-			BIO_write(bio, input.data(), static_cast<int>(input.size())) != static_cast<std::int64_t>(input.size())) {
-		BIO_free(bio);
-		return NULL;
-	}
-
-	PKCS7* pkcs7 = d2i_PKCS7_bio(bio, nullptr);
-	if (!pkcs7) {
-		BIO_free(bio);
-		return NULL;
-	}
-	BIO_free(bio);
-
-	return pkcs7;
-}
 
 /* naming is hard */
 static std::vector<Certificate> convertToFileformatCertChain(std::vector<X509Certificate> chain)
@@ -149,8 +52,7 @@ Pkcs7::ContentInfo::ContentInfo(const PKCS7* pkcs7)
 		throw std::runtime_error("Couldn't parse the ContentInfo");
 	}
 
-	digest = std::vector<std::uint8_t>(spcContent->messageDigest->digest->data,
-			spcContent->messageDigest->digest->data + spcContent->messageDigest->digest->length);
+	digest = bytesToHexString(spcContent->messageDigest->digest->data, spcContent->messageDigest->digest->length);
 
 	digestAlgorithm = asn1ToAlgorithm(spcContent->messageDigest->digestAlgorithm->algorithm);
 
@@ -230,34 +132,6 @@ Pkcs7::Pkcs7(const std::vector<unsigned char>& input) noexcept
 		certificates.push_back(cert);
 	}
 	signerInfo.emplace(pkcs7.get(), certs);
-}
-
-static std::string serialToString(ASN1_INTEGER* serial)
-{
-	BIGNUM* bignum = ASN1_INTEGER_to_BN(serial, nullptr);
-
-	BIO* bio = BIO_new(BIO_s_mem());
-	BN_print(bio, bignum);
-	auto data_len = BIO_number_written(bio);
-
-	std::vector<char> result(data_len);
-	BIO_read(bio, static_cast<void*>(result.data()), data_len);
-
-	BIO_free_all(bio);
-	BN_free(bignum);
-	return { result.begin(), result.end() };
-}
-
-static std::string X509NameToString(X509_NAME* name)
-{
-	BIO* bio = BIO_new(BIO_s_mem());
-	X509_NAME_print_ex(bio, name, 0, XN_FLAG_RFC2253);
-	auto str_size = BIO_number_written(bio);
-
-	std::string result(str_size, '\0');
-	BIO_read(bio, (void*)result.data(), result.size());
-	BIO_free_all(bio);
-	return result;
 }
 
 Pkcs7::SignerInfo::SignerInfo(PKCS7* pkcs7, STACK_OF(X509)* raw_certs)
@@ -463,14 +337,14 @@ std::vector<DigitalSignature> Pkcs7::getSignatures() const
 		auto certChain = processor.getChain(counterSig.getX509(), certs);
 		auto fileformatCertChain = convertToFileformatCertChain(certChain);
 
-		signature.signers[0].counterSigners.push_back(Signer{ .chain = fileformatCertChain, .signingTime = counterSig.signingTime });
+		signature.signers[0].counterSigners.push_back(Signer{ .chain = fileformatCertChain, .signingTime = counterSig.signingTime, .digest = counterSig.digest });
 	}
 	for (auto&& msCounterSig : signInfo.msSignatures) {
 		CertificateProcessor processor;
 		auto certChain = processor.getChain(msCounterSig.signCert, msCounterSig.certs);
 		auto fileformatCertChain = convertToFileformatCertChain(certChain);
 
-		signature.signers[0].counterSigners.push_back(Signer{ .chain = fileformatCertChain, .signingTime = msCounterSig.signTime });
+		signature.signers[0].counterSigners.push_back(Signer{ .chain = fileformatCertChain, .signingTime = msCounterSig.signTime, .digest = msCounterSig.digest });
 	}
 
 	signatures.push_back(signature);

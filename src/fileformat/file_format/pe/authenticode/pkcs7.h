@@ -7,6 +7,7 @@
 #pragma once
 
 #include "authenticode_structs.h"
+#include "helper.h"
 #include "x509_certificate.h"
 #include "pkcs9.h"
 #include "ms_counter_signature.h"
@@ -33,6 +34,7 @@
 #include <optional>
 #include <cstdint>
 #include <exception>
+#include <cstring>
 
 namespace authenticode {
 
@@ -45,10 +47,9 @@ class Pkcs7
 	class ContentInfo
 	{
 	private:
-
 	public:
 		std::string contentType;
-		std::vector<std::uint8_t> digest;
+		std::string digest;
 		Algorithms digestAlgorithm;
 
 		ContentInfo() = default;

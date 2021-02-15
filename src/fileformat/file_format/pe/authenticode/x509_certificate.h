@@ -8,6 +8,7 @@
 
 #include "retdec/fileformat/types/certificate_table/certificate.h"
 #include "retdec/fileformat/types/certificate_table/certificate_table.h"
+#include "helper.h"
 
 #include <openssl/bn.h>
 #include <openssl/bio.h>

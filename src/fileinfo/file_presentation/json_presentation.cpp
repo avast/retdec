@@ -368,17 +368,6 @@ void JsonPresentation::presentLoaderInfo(Writer& writer) const
 	writer.EndObject();
 }
 
-std::string to_hex_string(std::vector<uint8_t> bytes)
-{
-	std::stringstream ss;
-	ss << std::hex;
-	for (int i = 0; i < bytes.size(); i++)
-	{
-		ss << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[i]);
-	}
-	return ss.str();
-}
-
 void WriteCertificateChain(JsonPresentation::Writer& writer, const std::vector<Certificate>& chain)
 {
 	writer.String("chain");
@@ -446,6 +435,8 @@ void WriteCertificateChain(JsonPresentation::Writer& writer, const std::vector<C
 void WriteSigner(JsonPresentation::Writer& writer, const Signer& signer)
 {
 	writer.StartObject();
+	serializeString(writer, "signTime", signer.signingTime);
+	serializeString(writer, "digest", signer.digest);
 	WriteCertificateChain(writer, signer.chain);
 	writer.String("counterSigners");
 	writer.StartArray();
@@ -464,7 +455,7 @@ void WriteSignature(JsonPresentation::Writer& writer, const DigitalSignature& si
 	writer.String(signature.digestAlgorithm);
 
 	writer.String("signedDigest");
-	writer.String(to_hex_string(signature.signedDigest));
+	writer.String(signature.signedDigest);
 
 	writer.String("signers");
 	writer.StartArray();
@@ -499,55 +490,6 @@ void JsonPresentation::presentCertificates(Writer& writer) const
 	}
 	writer.EndArray();
 	writer.EndObject();
-	// // Basic info.
-	// serializeString(
-	// 		writer,
-	// 		"numberOfCertificates",
-	// 		std::to_string(fileinfo.getNumberOfStoredCertificates()));
-	// if (fileinfo.hasCertificateTableSignerCertificate())
-	// {
-	// 	serializeString(
-	// 			writer,
-	// 			"signerCertificateIndex",
-	// 			std::to_string(fileinfo.getCertificateTableSignerCertificateIndex()));
-	// }
-	// if (fileinfo.hasCertificateTableCounterSignerCertificate())
-	// {
-	// 	serializeString(
-	// 			writer,
-	// 			"counterSignerCertificateIndex",
-	// 			std::to_string(fileinfo.getCertificateTableCounterSignerCertificateIndex()));
-	// }
-
-	// writer.String("certificates");
-	// writer.StartArray();
-	// for(std::size_t i = 0; i < fileinfo.getNumberOfStoredCertificates(); ++i)
-	// {
-	// 	writer.StartObject();
-
-	// 	serializeString(
-	// 		writer,
-	// 		"index",
-	// 		std::to_string(i));
-	// 	serializeString(
-	// 		writer,
-	// 		"sha1",
-	// 		fileinfo.getCertificateSha1Digest(i));
-	// 	serializeString(
-	// 		writer,
-	// 		"sha256",
-	// 		fileinfo.getCertificateSha256Digest(i));
-
-	// 	writer.String("attributes");
-	// 	writer.StartObject();
-
-	// 	writer.EndObject();
-
-	// 	writer.EndObject();
-
-	// writer.EndArray();
-
-	// writer.EndObject();
 }
 
 /**

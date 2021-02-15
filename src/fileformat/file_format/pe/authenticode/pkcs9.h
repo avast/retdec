@@ -8,6 +8,7 @@
 
 #include "authenticode_structs.h"
 #include "x509_certificate.h"
+#include "helper.h"
 
 #include <openssl/bn.h>
 #include <openssl/bio.h>
@@ -32,6 +33,7 @@ private:
 public:
 	std::vector<Pkcs9> counterSignatures;
 	std::string signingTime;
+	std::string digest;
 
 	const X509* getX509() const;
 	

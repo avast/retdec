@@ -25,12 +25,13 @@ struct Signer
 	*/
 	std::vector<Signer> counterSigners;
 	std::string signingTime; /* Timestamp counter signatures will have this set */
+	std::string digest;
 };
 
 /* naming - "Signature" was already taken by unpackers */
 struct DigitalSignature
 {
-	std::vector<std::uint8_t> signedDigest;
+	std::string signedDigest;
 	std::string digestAlgorithm;
 
 	std::vector<std::string> warnings; /* warning messages about the contents */
@@ -39,6 +40,7 @@ struct DigitalSignature
 
 /**
  * Table of certificates
+ * Currently PE - Authenticode specific structure (PKCS7)
  */
 class CertificateTable
 {
