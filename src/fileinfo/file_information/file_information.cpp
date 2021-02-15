@@ -7,7 +7,6 @@
 #include <algorithm>
 #include <memory>
 
-#include "fileinfo/file_information/file_information_types/certificate_table.h"
 #include "retdec/common/address.h"
 #include "fileinfo/file_information/file_information.h"
 #include "fileinfo/file_information/file_information_types/type_conversions.h"
@@ -1630,14 +1629,6 @@ bool FileInformation::hasResourceTableRecords() const
 	return resourceTable.hasRecords();
 }
 
-// /**
-//  * Get number of stored certificates
-//  * @return Number of stored certificates
-//  */
-// std::size_t FileInformation::getNumberOfStoredCertificates() const
-// {
-// 	return certificateTable.getNumberOfCertificates();
-// }
 
 // /**
 //  * Get index of the certificate of the counter-signer. Returned value should not be used without prior checking

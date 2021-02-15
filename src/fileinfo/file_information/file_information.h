@@ -9,7 +9,6 @@
 
 #include <optional>
 
-#include "fileinfo/file_information/file_information_types/certificate_table.h"
 #include "retdec/cpdetect/cpdetect.h"
 #include "fileinfo/file_information/file_information_types/file_information_types.h"
 
@@ -68,9 +67,7 @@ private:
 	DotnetInfo dotnetInfo; ///< .NET information
 	std::string failedDepsList; /// If non-empty, trhis contains the name of the dependency list that failed to load
 	std::vector<std::pair<std::string, std::string>> anomalies; ///< detected anomalies
-
 public:
-	// public now for dev reasons
 	const retdec::fileformat::CertificateTable* certificateTable = nullptr; ///< information about certificates
 
 	retdec::cpdetect::ToolInformation toolInfo; ///< detected tools

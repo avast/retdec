@@ -9,7 +9,6 @@ add_executable(fileinfo
 	file_detector/pe_detector.cpp
 	file_detector/raw_data_detector.cpp
 	file_information/file_information.cpp
-	file_information/file_information_types/certificate_table.cpp
 	file_information/file_information_types/data_directory.cpp
 	file_information/file_information_types/dotnet_info.cpp
 	file_information/file_information_types/dynamic_section/dynamic_entry.cpp

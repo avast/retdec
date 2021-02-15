@@ -4,7 +4,6 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include "fileinfo/file_information/file_information_types/certificate_table.h"
 #include "retdec/fileformat/types/certificate_table/certificate_table.h"
 #include "retdec/utils/conversion.h"
 #include "retdec/utils/string.h"

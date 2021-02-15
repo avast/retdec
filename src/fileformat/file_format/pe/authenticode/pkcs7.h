@@ -61,7 +61,7 @@ class Pkcs7
 		void parseAuthAttrs(PKCS7_SIGNER_INFO* si_info);
 
 		std::unique_ptr<STACK_OF(X509), decltype(&sk_X509_free)> raw_signers;
-		X509* signerCert = nullptr;
+		const X509* signerCert = nullptr;
 		// SpcSpOpusInfo spcInfo; /* TODO decide what to do with this information as it's only optional */
 	public:
 		std::uint64_t version;
@@ -77,10 +77,10 @@ class Pkcs7
 		std::vector<std::uint8_t> encryptDigest;
 		std::vector<Pkcs7> nestedSignatures;
 		std::vector<Pkcs9> counterSignatures;
-		std::vector<MsNestedSignature> msSignatures;
+		std::vector<MsCounterSignature> msSignatures;
 		/* TODO add ms counter signatures */
 
-		X509* getSignerCert() const;
+		const X509* getSignerCert() const;
 
 		auto operator=(const SignerInfo&) = delete;
 		SignerInfo(const SignerInfo&) = delete;

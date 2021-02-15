@@ -413,7 +413,7 @@ void Pkcs7::SignerInfo::parseUnauthAttrs(PKCS7_SIGNER_INFO* si_info, STACK_OF(X5
 	}
 }
 
-X509* Pkcs7::SignerInfo::getSignerCert() const
+const X509* Pkcs7::SignerInfo::getSignerCert() const
 {
 	return signerCert;
 }
@@ -441,7 +441,7 @@ std::vector<DigitalSignature> Pkcs7::getSignatures() const
 	const SignerInfo& signInfo = signerInfo.value();
 
 	STACK_OF(X509)* certs = getCertificates();
-	X509* signer_cert = signInfo.getSignerCert();
+	const X509* signer_cert = signInfo.getSignerCert();
 	if (!signer_cert) {
 		// warnings.emplace_back("T1here is no signer certificate in SignerInfo");
 	}
