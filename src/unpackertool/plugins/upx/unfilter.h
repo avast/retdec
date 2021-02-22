@@ -28,6 +28,7 @@ enum Filters
 	FILTER_46       = 0x46,
 	FILTER_49       = 0x49,
 	FILTER_50       = 0x50,
+	FILTER_51       = 0x51,
 	FILTER_D0       = 0xD0,
 	FILTER_UNKNOWN  = 0xFF,
 };

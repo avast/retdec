@@ -160,7 +160,7 @@ rule mipsBe_lzma_v393
 	meta:
 		tool = "P"
 		name = "UPX"
-		version = "v393"
+		version = "3.93 [LZMA]"
 		source = "Made by Jan Neduchal"
 		pattern = "04??????27F70000909900002401FA0090980001332200070019C8C2032108042421F16003A1E821AFA1002827AA0020AF"
 	strings:
@@ -175,7 +175,7 @@ rule mipsBe_nrv2x_v393
 	meta:
 		tool = "P"
 		name = "UPX"
-		version = "v393"
+		version = "3.93 [NRV2x]"
 		source = "Made by Jan Neduchal"
 		pattern = "04??????27F7000027BDFFFCAFBF000000A42820ACE600003C0D800001A04821240B000104??????240F000111??????90"
 	strings:
@@ -190,7 +190,7 @@ rule mipsLe_lzma_v393
 	meta:
 		tool = "P"
 		name = "UPX"
-		version = "v393"
+		version = "3.93 [LZMA]"
 		source = "Made by Jan Neduchal"
 		pattern = "4C??????0000F7270000999000FA01240100989007002233C2C819000408210360F1212421E8A1032800A1AF2000AA272C"
 	strings:
@@ -205,7 +205,7 @@ rule mipsLe_nrv2b_v393
 	meta:
 		tool = "P"
 		name = "UPX"
-		version = "v393"
+		version = "3.93 [NRV2B]"
 		source = "Made by Jan Neduchal"
 		pattern = "B5??????0000F727FCFFBD270000BFAF2028A4000000E6AC00800D3C2148A00101000B2438??????01000F2405??????00"
 	strings:
@@ -220,7 +220,7 @@ rule mipsLe_nrv2d_v393
 	meta:
 		tool = "P"
 		name = "UPX"
-		version = "v393"
+		version = "3.93 [NRV2D]"
 		source = "Made by Jan Neduchal"
 		pattern = "BC??????0000F727FCFFBD270000BFAF2028A4000000E6AC00800D3C2148A00101000B243F??????01000F2405??????00"
 	strings:
@@ -235,7 +235,7 @@ rule mipsLe_nrv2e_v393
 	meta:
 		tool = "P"
 		name = "UPX"
-		version = "v393"
+		version = "3.93 [NRV2E]"
 		source = "Made by Jan Neduchal"
 		pattern = "C0??????0000F727FCFFBD270000BFAF2028A4000000E6AC00800D3C2148A00101000B2443??????01000F2405??????00"
 	strings:
@@ -250,7 +250,7 @@ rule mipsBe_lzma_v395
 	meta:
 		tool = "P"
 		name = "UPX"
-		version = "v395"
+		version = "3.95 [LZMA]"
 		source = "Made by Jan Neduchal"
 		pattern = "04??????27FE0000909900002401FA0090980001332200070019C8C2032108042421F16003A1E821AFA1002827AA0020AF"
 	strings:
@@ -265,7 +265,7 @@ rule mipsBe_nrv2x_v395
 	meta:
 		tool = "P"
 		name = "UPX"
-		version = "v395"
+		version = "3.95 [NRV2x]"
 		source = "Made by Jan Neduchal"
 		pattern = "04??????27FE000027BDFFFCAFBF000000A42820ACE600003C0D800001A04821240B000104??????240F000111??????90"
 	strings:
@@ -280,7 +280,7 @@ rule mipsLe_lzma_v395
 	meta:
 		tool = "P"
 		name = "UPX"
-		version = "v395"
+		version = "3.95 [LZMA]"
 		source = "Made by Jan Neduchal"
 		pattern = "6D??????0000FE270000999000FA01240100989007002233C2C819000408210360F1212421E8A1032800A1AF2000AA272C"
 	strings:
@@ -295,7 +295,7 @@ rule mipsLe_nrv2b_v395
 	meta:
 		tool = "P"
 		name = "UPX"
-		version = "v395"
+		version = "3.95 [NRV2B]"
 		source = "Made by Jan Neduchal"
 		pattern = "D7??????0000FE27FCFFBD270000BFAF2028A4000000E6AC00800D3C2148A00101000B2438??????01000F2405??????00"
 	strings:
@@ -310,7 +310,7 @@ rule mipsLe_nrv2d_v395
 	meta:
 		tool = "P"
 		name = "UPX"
-		version = "v395"
+		version = "3.95 [NRV2D]"
 		source = "Made by Jan Neduchal"
 		pattern = "DE??????0000FE27FCFFBD270000BFAF2028A4000000E6AC00800D3C2148A00101000B243F??????01000F2405??????00"
 	strings:
@@ -325,7 +325,7 @@ rule mipsLe_nrv2e_v395
 	meta:
 		tool = "P"
 		name = "UPX"
-		version = "v395"
+		version = "3.95 [NRV2E]"
 		source = "Made by Jan Neduchal"
 		pattern = "E2??????0000FE27FCFFBD270000BFAF2028A4000000E6AC00800D3C2148A00101000B2443??????01000F2405??????00"
 	strings:

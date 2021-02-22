@@ -181,7 +181,7 @@ rule arm_v393
 	meta:
 		tool = "P"
 		name = "UPX"
-		version = "v393"
+		version = "3.93"
 		source = "Made by Jan Neduchal"
 		pattern = "1CC04FE2064C9CE80CB08BE00CA08AE0????9?E5????4?E0????8?E0????A?E1????8?E2????A?E3????2?E9????A?E3??"
 	strings:
@@ -196,7 +196,7 @@ rule armBe_v393
 	meta:
 		tool = "P"
 		name = "UPX"
-		version = "v393"
+		version = "3.93"
 		source = "Made by Jan Neduchal"
 		pattern = "E24FC01CE89C4C06E08BB00CE08AA00CE59?????E04?????E08?????E1A?????E28?????E3A?????E92?????E3A?????E5"
 	strings:
@@ -211,7 +211,7 @@ rule arm_v394
 	meta:
 		tool = "P"
 		name = "UPX"
-		version = "v394"
+		version = "3.94"
 		source = "Made by Jan Neduchal"
 		pattern = "1CC04FE2064C9CE80200A0E10CB08BE00CA08AE0????9?E5????4?E0????A?E1????8?E0????8?E2????A?E3????2?E9??"
 	strings:
@@ -226,22 +226,7 @@ rule armBe_v394
 	meta:
 		tool = "P"
 		name = "UPX"
-		version = "v394"
-		source = "Made by Jan Neduchal"
-		pattern = "E24FC01CE89C4C06E1A00002E08BB00CE08AA00CE59?????E04?????E1A?????E08?????E28?????E3A?????E92?????E3"
-	strings:
-		$h00 = { E2 4F C0 1C E8 9C 4C 06 E1 A0 00 02 E0 8B B0 0C E0 8A A0 0C E5 9? ?? ?? E0 4? ?? ?? E1 A? ?? ?? E0 8? ?? ?? E2 8? ?? ?? E3 A? ?? ?? E9 2? ?? ?? E3 }
-	condition:
-		$h00 at elf.entry_point
-}
-
-
-rule armBe_nrv2b_v394
-{
-	meta:
-		tool = "P"
-		name = "UPX"
-		version = "v394"
+		version = "3.94"
 		source = "Made by Jan Neduchal"
 		pattern = "E24FC01CE89C4C06E1A00002E08BB00CE08AA00CE59?????E04?????E1A?????E08?????E28?????E3A?????E92?????E3"
 	strings:
@@ -256,7 +241,7 @@ rule arm_lzma_v395
 	meta:
 		tool = "P"
 		name = "UPX"
-		version = "v395"
+		version = "3.95 [LZMA]"
 		source = "Made by Jan Neduchal"
 		pattern = "18D04DE2DF0200EB00C0DDE50E005CE37802001A0C482DE900B0D0E506CCA0E3ABB1A0E11CCBA0E10DB0A0E13ACD8CE20C"
 	strings:
@@ -271,7 +256,7 @@ rule arm_nrv2b_v395
 	meta:
 		tool = "P"
 		name = "UPX"
-		version = "v395"
+		version = "3.95 [NRV2B]"
 		source = "Made by Jan Neduchal"
 		pattern = "18D04DE29E0000EB001081E03E402DE90050E0E30241A0E31D0000EA"
 	strings:
@@ -286,7 +271,7 @@ rule arm_nrv2d_v395
 	meta:
 		tool = "P"
 		name = "UPX"
-		version = "v395"
+		version = "3.95 [NRV2D]"
 		source = "Made by Jan Neduchal"
 		pattern = "18D04DE2AD0000EBFC402DE9007081E00050E0E30241A0E3140000EA1800BDE8070040E0032042E0002084E50040A0E103"
 	strings:
@@ -301,7 +286,7 @@ rule arm_nrv2e_v395
 	meta:
 		tool = "P"
 		name = "UPX"
-		version = "v395"
+		version = "3.95 [NRV2E]"
 		source = "Made by Jan Neduchal"
 		pattern = "18D04DE2B20000EBFC402DE9007081E00050E0E30241A0E3140000EA1800BDE8070040E0032042E0002084E50040A0E103"
 	strings:
@@ -316,7 +301,7 @@ rule armBe_lzma_v395
 	meta:
 		tool = "P"
 		name = "UPX"
-		version = "v395"
+		version = "3.95 [LZMA]"
 		source = "Made by Jan Neduchal"
 		pattern = "E24DD018EB0002D8E5DDC000E35C000E1A000274E92D480CE5D0B000E3A0CC06E1A0B1ABE1A0CB1CE1A0B00DE28CCD3AE0"
 	strings:
@@ -331,7 +316,7 @@ rule armBe_nrv2b_v395
 	meta:
 		tool = "P"
 		name = "UPX"
-		version = "v395"
+		version = "3.95 [NRV2B]"
 		source = "Made by Jan Neduchal"
 		pattern = "E24DD018EB000097E0811000E92D403EE3E05000E3A04102EA000019"
 	strings:
@@ -346,7 +331,7 @@ rule armBe_nrv2d_v395
 	meta:
 		tool = "P"
 		name = "UPX"
-		version = "v395"
+		version = "3.95 [NRV2D]"
 		source = "Made by Jan Neduchal"
 		pattern = "E24DD018EB0000A6E92D40FCE0817000E3E05000E3A04102EA000010E8BD0018E0400007E0422003E5842000E1A04000E1"
 	strings:
@@ -361,7 +346,7 @@ rule armBe_nrv2e_v395
 	meta:
 		tool = "P"
 		name = "UPX"
-		version = "v395"
+		version = "3.95 [NRV2E]"
 		source = "Made by Jan Neduchal"
 		pattern = "E24DD018EB0000ABE92D40FCE0817000E3E05000E3A04102EA000010E8BD0018E0400007E0422003E5842000E1A04000E1"
 	strings:
@@ -376,7 +361,7 @@ rule arm_lzma_v396
 	meta:
 		tool = "P"
 		name = "UPX"
-		version = "v396"
+		version = "3.96 [LZMA]"
 		source = "Made by Jan Neduchal"
 		pattern = "18D04DE2E60200EB00C0DDE50E005CE37802001A0C482DE900B0D0E506CCA0E3ABB1A0E11CCBA0E10DB0A0E13ACD8CE20C"
 	strings:
@@ -391,7 +376,7 @@ rule arm_nrv2b_v396
 	meta:
 		tool = "P"
 		name = "UPX"
-		version = "v396"
+		version = "3.96 [NRV2B]"
 		source = "Made by Jan Neduchal"
 		pattern = "18D04DE2A50000EB001081E03E402DE90050E0E30241A0E31D0000EA"
 	strings:
@@ -406,7 +391,7 @@ rule arm_nrv2d_v396
 	meta:
 		tool = "P"
 		name = "UPX"
-		version = "v396"
+		version = "3.96 [NRV2D]"
 		source = "Made by Jan Neduchal"
 		pattern = "18D04DE2B40000EBFC402DE9007081E00050E0E30241A0E3140000EA1800BDE8070040E0032042E0002084E50040A0E103"
 	strings:
@@ -421,7 +406,7 @@ rule arm_nrv2e_v396
 	meta:
 		tool = "P"
 		name = "UPX"
-		version = "v396"
+		version = "3.96 [NRV2E]"
 		source = "Made by Jan Neduchal"
 		pattern = "18D04DE2B90000EBFC402DE9007081E00050E0E30241A0E3140000EA1800BDE8070040E0032042E0002084E50040A0E103"
 	strings:
@@ -436,7 +421,7 @@ rule armBe_lzma_v396
 	meta:
 		tool = "P"
 		name = "UPX"
-		version = "v396"
+		version = "3.96 [LZMA]"
 		source = "Made by Jan Neduchal"
 		pattern = "E24DD018EB0002DDE5DDC000E35C000E1A000274E92D480CE5D0B000E3A0CC06E1A0B1ABE1A0CB1CE1A0B00DE28CCD3AE0"
 	strings:
@@ -451,7 +436,7 @@ rule armBe_nrv2b_v396
 	meta:
 		tool = "P"
 		name = "UPX"
-		version = "v396"
+		version = "3.96 [NRV2B]"
 		source = "Made by Jan Neduchal"
 		pattern = "E24DD018EB00009CE0811000E92D403EE3E05000E3A04102EA000019"
 	strings:
@@ -466,7 +451,7 @@ rule armBe_nrv2d_v396
 	meta:
 		tool = "P"
 		name = "UPX"
-		version = "v396"
+		version = "3.96 [NRV2D]"
 		source = "Made by Jan Neduchal"
 		pattern = "E24DD018EB0000ABE92D40FCE0817000E3E05000E3A04102EA000010E8BD0018E0400007E0422003E5842000E1A04000E1"
 	strings:
@@ -481,7 +466,7 @@ rule armBe_nrv2e_v396
 	meta:
 		tool = "P"
 		name = "UPX"
-		version = "v396"
+		version = "3.96 [NRV2E]"
 		source = "Made by Jan Neduchal"
 		pattern = "E24DD018EB0000B0E92D40FCE0817000E3E05000E3A04102EA000010E8BD0018E0400007E0422003E5842000E1A04000E1"
 	strings:

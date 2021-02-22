@@ -124,12 +124,13 @@ rule upx_394_lzma_be
 	condition:
 		$1 at elf.entry_point
 }
+
 rule powerpc_lzma_v393
 {
 	meta:
 		tool = "P"
 		name = "UPX"
-		version = "v393"
+		version = "3.93 [LZMA]"
 		source = "Made by Jan Neduchal"
 		pattern = "48??????2807000E40??????7C0802A67CC93378810600007CA72B7838A4FFFE388300029001000888030000540BE8FE54"
 	strings:
@@ -144,7 +145,7 @@ rule powerpc_nrv2b_v393
 	meta:
 		tool = "P"
 		name = "UPX"
-		version = "v393"
+		version = "3.93 [NRV2B]"
 		source = "Made by Jan Neduchal"
 		pattern = "48??????7C0029EC7DA802A62807000240??????90A600007C841A143C0080003D2080003863FFFF38A5FFFF3940FFFF48"
 	strings:
@@ -159,7 +160,7 @@ rule powerpc_nrv2d_v393
 	meta:
 		tool = "P"
 		name = "UPX"
-		version = "v393"
+		version = "3.93 [NRV2D]"
 		source = "Made by Jan Neduchal"
 		pattern = "48??????7C0029EC7DA802A62807000540??????90A600007C841A143C0080003D2080003863FFFF38A5FFFF3940FFFF48"
 	strings:
@@ -174,7 +175,7 @@ rule powerpc_nrv2e_v393
 	meta:
 		tool = "P"
 		name = "UPX"
-		version = "v393"
+		version = "3.93 [NRV2E]"
 		source = "Made by Jan Neduchal"
 		pattern = "48??????7C0029EC7DA802A62807000840??????90A600007C841A143C0080003D2080003863FFFF38A5FFFF3940FFFF48"
 	strings:
@@ -189,7 +190,7 @@ rule powerpc_lzma_v395
 	meta:
 		tool = "P"
 		name = "UPX"
-		version = "v395"
+		version = "3.95 [LZMA]"
 		source = "Made by Jan Neduchal"
 		pattern = "48??????2807000E40??????9421FFE87C0802A67CC93378810600007CA72B7838A4FFFE38830002900100088803000054"
 	strings:

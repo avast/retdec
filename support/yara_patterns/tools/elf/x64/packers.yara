@@ -91,12 +91,13 @@ rule upx_394_lzma_2
 	condition:
 		$1 at elf.entry_point
 }
+
 rule x64_lzma_v393
 {
 	meta:
 		tool = "P"
 		name = "UPX"
-		version = "v393"
+		version = "3.93 [LZMA]"
 		source = "Made by Jan Neduchal"
 		pattern = "E8????????555351524801FE5641??????0F85????????554889E5448B094989D04889F2488D7702568A07FFCA88C12407"
 	strings:
@@ -111,7 +112,7 @@ rule x64_nrv2x_v393
 	meta:
 		tool = "P"
 		name = "UPX"
-		version = "v393"
+		version = "3.93 [NRV2x]"
 		source = "Made by Jan Neduchal"
 		pattern = "E8????????555351524801FE564889FE4889D731DB31C94883CDFFE8????????01DB74??F3C38B1E4883EEFC11DB8A16F3"
 	strings:
@@ -126,7 +127,7 @@ rule x64_lzma_v395
 	meta:
 		tool = "P"
 		name = "UPX"
-		version = "v395"
+		version = "3.95 [LZMA]"
 		source = "Made by Jan Neduchal"
 		pattern = "5052E8????????555351524801FE5641??????0F85????????554889E5448B094989D04889F2488D7702568A07FFCA88C1"
 	strings:
@@ -141,7 +142,7 @@ rule x64_nrv2x_v395
 	meta:
 		tool = "P"
 		name = "UPX"
-		version = "v395"
+		version = "3.95 [NRV2x]"
 		source = "Made by Jan Neduchal"
 		pattern = "5052E8????????555351524801FE564889FE4889D731DB31C94883CDFFE8????????01DB74??F3C38B1E4883EEFC11DB8A"
 	strings:

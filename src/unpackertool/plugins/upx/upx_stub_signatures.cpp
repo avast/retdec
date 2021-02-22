@@ -2034,7 +2034,7 @@ std::vector<UpxStubData> UpxStubSignatures::allStubs =
 	{ Architecture::ARM,    Format::ELF,    &armElfNrv2dSignaturev394,     UpxStubVersion::NRV2D, 0x0,    0x170 },
 	{ Architecture::ARM,    Format::ELF,    &armElfNrv2eSignaturev394,     UpxStubVersion::NRV2E, 0x0,    0x170 },
 	// ARM Big-endian ELF
-	{ Architecture::ARM,    Format::ELF,    &armBeElfLzmaSignaturev394,    UpxStubVersion::NRV2B, 0x0,    0x180 },
+	{ Architecture::ARM,    Format::ELF,    &armBeElfLzmaSignaturev394,    UpxStubVersion::LZMA,  0x0,    0x180 },
 	{ Architecture::ARM,    Format::ELF,    &armBeElfNrv2bSignaturev393,   UpxStubVersion::NRV2B, 0x0,    0x180 },
 	{ Architecture::ARM,    Format::ELF,    &armBeElfNrv2dSignaturev393,   UpxStubVersion::NRV2D, 0x0,    0x180 },
 	{ Architecture::ARM,    Format::ELF,    &armBeElfNrv2eSignaturev393,   UpxStubVersion::NRV2E, 0x0,    0x180 },
