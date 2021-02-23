@@ -71,9 +71,9 @@ add_library(fileformat STATIC
 	file_format/pe/pe_format.cpp
 	file_format/pe/pe_dll_list.cpp
 	file_format/pe/authenticode/authenticode.cpp
-	file_format/pe/authenticode/pkcs9.cpp
+	file_format/pe/authenticode/pkcs9_counter_signature.cpp
 	file_format/pe/authenticode/ms_counter_signature.cpp
-	file_format/pe/authenticode/pkcs7.cpp
+	file_format/pe/authenticode/pkcs7_signature.cpp
 	file_format/pe/authenticode/x509_certificate.cpp
 	file_format/pe/authenticode/helper.cpp
 	file_format/pe/authenticode/authenticode_structs.cpp

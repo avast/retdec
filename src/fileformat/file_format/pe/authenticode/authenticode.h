@@ -9,7 +9,7 @@
 #include "retdec/fileformat/types/certificate_table/certificate_table.h"
 
 #include "authenticode_structs.h"
-#include "pkcs7.h"
+#include "pkcs7_signature.h"
 
 #include <openssl/bn.h>
 #include <openssl/bio.h>
@@ -34,7 +34,7 @@ namespace authenticode {
 class Authenticode
 {
 private:
-	Pkcs7 pkcs7;
+	Pkcs7Signature pkcs7;
 
 public:
 	Authenticode(std::vector<unsigned char> data);
