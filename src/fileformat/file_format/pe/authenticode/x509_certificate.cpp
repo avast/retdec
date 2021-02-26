@@ -18,26 +18,12 @@
 
 namespace authenticode {
 
-X509Certificate::X509Certificate(X509* cert)
-{
-	this->cert = cert;
-}
-
-std::string X509Certificate::getX509Name(X509_NAME* name) const
-{
-	BIO* bio = BIO_new(BIO_s_mem());
-	X509_NAME_print_ex(bio, name, 0, XN_FLAG_RFC2253);
-	auto str_size = BIO_number_written(bio);
-
-	std::string result(str_size, '\0');
-	BIO_read(bio, (void*)result.data(), result.size());
-	BIO_free_all(bio);
-	return result;
-}
+X509Certificate::X509Certificate(const X509* cert)
+	: cert(cert) {}
 
 std::string X509Certificate::getSerialNumber() const
 {
-	ASN1_INTEGER* serial_number_asn1 = X509_get_serialNumber(cert);
+	ASN1_INTEGER* serial_number_asn1 = X509_get_serialNumber(const_cast<X509*>(cert));
 	BIGNUM* bignum = ASN1_INTEGER_to_BN(serial_number_asn1, nullptr);
 
 	BIO* bio = BIO_new(BIO_s_mem());
@@ -72,17 +58,12 @@ std::string X509Certificate::getValidUntil() const
 std::string X509Certificate::getPem() const
 {
 	BIO* bio = BIO_new(BIO_s_mem());
-	PEM_write_bio_X509(bio, cert);
+	PEM_write_bio_X509(bio, const_cast<X509*>(cert));
 	auto data_len = BIO_number_written(bio);
 
 	std::vector<char> result(data_len);
 	BIO_read(bio, static_cast<void*>(result.data()), data_len);
 	return { result.begin(), result.end() };
-}
-
-X509* X509Certificate::getX509() const
-{
-	return cert;
 }
 
 Certificate::Attributes parseAttributes(X509_NAME* raw)
@@ -168,7 +149,7 @@ std::string X509Certificate::getSha1() const
 	std::uint8_t sha1_bytes[sha1_length];
 
 	std::uint8_t* data = nullptr;
-	int len = i2d_X509(cert, &data);
+	int len = i2d_X509(const_cast<X509*>(cert), &data);
 
 	const EVP_MD* md = EVP_sha1();
 	calculateDigest(md, data, len, sha1_bytes);
@@ -182,7 +163,7 @@ std::string X509Certificate::getSha256() const
 	std::uint8_t sha256_bytes[sha256_length];
 
 	std::uint8_t* data = nullptr;
-	int len = i2d_X509(cert, &data);
+	int len = i2d_X509(const_cast<X509*>(cert), &data);
 
 	const EVP_MD* md = EVP_sha256();
 	calculateDigest(md, data, len, sha256_bytes);
@@ -198,12 +179,12 @@ int X509Certificate::getVersion() const
 
 std::string X509Certificate::getRawSubject() const
 {
-	return getX509Name(X509_get_subject_name(cert));
+	return X509NameToString(X509_get_subject_name(cert));
 }
 
 std::string X509Certificate::getRawIssuer() const
 {
-	return getX509Name(X509_get_issuer_name(cert));
+	return X509NameToString(X509_get_issuer_name(cert));
 }
 
 Certificate X509Certificate::createCertificate() const

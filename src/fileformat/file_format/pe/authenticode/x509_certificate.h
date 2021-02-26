@@ -31,14 +31,12 @@ namespace authenticode {
 class X509Certificate
 { /* Can't name it X509 due to the collisions with openssl*/
 private:
-	X509* cert;
-	std::string getX509Name(X509_NAME* name) const;
+	const X509* cert;
 
 public:
-	X509Certificate(X509* cert);
+	X509Certificate(const X509* cert);
 	X509Certificate() = default;
 
-	X509* getX509() const;
 	int getVersion() const;
 	std::string getValidUntil() const;
 	std::string getValidSince() const;
@@ -50,7 +48,7 @@ public:
 	std::string getPublicKeyAlgorithm() const;
 	std::string getPem() const;
 	std::string getSignature() const;
-	std::string getSha1() const; /* returns thumbprint of the complete certificate data */
+	std::string getSha1() const;
 	std::string getSha256() const;
 	Certificate::Attributes getSubject() const;
 	Certificate::Attributes getIssuer() const;
@@ -68,7 +66,7 @@ public:
 
 	CertificateProcessor();
 	~CertificateProcessor();
-	
+
 	std::vector<X509Certificate> getChain(const X509* cert, const STACK_OF(X509)* all_certs);
 };
 
