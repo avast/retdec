@@ -8,14 +8,17 @@
 
 #include "helper.h"
 
+#include <bits/stdint-uintn.h>
 #include <memory>
 #include <openssl/bio.h>
 #include <openssl/pkcs7.h>
 
 #include <cstdint>
 #include <openssl/ts.h>
+#include <openssl/x509.h>
 #include <string>
 #include <vector>
+#include <cstring>
 
 namespace authenticode {
 
@@ -24,13 +27,16 @@ class MsCounterSignature
 	std::unique_ptr<PKCS7, decltype(&PKCS7_free)> pkcs7;
 	std::unique_ptr<TS_TST_INFO, decltype(&TS_TST_INFO_free)> tstInfo;
 	std::unique_ptr<STACK_OF(X509), decltype(&sk_X509_free)> signers;
+	TS_MSG_IMPRINT* imprint;
 
 public:
 	const X509* signCert = nullptr;
 	const STACK_OF(X509)* certs = nullptr;
+
 	std::string signTime;
-	std::string digest;
-	std::vector<std::string> verify() const;
+	std::vector<std::uint8_t> messageDigest;
+
+	std::vector<std::string> verify(std::vector<std::uint8_t> sig_enc_content) const;
 	MsCounterSignature(const std::vector<std::uint8_t>& data);
 };
 

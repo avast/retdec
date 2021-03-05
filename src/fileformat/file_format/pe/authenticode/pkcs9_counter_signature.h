@@ -24,21 +24,23 @@
 #include <string>
 #include <cstdint>
 #include <ctime>
+#include <cstring>
 
 namespace authenticode {
 
 class Pkcs9CounterSignature
 {
 private:
-	const X509* signerCert;
 	std::unique_ptr<PKCS7_SIGNER_INFO, decltype(&PKCS7_SIGNER_INFO_free)> sinfo;
-	
+
 public:
-	std::string signingTime;
+	const X509* signerCert;
+
+	std::string contentType;
+	std::string signTime;
 	std::vector<std::uint8_t> messageDigest;
 	std::vector<Pkcs9CounterSignature> counterSignatures;
 
-	const X509* getX509() const;
 	std::vector<std::string> verify(std::vector<uint8_t> sig_enc_content) const;
 	Pkcs9CounterSignature(std::vector<std::uint8_t>& data, const STACK_OF(X509)* certificates);
 };

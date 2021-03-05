@@ -23,9 +23,10 @@ struct Signer
 	construct arbitrarily long series of countersignatures.""
 	https://tools.ietf.org/html/rfc2985
 	*/
-	std::vector<Signer> counterSigners;
 	std::string signingTime; /* Timestamp counter signatures will have this set */
 	std::string digest;
+	std::vector<std::string> warnings; /* warning messages about the content validity */
+	std::vector<Signer> counterSigners;
 };
 
 /* naming - "Signature" was already taken by unpackers */

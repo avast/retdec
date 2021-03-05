@@ -276,7 +276,8 @@ void Pkcs7Signature::SignerInfo::parseUnauthAttrs(const PKCS7_SIGNER_INFO* si_in
 	}
 }
 
-const PKCS7_SIGNER_INFO* Pkcs7Signature::SignerInfo::getSignerInfo() const {
+const PKCS7_SIGNER_INFO* Pkcs7Signature::SignerInfo::getSignerInfo() const
+{
 	return sinfo;
 }
 
@@ -313,11 +314,11 @@ std::vector<std::string> Pkcs7Signature::verify() const
 		- [x] contentInfo contains PE hash, hashing algorithm and SpcIndirectDataOid
 		- [x] SignerInfo contains signer cert
 		- [x] Authenticated attributes contains all the necessary information:
-		  [x]- ContentType with PKCS9 MessageDigest OID value
-		  [x]- MessageDigest contains correct hash value of PKCS7 SignedData
-		  [x]- SpcSpOpusInfo 
+		- [x] ContentType with PKCS9 MessageDigest OID value
+		- [x] MessageDigest contains correct hash value of PKCS7 SignedData
+		- [x] SpcSpOpusInfo 
 		- [x] Decrypted encryptedDigest math calculated hash of authenticated attributes
-		- verify counter signaturesd
+		- [x] verify counter signatures
 	*/
 	std::vector<std::string> warnings;
 
@@ -394,6 +395,8 @@ std::vector<std::string> Pkcs7Signature::verify() const
 			if (!isSigValid) {
 				warnings.emplace_back("Signature isn't valid");
 			}
+
+			BIO_free_all(p7bio);
 		}
 	}
 	else {
@@ -405,7 +408,7 @@ std::vector<std::string> Pkcs7Signature::verify() const
 		counterSig.verify(signerInfo->encryptDigest);
 	}
 	for (auto&& msCounterSig : signerInfo->msSignatures) {
-		msCounterSig.verify();
+		msCounterSig.verify(signerInfo->encryptDigest);
 	}
 	return warnings;
 }
@@ -413,16 +416,13 @@ std::vector<std::string> Pkcs7Signature::verify() const
 std::vector<DigitalSignature> Pkcs7Signature::getSignatures() const
 {
 	std::vector<DigitalSignature> signatures;
-	
+
 	CertificateProcessor processor;
 
-	auto warnings = verify();
-
-	DigitalSignature signature{
-		.signedDigest = contentInfo->digest,
-		.digestAlgorithm = OBJ_nid2ln(contentInfo->digestAlgorithm),
-		.warnings = warnings
-	};
+	DigitalSignature signature;
+	signature.signedDigest = contentInfo->digest;
+	signature.digestAlgorithm = OBJ_nid2ln(contentInfo->digestAlgorithm);
+	signature.warnings = verify();
 
 	/* No signer would mean, we have pretty much nothing */
 	if (!signerInfo.has_value()) {
@@ -445,19 +445,29 @@ std::vector<DigitalSignature> Pkcs7Signature::getSignatures() const
 
 	for (auto&& counterSig : signInfo.counterSignatures) {
 		CertificateProcessor processor;
-		auto certChain = processor.getChain(counterSig.getX509(), certs);
+		auto certChain = processor.getChain(counterSig.signerCert, certs);
 		auto fileformatCertChain = convertToFileformatCertChain(certChain);
 
 		signature.signers[0].counterSigners.push_back(
-				Signer{ .chain = fileformatCertChain, .signingTime = counterSig.signingTime, .digest = bytesToHexString(counterSig.messageDigest.data(), counterSig.messageDigest.size()) });
+				Signer{
+						.chain = fileformatCertChain,
+						.signingTime = counterSig.signTime,
+						.digest = bytesToHexString(counterSig.messageDigest.data(), counterSig.messageDigest.size()),
+						.warnings = counterSig.verify(signerInfo->encryptDigest),
+						.counterSigners = std::vector<Signer>() });
 	}
-	for (auto&& msCounterSig : signInfo.msSignatures) {
+	for (auto&& counterSig : signInfo.msSignatures) {
 		CertificateProcessor processor;
-		auto certChain = processor.getChain(msCounterSig.signCert, msCounterSig.certs);
+		auto certChain = processor.getChain(counterSig.signCert, counterSig.certs);
 		auto fileformatCertChain = convertToFileformatCertChain(certChain);
 
 		signature.signers[0].counterSigners.push_back(
-				Signer{ .chain = fileformatCertChain, .signingTime = msCounterSig.signTime, .digest = msCounterSig.digest });
+				Signer{
+						.chain = fileformatCertChain,
+						.signingTime = counterSig.signTime,
+						.digest = bytesToHexString(counterSig.messageDigest.data(), counterSig.messageDigest.size()),
+						.warnings = counterSig.verify(signerInfo->encryptDigest),
+						.counterSigners = std::vector<Signer>() });
 	}
 
 	signatures.push_back(signature);

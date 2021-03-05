@@ -435,6 +435,12 @@ void WriteCertificateChain(JsonPresentation::Writer& writer, const std::vector<C
 void WriteSigner(JsonPresentation::Writer& writer, const Signer& signer)
 {
 	writer.StartObject();
+	writer.String("warnings");
+	writer.StartArray();
+	for (auto&& warn : signer.warnings) {
+		writer.String(warn);
+	}
+	writer.EndArray();
 	serializeString(writer, "signTime", signer.signingTime);
 	serializeString(writer, "digest", signer.digest);
 	WriteCertificateChain(writer, signer.chain);

@@ -5,19 +5,6 @@
  */
 
 #include "pkcs9_counter_signature.h"
-#include "helper.h"
-#include "x509_certificate.h"
-#include <bits/stdint-uintn.h>
-#include <cstdint>
-#include <cstring>
-#include <openssl/evp.h>
-#include <openssl/objects.h>
-#include <openssl/ossl_typ.h>
-#include <openssl/pkcs7.h>
-#include <openssl/ts.h>
-#include <openssl/x509.h>
-#include <stdexcept>
-
 namespace authenticode {
 
 /* PKCS7 stores all certificates for the signer and counter signers, we need to pass the certs */
@@ -59,12 +46,12 @@ Pkcs9CounterSignature::Pkcs9CounterSignature(std::vector<std::uint8_t>& data, co
 			counterSignatures.emplace_back(data, certificates);
 		}
 		else if (OBJ_obj2nid(attribute_object) == NID_pkcs9_contentType) {
-			continue;
+			contentType = OBJ_nid2sn(NID_pkcs9_contentType);
 		}
 
 		/* Signing Time (1.2.840.113549.1.9.5) is set to the UTC time of timestamp generation time. */
 		else if (OBJ_obj2nid(attribute_object) == NID_pkcs9_signingTime) {
-			signingTime = parseDateTime(attr_type->value.utctime);
+			signTime = parseDateTime(attr_type->value.utctime);
 		}
 		/* 
 			Message Digest (1.2.840.113549.1.9.4) is set to the hash value of the SignerInfo structure's
@@ -80,7 +67,8 @@ Pkcs9CounterSignature::Pkcs9CounterSignature(std::vector<std::uint8_t>& data, co
 	}
 }
 
-std::vector<std::string> Pkcs9CounterSignature::verify(std::vector<uint8_t> sig_enc_content) const {
+std::vector<std::string> Pkcs9CounterSignature::verify(std::vector<uint8_t> sig_enc_content) const
+{
 	std::vector<std::string> warnings;
 	if (!sinfo) {
 		warnings.emplace_back("Couldn't parse counter-signature.");
@@ -92,6 +80,10 @@ std::vector<std::string> Pkcs9CounterSignature::verify(std::vector<uint8_t> sig_
 		return warnings;
 	}
 
+	if (contentType.empty()) {
+		warnings.emplace_back("Missing pkcs9 contentType");
+	}
+
 	std::uint8_t* data = nullptr;
 	auto len = ASN1_item_i2d((ASN1_VALUE*)sinfo->auth_attr, &data, ASN1_ITEM_rptr(PKCS7_ATTR_VERIFY));
 
@@ -100,12 +92,12 @@ std::vector<std::string> Pkcs9CounterSignature::verify(std::vector<uint8_t> sig_
 		warnings.emplace_back("Unknown digest algorithm");
 		return warnings;
 	}
-	unsigned char digest[EVP_MAX_MD_SIZE] = { 0 };
+	std::uint8_t digest[EVP_MAX_MD_SIZE] = { 0 };
 	calculateDigest(md, data, len, digest);
+	free(data);
 
-	unsigned char* enc_data = sinfo->enc_digest->data;
+	std::uint8_t* enc_data = sinfo->enc_digest->data;
 	int enc_len = sinfo->enc_digest->length;
-
 
 	auto pkey = X509_get0_pubkey(signerCert);
 	auto ctx = EVP_PKEY_CTX_new(pkey, nullptr);
@@ -115,26 +107,28 @@ std::vector<std::string> Pkcs9CounterSignature::verify(std::vector<uint8_t> sig_
 
 	EVP_PKEY_verify_recover_init(ctx);
 	EVP_PKEY_verify_recover(ctx, dec_data.data(), &dec_len, enc_data, enc_len);
+	EVP_PKEY_CTX_free(ctx);
 
+	int md_len = EVP_MD_size(md);
 	/* compare the encrypted digest and calculated digest */
-	if (std::memcmp(digest, dec_data.data(), dec_len)) {
+	if (std::memcmp(digest, dec_data.data(), md_len)) {
 		warnings.emplace_back("Failed to verify the counter-signature");
 	}
 
-	std::memset(digest, 0, EVP_MAX_MD_SIZE);
-
 	/* compare the saved, now verified digest attribute with the signature that it counter signs */
-	calculateDigest(md, sig_enc_content.data(), sig_enc_content.size(), digest);
-	if (std::memcmp(digest, messageDigest.data(), messageDigest.size())) {
-		warnings.emplace_back("Failed to verify the counter-signature");
+	if (messageDigest.empty()) {
+		warnings.emplace_back("Message digest is missing");
+	}
+	else {
+		std::memset(digest, 0, EVP_MAX_MD_SIZE);
+
+		calculateDigest(md, sig_enc_content.data(), sig_enc_content.size(), digest);
+		if (std::memcmp(digest, messageDigest.data(), messageDigest.size())) {
+			warnings.emplace_back("Failed to verify the counter-signature");
+		}
 	}
 
 	return warnings;
-}
-
-const X509* Pkcs9CounterSignature::getX509() const
-{
-	return signerCert;
 }
 
 } // namespace authenticode
