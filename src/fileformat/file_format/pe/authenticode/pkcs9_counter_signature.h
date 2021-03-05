@@ -10,6 +10,7 @@
 #include "x509_certificate.h"
 #include "helper.h"
 
+#include <memory>
 #include <openssl/bn.h>
 #include <openssl/bio.h>
 #include <openssl/evp.h>
@@ -30,13 +31,15 @@ class Pkcs9CounterSignature
 {
 private:
 	const X509* signerCert;
+	std::unique_ptr<PKCS7_SIGNER_INFO, decltype(&PKCS7_SIGNER_INFO_free)> sinfo;
+	
 public:
-	std::vector<Pkcs9CounterSignature> counterSignatures;
 	std::string signingTime;
-	std::string digest;
+	std::vector<std::uint8_t> messageDigest;
+	std::vector<Pkcs9CounterSignature> counterSignatures;
 
 	const X509* getX509() const;
-	
+	std::vector<std::string> verify(std::vector<uint8_t> sig_enc_content) const;
 	Pkcs9CounterSignature(std::vector<std::uint8_t>& data, const STACK_OF(X509)* certificates);
 };
 

@@ -5,7 +5,15 @@
  */
 
 #include "pkcs7_signature.h"
+#include "helper.h"
 #include <algorithm>
+#include <openssl/asn1.h>
+#include <openssl/bio.h>
+#include <openssl/err.h>
+#include <openssl/objects.h>
+#include <openssl/ossl_typ.h>
+#include <openssl/pkcs7.h>
+#include <openssl/x509.h>
 #include <string>
 
 using namespace retdec::fileformat;
@@ -31,34 +39,35 @@ static std::vector<Certificate> convertToFileformatCertChain(std::vector<X509Cer
 	return fileformat_chain;
 }
 
-Pkcs7Signature::ContentInfo::ContentInfo(const PKCS7* pkcs7)
+Pkcs7Signature::ContentInfo::ContentInfo(const PKCS7* contents)
 {
 	/* SignedData contentType must be set to SPC_INDIRECT_DATA_OBJID (1.3.6.1.4.1.311.2.1.4) */
-	if (OBJ_obj2nid(pkcs7->d.sign->contents->type) != NID_spc_indirect_data) {
-		warnings.emplace_back("Invalid Authenticode contentInfo type, expected SpcIndirectData");
+	if (!contents) {
 		return;
 	}
-	contentType = "SpcIndirectData";
 
-	size_t len = pkcs7->d.sign->contents->d.other->value.sequence->length;
-	const unsigned char* data = pkcs7->d.sign->contents->d.other->value.sequence->data;
+	contentType = OBJ_obj2nid(contents->type);
+
+	if (contentType != NID_spc_indirect_data) {
+		return;
+	}
+
+	size_t len = contents->d.other->value.sequence->length;
+	const unsigned char* data = contents->d.other->value.sequence->data;
 
 	auto* spcContent = SpcIndirectDataContent_new();
 	if (!spcContent) {
-		warnings.emplace_back("Couldn't allocate SpcIndirectDataContent object");
 		return;
 	}
 
 	d2i_SpcIndirectDataContent(&spcContent, &data, len);
-
 	if (!spcContent) {
-		warnings.emplace_back("Couldn't parse the ContentInfo");
 		return;
 	}
 
 	digest = bytesToHexString(spcContent->messageDigest->digest->data, spcContent->messageDigest->digest->length);
 
-	digestAlgorithm = asn1ToAlgorithm(spcContent->messageDigest->digestAlgorithm->algorithm);
+	digestAlgorithm = OBJ_obj2nid(spcContent->messageDigest->digestAlgorithm->algorithm);
 
 	SpcIndirectDataContent_free(spcContent);
 }
@@ -100,34 +109,25 @@ Pkcs7Signature::Pkcs7Signature(const std::vector<unsigned char>& input) noexcept
 	pkcs7.reset(getPkcs7(input));
 
 	if (!pkcs7) {
-		warnings.emplace_back("Couldn't parse the data as PKCS#7");
 		return;
 	}
 
 	/* Authenticode uses SignedData Pkcs7 type, check if that complies */
 	if (!PKCS7_type_is_signed(pkcs7)) {
-		warnings.emplace_back("Invalid PKCS#7 type, expected SignedData");
 		return;
 	}
 
 	STACK_OF(X509_ALGOR)* algos = pkcs7->d.sign->md_algs;
 	/* Must be exactly 1 signer and for each signer there is one algorithm */
-	if (sk_X509_ALGOR_num(algos) != 1) {
-		warnings.emplace_back("Invalid number of DigestAlgorithmIdentifiers: " + std::to_string(sk_X509_ALGOR_num(algos)) + " - should be 1.");
-	}
-	else {
-		X509_ALGOR* contentAlgo = sk_X509_ALGOR_value(algos, 0);
-		contentDigestAlgorithm = asn1ToAlgorithm(contentAlgo->algorithm);
+	int alg_count = sk_X509_ALGOR_num(algos);
+	for (int i = 0; i < alg_count; i++) {
+		contentDigestAlgorithms.emplace_back(OBJ_obj2nid(sk_X509_ALGOR_value(algos, i)->algorithm));
 	}
 
 	/* Parse the content info */
-	contentInfo = ContentInfo(pkcs7.get());
+	contentInfo.emplace(pkcs7->d.sign->contents);
 
 	ASN1_INTEGER_get_uint64(&version, pkcs7->d.sign->version);
-	/* Version has to be equal to 1 */
-	if (version != 1) {
-		warnings.emplace_back("Invalid Pkcs7 version: " + std::to_string(version) + " - should be 1.");
-	}
 
 	/* Parse the certificate data into internal structures */
 	const STACK_OF(X509)* certs = pkcs7->d.sign->cert;
@@ -139,21 +139,13 @@ Pkcs7Signature::Pkcs7Signature(const std::vector<unsigned char>& input) noexcept
 	}
 
 	STACK_OF(PKCS7_SIGNER_INFO)* signer_infos = PKCS7_get_signer_info(pkcs7.get());
-	if (!signer_infos) {
-		warnings.emplace_back("Couldn't parse signers");
-		return;
+	if (signer_infos && sk_PKCS7_SIGNER_INFO_num(signer_infos) > 0) {
+		signerInfo.emplace(pkcs7.get(), sk_PKCS7_SIGNER_INFO_value(signer_infos, 0), certs);
 	}
-
-	if (sk_PKCS7_SIGNER_INFO_num(signer_infos) != 1) {
-		warnings.emplace_back("Invalid number of Signers - Authenticode supports single Signer");
-		return;
-	}
-
-	signerInfo.emplace(pkcs7.get(), sk_PKCS7_SIGNER_INFO_value(signer_infos, 0), certs);
 }
 
 Pkcs7Signature::SignerInfo::SignerInfo(const PKCS7* pkcs7, const PKCS7_SIGNER_INFO* si_info, const STACK_OF(X509)* raw_certs)
-	: raw_signers(nullptr, sk_X509_free)
+	: raw_signers(nullptr, sk_X509_free), sinfo(si_info)
 {
 	/*
 	SignerInfo ::= SEQUENCE {
@@ -180,17 +172,14 @@ Pkcs7Signature::SignerInfo::SignerInfo(const PKCS7* pkcs7, const PKCS7_SIGNER_IN
 	X509_ALGOR* digestAlgo = si_info->digest_alg;
 	X509_ALGOR* digestEncryptAlgo = si_info->digest_enc_alg;
 
-	digestAlgorithm = asn1ToAlgorithm(digestAlgo->algorithm);
-	digestEncryptAlgorithm = asn1ToAlgorithm(digestEncryptAlgo->algorithm);
+	digestAlgorithm = OBJ_obj2nid(digestAlgo->algorithm);
+	digestEncryptAlgorithm = OBJ_obj2nid(digestEncryptAlgo->algorithm);
 
 	encryptDigest = std::vector<std::uint8_t>(si_info->enc_digest->data,
 			si_info->enc_digest->data + si_info->enc_digest->length);
 
 	ASN1_INTEGER_get_uint64(&version, si_info->version);
 	/* Version has to be equal to 1 */
-	if (version != 1) {
-		warnings.emplace_back("Invalid Pkcs7 version: " + std::to_string(version) + " - should be 1.");
-	}
 
 	serial = serialToString(si_info->issuer_and_serial->serial);
 	issuer = X509NameToString(si_info->issuer_and_serial->issuer);
@@ -202,8 +191,6 @@ Pkcs7Signature::SignerInfo::SignerInfo(const PKCS7* pkcs7, const PKCS7_SIGNER_IN
 	raw_signers.reset(PKCS7_get0_signers(const_cast<PKCS7*>(pkcs7), const_cast<STACK_OF(X509)*>(raw_certs), 0));
 
 	if (!raw_signers) {
-		/* don't know how this could happen, but just to be sure */
-		warnings.emplace_back("Couldn't find signer certificate");
 		return;
 	}
 
@@ -211,13 +198,11 @@ Pkcs7Signature::SignerInfo::SignerInfo(const PKCS7* pkcs7, const PKCS7_SIGNER_IN
 	/* This by logic shouldn't happen as above we established there is single SignerInfo,
 	   but I am not completely sure so I'll keep it here for a while */
 	if (signers_count != 1) {
-		warnings.emplace_back("Invalid number of Signers: " + std::to_string(signers_count) + " - Authenticode supports single Signer");
 		return;
 	}
 
 	signerCert = sk_X509_value(raw_signers.get(), 0);
 	if (!signerCert) {
-		warnings.emplace_back("Couldn't find signer certificate");
 		return;
 	}
 }
@@ -254,7 +239,7 @@ void Pkcs7Signature::SignerInfo::parseAuthAttrs(const PKCS7_SIGNER_INFO* si_info
 			    moreInfo    [1] EXPLICIT SpcLink OPTIONAL,
 		    } --#public--
 			*/
-			// spcInfo = SpcSpOpusInfo((const unsigned char*)attr_type->value.sequence->data, attr_type->value.sequence->length);
+			spcInfo = SpcSpOpusInfo((const unsigned char*)attr_type->value.sequence->data, attr_type->value.sequence->length);
 		}
 	}
 }
@@ -291,6 +276,10 @@ void Pkcs7Signature::SignerInfo::parseUnauthAttrs(const PKCS7_SIGNER_INFO* si_in
 	}
 }
 
+const PKCS7_SIGNER_INFO* Pkcs7Signature::SignerInfo::getSignerInfo() const {
+	return sinfo;
+}
+
 Pkcs7Signature::SpcSpOpusInfo::SpcSpOpusInfo(const unsigned char* data, int len) noexcept
 {
 	// TODO
@@ -301,6 +290,9 @@ Pkcs7Signature::SpcSpOpusInfo::SpcSpOpusInfo(const unsigned char* data, int len)
 	} --#public--
 	*/
 	::SpcSpOpusInfo* spcInfo = SpcSpOpusInfo_new();
+	if (!spcInfo) {
+		return;
+	}
 	d2i_SpcSpOpusInfo(&spcInfo, &data, len);
 	SpcSpOpusInfo_free(spcInfo);
 }
@@ -312,29 +304,123 @@ const X509* Pkcs7Signature::SignerInfo::getSignerCert() const
 
 /* verifies if signature complies with specification rules,
    for each broken rule, create a message in this->warnings */
-void Pkcs7Signature::verify()
+std::vector<std::string> Pkcs7Signature::verify() const
 {
-	/* verify things that don't belong to the parsing process  
-		- SignedData and SignerInfo digestAlgorithm match
-		- Authenticated attributes contains all the necessary information
-		- authAtrributes contains:
-			- ContentType with PKCS9 MessageDigest OID value
-			- MessageDigest contains correct hash value of PKCS7 SignedData
-			- SpcSpOpusInfo 
-		- Decrypted encryptedDigest math calculated hash of authenticated attributes
+	/* Check if signature is correctly parsed and complies with the spec:
+		- [x] Version is equal to 1
+		- [x] contentDigestAlgorithms contain single algorithm
+		- [x] SignedData and SignerInfo digestAlgorithm match
+		- [x] contentInfo contains PE hash, hashing algorithm and SpcIndirectDataOid
+		- [x] SignerInfo contains signer cert
+		- [x] Authenticated attributes contains all the necessary information:
+		  [x]- ContentType with PKCS9 MessageDigest OID value
+		  [x]- MessageDigest contains correct hash value of PKCS7 SignedData
+		  [x]- SpcSpOpusInfo 
+		- [x] Decrypted encryptedDigest math calculated hash of authenticated attributes
+		- verify counter signaturesd
 	*/
-	return;
+	std::vector<std::string> warnings;
+
+	/* Verification of the signature SignedData contents */
+	if (!pkcs7) { // no sense to continue
+		warnings.emplace_back("Couldn't parse the Pkcs7 signature.");
+		return warnings;
+	}
+
+	if (!PKCS7_type_is_signed(pkcs7)) {
+		warnings.emplace_back("Invalid PKCS#7 type, expected SignedData.");
+	}
+
+	if (version != 1) {
+		warnings.emplace_back("Signature version is: " + std::to_string(version) + ", expected 1.");
+	}
+
+	if (contentDigestAlgorithms.size() != 1) {
+		warnings.emplace_back("Invalid number of DigestAlgorithmIdentifiers: " + std::to_string(contentDigestAlgorithms.size()) + " - expected 1.");
+	}
+
+	if (contentInfo) {
+		if (contentInfo->contentType != NID_spc_indirect_data) {
+			warnings.emplace_back("Wrong contentInfo contentType.");
+		}
+		else if (contentInfo->digest.empty()) {
+			warnings.emplace_back("File digest is missing.");
+		}
+	}
+	else {
+		warnings.emplace_back("Couldn't get contentInfo.");
+	}
+
+	if (signerInfo) {
+		if (!signerInfo->getSignerCert()) {
+			warnings.emplace_back("Signing cert is missing.");
+		}
+		if (signerInfo->version != 1) {
+			warnings.emplace_back("SignerInfo version is: " + std::to_string(signerInfo->version) + ", expected 1.");
+		}
+		if (contentDigestAlgorithms.size() > 0 && signerInfo->digestAlgorithm != contentDigestAlgorithms[0]) {
+			warnings.emplace_back("SignedData digest algorithm and signerInfo digest algorithm don't match.");
+		}
+		if (signerInfo->encryptDigest.empty()) {
+			warnings.emplace_back("Encrypted digest is empty");
+		}
+
+		// verify auth attrs existence
+		if (!signerInfo->spcInfo) {
+			warnings.emplace_back("Couldn't get SpcSpOpusInfo.");
+		}
+		if (signerInfo->messageDigest.empty()) {
+			warnings.emplace_back("Couldn't get SignerInfo message digest");
+		}
+		if (signerInfo->contentType.empty()) {
+			warnings.emplace_back("Missing correct SignerInfo contentType");
+		}
+		if (!signerInfo->encryptDigest.empty() && signerInfo->getSignerCert()) {
+			/* Verify the signer hash and it's encryptedDigest */
+			const auto* data_ptr = pkcs7->d.sign->contents->d.other->value.sequence->data;
+			long data_len = pkcs7->d.sign->contents->d.other->value.sequence->length;
+			if (version == 1) {
+				int pclass = 0, ptag = 0;
+				ASN1_get_object(&data_ptr, &data_len, &ptag, &pclass, data_len);
+			}
+
+			BIO* content_bio = BIO_new_mem_buf(data_ptr, data_len);
+			BIO* p7bio = PKCS7_dataInit(pkcs7.get(), content_bio);
+
+			char tmp[4096];
+			while (BIO_read(p7bio, tmp, sizeof(tmp)) > 0) {}
+
+			bool isSigValid = PKCS7_signatureVerify(p7bio, pkcs7.get(), const_cast<PKCS7_SIGNER_INFO*>(signerInfo->getSignerInfo()), const_cast<X509*>(signerInfo->getSignerCert())) == 1;
+			if (!isSigValid) {
+				warnings.emplace_back("Signature isn't valid");
+			}
+		}
+	}
+	else {
+		warnings.emplace_back("Couldn't get SignerInfo.");
+	}
+
+	// verify counter signatures
+	for (auto&& counterSig : signerInfo->counterSignatures) {
+		counterSig.verify(signerInfo->encryptDigest);
+	}
+	for (auto&& msCounterSig : signerInfo->msSignatures) {
+		msCounterSig.verify();
+	}
+	return warnings;
 }
 
 std::vector<DigitalSignature> Pkcs7Signature::getSignatures() const
 {
 	std::vector<DigitalSignature> signatures;
-
+	
 	CertificateProcessor processor;
 
+	auto warnings = verify();
+
 	DigitalSignature signature{
-		.signedDigest = contentInfo.digest,
-		.digestAlgorithm = algorithmToString(contentInfo.digestAlgorithm),
+		.signedDigest = contentInfo->digest,
+		.digestAlgorithm = OBJ_nid2ln(contentInfo->digestAlgorithm),
 		.warnings = warnings
 	};
 
@@ -351,10 +437,10 @@ std::vector<DigitalSignature> Pkcs7Signature::getSignatures() const
 	if (signer_cert) {
 		std::vector<X509Certificate> chain = processor.getChain(signer_cert, certs);
 		auto fileformat_chain = convertToFileformatCertChain(chain);
-		signature.signers.push_back(Signer{ .chain = fileformat_chain, .warnings = signInfo.warnings});
+		signature.signers.push_back(Signer{ .chain = fileformat_chain });
 	}
 	else {
-		signature.signers.push_back(Signer{.digest = signInfo.messageDigest, .warnings = signInfo.warnings});
+		signature.signers.push_back(Signer{ .digest = signInfo.messageDigest });
 	}
 
 	for (auto&& counterSig : signInfo.counterSignatures) {
@@ -363,7 +449,7 @@ std::vector<DigitalSignature> Pkcs7Signature::getSignatures() const
 		auto fileformatCertChain = convertToFileformatCertChain(certChain);
 
 		signature.signers[0].counterSigners.push_back(
-				Signer{ .chain = fileformatCertChain, .signingTime = counterSig.signingTime, .digest = counterSig.digest });
+				Signer{ .chain = fileformatCertChain, .signingTime = counterSig.signingTime, .digest = bytesToHexString(counterSig.messageDigest.data(), counterSig.messageDigest.size()) });
 	}
 	for (auto&& msCounterSig : signInfo.msSignatures) {
 		CertificateProcessor processor;
@@ -380,8 +466,6 @@ std::vector<DigitalSignature> Pkcs7Signature::getSignatures() const
 		auto nestedSigs = nestedPkcs7.getSignatures();
 		signatures.insert(signatures.end(), nestedSigs.begin(), nestedSigs.end());
 	}
-
-	signature.warnings = warnings;
 
 	return signatures;
 }

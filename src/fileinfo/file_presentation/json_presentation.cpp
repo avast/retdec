@@ -450,7 +450,12 @@ void WriteSigner(JsonPresentation::Writer& writer, const Signer& signer)
 void WriteSignature(JsonPresentation::Writer& writer, const DigitalSignature& signature)
 {
 	writer.StartObject();
-
+	writer.String("warnings");
+	writer.StartArray();
+	for (auto&& warn : signature.warnings) {
+		writer.String(warn);
+	}
+	writer.EndArray();
 	writer.String("digestAlgorithm");
 	writer.String(signature.digestAlgorithm);
 

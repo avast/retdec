@@ -25,6 +25,7 @@
 #include <openssl/x509.h>
 #include <openssl/pem.h>
 #include <openssl/pkcs7.h>
+#include <openssl/err.h>
 
 #include <array>
 #include <vector>
@@ -47,13 +48,10 @@ class Pkcs7Signature
 	class ContentInfo
 	{
 	public:
-		std::string contentType;
+		int contentType;
 		std::string digest;
-		Algorithms digestAlgorithm;
+		int digestAlgorithm;
 
-		std::vector<std::string> warnings;
-
-		ContentInfo() = default;
 		ContentInfo(const PKCS7* pkcs7);
 	};
 	class SignerInfo
@@ -64,7 +62,7 @@ class Pkcs7Signature
 
 		std::unique_ptr<STACK_OF(X509), decltype(&sk_X509_free)> raw_signers;
 		const X509* signerCert = nullptr;
-		// SpcSpOpusInfo spcInfo; /* TODO decide what to do with this information as it's only optional */
+		const PKCS7_SIGNER_INFO* sinfo = nullptr;
 	public:
 		std::uint64_t version;
 
@@ -72,19 +70,18 @@ class Pkcs7Signature
 		std::string issuer;
 		std::string contentType; /* TODO decide if we should store oid or name repre? */
 		std::string messageDigest;
+		std::optional<SpcSpOpusInfo> spcInfo;
 
-		Algorithms digestAlgorithm; /* Must be identical to SignedData::digestAlgorithm */
-		Algorithms digestEncryptAlgorithm;
+		int digestAlgorithm; /* Must be identical to SignedData::digestAlgorithm */
+		int digestEncryptAlgorithm;
 
 		std::vector<std::uint8_t> encryptDigest;
 		std::vector<Pkcs7Signature> nestedSignatures;
 		std::vector<Pkcs9CounterSignature> counterSignatures;
 		std::vector<MsCounterSignature> msSignatures;
 
-		std::vector<std::string> warnings;
-
 		const X509* getSignerCert() const;
-
+		const PKCS7_SIGNER_INFO* getSignerInfo() const;
 		auto operator=(const SignerInfo&) = delete;
 		SignerInfo(const SignerInfo&) = delete;
 
@@ -99,15 +96,14 @@ private:
 
 public:
 	std::uint64_t version;
-	ContentInfo contentInfo;
+	std::optional<ContentInfo> contentInfo;
 	std::optional<SignerInfo> signerInfo;
 
-	Algorithms contentDigestAlgorithm; // must match SignerInfo digestAlgorithm
+	std::vector<int> contentDigestAlgorithms;
 	std::vector<X509Certificate> certificates; /* typically no root certificates, timestamp may include root one */
-	std::vector<std::string> warnings;
 
 	std::vector<retdec::fileformat::DigitalSignature> getSignatures() const;
-	void verify();
+	std::vector<std::string> verify() const;
 
 	Pkcs7Signature& operator=(const Pkcs7Signature&) = delete;
 	Pkcs7Signature(const Pkcs7Signature&) = delete;

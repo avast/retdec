@@ -30,7 +30,7 @@ public:
 	const STACK_OF(X509)* certs = nullptr;
 	std::string signTime;
 	std::string digest;
-
+	std::vector<std::string> verify() const;
 	MsCounterSignature(const std::vector<std::uint8_t>& data);
 };
 

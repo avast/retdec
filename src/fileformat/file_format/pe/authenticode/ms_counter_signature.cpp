@@ -13,12 +13,12 @@ MsCounterSignature::MsCounterSignature(const std::vector<std::uint8_t>& data)
 {
 	pkcs7.reset(getPkcs7(data));
 	if (!pkcs7) {
-		throw std::runtime_error("Couldn't parse MsNestedSignature");
+		return;
 	}
 
 	tstInfo.reset(PKCS7_to_TS_TST_INFO(pkcs7.get()));
 	if (!tstInfo) {
-		throw std::runtime_error("Couldn't parse MsNestedSignature");
+		return;
 	}
 
 	const ASN1_TIME* raw_time = TS_TST_INFO_get_time(tstInfo.get());
@@ -37,6 +37,13 @@ MsCounterSignature::MsCounterSignature(const std::vector<std::uint8_t>& data)
 	TS_MSG_IMPRINT* imprint = TS_TST_INFO_get_msg_imprint(tstInfo.get());
 	ASN1_STRING* raw_digest = TS_MSG_IMPRINT_get_msg(imprint);
 	digest = bytesToHexString(raw_digest->data, raw_digest->length);
+}
+
+std::vector<std::string> MsCounterSignature::verify() const {
+	std::vector<std::string> warnings;
+
+
+	return warnings;
 }
 
 } // namespace authenticode

@@ -6,7 +6,13 @@
 
 #include "pkcs9_counter_signature.h"
 #include "helper.h"
+#include "x509_certificate.h"
+#include <bits/stdint-uintn.h>
 #include <cstdint>
+#include <cstring>
+#include <openssl/evp.h>
+#include <openssl/objects.h>
+#include <openssl/ossl_typ.h>
 #include <openssl/pkcs7.h>
 #include <openssl/ts.h>
 #include <openssl/x509.h>
@@ -16,6 +22,7 @@ namespace authenticode {
 
 /* PKCS7 stores all certificates for the signer and counter signers, we need to pass the certs */
 Pkcs9CounterSignature::Pkcs9CounterSignature(std::vector<std::uint8_t>& data, const STACK_OF(X509)* certificates)
+	: sinfo(nullptr, PKCS7_SIGNER_INFO_free)
 {
 	/*
 		counterSignature ATTRIBUTE ::= {
@@ -24,21 +31,21 @@ Pkcs9CounterSignature::Pkcs9CounterSignature(std::vector<std::uint8_t>& data, co
 		}
 	*/
 	const unsigned char* data_ptr = data.data();
-	PKCS7_SIGNER_INFO* countersignInfo = d2i_PKCS7_SIGNER_INFO(nullptr, &data_ptr, data.size());
-	if (!countersignInfo) {
-		throw std::runtime_error("SignerInfo allocation failed");
+	sinfo.reset(d2i_PKCS7_SIGNER_INFO(nullptr, &data_ptr, data.size()));
+	if (!sinfo) {
+		return;
 	}
 
 	/* get the signer certificate of this counter signatures */
 	signerCert = X509_find_by_issuer_and_serial(const_cast<STACK_OF(X509)*>(certificates),
-			countersignInfo->issuer_and_serial->issuer, countersignInfo->issuer_and_serial->serial);
+			sinfo->issuer_and_serial->issuer, sinfo->issuer_and_serial->serial);
 
 	if (!signerCert) {
-		throw std::runtime_error("Unable to find PKCS9 countersignature certificate");
+		return;
 	}
 
-	for (int i = 0; i < sk_X509_ATTRIBUTE_num(countersignInfo->auth_attr); ++i) {
-		X509_ATTRIBUTE* attribute = sk_X509_ATTRIBUTE_value(countersignInfo->auth_attr, i);
+	for (int i = 0; i < sk_X509_ATTRIBUTE_num(sinfo->auth_attr); ++i) {
+		X509_ATTRIBUTE* attribute = sk_X509_ATTRIBUTE_value(sinfo->auth_attr, i);
 		ASN1_OBJECT* attribute_object = X509_ATTRIBUTE_get0_object(attribute);
 		ASN1_TYPE* attr_type = X509_ATTRIBUTE_get0_type(attribute, 0);
 		/* 
@@ -67,11 +74,62 @@ Pkcs9CounterSignature::Pkcs9CounterSignature(std::vector<std::uint8_t>& data, co
 			MessageDigest ::= OCTET STRING
 		*/
 		else if (OBJ_obj2nid(attribute_object) == NID_pkcs9_messageDigest) {
-			digest = bytesToHexString(attr_type->value.asn1_string->data, attr_type->value.asn1_string->length);
+			messageDigest = std::vector<std::uint8_t>(attr_type->value.octet_string->data,
+					attr_type->value.octet_string->data + attr_type->value.octet_string->length);
 		}
 	}
+}
 
-	PKCS7_SIGNER_INFO_free(countersignInfo);
+std::vector<std::string> Pkcs9CounterSignature::verify(std::vector<uint8_t> sig_enc_content) const {
+	std::vector<std::string> warnings;
+	if (!sinfo) {
+		warnings.emplace_back("Couldn't parse counter-signature.");
+		return warnings;
+	}
+
+	if (!signerCert) {
+		warnings.emplace_back("No counter-signature certificate");
+		return warnings;
+	}
+
+	std::uint8_t* data = nullptr;
+	auto len = ASN1_item_i2d((ASN1_VALUE*)sinfo->auth_attr, &data, ASN1_ITEM_rptr(PKCS7_ATTR_VERIFY));
+
+	const EVP_MD* md = EVP_get_digestbyobj(sinfo->digest_alg->algorithm);
+	if (!md) {
+		warnings.emplace_back("Unknown digest algorithm");
+		return warnings;
+	}
+	unsigned char digest[EVP_MAX_MD_SIZE] = { 0 };
+	calculateDigest(md, data, len, digest);
+
+	unsigned char* enc_data = sinfo->enc_digest->data;
+	int enc_len = sinfo->enc_digest->length;
+
+
+	auto pkey = X509_get0_pubkey(signerCert);
+	auto ctx = EVP_PKEY_CTX_new(pkey, nullptr);
+
+	std::size_t dec_len = 65536;
+	std::vector<std::uint8_t> dec_data(dec_len);
+
+	EVP_PKEY_verify_recover_init(ctx);
+	EVP_PKEY_verify_recover(ctx, dec_data.data(), &dec_len, enc_data, enc_len);
+
+	/* compare the encrypted digest and calculated digest */
+	if (std::memcmp(digest, dec_data.data(), dec_len)) {
+		warnings.emplace_back("Failed to verify the counter-signature");
+	}
+
+	std::memset(digest, 0, EVP_MAX_MD_SIZE);
+
+	/* compare the saved, now verified digest attribute with the signature that it counter signs */
+	calculateDigest(md, sig_enc_content.data(), sig_enc_content.size(), digest);
+	if (std::memcmp(digest, messageDigest.data(), messageDigest.size())) {
+		warnings.emplace_back("Failed to verify the counter-signature");
+	}
+
+	return warnings;
 }
 
 const X509* Pkcs9CounterSignature::getX509() const

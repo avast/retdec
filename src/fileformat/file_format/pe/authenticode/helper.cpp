@@ -145,16 +145,12 @@ PKCS7* getPkcs7(const std::vector<unsigned char>& input)
 	if (!bio || BIO_reset(bio) != 1 ||
 			BIO_write(bio, input.data(), static_cast<int>(input.size())) != static_cast<std::int64_t>(input.size())) {
 		BIO_free(bio);
-		return NULL;
+		return nullptr;
 	}
 
 	PKCS7* pkcs7 = d2i_PKCS7_bio(bio, nullptr);
-	if (!pkcs7) {
-		BIO_free(bio);
-		return NULL;
-	}
-	BIO_free(bio);
 
+	BIO_free(bio);
 	return pkcs7;
 }
 
