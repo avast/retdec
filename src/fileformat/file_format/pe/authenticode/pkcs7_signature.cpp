@@ -434,14 +434,15 @@ std::vector<DigitalSignature> Pkcs7Signature::getSignatures() const
 	STACK_OF(X509)* certs = pkcs7->d.sign->cert;
 
 	const X509* signer_cert = signInfo.getSignerCert();
+	Signer signer = Signer();
 	if (signer_cert) {
 		std::vector<X509Certificate> chain = processor.getChain(signer_cert, certs);
 		auto fileformat_chain = convertToFileformatCertChain(chain);
-		signature.signers.push_back(Signer{ .chain = fileformat_chain });
+		signer.chain = fileformat_chain;
 	}
-	else {
-		signature.signers.push_back(Signer{ .digest = signInfo.messageDigest });
-	}
+	signer.digest = signInfo.messageDigest;
+
+	signature.signers.push_back(signer);
 
 	for (auto&& counterSig : signInfo.counterSignatures) {
 		CertificateProcessor processor;
