@@ -1,7 +1,7 @@
 /**
  * @file src/fileformat/file_format/pe/authenticode/pkcs7.cpp
  * @brief Class wrapper above openssl Pkcs7
- * @copyright (c) 2020 Avast Software, licensed under the MIT license
+ * @copyright (c) 2021 Avast Software, licensed under the MIT license
  */
 
 #include "pkcs7_signature.h"
@@ -229,8 +229,7 @@ void Pkcs7Signature::SignerInfo::parseAuthAttrs(const PKCS7_SIGNER_INFO* si_info
 			/*
 			 MessageDigest ::= OCTET STRING
 			*/
-			messageDigest = std::string(attr_type->value.asn1_string->data,
-					attr_type->value.asn1_string->data + attr_type->value.asn1_string->length);
+			messageDigest = bytesToHexString(attr_type->value.asn1_string->data,  attr_type->value.asn1_string->length);
 		}
 		else if (attr_object_nid == NID_spc_sp_opus_info_objid) {
 			/*
@@ -271,7 +270,7 @@ void Pkcs7Signature::SignerInfo::parseUnauthAttrs(const PKCS7_SIGNER_INFO* si_in
 			std::vector<std::uint8_t> countersig_data(attr_type->value.sequence->data,
 					attr_type->value.sequence->data + attr_type->value.sequence->length);
 
-			msSignatures.emplace_back(countersig_data);
+			msCounterSignatures.emplace_back(countersig_data);
 		}
 	}
 }
@@ -388,11 +387,13 @@ std::vector<std::string> Pkcs7Signature::verify() const
 			BIO* content_bio = BIO_new_mem_buf(data_ptr, data_len);
 			BIO* p7bio = PKCS7_dataInit(pkcs7.get(), content_bio);
 
-			char tmp[4096];
-			while (BIO_read(p7bio, tmp, sizeof(tmp)) > 0) {}
+			char buf[4096];
+			/* We now have to 'read' from p7bio to calculate digests etc. */
+			while (BIO_read(p7bio, buf, sizeof(buf)) > 0)
+				continue;
 
-			bool isSigValid = PKCS7_signatureVerify(p7bio, pkcs7.get(), const_cast<PKCS7_SIGNER_INFO*>(signerInfo->getSignerInfo()), const_cast<X509*>(signerInfo->getSignerCert())) == 1;
-			if (!isSigValid) {
+			bool is_valid = PKCS7_signatureVerify(p7bio, pkcs7.get(), const_cast<PKCS7_SIGNER_INFO*>(signerInfo->getSignerInfo()), const_cast<X509*>(signerInfo->getSignerCert())) == 1;
+			if (!is_valid) {
 				warnings.emplace_back("Signature isn't valid");
 			}
 
@@ -403,13 +404,6 @@ std::vector<std::string> Pkcs7Signature::verify() const
 		warnings.emplace_back("Couldn't get SignerInfo.");
 	}
 
-	// verify counter signatures
-	for (auto&& counterSig : signerInfo->counterSignatures) {
-		counterSig.verify(signerInfo->encryptDigest);
-	}
-	for (auto&& msCounterSig : signerInfo->msSignatures) {
-		msCounterSig.verify(signerInfo->encryptDigest);
-	}
 	return warnings;
 }
 
@@ -423,6 +417,7 @@ std::vector<DigitalSignature> Pkcs7Signature::getSignatures() const
 	signature.signedDigest = contentInfo->digest;
 	signature.digestAlgorithm = OBJ_nid2ln(contentInfo->digestAlgorithm);
 	signature.warnings = verify();
+	signature.certificates = getCertificates();
 
 	/* No signer would mean, we have pretty much nothing */
 	if (!signerInfo.has_value()) {
@@ -453,11 +448,12 @@ std::vector<DigitalSignature> Pkcs7Signature::getSignatures() const
 				Signer{
 						.chain = fileformatCertChain,
 						.signingTime = counterSig.signTime,
-						.digest = bytesToHexString(counterSig.messageDigest.data(), counterSig.messageDigest.size()),
+						.digest = bytesToHexString(counterSig.messageDigest.data(),
+								counterSig.messageDigest.size()),
 						.warnings = counterSig.verify(signerInfo->encryptDigest),
 						.counterSigners = std::vector<Signer>() });
 	}
-	for (auto&& counterSig : signInfo.msSignatures) {
+	for (auto&& counterSig : signInfo.msCounterSignatures) {
 		CertificateProcessor processor;
 		auto certChain = processor.getChain(counterSig.signCert, counterSig.certs);
 		auto fileformatCertChain = convertToFileformatCertChain(certChain);
@@ -466,8 +462,9 @@ std::vector<DigitalSignature> Pkcs7Signature::getSignatures() const
 				Signer{
 						.chain = fileformatCertChain,
 						.signingTime = counterSig.signTime,
-						.digest = bytesToHexString(counterSig.messageDigest.data(), counterSig.messageDigest.size()),
-						.warnings = counterSig.verify(signerInfo->encryptDigest),
+						.digest = bytesToHexString(counterSig.messageDigest.data(),
+								counterSig.messageDigest.size()),
+						.warnings = counterSig.verify(processor, signerInfo->encryptDigest),
 						.counterSigners = std::vector<Signer>() });
 	}
 
@@ -479,5 +476,23 @@ std::vector<DigitalSignature> Pkcs7Signature::getSignatures() const
 	}
 
 	return signatures;
+}
+
+std::vector<Certificate> Pkcs7Signature::getCertificates() const {
+	std::vector<X509Certificate> all_x509certs = certificates;
+
+	if (!signerInfo.has_value()) {
+		return convertToFileformatCertChain(all_x509certs);
+	}
+
+	// ms counter signatures have their own collection, add them
+	for (auto&& counterSig : signerInfo->msCounterSignatures) {
+		int cert_count = sk_X509_num(counterSig.certs);
+		for (int i = 0; i < cert_count; i++) {
+			all_x509certs.emplace_back(sk_X509_value(counterSig.certs, i));
+		}
+	}
+
+	return convertToFileformatCertChain(all_x509certs);
 }
 } // namespace authenticode

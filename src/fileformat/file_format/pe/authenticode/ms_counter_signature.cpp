@@ -1,11 +1,15 @@
 /**
  * @file src/fileformat/file_format/pe/authenticode/ms_nested_signature.cpp
  * @brief Representation of MsCounterSignature
- * @copyright (c) 2020 Avast Software, licensed under the MIT license
+ * @copyright (c) 2021 Avast Software, licensed under the MIT license
  */
 
 #include "ms_counter_signature.h"
+#include "x509_certificate.h"
+#include <openssl/bio.h>
+#include <openssl/err.h>
 #include <openssl/ossl_typ.h>
+#include <openssl/x509.h>
 #include <openssl/x509_vfy.h>
 
 namespace authenticode {
@@ -41,9 +45,16 @@ MsCounterSignature::MsCounterSignature(const std::vector<std::uint8_t>& data)
 	messageDigest = std::vector<std::uint8_t>(raw_digest->data, raw_digest->data + raw_digest->length);
 }
 
-std::vector<std::string> MsCounterSignature::verify(std::vector<std::uint8_t> sig_enc_content) const
+std::vector<std::string> MsCounterSignature::verify(
+		CertificateProcessor& processor,
+		const std::vector<std::uint8_t>& sig_enc_content) const
 {
 	std::vector<std::string> warnings;
+
+	if (!pkcs7) {
+		warnings.emplace_back("Couldn't parse signature");
+		return warnings;
+	}
 
 	X509_ALGOR* digest_algo = TS_MSG_IMPRINT_get_algo(imprint);
 	const EVP_MD* md = EVP_get_digestbyobj(digest_algo->algorithm);
@@ -54,6 +65,7 @@ std::vector<std::string> MsCounterSignature::verify(std::vector<std::uint8_t> si
 
 	if (messageDigest.empty()) {
 		warnings.emplace_back("Failed to verify the counter-signature, no message digest.");
+		return warnings;
 	}
 
 	std::uint8_t digest[EVP_MAX_MD_SIZE] = { 0 };
@@ -61,14 +73,13 @@ std::vector<std::string> MsCounterSignature::verify(std::vector<std::uint8_t> si
 
 	int md_len = EVP_MD_size(md);
 	if (std::memcmp(digest, messageDigest.data(), md_len)) {
-		warnings.emplace_back("Failed to verify the counter-signature");
+		warnings.emplace_back("Failed to verify the signature with counter-signature.");
 	}
 
 	TS_VERIFY_CTX* ctx = TS_VERIFY_CTX_new();
-	TS_VERIFY_CTX_init(ctx);
-	TS_VERIFY_CTX_set_flags(ctx, TS_VFY_SIGNATURE | TS_VFY_VERSION | TS_VFY_IMPRINT);
-
 	X509_STORE* store = X509_STORE_new();
+	TS_VERIFY_CTX_init(ctx);
+	TS_VERIFY_CTX_set_flags(ctx, TS_VFY_VERSION | TS_VFY_IMPRINT);
 	TS_VERIFY_CTX_set_store(ctx, store);
 	TS_VERIFY_CTS_set_certs(ctx, pkcs7->d.sign->cert);
 	TS_VERIFY_CTX_set_imprint(ctx, digest, md_len);
@@ -77,12 +88,37 @@ std::vector<std::string> MsCounterSignature::verify(std::vector<std::uint8_t> si
 		warnings.emplace_back("Failed to verify the counter-signature");
 	}
 
-	/* Remove these members as the free function wants to deallocate them also, better than to dup them */
+	/* VERIFY_CTX_free tries to free these, we don't want that */
 	TS_VERIFY_CTX_set_imprint(ctx, nullptr, 0);
 	TS_VERIFY_CTS_set_certs(ctx, nullptr);
 
 	TS_VERIFY_CTX_free(ctx);
 
+	/* Verify signature with PKCS7_signatureVerify
+	   because TS_RESP_verify_token tries to verify
+	   chain and without trust anchors it fails */
+	/* Verify the signer hash and it's encryptedDigest */
+	// const auto* data_ptr = pkcs7->d.sign->contents->d.other->value.sequence->data;
+	// long data_len = pkcs7->d.sign->contents->d.other->value.sequence->length;
+
+	// BIO* content_bio = BIO_new_mem_buf(data_ptr, data_len);
+	// BIO* p7bio = PKCS7_dataInit(pkcs7.get(), content_bio);
+	BIO* p7bio = PKCS7_dataInit(pkcs7.get(), NULL);
+
+	char buf[4096];
+	/* We now have to 'read' from p7bio to calculate digests etc. */
+	while (BIO_read(p7bio, buf, sizeof(buf)) > 0)
+		continue;
+
+	STACK_OF(PKCS7_SIGNER_INFO)* sinfos = PKCS7_get_signer_info(pkcs7.get());
+	PKCS7_SIGNER_INFO* si = sk_PKCS7_SIGNER_INFO_value(sinfos, 0);
+
+	is_valid = PKCS7_signatureVerify(p7bio, pkcs7.get(), si, const_cast<X509*>(signCert)) == 1;
+	if (!is_valid) {
+		warnings.emplace_back("Failed to verify the counter-signature");
+	}
+
+	BIO_free_all(p7bio);
 	return warnings;
 }
 

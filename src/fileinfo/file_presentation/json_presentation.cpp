@@ -368,44 +368,25 @@ void JsonPresentation::presentLoaderInfo(Writer& writer) const
 	writer.EndObject();
 }
 
-void WriteCertificateChain(JsonPresentation::Writer& writer, const std::vector<Certificate>& chain)
+void WriteCertificateChain(JsonPresentation::Writer& writer, const std::vector<Certificate>& certificates)
 {
-	writer.String("chain");
 	writer.StartArray();
-	for (auto&& cert : chain)
+	for (auto&& cert : certificates)
 	{
 		writer.StartObject();
-		serializeString(writer, "validSince", cert.getValidSince());
-		serializeString(writer, "validUntil", cert.getValidUntil());
-		serializeString(writer, "publicKey", cert.getPublicKey());
+		serializeString(writer, "subject", cert.getRawSubject());
+		serializeString(writer, "issuer", cert.getRawIssuer());
+		serializeString(writer, "serialNumber", cert.getSerialNumber());
 		serializeString(writer, "publicKeyAlgorithm", cert.getPublicKeyAlgorithm());
 		serializeString(writer, "signatureAlgorithm", cert.getSignatureAlgorithm());;
-		serializeString(writer, "serialNumber", cert.getSerialNumber());
-		serializeString(writer, "issuer", cert.getRawIssuer());
-		serializeString(writer, "subject", cert.getRawSubject());
+		serializeString(writer, "validSince", cert.getValidSince());
+		serializeString(writer, "validUntil", cert.getValidUntil());
 		serializeString(writer, "sha1", cert.getSha1Digest());
 		serializeString(writer, "sha256", cert.getSha256Digest());
+		serializeString(writer, "publicKey", cert.getPublicKey());
 
 		writer.String("attributes");
 		writer.StartObject();
-		writer.String("issuer");
-		writer.StartObject();
-		serializeString(writer, "country", cert.getIssuer().country);
-		serializeString(writer, "organization", cert.getIssuer().organization);
-		serializeString(writer, "organizationalUnit",  cert.getIssuer().organizationalUnit);
-		serializeString(writer, "nameQualifier",  cert.getIssuer().nameQualifier);
-		serializeString(writer, "state", cert.getIssuer().state);
-		serializeString(writer, "commonName", cert.getIssuer().commonName);
-		serializeString(writer, "serialNumber", cert.getIssuer().serialNumber);
-		serializeString(writer, "locality", cert.getIssuer().locality);
-		serializeString(writer, "title", cert.getIssuer().title);
-		serializeString(writer, "surname", cert.getIssuer().surname);
-		serializeString(writer, "givenName", cert.getIssuer().givenName);
-		serializeString(writer, "initials", cert.getIssuer().initials);
-		serializeString(writer, "pseudonym", cert.getIssuer().pseudonym);
-		serializeString(writer, "generationQualifier", cert.getIssuer().generationQualifier);
-		serializeString(writer, "emailAddress", cert.getIssuer().emailAddress);
-		writer.EndObject();
 
 		writer.String("subject");
 		writer.StartObject();
@@ -425,6 +406,26 @@ void WriteCertificateChain(JsonPresentation::Writer& writer, const std::vector<C
 		serializeString(writer, "generationQualifier", cert.getSubject().generationQualifier);
 		serializeString(writer, "emailAddress", cert.getSubject().emailAddress);
 		writer.EndObject();
+
+		writer.String("issuer");
+		writer.StartObject();
+		serializeString(writer, "country", cert.getIssuer().country);
+		serializeString(writer, "organization", cert.getIssuer().organization);
+		serializeString(writer, "organizationalUnit",  cert.getIssuer().organizationalUnit);
+		serializeString(writer, "nameQualifier",  cert.getIssuer().nameQualifier);
+		serializeString(writer, "state", cert.getIssuer().state);
+		serializeString(writer, "commonName", cert.getIssuer().commonName);
+		serializeString(writer, "serialNumber", cert.getIssuer().serialNumber);
+		serializeString(writer, "locality", cert.getIssuer().locality);
+		serializeString(writer, "title", cert.getIssuer().title);
+		serializeString(writer, "surname", cert.getIssuer().surname);
+		serializeString(writer, "givenName", cert.getIssuer().givenName);
+		serializeString(writer, "initials", cert.getIssuer().initials);
+		serializeString(writer, "pseudonym", cert.getIssuer().pseudonym);
+		serializeString(writer, "generationQualifier", cert.getIssuer().generationQualifier);
+		serializeString(writer, "emailAddress", cert.getIssuer().emailAddress);
+		writer.EndObject();
+
 		writer.EndObject();
 
 		writer.EndObject();
@@ -443,6 +444,7 @@ void WriteSigner(JsonPresentation::Writer& writer, const Signer& signer)
 	writer.EndArray();
 	serializeString(writer, "signTime", signer.signingTime);
 	serializeString(writer, "digest", signer.digest);
+	writer.String("chain");
 	WriteCertificateChain(writer, signer.chain);
 	writer.String("counterSigners");
 	writer.StartArray();
@@ -467,6 +469,9 @@ void WriteSignature(JsonPresentation::Writer& writer, const DigitalSignature& si
 
 	writer.String("signedDigest");
 	writer.String(signature.signedDigest);
+
+	writer.String("allCertificates");
+	WriteCertificateChain(writer, signature.certificates);
 
 	writer.String("signers");
 	writer.StartArray();

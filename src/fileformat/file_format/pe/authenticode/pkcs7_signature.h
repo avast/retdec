@@ -1,13 +1,15 @@
 /**
  * @file src/fileformat/file_format/pe/authenticode/pkcs7.h
  * @brief Class wrapper above openssl Pkcs7
- * @copyright (c) 2020 Avast Software, licensed under the MIT license
+ * @copyright (c) 2021 Avast Software, licensed under the MIT license
  */
 
 #pragma once
 
 #include "authenticode_structs.h"
 #include "helper.h"
+#include "retdec/fileformat/types/certificate_table/certificate.h"
+#include "retdec/fileformat/types/certificate_table/certificate_table.h"
 #include "x509_certificate.h"
 #include "pkcs9_counter_signature.h"
 #include "ms_counter_signature.h"
@@ -78,7 +80,7 @@ class Pkcs7Signature
 		std::vector<std::uint8_t> encryptDigest;
 		std::vector<Pkcs7Signature> nestedSignatures;
 		std::vector<Pkcs9CounterSignature> counterSignatures;
-		std::vector<MsCounterSignature> msSignatures;
+		std::vector<MsCounterSignature> msCounterSignatures;
 
 		const X509* getSignerCert() const;
 		const PKCS7_SIGNER_INFO* getSignerInfo() const;
@@ -102,8 +104,10 @@ public:
 	std::vector<int> contentDigestAlgorithms;
 	std::vector<X509Certificate> certificates; /* typically no root certificates, timestamp may include root one */
 
-	std::vector<retdec::fileformat::DigitalSignature> getSignatures() const;
 	std::vector<std::string> verify() const;
+	std::vector<retdec::fileformat::DigitalSignature> getSignatures() const;
+	std::vector<Certificate> getCertificates() const;
+
 
 	Pkcs7Signature& operator=(const Pkcs7Signature&) = delete;
 	Pkcs7Signature(const Pkcs7Signature&) = delete;

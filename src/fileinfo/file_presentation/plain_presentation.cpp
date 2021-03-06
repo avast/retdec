@@ -726,7 +726,9 @@ static void printSigner(const Signer& signer, int indent)
 {
 
 	Log::info() << std::string(indent, ' ') << "Digest:       " << signer.digest << "\n";
-	Log::info() << std::string(indent, ' ') << "Signing time: " << signer.signingTime << "\n";
+	if (!signer.signingTime.empty()) {
+		Log::info() << std::string(indent, ' ') << "Signing time: " << signer.signingTime << "\n";
+	}
 
 	printCertificateChain(signer.chain, indent);
 

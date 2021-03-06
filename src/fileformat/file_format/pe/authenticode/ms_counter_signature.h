@@ -1,7 +1,7 @@
 /**
  * @file src/fileformat/file_format/pe/authenticode/ms_nested_signature.h
  * @brief Representation of MsCounterSignature
- * @copyright (c) 2020 Avast Software, licensed under the MIT license
+ * @copyright (c) 2021 Avast Software, licensed under the MIT license
  */
 
 #pragma once
@@ -36,7 +36,7 @@ public:
 	std::string signTime;
 	std::vector<std::uint8_t> messageDigest;
 
-	std::vector<std::string> verify(std::vector<std::uint8_t> sig_enc_content) const;
+	std::vector<std::string> verify(CertificateProcessor& processor, const std::vector<std::uint8_t>& sig_enc_content) const;
 	MsCounterSignature(const std::vector<std::uint8_t>& data);
 };
 

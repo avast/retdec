@@ -10,6 +10,7 @@
 #include "retdec/fileformat/types/certificate_table/certificate_table.h"
 #include "helper.h"
 
+#include <memory>
 #include <openssl/bn.h>
 #include <openssl/bio.h>
 #include <openssl/evp.h>
@@ -19,6 +20,7 @@
 #include <openssl/x509.h>
 #include <openssl/pem.h>
 
+#include <openssl/x509_vfy.h>
 #include <string>
 #include <vector>
 #include <ctime>
@@ -58,16 +60,16 @@ public:
 class CertificateProcessor
 {
 private:
-	X509_STORE* trust_store;
-	X509_STORE_CTX* ctx;
+	std::unique_ptr<X509_STORE, decltype(&X509_STORE_free)> trust_store;
+	std::unique_ptr<X509_STORE_CTX, decltype(&X509_STORE_CTX_free)> ctx;
 
 public:
 	std::vector<X509Certificate> chain;
 
 	CertificateProcessor();
-	~CertificateProcessor();
 
 	std::vector<X509Certificate> getChain(const X509* cert, const STACK_OF(X509)* all_certs);
+	const X509_STORE* getStore() const;
 };
 
 } // namespace authenticode

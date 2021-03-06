@@ -5,6 +5,7 @@
  */
 
 #include "pkcs9_counter_signature.h"
+#include "authenticode_structs.h"
 namespace authenticode {
 
 /* PKCS7 stores all certificates for the signer and counter signers, we need to pass the certs */
@@ -111,8 +112,24 @@ std::vector<std::string> Pkcs9CounterSignature::verify(std::vector<uint8_t> sig_
 
 	int md_len = EVP_MD_size(md);
 	/* compare the encrypted digest and calculated digest */
-	if (std::memcmp(digest, dec_data.data(), md_len)) {
-		warnings.emplace_back("Failed to verify the counter-signature");
+	bool is_valid = false;
+
+	/* Sometimes signed data contains DER encoded DigestInfo structure which 
+	   contains hash of authenticated attributes but other times it is just purely 
+	   hash and I don't think there's other way to distinguish it but only based on 
+	   the length of data we get */
+
+	if (md_len == dec_len) {
+		is_valid = !std::memcmp(digest, dec_data.data(), md_len);
+	}
+	else {
+		const std::uint8_t* data_ptr = dec_data.data();
+		DigestInfo* digest_info = d2i_DigestInfo(nullptr, &data_ptr, dec_len);
+		is_valid = !std::memcmp(digest_info->digest->data, digest, md_len);
+		DigestInfo_free(digest_info);
+	}
+	if (!is_valid) {
+		warnings.emplace_back("Failed to verify the counter-signature.");
 	}
 
 	/* compare the saved, now verified digest attribute with the signature that it counter signs */
@@ -124,7 +141,7 @@ std::vector<std::string> Pkcs9CounterSignature::verify(std::vector<uint8_t> sig_
 
 		calculateDigest(md, sig_enc_content.data(), sig_enc_content.size(), digest);
 		if (std::memcmp(digest, messageDigest.data(), messageDigest.size())) {
-			warnings.emplace_back("Failed to verify the counter-signature");
+			warnings.emplace_back("Failed to verify the signature with counter-signature");
 		}
 	}
 

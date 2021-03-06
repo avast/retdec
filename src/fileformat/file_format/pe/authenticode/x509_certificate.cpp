@@ -1,7 +1,7 @@
 /**
  * @file src/fileformat/file_format/pe/authenticode/x509_certificate.h
  * @brief Class that wraps openssl x509 certificate information.
- * @copyright (c) 2020 Avast Software, licensed under the MIT license
+ * @copyright (c) 2021 Avast Software, licensed under the MIT license
  */
 
 #include "x509_certificate.h"
@@ -9,6 +9,7 @@
 #include <cstdlib>
 #include <openssl/bio.h>
 #include <openssl/bn.h>
+#include <openssl/err.h>
 #include <openssl/evp.h>
 #include <openssl/ossl_typ.h>
 #include <openssl/pem.h>
@@ -205,52 +206,58 @@ Certificate X509Certificate::createCertificate() const
 	return out_cert;
 }
 
-/* It's assumed that the certificates are processed in correct
-   order by callbacks set in the CertProcessor constructor */
+// /* It's assumed that the certificates are processed in correct
+//    order by callbacks set in the CertProcessor constructor */
 
-static CertificateProcessor* getProcessor(X509_STORE_CTX* ctx)
-{
-	return static_cast<CertificateProcessor*>(X509_STORE_get_ex_data(X509_STORE_CTX_get0_store(ctx), 0));
-}
+// static CertificateProcessor* getProcessor(X509_STORE_CTX* ctx)
+// {
+// 	return static_cast<CertificateProcessor*>(X509_STORE_get_ex_data(X509_STORE_CTX_get0_store(ctx), 0));
+// }
 
-static void addCertificateToChain(X509_STORE_CTX* ctx, const X509Certificate& cert)
-{
-	auto depth = X509_STORE_CTX_get_error_depth(ctx);
-	void* data = X509_STORE_CTX_get_ex_data(ctx, depth);
-	if (data == nullptr) {
-		CertificateProcessor* processor = getProcessor(ctx);
-		processor->chain.push_back(cert);
-		X509_STORE_CTX_set_ex_data(ctx, depth, (void*)processor);
-	}
-}
+// static void addCertificateToChain(X509_STORE_CTX* ctx, const X509Certificate& cert)
+// {
+// 	auto depth = X509_STORE_CTX_get_error_depth(ctx);
+// 	void* data = X509_STORE_CTX_get_ex_data(ctx, depth);
+// 	if (data == nullptr) {
+// 		CertificateProcessor* processor = getProcessor(ctx);
+// 		processor->chain.push_back(cert);
+// 		X509_STORE_CTX_set_ex_data(ctx, depth, (void*)processor);
+// 	}
+// }
 
-static int verifyCallback(int /*ok*/, X509_STORE_CTX* ctx)
-{
-	auto cert = X509_STORE_CTX_get_current_cert(ctx);
-	addCertificateToChain(ctx, cert);
-	return 1;
-}
-
-std::vector<X509Certificate> CertificateProcessor::getChain(const X509* cert, const STACK_OF(X509)* all_certs)
-{
-	X509_STORE_CTX_init(ctx, trust_store, const_cast<X509*>(cert), const_cast<STACK_OF(X509)*>(all_certs));
-	X509_verify_cert(ctx);
-	return chain;
-}
+// static int verifyCallback(int /*ok*/, X509_STORE_CTX* ctx)
+// {
+// 	auto cert = X509_STORE_CTX_get_current_cert(ctx);
+// 	addCertificateToChain(ctx, cert);
+// 	return 1;
+// }
 
 CertificateProcessor::CertificateProcessor()
+	: trust_store(nullptr, X509_STORE_free),
+	  ctx(nullptr, X509_STORE_CTX_free)
 {
-	trust_store = X509_STORE_new();
-	ctx = X509_STORE_CTX_new();
-
-	X509_STORE_set_verify_cb(trust_store, &verifyCallback);
-	X509_STORE_set_ex_data(trust_store, 0, static_cast<void*>(this));
+	trust_store.reset(X509_STORE_new());
+	ctx.reset(X509_STORE_CTX_new());
 }
 
-CertificateProcessor::~CertificateProcessor()
+std::vector<X509Certificate> CertificateProcessor::getChain(const X509* signer, const STACK_OF(X509)* all_certs)
 {
-	X509_STORE_free(trust_store);
-	X509_STORE_CTX_free(ctx);
+	X509_STORE_CTX_init(ctx.get(), trust_store.get(), const_cast<X509*>(signer), const_cast<STACK_OF(X509)*>(all_certs));
+	bool is_valid = X509_verify_cert(ctx.get()) == 1;
+	STACK_OF(X509)* chain = X509_STORE_CTX_get_chain(ctx.get());
+
+	std::vector<X509Certificate> certificates;
+
+	int cert_cnt = sk_X509_num(chain);
+	for (int i = 0; i < cert_cnt; i++) {
+		certificates.emplace_back(sk_X509_value(chain, i));
+	}
+
+	return certificates;
 }
 
+const X509_STORE* CertificateProcessor::getStore() const
+{
+	return trust_store.get();
+}
 } // namespace authenticode

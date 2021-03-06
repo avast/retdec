@@ -33,7 +33,7 @@ std::string parsePublicKey(BIO* bio)
 
 /* Calculates md digest type from data, result is a written into 
    digest that has to be large enough to accomodate whole digest */
-void calculateDigest(const EVP_MD* md, std::uint8_t* data, int len, std::uint8_t* digest)
+void calculateDigest(const EVP_MD* md, const std::uint8_t* data, int len, std::uint8_t* digest)
 {
 	EVP_MD_CTX* mdctx = EVP_MD_CTX_new();
 	EVP_DigestInit_ex(mdctx, md, NULL);
@@ -47,7 +47,7 @@ std::string bytesToHexString(const std::uint8_t* in, int len)
 	const std::uint8_t* end = in + len;
 	std::ostringstream oss;
 	for (; in != end; ++in)
-		oss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(*in);
+		oss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << static_cast<int>(*in);
 	return oss.str();
 }
 
