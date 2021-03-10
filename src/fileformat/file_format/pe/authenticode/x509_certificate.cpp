@@ -242,11 +242,16 @@ CertificateProcessor::CertificateProcessor()
 
 std::vector<X509Certificate> CertificateProcessor::getChain(const X509* signer, const STACK_OF(X509)* all_certs)
 {
+	std::vector<X509Certificate> certificates;
+
+	if (!signer) {
+		return certificates;
+	}
+
 	X509_STORE_CTX_init(ctx.get(), trust_store.get(), const_cast<X509*>(signer), const_cast<STACK_OF(X509)*>(all_certs));
 	bool is_valid = X509_verify_cert(ctx.get()) == 1;
 	STACK_OF(X509)* chain = X509_STORE_CTX_get_chain(ctx.get());
 
-	std::vector<X509Certificate> certificates;
 
 	int cert_cnt = sk_X509_num(chain);
 	for (int i = 0; i < cert_cnt; i++) {

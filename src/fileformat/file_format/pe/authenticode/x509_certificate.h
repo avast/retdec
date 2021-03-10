@@ -33,7 +33,7 @@ namespace authenticode {
 class X509Certificate
 { /* Can't name it X509 due to the collisions with openssl*/
 private:
-	const X509* cert;
+	const X509* cert = nullptr;
 
 public:
 	X509Certificate(const X509* cert);

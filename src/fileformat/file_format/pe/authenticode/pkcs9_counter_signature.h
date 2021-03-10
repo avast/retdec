@@ -34,7 +34,7 @@ private:
 	std::unique_ptr<PKCS7_SIGNER_INFO, decltype(&PKCS7_SIGNER_INFO_free)> sinfo;
 
 public:
-	const X509* signerCert;
+	const X509* signerCert = nullptr;
 
 	std::string contentType;
 	std::string signTime;
