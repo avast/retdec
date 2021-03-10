@@ -12,6 +12,7 @@ namespace authenticode {
 Pkcs9CounterSignature::Pkcs9CounterSignature(std::vector<std::uint8_t>& data, const STACK_OF(X509)* certificates)
 	: sinfo(nullptr, PKCS7_SIGNER_INFO_free)
 {
+	// TODO maybe add digest algo to the output
 	/*
 		counterSignature ATTRIBUTE ::= {
 		  WITH SYNTAX SignerInfo
@@ -107,29 +108,33 @@ std::vector<std::string> Pkcs9CounterSignature::verify(std::vector<uint8_t> sig_
 	std::vector<std::uint8_t> dec_data(dec_len);
 
 	EVP_PKEY_verify_recover_init(ctx);
-	EVP_PKEY_verify_recover(ctx, dec_data.data(), &dec_len, enc_data, enc_len);
+	bool is_recovered = EVP_PKEY_verify_recover(ctx, dec_data.data(), &dec_len, enc_data, enc_len) == 1;
 	EVP_PKEY_CTX_free(ctx);
 
-	int md_len = EVP_MD_size(md);
-	/* compare the encrypted digest and calculated digest */
-	bool is_valid = false;
+	if (is_recovered) {
+		int md_len = EVP_MD_size(md);
+		/* compare the encrypted digest and calculated digest */
+		bool is_valid = false;
 
-	/* Sometimes signed data contains DER encoded DigestInfo structure which 
-	   contains hash of authenticated attributes but other times it is just purely 
-	   hash and I don't think there's other way to distinguish it but only based on 
-	   the length of data we get */
+		/* Sometimes signed data contains DER encoded DigestInfo structure which 
+		contains hash of authenticated attributes but other times it is just purely 
+		hash and I don't think there's other way to distinguish it but only based on 
+		the length of data we get */
 
-	if (md_len == dec_len) {
-		is_valid = !std::memcmp(digest, dec_data.data(), md_len);
-	}
-	else {
-		const std::uint8_t* data_ptr = dec_data.data();
-		DigestInfo* digest_info = d2i_DigestInfo(nullptr, &data_ptr, dec_len);
-		is_valid = !std::memcmp(digest_info->digest->data, digest, md_len);
-		DigestInfo_free(digest_info);
-	}
-	if (!is_valid) {
-		warnings.emplace_back("Failed to verify the counter-signature.");
+		if (md_len == dec_len) {
+			is_valid = !std::memcmp(digest, dec_data.data(), md_len);
+		}
+		else {
+			const std::uint8_t* data_ptr = dec_data.data();
+			DigestInfo* digest_info = d2i_DigestInfo(nullptr, &data_ptr, dec_len);
+			is_valid = !std::memcmp(digest_info->digest->data, digest, md_len);
+			DigestInfo_free(digest_info);
+		}
+		if (!is_valid) {
+			warnings.emplace_back("Failed to verify the counter-signature.");
+		}
+	} else {
+		warnings.emplace_back("Couldn't decrypt the digest");
 	}
 
 	/* compare the saved, now verified digest attribute with the signature that it counter signs */

@@ -45,21 +45,12 @@ MsCounterSignature::MsCounterSignature(const std::vector<std::uint8_t>& data)
 	messageDigest = std::vector<std::uint8_t>(raw_digest->data, raw_digest->data + raw_digest->length);
 }
 
-std::vector<std::string> MsCounterSignature::verify(
-		CertificateProcessor& processor,
-		const std::vector<std::uint8_t>& sig_enc_content) const
+std::vector<std::string> MsCounterSignature::verify(const std::vector<std::uint8_t>& sig_enc_content) const
 {
 	std::vector<std::string> warnings;
 
 	if (!pkcs7) {
-		warnings.emplace_back("Couldn't parse signature");
-		return warnings;
-	}
-
-	X509_ALGOR* digest_algo = TS_MSG_IMPRINT_get_algo(imprint);
-	const EVP_MD* md = EVP_get_digestbyobj(digest_algo->algorithm);
-	if (!md) {
-		warnings.emplace_back("Unknown digest algorithm");
+		warnings.emplace_back("Couldn't parse signature..");
 		return warnings;
 	}
 
@@ -68,6 +59,12 @@ std::vector<std::string> MsCounterSignature::verify(
 		return warnings;
 	}
 
+	X509_ALGOR* digest_algo = TS_MSG_IMPRINT_get_algo(imprint);
+	const EVP_MD* md = EVP_get_digestbyobj(digest_algo->algorithm);
+	if (!md) {
+		warnings.emplace_back("Unknown digest algorithm.");
+		return warnings;
+	}
 	std::uint8_t digest[EVP_MAX_MD_SIZE] = { 0 };
 	calculateDigest(md, sig_enc_content.data(), sig_enc_content.size(), digest);
 
@@ -79,14 +76,13 @@ std::vector<std::string> MsCounterSignature::verify(
 	TS_VERIFY_CTX* ctx = TS_VERIFY_CTX_new();
 	X509_STORE* store = X509_STORE_new();
 	TS_VERIFY_CTX_init(ctx);
+
 	TS_VERIFY_CTX_set_flags(ctx, TS_VFY_VERSION | TS_VFY_IMPRINT);
 	TS_VERIFY_CTX_set_store(ctx, store);
 	TS_VERIFY_CTS_set_certs(ctx, pkcs7->d.sign->cert);
 	TS_VERIFY_CTX_set_imprint(ctx, digest, md_len);
+
 	bool is_valid = TS_RESP_verify_token(ctx, pkcs7.get()) == 1;
-	if (!is_valid) {
-		warnings.emplace_back("Failed to verify the counter-signature");
-	}
 
 	/* VERIFY_CTX_free tries to free these, we don't want that */
 	TS_VERIFY_CTX_set_imprint(ctx, nullptr, 0);
@@ -94,15 +90,13 @@ std::vector<std::string> MsCounterSignature::verify(
 
 	TS_VERIFY_CTX_free(ctx);
 
+	if (!is_valid) {
+		warnings.emplace_back("Failed to verify the counter-signature");
+	}
+
 	/* Verify signature with PKCS7_signatureVerify
 	   because TS_RESP_verify_token tries to verify
 	   chain and without trust anchors it fails */
-	/* Verify the signer hash and it's encryptedDigest */
-	// const auto* data_ptr = pkcs7->d.sign->contents->d.other->value.sequence->data;
-	// long data_len = pkcs7->d.sign->contents->d.other->value.sequence->length;
-
-	// BIO* content_bio = BIO_new_mem_buf(data_ptr, data_len);
-	// BIO* p7bio = PKCS7_dataInit(pkcs7.get(), content_bio);
 	BIO* p7bio = PKCS7_dataInit(pkcs7.get(), NULL);
 
 	char buf[4096];

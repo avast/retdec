@@ -229,7 +229,7 @@ void Pkcs7Signature::SignerInfo::parseAuthAttrs(const PKCS7_SIGNER_INFO* si_info
 			/*
 			 MessageDigest ::= OCTET STRING
 			*/
-			messageDigest = bytesToHexString(attr_type->value.asn1_string->data,  attr_type->value.asn1_string->length);
+			messageDigest = bytesToHexString(attr_type->value.asn1_string->data, attr_type->value.asn1_string->length);
 		}
 		else if (attr_object_nid == NID_spc_sp_opus_info_objid) {
 			/*
@@ -377,6 +377,7 @@ std::vector<std::string> Pkcs7Signature::verify() const
 		}
 		if (!signerInfo->encryptDigest.empty() && signerInfo->getSignerCert()) {
 			/* Verify the signer hash and it's encryptedDigest */
+
 			const auto* data_ptr = pkcs7->d.sign->contents->d.other->value.sequence->data;
 			long data_len = pkcs7->d.sign->contents->d.other->value.sequence->length;
 			if (version == 1) {
@@ -414,8 +415,10 @@ std::vector<DigitalSignature> Pkcs7Signature::getSignatures() const
 	CertificateProcessor processor;
 
 	DigitalSignature signature;
-	signature.signedDigest = contentInfo->digest;
-	signature.digestAlgorithm = OBJ_nid2ln(contentInfo->digestAlgorithm);
+	if (contentInfo.has_value()) {
+		signature.signedDigest = contentInfo->digest;
+		signature.digestAlgorithm = OBJ_nid2ln(contentInfo->digestAlgorithm);
+	}
 	signature.warnings = verify();
 	signature.certificates = getCertificates();
 
@@ -464,7 +467,7 @@ std::vector<DigitalSignature> Pkcs7Signature::getSignatures() const
 						.signingTime = counterSig.signTime,
 						.digest = bytesToHexString(counterSig.messageDigest.data(),
 								counterSig.messageDigest.size()),
-						.warnings = counterSig.verify(processor, signerInfo->encryptDigest),
+						.warnings = counterSig.verify(signerInfo->encryptDigest),
 						.counterSigners = std::vector<Signer>() });
 	}
 
@@ -478,7 +481,8 @@ std::vector<DigitalSignature> Pkcs7Signature::getSignatures() const
 	return signatures;
 }
 
-std::vector<Certificate> Pkcs7Signature::getCertificates() const {
+std::vector<Certificate> Pkcs7Signature::getCertificates() const
+{
 	std::vector<X509Certificate> all_x509certs = certificates;
 
 	if (!signerInfo.has_value()) {
