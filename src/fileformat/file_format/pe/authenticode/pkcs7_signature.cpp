@@ -6,6 +6,7 @@
 
 #include "pkcs7_signature.h"
 #include "helper.h"
+#include "x509_certificate.h"
 #include <algorithm>
 #include <openssl/asn1.h>
 #include <openssl/bio.h>
@@ -420,7 +421,7 @@ std::vector<DigitalSignature> Pkcs7Signature::getSignatures() const
 		signature.digestAlgorithm = OBJ_nid2ln(contentInfo->digestAlgorithm);
 	}
 	signature.warnings = verify();
-	signature.certificates = getCertificates();
+	signature.certificates = getAllCertificates();
 
 	/* No signer would mean, we have pretty much nothing */
 	if (!signerInfo.has_value()) {
@@ -432,7 +433,7 @@ std::vector<DigitalSignature> Pkcs7Signature::getSignatures() const
 	STACK_OF(X509)* certs = pkcs7->d.sign->cert;
 
 	const X509* signer_cert = signInfo.getSignerCert();
-	Signer signer = Signer();
+	Signer signer;
 	if (signer_cert) {
 		std::vector<X509Certificate> chain = processor.getChain(signer_cert, certs);
 		auto fileformat_chain = convertToFileformatCertChain(chain);
@@ -481,7 +482,8 @@ std::vector<DigitalSignature> Pkcs7Signature::getSignatures() const
 	return signatures;
 }
 
-std::vector<Certificate> Pkcs7Signature::getCertificates() const
+/* Returns all certificate, including counter signature, excluding nested signatures */
+std::vector<Certificate> Pkcs7Signature::getAllCertificates() const
 {
 	std::vector<X509Certificate> all_x509certs = certificates;
 

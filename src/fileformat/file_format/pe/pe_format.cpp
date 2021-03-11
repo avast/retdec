@@ -2071,25 +2071,15 @@ void PeFormat::loadResources()
  */
 void PeFormat::loadCertificates()
 {
-	const auto &securityDir = file->securityDir();
-	if(securityDir.calcNumberOfCertificates() == 0)
-	{
+	const auto& securityDir = file->securityDir();
+	if (securityDir.calcNumberOfCertificates() == 0) {
 		return;
 	}
-	// We always take the first one, there are no additional certificate tables in PE
+	// We always take the first one, there might be more WIN_CERT structures tho
 	auto certBytes = securityDir.getCertificate(0);
-	try
-	{
-		auto authenticode = authenticode::Authenticode(certBytes);
-		auto signatures = authenticode.getSignatures();
-		certificateTable = new CertificateTable(signatures);
-	}
-	catch (const std::exception& e)
-	{
-		delete certificateTable;
-		certificateTable = nullptr;
-		std::cerr << e.what() << std::endl; // debug purpose now
-	}
+
+	auto authenticode = authenticode::Authenticode(certBytes);
+	certificateTable = new CertificateTable(authenticode.getSignatures());
 }
 
 /**

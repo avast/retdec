@@ -106,7 +106,7 @@ public:
 
 	std::vector<std::string> verify() const;
 	std::vector<retdec::fileformat::DigitalSignature> getSignatures() const;
-	std::vector<Certificate> getCertificates() const;
+	std::vector<Certificate> getAllCertificates() const;
 
 
 	Pkcs7Signature& operator=(const Pkcs7Signature&) = delete;
