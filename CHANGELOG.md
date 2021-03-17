@@ -13,7 +13,7 @@
 * Enhancement: Replace RetDec's `FilesystemPath` implementation with C++ Filesystem library ([#806](https://github.com/avast/retdec/pull/806)).
 * Enhancement: Added support for Ninja CMake generator ([#8](https://github.com/avast/retdec/issues/8), [#830](https://github.com/avast/retdec/issues/8)).
 * Enhancement: Removed copyrights from RetDec's outputs ([#843](https://github.com/avast/retdec/pull/843)).
-* Enhancement: Add `--version` program option to all executable RetDec apps and add this info to `retdec-fileinfo`'s verbose output as well ([#926](https://github.com/avast/retdec/pull/926)). 
+* Enhancement: Add `--version` program option to all executable RetDec apps and add this info to `retdec-fileinfo`'s verbose output as well ([#926](https://github.com/avast/retdec/pull/926)).
 * Enhancement: Added support for new ELF UPX unpacking stubs (versions 3.93 - 3.96) ([#929](https://github.com/avast/retdec/pull/929)).
 * Fix: Arithmetic shift is no longer converted to signed division as these operations provide different output with negative numbers. ([#724](https://github.com/avast/retdec/issues/724)).
 * Fix: Fixed infinite looping during the copy-propagation optimization in `llvmir2hll` ([#876](https://github.com/avast/retdec/pull/876)).
