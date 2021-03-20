@@ -55,6 +55,11 @@ std::string ImportTable::getImphashSha256() const
 	return table ? table->getImphashSha256() : "";
 }
 
+std::string ImportTable::getImphashTlsh() const
+{
+	return table ? table->getImpHashTlsh() : "";
+}
+
 /**
  * Get import
  * @param position Index of selected import from table (indexed from 0)

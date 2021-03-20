@@ -13,6 +13,7 @@
 
 #include "retdec/fileformat/file_format/file_format.h"
 #include "retdec/fileformat/types/note_section/elf_notes.h"
+#include "retdec/fileformat/types/import_table/elf_import_table.h"
 
 namespace retdec {
 namespace fileformat {

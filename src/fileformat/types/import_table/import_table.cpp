@@ -676,6 +676,14 @@ const std::string& ImportTable::getImphashSha256() const
 }
 
 /**
+ * Get imphash as tlsh
+ * @return Imphash as tlsh
+ */
+const std::string& ImportTable::getImpHashTlsh() const {
+	return impHashTlsh;
+}
+
+/**
  * Get list of missing dependencies
  * @return Vector of missing dependencies
  */

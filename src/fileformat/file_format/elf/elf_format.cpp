@@ -1758,7 +1758,7 @@ void ElfFormat::loadSymbols(const ELFIO::elfio *file, const ELFIO::symbol_sectio
 			{
 				if(!importTable)
 				{
-					importTable = new ImportTable();
+					importTable = new ElfImportTable();
 				}
 				auto keyIter = importNameAddressMap.equal_range(name);
 				// we create std::set from std::multimap values in order to ensure determinism

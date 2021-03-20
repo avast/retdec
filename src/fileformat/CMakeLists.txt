@@ -13,6 +13,9 @@ add_library(fileformat STATIC
 	utils/other.cpp
 	utils/asn1.cpp
 	utils/file_io.cpp
+	utils/tlsh/tlsh_impl.cpp
+	utils/tlsh/tlsh_util.cpp
+	utils/tlsh/tlsh.cpp
 	format_factory.cpp
 	types/dotnet_headers/blob_stream.cpp
 	types/dotnet_headers/user_string_stream.cpp
@@ -34,6 +37,7 @@ add_library(fileformat STATIC
 	types/visual_basic/visual_basic_extern.cpp
 	types/import_table/import.cpp
 	types/import_table/import_table.cpp
+	types/import_table/elf_import_table.cpp
 	types/import_table/pe_import.cpp
 	types/export_table/export.cpp
 	types/export_table/export_table.cpp

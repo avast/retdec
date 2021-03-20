@@ -1204,6 +1204,14 @@ std::string FileInformation::getImphashSha256() const
 {
 	return importTable.getImphashSha256();
 }
+/**
+ * Get imphash as Tlsh
+ * @return Imphash as Tlsh
+ */
+std::string FileInformation::getImphashTlsh() const
+{
+	return importTable.getImphashTlsh();
+}
 
 /**
  * Get import

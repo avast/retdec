@@ -11,7 +11,6 @@
 #include <vector>
 
 #include "retdec/fileformat/types/import_table/import.h"
-
 namespace retdec {
 namespace fileformat {
 
@@ -20,7 +19,7 @@ namespace fileformat {
  */
 class ImportTable
 {
-	private:
+	protected:
 		using importsIterator = std::vector<std::unique_ptr<Import>>::const_iterator;
 		std::vector<std::string> libraries;           ///< name of libraries
 		std::vector<std::string> missingDeps;         ///< missing dependencies
@@ -28,6 +27,7 @@ class ImportTable
 		std::string impHashCrc32;                     ///< imphash CRC32
 		std::string impHashMd5;                       ///< imphash MD5
 		std::string impHashSha256;                    ///< imphash SHA256
+		std::string impHashTlsh;
 	public:
 		/// @name Getters
 		/// @{
@@ -39,6 +39,7 @@ class ImportTable
 		const std::string& getImphashCrc32() const;
 		const std::string& getImphashMd5() const;
 		const std::string& getImphashSha256() const;
+		const std::string& getImpHashTlsh() const;
 		const std::vector<std::string> & getMissingDependencies() const;
 
 		std::string getLibrary(std::size_t libraryIndex) const;
@@ -55,7 +56,7 @@ class ImportTable
 
 		/// @name Other methods
 		/// @{
-		void computeHashes();
+		virtual void computeHashes();
 		void clear();
 		void addLibrary(std::string name, bool missingDependency = false);
 		void addImport(std::unique_ptr<Import>&& import);
@@ -70,6 +71,8 @@ class ImportTable
 		void dump(std::string &dumpTable) const;
 		void dumpLibrary(std::size_t libraryIndex, std::string &libraryDump) const;
 		/// @}
+
+		virtual ~ImportTable() = default;
 };
 
 } // namespace fileformat
