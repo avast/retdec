@@ -32,7 +32,14 @@ bool isSymbolExcluded(std::string symbol)
 	if (symbol.empty()) {
 		return true;
 	}
+	/* ignore:
+		symbols starting with . or _
+		x86-64 specific functions
+		string functions (str.* and mem.*), gcc changes them depending on architecture
+		symbols starting with . or _
+	*/
 	std::regex exclusion_regex("(^[_\.].*$)|(^.*64$)|(^str.*$)|(^mem.*$)");
+
 	if (std::regex_match(symbol, exclusion_regex)) {
 		return true;
 	}
