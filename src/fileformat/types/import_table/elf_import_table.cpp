@@ -16,7 +16,7 @@ using namespace retdec::utils;
 namespace retdec {
 namespace fileformat {
 
-static const std::vector<std::string> exclusion_strings = {
+static const std::set<std::string> exclusion_set = {
 	"__libc_start_main", // main function
 	"main", // main function
 	"abort", // ARM default
@@ -44,7 +44,7 @@ bool isSymbolExcluded(std::string symbol)
 		return true;
 	}
 
-	if (std::find(exclusion_strings.begin(), exclusion_strings.end(), symbol) != exclusion_strings.end()) {
+	if (exclusion_set.count(symbol)) {
 		return true;
 	}
 
