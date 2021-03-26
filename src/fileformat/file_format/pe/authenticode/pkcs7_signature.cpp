@@ -214,9 +214,10 @@ void Pkcs7Signature::SignerInfo::parseAuthAttrs(const PKCS7_SIGNER_INFO* si_info
 		ASN1_TYPE* attr_type = X509_ATTRIBUTE_get0_type(attr, 0);
 		ASN1_OBJECT* attr_object = X509_ATTRIBUTE_get0_object(attr);
 
-		if (!attr_object) {
-			continue; // Does this happen?
+		if (!attr_object || !attr_type) {
+			continue;
 		}
+
 		auto attr_object_nid = OBJ_obj2nid(attr_object);
 		char buf[100]; /* 100 should be more than enough for any oid - openssl docs */
 		if (attr_object_nid == NID_pkcs9_contentType) {
@@ -409,7 +410,7 @@ std::vector<std::string> Pkcs7Signature::verify() const
 	return warnings;
 }
 
-std::vector<DigitalSignature> Pkcs7Signature::getSignatures() const
+std::vector<DigitalSignature> Pkcs7Signature::getSignatures(std::string file_hash) const
 {
 	std::vector<DigitalSignature> signatures;
 
@@ -475,7 +476,7 @@ std::vector<DigitalSignature> Pkcs7Signature::getSignatures() const
 	signatures.push_back(signature);
 
 	for (auto&& nestedPkcs7 : signInfo.nestedSignatures) {
-		auto nestedSigs = nestedPkcs7.getSignatures();
+		auto nestedSigs = nestedPkcs7.getSignatures(file_hash);
 		signatures.insert(signatures.end(), nestedSigs.begin(), nestedSigs.end());
 	}
 

@@ -38,7 +38,7 @@ private:
 
 public:
 	Authenticode(std::vector<unsigned char> data);
-	std::vector<DigitalSignature> getSignatures() const;
+	std::vector<DigitalSignature> getSignatures(std::string file_hash) const;
 };
 
 } // namespace authenticode

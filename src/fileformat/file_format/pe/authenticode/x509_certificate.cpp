@@ -141,7 +141,12 @@ std::string X509Certificate::getPublicKey() const
 
 std::string X509Certificate::getPublicKeyAlgorithm() const
 {
-	return OBJ_nid2sn(EVP_PKEY_base_id(X509_get0_pubkey(cert)));
+	const EVP_PKEY* pkey = X509_get0_pubkey(cert);
+	if (!pkey) {
+		return "unknown";
+	}
+
+	return OBJ_nid2sn(EVP_PKEY_base_id(pkey));
 }
 
 std::string X509Certificate::getSha1() const

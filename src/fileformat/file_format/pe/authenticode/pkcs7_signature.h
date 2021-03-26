@@ -95,6 +95,8 @@ class Pkcs7Signature
 
 private:
 	std::unique_ptr<PKCS7, decltype(&PKCS7_free)> pkcs7;
+	std::vector<Certificate> getAllCertificates() const;
+	std::vector<std::string> verify() const;
 
 public:
 	std::uint64_t version;
@@ -104,9 +106,7 @@ public:
 	std::vector<int> contentDigestAlgorithms;
 	std::vector<X509Certificate> certificates; /* typically no root certificates, timestamp may include root one */
 
-	std::vector<std::string> verify() const;
-	std::vector<retdec::fileformat::DigitalSignature> getSignatures() const;
-	std::vector<Certificate> getAllCertificates() const;
+	std::vector<retdec::fileformat::DigitalSignature> getSignatures(std::string file_hash) const;
 
 
 	Pkcs7Signature& operator=(const Pkcs7Signature&) = delete;

@@ -2078,8 +2078,8 @@ void PeFormat::loadCertificates()
 	// We always take the first one, there might be more WIN_CERT structures tho
 	auto certBytes = securityDir.getCertificate(0);
 
-	auto authenticode = authenticode::Authenticode(certBytes);
-	certificateTable = new CertificateTable(authenticode.getSignatures());
+	authenticode::Authenticode authenticode(certBytes);
+	certificateTable = new CertificateTable(authenticode.getSignatures({0}));
 }
 
 /**
