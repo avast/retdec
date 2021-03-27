@@ -6,6 +6,7 @@
 
 #include "pkcs9_counter_signature.h"
 #include "authenticode_structs.h"
+#include <openssl/objects.h>
 namespace authenticode {
 
 /* PKCS7 stores all certificates for the signer and counter signers, we need to pass the certs */
@@ -24,6 +25,8 @@ Pkcs9CounterSignature::Pkcs9CounterSignature(std::vector<std::uint8_t>& data, co
 	if (!sinfo) {
 		return;
 	}
+
+	digestAlgorithm = OBJ_obj2nid(sinfo->digest_alg->algorithm);
 
 	/* get the signer certificate of this counter signatures */
 	signerCert = X509_find_by_issuer_and_serial(const_cast<STACK_OF(X509)*>(certificates),

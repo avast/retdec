@@ -35,6 +35,7 @@ public:
 
 	std::string signTime;
 	std::vector<std::uint8_t> messageDigest;
+	int digestAlgorithm;
 
 	std::vector<std::string> verify(const std::vector<std::uint8_t>& sig_enc_content) const;
 	MsCounterSignature(const std::vector<std::uint8_t>& data);

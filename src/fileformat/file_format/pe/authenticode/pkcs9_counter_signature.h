@@ -39,6 +39,7 @@ public:
 	std::string contentType;
 	std::string signTime;
 	std::vector<std::uint8_t> messageDigest;
+	int digestAlgorithm;
 	std::vector<Pkcs9CounterSignature> counterSignatures;
 
 	std::vector<std::string> verify(std::vector<uint8_t> sig_enc_content) const;

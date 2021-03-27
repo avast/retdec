@@ -41,6 +41,9 @@ MsCounterSignature::MsCounterSignature(const std::vector<std::uint8_t>& data)
 	signCert = sk_X509_value(signers.get(), 0);
 	imprint = TS_TST_INFO_get_msg_imprint(tstInfo.get());
 
+	X509_ALGOR* digest_algo = TS_MSG_IMPRINT_get_algo(imprint);
+	digestAlgorithm = OBJ_obj2nid(digest_algo->algorithm);
+
 	ASN1_STRING* raw_digest = TS_MSG_IMPRINT_get_msg(imprint);
 	messageDigest = std::vector<std::uint8_t>(raw_digest->data, raw_digest->data + raw_digest->length);
 }
@@ -59,8 +62,7 @@ std::vector<std::string> MsCounterSignature::verify(const std::vector<std::uint8
 		return warnings;
 	}
 
-	X509_ALGOR* digest_algo = TS_MSG_IMPRINT_get_algo(imprint);
-	const EVP_MD* md = EVP_get_digestbyobj(digest_algo->algorithm);
+	const EVP_MD* md = EVP_get_digestbynid(digestAlgorithm);
 	if (!md) {
 		warnings.emplace_back("Unknown digest algorithm.");
 		return warnings;

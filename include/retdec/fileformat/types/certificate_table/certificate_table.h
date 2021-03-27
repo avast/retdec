@@ -25,6 +25,7 @@ struct Signer
 	*/
 	std::string signingTime; /* Timestamp counter signatures will have this set */
 	std::string digest;
+	std::string digestAlgorithm;
 	std::vector<std::string> warnings; /* warning messages about the content validity */
 	std::vector<Signer> counterSigners;
 };
@@ -32,12 +33,12 @@ struct Signer
 /* naming - "Signature" was already taken by unpackers */
 struct DigitalSignature
 {
+	std::string fileDigest;
 	std::string signedDigest;
 	std::string digestAlgorithm;
 	std::vector<Certificate> certificates;
-
 	std::vector<std::string> warnings; /* warning messages about the content validity */
-	std::vector<Signer> signers;
+	Signer signer;
 };
 
 /**

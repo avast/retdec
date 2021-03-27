@@ -8,6 +8,7 @@
 
 #include "authenticode_structs.h"
 #include "helper.h"
+#include "retdec/fileformat/file_format/pe/pe_format.h"
 #include "retdec/fileformat/types/certificate_table/certificate.h"
 #include "retdec/fileformat/types/certificate_table/certificate_table.h"
 #include "x509_certificate.h"
@@ -65,6 +66,7 @@ class Pkcs7Signature
 		std::unique_ptr<STACK_OF(X509), decltype(&sk_X509_free)> raw_signers;
 		const X509* signerCert = nullptr;
 		const PKCS7_SIGNER_INFO* sinfo = nullptr;
+
 	public:
 		std::uint64_t version;
 
@@ -95,8 +97,10 @@ class Pkcs7Signature
 
 private:
 	std::unique_ptr<PKCS7, decltype(&PKCS7_free)> pkcs7;
+
+	std::string calculateFileDigest(const retdec::fileformat::PeFormat* peFile) const;
 	std::vector<Certificate> getAllCertificates() const;
-	std::vector<std::string> verify() const;
+	std::vector<std::string> verify(std::string fileDigest) const;
 
 public:
 	std::uint64_t version;
@@ -106,8 +110,7 @@ public:
 	std::vector<int> contentDigestAlgorithms;
 	std::vector<X509Certificate> certificates; /* typically no root certificates, timestamp may include root one */
 
-	std::vector<retdec::fileformat::DigitalSignature> getSignatures(std::string file_hash) const;
-
+	std::vector<retdec::fileformat::DigitalSignature> getSignatures(const retdec::fileformat::PeFormat* peFile) const;
 
 	Pkcs7Signature& operator=(const Pkcs7Signature&) = delete;
 	Pkcs7Signature(const Pkcs7Signature&) = delete;

@@ -508,47 +508,6 @@ Symbol::UsageType getSymbolUsageType(std::uint8_t storageClass, std::uint8_t com
 	return Symbol::UsageType::UNKNOWN;
 }
 
-/**
- * Calculates the digest using selected hash algorithm.
- * @param peFile PE file with the signature.
- * @param algorithm Algorithm to use.
- * @return Hex string of hash.
- */
-std::string calculateDigest(
-		const retdec::fileformat::PeFormat* peFile,
-		const EVP_MD* algorithm)
-{
-	EVP_MD_CTX* ctx = EVP_MD_CTX_create();
-
-	if (EVP_DigestInit(ctx, algorithm) != 1) // 1 == success
-	{
-		return {};
-	}
-
-	auto digestRanges = peFile->getDigestRanges();
-	for (const auto& range : digestRanges)
-	{
-		const std::uint8_t* data = std::get<0>(range);
-		std::size_t size = std::get<1>(range);
-
-		if (EVP_DigestUpdate(ctx, data, size) != 1) // 1 == success
-		{
-			return {};
-		}
-	}
-
-	std::vector<std::uint8_t> hash(EVP_MD_size(algorithm));
-	if (EVP_DigestFinal(ctx, hash.data(), nullptr) != 1)
-	{
-		return {};
-	}
-
-	EVP_MD_CTX_destroy(ctx);
-
-	std::string ret;
-	retdec::utils::bytesToHexString(hash, ret);
-	return ret;
-}
 
 /**
  * Verifies signature of PE file using PKCS7.
@@ -617,12 +576,12 @@ bool verifySignature(const retdec::fileformat::PeFormat* peFile, PKCS7 *p7)
 	}
 
 	auto storedHash = std::static_pointer_cast<Asn1OctetString>(digestValue)->getString();
-	auto calculatedHash = calculateDigest(peFile, algorithm);
-	if (storedHash != calculatedHash)
-	{
-		EVP_cleanup();
-		return false;
-	}
+	// auto calculatedHash = calculateDigest(peFile, algorithm);
+	// if (storedHash != calculatedHash)
+	// {
+	// 	EVP_cleanup();
+	// 	return false;
+	// }
 
 	auto contentData = contentInfo->getContentData();
 	auto contentBio = std::unique_ptr<BIO, decltype(&BIO_free)>(
@@ -2079,7 +2038,8 @@ void PeFormat::loadCertificates()
 	auto certBytes = securityDir.getCertificate(0);
 
 	authenticode::Authenticode authenticode(certBytes);
-	certificateTable = new CertificateTable(authenticode.getSignatures({0}));
+	
+	certificateTable = new CertificateTable(authenticode.getSignatures(this));
 }
 
 /**

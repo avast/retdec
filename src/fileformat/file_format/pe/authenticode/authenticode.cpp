@@ -12,9 +12,9 @@ namespace authenticode {
 Authenticode::Authenticode(std::vector<unsigned char> data)
 	: pkcs7(data) {}
 
-std::vector<DigitalSignature> Authenticode::getSignatures(std::string file_hash) const
+std::vector<DigitalSignature> Authenticode::getSignatures(const retdec::fileformat::PeFormat* peFile) const
 {
-	return pkcs7.getSignatures(file_hash);
+	return pkcs7.getSignatures(peFile);
 }
 
 } // namespace authenticode

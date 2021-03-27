@@ -442,16 +442,23 @@ void WriteSigner(JsonPresentation::Writer& writer, const Signer& signer)
 		writer.String(warn);
 	}
 	writer.EndArray();
+
 	serializeString(writer, "signTime", signer.signingTime);
+
 	serializeString(writer, "digest", signer.digest);
+
+	serializeString(writer, "digestAlgorithm", signer.digestAlgorithm);
+
 	writer.String("chain");
 	WriteCertificateChain(writer, signer.chain);
+
 	writer.String("counterSigners");
 	writer.StartArray();
 	for (auto&& csigner : signer.counterSigners) {
 		WriteSigner(writer, csigner);
 	}
 	writer.EndArray();
+
 	writer.EndObject();
 }
 
@@ -464,22 +471,19 @@ void WriteSignature(JsonPresentation::Writer& writer, const DigitalSignature& si
 		writer.String(warn);
 	}
 	writer.EndArray();
-	writer.String("digestAlgorithm");
-	writer.String(signature.digestAlgorithm);
 
-	writer.String("signedDigest");
-	writer.String(signature.signedDigest);
+	serializeString(writer, "digestAlgorithm", signature.digestAlgorithm);
+
+	serializeString(writer, "fileDigest", signature.fileDigest);
+
+	serializeString(writer, "signedDigest", signature.signedDigest);
 
 	writer.String("allCertificates");
 	WriteCertificateChain(writer, signature.certificates);
 
-	writer.String("signers");
-	writer.StartArray();
-	for (int i = 0; i < signature.signers.size(); ++i)
-	{
-		WriteSigner(writer, signature.signers[i]);
-	}
-	writer.EndArray();
+	writer.String("signer");
+	WriteSigner(writer, signature.signer);
+
 	writer.EndObject();
 }
 

@@ -306,7 +306,7 @@ const X509* Pkcs7Signature::SignerInfo::getSignerCert() const
 
 /* verifies if signature complies with specification rules,
    for each broken rule, create a message in this->warnings */
-std::vector<std::string> Pkcs7Signature::verify() const
+std::vector<std::string> Pkcs7Signature::verify(std::string fileDigest) const
 {
 	/* Check if signature is correctly parsed and complies with the spec:
 		- [x] Version is equal to 1
@@ -319,7 +319,7 @@ std::vector<std::string> Pkcs7Signature::verify() const
 		- [x] MessageDigest contains correct hash value of PKCS7 SignedData
 		- [x] SpcSpOpusInfo 
 		- [x] Decrypted encryptedDigest math calculated hash of authenticated attributes
-		- [x] verify counter signatures
+		- [x] fileDigest match the signature digest
 	*/
 	std::vector<std::string> warnings;
 
@@ -346,7 +346,12 @@ std::vector<std::string> Pkcs7Signature::verify() const
 			warnings.emplace_back("Wrong contentInfo contentType.");
 		}
 		else if (contentInfo->digest.empty()) {
-			warnings.emplace_back("File digest is missing.");
+			warnings.emplace_back("Signature digest is missing.");
+		}
+		else {
+			if (fileDigest != contentInfo->digest) {
+				warnings.emplace_back("Signature digest doesn't match the file digest.");
+			}
 		}
 	}
 	else {
@@ -410,18 +415,67 @@ std::vector<std::string> Pkcs7Signature::verify() const
 	return warnings;
 }
 
-std::vector<DigitalSignature> Pkcs7Signature::getSignatures(std::string file_hash) const
+/**
+ * Calculates the digest using selected hash algorithm.
+ * @param peFile PE file with the signature.
+ * @return Hex string of hash.
+ *
+ * Function assumes the contentInfo is correctly parsed
+ */
+std::string Pkcs7Signature::calculateFileDigest(const retdec::fileformat::PeFormat* peFile) const
+{
+	if (!peFile) {
+		return {};
+	}
+
+	const EVP_MD* algorithm = EVP_get_digestbynid(contentInfo->digestAlgorithm);
+	if (!algorithm) {
+		return {};
+	}
+	EVP_MD_CTX* ctx = EVP_MD_CTX_create();
+
+	if (EVP_DigestInit(ctx, algorithm) != 1) // 1 == success
+	{
+		return {};
+	}
+
+	auto digestRanges = peFile->getDigestRanges();
+	for (const auto& range : digestRanges) {
+		const std::uint8_t* data = std::get<0>(range);
+		std::size_t size = std::get<1>(range);
+
+		if (EVP_DigestUpdate(ctx, data, size) != 1) // 1 == success
+		{
+			return {};
+		}
+	}
+
+	std::vector<std::uint8_t> hash(EVP_MD_size(algorithm));
+	if (EVP_DigestFinal(ctx, hash.data(), nullptr) != 1) {
+		return {};
+	}
+	EVP_MD_CTX_destroy(ctx);
+
+	return bytesToHexString(hash.data(), EVP_MD_size(algorithm));
+}
+
+std::vector<DigitalSignature> Pkcs7Signature::getSignatures(const retdec::fileformat::PeFormat* peFile) const
 {
 	std::vector<DigitalSignature> signatures;
 
 	CertificateProcessor processor;
 
+	std::string fileDigest;
+
 	DigitalSignature signature;
 	if (contentInfo.has_value()) {
 		signature.signedDigest = contentInfo->digest;
 		signature.digestAlgorithm = OBJ_nid2ln(contentInfo->digestAlgorithm);
+
+		fileDigest = calculateFileDigest(peFile);
 	}
-	signature.warnings = verify();
+	signature.fileDigest = fileDigest;
+	signature.warnings = verify(fileDigest);
 	signature.certificates = getAllCertificates();
 
 	/* No signer would mean, we have pretty much nothing */
@@ -441,34 +495,38 @@ std::vector<DigitalSignature> Pkcs7Signature::getSignatures(std::string file_has
 		signer.chain = fileformat_chain;
 	}
 	signer.digest = signInfo.messageDigest;
+	signer.digestAlgorithm = OBJ_nid2ln(signInfo.digestAlgorithm);
 
-	signature.signers.push_back(signer);
+	signature.signer = signer;
 
 	for (auto&& counterSig : signInfo.counterSignatures) {
 		CertificateProcessor processor;
 		auto certChain = processor.getChain(counterSig.signerCert, certs);
 		auto fileformatCertChain = convertToFileformatCertChain(certChain);
 
-		signature.signers[0].counterSigners.push_back(
+		signature.signer.counterSigners.push_back(
 				Signer{
 						.chain = fileformatCertChain,
 						.signingTime = counterSig.signTime,
 						.digest = bytesToHexString(counterSig.messageDigest.data(),
 								counterSig.messageDigest.size()),
+						.digestAlgorithm = OBJ_nid2ln(counterSig.digestAlgorithm),
 						.warnings = counterSig.verify(signerInfo->encryptDigest),
 						.counterSigners = std::vector<Signer>() });
 	}
+
 	for (auto&& counterSig : signInfo.msCounterSignatures) {
 		CertificateProcessor processor;
 		auto certChain = processor.getChain(counterSig.signCert, counterSig.certs);
 		auto fileformatCertChain = convertToFileformatCertChain(certChain);
 
-		signature.signers[0].counterSigners.push_back(
+		signature.signer.counterSigners.push_back(
 				Signer{
 						.chain = fileformatCertChain,
 						.signingTime = counterSig.signTime,
 						.digest = bytesToHexString(counterSig.messageDigest.data(),
 								counterSig.messageDigest.size()),
+						.digestAlgorithm = OBJ_nid2ln(counterSig.digestAlgorithm),
 						.warnings = counterSig.verify(signerInfo->encryptDigest),
 						.counterSigners = std::vector<Signer>() });
 	}
@@ -476,7 +534,7 @@ std::vector<DigitalSignature> Pkcs7Signature::getSignatures(std::string file_has
 	signatures.push_back(signature);
 
 	for (auto&& nestedPkcs7 : signInfo.nestedSignatures) {
-		auto nestedSigs = nestedPkcs7.getSignatures(file_hash);
+		auto nestedSigs = nestedPkcs7.getSignatures(peFile);
 		signatures.insert(signatures.end(), nestedSigs.begin(), nestedSigs.end());
 	}
 

@@ -725,9 +725,10 @@ static void printCertificateChain(const std::vector<Certificate>& certs, int ind
 static void printSigner(const Signer& signer, int indent)
 {
 
-	Log::info() << std::string(indent, ' ') << "Digest:       " << signer.digest << "\n";
+	Log::info() << std::string(indent, ' ') << "Digest Algorithm: " << signer.digestAlgorithm << "\n";
+	Log::info() << std::string(indent, ' ') << "Digest:           " << signer.digest << "\n";
 	if (!signer.signingTime.empty()) {
-		Log::info() << std::string(indent, ' ') << "Signing time: " << signer.signingTime << "\n";
+		Log::info() << std::string(indent, ' ') << "Signing time:     " << signer.signingTime << "\n";
 	}
 
 	printCertificateChain(signer.chain, indent);
@@ -742,12 +743,12 @@ static void printSigner(const Signer& signer, int indent)
 static void printSignature(const DigitalSignature& signature, int indent)
 {
 	Log::info() << std::string(indent, ' ') << "Digest Algorithm: " << signature.digestAlgorithm << "\n";
-	Log::info() << std::string(indent, ' ') << "Digest: " << signature.signedDigest << "\n";
-	for (int idx = 0; idx < signature.signers.size(); idx++) {
-		Log::info() << std::string(indent, ' ') << "Signer #" << idx << ":\n";
-		printSigner(signature.signers[idx], indent + 4);
-		Log::info() << "\n";
-	}
+	Log::info() << std::string(indent, ' ') << "Signed Digest:    " << signature.signedDigest << "\n";
+	Log::info() << std::string(indent, ' ') << "File  Digest:     " << signature.fileDigest << "\n";
+
+	Log::info() << std::string(indent, ' ') << "Signer:\n";
+	printSigner(signature.signer, indent + 4);
+	Log::info() << "\n";
 }
 
 void PlainPresentation::presentSignatures() const

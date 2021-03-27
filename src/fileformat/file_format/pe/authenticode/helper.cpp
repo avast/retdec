@@ -94,50 +94,6 @@ std::string X509NameToString(X509_NAME* name)
 	return result;
 }
 
-/* This translating functions could be replaced by OBJ_nid2ln() ? */
-std::string algorithmToString(Algorithms alg)
-{
-	switch (alg) {
-	case Algorithms::MD5:
-		return LN_md5;
-	case Algorithms::SHA1:
-		return LN_sha1;
-	case Algorithms::SHA224:
-		return LN_sha224;
-	case Algorithms::SHA256:
-		return LN_sha256;
-	case Algorithms::SHA384:
-		return LN_sha384;
-	case Algorithms::SHA512:
-		return LN_sha512;
-	case Algorithms::MD5_RSA:
-		return LN_md5WithRSAEncryption;
-	case Algorithms::SHA1_RSA:
-		return LN_sha1WithRSAEncryption;
-	case Algorithms::SHA224_RSA:
-		return LN_sha224WithRSAEncryption;
-	case Algorithms::SHA256_RSA:
-		return LN_sha256WithRSAEncryption;
-	case Algorithms::SHA384_RSA:
-		return LN_sha384WithRSAEncryption;
-	case Algorithms::SHA512_RSA:
-		return LN_sha512WithRSAEncryption;
-	case Algorithms::RSA:
-		return LN_rsaEncryption;
-	case Algorithms::DSA:
-		return LN_dsa;
-	default:
-		return "";
-	}
-}
-
-Algorithms asn1ToAlgorithm(ASN1_OBJECT* obj)
-{
-	/* maybe just have Algorithms as a typedef to nid ? */
-	int nid = OBJ_obj2nid(obj);
-	return static_cast<Algorithms>(nid);
-}
-
 /* If PKCS7 cannot be created it throws otherwise returns valid pointer */
 PKCS7* getPkcs7(const std::vector<unsigned char>& input)
 {
