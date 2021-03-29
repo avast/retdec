@@ -382,9 +382,8 @@ std::vector<std::string> Pkcs7Signature::verify(std::string fileDigest) const
 		if (signerInfo->contentType.empty()) {
 			warnings.emplace_back("Missing correct SignerInfo contentType");
 		}
-		if (!signerInfo->encryptDigest.empty() && signerInfo->getSignerCert()) {
+		if (!signerInfo->encryptDigest.empty() && signerInfo->getSignerCert() && contentInfo && pkcs7->d.sign->contents->d.data) {
 			/* Verify the signer hash and it's encryptedDigest */
-
 			const auto* data_ptr = pkcs7->d.sign->contents->d.other->value.sequence->data;
 			long data_len = pkcs7->d.sign->contents->d.other->value.sequence->length;
 			if (version == 1) {
@@ -406,6 +405,9 @@ std::vector<std::string> Pkcs7Signature::verify(std::string fileDigest) const
 			}
 
 			BIO_free_all(p7bio);
+		}
+		else {
+			warnings.emplace_back("Signature isn't valid");
 		}
 	}
 	else {

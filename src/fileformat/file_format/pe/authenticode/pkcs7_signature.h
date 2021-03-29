@@ -51,9 +51,9 @@ class Pkcs7Signature
 	class ContentInfo
 	{
 	public:
-		int contentType;
+		int contentType = 0;
+		int digestAlgorithm = 0;
 		std::string digest;
-		int digestAlgorithm;
 
 		ContentInfo(const PKCS7* pkcs7);
 	};
@@ -68,16 +68,16 @@ class Pkcs7Signature
 		const PKCS7_SIGNER_INFO* sinfo = nullptr;
 
 	public:
-		std::uint64_t version;
+		std::uint64_t version = 0;
 
 		std::string serial;
 		std::string issuer;
-		std::string contentType; /* TODO decide if we should store oid or name repre? */
+		std::string contentType;
 		std::string messageDigest;
 		std::optional<SpcSpOpusInfo> spcInfo;
 
-		int digestAlgorithm; /* Must be identical to SignedData::digestAlgorithm */
-		int digestEncryptAlgorithm;
+		int digestAlgorithm = 0; /* Must be identical to SignedData::digestAlgorithm */
+		int digestEncryptAlgorithm = 0;
 
 		std::vector<std::uint8_t> encryptDigest;
 		std::vector<Pkcs7Signature> nestedSignatures;
@@ -103,7 +103,7 @@ private:
 	std::vector<std::string> verify(std::string fileDigest) const;
 
 public:
-	std::uint64_t version;
+	std::uint64_t version = 0;
 	std::optional<ContentInfo> contentInfo;
 	std::optional<SignerInfo> signerInfo;
 
