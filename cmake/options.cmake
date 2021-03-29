@@ -174,12 +174,6 @@ macro(set_if_all_set res)
 	set(${res} ${r})
 endmacro()
 
-# scripts
-set_if_at_least_one_set(RETDEC_ENABLE_SCRIPTS RETDEC_ENABLE_ALL)
-
-# support
-set_if_at_least_one_set(RETDEC_ENABLE_SUPPORT RETDEC_ENABLE_ALL)
-
 # src
 
 # Executables - targets are not used anywhere.
@@ -502,3 +496,23 @@ set_if_at_least_one_set(RETDEC_ENABLE_YARAMOD
 		RETDEC_ENABLE_IDR2PAT
 		RETDEC_ENABLE_PAT2YARA
 		RETDEC_ENABLE_PATTERNGEN)
+
+# Support
+
+set_if_at_least_one_set(RETDEC_ENABLE_SUPPORT_ORDINALS
+		RETDEC_ENABLE_BIN2LLVMIR)
+
+set_if_at_least_one_set(RETDEC_ENABLE_SUPPORT_TYPES
+		RETDEC_ENABLE_BIN2LLVMIR)
+
+set_if_at_least_one_set(RETDEC_ENABLE_SUPPORT_YARA_SIGNSRCH
+		RETDEC_ENABLE_RETDEC
+		RETDEC_ENABLE_FILEINFO)
+
+set_if_at_least_one_set(RETDEC_ENABLE_SUPPORT_YARA_TOOLS
+		RETDEC_ENABLE_RETDEC
+		RETDEC_ENABLE_CPDETECT
+		RETDEC_ENABLE_FILEINFO)
+
+set_if_at_least_one_set(RETDEC_ENABLE_SUPPORT_YARA_STATIC_CODE
+		RETDEC_ENABLE_RETDEC)

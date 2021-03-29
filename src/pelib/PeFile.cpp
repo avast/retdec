@@ -316,7 +316,7 @@ namespace PeLib
 	{
 		if(m_imageLoader.getDataDirRva(PELIB_IMAGE_DIRECTORY_ENTRY_SECURITY))
 		{
-			return securityDir().read(m_iStream, 
+			return securityDir().read(m_iStream,
 									  m_imageLoader.getDataDirRva(PELIB_IMAGE_DIRECTORY_ENTRY_SECURITY),
 									  m_imageLoader.getDataDirSize(PELIB_IMAGE_DIRECTORY_ENTRY_SECURITY));
 		}

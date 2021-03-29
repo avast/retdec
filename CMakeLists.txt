@@ -6,6 +6,17 @@ project(retdec
 	VERSION 4.0
 )
 
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/GetGitRevisionDescription.cmake)
+get_git_head_revision(
+	RETDEC_GIT_REFSPEC
+	RETDEC_GIT_COMMIT_HASH
+)
+git_describe(
+	RETDEC_GIT_VERSION_TAG
+	"--tags"
+)
+string(TIMESTAMP RETDEC_BUILD_DATE UTC)
+
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -147,9 +158,9 @@ endif()
 
 add_subdirectory(deps)
 cond_add_subdirectory(doc RETDEC_DOC)
-cond_add_subdirectory(scripts RETDEC_ENABLE_SCRIPTS)
+add_subdirectory(scripts)
 add_subdirectory(src)
-cond_add_subdirectory(support RETDEC_ENABLE_SUPPORT)
+add_subdirectory(support)
 add_subdirectory(tests)
 
 # Create config version file.
@@ -188,12 +199,9 @@ install(
 )
 
 # Install commit id file.
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/GetGitRevisionDescription.cmake)
-get_git_head_revision(GIT_REFSPEC GIT_COMMIT)
-string(TIMESTAMP DATE UTC)
 file(WRITE
 	"${CMAKE_CURRENT_BINARY_DIR}/BUILD-ID"
-	"This build was generated from commit ${GIT_COMMIT} on ${DATE} (UTC)."
+	"RetDec ${RETDEC_GIT_VERSION_TAG} built from commit ${RETDEC_GIT_COMMIT_HASH} on ${RETDEC_BUILD_DATE} (UTC).\n"
 )
 install(
 	FILES

@@ -10,7 +10,10 @@
 #include "retdec/demangler/demangler.h"
 
 #include "retdec/utils/io/log.h"
+#include "retdec/utils/version.h"
 
+using namespace std::string_literals;
+using namespace retdec::utils;
 using namespace retdec::utils::io;
 
 using ItaniumDemangler = retdec::demangler::ItaniumDemangler;
@@ -22,8 +25,9 @@ using BorlandDemangler = retdec::demangler::BorlandDemangler;
  */
 const std::string helpmsg =
 	"Usage:\n"
-	"\t'retdec-demangler [-h, --help]   | Show this help.\n"
-	"\t'retdec-demangler <mangledname>  | Attempt to demangle <mangledname> using all available demanglers and print result if succeded.\n";
+	"\tretdec-demangler [-h, --help]   | Show this help.\n"
+	"\tretdec-demangler --version      | Show RetDec version.\n"
+	"\tretdec-demangler <mangledname>  | Attempt to demangle <mangledname> using all available demanglers and print result if succeded.\n";
 
 /**
  * @brief Main function of the Demangler tool.
@@ -38,8 +42,14 @@ int main(int argc, char *argv[])
 	std::string demangledMs;
 	std::string demangledBorland;
 
-	if (argc <= 1 || strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "--help") == 0) {
+	if (argc <= 1 || "-h"s == argv[1] || "--help"s == argv[1]) {
 		Log::info() << helpmsg;
+		return 0;
+	}
+
+	if ("--version"s == argv[1])
+	{
+		Log::info() << version::getVersionStringLong() << std::endl;
 		return 0;
 	}
 

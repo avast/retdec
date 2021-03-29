@@ -4091,7 +4091,7 @@ constexpr static std::string_view defDllList[] = {
 template <typename T> constexpr bool isSorted(T && arr) {
 	auto first = std::begin(arr);
 	auto last = std::end(arr);
-	
+
 	if (first != last) {
 		auto next = first;
 		while (++next != last) {

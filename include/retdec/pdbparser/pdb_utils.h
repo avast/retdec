@@ -117,8 +117,8 @@ typedef std::vector<PDBModule> PDBModulesVec;
 typedef struct _PDBPESection
 {
 		const char * name;  // section name
-		PDB_DWORD virtual_address;  // virtual address
-		PDB_DWORD file_address;  // address in file
+		uint64_t virtual_address;  // virtual address
+		uint64_t file_address;  // address in file
 } PDBPESection;
 
 // PDB PE sections vector

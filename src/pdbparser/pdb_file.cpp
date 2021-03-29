@@ -88,7 +88,7 @@ PDBFileState PDBFile::load_pdb_file(const char *filename)
  * Can be called only once.
  * @param image_base Base address of program's virtual memory.
  */
-void PDBFile::initialize(int image_base)
+void PDBFile::initialize(uint64_t image_base)
 {
 	if (!pdb_loaded || streams.size() <= PDB_STREAM_TPI || pdb_initialized || streams.size() <= PDB_STREAM_DBI)
 	{
@@ -491,7 +491,7 @@ void PDBFile::parse_modules(void)
  * Parses PE Sections stream and gets section name, virtual address and file address
  * Vector "sections" is filled here.
  */
-void PDBFile::parse_sections(int image_base)
+void PDBFile::parse_sections(uint64_t image_base)
 {
 	if (pdb_sec_num <= 0)  // Sections stream not present
 		return;

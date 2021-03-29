@@ -46,7 +46,7 @@ bool deserializeBool(
 	const std::string& key,
 	bool defaultValue = false);
 
-bool deserializeDouble(
+double deserializeDouble(
 	const rapidjson::Value& val,
 	const std::string& key,
 	double defaultValue = 0.0);

@@ -990,7 +990,7 @@ template <int bits> void PeUpxStub<bits>::fixResources(const DynamicBuffer& unpa
 
 	std::unordered_set<std::uint32_t> visitedNodes;
 	loadResources(_newPeFile->resDir().getRoot(), 0, uncompressedRsrcRva, compressedRsrcRva, uncompressedRsrcs, unpackedData, visitedNodes);
-	
+
 	pSectionHeader = imageLoader.addSection("gu_rsrcs", imageLoader.getSectionAlignment());
 	if(pSectionHeader != nullptr)
 	{
@@ -1003,7 +1003,7 @@ template <int bits> void PeUpxStub<bits>::fixResources(const DynamicBuffer& unpa
 		std::uint32_t newRsrcRva = pSectionHeader->VirtualAddress;
 		std::uint32_t newRsrcSize = 0;
 		_newPeFile->resDir().recalculate(newRsrcSize, newRsrcRva);
-		
+
 		imageLoader.enlargeLastSection(newRsrcSize);
 		imageLoader.setDataDirectory(PeLib::PELIB_IMAGE_DIRECTORY_ENTRY_RESOURCE, newRsrcRva, newRsrcSize);
 		imageLoader.makeValid();
@@ -1238,7 +1238,7 @@ template <int bits> void PeUpxStub<bits>::saveFile(const std::string& outputFile
 	if (!_coffSymbolTable.empty())
 		retdec::utils::writeFile(outputFileHandle, _coffSymbolTable, imageLoader.getPointerToSymbolTable());
 	outputFileHandle.close();
-	
+
 	// Write resources at the end, because they would be rewritten by unpackedData which have them zeroed
 	if((Rva = imageLoader.getDataDirRva(PeLib::PELIB_IMAGE_DIRECTORY_ENTRY_RESOURCE)) != 0)
 		_newPeFile->resDir().write(outputFile, imageLoader.getFileOffsetFromRva(Rva), Rva);

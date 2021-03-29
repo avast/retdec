@@ -1,5 +1,7 @@
 
 add_library(utils STATIC
+	io/log.cpp
+	io/logger.cpp
 	alignment.cpp
 	byte_value_storage.cpp
 	binary_path.cpp
@@ -12,13 +14,18 @@ add_library(utils STATIC
 	string.cpp
 	system.cpp
 	time.cpp
+	version.cpp
 	${RETDEC_DEPS_DIR}/whereami/whereami/whereami.c
-	io/log.cpp
-	io/logger.cpp
 )
 add_library(retdec::utils ALIAS utils)
 
 target_compile_features(utils PUBLIC cxx_std_17)
+
+target_compile_definitions(utils PRIVATE
+	RETDEC_GIT_COMMIT_HASH="${RETDEC_GIT_COMMIT_HASH}"
+	RETDEC_BUILD_DATE="${RETDEC_BUILD_DATE}"
+	RETDEC_GIT_VERSION_TAG="${RETDEC_GIT_VERSION_TAG}"
+)
 
 target_include_directories(utils
 	PUBLIC

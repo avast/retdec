@@ -11,6 +11,7 @@
 #include "retdec/utils/conversion.h"
 #include "retdec/utils/string.h"
 #include "retdec/utils/io/log.h"
+#include "retdec/utils/version.h"
 
 using namespace retdec::fileformat;
 using namespace retdec::utils;
@@ -27,13 +28,14 @@ void printUsage()
 	"offset and prints signature representing contents of all files.\n\n"
 	"Usage: getsig [OPTIONS] FILE1 [FILE2 ...]\n\n"
 	"General:\n"
-	"  -h --help              Print this message.\n\n"
+	"  -h --help              Show this help.\n\n"
+	"  --version              Show RetDec version.\n\n"
 	"Rule options:\n"
 	"  -r --rule-name NAME\n"
 	"    Set name of rule. Default value is 'unknown'.\n\n"
 	"  -n --name NAME\n"
 	"    Set name of tool. Default value is 'unknown'.\n\n"
-	"  -v --version VERSION\n"
+	"  -v --tool-version VERSION\n"
 	"    Set version of tool. Attribute is omitted if not specified.\n\n"
 	"  -e --extra INFO\n"
 	"    Set extra information. Attribute is omitted if not specified.\n\n"
@@ -154,7 +156,7 @@ bool doParams(
 	{
 		"r",    "rule-name",
 		"n",    "name",
-		"v",    "version",
+		"v",    "tool-version",
 		"e",    "extra",
 		"l",    "language",
 		"s",    "size",
@@ -197,6 +199,11 @@ bool doParams(
 			printUsage();
 			exit(EXIT_SUCCESS);
 		}
+		else if (c == "--version")
+		{
+			Log::info() << version::getVersionStringLong() << "\n";
+			exit(EXIT_SUCCESS);
+		}
 		else if (c == "-b" || c == "--bytecode")
 		{
 			options.bytecode = true;
@@ -236,7 +243,7 @@ bool doParams(
 		{
 			options.name = getParamOrDie(argv, i);
 		}
-		else if (c == "-v" || c == "--version")
+		else if (c == "-v" || c == "--tool-version")
 		{
 			options.version = getParamOrDie(argv, i);
 		}

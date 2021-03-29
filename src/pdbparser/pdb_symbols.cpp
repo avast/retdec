@@ -58,7 +58,7 @@ void dump_local_variable(PDBLocalVariable &var)
 
 void PDBFunction::dump(void)
 {
-	printf("** Function [%s] at 0x%08x\n", name, address);
+	printf("** Function [%s] at 0x%16lx\n", name, address);
 	if (overload_index > 0)
 		printf("\tFunction is overloaded. Index: %d\n", overload_index);
 	printf("\tOffset : %08x\n", offset);
@@ -100,12 +100,12 @@ void PDBFunction::dump(void)
 			data[i].type_def->dump(true);
 			size = data[i].type_def->size_bytes;
 		}
-		printf(" Size: %d bytes [%s] at 0x%08x\n", size, data[i].name, data[i].address);
+		printf(" Size: %d bytes [%s] at 0x%16lx\n", size, data[i].name, data[i].address);
 	}
 	printf("\tLine number information:\n");
 	for (unsigned int i = 0; i < lines.size(); i++)
 	{
-		printf("\t\tLine: %d Offset: %08x (%08x)\n", lines[i].line, lines[i].offset, lines[i].offset + address);
+		printf("\t\tLine: %d Offset: %08x (%16lx)\n", lines[i].line, lines[i].offset, lines[i].offset + address);
 	}
 	puts("");
 }
@@ -386,7 +386,7 @@ void PDBSymbols::parse_symbols(void)
 				case 0xF2:
 				{  // Symbol is line info header
 					LineInfoHeader *sym = reinterpret_cast<LineInfoHeader *>(symbol);
-					int addr = get_virtual_address(sym->seg, sym->off);
+					auto addr = get_virtual_address(sym->seg, sym->off);
 
 					PDBFunctionAddressMap::iterator fIt = functions.find(addr);
 					if (fIt != functions.end() && fIt->second != nullptr)
@@ -768,7 +768,7 @@ void PDBSymbols::print_global_variables(void)
 	puts("******* SYM global variables list *******");
 	for (PDBGlobalVarAddressMap::iterator it = global_variables.begin(); it != global_variables.end(); ++it)
 	{
-		printf("Global variable [%s] at 0x%08x\n", it->second.name, it->second.address);
+		printf("Global variable [%s] at 0x%16lx\n", it->second.name, it->second.address);
 		printf("\tOffset : %08x\n", it->second.offset);
 		printf("\tSection: %04x\n", it->second.section);
 		printf("\tModule : %d\n", it->second.module_index);

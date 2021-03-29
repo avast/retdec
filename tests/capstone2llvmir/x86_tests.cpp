@@ -12599,7 +12599,7 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FPATAN_compute)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_VALUES_CALLED({
-		{_module.getFunction("__asm_fpatan"), {20.0 / 10.0}},
+		{_module.getFunction("__asm_fpatan"), {20.0, 10.0}},
 	});
 }
 

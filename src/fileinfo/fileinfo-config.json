@@ -1,0 +1,27 @@
+{
+    // plain|json
+    "outputFormat": "plain",
+    // exact|similarity|sim-list
+    "yaraMatchingType": "exact",
+    "useInternalSignatureDb": true,
+    "useExternalSignatureDb": false,
+    "externalMalwareYaraRules": [
+    ],
+    "externalCryptoYaraRules": [
+        "./support/generic/yara_patterns/signsrch/signsrch.yara",
+        "./support/generic/yara_patterns/signsrch/signsrch.yarac",
+        "./support/generic/yara_patterns/signsrch/signsrch_regex.yara",
+        "./support/generic/yara_patterns/signsrch/signsrch_regex.yarac"
+    ],
+    "externalOtherYaraRules": [
+    ],
+    "loadStrings": false,
+    // default|all|file|verbose
+    "noHashes": "default",
+    "epBytes": 50,
+    "verbose": false,
+    "explanatory": false,
+    "maxMemory":0,
+    "maxMemoryHalf": false,
+    "dlls": ""
+}

@@ -155,3 +155,182 @@ rule upx_39x_nrv2e_be
 	condition:
 		$1 at elf.entry_point
 }
+rule mipsBe_lzma_v393
+{
+	meta:
+		tool = "P"
+		name = "UPX"
+		version = "3.93 [LZMA]"
+		source = "Made by Jan Neduchal"
+		pattern = "04??????27F70000909900002401FA0090980001332200070019C8C2032108042421F16003A1E821AFA1002827AA0020AF"
+	strings:
+		$h00 = { 04 ?? ?? ?? 27 F7 00 00 90 99 00 00 24 01 FA 00 90 98 00 01 33 22 00 07 00 19 C8 C2 03 21 08 04 24 21 F1 60 03 A1 E8 21 AF A1 00 28 27 AA 00 20 AF }
+	condition:
+		$h00 at elf.entry_point
+}
+
+
+rule mipsBe_nrv2x_v393
+{
+	meta:
+		tool = "P"
+		name = "UPX"
+		version = "3.93 [NRV2x]"
+		source = "Made by Jan Neduchal"
+		pattern = "04??????27F7000027BDFFFCAFBF000000A42820ACE600003C0D800001A04821240B000104??????240F000111??????90"
+	strings:
+		$h00 = { 04 ?? ?? ?? 27 F7 00 00 27 BD FF FC AF BF 00 00 00 A4 28 20 AC E6 00 00 3C 0D 80 00 01 A0 48 21 24 0B 00 01 04 ?? ?? ?? 24 0F 00 01 11 ?? ?? ?? 90 }
+	condition:
+		$h00 at elf.entry_point
+}
+
+
+rule mipsLe_lzma_v393
+{
+	meta:
+		tool = "P"
+		name = "UPX"
+		version = "3.93 [LZMA]"
+		source = "Made by Jan Neduchal"
+		pattern = "4C??????0000F7270000999000FA01240100989007002233C2C819000408210360F1212421E8A1032800A1AF2000AA272C"
+	strings:
+		$h00 = { 4C ?? ?? ?? 00 00 F7 27 00 00 99 90 00 FA 01 24 01 00 98 90 07 00 22 33 C2 C8 19 00 04 08 21 03 60 F1 21 24 21 E8 A1 03 28 00 A1 AF 20 00 AA 27 2C }
+	condition:
+		$h00 at elf.entry_point
+}
+
+
+rule mipsLe_nrv2b_v393
+{
+	meta:
+		tool = "P"
+		name = "UPX"
+		version = "3.93 [NRV2B]"
+		source = "Made by Jan Neduchal"
+		pattern = "B5??????0000F727FCFFBD270000BFAF2028A4000000E6AC00800D3C2148A00101000B2438??????01000F2405??????00"
+	strings:
+		$h00 = { B5 ?? ?? ?? 00 00 F7 27 FC FF BD 27 00 00 BF AF 20 28 A4 00 00 00 E6 AC 00 80 0D 3C 21 48 A0 01 01 00 0B 24 38 ?? ?? ?? 01 00 0F 24 05 ?? ?? ?? 00 }
+	condition:
+		$h00 at elf.entry_point
+}
+
+
+rule mipsLe_nrv2d_v393
+{
+	meta:
+		tool = "P"
+		name = "UPX"
+		version = "3.93 [NRV2D]"
+		source = "Made by Jan Neduchal"
+		pattern = "BC??????0000F727FCFFBD270000BFAF2028A4000000E6AC00800D3C2148A00101000B243F??????01000F2405??????00"
+	strings:
+		$h00 = { BC ?? ?? ?? 00 00 F7 27 FC FF BD 27 00 00 BF AF 20 28 A4 00 00 00 E6 AC 00 80 0D 3C 21 48 A0 01 01 00 0B 24 3F ?? ?? ?? 01 00 0F 24 05 ?? ?? ?? 00 }
+	condition:
+		$h00 at elf.entry_point
+}
+
+
+rule mipsLe_nrv2e_v393
+{
+	meta:
+		tool = "P"
+		name = "UPX"
+		version = "3.93 [NRV2E]"
+		source = "Made by Jan Neduchal"
+		pattern = "C0??????0000F727FCFFBD270000BFAF2028A4000000E6AC00800D3C2148A00101000B2443??????01000F2405??????00"
+	strings:
+		$h00 = { C0 ?? ?? ?? 00 00 F7 27 FC FF BD 27 00 00 BF AF 20 28 A4 00 00 00 E6 AC 00 80 0D 3C 21 48 A0 01 01 00 0B 24 43 ?? ?? ?? 01 00 0F 24 05 ?? ?? ?? 00 }
+	condition:
+		$h00 at elf.entry_point
+}
+
+
+rule mipsBe_lzma_v395
+{
+	meta:
+		tool = "P"
+		name = "UPX"
+		version = "3.95 [LZMA]"
+		source = "Made by Jan Neduchal"
+		pattern = "04??????27FE0000909900002401FA0090980001332200070019C8C2032108042421F16003A1E821AFA1002827AA0020AF"
+	strings:
+		$h00 = { 04 ?? ?? ?? 27 FE 00 00 90 99 00 00 24 01 FA 00 90 98 00 01 33 22 00 07 00 19 C8 C2 03 21 08 04 24 21 F1 60 03 A1 E8 21 AF A1 00 28 27 AA 00 20 AF }
+	condition:
+		$h00 at elf.entry_point
+}
+
+
+rule mipsBe_nrv2x_v395
+{
+	meta:
+		tool = "P"
+		name = "UPX"
+		version = "3.95 [NRV2x]"
+		source = "Made by Jan Neduchal"
+		pattern = "04??????27FE000027BDFFFCAFBF000000A42820ACE600003C0D800001A04821240B000104??????240F000111??????90"
+	strings:
+		$h00 = { 04 ?? ?? ?? 27 FE 00 00 27 BD FF FC AF BF 00 00 00 A4 28 20 AC E6 00 00 3C 0D 80 00 01 A0 48 21 24 0B 00 01 04 ?? ?? ?? 24 0F 00 01 11 ?? ?? ?? 90 }
+	condition:
+		$h00 at elf.entry_point
+}
+
+
+rule mipsLe_lzma_v395
+{
+	meta:
+		tool = "P"
+		name = "UPX"
+		version = "3.95 [LZMA]"
+		source = "Made by Jan Neduchal"
+		pattern = "6D??????0000FE270000999000FA01240100989007002233C2C819000408210360F1212421E8A1032800A1AF2000AA272C"
+	strings:
+		$h00 = { 6D ?? ?? ?? 00 00 FE 27 00 00 99 90 00 FA 01 24 01 00 98 90 07 00 22 33 C2 C8 19 00 04 08 21 03 60 F1 21 24 21 E8 A1 03 28 00 A1 AF 20 00 AA 27 2C }
+	condition:
+		$h00 at elf.entry_point
+}
+
+
+rule mipsLe_nrv2b_v395
+{
+	meta:
+		tool = "P"
+		name = "UPX"
+		version = "3.95 [NRV2B]"
+		source = "Made by Jan Neduchal"
+		pattern = "D7??????0000FE27FCFFBD270000BFAF2028A4000000E6AC00800D3C2148A00101000B2438??????01000F2405??????00"
+	strings:
+		$h00 = { D7 ?? ?? ?? 00 00 FE 27 FC FF BD 27 00 00 BF AF 20 28 A4 00 00 00 E6 AC 00 80 0D 3C 21 48 A0 01 01 00 0B 24 38 ?? ?? ?? 01 00 0F 24 05 ?? ?? ?? 00 }
+	condition:
+		$h00 at elf.entry_point
+}
+
+
+rule mipsLe_nrv2d_v395
+{
+	meta:
+		tool = "P"
+		name = "UPX"
+		version = "3.95 [NRV2D]"
+		source = "Made by Jan Neduchal"
+		pattern = "DE??????0000FE27FCFFBD270000BFAF2028A4000000E6AC00800D3C2148A00101000B243F??????01000F2405??????00"
+	strings:
+		$h00 = { DE ?? ?? ?? 00 00 FE 27 FC FF BD 27 00 00 BF AF 20 28 A4 00 00 00 E6 AC 00 80 0D 3C 21 48 A0 01 01 00 0B 24 3F ?? ?? ?? 01 00 0F 24 05 ?? ?? ?? 00 }
+	condition:
+		$h00 at elf.entry_point
+}
+
+
+rule mipsLe_nrv2e_v395
+{
+	meta:
+		tool = "P"
+		name = "UPX"
+		version = "3.95 [NRV2E]"
+		source = "Made by Jan Neduchal"
+		pattern = "E2??????0000FE27FCFFBD270000BFAF2028A4000000E6AC00800D3C2148A00101000B2443??????01000F2405??????00"
+	strings:
+		$h00 = { E2 ?? ?? ?? 00 00 FE 27 FC FF BD 27 00 00 BF AF 20 28 A4 00 00 00 E6 AC 00 80 0D 3C 21 48 A0 01 01 00 0B 24 43 ?? ?? ?? 01 00 0F 24 05 ?? ?? ?? 00 }
+	condition:
+		$h00 at elf.entry_point
+}
+

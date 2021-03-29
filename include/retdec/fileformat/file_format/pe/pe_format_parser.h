@@ -117,7 +117,7 @@ class PeFormatParser
 	{
 		return peFile->imageLoader().getFileAlignment();
 	}
-		
+
 	std::uint32_t getSectionAlignment() const
 	{
 		return peFile->imageLoader().getSectionAlignment();
@@ -284,7 +284,7 @@ class PeFormatParser
 
 		return false;
 	}
-		
+
 	bool getDataDirectoryRelative(unsigned long long index, unsigned long long &relAddr, unsigned long long &size) const
 	{
 		relAddr = peFile->imageLoader().getDataDirRva(index);

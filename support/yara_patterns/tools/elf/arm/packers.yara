@@ -176,3 +176,302 @@ rule upx_394_nrv2e
 	condition:
 		$1 at elf.entry_point
 }
+rule arm_v393
+{
+	meta:
+		tool = "P"
+		name = "UPX"
+		version = "3.93"
+		source = "Made by Jan Neduchal"
+		pattern = "1CC04FE2064C9CE80CB08BE00CA08AE0????9?E5????4?E0????8?E0????A?E1????8?E2????A?E3????2?E9????A?E3??"
+	strings:
+		$h00 = { 1C C0 4F E2 06 4C 9C E8 0C B0 8B E0 0C A0 8A E0 ?? ?? 9? E5 ?? ?? 4? E0 ?? ?? 8? E0 ?? ?? A? E1 ?? ?? 8? E2 ?? ?? A? E3 ?? ?? 2? E9 ?? ?? A? E3 ?? }
+	condition:
+		$h00 at elf.entry_point
+}
+
+
+rule armBe_v393
+{
+	meta:
+		tool = "P"
+		name = "UPX"
+		version = "3.93"
+		source = "Made by Jan Neduchal"
+		pattern = "E24FC01CE89C4C06E08BB00CE08AA00CE59?????E04?????E08?????E1A?????E28?????E3A?????E92?????E3A?????E5"
+	strings:
+		$h00 = { E2 4F C0 1C E8 9C 4C 06 E0 8B B0 0C E0 8A A0 0C E5 9? ?? ?? E0 4? ?? ?? E0 8? ?? ?? E1 A? ?? ?? E2 8? ?? ?? E3 A? ?? ?? E9 2? ?? ?? E3 A? ?? ?? E5 }
+	condition:
+		$h00 at elf.entry_point
+}
+
+
+rule arm_v394
+{
+	meta:
+		tool = "P"
+		name = "UPX"
+		version = "3.94"
+		source = "Made by Jan Neduchal"
+		pattern = "1CC04FE2064C9CE80200A0E10CB08BE00CA08AE0????9?E5????4?E0????A?E1????8?E0????8?E2????A?E3????2?E9??"
+	strings:
+		$h00 = { 1C C0 4F E2 06 4C 9C E8 02 00 A0 E1 0C B0 8B E0 0C A0 8A E0 ?? ?? 9? E5 ?? ?? 4? E0 ?? ?? A? E1 ?? ?? 8? E0 ?? ?? 8? E2 ?? ?? A? E3 ?? ?? 2? E9 ?? }
+	condition:
+		$h00 at elf.entry_point
+}
+
+
+rule armBe_v394
+{
+	meta:
+		tool = "P"
+		name = "UPX"
+		version = "3.94"
+		source = "Made by Jan Neduchal"
+		pattern = "E24FC01CE89C4C06E1A00002E08BB00CE08AA00CE59?????E04?????E1A?????E08?????E28?????E3A?????E92?????E3"
+	strings:
+		$h00 = { E2 4F C0 1C E8 9C 4C 06 E1 A0 00 02 E0 8B B0 0C E0 8A A0 0C E5 9? ?? ?? E0 4? ?? ?? E1 A? ?? ?? E0 8? ?? ?? E2 8? ?? ?? E3 A? ?? ?? E9 2? ?? ?? E3 }
+	condition:
+		$h00 at elf.entry_point
+}
+
+
+rule arm_lzma_v395
+{
+	meta:
+		tool = "P"
+		name = "UPX"
+		version = "3.95 [LZMA]"
+		source = "Made by Jan Neduchal"
+		pattern = "18D04DE2DF0200EB00C0DDE50E005CE37802001A0C482DE900B0D0E506CCA0E3ABB1A0E11CCBA0E10DB0A0E13ACD8CE20C"
+	strings:
+		$h00 = { 18 D0 4D E2 DF 02 00 EB 00 C0 DD E5 0E 00 5C E3 78 02 00 1A 0C 48 2D E9 00 B0 D0 E5 06 CC A0 E3 AB B1 A0 E1 1C CB A0 E1 0D B0 A0 E1 3A CD 8C E2 0C }
+	condition:
+		$h00 at elf.entry_point
+}
+
+
+rule arm_nrv2b_v395
+{
+	meta:
+		tool = "P"
+		name = "UPX"
+		version = "3.95 [NRV2B]"
+		source = "Made by Jan Neduchal"
+		pattern = "18D04DE29E0000EB001081E03E402DE90050E0E30241A0E31D0000EA"
+	strings:
+		$h00 = { 18 D0 4D E2 9E 00 00 EB 00 10 81 E0 3E 40 2D E9 00 50 E0 E3 02 41 A0 E3 1D 00 00 EA  }
+	condition:
+		$h00 at elf.entry_point
+}
+
+
+rule arm_nrv2d_v395
+{
+	meta:
+		tool = "P"
+		name = "UPX"
+		version = "3.95 [NRV2D]"
+		source = "Made by Jan Neduchal"
+		pattern = "18D04DE2AD0000EBFC402DE9007081E00050E0E30241A0E3140000EA1800BDE8070040E0032042E0002084E50040A0E103"
+	strings:
+		$h00 = { 18 D0 4D E2 AD 00 00 EB FC 40 2D E9 00 70 81 E0 00 50 E0 E3 02 41 A0 E3 14 00 00 EA 18 00 BD E8 07 00 40 E0 03 20 42 E0 00 20 84 E5 00 40 A0 E1 03 }
+	condition:
+		$h00 at elf.entry_point
+}
+
+
+rule arm_nrv2e_v395
+{
+	meta:
+		tool = "P"
+		name = "UPX"
+		version = "3.95 [NRV2E]"
+		source = "Made by Jan Neduchal"
+		pattern = "18D04DE2B20000EBFC402DE9007081E00050E0E30241A0E3140000EA1800BDE8070040E0032042E0002084E50040A0E103"
+	strings:
+		$h00 = { 18 D0 4D E2 B2 00 00 EB FC 40 2D E9 00 70 81 E0 00 50 E0 E3 02 41 A0 E3 14 00 00 EA 18 00 BD E8 07 00 40 E0 03 20 42 E0 00 20 84 E5 00 40 A0 E1 03 }
+	condition:
+		$h00 at elf.entry_point
+}
+
+
+rule armBe_lzma_v395
+{
+	meta:
+		tool = "P"
+		name = "UPX"
+		version = "3.95 [LZMA]"
+		source = "Made by Jan Neduchal"
+		pattern = "E24DD018EB0002D8E5DDC000E35C000E1A000274E92D480CE5D0B000E3A0CC06E1A0B1ABE1A0CB1CE1A0B00DE28CCD3AE0"
+	strings:
+		$h00 = { E2 4D D0 18 EB 00 02 D8 E5 DD C0 00 E3 5C 00 0E 1A 00 02 74 E9 2D 48 0C E5 D0 B0 00 E3 A0 CC 06 E1 A0 B1 AB E1 A0 CB 1C E1 A0 B0 0D E2 8C CD 3A E0 }
+	condition:
+		$h00 at elf.entry_point
+}
+
+
+rule armBe_nrv2b_v395
+{
+	meta:
+		tool = "P"
+		name = "UPX"
+		version = "3.95 [NRV2B]"
+		source = "Made by Jan Neduchal"
+		pattern = "E24DD018EB000097E0811000E92D403EE3E05000E3A04102EA000019"
+	strings:
+		$h00 = { E2 4D D0 18 EB 00 00 97 E0 81 10 00 E9 2D 40 3E E3 E0 50 00 E3 A0 41 02 EA 00 00 19  }
+	condition:
+		$h00 at elf.entry_point
+}
+
+
+rule armBe_nrv2d_v395
+{
+	meta:
+		tool = "P"
+		name = "UPX"
+		version = "3.95 [NRV2D]"
+		source = "Made by Jan Neduchal"
+		pattern = "E24DD018EB0000A6E92D40FCE0817000E3E05000E3A04102EA000010E8BD0018E0400007E0422003E5842000E1A04000E1"
+	strings:
+		$h00 = { E2 4D D0 18 EB 00 00 A6 E9 2D 40 FC E0 81 70 00 E3 E0 50 00 E3 A0 41 02 EA 00 00 10 E8 BD 00 18 E0 40 00 07 E0 42 20 03 E5 84 20 00 E1 A0 40 00 E1 }
+	condition:
+		$h00 at elf.entry_point
+}
+
+
+rule armBe_nrv2e_v395
+{
+	meta:
+		tool = "P"
+		name = "UPX"
+		version = "3.95 [NRV2E]"
+		source = "Made by Jan Neduchal"
+		pattern = "E24DD018EB0000ABE92D40FCE0817000E3E05000E3A04102EA000010E8BD0018E0400007E0422003E5842000E1A04000E1"
+	strings:
+		$h00 = { E2 4D D0 18 EB 00 00 AB E9 2D 40 FC E0 81 70 00 E3 E0 50 00 E3 A0 41 02 EA 00 00 10 E8 BD 00 18 E0 40 00 07 E0 42 20 03 E5 84 20 00 E1 A0 40 00 E1 }
+	condition:
+		$h00 at elf.entry_point
+}
+
+
+rule arm_lzma_v396
+{
+	meta:
+		tool = "P"
+		name = "UPX"
+		version = "3.96 [LZMA]"
+		source = "Made by Jan Neduchal"
+		pattern = "18D04DE2E60200EB00C0DDE50E005CE37802001A0C482DE900B0D0E506CCA0E3ABB1A0E11CCBA0E10DB0A0E13ACD8CE20C"
+	strings:
+		$h00 = { 18 D0 4D E2 E6 02 00 EB 00 C0 DD E5 0E 00 5C E3 78 02 00 1A 0C 48 2D E9 00 B0 D0 E5 06 CC A0 E3 AB B1 A0 E1 1C CB A0 E1 0D B0 A0 E1 3A CD 8C E2 0C }
+	condition:
+		$h00 at elf.entry_point
+}
+
+
+rule arm_nrv2b_v396
+{
+	meta:
+		tool = "P"
+		name = "UPX"
+		version = "3.96 [NRV2B]"
+		source = "Made by Jan Neduchal"
+		pattern = "18D04DE2A50000EB001081E03E402DE90050E0E30241A0E31D0000EA"
+	strings:
+		$h00 = { 18 D0 4D E2 A5 00 00 EB 00 10 81 E0 3E 40 2D E9 00 50 E0 E3 02 41 A0 E3 1D 00 00 EA  }
+	condition:
+		$h00 at elf.entry_point
+}
+
+
+rule arm_nrv2d_v396
+{
+	meta:
+		tool = "P"
+		name = "UPX"
+		version = "3.96 [NRV2D]"
+		source = "Made by Jan Neduchal"
+		pattern = "18D04DE2B40000EBFC402DE9007081E00050E0E30241A0E3140000EA1800BDE8070040E0032042E0002084E50040A0E103"
+	strings:
+		$h00 = { 18 D0 4D E2 B4 00 00 EB FC 40 2D E9 00 70 81 E0 00 50 E0 E3 02 41 A0 E3 14 00 00 EA 18 00 BD E8 07 00 40 E0 03 20 42 E0 00 20 84 E5 00 40 A0 E1 03 }
+	condition:
+		$h00 at elf.entry_point
+}
+
+
+rule arm_nrv2e_v396
+{
+	meta:
+		tool = "P"
+		name = "UPX"
+		version = "3.96 [NRV2E]"
+		source = "Made by Jan Neduchal"
+		pattern = "18D04DE2B90000EBFC402DE9007081E00050E0E30241A0E3140000EA1800BDE8070040E0032042E0002084E50040A0E103"
+	strings:
+		$h00 = { 18 D0 4D E2 B9 00 00 EB FC 40 2D E9 00 70 81 E0 00 50 E0 E3 02 41 A0 E3 14 00 00 EA 18 00 BD E8 07 00 40 E0 03 20 42 E0 00 20 84 E5 00 40 A0 E1 03 }
+	condition:
+		$h00 at elf.entry_point
+}
+
+
+rule armBe_lzma_v396
+{
+	meta:
+		tool = "P"
+		name = "UPX"
+		version = "3.96 [LZMA]"
+		source = "Made by Jan Neduchal"
+		pattern = "E24DD018EB0002DDE5DDC000E35C000E1A000274E92D480CE5D0B000E3A0CC06E1A0B1ABE1A0CB1CE1A0B00DE28CCD3AE0"
+	strings:
+		$h00 = { E2 4D D0 18 EB 00 02 DD E5 DD C0 00 E3 5C 00 0E 1A 00 02 74 E9 2D 48 0C E5 D0 B0 00 E3 A0 CC 06 E1 A0 B1 AB E1 A0 CB 1C E1 A0 B0 0D E2 8C CD 3A E0 }
+	condition:
+		$h00 at elf.entry_point
+}
+
+
+rule armBe_nrv2b_v396
+{
+	meta:
+		tool = "P"
+		name = "UPX"
+		version = "3.96 [NRV2B]"
+		source = "Made by Jan Neduchal"
+		pattern = "E24DD018EB00009CE0811000E92D403EE3E05000E3A04102EA000019"
+	strings:
+		$h00 = { E2 4D D0 18 EB 00 00 9C E0 81 10 00 E9 2D 40 3E E3 E0 50 00 E3 A0 41 02 EA 00 00 19  }
+	condition:
+		$h00 at elf.entry_point
+}
+
+
+rule armBe_nrv2d_v396
+{
+	meta:
+		tool = "P"
+		name = "UPX"
+		version = "3.96 [NRV2D]"
+		source = "Made by Jan Neduchal"
+		pattern = "E24DD018EB0000ABE92D40FCE0817000E3E05000E3A04102EA000010E8BD0018E0400007E0422003E5842000E1A04000E1"
+	strings:
+		$h00 = { E2 4D D0 18 EB 00 00 AB E9 2D 40 FC E0 81 70 00 E3 E0 50 00 E3 A0 41 02 EA 00 00 10 E8 BD 00 18 E0 40 00 07 E0 42 20 03 E5 84 20 00 E1 A0 40 00 E1 }
+	condition:
+		$h00 at elf.entry_point
+}
+
+
+rule armBe_nrv2e_v396
+{
+	meta:
+		tool = "P"
+		name = "UPX"
+		version = "3.96 [NRV2E]"
+		source = "Made by Jan Neduchal"
+		pattern = "E24DD018EB0000B0E92D40FCE0817000E3E05000E3A04102EA000010E8BD0018E0400007E0422003E5842000E1A04000E1"
+	strings:
+		$h00 = { E2 4D D0 18 EB 00 00 B0 E9 2D 40 FC E0 81 70 00 E3 E0 50 00 E3 A0 41 02 EA 00 00 10 E8 BD 00 18 E0 40 00 07 E0 42 20 03 E5 84 20 00 E1 A0 40 00 E1 }
+	condition:
+		$h00 at elf.entry_point
+}
+

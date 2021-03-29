@@ -15,9 +15,11 @@
 #include "retdec/utils/conversion.h"
 #include "retdec/utils/string.h"
 #include "retdec/utils/io/log.h"
+#include "retdec/utils/version.h"
 
 #include "retdec/capstone2llvmir/capstone2llvmir.h"
 
+using namespace retdec::utils;
 using namespace retdec::utils::io;
 
 // byte ptr [0x12345678], 0x11
@@ -41,7 +43,12 @@ class ProgramOptions
 			{
 				std::string c = argv[i];
 
-				if (c == "-a")
+				if (c == "--version")
+				{
+					Log::info() << version::getVersionStringLong() << "\n";
+					exit(0);
+				}
+				else if (c == "-a")
 				{
 					_arch = getParamOrDie(argc, argv, i);
 					if (_arch == "arm") arch = CS_ARCH_ARM;
@@ -171,6 +178,8 @@ class ProgramOptions
 			std::string tmp;
 			retdec::utils::bytesToHexString(CODE, tmp, 0, 0, false, true);
 			Log::info() << _programName << ":\n"
+				"\t-h|--help Show this help.\n"
+				"\t--version Show RetDec version.\n"
 				"\t-a name   Set architecture name.\n"
 				"\t          Possible values: arm, arm64, mips, x86, ppc, sparc, sysz, xcore\n"
 				"\t          Default value: x86.\n"

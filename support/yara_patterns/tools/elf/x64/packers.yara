@@ -91,3 +91,63 @@ rule upx_394_lzma_2
 	condition:
 		$1 at elf.entry_point
 }
+
+rule x64_lzma_v393
+{
+	meta:
+		tool = "P"
+		name = "UPX"
+		version = "3.93 [LZMA]"
+		source = "Made by Jan Neduchal"
+		pattern = "E8????????555351524801FE5641??????0F85????????554889E5448B094989D04889F2488D7702568A07FFCA88C12407"
+	strings:
+		$h00 = { E8 ?? ?? ?? ?? 55 53 51 52 48 01 FE 56 41 ?? ?? ?? 0F 85 ?? ?? ?? ?? 55 48 89 E5 44 8B 09 49 89 D0 48 89 F2 48 8D 77 02 56 8A 07 FF CA 88 C1 24 07 }
+	condition:
+		$h00 at elf.entry_point
+}
+
+
+rule x64_nrv2x_v393
+{
+	meta:
+		tool = "P"
+		name = "UPX"
+		version = "3.93 [NRV2x]"
+		source = "Made by Jan Neduchal"
+		pattern = "E8????????555351524801FE564889FE4889D731DB31C94883CDFFE8????????01DB74??F3C38B1E4883EEFC11DB8A16F3"
+	strings:
+		$h00 = { E8 ?? ?? ?? ?? 55 53 51 52 48 01 FE 56 48 89 FE 48 89 D7 31 DB 31 C9 48 83 CD FF E8 ?? ?? ?? ?? 01 DB 74 ?? F3 C3 8B 1E 48 83 EE FC 11 DB 8A 16 F3 }
+	condition:
+		$h00 at elf.entry_point
+}
+
+
+rule x64_lzma_v395
+{
+	meta:
+		tool = "P"
+		name = "UPX"
+		version = "3.95 [LZMA]"
+		source = "Made by Jan Neduchal"
+		pattern = "5052E8????????555351524801FE5641??????0F85????????554889E5448B094989D04889F2488D7702568A07FFCA88C1"
+	strings:
+		$h00 = { 50 52 E8 ?? ?? ?? ?? 55 53 51 52 48 01 FE 56 41 ?? ?? ?? 0F 85 ?? ?? ?? ?? 55 48 89 E5 44 8B 09 49 89 D0 48 89 F2 48 8D 77 02 56 8A 07 FF CA 88 C1 }
+	condition:
+		$h00 at elf.entry_point
+}
+
+
+rule x64_nrv2x_v395
+{
+	meta:
+		tool = "P"
+		name = "UPX"
+		version = "3.95 [NRV2x]"
+		source = "Made by Jan Neduchal"
+		pattern = "5052E8????????555351524801FE564889FE4889D731DB31C94883CDFFE8????????01DB74??F3C38B1E4883EEFC11DB8A"
+	strings:
+		$h00 = { 50 52 E8 ?? ?? ?? ?? 55 53 51 52 48 01 FE 56 48 89 FE 48 89 D7 31 DB 31 C9 48 83 CD FF E8 ?? ?? ?? ?? 01 DB 74 ?? F3 C3 8B 1E 48 83 EE FC 11 DB 8A }
+	condition:
+		$h00 at elf.entry_point
+}
+

@@ -15,10 +15,12 @@ import sys
 utils = importlib.import_module('retdec-utils')
 utils.check_python_version()
 utils.ensure_script_is_being_run_from_installed_retdec()
-retdec_archive_decompiler = importlib.import_module('retdec-archive-decompiler')
 
-ArchiveDecompiler = retdec_archive_decompiler.ArchiveDecompiler
-
+try:
+    retdec_archive_decompiler = importlib.import_module('retdec-archive-decompiler')
+    ArchiveDecompiler = retdec_archive_decompiler.ArchiveDecompiler
+except ImportError:
+    ArchiveDecompiler = None
 
 sys.stdout = utils.Unbuffered(sys.stdout)
 
@@ -78,6 +80,7 @@ def main():
         if args.json:
             archive_decompiler_args.append('--json')
 
+        assert ArchiveDecompiler is not None, "You need to install RetDec with Decompiler in order to analyze archives"
         decompiler = ArchiveDecompiler(archive_decompiler_args)
         sys.exit(decompiler.decompile_archive())
 

@@ -124,3 +124,77 @@ rule upx_394_lzma_be
 	condition:
 		$1 at elf.entry_point
 }
+
+rule powerpc_lzma_v393
+{
+	meta:
+		tool = "P"
+		name = "UPX"
+		version = "3.93 [LZMA]"
+		source = "Made by Jan Neduchal"
+		pattern = "48??????2807000E40??????7C0802A67CC93378810600007CA72B7838A4FFFE388300029001000888030000540BE8FE54"
+	strings:
+		$h00 = { 48 ?? ?? ?? 28 07 00 0E 40 ?? ?? ?? 7C 08 02 A6 7C C9 33 78 81 06 00 00 7C A7 2B 78 38 A4 FF FE 38 83 00 02 90 01 00 08 88 03 00 00 54 0B E8 FE 54 }
+	condition:
+		$h00 at elf.entry_point
+}
+
+
+rule powerpc_nrv2b_v393
+{
+	meta:
+		tool = "P"
+		name = "UPX"
+		version = "3.93 [NRV2B]"
+		source = "Made by Jan Neduchal"
+		pattern = "48??????7C0029EC7DA802A62807000240??????90A600007C841A143C0080003D2080003863FFFF38A5FFFF3940FFFF48"
+	strings:
+		$h00 = { 48 ?? ?? ?? 7C 00 29 EC 7D A8 02 A6 28 07 00 02 40 ?? ?? ?? 90 A6 00 00 7C 84 1A 14 3C 00 80 00 3D 20 80 00 38 63 FF FF 38 A5 FF FF 39 40 FF FF 48 }
+	condition:
+		$h00 at elf.entry_point
+}
+
+
+rule powerpc_nrv2d_v393
+{
+	meta:
+		tool = "P"
+		name = "UPX"
+		version = "3.93 [NRV2D]"
+		source = "Made by Jan Neduchal"
+		pattern = "48??????7C0029EC7DA802A62807000540??????90A600007C841A143C0080003D2080003863FFFF38A5FFFF3940FFFF48"
+	strings:
+		$h00 = { 48 ?? ?? ?? 7C 00 29 EC 7D A8 02 A6 28 07 00 05 40 ?? ?? ?? 90 A6 00 00 7C 84 1A 14 3C 00 80 00 3D 20 80 00 38 63 FF FF 38 A5 FF FF 39 40 FF FF 48 }
+	condition:
+		$h00 at elf.entry_point
+}
+
+
+rule powerpc_nrv2e_v393
+{
+	meta:
+		tool = "P"
+		name = "UPX"
+		version = "3.93 [NRV2E]"
+		source = "Made by Jan Neduchal"
+		pattern = "48??????7C0029EC7DA802A62807000840??????90A600007C841A143C0080003D2080003863FFFF38A5FFFF3940FFFF48"
+	strings:
+		$h00 = { 48 ?? ?? ?? 7C 00 29 EC 7D A8 02 A6 28 07 00 08 40 ?? ?? ?? 90 A6 00 00 7C 84 1A 14 3C 00 80 00 3D 20 80 00 38 63 FF FF 38 A5 FF FF 39 40 FF FF 48 }
+	condition:
+		$h00 at elf.entry_point
+}
+
+
+rule powerpc_lzma_v395
+{
+	meta:
+		tool = "P"
+		name = "UPX"
+		version = "3.95 [LZMA]"
+		source = "Made by Jan Neduchal"
+		pattern = "48??????2807000E40??????9421FFE87C0802A67CC93378810600007CA72B7838A4FFFE38830002900100088803000054"
+	strings:
+		$h00 = { 48 ?? ?? ?? 28 07 00 0E 40 ?? ?? ?? 94 21 FF E8 7C 08 02 A6 7C C9 33 78 81 06 00 00 7C A7 2B 78 38 A4 FF FE 38 83 00 02 90 01 00 08 88 03 00 00 54 }
+	condition:
+		$h00 at elf.entry_point
+}

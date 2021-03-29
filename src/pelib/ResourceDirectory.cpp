@@ -318,9 +318,7 @@ namespace PeLib
 		// Invalid leaf.
 		std::uint32_t uiRva = uiRsrcRva + uiOffset;
 		if(uiRva > sizeOfImage)
-		{
 			return ERROR_INVALID_FILE;
-		}
 
 		// Load the resource data entry
 		imageLoader.readImage(&entry, uiRva, sizeof(PELIB_IMAGE_RESOURCE_DATA_ENTRY));
@@ -330,6 +328,8 @@ namespace PeLib
 		m_data.clear();
 
 		// No data or invalid leaf
+		if(entry.OffsetToData == 0 && entry.Size == 0)
+			return ERROR_INVALID_FILE;
 		if(entry.OffsetToData > sizeOfImage || entry.Size > sizeOfImage)
 			return ERROR_NONE;
 		if((uiRsrcRva + entry.OffsetToData) >= sizeOfImage || (uiRsrcRva + entry.OffsetToData + entry.Size) > sizeOfImage)
@@ -645,8 +645,17 @@ namespace PeLib
 		if(imageLoader.readImage(&header, uiRva, PELIB_IMAGE_RESOURCE_DIRECTORY::size()) != PELIB_IMAGE_RESOURCE_DIRECTORY::size())
 			return ERROR_INVALID_FILE;
 
-		// Add the total number of entries to the occupied range
+		// FE015EB24B7EEA2907698A6D7142198644A757066DA4EB8D3A4B63900008CF5E: Invalid root resource directory
+		// We artificially limit the allowed number of resource entries
+		if((header.NumberOfNamedEntries > PELIB_MAX_RESOURCE_ENTRIES) || (header.NumberOfIdEntries > PELIB_MAX_RESOURCE_ENTRIES))
+			return ERROR_INVALID_FILE;
+
+		// More checks for number of entries
 		unsigned int uiNumberOfEntries = header.NumberOfNamedEntries + header.NumberOfIdEntries;
+		if(uiNumberOfEntries > PELIB_MAX_RESOURCE_ENTRIES)
+			return ERROR_INVALID_FILE;
+
+		// Add the total number of entries to the occupied range
 		resDir->addOccupiedAddressRange(uiRva, uiRva + PELIB_IMAGE_RESOURCE_DIRECTORY::size() - 1);
 		uiRva += PELIB_IMAGE_RESOURCE_DIRECTORY::size();
 
@@ -717,7 +726,7 @@ namespace PeLib
 					}
 
 					// Read the resource name
-					imageLoader.readStringRc(rc.entry.wstrName, uiRsrcRva + uiNameOffset); 
+					imageLoader.readStringRc(rc.entry.wstrName, uiRsrcRva + uiNameOffset);
 				}
 			}
 
@@ -1021,11 +1030,6 @@ namespace PeLib
 	{
 		std::uint32_t resDirRva = imageLoader.getDataDirRva(PELIB_IMAGE_DIRECTORY_ENTRY_RESOURCE);
 		std::uint32_t sizeOfImage = imageLoader.getSizeOfImage();
-
-		if(resDirRva >= sizeOfImage)
-		{
-			return ERROR_INVALID_FILE;
-		}
 
 		return m_rnRoot.read(imageLoader, resDirRva, 0, sizeOfImage, this);
 	}

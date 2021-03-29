@@ -41,8 +41,8 @@ enum struct PELIB_MEMBER_TYPE : std::uint32_t
 enum struct PELIB_COMPARE_RESULT : std::uint32_t
 {
 	ImagesEqual,                                    // The images are equal
-	ImagesWindowsLoadedWeDidnt,                     // 
-	ImagesWindowsDidntLoadWeDid,                    // 
+	ImagesWindowsLoadedWeDidnt,                     //
+	ImagesWindowsDidntLoadWeDid,                    //
 	ImagesDifferentSize,                            // The images have different size
 	ImagesDifferentPageAccess,                      // An image page is different (accessible vs non-accessible)
 	ImagesDifferentPageValue,                       // There is a different value at a certain offset
@@ -74,7 +74,7 @@ struct PELIB_IMAGE_COMPARE
 	PELIB_COMPARE_RESULT compareResult = PELIB_COMPARE_RESULT::ImagesCompareInvalid;
 	const char * szFileName = nullptr;              // Current file being compared (plain name)
 	const char * dumpIfNotEqual = nullptr;          // If non-NULL, the image will be dumped into that file if different
-	std::uint32_t differenceOffset = 0;             // If compareResult is ImagesDifferentPageValue, this contains offset of the difference 
+	std::uint32_t differenceOffset = 0;             // If compareResult is ImagesDifferentPageValue, this contains offset of the difference
 	std::uint32_t startTickCount = 0;               // GetTickCount value at the start of image testing
 };
 
@@ -204,7 +204,7 @@ class ImageLoader
 
 	std::uint64_t getSizeOfFile() const
 	{
-		return fileSize;
+		return savedFileSize;
 	}
 
 	std::uint64_t getOrdinalMask() const
@@ -451,7 +451,7 @@ class ImageLoader
 	PELIB_IMAGE_OPTIONAL_HEADER optionalHeader;         // 32/64-bit optional header
 	ByteBuffer rawFileData;                             // Loaded content of the image in case it couldn't have been mapped
 	LoaderError ldrError;
-	std::uint64_t fileSize;                             // Size of the raw file
+	std::uint64_t savedFileSize;                        // Size of the raw file
 	std::uint32_t windowsBuildNumber;
 	std::uint32_t ntSignature;
 	std::uint32_t maxSectionCount;
