@@ -73,24 +73,18 @@ void ElfImportTable::computeHashes()
 	}
 
 	if (impHashString.size()) {
+		auto data = reinterpret_cast<const uint8_t*>(impHashString.data());
+
 		Tlsh tlsh;
-		tlsh.update(
-				reinterpret_cast<const uint8_t*>(impHashString.data()),
-				impHashString.size());
+		tlsh.update(data, impHashString.size());
 
 		tlsh.final();
 		const int show_version = 1; /* this prepends the hash with 'T' + number of the version */
 		impHashTlsh = toLower(tlsh.getHash(show_version));
 
-		impHashCrc32 = getCrc32(
-				reinterpret_cast<const uint8_t*>(impHashString.data()),
-				impHashString.size());
-		impHashMd5 = getMd5(
-				reinterpret_cast<const uint8_t*>(impHashString.data()),
-				impHashString.size());
-		impHashSha256 = getSha256(
-				reinterpret_cast<const uint8_t*>(impHashString.data()),
-				impHashString.size());
+		impHashCrc32 = getCrc32(data, impHashString.size());
+		impHashMd5 = getMd5(data, impHashString.size());
+		impHashSha256 = getSha256(data, impHashString.size());
 	}
 }
 
