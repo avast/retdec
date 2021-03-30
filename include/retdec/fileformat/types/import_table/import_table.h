@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "retdec/fileformat/types/import_table/import.h"
+
 namespace retdec {
 namespace fileformat {
 

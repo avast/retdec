@@ -9,6 +9,7 @@
 #include "retdec/fileformat/utils/tlsh/tlsh.h"
 #include "retdec/fileformat/types/import_table/elf_import_table.h"
 #include <algorithm>
+#include <unordered_set>>
 #include <regex>
 
 using namespace retdec::utils;
@@ -16,7 +17,9 @@ using namespace retdec::utils;
 namespace retdec {
 namespace fileformat {
 
-static const std::set<std::string> exclusion_set = {
+/* exclusions are based on the original implementation 
+   https://github.com/trendmicro/telfhash/blob/master/telfhash/telfhash.py */
+static const std::unordered_set<std::string> exclusion_set = {
 	"__libc_start_main", // main function
 	"main", // main function
 	"abort", // ARM default
@@ -27,36 +30,25 @@ static const std::set<std::string> exclusion_set = {
 	"malloc_trim" // GNU extensions
 };
 
-bool isSymbolExcluded(std::string symbol)
+/*
+ignore
+	symbols starting with . or 
+	x86-64 specific functions
+	string functions (str.* and mem.*), gcc changes them depending on architecture
+	symbols starting with . or _
+*/
+static std::regex exclusion_regex("(^[_\.].*$)|(^.*64$)|(^str.*$)|(^mem.*$)");
+
+static bool isSymbolExcluded(const std::string& symbol)
 {
-	if (symbol.empty()) {
-		return true;
-	}
-	/* ignore:
-		symbols starting with . or _
-		x86-64 specific functions
-		string functions (str.* and mem.*), gcc changes them depending on architecture
-		symbols starting with . or _
-	*/
-	std::regex exclusion_regex("(^[_\.].*$)|(^.*64$)|(^str.*$)|(^mem.*$)");
-
-	if (std::regex_match(symbol, exclusion_regex)) {
-		return true;
-	}
-
-	if (exclusion_set.count(symbol)) {
-		return true;
-	}
-
-	return false;
+	return symbol.empty() 
+		|| std::regex_match(symbol, exclusion_regex) 
+		|| exclusion_set.count(symbol);
 }
 
-/**
- * Compute import telfhash
- */
 void ElfImportTable::computeHashes()
 {
-	std::vector<std::string> imported_symbols;
+	std::vector<std::string> imported_symbols(imports.size());
 
 	for (const auto& import : imports) {
 		auto funcName = toLower(import->getName());
@@ -69,6 +61,7 @@ void ElfImportTable::computeHashes()
 		imported_symbols.push_back(funcName);
 	}
 
+	/* sort them lexicographically */
 	std::sort(imported_symbols.begin(), imported_symbols.end());
 
 	std::string impHashString;
@@ -81,14 +74,23 @@ void ElfImportTable::computeHashes()
 
 	if (impHashString.size()) {
 		Tlsh tlsh;
-		tlsh.update(reinterpret_cast<const uint8_t*>(impHashString.data()), impHashString.size());
+		tlsh.update(
+				reinterpret_cast<const uint8_t*>(impHashString.data()),
+				impHashString.size());
+
 		tlsh.final();
 		const int show_version = 1; /* this prepends the hash with 'T' + number of the version */
 		impHashTlsh = toLower(tlsh.getHash(show_version));
 
-		impHashCrc32 = getCrc32(reinterpret_cast<const uint8_t*>(impHashString.data()), impHashString.size());
-		impHashMd5 = getMd5(reinterpret_cast<const uint8_t*>(impHashString.data()), impHashString.size());
-		impHashSha256 = getSha256(reinterpret_cast<const uint8_t*>(impHashString.data()), impHashString.size());
+		impHashCrc32 = getCrc32(
+				reinterpret_cast<const uint8_t*>(impHashString.data()),
+				impHashString.size());
+		impHashMd5 = getMd5(
+				reinterpret_cast<const uint8_t*>(impHashString.data()),
+				impHashString.size());
+		impHashSha256 = getSha256(
+				reinterpret_cast<const uint8_t*>(impHashString.data()),
+				impHashString.size());
 	}
 }
 

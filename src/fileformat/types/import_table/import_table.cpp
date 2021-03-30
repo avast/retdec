@@ -675,10 +675,6 @@ const std::string& ImportTable::getImphashSha256() const
 	return impHashSha256;
 }
 
-/**
- * Get imphash as tlsh
- * @return Imphash as tlsh
- */
 const std::string& ImportTable::getImpHashTlsh() const {
 	return impHashTlsh;
 }
