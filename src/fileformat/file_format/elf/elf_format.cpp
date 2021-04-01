@@ -4,6 +4,7 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
+#include <elfio/elf_types.hpp>
 #include <map>
 
 #include "retdec/utils/conversion.h"
@@ -1733,6 +1734,10 @@ void ElfFormat::loadSymbols(const ELFIO::elfio *file, const ELFIO::symbol_sectio
 	std::unordered_multimap<std::string, unsigned long long> importNameAddressMap;
 	loadRelocations(file, section, importNameAddressMap);
 
+	if (elfImportTable && !elfImportTable->isDynsym) {
+		elfImportTable->symbolNames = {};
+	}
+
 	for(std::size_t i = 0, e = elfSymbolTable->get_loaded_symbols_num(); i < e; ++i)
 	{
 		auto symbol = std::make_shared<ElfSymbol>();
@@ -1747,6 +1752,15 @@ void ElfFormat::loadSymbols(const ELFIO::elfio *file, const ELFIO::symbol_sectio
 		symbol->setElfBind(bind);
 		symbol->setElfOther(other);
 		link = fixSymbolLink(link, value);
+		if (type == STT_FUNC && bind == STB_GLOBAL && other == STV_DEFAULT) {
+			if (!elfImportTable) {
+				elfImportTable = new ElfImportTable();
+			}
+			if (!elfImportTable->isDynsym) {
+				elfImportTable->symbolNames.push_back(name);
+			}
+		}
+
 		if(link >= file->sections.size() || !file->sections[link] || link == SHN_ABS ||
 			link == SHN_COMMON || link == SHN_UNDEF || link == SHN_XINDEX)
 		{
@@ -1756,9 +1770,9 @@ void ElfFormat::loadSymbols(const ELFIO::elfio *file, const ELFIO::symbol_sectio
 			// Ignore first STN_UNDEF STT_NOTYPE symbol when considering imports
 			if(link == SHN_UNDEF && i != 0)
 			{
-				if(!importTable)
+				if(!elfImportTable)
 				{
-					importTable = new ElfImportTable();
+					elfImportTable = new ElfImportTable();
 				}
 				auto keyIter = importNameAddressMap.equal_range(name);
 				// we create std::set from std::multimap values in order to ensure determinism
@@ -1769,7 +1783,7 @@ void ElfFormat::loadSymbols(const ELFIO::elfio *file, const ELFIO::symbol_sectio
 					import->setName(name);
 					import->setAddress(address.second);
 					import->setUsageType(symbolToImportUsage(symbol->getUsageType()));
-					importTable->addImport(std::move(import));
+					elfImportTable->addImport(std::move(import));
 				}
 				if(keyIter.first == keyIter.second && getSectionFromAddress(value))
 				{
@@ -1777,7 +1791,7 @@ void ElfFormat::loadSymbols(const ELFIO::elfio *file, const ELFIO::symbol_sectio
 					import->setName(name);
 					import->setAddress(value);
 					import->setUsageType(symbolToImportUsage(symbol->getUsageType()));
-					importTable->addImport(std::move(import));
+					elfImportTable->addImport(std::move(import));
 				}
 			}
 		}
@@ -1798,6 +1812,7 @@ void ElfFormat::loadSymbols(const ELFIO::elfio *file, const ELFIO::symbol_sectio
 	}
 
 	symtab->setName(section->get_name());
+
 	if(symtab->hasSymbols())
 	{
 		symbolTables.push_back(symtab);
@@ -1806,6 +1821,11 @@ void ElfFormat::loadSymbols(const ELFIO::elfio *file, const ELFIO::symbol_sectio
 	{
 		delete symtab;
 	}
+	if (elfImportTable && section->get_type() == SHT_DYNSYM) {
+		elfImportTable->isDynsym = true;
+	}
+
+	importTable = elfImportTable;
 
 	loadImpHash();
 	loadExpHash();

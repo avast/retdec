@@ -7,6 +7,7 @@
 #include "retdec/fileformat/utils/crypto.h"
 #include "retdec/utils/string.h"
 #include "retdec/fileformat/types/import_table/elf_import_table.h"
+#include <iostream>
 #include <tlsh/tlsh.h>
 #include <algorithm>
 #include <unordered_set>>
@@ -48,17 +49,17 @@ static bool isSymbolExcluded(const std::string& symbol)
 
 void ElfImportTable::computeHashes()
 {
-	std::vector<std::string> imported_symbols(imports.size());
+	std::vector<std::string> imported_symbols;
+	imported_symbols.reserve(symbolNames.size());
 
-	for (const auto& import : imports) {
-		auto funcName = toLower(import->getName());
+	for (const auto& symbol : symbolNames) {
+		auto name = toLower(symbol);
 
-		// filter the symbols just as telfhash does for the same result
-		if (isSymbolExcluded(funcName)) {
+		if (isSymbolExcluded(name)) {
 			continue;
 		}
 
-		imported_symbols.push_back(funcName);
+		imported_symbols.emplace_back(name);
 	}
 
 	/* sort them lexicographically */

@@ -24,6 +24,8 @@ namespace fileformat {
 class ElfFormat : public FileFormat
 {
 	private:
+		ElfImportTable *elfImportTable = nullptr;
+
 		/**
 		 * Description of ELF relocation table
 		 */
