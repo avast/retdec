@@ -13,9 +13,6 @@ add_library(fileformat STATIC
 	utils/other.cpp
 	utils/asn1.cpp
 	utils/file_io.cpp
-	utils/tlsh/tlsh_impl.cpp
-	utils/tlsh/tlsh_util.cpp
-	utils/tlsh/tlsh.cpp
 	format_factory.cpp
 	types/dotnet_headers/blob_stream.cpp
 	types/dotnet_headers/user_string_stream.cpp
@@ -99,6 +96,7 @@ target_link_libraries(fileformat
 		retdec::utils
 		retdec::pelib
 		retdec::deps::elfio
+		retdec::deps::tlsh
 		retdec::deps::llvm
 	PRIVATE
 		OpenSSL::Crypto

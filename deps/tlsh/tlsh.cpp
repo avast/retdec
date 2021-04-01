@@ -55,8 +55,8 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "retdec/fileformat/utils/tlsh/tlsh.h"
-#include "retdec/fileformat/utils/tlsh/tlsh_impl.h"
+#include "include/tlsh/tlsh.h"
+#include "include/tlsh/tlsh_impl.h"
 #include "stdio.h"
 #include <errno.h>
 #include <string.h>

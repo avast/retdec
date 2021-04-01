@@ -4902,18 +4902,18 @@ int mod_diff(unsigned int x, unsigned int y, unsigned int R)
     int dl = 0;
     int dr = 0;
     if ( y > x ){
-        dl = (int)(y - x);
-        dr = (int)(x + R - y);
+        dl = static_cast<int>(y - x);
+        dr = static_cast<int>(x + R - y);
     }else{
-        dl = (int)(x - y);
-        dr = (int)(y + R - x);
+        dl = static_cast<int>(x - y);
+        dr = static_cast<int>(y + R - x);
     }
     return (dl > dr ? dr : dl);
 }
 
 ///////////////////////////////////////////////////////////////
 
-#include "retdec/fileformat/utils/tlsh/tlsh.h"
+#include "include/tlsh/tlsh.h"
 
 #ifdef TLSH_DISTANCE_PARAMETERS
 #include <stdlib.h>	// for abs()
@@ -5018,14 +5018,14 @@ void to_hex( unsigned char * psrc, int len, char* pdest )
 	"E0E1E2E3E4E5E6E7E8E9EAEBECEDEEEF"
 	"F0F1F2F3F4F5F6F7F8F9FAFBFCFDFEFF"
     };
-    unsigned short* pwHex = (unsigned short*)HexLookup; 
-	unsigned short* pwDest= (unsigned short*)pdest;
+    unsigned short* pwHex = reinterpret_cast<unsigned short*>(HexLookup); 
+	unsigned short* pwDest= reinterpret_cast<unsigned short*>(pdest);
 
 	for (int i=0; i<len; i++ ) {
 		*pwDest= pwHex[*psrc];
 		pwDest++; psrc++;
 	}
-	*((unsigned char*)pwDest)= 0;  // terminate the string
+	*(reinterpret_cast<unsigned char*>(pwDest))= 0;  // terminate the string
 }
 
 void from_hex( const char* psrc, int len, unsigned char* pdest )
@@ -5043,8 +5043,8 @@ void from_hex( const char* psrc, int len, unsigned char* pdest )
     };
 
     for (int i=0; i<len; i += 2 ) {
-	unsigned d =  DecLookup[*(unsigned char *)(psrc + i)] << 4;
-	d |= DecLookup[*(unsigned char *)(psrc + i + 1)];
+	unsigned d =  DecLookup[*reinterpret_cast<unsigned char*>(const_cast<char*>(psrc + i))] << 4;
+	d |= DecLookup[*reinterpret_cast<unsigned char*>(const_cast<char*>(psrc + i + 1))];
 	*pdest++ = d;
     }
 }

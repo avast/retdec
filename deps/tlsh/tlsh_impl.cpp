@@ -55,9 +55,9 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "retdec/fileformat/utils/tlsh/tlsh.h"
-#include "retdec/fileformat/utils/tlsh/tlsh_impl.h"
-#include "retdec/fileformat/utils/tlsh/tlsh_util.h"
+#include "include/tlsh/tlsh.h"
+#include "include/tlsh/tlsh_impl.h"
+#include "include/tlsh/tlsh_util.h"
 
 #include <string>
 #include <cassert>
@@ -183,7 +183,7 @@ void TlshImpl::update(const unsigned char* data, unsigned int len)
 	return;
     }
 #endif
-    int j = (int)(this->data_len % RNG_SIZE);
+    int j = static_cast<int>(this->data_len % RNG_SIZE);
 
     for( unsigned int i=0; i<len; i++, fed_len++, j=RNG_IDX(j+1) ) {
         this->slide_window[j] = data[i];
@@ -302,7 +302,7 @@ void TlshImpl::update(const unsigned char* data, unsigned int len)
 void TlshImpl::fast_update(const unsigned char* data, unsigned int len) 
 {
 	unsigned int fed_len = this->data_len;
-	int j = (int)(this->data_len % RNG_SIZE);
+	int j = static_cast<int>(this->data_len % RNG_SIZE);
 	unsigned char checksum = this->lsh_bin.checksum[0];
 
 	for( unsigned int i=0; i<len;  ) {
@@ -415,12 +415,6 @@ void TlshImpl::final(int fc_cons_option)
     unsigned int q1, q2, q3;
     find_quartile(&q1, &q2, &q3, this->a_bucket);
 
-    // issue #79 - divide by 0 if q3 == 0
-    if (q3 == 0) {
-      delete [] this->a_bucket; this->a_bucket = NULL;
-      return;
-    }
-
     // buckets must be more than 50% non-zero
     int nonzero = 0;
     for(unsigned int i=0; i<CODE_SIZE; i++) {
@@ -462,8 +456,8 @@ void TlshImpl::final(int fc_cons_option)
     delete [] this->a_bucket; this->a_bucket = NULL;
     
     this->lsh_bin.Lvalue = l_capturing(this->data_len);
-    this->lsh_bin.Q.QR.Q1ratio = (unsigned int) ((float)(q1*100)/(float) q3) % 16;
-    this->lsh_bin.Q.QR.Q2ratio = (unsigned int) ((float)(q2*100)/(float) q3) % 16;
+    this->lsh_bin.Q.QR.Q1ratio = static_cast<unsigned int> (static_cast<float>(q1*100)/static_cast<float> (q3)) % 16;
+    this->lsh_bin.Q.QR.Q2ratio = static_cast<unsigned int> (static_cast<float>(q2*100)/static_cast<float> (q3)) % 16;
     this->lsh_code_valid = true;   
 }
 
@@ -499,7 +493,7 @@ int TlshImpl::fromTlshStr(const char* str)
 	this->reset();
 
 	lsh_bin_struct tmp;
-	from_hex( &str[start], INTERNAL_TLSH_STRING_LEN, (unsigned char*)&tmp );
+	from_hex( &str[start], INTERNAL_TLSH_STRING_LEN, reinterpret_cast<unsigned char*>(&tmp) );
 
 	// Reconstruct checksum, Qrations & lvalue
 	for (int k = 0; k < TLSH_CHECKSUM_LEN; k++) {    
@@ -539,9 +533,9 @@ const char* TlshImpl::hash(char *buffer, unsigned int bufSize, int showvers) con
 	if (showvers) {
 		buffer[0] = 'T';
 		buffer[1] = '0' + showvers;
-		to_hex( (unsigned char*)&tmp, sizeof(tmp), &buffer[2]);
+		to_hex( reinterpret_cast<unsigned char*>(&tmp), sizeof(tmp), &buffer[2]);
 	} else {
-		to_hex( (unsigned char*)&tmp, sizeof(tmp), buffer);
+		to_hex( reinterpret_cast<unsigned char*>(&tmp), sizeof(tmp), buffer);
 	}
 	return buffer;
 }
