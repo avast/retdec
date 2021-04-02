@@ -1756,7 +1756,8 @@ void ElfFormat::loadSymbols(const ELFIO::elfio *file, const ELFIO::symbol_sectio
 			if (!elfImportTable) {
 				elfImportTable = new ElfImportTable();
 			}
-			if (!elfImportTable->isDynsym) {
+			/* check if we already have prefered dynsym symbols and ignore symbols from segments */
+			if (!elfImportTable->isDynsym && section->get_name().find("dynamic_") == std::string::npos) {
 				elfImportTable->symbolNames.push_back(name);
 			}
 		}
