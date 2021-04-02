@@ -53,11 +53,14 @@ void ElfImportTable::computeHashes()
 	imported_symbols.reserve(symbolNames.size());
 
 	for (const auto& symbol : symbolNames) {
-		auto name = toLower(symbol);
-
-		if (isSymbolExcluded(name)) {
+		/* It is important to first exclude, then lowercase
+		   as "Str_Aprintf" is valid, but would become
+		   filtered when lower case */
+		if (isSymbolExcluded(symbol)) {
 			continue;
 		}
+
+		auto name = toLower(symbol);
 
 		imported_symbols.emplace_back(name);
 	}
