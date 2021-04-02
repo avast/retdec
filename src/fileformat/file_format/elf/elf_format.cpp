@@ -1752,7 +1752,8 @@ void ElfFormat::loadSymbols(const ELFIO::elfio *file, const ELFIO::symbol_sectio
 		symbol->setElfBind(bind);
 		symbol->setElfOther(other);
 		link = fixSymbolLink(link, value);
-		if (type == STT_FUNC && bind == STB_GLOBAL && other == STV_DEFAULT) {
+		auto visibility = other & 0x3;
+		if (type == STT_FUNC && bind == STB_GLOBAL && visibility == STV_DEFAULT) {
 			if (!elfImportTable) {
 				elfImportTable = new ElfImportTable();
 			}

@@ -7,11 +7,12 @@
 #include "retdec/fileformat/utils/crypto.h"
 #include "retdec/utils/string.h"
 #include "retdec/fileformat/types/import_table/elf_import_table.h"
-#include <iostream>
 #include <tlsh/tlsh.h>
+
 #include <algorithm>
 #include <unordered_set>>
 #include <regex>
+
 
 using namespace retdec::utils;
 
