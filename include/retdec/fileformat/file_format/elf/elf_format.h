@@ -25,7 +25,8 @@ class ElfFormat : public FileFormat
 {
 	private:
 		std::vector<std::string> telfhashSymbols;
-		bool telfhashDynsym; /* flag if we already loaded preferred dynsym */
+		/* flag if we already loaded symbols from SHT_DYNSYM */
+		bool telfhashDynsym = false;
 		std::string telfhash;
 
 		/**
