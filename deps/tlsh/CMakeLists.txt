@@ -130,9 +130,8 @@ target_include_directories(tlsh
 
 
 # set_target_properties(tlsh PROPERTIES OUTPUT_NAME "retdec-tlsh")
-
 if(MSVC)
-    add_definitions(-DTLSH_EXPORTS -DTLSH_LIB)
+	add_compile_definitions(WINDOWS TLSH_EXPORTS TLSH_LIB)
 endif()
 
 # Install includes.
