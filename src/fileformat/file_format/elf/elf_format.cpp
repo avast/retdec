@@ -6,12 +6,14 @@
 
 #include <elfio/elf_types.hpp>
 #include <map>
+#include <regex>
 
 #include "retdec/utils/conversion.h"
 #include "retdec/utils/string.h"
 #include "retdec/fileformat/file_format/elf/elf_format.h"
 #include "retdec/fileformat/types/symbol_table/elf_symbol.h"
 #include "retdec/fileformat/utils/conversions.h"
+#include <tlsh/tlsh.h>
 
 using namespace retdec::utils;
 using namespace ELFIO;
@@ -1734,8 +1736,12 @@ void ElfFormat::loadSymbols(const ELFIO::elfio *file, const ELFIO::symbol_sectio
 	std::unordered_multimap<std::string, unsigned long long> importNameAddressMap;
 	loadRelocations(file, section, importNameAddressMap);
 
-	if (elfImportTable && !elfImportTable->isDynsym) {
-		elfImportTable->symbolNames = {};
+	/* check to ignore symbols from segments for telfhash this is pretty
+	   ugly and error prone, find a better way to know symbol source */
+	bool isSegmentSymbols = section->get_name().find("dynamic_") != std::string::npos;
+
+	if (!telfhashDynsym && !isSegmentSymbols) {
+		telfhashSymbols = {};
 	}
 
 	for(std::size_t i = 0, e = elfSymbolTable->get_loaded_symbols_num(); i < e; ++i)
@@ -1754,12 +1760,10 @@ void ElfFormat::loadSymbols(const ELFIO::elfio *file, const ELFIO::symbol_sectio
 		link = fixSymbolLink(link, value);
 		auto visibility = other & 0x3;
 		if (type == STT_FUNC && bind == STB_GLOBAL && visibility == STV_DEFAULT) {
-			if (!elfImportTable) {
-				elfImportTable = new ElfImportTable();
-			}
-			/* check if we already have prefered dynsym symbols and ignore symbols from segments */
-			if (!elfImportTable->isDynsym && section->get_name().find("dynamic_") == std::string::npos) {
-				elfImportTable->symbolNames.push_back(name);
+			/* check if we already have prefered dynsym symbols and ignore symbols from segments 
+			   this is pretty ugly and error prone, find a better way to know symbol source */
+			if (!telfhashDynsym && !isSegmentSymbols) {
+				telfhashSymbols.push_back(name);
 			}
 		}
 
@@ -1772,9 +1776,9 @@ void ElfFormat::loadSymbols(const ELFIO::elfio *file, const ELFIO::symbol_sectio
 			// Ignore first STN_UNDEF STT_NOTYPE symbol when considering imports
 			if(link == SHN_UNDEF && i != 0)
 			{
-				if(!elfImportTable)
+				if(!importTable)
 				{
-					elfImportTable = new ElfImportTable();
+					importTable = new ElfImportTable();
 				}
 				auto keyIter = importNameAddressMap.equal_range(name);
 				// we create std::set from std::multimap values in order to ensure determinism
@@ -1785,7 +1789,7 @@ void ElfFormat::loadSymbols(const ELFIO::elfio *file, const ELFIO::symbol_sectio
 					import->setName(name);
 					import->setAddress(address.second);
 					import->setUsageType(symbolToImportUsage(symbol->getUsageType()));
-					elfImportTable->addImport(std::move(import));
+					importTable->addImport(std::move(import));
 				}
 				if(keyIter.first == keyIter.second && getSectionFromAddress(value))
 				{
@@ -1793,7 +1797,7 @@ void ElfFormat::loadSymbols(const ELFIO::elfio *file, const ELFIO::symbol_sectio
 					import->setName(name);
 					import->setAddress(value);
 					import->setUsageType(symbolToImportUsage(symbol->getUsageType()));
-					elfImportTable->addImport(std::move(import));
+					importTable->addImport(std::move(import));
 				}
 			}
 		}
@@ -1823,14 +1827,83 @@ void ElfFormat::loadSymbols(const ELFIO::elfio *file, const ELFIO::symbol_sectio
 	{
 		delete symtab;
 	}
-	if (elfImportTable && section->get_type() == SHT_DYNSYM) {
-		elfImportTable->isDynsym = true;
+	if (section->get_type() == SHT_DYNSYM) {
+		telfhashDynsym = true;
 	}
 
-	importTable = elfImportTable;
-
+	loadTelfhash();
 	loadImpHash();
 	loadExpHash();
+}
+
+/* exclusions are based on the original implementation 
+   https://github.com/trendmicro/telfhash/blob/master/telfhash/telfhash.py */
+static const std::unordered_set<std::string> exclusion_set = {
+	"__libc_start_main", // main function
+	"main", // main function
+	"abort", // ARM default
+	"cachectl", // MIPS default
+	"cacheflush", // MIPS default
+	"puts", // Compiler optimization (function replacement)
+	"atol", // Compiler optimization (function replacement)
+	"malloc_trim" // GNU extensions
+};
+
+/*
+ignore
+	symbols starting with . or 
+	x86-64 specific functions
+	string functions (str.* and mem.*), gcc changes them depending on architecture
+	symbols starting with . or _
+*/
+static std::regex exclusion_regex("(^[_\.].*$)|(^.*64$)|(^str.*$)|(^mem.*$)");
+
+static bool isSymbolExcluded(const std::string& symbol)
+{
+	return symbol.empty() 
+	|| std::regex_match(symbol, exclusion_regex) 
+	|| exclusion_set.count(symbol);
+}
+
+void ElfFormat::loadTelfhash()
+{
+	std::vector<std::string> imported_symbols;
+	imported_symbols.reserve(telfhashSymbols.size());
+
+	for (const auto& symbol : telfhashSymbols) {
+		/* It is important to first exclude, then lowercase
+		   as "Str_Aprintf" is valid, but would become
+		   filtered when lower case */
+		if (isSymbolExcluded(symbol)) {
+			continue;
+		}
+
+		auto name = toLower(symbol);
+
+		imported_symbols.emplace_back(name);
+	}
+
+	/* sort them lexicographically */
+	std::sort(imported_symbols.begin(), imported_symbols.end());
+
+	std::string impHashString;
+	for (const auto& symbol : imported_symbols) {
+		if (!impHashString.empty())
+			impHashString.append(1, ',');
+
+		impHashString.append(symbol);
+	}
+
+	if (impHashString.size()) {
+		auto data = reinterpret_cast<const uint8_t*>(impHashString.data());
+
+		Tlsh tlsh;
+		tlsh.update(data, impHashString.size());
+
+		tlsh.final();
+		const int show_version = 1; /* this prepends the hash with 'T' + number of the version */
+		telfhash = toLower(tlsh.getHash(show_version));
+	}
 }
 
 /**
@@ -2977,6 +3050,11 @@ unsigned long long ElfFormat::getBaseOffset() const
 	}
 
 	return minOffset == std::numeric_limits<unsigned long long>::max() ? 0 : minOffset;
+}
+
+
+const std::string& ElfFormat::getTelfhash() const {
+	return telfhash;
 }
 
 } // namespace fileformat

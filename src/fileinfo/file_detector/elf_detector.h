@@ -35,6 +35,7 @@ class ElfDetector : public FileDetector
 		void getDynamicSectionsSegments();
 		void getNotes();
 		void getCoreInfo();
+		void getTelfhash();
 		/// @}
 	protected:
 		/// @name Detection methods

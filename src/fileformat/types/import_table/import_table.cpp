@@ -10,6 +10,7 @@
 #include "retdec/fileformat/utils/crypto.h"
 #include "retdec/pelib/PeLibAux.h"
 #include "retdec/fileformat/types/import_table/import_table.h"
+#include <tlsh/tlsh.h>
 
 using namespace retdec::utils;
 
@@ -763,7 +764,7 @@ ImportTable::importsIterator ImportTable::end() const
 }
 
 /**
- * Compute import hashes - CRC32, MD5, SHA256.
+ * Compute import hashes - CRC32, MD5, SHA256, TLSH.
  */
 void ImportTable::computeHashes()
 {
@@ -824,11 +825,19 @@ void ImportTable::computeHashes()
 		//}
 	}
 
-	if (impHashBytes.size())
-	{
-		impHashCrc32 = getCrc32((const uint8_t *)impHashBytes.data(), impHashBytes.size());
-		impHashMd5 = getMd5((const uint8_t *)impHashBytes.data(), impHashBytes.size());
-		impHashSha256 = getSha256((const uint8_t *)impHashBytes.data(), impHashBytes.size());
+	if (impHashBytes.size()) {
+		auto data = reinterpret_cast<const uint8_t*>(impHashBytes.data());
+
+		Tlsh tlsh;
+		tlsh.update(data, impHashBytes.size());
+		tlsh.final();
+		/* this prepends the hash with 'T' + number of the version */
+		const int show_version = 1;
+		impHashTlsh = toLower(tlsh.getHash(show_version));
+
+		impHashCrc32 = getCrc32(data, impHashBytes.size());
+		impHashMd5 = getMd5(data, impHashBytes.size());
+		impHashSha256 = getSha256(data, impHashBytes.size());
 	}
 }
 

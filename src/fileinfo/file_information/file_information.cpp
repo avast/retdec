@@ -105,6 +105,11 @@ std::string FileInformation::getPathToFile() const
 	return filePath;
 }
 
+std::string FileInformation::getTelfhash() const 
+{
+	return telfhash;
+}
+
 /**
  * Get CRC32 of input file
  * @return CRC32 of input file
@@ -3735,6 +3740,11 @@ void FileInformation::setStatus(ReturnCode state)
 void FileInformation::setPathToFile(const std::string &filepath)
 {
 	filePath = filepath;
+}
+
+void FileInformation::setTelfhash(const std::string &hash)
+{
+	telfhash = hash;
 }
 
 /**

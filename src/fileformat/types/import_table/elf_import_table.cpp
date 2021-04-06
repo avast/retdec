@@ -19,51 +19,14 @@ using namespace retdec::utils;
 namespace retdec {
 namespace fileformat {
 
-/* exclusions are based on the original implementation 
-   https://github.com/trendmicro/telfhash/blob/master/telfhash/telfhash.py */
-static const std::unordered_set<std::string> exclusion_set = {
-	"__libc_start_main", // main function
-	"main", // main function
-	"abort", // ARM default
-	"cachectl", // MIPS default
-	"cacheflush", // MIPS default
-	"puts", // Compiler optimization (function replacement)
-	"atol", // Compiler optimization (function replacement)
-	"malloc_trim" // GNU extensions
-};
-
-/*
-ignore
-	symbols starting with . or 
-	x86-64 specific functions
-	string functions (str.* and mem.*), gcc changes them depending on architecture
-	symbols starting with . or _
-*/
-static std::regex exclusion_regex("(^[_\.].*$)|(^.*64$)|(^str.*$)|(^mem.*$)");
-
-static bool isSymbolExcluded(const std::string& symbol)
-{
-	return symbol.empty() 
-		|| std::regex_match(symbol, exclusion_regex) 
-		|| exclusion_set.count(symbol);
-}
-
 void ElfImportTable::computeHashes()
 {
 	std::vector<std::string> imported_symbols;
-	imported_symbols.reserve(symbolNames.size());
+	imported_symbols.reserve(imports.size());
 
-	for (const auto& symbol : symbolNames) {
-		/* It is important to first exclude, then lowercase
-		   as "Str_Aprintf" is valid, but would become
-		   filtered when lower case */
-		if (isSymbolExcluded(symbol)) {
-			continue;
-		}
-
-		auto name = toLower(symbol);
-
-		imported_symbols.emplace_back(name);
+	for (const auto& import : imports) {
+		auto name = import->getName();
+		imported_symbols.emplace_back(toLower(name));
 	}
 
 	/* sort them lexicographically */
@@ -84,7 +47,8 @@ void ElfImportTable::computeHashes()
 		tlsh.update(data, impHashString.size());
 
 		tlsh.final();
-		const int show_version = 1; /* this prepends the hash with 'T' + number of the version */
+		/* this prepends the hash with 'T' + number of the version */
+		const int show_version = 1;
 		impHashTlsh = toLower(tlsh.getHash(show_version));
 
 		impHashCrc32 = getCrc32(data, impHashString.size());
