@@ -1,7 +1,7 @@
 /**
  * @file src/fileformat/file_format/pe/authenticode/authenticode.h
  * @brief Class that parses PE Authenticode data
- * @copyright (c) 2020 Avast Software, licensed under the MIT license
+ * @copyright (c) 2021 Avast Software, licensed under the MIT license
  */
 
 #pragma once
@@ -23,21 +23,19 @@
 #include <vector>
 #include <string>
 #include <cstdint>
-#include <iostream> /* remove */
 #include <ctime>
 
 using retdec::fileformat::DigitalSignature;
 
 namespace authenticode {
 
-/* Basically a PKCS7 with specific contraints */
 class Authenticode
 {
 private:
 	Pkcs7Signature pkcs7;
 
 public:
-	Authenticode(std::vector<unsigned char> data);
+	Authenticode(const std::vector<unsigned char>& data);
 	std::vector<DigitalSignature> getSignatures(const retdec::fileformat::PeFormat* peFile) const;
 };
 

@@ -13,7 +13,6 @@ namespace authenticode {
 Pkcs9CounterSignature::Pkcs9CounterSignature(std::vector<std::uint8_t>& data, const STACK_OF(X509)* certificates)
 	: sinfo(nullptr, PKCS7_SIGNER_INFO_free)
 {
-	// TODO maybe add digest algo to the output
 	/*
 		counterSignature ATTRIBUTE ::= {
 		  WITH SYNTAX SignerInfo
@@ -72,7 +71,7 @@ Pkcs9CounterSignature::Pkcs9CounterSignature(std::vector<std::uint8_t>& data, co
 	}
 }
 
-std::vector<std::string> Pkcs9CounterSignature::verify(std::vector<uint8_t> sig_enc_content) const
+std::vector<std::string> Pkcs9CounterSignature::verify(const std::vector<uint8_t>&  sig_enc_content) const
 {
 	std::vector<std::string> warnings;
 	if (!sinfo) {

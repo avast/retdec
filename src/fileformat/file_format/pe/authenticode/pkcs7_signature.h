@@ -100,7 +100,7 @@ private:
 
 	std::string calculateFileDigest(const retdec::fileformat::PeFormat* peFile) const;
 	std::vector<Certificate> getAllCertificates() const;
-	std::vector<std::string> verify(std::string fileDigest) const;
+	std::vector<std::string> verify(const std::string& fileDigest) const;
 
 public:
 	std::uint64_t version = 0;

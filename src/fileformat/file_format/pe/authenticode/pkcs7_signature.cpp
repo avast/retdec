@@ -284,7 +284,6 @@ const PKCS7_SIGNER_INFO* Pkcs7Signature::SignerInfo::getSignerInfo() const
 
 Pkcs7Signature::SpcSpOpusInfo::SpcSpOpusInfo(const unsigned char* data, int len) noexcept
 {
-	// TODO
 	/*
 	SpcSpOpusInfo ::= SEQUENCE {
 		programName [0] EXPLICIT SpcString OPTIONAL,
@@ -306,7 +305,7 @@ const X509* Pkcs7Signature::SignerInfo::getSignerCert() const
 
 /* verifies if signature complies with specification rules,
    for each broken rule, create a message in this->warnings */
-std::vector<std::string> Pkcs7Signature::verify(std::string fileDigest) const
+std::vector<std::string> Pkcs7Signature::verify(const std::string& fileDigest) const
 {
 	/* Check if signature is correctly parsed and complies with the spec:
 		- [x] Version is equal to 1

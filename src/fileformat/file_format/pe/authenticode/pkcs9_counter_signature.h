@@ -42,7 +42,7 @@ public:
 	int digestAlgorithm;
 	std::vector<Pkcs9CounterSignature> counterSignatures;
 
-	std::vector<std::string> verify(std::vector<uint8_t> sig_enc_content) const;
+	std::vector<std::string> verify(const std::vector<uint8_t>& sig_enc_content) const;
 	Pkcs9CounterSignature(std::vector<std::uint8_t>& data, const STACK_OF(X509)* certificates);
 };
 
