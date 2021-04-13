@@ -111,11 +111,6 @@ if(WIN32)
 	)
 endif()
 
-# needed by tlsh lib
-if(MSVC)
-	add_compile_definitions(WINDOWS TLSH_EXPORTS TLSH_LIB)
-endif()
-
 set_target_properties(fileformat
 	PROPERTIES
 		OUTPUT_NAME "retdec-fileformat"
