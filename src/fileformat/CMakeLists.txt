@@ -96,9 +96,9 @@ target_link_libraries(fileformat
 		retdec::utils
 		retdec::pelib
 		retdec::deps::elfio
-		retdec::deps::tlsh
 		retdec::deps::llvm
 	PRIVATE
+		retdec::deps::tlsh
 		OpenSSL::Crypto
 )
 
