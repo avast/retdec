@@ -31,6 +31,9 @@ class RichHeader
 		std::string getRecordNumberOfUsesStr(std::size_t position) const;
 		std::string getRecordProductNameStr(std::size_t position) const;
 		std::string getRecordVisualStudioNameStr(std::size_t position) const;
+		std::string getSha256() const;
+		std::string getCrc32() const;
+		std::string getMd5() const;
 		std::vector<std::uint8_t> getRawBytes() const;
 		/// @}
 

@@ -1113,7 +1113,17 @@ void PeFormat::loadRichHeader()
 
 	richHeader->setKey(header.getKey());
 	richHeader->setSignature(signature);
-	richHeader->setBytes(header.getDecryptedHeaderBytes());
+
+	auto decrypted_bytes = header.getDecryptedHeaderBytes();
+	richHeader->setBytes(decrypted_bytes);
+
+	auto crc32 = retdec::fileformat::getCrc32(decrypted_bytes.data(), decrypted_bytes.size());
+	auto md5 = retdec::fileformat::getMd5(decrypted_bytes.data(), decrypted_bytes.size());
+	auto sha256 = retdec::fileformat::getSha256(decrypted_bytes.data(), decrypted_bytes.size());
+
+	richHeader->setCrc32(crc32);
+	richHeader->setMd5(md5);
+	richHeader->setSha256(sha256);
 }
 
 /**

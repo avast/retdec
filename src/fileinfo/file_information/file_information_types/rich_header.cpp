@@ -114,6 +114,19 @@ std::vector<std::uint8_t> RichHeader::getRawBytes() const
 	return header ? header->getBytes() : std::vector<std::uint8_t>{};
 }
 
+std::string RichHeader::getSha256() const
+{
+	return header ? header->getSha256() : "";
+}
+std::string RichHeader::getCrc32() const
+{
+	return header ? header->getCrc32() : "";
+}
+std::string RichHeader::getMd5() const
+{
+	return header ? header->getMd5() : "";
+}
+
 /**
  * Set rich header data
  * @param richHeader Instance of class with original information about rich header
@@ -131,6 +144,8 @@ bool RichHeader::hasRecords() const
 {
 	return header ? header->hasRecords() : false;
 }
+
+
 
 } // namespace fileinfo
 } // namespace retdec

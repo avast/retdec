@@ -159,6 +159,9 @@ class FileInformation
 		std::string getRichHeaderRecordProductNameStr(std::size_t position) const;
 		std::string getRichHeaderRecordVisualStudioNameStr(std::size_t position) const;
 		std::string getRichHeaderRawBytesStr() const;
+		std::string getRichHeaderSha256() const;
+		std::string getRichHeaderCrc32() const;
+		std::string getRichHeaderMd5() const;
 		bool hasRichHeaderRecords() const;
 		/// @}
 

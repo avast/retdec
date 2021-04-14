@@ -109,6 +109,19 @@ bool RichHeader::getSuspicious() const
 	return isSuspicious;
 }
 
+std::string RichHeader::getSha256() const
+{
+	return sha256;
+}
+std::string RichHeader::getCrc32() const
+{
+	return crc32;
+}
+std::string RichHeader::getMd5() const
+{
+	return md5;
+}
+
 /**
  * Returns the decrypted bytes of the rich header.
  * @return Decrypted bytes of rich header.
@@ -165,6 +178,19 @@ void RichHeader::setValidStructure(bool richValidStructure)
 void RichHeader::setSuspicious(bool richSuspicious)
 {
 	isSuspicious = richSuspicious;
+}
+
+void RichHeader::setSha256(const std::string& sha256)
+{
+	this->sha256 = sha256;
+}
+void RichHeader::setCrc32(const std::string& crc32)
+{
+	this->crc32 = crc32;
+}
+void RichHeader::setMd5(const std::string& md5)
+{
+	this->md5 = md5;
 }
 
 /**
