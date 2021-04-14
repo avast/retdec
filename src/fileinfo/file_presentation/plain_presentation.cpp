@@ -445,6 +445,19 @@ void PlainPresentation::presentRichHeader() const
 			Log::info() << (i ? std::string(signDesc.length(), ' ') : signDesc) << sig.substr(i, signLineLen) << "\n";
 		}
 	}
+	auto crc32 = fileinfo.getRichHeaderCrc32();
+	auto md5 = fileinfo.getRichHeaderMd5();
+	auto sha256 = fileinfo.getRichHeaderSha256();
+
+	if (!crc32.empty()) {
+		Log::info() << "Rich header CRC32        : " << crc32 << "\n";
+	}
+	if (!md5.empty()) {
+		Log::info() << "Rich header MD5          : " << md5 << "\n";
+	}
+	if (!sha256.empty()) {
+		Log::info() << "Rich header SHA256       : " << sha256 << "\n";
+	}
 }
 
 /**

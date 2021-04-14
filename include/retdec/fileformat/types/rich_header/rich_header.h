@@ -31,6 +31,10 @@ class RichHeader
 		bool isValidStructure = false;   ///< @c true if header has valid structure
 		bool isSuspicious = false;       ///< @c true if content of header is suspicious
 		std::vector<std::uint8_t> bytes; ///< decrypted content of rich header
+		/// hashes of decrypted rich header
+		std::string sha256;
+		std::string md5;
+		std::string crc32;
 	public:
 		/// @name Getters
 		/// @{
@@ -43,6 +47,9 @@ class RichHeader
 		const LinkerInfo* getLastRecord() const;
 		bool getValidStructure() const;
 		bool getSuspicious() const;
+		std::string getSha256() const;
+		std::string getCrc32() const;
+		std::string getMd5() const;
 		const std::vector<std::uint8_t>& getBytes() const;
 		/// @}
 
@@ -54,6 +61,9 @@ class RichHeader
 		void setValidStructure(bool richValidStructure);
 		void setSuspicious(bool richSuspicious);
 		void setBytes(const std::vector<std::uint8_t>& richHeaderBytes);
+		void setSha256(const std::string& sha256);
+		void setCrc32(const std::string& crc32);
+		void setMd5(const std::string& md5);
 		/// @}
 
 		/// @name Iterators

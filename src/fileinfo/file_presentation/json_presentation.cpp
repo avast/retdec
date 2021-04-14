@@ -291,6 +291,15 @@ void JsonPresentation::presentRichHeader(Writer& writer) const
 	serializeString(writer, "offset", offset);
 	serializeString(writer, "key", key);
 	serializeString(writer, "signature", sig);
+
+	auto crc32 = fileinfo.getRichHeaderCrc32();
+	auto md5 = fileinfo.getRichHeaderMd5();
+	auto sha256 = fileinfo.getRichHeaderSha256();
+	
+	serializeString(writer, "crc32", crc32);
+	serializeString(writer, "md5", md5);
+	serializeString(writer, "sha256", sha256);
+
 	writer.EndObject();
 }
 

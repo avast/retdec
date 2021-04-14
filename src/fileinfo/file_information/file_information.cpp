@@ -790,6 +790,19 @@ bool FileInformation::hasRichHeaderRecords() const
 	return richHeader.hasRecords();
 }
 
+std::string FileInformation::getRichHeaderSha256() const
+{
+	return richHeader.getSha256();
+}
+std::string FileInformation::getRichHeaderCrc32() const
+{
+	return richHeader.getCrc32();
+}
+std::string FileInformation::getRichHeaderMd5() const
+{
+	return richHeader.getMd5();
+}
+
 /**
  * Check whether visual basic informations are used.
  * @return @c true if it is used, otherwise @c false/
