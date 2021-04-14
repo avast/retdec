@@ -1760,7 +1760,7 @@ void ElfFormat::loadSymbols(const ELFIO::elfio *file, const ELFIO::symbol_sectio
 		link = fixSymbolLink(link, value);
 		auto visibility = other & 0x3;
 		if (type == STT_FUNC && bind == STB_GLOBAL && visibility == STV_DEFAULT) {
-			/* check if we already have prefered dynsym symbols and ignore symbols from segments 
+			/* check if we already have prefered dynsym symbols and ignore symbols from segments
 			   this is pretty ugly and error prone, find a better way to know symbol source */
 			if (!telfhashDynsym && !isSegmentSymbols) {
 				telfhashSymbols.push_back(name);
@@ -1836,7 +1836,7 @@ void ElfFormat::loadSymbols(const ELFIO::elfio *file, const ELFIO::symbol_sectio
 	loadExpHash();
 }
 
-/* exclusions are based on the original implementation 
+/* exclusions are based on the original implementation
    https://github.com/trendmicro/telfhash/blob/master/telfhash/telfhash.py */
 static const std::unordered_set<std::string> exclusion_set = {
 	"__libc_start_main", // main function
@@ -1851,7 +1851,7 @@ static const std::unordered_set<std::string> exclusion_set = {
 
 /*
 ignore
-	symbols starting with . or 
+	symbols starting with . or
 	x86-64 specific functions
 	string functions (str.* and mem.*), gcc changes them depending on architecture
 	symbols starting with . or _
@@ -1860,8 +1860,8 @@ static std::regex exclusion_regex("(^[_\.].*$)|(^.*64$)|(^str.*$)|(^mem.*$)");
 
 static bool isSymbolExcluded(const std::string& symbol)
 {
-	return symbol.empty() 
-	|| std::regex_match(symbol, exclusion_regex) 
+	return symbol.empty()
+	|| std::regex_match(symbol, exclusion_regex)
 	|| exclusion_set.count(symbol);
 }
 
