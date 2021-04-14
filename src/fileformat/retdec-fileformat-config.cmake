@@ -14,6 +14,7 @@ if(NOT TARGET retdec::fileformat)
             pelib
             elfio
             llvm
+            tlsh
     )
 
     include(${CMAKE_CURRENT_LIST_DIR}/retdec-fileformat-targets.cmake)

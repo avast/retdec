@@ -26,6 +26,7 @@ class FileInformation
 	private:
 		retdec::cpdetect::ReturnCode status = retdec::cpdetect::ReturnCode::OK;
 		std::string filePath;                          ///< path to input file
+		std::string telfhash;                          ///< telfhash of ELF input file
 		std::string crc32;                             ///< CRC32 of input file
 		std::string md5;                               ///< MD5 of input file
 		std::string sha256;                            ///< SHA256 of input file
@@ -76,6 +77,7 @@ class FileInformation
 		/// @{
 		retdec::cpdetect::ReturnCode getStatus() const;
 		std::string getPathToFile() const;
+		std::string getTelfhash() const;
 		std::string getCrc32() const;
 		std::string getMd5() const;
 		std::string getSha256() const;
@@ -216,6 +218,7 @@ class FileInformation
 		std::string getImphashCrc32() const;
 		std::string getImphashMd5() const;
 		std::string getImphashSha256() const;
+		std::string getImphashTlsh() const;
 		const retdec::fileformat::Import* getImport(std::size_t position) const;
 		std::string getImportName(std::size_t position) const;
 		std::string getImportLibraryName(std::size_t position) const;
@@ -546,6 +549,7 @@ class FileInformation
 		/// @{
 		void setStatus(retdec::cpdetect::ReturnCode state);
 		void setPathToFile(const std::string &filepath);
+		void setTelfhash(const std::string &telfhash);
 		void setCrc32(const std::string &fileCrc32);
 		void setMd5(const std::string &fileMd5);
 		void setSha256(const std::string &fileSha256);

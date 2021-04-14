@@ -105,6 +105,11 @@ std::string FileInformation::getPathToFile() const
 	return filePath;
 }
 
+std::string FileInformation::getTelfhash() const 
+{
+	return telfhash;
+}
+
 /**
  * Get CRC32 of input file
  * @return CRC32 of input file
@@ -1203,6 +1208,14 @@ std::string FileInformation::getImphashMd5() const
 std::string FileInformation::getImphashSha256() const
 {
 	return importTable.getImphashSha256();
+}
+/**
+ * Get imphash as Tlsh
+ * @return Imphash as Tlsh
+ */
+std::string FileInformation::getImphashTlsh() const
+{
+	return importTable.getImphashTlsh();
 }
 
 /**
@@ -3727,6 +3740,11 @@ void FileInformation::setStatus(ReturnCode state)
 void FileInformation::setPathToFile(const std::string &filepath)
 {
 	filePath = filepath;
+}
+
+void FileInformation::setTelfhash(const std::string &hash)
+{
+	telfhash = hash;
 }
 
 /**

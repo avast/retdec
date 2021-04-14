@@ -13,6 +13,7 @@
 
 #include "retdec/fileformat/file_format/file_format.h"
 #include "retdec/fileformat/types/note_section/elf_notes.h"
+#include "retdec/fileformat/types/import_table/elf_import_table.h"
 
 namespace retdec {
 namespace fileformat {
@@ -23,6 +24,11 @@ namespace fileformat {
 class ElfFormat : public FileFormat
 {
 	private:
+		std::vector<std::string> telfhashSymbols;
+		/// flag if we already loaded symbols from SHT_DYNSYM
+		bool telfhashDynsym = false;
+		std::string telfhash;
+
 		/**
 		 * Description of ELF relocation table
 		 */
@@ -80,6 +86,7 @@ class ElfFormat : public FileFormat
 		void loadCorePrPsInfo(std::size_t offset, std::size_t size);
 		void loadCoreAuxvInfo(std::size_t offset, std::size_t size);
 		void loadCoreInfo();
+		void loadTelfhash();
 		/// @}
 	protected:
 		int elfClass;        ///< class of input ELF file
@@ -134,6 +141,7 @@ class ElfFormat : public FileFormat
 		std::size_t getOsOrAbiVersion() const;
 		std::size_t getSectionTableSize() const;
 		std::size_t getSegmentTableSize() const;
+		const std::string& getTelfhash() const;
 		int getElfClass() const;
 		bool isWiiPowerPc() const;
 		/// @}

@@ -50,10 +50,12 @@ std::size_t ImportTableJsonGetter::getBasicInfo(std::size_t structIndex, std::ve
 	desc.push_back("crc32");
 	desc.push_back("md5");
 	desc.push_back("sha256");
+	desc.push_back("tlsh");
 	info.push_back(std::to_string(fileinfo.getNumberOfStoredImports()));
 	info.push_back(fileinfo.getImphashCrc32());
 	info.push_back(fileinfo.getImphashMd5());
 	info.push_back(fileinfo.getImphashSha256());
+	info.push_back(fileinfo.getImphashTlsh());
 
 	return info.size();
 }

@@ -4,6 +4,7 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
+#include "retdec/fileformat/file_format/file_format.h"
 #include "retdec/fileformat/utils/conversions.h"
 #include "fileinfo/file_presentation/getters/simple_getter/basic_json_getter.h"
 
@@ -26,6 +27,7 @@ std::size_t BasicJsonGetter::loadInformation(std::vector<std::string> &desc, std
 	desc.clear();
 	info.clear();
 
+	desc.push_back("telfhash");
 	desc.push_back("crc32");
 	desc.push_back("md5");
 	desc.push_back("sha256");
@@ -36,6 +38,7 @@ std::size_t BasicJsonGetter::loadInformation(std::vector<std::string> &desc, std
 	desc.push_back("endianness");
 	desc.push_back("imageBaseAddress");
 
+	info.push_back(fileinfo.getTelfhash());
 	info.push_back(fileinfo.getCrc32());
 	info.push_back(fileinfo.getMd5());
 	info.push_back(fileinfo.getSha256());

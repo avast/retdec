@@ -34,6 +34,7 @@ add_library(fileformat STATIC
 	types/visual_basic/visual_basic_extern.cpp
 	types/import_table/import.cpp
 	types/import_table/import_table.cpp
+	types/import_table/elf_import_table.cpp
 	types/import_table/pe_import.cpp
 	types/export_table/export.cpp
 	types/export_table/export_table.cpp
@@ -97,6 +98,7 @@ target_link_libraries(fileformat
 		retdec::deps::elfio
 		retdec::deps::llvm
 	PRIVATE
+		retdec::deps::tlsh
 		OpenSSL::Crypto
 )
 

@@ -1949,6 +1949,10 @@ void ElfDetector::detectFileType()
 	fileInfo.setFileType(fileType);
 }
 
+void ElfDetector::getTelfhash() {
+	fileInfo.setTelfhash(elfParser->getTelfhash());
+}
+
 void ElfDetector::getAdditionalInfo()
 {
 	getFileVersion();
@@ -1962,6 +1966,7 @@ void ElfDetector::getAdditionalInfo()
 	getSymbolTable();
 	getNotes();
 	getCoreInfo();
+	getTelfhash();
 }
 
 /**
