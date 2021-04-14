@@ -15,5 +15,6 @@ class ElfImportTable : public ImportTable
 public:
 	void computeHashes() override;
 };
+	
 } // namespace fileformat
 } // namespace retdec
