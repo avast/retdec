@@ -5,6 +5,7 @@
 * New feature: Generate ELF (import) symbol-related hashes, including VirusTotal compatible `telfhash` ([#286](https://github.com/avast/retdec/issues/286), [#936](https://github.com/avast/retdec/pull/936)).
 * New Feature: `retdec-fileinfo` can be configured via JSON file. See `--fileinfo-config` option for more details.
 * New Feature: RetDec is now also a library ([#779](https://github.com/avast/retdec/pull/779). Related changes are the removal of `retdec-decompiler.py` (it is now a binary, e.g. `retdec-decompiler.exe` on Windows), `retdec-bin2llvmir`, `retdec-llvmir2hll`, and some other supportive functionality.
+* Enhancement: Compute hashes of decrypted PE rich headers ([#621](https://github.com/avast/retdec/issues/621), [#945](https://github.com/avast/retdec/pull/945)).
 * Enhancement: Unified logging on stdout/stderr. Added option `--silent`. Printed text is colored only when output is a terminal ([#791](https://github.com/avast/retdec/issues/791).
 * Enhancement: Support all the CMake build types (i.e. `Debug`, `Release`, `RelWithDebInfo` and `MinSizeRel`) on all systems ([#774](https://github.com/avast/retdec/issues/774)).
 * Enhancement: YARA updated to version 4.0.1 ([#758](https://github.com/avast/retdec/issues/758)), fixed Mach-O parsing issue ([#283](https://github.com/avast/retdec/issues/283)).
