@@ -46,11 +46,18 @@ std::size_t RichHeaderJsonGetter::getBasicInfo(std::size_t structIndex, std::vec
 	desc.push_back("offset");
 	desc.push_back("key");
 	desc.push_back("signature");
+	desc.push_back("crc32");
+	desc.push_back("md5");
+	desc.push_back("sha256");
 	desc.push_back("numberOfRecords");
 	desc.push_back("rawBytes");
+
 	info.push_back(fileinfo.getRichHeaderOffsetStr(hexWithPrefix));
 	info.push_back(fileinfo.getRichHeaderKeyStr(hexWithPrefix));
 	info.push_back(toLower(fileinfo.getRichHeaderSignature()));
+	info.push_back(fileinfo.getRichHeaderCrc32());
+	info.push_back(fileinfo.getRichHeaderMd5());
+	info.push_back(fileinfo.getRichHeaderSha256());
 	info.push_back(std::to_string(fileinfo.getNumberOfStoredRecordsInRichHeader()));
 	info.push_back(replaceNonprintableChars(fileinfo.getRichHeaderRawBytesStr()));
 
