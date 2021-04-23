@@ -296,7 +296,8 @@ Signature x86PeLzmaSignature1 =
 	0x56, // PUSH ESI
 	0x83, 0xC3, 0x04, // ADD EBX, 4
 	0x53, 0x50, // PUSH EBX, PUSH EAX
-	0xC7, 0x03, CAP, CAP, CAP, CAP // MOV DWORD PTR [EBX], <LZMA properties>
+	0xC7, 0x03, CAP, CAP, CAP, CAP, // MOV DWORD PTR [EBX], <LZMA properties>
+	0x90 // NOP
 };
 
 // LZMA Version 2 (DLL)
@@ -324,7 +325,66 @@ Signature x86PeLzmaSignature2 =
 	0x56, // PUSH ESI
 	0x83, 0xC3, 0x04, // ADD EBX, 4
 	0x53, 0x50, // PUSH EBX, PUSH EAX
-	0xC7, 0x03, CAP, CAP, CAP, CAP // MOV DWORD PTR [EBX], <LZMA properties>
+	0xC7, 0x03, CAP, CAP, CAP, CAP, // MOV DWORD PTR [EBX], <LZMA properties>
+	0x90 // NOP
+};
+
+// LZMA Version 3
+// Since commit https://github.com/upx/upx/commit/f7751684afffd4c2c5b0e9d71798ec7dc3245ec3 upwards there's no NOP sled
+Signature x86PeLzmaSignature3 =
+{
+	0x60, // PUSHA
+	0xBE, CAP, CAP, CAP, CAP, // MOV ESI, <Address of Packed Data>
+	0x8D, 0xBE, ANY, ANY, ANY, ANY, // LEA EDI, [ESI - <offset from packed data to start of section upx0>]
+	0x57, // PUSH EDI
+	0x89, 0xE5, // MOV EBP, ESP
+	0x8D, 0x9C, 0x24, ANY, ANY, ANY, ANY, // LEA EBX, [ESP - <Needed size of stack>]
+	0x31, 0xC0, // XOR EAX, EAX
+	0x50, // PUSH EAX
+	0x39, 0xDC, // CMP ESP, EBX
+	0x75, 0xFB, // JNZ rel -5
+	0x46, 0x46, // INC ESI, INC ESI
+	0x53, // PUSH EBX
+	0x68, CAP, CAP, CAP, CAP, // PUSH <Size of Unpacked Data>
+	0x57, // PUSH EDI
+	0x83, 0xC3, 0x04, // ADD EBX, 4
+	0x53, // PUSH EBX
+	0x68, CAP, CAP, CAP, CAP, // PUSH <Size of Packed Data>
+	0x56, // PUSH ESI
+	0x83, 0xC3, 0x04, // ADD EBX, 4
+	0x53, 0x50, // PUSH EBX, PUSH EAX
+	0xC7, 0x03, CAP, CAP, CAP, CAP, // MOV DWORD PTR [EBX], <LZMA properties>
+	0x55 // PUSH EBP
+};
+
+// LZMA Version 4 (DLL)
+// Since commit https://github.com/upx/upx/commit/f7751684afffd4c2c5b0e9d71798ec7dc3245ec3 upwards there's no NOP sled
+Signature x86PeLzmaSignature4 =
+{
+	0x80, 0x7C, 0x24, 0x08, 0x01, // CMP BYTE PTR [ESP + 8], 1
+	0x0F, 0x85, ANY, ANY, ANY, ANY, // JNZ <behind unpacking stub>
+	0x60, // PUSHA
+	0xBE, CAP, CAP, CAP, CAP, // MOV ESI, <Address of Packed Data>
+	0x8D, 0xBE, ANY, ANY, ANY, ANY, // LEA EDI, [ESI - <offset from packed data to start of section upx0>]
+	0x57, // PUSH EDI
+	0x89, 0xE5, // MOV EBP, ESP
+	0x8D, 0x9C, 0x24, ANY, ANY, ANY, ANY, // LEA EBX, [ESP - <Needed size of stack>]
+	0x31, 0xC0, // XOR EAX, EAX
+	0x50, // PUSH EAX
+	0x39, 0xDC, // CMP ESP, EBX
+	0x75, 0xFB, // JNZ rel -5
+	0x46, 0x46, // INC ESI, INC ESI
+	0x53, // PUSH EBX
+	0x68, CAP, CAP, CAP, CAP, // PUSH <Size of Unpacked Data>
+	0x57, // PUSH EDI
+	0x83, 0xC3, 0x04, // ADD EBX, 4
+	0x53, // PUSH EBX
+	0x68, CAP, CAP, CAP, CAP, // PUSH <Size of Packed Data>
+	0x56, // PUSH ESI
+	0x83, 0xC3, 0x04, // ADD EBX, 4
+	0x53, 0x50, // PUSH EBX, PUSH EAX
+	0xC7, 0x03, CAP, CAP, CAP, CAP, // MOV DWORD PTR [EBX], <LZMA properties>
+	0x55 // PUSH EBP
 };
 
 // NRV2B Version 1
@@ -1958,6 +2018,8 @@ std::vector<UpxStubData> UpxStubSignatures::allStubs =
 	// x86 PE
 	{ Architecture::X86,    Format::PE,     &x86PeLzmaSignature1,       UpxStubVersion::LZMA,  0xAE1,  0x0 },
 	{ Architecture::X86,    Format::PE,     &x86PeLzmaSignature2,       UpxStubVersion::LZMA,  0xAE9,  0x0 },
+	{ Architecture::X86,    Format::PE,     &x86PeLzmaSignature3,       UpxStubVersion::LZMA,  0xADC,  0x0 },
+	{ Architecture::X86,    Format::PE,     &x86PeLzmaSignature4,       UpxStubVersion::LZMA,  0xAF1,  0x0 },
 	{ Architecture::X86,    Format::PE,     &x86PeNrv2bSignature1,      UpxStubVersion::NRV2B, 0x0D3,  0x0 },
 	{ Architecture::X86,    Format::PE,     &x86PeNrv2bSignature2,      UpxStubVersion::NRV2B, 0x0CB,  0x0 },
 	{ Architecture::X86,    Format::PE,     &x86PeNrv2bSignature3,      UpxStubVersion::NRV2B, 0x0DB,  0x0 },
