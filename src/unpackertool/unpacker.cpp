@@ -44,7 +44,7 @@ bool detectPackers(const std::string& inputFile, std::vector<retdec::cpdetect::D
 	using namespace retdec::cpdetect;
 	using namespace retdec::fileformat;
 
-	DetectParams detectionParams(SearchType::MOST_SIMILAR, true, true);
+	DetectParams detectionParams(SearchType::MOST_SIMILAR, true, false);
 
 	ToolInformation toolInfo;
 	switch (detectFileFormat(inputFile))
