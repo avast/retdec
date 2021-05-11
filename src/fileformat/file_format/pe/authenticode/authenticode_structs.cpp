@@ -1,3 +1,10 @@
+/**
+ * @file src/fileformat/file_format/pe/authenticode/authenticode_structs.cpp
+ * @brief Defines custom OpenSSL objects and functions
+ * @copyright (c) 2021 Avast Software, licensed under the MIT license
+ * @author Marek Milkovič - @metthal
+ */
+
 /* Author #Metthal */
 
 #include "authenticode_structs.h"

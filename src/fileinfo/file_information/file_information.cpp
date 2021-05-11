@@ -1629,6 +1629,7 @@ bool FileInformation::hasResourceTableRecords() const
 	return resourceTable.hasRecords();
 }
 
+
 /**
  * Get start address of raw data of TLS
  * @param format Format of result (e.g. std::dec, std::hex)
