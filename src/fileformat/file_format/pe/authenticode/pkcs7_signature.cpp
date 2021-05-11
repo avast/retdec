@@ -42,7 +42,30 @@ static std::vector<Certificate> convertToFileformatCertChain(std::vector<X509Cer
 
 Pkcs7Signature::ContentInfo::ContentInfo(const PKCS7* contents)
 {
-	/* SignedData contentType must be set to SPC_INDIRECT_DATA_OBJID (1.3.6.1.4.1.311.2.1.4) */
+	/* 
+	ContentInfo ::= SEQUENCE {
+	    contentType ContentType,
+	    content
+	      [0] EXPLICIT ANY DEFINED BY contentType OPTIONAL }
+	ContentType ::= OBJECT IDENTIFIER
+	// contentType must be set to SPC_INDIRECT_DATA_OBJID (1.3.6.1.4.1.311.2.1.4)
+	SpcIndirectDataContent ::= SEQUENCE {
+	    data SpcAttributeTypeAndOptionalValue,
+	    messageDigest DigestInfo
+	} --#public—
+	SpcAttributeTypeAndOptionalValue ::= SEQUENCE {
+	    type ObjectID,
+	    value [0] EXPLICIT ANY OPTIONAL
+	}
+	DigestInfo ::= SEQUENCE {
+	    digestAlgorithm AlgorithmIdentifier,
+	    digest OCTETSTRING
+	}
+	AlgorithmIdentifier ::= SEQUENCE {
+	    algorithm ObjectID,
+	    parameters [0] EXPLICIT ANY OPTIONAL
+	}
+	*/
 	if (!contents) {
 		return;
 	}
@@ -289,12 +312,41 @@ Pkcs7Signature::SpcSpOpusInfo::SpcSpOpusInfo(const unsigned char* data, int len)
 		programName [0] EXPLICIT SpcString OPTIONAL,
 		moreInfo    [1] EXPLICIT SpcLink OPTIONAL,
 	} --#public--
+
+	SpcLink ::= CHOICE {
+	    url [0] IMPLICIT IA5STRING,
+	    moniker [1] IMPLICIT SpcSerializedObject,
+	    file [2] EXPLICIT SpcString
+	} --#public--
+
+	SpcString ::= CHOICE {
+	    unicode [0] IMPLICIT BMPSTRING,
+	    ascii [1] IMPLICIT IA5STRING
+	}
 	*/
 	::SpcSpOpusInfo* spcInfo = SpcSpOpusInfo_new();
 	if (!spcInfo) {
 		return;
 	}
 	d2i_SpcSpOpusInfo(&spcInfo, &data, len);
+	if (!spcInfo) {
+		return;
+	}
+
+	if (spcInfo->programName) {
+		/* name is ascii string or utf16 string */
+		if (spcInfo->programName->type) {
+			programName = std::string(spcInfo->programName->value.ascii->data, spcInfo->programName->value.ascii->data + spcInfo->programName->value.ascii->length);
+		}
+		else {
+			unsigned char* data = nullptr;
+			int len = ASN1_STRING_to_UTF8(&data, spcInfo->programName->value.unicode);
+			if (len >= 0) {
+				programName = std::string(data, data + len);
+				OPENSSL_free(data);
+			}
+		}
+	}
 	SpcSpOpusInfo_free(spcInfo);
 }
 
@@ -472,9 +524,9 @@ std::vector<DigitalSignature> Pkcs7Signature::getSignatures(const retdec::filefo
 	if (contentInfo.has_value()) {
 		signature.signedDigest = contentInfo->digest;
 		signature.digestAlgorithm = OBJ_nid2ln(contentInfo->digestAlgorithm);
-
 		fileDigest = calculateFileDigest(peFile);
 	}
+
 	signature.fileDigest = fileDigest;
 	signature.warnings = verify(fileDigest);
 	signature.certificates = getAllCertificates();
@@ -483,6 +535,10 @@ std::vector<DigitalSignature> Pkcs7Signature::getSignatures(const retdec::filefo
 	if (!signerInfo.has_value()) {
 		signatures.push_back(signature);
 		return signatures;
+	}
+
+	if (signerInfo.has_value() && signerInfo->spcInfo.has_value()) {
+		signature.programName = signerInfo->spcInfo->programName;
 	}
 
 	const SignerInfo& signInfo = signerInfo.value();
@@ -505,15 +561,16 @@ std::vector<DigitalSignature> Pkcs7Signature::getSignatures(const retdec::filefo
 		auto certChain = processor.getChain(counterSig.signerCert, certs);
 		auto fileformatCertChain = convertToFileformatCertChain(certChain);
 
-		signature.signer.counterSigners.push_back(
-				Signer{
-						.chain = fileformatCertChain,
-						.signingTime = counterSig.signTime,
-						.digest = bytesToHexString(counterSig.messageDigest.data(),
-								counterSig.messageDigest.size()),
-						.digestAlgorithm = OBJ_nid2ln(counterSig.digestAlgorithm),
-						.warnings = counterSig.verify(signerInfo->encryptDigest),
-						.counterSigners = std::vector<Signer>() });
+		Signer counterSigner;
+		counterSigner.chain = fileformatCertChain;
+		counterSigner.signingTime = counterSig.signTime,
+		counterSigner.digest = bytesToHexString(counterSig.messageDigest.data(),
+				counterSig.messageDigest.size()),
+		counterSigner.digestAlgorithm = OBJ_nid2ln(counterSig.digestAlgorithm),
+		counterSigner.warnings = counterSig.verify(signerInfo->encryptDigest),
+		counterSigner.counterSigners = std::vector<Signer>();
+
+		signature.signer.counterSigners.push_back(counterSigner);
 	}
 
 	for (auto&& counterSig : signInfo.msCounterSignatures) {
@@ -521,15 +578,16 @@ std::vector<DigitalSignature> Pkcs7Signature::getSignatures(const retdec::filefo
 		auto certChain = processor.getChain(counterSig.signCert, counterSig.certs);
 		auto fileformatCertChain = convertToFileformatCertChain(certChain);
 
-		signature.signer.counterSigners.push_back(
-				Signer{
-						.chain = fileformatCertChain,
-						.signingTime = counterSig.signTime,
-						.digest = bytesToHexString(counterSig.messageDigest.data(),
-								counterSig.messageDigest.size()),
-						.digestAlgorithm = OBJ_nid2ln(counterSig.digestAlgorithm),
-						.warnings = counterSig.verify(signerInfo->encryptDigest),
-						.counterSigners = std::vector<Signer>() });
+		Signer counterSigner;
+		counterSigner.chain = fileformatCertChain;
+		counterSigner.signingTime = counterSig.signTime,
+		counterSigner.digest = bytesToHexString(counterSig.messageDigest.data(),
+				counterSig.messageDigest.size()),
+		counterSigner.digestAlgorithm = OBJ_nid2ln(counterSig.digestAlgorithm),
+		counterSigner.warnings = counterSig.verify(signerInfo->encryptDigest),
+		counterSigner.counterSigners = std::vector<Signer>();
+
+		signature.signer.counterSigners.push_back(counterSigner);
 	}
 
 	signatures.push_back(signature);

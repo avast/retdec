@@ -23,9 +23,7 @@ std::string bytesToHexString(const std::uint8_t* in, int len);
 std::string parsePublicKey(BIO* bio);
 std::string serialToString(ASN1_INTEGER* serial);
 std::string X509NameToString(X509_NAME* name);
-std::string algorithmToString(Algorithms alg);
 std::string parseDateTime(const ASN1_TIME* dateTime);
-Algorithms asn1ToAlgorithm(ASN1_OBJECT* obj);
 PKCS7* getPkcs7(const std::vector<unsigned char>& input);
 void calculateDigest(const EVP_MD* md, const std::uint8_t* data, int len, std::uint8_t* digest);
 

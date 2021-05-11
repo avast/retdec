@@ -36,6 +36,7 @@ struct DigitalSignature
 	std::string fileDigest;
 	std::string signedDigest;
 	std::string digestAlgorithm;
+	std::string programName;
 	std::vector<Certificate> certificates;
 	std::vector<std::string> warnings; /* warning messages about the content validity */
 	Signer signer;

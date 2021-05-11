@@ -5,7 +5,7 @@
  */
 
 #include "helper.h"
-
+#include <sstream>
 namespace authenticode {
 
 std::string parsePublicKey(BIO* bio)

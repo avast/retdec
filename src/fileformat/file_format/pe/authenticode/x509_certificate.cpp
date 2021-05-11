@@ -211,32 +211,6 @@ Certificate X509Certificate::createCertificate() const
 	return out_cert;
 }
 
-// /* It's assumed that the certificates are processed in correct
-//    order by callbacks set in the CertProcessor constructor */
-
-// static CertificateProcessor* getProcessor(X509_STORE_CTX* ctx)
-// {
-// 	return static_cast<CertificateProcessor*>(X509_STORE_get_ex_data(X509_STORE_CTX_get0_store(ctx), 0));
-// }
-
-// static void addCertificateToChain(X509_STORE_CTX* ctx, const X509Certificate& cert)
-// {
-// 	auto depth = X509_STORE_CTX_get_error_depth(ctx);
-// 	void* data = X509_STORE_CTX_get_ex_data(ctx, depth);
-// 	if (data == nullptr) {
-// 		CertificateProcessor* processor = getProcessor(ctx);
-// 		processor->chain.push_back(cert);
-// 		X509_STORE_CTX_set_ex_data(ctx, depth, (void*)processor);
-// 	}
-// }
-
-// static int verifyCallback(int /*ok*/, X509_STORE_CTX* ctx)
-// {
-// 	auto cert = X509_STORE_CTX_get_current_cert(ctx);
-// 	addCertificateToChain(ctx, cert);
-// 	return 1;
-// }
-
 CertificateProcessor::CertificateProcessor()
 	: trust_store(nullptr, X509_STORE_free),
 	  ctx(nullptr, X509_STORE_CTX_free)

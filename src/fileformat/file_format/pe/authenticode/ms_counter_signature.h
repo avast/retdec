@@ -1,5 +1,5 @@
 /**
- * @file src/fileformat/file_format/pe/authenticode/ms_nested_signature.h
+ * @file src/fileformat/file_format/pe/authenticode/ms_counter_signature.h
  * @brief Representation of MsCounterSignature
  * @copyright (c) 2021 Avast Software, licensed under the MIT license
  */
@@ -8,7 +8,6 @@
 
 #include "helper.h"
 
-#include <bits/stdint-uintn.h>
 #include <memory>
 #include <openssl/bio.h>
 #include <openssl/pkcs7.h>

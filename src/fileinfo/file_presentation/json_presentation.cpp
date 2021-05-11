@@ -484,10 +484,9 @@ void WriteSignature(JsonPresentation::Writer& writer, const DigitalSignature& si
 	writer.EndArray();
 
 	serializeString(writer, "digestAlgorithm", signature.digestAlgorithm);
-
 	serializeString(writer, "fileDigest", signature.fileDigest);
-
 	serializeString(writer, "signedDigest", signature.signedDigest);
+	serializeString(writer, "programName", signature.programName);
 
 	writer.String("allCertificates");
 	WriteCertificateChain(writer, signature.certificates);
@@ -509,7 +508,7 @@ void JsonPresentation::presentCertificates(Writer& writer) const
 		return;
 	}
 
-	writer.String("certificateTable");
+	writer.String("digitalSignatures");
 	writer.StartObject();
 	writer.Key("numberOfSignatures");
 	writer.Int64(fileinfo.certificateTable->signatures.size());

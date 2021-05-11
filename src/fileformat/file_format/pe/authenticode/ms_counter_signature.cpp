@@ -1,5 +1,5 @@
 /**
- * @file src/fileformat/file_format/pe/authenticode/ms_nested_signature.cpp
+ * @file src/fileformat/file_format/pe/authenticode/ms_counter_signature.cpp
  * @brief Representation of MsCounterSignature
  * @copyright (c) 2021 Avast Software, licensed under the MIT license
  */

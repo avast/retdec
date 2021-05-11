@@ -54,36 +54,6 @@ ASN1_SEQUENCE(SpcSpOpusInfo) = {
 	ASN1_EXP_OPT(SpcSpOpusInfo, moreInfo, SpcLink, 1)
 } ASN1_SEQUENCE_END(SpcSpOpusInfo)
 
-ASN1_SEQUENCE(CtlEntryAttribute) = {
-	ASN1_SIMPLE(CtlEntryAttribute, identifier, ASN1_OBJECT),
-	ASN1_SET_OF(CtlEntryAttribute, values, ASN1_ANY)
-} ASN1_SEQUENCE_END(CtlEntryAttribute)
-
-ASN1_SEQUENCE(CtlEntry) = {
-	ASN1_SIMPLE(CtlEntry, subjectIdentifier, ASN1_OCTET_STRING),
-	ASN1_SET_OF_OPT(CtlEntry, attributes, X509_ATTRIBUTE)
-} ASN1_SEQUENCE_END(CtlEntry)
-
-ASN1_SEQUENCE(CtlUsage) = {
-	ASN1_SIMPLE(CtlUsage, identifier, ASN1_OBJECT)
-} ASN1_SEQUENCE_END(CtlUsage)
-
-ASN1_SEQUENCE(CtlInfo) = {
-	ASN1_SIMPLE(CtlInfo, subjectUsage, CtlUsage),
-	ASN1_OPT(CtlInfo, listIdentifier, ASN1_OCTET_STRING),
-	ASN1_OPT(CtlInfo, sequenceNumber, ASN1_INTEGER),
-	ASN1_SIMPLE(CtlInfo, lastUpdate, ASN1_TIME),
-	ASN1_SIMPLE(CtlInfo, subjectAlgorithm, AlgorithmIdentifier),
-	ASN1_SEQUENCE_OF(CtlInfo, entries, CtlEntry),
-	ASN1_EXP_SEQUENCE_OF_OPT(CtlInfo, extensions, X509_EXTENSION, 0)
-} ASN1_SEQUENCE_END(CtlInfo)
-
-ASN1_SEQUENCE(CatalogNameValue) = {
-	ASN1_SIMPLE(CatalogNameValue, name, ASN1_BMPSTRING),
-	ASN1_SIMPLE(CatalogNameValue, unk, ASN1_INTEGER),
-	ASN1_SIMPLE(CatalogNameValue, value, ASN1_OCTET_STRING)
-} ASN1_SEQUENCE_END(CatalogNameValue)
-
 IMPLEMENT_ASN1_FUNCTIONS(SpcString)
 IMPLEMENT_ASN1_FUNCTIONS(SpcSerializedObject)
 IMPLEMENT_ASN1_FUNCTIONS(SpcLink)
@@ -93,8 +63,3 @@ IMPLEMENT_ASN1_FUNCTIONS(AlgorithmIdentifier)
 IMPLEMENT_ASN1_FUNCTIONS(DigestInfo)
 IMPLEMENT_ASN1_FUNCTIONS(SpcIndirectDataContent)
 IMPLEMENT_ASN1_FUNCTIONS(SpcSpOpusInfo)
-IMPLEMENT_ASN1_FUNCTIONS(CtlEntryAttribute)
-IMPLEMENT_ASN1_FUNCTIONS(CtlEntry)
-IMPLEMENT_ASN1_FUNCTIONS(CtlUsage)
-IMPLEMENT_ASN1_FUNCTIONS(CtlInfo)
-IMPLEMENT_ASN1_FUNCTIONS(CatalogNameValue)

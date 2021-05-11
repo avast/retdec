@@ -746,6 +746,7 @@ static void printSignature(const DigitalSignature& signature, int indent)
 	Log::info() << std::string(indent, ' ') << "Digest Algorithm: " << signature.digestAlgorithm << "\n";
 	Log::info() << std::string(indent, ' ') << "Signed Digest:    " << signature.signedDigest << "\n";
 	Log::info() << std::string(indent, ' ') << "File  Digest:     " << signature.fileDigest << "\n";
+	Log::info() << std::string(indent, ' ') << "Program Name: " << signature.programName << "\n";
 
 	Log::info() << std::string(indent, ' ') << "Signer:\n";
 	printSigner(signature.signer, indent + 4);
@@ -758,7 +759,7 @@ void PlainPresentation::presentSignatures() const
 	if (!table) {
 		return;
 	}
-	Log::info() << "Certificate table:\n";
+	Log::info() << "Digital Signatures:\n";
 	int indent = 4;
 	Log::info() << std::string(indent, ' ') << "Signature count: " << table->signatureCount() << "\n";
 

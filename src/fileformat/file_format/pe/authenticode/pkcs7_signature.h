@@ -47,10 +47,10 @@ class Pkcs7Signature
 	struct SpcSpOpusInfo
 	{
 		SpcSpOpusInfo(const unsigned char* data, int len) noexcept;
+		std::string programName; /* utf-8 */
 	};
-	class ContentInfo
+	struct ContentInfo
 	{
-	public:
 		int contentType = 0;
 		int digestAlgorithm = 0;
 		std::string digest;
