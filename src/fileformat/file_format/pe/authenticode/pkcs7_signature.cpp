@@ -376,48 +376,48 @@ std::vector<std::string> Pkcs7Signature::verify(const std::string& fileDigest) c
 
 	/* Verification of the signature SignedData contents */
 	if (!pkcs7) { // no sense to continue
-		warnings.emplace_back("Couldn't parse the Pkcs7 signature.");
+		warnings.emplace_back("Couldn't parse the Pkcs7 signature");
 		return warnings;
 	}
 
 	if (!PKCS7_type_is_signed(pkcs7)) {
-		warnings.emplace_back("Invalid PKCS#7 type, expected SignedData.");
+		warnings.emplace_back("Invalid PKCS#7 type, expected SignedData");
 	}
 
 	if (version != 1) {
-		warnings.emplace_back("Signature version is: " + std::to_string(version) + ", expected 1.");
+		warnings.emplace_back("Signature version is: " + std::to_string(version) + ", expected 1");
 	}
 
 	if (contentDigestAlgorithms.size() != 1) {
-		warnings.emplace_back("Invalid number of DigestAlgorithmIdentifiers: " + std::to_string(contentDigestAlgorithms.size()) + " - expected 1.");
+		warnings.emplace_back("Invalid number of DigestAlgorithmIdentifiers: " + std::to_string(contentDigestAlgorithms.size()) + " - expected 1");
 	}
 
 	if (contentInfo) {
 		if (contentInfo->contentType != NID_spc_indirect_data) {
-			warnings.emplace_back("Wrong contentInfo contentType.");
+			warnings.emplace_back("Wrong contentInfo contentType");
 		}
 		else if (contentInfo->digest.empty()) {
-			warnings.emplace_back("Signature digest is missing.");
+			warnings.emplace_back("Signature digest is missing");
 		}
 		else {
 			if (fileDigest != contentInfo->digest) {
-				warnings.emplace_back("Signature digest doesn't match the file digest.");
+				warnings.emplace_back("Signature digest doesn't match the file digest");
 			}
 		}
 	}
 	else {
-		warnings.emplace_back("Couldn't get contentInfo.");
+		warnings.emplace_back("Couldn't get contentInfo");
 	}
 
 	if (signerInfo) {
 		if (!signerInfo->getSignerCert()) {
-			warnings.emplace_back("Signing cert is missing.");
+			warnings.emplace_back("Signing cert is missing");
 		}
 		if (signerInfo->version != 1) {
-			warnings.emplace_back("SignerInfo version is: " + std::to_string(signerInfo->version) + ", expected 1.");
+			warnings.emplace_back("SignerInfo version is: " + std::to_string(signerInfo->version) + ", expected 1");
 		}
 		if (contentDigestAlgorithms.size() > 0 && signerInfo->digestAlgorithm != contentDigestAlgorithms[0]) {
-			warnings.emplace_back("SignedData digest algorithm and signerInfo digest algorithm don't match.");
+			warnings.emplace_back("SignedData digest algorithm and signerInfo digest algorithm don't match");
 		}
 		if (signerInfo->encryptDigest.empty()) {
 			warnings.emplace_back("Encrypted digest is empty");
@@ -425,7 +425,7 @@ std::vector<std::string> Pkcs7Signature::verify(const std::string& fileDigest) c
 
 		// verify auth attrs existence
 		if (!signerInfo->spcInfo) {
-			warnings.emplace_back("Couldn't get SpcSpOpusInfo.");
+			warnings.emplace_back("Couldn't get SpcSpOpusInfo");
 		}
 		if (signerInfo->messageDigest.empty()) {
 			warnings.emplace_back("Couldn't get SignerInfo message digest");
@@ -462,7 +462,7 @@ std::vector<std::string> Pkcs7Signature::verify(const std::string& fileDigest) c
 		}
 	}
 	else {
-		warnings.emplace_back("Couldn't get SignerInfo.");
+		warnings.emplace_back("Couldn't get SignerInfo");
 	}
 
 	return warnings;

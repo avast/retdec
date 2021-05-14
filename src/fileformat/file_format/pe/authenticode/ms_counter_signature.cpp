@@ -53,18 +53,18 @@ std::vector<std::string> MsCounterSignature::verify(const std::vector<std::uint8
 	std::vector<std::string> warnings;
 
 	if (!pkcs7) {
-		warnings.emplace_back("Couldn't parse signature..");
+		warnings.emplace_back("Couldn't parse signature");
 		return warnings;
 	}
 
 	if (messageDigest.empty()) {
-		warnings.emplace_back("Failed to verify the counter-signature, no message digest.");
+		warnings.emplace_back("Failed to verify the counter-signature, no message digest");
 		return warnings;
 	}
 
 	const EVP_MD* md = EVP_get_digestbynid(digestAlgorithm);
 	if (!md) {
-		warnings.emplace_back("Unknown digest algorithm.");
+		warnings.emplace_back("Unknown digest algorithm");
 		return warnings;
 	}
 	std::uint8_t digest[EVP_MAX_MD_SIZE] = { 0 };
@@ -72,7 +72,7 @@ std::vector<std::string> MsCounterSignature::verify(const std::vector<std::uint8
 
 	int md_len = EVP_MD_size(md);
 	if (std::memcmp(digest, messageDigest.data(), md_len)) {
-		warnings.emplace_back("Failed to verify the signature with counter-signature.");
+		warnings.emplace_back("Failed to verify the signature with counter-signature");
 	}
 
 	TS_VERIFY_CTX* ctx = TS_VERIFY_CTX_new();

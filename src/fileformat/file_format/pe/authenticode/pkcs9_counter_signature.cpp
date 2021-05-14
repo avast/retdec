@@ -133,7 +133,7 @@ std::vector<std::string> Pkcs9CounterSignature::verify(const std::vector<uint8_t
 			DigestInfo_free(digest_info);
 		}
 		if (!is_valid) {
-			warnings.emplace_back("Failed to verify the counter-signature.");
+			warnings.emplace_back("Failed to verify the counter-signature");
 		}
 	} else {
 		warnings.emplace_back("Couldn't decrypt the digest");
