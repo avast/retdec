@@ -394,7 +394,7 @@ void WriteCertificateChain(JsonPresentation::Writer& writer, const std::vector<C
 		serializeString(writer, "validUntil", cert.getValidUntil());
 		serializeString(writer, "sha1", cert.getSha1Digest());
 		serializeString(writer, "sha256", cert.getSha256Digest());
-		// serializeString(writer, "publicKey", cert.getPublicKey());
+		serializeString(writer, "publicKey", cert.getPublicKey());
 
 		writer.String("attributes");
 		writer.StartObject();
