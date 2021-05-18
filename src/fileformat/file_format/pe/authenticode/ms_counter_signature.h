@@ -26,7 +26,7 @@ class MsCounterSignature
 	std::unique_ptr<PKCS7, decltype(&PKCS7_free)> pkcs7;
 	std::unique_ptr<TS_TST_INFO, decltype(&TS_TST_INFO_free)> tstInfo;
 	std::unique_ptr<STACK_OF(X509), decltype(&sk_X509_free)> signers;
-	TS_MSG_IMPRINT* imprint;
+	TS_MSG_IMPRINT* imprint = nullptr;
 
 public:
 	const X509* signCert = nullptr;
@@ -34,7 +34,7 @@ public:
 
 	std::string signTime;
 	std::vector<std::uint8_t> messageDigest;
-	int digestAlgorithm;
+	int digestAlgorithm = 0;
 
 	std::vector<std::string> verify(const std::vector<std::uint8_t>& sig_enc_content) const;
 	MsCounterSignature(const std::vector<std::uint8_t>& data);
