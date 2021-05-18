@@ -1,5 +1,5 @@
 /**
- * @file src/fileformat/file_format/pe/authenticode/pkcs9.cpp
+ * @file src/fileformat/file_format/pe/authenticode/pkcs9_counter_signature.cpp
  * @brief Class that wraps openssl pkcs9 information.
  * @copyright (c) 2020 Avast Software, licensed under the MIT license
  */
