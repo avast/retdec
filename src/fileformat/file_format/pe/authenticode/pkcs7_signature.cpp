@@ -1,5 +1,5 @@
 /**
- * @file src/fileformat/file_format/pe/authenticode/pkcs7.cpp
+ * @file src/fileformat/file_format/pe/authenticode/pkcs7_signature.cpp
  * @brief Class wrapper above openssl Pkcs7
  * @copyright (c) 2021 Avast Software, licensed under the MIT license
  */
