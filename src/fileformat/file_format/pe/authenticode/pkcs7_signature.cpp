@@ -101,7 +101,7 @@ Pkcs7Signature::ContentInfo::ContentInfo(const PKCS7* contents)
  * 
  * @param input 
  */
-Pkcs7Signature::Pkcs7Signature(const std::vector<unsigned char>& input) noexcept
+Pkcs7Signature::Pkcs7Signature(const std::vector<std::uint8_t>& input) noexcept
 	: pkcs7(nullptr, PKCS7_free)
 {
 	/* 
