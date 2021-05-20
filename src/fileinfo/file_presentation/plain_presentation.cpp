@@ -4,6 +4,8 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
+#include "retdec/fileformat/types/certificate_table/certificate.h"
+#include "retdec/fileformat/types/certificate_table/certificate_table.h"
 #include "retdec/utils/string.h"
 #include "retdec/utils/io/log.h"
 #include "retdec/utils/version.h"
@@ -11,6 +13,7 @@
 #include "fileinfo/file_presentation/getters/format.h"
 #include "fileinfo/file_presentation/getters/plain_getters.h"
 #include "fileinfo/file_presentation/plain_presentation.h"
+#include <string>
 
 using namespace retdec::utils;
 using namespace retdec::utils::io;
@@ -710,6 +713,76 @@ void PlainPresentation::presentCore() const
 	}
 }
 
+static void printCertificate(const Certificate& cert, int indent)
+{
+	Log::info() << std::string(indent, ' ') << "Subject:              " << cert.getRawSubject() << "\n";
+	Log::info() << std::string(indent, ' ') << "Issuer:               " << cert.getRawIssuer() << "\n";
+	Log::info() << std::string(indent, ' ') << "Serial:               " << cert.getSerialNumber() << "\n";
+	Log::info() << std::string(indent, ' ') << "SHA1:                 " << cert.getSha1Digest() << "\n";
+	Log::info() << std::string(indent, ' ') << "SHA256:               " << cert.getSha256Digest() << "\n";
+	Log::info() << std::string(indent, ' ') << "Valid since:          " << cert.getValidSince() << "\n";
+	Log::info() << std::string(indent, ' ') << "Valid until:          " << cert.getValidUntil() << "\n";
+	Log::info() << std::string(indent, ' ') << "Signature Algorithm:  " << cert.getSignatureAlgorithm() << "\n";
+	Log::info() << std::string(indent, ' ') << "Public Key Algorithm: " << cert.getPublicKeyAlgorithm() << "\n";
+	Log::info() << std::string(indent, ' ') << "Public key:           " << cert.getPublicKey() << ":\n";
+}
+
+static void printCertificateChain(const std::vector<Certificate>& certs, int indent)
+{
+	for (int idx = 0; idx < certs.size(); idx++) {
+		Log::info() << std::string(indent, ' ') << "Certificate #" << idx << "\n";
+		printCertificate(certs[idx], indent + 4);
+		Log::info() << "\n";
+	}
+}
+
+static void printSigner(const Signer& signer, int indent)
+{
+
+	Log::info() << std::string(indent, ' ') << "Digest Algorithm: " << signer.digestAlgorithm << "\n";
+	Log::info() << std::string(indent, ' ') << "Digest:           " << signer.digest << "\n";
+	if (!signer.signingTime.empty()) {
+		Log::info() << std::string(indent, ' ') << "Signing time:     " << signer.signingTime << "\n";
+	}
+
+	printCertificateChain(signer.chain, indent);
+
+	for (int idx = 0; idx < signer.counterSigners.size(); idx++) {
+		Log::info() << std::string(indent, ' ') << "Countersigner #" << idx << ":\n";
+		printSigner(signer.counterSigners[idx], indent + 4);
+		Log::info() << "\n";
+	}
+}
+
+static void printSignature(const DigitalSignature& signature, int indent)
+{
+	Log::info() << std::string(indent, ' ') << "Digest Algorithm: " << signature.digestAlgorithm << "\n";
+	Log::info() << std::string(indent, ' ') << "Signed Digest:    " << signature.signedDigest << "\n";
+	Log::info() << std::string(indent, ' ') << "File  Digest:     " << signature.fileDigest << "\n";
+	Log::info() << std::string(indent, ' ') << "Program Name: " << signature.programName << "\n";
+
+	Log::info() << std::string(indent, ' ') << "Signer:\n";
+	printSigner(signature.signer, indent + 4);
+	Log::info() << "\n";
+}
+
+void PlainPresentation::presentSignatures() const
+{
+	const CertificateTable* table = fileinfo.certificateTable;
+	if (!table) {
+		return;
+	}
+	Log::info() << "Digital Signatures:\n";
+	int indent = 4;
+	Log::info() << std::string(indent, ' ') << "Signature count: " << table->signatureCount() << "\n";
+
+	for (int idx = 0; idx < table->signatureCount(); idx++) {
+		Log::info() << std::string(indent, ' ') << "Signature #" << idx << ":\n";
+		printSignature(table->signatures[idx], indent + 4);
+		Log::info() << "\n";
+	}
+}
+
 bool PlainPresentation::present()
 {
 	if(verbose)
@@ -795,8 +868,8 @@ bool PlainPresentation::present()
 			}
 			Log::info() << replaceNonasciiChars(manifest);
 		}
+		presentSignatures();
 
-		presentIterativeSimple(CertificateTablePlainGetter(fileinfo));
 		presentSimple(DotnetPlainGetter(fileinfo), false, ".NET Information");
 		presentDotnetClasses();
 		presentSimple(VisualBasicPlainGetter(fileinfo), false, "Visual Basic Information");

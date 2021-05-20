@@ -51,7 +51,7 @@ namespace PeLib
 		inStream_w.seekg(uiOffset, std::ios::beg);
 
 		std::vector<unsigned char> vCertDirectory(uiSize);
-		inStream_w.read(reinterpret_cast<char*>(vCertDirectory.data()), uiSize);
+		inStream_w.read(reinterpret_cast<char*>(vCertDirectory.data()), uiSize); // reads the whole directory
 
 		// Verify zeroed certificates (00002edec5247488029b2cc69568dda90714eeed8de0d84f1488635196b7e708)
 		if (std::all_of(vCertDirectory.begin(), vCertDirectory.end(), [](unsigned char item) { return item == 0; }))

@@ -211,7 +211,11 @@ void FileDetector::getCertificates()
 {
 	if (fileParser->isSignaturePresent())
 		fileInfo.setSignatureVerified(fileParser->isSignatureVerified());
-	fileInfo.setCertificateTable(fileParser->getCertificateTable());
+
+	// const CertificateTable* certificateTable = fileParser->getCertificateTable());
+	if (fileParser->getCertificateTable()) {
+		fileInfo.setCertificateTable(fileParser->getCertificateTable());
+	}
 }
 
 /**

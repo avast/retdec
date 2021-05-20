@@ -4,6 +4,7 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
+#include "retdec/fileformat/types/certificate_table/certificate_table.h"
 #include "retdec/utils/conversion.h"
 #include "retdec/utils/string.h"
 #include "retdec/utils/io/log.h"
@@ -387,129 +388,62 @@ void JsonPresentation::presentLoaderInfo(Writer& writer) const
 	writer.EndObject();
 }
 
-/**
- * Present information about certificates into certificate table
- */
-void JsonPresentation::presentCertificates(Writer& writer) const
+void WriteCertificateChain(JsonPresentation::Writer& writer, const std::vector<Certificate>& certificates)
 {
-	if(!fileinfo.hasCertificateTableRecords())
-	{
-		return;
-	}
-
-	writer.String("certificateTable");
-	writer.StartObject();
-
-	// Basic info.
-	serializeString(
-			writer,
-			"numberOfCertificates",
-			std::to_string(fileinfo.getNumberOfStoredCertificates()));
-	if (fileinfo.hasCertificateTableSignerCertificate())
-	{
-		serializeString(
-				writer,
-				"signerCertificateIndex",
-				std::to_string(fileinfo.getCertificateTableSignerCertificateIndex()));
-	}
-	if (fileinfo.hasCertificateTableCounterSignerCertificate())
-	{
-		serializeString(
-				writer,
-				"counterSignerCertificateIndex",
-				std::to_string(fileinfo.getCertificateTableCounterSignerCertificateIndex()));
-	}
-
-	writer.String("certificates");
 	writer.StartArray();
-	for(std::size_t i = 0; i < fileinfo.getNumberOfStoredCertificates(); ++i)
+	for (auto&& cert : certificates)
 	{
 		writer.StartObject();
-
-		serializeString(
-			writer,
-			"index",
-			std::to_string(i));
-		serializeString(
-			writer,
-			"validSince",
-			fileinfo.getCertificateValidSince(i));
-		serializeString(
-			writer,
-			"validUntil",
-			fileinfo.getCertificateValidUntil(i));
-		serializeString(
-			writer,
-			"publicKey",
-			fileinfo.getCertificatePublicKey(i));
-		serializeString(
-			writer,
-			"publicKeyAlgorithm",
-			fileinfo.getCertificatePublicKeyAlgorithm(i));
-		serializeString(
-			writer,
-			"signatureAlgorithm",
-			fileinfo.getCertificateSignatureAlgorithm(i));
-		serializeString(
-			writer,
-			"serialNumber",
-			fileinfo.getCertificateSerialNumber(i));
-		serializeString(
-			writer,
-			"issuer",
-			fileinfo.getCertificateIssuerRawStr(i));
-		serializeString(
-			writer,
-			"subject",
-			fileinfo.getCertificateSubjectRawStr(i));
-		serializeString(
-			writer,
-			"sha1",
-			fileinfo.getCertificateSha1Digest(i));
-		serializeString(
-			writer,
-			"sha256",
-			fileinfo.getCertificateSha256Digest(i));
+		serializeString(writer, "subject", cert.getRawSubject());
+		serializeString(writer, "issuer", cert.getRawIssuer());
+		serializeString(writer, "serialNumber", cert.getSerialNumber());
+		serializeString(writer, "publicKeyAlgorithm", cert.getPublicKeyAlgorithm());
+		serializeString(writer, "signatureAlgorithm", cert.getSignatureAlgorithm());;
+		serializeString(writer, "validSince", cert.getValidSince());
+		serializeString(writer, "validUntil", cert.getValidUntil());
+		serializeString(writer, "sha1", cert.getSha1Digest());
+		serializeString(writer, "sha256", cert.getSha256Digest());
+		serializeString(writer, "publicKey", cert.getPublicKey());
 
 		writer.String("attributes");
 		writer.StartObject();
 
-		writer.String("issuer");
-		writer.StartObject();
-		serializeString(writer, "country", fileinfo.getCertificateIssuerCountry(i));
-		serializeString(writer, "organization", fileinfo.getCertificateIssuerOrganization(i));
-		serializeString(writer, "organizationalUnit", fileinfo.getCertificateIssuerOrganizationalUnit(i));
-		serializeString(writer, "nameQualifier", fileinfo.getCertificateIssuerNameQualifier(i));
-		serializeString(writer, "state", fileinfo.getCertificateIssuerState(i));
-		serializeString(writer, "commonName", fileinfo.getCertificateIssuerCommonName(i));
-		serializeString(writer, "serialNumber", fileinfo.getCertificateIssuerSerialNumber(i));
-		serializeString(writer, "locality", fileinfo.getCertificateIssuerLocality(i));
-		serializeString(writer, "title", fileinfo.getCertificateIssuerTitle(i));
-		serializeString(writer, "surname", fileinfo.getCertificateIssuerSurname(i));
-		serializeString(writer, "givenName", fileinfo.getCertificateIssuerGivenName(i));
-		serializeString(writer, "initials", fileinfo.getCertificateIssuerInitials(i));
-		serializeString(writer, "pseudonym", fileinfo.getCertificateIssuerPseudonym(i));
-		serializeString(writer, "generationQualifier", fileinfo.getCertificateIssuerGenerationQualifier(i));
-		serializeString(writer, "emailAddress", fileinfo.getCertificateIssuerEmailAddress(i));
-		writer.EndObject();
-
 		writer.String("subject");
 		writer.StartObject();
-		serializeString(writer, "country", fileinfo.getCertificateSubjectCountry(i));
-		serializeString(writer, "organization", fileinfo.getCertificateSubjectOrganization(i));
-		serializeString(writer, "organizationalUnit", fileinfo.getCertificateSubjectOrganizationalUnit(i));
-		serializeString(writer, "nameQualifier", fileinfo.getCertificateSubjectNameQualifier(i));
-		serializeString(writer, "state", fileinfo.getCertificateSubjectState(i));
-		serializeString(writer, "commonName", fileinfo.getCertificateSubjectCommonName(i));
-		serializeString(writer, "serialNumber", fileinfo.getCertificateSubjectSerialNumber(i));
-		serializeString(writer, "locality", fileinfo.getCertificateSubjectLocality(i));
-		serializeString(writer, "title", fileinfo.getCertificateSubjectTitle(i));
-		serializeString(writer, "surname", fileinfo.getCertificateSubjectSurname(i));
-		serializeString(writer, "givenName", fileinfo.getCertificateSubjectGivenName(i));
-		serializeString(writer, "initials", fileinfo.getCertificateSubjectInitials(i));
-		serializeString(writer, "pseudonym", fileinfo.getCertificateSubjectPseudonym(i));
-		serializeString(writer, "generationQualifier", fileinfo.getCertificateSubjectGenerationQualifier(i));
-		serializeString(writer, "emailAddress", fileinfo.getCertificateSubjectEmailAddress(i));
+		serializeString(writer, "country", cert.getSubject().country);
+		serializeString(writer, "organization", cert.getSubject().organization);
+		serializeString(writer, "organizationalUnit",  cert.getSubject().organizationalUnit);
+		serializeString(writer, "nameQualifier",  cert.getSubject().nameQualifier);
+		serializeString(writer, "state", cert.getSubject().state);
+		serializeString(writer, "commonName", cert.getSubject().commonName);
+		serializeString(writer, "serialNumber", cert.getSubject().serialNumber);
+		serializeString(writer, "locality", cert.getSubject().locality);
+		serializeString(writer, "title", cert.getSubject().title);
+		serializeString(writer, "surname", cert.getSubject().surname);
+		serializeString(writer, "givenName", cert.getSubject().givenName);
+		serializeString(writer, "initials", cert.getSubject().initials);
+		serializeString(writer, "pseudonym", cert.getSubject().pseudonym);
+		serializeString(writer, "generationQualifier", cert.getSubject().generationQualifier);
+		serializeString(writer, "emailAddress", cert.getSubject().emailAddress);
+		writer.EndObject();
+
+		writer.String("issuer");
+		writer.StartObject();
+		serializeString(writer, "country", cert.getIssuer().country);
+		serializeString(writer, "organization", cert.getIssuer().organization);
+		serializeString(writer, "organizationalUnit",  cert.getIssuer().organizationalUnit);
+		serializeString(writer, "nameQualifier",  cert.getIssuer().nameQualifier);
+		serializeString(writer, "state", cert.getIssuer().state);
+		serializeString(writer, "commonName", cert.getIssuer().commonName);
+		serializeString(writer, "serialNumber", cert.getIssuer().serialNumber);
+		serializeString(writer, "locality", cert.getIssuer().locality);
+		serializeString(writer, "title", cert.getIssuer().title);
+		serializeString(writer, "surname", cert.getIssuer().surname);
+		serializeString(writer, "givenName", cert.getIssuer().givenName);
+		serializeString(writer, "initials", cert.getIssuer().initials);
+		serializeString(writer, "pseudonym", cert.getIssuer().pseudonym);
+		serializeString(writer, "generationQualifier", cert.getIssuer().generationQualifier);
+		serializeString(writer, "emailAddress", cert.getIssuer().emailAddress);
 		writer.EndObject();
 
 		writer.EndObject();
@@ -517,7 +451,83 @@ void JsonPresentation::presentCertificates(Writer& writer) const
 		writer.EndObject();
 	}
 	writer.EndArray();
+}
 
+void WriteSigner(JsonPresentation::Writer& writer, const Signer& signer)
+{
+	writer.StartObject();
+	writer.String("warnings");
+	writer.StartArray();
+	for (auto&& warn : signer.warnings) {
+		writer.String(warn);
+	}
+	writer.EndArray();
+
+	serializeString(writer, "signTime", signer.signingTime);
+
+	serializeString(writer, "digest", signer.digest);
+
+	serializeString(writer, "digestAlgorithm", signer.digestAlgorithm);
+
+	writer.String("chain");
+	WriteCertificateChain(writer, signer.chain);
+
+	writer.String("counterSigners");
+	writer.StartArray();
+	for (auto&& csigner : signer.counterSigners) {
+		WriteSigner(writer, csigner);
+	}
+	writer.EndArray();
+
+	writer.EndObject();
+}
+
+void WriteSignature(JsonPresentation::Writer& writer, const DigitalSignature& signature)
+{
+	writer.StartObject();
+	writer.String("warnings");
+	writer.StartArray();
+	for (auto&& warn : signature.warnings) {
+		writer.String(warn);
+	}
+	writer.EndArray();
+
+	serializeString(writer, "digestAlgorithm", signature.digestAlgorithm);
+	serializeString(writer, "fileDigest", signature.fileDigest);
+	serializeString(writer, "signedDigest", signature.signedDigest);
+	serializeString(writer, "programName", signature.programName);
+
+	writer.String("allCertificates");
+	WriteCertificateChain(writer, signature.certificates);
+
+	writer.String("signer");
+	WriteSigner(writer, signature.signer);
+
+	writer.EndObject();
+}
+
+/**
+ * Present information about certificates into certificate table
+ */
+void JsonPresentation::presentCertificates(Writer& writer) const
+{
+
+	if(!fileinfo.certificateTable)
+	{
+		return;
+	}
+
+	writer.String("digitalSignatures");
+	writer.StartObject();
+	writer.Key("numberOfSignatures");
+	writer.Int64(fileinfo.certificateTable->signatures.size());
+	writer.String("signatures");
+	writer.StartArray();
+	for (auto&& signature : fileinfo.certificateTable->signatures)
+	{
+		WriteSignature(writer, signature);
+	}
+	writer.EndArray();
 	writer.EndObject();
 }
 

@@ -1,7 +1,7 @@
 /**
  * @file src/fileformat/types/certificate_table/certificate.cpp
  * @brief Class for one certificate.
- * @copyright (c) 2017 Avast Software, licensed under the MIT license
+ * @copyright (c) 2020 Avast Software, licensed under the MIT license
  */
 
 #include <unordered_map>
