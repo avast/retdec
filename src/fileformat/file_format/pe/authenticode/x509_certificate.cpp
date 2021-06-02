@@ -26,58 +26,58 @@ std::string X509Certificate::getSerialNumber() const
 {
     // https://github.com/VirusTotal/yara/blob/879a6576dd6e544bf9fc7711821029bf842fac54/libyara/modules/pe/pe.c#L1316
     ASN1_INTEGER* serial_number_asn1 = X509_get_serialNumber(const_cast<X509*>(cert));
-    if (serial_number_asn1) {
-        // ASN1_INTEGER can be negative (serial->type & V_ASN1_NEG_INTEGER),
-        // in which case the serial number will be stored in 2's complement.
-        //
-        // Handle negative serial numbers, which are technically not allowed
-        // by RFC5280, but do exist. An example binary which has a negative
-        // serial number is: 4bfe05f182aa273e113db6ed7dae4bb8.
-        //
-        // Negative serial numbers are handled by calling i2d_ASN1_INTEGER()
-        // with a NULL second parameter. This will return the size of the
-        // buffer necessary to store the proper serial number.
-        //
-        // Do this even for positive serial numbers because it makes the code
-        // cleaner and easier to read.
+    if (!serial_number_asn1)
+        return {};
 
-        int bytes = i2d_ASN1_INTEGER(serial_number_asn1, nullptr);
+    // ASN1_INTEGER can be negative (serial->type & V_ASN1_NEG_INTEGER),
+    // in which case the serial number will be stored in 2's complement.
+    //
+    // Handle negative serial numbers, which are technically not allowed
+    // by RFC5280, but do exist. An example binary which has a negative
+    // serial number is: 4bfe05f182aa273e113db6ed7dae4bb8.
+    //
+    // Negative serial numbers are handled by calling i2d_ASN1_INTEGER()
+    // with a NULL second parameter. This will return the size of the
+    // buffer necessary to store the proper serial number.
+    //
+    // Do this even for positive serial numbers because it makes the code
+    // cleaner and easier to read.
 
-        // According to X.509 specification the maximum length for the
-        // serial number is 20 octets. Add two bytes to account for
-        // DER type and length information.
+    int bytes = i2d_ASN1_INTEGER(serial_number_asn1, nullptr);
 
-        if (bytes > 2 && bytes <= 22) {
-            // Now that we know the size of the serial number allocate enough
-            // space to hold it, and use i2d_ASN1_INTEGER() one last time to
-            // hold it in the allocated buffer.
+    // According to X.509 specification the maximum length for the
+    // serial number is 20 octets. Add two bytes to account for
+    // DER type and length information.
 
-            std::vector<unsigned char> serial_der(bytes, 0);
-            auto tmp_pointer = serial_der.data();
+    if (bytes <= 2 || bytes > 22)
+        return {};
 
-            // First 2 bytes are DER length information
-            bytes = i2d_ASN1_INTEGER(serial_number_asn1, &tmp_pointer) - 2;
+    // Now that we know the size of the serial number allocate enough
+    // space to hold it, and use i2d_ASN1_INTEGER() one last time to
+    // hold it in the allocated buffer.
 
-            // For each byte in the serial to convert to hexlified format we
-            // need three bytes, two for the byte itself and one for colon.
-            // The last one doesn't have the colon, but the extra byte is used
-            // for the NULL terminator.
-            std::vector<char> result(bytes * 3, 0);
-            for (int j = 0; j < bytes; j++)
-            {
-                // Don't put the colon on the last one.
-                // Skip over DER type, length information (first 2 bytes of serial_der)
-                if (j < bytes - 1)
-                    snprintf(result.data() + 3 * j, 4, "%02x:", serial_der[j + 2]);
-                else
-                    snprintf(result.data() + 3 * j, 3, "%02x", serial_der[j + 2]);
-            }
-            // Ignore NULL terminator
-            return {result.begin(), result.end() - 1};
-        }
+    std::vector<unsigned char> serial_der(bytes, 0);
+    auto tmp_pointer = serial_der.data();
+
+    // First 2 bytes are DER length information
+    bytes = i2d_ASN1_INTEGER(serial_number_asn1, &tmp_pointer) - 2;
+
+    // For each byte in the serial to convert to hexlified format we
+    // need three bytes, two for the byte itself and one for colon.
+    // The last one doesn't have the colon, but the extra byte is used
+    // for the NULL terminator.
+    std::vector<char> result(bytes * 3, 0);
+    for (int j = 0; j < bytes; j++)
+    {
+        // Don't put the colon on the last one.
+        // Skip over DER type, length information (first 2 bytes of serial_der)
+        if (j < bytes - 1)
+            snprintf(result.data() + 3 * j, 4, "%02x:", serial_der[j + 2]);
+        else
+            snprintf(result.data() + 3 * j, 3, "%02x", serial_der[j + 2]);
     }
-    // X509_get_serialNumber returned nullptr or i2d_ASN1_INTEGER returned invalid number of bytes
-    return {};
+    // Ignore NULL terminator
+    return {result.begin(), result.end() - 1};
 }
 
 std::string X509Certificate::getSignatureAlgorithm() const
