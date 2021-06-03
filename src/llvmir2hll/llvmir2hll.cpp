@@ -891,7 +891,7 @@ LlvmIr2Hll::instantiatePatternFinders(
 	cio->init(llvmir2hll::CGBuilder::getCG(resModule), va);
 
 	llvmir2hll::PatternFinderRunner::PatternFinders pfs;
-	for (const auto pfId : pfsIds)
+	for (const auto &pfId : pfsIds)
 	{
 		auto& inst = llvmir2hll::PatternFinderFactory::getInstance();
 		ShPtr<llvmir2hll::PatternFinder> pf(

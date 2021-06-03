@@ -1954,7 +1954,7 @@ StructureConverter::SwitchClauseVector StructureConverter::sortSwitchClauses(
 */
 ShPtr<StructureConverter::SwitchClause> StructureConverter::findFirstClauseWithSinglePred(
 		const SwitchClauseVector &clauses) const {
-	for (const auto clause: clauses) {
+	for (const auto &clause: clauses) {
 		const auto clauseBody = clause->second;
 		if (clauseBody->getPredsNum() == 1) {
 			return clause;
