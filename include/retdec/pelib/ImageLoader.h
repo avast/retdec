@@ -382,6 +382,7 @@ class ImageLoader
 	int captureImageSections(ByteBuffer & fileData);
 	int captureOptionalHeader32(std::uint8_t * fileData, std::uint8_t * filePtr, std::uint8_t * fileEnd);
 	int captureOptionalHeader64(std::uint8_t * fileData, std::uint8_t * filePtr, std::uint8_t * fileEnd);
+	std::uint32_t copyDataDirectories(std::uint8_t * optionalHeaderPtr, std::uint8_t * dataDirectoriesPtr, std::size_t optionalHeaderMax, std::uint32_t numberOfRvaAndSizes);
 
 	int verifyDosHeader(PELIB_IMAGE_DOS_HEADER & hdr, std::size_t fileSize);
 	int verifyDosHeader(std::istream & fs, std::streamoff fileOffset, std::size_t fileSize);
