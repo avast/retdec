@@ -324,6 +324,24 @@ class ImageLoader
 		return (optionalHeader.NumberOfRvaAndSizes > dataDirIndex) ? optionalHeader.DataDirectory[dataDirIndex].Size : 0;
 	}
 
+	std::uint32_t getComDirRva() const
+	{
+		// For 32-bit binaries, the COM directory is valid even if NumberOfRvaAndSizes < IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR
+		// Sample: 58b0147d7dd3cd73cb8bf8df077e244650621174f7ff788ad06fd0c1f82aac40
+		if(optionalHeader.Magic == PELIB_IMAGE_NT_OPTIONAL_HDR32_MAGIC)
+			return optionalHeader.DataDirectory[PELIB_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR].VirtualAddress;
+		return getDataDirRva(PELIB_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
+	}
+
+	std::uint32_t getComDirSize() const
+	{
+		// For 32-bit binaries, the COM directory is valid even if NumberOfRvaAndSizes < IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR
+		// Sample: 58b0147d7dd3cd73cb8bf8df077e244650621174f7ff788ad06fd0c1f82aac40
+		if(optionalHeader.Magic == PELIB_IMAGE_NT_OPTIONAL_HDR32_MAGIC)
+			return optionalHeader.DataDirectory[PELIB_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR].Size;
+		return getDataDirSize(PELIB_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
+	}
+
 	std::uint64_t getVirtualAddressMasked(std::uint32_t rva)
 	{
 		std::uint64_t virtualAddress = getImageBase() + rva;

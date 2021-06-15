@@ -292,6 +292,13 @@ class PeFormatParser
 		return (relAddr != 0);
 	}
 
+	bool getComDirectoryRelative(unsigned long long &relAddr, unsigned long long &size) const
+	{
+		relAddr = peFile->imageLoader().getComDirRva();
+		size = peFile->imageLoader().getComDirSize();
+		return (relAddr != 0);
+	}
+
 	bool getDataDirectoryAbsolute(unsigned long long index, unsigned long long &absAddr, unsigned long long &size) const
 	{
 		if(getDataDirectoryRelative(index, absAddr, size))

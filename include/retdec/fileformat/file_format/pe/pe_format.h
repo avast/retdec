@@ -187,6 +187,7 @@ class PeFormat : public FileFormat
 		bool getNumberOfRelocations(unsigned long long &relocs) const;
 		bool getDataDirectoryRelative(unsigned long long index, unsigned long long &relAddr, unsigned long long &size) const;
 		bool getDataDirectoryAbsolute(unsigned long long index, unsigned long long &absAddr, unsigned long long &size) const;
+		bool getComDirectoryRelative(unsigned long long &relAddr, unsigned long long &size) const;
 		const PeCoffSection* getPeSection(const std::string &secName) const;
 		const PeCoffSection* getPeSection(unsigned long long secIndex) const;
 		const CLRHeader* getCLRHeader() const;
