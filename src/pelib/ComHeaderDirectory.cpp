@@ -22,8 +22,8 @@ namespace PeLib
 
 	int ComHeaderDirectory::read(ImageLoader & imageLoader)
 	{
-		std::uint32_t rva = imageLoader.getDataDirRva(PELIB_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
-		std::uint32_t size = imageLoader.getDataDirSize(PELIB_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
+		std::uint32_t rva = imageLoader.getComDirRva();
+		std::uint32_t size = imageLoader.getComDirSize();
 		std::uint32_t sizeOfImage = imageLoader.getSizeOfImage();
 		if(rva >= sizeOfImage || (rva + size) > sizeOfImage)
 		{

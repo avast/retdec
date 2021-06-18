@@ -116,6 +116,9 @@ PeLib::ImageLoader::ImageLoader(uint32_t versionInfo)
 
 		// Since build 18362, extra checks are performed on non-intel platforms
 		checkNonLegacyDllCharacteristics = (windowsBuildNumber >= 18362);
+
+		// Since build 21996, single-section images only contain data up to the image size
+		alignSingleSectionImagesToPage = !(windowsBuildNumber >= 21996);
 	}
 }
 
@@ -879,7 +882,7 @@ int PeLib::ImageLoader::Load(
 	if(fileError != ERROR_NONE)
 		return fileError;
 
-	// Check and capture NT headers. Don't go any further than here if the NT headers were detected as bad.
+	// Check and capture NT headers. Don't go any fuhrter than here if the NT headers were detected as bad.
 	// Sample: retdec-regression-tests\tools\fileinfo\features\pe-loader-corruptions\001-pe-header-cut-001.ex_
 	fileError = captureNtHeaders(fileData);
 	if(fileError != ERROR_NONE || ldrError == LDR_ERROR_NTHEADER_OUT_OF_FILE)
@@ -2118,7 +2121,7 @@ int PeLib::ImageLoader::captureImageSections(ByteBuffer & fileData)
 		// * Windows 10: no align
 		// If the image is smaller than one page, it is aligned to one page
 		sizeOfImage = AlignToSize(sizeOfImage, ssiImageAlignment32);
-		if(is64BitWindows)
+		if(is64BitWindows && alignSingleSectionImagesToPage)
 			sizeOfImage = AlignToSize(sizeOfImage, PELIB_PAGE_SIZE);
 		if(sizeOfImage < PELIB_PAGE_SIZE)
 			sizeOfImage = PELIB_PAGE_SIZE;
@@ -2178,15 +2181,42 @@ int PeLib::ImageLoader::loadImageAsIs(ByteBuffer & fileData)
 	return ERROR_NONE;
 }
 
+// While copying the data directories, we take into account possible out-of-bounds
+// data directory entries, as long as they fit into sizeOfOptionalHeader
+// Sample: 53b13d7cfb97b5475e21717397c85376a1de2b18c2eeb6532b160fb8aa3a393d
+// This sample has NumberOfRvaAndSizes set to 0x0E, but the IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR (0x0E),
+// but the .NET framework (_CorExeMain) does not care about NumberOfRvaAndSizes
+// and directly takes the DataDirectory without checking NumberOfRvaAndSizes
+std::uint32_t PeLib::ImageLoader::copyDataDirectories(
+	uint8_t * optionalHeaderPtr,
+	uint8_t * dataDirectoriesPtr,
+	size_t optionalHeaderMax,			// How many bytes do we have from the beginning of the optional header till the end of the file
+	uint32_t numberOfRvaAndSizes)
+{
+	uint8_t * dataDirectoriesEnd = dataDirectoriesPtr + PELIB_IMAGE_NUMBEROF_DIRECTORY_ENTRIES * sizeof(PELIB_IMAGE_DATA_DIRECTORY);
+
+	// Do not leave numberOfRvaAndSizes higher than the maximum possible value
+	if(numberOfRvaAndSizes > PELIB_IMAGE_NUMBEROF_DIRECTORY_ENTRIES)
+		numberOfRvaAndSizes = PELIB_IMAGE_NUMBEROF_DIRECTORY_ENTRIES;
+
+	// Determine the end of data directories based on file size.
+	// Note that the SizeOfOptionalHeader does NOT have any meaning in this
+	if(dataDirectoriesEnd > (optionalHeaderPtr + optionalHeaderMax))
+		dataDirectoriesEnd = (optionalHeaderPtr + optionalHeaderMax);
+
+	// Copy data directories, up to SizeOfOptionalHeader
+	if(dataDirectoriesEnd > dataDirectoriesPtr)
+		memcpy(optionalHeader.DataDirectory, dataDirectoriesPtr, (dataDirectoriesEnd - dataDirectoriesPtr));
+	return numberOfRvaAndSizes;
+}
+
 int PeLib::ImageLoader::captureOptionalHeader64(
 	uint8_t * fileBegin,
 	uint8_t * filePtr,
 	uint8_t * fileEnd)
 {
 	PELIB_IMAGE_OPTIONAL_HEADER64 optionalHeader64{};
-	uint8_t * dataDirectoryPtr;
 	uint32_t sizeOfOptionalHeader = sizeof(PELIB_IMAGE_OPTIONAL_HEADER64);
-	uint32_t numberOfRvaAndSizes;
 
 	// Capture optional header. Note that IMAGE_FILE_HEADER::SizeOfOptionalHeader
 	// is not taken into account by the Windows loader - it simply assumes that the entire optional header is present
@@ -2230,18 +2260,10 @@ int PeLib::ImageLoader::captureOptionalHeader64(
 	optionalHeader.NumberOfRvaAndSizes         = optionalHeader64.NumberOfRvaAndSizes;
 
 	// Copy data directories
-	if((numberOfRvaAndSizes = optionalHeader64.NumberOfRvaAndSizes) > PELIB_IMAGE_NUMBEROF_DIRECTORY_ENTRIES)
-		numberOfRvaAndSizes = PELIB_IMAGE_NUMBEROF_DIRECTORY_ENTRIES;
-	memcpy(optionalHeader.DataDirectory, optionalHeader64.DataDirectory, sizeof(PELIB_IMAGE_DATA_DIRECTORY) * numberOfRvaAndSizes);
-
-	// Cut the real number of data directory entries by the file size
-	dataDirectoryPtr = filePtr + offsetof(PELIB_IMAGE_OPTIONAL_HEADER64, DataDirectory);
-	if(dataDirectoryPtr < fileEnd)
-	{
-		if((dataDirectoryPtr + numberOfRvaAndSizes * sizeof(PELIB_IMAGE_DATA_DIRECTORY)) > fileEnd)
-			numberOfRvaAndSizes = (fileEnd - dataDirectoryPtr + sizeof(PELIB_IMAGE_DATA_DIRECTORY) - 1) / sizeof(PELIB_IMAGE_DATA_DIRECTORY);
-	}
-	realNumberOfRvaAndSizes = numberOfRvaAndSizes;
+	realNumberOfRvaAndSizes = copyDataDirectories((uint8_t *)(&optionalHeader64),
+												  (uint8_t *)(&optionalHeader64.DataDirectory[0]),
+												  fileEnd - filePtr,
+												  optionalHeader64.NumberOfRvaAndSizes);
 
 	// Remember the offset of the checksum field
 	checkSumFileOffset = (filePtr - fileBegin) + offsetof(PELIB_IMAGE_OPTIONAL_HEADER64, CheckSum);
@@ -2255,9 +2277,7 @@ int PeLib::ImageLoader::captureOptionalHeader32(
 	uint8_t * fileEnd)
 {
 	PELIB_IMAGE_OPTIONAL_HEADER32 optionalHeader32{};
-	uint8_t * dataDirectoryPtr;
 	uint32_t sizeOfOptionalHeader = sizeof(PELIB_IMAGE_OPTIONAL_HEADER32);
-	uint32_t numberOfRvaAndSizes;
 
 	// Capture optional header. Note that IMAGE_FILE_HEADER::SizeOfOptionalHeader
 	// is not taken into account by the Windows loader - it simply assumes that the entire optional header is present
@@ -2302,18 +2322,10 @@ int PeLib::ImageLoader::captureOptionalHeader32(
 	optionalHeader.NumberOfRvaAndSizes         = optionalHeader32.NumberOfRvaAndSizes;
 
 	// Copy data directories
-	if((numberOfRvaAndSizes = optionalHeader32.NumberOfRvaAndSizes) > PELIB_IMAGE_NUMBEROF_DIRECTORY_ENTRIES)
-		numberOfRvaAndSizes = PELIB_IMAGE_NUMBEROF_DIRECTORY_ENTRIES;
-	memcpy(optionalHeader.DataDirectory, optionalHeader32.DataDirectory, sizeof(PELIB_IMAGE_DATA_DIRECTORY) * numberOfRvaAndSizes);
-
-	// Cut the real number of data directory entries by the file size
-	dataDirectoryPtr = filePtr + offsetof(PELIB_IMAGE_OPTIONAL_HEADER32, DataDirectory);
-	if(dataDirectoryPtr < fileEnd)
-	{
-		if((dataDirectoryPtr + numberOfRvaAndSizes * sizeof(PELIB_IMAGE_DATA_DIRECTORY)) > fileEnd)
-			numberOfRvaAndSizes = (fileEnd - dataDirectoryPtr + sizeof(PELIB_IMAGE_DATA_DIRECTORY) - 1) / sizeof(PELIB_IMAGE_DATA_DIRECTORY);
-	}
-	realNumberOfRvaAndSizes = numberOfRvaAndSizes;
+	realNumberOfRvaAndSizes = copyDataDirectories((uint8_t *)(&optionalHeader32),
+												  (uint8_t *)(&optionalHeader32.DataDirectory[0]),
+												  fileEnd - filePtr,
+												  optionalHeader32.NumberOfRvaAndSizes);
 
 	// Remember the offset of the checksum field
 	checkSumFileOffset = (filePtr - fileBegin) + offsetof(PELIB_IMAGE_OPTIONAL_HEADER32, CheckSum);
@@ -2799,9 +2811,13 @@ bool PeLib::ImageLoader::checkForSectionTablesWithinHeader(uint32_t e_lfanew)
 {
 	uint32_t OffsetToSectionTable = sizeof(uint32_t) + sizeof(PELIB_IMAGE_FILE_HEADER) + fileHeader.SizeOfOptionalHeader;
 	uint32_t NumberOfSubsections = fileHeader.NumberOfSections;
-	uint32_t NtHeaderSize = PELIB_PAGE_SIZE - e_lfanew;
+	uint32_t NtHeaderSize;
 
-	// If this condition is true, then the image header contains data up fo SizeofHeaders
+	// Sample: retdec-regression-tests\features\corkami\inputs\96emptysections.ex
+	// Must count with more pages if the header size is greater than one page
+	NtHeaderSize = AlignToSize(optionalHeader.SizeOfHeaders, PELIB_PAGE_SIZE) - e_lfanew;
+
+	// If this condition is true, then the image header contains data up to SizeofHeaders
 	// If not, the image header contains the entire page.
 	if((e_lfanew + OffsetToSectionTable + (NumberOfSubsections + 1) * sizeof(PELIB_IMAGE_SECTION_HEADER)) <= NtHeaderSize)
 		return false;
@@ -2886,8 +2902,10 @@ void PeLib::ImageLoader::compareWithWindowsMappedImage(
 	size_t mismatchOffset;
 	size_t rva = 0;
 
-	// Are both loaded?
-	if(winImageData != nullptr && isImageMappedOk())
+	// Check if the image was loaded by both Windows and us
+	// Note that in Windows 7, the image can actually be mapped at base address 0
+	// Sample: retdec-regression-tests\features\corkami\inputs\ibnullXP.ex 
+	if((winImageData || imageSize) && isImageMappedOk())
 	{
 		// Check whether the image size is the same
 		if(imageSize != getSizeOfImageAligned())
