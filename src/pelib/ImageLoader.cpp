@@ -116,6 +116,9 @@ PeLib::ImageLoader::ImageLoader(uint32_t versionInfo)
 
 		// Since build 18362, extra checks are performed on non-intel platforms
 		checkNonLegacyDllCharacteristics = (windowsBuildNumber >= 18362);
+
+		// Since build 21996, single-section images only contain data up to the image size
+		alignSingleSectionImagesToPage = !(windowsBuildNumber >= 21996);
 	}
 }
 
@@ -2118,7 +2121,7 @@ int PeLib::ImageLoader::captureImageSections(ByteBuffer & fileData)
 		// * Windows 10: no align
 		// If the image is smaller than one page, it is aligned to one page
 		sizeOfImage = AlignToSize(sizeOfImage, ssiImageAlignment32);
-		if(is64BitWindows)
+		if(is64BitWindows && alignSingleSectionImagesToPage)
 			sizeOfImage = AlignToSize(sizeOfImage, PELIB_PAGE_SIZE);
 		if(sizeOfImage < PELIB_PAGE_SIZE)
 			sizeOfImage = PELIB_PAGE_SIZE;

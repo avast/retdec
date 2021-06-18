@@ -490,6 +490,7 @@ class ImageLoader
 	bool forceIntegrityCheckCertificate;                // If true, extra check for certificate will be provided
 	bool checkNonLegacyDllCharacteristics;              // If true, extra checks will be performed on DllCharacteristics
 	bool checkImagePostMapping;                         // If true, extra checks will be performed after the image is mapped
+	bool alignSingleSectionImagesToPage;                // Align single-section images to page size in 64-bit windows
 };
 
 }	// namespace PeLib
