@@ -885,6 +885,8 @@ namespace
 
 				// "DanS" - 0x536e6144 signals the start (end) of the rich header
 				if (decrypted_dword == 0x536e6144) {
+					// Set the offset to "DanS"
+					this->offset = (i - rich.begin()) * 4;
 					// Because we are analysing bottom up, reverse the vector
 					std::reverse(decryptedHeader.begin(), decryptedHeader.end());
 					break;
@@ -935,6 +937,11 @@ namespace
 	bool RichHeader::isStructureValid() const
 	{
 		return validStructure;
+	}
+
+	std::uint64_t RichHeader::getOffset() const
+	{
+		return offset;
 	}
 
 	std::size_t RichHeader::getNumberOfIterations() const
