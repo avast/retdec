@@ -9,6 +9,7 @@
 #include <iomanip>
 #include <array>
 #include <unordered_map>
+#include <algorithm>
 
 #include "retdec/pelib/PeLibInc.h"
 #include "retdec/pelib/RichHeader.h"
@@ -794,23 +795,33 @@ namespace
 		}
 	}
 
+	/**
+	 * @brief Checks if the decrypted header looks valid, if it does
+	 * 	      then it analyses the header contents and saves it
+	 *        into this->records
+	 * 
+	 * @param ignoreInvalidKey 
+	 * @return true - the header looks valid
+	 * @return false - header isn't valid
+	 */
 	bool RichHeader::analyze(bool ignoreInvalidKey)
 	{
 		bool hValid = true;
 		size_t decSize = decryptedHeader.size();
-		if (decSize < 4)
-		{
+		if (decSize < 4) {
 			return false;
 		}
-		else if (decryptedHeader[0] != 0x536e6144 || decryptedHeader[1] != 0 ||
-			decryptedHeader[2] != 0 || decryptedHeader[3] != 0)
-		{
-			if (ignoreInvalidKey)
-			{
+		// Check if the start is "DanS" with 3 NULL
+		// DWORDS padding into 16 byte paragraph
+		else if (decryptedHeader[0] != 0x536e6144 ||
+				decryptedHeader[1] != 0 ||
+				decryptedHeader[2] != 0 ||
+				decryptedHeader[3] != 0) {
+
+			if (ignoreInvalidKey) {
 				hValid = false;
 			}
-			else
-			{
+			else {
 				return false;
 			}
 		}
@@ -848,12 +859,13 @@ namespace
 			rich.push_back(actInput);
 		}
 
-		std::uint32_t sign[] = {0x68636952};
+		std::uint32_t sign[] = {0x68636952}; // "Rich"
 		auto lastPos = rich.end();
 
 		// try to find signature of rich header and key for decryption
 		do
 		{
+			// Find the Rich header ending marker "Rich"
 			auto richSignature = find_end(rich.begin(), lastPos, sign, sign + 1);
 			if (richSignature == lastPos || richSignature + 1 == rich.end())
 			{
@@ -865,16 +877,23 @@ namespace
 			decryptedHeader.clear();
 			++noOfIters;
 
-			for (auto i = rich.begin(); i != richSignature; ++i)
-			{
-				decryptedHeader.push_back(*i ^ key);
-			}
+			// Start analyzing from the end - "Rich" marker
+			// and move upwards to decrypted "DanS" marker
+			for (auto i = richSignature - 1; i >= rich.begin(); --i) {
+				std::uint32_t decrypted_dword = *i ^ key;
+				decryptedHeader.push_back(decrypted_dword);
 
+				// "DanS" - 0x536e6144 signals the start (end) of the rich header
+				if (decrypted_dword == 0x536e6144) {
+					// Because we are analysing bottom up, reverse the vector
+					std::reverse(decryptedHeader.begin(), decryptedHeader.end());
+					break;
+				}
+			}
 			setValidStructure();
 		} while (!analyze());
 
-		if (ignoreInvalidKey && noOfIters)
-		{
+		if (ignoreInvalidKey && noOfIters) {
 			analyze(true);
 		}
 	}
