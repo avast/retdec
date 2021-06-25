@@ -107,6 +107,14 @@ const std::string& Certificate::getRawIssuer() const
 	return issuerRaw;
 }
 
+const std::string& Certificate::getOnelineSubject() const
+{
+	return subjectOneline;
+}
+const std::string& Certificate::getOnelineIssuer() const
+{
+	return issuerOneline;
+}
 /**
  * Get subject of certificate in form of attributes
  * @return Subject of certificate
