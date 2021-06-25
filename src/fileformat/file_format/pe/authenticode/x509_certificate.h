@@ -44,6 +44,8 @@ public:
 	std::string getValidSince() const;
 	std::string getRawSubject() const;
 	std::string getRawIssuer() const;
+	std::string getOnelineSubject() const;
+	std::string getOnelineIssuer() const;
 	std::string getSerialNumber() const;
 	std::string getSignatureAlgorithm() const;
 	std::string getPublicKey() const;
