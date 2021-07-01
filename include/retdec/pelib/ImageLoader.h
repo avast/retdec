@@ -172,6 +172,7 @@ class ImageLoader
 	std::uint32_t vaToRva(std::uint64_t VirtualAddress) const;
 	std::uint32_t getFileOffsetFromRva(std::uint32_t rva) const;
 	std::uint32_t getRealPointerToRawData(std::size_t sectionIndex) const;
+	std::uint32_t getRealSizeOfRawData(std::size_t sectionIndex) const;
 	std::uint32_t getImageProtection(std::uint32_t characteristics) const;
 	std::size_t   getSectionIndexByRva(std::uint32_t Rva) const;
 
