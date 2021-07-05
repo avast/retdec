@@ -61,6 +61,7 @@ class PeFormat : public FileFormat
 
 		/// @name Auxiliary methods
 		/// @{
+		std::uint64_t getValidSectionOffset(std::uint64_t rva);
 		std::size_t getRichHeaderOffset(const std::string &plainFile);
 		bool getResourceNodes(std::vector<const PeLib::ResourceChild*> &nodes, std::vector<std::size_t> &levels);
 		void loadRichHeader();
