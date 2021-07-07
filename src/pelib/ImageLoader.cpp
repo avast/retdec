@@ -1847,11 +1847,13 @@ int PeLib::ImageLoader::captureSectionName(
 	// rstrip trailing nulls
 	const uint8_t* end = Name + PELIB_IMAGE_SIZEOF_SHORT_NAME;
 	// find the first non-null from end
-	do {
+	do
+	{
 		end--;
 	} while (end - Name > 0 && *end == 0);
 
-	if (end - Name > 0) {
+	if (end - Name > 0)
+	{
 		sectionName.assign(Name, end + 1);
 	}
 
