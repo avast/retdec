@@ -731,7 +731,8 @@ namespace PeLib
 					imageLoader.readImage(&length, name_rva, sizeof(std::uint16_t));
 
 					// Sanity check for pointer to junk data instead of valid string
-					if (length <= 100) {
+					if (length <= 100)
+					{
 						// Read the resource name
 						imageLoader.readStringRc(rc.entry.wstrName, name_rva);
 					}
