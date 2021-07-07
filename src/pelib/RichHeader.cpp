@@ -797,7 +797,7 @@ namespace
 
 	/**
 	 * @brief Checks if the decrypted header looks valid, if it does
-	 * 	      then it analyses the header contents and saves it
+	 *        then it analyses the header contents and saves it
 	 *        into this->records
 	 * 
 	 * @param ignoreInvalidKey 
@@ -808,7 +808,8 @@ namespace
 	{
 		bool hValid = true;
 		size_t decSize = decryptedHeader.size();
-		if (decSize < 4) {
+		if (decSize < 4)
+		{
 			return false;
 		}
 		// Check if the start is "DanS" with 3 NULL
@@ -816,12 +817,14 @@ namespace
 		else if (decryptedHeader[0] != 0x536e6144 ||
 				decryptedHeader[1] != 0 ||
 				decryptedHeader[2] != 0 ||
-				decryptedHeader[3] != 0) {
-
-			if (ignoreInvalidKey) {
+				decryptedHeader[3] != 0)
+		{
+			if (ignoreInvalidKey)
+			{
 				hValid = false;
 			}
-			else {
+			else
+			{
 				return false;
 			}
 		}
@@ -879,12 +882,13 @@ namespace
 
 			// Start analyzing from the end - "Rich" marker
 			// and move upwards to decrypted "DanS" marker
-			for (auto i = richSignature - 1; i >= rich.begin(); --i) {
+			for (auto i = richSignature - 1; i >= rich.begin(); --i)
+			{
 				std::uint32_t decrypted_dword = *i ^ key;
 				decryptedHeader.push_back(decrypted_dword);
-
 				// "DanS" - 0x536e6144 signals the start (end) of the rich header
-				if (decrypted_dword == 0x536e6144) {
+				if (decrypted_dword == 0x536e6144)
+				{
 					// Set the offset to "DanS"
 					this->offset = (i - rich.begin()) * 4;
 					// Because we are analysing bottom up, reverse the vector
@@ -895,7 +899,8 @@ namespace
 			setValidStructure();
 		} while (!analyze());
 
-		if (ignoreInvalidKey && noOfIters) {
+		if (ignoreInvalidKey && noOfIters)
+		{
 			analyze(true);
 		}
 	}

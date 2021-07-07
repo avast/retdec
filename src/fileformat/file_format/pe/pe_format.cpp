@@ -740,7 +740,6 @@ bool PeFormat::getResourceNodes(std::vector<const PeLib::ResourceChild*> &nodes,
  */
 void PeFormat::loadRichHeader()
 {
-	// Sanity checks
 	if(getPeHeaderOffset() <= getMzHeaderSize())
 	{
 		return;
