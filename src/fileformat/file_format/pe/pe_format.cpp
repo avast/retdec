@@ -2427,6 +2427,14 @@ void PeFormat::detectTypeLibId()
 	for (std::size_t i = 1; i <= customAttributeTable->getNumberOfRows(); ++i)
 	{
 		auto customAttributeRow = customAttributeTable->getRow(i);
+
+		// Check that the parent is index into Assembly table
+		MetadataTableType parent_table;
+		if (customAttributeRow->parent.getTable(parent_table) && parent_table != MetadataTableType::Assembly)
+		{
+			continue;
+		}
+
 		if (customAttributeRow->type.getIndex() == guidMemberRef)
 		{
 			// Its value is the TypeLib we are looking for
