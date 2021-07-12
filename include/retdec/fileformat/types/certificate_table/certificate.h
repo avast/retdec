@@ -46,7 +46,9 @@ class Certificate
 		std::string sha1Digest;
 		std::string sha256Digest;
 		std::string subjectRaw;
+		std::string subjectOneline;
 		std::string issuerRaw;
+		std::string issuerOneline;
 		Attributes subject;
 		Attributes issuer;
 
@@ -63,6 +65,8 @@ class Certificate
 		const std::string& getSha256Digest() const;
 		const std::string& getRawSubject() const;
 		const std::string& getRawIssuer() const;
+		const std::string& getOnelineSubject() const;
+		const std::string& getOnelineIssuer() const;
 		const Certificate::Attributes& getSubject() const;
 		const Certificate::Attributes& getIssuer() const;
 		/// @}

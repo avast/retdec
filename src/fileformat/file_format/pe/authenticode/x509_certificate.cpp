@@ -235,11 +235,29 @@ std::string X509Certificate::getRawIssuer() const
 	return X509NameToString(X509_get_issuer_name(cert));
 }
 
+// Oneline version for YARA compatibility
+std::string X509Certificate::getOnelineSubject() const
+{
+	char buffer[256] = {0};
+	X509_NAME_oneline(X509_get_subject_name(cert), buffer, sizeof(buffer));
+	return std::string(buffer);
+}
+
+// Oneline version for YARA compatibility
+std::string X509Certificate::getOnelineIssuer() const
+{
+	char buffer[256] = {0};
+	X509_NAME_oneline(X509_get_issuer_name(cert), buffer, sizeof(buffer));
+	return std::string(buffer);
+}
+
 Certificate X509Certificate::createCertificate() const
 {
 	Certificate out_cert;
 	out_cert.issuerRaw = getRawIssuer();
+	out_cert.issuerOneline = getOnelineIssuer();
 	out_cert.subjectRaw = getRawSubject();
+	out_cert.subjectOneline = getOnelineSubject();
 	out_cert.issuer = getIssuer();
 	out_cert.subject = getSubject();
 	out_cert.publicKey = getPublicKey();

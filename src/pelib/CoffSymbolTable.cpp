@@ -42,7 +42,8 @@ namespace PeLib
 				{
 					for (std::size_t j = NameOffset; j < stringTableSize && stringTable[j] != '\0'; ++j)
 					{
-						// If we have symbol name with length of 96 and it contains non-printable character, stop there because it does not seem to be valid.
+						// If we have symbol name with length of COFF_SYMBOL_NAME_MAX_LENGTH and it
+						// contains non-printable character, stop there because it does not seem to be valid.
 						if (j - NameOffset == COFF_SYMBOL_NAME_MAX_LENGTH)
 						{
 							auto nonPrintableChars = std::count_if(symbol.Name.begin(), symbol.Name.end(), [](unsigned char c) { return !isprint(c); });

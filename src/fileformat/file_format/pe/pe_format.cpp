@@ -790,7 +790,6 @@ void PeFormat::loadRichHeader()
 	std::string signature;
 	richHeader = new RichHeader();
 	richHeader->setOffset(offset);
-	richHeader->setSuspicious(header.getNumberOfIterations() > 1);
 	richHeader->setValidStructure(true);
 	if(!header.isHeaderValid())
 	{
@@ -811,9 +810,16 @@ void PeFormat::loadRichHeader()
 
 		file->readRichHeader(maxOffset, getPeHeaderOffset() - maxOffset, true);
 		richHeader->setOffset(maxOffset);
-		richHeader->setSuspicious(header.getNumberOfIterations() > 1);
-		signature = header.getDecryptedHeaderItemsSignature({0, 1, 2, 3});
+		signature = header.getDecryptedHeaderItemsSignature({ 0, 1, 2, 3 });
 	}
+
+	richHeader->setSuspicious(header.getNumberOfIterations() > 1);
+
+	unsigned long long base_offset;
+	richHeader->getOffset(base_offset);
+	// in case the rich header does have junk data
+	// injected before and doesn't start exactly at offset
+	richHeader->setOffset(base_offset + header.getOffset());
 
 	for(const auto &item : header)
 	{
