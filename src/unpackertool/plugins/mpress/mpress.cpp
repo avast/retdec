@@ -101,7 +101,7 @@ void MpressPlugin::prepare()
 void MpressPlugin::unpack()
 {
 	// Find the section which contains the packed content
-	unsigned long long ep;
+	std::uint64_t ep;
 	std::vector<std::uint8_t> packedContentSectAddrBytes;
 
 	_file->getFileFormat()->getEpAddress(ep);
@@ -215,7 +215,7 @@ void MpressPlugin::decodeLzmaProperties(DynamicBuffer& compressedContent, std::u
 
 std::uint32_t MpressPlugin::getFixStub()
 {
-	unsigned long long ep, epOffset;
+	std::uint64_t ep, epOffset;
 	std::vector<std::uint8_t> fixStubOffsetBytes;
 
 	// Fix imports stub is calculated from the EP section where there is offset into it written at specific offset
@@ -580,7 +580,7 @@ void MpressPlugin::fixRelocations()
 	PeLib::ImageLoader & imageLoader = _peFile->imageLoader();
 
 	// Calculate the offset of EP in EP section
-	unsigned long long epAddress;
+	std::uint64_t epAddress;
 	_file->getFileFormat()->getEpAddress(epAddress);
 	epAddress -= epSegment->getAddress();
 
@@ -605,7 +605,7 @@ void MpressPlugin::fixRelocations()
 
 MpressUnpackerStub MpressPlugin::detectUnpackerStubVersion()
 {
-	unsigned long long ep;
+	std::uint64_t ep;
 	std::vector<std::uint8_t> signatureBytes;
 
 	// Get the data in EP section so we can compare it with signature

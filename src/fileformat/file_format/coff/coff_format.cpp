@@ -609,34 +609,34 @@ bool CoffFormat::isExecutable() const
 	return !isDll() && !isObjectFile();
 }
 
-bool CoffFormat::getMachineCode(unsigned long long &result) const
+bool CoffFormat::getMachineCode(std::uint64_t &result) const
 {
 	result = file->getMachine();
 	return true;
 }
 
-bool CoffFormat::getAbiVersion(unsigned long long &result) const
+bool CoffFormat::getAbiVersion(std::uint64_t &result) const
 {
 	// not in COFF files
 	static_cast<void>(result);
 	return false;
 }
 
-bool CoffFormat::getImageBaseAddress(unsigned long long &imageBase) const
+bool CoffFormat::getImageBaseAddress(std::uint64_t &imageBase) const
 {
 	// not in COFF files
 	static_cast<void>(imageBase);
 	return false;
 }
 
-bool CoffFormat::getEpAddress(unsigned long long &result) const
+bool CoffFormat::getEpAddress(std::uint64_t &result) const
 {
 	// not in COFF files
 	static_cast<void>(result);
 	return false;
 }
 
-bool CoffFormat::getEpOffset(unsigned long long &epOffset) const
+bool CoffFormat::getEpOffset(std::uint64_t &epOffset) const
 {
 	// not in COFF files
 	static_cast<void>(epOffset);

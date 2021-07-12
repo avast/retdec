@@ -160,7 +160,7 @@ template <int bits> PeUpxStub<bits>::PeUpxStub(retdec::loader::Image* inputFile,
 		_realEpAddress(0), _newPeFile(nullptr), _rvaShift(0), _exportsCompressed(false),
 		_filterId(FILTER_UNKNOWN), _filterCount(0), _filterParam(0)
 {
-	unsigned long long ep;
+	std::uint64_t ep;
 	_file->getFileFormat()->getEpAddress(ep);
 	_realEpAddress = ep;
 }

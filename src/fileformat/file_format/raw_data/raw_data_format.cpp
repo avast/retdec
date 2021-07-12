@@ -136,22 +136,22 @@ bool RawDataFormat::isExecutable() const
 	return true;
 }
 
-bool RawDataFormat::getMachineCode(unsigned long long &result) const
+bool RawDataFormat::getMachineCode(std::uint64_t &result) const
 {
 	return false;
 }
 
-bool RawDataFormat::getAbiVersion(unsigned long long &result) const
+bool RawDataFormat::getAbiVersion(std::uint64_t &result) const
 {
 	return false;
 }
 
-bool RawDataFormat::getImageBaseAddress(unsigned long long &imageBase) const
+bool RawDataFormat::getImageBaseAddress(std::uint64_t&imageBase) const
 {
 	return false;
 }
 
-bool RawDataFormat::getEpAddress(unsigned long long &result) const
+bool RawDataFormat::getEpAddress(std::uint64_t &result) const
 {
 	if(hasEntryPoint && isEntryPointValid())
 	{
@@ -164,7 +164,7 @@ bool RawDataFormat::getEpAddress(unsigned long long &result) const
 	return true;
 }
 
-bool RawDataFormat::getEpOffset(unsigned long long &result) const
+bool RawDataFormat::getEpOffset(std::uint64_t &result) const
 {
 	if(hasEntryPoint && isEntryPointValid())
 	{

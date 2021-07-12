@@ -1354,7 +1354,7 @@ void PeHeuristics::getBorlandDelphiHeuristics()
 	auto source = DetectionMethod::COMBINED;
 	auto strength = DetectionStrength::MEDIUM;
 
-	unsigned long long imageBaseAddr;
+	std::uint64_t imageBaseAddr;
 	if (!fileParser.getImageBaseAddress(imageBaseAddr)
 			|| !toolInfo.entryPointSection
 			|| toolInfo.epSection.getIndex()

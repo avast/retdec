@@ -369,7 +369,7 @@ void PeDetector::detectFileClass()
 
 void PeDetector::detectArchitecture()
 {
-	unsigned long long machineType = 0;
+	std::uint64_t machineType = 0;
 	if(!peParser->getMachineCode(machineType))
 	{
 		return;

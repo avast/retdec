@@ -44,7 +44,7 @@ MachODetector::MachODetector(
  */
 void MachODetector::getEntryPoint()
 {
-	unsigned long long res = 0;
+	std::uint64_t res = 0;
 	if(fileParser->getEpAddress(res))
 	{
 		fileInfo.toolInfo.epAddress = res;
@@ -259,7 +259,7 @@ void MachODetector::detectFileClass()
 
 void MachODetector::detectArchitecture()
 {
-	unsigned long long machineType = 0;
+	std::uint64_t machineType = 0;
 	if(!machoParser->getMachineCode(machineType))
 	{
 		return;

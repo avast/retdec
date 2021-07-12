@@ -2699,7 +2699,7 @@ std::size_t ElfFormat::getBytesPerWord() const
 
 bool ElfFormat::hasMixedEndianForDouble() const
 {
-	unsigned long long abiVersion = 0;
+	std::uint64_t abiVersion = 0;
 	bool hasAbi = getAbiVersion(abiVersion);
 	return isArm() && (!hasAbi || abiVersion < 5);
 }
@@ -2734,13 +2734,13 @@ bool ElfFormat::isExecutable() const
 	return reader.get_type() == ET_EXEC;
 }
 
-bool ElfFormat::getMachineCode(unsigned long long &result) const
+bool ElfFormat::getMachineCode(std::uint64_t &result) const
 {
 	result = reader.get_machine();
 	return true;
 }
 
-bool ElfFormat::getAbiVersion(unsigned long long &result) const
+bool ElfFormat::getAbiVersion(std::uint64_t &result) const
 {
 	// this works only for 32-bit ARM
 	if(!isArm() || getWordLength() != 32)
@@ -2757,14 +2757,14 @@ bool ElfFormat::getAbiVersion(unsigned long long &result) const
 	return abi;
 }
 
-bool ElfFormat::getImageBaseAddress(unsigned long long &imageBase) const
+bool ElfFormat::getImageBaseAddress(std::uint64_t &imageBase) const
 {
 	// not in ELF files
 	static_cast<void>(imageBase);
 	return false;
 }
 
-bool ElfFormat::getEpAddress(unsigned long long &result) const
+bool ElfFormat::getEpAddress(std::uint64_t &result) const
 {
 	const unsigned long long epAddress = reader.get_entry();
 	if(epAddress)
@@ -2795,9 +2795,9 @@ bool ElfFormat::getEpAddress(unsigned long long &result) const
 	return false;
 }
 
-bool ElfFormat::getEpOffset(unsigned long long &epOffset) const
+bool ElfFormat::getEpOffset(std::uint64_t &epOffset) const
 {
-	unsigned long long epRva;
+	std::uint64_t epRva;
 	if(!getEpAddress(epRva))
 	{
 		return false;

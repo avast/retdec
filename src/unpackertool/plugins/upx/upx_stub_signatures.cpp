@@ -2157,7 +2157,7 @@ const UpxStubData* UpxStubSignatures::matchSignatures(Image* file, DynamicBuffer
 		return nullptr;
 
 	// Offset of EP in its section/segment
-	unsigned long long ep;
+	std::uint64_t ep;
 	file->getFileFormat()->getEpAddress(ep);
 	ep -= epSeg->getAddress();
 

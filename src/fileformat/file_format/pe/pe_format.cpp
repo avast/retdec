@@ -1651,7 +1651,8 @@ void PeFormat::loadResourceNodes(std::vector<const PeLib::ResourceChild*> &nodes
 void PeFormat::loadResources()
 {
 	size_t iconGroupIDcounter = 0;
-	unsigned long long rva = 0, size = 0, imageBase = 0;
+	unsigned long long rva = 0, size = 0;
+	std::uint64_t imageBase = 0;
 	if(!getDataDirectoryRelative(PELIB_IMAGE_DIRECTORY_ENTRY_RESOURCE, rva, size))
 	{
 		return;
@@ -2786,26 +2787,26 @@ bool PeFormat::isExecutable() const
 	return !isDll();
 }
 
-bool PeFormat::getMachineCode(unsigned long long &result) const
+bool PeFormat::getMachineCode(std::uint64_t &result) const
 {
 	result = formatParser->getMachineType();
 	return true;
 }
 
-bool PeFormat::getAbiVersion(unsigned long long &result) const
+bool PeFormat::getAbiVersion(std::uint64_t &result) const
 {
 	// not in PE files
 	static_cast<void>(result);
 	return false;
 }
 
-bool PeFormat::getImageBaseAddress(unsigned long long &imageBase) const
+bool PeFormat::getImageBaseAddress(std::uint64_t &imageBase) const
 {
 	imageBase = formatParser->getImageBaseAddress();
 	return true;
 }
 
-bool PeFormat::getEpAddress(unsigned long long &result) const
+bool PeFormat::getEpAddress(std::uint64_t &result) const
 {
 	std::uint64_t tempResult = 0;
 
@@ -2818,7 +2819,7 @@ bool PeFormat::getEpAddress(unsigned long long &result) const
 	return false;
 }
 
-bool PeFormat::getEpOffset(unsigned long long &epOffset) const
+bool PeFormat::getEpOffset(std::uint64_t &epOffset) const
 {
 	std::uint64_t tempResult = 0;
 
@@ -3406,12 +3407,11 @@ void PeFormat::scanForAnomalies()
 /**
  * Scan for section anomalies
  */
-void PeFormat::scanForSectionAnomalies(unsigned anamaliesLimit)
+void PeFormat::scanForSectionAnomalies(unsigned anomaliesLimit)
 {
 	std::size_t nSecs = getDeclaredNumberOfSections();
 
-	unsigned long long imageBase;
-	unsigned long long epAddr;
+	std::uint64_t imageBase, epAddr;
 
 	if (getEpAddress(epAddr))
 	{
@@ -3446,7 +3446,7 @@ void PeFormat::scanForSectionAnomalies(unsigned anamaliesLimit)
 	std::set<std::string> secNames;
 	for (std::size_t i = 0; i < nSecs; i++)
 	{
-		if (anomalies.size() > anamaliesLimit)
+		if (anomalies.size() > anomaliesLimit)
 		{
 			break;
 		}
@@ -3531,7 +3531,7 @@ void PeFormat::scanForSectionAnomalies(unsigned anamaliesLimit)
 
 		for (std::size_t j = i + 1; j < nSecs; j++)
 		{
-			if (anomalies.size() > anamaliesLimit)
+			if (anomalies.size() > anomaliesLimit)
 			{
 				break;
 			}
