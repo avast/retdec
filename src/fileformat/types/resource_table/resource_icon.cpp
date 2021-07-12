@@ -179,5 +179,15 @@ bool ResourceIcon::hasValidColorCount() const
 	return validColorCount;
 }
 
+/**
+* Returns tru if the icon dimensions were already set before
+* @return @c `true` if they were, otherwise `false`
+*/
+bool ResourceIcon::hasValidDimensions() const
+{
+	return (width && height);
+}
+
+
 } // namespace fileformat
 } // namespace retdec

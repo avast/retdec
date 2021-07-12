@@ -553,6 +553,18 @@ uint32_t PeLib::ImageLoader::getRealPointerToRawData(size_t sectionIndex) const
 	return sections[sectionIndex].PointerToRawData & ~(PELIB_SECTOR_SIZE - 1);
 }
 
+uint32_t PeLib::ImageLoader::getRealSizeOfRawData(std::size_t sectionIndex) const
+{
+	if(sectionIndex >= sections.size())
+		return UINT32_MAX;
+	if(optionalHeader.SectionAlignment < PELIB_PAGE_SIZE)
+		return sections[sectionIndex].PointerToRawData;
+
+	uint32_t beginOfRawData = sections[sectionIndex].PointerToRawData & ~(PELIB_SECTOR_SIZE - 1);
+	uint32_t endOfRawData = sections[sectionIndex].PointerToRawData + AlignToSize(sections[sectionIndex].SizeOfRawData, optionalHeader.FileAlignment);
+	return endOfRawData - beginOfRawData;
+}
+
 uint32_t PeLib::ImageLoader::getImageProtection(uint32_t sectionCharacteristics) const
 {
 	uint32_t Index = 0;
