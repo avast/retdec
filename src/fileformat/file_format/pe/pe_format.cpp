@@ -3415,11 +3415,11 @@ void PeFormat::scanForSectionAnomalies(unsigned anomaliesLimit)
 
 	if (getEpAddress(epAddr))
 	{
-		auto *epSec = dynamic_cast<const PeCoffSection*>(getEpSection());
+		auto* epSec = dynamic_cast<const PeCoffSection*>(getSectionFromAddress(epAddr));
 		if (epSec)
 		{
 			// scan EP in last section
-			const PeCoffSection *lastSec = (nSecs) ? getPeSection(nSecs - 1) : nullptr;
+			const PeCoffSection* lastSec = (nSecs) ? getPeSection(nSecs - 1) : nullptr;
 			if (epSec == lastSec)
 			{
 				anomalies.emplace_back(
@@ -3433,6 +3433,13 @@ void PeFormat::scanForSectionAnomalies(unsigned anomaliesLimit)
 				anomalies.emplace_back(
 					"EpInWritableSection", "Entry point in writable section"
 				);
+			}
+			// if we can't get valid offset then the EP is outside of the physical file
+			std::uint64_t epOffset = 0;
+			if (!getEpOffset(epOffset))
+			{
+				anomalies.emplace_back(
+						"EpInMemoryOnly", "Entry point in memory-only part of a section");
 			}
 		}
 		else
