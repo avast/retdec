@@ -151,7 +151,7 @@ template <int bits> void ElfUpxStub<bits>::unpack(const std::string& outputFile)
 	// Thus there is no way we can get this data through fileformat nor elfio
 	std::string inputFilePath = _file->getFileFormat()->getPathToFile();
 
-	unsigned long long ep;
+	std::uint64_t ep;
 	_file->getFileFormat()->getEpAddress(ep);
 	ep -= _file->getEpSegment()->getAddress();
 

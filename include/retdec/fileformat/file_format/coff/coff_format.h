@@ -72,11 +72,11 @@ class CoffFormat : public FileFormat
 		virtual bool isObjectFile() const override;
 		virtual bool isDll() const override;
 		virtual bool isExecutable() const override;
-		virtual bool getMachineCode(unsigned long long &result) const override;
-		virtual bool getAbiVersion(unsigned long long &result) const override;
-		virtual bool getImageBaseAddress(unsigned long long &imageBase) const override;
-		virtual bool getEpAddress(unsigned long long &result) const override;
-		virtual bool getEpOffset(unsigned long long &epOffset) const override;
+		virtual bool getMachineCode(std::uint64_t &result) const override;
+		virtual bool getAbiVersion(std::uint64_t &result) const override;
+		virtual bool getImageBaseAddress(std::uint64_t &imageBase) const override;
+		virtual bool getEpAddress(std::uint64_t &result) const override;
+		virtual bool getEpOffset(std::uint64_t &epOffset) const override;
 		virtual Architecture getTargetArchitecture() const override;
 		virtual std::size_t getDeclaredNumberOfSections() const override;
 		virtual std::size_t getDeclaredNumberOfSegments() const override;

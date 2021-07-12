@@ -253,7 +253,7 @@ bool ProviderInitialization::runOnModule(Module& m)
 		if (f->getFileFormat()->isObjectFile()) ft.setIsObject();
 		if (f->getFileFormat()->isDll()) ft.setIsShared();
 	}
-	unsigned long long ep = 0;
+	std::uint64_t ep = 0;
 	if (f->getFileFormat()->getEpAddress(ep))
 	{
 		c->getConfig().parameters.setEntryPoint(ep);

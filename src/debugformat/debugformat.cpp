@@ -42,7 +42,7 @@ DebugFormat::DebugFormat(
 	{
 		LOG << "\n*** DebugFormat::DebugFormat(): PDB" << std::endl;
 
-		unsigned long long imageBase = 0;
+		std::uint64_t imageBase = 0;
 		if (auto* pe = dynamic_cast<const fileformat::PeFormat*>(
 				inFile->getFileFormat()))
 		{

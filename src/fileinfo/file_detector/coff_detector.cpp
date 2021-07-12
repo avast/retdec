@@ -378,7 +378,7 @@ void CoffDetector::detectFileClass()
 
 void CoffDetector::detectArchitecture()
 {
-	unsigned long long machineType = 0;
+	std::uint64_t machineType = 0;
 	if(!coffParser->getMachineCode(machineType))
 	{
 		return;

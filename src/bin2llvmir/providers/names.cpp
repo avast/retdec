@@ -444,7 +444,7 @@ void NameContainer::initFromImage()
 
 	if (_image->getFileFormat())
 	{
-		unsigned long long ep = 0;
+		std::uint64_t ep = 0;
 		if (_image->getFileFormat()->getEpAddress(ep))
 		{
 			if (_config->getConfig().architecture.isArm32OrThumb() && ep % 2)

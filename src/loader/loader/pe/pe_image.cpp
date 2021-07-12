@@ -34,7 +34,7 @@ bool PeImage::load()
 	const retdec::fileformat::PeFormat* peFormat = static_cast<const retdec::fileformat::PeFormat*>(getFileFormat());
 
 	// Load image base address from fileformat and store it into loader image
-	unsigned long long imageBase;
+	std::uint64_t imageBase;
 	peFormat->getImageBaseAddress(imageBase);
 	setBaseAddress(imageBase);
 

@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <cassert>
 #include <climits>
+#include <cstdint>
 #include <cstring>
 #include <functional>
 #include <sstream>
@@ -1211,7 +1212,7 @@ bool FileFormat::getBytes(std::vector<std::uint8_t> &result, unsigned long long 
  */
 bool FileFormat::getEpBytes(std::vector<std::uint8_t> &result, unsigned long long numberOfBytes) const
 {
-	unsigned long long epOffset;
+	std::uint64_t epOffset;
 	if(stateIsValid && getEpOffset(epOffset))
 	{
 		return getBytes(result, epOffset, numberOfBytes);
@@ -1247,7 +1248,7 @@ bool FileFormat::getHexBytes(std::string &result, unsigned long long offset, uns
  */
 bool FileFormat::getHexEpBytes(std::string &result, unsigned long long numberOfBytes) const
 {
-	unsigned long long epOffset;
+	std::uint64_t epOffset;
 	if(stateIsValid && getEpOffset(epOffset))
 	{
 		return getHexBytes(result, epOffset, numberOfBytes);
@@ -1329,9 +1330,10 @@ bool FileFormat::isObjectStretchedOverSections(std::size_t addr, std::size_t siz
  * Get information about section containing entry point
  * @return Pointer to EP section if file has entry point and EP section was detected, @c nullptr otherwise
  */
+ // useless?
 const Section* FileFormat::getEpSection()
 {
-	unsigned long long ep;
+	std::uint64_t ep;
 	if(!getEpOffset(ep))
 	{
 		return nullptr;
@@ -1415,7 +1417,7 @@ const Section* FileFormat::getLastButOneSection() const
  */
 const Segment* FileFormat::getEpSegment()
 {
-	unsigned long long epAddress;
+	std::uint64_t epAddress;
 	if(!getEpAddress(epAddress))
 	{
 		return nullptr;
@@ -2434,13 +2436,13 @@ void FileFormat::dump(std::string &dumpFile)
 	ret << "; Endianness: " << sEndian << "\n";
 	ret << "; Type: " << sType << "\n";
 
-	unsigned long long addr;
+	std::uint64_t addr;
 	if(getEpAddress(addr))
 	{
 		ret << "; Entry point address: " << std::hex << addr << "\n";
 	}
 
-	unsigned long long offset;
+	std::uint64_t offset;
 	if(getEpOffset(offset))
 	{
 		ret << "; Entry point offset: " << offset << "\n";

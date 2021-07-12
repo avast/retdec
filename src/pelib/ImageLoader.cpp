@@ -457,20 +457,27 @@ uint32_t PeLib::ImageLoader::getFileOffsetFromRva(uint32_t rva) const
 			// Only if the pointer to raw data is not zero
 			if(sectHdr.PointerToRawData != 0 && sectHdr.SizeOfRawData != 0)
 			{
-				uint32_t realPointerToRawData = sectHdr.PointerToRawData;
-				uint32_t sectionRvaStart = sectHdr.VirtualAddress;
-				uint32_t virtualSize = (sectHdr.VirtualSize != 0) ? sectHdr.VirtualSize : sectHdr.SizeOfRawData;
+				uint64_t realPointerToRawData = sectHdr.PointerToRawData;
+				uint64_t sectionRvaStart = sectHdr.VirtualAddress;
+				uint64_t virtSize = sectHdr.VirtualSize;
+				uint64_t rawSize = sectHdr.SizeOfRawData;
 
+				//
+				uint64_t section_size = virtSize < rawSize ? virtSize : rawSize;
 				// For multi-section images, real pointer to raw data is aligned down to sector size
-				if(optionalHeader.SectionAlignment >= PELIB_PAGE_SIZE)
+				if (optionalHeader.SectionAlignment >= PELIB_PAGE_SIZE)
 					realPointerToRawData = realPointerToRawData & ~(PELIB_SECTOR_SIZE - 1);
 
-				// Is the RVA inside that section?
-				if(sectionRvaStart <= rva && rva < (sectionRvaStart + virtualSize))
+				// Check if the claimed real pointer can actually exist in the file
+				uint64_t offset = rva - sectionRvaStart;
+				bool fitsInFile = realPointerToRawData + offset < savedFileSize;
+
+				// Is the RVA inside that part of the section, that is backed by disk data?
+				if (sectionRvaStart <= rva && rva < (sectionRvaStart + section_size) && fitsInFile)
 				{
 					// Make sure we round the pointer to raw data down to PELIB_SECTOR_SIZE.
 					// In case when PointerToRawData is less than 0x200, it maps to the header!
-					return realPointerToRawData + (rva - sectionRvaStart);
+					return realPointerToRawData + offset;
 				}
 			}
 		}

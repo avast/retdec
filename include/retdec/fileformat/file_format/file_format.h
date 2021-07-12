@@ -307,11 +307,11 @@ class FileFormat : public retdec::utils::ByteValueStorage, private retdec::utils
 		virtual bool isObjectFile() const = 0;
 		virtual bool isDll() const = 0;
 		virtual bool isExecutable() const = 0;
-		virtual bool getMachineCode(unsigned long long &result) const = 0;
-		virtual bool getAbiVersion(unsigned long long &result) const = 0;
-		virtual bool getImageBaseAddress(unsigned long long &imageBase) const = 0;
-		virtual bool getEpAddress(unsigned long long &result) const = 0;
-		virtual bool getEpOffset(unsigned long long &epOffset) const = 0;
+		virtual bool getMachineCode(std::uint64_t &result) const = 0;
+		virtual bool getAbiVersion(std::uint64_t &result) const = 0;
+		virtual bool getImageBaseAddress(std::uint64_t &imageBase) const = 0;
+		virtual bool getEpAddress(std::uint64_t &result) const = 0;
+		virtual bool getEpOffset(std::uint64_t &epOffset) const = 0;
 		virtual Architecture getTargetArchitecture() const = 0;
 		virtual std::size_t getDeclaredNumberOfSections() const = 0;
 		virtual std::size_t getDeclaredNumberOfSegments() const = 0;
