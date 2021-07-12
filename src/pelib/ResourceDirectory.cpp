@@ -725,8 +725,17 @@ namespace PeLib
 						return ERROR_INVALID_FILE;
 					}
 
-					// Read the resource name
-					imageLoader.readStringRc(rc.entry.wstrName, uiRsrcRva + uiNameOffset);
+					std::uint16_t length = 0;
+					std::uint32_t name_rva = uiRsrcRva + uiNameOffset;
+					// Read the string length (first 2 bytes at start)
+					imageLoader.readImage(&length, name_rva, sizeof(std::uint16_t));
+
+					// Sanity check for pointer to junk data instead of valid string
+					if (length <= 100)
+					{
+						// Read the resource name
+						imageLoader.readStringRc(rc.entry.wstrName, name_rva);
+					}
 				}
 			}
 
