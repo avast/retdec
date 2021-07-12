@@ -774,8 +774,9 @@ ReturnCode CompilerDetector::getAllInformation()
 		toolInfo.overlayOffset = fileParser.getDeclaredFileLength();
 	}
 
-	const bool invalidEntryPoint = !toolInfo.entryPointAddress
-			|| !toolInfo.entryPointOffset;
+	// False EP offset (offset outside of file) doesn't have 
+	// to mean invalid EP as it can be memory only
+	const bool invalidEntryPoint = !toolInfo.entryPointAddress;
 	if (!fileParser.getHexEpBytes(toolInfo.epBytes, cpParams.epBytesCount)
 			&& !invalidEntryPoint
 			&& !fileParser.isInValidState())
