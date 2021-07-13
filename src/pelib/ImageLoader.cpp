@@ -1842,16 +1842,21 @@ int PeLib::ImageLoader::captureSectionName(
 
 	// The section name is directly in the section header.
 	// It has fixed length and must not be necessarily terminated with zero.
-	// Historically, PELIB copies the name of the section WITHOUT zero chars,
-	// even if the zero chars are in the middle. Aka ".text\0\0X" results in ".textX"
 	sectionName.clear();
-	for(size_t i = 0; i < PELIB_IMAGE_SIZEOF_SHORT_NAME; i++)
+
+	// rstrip trailing nulls
+	const uint8_t* end = Name + PELIB_IMAGE_SIZEOF_SHORT_NAME;
+	// find the first non-null from end
+	do
 	{
-		if(Name[i])
-		{
-			sectionName += Name[i];
-		}
+		end--;
+	} while (end - Name > 0 && *end == 0);
+
+	if (end - Name > 0)
+	{
+		sectionName.assign(Name, end + 1);
 	}
+
 	return ERROR_NONE;
 }
 
