@@ -50,6 +50,8 @@ class CertificateTable
 {
 public:
 	std::vector<DigitalSignature> signatures;
+	// if the certificates overlap any section then they are not visible for windows
+	bool isOutsideImage = false;
 
 	CertificateTable(std::vector<DigitalSignature> signatures);
 	CertificateTable() = default;

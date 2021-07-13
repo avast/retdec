@@ -521,6 +521,8 @@ void JsonPresentation::presentCertificates(Writer& writer) const
 
 	writer.String("digitalSignatures");
 	writer.StartObject();
+	writer.Key("isOutsideImage");
+	writer.Bool(fileinfo.certificateTable->isOutsideImage);
 	writer.Key("numberOfSignatures");
 	writer.Int64(fileinfo.certificateTable->signatures.size());
 	writer.String("signatures");

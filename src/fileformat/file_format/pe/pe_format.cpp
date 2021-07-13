@@ -1798,16 +1798,43 @@ void PeFormat::loadResources()
  */
 void PeFormat::loadCertificates()
 {
-	const auto& securityDir = file->securityDir();
-	if (securityDir.calcNumberOfCertificates() == 0) {
+	const SecurityDirectory& securityDir = file->securityDir();
+	if (securityDir.calcNumberOfCertificates() == 0)
+	{
 		return;
 	}
+
 	// We always take the first one, there might be more WIN_CERT structures tho
-	auto certBytes = securityDir.getCertificate(0);
+	const std::vector<unsigned char>& certBytes = securityDir.getCertificate(0);
 
 	authenticode::Authenticode authenticode(certBytes);
-	
-	certificateTable = new CertificateTable(authenticode.getSignatures(this));
+
+	this->certificateTable = new CertificateTable(authenticode.getSignatures(this));
+
+	std::uint64_t dirOffset = securityDir.getOffset();
+	std::uint64_t dirSize = securityDir.getSize();
+
+	std::vector<Section*> sections = getSections();
+
+	certificateTable->isOutsideImage = true;
+	// check if the SecurityDir overlaps with any real part of section
+	// if it does, Windows ignores the certificates
+	for (const Section* sec : sections)
+	{
+		std::uint64_t realSize = sec->getSizeInFile();
+		std::uint64_t realOffset = sec->getOffset();
+		if (!realSize)
+		{
+			continue;
+		}
+		std::uint64_t realEndOffset = realOffset + realSize;
+		std::uint64_t dirEndOffset = dirOffset + dirOffset;
+		// if the intervals overlap
+		if (dirOffset < realEndOffset && realOffset < dirEndOffset)
+		{
+			certificateTable->isOutsideImage = false;
+		}
+	}
 }
 
 /**
