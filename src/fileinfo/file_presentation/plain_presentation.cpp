@@ -772,8 +772,10 @@ void PlainPresentation::presentSignatures() const
 	if (!table) {
 		return;
 	}
-	Log::info() << "Digital Signatures:\n";
+	Log::info() << "\nDigital Signatures:\n";
 	int indent = 4;
+	std::string isOutsideImage = table->isOutsideImage ? "True" : "False";
+	Log::info() << std::string(indent, ' ') << "Is Outside of Image: " << isOutsideImage << "\n";
 	Log::info() << std::string(indent, ' ') << "Signature count: " << table->signatureCount() << "\n";
 
 	for (int idx = 0; idx < table->signatureCount(); idx++) {

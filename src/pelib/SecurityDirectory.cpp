@@ -84,6 +84,20 @@ namespace PeLib
 			m_certs.push_back(cert);
 		}
 
+		// save the offset and size for future checks
+		this->offset = uiOffset;
+		this->size = size;
+
 		return ERROR_NONE;
+	}
+
+	std::uint64_t SecurityDirectory::getOffset() const
+	{
+		return offset;
+	}
+
+	std::uint64_t SecurityDirectory::getSize() const
+	{
+		return size;
 	}
 }
