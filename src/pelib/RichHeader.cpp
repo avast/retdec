@@ -882,7 +882,7 @@ namespace
 
 			// Start analyzing from the end - "Rich" marker
 			// and move upwards to decrypted "DanS" marker
-			for (auto it = std::make_reverse_iterator(richSignature); it < rich.rend(); it++)
+			for (auto it = std::make_reverse_iterator(richSignature); it < rich.rend(); ++it)
 			{
 				std::uint32_t decrypted_dword = *it ^ key;
 				decryptedHeader.push_back(decrypted_dword);
