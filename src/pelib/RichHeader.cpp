@@ -882,15 +882,15 @@ namespace
 
 			// Start analyzing from the end - "Rich" marker
 			// and move upwards to decrypted "DanS" marker
-			for (auto i = richSignature - 1; i >= rich.begin(); --i)
+			for (auto it = std::make_reverse_iterator(richSignature); it < rich.rend(); it++)
 			{
-				std::uint32_t decrypted_dword = *i ^ key;
+				std::uint32_t decrypted_dword = *it ^ key;
 				decryptedHeader.push_back(decrypted_dword);
 				// "DanS" - 0x536e6144 signals the start (end) of the rich header
 				if (decrypted_dword == 0x536e6144)
 				{
 					// Set the offset to "DanS"
-					this->offset = (i - rich.begin()) * 4;
+					this->offset = std::distance(it + 1, rich.rend()) * 4;
 					// Because we are analysing bottom up, reverse the vector
 					std::reverse(decryptedHeader.begin(), decryptedHeader.end());
 					break;
