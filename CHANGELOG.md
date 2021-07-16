@@ -20,6 +20,7 @@
 * Enhancement: Added support for new ELF UPX unpacking stubs (versions 3.93 - 3.96) ([#929](https://github.com/avast/retdec/pull/929)).
 * Enhancement: Improved YARA rules for detection of the SHA-512 algorithm ([#935](https://github.com/avast/retdec/pull/935)).
 * Enhancement: Improved PE Authenticode parsing ([#902](https://github.com/avast/retdec/pull/902), [#380](https://github.com/avast/retdec/issues/380)).
+* Fix: Fixed .NET's TypeLib ID parsing - add _Parent relationship_ check ([#966](https://github.com/avast/retdec/issues/966), [#983](https://github.com/avast/retdec/pull/983), [regression tests #96](https://github.com/avast/retdec-regression-tests/pull/96)).
 * Fix: Make error handling for PE resource directory in sync with YARA - i.e. behave as YARA does ([#988](https://github.com/avast/retdec/pull/988), [regression tests #98](https://github.com/avast/retdec-regression-tests/pull/98)).
 * Fix: Fixed memory leak in `Fileformat` library ([#951](https://github.com/avast/retdec/issues/951), [#984](https://github.com/avast/retdec/pull/984)).
 * Fix: Raise max length limit applied to PE symbol names ([#957](https://github.com/avast/retdec/issues/957), [#978](https://github.com/avast/retdec/pull/978), [regression tests #93](https://github.com/avast/retdec-regression-tests/pull/93)).
