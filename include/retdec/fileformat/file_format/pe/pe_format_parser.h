@@ -212,7 +212,7 @@ class PeFormatParser
 	{
 		std::uint32_t entryPoint = peFile->imageLoader().getOptionalHeader().AddressOfEntryPoint;
 
-		epOffset = peFile->imageLoader().getFileOffsetFromRva(entryPoint);
+		epOffset = peFile->imageLoader().getValidOffsetFromRva(entryPoint);
 		return (entryPoint != 0 || isDll() == false) && (epOffset != UINT32_MAX);
 	}
 
