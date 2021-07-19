@@ -484,7 +484,7 @@ uint32_t PeLib::ImageLoader::getFileOffsetFromRva(uint32_t rva) const
 	return rva;
 }
 
-// similar to getFileOffsetFromRva, but the offset is within the real file and memory image
+// similar to getFileOffsetFromRva, but the offset is within the real file and not memory image
 uint32_t PeLib::ImageLoader::getValidOffsetFromRva(uint32_t rva) const
 {
 	// If we have sections loaded, then we calculate the file offset from section headers
@@ -525,8 +525,7 @@ uint32_t PeLib::ImageLoader::getValidOffsetFromRva(uint32_t rva) const
 		return (rva < optionalHeader.SizeOfHeaders) ? rva : UINT32_MAX;
 	}
 
-	// The rva maps directly to the file offset
-	return rva;
+	return UINT32_MAX;
 }
 
 uint32_t PeLib::ImageLoader::getFieldOffset(PELIB_MEMBER_TYPE field) const
