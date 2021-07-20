@@ -324,6 +324,24 @@ class ImageLoader
 		return (optionalHeader.NumberOfRvaAndSizes > dataDirIndex) ? optionalHeader.DataDirectory[dataDirIndex].Size : 0;
 	}
 
+	std::uint32_t getComDirRva() const
+	{
+		// For 32-bit binaries, the COM directory is valid even if NumberOfRvaAndSizes < IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR
+		// Sample: 58b0147d7dd3cd73cb8bf8df077e244650621174f7ff788ad06fd0c1f82aac40
+		if(optionalHeader.Magic == PELIB_IMAGE_NT_OPTIONAL_HDR32_MAGIC)
+			return optionalHeader.DataDirectory[PELIB_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR].VirtualAddress;
+		return getDataDirRva(PELIB_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
+	}
+
+	std::uint32_t getComDirSize() const
+	{
+		// For 32-bit binaries, the COM directory is valid even if NumberOfRvaAndSizes < IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR
+		// Sample: 58b0147d7dd3cd73cb8bf8df077e244650621174f7ff788ad06fd0c1f82aac40
+		if(optionalHeader.Magic == PELIB_IMAGE_NT_OPTIONAL_HDR32_MAGIC)
+			return optionalHeader.DataDirectory[PELIB_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR].Size;
+		return getDataDirSize(PELIB_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
+	}
+
 	std::uint64_t getVirtualAddressMasked(std::uint32_t rva)
 	{
 		std::uint64_t virtualAddress = getImageBase() + rva;
@@ -382,6 +400,7 @@ class ImageLoader
 	int captureImageSections(ByteBuffer & fileData);
 	int captureOptionalHeader32(std::uint8_t * fileData, std::uint8_t * filePtr, std::uint8_t * fileEnd);
 	int captureOptionalHeader64(std::uint8_t * fileData, std::uint8_t * filePtr, std::uint8_t * fileEnd);
+	std::uint32_t copyDataDirectories(std::uint8_t * optionalHeaderPtr, std::uint8_t * dataDirectoriesPtr, std::size_t optionalHeaderMax, std::uint32_t numberOfRvaAndSizes);
 
 	int verifyDosHeader(PELIB_IMAGE_DOS_HEADER & hdr, std::size_t fileSize);
 	int verifyDosHeader(std::istream & fs, std::streamoff fileOffset, std::size_t fileSize);
@@ -471,6 +490,7 @@ class ImageLoader
 	bool forceIntegrityCheckCertificate;                // If true, extra check for certificate will be provided
 	bool checkNonLegacyDllCharacteristics;              // If true, extra checks will be performed on DllCharacteristics
 	bool checkImagePostMapping;                         // If true, extra checks will be performed after the image is mapped
+	bool alignSingleSectionImagesToPage;                // Align single-section images to page size in 64-bit windows
 };
 
 }	// namespace PeLib
