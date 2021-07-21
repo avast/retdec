@@ -5,6 +5,7 @@
 * New feature: Generate ELF (import) symbol-related hashes, including VirusTotal compatible `telfhash` ([#286](https://github.com/avast/retdec/issues/286), [#936](https://github.com/avast/retdec/pull/936)).
 * New Feature: `retdec-fileinfo` can be configured via JSON file. See `--fileinfo-config` option for more details.
 * New Feature: RetDec is now also a library ([#779](https://github.com/avast/retdec/pull/779). Related changes are the removal of `retdec-decompiler.py` (it is now a binary, e.g. `retdec-decompiler.exe` on Windows), `retdec-bin2llvmir`, `retdec-llvmir2hll`, and some other supportive functionality.
+* Enhancement: Add YARA signature for InnoSetup 6.1.0 ([#989](https://github.com/avast/retdec/pull/989)).
 * Enhancement: Provide one-line-style values for digital signature's subjects and issuers ([#956](https://github.com/avast/retdec/issues/956), [#976](https://github.com/avast/retdec/pull/976), [regression tests #92](https://github.com/avast/retdec-regression-tests/pull/92)).
 * Enhancement: Compute hashes of decrypted PE rich headers ([#621](https://github.com/avast/retdec/issues/621), [#945](https://github.com/avast/retdec/pull/945)).
 * Enhancement: Unified logging on stdout/stderr. Added option `--silent`. Printed text is colored only when output is a terminal ([#791](https://github.com/avast/retdec/issues/791).
@@ -20,6 +21,7 @@
 * Enhancement: Added support for new ELF UPX unpacking stubs (versions 3.93 - 3.96) ([#929](https://github.com/avast/retdec/pull/929)).
 * Enhancement: Improved YARA rules for detection of the SHA-512 algorithm ([#935](https://github.com/avast/retdec/pull/935)).
 * Enhancement: Improved PE Authenticode parsing ([#902](https://github.com/avast/retdec/pull/902), [#380](https://github.com/avast/retdec/issues/380)).
+* Fix: Prevent PE delayed import parser to load garbage data ([#981](https://github.com/avast/retdec/pull/981)).
 * Fix: Don't detect .NET structures that do not belong to the binary itself, but to the embedded binary ([#967](https://github.com/avast/retdec/issues/967), [#970](https://github.com/avast/retdec/pull/970), [regression tests #90](https://github.com/avast/retdec-regression-tests/pull/90)).
 * Fix: Fixed handling of escaped characters in PE section names ([#958](https://github.com/avast/retdec/issues/958), [#979](https://github.com/avast/retdec/pull/979), [regression tests #94](https://github.com/avast/retdec-regression-tests/pull/94)).
 * Fix: Fixed .NET's TypeLib ID parsing - add _Parent relationship_ check ([#966](https://github.com/avast/retdec/issues/966), [#983](https://github.com/avast/retdec/pull/983), [regression tests #96](https://github.com/avast/retdec-regression-tests/pull/96)).
