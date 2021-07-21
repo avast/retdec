@@ -3567,7 +3567,7 @@ rule xt_app_launcher
 		any of them
 }
 
-private rule inno_610
+rule inno_610
 {
          meta:
                 tool = "I"
