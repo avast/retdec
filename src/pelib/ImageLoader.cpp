@@ -558,7 +558,7 @@ uint32_t PeLib::ImageLoader::getRealSizeOfRawData(std::size_t sectionIndex) cons
 	if(sectionIndex >= sections.size())
 		return UINT32_MAX;
 	if(optionalHeader.SectionAlignment < PELIB_PAGE_SIZE)
-		return sections[sectionIndex].PointerToRawData;
+		return sections[sectionIndex].SizeOfRawData;
 
 	uint32_t beginOfRawData = sections[sectionIndex].PointerToRawData & ~(PELIB_SECTOR_SIZE - 1);
 	uint32_t endOfRawData = sections[sectionIndex].PointerToRawData + AlignToSize(sections[sectionIndex].SizeOfRawData, optionalHeader.FileAlignment);
