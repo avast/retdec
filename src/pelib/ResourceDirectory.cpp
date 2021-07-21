@@ -677,8 +677,6 @@ namespace PeLib
 			return ERROR_NONE;
 		}
 
-		// Load all entries to the vector
-		std::vector<PELIB_IMAGE_RESOURCE_DIRECTORY_ENTRY> vResourceChildren(uiNumberOfEntries);
 		resDir->insertNodeOffset(uiOffset);
 
 		if (uiNumberOfEntries > 0)
@@ -686,6 +684,7 @@ namespace PeLib
 			resDir->addOccupiedAddressRange(uiRva, uiRva + uiNumberOfEntries * PELIB_IMAGE_RESOURCE_DIRECTORY_ENTRY::size() - 1);
 		}
 
+		// Load all entries to the vector
 		for (unsigned int i = 0; i < uiNumberOfEntries; i++)
 		{
 			ResourceChild rc;
@@ -728,7 +727,7 @@ namespace PeLib
 				{
 					// Check whether we have enough space to read at least one character
 					unsigned int uiNameOffset = rc.entry.irde.Name & PELIB_IMAGE_RESOURCE_RVA_MASK;
-					if (uiRva + uiNameOffset + sizeof(std::uint16_t) > sizeOfImage)
+					if (uiRsrcRva + uiNameOffset + sizeof(std::uint16_t) > sizeOfImage)
 					{
 						return ERROR_INVALID_FILE;
 					}

@@ -39,27 +39,31 @@ constexpr std::pair<uint16_t, uint16_t> iconPriorities[] =
 bool iconCompare(const retdec::fileformat::ResourceIcon *i1, const retdec::fileformat::ResourceIcon *i2)
 {
 	auto i1Width = i1->getWidth();
+	auto i1Height = i1->getHeight();
 	auto i1BitCount = i1->getBitCount();
 	auto i2Width = i2->getWidth();
 	auto i2Height = i2->getHeight();
 	auto i2BitCount = i2->getBitCount();
 
-	if(i2Width != i2Height)
-	{
+	// Priority 1: icon with the same dimensions over icons 
+	if((i1Width == i1Height) && (i2Width != i2Height))
 		return false;
-	}
+	if((i1Width != i1Height) && (i2Width == i2Height))
+		return true;
 
 	for(const auto &p : iconPriorities)
 	{
+		// Priority 2: Icons where both size and bit count match
 		if(p.first == i1Width && p.second == i1BitCount)
-		{
 			return false;
-		}
-
 		if(p.first == i2Width && p.second == i2BitCount)
-		{
 			return true;
-		}
+
+		// Priority 3: Icons where size matches
+		if(p.first == i1Width)
+			return false;
+		if(p.first == i2Width)
+			return true;
 	}
 
 	return false;
@@ -183,8 +187,8 @@ bool ResourceIconGroup::getEntryWidth(std::size_t eIndex, std::uint16_t &width) 
 		return false;
 	}
 
-	width = bytes[0];
-
+	if((width = bytes[0]) == 0)
+		width = 256;	// https://devblogs.microsoft.com/oldnewthing/20101018-00/?p=12513
 	return true;
 }
 
@@ -203,8 +207,8 @@ bool ResourceIconGroup::getEntryHeight(std::size_t eIndex, std::uint16_t &height
 		return false;
 	}
 
-	height = bytes[0];
-
+	if((height = bytes[0]) == 0)
+		height = 256;	// https://devblogs.microsoft.com/oldnewthing/20101018-00/?p=12513
 	return true;
 }
 

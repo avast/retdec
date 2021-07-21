@@ -56,6 +56,8 @@ class ResourceIcon : public Resource
 		/// @{
 		bool hasLoadedProperties() const;
 		bool hasValidColorCount() const;
+		bool hasValidDimensions() const;
+
 		/// @}
 };
 

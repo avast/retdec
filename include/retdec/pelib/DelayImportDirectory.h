@@ -102,7 +102,7 @@ namespace PeLib
 					return ERROR_INVALID_FILE;
 				init();
 
-				// Keep loading until we encounter an entry filles with zeros
+				// Keep loading until we encounter an entry filled with zeros
 				for(std::uint32_t i = 0;; i += sizeof(PELIB_IMAGE_DELAY_LOAD_DESCRIPTOR))
 				{
 					PELIB_IMAGE_DELAY_IMPORT_DIRECTORY_RECORD rec;
@@ -113,8 +113,14 @@ namespace PeLib
 					if(!imageLoader.readImage(&rec.delayedImport, rva + i, sizeof(PELIB_IMAGE_DELAY_LOAD_DESCRIPTOR)))
 						break;
 
-					// Valid delayed import entry starts either with 0 or 0x01
-					if(rec.delayedImport.Attributes & 0xFFFF0000)
+					// Valid delayed import entry starts either with 0 or 0x01.
+					// We strict require one of the valid values here
+					if(rec.delayedImport.Attributes > PELIB_DELAY_ATTRIBUTE_V2)
+						break;
+
+					// Stop on blatantly invalid entries
+					if(rec.delayedImport.NameRva < sizeof(PELIB_IMAGE_DOS_HEADER) ||
+					   rec.delayedImport.DelayImportNameTableRva < sizeof(PELIB_IMAGE_DOS_HEADER))
 						break;
 
 					// Check for the termination entry
