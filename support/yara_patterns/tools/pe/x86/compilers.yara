@@ -2036,28 +2036,13 @@ rule ms_visual_basic_60_03 {
 		$1 at pe.entry_point
 }
 
-rule dotnet_01 {
+rule dotnet {
 	meta:
 		tool = "C"
 		name = ".NET"
 		bytecode = true
-		pattern = "00000000000000005F436F72446C6C4D61696E006D73636F7265652E646C6C0000??0000FF25"
-	strings:
-		$1 = { 00 00 00 00 00 00 00 00 5F 43 6F 72 44 6C 6C 4D 61 69 6E 00 6D 73 63 6F 72 65 65 2E 64 6C 6C 00 00 ?? 00 00 FF 25 }
 	condition:
-		$1 at pe.entry_point
-}
-
-rule dotnet_02 {
-	meta:
-		tool = "C"
-		name = ".NET"
-		bytecode = true
-		pattern = "00000000000000005F436F724578654D61696E006D73636F7265652E646C6C0000000000FF25"
-	strings:
-		$1 = { 00 00 00 00 00 00 00 00 5F 43 6F 72 45 78 65 4D 61 69 6E 00 6D 73 63 6F 72 65 65 2E 64 6C 6C 00 00 00 00 00 FF 25 }
-	condition:
-		$1 at pe.entry_point
+        pe.imports("mscoree.dll") == 1 and pe.number_of_imports == 1
 }
 
 rule msvc_uv_01 {
