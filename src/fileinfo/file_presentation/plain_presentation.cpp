@@ -756,6 +756,7 @@ static void printSigner(const Signer& signer, int indent)
 
 static void printSignature(const DigitalSignature& signature, int indent)
 {
+	Log::info() << std::string(indent, ' ') << "Is Valid: " << signature.isValid << "\n";
 	Log::info() << std::string(indent, ' ') << "Digest Algorithm: " << signature.digestAlgorithm << "\n";
 	Log::info() << std::string(indent, ' ') << "Signed Digest:    " << signature.signedDigest << "\n";
 	Log::info() << std::string(indent, ' ') << "File  Digest:     " << signature.fileDigest << "\n";

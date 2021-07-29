@@ -534,6 +534,7 @@ std::vector<DigitalSignature> Pkcs7Signature::getSignatures(const retdec::filefo
 	/* No signer would mean, we have pretty much nothing */
 	if (!signerInfo.has_value()) {
 		signatures.push_back(signature);
+		signature.isValid = false;
 		return signatures;
 	}
 
@@ -556,6 +557,15 @@ std::vector<DigitalSignature> Pkcs7Signature::getSignatures(const retdec::filefo
 
 	signature.signer = signer;
 
+	// If there are warnings, then the signature is invalid
+	// We don't use the countersignature warnings here as
+	// previous implementation did when verifying
+	if (signature.warnings.empty()) {
+		signature.isValid = true;
+	} else {
+		signature.isValid = false;
+	}
+
 	for (auto&& counterSig : signInfo.counterSignatures) {
 		CertificateProcessor processor;
 		auto certChain = processor.getChain(counterSig.signerCert, certs);
@@ -563,11 +573,11 @@ std::vector<DigitalSignature> Pkcs7Signature::getSignatures(const retdec::filefo
 
 		Signer counterSigner;
 		counterSigner.chain = fileformatCertChain;
-		counterSigner.signingTime = counterSig.signTime,
+		counterSigner.signingTime = counterSig.signTime;
 		counterSigner.digest = bytesToHexString(counterSig.messageDigest.data(),
-				counterSig.messageDigest.size()),
-		counterSigner.digestAlgorithm = OBJ_nid2ln(counterSig.digestAlgorithm),
-		counterSigner.warnings = counterSig.verify(signerInfo->encryptDigest),
+				counterSig.messageDigest.size());
+		counterSigner.digestAlgorithm = OBJ_nid2ln(counterSig.digestAlgorithm);
+		counterSigner.warnings = counterSig.verify(signerInfo->encryptDigest);
 		counterSigner.counterSigners = std::vector<Signer>();
 
 		signature.signer.counterSigners.push_back(counterSigner);
@@ -580,11 +590,11 @@ std::vector<DigitalSignature> Pkcs7Signature::getSignatures(const retdec::filefo
 
 		Signer counterSigner;
 		counterSigner.chain = fileformatCertChain;
-		counterSigner.signingTime = counterSig.signTime,
+		counterSigner.signingTime = counterSig.signTime;
 		counterSigner.digest = bytesToHexString(counterSig.messageDigest.data(),
-				counterSig.messageDigest.size()),
-		counterSigner.digestAlgorithm = OBJ_nid2ln(counterSig.digestAlgorithm),
-		counterSigner.warnings = counterSig.verify(signerInfo->encryptDigest),
+				counterSig.messageDigest.size());
+		counterSigner.digestAlgorithm = OBJ_nid2ln(counterSig.digestAlgorithm);
+		counterSigner.warnings = counterSig.verify(signerInfo->encryptDigest);
 		counterSigner.counterSigners = std::vector<Signer>();
 
 		signature.signer.counterSigners.push_back(counterSigner);

@@ -1806,7 +1806,7 @@ void PeFormat::loadCertificates()
 	auto certBytes = securityDir.getCertificate(0);
 
 	authenticode::Authenticode authenticode(certBytes);
-	
+
 	certificateTable = new CertificateTable(authenticode.getSignatures(this));
 }
 
