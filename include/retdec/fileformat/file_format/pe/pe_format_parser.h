@@ -276,13 +276,8 @@ class PeFormatParser
 
 	bool getDllFlags(unsigned long long & dllFlags) const
 	{
-		if(peFile->imageLoader().getCharacteristics() & PeLib::PELIB_IMAGE_FILE_DLL)
-		{
-			dllFlags = peFile->imageLoader().getOptionalHeader().DllCharacteristics;
-			return true;
-		}
-
-		return false;
+		dllFlags = peFile->imageLoader().getOptionalHeader().DllCharacteristics;
+		return true;
 	}
 
 	bool getDataDirectoryRelative(unsigned long long index, unsigned long long &relAddr, unsigned long long &size) const
