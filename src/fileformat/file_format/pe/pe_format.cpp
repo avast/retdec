@@ -2781,14 +2781,9 @@ bool PeFormat::hasMixedEndianForDouble() const
  */
 std::size_t PeFormat::getDeclaredFileLength() const
 {
-	std::size_t declSize = FileFormat::getDeclaredFileLength();
-	if(getNumberOfCoffSymbols() && getCoffSymbolTableOffset())
-	{
-		const std::size_t symTabMaxOffset = getCoffSymbolTableOffset() + (getNumberOfCoffSymbols() * PELIB_IMAGE_SIZEOF_COFF_SYMBOL);
-		declSize = std::max(declSize, symTabMaxOffset);
-	}
-
-	return declSize + getSizeOfStringTable();
+	// LZ: Do not include COFF symbol table in the declared file length;
+	// This is because other PE tools (for example YARA) don't do that either.
+	return FileFormat::getDeclaredFileLength();
 }
 
 bool PeFormat::areSectionsValid() const
