@@ -560,11 +560,7 @@ std::vector<DigitalSignature> Pkcs7Signature::getSignatures(const retdec::filefo
 	// If there are warnings, then the signature is invalid
 	// We don't use the countersignature warnings here as
 	// previous implementation did when verifying
-	if (signature.warnings.empty()) {
-		signature.isValid = true;
-	} else {
-		signature.isValid = false;
-	}
+	signature.isValid = signature.warnings.empty();
 
 	for (auto&& counterSig : signInfo.counterSignatures) {
 		CertificateProcessor processor;
