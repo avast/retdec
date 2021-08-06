@@ -483,6 +483,50 @@ uint32_t PeLib::ImageLoader::getFileOffsetFromRva(uint32_t rva) const
 	return rva;
 }
 
+// similar to getFileOffsetFromRva, but the offset is within the real file and not memory image
+uint32_t PeLib::ImageLoader::getValidOffsetFromRva(uint32_t rva) const
+{
+	// If we have sections loaded, then we calculate the file offset from section headers
+	if (sections.size())
+	{
+		// Check whether the rva goes into any section
+		for (auto& sectHdr : sections)
+		{
+			// Only if the pointer to raw data is not zero
+			if (sectHdr.PointerToRawData != 0 && sectHdr.SizeOfRawData != 0)
+			{
+				uint32_t realPointerToRawData = sectHdr.PointerToRawData;
+				uint32_t sectionRvaStart = sectHdr.VirtualAddress;
+				uint32_t virtSize = sectHdr.VirtualSize;
+				uint32_t rawSize = sectHdr.SizeOfRawData;
+
+				// if rawSize is larger than what is mapped to memory, use only the mapped part
+				uint32_t section_size = virtSize < rawSize ? virtSize : rawSize;
+				// For multi-section images, real pointer to raw data is aligned down to sector size
+				if (optionalHeader.SectionAlignment >= PELIB_PAGE_SIZE)
+					realPointerToRawData = realPointerToRawData & ~(PELIB_SECTOR_SIZE - 1);
+
+				// Check if the claimed real pointer can actually exist in the file
+				uint64_t offset = rva - sectionRvaStart;
+				bool fitsInFile = realPointerToRawData + offset < savedFileSize;
+
+				// Is the RVA inside that part of the section, that is backed by disk data?
+				if (sectionRvaStart <= rva && rva < (sectionRvaStart + section_size) && fitsInFile)
+				{
+					// Make sure we round the pointer to raw data down to PELIB_SECTOR_SIZE.
+					// In case when PointerToRawData is less than 0x200, it maps to the header!
+					return realPointerToRawData + offset;
+				}
+			}
+		}
+
+		// Check if the rva goes into the header
+		return (rva < optionalHeader.SizeOfHeaders) ? rva : UINT32_MAX;
+	}
+
+	return UINT32_MAX;
+}
+
 uint32_t PeLib::ImageLoader::getFieldOffset(PELIB_MEMBER_TYPE field) const
 {
 	uint32_t imageBitability = getImageBitability();

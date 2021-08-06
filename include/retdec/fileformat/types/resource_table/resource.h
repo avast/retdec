@@ -83,6 +83,7 @@ class Resource
 
 		/// @name Other methods
 		/// @{
+		bool isValidOffset() const;
 		bool isLoaded() const;
 		bool hasValidName() const;
 		bool hasValidId() const;

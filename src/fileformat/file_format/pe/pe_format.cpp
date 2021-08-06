@@ -1646,39 +1646,6 @@ void PeFormat::loadResourceNodes(std::vector<const PeLib::ResourceChild*> &nodes
 }
 
 /**
- * @brief Get valid section offset, that is within a physical
- *        part of a section and PE file, from VA address
- * 
- * @param va Virtual Address
- * @return std::uint64_t 0 means invalid
- */
-std::uint64_t PeFormat::getValidSectionOffset(std::uint64_t va)
-{
-	const SecSeg* secSeg = getSectionOrSegmentFromAddress(va);
-	if (!secSeg)
-	{
-		return 0;
-	}
-	auto secVa = secSeg->getAddress();
-
-	// if the offset is within the physical part of section
-	if (va - secVa >= secSeg->getSizeInFile())
-	{
-		return 0;
-	}
-
-	std::uint64_t res = va - secVa + secSeg->getOffset();
-
-	// if the offset is within the file
-	if (res >= getFileLength())
-	{
-		return 0;
-	}
-
-	return res;
-}
-
-/**
  * Load resources
  */
 void PeFormat::loadResources()
@@ -1790,7 +1757,7 @@ void PeFormat::loadResources()
 				}
 
 				// Check if the offset is actually within the section bounds
-				std::uint64_t dataOffset = getValidSectionOffset(imageBase + lanLeaf->getOffsetToData());
+				std::uint64_t dataOffset = getImageLoader().getValidOffsetFromRva(lanLeaf->getOffsetToData());
 				resource->setOffset(dataOffset);
 				resource->setSizeInFile(lanLeaf->getSize());
 				resource->setLanguage(lanChild->getName());
@@ -3627,8 +3594,8 @@ void PeFormat::scanForResourceAnomalies()
 
 		// scan for resource stretched over multiple sections
 		unsigned long long resAddr;
-		if (getAddressFromOffset(resAddr, res->getOffset()) &&
-			isObjectStretchedOverSections(resAddr, res->getSizeInFile()))
+		if (res->isValidOffset() && getAddressFromOffset(resAddr, res->getOffset()) &&
+				isObjectStretchedOverSections(resAddr, res->getSizeInFile()))
 		{
 			anomalies.emplace_back("StretchedResource", "Resource " + replaceNonprintableChars(msgName) + " is stretched over multiple sections");
 		}
