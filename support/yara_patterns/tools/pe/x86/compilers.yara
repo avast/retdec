@@ -254,17 +254,26 @@ rule autohotkey_uv_01 {
 		language = "AutoHotKey"
 		bytecode = true
 	strings:
-		$1 = ">AUTOHOTKEY SCRIPT<"
-		$2 = ">AUTOHOTKEY SCRIPT<" wide
-	condition:
-		pe.is_32bit() and
-		for 1 of them : (
-			@ > pe.sections[pe.section_index(".rdata")].raw_data_offset and
-			@ < pe.sections[pe.section_index(".rdata")].raw_data_offset +
-			pe.sections[pe.section_index(".rdata")].raw_data_size
-		) or
-		for 1 i in (0 .. pe.number_of_resources) : (
-			pe.resources[i].name_string matches />AUTOHOTKEY SCRIPT</
+		$0 = "Hotkeys/hotstrings are not allowed inside functions." wide ascii
+		$1 = "IfWin should be #IfWin." wide ascii
+		$2 = "This hotstring is missing its abbreviation." wide ascii
+		$3 = "Duplicate hotkey." wide ascii
+		$4 = ">AUTOHOTKEY SCRIPT<" wide ascii
+    condition:
+        pe.is_32bit() 
+		and 
+		pe.number_of_resources > 0 
+		and ((
+					(@4 > pe.sections[pe.section_index(".rdata")].raw_data_offset 
+					and
+					@4 < pe.sections[pe.section_index(".rdata")].raw_data_offset +
+					pe.sections[pe.section_index(".rdata")].raw_data_size) 
+				or
+				(for 1 i in (0 .. pe.number_of_resources) : (
+					pe.resources[i].name_string matches />AUTOHOTKEY SCRIPT</))
+			)
+			or 
+			(3 of ($0,$1,$2,$3))
 		)
 }
 
@@ -1951,89 +1960,22 @@ rule ms_fortran {
 		$1 at pe.entry_point
 }
 
-rule ms_visual_basic_50_60_01 {
+rule ms_visual_basic_60 {
 	meta:
 		tool = "C"
 		name = "Microsoft Visual Basic"
-		version = "5.0 - 6.0"
-		pattern = "68????????E8????????00000000000030000000"
-	strings:
-		$1 = { 68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 00 00 00 00 00 00 30 00 00 00 }
-	condition:
-		$1 at pe.entry_point
+		version = "6.0"
+    condition:
+		pe.imports("msvbvm60.dll", 100) or pe.imports("msvbvm60.dll", "ThunRTMain")
 }
 
-rule ms_visual_basic_50_60_02 {
-	meta:
-		tool = "C"
-		name = "Microsoft Visual Basic"
-		version = "5.0 - 6.0"
-		pattern = "FF25????????????68????????E8??FFFFFF"
-	strings:
-		$1 = { FF 25 ?? ?? ?? ?? ?? ?? 68 ?? ?? ?? ?? E8 ?? FF FF FF }
-	condition:
-		$1 at pe.entry_point
-}
-
-rule ms_visual_basic_50_01 {
+rule ms_visual_basic_50 {
 	meta:
 		tool = "C"
 		name = "Microsoft Visual Basic"
 		version = "5.0"
-		pattern = "FFFFFF0000000000003000000040000000000000"
-		start = 7
-	strings:
-		$1 = { FF FF FF 00 00 00 00 00 00 30 00 00 00 40 00 00 00 00 00 00 }
 	condition:
-		$1 at pe.entry_point + 7
-}
-
-rule ms_visual_basic_50_02 {
-	meta:
-		tool = "C"
-		name = "Microsoft Visual Basic"
-		version = "5.0"
-		pattern = "FFFFFF0000000000003000000040000000000000"
-	strings:
-		$1 = { FF FF FF 00 00 00 00 00 00 30 00 00 00 40 00 00 00 00 00 00 }
-	condition:
-		$1 at pe.entry_point
-}
-
-rule ms_visual_basic_60_01 {
-	meta:
-		tool = "C"
-		name = "Microsoft Visual Basic"
-		version = "6.0"
-		pattern = "5A68????????68????????52E9????FF"
-	strings:
-		$1 = { 5A 68 ?? ?? ?? ?? 68 ?? ?? ?? ?? 52 E9 ?? ?? FF }
-	condition:
-		$1 at pe.entry_point
-}
-
-rule ms_visual_basic_60_02 {
-	meta:
-		tool = "C"
-		name = "Microsoft Visual Basic"
-		version = "6.0"
-		pattern = "5A68????????68????????52E9????????000000??00000030000000??000000??000000"
-	strings:
-		$1 = { 5A 68 ?? ?? ?? ?? 68 ?? ?? ?? ?? 52 E9 ?? ?? ?? ?? 00 00 00 ?? 00 00 00 30 00 00 00 ?? 00 00 00 ?? 00 00 00 }
-	condition:
-		$1 at pe.entry_point
-}
-
-rule ms_visual_basic_60_03 {
-	meta:
-		tool = "C"
-		name = "Microsoft Visual Basic"
-		version = "6.0"
-		pattern = "FF25????????68????????E8??FFFFFF????????????30"
-	strings:
-		$1 = { FF 25 ?? ?? ?? ?? 68 ?? ?? ?? ?? E8 ?? FF FF FF ?? ?? ?? ?? ?? ?? 30 }
-	condition:
-		$1 at pe.entry_point
+		pe.imports("msvbvm50.dll", 100) or pe.imports("msvbvm50.dll", "ThunRTMain")
 }
 
 rule dotnet_01 {

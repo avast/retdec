@@ -143,17 +143,26 @@ rule autohotkey_uv_01 {
 		language = "AutoHotKey"
 		bytecode = true
 	strings:
-		$1 = ">AUTOHOTKEY SCRIPT<"
-		$2 = ">AUTOHOTKEY SCRIPT<" wide
-	condition:
-		pe.is_64bit() and
-		for 1 of them : (
-			@ > pe.sections[pe.section_index(".rdata")].raw_data_offset and
-			@ < pe.sections[pe.section_index(".rdata")].raw_data_offset +
-			pe.sections[pe.section_index(".rdata")].raw_data_size
-		) or
-		for 1 i in (0 .. pe.number_of_resources) : (
-			pe.resources[i].name_string matches />AUTOHOTKEY SCRIPT</
+		$0 = "Hotkeys/hotstrings are not allowed inside functions." wide ascii
+		$1 = "IfWin should be #IfWin." wide ascii
+		$2 = "This hotstring is missing its abbreviation." wide ascii
+		$3 = "Duplicate hotkey." wide ascii
+		$4 = ">AUTOHOTKEY SCRIPT<" wide ascii
+    condition:
+        pe.is_64bit() 
+		and 
+		pe.number_of_resources > 0 
+		and ((
+					(@4 > pe.sections[pe.section_index(".rdata")].raw_data_offset 
+					and
+					@4 < pe.sections[pe.section_index(".rdata")].raw_data_offset +
+					pe.sections[pe.section_index(".rdata")].raw_data_size) 
+				or
+				(for 1 i in (0 .. pe.number_of_resources) : (
+					pe.resources[i].name_string matches />AUTOHOTKEY SCRIPT</))
+			)
+			or 
+			(3 of ($0,$1,$2,$3))
 		)
 }
 

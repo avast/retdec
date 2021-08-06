@@ -83,7 +83,7 @@ bool isAddressFromRegion(const SecSeg *actualRegion, const SecSeg *newRegion, st
 		return false;
 	}
 
-	unsigned long long newRegionSize;
+	unsigned long long newRegionSize = 0;
 	if(!newRegion->getSizeInMemory(newRegionSize))
 	{
 		newRegionSize = newRegion->getSizeInFile();

@@ -40,7 +40,8 @@ namespace PeLib
 		ERROR_ENTRY_NOT_FOUND = -7,
 		ERROR_DUPLICATE_ENTRY = -8,
 		ERROR_DIRECTORY_DOES_NOT_EXIST = -9,
-		ERROR_COFF_SYMBOL_TABLE_DOES_NOT_EXIST = -10
+		ERROR_COFF_SYMBOL_TABLE_DOES_NOT_EXIST = -10,
+		ERROR_SKIP_RESOURCE = -11
 	};
 
 	enum LoaderError
@@ -1127,8 +1128,8 @@ namespace PeLib
 		}
 	};
 
-	const std::size_t IMPORT_LIBRARY_MAX_LENGTH = 96;
-	const std::size_t IMPORT_SYMBOL_MAX_LENGTH = 96;
+	const std::size_t IMPORT_LIBRARY_MAX_LENGTH = 256;
+	const std::size_t IMPORT_SYMBOL_MAX_LENGTH = 256;
 
 	struct PELIB_IMAGE_RESOURCE_DATA_ENTRY
 	{
@@ -1242,7 +1243,7 @@ namespace PeLib
 */
 
 	const unsigned int PELIB_IMAGE_SIZEOF_COFF_SYMBOL = 18;
-	const std::size_t COFF_SYMBOL_NAME_MAX_LENGTH = 96;
+	const std::size_t COFF_SYMBOL_NAME_MAX_LENGTH = 256;
 
 	struct PELIB_IMAGE_COFF_SYMBOL
 	{

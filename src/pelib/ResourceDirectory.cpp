@@ -636,6 +636,10 @@ namespace PeLib
 			std::uint32_t sizeOfImage,
 			ResourceDirectory* resDir)
 	{
+		//
+		// Any error handling here must be in syn with YARA (Module: pe.c, Function: _pe_iterate_resources)
+		//
+
 		// Enough space to be a valid node?
 		std::uint32_t uiRva = uiRsrcRva + uiOffset;
 		if(uiRva > sizeOfImage)
@@ -645,15 +649,19 @@ namespace PeLib
 		if(imageLoader.readImage(&header, uiRva, PELIB_IMAGE_RESOURCE_DIRECTORY::size()) != PELIB_IMAGE_RESOURCE_DIRECTORY::size())
 			return ERROR_INVALID_FILE;
 
-		// FE015EB24B7EEA2907698A6D7142198644A757066DA4EB8D3A4B63900008CF5E: Invalid root resource directory
-		// We artificially limit the allowed number of resource entries
-		if((header.NumberOfNamedEntries > PELIB_MAX_RESOURCE_ENTRIES) || (header.NumberOfIdEntries > PELIB_MAX_RESOURCE_ENTRIES))
-			return ERROR_INVALID_FILE;
-
-		// More checks for number of entries
+		// FE015EB24B7EEA2907698A6D7142198644A757066DA4EB8D3A4B63900008CF5E
+		//  * Invalid root resource directory
+		// 7dfc75ade04a0deb55dfbf87baff2306e625c5280748856f69f2f43599615249
+		//  * IMAGE_RESOURCE_DIRECTORY::Characteristics != 0
+		//  * IMAGE_RESOURCE_DIRECTORY::NumberOfIdEntries == 0x8000
+		// We artificially limit the allowed number of resource entries.
+		// If exceeded, we don't stop resource parsing, but rather ignore the resource and move on
+		// in order to be in sync with YARA
 		unsigned int uiNumberOfEntries = header.NumberOfNamedEntries + header.NumberOfIdEntries;
-		if(uiNumberOfEntries > PELIB_MAX_RESOURCE_ENTRIES)
-			return ERROR_INVALID_FILE;
+		if((header.NumberOfNamedEntries > PELIB_MAX_RESOURCE_ENTRIES) ||
+		   (header.NumberOfIdEntries > PELIB_MAX_RESOURCE_ENTRIES) ||
+		   (uiNumberOfEntries > PELIB_MAX_RESOURCE_ENTRIES))
+			return ERROR_SKIP_RESOURCE;
 
 		// Add the total number of entries to the occupied range
 		resDir->addOccupiedAddressRange(uiRva, uiRva + PELIB_IMAGE_RESOURCE_DIRECTORY::size() - 1);
@@ -669,8 +677,6 @@ namespace PeLib
 			return ERROR_NONE;
 		}
 
-		// Load all entries to the vector
-		std::vector<PELIB_IMAGE_RESOURCE_DIRECTORY_ENTRY> vResourceChildren(uiNumberOfEntries);
 		resDir->insertNodeOffset(uiOffset);
 
 		if (uiNumberOfEntries > 0)
@@ -678,6 +684,7 @@ namespace PeLib
 			resDir->addOccupiedAddressRange(uiRva, uiRva + uiNumberOfEntries * PELIB_IMAGE_RESOURCE_DIRECTORY_ENTRY::size() - 1);
 		}
 
+		// Load all entries to the vector
 		for (unsigned int i = 0; i < uiNumberOfEntries; i++)
 		{
 			ResourceChild rc;
@@ -720,13 +727,22 @@ namespace PeLib
 				{
 					// Check whether we have enough space to read at least one character
 					unsigned int uiNameOffset = rc.entry.irde.Name & PELIB_IMAGE_RESOURCE_RVA_MASK;
-					if (uiRva + uiNameOffset + sizeof(std::uint16_t) > sizeOfImage)
+					if (uiRsrcRva + uiNameOffset + sizeof(std::uint16_t) > sizeOfImage)
 					{
 						return ERROR_INVALID_FILE;
 					}
 
-					// Read the resource name
-					imageLoader.readStringRc(rc.entry.wstrName, uiRsrcRva + uiNameOffset);
+					std::uint16_t length = 0;
+					std::uint32_t name_rva = uiRsrcRva + uiNameOffset;
+					// Read the string length (first 2 bytes at start)
+					imageLoader.readImage(&length, name_rva, sizeof(std::uint16_t));
+
+					// Sanity check for pointer to junk data instead of valid string
+					if (length <= 100)
+					{
+						// Read the resource name
+						imageLoader.readStringRc(rc.entry.wstrName, name_rva);
+					}
 				}
 			}
 
@@ -747,12 +763,18 @@ namespace PeLib
 
 			// Read the child node
 			childError = rc.child->read(imageLoader, uiRsrcRva, rc.entry.irde.OffsetToData & PELIB_IMAGE_RESOURCE_RVA_MASK, sizeOfImage, resDir);
-			if (childError != ERROR_NONE)
+			switch(childError)
 			{
-				return childError;
-			}
+				case ERROR_NONE:             // If the resource was found to be OK, insert it to the list of children
+					children.push_back(rc);
+					break;
 
-			children.push_back(rc);
+				case ERROR_SKIP_RESOURCE:    // Do not insert invalid resources; do not stop processing either
+					break;
+
+				default:
+					return childError;
+			}
 		}
 
 		return ERROR_NONE;

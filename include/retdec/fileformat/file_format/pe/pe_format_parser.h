@@ -265,8 +265,8 @@ class PeFormatParser
 		section.setType(sectionType);
 		section.setIndex(secIndex);
 		section.setOffset(imageLoader.getRealPointerToRawData(secIndex));
-		section.setSizeInFile(pSectionHeader->SizeOfRawData);
-		section.setSizeInMemory(pSectionHeader->VirtualSize);
+		section.setSizeInFile(imageLoader.getRealSizeOfRawData(secIndex));
+		section.setSizeInMemory((pSectionHeader->VirtualSize != 0) ? pSectionHeader->VirtualSize : pSectionHeader->SizeOfRawData);
 		section.setAddress(pSectionHeader->VirtualAddress ? imageLoader.getImageBase() + pSectionHeader->VirtualAddress : 0);
 		section.setMemory(section.getAddress());
 		section.setPeCoffFlags(pSectionHeader->Characteristics);
@@ -276,19 +276,21 @@ class PeFormatParser
 
 	bool getDllFlags(unsigned long long & dllFlags) const
 	{
-		if(peFile->imageLoader().getCharacteristics() & PeLib::PELIB_IMAGE_FILE_DLL)
-		{
-			dllFlags = peFile->imageLoader().getOptionalHeader().DllCharacteristics;
-			return true;
-		}
-
-		return false;
+		dllFlags = peFile->imageLoader().getOptionalHeader().DllCharacteristics;
+		return true;
 	}
 
 	bool getDataDirectoryRelative(unsigned long long index, unsigned long long &relAddr, unsigned long long &size) const
 	{
 		relAddr = peFile->imageLoader().getDataDirRva(index);
 		size = peFile->imageLoader().getDataDirSize(index);
+		return (relAddr != 0);
+	}
+
+	bool getComDirectoryRelative(unsigned long long &relAddr, unsigned long long &size) const
+	{
+		relAddr = peFile->imageLoader().getComDirRva();
+		size = peFile->imageLoader().getComDirSize();
 		return (relAddr != 0);
 	}
 
