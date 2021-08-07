@@ -496,10 +496,6 @@ bool DotnetTypeReconstructor::reconstructGenericParameters()
  */
 bool DotnetTypeReconstructor::reconstructMethodParameters()
 {
-	auto paramTable = static_cast<const MetadataTable<Param>*>(metadataStream->getMetadataTable(MetadataTableType::Param));
-	if (paramTable == nullptr)
-		return true;
-
 	// We need to iterate over classes because we need to know the owner of every single method
 	for (const auto& kv : defClassTable)
 	{
@@ -524,11 +520,7 @@ bool DotnetTypeReconstructor::reconstructMethodParameters()
 			auto startIndex = methodDef->paramList.getIndex();
 			for (auto i = startIndex; i < startIndex + method->getDeclaredParametersCount(); ++i)
 			{
-				auto param = paramTable->getRow(i);
-				if (param == nullptr)
-					break;
-
-				auto newParam = createMethodParameter(param, classType.get(), method.get(), signature);
+				auto newParam = createMethodParameter(i, startIndex, classType.get(), method.get(), signature);
 				if (newParam == nullptr)
 				{
 					methodOk = false;
@@ -1018,14 +1010,31 @@ std::unique_ptr<DotnetMethod> DotnetTypeReconstructor::createMethod(const Method
  * @param signature Signature with data types. Is destroyed in the meantime.
  * @return New method parameter or @c nullptr in case of failure.
  */
-std::unique_ptr<DotnetParameter> DotnetTypeReconstructor::createMethodParameter(const Param* param, const DotnetClass* ownerClass,
+std::unique_ptr<DotnetParameter> DotnetTypeReconstructor::createMethodParameter(
+		std::size_t paramIdx, std::size_t startIdx, const DotnetClass* ownerClass,
 		const DotnetMethod* ownerMethod, std::vector<std::uint8_t>& signature)
 {
 	std::string paramName;
-	if (!stringStream->getString(param->name.getIndex(), paramName))
-		return nullptr;
 
-	paramName = retdec::utils::replaceNonprintableChars(paramName);
+	auto paramTable = static_cast<const MetadataTable<Param>*>(metadataStream->getMetadataTable(MetadataTableType::Param));
+	const Param* param;
+
+	if (paramTable && (param = paramTable->getRow(paramIdx)))
+	{
+		if (!stringStream->getString(param->name.getIndex(), paramName)) {
+			paramName = retdec::utils::replaceNonprintableChars(paramName);
+		}
+		// else leave it empty with just a type
+	}
+	// If there is no paramTable, we can still reconstruct everything
+	// from the signature, except name -> default name
+	else
+	{
+		std::stringstream fmt;
+		fmt << "P_" << paramIdx - startIdx;
+		paramName = fmt.str();
+	}
+
 	auto type = dataTypeFromSignature(signature, ownerClass, ownerMethod);
 	if (type == nullptr)
 		return nullptr;
