@@ -656,7 +656,15 @@ bool DotnetTypeReconstructor::reconstructNestedClasses()
 		if (enclosingItr == defClassTable.end())
 			continue;
 
-		nestedItr->second->setNameSpace(enclosingItr->second->getFullyQualifiedName());
+		const std::string& namespac = nestedItr->second->getNameSpace();
+		if (namespac.empty())
+		{
+			nestedItr->second->setNameSpace(enclosingItr->second->getFullyQualifiedName());
+		}
+		else
+		{
+			nestedItr->second->setNameSpace(enclosingItr->second->getFullyQualifiedName() + "." + nestedItr->second->getNameSpace());
+		}
 	}
 
 	return true;
