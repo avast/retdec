@@ -176,6 +176,12 @@ DotnetTypeVisibility toTypeVisibility(const T* source)
 		return DotnetTypeVisibility::Protected;
 	else if (source->isPrivate())
 		return DotnetTypeVisibility::Private;
+	else if (source->isInternal())
+		return DotnetTypeVisibility::Internal;
+	else if (source->isFamOrAssem())
+		return DotnetTypeVisibility::ProtectedInternal;
+	else if (source->isFamAndAssem())
+		return DotnetTypeVisibility::PrivateProtected;
 	else
 		return DotnetTypeVisibility::Private;
 }
@@ -183,16 +189,21 @@ DotnetTypeVisibility toTypeVisibility(const T* source)
 template <>
 DotnetTypeVisibility toTypeVisibility<TypeDef>(const TypeDef* source)
 {
-	if (source->isPublic() || source->isNestedPublic())
-		return DotnetTypeVisibility::Public;
+	if (source->isNonPublic() || source->isNestedInternal())
+		return DotnetTypeVisibility::Internal;
 	else if (source->isNestedProtected())
 		return DotnetTypeVisibility::Protected;
-	else if (source->isNonPublic() || source->isNestedPrivate())
+	else if (source->isNestedPrivate())
 		return DotnetTypeVisibility::Private;
+	else if (source->isNestedFamAndAssem())
+		return DotnetTypeVisibility::PrivateProtected;
+	else if (source->isNestedFamOrAssem())
+		return DotnetTypeVisibility::ProtectedInternal;
+	else if (source->isNestedPublic() || source->isPublic())
+		return DotnetTypeVisibility::Public;
 	else
 		return DotnetTypeVisibility::Private;
 }
-
 }
 
 /**
