@@ -1924,15 +1924,15 @@ void PeFormat::loadDotnetHeaders()
 			return;
 		}
 
-		if (streamName == "#~" || streamName == "#-")
+		if ((streamName == "#~" || streamName == "#-") && !metadataStream)
 			parseMetadataStream(metadataHeaderAddress, streamOffset, streamSize);
-		else if (streamName == "#Blob")
+		else if (streamName == "#Blob" && !blobStream)
 			parseBlobStream(metadataHeaderAddress, streamOffset, streamSize);
-		else if (streamName == "#GUID")
+		else if (streamName == "#GUID" && !guidStream)
 			parseGuidStream(metadataHeaderAddress, streamOffset, streamSize);
-		else if (streamName == "#Strings")
+		else if (streamName == "#Strings" && !stringStream)
 			parseStringStream(metadataHeaderAddress, streamOffset, streamSize);
-		else if (streamName == "#US")
+		else if (streamName == "#US" && !userStringStream)
 			parseUserStringStream(metadataHeaderAddress, streamOffset, streamSize);
 
 		// Round-up to the nearest higher multiple of 4
