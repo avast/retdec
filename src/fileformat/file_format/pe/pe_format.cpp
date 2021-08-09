@@ -2060,6 +2060,13 @@ void PeFormat::parseMetadataStream(std::uint64_t baseAddress, std::uint64_t offs
 			currentAddress += 4;
 		}
 	}
+	// ExtraData flags means there is extra 4 bytes at the end Rows array that contaisn the rows sizes
+	// I don't see anything about in at ECMA-335, but I can see in real samples and in IlSpy source
+	// that understands it and correctly decompiles, sample: 5b5817fe2d4f0989501802b0e2bb4451583ff27fd0723f40bb7f8b0417dd7c58
+	if (heapOffsetSizes & 0x40)
+	{
+		currentAddress += 4;
+	}
 
 	for (std::size_t i = 0; i < 64; ++i)
 	{
