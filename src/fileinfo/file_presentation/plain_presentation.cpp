@@ -724,7 +724,7 @@ static void printCertificate(const Certificate& cert, int indent)
 	Log::info() << std::string(indent, ' ') << "Valid until:          " << cert.getValidUntil() << "\n";
 	Log::info() << std::string(indent, ' ') << "Signature Algorithm:  " << cert.getSignatureAlgorithm() << "\n";
 	Log::info() << std::string(indent, ' ') << "Public Key Algorithm: " << cert.getPublicKeyAlgorithm() << "\n";
-	Log::info() << std::string(indent, ' ') << "Public key:           " << cert.getPublicKey() << ":\n";
+	Log::info() << std::string(indent, ' ') << "Public key:           " << cert.getPublicKey() << "\n";
 }
 
 static void printCertificateChain(const std::vector<Certificate>& certs, int indent)
@@ -773,7 +773,9 @@ void PlainPresentation::presentSignatures() const
 	if (!table) {
 		return;
 	}
-	Log::info() << "Digital Signatures:\n";
+	Log::info() << "\n";
+	Log::info() << "Digital Signatures\n";
+	Log::info() << "------------------\n\n";
 	int indent = 4;
 	Log::info() << std::string(indent, ' ') << "Signature count: " << table->signatureCount() << "\n";
 
