@@ -652,7 +652,8 @@ bool DotnetTypeReconstructor::reconstructNestedClasses()
 		auto nestedClass = nestedClassTable->getRow(i);
 
 		auto nestedItr = defClassTable.find(nestedClass->nestedClass.getIndex());
-		if (nestedItr == defClassTable.end())
+		// Validate that the type is actually nested
+		if (nestedItr == defClassTable.end() || !nestedItr->second->isNested())
 			continue;
 
 		auto enclosingItr = defClassTable.find(nestedClass->enclosingClass.getIndex());
