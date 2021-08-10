@@ -2306,14 +2306,8 @@ void PeFormat::parseStringStream(std::uint64_t baseAddress, std::uint64_t offset
 	while (currentOffset < size)
 	{
 		std::string string;
-		if (!getNTBS(address + currentOffset, string))
-		{
-			currentOffset += 1;
-			continue;
-		}
-
+		getNTBS(address + currentOffset, string);
 		stringStream->addString(currentOffset, string);
-
 		// +1 for null-terminator
 		currentOffset += 1 + string.length();
 	}
