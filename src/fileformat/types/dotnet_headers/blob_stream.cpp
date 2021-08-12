@@ -29,11 +29,10 @@ std::vector<std::uint8_t> BlobStream::getElement(std::size_t offset) const
 {
 	// Ugly, C like just for fast prototype, rework TODO
 	std::uint32_t len = 0;
-	std::vector<std::uint8_t> res;
 	const unsigned char* ptr = data.data() + offset;
 	if (offset >= data.size())
 	{
-		return res;
+		return {};
 	}
 	else if ((*ptr & 0x80) == 0x00)
 	{
@@ -41,7 +40,7 @@ std::vector<std::uint8_t> BlobStream::getElement(std::size_t offset) const
 		offset += 1;
 		if (offset + len <= data.size())
 		{
-			res.assign(data.begin() + offset, data.begin() + offset + len);
+			return { data.begin() + offset, data.begin() + offset + len };
 		}
 	}
 	else if ((*ptr & 0xC0) == 0x80)
@@ -55,7 +54,7 @@ std::vector<std::uint8_t> BlobStream::getElement(std::size_t offset) const
 		}
 		if (offset + len <= data.size())
 		{
-			res.assign(data.begin() + offset, data.begin() + offset + len);
+			return { data.begin() + offset, data.begin() + offset + len };
 		}
 	}
 	else if ((*ptr & 0xE0) == 0xC0)
@@ -72,11 +71,11 @@ std::vector<std::uint8_t> BlobStream::getElement(std::size_t offset) const
 		}
 		if (offset + len <= data.size())
 		{
-			res.assign(data.begin() + offset, data.begin() + offset + len);
+			return { data.begin() + offset, data.begin() + offset + len };
 		}
 	}
 
-	return res;
+	return {};
 }
 } // namespace fileformat
 } // namespace retdec

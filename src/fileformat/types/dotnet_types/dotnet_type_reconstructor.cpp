@@ -518,7 +518,7 @@ bool DotnetTypeReconstructor::reconstructMethodParameters()
 			// Obtain postponed signature
 			// We now know all the information required for method parameters reconstruction
 			auto methodDef = method->getRawRecord();
-			auto signature = methodReturnTypeAndParamTypeTable[method.get()];
+			auto& signature = methodReturnTypeAndParamTypeTable[method.get()];
 
 			// Reconstruct return type
 			auto returnType = dataTypeFromSignature(signature, classType.get(), method.get());
@@ -1191,7 +1191,7 @@ std::unique_ptr<DotnetDataTypeArray> DotnetTypeReconstructor::createArray(std::v
 	// Some dimensions can have limited size by declaration
 	// Size 0 means not specified
 	std::uint64_t numOfSizes = decodeUnsigned(data, bytesRead);
-	if (bytesRead == 0)
+	if (bytesRead == 0 || numOfSizes > rank)
 		return nullptr;
 	data.erase(data.begin(), data.begin() + bytesRead);
 
@@ -1206,7 +1206,7 @@ std::unique_ptr<DotnetDataTypeArray> DotnetTypeReconstructor::createArray(std::v
 
 	// And some dimensions can also be limited by special lower bound
 	std::size_t numOfLowBounds = decodeUnsigned(data, bytesRead);
-	if (bytesRead == 0)
+	if (bytesRead == 0 || numOfLowBounds > rank)
 		return nullptr;
 	data.erase(data.begin(), data.begin() + bytesRead);
 
