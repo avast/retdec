@@ -2221,55 +2221,11 @@ void PeFormat::parseMetadataStream(std::uint64_t baseAddress, std::uint64_t offs
  */
 void PeFormat::parseBlobStream(std::uint64_t baseAddress, std::uint64_t offset, std::uint64_t size)
 {
-	blobStream = std::make_unique<BlobStream>(offset, size);
+	std::vector<std::uint8_t> data;
 	auto address = baseAddress + offset;
+	getXBytes(address, size, data);
+	blobStream = std::make_unique<BlobStream>(data, offset, size);
 
-	std::vector<std::uint8_t> elementData;
-	std::uint64_t length, lengthSize;
-
-	std::size_t inStreamOffset = 0;
-	while (inStreamOffset < size)
-	{
-		// First std::uint8_t is length of next element in the blob
-		lengthSize = 1;
-		if (!get1Byte(address + inStreamOffset, length))
-		{
-			return;
-		}
-
-		// 2-std::uint8_t length encoding if the length is 10xxxxxx
-		if ((length & 0xC0) == 0x80)
-		{
-			if (!get2Byte(address + inStreamOffset, length, Endianness::BIG))
-			{
-				return;
-			}
-
-			length &= ~0xC000;
-			lengthSize = 2;
-		}
-		// 4-std::uint8_t length encoding if the length is 110xxxxx
-		else if ((length & 0xE0) == 0xC0)
-		{
-			if (!get4Byte(address + inStreamOffset, length, Endianness::BIG))
-			{
-				return;
-			}
-
-			length &= ~0xE0000000;
-			lengthSize = 4;
-		}
-
-		// Read only if length is greater than 0
-		elementData.clear();
-		if (length > 0 && !getXBytes(address + inStreamOffset + lengthSize, length, elementData))
-		{
-			return;
-		}
-
-		blobStream->addElement(inStreamOffset, elementData);
-		inStreamOffset += lengthSize + length;
-	}
 }
 
 /**

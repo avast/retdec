@@ -5,6 +5,7 @@
  */
 
 #include "retdec/fileformat/types/dotnet_headers/blob_stream.h"
+#include <cstdint>
 
 namespace retdec {
 namespace fileformat {
@@ -14,7 +15,8 @@ namespace fileformat {
  * @param streamOffset Stream offset.
  * @param streamSize Stream size.
  */
-BlobStream::BlobStream(std::uint64_t streamOffset, std::uint64_t streamSize) : Stream(StreamType::Blob, streamOffset, streamSize)
+BlobStream::BlobStream(std::vector<std::uint8_t> data, std::uint64_t streamOffset, std::uint64_t streamSize)
+	: Stream(StreamType::Blob, streamOffset, streamSize), data(data)
 {
 }
 
@@ -25,22 +27,48 @@ BlobStream::BlobStream(std::uint64_t streamOffset, std::uint64_t streamSize) : S
  */
 std::vector<std::uint8_t> BlobStream::getElement(std::size_t offset) const
 {
-	auto itr = elements.find(offset);
-	if (itr == elements.end())
-		return {};
+	// Ugly, C like just for fast prototype, rework TODO
+	std::uint32_t len = 0;
+	std::vector<std::uint8_t> res;
+	const unsigned char* ptr = data.data() + offset;
+	if (offset >= data.size())
+	{
+		return res;
+	}
+	else if ((*ptr & 0x80) == 0x00)
+	{
+		len = *ptr;
+		offset += 1;
+		res.assign(data.begin() + offset, data.begin() + offset + len);
+	}
+	else if ((*ptr & 0xC0) == 0x80)
+	{
+		// Make sure we have one more byte.
+		if (offset + 1 < data.size())
+		{
+			// Shift remaining 6 bits left by 8 and OR in the remaining byte.
+			len = ((*ptr & 0x3F) << 8) | *(ptr + 1);
+			offset += 2;
+		}
 
-	return itr->second;
+		res.assign(data.begin() + offset, data.begin() + offset + len);
+	}
+	else if ((*ptr & 0xE0) == 0xC0)
+	{
+		// Make sure we have 3 more bytes.
+		if (offset + 2 < data.size())
+		{
+			// Shift remaining 6 bits left by 8 and OR in the remaining byte.
+			len = ((*ptr & 0x1F) << 24) |
+					(*(ptr + 1) << 16) |
+					(*(ptr + 2) << 8) |
+					*(ptr + 3);
+			offset += 2;
+		}
+		res.assign(data.begin() + offset, data.begin() + offset + len);
+	}
+
+	return res;
 }
-
-/**
- * Adds new element at the specified offset.
- * @param offset Offset of the element.
- * @param data Data of the element.
- */
-void BlobStream::addElement(std::size_t offset, const std::vector<std::uint8_t>& data)
-{
-	elements.emplace(offset, data);
-}
-
 } // namespace fileformat
 } // namespace retdec
