@@ -1459,6 +1459,7 @@ const DotnetClass* DotnetTypeReconstructor::selectClass(const TypeDefOrRef& type
 
 		result = itr->second.get();
 	}
+	// TODO TypeSpec is missing here
 
 	return result;
 }

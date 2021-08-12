@@ -39,7 +39,10 @@ std::vector<std::uint8_t> BlobStream::getElement(std::size_t offset) const
 	{
 		len = *ptr;
 		offset += 1;
-		res.assign(data.begin() + offset, data.begin() + offset + len);
+		if (offset + len <= data.size())
+		{
+			res.assign(data.begin() + offset, data.begin() + offset + len);
+		}
 	}
 	else if ((*ptr & 0xC0) == 0x80)
 	{
@@ -50,22 +53,27 @@ std::vector<std::uint8_t> BlobStream::getElement(std::size_t offset) const
 			len = ((*ptr & 0x3F) << 8) | *(ptr + 1);
 			offset += 2;
 		}
-
-		res.assign(data.begin() + offset, data.begin() + offset + len);
+		if (offset + len <= data.size())
+		{
+			res.assign(data.begin() + offset, data.begin() + offset + len);
+		}
 	}
 	else if ((*ptr & 0xE0) == 0xC0)
 	{
 		// Make sure we have 3 more bytes.
-		if (offset + 2 < data.size())
+		if (offset + 3 < data.size())
 		{
 			// Shift remaining 6 bits left by 8 and OR in the remaining byte.
 			len = ((*ptr & 0x1F) << 24) |
 					(*(ptr + 1) << 16) |
 					(*(ptr + 2) << 8) |
 					*(ptr + 3);
-			offset += 2;
+			offset += 4;
 		}
-		res.assign(data.begin() + offset, data.begin() + offset + len);
+		if (offset + len <= data.size())
+		{
+			res.assign(data.begin() + offset, data.begin() + offset + len);
+		}
 	}
 
 	return res;
