@@ -3148,7 +3148,43 @@ bool PeFormat::initDllList(const std::string & dllListFile)
  */
 bool PeFormat::isDotNet() const
 {
-	return clrHeader != nullptr || metadataHeader != nullptr;
+	if (!clrHeader || !metadataHeader) {
+		return false;
+	}
+
+	unsigned correctHdrSize = 72;
+	if (clrHeader->getHeaderSize() != correctHdrSize)
+	{
+		return false;
+	}
+
+	std::uint32_t numberOfRvaAndSizes = getImageLoader().getOptionalHeader().NumberOfRvaAndSizes;
+	// If the binary is 64bit, check NumberOfRvaAndSizes, otherwise don't
+	if (getImageBitability() == 64 &&
+			numberOfRvaAndSizes < PELIB_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR)
+	{
+		return false;
+	}
+	else if (!isDll())
+	{ // If 32 bit check if first 2 bytes at entry point are 0xFF 0x25
+
+		unsigned long long entryAddr = 0;
+		if (!getEpAddress(entryAddr))
+		{
+			return false;
+		}
+		std::uint64_t bytes[2];
+		if (!get1Byte(entryAddr, bytes[0]) || !get1Byte(entryAddr + 1, bytes[1]))
+		{
+			return false;
+		}
+		if (bytes[0] != 0xFF || bytes[1] != 0x25)
+		{
+			return false;
+		}
+	}
+
+	return true;
 }
 
 /**
