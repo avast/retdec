@@ -148,3 +148,31 @@ function(patch_dotnet file)
     endif()
 endfunction()
 patch_dotnet("${yara_path}/libyara/modules/dotnet/dotnet.c")
+
+# https://github.com/VirusTotal/yara/pull/1540
+function(patch_configure_ac file)
+    file(READ "${file}" content)
+    set(new_content "${content}")
+
+    string(REPLACE
+        "PKG_CHECK_MODULES(PROTOBUF_C, libprotobuf-c >= 1.0.0)"
+        "PKG_CHECK_MODULES([PROTOBUF_C], [libprotobuf-c >= 1.0.0])"
+        new_content
+        "${new_content}"
+    )
+
+    string(REPLACE
+        "AC_CHECK_LIB(protobuf-c, protobuf_c_message_unpack,,"
+        "AC_CHECK_LIB([protobuf-c], protobuf_c_message_unpack,,"
+        new_content
+        "${new_content}"
+    )
+
+    if("${new_content}" STREQUAL "${content}")
+        message(STATUS "-- Patching: ${file} skipped")
+    else()
+        message(STATUS "-- Patching: ${file} patched")
+        file(WRITE "${file}" "${new_content}")
+    endif()
+endfunction()
+patch_configure_ac("${yara_path}/configure.ac")
