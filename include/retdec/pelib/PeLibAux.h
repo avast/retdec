@@ -1111,16 +1111,16 @@ namespace PeLib
 		PELIB_IMAGE_IMPORT_DESCRIPTOR impdesc;
 		/// The name of an imported DLL.
 		std::string name;
-		/// All first thunk value of an imported DLL.
-		std::vector<PELIB_THUNK_DATA> originalfirstthunk;
-		std::vector<PELIB_THUNK_DATA> firstthunk;
+		/// The list of functions imported from the DLL
+		//std::vector<PELIB_THUNK_DATA> originalfirstthunk;
+		//std::vector<PELIB_THUNK_DATA> firstthunk;
 		std::vector<PELIB_THUNK_DATA> thunk_data;
 
 		inline std::uint32_t calculateSize(std::uint32_t pointerSize) const
 		{
 			std::uint32_t totalSize = sizeof(PELIB_IMAGE_IMPORT_DESCRIPTOR) + name.size() + 1;  // descriptor + dllname
 
-			for(const auto & element : originalfirstthunk)
+			for(const auto & element : thunk_data)
 				totalSize += element.calculateSize(pointerSize);
 			return totalSize + pointerSize;                            // Add zero-termination
 		}

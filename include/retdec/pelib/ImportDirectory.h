@@ -248,13 +248,11 @@ namespace PeLib
 		if (FileIter == m_vNewiid.end())
 		{
 			iid.thunk_data.push_back(td);
-			iid.firstthunk.push_back(td);
 			m_vNewiid.push_back(iid);
 		}
 		else
 		{
 			FileIter->thunk_data.push_back(td);
-			FileIter->firstthunk.push_back(td);
 		}
 
 		return ERROR_NONE;
@@ -287,13 +285,11 @@ namespace PeLib
 		if (FileIter == m_vNewiid.end())
 		{
 			iid.thunk_data.push_back(td);
-			iid.firstthunk.push_back(td);
 			m_vNewiid.push_back(iid);
 		}
 		else
 		{
 			FileIter->thunk_data.push_back(td);
-			FileIter->firstthunk.push_back(td);
 		}
 
 		return ERROR_NONE;
@@ -303,7 +299,7 @@ namespace PeLib
 	* Searches through the import directory and returns the number of the import
 	* directory entry which belongs to the given filename.
 	* @param strFilename Name of the imported file.
-	* @param cdDir Flag to decide if the OLDDIR or new import directory is used.
+	* @param newDir Flag to decide if the OLDDIR or new import directory is used.
 	* @return The ID of an imported file.
 	**/
 	inline
@@ -334,7 +330,7 @@ namespace PeLib
 	* Searches through an imported file for a specific function.
 	* @param strFilename Name of the imported file.
 	* @param strFuncname Name of the imported function.
-	* @param cdDir Flag to decide if the OLDDIR or new import directory is used.
+	* @param newDir Flag to decide if the OLDDIR or new import directory is used.
 	* @return ID of the imported function.
 	**/
 	inline
@@ -372,7 +368,7 @@ namespace PeLib
 	* Get the name of an imported function.
 	* @param dwFilenr Identifies which file should be checked.
 	* @param dwFuncnr Identifies which function should be checked.
-	* @param cdDir Flag to decide if the OLDDIR or new import directory is used.
+	* @param newDir Flag to decide if the OLDDIR or new import directory is used.
 	* @return Name of an imported function.
 	* \todo Marked line is unsafe (function should be rewritten).
 	**/
@@ -381,15 +377,9 @@ namespace PeLib
 	{
 		auto & il = getImportList(newDir);
 
-		// Unsafe
-		// mz: fix #1189
-		if (il[dwFilenr].impdesc.OriginalFirstThunk && dwFuncnr < il[dwFilenr].thunk_data.size())
+		if(dwFilenr < il.size() && dwFuncnr < il[dwFilenr].thunk_data.size())
 		{
 			return il[dwFilenr].thunk_data[dwFuncnr].fname;
-		}
-		else
-		{
-			return il[dwFilenr].firstthunk[dwFuncnr].fname;
 		}
 	}
 
@@ -398,14 +388,9 @@ namespace PeLib
 	{
 		auto & il = getImportList(newDir);
 
-		// Unsafe
-		if(il[dwFilenr].impdesc.OriginalFirstThunk)
+		if(dwFilenr < il.size() && dwFuncnr < il[dwFilenr].thunk_data.size())
 		{
 			il[dwFilenr].thunk_data[dwFuncnr].fname = functionName;
-		}
-		else
-		{
-			il[dwFilenr].firstthunk[dwFuncnr].fname = functionName;
 		}
 	}
 
@@ -510,44 +495,34 @@ namespace PeLib
 	* Get the hint of an imported function.
 	* @param dwFilenr Identifies which file should be checked.
 	* @param dwFuncnr Identifies which function should be checked.
-	* @param cdDir Flag to decide if the OLDDIR or new import directory is used.
+	* @param newDir Flag to decide if the OLDDIR or new import directory is used.
 	* @return Hint of an imported function.
 	**/
 	inline
 	std::uint16_t ImportDirectory::getFunctionHint(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, bool newDir) const
 	{
-		if (newDir == false)
+		auto& il = getImportList(newDir);
+		std::uint16_t hint = 0;
+
+		if(dwFilenr < il.size() && dwFuncnr < il[dwFilenr].thunk_data.size())
 		{
-			// mz: fix #1189
-			if (m_vOldiid[dwFilenr].impdesc.OriginalFirstThunk && dwFuncnr < m_vOldiid[dwFilenr].thunk_data.size())
-			{
-				return m_vOldiid[dwFilenr].thunk_data[dwFuncnr].hint;
-			}
-			else
-			{
-				return m_vOldiid[dwFilenr].firstthunk[dwFuncnr].hint;
-			}
+			hint = il[dwFilenr].thunk_data[dwFuncnr].hint;
 		}
-		else return m_vNewiid[dwFilenr].thunk_data[dwFuncnr].hint;
+
+		return hint;
 	}
 
 	inline
 	void ImportDirectory::setFunctionHint(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, bool newDir, std::uint16_t value)
 	{
-		if (newDir == false)
-		{
-			if (m_vOldiid[dwFilenr].impdesc.OriginalFirstThunk)
-			{
-				m_vOldiid[dwFilenr].thunk_data[dwFuncnr].hint = value;
-			}
-			else
-			{
-				m_vOldiid[dwFilenr].firstthunk[dwFuncnr].hint = value;
-			}
-		}
-		else m_vNewiid[dwFilenr].thunk_data[dwFuncnr].hint = value;
-	}
+		auto& il = getImportList(newDir);
 
+		if(dwFilenr < il.size() && dwFuncnr < il[dwFilenr].thunk_data.size())
+		{
+			il[dwFilenr].thunk_data[dwFuncnr].hint = value;
+		}
+	}
+	/*
 	inline bool isInvalidOrdinal(std::uint64_t ordinal, std::uint64_t ordinalMask, std::uint64_t sizeOfImage)
 	{
 		// Check for invalid name
@@ -568,6 +543,7 @@ namespace PeLib
 
 		return false;
 	}
+	*/
 
 	/**
 	* Updates pointer size for import directory
@@ -630,6 +606,7 @@ namespace PeLib
 		// For tracking unique imported DLLs
 		std::vector<PELIB_IMAGE_IMPORT_DIRECTORY> vOldIidCurr;
 		std::unordered_map<std::string, int> uniqueDllList;
+		std::set<std::uint32_t> seenOffsets;
 		std::uint32_t uiDescCounter = 0;
 
 		// Read and store all descriptors. Each descriptor corresponds to one imported DLL name.
@@ -723,17 +700,16 @@ namespace PeLib
 				                                                     vOldIidCurr[i].impdesc.FirstThunk;
 			std::uint32_t firstThunk = vOldIidCurr[i].impdesc.FirstThunk;
 
+			// Don't allow multiple import descriptors to take data from the same RVA
+			if(seenOffsets.count(firstThunk))
+				continue;
+			seenOffsets.insert(firstThunk);
+
 			// Parse individual imports
 			for(uiIndex = 0;; uiIndex++)
 			{
 				PELIB_THUNK_DATA thunkData;
-
-				// Check whether the thunk RVA is inside image
-				if(originalThunk >= imageLoader.getSizeOfImage())
-				{
-					setLoaderError(LDR_ERROR_IMPDIR_THUNK_RVA_INVALID);
-					return ERROR_INVALID_FILE;
-				}
+				bool thunkReadFailed = false;
 
 				// Read single value (32-bit or 64-bit) from the thunk chain
 				if(!imageLoader.readPointer(originalThunk, thunkData.itd.Ordinal))
@@ -750,60 +726,67 @@ namespace PeLib
 					break;
 				}
 
-				// Check samples that have import name out of the image
-				// Sample: CCE461B6EB23728BA3B8A97B9BE84C0FB9175DB31B9949E64144198AB3F702CE
-				// Import by ordinal must be lower-word only; any ordinal that is greater than 0xFFFF is invalid.
-				// Sample: 7CE5BB5CA99B3570514AF03782545D41213A77A0F93D4AAC8269823A8D3A58EF
-				if(isInvalidOrdinal(thunkData.itd.Ordinal, OrdinalMask, SizeOfImage))
-				{
-					setLoaderError(LDR_ERROR_IMPDIR_NAME_RVA_INVALID);
-					break;
-				}
+				// Set the patch RVA
+				thunkData.patchRva = firstThunk;
 
 				// Is it an import by name?
 				if((thunkData.itd.Ordinal & OrdinalMask) == 0)
 				{
-					// Verify if the RVA is correct
-					if(thunkData.itd.Ordinal >= imageLoader.getSizeOfImage())
+					// Check samples that have import name out of the image
+					// Sample: CCE461B6EB23728BA3B8A97B9BE84C0FB9175DB31B9949E64144198AB3F702CE
+					if(thunkData.itd.Ordinal < imageLoader.getSizeOfImage())
+					{
+						// Read the import hint
+						if(imageLoader.readImage(&thunkData.hint, thunkData.itd.Ordinal, sizeof(std::uint16_t)) != sizeof(std::uint16_t))
+						{
+							setLoaderError(LDR_ERROR_IMPDIR_THUNK_RVA_INVALID);
+							thunkReadFailed = true;
+							thunkData.hint = 0;
+						}
+
+						// Read the import name
+						imageLoader.readString(thunkData.fname, thunkData.itd.Ordinal + sizeof(std::uint16_t), IMPORT_SYMBOL_MAX_LENGTH);
+
+						// Space occupied by names
+						// +1 for null terminator
+						// If the end address is even, we need to align it by 2, so next name always starts at even address
+						m_occupiedAddresses.emplace_back(
+							static_cast<unsigned int>(thunkData.itd.Ordinal),
+							static_cast<unsigned int>(thunkData.itd.Ordinal + sizeof(thunkData.hint) + thunkData.fname.length() + 1)
+						);
+
+						// Align the end by 2
+						m_occupiedAddresses.back().second = (m_occupiedAddresses.back().second + 1) & 0xFFFFFFFFE;
+					}
+					else
 					{
 						setLoaderError(LDR_ERROR_IMPDIR_NAME_RVA_INVALID);
-						break;
+						thunkReadFailed = true;
 					}
-
-					// Read the import hint
-					if(imageLoader.readImage(&thunkData.hint, thunkData.itd.Ordinal, sizeof(std::uint16_t)) != sizeof(std::uint16_t))
-					{
-						setLoaderError(LDR_ERROR_IMPDIR_THUNK_RVA_INVALID);
-						return ERROR_INVALID_FILE;
-					}
-
-					// Read the import name
-					if(imageLoader.readString(thunkData.fname, thunkData.itd.Ordinal + sizeof(std::uint16_t), IMPORT_SYMBOL_MAX_LENGTH) == 0)
-					{
-						setLoaderError(LDR_ERROR_IMPDIR_THUNK_RVA_INVALID);
-						return ERROR_INVALID_FILE;
-					}
-
-					// Space occupied by names
-					// +1 for null terminator
-					// If the end address is even, we need to align it by 2, so next name always starts at even address
-					m_occupiedAddresses.emplace_back(
-						static_cast<unsigned int>(thunkData.itd.Ordinal),
-						static_cast<unsigned int>(thunkData.itd.Ordinal + sizeof(thunkData.hint) + thunkData.fname.length() + 1)
-					);
-
-					// Align the end by 2
-					m_occupiedAddresses.back().second = (m_occupiedAddresses.back().second + 1) & 0xFFFFFFFFE;
 				}
 				else
 				{
-					thunkData.fname = retdec::utils::ordLookUp(vOldIidCurr[i].name, thunkData.itd.Ordinal & ~OrdinalMask);
-					thunkData.hint = 0;
+					// Mask out the ordinal bit. Then, any ordinal must not be larger than 0xFFFF
+					std::uint32_t ordinal = thunkData.itd.Ordinal & ~OrdinalMask;
+
+					// Import by ordinal must be lower-word only; any ordinal that is greater than 0xFFFF is invalid.
+					// Sample: 7CE5BB5CA99B3570514AF03782545D41213A77A0F93D4AAC8269823A8D3A58EF
+					if((ordinal >> 0x10) == 0)
+					{
+						thunkData.fname = retdec::utils::ordLookUp(vOldIidCurr[i].name, ordinal);
+						thunkData.hint = 0;
+					}
+					else
+					{
+						setLoaderError(LDR_ERROR_IMPDIR_NAME_RVA_INVALID);
+					}
 				}
 
 				// Insert the thunk into the import descriptor
-				thunkData.patchRva = firstThunk;
-				vOldIidCurr[i].thunk_data.push_back(thunkData);
+				if(thunkReadFailed == false)
+				{
+					vOldIidCurr[i].thunk_data.push_back(thunkData);
+				}
 				
 				// Increment both pointers
 				originalThunk += imageLoader.getPointerSize();
@@ -811,177 +794,6 @@ namespace PeLib
 			}
 		}
 
-		/*
-
-		// Read the entries from the OriginalFirstThunk - ILT
-		for(std::size_t i = 0; i < vOldIidCurr.size(); i++)
-		{
-			// OriginalFirstThunk is only valid when pointing within the image, excluding headers
-			if(hasValidOriginalFirstThunk(vOldIidCurr[i].impdesc, imageLoader))
-			{
-				PELIB_THUNK_DATA tdCurr;
-				std::uint32_t thunkRva = vOldIidCurr[i].impdesc.OriginalFirstThunk;
-
-				for(uiIndex = 0; ; uiIndex++)
-				{
-					// Read single value (32-bit or 64-bit) from the thunk chain
-					if(!imageLoader.readPointer(thunkRva, tdCurr.itd.Ordinal))
-						break;
-
-					// Are we at the end of the list?
-					if(tdCurr.itd.Ordinal == 0)
-						break;
-
-					// Did we exceed the count of imported functions?
-					if(uiIndex >= PELIB_MAX_IMPORTED_FUNCTIONS)
-					{
-						setLoaderError(LDR_ERROR_IMPDIR_IMPORT_COUNT_EXCEEDED);
-						break;
-					}
-
-					// Check samples that have import name out of the image
-					// Sample: CCE461B6EB23728BA3B8A97B9BE84C0FB9175DB31B9949E64144198AB3F702CE
-					// Import by ordinal must be lower-word only; any ordinal that is greater than 0xFFFF is invalid.
-					// Sample: 7CE5BB5CA99B3570514AF03782545D41213A77A0F93D4AAC8269823A8D3A58EF
-					if(isInvalidOrdinal(tdCurr.itd.Ordinal, OrdinalMask, SizeOfImage))
-					{
-						setLoaderError(LDR_ERROR_IMPDIR_NAME_RVA_INVALID);
-						break;
-					}
-
-					// Insert ordinal to the list
-					vOldIidCurr[i].originalfirstthunk.push_back(tdCurr);
-					thunkRva += m_thunkSize;
-				}
-
-				// Space occupied by OriginalFirstThunks
-				// -1 because we need open interval
-				if(vOldIidCurr[i].impdesc.OriginalFirstThunk < thunkRva)
-					m_occupiedAddresses.emplace_back(vOldIidCurr[i].impdesc.OriginalFirstThunk, thunkRva - 1);
-			}
-		}
-
-		// FirstThunk - IAT
-		std::set<std::uint32_t> seenOffsets;
-		for (std::size_t i = 0; i < vOldIidCurr.size(); i++)
-		{
-			std::uint32_t thunkRva = vOldIidCurr[i].impdesc.FirstThunk;
-			bool hasValidIlt = hasValidOriginalFirstThunk(vOldIidCurr[i].impdesc, imageLoader);
-
-			if (thunkRva >= imageLoader.getSizeOfImage())
-			{
-				setLoaderError(LDR_ERROR_IMPDIR_THUNK_RVA_INVALID);
-				return ERROR_INVALID_FILE;
-			}
-			if (seenOffsets.count(thunkRva))
-			{
-				continue;
-			}
-			seenOffsets.insert(thunkRva);
-			PELIB_THUNK_DATA tdCurr;
-
-			for(uiIndex = 0; ; uiIndex++)
-			{
-				if ((thunkRva + m_thunkSize) > SizeOfImage)
-				{
-					setLoaderError(LDR_ERROR_IMPDIR_THUNK_RVA_INVALID);
-					return ERROR_INVALID_FILE;
-				}
-
-				// Read the import thunk. Make sure it's initialized in case the file read fails
-				tdCurr.itd.Ordinal = 0;
-				imageLoader.readPointer(thunkRva, tdCurr.itd.Ordinal);
-				thunkRva += m_thunkSize;
-
-				// Are we at the end of the list?
-				if (tdCurr.itd.Ordinal == 0)
-					break;
-
-				// Did the number of imported functions exceede maximum?
-				if(uiIndex >= PELIB_MAX_IMPORTED_FUNCTIONS)
-				{
-					setLoaderError(LDR_ERROR_IMPDIR_IMPORT_COUNT_EXCEEDED);
-					return ERROR_INVALID_FILE;
-				}
-
-				// Check samples that have import name out of the image
-				// Sample: CCE461B6EB23728BA3B8A97B9BE84C0FB9175DB31B9949E64144198AB3F702CE
-				//if(isInvalidOrdinal(tdCurr.itd.Ordinal, OrdinalMask, SizeOfImage))
-				//	break;
-
-				vOldIidCurr[i].firstthunk.push_back(tdCurr);
-
-				// If this import descriptor has valid ILT, then size of IAT is determined from the size of ILT
-				if (hasValidIlt && vOldIidCurr[i].originalfirstthunk.size() == vOldIidCurr[i].firstthunk.size())
-				{
-					// We need to move this offset in this case because otherwise we would calculate the occupied addresses wrongly
-					thunkRva += m_thunkSize;
-					break;
-				}
-			}
-
-			// Space occupied by FirstThunks
-			// -1 because we need open interval
-			if (vOldIidCurr[i].impdesc.FirstThunk < thunkRva)
-				m_occupiedAddresses.emplace_back(vOldIidCurr[i].impdesc.FirstThunk, thunkRva - 1);
-		}
-
-		// For each import descriptor, read all imported symbols, both by name and by ordinal
-		for(std::size_t i = 0; i < vOldIidCurr.size(); i++)
-		{
-			// This reflects the check in the Windows loader (LdrpSnapIAT)
-			// "If the OriginalFirstThunk field does not point inside the image, then ignore
-			// it. This is will detect bogus Borland Linker 2.25 images that did not fill
-			// this field in."
-			std::vector<PELIB_THUNK_DATA>& thunkVector = hasValidOriginalFirstThunk(vOldIidCurr[i].impdesc, imageLoader) ?
-				vOldIidCurr[i].originalfirstthunk :
-				vOldIidCurr[i].firstthunk;
-
-			for(auto& thunkData : thunkVector)
-			{
-				// Is it an import by name?
-				if((thunkData.itd.Ordinal & OrdinalMask) == 0)
-				{
-					// Verify if the RVA is correct
-					if(thunkData.itd.Ordinal >= imageLoader.getSizeOfImage())
-					{
-						setLoaderError(LDR_ERROR_IMPDIR_NAME_RVA_INVALID);
-						break;
-					}
-
-					// Read the import hint
-					if(imageLoader.readImage(&thunkData.hint, thunkData.itd.Ordinal, sizeof(std::uint16_t)) != sizeof(std::uint16_t))
-					{
-						setLoaderError(LDR_ERROR_IMPDIR_THUNK_RVA_INVALID);
-						return ERROR_INVALID_FILE;
-					}
-
-					// Read the import name
-					if(imageLoader.readString(thunkData.fname, thunkData.itd.Ordinal + sizeof(std::uint16_t), IMPORT_SYMBOL_MAX_LENGTH) == 0)
-					{
-						setLoaderError(LDR_ERROR_IMPDIR_THUNK_RVA_INVALID);
-						return ERROR_INVALID_FILE;
-					}
-
-					// Space occupied by names
-					// +1 for null terminator
-					// If the end address is even, we need to align it by 2, so next name always starts at even address
-					m_occupiedAddresses.emplace_back(
-						static_cast<unsigned int>(thunkData.itd.Ordinal),
-						static_cast<unsigned int>(thunkData.itd.Ordinal + sizeof(thunkData.hint) + thunkData.fname.length() + 1)
-					);
-
-					if(!(m_occupiedAddresses.back().second & 1))
-						m_occupiedAddresses.back().second += 1;
-
-				}
-				else
-				{
-					thunkData.hint = 0;
-				}
-			}
-		}
-*/
 		std::swap(vOldIidCurr, m_vOldiid);
 		return ERROR_NONE;
 	}
@@ -1267,7 +1079,7 @@ namespace PeLib
 
 	/**
 	* @param strFilename Name of the imported file.
-	* @param cdDir Flag to decide if the OLDDIR or new import directory is used.
+	* @param newDir Flag to decide if the OLDDIR or new import directory is used.
 	* @return FirstThunk value of an imported file.
 	**/
 	inline
@@ -1278,7 +1090,7 @@ namespace PeLib
 
 	/**
 	* @param strFilename Name of the imported file.
-	* @param cdDir Flag to decide if the OLDDIR or new import directory is used.
+	* @param newDir Flag to decide if the OLDDIR or new import directory is used.
 	* @return OriginalFirstThunk value of an imported file.
 	**/
 	inline
@@ -1289,7 +1101,7 @@ namespace PeLib
 
 	/**
 	* @param strFilename Name of the imported file.
-	* @param cdDir Flag to decide if the OLDDIR or new import directory is used.
+	* @param newDir Flag to decide if the OLDDIR or new import directory is used.
 	* @return ForwarderChain value of an imported file.
 	**/
 	inline
@@ -1300,7 +1112,7 @@ namespace PeLib
 
 	/**
 	* @param strFilename Name of the imported file.
-	* @param cdDir Flag to decide if the OLDDIR or new import directory is used.
+	* @param newDir Flag to decide if the OLDDIR or new import directory is used.
 	* @return TimeDateStamp value of an imported file.
 	**/
 	inline
@@ -1317,7 +1129,7 @@ namespace PeLib
 
 	/**
 	* @param dwFilenr Name of the imported file.
-	* @param cdDir Flag to decide if the OLDDIR or new import directory is used.
+	* @param newDir Flag to decide if the OLDDIR or new import directory is used.
 	* @return FirstThunk value of an imported file.
 	**/
 	inline
@@ -1334,7 +1146,7 @@ namespace PeLib
 
 	/**
 	* @param dwFilenr Name of the imported file.
-	* @param cdDir Flag to decide if the OLDDIR or new import directory is used.
+	* @param newDir Flag to decide if the OLDDIR or new import directory is used.
 	* @return OriginalFirstThunk value of an imported file.
 	**/
 	inline
@@ -1351,7 +1163,7 @@ namespace PeLib
 
 	/**
 	* @param dwFilenr Name of the imported file.
-	* @param cdDir Flag to decide if the OLDDIR or new import directory is used.
+	* @param newDir Flag to decide if the OLDDIR or new import directory is used.
 	* @return ForwarderChain value of an imported file.
 	**/
 
@@ -1369,7 +1181,7 @@ namespace PeLib
 
 	/**
 	* @param dwFilenr Name of the imported file.
-	* @param cdDir Flag to decide if the OLDDIR or new import directory is used.
+	* @param newDir Flag to decide if the OLDDIR or new import directory is used.
 	* @return TimeDateStamp value of an imported file.
 	**/
 	inline
@@ -1399,25 +1211,25 @@ namespace PeLib
 	/**
 	* @param dwFilenr ID of the imported file.
 	* @param dwFuncnr ID of the imported function.
-	* @param cdDir Flag to decide if the OLDDIR or new import directory is used.
+	* @param newDir Flag to decide if the OLDDIR or new import directory is used.
 	* @return FirstThunk value of an imported function.
 	**/
 	inline
 	std::uint32_t ImportDirectory::getFirstThunk(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, bool newDir) const
 	{
-		return getImportList(newDir)[dwFilenr].firstthunk[dwFuncnr].itd.Ordinal;
+		return getImportList(newDir)[dwFilenr].thunk_data[dwFuncnr].itd.Ordinal;
 	}
 
 	inline
 	void ImportDirectory::setFirstThunk(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, bool newDir, std::uint32_t value)
 	{
-		getImportList(newDir)[dwFilenr].firstthunk[dwFuncnr].itd.Ordinal = value;
+		getImportList(newDir)[dwFilenr].thunk_data[dwFuncnr].itd.Ordinal = value;
 	}
 
 	/**
 	* @param dwFilenr ID of the imported file.
 	* @param dwFuncnr ID of the imported function.
-	* @param cdDir Flag to decide if the OLDDIR or new import directory is used.
+	* @param newDir Flag to decide if the OLDDIR or new import directory is used.
 	* @return OriginalFirstThunk value of an imported function.
 	**/
 	inline
