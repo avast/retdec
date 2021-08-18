@@ -709,7 +709,6 @@ namespace PeLib
 			for(uiIndex = 0;; uiIndex++)
 			{
 				PELIB_THUNK_DATA thunkData;
-				bool thunkReadFailed = false;
 
 				// Read single value (32-bit or 64-bit) from the thunk chain
 				if(!imageLoader.readPointer(originalThunk, thunkData.itd.Ordinal))
@@ -740,7 +739,6 @@ namespace PeLib
 						if(imageLoader.readImage(&thunkData.hint, thunkData.itd.Ordinal, sizeof(std::uint16_t)) != sizeof(std::uint16_t))
 						{
 							setLoaderError(LDR_ERROR_IMPDIR_THUNK_RVA_INVALID);
-							thunkReadFailed = true;
 							thunkData.hint = 0;
 						}
 
@@ -761,7 +759,6 @@ namespace PeLib
 					else
 					{
 						setLoaderError(LDR_ERROR_IMPDIR_NAME_RVA_INVALID);
-						thunkReadFailed = true;
 					}
 				}
 				else
@@ -778,15 +775,12 @@ namespace PeLib
 					}
 					else
 					{
-						setLoaderError(LDR_ERROR_IMPDIR_NAME_RVA_INVALID);
+						setLoaderError(LDR_ERROR_IMPDIR_THUNK_RVA_INVALID);
 					}
 				}
 
 				// Insert the thunk into the import descriptor
-				if(thunkReadFailed == false)
-				{
-					vOldIidCurr[i].thunk_data.push_back(thunkData);
-				}
+				vOldIidCurr[i].thunk_data.push_back(thunkData);
 				
 				// Increment both pointers
 				originalThunk += imageLoader.getPointerSize();
