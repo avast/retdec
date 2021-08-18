@@ -758,7 +758,7 @@ namespace PeLib
 					}
 					else
 					{
-						setLoaderError(LDR_ERROR_IMPDIR_NAME_RVA_INVALID);
+						setLoaderError(LDR_ERROR_IMPDIR_THUNK_RVA_INVALID);
 					}
 				}
 				else
