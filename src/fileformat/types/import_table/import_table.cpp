@@ -241,7 +241,7 @@ void ImportTable::computeHashes()
 			unsigned long long ord;
 			if(import->getOrdinalNumber(ord))
 			{
-				funcName = toLower(retdec::utils::ordLookUp(libName, ord));
+				funcName = toLower(retdec::utils::ordLookUp(libName, ord, true));
 			}
 		}
 

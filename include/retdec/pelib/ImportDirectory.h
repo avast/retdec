@@ -752,7 +752,7 @@ namespace PeLib
 					// Sample: 7CE5BB5CA99B3570514AF03782545D41213A77A0F93D4AAC8269823A8D3A58EF
 					if((ordinal >> 0x10) == 0)
 					{
-						thunkData.fname = retdec::utils::ordLookUp(vOldIidCurr[i].name, ordinal);
+						thunkData.fname = retdec::utils::ordLookUp(vOldIidCurr[i].name, ordinal, false);
 						thunkData.hint = 0;
 					}
 					else

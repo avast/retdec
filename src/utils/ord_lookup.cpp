@@ -544,7 +544,7 @@ std::map<std::size_t, std::string> oleaut32Map =
  * @param ordNum ordinal number
  * @return new string name
  */
-std::string ordLookUp(const std::string& libName, const std::size_t& ordNum)
+std::string ordLookUp(const std::string& libName, const std::size_t& ordNum, bool forceNameFromOrdinal)
 {
 	std::string res;
 
@@ -557,7 +557,9 @@ std::string ordLookUp(const std::string& libName, const std::size_t& ordNum)
 		res = mapGetValueOrDefault(oleaut32Map, ordNum);
 	}
 
-	return res.empty() ? "ord" + std::to_string(ordNum) : res;
+	if(res.empty() && forceNameFromOrdinal)
+		res = "ord" + std::to_string(ordNum);
+	return res;
 }
 
 } // namespace utils

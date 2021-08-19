@@ -10,7 +10,7 @@
 namespace retdec {
 namespace utils {
 
-std::string ordLookUp(const std::string& libName, const std::size_t& ordNum);
+std::string ordLookUp(const std::string& libName, const std::size_t& ordNum, bool forceNameFromOrdinal);
 
 } // namespace utils
 } // namespace retdec
