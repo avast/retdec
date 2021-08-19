@@ -131,7 +131,7 @@ namespace PeLib
 		  /// Get the number of functions which are imported by a specific file.
 		  std::uint32_t getNumberOfFunctions(std::size_t dwFilenr, bool newDir) const; // EXPORT
 		  /// Get information about n-th imported function
-		  bool getImportedFunction(std::size_t dwFilenr, std::size_t dwFuncnr, std::string & importName, std::uint16_t & importHint, std::uint32_t & importOrdinal, std::uint32_t & patchRva, bool newDir) const;
+		  bool getImportedFunction(std::size_t dwFilenr, std::size_t dwFuncnr, std::string & importName, std::uint16_t & importHint, std::uint32_t & importOrdinal, std::uint32_t & patchRva, bool & isImportByOrdinal, bool newDir) const;
 
 		  /// Get the hint of an imported function.
 		  std::uint16_t getFunctionHint(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, bool newDir) const; // EXPORT
@@ -243,7 +243,7 @@ namespace PeLib
 		PELIB_IMAGE_IMPORT_DIRECTORY iid;
 		PELIB_THUNK_DATA td;
 		td.hint = wHint;
-		td.itd.Ordinal = wHint /* | PELIB_IMAGE_ORDINAL_FLAGS::PELIB_IMAGE_ORDINAL_FLAG */;
+		td.itd.Ordinal = wHint | m_ordinalMask;
 		iid.name = strFilename;
 		if (FileIter == m_vNewiid.end())
 		{
@@ -448,6 +448,7 @@ namespace PeLib
 	* @param importName If this is import by name, this string is filled by the import name
 	* @param importHint If this is import by name, this 16-bit integer will be filled by the import hint
 	* @param importOrdinal If this is import by orginal, this 32-bit integer will be filled by the ordinal of the function
+	* @param isImportByOrdinal Set to true if this is import by ordinal
 	* @return true = the indexes are in range, so an import was returned
 	**/
 	inline
@@ -458,6 +459,7 @@ namespace PeLib
 		std::uint16_t& importHint,
 		std::uint32_t& importOrdinal,
 		std::uint32_t& patchRva,
+		bool& isImportByOrdinal,
 		bool newDir) const
 	{
 		auto& il = getImportList(newDir);
@@ -471,11 +473,13 @@ namespace PeLib
 				if(il[dwFilenr].thunk_data[dwFuncnr].itd.Ordinal & m_ordinalMask)
 				{
 					importOrdinal = il[dwFilenr].thunk_data[dwFuncnr].itd.Ordinal & ~m_ordinalMask;
+					isImportByOrdinal = true;
 					importHint = 0;
 				}
 				else
 				{
 					importHint = il[dwFilenr].thunk_data[dwFuncnr].hint;
+					isImportByOrdinal = false;
 					importOrdinal = 0;
 				}
 
@@ -522,28 +526,6 @@ namespace PeLib
 			il[dwFilenr].thunk_data[dwFuncnr].hint = value;
 		}
 	}
-	/*
-	inline bool isInvalidOrdinal(std::uint64_t ordinal, std::uint64_t ordinalMask, std::uint64_t sizeOfImage)
-	{
-		// Check for invalid name
-		if((ordinal & ordinalMask) == 0)
-		{
-			// Any name RVA that goes out of image is considered invalid
-			if(ordinal >= sizeOfImage)
-			{
-				return true;
-			}
-		}
-		else
-		{
-			// Mask out the ordinal bit. Then, any ordinal must not be larger than 0xFFFF
-			ordinal = ordinal & ~ordinalMask;
-			return (ordinal >> 0x10) != 0;
-		}
-
-		return false;
-	}
-	*/
 
 	/**
 	* Updates pointer size for import directory

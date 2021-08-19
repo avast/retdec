@@ -336,20 +336,20 @@ class PeFormatParser
 		std::uint32_t ordinalNumber = 0;
 		std::uint32_t patchRva = 0;
 		std::uint16_t importHint = 0;
+		bool isImportByOrdinal = false;
 
-		if(peImports.getImportedFunction(fileIndex, importIndex, importName, importHint, ordinalNumber, patchRva, false))
+		if(peImports.getImportedFunction(fileIndex, importIndex, importName, importHint, ordinalNumber, patchRva, isImportByOrdinal, false))
 		{
 			auto import = std::make_unique<PeImport>(PeImportFlag::None);
 
-			if(importName.length())
-			{
-				import->invalidateOrdinalNumber();
-				import->setName(importName);
-			}
-			else
+			if(isImportByOrdinal)
 			{
 				import->setOrdinalNumber(ordinalNumber);
 			}
+
+			// Note: Even when the function is imported by ordinal, there can be name
+			// Example: WS2_32.dll!@115 -> WSAStartup
+			import->setName(importName);
 
 			import->setLibraryIndex(fileIndex);
 			import->setAddress(imageBase + patchRva);
