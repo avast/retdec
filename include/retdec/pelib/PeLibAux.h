@@ -156,6 +156,8 @@ namespace PeLib
 	const std::uint32_t PE_MAX_SECTION_COUNT_XP = 96;
 	const std::uint32_t PE_MAX_SECTION_COUNT_7 = 192;
 
+	const std::uint32_t PELIB_IMAGE_DEBUG_INFO_CODEVIEW = 2;
+
 	const std::uint32_t PELIB_SECTOR_SIZE = 0x200;
 
 	const std::uint32_t PELIB_IMAGE_NUMBEROF_DIRECTORY_ENTRIES = 16;
