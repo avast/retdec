@@ -81,7 +81,7 @@ namespace PeLib
 		for (std::size_t i = 0; i < entryCount; i++)
 		{
 			bytesRead = imageLoader.readImage(&iddCurr.idd, rva, sizeof(PELIB_IMAGE_DEBUG_DIRECTORY));
-			if(bytesRead != sizeof(PELIB_IMAGE_DEBUG_DIRECTORY))
+			if(bytesRead != sizeof(PELIB_IMAGE_DEBUG_DIRECTORY) || iddCurr.idd.Type != PELIB_IMAGE_DEBUG_INFO_CODEVIEW)
 				break;
 
 			debugInfo.push_back(iddCurr);
