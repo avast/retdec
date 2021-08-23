@@ -542,6 +542,7 @@ std::map<std::size_t, std::string> oleaut32Map =
  * Lookup import name for given library name and ordinal number
  * @param libName library name
  * @param ordNum ordinal number
+ * @param forceNameFromOrdinal
  * @return new string name
  */
 std::string ordLookUp(const std::string& libName, const std::size_t& ordNum, bool forceNameFromOrdinal)

@@ -444,11 +444,13 @@ namespace PeLib
 	/**
 	* Retrieves the n-th import function from the m-th import directory
 	* @param dwFilenr Zero-based index of the imported module
-	* @param dwFilenr Zero-based index of the imported function in the module above
+	* @param dwFuncnr Zero-based index of the imported function in the module above
 	* @param importName If this is import by name, this string is filled by the import name
 	* @param importHint If this is import by name, this 16-bit integer will be filled by the import hint
 	* @param importOrdinal If this is import by orginal, this 32-bit integer will be filled by the ordinal of the function
+	* @param patchRva RVA of the patched address
 	* @param isImportByOrdinal Set to true if this is import by ordinal
+	* @param newDir Flag to decide if the OLDDIR or new import directory is used.
 	* @return true = the indexes are in range, so an import was returned
 	**/
 	inline
@@ -763,7 +765,7 @@ namespace PeLib
 
 				// Insert the thunk into the import descriptor
 				vOldIidCurr[i].thunk_data.push_back(thunkData);
-				
+
 				// Increment both pointers
 				originalThunk += imageLoader.getPointerSize();
 				firstThunk += imageLoader.getPointerSize();
