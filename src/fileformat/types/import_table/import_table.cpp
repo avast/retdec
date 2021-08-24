@@ -253,9 +253,11 @@ void ImportTable::computeHashes()
 			libName.erase(libName.length() - 4, 4);
 		}
 
+		// Issue 460: Do not generate import name hash if there is an imported name that is either empty or invalid
+		// https://github.com/avast/retdec/issues/460
 		if(libName.empty() || funcName.empty())
 		{
-			continue;
+			break;
 		}
 
 		// Yara adds comma if there are multiple imports
