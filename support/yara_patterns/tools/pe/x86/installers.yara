@@ -3566,3 +3566,20 @@ rule xt_app_launcher
 		pe.overlay.size != 0 and
 		any of them
 }
+
+rule inno_610
+{
+         meta:
+                tool = "I"
+                name = "Inno Setup"
+                version = "6.1.0"
+                author = "Thomas Roccia"
+                pattern = "entry-point: 55 8B EC 83 C4 A4 53 56 57 33 C0 89 45 C4 89 45 C0 89 45 A4 89 45 D0 89 45 C8 89 45 CC 89 45 D4 89 "
+         strings:
+                $s1 = { 55 8B EC 83 C4 A4 53 56 57 33 C0 89 45 C4 89 45 C0 89 45 A4 89 45 D0 89 45 C8 89 45 CC 89 45 D4 89 }
+                $s2 = "Inno Setup Setup Data (6.1.0) (u)" fullword wide ascii
+                $s3 =  "Inno Setup Messages (6.0.0) (u)" fullword wide ascii
+         condition:
+                $s1 at pe.entry_point and
+                all of ($s*)
+}

@@ -40,7 +40,8 @@ namespace PeLib
 		ERROR_ENTRY_NOT_FOUND = -7,
 		ERROR_DUPLICATE_ENTRY = -8,
 		ERROR_DIRECTORY_DOES_NOT_EXIST = -9,
-		ERROR_COFF_SYMBOL_TABLE_DOES_NOT_EXIST = -10
+		ERROR_COFF_SYMBOL_TABLE_DOES_NOT_EXIST = -10,
+		ERROR_SKIP_RESOURCE = -11
 	};
 
 	enum LoaderError
@@ -154,6 +155,8 @@ namespace PeLib
 	const std::uint32_t PELIB_MAX_EXPORTED_FUNCTIONS = 0x1000;          // Maximum number of exported functions that we support
 	const std::uint32_t PE_MAX_SECTION_COUNT_XP = 96;
 	const std::uint32_t PE_MAX_SECTION_COUNT_7 = 192;
+
+	const std::uint32_t PELIB_IMAGE_DEBUG_INFO_CODEVIEW = 2;
 
 	const std::uint32_t PELIB_SECTOR_SIZE = 0x200;
 

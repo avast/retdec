@@ -1842,17 +1842,27 @@ void PeFormat::loadDotnetHeaders()
 {
 	std::uint64_t metadataHeaderAddress = 0;
 
-	// If our file contains CLR header, then use it
+	// If our file contains CLR header, then use it. Note that .NET framework doesn't
+	// verify the OPTIONAL_HEADER::NumberOfRvaAndSizes, so we must do it the same way.
 	std::uint64_t comHeaderAddress, comHeaderSize;
-	if(getDataDirectoryRelative(PELIB_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR, comHeaderAddress, comHeaderSize) && comHeaderSize)
+	if(getComDirectoryRelative(comHeaderAddress, comHeaderSize) && comHeaderSize)
 	{
 		clrHeader = formatParser->getClrHeader();
 		metadataHeaderAddress = formatParser->getImageBaseAddress() + clrHeader->getMetadataDirectoryAddress();
 	}
-	// If not, then try to guess whether the file could possibly be .NET file based on imports and try to search for metadata header
 	else
 	{
-		if (importTable && importTable->getNumberOfImportsInLibraryCaseInsensitive("mscoree.dll"))
+		return;
+	}
+
+	// If not, then try to guess whether the file could possibly be .NET file based on imports and try to search for metadata header
+	// LZ: Don't. This will lead to the situation when totally unrelated .NET metadata will be read from the binary,
+	// for example from a binary embedded in resources or in overlay.
+	// Sample: 76360c777ac93d7fc7398b5d140c4117eb08501cac30d170f33ab260e1788e74
+	/*
+	else
+	{
+		if (importTable && importTable->getImport("mscoree.dll"))
 		{
 			metadataHeaderAddress = detectPossibleMetadataHeaderAddress();
 			if (metadataHeaderAddress == 0)
@@ -1863,6 +1873,7 @@ void PeFormat::loadDotnetHeaders()
 			return;
 		}
 	}
+	*/
 
 	// This explicit initialization needs to be here, because clang 4.0 has bug in optimizer and it causes problem in valgrind.
 	std::uint64_t signature = 0;
@@ -2434,6 +2445,14 @@ void PeFormat::detectTypeLibId()
 	for (std::size_t i = 1; i <= customAttributeTable->getNumberOfRows(); ++i)
 	{
 		auto customAttributeRow = customAttributeTable->getRow(i);
+
+		// Check that the parent is index into Assembly table
+		MetadataTableType parent_table;
+		if (customAttributeRow->parent.getTable(parent_table) && parent_table != MetadataTableType::Assembly)
+		{
+			continue;
+		}
+
 		if (customAttributeRow->type.getIndex() == guidMemberRef)
 		{
 			// Its value is the TypeLib we are looking for
@@ -2763,14 +2782,9 @@ bool PeFormat::hasMixedEndianForDouble() const
  */
 std::size_t PeFormat::getDeclaredFileLength() const
 {
-	std::size_t declSize = FileFormat::getDeclaredFileLength();
-	if(getNumberOfCoffSymbols() && getCoffSymbolTableOffset())
-	{
-		const std::size_t symTabMaxOffset = getCoffSymbolTableOffset() + (getNumberOfCoffSymbols() * PELIB_IMAGE_SIZEOF_COFF_SYMBOL);
-		declSize = std::max(declSize, symTabMaxOffset);
-	}
-
-	return declSize + getSizeOfStringTable();
+	// LZ: Do not include COFF symbol table in the declared file length;
+	// This is because other PE tools (for example YARA) don't do that either.
+	return FileFormat::getDeclaredFileLength();
 }
 
 bool PeFormat::areSectionsValid() const
@@ -3299,6 +3313,19 @@ bool PeFormat::getDataDirectoryRelative(std::uint64_t index, std::uint64_t &relA
 bool PeFormat::getDataDirectoryAbsolute(std::uint64_t index, std::uint64_t &absAddr, std::uint64_t &size) const
 {
 	return formatParser->getDataDirectoryAbsolute(index, absAddr, size);
+}
+
+/**
+* Special for .NET data directory to correctly process data directory on 32-bit binaries
+* @param relAddr Into this parameter is stored relative virtual address of directory
+* @param size Into this parameter is stored size of directory
+* @return @c true if index of selected directory is valid, @c false otherwise
+*
+* If method returns @c false, @a relAddr and @a size are left unchanged.
+*/
+bool PeFormat::getComDirectoryRelative(std::uint64_t &relAddr, std::uint64_t &size) const
+{
+	return formatParser->getComDirectoryRelative(relAddr, size);
 }
 
 /**
