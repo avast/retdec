@@ -21,6 +21,7 @@
 * Enhancement: Added support for new ELF UPX unpacking stubs (versions 3.93 - 3.96) ([#929](https://github.com/avast/retdec/pull/929)).
 * Enhancement: Improved YARA rules for detection of the SHA-512 algorithm ([#935](https://github.com/avast/retdec/pull/935)).
 * Enhancement: Improved PE Authenticode parsing ([#902](https://github.com/avast/retdec/pull/902), [#380](https://github.com/avast/retdec/issues/380)).
+* Fix: Fix PE imports parsing issues ([#1003](https://github.com/avast/retdec/pull/1003), [regression tests #107](https://github.com/avast/retdec-regression-tests/pull/107)).
 * Fix: Accept PDB info only if `IMAGE_DEBUG_TYPE_CODEVIEW` flag is set ([#1004](https://github.com/avast/retdec/pull/1004)).
 * Fix: Prevent PE delayed import parser to load garbage data ([#981](https://github.com/avast/retdec/pull/981)).
 * Fix: Don't detect .NET structures that do not belong to the binary itself, but to the embedded binary ([#967](https://github.com/avast/retdec/issues/967), [#970](https://github.com/avast/retdec/pull/970), [regression tests #90](https://github.com/avast/retdec-regression-tests/pull/90)).
