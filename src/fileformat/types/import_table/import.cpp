@@ -22,7 +22,7 @@ std::string Import::getName() const
  * Get index of library from which is import
  * @return Index of library from which is import
  */
-unsigned long long Import::getLibraryIndex() const
+std::uint64_t Import::getLibraryIndex() const
 {
 	return libraryIndex;
 }
@@ -31,7 +31,7 @@ unsigned long long Import::getLibraryIndex() const
  * Get address of import
  * @return Address of import
  */
-unsigned long long Import::getAddress() const
+std::uint64_t Import::getAddress() const
 {
 	return address;
 }
@@ -43,7 +43,7 @@ unsigned long long Import::getAddress() const
  *
  * If method returns @c false, @a importOrdinalNumber is left unchanged
  */
-bool Import::getOrdinalNumber(unsigned long long &importOrdinalNumber) const
+bool Import::getOrdinalNumber(std::uint64_t &importOrdinalNumber) const
 {
 	if(ordinalNumberIsValid)
 	{
@@ -107,7 +107,7 @@ void Import::setName(std::string importName)
  * Set library index
  * @param importLibraryIndex Index of library from which is import
  */
-void Import::setLibraryIndex(unsigned long long importLibraryIndex)
+void Import::setLibraryIndex(std::uint64_t importLibraryIndex)
 {
 	libraryIndex = importLibraryIndex;
 }
@@ -116,7 +116,7 @@ void Import::setLibraryIndex(unsigned long long importLibraryIndex)
  * Set address of import
  * @param importAddress Address of import
  */
-void Import::setAddress(unsigned long long importAddress)
+void Import::setAddress(std::uint64_t importAddress)
 {
 	address = importAddress;
 }
@@ -125,7 +125,7 @@ void Import::setAddress(unsigned long long importAddress)
  * Set ordinal number of import
  * @param importOrdinalNumber Ordinal number of import
  */
-void Import::setOrdinalNumber(unsigned long long importOrdinalNumber)
+void Import::setOrdinalNumber(std::uint64_t importOrdinalNumber)
 {
 	ordinalNumber = importOrdinalNumber;
 	ordinalNumberIsValid = true;

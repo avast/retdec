@@ -313,13 +313,13 @@ class ImageLoader
 		return securityDirFileOffset;
 	}
 
-	std::uint32_t getDataDirRva(std::size_t dataDirIndex) const
+	std::uint32_t getDataDirRva(std::uint64_t dataDirIndex) const
 	{
 		// The data directory must be present there
 		return (optionalHeader.NumberOfRvaAndSizes > dataDirIndex) ? optionalHeader.DataDirectory[dataDirIndex].VirtualAddress : 0;
 	}
 
-	std::uint32_t getDataDirSize(std::size_t dataDirIndex) const
+	std::uint32_t getDataDirSize(std::uint64_t dataDirIndex) const
 	{
 		// The data directory must be present there
 		return (optionalHeader.NumberOfRvaAndSizes > dataDirIndex) ? optionalHeader.DataDirectory[dataDirIndex].Size : 0;

@@ -181,14 +181,14 @@ class PeFormat : public FileFormat
 
 		bool isDotNet() const;
 		bool isPackedDotNet() const;
-		bool isVisualBasic(unsigned long long &version) const;
-		bool getDllFlags(unsigned long long &dllFlags) const;
-		bool getNumberOfBaseRelocationBlocks(unsigned long long &relocs) const;
-		bool getNumberOfRelocations(unsigned long long &relocs) const;
-		bool getDataDirectoryRelative(unsigned long long index, unsigned long long &relAddr, unsigned long long &size) const;
-		bool getDataDirectoryAbsolute(unsigned long long index, unsigned long long &absAddr, unsigned long long &size) const;
+		bool isVisualBasic(std::uint64_t &version) const;
+		bool getDllFlags(std::uint64_t &dllFlags) const;
+		bool getNumberOfBaseRelocationBlocks(std::uint64_t &relocs) const;
+		bool getNumberOfRelocations(std::uint64_t &relocs) const;
+		bool getDataDirectoryRelative(std::uint64_t index, std::uint64_t &relAddr, std::uint64_t &size) const;
+		bool getDataDirectoryAbsolute(std::uint64_t index, std::uint64_t &absAddr, std::uint64_t &size) const;
 		const PeCoffSection* getPeSection(const std::string &secName) const;
-		const PeCoffSection* getPeSection(unsigned long long secIndex) const;
+		const PeCoffSection* getPeSection(std::uint64_t secIndex) const;
 		const CLRHeader* getCLRHeader() const;
 		const MetadataHeader* getMetadataHeader() const;
 		const MetadataStream* getMetadataStream() const;

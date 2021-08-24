@@ -274,7 +274,7 @@ class PeFormatParser
 		return true;
 	}
 
-	bool getDllFlags(unsigned long long & dllFlags) const
+	bool getDllFlags(std::uint64_t &dllFlags) const
 	{
 		if(peFile->imageLoader().getCharacteristics() & PeLib::PELIB_IMAGE_FILE_DLL)
 		{
@@ -285,14 +285,14 @@ class PeFormatParser
 		return false;
 	}
 
-	bool getDataDirectoryRelative(unsigned long long index, unsigned long long &relAddr, unsigned long long &size) const
+	bool getDataDirectoryRelative(std::uint64_t index, std::uint64_t &relAddr, std::uint64_t &size) const
 	{
 		relAddr = peFile->imageLoader().getDataDirRva(index);
 		size = peFile->imageLoader().getDataDirSize(index);
 		return (relAddr != 0);
 	}
 
-	bool getDataDirectoryAbsolute(unsigned long long index, unsigned long long &absAddr, unsigned long long &size) const
+	bool getDataDirectoryAbsolute(std::uint64_t index, std::uint64_t &absAddr, std::uint64_t &size) const
 	{
 		if(getDataDirectoryRelative(index, absAddr, size))
 		{

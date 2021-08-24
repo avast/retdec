@@ -137,7 +137,7 @@ common::Pattern saveCryptoRule(
 			patMatch.setEntrySize(entrySizeValue / file->getByteLength());
 		}
 		patMatch.setOffset(match->getOffset());
-		unsigned long long val = 0;
+		std::uint64_t val = 0;
 		if(file->getAddressFromOffset(val, match->getOffset()))
 		{
 			patMatch.setAddress(val);

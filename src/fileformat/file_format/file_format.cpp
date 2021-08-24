@@ -1133,7 +1133,7 @@ std::size_t FileFormat::bytesFromNibblesRounded(std::size_t nibbles) const
  *
  * If method returns @c false, @a result is left unchanged
  */
-bool FileFormat::getOffsetFromAddress(unsigned long long &result, unsigned long long address) const
+bool FileFormat::getOffsetFromAddress(std::uint64_t &result, std::uint64_t address) const
 {
 	const auto *secSeg = getSectionOrSegmentFromAddress(address);
 	if(!secSeg)
@@ -1159,7 +1159,7 @@ bool FileFormat::getOffsetFromAddress(unsigned long long &result, unsigned long 
  *
  * If method returns @c false, @a result is left unchanged
  */
-bool FileFormat::getAddressFromOffset(unsigned long long &result, unsigned long long offset) const
+bool FileFormat::getAddressFromOffset(std::uint64_t &result, std::uint64_t offset) const
 {
 	const auto *secSeg = getSectionOrSegmentFromOffset(offset);
 	if(!secSeg)

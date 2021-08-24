@@ -330,7 +330,7 @@ void PeHeuristics::getVisualBasicHeuristics()
 	auto source = DetectionMethod::LINKED_LIBRARIES_H;
 	auto strength = DetectionStrength::HIGH;
 
-	unsigned long long version = 0;
+	std::uint64_t version = 0;
 	if (peParser.isVisualBasic(version))
 	{
 		addCompiler(source, strength, "Visual Basic", std::to_string(version));
@@ -483,7 +483,7 @@ void PeHeuristics::getMorphineHeuristics()
 			&& sections[2]->getName() == ".idata"
 			&& sections[2]->getSizeInFile() == 0x200)
 	{
-		unsigned long long rva, size;
+		std::uint64_t rva, size;
 		if (peParser.getDataDirectoryRelative(1, rva, size) && size == 0x1000)
 		{
 			addPacker(source, strength, "Morphine", "1.2");
@@ -813,7 +813,7 @@ void PeHeuristics::getPetiteHeuristics()
  */
 void PeHeuristics::getPelockHeuristics()
 {
-	unsigned long long rva, size;
+	std::uint64_t rva, size;
 	if (peParser.getDataDirectoryRelative(1, rva, size)
 			&& size == 0x5C
 			&& peParser.getDataDirectoryRelative(15, rva, size)
