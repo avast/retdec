@@ -18,19 +18,19 @@
 
 #include "retdec/pelib/PeLibAux.h"
 #include "retdec/pelib/ImageLoader.h"
+#include "retdec/pelib/ImageLoader.h"
+#include "retdec/utils/ord_lookup.h"
+#include "retdec/utils/string.h"
 
 namespace PeLib
 {
-	/// Parameter for functions that can operate on the OLDDIR or new import directory.
-	enum currdir {OLDDIR = 1, NEWDIR};
-
 	class PeLibException;
 
 	/// Class that handles import directories.
 	/**
 	* This class can read import directories from existing PE files or start completely from scratch.
 	* Modifying import directories and writing them to files is also possible.
-	* It's worthy to note that many functions require an extra parameter of type currdir
+	* It's worthy to note that many functions require an extra parameter of type newDir
 	* because the structure of import directories make it necessary that the OLDDIR import directory
 	* must be preserved. That's why some functions (like adding and removing) imported functions
 	* only exist for the new import directory, not for the one which is already written to the file.
@@ -78,11 +78,11 @@ namespace PeLib
 					if (FileIter != EndIter)
 					{
 						auto Iter = std::find_if(
-								FileIter->originalfirstthunk.begin(),
-								FileIter->originalfirstthunk.end(),
+								FileIter->thunk_data.begin(),
+								FileIter->thunk_data.end(),
 								std::bind(comp, std::placeholders::_1, value)
 						);
-						if (Iter != FileIter->originalfirstthunk.end())
+						if (Iter != FileIter->thunk_data.end())
 						{
 							return true;
 						}
@@ -113,29 +113,32 @@ namespace PeLib
 		  int addFunction(const std::string& strFilename, const std::string& strFuncname); // EXPORT _byName
 
 		  /// Get the ID of a file through it's name.
-		  unsigned int getFileIndex(const std::string& strFilename, currdir cdDir) const; // EXPORT
+		  unsigned int getFileIndex(const std::string& strFilename, bool newDir) const; // EXPORT
 		  /// Get the ID of a function through it's name.
-		  unsigned int getFunctionIndex(const std::string& strFilename, const std::string& strFuncname, currdir cdDir) const; // EXPORT
+		  unsigned int getFunctionIndex(const std::string& strFilename, const std::string& strFuncname, bool newDir) const; // EXPORT
 
 		  /// Get the name of an imported file.
-		  std::string getFileName(std::uint32_t dwFilenr, currdir cdDir) const; // EXPORT
+		  std::string getFileName(std::uint32_t dwFilenr, bool newDir) const; // EXPORT
 
-		  void setFileName(std::uint32_t filenr, currdir cdDir, const std::string& name); // EXPORT
+		  void setFileName(std::uint32_t filenr, bool newDir, const std::string& name); // EXPORT
 
 		  /// Retrieve the loader error
 		  LoaderError loaderError() const;
 		  void setLoaderError(LoaderError ldrError);
 
-		  /// Get the hint of an imported function.
-		  std::uint16_t getFunctionHint(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, currdir cdDir) const; // EXPORT
-		  void setFunctionHint(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, currdir cdDir, std::uint16_t value); // EXPORT
-		  /// Get the name of an imported function.
-		  std::string getFunctionName(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, currdir cdDir) const; // EXPORT
-		  void setFunctionName(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, currdir cdDir, const std::string& functionName); // EXPORT
 		  /// Get the number of files which are imported.
-		  std::uint32_t getNumberOfFiles(currdir cdDir) const; // EXPORT
-		  /// Get the number of fucntions which are imported by a specific file.
-		  std::uint32_t getNumberOfFunctions(std::uint32_t dwFilenr, currdir cdDir) const; // EXPORT
+		  std::uint32_t getNumberOfFiles(bool newDir) const; // EXPORT
+		  /// Get the number of functions which are imported by a specific file.
+		  std::uint32_t getNumberOfFunctions(std::size_t dwFilenr, bool newDir) const; // EXPORT
+		  /// Get information about n-th imported function
+		  bool getImportedFunction(std::size_t dwFilenr, std::size_t dwFuncnr, std::string & importName, std::uint16_t & importHint, std::uint32_t & importOrdinal, std::uint32_t & patchRva, bool & isImportByOrdinal, bool newDir) const;
+
+		  /// Get the hint of an imported function.
+		  std::uint16_t getFunctionHint(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, bool newDir) const; // EXPORT
+		  void setFunctionHint(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, bool newDir, std::uint16_t value); // EXPORT
+		  /// Get the name of an imported function.
+		  std::string getFunctionName(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, bool newDir) const; // EXPORT
+		  void setFunctionName(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, bool newDir, const std::string& functionName); // EXPORT
 		  /// Read a file's import directory.
 		  int read(ImageLoader & imageLoader); // EXPORT
 		  /// Writes pointer to the buffer (32-bit or 64-bit)
@@ -156,43 +159,48 @@ namespace PeLib
 		  void setPointerSize(std::uint32_t pointerSize);
 
 		  /// Returns the FirstThunk value of a function.
-		  std::uint32_t getFirstThunk(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, currdir cdDir) const; // EXPORT _byNumber
-		  void setFirstThunk(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, currdir cdDir, std::uint32_t value); // EXPORT _byNumber
+		  std::uint32_t getFirstThunk(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, bool newDir) const; // EXPORT _byNumber
+		  void setFirstThunk(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, bool newDir, std::uint32_t value); // EXPORT _byNumber
 		  /// Returns the OriginalFirstThunk value of a function.
-		  std::uint32_t getOriginalFirstThunk(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, currdir cdDir) const; // EXPORT _byNumber
-		  void setOriginalFirstThunk(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, currdir cdDir, std::uint32_t value); // EXPORT
+		  std::uint32_t getOriginalFirstThunk(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, bool newDir) const; // EXPORT _byNumber
+		  void setOriginalFirstThunk(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, bool newDir, std::uint32_t value); // EXPORT
 
-//		  std::uint64_t getFirstThunk(const std::string& strFilename, const std::string& strFuncname, currdir cdDir) const throw (PeLibException);
-//		  std::uint64_t getOriginalFirstThunk(const std::string& strFilename, const std::string& strFuncname, currdir cdDir) const throw (PeLibException);
-
-		  /// Returns the FirstThunk value of a file.
-		  std::uint32_t getFirstThunk(const std::string& strFilename, currdir cdDir) const; // EXPORT _byName
-		  /// Returns the OriginalFirstThunk value of a file.
-		  std::uint32_t getOriginalFirstThunk(const std::string& strFilename, currdir cdDir) const; // EXPORT _byName
-		  /// Returns the ForwarderChain value of a file.
-		  std::uint32_t getForwarderChain(const std::string& strFilename, currdir cdDir) const; // EXPORT _byName
-		  std::uint32_t getRvaOfName(const std::string& strFilename, currdir cdDir) const; // EXPORT _byName
-		  /// Returns the TimeDateStamp value of a file.
-		  std::uint32_t getTimeDateStamp(const std::string& strFilename, currdir cdDir) const; // EXPORT _byName
+//		  std::uint64_t getFirstThunk(const std::string& strFilename, const std::string& strFuncname, bool newDir) const throw (PeLibException);
+//		  std::uint64_t getOriginalFirstThunk(const std::string& strFilename, const std::string& strFuncname, bool newDir) const throw (PeLibException);
 
 		  /// Returns the FirstThunk value of a file.
-		  std::uint32_t getFirstThunk(std::uint32_t dwFilenr, currdir cdDir) const; // EXPORT
-		  void setFirstThunk(std::uint32_t dwFilenr, currdir cdDir, std::uint32_t value); // EXPORT _byNumber_function
+		  std::uint32_t getFirstThunk(const std::string& strFilename, bool newDir) const; // EXPORT _byName
 		  /// Returns the OriginalFirstThunk value of a file.
-		  std::uint32_t getOriginalFirstThunk(std::uint32_t dwFilenr, currdir cdDir) const; // EXPORT
-		  void setOriginalFirstThunk(std::uint32_t dwFilenr, currdir cdDir, std::uint32_t value); // EXPORT _byNumber_function
+		  std::uint32_t getOriginalFirstThunk(const std::string& strFilename, bool newDir) const; // EXPORT _byName
 		  /// Returns the ForwarderChain value of a file.
-		  std::uint32_t getForwarderChain(std::uint32_t dwFilenr, currdir cdDir) const; // EXPORT _byNumber
-		  void setForwarderChain(std::uint32_t dwFilenr, currdir cdDir, std::uint32_t value); // EXPORT _byNumber_function
-		  std::uint32_t getRvaOfName(std::uint32_t dwFilenr, currdir cdDir) const; // EXPORT _byNumber
-		  void setRvaOfName(std::uint32_t dwFilenr, currdir cdDir, std::uint32_t value); // EXPORT
+		  std::uint32_t getForwarderChain(const std::string& strFilename, bool newDir) const; // EXPORT _byName
+		  std::uint32_t getRvaOfName(const std::string& strFilename, bool newDir) const; // EXPORT _byName
 		  /// Returns the TimeDateStamp value of a file.
-		  std::uint32_t getTimeDateStamp(std::uint32_t dwFilenr, currdir cdDir) const; // EXPORT
-		  void setTimeDateStamp(std::uint32_t dwFilenr, currdir cdDir, std::uint32_t value); // EXPORT _byNumber
+		  std::uint32_t getTimeDateStamp(const std::string& strFilename, bool newDir) const; // EXPORT _byName
+
+		  /// Returns the FirstThunk value of a file.
+		  std::uint32_t getFirstThunk(std::uint32_t dwFilenr, bool newDir) const; // EXPORT
+		  void setFirstThunk(std::uint32_t dwFilenr, bool newDir, std::uint32_t value); // EXPORT _byNumber_function
+		  /// Returns the OriginalFirstThunk value of a file.
+		  std::uint32_t getOriginalFirstThunk(std::uint32_t dwFilenr, bool newDir) const; // EXPORT
+		  void setOriginalFirstThunk(std::uint32_t dwFilenr, bool newDir, std::uint32_t value); // EXPORT _byNumber_function
+		  /// Returns the ForwarderChain value of a file.
+		  std::uint32_t getForwarderChain(std::uint32_t dwFilenr, bool newDir) const; // EXPORT _byNumber
+		  void setForwarderChain(std::uint32_t dwFilenr, bool newDir, std::uint32_t value); // EXPORT _byNumber_function
+		  std::uint32_t getRvaOfName(std::uint32_t dwFilenr, bool newDir) const; // EXPORT _byNumber
+		  void setRvaOfName(std::uint32_t dwFilenr, bool newDir, std::uint32_t value); // EXPORT
+		  /// Returns the TimeDateStamp value of a file.
+		  std::uint32_t getTimeDateStamp(std::uint32_t dwFilenr, bool newDir) const; // EXPORT
+		  void setTimeDateStamp(std::uint32_t dwFilenr, bool newDir, std::uint32_t value); // EXPORT _byNumber
 
 		  const std::vector<std::pair<unsigned int, unsigned int>>& getOccupiedAddresses() const;
 
-//		  std::uint16_t getFunctionHint(const std::string& strFilename, const std::string& strFuncname, currdir cdDir) const throw (PeLibException);
+//		  std::uint16_t getFunctionHint(const std::string& strFilename, const std::string& strFuncname, bool newDir) const throw (PeLibException);
+
+		protected:
+
+		  const std::vector<PELIB_IMAGE_IMPORT_DIRECTORY>& getImportList(bool newDir) const;
+		  std::vector<PELIB_IMAGE_IMPORT_DIRECTORY>& getImportList(bool newDir);
 	};
 
 	/**
@@ -235,18 +243,16 @@ namespace PeLib
 		PELIB_IMAGE_IMPORT_DIRECTORY iid;
 		PELIB_THUNK_DATA td;
 		td.hint = wHint;
-		td.itd.Ordinal = wHint /* | PELIB_IMAGE_ORDINAL_FLAGS::PELIB_IMAGE_ORDINAL_FLAG */;
+		td.itd.Ordinal = wHint | m_ordinalMask;
 		iid.name = strFilename;
 		if (FileIter == m_vNewiid.end())
 		{
-			iid.originalfirstthunk.push_back(td);
-			iid.firstthunk.push_back(td);
+			iid.thunk_data.push_back(td);
 			m_vNewiid.push_back(iid);
 		}
 		else
 		{
-			FileIter->originalfirstthunk.push_back(td);
-			FileIter->firstthunk.push_back(td);
+			FileIter->thunk_data.push_back(td);
 		}
 
 		return ERROR_NONE;
@@ -278,14 +284,12 @@ namespace PeLib
 		iid.name = strFilename;
 		if (FileIter == m_vNewiid.end())
 		{
-			iid.originalfirstthunk.push_back(td);
-			iid.firstthunk.push_back(td);
+			iid.thunk_data.push_back(td);
 			m_vNewiid.push_back(iid);
 		}
 		else
 		{
-			FileIter->originalfirstthunk.push_back(td);
-			FileIter->firstthunk.push_back(td);
+			FileIter->thunk_data.push_back(td);
 		}
 
 		return ERROR_NONE;
@@ -295,32 +299,23 @@ namespace PeLib
 	* Searches through the import directory and returns the number of the import
 	* directory entry which belongs to the given filename.
 	* @param strFilename Name of the imported file.
-	* @param cdDir Flag to decide if the OLDDIR or new import directory is used.
+	* @param newDir Flag to decide if the OLDDIR or new import directory is used.
 	* @return The ID of an imported file.
 	**/
 	inline
-	unsigned int ImportDirectory::getFileIndex(const std::string& strFilename, currdir cdDir) const
+	unsigned int ImportDirectory::getFileIndex(const std::string& strFilename, bool newDir) const
 	{
-		const std::vector<PELIB_IMAGE_IMPORT_DIRECTORY>* currDir;
-
-		if (cdDir == OLDDIR)
-		{
-			 currDir = &m_vOldiid;
-		}
-		else
-		{
-			 currDir = &m_vNewiid;
-		}
+		auto * il = &getImportList(newDir);
 
 		ConstImpDirFileIterator FileIter = std::find_if(
-				currDir->begin(),
-				currDir->end(),
+				il->begin(),
+				il->end(),
 				[&](const auto& i) { return i == strFilename; }
 		);
 
-		if (FileIter != currDir->end())
+		if (FileIter != il->end())
 		{
-			return static_cast<unsigned int>(std::distance(currDir->begin(), FileIter));
+			return static_cast<unsigned int>(std::distance(il->begin(), FileIter));
 		}
 		else
 		{
@@ -335,17 +330,17 @@ namespace PeLib
 	* Searches through an imported file for a specific function.
 	* @param strFilename Name of the imported file.
 	* @param strFuncname Name of the imported function.
-	* @param cdDir Flag to decide if the OLDDIR or new import directory is used.
+	* @param newDir Flag to decide if the OLDDIR or new import directory is used.
 	* @return ID of the imported function.
 	**/
 	inline
-	unsigned int ImportDirectory::getFunctionIndex(const std::string& strFilename, const std::string& strFuncname, currdir cdDir) const
+	unsigned int ImportDirectory::getFunctionIndex(const std::string& strFilename, const std::string& strFuncname, bool newDir) const
 	{
-		unsigned int uiFile = getFileIndex(strFilename, cdDir);
+		unsigned int uiFile = getFileIndex(strFilename, newDir);
 
-		for (unsigned int i=0;i<getNumberOfFunctions(uiFile, cdDir);i++)
+		for (unsigned int i=0;i<getNumberOfFunctions(uiFile, newDir);i++)
 		{
-			if (getFunctionName(uiFile, i, cdDir) == strFuncname) return i;
+			if (getFunctionName(uiFile, i, newDir) == strFuncname) return i;
 		}
 
 		return -1;
@@ -354,85 +349,48 @@ namespace PeLib
 	/**
 	* Get the name of an imported file.
 	* @param dwFilenr Identifies which file should be checked.
-	* @param cdDir Flag to decide if the OLDDIR or new import directory is used.
+	* @param newDir Flag to decide if the OLDDIR or new import directory is used.
 	* @return Name of an imported file.
 	**/
 	inline
-	std::string ImportDirectory::getFileName(std::uint32_t dwFilenr, currdir cdDir) const
+	std::string ImportDirectory::getFileName(std::uint32_t dwFilenr, bool newDir) const
 	{
-		if (cdDir == OLDDIR) return m_vOldiid[dwFilenr].name;
-		else return m_vNewiid[dwFilenr].name;
+		return getImportList(newDir)[dwFilenr].name;
 	}
 
 	inline
-	void ImportDirectory::setFileName(std::uint32_t filenr, currdir cdDir, const std::string& name)
+	void ImportDirectory::setFileName(std::uint32_t filenr, bool newDir, const std::string& name)
 	{
-		if (cdDir == OLDDIR) m_vOldiid[filenr].name = name;
-		else m_vNewiid[filenr].name = name;
+		getImportList(newDir)[filenr].name = name;
 	}
 
 	/**
 	* Get the name of an imported function.
 	* @param dwFilenr Identifies which file should be checked.
 	* @param dwFuncnr Identifies which function should be checked.
-	* @param cdDir Flag to decide if the OLDDIR or new import directory is used.
+	* @param newDir Flag to decide if the OLDDIR or new import directory is used.
 	* @return Name of an imported function.
 	* \todo Marked line is unsafe (function should be rewritten).
 	**/
 	inline
-	std::string ImportDirectory::getFunctionName(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, currdir cdDir) const
+	std::string ImportDirectory::getFunctionName(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, bool newDir) const
 	{
-		if (cdDir == OLDDIR)
+		auto & il = getImportList(newDir);
+
+		if(dwFilenr < il.size() && dwFuncnr < il[dwFilenr].thunk_data.size())
 		{
-			// Unsafe
-			// mz: fix #1189
-			if (m_vOldiid[dwFilenr].impdesc.OriginalFirstThunk && dwFuncnr < m_vOldiid[dwFilenr].originalfirstthunk.size())
-			{
-				return m_vOldiid[dwFilenr].originalfirstthunk[dwFuncnr].fname;
-			}
-			else
-			{
-				return m_vOldiid[dwFilenr].firstthunk[dwFuncnr].fname;
-			}
-		}
-		else
-		{
-			if (m_vNewiid[dwFilenr].impdesc.OriginalFirstThunk)
-			{
-				return m_vNewiid[dwFilenr].originalfirstthunk[dwFuncnr].fname;
-			}
-			else
-			{
-				return m_vNewiid[dwFilenr].firstthunk[dwFuncnr].fname;
-			}
+			return il[dwFilenr].thunk_data[dwFuncnr].fname;
 		}
 	}
 
 	inline
-	void ImportDirectory::setFunctionName(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, currdir cdDir, const std::string& functionName)
+	void ImportDirectory::setFunctionName(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, bool newDir, const std::string& functionName)
 	{
-		if (cdDir == OLDDIR)
+		auto & il = getImportList(newDir);
+
+		if(dwFilenr < il.size() && dwFuncnr < il[dwFilenr].thunk_data.size())
 		{
-			// Unsafe
-			if (m_vOldiid[dwFilenr].impdesc.OriginalFirstThunk)
-			{
-				m_vOldiid[dwFilenr].originalfirstthunk[dwFuncnr].fname = functionName;
-			}
-			else
-			{
-				m_vOldiid[dwFilenr].firstthunk[dwFuncnr].fname = functionName;
-			}
-		}
-		else
-		{
-			if (m_vNewiid[dwFilenr].impdesc.OriginalFirstThunk)
-			{
-				m_vNewiid[dwFilenr].originalfirstthunk[dwFuncnr].fname = functionName;
-			}
-			else
-			{
-				m_vNewiid[dwFilenr].firstthunk[dwFuncnr].fname = functionName;
-			}
+			il[dwFilenr].thunk_data[dwFuncnr].fname = functionName;
 		}
 	}
 
@@ -456,92 +414,119 @@ namespace PeLib
 	}
 
 	/**
-	* Get the hint of an imported function.
-	* @param dwFilenr Identifies which file should be checked.
-	* @param dwFuncnr Identifies which function should be checked.
-	* @param cdDir Flag to decide if the OLDDIR or new import directory is used.
-	* @return Hint of an imported function.
-	**/
-	inline
-	std::uint16_t ImportDirectory::getFunctionHint(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, currdir cdDir) const
-	{
-		if (cdDir == OLDDIR)
-		{
-			// mz: fix #1189
-			if (m_vOldiid[dwFilenr].impdesc.OriginalFirstThunk && dwFuncnr < m_vOldiid[dwFilenr].originalfirstthunk.size())
-			{
-				return m_vOldiid[dwFilenr].originalfirstthunk[dwFuncnr].hint;
-			}
-			else
-			{
-				return m_vOldiid[dwFilenr].firstthunk[dwFuncnr].hint;
-			}
-		}
-		else return m_vNewiid[dwFilenr].originalfirstthunk[dwFuncnr].hint;
-	}
-
-	inline
-	void ImportDirectory::setFunctionHint(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, currdir cdDir, std::uint16_t value)
-	{
-		if (cdDir == OLDDIR)
-		{
-			if (m_vOldiid[dwFilenr].impdesc.OriginalFirstThunk)
-			{
-				m_vOldiid[dwFilenr].originalfirstthunk[dwFuncnr].hint = value;
-			}
-			else
-			{
-				m_vOldiid[dwFilenr].firstthunk[dwFuncnr].hint = value;
-			}
-		}
-		else m_vNewiid[dwFilenr].originalfirstthunk[dwFuncnr].hint = value;
-	}
-
-	/**
 	* Get the number of files which are currently being imported.
-	* @param cdDir Flag to decide if the OLDDIR or new import directory is used.
+	* @param newDir Flag to decide if the OLDDIR or new import directory is used.
 	* @return Number of files which are currently being imported.
 	**/
 	inline
-	std::uint32_t ImportDirectory::getNumberOfFiles(currdir cdDir) const
+	std::uint32_t ImportDirectory::getNumberOfFiles(bool newDir) const
 	{
-		std::size_t numFiles = (cdDir == OLDDIR) ? m_vOldiid.size() : m_vNewiid.size();
-
-		return static_cast<std::uint32_t>(numFiles);
+		return static_cast<std::uint32_t>(getImportList(newDir).size());
 	}
 
 	/**
 	* Get the number of functions which are currently being imported from a specific file.
 	* @param dwFilenr Identifies which file should be checked.
-	* @param cdDir Flag to decide if the OLDDIR or new import directory is used.
+	* @param newDir Flag to decide if the OLDDIR or new import directory is used.
 	* @return Number of functions which are currently being imported from a specific file.
 	**/
 	inline
-	std::uint32_t ImportDirectory::getNumberOfFunctions(std::uint32_t dwFilenr, currdir cdDir) const
+	std::uint32_t ImportDirectory::getNumberOfFunctions(std::size_t dwFilenr, bool newDir) const
 	{
-		if (cdDir == OLDDIR) return static_cast<unsigned int>(m_vOldiid[dwFilenr].firstthunk.size());
-		else return static_cast<unsigned int>(m_vNewiid[dwFilenr].firstthunk.size());
+		auto& il = getImportList(newDir);
+		std::uint32_t numFuncs = 0;
+
+		if(dwFilenr < il.size())
+			numFuncs = static_cast<std::uint32_t>(il[dwFilenr].thunk_data.size());
+		return numFuncs;
 	}
 
-	inline bool isInvalidOrdinal(std::uint64_t ordinal, std::uint64_t ordinalMask, std::uint64_t sizeOfImage)
+	/**
+	* Retrieves the n-th import function from the m-th import directory
+	* @param dwFilenr Zero-based index of the imported module
+	* @param dwFuncnr Zero-based index of the imported function in the module above
+	* @param importName If this is import by name, this string is filled by the import name
+	* @param importHint If this is import by name, this 16-bit integer will be filled by the import hint
+	* @param importOrdinal If this is import by orginal, this 32-bit integer will be filled by the ordinal of the function
+	* @param patchRva RVA of the patched address
+	* @param isImportByOrdinal Set to true if this is import by ordinal
+	* @param newDir Flag to decide if the OLDDIR or new import directory is used.
+	* @return true = the indexes are in range, so an import was returned
+	**/
+	inline
+	bool ImportDirectory::getImportedFunction(
+		std::size_t dwFilenr,
+		std::size_t dwFuncnr,
+		std::string& importName,
+		std::uint16_t& importHint,
+		std::uint32_t& importOrdinal,
+		std::uint32_t& patchRva,
+		bool& isImportByOrdinal,
+		bool newDir) const
 	{
-		// Check for invalid name
-		if((ordinal & ordinalMask) == 0)
+		auto& il = getImportList(newDir);
+
+		// Range check for the number of modules
+		if(dwFilenr < il.size())
 		{
-			// Any name RVA that goes out of image is considered invalid
-			if(ordinal >= sizeOfImage)
+			// Range check for the number of functions
+			if(dwFuncnr < il[dwFilenr].thunk_data.size())
 			{
+				if(il[dwFilenr].thunk_data[dwFuncnr].itd.Ordinal & m_ordinalMask)
+				{
+					importOrdinal = il[dwFilenr].thunk_data[dwFuncnr].itd.Ordinal & ~m_ordinalMask;
+					isImportByOrdinal = true;
+					importHint = 0;
+				}
+				else
+				{
+					importHint = il[dwFilenr].thunk_data[dwFuncnr].hint;
+					isImportByOrdinal = false;
+					importOrdinal = 0;
+				}
+
+				// Function name may be present even if import by ordinal
+				// (auto-retrieved on well-known ordinals, e.g. ws2_32.dll)
+				importName = il[dwFilenr].thunk_data[dwFuncnr].fname;
+				patchRva = il[dwFilenr].thunk_data[dwFuncnr].patchRva;
 				return true;
 			}
 		}
-		else
+
+		// Out of range
+		return false;
+	}
+
+	/**
+	* Get the hint of an imported function.
+	* @param dwFilenr Identifies which file should be checked.
+	* @param dwFuncnr Identifies which function should be checked.
+	* @param newDir Flag to decide if the OLDDIR or new import directory is used.
+	* @return Hint of an imported function.
+	**/
+	inline
+	std::uint16_t ImportDirectory::getFunctionHint(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, bool newDir) const
+	{
+		auto& il = getImportList(newDir);
+		std::uint16_t hint = 0;
+
+		if(dwFilenr < il.size() && dwFuncnr < il[dwFilenr].thunk_data.size())
 		{
-			// Mask out the ordinal bit. Then, any ordinal must not be larger than 0xFFFF
-			ordinal = ordinal & ~ordinalMask;
-			return (ordinal >> 0x10) != 0;
+			hint = il[dwFilenr].thunk_data[dwFuncnr].hint;
 		}
 
-		return false;
+		return hint;
+	}
+
+	inline
+	void ImportDirectory::setFunctionHint(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, bool newDir, std::uint16_t value)
+	{
+		auto& il = getImportList(newDir);
+
+		if(dwFilenr < il.size() && dwFuncnr < il[dwFilenr].thunk_data.size())
+		{
+			il[dwFilenr].thunk_data[dwFuncnr].hint = value;
+		}
 	}
 
 	/**
@@ -588,9 +573,9 @@ namespace PeLib
 	{
 		std::uint64_t OrdinalMask = imageLoader.getOrdinalMask();
 		std::uint32_t SizeOfImage = imageLoader.getSizeOfImage();
-		std::uint32_t uiIndex;
 		std::uint32_t rvaBegin = imageLoader.getDataDirRva(PELIB_IMAGE_DIRECTORY_ENTRY_IMPORT);
 		std::uint32_t rva = rvaBegin;
+		std::uint32_t uiIndex;
 
 		setPointerSize(imageLoader.getPointerSize());
 		m_ldrError = LDR_ERROR_NONE;
@@ -605,9 +590,10 @@ namespace PeLib
 		// For tracking unique imported DLLs
 		std::vector<PELIB_IMAGE_IMPORT_DIRECTORY> vOldIidCurr;
 		std::unordered_map<std::string, int> uniqueDllList;
+		std::set<std::uint32_t> seenOffsets;
 		std::uint32_t uiDescCounter = 0;
 
-		// Read and store all descriptors
+		// Read and store all descriptors. Each descriptor corresponds to one imported DLL name.
 		for (;;)
 		{
 			PELIB_IMAGE_IMPORT_DIRECTORY iidCurr;
@@ -686,24 +672,34 @@ namespace PeLib
 		// Space occupied by import descriptors
 		m_occupiedAddresses.emplace_back(rvaBegin, rva);
 
-		// OriginalFirstThunk - ILT
+		// Read the import entries (functions) for each import descriptor. Read both thunks at once
 		for(std::size_t i = 0; i < vOldIidCurr.size(); i++)
 		{
-			// OriginalFirstThunk is only valid when pointing within the image, excluding headers
-			if(!hasValidOriginalFirstThunk(vOldIidCurr[i].impdesc, imageLoader))
+			// This reflects the check in the Windows loader (LdrpSnapIAT)
+			// "If the OriginalFirstThunk field does not point inside the image, then ignore
+			// it. This is will detect bogus Borland Linker 2.25 images that did not fill
+			// this field in."
+			std::uint32_t originalThunk = hasValidOriginalFirstThunk(vOldIidCurr[i].impdesc, imageLoader) ?
+				                                                     vOldIidCurr[i].impdesc.OriginalFirstThunk :
+				                                                     vOldIidCurr[i].impdesc.FirstThunk;
+			std::uint32_t firstThunk = vOldIidCurr[i].impdesc.FirstThunk;
+
+			// Don't allow multiple import descriptors to take data from the same RVA
+			if(seenOffsets.count(firstThunk))
 				continue;
-			std::uint32_t thunkRva = vOldIidCurr[i].impdesc.OriginalFirstThunk;
+			seenOffsets.insert(firstThunk);
 
-			PELIB_THUNK_DATA tdCurr;
-
-			for(uiIndex = 0; ; uiIndex++)
+			// Parse individual imports
+			for(uiIndex = 0;; uiIndex++)
 			{
+				PELIB_THUNK_DATA thunkData;
+
 				// Read single value (32-bit or 64-bit) from the thunk chain
-				if(!imageLoader.readPointer(thunkRva, tdCurr.itd.Ordinal))
+				if(!imageLoader.readPointer(originalThunk, thunkData.itd.Ordinal))
 					break;
 
 				// Are we at the end of the list?
-				if (tdCurr.itd.Ordinal == 0)
+				if(thunkData.itd.Ordinal == 0)
 					break;
 
 				// Did we exceed the count of imported functions?
@@ -713,123 +709,66 @@ namespace PeLib
 					break;
 				}
 
-				// Check samples that have import name out of the image
-				// Sample: CCE461B6EB23728BA3B8A97B9BE84C0FB9175DB31B9949E64144198AB3F702CE
-				// Import by ordinal must be lower-word only; any ordinal that is greater than 0xFFFF is invalid.
-				// Sample: 7CE5BB5CA99B3570514AF03782545D41213A77A0F93D4AAC8269823A8D3A58EF
-				if(isInvalidOrdinal(tdCurr.itd.Ordinal, OrdinalMask, SizeOfImage))
+				// Set the patch RVA
+				thunkData.patchRva = firstThunk;
+
+				// Is it an import by name?
+				if((thunkData.itd.Ordinal & OrdinalMask) == 0)
 				{
-					setLoaderError(LDR_ERROR_IMPDIR_NAME_RVA_INVALID);
-					break;
+					// Check samples that have import name out of the image
+					// Sample: CCE461B6EB23728BA3B8A97B9BE84C0FB9175DB31B9949E64144198AB3F702CE
+					if(thunkData.itd.Ordinal < imageLoader.getSizeOfImage())
+					{
+						// Read the import hint
+						if(imageLoader.readImage(&thunkData.hint, thunkData.itd.Ordinal, sizeof(std::uint16_t)) != sizeof(std::uint16_t))
+						{
+							setLoaderError(LDR_ERROR_IMPDIR_THUNK_RVA_INVALID);
+							thunkData.hint = 0;
+						}
+
+						// Read the import name
+						imageLoader.readString(thunkData.fname, thunkData.itd.Ordinal + sizeof(std::uint16_t), IMPORT_SYMBOL_MAX_LENGTH);
+
+						// Space occupied by names
+						// +1 for null terminator
+						// If the end address is even, we need to align it by 2, so next name always starts at even address
+						m_occupiedAddresses.emplace_back(
+							static_cast<unsigned int>(thunkData.itd.Ordinal),
+							static_cast<unsigned int>(thunkData.itd.Ordinal + sizeof(thunkData.hint) + thunkData.fname.length() + 1)
+						);
+
+						// Align the end by 2
+						m_occupiedAddresses.back().second = (m_occupiedAddresses.back().second + 1) & 0xFFFFFFFFE;
+					}
+					else
+					{
+						setLoaderError(LDR_ERROR_IMPDIR_THUNK_RVA_INVALID);
+					}
+				}
+				else
+				{
+					// Mask out the ordinal bit. Then, any ordinal must not be larger than 0xFFFF
+					std::uint32_t ordinal = thunkData.itd.Ordinal & ~OrdinalMask;
+
+					// Import by ordinal must be lower-word only; any ordinal that is greater than 0xFFFF is invalid.
+					// Sample: 7CE5BB5CA99B3570514AF03782545D41213A77A0F93D4AAC8269823A8D3A58EF
+					if((ordinal >> 0x10) == 0)
+					{
+						thunkData.fname = retdec::utils::ordLookUp(vOldIidCurr[i].name, ordinal, false);
+						thunkData.hint = 0;
+					}
+					else
+					{
+						setLoaderError(LDR_ERROR_IMPDIR_THUNK_RVA_INVALID);
+					}
 				}
 
-				// Insert ordinal to the list
-				vOldIidCurr[i].originalfirstthunk.push_back(tdCurr);
-				thunkRva += m_thunkSize;
-			}
+				// Insert the thunk into the import descriptor
+				vOldIidCurr[i].thunk_data.push_back(thunkData);
 
-			// Space occupied by OriginalFirstThunks
-			// -1 because we need open interval
-			if (vOldIidCurr[i].impdesc.OriginalFirstThunk < thunkRva)
-				m_occupiedAddresses.emplace_back(vOldIidCurr[i].impdesc.OriginalFirstThunk, thunkRva - 1);
-		}
-
-		// FirstThunk - IAT
-		std::set<std::uint32_t> seenOffsets;
-		for (std::size_t i = 0; i < vOldIidCurr.size(); i++)
-		{
-			std::uint32_t thunkRva = vOldIidCurr[i].impdesc.FirstThunk;
-			bool hasValidIlt = hasValidOriginalFirstThunk(vOldIidCurr[i].impdesc, imageLoader);
-
-			if (thunkRva >= imageLoader.getSizeOfImage())
-			{
-				setLoaderError(LDR_ERROR_IMPDIR_THUNK_RVA_INVALID);
-				return ERROR_INVALID_FILE;
-			}
-			if (seenOffsets.count(thunkRva))
-			{
-				continue;
-			}
-			seenOffsets.insert(thunkRva);
-			PELIB_THUNK_DATA tdCurr;
-
-			for(uiIndex = 0; ; uiIndex++)
-			{
-				if ((thunkRva + m_thunkSize) > SizeOfImage)
-				{
-					setLoaderError(LDR_ERROR_IMPDIR_THUNK_RVA_INVALID);
-					return ERROR_INVALID_FILE;
-				}
-
-				// Read the import thunk. Make sure it's initialized in case the file read fails
-				tdCurr.itd.Ordinal = 0;
-				imageLoader.readPointer(thunkRva, tdCurr.itd.Ordinal);
-				thunkRva += m_thunkSize;
-
-				// Are we at the end of the list?
-				if (tdCurr.itd.Ordinal == 0)
-					break;
-
-				// Did the number of imported functions exceede maximum?
-				if(uiIndex >= PELIB_MAX_IMPORTED_FUNCTIONS)
-				{
-					setLoaderError(LDR_ERROR_IMPDIR_IMPORT_COUNT_EXCEEDED);
-					return ERROR_INVALID_FILE;
-				}
-
-				// Check samples that have import name out of the image
-				// Sample: CCE461B6EB23728BA3B8A97B9BE84C0FB9175DB31B9949E64144198AB3F702CE
-				//if(isInvalidOrdinal(tdCurr.itd.Ordinal, OrdinalMask, SizeOfImage))
-				//	break;
-
-				vOldIidCurr[i].firstthunk.push_back(tdCurr);
-
-				// If this import descriptor has valid ILT, then size of IAT is determined from the size of ILT
-				if (hasValidIlt && vOldIidCurr[i].originalfirstthunk.size() == vOldIidCurr[i].firstthunk.size())
-				{
-					// We need to move this offset in this case because otherwise we would calculate the occupied addresses wrongly
-					thunkRva += m_thunkSize;
-					break;
-				}
-			}
-
-			// Space occupied by FirstThunks
-			// -1 because we need open interval
-			if (vOldIidCurr[i].impdesc.FirstThunk < thunkRva)
-				m_occupiedAddresses.emplace_back(vOldIidCurr[i].impdesc.FirstThunk, thunkRva - 1);
-		}
-
-		// Names
-		for (unsigned int i=0;i<vOldIidCurr.size();i++)
-		{
-			std::vector<PELIB_THUNK_DATA> & thunkVector = hasValidOriginalFirstThunk(vOldIidCurr[i].impdesc, imageLoader) ?
-														  vOldIidCurr[i].originalfirstthunk :
-														  vOldIidCurr[i].firstthunk;
-			for (auto & thunkData : thunkVector)
-			{
-				if (thunkData.itd.Ordinal & OrdinalMask)
-				{
-					thunkData.hint = 0;
-					continue;
-				}
-
-				if(imageLoader.readImage(&thunkData.hint, thunkData.itd.Ordinal, sizeof(std::uint16_t)) != sizeof(std::uint16_t))
-				{
-					setLoaderError(LDR_ERROR_IMPDIR_THUNK_RVA_INVALID);
-					return ERROR_INVALID_FILE;
-				}
-
-				imageLoader.readString(thunkData.fname, thunkData.itd.Ordinal + sizeof(std::uint16_t), IMPORT_SYMBOL_MAX_LENGTH);
-
-				// Space occupied by names
-				// +1 for null terminator
-				// If the end address is even, we need to align it by 2, so next name always starts at even address
-				m_occupiedAddresses.emplace_back(
-					static_cast<unsigned int>(thunkData.itd.Ordinal),
-					static_cast<unsigned int>(thunkData.itd.Ordinal + sizeof(thunkData.hint) + thunkData.fname.length() + 1)
-					);
-				if (!(m_occupiedAddresses.back().second & 1))
-					m_occupiedAddresses.back().second += 1;
+				// Increment both pointers
+				originalThunk += imageLoader.getPointerSize();
+				firstThunk += imageLoader.getPointerSize();
 			}
 		}
 
@@ -869,18 +808,18 @@ namespace PeLib
 		for (unsigned int i=0;i<m_vNewiid.size();i++)
 		{
 			uiSizeofdllnames += static_cast<unsigned int>(m_vNewiid[i].name.size()) + 1;
-			uiSizeofoft += (static_cast<unsigned int>(m_vNewiid[i].originalfirstthunk.size())+1) * m_thunkSize;
+			uiSizeofoft += (static_cast<unsigned int>(m_vNewiid[i].thunk_data.size())+1) * m_thunkSize;
 
-			for(unsigned int j=0;j<m_vNewiid[i].originalfirstthunk.size();j++)
+			for(unsigned int j=0;j<m_vNewiid[i].thunk_data.size();j++)
 			{
 				// +3 for hint (std::uint16_t) and 00-std::uint8_t
-				uiSizeoffuncnames += (static_cast<unsigned int>(m_vNewiid[i].originalfirstthunk[j].fname.size()) + 3);
+				uiSizeoffuncnames += (static_cast<unsigned int>(m_vNewiid[i].thunk_data[j].fname.size()) + 3);
 			}
 		}
 
 //		for (unsigned int i=0;i<m_vNewiid.size();i++)
 //		{
-//			uiSizeofoft += (static_cast<unsigned int>(m_vNewiid[i].originalfirstthunk.size())+1) * PELIB_IMAGE_THUNK_DATA::size();
+//			uiSizeofoft += (static_cast<unsigned int>(m_vNewiid[i].thunk_data.size())+1) * PELIB_IMAGE_THUNK_DATA::size();
 //		}
 
 		OutputBuffer obBuffer(vBuffer);
@@ -903,7 +842,7 @@ namespace PeLib
 
 			for (unsigned int j=1;j<=i;j++)
 			{
-				dwPoft += (static_cast<unsigned int>(m_vNewiid[j-1].originalfirstthunk.size()) + 1) * m_thunkSize;
+				dwPoft += (static_cast<unsigned int>(m_vNewiid[j-1].thunk_data.size()) + 1) * m_thunkSize;
 			}
 
 			obBuffer << (fixEntries ? dwPoft : m_vNewiid[i].impdesc.OriginalFirstThunk);
@@ -934,21 +873,21 @@ namespace PeLib
 		// Rebuild original first thunk
 		for (std::size_t i = 0;i<m_vNewiid.size();i++)
 		{
-			for (std::size_t j = 0;j<m_vNewiid[i].originalfirstthunk.size();j++)
+			for (std::size_t j = 0;j<m_vNewiid[i].thunk_data.size();j++)
 			{
-				if((m_vNewiid[i].originalfirstthunk[j].itd.Ordinal & m_ordinalMask) || fixEntries == false)
+				if((m_vNewiid[i].thunk_data[j].itd.Ordinal & m_ordinalMask) || fixEntries == false)
 				{
-					writePointer(obBuffer, m_vNewiid[i].originalfirstthunk[j].itd.Ordinal);
-					//obBuffer << m_vNewiid[i].originalfirstthunk[j].itd.Ordinal;
+					writePointer(obBuffer, m_vNewiid[i].thunk_data[j].itd.Ordinal);
+					//obBuffer << m_vNewiid[i].thunk_data[j].itd.Ordinal;
 				}
 				else
 				{
 					writePointer(obBuffer, uiPfunc);
 					//obBuffer << uiPfunc;
 					// store the offset in Ordinal, they cannot overlay thanks to PELIB_IMAGE_ORDINAL_FLAG
-					m_vNewiid[i].originalfirstthunk[j].itd.Ordinal = uiPfunc;
+					m_vNewiid[i].thunk_data[j].itd.Ordinal = uiPfunc;
 				}
-				uiPfunc += static_cast<std::uint64_t>(m_vNewiid[i].originalfirstthunk[j].fname.size()) + 3;
+				uiPfunc += static_cast<std::uint64_t>(m_vNewiid[i].thunk_data[j].fname.size()) + 3;
 			}
 			writePointer(obBuffer, 0);
 			//obBuffer << static_cast<std::uint64_t>(0);
@@ -963,10 +902,10 @@ namespace PeLib
 		// Write function names into directory
 		for (unsigned int i=0;i<m_vNewiid.size();i++)
 		{
-			for (unsigned int j=0;j<m_vNewiid[i].originalfirstthunk.size();j++)
+			for (unsigned int j=0;j<m_vNewiid[i].thunk_data.size();j++)
 			{
-				obBuffer << m_vNewiid[i].originalfirstthunk[j].hint;
-				obBuffer.add(m_vNewiid[i].originalfirstthunk[j].fname.c_str(), static_cast<unsigned int>(m_vNewiid[i].originalfirstthunk[j].fname.size()) + 1);
+				obBuffer << m_vNewiid[i].thunk_data[j].hint;
+				obBuffer.add(m_vNewiid[i].thunk_data[j].fname.c_str(), static_cast<unsigned int>(m_vNewiid[i].thunk_data[j].fname.size()) + 1);
 			}
 		}
 	}
@@ -1008,16 +947,16 @@ namespace PeLib
 		{
 			if (isEqualNc(viPos->name, strFilename))
 			{
-				unsigned int oldSize = static_cast<unsigned int>(viPos->originalfirstthunk.size());
-				viPos->originalfirstthunk.erase(
+				unsigned int oldSize = static_cast<unsigned int>(viPos->thunk_data.size());
+				viPos->thunk_data.erase(
 					std::remove_if(
-						viPos->originalfirstthunk.begin(),
-						viPos->originalfirstthunk.end(),
+						viPos->thunk_data.begin(),
+						viPos->thunk_data.end(),
 						[&](const auto& i) { return i.equalFunctionName(strFuncname); }
 					),
-					viPos->originalfirstthunk.end()
+					viPos->thunk_data.end()
 				);
-				if (viPos->originalfirstthunk.size() != oldSize) notFound = 0;
+				if (viPos->thunk_data.size() != oldSize) notFound = 0;
 			}
 			++viPos;
 		}
@@ -1040,16 +979,16 @@ namespace PeLib
 		{
 			if (isEqualNc(viPos->name, strFilename))
 			{
-				unsigned int oldSize = static_cast<unsigned int>(viPos->originalfirstthunk.size());
-				viPos->originalfirstthunk.erase(
+				unsigned int oldSize = static_cast<unsigned int>(viPos->thunk_data.size());
+				viPos->thunk_data.erase(
 					std::remove_if(
-						viPos->originalfirstthunk.begin(),
-						viPos->originalfirstthunk.end(),
+						viPos->thunk_data.begin(),
+						viPos->thunk_data.end(),
 						[&](const auto& i) { return i.equalHint(wHint); }
 					),
-					viPos->originalfirstthunk.end()
+					viPos->thunk_data.end()
 				);
-				if (viPos->originalfirstthunk.size() != oldSize) notFound = 0;
+				if (viPos->thunk_data.size() != oldSize) notFound = 0;
 			}
 			++viPos;
 		}
@@ -1118,274 +1057,167 @@ namespace PeLib
 
 	/**
 	* @param strFilename Name of the imported file.
-	* @param cdDir Flag to decide if the OLDDIR or new import directory is used.
+	* @param newDir Flag to decide if the OLDDIR or new import directory is used.
 	* @return FirstThunk value of an imported file.
 	**/
 	inline
-	std::uint32_t ImportDirectory::getFirstThunk(const std::string& strFilename, currdir cdDir) const
+	std::uint32_t ImportDirectory::getFirstThunk(const std::string& strFilename, bool newDir) const
 	{
-		if (cdDir == OLDDIR)
-		{
-			return m_vOldiid[getFileIndex(strFilename, cdDir)].impdesc.FirstThunk;
-		}
-		else
-		{
-			return m_vNewiid[getFileIndex(strFilename, cdDir)].impdesc.FirstThunk;
-		}
+		return getImportList(newDir)[getFileIndex(strFilename, newDir)].impdesc.FirstThunk;
 	}
 
 	/**
 	* @param strFilename Name of the imported file.
-	* @param cdDir Flag to decide if the OLDDIR or new import directory is used.
+	* @param newDir Flag to decide if the OLDDIR or new import directory is used.
 	* @return OriginalFirstThunk value of an imported file.
 	**/
 	inline
-	std::uint32_t ImportDirectory::getOriginalFirstThunk(const std::string& strFilename, currdir cdDir) const
+	std::uint32_t ImportDirectory::getOriginalFirstThunk(const std::string& strFilename, bool newDir) const
 	{
-		if (cdDir == OLDDIR)
-		{
-			return m_vOldiid[getFileIndex(strFilename, cdDir)].impdesc.OriginalFirstThunk;
-		}
-		else
-		{
-			return m_vNewiid[getFileIndex(strFilename, cdDir)].impdesc.OriginalFirstThunk;
-		}
+		return getImportList(newDir)[getFileIndex(strFilename, newDir)].impdesc.OriginalFirstThunk;
 	}
 
 	/**
 	* @param strFilename Name of the imported file.
-	* @param cdDir Flag to decide if the OLDDIR or new import directory is used.
+	* @param newDir Flag to decide if the OLDDIR or new import directory is used.
 	* @return ForwarderChain value of an imported file.
 	**/
 	inline
-	std::uint32_t ImportDirectory::getForwarderChain(const std::string& strFilename, currdir cdDir) const
+	std::uint32_t ImportDirectory::getForwarderChain(const std::string& strFilename, bool newDir) const
 	{
-		if (cdDir == OLDDIR)
-		{
-			return m_vOldiid[getFileIndex(strFilename, cdDir)].impdesc.ForwarderChain;
-		}
-		else
-		{
-			return m_vNewiid[getFileIndex(strFilename, cdDir)].impdesc.ForwarderChain;
-		}
+		return getImportList(newDir)[getFileIndex(strFilename, newDir)].impdesc.ForwarderChain;
 	}
 
 	/**
 	* @param strFilename Name of the imported file.
-	* @param cdDir Flag to decide if the OLDDIR or new import directory is used.
+	* @param newDir Flag to decide if the OLDDIR or new import directory is used.
 	* @return TimeDateStamp value of an imported file.
 	**/
 	inline
-	std::uint32_t ImportDirectory::getTimeDateStamp(const std::string& strFilename, currdir cdDir) const
+	std::uint32_t ImportDirectory::getTimeDateStamp(const std::string& strFilename, bool newDir) const
 	{
-		if (cdDir == OLDDIR)
-		{
-			return m_vOldiid[getFileIndex(strFilename, cdDir)].impdesc.TimeDateStamp;
-		}
-		else
-		{
-			return m_vNewiid[getFileIndex(strFilename, cdDir)].impdesc.TimeDateStamp;
-		}
+		return getImportList(newDir)[getFileIndex(strFilename, newDir)].impdesc.TimeDateStamp;
 	}
 
 	inline
-	std::uint32_t ImportDirectory::getRvaOfName(const std::string& strFilename, currdir cdDir) const
+	std::uint32_t ImportDirectory::getRvaOfName(const std::string& strFilename, bool newDir) const
 	{
-		if (cdDir == OLDDIR)
-		{
-			return m_vOldiid[getFileIndex(strFilename, cdDir)].impdesc.Name;
-		}
-		else
-		{
-			return m_vNewiid[getFileIndex(strFilename, cdDir)].impdesc.Name;
-		}
+		return getImportList(newDir)[getFileIndex(strFilename, newDir)].impdesc.Name;
 	}
 
 	/**
 	* @param dwFilenr Name of the imported file.
-	* @param cdDir Flag to decide if the OLDDIR or new import directory is used.
+	* @param newDir Flag to decide if the OLDDIR or new import directory is used.
 	* @return FirstThunk value of an imported file.
 	**/
 	inline
-	std::uint32_t ImportDirectory::getFirstThunk(std::uint32_t dwFilenr, currdir cdDir) const
+	std::uint32_t ImportDirectory::getFirstThunk(std::uint32_t dwFilenr, bool newDir) const
 	{
-		if (cdDir == OLDDIR)
-		{
-			return m_vOldiid[dwFilenr].impdesc.FirstThunk;
-		}
-		else
-		{
-			return m_vNewiid[dwFilenr].impdesc.FirstThunk;
-		}
+		return getImportList(newDir)[dwFilenr].impdesc.FirstThunk;
 	}
 
 	inline
-	void ImportDirectory::setFirstThunk(std::uint32_t dwFilenr, currdir cdDir, std::uint32_t value)
+	void ImportDirectory::setFirstThunk(std::uint32_t dwFilenr, bool newDir, std::uint32_t value)
 	{
-		if (cdDir == OLDDIR)
-		{
-			m_vOldiid[dwFilenr].impdesc.FirstThunk = value;
-		}
-		else
-		{
-			m_vNewiid[dwFilenr].impdesc.FirstThunk = value;
-		}
+		getImportList(newDir)[dwFilenr].impdesc.FirstThunk = value;
 	}
 
 	/**
 	* @param dwFilenr Name of the imported file.
-	* @param cdDir Flag to decide if the OLDDIR or new import directory is used.
+	* @param newDir Flag to decide if the OLDDIR or new import directory is used.
 	* @return OriginalFirstThunk value of an imported file.
 	**/
 	inline
-	std::uint32_t ImportDirectory::getOriginalFirstThunk(std::uint32_t dwFilenr, currdir cdDir) const
+	std::uint32_t ImportDirectory::getOriginalFirstThunk(std::uint32_t dwFilenr, bool newDir) const
 	{
-		if (cdDir == OLDDIR)
-		{
-			return m_vOldiid[dwFilenr].impdesc.OriginalFirstThunk;
-		}
-		else
-		{
-			return m_vNewiid[dwFilenr].impdesc.OriginalFirstThunk;
-		}
+		return getImportList(newDir)[dwFilenr].impdesc.OriginalFirstThunk;
 	}
 
 	inline
-	void ImportDirectory::setOriginalFirstThunk(std::uint32_t dwFilenr, currdir cdDir, std::uint32_t value)
+	void ImportDirectory::setOriginalFirstThunk(std::uint32_t dwFilenr, bool newDir, std::uint32_t value)
 	{
-		if (cdDir == OLDDIR)
-		{
-			m_vOldiid[dwFilenr].impdesc.OriginalFirstThunk = value;
-		}
-		else
-		{
-			m_vNewiid[dwFilenr].impdesc.OriginalFirstThunk = value;
-		}
+		getImportList(newDir)[dwFilenr].impdesc.OriginalFirstThunk = value;
 	}
 
 	/**
 	* @param dwFilenr Name of the imported file.
-	* @param cdDir Flag to decide if the OLDDIR or new import directory is used.
+	* @param newDir Flag to decide if the OLDDIR or new import directory is used.
 	* @return ForwarderChain value of an imported file.
 	**/
 
 	inline
-	std::uint32_t ImportDirectory::getForwarderChain(std::uint32_t dwFilenr, currdir cdDir) const
+	std::uint32_t ImportDirectory::getForwarderChain(std::uint32_t dwFilenr, bool newDir) const
 	{
-		if (cdDir == OLDDIR)
-		{
-			return m_vOldiid[dwFilenr].impdesc.ForwarderChain;
-		}
-		else
-		{
-			return m_vNewiid[dwFilenr].impdesc.ForwarderChain;
-		}
+		return getImportList(newDir)[dwFilenr].impdesc.ForwarderChain;
 	}
 
 	inline
-	void ImportDirectory::setForwarderChain(std::uint32_t dwFilenr, currdir cdDir, std::uint32_t value)
+	void ImportDirectory::setForwarderChain(std::uint32_t dwFilenr, bool newDir, std::uint32_t value)
 	{
-		if (cdDir == OLDDIR)
-		{
-			m_vOldiid[dwFilenr].impdesc.ForwarderChain = value;
-		}
-		else
-		{
-			m_vNewiid[dwFilenr].impdesc.ForwarderChain = value;
-		}
+		getImportList(newDir)[dwFilenr].impdesc.ForwarderChain = value;
 	}
 
 	/**
 	* @param dwFilenr Name of the imported file.
-	* @param cdDir Flag to decide if the OLDDIR or new import directory is used.
+	* @param newDir Flag to decide if the OLDDIR or new import directory is used.
 	* @return TimeDateStamp value of an imported file.
 	**/
 	inline
-	std::uint32_t ImportDirectory::getTimeDateStamp(std::uint32_t dwFilenr, currdir cdDir) const
+	std::uint32_t ImportDirectory::getTimeDateStamp(std::uint32_t dwFilenr, bool newDir) const
 	{
-		if (cdDir == OLDDIR)
-		{
-			return m_vOldiid[dwFilenr].impdesc.TimeDateStamp;
-		}
-		else
-		{
-			return m_vNewiid[dwFilenr].impdesc.TimeDateStamp;
-		}
+		return getImportList(newDir)[dwFilenr].impdesc.TimeDateStamp;
 	}
 
 	inline
-	void ImportDirectory::setTimeDateStamp(std::uint32_t dwFilenr, currdir cdDir, std::uint32_t value)
+	void ImportDirectory::setTimeDateStamp(std::uint32_t dwFilenr, bool newDir, std::uint32_t value)
 	{
-		if (cdDir == OLDDIR)
-		{
-			m_vOldiid[dwFilenr].impdesc.TimeDateStamp = value;
-		}
-		else
-		{
-			m_vNewiid[dwFilenr].impdesc.TimeDateStamp = value;
-		}
+		getImportList(newDir)[dwFilenr].impdesc.TimeDateStamp = value;
 	}
 
 	inline
-	std::uint32_t ImportDirectory::getRvaOfName(std::uint32_t dwFilenr, currdir cdDir) const
+	std::uint32_t ImportDirectory::getRvaOfName(std::uint32_t dwFilenr, bool newDir) const
 	{
-		if (cdDir == OLDDIR)
-		{
-			return m_vOldiid[dwFilenr].impdesc.Name;
-		}
-		else
-		{
-			return m_vNewiid[dwFilenr].impdesc.Name;
-		}
+		return getImportList(newDir)[dwFilenr].impdesc.Name;
 	}
 
 	inline
-	void ImportDirectory::setRvaOfName(std::uint32_t dwFilenr, currdir cdDir, std::uint32_t value)
+	void ImportDirectory::setRvaOfName(std::uint32_t dwFilenr, bool newDir, std::uint32_t value)
 	{
-		if (cdDir == OLDDIR)
-		{
-			m_vOldiid[dwFilenr].impdesc.Name = value;
-		}
-		else
-		{
-			m_vNewiid[dwFilenr].impdesc.Name = value;
-		}
+		getImportList(newDir)[dwFilenr].impdesc.Name = value;
 	}
 
 	/**
 	* @param dwFilenr ID of the imported file.
 	* @param dwFuncnr ID of the imported function.
-	* @param cdDir Flag to decide if the OLDDIR or new import directory is used.
+	* @param newDir Flag to decide if the OLDDIR or new import directory is used.
 	* @return FirstThunk value of an imported function.
 	**/
 	inline
-	std::uint32_t ImportDirectory::getFirstThunk(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, currdir cdDir) const
+	std::uint32_t ImportDirectory::getFirstThunk(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, bool newDir) const
 	{
-		if (cdDir == OLDDIR) return m_vOldiid[dwFilenr].firstthunk[dwFuncnr].itd.Ordinal;
-		else return m_vNewiid[dwFilenr].firstthunk[dwFuncnr].itd.Ordinal;
+		return getImportList(newDir)[dwFilenr].thunk_data[dwFuncnr].itd.Ordinal;
 	}
 
 	inline
-	void ImportDirectory::setFirstThunk(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, currdir cdDir, std::uint32_t value)
+	void ImportDirectory::setFirstThunk(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, bool newDir, std::uint32_t value)
 	{
-		if (cdDir == OLDDIR) m_vOldiid[dwFilenr].firstthunk[dwFuncnr].itd.Ordinal = value;
-		else m_vNewiid[dwFilenr].firstthunk[dwFuncnr].itd.Ordinal = value;
+		getImportList(newDir)[dwFilenr].thunk_data[dwFuncnr].itd.Ordinal = value;
 	}
 
 	/**
 	* @param dwFilenr ID of the imported file.
 	* @param dwFuncnr ID of the imported function.
-	* @param cdDir Flag to decide if the OLDDIR or new import directory is used.
+	* @param newDir Flag to decide if the OLDDIR or new import directory is used.
 	* @return OriginalFirstThunk value of an imported function.
 	**/
 	inline
-	std::uint32_t ImportDirectory::getOriginalFirstThunk(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, currdir cdDir) const
+	std::uint32_t ImportDirectory::getOriginalFirstThunk(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, bool newDir) const
 	{
-		if (cdDir == OLDDIR)
+		if (newDir == false)
 		{
-			if (dwFuncnr < m_vOldiid[dwFilenr].originalfirstthunk.size())
+			if (dwFuncnr < m_vOldiid[dwFilenr].thunk_data.size())
 			{
-				return m_vOldiid[dwFilenr].originalfirstthunk[dwFuncnr].itd.Ordinal;
+				return m_vOldiid[dwFilenr].thunk_data[dwFuncnr].itd.Ordinal;
 			}
 			else
 			{
@@ -1394,15 +1226,14 @@ namespace PeLib
 		}
 		else
 		{
-			return m_vNewiid[dwFilenr].originalfirstthunk[dwFuncnr].itd.Ordinal;
+			return m_vNewiid[dwFilenr].thunk_data[dwFuncnr].itd.Ordinal;
 		}
 	}
 
 	inline
-	void ImportDirectory::setOriginalFirstThunk(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, currdir cdDir, std::uint32_t value)
+	void ImportDirectory::setOriginalFirstThunk(std::uint32_t dwFilenr, std::uint32_t dwFuncnr, bool newDir, std::uint32_t value)
 	{
-		if (cdDir == OLDDIR) m_vOldiid[dwFilenr].originalfirstthunk[dwFuncnr].itd.Ordinal = value;
-		else m_vNewiid[dwFilenr].originalfirstthunk[dwFuncnr].itd.Ordinal = value;
+		getImportList(newDir)[dwFilenr].thunk_data[dwFuncnr].itd.Ordinal = value;
 	}
 
 	inline
@@ -1410,6 +1241,17 @@ namespace PeLib
 	{
 		return m_occupiedAddresses;
 	}
+
+	inline const std::vector<PELIB_IMAGE_IMPORT_DIRECTORY>& ImportDirectory::getImportList(bool newDir) const
+	{
+		return (newDir == false) ? m_vOldiid : m_vNewiid;
+	}
+
+	inline std::vector<PELIB_IMAGE_IMPORT_DIRECTORY>& ImportDirectory::getImportList(bool newDir)
+	{
+		return (newDir == false) ? m_vOldiid : m_vNewiid;
+	}
+
 
 } // namespace PeLib
 

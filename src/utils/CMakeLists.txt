@@ -11,6 +11,7 @@ add_library(utils STATIC
 	file_io.cpp
 	math.cpp
 	memory.cpp
+	ord_lookup.cpp
 	string.cpp
 	system.cpp
 	time.cpp
