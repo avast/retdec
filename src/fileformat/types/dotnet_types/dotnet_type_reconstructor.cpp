@@ -1016,7 +1016,8 @@ std::unique_ptr<DotnetMethod> DotnetTypeReconstructor::createMethod(const Method
 
 /**
  * Creates new method parameter from Param table record.
- * @param param Param table record.
+ * @param paramIdx Index of the current Param record
+ * @param startIdx Index of the first Param record of the method
  * @param ownerClass Owning class.
  * @param ownerMethod Owning method.
  * @param signature Signature with data types. Is destroyed in the meantime.

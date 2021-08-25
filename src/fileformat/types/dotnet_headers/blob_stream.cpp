@@ -10,11 +10,6 @@
 namespace retdec {
 namespace fileformat {
 
-/**
- * Constructor.
- * @param streamOffset Stream offset.
- * @param streamSize Stream size.
- */
 BlobStream::BlobStream(std::vector<std::uint8_t> data, std::uint64_t streamOffset, std::uint64_t streamSize)
 	: Stream(StreamType::Blob, streamOffset, streamSize), data(data)
 {
