@@ -56,7 +56,7 @@ TEST_F(RawDataFormatTests_istream, TestSettersGetters)
 	parser->setBaseAddress(0x8000);
 
 	EXPECT_EQ(0x8000, parser->getSections()[0]->getAddress());
-	unsigned long long result = 0;
+	std::uint64_t result = 0;
 	EXPECT_EQ(true, parser->getEpOffset(result));
 	EXPECT_EQ(0x2, result);
 	EXPECT_EQ(true, parser->getEpAddress(result));
@@ -68,7 +68,7 @@ TEST_F(RawDataFormatTests_istream, TestSettersGetters)
 
 TEST_F(RawDataFormatTests_istream, TestInvalidEP)
 {
-	unsigned long long result;
+	std::uint64_t result;
 	parser->setBaseAddress(0x8000);
 
 	parser->setEntryPoint(0x800B);
@@ -110,7 +110,7 @@ TEST_F(RawDataFormatTests_data, CorrectLoading)
 
 TEST_F(RawDataFormatTests_data, TestInvalidEP)
 {
-	unsigned long long result;
+	std::uint64_t result;
 	parser->setBaseAddress(0x8000);
 
 	parser->setEntryPoint(0x800B);
