@@ -1762,8 +1762,8 @@ void PeFormat::loadResources()
 					resource->setNameId(nameChild->getOffsetToName());
 				}
 
-				unsigned long long dataOffset;
-				getOffsetFromAddress(dataOffset, imageBase + lanLeaf->getOffsetToData());
+				// Check if the offset is actually within the section bounds
+				std::uint64_t dataOffset = getImageLoader().getValidOffsetFromRva(lanLeaf->getOffsetToData());
 				resource->setOffset(dataOffset);
 				resource->setSizeInFile(lanLeaf->getSize());
 				resource->setLanguage(lanChild->getName());
@@ -3654,8 +3654,8 @@ void PeFormat::scanForResourceAnomalies()
 
 		// scan for resource stretched over multiple sections
 		unsigned long long resAddr;
-		if (getAddressFromOffset(resAddr, res->getOffset()) &&
-			isObjectStretchedOverSections(resAddr, res->getSizeInFile()))
+		if (res->isValidOffset() && getAddressFromOffset(resAddr, res->getOffset()) &&
+				isObjectStretchedOverSections(resAddr, res->getSizeInFile()))
 		{
 			anomalies.emplace_back("StretchedResource", "Resource " + replaceNonprintableChars(msgName) + " is stretched over multiple sections");
 		}

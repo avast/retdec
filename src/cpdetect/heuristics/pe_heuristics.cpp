@@ -1813,7 +1813,7 @@ void PeHeuristics::getSevenZipHeuristics()
 		{
 			// See: VS_VERSIONINFO structure documentation
 			auto resource = resourceTable->getResourceWithType(16);
-			if (resource)
+			if (resource && resource->isValidOffset())
 			{
 				std::uint64_t infoL = 0;
 				auto offset =  resource->getOffset();

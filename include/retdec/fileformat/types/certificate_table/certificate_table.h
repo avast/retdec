@@ -33,6 +33,7 @@ struct Signer
 /* naming - "Signature" was already taken by unpackers */
 struct DigitalSignature
 {
+	bool isValid;
 	std::string fileDigest;
 	std::string signedDigest;
 	std::string digestAlgorithm;

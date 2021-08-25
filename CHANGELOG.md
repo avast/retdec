@@ -5,6 +5,7 @@
 * New feature: Generate ELF (import) symbol-related hashes, including VirusTotal compatible `telfhash` ([#286](https://github.com/avast/retdec/issues/286), [#936](https://github.com/avast/retdec/pull/936)).
 * New Feature: `retdec-fileinfo` can be configured via JSON file. See `--fileinfo-config` option for more details.
 * New Feature: RetDec is now also a library ([#779](https://github.com/avast/retdec/pull/779). Related changes are the removal of `retdec-decompiler.py` (it is now a binary, e.g. `retdec-decompiler.exe` on Windows), `retdec-bin2llvmir`, `retdec-llvmir2hll`, and some other supportive functionality.
+* Enhancement: Add `signatureVerified` flag to PE's digital signature entries ([#994](https://github.com/avast/retdec/pull/994), [regression tests #102](https://github.com/avast/retdec-regression-tests/pull/102)).
 * Enhancement: Add YARA signature for InnoSetup 6.1.0 ([#989](https://github.com/avast/retdec/pull/989)).
 * Enhancement: Provide one-line-style values for digital signature's subjects and issuers ([#956](https://github.com/avast/retdec/issues/956), [#976](https://github.com/avast/retdec/pull/976), [regression tests #92](https://github.com/avast/retdec-regression-tests/pull/92)).
 * Enhancement: Compute hashes of decrypted PE rich headers ([#621](https://github.com/avast/retdec/issues/621), [#945](https://github.com/avast/retdec/pull/945)).
@@ -21,6 +22,7 @@
 * Enhancement: Added support for new ELF UPX unpacking stubs (versions 3.93 - 3.96) ([#929](https://github.com/avast/retdec/pull/929)).
 * Enhancement: Improved YARA rules for detection of the SHA-512 algorithm ([#935](https://github.com/avast/retdec/pull/935)).
 * Enhancement: Improved PE Authenticode parsing ([#902](https://github.com/avast/retdec/pull/902), [#380](https://github.com/avast/retdec/issues/380)).
+* Fix: Fix PE resource parsing issues ([#963](https://github.com/avast/retdec/issues/963), [#982](https://github.com/avast/retdec/pull/982), [regression tests #105](https://github.com/avast/retdec-regression-tests/pull/105)).
 * Fix: Fix PE imports parsing issues ([#1003](https://github.com/avast/retdec/pull/1003), [regression tests #107](https://github.com/avast/retdec-regression-tests/pull/107)).
 * Fix: Accept PDB info only if `IMAGE_DEBUG_TYPE_CODEVIEW` flag is set ([#1004](https://github.com/avast/retdec/pull/1004)).
 * Fix: Prevent PE delayed import parser to load garbage data ([#981](https://github.com/avast/retdec/pull/981)).
