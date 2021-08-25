@@ -106,7 +106,7 @@ Pkcs7Signature::Pkcs7Signature(const std::vector<std::uint8_t>& input) noexcept
 {
 	/* 
 	SignedData ::= SEQUENCE {
-	    version Version, (Must be 1)
+	    version Version,
 	    digestAlgorithms DigestAlgorithmIdentifiers,
 	    contentInfo ContentInfo,
 	    certificates
@@ -203,7 +203,6 @@ Pkcs7Signature::SignerInfo::SignerInfo(const PKCS7* pkcs7, const PKCS7_SIGNER_IN
 			si_info->enc_digest->data + si_info->enc_digest->length);
 
 	ASN1_INTEGER_get_uint64(&version, si_info->version);
-	/* Version has to be equal to 1 */
 
 	serial = serialToString(si_info->issuer_and_serial->serial);
 	issuer = X509NameToString(si_info->issuer_and_serial->issuer);
@@ -360,7 +359,6 @@ const X509* Pkcs7Signature::SignerInfo::getSignerCert() const
 std::vector<std::string> Pkcs7Signature::verify(const std::string& fileDigest) const
 {
 	/* Check if signature is correctly parsed and complies with the spec:
-		- [x] Version is equal to 1
 		- [x] contentDigestAlgorithms contain single algorithm
 		- [x] SignedData and SignerInfo digestAlgorithm match
 		- [x] contentInfo contains PE hash, hashing algorithm and SpcIndirectDataOid
@@ -382,10 +380,6 @@ std::vector<std::string> Pkcs7Signature::verify(const std::string& fileDigest) c
 
 	if (!PKCS7_type_is_signed(pkcs7)) {
 		warnings.emplace_back("Invalid PKCS#7 type, expected SignedData");
-	}
-
-	if (version != 1) {
-		warnings.emplace_back("Signature version is: " + std::to_string(version) + ", expected 1");
 	}
 
 	if (contentDigestAlgorithms.size() != 1) {
@@ -413,16 +407,12 @@ std::vector<std::string> Pkcs7Signature::verify(const std::string& fileDigest) c
 		if (!signerInfo->getSignerCert()) {
 			warnings.emplace_back("Signing cert is missing");
 		}
-		if (signerInfo->version != 1) {
-			warnings.emplace_back("SignerInfo version is: " + std::to_string(signerInfo->version) + ", expected 1");
-		}
 		if (contentDigestAlgorithms.size() > 0 && signerInfo->digestAlgorithm != contentDigestAlgorithms[0]) {
 			warnings.emplace_back("SignedData digest algorithm and signerInfo digest algorithm don't match");
 		}
 		if (signerInfo->encryptDigest.empty()) {
 			warnings.emplace_back("Encrypted digest is empty");
 		}
-
 		// verify auth attrs existence
 		if (!signerInfo->spcInfo) {
 			warnings.emplace_back("Couldn't get SpcSpOpusInfo");
@@ -534,6 +524,7 @@ std::vector<DigitalSignature> Pkcs7Signature::getSignatures(const retdec::filefo
 	/* No signer would mean, we have pretty much nothing */
 	if (!signerInfo.has_value()) {
 		signatures.push_back(signature);
+		signature.isValid = false;
 		return signatures;
 	}
 
@@ -556,6 +547,11 @@ std::vector<DigitalSignature> Pkcs7Signature::getSignatures(const retdec::filefo
 
 	signature.signer = signer;
 
+	// If there are warnings, then the signature is invalid
+	// We don't use the countersignature warnings here as
+	// previous implementation did when verifying
+	signature.isValid = signature.warnings.empty();
+
 	for (auto&& counterSig : signInfo.counterSignatures) {
 		CertificateProcessor processor;
 		auto certChain = processor.getChain(counterSig.signerCert, certs);
@@ -563,11 +559,11 @@ std::vector<DigitalSignature> Pkcs7Signature::getSignatures(const retdec::filefo
 
 		Signer counterSigner;
 		counterSigner.chain = fileformatCertChain;
-		counterSigner.signingTime = counterSig.signTime,
+		counterSigner.signingTime = counterSig.signTime;
 		counterSigner.digest = bytesToHexString(counterSig.messageDigest.data(),
-				counterSig.messageDigest.size()),
-		counterSigner.digestAlgorithm = OBJ_nid2ln(counterSig.digestAlgorithm),
-		counterSigner.warnings = counterSig.verify(signerInfo->encryptDigest),
+				counterSig.messageDigest.size());
+		counterSigner.digestAlgorithm = OBJ_nid2ln(counterSig.digestAlgorithm);
+		counterSigner.warnings = counterSig.verify(signerInfo->encryptDigest);
 		counterSigner.counterSigners = std::vector<Signer>();
 
 		signature.signer.counterSigners.push_back(counterSigner);
@@ -580,11 +576,11 @@ std::vector<DigitalSignature> Pkcs7Signature::getSignatures(const retdec::filefo
 
 		Signer counterSigner;
 		counterSigner.chain = fileformatCertChain;
-		counterSigner.signingTime = counterSig.signTime,
+		counterSigner.signingTime = counterSig.signTime;
 		counterSigner.digest = bytesToHexString(counterSig.messageDigest.data(),
-				counterSig.messageDigest.size()),
-		counterSigner.digestAlgorithm = OBJ_nid2ln(counterSig.digestAlgorithm),
-		counterSigner.warnings = counterSig.verify(signerInfo->encryptDigest),
+				counterSig.messageDigest.size());
+		counterSigner.digestAlgorithm = OBJ_nid2ln(counterSig.digestAlgorithm);
+		counterSigner.warnings = counterSig.verify(signerInfo->encryptDigest);
 		counterSigner.counterSigners = std::vector<Signer>();
 
 		signature.signer.counterSigners.push_back(counterSigner);

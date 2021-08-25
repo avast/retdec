@@ -706,9 +706,9 @@ template <int bits> void PeUpxStub<bits>::fixImports(const DynamicBuffer& unpack
 		}
 
 		// Sets the proper FirstThunk for new record in import directory
-		std::uint32_t fileIndex = _newPeFile->impDir().getFileIndex(libraryName, PeLib::NEWDIR);
+		std::uint32_t fileIndex = _newPeFile->impDir().getFileIndex(libraryName, true);
 		if (fileIndex != static_cast<std::uint32_t>(-1))
-			_newPeFile->impDir().setFirstThunk(fileIndex, PeLib::NEWDIR, firstThunk);
+			_newPeFile->impDir().setFirstThunk(fileIndex, true, firstThunk);
 
 		iltOffset = importHints.read<std::uint32_t>(readPos);
 		readPos += 4;
@@ -1218,13 +1218,13 @@ template <int bits> void PeUpxStub<bits>::saveFile(const std::string& outputFile
 		// OrignalFirstThunk-s are known only after the impDir is written into the file
 		// We then need to read it function by function and set the contents of IAT to be same as ILT
 		// If it isn't, the windows loader refuses to load the executable file
-		for(std::uint32_t fileIndex = 0; fileIndex < _newPeFile->impDir().getNumberOfFiles(PeLib::OLDDIR); ++fileIndex)
+		for(std::uint32_t fileIndex = 0; fileIndex < _newPeFile->impDir().getNumberOfFiles(false); ++fileIndex)
 		{
-			std::uint32_t destOffset = _newPeFile->impDir().getFirstThunk(fileIndex, PeLib::OLDDIR) - VirtualAddress;
+			std::uint32_t destOffset = _newPeFile->impDir().getFirstThunk(fileIndex, false) - VirtualAddress;
 
-			for(std::uint32_t funcIndex = 0; funcIndex < _newPeFile->impDir().getNumberOfFunctions(fileIndex, PeLib::OLDDIR); ++funcIndex, destOffset += 4)
+			for(std::uint32_t funcIndex = 0; funcIndex < _newPeFile->impDir().getNumberOfFunctions(fileIndex, false); ++funcIndex, destOffset += 4)
 			{
-				unpackedData.write<std::uint32_t>(_newPeFile->impDir().getOriginalFirstThunk(fileIndex, funcIndex, PeLib::OLDDIR), destOffset);
+				unpackedData.write<std::uint32_t>(_newPeFile->impDir().getOriginalFirstThunk(fileIndex, funcIndex, false), destOffset);
 			}
 		}
 	}

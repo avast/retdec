@@ -319,11 +319,11 @@ void MpressPlugin::fixImportsAndEp(DynamicBuffer& buffer)
 		readPos++; // skip null terminator
 
 		// Set FirstThunk to point into IAT
-		int fileIndex = _peFile->impDir().getFileIndex(moduleName, PeLib::NEWDIR);
+		int fileIndex = _peFile->impDir().getFileIndex(moduleName, true);
 		if (fileIndex == -1)
 			throw InvalidImportHintsException();
 
-		_peFile->impDir().setFirstThunk(fileIndex, PeLib::NEWDIR, destOffset);
+		_peFile->impDir().setFirstThunk(fileIndex, true, destOffset);
 		lowestDestOffset = std::min(destOffset, lowestDestOffset);
 		highestDestOffset = std::max(destOffset, highestDestOffset);
 		destOffset += destOffsetDiff;
@@ -677,15 +677,15 @@ void MpressPlugin::saveFile(const std::string& fileName, DynamicBuffer& content)
 
 	// After this all we need to update the IAT with the contents of ILT
 	// since Import Directory in PeLib is built after the write to the file
-	for (size_t fileIndex = 0; fileIndex < _peFile->impDir().getNumberOfFiles(PeLib::OLDDIR); ++fileIndex)
+	for (size_t fileIndex = 0; fileIndex < _peFile->impDir().getNumberOfFiles(false); ++fileIndex)
 	{
 		auto tmp = static_cast<unsigned int>(fileIndex);
 		auto w = static_cast<unsigned short>(_packedContentSect->getSecSeg()->getIndex());
-		size_t destOffset = _peFile->impDir().getFirstThunk(tmp, PeLib::OLDDIR) - imageLoader.getSectionHeader(w)->VirtualAddress;
-		for (size_t funcIndex = 0; funcIndex < _peFile->impDir().getNumberOfFunctions(tmp, PeLib::OLDDIR); ++funcIndex, destOffset += 4)
+		size_t destOffset = _peFile->impDir().getFirstThunk(tmp, false) - imageLoader.getSectionHeader(w)->VirtualAddress;
+		for (size_t funcIndex = 0; funcIndex < _peFile->impDir().getNumberOfFunctions(tmp, false); ++funcIndex, destOffset += 4)
 		{
 			content.write<std::uint32_t>(
-					_peFile->impDir().getOriginalFirstThunk(tmp, static_cast<unsigned int>(funcIndex), PeLib::OLDDIR),
+					_peFile->impDir().getOriginalFirstThunk(tmp, static_cast<unsigned int>(funcIndex), false),
 					static_cast<uint32_t>(destOffset));
 		}
 	}

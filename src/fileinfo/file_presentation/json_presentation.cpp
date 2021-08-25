@@ -487,6 +487,8 @@ void WriteSigner(JsonPresentation::Writer& writer, const Signer& signer)
 void WriteSignature(JsonPresentation::Writer& writer, const DigitalSignature& signature)
 {
 	writer.StartObject();
+	writer.String("signatureVerified");
+	writer.Bool(signature.isValid);
 	writer.String("warnings");
 	writer.StartArray();
 	for (auto&& warn : signature.warnings) {
