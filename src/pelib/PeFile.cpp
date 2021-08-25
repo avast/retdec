@@ -380,8 +380,8 @@ namespace PeLib
 
 	int PeFileT::readComHeaderDirectory()
 	{
-		if(m_imageLoader.getDataDirRva(PELIB_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR) &&
-		   m_imageLoader.getDataDirSize(PELIB_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR))
+		// Need to do this regardless of NumberOf
+		if(m_imageLoader.getComDirRva() && m_imageLoader.getComDirSize())
 		{
 			return comDir().read(m_imageLoader);
 		}

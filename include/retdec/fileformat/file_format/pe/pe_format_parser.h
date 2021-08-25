@@ -185,7 +185,7 @@ class PeFormatParser
 
 	std::uint32_t getNumberOfImportedLibraries() const
 	{
-		return peFile->impDir().getNumberOfFiles(PeLib::OLDDIR);
+		return peFile->impDir().getNumberOfFiles(false);
 	}
 
 	std::uint32_t getNumberOfDelayImportedLibraries() const
@@ -265,8 +265,8 @@ class PeFormatParser
 		section.setType(sectionType);
 		section.setIndex(secIndex);
 		section.setOffset(imageLoader.getRealPointerToRawData(secIndex));
-		section.setSizeInFile(pSectionHeader->SizeOfRawData);
-		section.setSizeInMemory(pSectionHeader->VirtualSize);
+		section.setSizeInFile(imageLoader.getRealSizeOfRawData(secIndex));
+		section.setSizeInMemory((pSectionHeader->VirtualSize != 0) ? pSectionHeader->VirtualSize : pSectionHeader->SizeOfRawData);
 		section.setAddress(pSectionHeader->VirtualAddress ? imageLoader.getImageBase() + pSectionHeader->VirtualAddress : 0);
 		section.setMemory(section.getAddress());
 		section.setPeCoffFlags(pSectionHeader->Characteristics);
@@ -276,19 +276,21 @@ class PeFormatParser
 
 	bool getDllFlags(unsigned long long & dllFlags) const
 	{
-		if(peFile->imageLoader().getCharacteristics() & PeLib::PELIB_IMAGE_FILE_DLL)
-		{
-			dllFlags = peFile->imageLoader().getOptionalHeader().DllCharacteristics;
-			return true;
-		}
-
-		return false;
+		dllFlags = peFile->imageLoader().getOptionalHeader().DllCharacteristics;
+		return true;
 	}
 
 	bool getDataDirectoryRelative(unsigned long long index, unsigned long long &relAddr, unsigned long long &size) const
 	{
 		relAddr = peFile->imageLoader().getDataDirRva(index);
 		size = peFile->imageLoader().getDataDirSize(index);
+		return (relAddr != 0);
+	}
+
+	bool getComDirectoryRelative(unsigned long long &relAddr, unsigned long long &size) const
+	{
+		relAddr = peFile->imageLoader().getComDirRva();
+		size = peFile->imageLoader().getComDirSize();
 		return (relAddr != 0);
 	}
 
@@ -307,10 +309,10 @@ class PeFormatParser
 	{
 		const auto & imports = peFile->impDir();
 
-		if(index >= imports.getNumberOfFiles(PeLib::OLDDIR))
+		if(index >= imports.getNumberOfFiles(false))
 			return false;
 
-		fileName = imports.getFileName(index, PeLib::OLDDIR);
+		fileName = imports.getFileName(index, false);
 		return true;
 	}
 
@@ -325,51 +327,37 @@ class PeFormatParser
 		return true;
 	}
 
-	std::unique_ptr<PeImport> getImport(unsigned long long fileIndex, unsigned long long importIndex) const
+	std::unique_ptr<PeImport> getImport(std::size_t fileIndex, std::size_t importIndex) const
 	{
 		const PeLib::ImportDirectory & peImports = peFile->impDir();
-		const auto ordinalMask = peFile->imageLoader().getOrdinalMask();
+		const auto imageBase = peFile->imageLoader().getImageBase();
 		const auto bits = peFile->imageLoader().getImageBitability();
+		std::string importName;
+		std::uint32_t ordinalNumber = 0;
+		std::uint32_t patchRva = 0;
+		std::uint16_t importHint = 0;
+		bool isImportByOrdinal = false;
 
-		if(fileIndex >= peImports.getNumberOfFiles(PeLib::OLDDIR) ||
-			importIndex >= peImports.getNumberOfFunctions(fileIndex, PeLib::OLDDIR))
+		if(peImports.getImportedFunction(fileIndex, importIndex, importName, importHint, ordinalNumber, patchRva, isImportByOrdinal, false))
 		{
-			return nullptr;
-		}
+			auto import = std::make_unique<PeImport>(PeImportFlag::None);
 
-		auto isOrdinalNumberValid = true;
-		unsigned long long ordinalNumber = peImports.getFunctionHint(fileIndex, importIndex, PeLib::OLDDIR);
-		if(!ordinalNumber)
-		{
-			const auto firstThunk = peImports.getFirstThunk(fileIndex, importIndex, PeLib::OLDDIR);
-			const auto originalFirstThunk = peImports.getOriginalFirstThunk(fileIndex, importIndex, PeLib::OLDDIR);
-			if(firstThunk & ordinalMask)
+			if(isImportByOrdinal)
 			{
-				ordinalNumber = firstThunk - ordinalMask;
+				import->setOrdinalNumber(ordinalNumber);
 			}
-			else if(originalFirstThunk & ordinalMask)
-			{
-				ordinalNumber = originalFirstThunk - ordinalMask;
-			}
-			else
-			{
-				isOrdinalNumberValid = false;
-			}
+
+			// Note: Even when the function is imported by ordinal, there can be name
+			// Example: WS2_32.dll!@115 -> WSAStartup
+			import->setName(importName);
+
+			import->setLibraryIndex(fileIndex);
+			import->setAddress(imageBase + patchRva);
+			return import;
 		}
 
-		auto import = std::make_unique<PeImport>(PeImportFlag::None);
-		if(isOrdinalNumberValid)
-		{
-			import->setOrdinalNumber(ordinalNumber);
-		}
-		else
-		{
-			import->invalidateOrdinalNumber();
-		}
-		import->setName(peImports.getFunctionName(fileIndex, importIndex, PeLib::OLDDIR));
-		import->setAddress(peFile->imageLoader().getImageBase() + peImports.getFirstThunk(fileIndex, PeLib::OLDDIR) + importIndex * (bits / 8));
-		import->setLibraryIndex(fileIndex);
-		return import;
+		// Out of range
+		return nullptr;
 	}
 
 	std::unique_ptr<PeImport> getDelayImport(unsigned long long fileIndex, unsigned long long importIndex) const

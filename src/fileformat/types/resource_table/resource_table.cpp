@@ -781,6 +781,11 @@ void ResourceTable::linkResourceIconGroups()
 					continue;
 				}
 
+				// Multiple icon group may reference an icon. If that happens, do not rewrite
+				// icon dimensions. Doing so messes up with the icon hash, and we only care for the first icon anyway
+				if(icon->hasValidDimensions())
+					continue;
+
 				icon->setWidth(width);
 				icon->setHeight(height);
 				icon->setIconSize(iconSize);

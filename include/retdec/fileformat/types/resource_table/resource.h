@@ -42,6 +42,7 @@ class Resource
 		bool sublanguageIdIsValid = false; ///< @c true if sublanguage ID is valid
 		bool loaded = false;               ///< @c true if content of resource was successfully loaded from input file
 	public:
+		virtual ~Resource() = default;
 		/// @name Getters
 		/// @{
 		std::string getCrc32() const;
