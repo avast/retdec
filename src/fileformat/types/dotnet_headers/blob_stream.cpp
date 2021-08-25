@@ -22,7 +22,8 @@ BlobStream::BlobStream(std::vector<std::uint8_t> data, std::uint64_t streamOffse
  */
 std::vector<std::uint8_t> BlobStream::getElement(std::size_t offset) const
 {
-	// Ugly, C like just for fast prototype, rework TODO
+	// Adapted from YARA
+	// https://github.com/VirusTotal/yara/blob/v4.1.2/libyara/modules/dotnet/dotnet.c#L130
 	std::uint32_t len = 0;
 	const unsigned char* ptr = data.data() + offset;
 	if (offset >= data.size())
