@@ -2224,7 +2224,7 @@ void PeFormat::parseBlobStream(std::uint64_t baseAddress, std::uint64_t offset, 
 	std::vector<std::uint8_t> data;
 	auto address = baseAddress + offset;
 	getXBytes(address, size, data);
-	blobStream = std::make_unique<BlobStream>(data, offset, size);
+	blobStream = std::make_unique<BlobStream>(std::move(data), offset, size);
 
 }
 
@@ -3152,7 +3152,7 @@ bool PeFormat::isDotNet() const
 		return false;
 	}
 
-	unsigned correctHdrSize = 72;
+	std::uint32_t correctHdrSize = 72;
 	if (clrHeader->getHeaderSize() != correctHdrSize)
 	{
 		return false;

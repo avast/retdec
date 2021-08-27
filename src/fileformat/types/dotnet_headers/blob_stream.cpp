@@ -11,7 +11,7 @@ namespace retdec {
 namespace fileformat {
 
 BlobStream::BlobStream(std::vector<std::uint8_t> data, std::uint64_t streamOffset, std::uint64_t streamSize)
-	: Stream(StreamType::Blob, streamOffset, streamSize), data(data)
+	: Stream(StreamType::Blob, streamOffset, streamSize), data(std::move(data))
 {
 }
 
