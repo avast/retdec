@@ -70,6 +70,27 @@ struct VersionInfoHeader
 namespace retdec {
 namespace fileformat {
 
+// Icon priority from YARA
+static const std::vector<IconPriorityEntry> iconPriority_YARA =
+{
+	{32, 32},
+	{24, 32},
+	{48, 32},
+	{32, 8},
+	{16, 32},
+	{64, 32},
+	{24, 8},
+	{48, 8},
+	{16, 8},
+	{64, 8},
+	{96, 32},
+	{96, 8},
+	{128, 32},
+	{128, 8},
+	{256, 32},
+	{256, 8}
+};
+
 /**
  * Compute icon perceptual hashes
  * @param icon Icon to compute the hash of
@@ -369,6 +390,93 @@ const ResourceIconGroup* ResourceTable::getPriorResourceIconGroup() const
 }
 
 /**
+ * Get the icon that will be used for calculation of the icon hash.
+ * This algorithm is supposed to be YARA-compatible
+ * @return Prior icon
+ */
+const ResourceIcon* ResourceTable::getIconForIconHash() const
+{
+	ResourceIconGroup * iconGroup = nullptr;
+	ResourceIcon * theBestIcon = nullptr;
+	std::size_t number_icon_ordinals = 0;
+	std::size_t best_icon_priority = 0xFF;
+
+	//
+	// Step 1: Get the suitable icon group. YARA takes the first icon group
+	// YARA: Done in module "pe.c", function "pe_collect_icon_ordinals()"
+	//
+
+	if(iconGroups.size())
+	{
+		iconGroup = iconGroups[0];
+		iconGroup->getNumberOfEntries(number_icon_ordinals);
+	}
+
+	//
+	// Step 2: Parse all icons in the PE and retrieve the 
+	// YARA: Done in module "pe.c", function "pe_collect_icon_data()"
+	//
+
+	if(iconGroup && number_icon_ordinals)
+	{
+		for(ResourceIcon * icon : icons)
+		{
+			std::uint32_t icon_data_offset = icon->getOffset();
+			std::uint32_t icon_data_size = icon->getSizeInFile();
+
+			// Skip icons with zero offset or zero size
+			if(icon_data_offset == 0 || icon_data_size == 0 /* || icon_data_offset > pe->data_size */)
+				continue;
+
+			// Parse all icons in the group
+			for(std::size_t i = 0; i < number_icon_ordinals; i++)
+			{
+				std::size_t nameIdInGroup = 0;
+				std::size_t nameIdOfIcon = 0;
+				std::uint16_t iconWidth = 0;
+				std::uint16_t iconHeight = 0;
+				std::uint16_t iconBitCount = 0;
+
+				// Skip icons that are of different ID
+				iconGroup->getEntryNameID(i, nameIdInGroup);
+				icon->getNameId(nameIdOfIcon);
+				if(nameIdOfIcon != nameIdInGroup /* || fits_in_pe() */) 
+					continue;
+
+				// Retrieve size and bit count
+				iconGroup->getEntryWidth(i, iconWidth);
+				iconGroup->getEntryHeight(i, iconHeight);
+				iconGroup->getEntryBitCount(i, iconBitCount);
+				
+				// YARA ignores any icons that have width != height
+				if(iconWidth == iconHeight)
+				{
+					for(size_t j = 0; j < iconPriority_YARA.size() && j < best_icon_priority; j++)
+					{
+						if(iconWidth == iconPriority_YARA[j].iconWidth && iconBitCount == iconPriority_YARA[j].iconBitCount)
+						{
+							best_icon_priority = j;
+							theBestIcon = icon;
+							break;
+						}
+					}
+				}
+
+				// Set the current icon as the best one
+				if(!theBestIcon && icons.size())
+				{
+					best_icon_priority = iconPriority_YARA.size();
+					theBestIcon = icon;
+				}
+			}
+		}
+	}
+
+	// Return whatever best icon we found
+	return theBestIcon;
+}
+
+/**
  * Get begin iterator
  * @return Begin iterator
  */
@@ -393,13 +501,7 @@ void ResourceTable::computeIconHashes()
 {
 	std::vector<std::uint8_t> iconHashBytes;
 
-	auto priorGroup = getPriorResourceIconGroup();
-	if(!priorGroup)
-	{
-		return;
-	}
-
-	auto priorIcon = priorGroup->getPriorIcon();
+	auto priorIcon = getIconForIconHash();
 	if(!priorIcon)
 	{
 		return;
