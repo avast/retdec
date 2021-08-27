@@ -329,7 +329,7 @@ namespace PeLib
 
 		// No data or invalid leaf
 		if(entry.OffsetToData == 0 && entry.Size == 0)
-			return ERROR_INVALID_FILE;
+			return ERROR_SKIP_RESOURCE;	// Be in sync with YARA
 		if(entry.OffsetToData > sizeOfImage || entry.Size > sizeOfImage)
 			return ERROR_NONE;
 		if((uiRsrcRva + entry.OffsetToData) >= sizeOfImage || (uiRsrcRva + entry.OffsetToData + entry.Size) > sizeOfImage)

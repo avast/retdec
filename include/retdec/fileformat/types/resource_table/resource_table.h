@@ -18,6 +18,22 @@ namespace retdec {
 namespace fileformat {
 
 /**
+ * Definition of the icon priority structure
+ */
+
+struct IconPriorityEntry
+{
+	IconPriorityEntry(std::uint16_t width, std::uint16_t bitCount)
+	{
+		iconWidth = width;
+		iconBitCount = bitCount;
+	}
+
+	std::uint16_t iconWidth;
+	std::uint16_t iconBitCount;
+};
+
+/**
  * Table of resources
  */
 class ResourceTable
@@ -63,6 +79,7 @@ class ResourceTable
 		const std::string& getResourceIconhashSha256() const;
 		const std::string& getResourceIconPerceptualAvgHash() const;
 		const ResourceIconGroup* getPriorResourceIconGroup() const;
+		const ResourceIcon* getIconForIconHash() const;
 		/// @}
 
 		/// @name Iterators
