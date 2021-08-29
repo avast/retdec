@@ -30,6 +30,11 @@ std::vector<std::uint8_t> BlobStream::getElement(std::size_t offset) const
 	{
 		return {};
 	}
+	// ECMA 335 II.24.2.4
+	/* Blob starts with their length in big-endian order 
+	which can be variable in size. We can figure out the 
+	size of the length using first few bits of the first byte. */
+	// If first bit is 0, length is encoded in the first byte
 	else if ((*ptr & 0x80) == 0x00)
 	{
 		len = *ptr;
@@ -39,6 +44,7 @@ std::vector<std::uint8_t> BlobStream::getElement(std::size_t offset) const
 			return { data.begin() + offset, data.begin() + offset + len };
 		}
 	}
+	// If first 2 bits are 10, length is stored in 2 bytes
 	else if ((*ptr & 0xC0) == 0x80)
 	{
 		// Make sure we have one more byte.
@@ -53,6 +59,7 @@ std::vector<std::uint8_t> BlobStream::getElement(std::size_t offset) const
 			return { data.begin() + offset, data.begin() + offset + len };
 		}
 	}
+	// If first 3 bits are 110, length is stored in 4 bytes
 	else if ((*ptr & 0xE0) == 0xC0)
 	{
 		// Make sure we have 3 more bytes.

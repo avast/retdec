@@ -3160,10 +3160,12 @@ bool PeFormat::isDotNet() const
 
 	std::uint32_t numberOfRvaAndSizes = getImageLoader().getOptionalHeader().NumberOfRvaAndSizes;
 	// If the binary is 64bit, check NumberOfRvaAndSizes, otherwise don't
-	if (getImageBitability() == 64 &&
-			numberOfRvaAndSizes < PELIB_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR)
+	if (getImageBitability() == 64)
 	{
-		return false;
+		if (numberOfRvaAndSizes < PELIB_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR)
+		{
+			return false;
+		}
 	}
 	else if (!isDll())
 	{ // If 32 bit check if first 2 bytes at entry point are 0xFF 0x25
