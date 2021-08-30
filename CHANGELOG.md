@@ -23,6 +23,7 @@
 * Enhancement: Added support for new ELF UPX unpacking stubs (versions 3.93 - 3.96) ([#929](https://github.com/avast/retdec/pull/929)).
 * Enhancement: Improved YARA rules for detection of the SHA-512 algorithm ([#935](https://github.com/avast/retdec/pull/935)).
 * Enhancement: Improved PE Authenticode parsing ([#902](https://github.com/avast/retdec/pull/902), [#380](https://github.com/avast/retdec/issues/380)).
+* Fix: Stricter validation of PE signatures - they need to be outside of the image to be considered valid ([#972](https://github.com/avast/retdec/issues/972), [#986](https://github.com/avast/retdec/pull/986), [regression tests #108](https://github.com/avast/retdec-regression-tests/pull/108)).
 * Fix: Do not provide entry point offset in case it doesn't exist ([#962](https://github.com/avast/retdec/issues/962), [#975](https://github.com/avast/retdec/pull/975), [regression tests #101](https://github.com/avast/retdec-regression-tests/pull/101)).
 * Fix: Fix PE resource parsing issues ([#963](https://github.com/avast/retdec/issues/963), [#982](https://github.com/avast/retdec/pull/982), [regression tests #105](https://github.com/avast/retdec-regression-tests/pull/105)).
 * Fix: Fix PE imports parsing issues ([#1003](https://github.com/avast/retdec/pull/1003), [regression tests #107](https://github.com/avast/retdec-regression-tests/pull/107)).
