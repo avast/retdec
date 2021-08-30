@@ -94,6 +94,7 @@ class DotnetClass : public DotnetType
 		bool isInterface() const;
 		bool isAbstract() const;
 		bool isSealed() const;
+		bool isNested() const;
 		/// @}
 
 		/// @name Additions

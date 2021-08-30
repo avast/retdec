@@ -50,7 +50,7 @@ class DotnetTypeReconstructor
 		std::unique_ptr<DotnetField> createField(const Field* field, const DotnetClass* ownerClass);
 		std::unique_ptr<DotnetProperty> createProperty(const Property* property, const DotnetClass* ownerClass);
 		std::unique_ptr<DotnetMethod> createMethod(const MethodDef* methodDef, const DotnetClass* ownerClass);
-		std::unique_ptr<DotnetParameter> createMethodParameter(const Param* param, const DotnetClass* ownerClass, const DotnetMethod* ownerMethod, std::vector<std::uint8_t>& signature);
+		std::unique_ptr<DotnetParameter> createMethodParameter(std::size_t paramIdx, std::size_t startIdx, const DotnetClass* ownerClass, const DotnetMethod* ownerMethod, std::vector<std::uint8_t>& signature);
 
 		template <typename T> std::unique_ptr<T> createDataTypeFollowedByReference(std::vector<std::uint8_t>& data);
 		template <typename T> std::unique_ptr<T> createDataTypeFollowedByType(std::vector<std::uint8_t>& data, const DotnetClass* ownerClass, const DotnetMethod* ownerMethod);

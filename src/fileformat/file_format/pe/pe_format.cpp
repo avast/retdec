@@ -1924,15 +1924,15 @@ void PeFormat::loadDotnetHeaders()
 			return;
 		}
 
-		if (streamName == "#~" || streamName == "#-")
+		if ((streamName == "#~" || streamName == "#-") && !metadataStream)
 			parseMetadataStream(metadataHeaderAddress, streamOffset, streamSize);
-		else if (streamName == "#Blob")
+		else if (streamName == "#Blob" && !blobStream)
 			parseBlobStream(metadataHeaderAddress, streamOffset, streamSize);
-		else if (streamName == "#GUID")
+		else if (streamName == "#GUID" && !guidStream)
 			parseGuidStream(metadataHeaderAddress, streamOffset, streamSize);
-		else if (streamName == "#Strings")
+		else if (streamName == "#Strings" && !stringStream)
 			parseStringStream(metadataHeaderAddress, streamOffset, streamSize);
-		else if (streamName == "#US")
+		else if (streamName == "#US" && !userStringStream)
 			parseUserStringStream(metadataHeaderAddress, streamOffset, streamSize);
 
 		// Round-up to the nearest higher multiple of 4
@@ -2059,6 +2059,13 @@ void PeFormat::parseMetadataStream(std::uint64_t baseAddress, std::uint64_t offs
 			metadataStream->addMetadataTable(static_cast<MetadataTableType>(i), tableSize);
 			currentAddress += 4;
 		}
+	}
+	// ExtraData flags means there is extra 4 bytes at the end Rows array that contaisn the rows sizes
+	// I don't see anything about in at ECMA-335, but I can see in real samples and in IlSpy source
+	// that understands it and correctly decompiles, sample: 5b5817fe2d4f0989501802b0e2bb4451583ff27fd0723f40bb7f8b0417dd7c58
+	if (heapOffsetSizes & 0x40)
+	{
+		currentAddress += 4;
 	}
 
 	for (std::size_t i = 0; i < 64; ++i)
@@ -2214,55 +2221,11 @@ void PeFormat::parseMetadataStream(std::uint64_t baseAddress, std::uint64_t offs
  */
 void PeFormat::parseBlobStream(std::uint64_t baseAddress, std::uint64_t offset, std::uint64_t size)
 {
-	blobStream = std::make_unique<BlobStream>(offset, size);
+	std::vector<std::uint8_t> data;
 	auto address = baseAddress + offset;
+	getXBytes(address, size, data);
+	blobStream = std::make_unique<BlobStream>(std::move(data), offset, size);
 
-	std::vector<std::uint8_t> elementData;
-	std::uint64_t length, lengthSize;
-
-	std::size_t inStreamOffset = 0;
-	while (inStreamOffset < size)
-	{
-		// First std::uint8_t is length of next element in the blob
-		lengthSize = 1;
-		if (!get1Byte(address + inStreamOffset, length))
-		{
-			return;
-		}
-
-		// 2-std::uint8_t length encoding if the length is 10xxxxxx
-		if ((length & 0xC0) == 0x80)
-		{
-			if (!get2Byte(address + inStreamOffset, length, Endianness::BIG))
-			{
-				return;
-			}
-
-			length &= ~0xC000;
-			lengthSize = 2;
-		}
-		// 4-std::uint8_t length encoding if the length is 110xxxxx
-		else if ((length & 0xE0) == 0xC0)
-		{
-			if (!get4Byte(address + inStreamOffset, length, Endianness::BIG))
-			{
-				return;
-			}
-
-			length &= ~0xE0000000;
-			lengthSize = 4;
-		}
-
-		// Read only if length is greater than 0
-		elementData.clear();
-		if (length > 0 && !getXBytes(address + inStreamOffset + lengthSize, length, elementData))
-		{
-			return;
-		}
-
-		blobStream->addElement(inStreamOffset, elementData);
-		inStreamOffset += lengthSize + length;
-	}
 }
 
 /**
@@ -2299,14 +2262,8 @@ void PeFormat::parseStringStream(std::uint64_t baseAddress, std::uint64_t offset
 	while (currentOffset < size)
 	{
 		std::string string;
-		if (!getNTBS(address + currentOffset, string))
-		{
-			currentOffset += 1;
-			continue;
-		}
-
+		getNTBS(address + currentOffset, string);
 		stringStream->addString(currentOffset, string);
-
 		// +1 for null-terminator
 		currentOffset += 1 + string.length();
 	}
@@ -3191,7 +3148,45 @@ bool PeFormat::initDllList(const std::string & dllListFile)
  */
 bool PeFormat::isDotNet() const
 {
-	return clrHeader != nullptr || metadataHeader != nullptr;
+	if (!clrHeader || !metadataHeader) {
+		return false;
+	}
+
+	std::uint32_t correctHdrSize = 72;
+	if (clrHeader->getHeaderSize() != correctHdrSize)
+	{
+		return false;
+	}
+
+	std::uint32_t numberOfRvaAndSizes = getImageLoader().getOptionalHeader().NumberOfRvaAndSizes;
+	// If the binary is 64bit, check NumberOfRvaAndSizes, otherwise don't
+	if (getImageBitability() == 64)
+	{
+		if (numberOfRvaAndSizes < PELIB_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR)
+		{
+			return false;
+		}
+	}
+	else if (!isDll())
+	{ // If 32 bit check if first 2 bytes at entry point are 0xFF 0x25
+
+		unsigned long long entryAddr = 0;
+		if (!getEpAddress(entryAddr))
+		{
+			return false;
+		}
+		std::uint64_t bytes[2];
+		if (!get1Byte(entryAddr, bytes[0]) || !get1Byte(entryAddr + 1, bytes[1]))
+		{
+			return false;
+		}
+		if (bytes[0] != 0xFF || bytes[1] != 0x25)
+		{
+			return false;
+		}
+	}
+
+	return true;
 }
 
 /**
