@@ -3198,7 +3198,7 @@ bool PeFormat::isDotNet() const
 	else if (!isDll())
 	{ // If 32 bit check if first 2 bytes at entry point are 0xFF 0x25
 
-		unsigned long long entryAddr = 0;
+		std::uint64_t entryAddr = 0;
 		if (!getEpAddress(entryAddr))
 		{
 			return false;
