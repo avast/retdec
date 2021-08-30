@@ -770,16 +770,19 @@ static void printSignature(const DigitalSignature& signature, int indent)
 void PlainPresentation::presentSignatures() const
 {
 	const CertificateTable* table = fileinfo.certificateTable;
-	if (!table) {
+	if (!table || !table->isOutsideImage)
+	{
 		return;
 	}
 	Log::info() << "\n";
 	Log::info() << "Digital Signatures\n";
 	Log::info() << "------------------\n\n";
 	int indent = 4;
+
 	Log::info() << std::string(indent, ' ') << "Signature count: " << table->signatureCount() << "\n";
 
-	for (int idx = 0; idx < table->signatureCount(); idx++) {
+	for (int idx = 0; idx < table->signatureCount(); idx++)
+	{
 		Log::info() << std::string(indent, ' ') << "Signature #" << idx << ":\n";
 		printSignature(table->signatures[idx], indent + 4);
 		Log::info() << "\n";

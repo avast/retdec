@@ -516,12 +516,12 @@ void WriteSignature(JsonPresentation::Writer& writer, const DigitalSignature& si
 void JsonPresentation::presentCertificates(Writer& writer) const
 {
 
-	if(!fileinfo.certificateTable)
+	if (!fileinfo.certificateTable || !fileinfo.certificateTable->isOutsideImage)
 	{
 		return;
 	}
-
 	writer.String("digitalSignatures");
+
 	writer.StartObject();
 	writer.Key("numberOfSignatures");
 	writer.Int64(fileinfo.certificateTable->signatures.size());
