@@ -71,7 +71,7 @@ TEST_F(IntelHexFormatTests_istream, CorrectParsing)
 
 TEST_F(IntelHexFormatTests_istream, CorrectSections)
 {
-	unsigned long long res;
+	std::uint64_t res;
 	EXPECT_EQ(true, parser->getEpAddress(res));
 	EXPECT_EQ(2, parser->getDeclaredNumberOfSections());
 	EXPECT_EQ(0xffff0001, res);
@@ -91,7 +91,7 @@ TEST_F(IntelHexFormatTests_istream, CorrectSections)
 
 TEST_F(IntelHexFormatTests_istream, CorrectSerialization)
 {
-	unsigned long long res;
+	std::uint64_t res;
 	EXPECT_EQ(true, parser->getEpOffset(res));
 	EXPECT_EQ(0x01, res);
 	EXPECT_EQ(0x63, parser->getLoadedBytes().size());
@@ -99,7 +99,7 @@ TEST_F(IntelHexFormatTests_istream, CorrectSerialization)
 
 TEST_F(IntelHexFormatTests_istream, CorrectFileInfo)
 {
-	unsigned long long res;
+	std::uint64_t res;
 	EXPECT_EQ(330, parser->getFileLength());
 	EXPECT_EQ(99, parser->getDeclaredFileLength());
 	EXPECT_EQ(parser->getLoadedFileLength(), parser->getDeclaredFileLength());
@@ -170,7 +170,7 @@ TEST_F(IntelHexFormatTests_data, CorrectParsing)
 
 TEST_F(IntelHexFormatTests_data, CorrectSections)
 {
-	unsigned long long res;
+	std::uint64_t res;
 	EXPECT_EQ(true, parser->getEpAddress(res));
 	EXPECT_EQ(2, parser->getDeclaredNumberOfSections());
 	EXPECT_EQ(0xffff0001, res);

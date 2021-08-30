@@ -4,6 +4,7 @@
  * @copyright (c) 2020 Avast Software, licensed under the MIT license
  */
 
+#include <cstdint>
 #include <iostream>
 #include <fstream>
 

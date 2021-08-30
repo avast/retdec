@@ -85,7 +85,7 @@ void PatternDetector::createPatternFromRule(Pattern &pattern, const yaracpp::Yar
 		PatternMatch patMatch;
 		patMatch.setDataSize(match->getDataSize());
 		patMatch.setOffset(match->getOffset());
-		unsigned long long val;
+		std::uint64_t val;
 		if(fileParser && fileParser->getAddressFromOffset(val, match->getOffset()))
 		{
 			patMatch.setAddress(val);
@@ -250,7 +250,7 @@ void PatternDetector::saveCryptoRule(const yaracpp::YaraRule &rule)
 			}
 		}
 		patMatch.setOffset(match->getOffset());
-		unsigned long long val = 0;
+		std::uint64_t val = 0;
 		if(fileParser && fileParser->getAddressFromOffset(val, match->getOffset()))
 		{
 			patMatch.setAddress(val);

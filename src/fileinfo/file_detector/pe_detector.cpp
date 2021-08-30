@@ -104,7 +104,7 @@ void PeDetector::getFileFlags()
  */
 void PeDetector::getDllFlags()
 {
-	unsigned long long flags;
+	std::uint64_t flags;
 	if(!peParser->getDllFlags(flags))
 	{
 		return;
@@ -184,7 +184,7 @@ void PeDetector::getCoffSymbols()
  */
 void PeDetector::getRelocationTableInfo()
 {
-	unsigned long long relocs = 0;
+	std::uint64_t relocs = 0;
 	if(peParser->getNumberOfRelocations(relocs))
 	{
 		RelocationTable relTable;
@@ -344,7 +344,7 @@ void PeDetector::getDotnetInfo()
  */
 void PeDetector::getVisualBasicInfo()
 {
-	unsigned long long version;
+	std::uint64_t version;
 	if (!peParser->isVisualBasic(version))
 	{
 		return;
@@ -369,7 +369,7 @@ void PeDetector::detectFileClass()
 
 void PeDetector::detectArchitecture()
 {
-	unsigned long long machineType = 0;
+	std::uint64_t machineType = 0;
 	if(!peParser->getMachineCode(machineType))
 	{
 		return;

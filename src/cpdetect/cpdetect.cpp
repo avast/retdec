@@ -766,6 +766,7 @@ ReturnCode CompilerDetector::getAllInformation()
 	}
 
 	fileParser.getImageBaseAddress(toolInfo.imageBase);
+
 	toolInfo.entryPointAddress = fileParser.getEpAddress(toolInfo.epAddress);
 	toolInfo.entryPointOffset = fileParser.getEpOffset(toolInfo.epOffset);
 
@@ -774,8 +775,19 @@ ReturnCode CompilerDetector::getAllInformation()
 		toolInfo.overlayOffset = fileParser.getDeclaredFileLength();
 	}
 
-	const bool invalidEntryPoint = !toolInfo.entryPointAddress
-			|| !toolInfo.entryPointOffset;
+	bool invalidEntryPoint = false;
+	Format format = fileParser.getFileFormat();
+	if (format == Format::PE)
+	{
+		// False EP offset (offset outside of file) doesn't have
+		// to mean invalid EP as it can be memory only
+		invalidEntryPoint = !toolInfo.entryPointAddress;
+	}
+	else
+	{
+		invalidEntryPoint = !toolInfo.entryPointAddress || !toolInfo.entryPointOffset;
+	}
+
 	if (!fileParser.getHexEpBytes(toolInfo.epBytes, cpParams.epBytesCount)
 			&& !invalidEntryPoint
 			&& !fileParser.isInValidState())

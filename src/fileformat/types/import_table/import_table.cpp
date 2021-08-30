@@ -238,7 +238,7 @@ void ImportTable::computeHashes()
 		// YARA compatible name lookup
 		if(funcName.empty())
 		{
-			unsigned long long ord;
+			std::uint64_t ord;
 			if(import->getOrdinalNumber(ord))
 			{
 				funcName = toLower(retdec::utils::ordLookUp(libName, ord, true));
@@ -450,7 +450,7 @@ void ImportTable::dump(std::string &dumpTable) const
 
 	if(hasImports())
 	{
-		unsigned long long aux;
+		std::uint64_t aux;
 		ret << ";\n";
 
 		for(const auto &imp : imports)
@@ -495,7 +495,7 @@ void ImportTable::dumpLibrary(std::size_t libraryIndex, std::string &libraryDump
 
 	if(!indexes.empty())
 	{
-		unsigned long long aux;
+		std::uint64_t aux;
 		ret << ";\n";
 
 		for(const auto &i : indexes)

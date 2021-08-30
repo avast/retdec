@@ -19,8 +19,8 @@ class Export
 {
 	private:
 		std::string name;
-		unsigned long long address = 0;
-		unsigned long long ordinalNumber = 0;
+		std::uint64_t address = 0;
+		std::uint64_t ordinalNumber = 0;
 		bool ordinalNumberIsValid = false;
 	public:
 		virtual ~Export() = default;
@@ -28,15 +28,15 @@ class Export
 		/// @name Getters
 		/// @{
 		std::string getName() const;
-		unsigned long long getAddress() const;
-		bool getOrdinalNumber(unsigned long long &exportOrdinalNumber) const;
+		std::uint64_t getAddress() const;
+		bool getOrdinalNumber(std::uint64_t &exportOrdinalNumber) const;
 		/// @}
 
 		/// @name Setters
 		/// @{
 		void setName(std::string exportName);
-		void setAddress(unsigned long long exportAddress);
-		void setOrdinalNumber(unsigned long long exportOrdinalNumber);
+		void setAddress(std::uint64_t exportAddress);
+		void setOrdinalNumber(std::uint64_t exportOrdinalNumber);
 		/// @}
 
 		/// @name Other methods

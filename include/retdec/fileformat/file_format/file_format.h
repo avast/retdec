@@ -206,8 +206,8 @@ class FileFormat : public retdec::utils::ByteValueStorage, private retdec::utils
 		std::size_t nibblesFromBytes(std::size_t bytes) const;
 		std::size_t bytesFromNibbles(std::size_t nibbles) const;
 		std::size_t bytesFromNibblesRounded(std::size_t nibbles) const;
-		bool getOffsetFromAddress(unsigned long long &result, unsigned long long address) const;
-		bool getAddressFromOffset(unsigned long long &result, unsigned long long offset) const;
+		bool getOffsetFromAddress(std::uint64_t &result, std::uint64_t address) const;
+		bool getAddressFromOffset(std::uint64_t &result, std::uint64_t offset) const;
 		bool getBytes(std::vector<std::uint8_t> &result, unsigned long long offset, unsigned long long numberOfBytes) const;
 		bool getEpBytes(std::vector<std::uint8_t> &result, unsigned long long numberOfBytes) const;
 		bool getHexBytes(std::string &result, unsigned long long offset, unsigned long long numberOfBytes) const;
@@ -307,11 +307,11 @@ class FileFormat : public retdec::utils::ByteValueStorage, private retdec::utils
 		virtual bool isObjectFile() const = 0;
 		virtual bool isDll() const = 0;
 		virtual bool isExecutable() const = 0;
-		virtual bool getMachineCode(unsigned long long &result) const = 0;
-		virtual bool getAbiVersion(unsigned long long &result) const = 0;
-		virtual bool getImageBaseAddress(unsigned long long &imageBase) const = 0;
-		virtual bool getEpAddress(unsigned long long &result) const = 0;
-		virtual bool getEpOffset(unsigned long long &epOffset) const = 0;
+		virtual bool getMachineCode(std::uint64_t &result) const = 0;
+		virtual bool getAbiVersion(std::uint64_t &result) const = 0;
+		virtual bool getImageBaseAddress(std::uint64_t &imageBase) const = 0;
+		virtual bool getEpAddress(std::uint64_t &result) const = 0;
+		virtual bool getEpOffset(std::uint64_t &epOffset) const = 0;
 		virtual Architecture getTargetArchitecture() const = 0;
 		virtual std::size_t getDeclaredNumberOfSections() const = 0;
 		virtual std::size_t getDeclaredNumberOfSegments() const = 0;

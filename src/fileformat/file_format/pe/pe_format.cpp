@@ -855,11 +855,11 @@ void PeFormat::loadVisualBasicHeader()
 {
 	const auto &allBytes = getBytes();
 	std::vector<std::uint8_t> bytes;
-	unsigned long long version = 0;
-	unsigned long long vbHeaderAddress = 0;
-	unsigned long long vbHeaderOffset = 0;
-	unsigned long long vbProjectInfoOffset = 0;
-	unsigned long long vbComDataRegistrationOffset = 0;
+	std::uint64_t version = 0;
+	std::uint64_t vbHeaderAddress = 0;
+	std::uint64_t vbHeaderOffset = 0;
+	std::uint64_t vbProjectInfoOffset = 0;
+	std::uint64_t vbComDataRegistrationOffset = 0;
 	std::string projLanguageDLL;
 	std::string projBackupLanguageDLL;
 	std::string projExeName;
@@ -1110,8 +1110,8 @@ bool PeFormat::parseVisualBasicComRegistrationInfo(std::size_t structureOffset,
 bool PeFormat::parseVisualBasicProjectInfo(std::size_t structureOffset)
 {
 	std::vector<std::uint8_t> bytes;
-	unsigned long long vbExternTableOffset = 0;
-	unsigned long long vbObjectTableOffset = 0;
+	std::uint64_t vbExternTableOffset = 0;
+	std::uint64_t vbObjectTableOffset = 0;
 	std::string projPath;
 	std::size_t offset = 0;
 	struct VBProjInfo vbpi;
@@ -1164,7 +1164,7 @@ bool PeFormat::parseVisualBasicExternTable(std::size_t structureOffset, std::siz
 	std::vector<std::uint8_t> bytes;
 	struct VBExternTableEntry entry;
 	struct VBExternTableEntryData entryData;
-	unsigned long long vbExternEntryDataOffset = 0;
+	std::uint64_t vbExternEntryDataOffset = 0;
 	std::size_t offset = 0;
 
 	for (std::size_t i = 0; i < nEntries; i++)
@@ -1204,14 +1204,14 @@ bool PeFormat::parseVisualBasicExternTable(std::size_t structureOffset, std::siz
 		entryData.moduleNameAddr = entryDataContent.read<std::uint32_t>(offset); offset += sizeof(entryData.moduleNameAddr);
 		entryData.apiNameAddr = entryDataContent.read<std::uint32_t>(offset); offset += sizeof(entryData.apiNameAddr);
 
-		unsigned long long moduleNameOffset;
+		std::uint64_t moduleNameOffset;
 		if (getOffsetFromAddress(moduleNameOffset, entryData.moduleNameAddr))
 		{
 			moduleName = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(),
 														moduleNameOffset, VB_MAX_STRING_LEN, true);
 		}
 
-		unsigned long long apiNameOffset;
+		std::uint64_t apiNameOffset;
 		if (getOffsetFromAddress(apiNameOffset, entryData.apiNameAddr))
 		{
 			apiName = retdec::utils::readNullTerminatedAscii(allBytes.data(), allBytes.size(),
@@ -1242,8 +1242,8 @@ bool PeFormat::parseVisualBasicObjectTable(std::size_t structureOffset)
 	const auto &allBytes = getBytes();
 	std::vector<std::uint8_t> bytes;
 	std::size_t offset = 0;
-	unsigned long long projectNameOffset = 0;
-	unsigned long long objectDescriptorsOffset = 0;
+	std::uint64_t projectNameOffset = 0;
+	std::uint64_t objectDescriptorsOffset = 0;
 	struct VBObjectTable vbot;
 	std::string projName;
 
@@ -1331,7 +1331,7 @@ bool PeFormat::parseVisualBasicObjects(std::size_t structureOffset, std::size_t 
 		vbpod.objectType = structContent.read<std::uint32_t>(offset); offset += sizeof(vbpod.objectType);
 		vbpod.null = structContent.read<std::uint32_t>(offset); offset += sizeof(vbpod.null);
 
-		unsigned long long objectNameOffset;
+		std::uint64_t objectNameOffset;
 		if (!getOffsetFromAddress(objectNameOffset, vbpod.objectNameAddr))
 		{
 			continue;
@@ -1342,7 +1342,7 @@ bool PeFormat::parseVisualBasicObjects(std::size_t structureOffset, std::size_t 
 		object = std::make_unique<VisualBasicObject>();
 		object->setName(objectName);
 
-		unsigned long long methodAddrOffset;
+		std::uint64_t methodAddrOffset;
 		if (getOffsetFromAddress(methodAddrOffset, vbpod.methodNamesAddr))
 		{
 			for (std::size_t mIdx = 0; mIdx < vbpod.nMethods; mIdx++)
@@ -1360,7 +1360,7 @@ bool PeFormat::parseVisualBasicObjects(std::size_t structureOffset, std::size_t 
 					methodNameAddr = byteSwap32(methodNameAddr);
 				}
 
-				unsigned long long methodNameOffset;
+				std::uint64_t methodNameOffset;
 				if (!getOffsetFromAddress(methodNameOffset, methodNameAddr))
 				{
 					continue;
@@ -1616,7 +1616,7 @@ void PeFormat::loadPdbInfo()
  */
 void PeFormat::loadResourceNodes(std::vector<const PeLib::ResourceChild*> &nodes, const std::vector<std::size_t> &levels)
 {
-	unsigned long long rva = 0, size = 0;
+	std::uint64_t rva = 0, size = 0;
 	if(levels.empty() || !getDataDirectoryRelative(PELIB_IMAGE_DIRECTORY_ENTRY_RESOURCE, rva, size))
 	{
 		return;
@@ -1657,7 +1657,8 @@ void PeFormat::loadResourceNodes(std::vector<const PeLib::ResourceChild*> &nodes
 void PeFormat::loadResources()
 {
 	size_t iconGroupIDcounter = 0;
-	unsigned long long rva = 0, size = 0, imageBase = 0;
+	std::uint64_t rva = 0, size = 0;
+	std::uint64_t imageBase = 0;
 	if(!getDataDirectoryRelative(PELIB_IMAGE_DIRECTORY_ENTRY_RESOURCE, rva, size))
 	{
 		return;
@@ -1815,7 +1816,7 @@ void PeFormat::loadCertificates()
  */
 void PeFormat::loadTlsInformation()
 {
-	unsigned long long rva = 0, size = 0;
+	std::uint64_t rva = 0, size = 0;
 	if (!getDataDirectoryRelative(PELIB_IMAGE_DIRECTORY_ENTRY_TLS, rva, size) || size == 0)
 	{
 		return;
@@ -1843,7 +1844,7 @@ void PeFormat::loadDotnetHeaders()
 
 	// If our file contains CLR header, then use it. Note that .NET framework doesn't
 	// verify the OPTIONAL_HEADER::NumberOfRvaAndSizes, so we must do it the same way.
-	unsigned long long comHeaderAddress, comHeaderSize;
+	std::uint64_t comHeaderAddress, comHeaderSize;
 	if(getComDirectoryRelative(comHeaderAddress, comHeaderSize) && comHeaderSize)
 	{
 		clrHeader = formatParser->getClrHeader();
@@ -2763,26 +2764,26 @@ bool PeFormat::isExecutable() const
 	return !isDll();
 }
 
-bool PeFormat::getMachineCode(unsigned long long &result) const
+bool PeFormat::getMachineCode(std::uint64_t &result) const
 {
 	result = formatParser->getMachineType();
 	return true;
 }
 
-bool PeFormat::getAbiVersion(unsigned long long &result) const
+bool PeFormat::getAbiVersion(std::uint64_t &result) const
 {
 	// not in PE files
 	static_cast<void>(result);
 	return false;
 }
 
-bool PeFormat::getImageBaseAddress(unsigned long long &imageBase) const
+bool PeFormat::getImageBaseAddress(std::uint64_t &imageBase) const
 {
 	imageBase = formatParser->getImageBaseAddress();
 	return true;
 }
 
-bool PeFormat::getEpAddress(unsigned long long &result) const
+bool PeFormat::getEpAddress(std::uint64_t &result) const
 {
 	std::uint64_t tempResult = 0;
 
@@ -2795,7 +2796,7 @@ bool PeFormat::getEpAddress(unsigned long long &result) const
 	return false;
 }
 
-bool PeFormat::getEpOffset(unsigned long long &epOffset) const
+bool PeFormat::getEpOffset(std::uint64_t &epOffset) const
 {
 	std::uint64_t tempResult = 0;
 
@@ -3211,7 +3212,7 @@ bool PeFormat::isPackedDotNet() const
  *    version was not detected
  * @return @c true if input file original language is Visual Basic, @c false otherwise
  */
-bool PeFormat::isVisualBasic(unsigned long long &version) const
+bool PeFormat::isVisualBasic(std::uint64_t &version) const
 {
 	version = 0;
 	return importTable && std::any_of(visualBasicLibrariesMap.begin(), visualBasicLibrariesMap.end(),
@@ -3233,7 +3234,7 @@ bool PeFormat::isVisualBasic(unsigned long long &version) const
  * @param dllFlags Into this parameter DLL flags will be stored
  * @return @c true if file is DLL and flags are successfully detected, @c false otherwise
  */
-bool PeFormat::getDllFlags(unsigned long long &dllFlags) const
+bool PeFormat::getDllFlags(std::uint64_t &dllFlags) const
 {
 	return formatParser->getDllFlags(dllFlags);
 }
@@ -3245,9 +3246,9 @@ bool PeFormat::getDllFlags(unsigned long long &dllFlags) const
  *
  * If function returns @c false, @a relocs is left unchanged
  */
-bool PeFormat::getNumberOfBaseRelocationBlocks(unsigned long long &relocs) const
+bool PeFormat::getNumberOfBaseRelocationBlocks(std::uint64_t &relocs) const
 {
-	unsigned long long addr, size;
+	std::uint64_t addr, size;
 	if(!getDataDirectoryRelative(PELIB_IMAGE_DIRECTORY_ENTRY_BASERELOC, addr, size) || !addr)
 	{
 		return false;
@@ -3264,16 +3265,16 @@ bool PeFormat::getNumberOfBaseRelocationBlocks(unsigned long long &relocs) const
  *
  * If function returns @c false, @a relocs is left unchanged
  */
-bool PeFormat::getNumberOfRelocations(unsigned long long &relocs) const
+bool PeFormat::getNumberOfRelocations(std::uint64_t &relocs) const
 {
-	unsigned long long blocks = 0;
+	std::uint64_t blocks = 0;
 	if(!getNumberOfBaseRelocationBlocks(blocks))
 	{
 		return false;
 	}
 	relocs = 0;
 
-	for(unsigned long long i = 0; i < blocks; ++i)
+	for(std::uint64_t i = 0; i < blocks; ++i)
 	{
 		relocs += formatParser->getNumberOfRelocationData(i);
 	}
@@ -3290,7 +3291,7 @@ bool PeFormat::getNumberOfRelocations(unsigned long long &relocs) const
  *
  * If method returns @c false, @a relAddr and @a size are left unchanged.
  */
-bool PeFormat::getDataDirectoryRelative(unsigned long long index, unsigned long long &relAddr, unsigned long long &size) const
+bool PeFormat::getDataDirectoryRelative(std::uint64_t index, std::uint64_t &relAddr, std::uint64_t &size) const
 {
 	return formatParser->getDataDirectoryRelative(index, relAddr, size);
 }
@@ -3304,7 +3305,7 @@ bool PeFormat::getDataDirectoryRelative(unsigned long long index, unsigned long 
  *
  * If method returns @c false, @a absAddr and @a size are left unchanged.
  */
-bool PeFormat::getDataDirectoryAbsolute(unsigned long long index, unsigned long long &absAddr, unsigned long long &size) const
+bool PeFormat::getDataDirectoryAbsolute(std::uint64_t index, std::uint64_t &absAddr, std::uint64_t &size) const
 {
 	return formatParser->getDataDirectoryAbsolute(index, absAddr, size);
 }
@@ -3317,7 +3318,7 @@ bool PeFormat::getDataDirectoryAbsolute(unsigned long long index, unsigned long 
 *
 * If method returns @c false, @a relAddr and @a size are left unchanged.
 */
-bool PeFormat::getComDirectoryRelative(unsigned long long &relAddr, unsigned long long &size) const
+bool PeFormat::getComDirectoryRelative(std::uint64_t &relAddr, std::uint64_t &size) const
 {
 	return formatParser->getComDirectoryRelative(relAddr, size);
 }
@@ -3339,7 +3340,7 @@ const PeCoffSection* PeFormat::getPeSection(const std::string &secName) const
  * @param secIndex Index of section (indexed from 0)
  * @return Pointer to section or @c nullptr if section was not detected
  */
-const PeCoffSection* PeFormat::getPeSection(unsigned long long secIndex) const
+const PeCoffSection* PeFormat::getPeSection(std::uint64_t secIndex) const
 {
 	return dynamic_cast<const PeCoffSection*>(getSection(secIndex));
 }
@@ -3434,20 +3435,19 @@ void PeFormat::scanForAnomalies()
 /**
  * Scan for section anomalies
  */
-void PeFormat::scanForSectionAnomalies(unsigned anamaliesLimit)
+void PeFormat::scanForSectionAnomalies(unsigned anomaliesLimit)
 {
 	std::size_t nSecs = getDeclaredNumberOfSections();
 
-	unsigned long long imageBase;
-	unsigned long long epAddr;
+	std::uint64_t imageBase, epAddr;
 
 	if (getEpAddress(epAddr))
 	{
-		auto *epSec = dynamic_cast<const PeCoffSection*>(getEpSection());
+		auto* epSec = dynamic_cast<const PeCoffSection*>(getSectionFromAddress(epAddr));
 		if (epSec)
 		{
 			// scan EP in last section
-			const PeCoffSection *lastSec = (nSecs) ? getPeSection(nSecs - 1) : nullptr;
+			const PeCoffSection* lastSec = (nSecs) ? getPeSection(nSecs - 1) : nullptr;
 			if (epSec == lastSec)
 			{
 				anomalies.emplace_back(
@@ -3462,6 +3462,13 @@ void PeFormat::scanForSectionAnomalies(unsigned anamaliesLimit)
 					"EpInWritableSection", "Entry point in writable section"
 				);
 			}
+			// if we can't get valid offset then the EP is outside of the physical file
+			std::uint64_t epOffset = 0;
+			if (!getEpOffset(epOffset))
+			{
+				anomalies.emplace_back(
+						"EpInMemoryOnly", "Entry point in memory-only part of a section");
+			}
 		}
 		else
 		{
@@ -3474,7 +3481,7 @@ void PeFormat::scanForSectionAnomalies(unsigned anamaliesLimit)
 	std::set<std::string> secNames;
 	for (std::size_t i = 0; i < nSecs; i++)
 	{
-		if (anomalies.size() > anamaliesLimit)
+		if (anomalies.size() > anomaliesLimit)
 		{
 			break;
 		}
@@ -3559,7 +3566,7 @@ void PeFormat::scanForSectionAnomalies(unsigned anamaliesLimit)
 
 		for (std::size_t j = i + 1; j < nSecs; j++)
 		{
-			if (anomalies.size() > anamaliesLimit)
+			if (anomalies.size() > anomaliesLimit)
 			{
 				break;
 			}
@@ -3621,9 +3628,9 @@ void PeFormat::scanForResourceAnomalies()
 		}
 
 		// scan for resource stretched over multiple sections
-		unsigned long long resAddr;
+		std::uint64_t resAddr;
 		if (res->isValidOffset() && getAddressFromOffset(resAddr, res->getOffset()) &&
-				isObjectStretchedOverSections(resAddr, res->getSizeInFile()))
+			isObjectStretchedOverSections(resAddr, res->getSizeInFile()))
 		{
 			anomalies.emplace_back("StretchedResource", "Resource " + replaceNonprintableChars(msgName) + " is stretched over multiple sections");
 		}
@@ -3638,7 +3645,7 @@ void PeFormat::scanForImportAnomalies()
 	// scan for import stretched over multiple sections
 	for(const auto &impRange : formatParser->getImportDirectoryOccupiedAddresses())
 	{
-		unsigned long long impAddr;
+		std::uint64_t impAddr;
 		if (getAddressFromOffset(impAddr, impRange.getStart()) &&
 			isObjectStretchedOverSections(impAddr, impRange.getSize()))
 		{
@@ -3652,7 +3659,7 @@ void PeFormat::scanForImportAnomalies()
 			{
 				if (imp->hasEmptyName())
 				{
-					unsigned long long ordNum;
+					std::uint64_t ordNum;
 					if (!imp->getOrdinalNumber(ordNum))
 					{
 						msgName = "<unknown>";
@@ -3682,7 +3689,7 @@ void PeFormat::scanForExportAnomalies()
 	// scan for export stretched over multiple sections
 	for(const auto &expRange : formatParser->getExportDirectoryOccupiedAddresses())
 	{
-		unsigned long long expAddr;
+		std::uint64_t expAddr;
 		if (getAddressFromOffset(expAddr, expRange.getStart()) &&
 			isObjectStretchedOverSections(expAddr, expRange.getSize()))
 		{
@@ -3696,7 +3703,7 @@ void PeFormat::scanForExportAnomalies()
 			{
 				if (exp->hasEmptyName())
 				{
-					unsigned long long ordNum;
+					std::uint64_t ordNum;
 					if (!exp->getOrdinalNumber(ordNum))
 					{
 						msgName = "<unknown>";

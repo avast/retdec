@@ -195,17 +195,17 @@ struct ToolInformation
 	/// @c false if file has no has no or invalid EP offset
 	bool entryPointOffset = false;
 	/// entry point offset
-	long long unsigned int epOffset =
-			std::numeric_limits<long long unsigned int>::max();
+	std::uint64_t epOffset =
+			std::numeric_limits<std::uint64_t>::max();
 
 	/// @c false if file has no has no or invalid EP address
 	bool entryPointAddress = false;
 	/// entry point address
-	long long unsigned int epAddress =
-			std::numeric_limits<long long unsigned int>::max();
+	std::uint64_t epAddress =
+			std::numeric_limits<std::uint64_t>::max();
 	/// image base address
-	long long unsigned int imageBase =
-			std::numeric_limits<long long unsigned int>::max();
+	std::uint64_t imageBase =
+			std::numeric_limits<std::uint64_t>::max();
 
 	/// offset of the file overlay. 0 if no overlay
 	uint64_t overlayOffset = 0;

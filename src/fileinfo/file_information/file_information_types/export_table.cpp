@@ -77,7 +77,7 @@ std::string ExportTable::getExportAddressStr(std::size_t position, std::ios_base
  */
 std::string ExportTable::getExportOrdinalNumberStr(std::size_t position, std::ios_base &(* format)(std::ios_base &)) const
 {
-	unsigned long long ordinal;
+	std::uint64_t ordinal;
 	const auto *record = table ? table->getExport(position) : nullptr;
 	return record && record->getOrdinalNumber(ordinal) ? getNumberAsString(ordinal, format) : "";
 }

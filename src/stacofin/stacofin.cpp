@@ -751,7 +751,7 @@ void Finder::search(
 		{
 			// This is different for every match.
 			detectedFunction.offset = ruleMatch.getOffset();
-			unsigned long long address = 0;
+			std::uint64_t address = 0;
 			if (!fileFormat->getAddressFromOffset(
 						address, detectedFunction.offset))
 			{
