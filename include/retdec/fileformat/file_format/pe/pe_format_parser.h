@@ -212,7 +212,7 @@ class PeFormatParser
 	{
 		std::uint32_t entryPoint = peFile->imageLoader().getOptionalHeader().AddressOfEntryPoint;
 
-		epOffset = peFile->imageLoader().getFileOffsetFromRva(entryPoint);
+		epOffset = peFile->imageLoader().getValidOffsetFromRva(entryPoint);
 		return (entryPoint != 0 || isDll() == false) && (epOffset != UINT32_MAX);
 	}
 
@@ -274,27 +274,27 @@ class PeFormatParser
 		return true;
 	}
 
-	bool getDllFlags(unsigned long long & dllFlags) const
+	bool getDllFlags(std::uint64_t &dllFlags) const
 	{
 		dllFlags = peFile->imageLoader().getOptionalHeader().DllCharacteristics;
 		return true;
 	}
 
-	bool getDataDirectoryRelative(unsigned long long index, unsigned long long &relAddr, unsigned long long &size) const
+	bool getDataDirectoryRelative(std::uint64_t index, std::uint64_t &relAddr, std::uint64_t &size) const
 	{
 		relAddr = peFile->imageLoader().getDataDirRva(index);
 		size = peFile->imageLoader().getDataDirSize(index);
 		return (relAddr != 0);
 	}
 
-	bool getComDirectoryRelative(unsigned long long &relAddr, unsigned long long &size) const
+	bool getComDirectoryRelative(std::uint64_t &relAddr, std::uint64_t &size) const
 	{
 		relAddr = peFile->imageLoader().getComDirRva();
 		size = peFile->imageLoader().getComDirSize();
 		return (relAddr != 0);
 	}
 
-	bool getDataDirectoryAbsolute(unsigned long long index, unsigned long long &absAddr, unsigned long long &size) const
+	bool getDataDirectoryAbsolute(std::uint64_t index, std::uint64_t &absAddr, std::uint64_t &size) const
 	{
 		if(getDataDirectoryRelative(index, absAddr, size))
 		{

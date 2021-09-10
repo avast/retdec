@@ -164,25 +164,25 @@ bool IntelHexFormat::isExecutable() const
 	return true;
 }
 
-bool IntelHexFormat::getMachineCode(unsigned long long &result) const
+bool IntelHexFormat::getMachineCode(std::uint64_t &result) const
 {
 	// Intel HEX does not provide such information
 	return false;
 }
 
-bool IntelHexFormat::getAbiVersion(unsigned long long &result) const
+bool IntelHexFormat::getAbiVersion(std::uint64_t &result) const
 {
 	// Intel HEX does not provide such information
 	return false;
 }
 
-bool IntelHexFormat::getImageBaseAddress(unsigned long long &imageBase) const
+bool IntelHexFormat::getImageBaseAddress(std::uint64_t &imageBase) const
 {
 	// Intel HEX does not provide such information
 	return false;
 }
 
-bool IntelHexFormat::getEpAddress(unsigned long long &result) const
+bool IntelHexFormat::getEpAddress(std::uint64_t &result) const
 {
 	if(parser.hasEntryPoint())
 	{
@@ -193,7 +193,7 @@ bool IntelHexFormat::getEpAddress(unsigned long long &result) const
 	return false;
 }
 
-bool IntelHexFormat::getEpOffset(unsigned long long &epOffset) const
+bool IntelHexFormat::getEpOffset(std::uint64_t &epOffset) const
 {
 	if(parser.hasEntryPoint())
 	{

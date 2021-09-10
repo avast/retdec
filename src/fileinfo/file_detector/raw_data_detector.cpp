@@ -120,7 +120,7 @@ void RawDataDetector::detectFileType()
 
 void RawDataDetector::getAdditionalInfo()
 {
-	unsigned long long ep = 0;
+	std::uint64_t ep = 0;
 	if(fileParser->getEpAddress(ep))
 	{
 		fileInfo.toolInfo.epAddress = ep;

@@ -19,8 +19,11 @@ namespace fileformat {
 enum class DotnetTypeVisibility
 {
 	Public,
+	Internal,
+	Private,
 	Protected,
-	Private
+	ProtectedInternal,
+	PrivateProtected
 };
 
 /**
@@ -56,6 +59,9 @@ class DotnetType
 		bool isPublic() const { return visibility == DotnetTypeVisibility::Public; }
 		bool isProtected() const { return visibility == DotnetTypeVisibility::Protected; }
 		bool isPrivate() const { return visibility == DotnetTypeVisibility::Private; }
+		bool isInternal() const { return visibility == DotnetTypeVisibility::Internal; }
+		bool isProtectedInternal() const { return visibility == DotnetTypeVisibility::ProtectedInternal; }
+		bool isPrivateProtected() const { return visibility == DotnetTypeVisibility::PrivateProtected; }
 		/// @}
 };
 

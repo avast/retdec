@@ -134,7 +134,7 @@ void ExportTable::computeHashes()
 		// convert ordinal to export name
 		if(funcName.empty())
 		{
-			unsigned long long ord;
+			std::uint64_t ord;
 			if(newExport.getOrdinalNumber(ord))
 			{
 				funcName = toLower("ord" + std::to_string(ord));
@@ -236,7 +236,7 @@ void ExportTable::dump(std::string &dumpTable) const
 
 	if(hasExports())
 	{
-		unsigned long long aux;
+		std::uint64_t aux;
 		ret << ";\n";
 
 		for(const auto &exp : exports)

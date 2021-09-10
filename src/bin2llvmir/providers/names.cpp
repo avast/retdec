@@ -367,7 +367,7 @@ void NameContainer::initFromImage()
 	{
 		Address addr = imp->getAddress();
 		std::string name = imp->getName();
-		unsigned long long ord = 0;
+		std::uint64_t ord = 0;
 		bool ordOk = false;
 
 		if (name.empty())
@@ -401,24 +401,24 @@ void NameContainer::initFromImage()
 		}
 	}
 
-	if (auto *exTbl = _image->getFileFormat()->getExportTable())
-	for (const auto &exp : *exTbl)
-	{
-		addNameForAddress(
-				exp.getAddress(),
-				exp.getName(),
-				Name::eType::EXPORT);
-	}
+	if (auto* exTbl = _image->getFileFormat()->getExportTable())
+		for (const auto& exp : *exTbl)
+		{
+			addNameForAddress(
+					exp.getAddress(),
+					exp.getName(),
+					Name::eType::EXPORT);
+		}
 
 	for (const auto* t : _image->getFileFormat()->getSymbolTables())
-	for (const auto& s : *t)
-	{
-		unsigned long long a = 0;
-		if (s->getRealAddress(a))
+		for (const auto& s : *t)
 		{
-			Name::eType t = Name::eType::SYMBOL_OTHER;
-			switch (s->getUsageType())
+			unsigned long long a = 0;
+			if (s->getRealAddress(a))
 			{
+				Name::eType t = Name::eType::SYMBOL_OTHER;
+				switch (s->getUsageType())
+				{
 				case retdec::fileformat::Symbol::UsageType::FUNCTION:
 					t = Name::eType::SYMBOL_FUNCTION;
 					break;
@@ -431,20 +431,20 @@ void NameContainer::initFromImage()
 				default:
 					t = Name::eType::SYMBOL_OTHER;
 					break;
-			}
+				}
 
-			if (_config->getConfig().architecture.isArm32OrThumb() && a % 2)
-			{
-				a -= 1;
-			}
+				if (_config->getConfig().architecture.isArm32OrThumb() && a % 2)
+				{
+					a -= 1;
+				}
 
-			addNameForAddress(a, s->getName(), t);
+				addNameForAddress(a, s->getName(), t);
+			}
 		}
-	}
 
 	if (_image->getFileFormat())
 	{
-		unsigned long long ep = 0;
+		std::uint64_t ep = 0;
 		if (_image->getFileFormat()->getEpAddress(ep))
 		{
 			if (_config->getConfig().architecture.isArm32OrThumb() && ep % 2)

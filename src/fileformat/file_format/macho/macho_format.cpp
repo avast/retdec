@@ -1380,23 +1380,23 @@ bool MachOFormat::isExecutable() const
 	return filetype == MachO::MH_EXECUTE || filetype == MachO::MH_PRELOAD;
 }
 
-bool MachOFormat::getMachineCode(unsigned long long &result) const
+bool MachOFormat::getMachineCode(std::uint64_t &result) const
 {
 	is32 ? result = static_cast<unsigned long long>(header32.cputype) : result = static_cast<unsigned long long>(header64.cputype);
 	return true;
 }
 
-bool MachOFormat::getAbiVersion(unsigned long long &result) const
+bool MachOFormat::getAbiVersion(std::uint64_t &result) const
 {
 	return false;
 }
 
-bool MachOFormat::getImageBaseAddress(unsigned long long &imageBase) const
+bool MachOFormat::getImageBaseAddress(std::uint64_t &imageBase) const
 {
 	return false;
 }
 
-bool MachOFormat::getEpAddress(unsigned long long &result) const
+bool MachOFormat::getEpAddress(std::uint64_t &result) const
 {
 	if(hasEntryPoint)
 	{
@@ -1407,7 +1407,7 @@ bool MachOFormat::getEpAddress(unsigned long long &result) const
 	return false;
 }
 
-bool MachOFormat::getEpOffset(unsigned long long &epOffset) const
+bool MachOFormat::getEpOffset(std::uint64_t &epOffset) const
 {
 	if(hasEntryPoint)
 	{

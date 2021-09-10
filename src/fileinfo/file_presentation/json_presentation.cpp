@@ -487,6 +487,8 @@ void WriteSigner(JsonPresentation::Writer& writer, const Signer& signer)
 void WriteSignature(JsonPresentation::Writer& writer, const DigitalSignature& signature)
 {
 	writer.StartObject();
+	writer.String("signatureVerified");
+	writer.Bool(signature.isValid);
 	writer.String("warnings");
 	writer.StartArray();
 	for (auto&& warn : signature.warnings) {
@@ -514,12 +516,12 @@ void WriteSignature(JsonPresentation::Writer& writer, const DigitalSignature& si
 void JsonPresentation::presentCertificates(Writer& writer) const
 {
 
-	if(!fileinfo.certificateTable)
+	if (!fileinfo.certificateTable || !fileinfo.certificateTable->isOutsideImage)
 	{
 		return;
 	}
-
 	writer.String("digitalSignatures");
+
 	writer.StartObject();
 	writer.Key("numberOfSignatures");
 	writer.Int64(fileinfo.certificateTable->signatures.size());

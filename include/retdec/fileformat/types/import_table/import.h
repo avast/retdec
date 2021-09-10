@@ -28,9 +28,9 @@ class Import
 
 	private:
 		std::string name;
-		unsigned long long libraryIndex = 0;
-		unsigned long long address = 0;
-		unsigned long long ordinalNumber = 0;
+		std::uint64_t libraryIndex = 0;
+		std::uint64_t address = 0;
+		std::uint64_t ordinalNumber = 0;
 		bool ordinalNumberIsValid = false;
 		UsageType usageType = UsageType::UNKNOWN;
 	public:
@@ -39,9 +39,9 @@ class Import
 		/// @name Getters
 		/// @{
 		std::string getName() const;
-		unsigned long long getLibraryIndex() const;
-		unsigned long long getAddress() const;
-		bool getOrdinalNumber(unsigned long long &importOrdinalNumber) const;
+		std::uint64_t getLibraryIndex() const;
+		std::uint64_t getAddress() const;
+		bool getOrdinalNumber(std::uint64_t &importOrdinalNumber) const;
 		Import::UsageType getUsageType() const;
 		/// @}
 
@@ -56,9 +56,9 @@ class Import
 		/// @name Setters
 		/// @{
 		void setName(std::string importName);
-		void setLibraryIndex(unsigned long long importLibraryIndex);
-		void setAddress(unsigned long long importAddress);
-		void setOrdinalNumber(unsigned long long importOrdinalNumber);
+		void setLibraryIndex(std::uint64_t importLibraryIndex);
+		void setAddress(std::uint64_t importAddress);
+		void setOrdinalNumber(std::uint64_t importOrdinalNumber);
 		void setUsageType(Import::UsageType importUsageType);
 		/// @}
 

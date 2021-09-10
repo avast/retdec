@@ -330,7 +330,7 @@ void PeHeuristics::getVisualBasicHeuristics()
 	auto source = DetectionMethod::LINKED_LIBRARIES_H;
 	auto strength = DetectionStrength::HIGH;
 
-	unsigned long long version = 0;
+	std::uint64_t version = 0;
 	if (peParser.isVisualBasic(version))
 	{
 		addCompiler(source, strength, "Visual Basic", std::to_string(version));
@@ -483,7 +483,7 @@ void PeHeuristics::getMorphineHeuristics()
 			&& sections[2]->getName() == ".idata"
 			&& sections[2]->getSizeInFile() == 0x200)
 	{
-		unsigned long long rva, size;
+		std::uint64_t rva, size;
 		if (peParser.getDataDirectoryRelative(1, rva, size) && size == 0x1000)
 		{
 			addPacker(source, strength, "Morphine", "1.2");
@@ -813,7 +813,7 @@ void PeHeuristics::getPetiteHeuristics()
  */
 void PeHeuristics::getPelockHeuristics()
 {
-	unsigned long long rva, size;
+	std::uint64_t rva, size;
 	if (peParser.getDataDirectoryRelative(1, rva, size)
 			&& size == 0x5C
 			&& peParser.getDataDirectoryRelative(15, rva, size)
@@ -1354,7 +1354,7 @@ void PeHeuristics::getBorlandDelphiHeuristics()
 	auto source = DetectionMethod::COMBINED;
 	auto strength = DetectionStrength::MEDIUM;
 
-	unsigned long long imageBaseAddr;
+	std::uint64_t imageBaseAddr;
 	if (!fileParser.getImageBaseAddress(imageBaseAddr)
 			|| !toolInfo.entryPointSection
 			|| toolInfo.epSection.getIndex()
@@ -1813,7 +1813,7 @@ void PeHeuristics::getSevenZipHeuristics()
 		{
 			// See: VS_VERSIONINFO structure documentation
 			auto resource = resourceTable->getResourceWithType(16);
-			if (resource)
+			if (resource && resource->isValidOffset())
 			{
 				std::uint64_t infoL = 0;
 				auto offset =  resource->getOffset();

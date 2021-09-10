@@ -278,7 +278,7 @@ std::string ResourceTable::getResourceSublanguageIdStr(std::size_t index, std::i
 std::string ResourceTable::getResourceOffsetStr(std::size_t index, std::ios_base &(* format)(std::ios_base &)) const
 {
 	const auto *record = table ? table->getResource(index) : nullptr;
-	return record ? getNumberAsString(record->getOffset(), format) : "";
+	return record && record->isValidOffset() ? getNumberAsString(record->getOffset(), format) : "";
 }
 
 /**

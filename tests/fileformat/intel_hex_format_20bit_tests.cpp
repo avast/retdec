@@ -4,6 +4,7 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
+#include <cstdint>
 #include <memory>
 #include <string>
 
@@ -62,7 +63,7 @@ TEST_F(IntelHexFormat20BitTests, CorrectSection)
 
 TEST_F(IntelHexFormat20BitTests, CorrectInfo)
 {
-	unsigned long long res;
+	std::uint64_t res;
 	EXPECT_EQ(true, parser->getEpOffset(res));
 	EXPECT_EQ(0x05, res);
 	EXPECT_EQ(true, parser->getEpAddress(res));

@@ -7,6 +7,8 @@
 #ifndef RETDEC_PELIB_SECURITYDIRECTORY_H
 #define RETDEC_PELIB_SECURITYDIRECTORY_H
 
+#include <cstdint>
+
 namespace PeLib
 {
 	class SecurityDirectory
@@ -14,9 +16,13 @@ namespace PeLib
 		private:
 		  LoaderError m_ldrError;
 		  std::vector<PELIB_IMAGE_CERTIFICATE_ENTRY> m_certs;
+		  std::uint64_t offset = 0;
+		  std::uint64_t size = 0;
 		public:
 		  /// Constructor
 		  SecurityDirectory();
+		  std::uint64_t getOffset() const;
+		  std::uint64_t getSize() const;
 		  /// Number of certificates in the directory.
 		  unsigned int calcNumberOfCertificates() const; // EXPORT
 		  /// Returns certificate at specified index.

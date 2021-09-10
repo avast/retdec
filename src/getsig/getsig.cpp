@@ -84,7 +84,7 @@ struct Options
 
 		// Search settings.
 		long long unsigned size = 100; ///< maximum size of pattern (bytes)
-		long long unsigned offset;     ///< value of search offset
+		std::uint64_t offset;     ///< value of search offset
 		bool isOffset = false;         ///< @c true if user provided offset
 };
 

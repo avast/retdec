@@ -651,6 +651,9 @@ struct TypeDef : public BaseRecord
 	bool isNestedPublic() const { return (flags & TypeVisibilityMask) == TypeNestedPublic; }
 	bool isNestedPrivate() const { return (flags & TypeVisibilityMask) == TypeNestedPrivate; }
 	bool isNestedProtected() const { return (flags & TypeVisibilityMask) == TypeNestedFamily; }
+	bool isNestedInternal() const { return (flags & TypeVisibilityMask) == TypeNestedAssembly; }
+	bool isNestedFamOrAssem() const { return (flags & TypeVisibilityMask) == TypeNestedFamORAssem; }
+	bool isNestedFamAndAssem() const { return (flags & TypeVisibilityMask) == TypeNestedFamANDAssem; }
 	bool isClass() const { return (flags & TypeClassSemanticsMask) == TypeClass; }
 	bool isInterface() const { return (flags & TypeClassSemanticsMask) == TypeInterface; }
 	bool isAbstract() const { return flags & TypeClassAbstract; }
@@ -688,6 +691,9 @@ struct Field : public BaseRecord
 	bool isPublic() const { return (flags & FieldAccessMask) == FieldPublic; }
 	bool isProtected() const { return (flags & FieldAccessMask) == FieldFamily; }
 	bool isPrivate() const { return (flags & FieldAccessMask) == FieldPrivate; }
+	bool isInternal() const { return (flags & FieldAccessMask) == FieldAssembly; }
+	bool isFamOrAssem() const { return (flags & FieldAccessMask) == FieldFamORAssem; }
+	bool isFamAndAssem() const { return (flags & FieldAccessMask) == FieldFamANDAssem; }
 	bool isStatic() const { return flags & FieldStatic; }
 
 	virtual void load(const FileFormat* file, const MetadataStream* stream, std::uint64_t& address) override
@@ -720,6 +726,10 @@ struct MethodDef : public BaseRecord
 	bool isPublic() const { return (flags & MethodMemberAccessMask) == MethodPublic; }
 	bool isPrivate() const { return (flags & MethodMemberAccessMask) == MethodPrivate; }
 	bool isProtected() const { return (flags & MethodMemberAccessMask) == MethodFamily; }
+	bool isInternal() const { return (flags & MethodMemberAccessMask) == MethodAssem; }
+	bool isFamOrAssem() const { return (flags & MethodMemberAccessMask) == MethodFamORAssem; }
+	bool isFamAndAssem() const { return (flags & MethodMemberAccessMask) == MethodFamANDAssem; }
+
 	bool isStatic() const { return flags & MethodStatic; }
 	bool isVirtual() const { return flags & MethodVirtual; }
 	bool isFinal() const { return flags & MethodFinal; }

@@ -6,6 +6,7 @@
 
 #include "retdec/utils/string.h"
 #include "retdec/fileformat/types/dotnet_types/dotnet_class.h"
+#include <cstdint>
 
 using namespace retdec::utils;
 
@@ -410,6 +411,18 @@ bool DotnetClass::isAbstract() const
 bool DotnetClass::isSealed() const
 {
 	return sealed;
+}
+
+bool DotnetClass::isNested() const
+{
+	const TypeDef* row = getRawTypeDef();
+	if (!row)
+	{
+		return false;
+	}
+	std::uint32_t flags = getRawTypeDef()->flags;
+	return (flags & TypeVisibilityMask) != TypeNotPublic &&
+			(flags & TypeVisibilityMask) != TypePublic;
 }
 
 /**

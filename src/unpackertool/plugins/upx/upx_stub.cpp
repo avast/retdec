@@ -385,7 +385,7 @@ void UpxStub::setStubCapturedData(const DynamicBuffer& stubCapturedData)
  */
 uint32_t UpxStub::getRealEpAddress() const
 {
-	unsigned long long ep;
+	std::uint64_t ep;
 	_file->getFileFormat()->getEpAddress(ep);
 	return ep;
 }

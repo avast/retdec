@@ -171,6 +171,7 @@ class ImageLoader
 
 	std::uint32_t vaToRva(std::uint64_t VirtualAddress) const;
 	std::uint32_t getFileOffsetFromRva(std::uint32_t rva) const;
+	std::uint32_t getValidOffsetFromRva(std::uint32_t rva) const;
 	std::uint32_t getRealPointerToRawData(std::size_t sectionIndex) const;
 	std::uint32_t getRealSizeOfRawData(std::size_t sectionIndex) const;
 	std::uint32_t getImageProtection(std::uint32_t characteristics) const;
@@ -313,13 +314,13 @@ class ImageLoader
 		return securityDirFileOffset;
 	}
 
-	std::uint32_t getDataDirRva(std::size_t dataDirIndex) const
+	std::uint32_t getDataDirRva(std::uint64_t dataDirIndex) const
 	{
 		// The data directory must be present there
 		return (optionalHeader.NumberOfRvaAndSizes > dataDirIndex) ? optionalHeader.DataDirectory[dataDirIndex].VirtualAddress : 0;
 	}
 
-	std::uint32_t getDataDirSize(std::size_t dataDirIndex) const
+	std::uint32_t getDataDirSize(std::uint64_t dataDirIndex) const
 	{
 		// The data directory must be present there
 		return (optionalHeader.NumberOfRvaAndSizes > dataDirIndex) ? optionalHeader.DataDirectory[dataDirIndex].Size : 0;

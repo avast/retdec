@@ -19,7 +19,10 @@ const std::unordered_map<DotnetTypeVisibility, std::string, retdec::utils::EnumC
 {
 	{ DotnetTypeVisibility::Public,    "public"    },
 	{ DotnetTypeVisibility::Protected, "protected" },
-	{ DotnetTypeVisibility::Private,   "private"   }
+	{ DotnetTypeVisibility::Private,   "private"   },
+	{ DotnetTypeVisibility::Internal,   "internal"   },
+	{ DotnetTypeVisibility::ProtectedInternal,   "protected internal"   },
+	{ DotnetTypeVisibility::PrivateProtected,   "private protected"   },
 };
 
 }
