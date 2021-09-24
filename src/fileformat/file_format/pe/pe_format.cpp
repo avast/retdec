@@ -10,12 +10,16 @@
 #include <iostream>
 #include <map>
 #include <new>
+#include <openssl/evp.h>
 #include <regex>
 #include <tuple>
 #include <unordered_map>
 #include <unordered_set>
 
 #include "authenticode/authenticode.h"
+#include "authenticode/certificate.h"
+#include "authenticode/helper.h"
+#include "retdec/fileformat/types/certificate_table/certificate.h"
 #include "retdec/fileformat/types/certificate_table/certificate_table.h"
 #include "retdec/utils/container.h"
 #include "retdec/utils/conversion.h"
@@ -1795,6 +1799,230 @@ void PeFormat::loadResources()
 }
 
 /**
+ * Calculates the digest using selected hash algorithm.
+ * @param peFile PE file with the signature.
+ * @param digestName Name of the digest algorithm
+ * @return Hex string of hash.
+ *
+ */
+static std::string calculateFileDigest(const PeFormat* peFile, const char* digestName)
+{
+	if (!peFile)
+	{
+		return {};
+	}
+
+	const EVP_MD* algorithm = EVP_get_digestbyname(digestName);
+	if (!algorithm)
+	{
+		return {};
+	}
+	EVP_MD_CTX* ctx = EVP_MD_CTX_create();
+
+	if (EVP_DigestInit(ctx, algorithm) != 1) // 1 == success
+	{
+		return {};
+	}
+
+	auto digestRanges = peFile->getDigestRanges();
+	for (const auto& range : digestRanges)
+	{
+		const std::uint8_t* data = std::get<0>(range);
+		std::size_t size = std::get<1>(range);
+
+		if (EVP_DigestUpdate(ctx, data, size) != 1) // 1 == success
+		{
+			return {};
+		}
+	}
+
+	std::vector<std::uint8_t> hash(EVP_MD_size(algorithm));
+	if (EVP_DigestFinal(ctx, hash.data(), nullptr) != 1)
+	{
+		return {};
+	}
+	EVP_MD_CTX_destroy(ctx);
+	std::string result;
+	bytesToHexString(hash.data(), EVP_MD_size(algorithm), result);
+	return result;
+}
+
+static Certificate::Attributes parseAttributes(Attributes attrs)
+{
+	Certificate::Attributes result;
+	result.country = attrs.country.data ? std::string(reinterpret_cast<char*>(attrs.country.data), attrs.country.len) : "";
+	result.organization = attrs.organization.data ? std::string(reinterpret_cast<char*>(attrs.organization.data), attrs.organization.len) : "";
+	result.organizationalUnit = attrs.organizationalUnit.data ? std::string(reinterpret_cast<char*>(attrs.organizationalUnit.data), attrs.organizationalUnit.len) : "";
+	result.nameQualifier = attrs.nameQualifier.data ? std::string(reinterpret_cast<char*>(attrs.nameQualifier.data), attrs.nameQualifier.len) : "";
+	result.state = attrs.state.data ? std::string(reinterpret_cast<char*>(attrs.state.data), attrs.state.len) : "";
+	result.commonName = attrs.commonName.data ? std::string(reinterpret_cast<char*>(attrs.commonName.data), attrs.commonName.len) : "";
+	result.serialNumber = attrs.serialNumber.data ? std::string(reinterpret_cast<char*>(attrs.serialNumber.data), attrs.serialNumber.len) : "";
+	result.locality = attrs.locality.data ? std::string(reinterpret_cast<char*>(attrs.locality.data), attrs.locality.len) : "";
+	result.title = attrs.title.data ? std::string(reinterpret_cast<char*>(attrs.title.data), attrs.title.len) : "";
+	result.surname = attrs.surname.data ? std::string(reinterpret_cast<char*>(attrs.surname.data), attrs.surname.len) : "";
+	result.givenName = attrs.givenName.data ? std::string(reinterpret_cast<char*>(attrs.givenName.data), attrs.givenName.len) : "";
+	result.initials = attrs.initials.data ? std::string(reinterpret_cast<char*>(attrs.initials.data), attrs.initials.len) : "";
+	result.pseudonym = attrs.pseudonym.data ? std::string(reinterpret_cast<char*>(attrs.pseudonym.data), attrs.pseudonym.len) : "";
+	result.generationQualifier = attrs.generationQualifier.data ? std::string(reinterpret_cast<char*>(attrs.generationQualifier.data), attrs.generationQualifier.len) : "";
+	result.emailAddress = attrs.emailAddress.data ? std::string(reinterpret_cast<char*>(attrs.emailAddress.data), attrs.emailAddress.len) : "";
+
+	return result;
+}
+
+static std::vector<Certificate> convertCertificates(CertificateArray* arr)
+{
+	if (!arr)
+		return {};
+
+	std::vector<Certificate> result;
+
+	for (std::size_t i = 0; i < arr->count; ++i)
+	{
+		::Certificate* cert = arr->certs[i];
+		Certificate new_cert;
+		new_cert.validSince = cert->not_before ? cert->not_before : "";
+		new_cert.validUntil = cert->not_after ? cert->not_after : "";
+		new_cert.publicKey = cert->key ? cert->key : "";
+		new_cert.publicKeyAlgo = cert->key_alg ? cert->key_alg : "";
+		new_cert.signatureAlgo = cert->sig_alg ? cert->sig_alg : "";
+		new_cert.serialNumber = cert->serial ? cert->serial : "";
+		new_cert.subjectRaw = cert->subject ? cert->subject : "";
+		new_cert.issuerRaw = cert->issuer ? cert->issuer : "";
+		new_cert.issuer = parseAttributes(cert->issuer_attrs);
+		new_cert.subject = parseAttributes(cert->subject_attrs);
+		if (cert->sha1.data)
+			bytesToHexString(cert->sha1.data, cert->sha1.len, new_cert.sha1Digest);
+		if (cert->sha256.data)
+			bytesToHexString(cert->sha256.data, cert->sha256.len, new_cert.sha256Digest);
+
+		result.emplace_back(new_cert);
+	}
+
+	return result;
+}
+
+static std::string authenticodeFlagToString(int flag)
+{
+	switch (flag)
+	{
+	case AUTHENTICODE_VFY_CANT_PARSE:
+		return "Couldn't parse the Pkcs7 signature";
+	case AUTHENTICODE_VFY_NO_SIGNER_CERT:
+		return "Signing cert is missing";
+	case AUTHENTICODE_VFY_DIGEST_MISSING:
+		return "Signature digest is missing";
+	case AUTHENTICODE_VFY_INTERNAL_ERROR:
+		return "Internal error";
+	case AUTHENTICODE_VFY_NO_SIGNER_INFO:
+		return "Couldn't get SignerInfo";
+	case AUTHENTICODE_VFY_WRONG_PKCS7_TYPE:
+		return "Invalid PKCS#7 type, expected SignedData";
+	case AUTHENTICODE_VFY_BAD_CONTENT:
+		return "Couldn't get contentInfo";
+	case AUTHENTICODE_VFY_INVALID:
+		return "Signature isn't valid";
+	default:
+		return "";
+	}
+}
+
+static std::string countersigFlagToString(int flag)
+{
+	switch (flag)
+	{
+	case COUNTERSIGNATURE_VFY_CANT_PARSE:
+		return "Couldn't parse counter-signature";
+	case COUNTERSIGNATURE_VFY_NO_SIGNER_CERT:
+		return "No counter-signature certificate";
+	case COUNTERSIGNATURE_VFY_UNKNOWN_ALGORITHM:
+		return "Unknown digest algorithm";
+	case COUNTERSIGNATURE_VFY_CANT_DECRYPT_DIGEST:
+		return "Couldn't decrypt the digest";
+	case COUNTERSIGNATURE_VFY_DIGEST_MISSING:
+		return "Message digest is missing";
+	case COUNTERSIGNATURE_VFY_INTERNAL_ERROR:
+		return "Internal error";
+	case COUNTERSIGNATURE_VFY_DOESNT_MATCH_SIGNATURE:
+		return "Failed to verify the signature with counter-signature";
+	case COUNTERSIGNATURE_VFY_TIME_MISSING:
+		return "Timestamp information is missing";
+	case COUNTERSIGNATURE_VFY_INVALID:
+		return "Failed to verify the counter-signature";
+	default:
+		return "";
+	}
+}
+
+static std::vector<DigitalSignature> authenticodeToSignatures(AuthenticodeArray* arr, const PeFormat* file)
+{
+	if (!arr || !file)
+		return {};
+
+	std::vector<DigitalSignature> result;
+
+	for (std::size_t i = 0; i < arr->count; ++i)
+	{
+		DigitalSignature signature;
+		Authenticode* auth = arr->signatures[i];
+
+		if (auth->digest.data)
+			bytesToHexString(auth->digest.data, auth->digest.len, signature.signedDigest);
+
+		signature.digestAlgorithm = auth->digest_alg ? auth->digest_alg : "";
+		signature.fileDigest = calculateFileDigest(file, auth->digest_alg);
+		signature.certificates = convertCertificates(auth->certs);
+		signature.isValid = auth->verify_flags == AUTHENTICODE_VFY_VALID;
+
+		/* Report first verification error */
+		if (signature.fileDigest != signature.signedDigest)
+		{
+			signature.warnings.emplace_back("Signature digest doesn't match the file digest");
+			signature.isValid = false;
+		}
+		else if (auth->verify_flags != AUTHENTICODE_VFY_VALID)
+		{
+			signature.warnings.emplace_back(authenticodeFlagToString(auth->verify_flags));
+		}
+
+		if (auth->signer)
+		{
+			::Signer* signer = auth->signer;
+			signature.programName = signer->program_name ? signer->program_name : "";
+			signature.signer.chain = convertCertificates(signer->chain);
+			signature.signer.digestAlgorithm = signer->digest_alg ? signer->digest_alg : "";
+			if (signer->digest.data)
+				bytesToHexString(signer->digest.data, signer->digest.len, signature.signer.digest);
+		}
+
+		if (auth->countersigs)
+		{
+			for (std::size_t i = 0; i < auth->countersigs->count; ++i)
+			{
+				Signer countersigner;
+				Countersignature* counter = auth->countersigs->counters[i];
+
+				if (counter->digest.data)
+					bytesToHexString(counter->digest.data, counter->digest.len, countersigner.digest);
+				countersigner.digestAlgorithm = counter->digest_alg ? counter->digest_alg : "";
+				countersigner.signingTime = counter->sign_time ? counter->sign_time : "";
+				countersigner.chain = convertCertificates(counter->chain);
+
+				/* If there any verification failures */
+				if (counter->verify_flags != COUNTERSIGNATURE_VFY_VALID)
+				{
+					countersigner.warnings.emplace_back(countersigFlagToString(counter->verify_flags));
+				}
+
+				signature.signer.counterSigners.emplace_back(countersigner);
+			}
+		}
+		result.emplace_back(signature);
+	}
+
+	return result;
+}
+
+/**
  * Load certificates.
  */
 void PeFormat::loadCertificates()
@@ -1808,17 +2036,19 @@ void PeFormat::loadCertificates()
 	// We always take the first one, there might be more WIN_CERT structures tho
 	const std::vector<unsigned char>& certBytes = securityDir.getCertificate(0);
 
-	authenticode::Authenticode authenticode(certBytes);
-
-	this->certificateTable = new CertificateTable(authenticode.getSignatures(this));
-
 	std::uint64_t dirOffset = securityDir.getOffset();
 	std::uint64_t dirSize = securityDir.getSize();
 
 	std::vector<Section*> sections = getSections();
 
+	AuthenticodeArray* auth = authenticode_new(certBytes.data(), certBytes.size());
+	std::vector<DigitalSignature> sigs = authenticodeToSignatures(auth, this);
+	authenticode_array_free(auth);
+
+	this->certificateTable = new CertificateTable(sigs);
+
 	certificateTable->isOutsideImage = true;
-	// check if the SecurityDir overlaps with any real part of section
+	// Check if the SecurityDir overlaps with any real part of section
 	// if it does, Windows ignores the certificates
 	for (const Section* sec : sections)
 	{
@@ -1834,6 +2064,7 @@ void PeFormat::loadCertificates()
 		if (dirOffset < realEndOffset && realOffset < dirEndOffset)
 		{
 			certificateTable->isOutsideImage = false;
+			break;
 		}
 	}
 }

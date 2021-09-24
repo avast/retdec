@@ -1,30 +1,47 @@
-/**
- * @file src/fileformat/file_format/pe/authenticode/helper.h
- * @brief Helper functions used for Authenticode components
- * @copyright (c) 2021 Avast Software, licensed under the MIT license
- */
-#pragma once
+/* Copyright (c) 2021 Avast Software
 
-#include "authenticode_structs.h"
-#include "x509_certificate.h"
-#include <openssl/bn.h>
-#include <openssl/bio.h>
-#include <openssl/evp.h>
-#include <openssl/ocsp.h>
-#include <openssl/pkcs7.h>
-#include <openssl/ts.h>
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
+#ifndef HELPER_H
+#define HELPER_H
+
 #include <openssl/x509.h>
-#include <openssl/pem.h>
-#include <openssl/pkcs7.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
 
-namespace authenticode {
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-std::string bytesToHexString(const std::uint8_t* in, int len);
-std::string parsePublicKey(BIO* bio);
-std::string serialToString(ASN1_INTEGER* serial);
-std::string X509NameToString(X509_NAME* name);
-std::string parseDateTime(const ASN1_TIME* dateTime);
-PKCS7* getPkcs7(const std::vector<unsigned char>& input);
-void calculateDigest(const EVP_MD* md, const std::uint8_t* data, int len, std::uint8_t* digest);
+typedef struct {
+    uint8_t* data;
+    int len;
+} ByteArray;
 
-} // namespace authenticode
+int byte_array_init(ByteArray* arr, const uint8_t* data, int len);
+char* parse_time(const ASN1_TIME* time);
+int calculate_digest(const EVP_MD* md, const uint8_t* data, size_t len, uint8_t* digest);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
