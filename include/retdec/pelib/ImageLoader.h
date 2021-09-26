@@ -21,6 +21,16 @@
 namespace PeLib {
 
 //-----------------------------------------------------------------------------
+// Enum for ImageLoader::Load()
+
+enum FileFlags : std::uint32_t
+{
+	Default = 0,
+	HeadersOnly = 1,
+	LoadAsImage = 2
+};
+
+//-----------------------------------------------------------------------------
 // Enum for ImageLoader::getFieldOffset()
 
 enum struct PELIB_MEMBER_TYPE : std::uint32_t
@@ -144,8 +154,8 @@ class ImageLoader
 	int Load(std::istream & fs, std::streamoff fileOffset = 0, bool loadHeadersOnly = false);
 	int Load(const char * fileName, bool loadHeadersOnly = false);
 
-	int Save(std::ostream & fs, std::streamoff fileOffset = 0, bool saveHeadersOnly = false);
-	int Save(const char * fileName, bool saveHeadersOnly = false);
+	int Save(std::ostream & fs, std::streamoff fileOffset = 0, FileFlags saveFlags = FileFlags::Default);
+	int Save(const char * fileName, FileFlags saveFlags = FileFlags::Default);
 
 	bool relocateImage(std::uint64_t newImageBase);
 
@@ -393,6 +403,7 @@ class ImageLoader
 	void writeNewImageBase(std::uint64_t newImageBase);
 
 	int captureDosHeader(ByteBuffer & fileData);
+	int saveToFile(std::ostream & fs, std::streamoff fileOffset, std::size_t rva, std::size_t length);
 	int saveDosHeader(std::ostream & fs, std::streamoff fileOffset);
 	int captureNtHeaders(ByteBuffer & fileData);
 	int saveNtHeaders(std::ostream & fs, std::streamoff fileOffset);
