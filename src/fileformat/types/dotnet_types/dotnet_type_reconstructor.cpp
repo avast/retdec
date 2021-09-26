@@ -33,6 +33,12 @@ const std::uint8_t Generic           = 0x10; ///< Flag indicating whether the me
  */
 std::uint64_t decodeUnsigned(const std::vector<std::uint8_t>& data, std::uint64_t& bytesRead)
 {
+	if (data.empty())
+	{
+		bytesRead = 0;
+		return 0;
+	}
+
 	std::uint64_t result = 0;
 	bytesRead = 0;
 
@@ -79,6 +85,12 @@ std::uint64_t decodeUnsigned(const std::vector<std::uint8_t>& data, std::uint64_
  */
 std::int64_t decodeSigned(const std::vector<std::uint8_t>& data, std::uint64_t& bytesRead)
 {
+	if (data.empty())
+	{
+		bytesRead = 0;
+		return 0;
+	}
+
 	std::int64_t result = 0;
 	bytesRead = 0;
 
