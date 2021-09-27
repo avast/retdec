@@ -33,14 +33,11 @@ const std::uint8_t Generic           = 0x10; ///< Flag indicating whether the me
  */
 std::uint64_t decodeUnsigned(const std::vector<std::uint8_t>& data, std::uint64_t& bytesRead)
 {
-	if (data.empty())
-	{
-		bytesRead = 0;
-		return 0;
-	}
-
 	std::uint64_t result = 0;
 	bytesRead = 0;
+
+	if (data.empty())
+		return result;
 
 	// If highest bit not set, it is 1-byte number
 	if ((data[0] & 0x80) == 0)
@@ -85,14 +82,11 @@ std::uint64_t decodeUnsigned(const std::vector<std::uint8_t>& data, std::uint64_
  */
 std::int64_t decodeSigned(const std::vector<std::uint8_t>& data, std::uint64_t& bytesRead)
 {
-	if (data.empty())
-	{
-		bytesRead = 0;
-		return 0;
-	}
-
-	std::int64_t result = 0;
+	std::uint64_t result = 0;
 	bytesRead = 0;
+
+	if (data.empty())
+		return result;
 
 	// If highest bit not set, it is 1-byte number
 	if ((data[0] & 0x80) == 0)
