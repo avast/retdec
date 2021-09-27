@@ -1841,13 +1841,14 @@ static std::string calculateFileDigest(const PeFormat* peFile, const char* diges
 	{
 		return {};
 	}
+
 	EVP_MD_CTX_destroy(ctx);
 	std::string result;
 	bytesToHexString(hash.data(), EVP_MD_size(algorithm), result);
 	return result;
 }
 
-static Certificate::Attributes parseAttributes(Attributes attrs)
+static Certificate::Attributes getX509Attributes(Attributes attrs)
 {
 	Certificate::Attributes result;
 	result.country = attrs.country.data ? std::string(reinterpret_cast<char*>(attrs.country.data), attrs.country.len) : "";
@@ -1869,7 +1870,7 @@ static Certificate::Attributes parseAttributes(Attributes attrs)
 	return result;
 }
 
-static std::vector<Certificate> convertCertificates(CertificateArray* arr)
+static std::vector<Certificate> getCertificates(CertificateArray* arr)
 {
 	if (!arr)
 		return {};
@@ -1888,8 +1889,8 @@ static std::vector<Certificate> convertCertificates(CertificateArray* arr)
 		new_cert.serialNumber = cert->serial ? cert->serial : "";
 		new_cert.subjectRaw = cert->subject ? cert->subject : "";
 		new_cert.issuerRaw = cert->issuer ? cert->issuer : "";
-		new_cert.issuer = parseAttributes(cert->issuer_attrs);
-		new_cert.subject = parseAttributes(cert->subject_attrs);
+		new_cert.issuer = getX509Attributes(cert->issuer_attrs);
+		new_cert.subject = getX509Attributes(cert->subject_attrs);
 		if (cert->sha1.data)
 			bytesToHexString(cert->sha1.data, cert->sha1.len, new_cert.sha1Digest);
 		if (cert->sha256.data)
@@ -1965,20 +1966,21 @@ static std::vector<DigitalSignature> authenticodeToSignatures(AuthenticodeArray*
 		DigitalSignature signature;
 		Authenticode* auth = arr->signatures[i];
 
+		// Convert each wanted attribute to internal repre
 		if (auth->digest.data)
 			bytesToHexString(auth->digest.data, auth->digest.len, signature.signedDigest);
-
 		signature.digestAlgorithm = auth->digest_alg ? auth->digest_alg : "";
-		signature.fileDigest = calculateFileDigest(file, auth->digest_alg);
-		signature.certificates = convertCertificates(auth->certs);
+		signature.certificates = getCertificates(auth->certs);
 		signature.isValid = auth->verify_flags == AUTHENTICODE_VFY_VALID;
 
-		/* Report first verification error */
+		// Calculate digest of the PE file and compare with signature information
+		signature.fileDigest = calculateFileDigest(file, auth->digest_alg);
 		if (signature.fileDigest != signature.signedDigest)
 		{
 			signature.warnings.emplace_back("Signature digest doesn't match the file digest");
 			signature.isValid = false;
 		}
+		// Else check if there was any signature verifiaction error, if so map it to an error message
 		else if (auth->verify_flags != AUTHENTICODE_VFY_VALID)
 		{
 			signature.warnings.emplace_back(authenticodeFlagToString(auth->verify_flags));
@@ -1987,8 +1989,9 @@ static std::vector<DigitalSignature> authenticodeToSignatures(AuthenticodeArray*
 		if (auth->signer)
 		{
 			::Signer* signer = auth->signer;
+			// Convert each wanted attribute to internal repre
 			signature.programName = signer->program_name ? signer->program_name : "";
-			signature.signer.chain = convertCertificates(signer->chain);
+			signature.signer.chain = getCertificates(signer->chain);
 			signature.signer.digestAlgorithm = signer->digest_alg ? signer->digest_alg : "";
 			if (signer->digest.data)
 				bytesToHexString(signer->digest.data, signer->digest.len, signature.signer.digest);
@@ -2001,13 +2004,14 @@ static std::vector<DigitalSignature> authenticodeToSignatures(AuthenticodeArray*
 				Signer countersigner;
 				Countersignature* counter = auth->countersigs->counters[i];
 
+				// Convert each wanted attribute to internal repre
 				if (counter->digest.data)
 					bytesToHexString(counter->digest.data, counter->digest.len, countersigner.digest);
 				countersigner.digestAlgorithm = counter->digest_alg ? counter->digest_alg : "";
 				countersigner.signingTime = counter->sign_time ? counter->sign_time : "";
-				countersigner.chain = convertCertificates(counter->chain);
+				countersigner.chain = getCertificates(counter->chain);
 
-				/* If there any verification failures */
+				// If there is any verification error, export it to proper message
 				if (counter->verify_flags != COUNTERSIGNATURE_VFY_VALID)
 				{
 					countersigner.warnings.emplace_back(countersigFlagToString(counter->verify_flags));
