@@ -82,7 +82,7 @@ std::uint64_t decodeUnsigned(const std::vector<std::uint8_t>& data, std::uint64_
  */
 std::int64_t decodeSigned(const std::vector<std::uint8_t>& data, std::uint64_t& bytesRead)
 {
-	std::uint64_t result = 0;
+	std::int64_t result = 0;
 	bytesRead = 0;
 
 	if (data.empty())
