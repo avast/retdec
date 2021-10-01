@@ -1074,7 +1074,7 @@ int PeLib::ImageLoader::Save(
 		return fileError;
 
 	// Write zeros to the rest of the file, up to size of image
-	if((saveFlags & FileFlags::HeadersOnly) == 0)
+	if(!(saveFlags & FileFlags::HeadersOnly))
 	{
 		// Write each section
 		for(const auto & section : sections)
