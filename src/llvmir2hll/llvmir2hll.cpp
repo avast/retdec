@@ -195,7 +195,7 @@ bool LlvmIr2Hll::runOnModule(llvm::Module &m)
 		Log::phase("alias analysis [" + aliasAnalysis->getId() + "]");
 		initAliasAnalysis();
 
-		Log::phase("optimizations [" + getTypeOfRunOptimizations()	+ "]");
+		Log::phase("optimizations");
 		runOptimizations();
 	}
 
@@ -603,7 +603,6 @@ void LlvmIr2Hll::runOptimizations()
 					llvmir2hll::ValueAnalysis::create(aliasAnalysis, true),
 					cio,
 					arithmExprEvaluator,
-					globalConfig->parameters.isBackendAggressiveOpts(),
 					Debug
 			)
 	);
@@ -842,16 +841,6 @@ retdec::llvmir2hll::StringSet LlvmIr2Hll::parseListOfOpts(
 {
 	llvmir2hll::StringVector parsedOpts(split(opts, ','));
 	return llvmir2hll::StringSet(parsedOpts.begin(), parsedOpts.end());
-}
-
-/**
-* @brief Returns the type of optimizations that should be run (as a string).
-*/
-std::string LlvmIr2Hll::getTypeOfRunOptimizations() const
-{
-	return globalConfig->parameters.isBackendAggressiveOpts()
-			? "aggressive"
-			: "normal";
 }
 
 /**

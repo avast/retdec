@@ -32,7 +32,7 @@ public:
 	OptimizerManager(const StringSet &enabledOpts, const StringSet &disabledOpts,
 		ShPtr<HLLWriter> hllWriter, ShPtr<ValueAnalysis> va,
 		ShPtr<CallInfoObtainer> cio, ShPtr<ArithmExprEvaluator> arithmExprEvaluator,
-		bool enableAggressiveOpts, bool enableDebug = false);
+		bool enableDebug = false);
 
 	void optimize(ShPtr<Module> m);
 
@@ -63,9 +63,6 @@ private:
 
 	/// Used evaluator of arithmetical expressions.
 	ShPtr<ArithmExprEvaluator> arithmExprEvaluator;
-
-	/// Enable aggressive optimizations?
-	bool enableAggressiveOpts;
 
 	/// Enable emission of debug messages?
 	bool enableDebug;
