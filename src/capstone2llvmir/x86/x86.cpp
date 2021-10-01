@@ -959,7 +959,8 @@ llvm::Value* Capstone2LlvmIrTranslatorX86_impl::loadOp(
 	{
 		case X86_OP_REG:
 		{
-			return loadRegister(op.reg, irb);
+			auto* r = loadRegister(op.reg, irb);
+			return r ? r : llvm::UndefValue::get(ty ? ty : getDefaultType());
 		}
 		case X86_OP_IMM:
 		{

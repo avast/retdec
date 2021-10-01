@@ -157,7 +157,8 @@ llvm::Value* Capstone2LlvmIrTranslatorPowerpc_impl::loadOp(
 	{
 		case PPC_OP_REG:
 		{
-			return loadRegister(op.reg, irb);
+			auto* r = loadRegister(op.reg, irb);
+			return r ? r : llvm::UndefValue::get(ty ? ty : getDefaultType());
 		}
 		case PPC_OP_IMM:
 		{

@@ -316,7 +316,8 @@ llvm::Value* Capstone2LlvmIrTranslatorMips_impl::loadOp(
 	{
 		case MIPS_OP_REG:
 		{
-			return loadRegister(op.reg, irb);
+			auto* r = loadRegister(op.reg, irb);
+			return r ? r : llvm::UndefValue::get(ty ? ty : getDefaultType());
 		}
 		case MIPS_OP_IMM:
 		{
