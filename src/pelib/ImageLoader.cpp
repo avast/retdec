@@ -1146,29 +1146,31 @@ std::uint32_t PeLib::ImageLoader::readWriteImage(
 	if(rva < rvaEnd)
 	{
 		std::uint8_t * bufferPtr = static_cast<std::uint8_t *>(buffer);
-		std::size_t pageIndex = rva / PELIB_PAGE_SIZE;
 
-		// The page index must be in range
-		if(pageIndex < pages.size())
+		while(rva < rvaEnd)
 		{
-			while(rva < rvaEnd)
+			std::uint32_t offsetInPage = rva & (PELIB_PAGE_SIZE - 1);
+			std::uint32_t bytesInPage = PELIB_PAGE_SIZE - offsetInPage;
+			std::size_t pageIndex = rva / PELIB_PAGE_SIZE;
+
+			// Perhaps the last page loaded?
+			if(bytesInPage > (rvaEnd - rva))
+				bytesInPage = (rvaEnd - rva);
+
+			// The page index must be in range
+			if(pageIndex < pages.size())
 			{
-				PELIB_FILE_PAGE & page = pages[pageIndex++];
-				std::uint32_t offsetInPage = rva & (PELIB_PAGE_SIZE - 1);
-				std::uint32_t bytesInPage = PELIB_PAGE_SIZE - offsetInPage;
-
-				// Perhaps the last page loaded?
-				if(bytesInPage > (rvaEnd - rva))
-					bytesInPage = (rvaEnd - rva);
-
-				// Perform the read/write operation
-				ReadWrite(page, bufferPtr, offsetInPage, bytesInPage);
-
-				// Move pointers
-				bufferPtr += bytesInPage;
-				bytesRead += bytesInPage;
-				rva += bytesInPage;
+				ReadWrite(pages[pageIndex], bufferPtr, offsetInPage, bytesInPage);
 			}
+			else
+			{
+				memset(bufferPtr, 0, bytesInPage);
+			}
+
+			// Move pointers
+			bufferPtr += bytesInPage;
+			bytesRead += bytesInPage;
+			rva += bytesInPage;
 		}
 	}
 
