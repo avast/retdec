@@ -138,7 +138,6 @@ private:
 
 	llvmir2hll::StringSet parseListOfOpts(
 			const std::string &opts) const;
-	std::string getTypeOfRunOptimizations() const;
 	llvmir2hll::StringVector getIdsOfPatternFindersToBeRun() const;
 	llvmir2hll::PatternFinderRunner::PatternFinders instantiatePatternFinders(
 		const llvmir2hll::StringVector &pfsIds);

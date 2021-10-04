@@ -36,6 +36,9 @@ std::uint64_t decodeUnsigned(const std::vector<std::uint8_t>& data, std::uint64_
 	std::uint64_t result = 0;
 	bytesRead = 0;
 
+	if (data.empty())
+		return result;
+
 	// If highest bit not set, it is 1-byte number
 	if ((data[0] & 0x80) == 0)
 	{
@@ -81,6 +84,9 @@ std::int64_t decodeSigned(const std::vector<std::uint8_t>& data, std::uint64_t& 
 {
 	std::int64_t result = 0;
 	bytesRead = 0;
+
+	if (data.empty())
+		return result;
 
 	// If highest bit not set, it is 1-byte number
 	if ((data[0] & 0x80) == 0)

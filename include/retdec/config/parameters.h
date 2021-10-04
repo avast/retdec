@@ -36,7 +36,6 @@ class Parameters
 		bool isBackendNoOpts() const;
 		bool isBackendEmitCfg() const;
 		bool isBackendEmitCg() const;
-		bool isBackendAggressiveOpts() const;
 		bool isBackendKeepAllBrackets() const;
 		bool isBackendKeepLibraryFuncs() const;
 		bool isBackendNoTimeVaryingInfo() const;
@@ -76,7 +75,6 @@ class Parameters
 		void setIsBackendNoOpts(bool b);
 		void setIsBackendEmitCfg(bool b);
 		void setIsBackendEmitCg(bool b);
-		void setIsBackendAggressiveOpts(bool b);
 		void setIsBackendKeepAllBrackets(bool b);
 		void setIsBackendKeepLibraryFuncs(bool b);
 		void setIsBackendNoTimeVaryingInfo(bool b);
@@ -176,7 +174,6 @@ class Parameters
 		bool _backendNoOpts = false;
 		bool _backendEmitCfg = false;
 		bool _backendEmitCg = false;
-		bool _backendAggressiveOpts = false;
 		bool _backendKeepAllBrackets = false;
 		bool _backendKeepLibraryFuncs = false;
 		bool _backendNoTimeVaryingInfo = false;
