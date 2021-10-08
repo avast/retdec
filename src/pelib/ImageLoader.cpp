@@ -912,7 +912,6 @@ PeLib::LoaderError PeLib::ImageLoader::loaderError() const
 
 //-----------------------------------------------------------------------------
 // Interface for loading files
-
 int PeLib::ImageLoader::Load(
 	ByteBuffer & fileData,
 	bool loadHeadersOnly)
@@ -1053,35 +1052,85 @@ int PeLib::ImageLoader::Load(
 int PeLib::ImageLoader::Save(
 	std::ostream & fs,
 	std::streamoff fileOffset,
-	FileFlags saveFlags)
+	std::uint32_t saveFlags)
 {
 	int fileError;
 
-	// Check and capture DOS header
-	fileError = saveDosHeader(fs, fileOffset);
-	if(fileError != ERROR_NONE)
-		return fileError;
-
-	// Check and capture NT headers
-	fileError = saveNtHeaders(fs, fileOffset + dosHeader.e_lfanew);
-	if(fileError != ERROR_NONE)
-		return fileError;
-
-	// Check and capture section headers
-	fileOffset = fileOffset + dosHeader.e_lfanew + sizeof(PELIB_IMAGE_NT_SIGNATURE) + sizeof(PELIB_IMAGE_FILE_HEADER) + fileHeader.SizeOfOptionalHeader;
-	fileError = saveSectionHeaders(fs, fileOffset);
-	if(fileError != ERROR_NONE)
-		return fileError;
-
-	// Write zeros to the rest of the file, up to size of image
-	if(!(saveFlags & FileFlags::HeadersOnly))
+	// This save mode is intended for unpackers. Headers are constructed
+	// from metadata and sections are filled with zeros
+	if(saveFlags & IoFlagNewFile)
 	{
-		// Write each section
-		for(const auto & section : sections)
+		// Save the DOS header
+		fileError = saveDosHeaderNew(fs, fileOffset);
+		if(fileError != ERROR_NONE)
+			return fileError;
+
+		// Save the NT headers
+		fileError = saveNtHeadersNew(fs, fileOffset + dosHeader.e_lfanew);
+		if(fileError != ERROR_NONE)
+			return fileError;
+
+		// Check and capture section headers
+		fileOffset = fileOffset + dosHeader.e_lfanew + sizeof(PELIB_IMAGE_NT_SIGNATURE) + sizeof(PELIB_IMAGE_FILE_HEADER) + fileHeader.SizeOfOptionalHeader;
+		fileError = saveSectionHeadersNew(fs, fileOffset);
+		if(fileError != ERROR_NONE)
+			return fileError;
+
+		// Write section data to the file, up to size of image
+		if(!(saveFlags & IoFlagHeadersOnly))
 		{
-			fileError = saveToFile(fs, section.PointerToRawData, section.VirtualAddress, section.SizeOfRawData);
-			if(fileError != ERROR_NONE)
-				return fileError;
+			// Get the curent file offset and file size
+			fileOffset += sections.size() * sizeof(PELIB_IMAGE_SECTION_HEADER);
+			std::streamoff fileSize = fileOffset;
+
+			// Estimate the file size with data
+			for(const auto & section : sections)
+			{
+				if(section.SizeOfRawData != 0)
+				{
+					if((section.PointerToRawData + section.SizeOfRawData) > fileSize)
+						fileSize = section.PointerToRawData + section.SizeOfRawData;
+				}
+			}
+
+			// Shall we write data to the file?
+			if(fileSize > fileOffset)
+			{
+				std::vector<char> ZeroBuffer(fileSize - fileOffset);
+
+				fs.seekp(fileOffset, std::ios::beg);
+				fs.write(ZeroBuffer.data(), ZeroBuffer.size());
+			}
+		}
+	}
+	else
+	{
+		// Save the DOS header
+		fileError = saveDosHeader(fs, fileOffset);
+		if(fileError != ERROR_NONE)
+			return fileError;
+
+		// Save the NT headers
+		fileError = saveNtHeaders(fs, fileOffset + dosHeader.e_lfanew);
+		if(fileError != ERROR_NONE)
+			return fileError;
+
+		// Check and capture section headers
+		fileOffset = fileOffset + dosHeader.e_lfanew + sizeof(PELIB_IMAGE_NT_SIGNATURE) + sizeof(PELIB_IMAGE_FILE_HEADER) + fileHeader.SizeOfOptionalHeader;
+		fileError = saveSectionHeaders(fs, fileOffset);
+		if(fileError != ERROR_NONE)
+			return fileError;
+
+		// Write section data to the file, up to size of image
+		if(!(saveFlags & IoFlagHeadersOnly))
+		{
+			// Write each section
+			for(const auto & section : sections)
+			{
+				fileError = saveToFile(fs, section.PointerToRawData, section.VirtualAddress, section.SizeOfRawData);
+				if(fileError != ERROR_NONE)
+					return fileError;
+			}
 		}
 	}
 
@@ -1090,7 +1139,7 @@ int PeLib::ImageLoader::Save(
 
 int PeLib::ImageLoader::Save(
 	const char * fileName,
-	FileFlags saveFlags)
+	std::uint32_t saveFlags)
 {
     std::ofstream fs(fileName, std::ifstream::out | std::ifstream::binary);
     if(!fs.is_open())
@@ -1611,6 +1660,16 @@ int PeLib::ImageLoader::saveToFile(
 	return ERROR_NONE;
 }
 
+int PeLib::ImageLoader::saveDosHeaderNew(
+	std::ostream & fs,
+	std::streamoff fileOffset)
+{
+	// Write DOS header as-is
+	fs.seekp(fileOffset, std::ios::beg);
+	fs.write(reinterpret_cast<char *>(&dosHeader), sizeof(PELIB_IMAGE_DOS_HEADER));
+	return ERROR_NONE;
+}
+
 int PeLib::ImageLoader::saveDosHeader(
 	std::ostream & fs,
 	std::streamoff fileOffset)
@@ -1749,6 +1808,117 @@ int PeLib::ImageLoader::captureNtHeaders(ByteBuffer & fileData)
 	// Check for proper alignment of the image base
 	if(optionalHeader.ImageBase & (PELIB_SIZE_64KB - 1))
 		setLoaderError(LDR_ERROR_IMAGE_BASE_NOT_ALIGNED);
+
+	return ERROR_NONE;
+}
+
+int PeLib::ImageLoader::saveNtHeadersNew(
+	std::ostream & fs,
+	std::streamoff fileOffset)
+{
+	// Calculate the size of the optional header. Any version of PE file,
+	// 32 or 64-bit, must have this field set to a correct value.
+	std::uint32_t sizeOfOptionalHeader = getFieldOffset(PELIB_MEMBER_TYPE::OPTHDR_sizeof_fixed) + optionalHeader.NumberOfRvaAndSizes * sizeof(PELIB_IMAGE_DATA_DIRECTORY);
+
+	// Move to the required file offset
+	fs.seekp(fileOffset, std::ios::beg);
+
+	// Write the NT signature
+	fs.write(reinterpret_cast<char *>(&ntSignature), sizeof(ntSignature));
+
+	// Write the file header
+	fileHeader.SizeOfOptionalHeader = sizeOfOptionalHeader;
+	fileHeader.NumberOfSections = (std::uint16_t)sections.size();
+	fs.write(reinterpret_cast<char *>(&fileHeader), sizeof(PELIB_IMAGE_FILE_HEADER));
+
+	// Write the optional header. Note that we need to distinguish 32-bit and 64-bit header
+	if(optionalHeader.Magic == PELIB_IMAGE_NT_OPTIONAL_HDR32_MAGIC)
+	{
+		PELIB_IMAGE_OPTIONAL_HEADER32 optionalHeader32;
+
+		// Verify some of the data to make sure they are able to convert to 32-bit values
+		if((optionalHeader.ImageBase >> 0x20) != 0)
+			return ERROR_INVALID_FILE;
+		if((optionalHeader.SizeOfStackReserve >> 0x20) != 0)
+			return ERROR_INVALID_FILE;
+		if((optionalHeader.SizeOfHeapReserve >> 0x20) != 0)
+			return ERROR_INVALID_FILE;
+
+		// Convert the optional header to 32-bit variant
+		optionalHeader32.Magic                       = optionalHeader.Magic;
+		optionalHeader32.MajorLinkerVersion          = optionalHeader.MajorLinkerVersion;
+		optionalHeader32.MinorLinkerVersion          = optionalHeader.MinorLinkerVersion;
+		optionalHeader32.SizeOfCode                  = optionalHeader.SizeOfCode;
+		optionalHeader32.SizeOfInitializedData       = optionalHeader.SizeOfInitializedData;
+		optionalHeader32.SizeOfUninitializedData     = optionalHeader.SizeOfUninitializedData;
+		optionalHeader32.AddressOfEntryPoint         = optionalHeader.AddressOfEntryPoint;
+		optionalHeader32.BaseOfCode                  = optionalHeader.BaseOfCode;
+		optionalHeader32.BaseOfData                  = optionalHeader.BaseOfData;
+		optionalHeader32.ImageBase                   = (std::uint32_t)optionalHeader.ImageBase;
+		optionalHeader32.SectionAlignment            = optionalHeader.SectionAlignment;
+		optionalHeader32.FileAlignment               = optionalHeader.FileAlignment;
+		optionalHeader32.MajorOperatingSystemVersion = optionalHeader.MajorOperatingSystemVersion;
+		optionalHeader32.MinorOperatingSystemVersion = optionalHeader.MinorOperatingSystemVersion;
+		optionalHeader32.MajorImageVersion           = optionalHeader.MajorImageVersion;
+		optionalHeader32.MinorImageVersion           = optionalHeader.MinorImageVersion;
+		optionalHeader32.MajorSubsystemVersion       = optionalHeader.MajorSubsystemVersion;
+		optionalHeader32.MinorSubsystemVersion       = optionalHeader.MinorSubsystemVersion;
+		optionalHeader32.Win32VersionValue           = optionalHeader.Win32VersionValue;
+		optionalHeader32.SizeOfImage                 = optionalHeader.SizeOfImage;
+		optionalHeader32.SizeOfHeaders               = optionalHeader.SizeOfHeaders;
+		optionalHeader32.CheckSum                    = optionalHeader.CheckSum;
+		optionalHeader32.Subsystem                   = optionalHeader.Subsystem;
+		optionalHeader32.DllCharacteristics          = optionalHeader.DllCharacteristics;
+		optionalHeader32.SizeOfStackReserve          = (std::uint32_t)optionalHeader.SizeOfStackReserve;
+		optionalHeader32.SizeOfStackCommit           = (std::uint32_t)optionalHeader.SizeOfStackCommit;
+		optionalHeader32.SizeOfHeapReserve           = (std::uint32_t)optionalHeader.SizeOfHeapReserve;
+		optionalHeader32.SizeOfHeapCommit            = (std::uint32_t)optionalHeader.SizeOfHeapCommit;
+		optionalHeader32.LoaderFlags                 = optionalHeader.LoaderFlags;
+		optionalHeader32.NumberOfRvaAndSizes         = optionalHeader.NumberOfRvaAndSizes;
+		memcpy(&optionalHeader32.DataDirectory, &optionalHeader.DataDirectory, sizeof(optionalHeader.DataDirectory));
+
+		// Write to file
+		fs.write(reinterpret_cast<char *>(&optionalHeader32), sizeOfOptionalHeader);
+	}
+	else
+	{
+		PELIB_IMAGE_OPTIONAL_HEADER64 optionalHeader64;
+
+		// Convert the optional header to 64-bit variant
+		optionalHeader64.Magic                       = optionalHeader.Magic;
+		optionalHeader64.MajorLinkerVersion          = optionalHeader.MajorLinkerVersion;
+		optionalHeader64.MinorLinkerVersion          = optionalHeader.MinorLinkerVersion;
+		optionalHeader64.SizeOfCode                  = optionalHeader.SizeOfCode;
+		optionalHeader64.SizeOfInitializedData       = optionalHeader.SizeOfInitializedData;
+		optionalHeader64.SizeOfUninitializedData     = optionalHeader.SizeOfUninitializedData;
+		optionalHeader64.AddressOfEntryPoint         = optionalHeader.AddressOfEntryPoint;
+		optionalHeader64.BaseOfCode                  = optionalHeader.BaseOfCode;
+		optionalHeader64.ImageBase                   = optionalHeader.ImageBase;
+		optionalHeader64.SectionAlignment            = optionalHeader.SectionAlignment;
+		optionalHeader64.FileAlignment               = optionalHeader.FileAlignment;
+		optionalHeader64.MajorOperatingSystemVersion = optionalHeader.MajorOperatingSystemVersion;
+		optionalHeader64.MinorOperatingSystemVersion = optionalHeader.MinorOperatingSystemVersion;
+		optionalHeader64.MajorImageVersion           = optionalHeader.MajorImageVersion;
+		optionalHeader64.MinorImageVersion           = optionalHeader.MinorImageVersion;
+		optionalHeader64.MajorSubsystemVersion       = optionalHeader.MajorSubsystemVersion;
+		optionalHeader64.MinorSubsystemVersion       = optionalHeader.MinorSubsystemVersion;
+		optionalHeader64.Win32VersionValue           = optionalHeader.Win32VersionValue;
+		optionalHeader64.SizeOfImage                 = optionalHeader.SizeOfImage;
+		optionalHeader64.SizeOfHeaders               = optionalHeader.SizeOfHeaders;
+		optionalHeader64.CheckSum                    = optionalHeader.CheckSum;
+		optionalHeader64.Subsystem                   = optionalHeader.Subsystem;
+		optionalHeader64.DllCharacteristics          = optionalHeader.DllCharacteristics;
+		optionalHeader64.SizeOfStackReserve          = optionalHeader.SizeOfStackReserve;
+		optionalHeader64.SizeOfStackCommit           = optionalHeader.SizeOfStackCommit;
+		optionalHeader64.SizeOfHeapReserve           = optionalHeader.SizeOfHeapReserve;
+		optionalHeader64.SizeOfHeapCommit            = optionalHeader.SizeOfHeapCommit;
+		optionalHeader64.LoaderFlags                 = optionalHeader.LoaderFlags;
+		optionalHeader64.NumberOfRvaAndSizes         = optionalHeader.NumberOfRvaAndSizes;
+		memcpy(&optionalHeader64.DataDirectory, &optionalHeader.DataDirectory, sizeof(optionalHeader64.DataDirectory));
+
+		// Write to file
+		fs.write(reinterpret_cast<char *>(&optionalHeader64), sizeOfOptionalHeader);
+	}
 
 	return ERROR_NONE;
 }
@@ -1979,6 +2149,32 @@ int PeLib::ImageLoader::captureSectionHeaders(ByteBuffer & fileData)
 		{
 			setLoaderError(LDR_ERROR_FILE_IS_CUT);
 		}
+	}
+
+	return ERROR_NONE;
+}
+
+int PeLib::ImageLoader::saveSectionHeadersNew(
+	std::ostream & fs,
+	std::streamoff fileOffset)
+{
+	PELIB_IMAGE_SECTION_HEADER * pHeaders;
+	std::size_t sectionCount = sections.size();
+	std::size_t index = 0;
+
+	if((pHeaders = new PELIB_IMAGE_SECTION_HEADER[sectionCount]) != nullptr)
+	{
+		// Populate the array with section headers
+		for(const auto & section : sections)
+		{
+			memcpy(pHeaders + index, section.Name, sizeof(PELIB_IMAGE_SECTION_HEADER));
+			index++;
+		}
+
+		// Write the section headers to file
+		fs.seekp(fileOffset, std::ios::beg);
+		fs.write(reinterpret_cast<char *>(pHeaders), sectionCount * sizeof(PELIB_IMAGE_SECTION_HEADER));
+		delete[] pHeaders;
 	}
 
 	return ERROR_NONE;

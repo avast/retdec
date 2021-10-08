@@ -21,16 +21,6 @@
 namespace PeLib {
 
 //-----------------------------------------------------------------------------
-// Enum for ImageLoader::Load()
-
-enum FileFlags : std::uint32_t
-{
-	Default = 0,
-	HeadersOnly = 1,
-	LoadAsImage = 2
-};
-
-//-----------------------------------------------------------------------------
 // Enum for ImageLoader::getFieldOffset()
 
 enum struct PELIB_MEMBER_TYPE : std::uint32_t
@@ -70,6 +60,13 @@ const std::uint32_t BuildNumber8 = 9200;            // Behavior equal to Windows
 const std::uint32_t BuildNumber10 = 10240;          // Behavior equal to Windows 10
 const std::uint32_t BuildNumberMask = 0x0FFFF;      // Mask for extracting the operating system
 const std::uint32_t BuildNumber64Bit = 0x10000;     // Emulate 64-bit system
+
+//-----------------------------------------------------------------------------
+// Flags for ImageLoader::Load() and ImageLoader::Save()
+
+const std::uint32_t IoFlagHeadersOnly = 1;          // Only load/save PE headers
+const std::uint32_t IoFlagNewFile     = 2;          // Create the PE as new file (for unpackers)
+const std::uint32_t IoFlagLoadAsImage = 4;          // Load the data as mapped image file
 
 //-----------------------------------------------------------------------------
 // Structure for comparison with Windows mapped images
@@ -154,8 +151,8 @@ class ImageLoader
 	int Load(std::istream & fs, std::streamoff fileOffset = 0, bool loadHeadersOnly = false);
 	int Load(const char * fileName, bool loadHeadersOnly = false);
 
-	int Save(std::ostream & fs, std::streamoff fileOffset = 0, FileFlags saveFlags = FileFlags::Default);
-	int Save(const char * fileName, FileFlags saveFlags = FileFlags::Default);
+	int Save(std::ostream & fs, std::streamoff fileOffset = 0, std::uint32_t saveFlags = 0);
+	int Save(const char * fileName, std::uint32_t saveFlags = 0);
 
 	bool relocateImage(std::uint64_t newImageBase);
 
@@ -404,11 +401,14 @@ class ImageLoader
 
 	int captureDosHeader(ByteBuffer & fileData);
 	int saveToFile(std::ostream & fs, std::streamoff fileOffset, std::size_t rva, std::size_t length);
+	int saveDosHeaderNew(std::ostream & fs, std::streamoff fileOffset);
 	int saveDosHeader(std::ostream & fs, std::streamoff fileOffset);
 	int captureNtHeaders(ByteBuffer & fileData);
+	int saveNtHeadersNew(std::ostream & fs, std::streamoff fileOffset);
 	int saveNtHeaders(std::ostream & fs, std::streamoff fileOffset);
 	int captureSectionName(ByteBuffer & fileData, std::string & sectionName, const std::uint8_t * name);
 	int captureSectionHeaders(ByteBuffer & fileData);
+	int saveSectionHeadersNew(std::ostream & fs, std::streamoff fileOffset);
 	int saveSectionHeaders(std::ostream & fs, std::streamoff fileOffset);
 	int captureImageSections(ByteBuffer & fileData);
 	int captureOptionalHeader32(std::uint8_t * fileData, std::uint8_t * filePtr, std::uint8_t * fileEnd);
