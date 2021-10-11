@@ -15,6 +15,7 @@
 #include "retdec/fileformat/types/dotnet_headers/string_stream.h"
 #include "retdec/fileformat/types/dotnet_headers/user_string_stream.h"
 #include "retdec/fileformat/types/dotnet_types/dotnet_class.h"
+#include "retdec/fileformat/types/pe_timestamps/pe_timestamps.h"
 #include "retdec/fileformat/types/visual_basic/visual_basic_info.h"
 #include "retdec/pelib/PeFile.h"
 
@@ -206,6 +207,7 @@ class PeFormat : public FileFormat
 		const std::string& getTypeRefhashSha256() const;
 		const VisualBasicInfo* getVisualBasicInfo() const;
 		std::vector<std::tuple<const std::uint8_t*, std::size_t>> getDigestRanges() const;
+		PeTimestamps getTimestamps() const;
 
 		/// @name Scanning methods
 		/// @{

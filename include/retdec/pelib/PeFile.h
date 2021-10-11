@@ -28,6 +28,7 @@
 #include "retdec/pelib/CoffSymbolTable.h"
 #include "retdec/pelib/DelayImportDirectory.h"
 #include "retdec/pelib/SecurityDirectory.h"
+#include "retdec/pelib/ConfigDirectory.h"
 
 namespace PeLib
 {
@@ -122,6 +123,7 @@ namespace PeLib
 		DebugDirectory m_debugdir;                        ///< Debug directory of the current file.
 		DelayImportDirectory m_delayimpdir;               ///< Delay import directory of the current file.
 		TlsDirectory m_tlsdir;                            ///< TLS directory of the current file.
+		ConfigDirectory m_configdir;                      ///< Load Config directory
 
 		public:
 
@@ -170,6 +172,7 @@ namespace PeLib
 		int readDelayImportDirectory() ;
 		/// Reads the security directory of the current file.
 		int readSecurityDirectory() ;
+		int readLoadConfigDirectory();
 
 		/// Checks the entry point code
 		LoaderError checkEntryPointErrors() const;
@@ -232,6 +235,9 @@ namespace PeLib
 		const TlsDirectory & tlsDir() const;
 		/// Accessor function for the TLS directory.
 		TlsDirectory & tlsDir();
+
+		const ConfigDirectory& configDir() const;
+		ConfigDirectory& configDir();
 	};
 }
 

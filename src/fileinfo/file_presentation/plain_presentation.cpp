@@ -8,6 +8,7 @@
 #include "retdec/fileformat/types/certificate_table/certificate_table.h"
 #include "retdec/utils/string.h"
 #include "retdec/utils/io/log.h"
+#include "retdec/utils/time.h"
 #include "retdec/utils/version.h"
 #include "retdec/fileformat/utils/conversions.h"
 #include "fileinfo/file_presentation/getters/format.h"
@@ -789,6 +790,37 @@ void PlainPresentation::presentSignatures() const
 	}
 }
 
+void presentPeTimestamps(FileInformation& fileinfo)
+{
+	PeTimestamps pe_timestamps = fileinfo.pe_timestamps;
+	Log::info() << "Timestamps:\n";
+	// Don't clutter output if they are 0 - which they often are except the header one
+	if (pe_timestamps.coffTime)
+		Log::info() << "    COFF Header           : " << timestampToDate(static_cast<std::time_t>(pe_timestamps.coffTime)) << "\n";
+	if (pe_timestamps.configTime)
+		Log::info() << "    Load Config Directory : " << timestampToDate(static_cast<std::time_t>(pe_timestamps.configTime)) << "\n";
+	if (pe_timestamps.exportTime)
+		Log::info() << "    Export Directory      : " << timestampToDate(static_cast<std::time_t>(pe_timestamps.exportTime)) << "\n";
+
+	for (auto timestamp : pe_timestamps.debugTime)
+	{
+		if (timestamp)
+			Log::info() << "    Debug Directory   : " << timestampToDate(static_cast<std::time_t>(timestamp)) << "\n";
+	}
+
+	for (auto timestamp : pe_timestamps.resourceTime)
+	{
+		if (timestamp)
+			Log::info() << "    Resource Directory : " << timestampToDate(static_cast<std::time_t>(timestamp)) << "\n";
+	}
+
+	for (auto timestamp : pe_timestamps.pdbTime)
+	{
+		if (timestamp)
+			Log::info() << "    PDB Debug Info     : " << timestampToDate(static_cast<std::time_t>(timestamp)) << "\n";
+	}
+}
+
 bool PlainPresentation::present()
 {
 	if(verbose)
@@ -832,6 +864,11 @@ bool PlainPresentation::present()
 		std::vector<std::string> desc, info;
 
 		presentPackingInfo();
+
+		if (fileinfo.getFileFormatEnum() == retdec::fileformat::Format::PE)
+		{
+			presentPeTimestamps(this->fileinfo);
+		}
 
 		HeaderPlainGetter headerInfo(fileinfo);
 		presentSimple(headerInfo, true);

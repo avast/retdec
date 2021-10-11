@@ -70,6 +70,7 @@ class FileInformation
 
 	public:
 		const retdec::fileformat::CertificateTable* certificateTable = nullptr; ///< information about signatures
+		retdec::fileformat::PeTimestamps pe_timestamps; ///< Various Timestamps stored in PE file
 		retdec::cpdetect::ToolInformation toolInfo; ///< detected tools
 		std::vector<std::string> messages;   ///< error, warning and other messages
 
