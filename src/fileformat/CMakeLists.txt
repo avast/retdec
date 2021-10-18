@@ -71,11 +71,6 @@ add_library(fileformat STATIC
 	types/tls_info/tls_info.cpp
 	file_format/pe/pe_format.cpp
 	file_format/pe/pe_dll_list.cpp
-	file_format/pe/authenticode/authenticode.c
-	file_format/pe/authenticode/countersignature.c
-	file_format/pe/authenticode/helper.c
-	file_format/pe/authenticode/structs.c
-	file_format/pe/authenticode/certificate.c
 	file_format/coff/coff_format.cpp
 	file_format/intel_hex/intel_hex_parser/intel_hex_tokenizer.cpp
 	file_format/intel_hex/intel_hex_parser/intel_hex_parser.cpp
@@ -104,6 +99,7 @@ target_link_libraries(fileformat
 		retdec::deps::llvm
 	PRIVATE
 		retdec::deps::tlsh
+		retdec::deps::authenticode
 		OpenSSL::Crypto
 )
 

@@ -56,7 +56,7 @@ Countersignature* pkcs9_countersig_new(
     ASN1_TYPE* messageDigest = PKCS7_get_signed_attribute(si, NID_pkcs9_messageDigest);
 
     const ASN1_TYPE* sign_time = PKCS7_get_signed_attribute(si, NID_pkcs9_signingTime);
-    result->sign_time = parse_time(sign_time->value.utctime);
+    result->sign_time = ASN1_TIME_to_time_t(sign_time->value.utctime);
 
     X509* signCert = X509_find_by_issuer_and_serial(
         certs, si->issuer_and_serial->issuer, si->issuer_and_serial->serial);
@@ -192,7 +192,7 @@ Countersignature* ms_countersig_new(const uint8_t* data, long size, ASN1_STRING*
     }
 
     const ASN1_TIME* rawTime = TS_TST_INFO_get_time(ts);
-    result->sign_time = parse_time(rawTime);
+    result->sign_time = ASN1_TIME_to_time_t(rawTime);
 
     STACK_OF(X509)* sigs = PKCS7_get0_signers(p7, p7->d.sign->cert, 0);
     X509* signCert = sk_X509_value(sigs, 0);
@@ -335,7 +335,6 @@ void countersignature_free(Countersignature* sig)
     if (sig) {
         free(sig->digest_alg);
         free(sig->digest.data);
-        free(sig->sign_time);
         certificate_array_free(sig->chain);
         free(sig);
     }

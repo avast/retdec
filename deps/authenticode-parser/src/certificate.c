@@ -21,9 +21,11 @@ SOFTWARE.
 
 #include "certificate.h"
 
+#include <openssl/asn1.h>
 #include <openssl/crypto.h>
 #include <openssl/evp.h>
 #include <openssl/sha.h>
+#include <openssl/x509.h>
 #include <string.h>
 
 #include "helper.h"
@@ -191,7 +193,7 @@ static char* integer_to_serial(ASN1_INTEGER* serial)
                 snprintf(res + 3 * i, 3, "%02x", serial_bytes[i]);
         }
     }
-    OPENSSL_free(serial_der);
+    free(serial_der);
 
     return (char*)res;
 }
@@ -276,9 +278,10 @@ Certificate* certificate_new(X509* x509)
     parse_name_attributes(issuerName, &result->issuer_attrs);
     parse_name_attributes(subjectName, &result->subject_attrs);
 
+    result->version = X509_get_version(x509);
     result->serial = integer_to_serial(X509_get_serialNumber(x509));
-    result->not_after = parse_time(X509_get0_notAfter(x509));
-    result->not_before = parse_time(X509_get0_notBefore(x509));
+    result->not_after = ASN1_TIME_to_time_t(X509_get0_notAfter(x509));
+    result->not_before = ASN1_TIME_to_time_t(X509_get0_notBefore(x509));
     result->sig_alg = strdup(OBJ_nid2ln(X509_get_signature_nid(x509)));
 
     EVP_PKEY* pkey = X509_get0_pubkey(x509);
@@ -359,8 +362,6 @@ void certificate_free(Certificate* cert)
         free(cert->sig_alg);
         free(cert->key_alg);
         free(cert->key);
-        free(cert->not_after);
-        free(cert->not_before);
         free(cert->sha1.data);
         free(cert->sha256.data);
         free(cert->serial);

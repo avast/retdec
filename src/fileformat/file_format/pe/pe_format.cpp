@@ -6,19 +6,20 @@
 
 #include <algorithm>
 #include <cassert>
+#include <ctime>
 #include <exception>
+#include <iomanip>
 #include <iostream>
 #include <map>
 #include <new>
 #include <openssl/evp.h>
 #include <regex>
+#include <sstream>
 #include <tuple>
 #include <unordered_map>
 #include <unordered_set>
 
-#include "authenticode/authenticode.h"
-#include "authenticode/certificate.h"
-#include "authenticode/helper.h"
+#include <authenticode-parser/authenticode.h>
 #include "retdec/fileformat/types/certificate_table/certificate.h"
 #include "retdec/fileformat/types/certificate_table/certificate_table.h"
 #include "retdec/utils/container.h"
@@ -1848,6 +1849,15 @@ static std::string calculateFileDigest(const PeFormat* peFile, const char* diges
 	return result;
 }
 
+static std::string time_to_string(std::time_t time)
+{
+	std::tm* tm = std::gmtime(&time);
+	std::stringstream ss;
+	// "Dec 21 00:00:00 2012 GMT" format
+	ss << std::put_time(tm, "%b %e %OH:%OM:%OS %Y GMT");
+	return ss.str();
+}
+
 static Certificate::Attributes getX509Attributes(Attributes attrs)
 {
 	Certificate::Attributes result;
@@ -1881,8 +1891,8 @@ static std::vector<Certificate> getCertificates(CertificateArray* arr)
 	{
 		::Certificate* cert = arr->certs[i];
 		Certificate new_cert;
-		new_cert.validSince = cert->not_before ? cert->not_before : "";
-		new_cert.validUntil = cert->not_after ? cert->not_after : "";
+		new_cert.validSince = cert->not_before ? time_to_string(cert->not_before) : "";
+		new_cert.validUntil = cert->not_after ? time_to_string(cert->not_after) : "";
 		new_cert.publicKey = cert->key ? cert->key : "";
 		new_cert.publicKeyAlgo = cert->key_alg ? cert->key_alg : "";
 		new_cert.signatureAlgo = cert->sig_alg ? cert->sig_alg : "";
@@ -2008,7 +2018,7 @@ static std::vector<DigitalSignature> authenticodeToSignatures(AuthenticodeArray*
 				if (counter->digest.data)
 					bytesToHexString(counter->digest.data, counter->digest.len, countersigner.digest);
 				countersigner.digestAlgorithm = counter->digest_alg ? counter->digest_alg : "";
-				countersigner.signingTime = counter->sign_time ? counter->sign_time : "";
+				countersigner.signingTime = counter->sign_time ? time_to_string(counter->sign_time) : "";
 				countersigner.chain = getCertificates(counter->chain);
 
 				// If there is any verification error, export it to proper message

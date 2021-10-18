@@ -19,54 +19,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef CERTIFICATE_H
-#define CERTIFICATE_H
+#ifndef AUTHENTICODE_PARSER_CERTIFICATE_H
+#define AUTHENTICODE_PARSER_CERTIFICATE_H
 
-#include "helper.h"
+#include <authenticode-parser/authenticode.h>
+
 #include <openssl/x509.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-typedef struct {
-    ByteArray country;
-    ByteArray organization;
-    ByteArray organizationalUnit;
-    ByteArray nameQualifier;
-    ByteArray state;
-    ByteArray commonName;
-    ByteArray serialNumber;
-    ByteArray locality;
-    ByteArray title;
-    ByteArray surname;
-    ByteArray givenName;
-    ByteArray initials;
-    ByteArray pseudonym;
-    ByteArray generationQualifier;
-    ByteArray emailAddress;
-} Attributes;
-
-typedef struct {
-    long version;
-    char* issuer;
-    char* subject;
-    char* serial;
-    ByteArray sha1;
-    ByteArray sha256;
-    char* key_alg;
-    char* sig_alg;
-    char* not_before;
-    char* not_after;
-    char* key;
-    Attributes issuer_attrs;
-    Attributes subject_attrs;
-} Certificate;
-
-typedef struct {
-    Certificate** certs;
-    size_t count;
-} CertificateArray;
 
 Certificate* certificate_new(X509* x509);
 void certificate_free(Certificate* cert);

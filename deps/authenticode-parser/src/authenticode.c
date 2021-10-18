@@ -19,8 +19,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include "authenticode.h"
-
 #include <openssl/asn1.h>
 #include <openssl/evp.h>
 #include <openssl/objects.h>
@@ -34,10 +32,14 @@ SOFTWARE.
 #include <stdlib.h>
 #include <string.h>
 
+#include <authenticode-parser/authenticode.h>
+
 #include "certificate.h"
 #include "countersignature.h"
 #include "helper.h"
 #include "structs.h"
+
+#define MAX_NESTED_COUNT 16
 
 /* Moves signatures from src to dst, returns 0 on success,
  * else 1. If error occurs, arguments are unchanged */
@@ -284,6 +286,9 @@ static void initialize_openssl()
  * of signatures as Authenticode signatures are often nested through unauth attributes */
 AuthenticodeArray* authenticode_new(const uint8_t* data, long len)
 {
+    if (!data || len == 0)
+        return NULL;
+
     /* We need to initialize all the custom objects for further parsing */
     initialize_openssl();
 
