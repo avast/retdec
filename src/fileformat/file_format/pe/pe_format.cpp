@@ -2022,8 +2022,8 @@ PeTimestamps PeFormat::getTimestamps() const
 				continue;
 
 			std::uint64_t timestamp;
-			get4Byte(debugDir.getPointerToRawData(i) + 8, timestamp);
-			timestamps.pdbTime.push_back(timestamp);
+			if (get4ByteOffset(debugDir.getPointerToRawData(i) + 8, timestamp))
+				timestamps.pdbTime.push_back(timestamp);
 		}
 	}
 
