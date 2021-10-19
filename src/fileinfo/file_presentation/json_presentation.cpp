@@ -1262,18 +1262,18 @@ void presentPeTimestamps(JsonPresentation::Writer& writer, FileInformation& file
 	writer.StartObject();
 
 	if (pe_timestamps.coffTime)
-		serializeString(writer, "coffHeader", timestampToDate(static_cast<std::time_t>(pe_timestamps.coffTime)));
+		serializeString(writer, "coffHeader", timestampToGmtDatetime(static_cast<std::time_t>(pe_timestamps.coffTime)));
 	if (pe_timestamps.configTime)
-		serializeString(writer, "loadConfigDir", timestampToDate(static_cast<std::time_t>(pe_timestamps.configTime)));
+		serializeString(writer, "loadConfigDir", timestampToGmtDatetime(static_cast<std::time_t>(pe_timestamps.configTime)));
 	if (pe_timestamps.exportTime)
-		serializeString(writer, "exportDir", timestampToDate(static_cast<std::time_t>(pe_timestamps.exportTime)));
+		serializeString(writer, "exportDir", timestampToGmtDatetime(static_cast<std::time_t>(pe_timestamps.exportTime)));
 
 	writer.String("debugDirEntries");
 	writer.StartArray();
 	for (auto timestamp : pe_timestamps.debugTime)
 	{
 		if (timestamp)
-			writer.String(timestampToDate(static_cast<std::time_t>(timestamp)));
+			writer.String(timestampToGmtDatetime(static_cast<std::time_t>(timestamp)));
 	}
 	writer.EndArray();
 
@@ -1282,7 +1282,7 @@ void presentPeTimestamps(JsonPresentation::Writer& writer, FileInformation& file
 	for (auto timestamp : pe_timestamps.resourceTime)
 	{
 		if (timestamp)
-			writer.String(timestampToDate(static_cast<std::time_t>(timestamp)));
+			writer.String(timestampToGmtDatetime(static_cast<std::time_t>(timestamp)));
 	}
 	writer.EndArray();
 
@@ -1291,7 +1291,7 @@ void presentPeTimestamps(JsonPresentation::Writer& writer, FileInformation& file
 	for (auto timestamp : pe_timestamps.pdbTime)
 	{
 		if (timestamp)
-			writer.String(timestampToDate(static_cast<std::time_t>(timestamp)));
+			writer.String(timestampToGmtDatetime(static_cast<std::time_t>(timestamp)));
 	}
 	writer.EndArray();
 

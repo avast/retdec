@@ -796,28 +796,28 @@ void presentPeTimestamps(FileInformation& fileinfo)
 	Log::info() << "Timestamps:\n";
 	// Don't clutter output if they are 0 - which they often are except the header one
 	if (pe_timestamps.coffTime)
-		Log::info() << "    COFF Header           : " << timestampToDate(static_cast<std::time_t>(pe_timestamps.coffTime)) << "\n";
+		Log::info() << "    COFF Header           : " << timestampToGmtDatetime(static_cast<std::time_t>(pe_timestamps.coffTime)) << "\n";
 	if (pe_timestamps.configTime)
-		Log::info() << "    Load Config Directory : " << timestampToDate(static_cast<std::time_t>(pe_timestamps.configTime)) << "\n";
+		Log::info() << "    Load Config Directory : " << timestampToGmtDatetime(static_cast<std::time_t>(pe_timestamps.configTime)) << "\n";
 	if (pe_timestamps.exportTime)
-		Log::info() << "    Export Directory      : " << timestampToDate(static_cast<std::time_t>(pe_timestamps.exportTime)) << "\n";
+		Log::info() << "    Export Directory      : " << timestampToGmtDatetime(static_cast<std::time_t>(pe_timestamps.exportTime)) << "\n";
 
 	for (auto timestamp : pe_timestamps.debugTime)
 	{
 		if (timestamp)
-			Log::info() << "    Debug Directory   : " << timestampToDate(static_cast<std::time_t>(timestamp)) << "\n";
+			Log::info() << "    Debug Directory   : " << timestampToGmtDatetime(static_cast<std::time_t>(timestamp)) << "\n";
 	}
 
 	for (auto timestamp : pe_timestamps.resourceTime)
 	{
 		if (timestamp)
-			Log::info() << "    Resource Directory : " << timestampToDate(static_cast<std::time_t>(timestamp)) << "\n";
+			Log::info() << "    Resource Directory : " << timestampToGmtDatetime(static_cast<std::time_t>(timestamp)) << "\n";
 	}
 
 	for (auto timestamp : pe_timestamps.pdbTime)
 	{
 		if (timestamp)
-			Log::info() << "    PDB Debug Info     : " << timestampToDate(static_cast<std::time_t>(timestamp)) << "\n";
+			Log::info() << "    PDB Debug Info     : " << timestampToGmtDatetime(static_cast<std::time_t>(timestamp)) << "\n";
 	}
 }
 

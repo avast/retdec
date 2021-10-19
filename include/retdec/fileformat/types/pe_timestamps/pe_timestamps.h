@@ -14,7 +14,7 @@ namespace retdec {
 namespace fileformat {
 
 /**
- * Class for rich header
+ * Class for PE timestamps
  */
 class PeTimestamps
 {
