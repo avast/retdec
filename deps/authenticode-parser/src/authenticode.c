@@ -597,10 +597,8 @@ AuthenticodeArray* parse_authenticode(const uint8_t* pe_data, long pe_len)
         }
 
         /* Complete the verification */
-        if (sig->verify_flags == AUTHENTICODE_VFY_VALID) {
-            if (memcmp(sig->file_digest.data, sig->digest.data, mdlen) != 0)
-                sig->verify_flags = AUTHENTICODE_VFY_WRONG_FILE_DIGEST;
-        }
+        if (memcmp(sig->file_digest.data, sig->digest.data, mdlen) != 0)
+            sig->verify_flags = AUTHENTICODE_VFY_WRONG_FILE_DIGEST;
     }
 
     return auth_array;
