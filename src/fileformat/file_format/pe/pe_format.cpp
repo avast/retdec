@@ -12,7 +12,6 @@
 #include <iostream>
 #include <map>
 #include <new>
-#include <openssl/evp.h>
 #include <regex>
 #include <sstream>
 #include <tuple>
@@ -1799,56 +1798,6 @@ void PeFormat::loadResources()
 	}
 }
 
-/**
- * Calculates the digest using selected hash algorithm.
- * @param peFile PE file with the signature.
- * @param digestName Name of the digest algorithm
- * @return Hex string of hash.
- *
- */
-static std::string calculateFileDigest(const PeFormat* peFile, const char* digestName)
-{
-	if (!peFile)
-	{
-		return {};
-	}
-
-	const EVP_MD* algorithm = EVP_get_digestbyname(digestName);
-	if (!algorithm)
-	{
-		return {};
-	}
-	EVP_MD_CTX* ctx = EVP_MD_CTX_create();
-
-	if (EVP_DigestInit(ctx, algorithm) != 1) // 1 == success
-	{
-		return {};
-	}
-
-	auto digestRanges = peFile->getDigestRanges();
-	for (const auto& range : digestRanges)
-	{
-		const std::uint8_t* data = std::get<0>(range);
-		std::size_t size = std::get<1>(range);
-
-		if (EVP_DigestUpdate(ctx, data, size) != 1) // 1 == success
-		{
-			return {};
-		}
-	}
-
-	std::vector<std::uint8_t> hash(EVP_MD_size(algorithm));
-	if (EVP_DigestFinal(ctx, hash.data(), nullptr) != 1)
-	{
-		return {};
-	}
-
-	EVP_MD_CTX_destroy(ctx);
-	std::string result;
-	bytesToHexString(hash.data(), EVP_MD_size(algorithm), result);
-	return result;
-}
-
 static std::string time_to_string(std::time_t time)
 {
 	std::tm* tm = std::gmtime(&time);
@@ -1932,6 +1881,10 @@ static std::string authenticodeFlagToString(int flag)
 		return "Couldn't get contentInfo";
 	case AUTHENTICODE_VFY_INVALID:
 		return "Signature isn't valid";
+	case AUTHENTICODE_VFY_WRONG_FILE_DIGEST:
+		return "Signature digest doesn't match the file digest";
+	case AUTHENTICODE_VFY_UNKNOWN_ALGORITHM:
+		return "Unknown digest algorithm";
 	default:
 		return "";
 	}
@@ -1964,6 +1917,38 @@ static std::string countersigFlagToString(int flag)
 	}
 }
 
+static void writeSignerInfo(::Signer* signer, DigitalSignature& signature)
+{
+	if (!signer)
+		return;
+
+	signature.signer.chain = getCertificates(signer->chain);
+	signature.programName = signer->program_name ? signer->program_name : "";
+	signature.signer.digestAlgorithm = signer->digest_alg ? signer->digest_alg : "";
+	if (signer->digest.data)
+		bytesToHexString(signer->digest.data, signer->digest.len, signature.signer.digest);
+}
+
+static Signer getCountersigner(Countersignature* counter)
+{
+	if (!counter)
+		return {};
+
+	Signer countersigner;
+
+	countersigner.chain = getCertificates(counter->chain);
+	countersigner.digestAlgorithm = counter->digest_alg ? counter->digest_alg : "";
+	countersigner.signingTime = counter->sign_time ? time_to_string(counter->sign_time) : "";
+	if (counter->digest.data)
+		bytesToHexString(counter->digest.data, counter->digest.len, countersigner.digest);
+
+	// If there is any verification error, export it as a proper message
+	if (counter->verify_flags != COUNTERSIGNATURE_VFY_VALID)
+		countersigner.warnings.emplace_back(countersigFlagToString(counter->verify_flags));
+	
+	return countersigner;
+}
+
 static std::vector<DigitalSignature> authenticodeToSignatures(AuthenticodeArray* arr, const PeFormat* file)
 {
 	if (!arr || !file)
@@ -1976,60 +1961,32 @@ static std::vector<DigitalSignature> authenticodeToSignatures(AuthenticodeArray*
 		DigitalSignature signature;
 		Authenticode* auth = arr->signatures[i];
 
-		// Convert each wanted attribute to internal repre
 		if (auth->digest.data)
 			bytesToHexString(auth->digest.data, auth->digest.len, signature.signedDigest);
-		signature.digestAlgorithm = auth->digest_alg ? auth->digest_alg : "";
+		if (auth->file_digest.data)
+			bytesToHexString(auth->file_digest.data, auth->file_digest.len, signature.fileDigest);
+
 		signature.certificates = getCertificates(auth->certs);
 		signature.isValid = auth->verify_flags == AUTHENTICODE_VFY_VALID;
+		signature.digestAlgorithm = auth->digest_alg ? auth->digest_alg : "";
 
-		// Calculate digest of the PE file and compare with signature information
-		signature.fileDigest = calculateFileDigest(file, auth->digest_alg);
-		if (signature.fileDigest != signature.signedDigest)
-		{
-			signature.warnings.emplace_back("Signature digest doesn't match the file digest");
-			signature.isValid = false;
-		}
-		// Else check if there was any signature verifiaction error, if so map it to an error message
-		else if (auth->verify_flags != AUTHENTICODE_VFY_VALID)
+		// If there is any verification error, export it as a proper message
+		if (auth->verify_flags != AUTHENTICODE_VFY_VALID)
 		{
 			signature.warnings.emplace_back(authenticodeFlagToString(auth->verify_flags));
 		}
 
-		if (auth->signer)
-		{
-			::Signer* signer = auth->signer;
-			// Convert each wanted attribute to internal repre
-			signature.programName = signer->program_name ? signer->program_name : "";
-			signature.signer.chain = getCertificates(signer->chain);
-			signature.signer.digestAlgorithm = signer->digest_alg ? signer->digest_alg : "";
-			if (signer->digest.data)
-				bytesToHexString(signer->digest.data, signer->digest.len, signature.signer.digest);
-		}
+		writeSignerInfo(auth->signer, signature);
 
 		if (auth->countersigs)
 		{
-			for (std::size_t i = 0; i < auth->countersigs->count; ++i)
+			for (std::size_t j = 0; j < auth->countersigs->count; ++j)
 			{
-				Signer countersigner;
-				Countersignature* counter = auth->countersigs->counters[i];
-
-				// Convert each wanted attribute to internal repre
-				if (counter->digest.data)
-					bytesToHexString(counter->digest.data, counter->digest.len, countersigner.digest);
-				countersigner.digestAlgorithm = counter->digest_alg ? counter->digest_alg : "";
-				countersigner.signingTime = counter->sign_time ? time_to_string(counter->sign_time) : "";
-				countersigner.chain = getCertificates(counter->chain);
-
-				// If there is any verification error, export it to proper message
-				if (counter->verify_flags != COUNTERSIGNATURE_VFY_VALID)
-				{
-					countersigner.warnings.emplace_back(countersigFlagToString(counter->verify_flags));
-				}
-
-				signature.signer.counterSigners.emplace_back(countersigner);
+				Countersignature* counter = auth->countersigs->counters[j];
+				signature.signer.counterSigners.emplace_back(getCountersigner(counter));
 			}
 		}
+
 		result.emplace_back(signature);
 	}
 
@@ -2055,7 +2012,7 @@ void PeFormat::loadCertificates()
 
 	std::vector<Section*> sections = getSections();
 
-	AuthenticodeArray* auth = authenticode_new(certBytes.data(), certBytes.size());
+	AuthenticodeArray* auth = parse_authenticode(this->getBytesData(), this->getFileLength());
 	std::vector<DigitalSignature> sigs = authenticodeToSignatures(auth, this);
 	authenticode_array_free(auth);
 

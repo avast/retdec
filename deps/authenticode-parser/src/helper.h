@@ -37,6 +37,22 @@ SOFTWARE.
 extern "C" {
 #endif
 
+/* Endianity related functions for PE reading */
+uint16_t bswap16(uint16_t d);
+uint32_t bswap32(uint32_t d);
+
+#if defined(WORDS_BIGENDIAN)
+#define letoh16(x) bswap16(x)
+#define letoh32(x) bswap32(x)
+#define betoh16(x) (x)
+#define betoh32(x) (x)
+#else
+#define letoh16(x) (x)
+#define letoh32(x) (x)
+#define betoh16(x) bswap16(x)
+#define betoh32(x) bswap32(x)
+#endif
+
 /* Calculates digest md of data, return bytes written to digest or 0 on error
  * Maximum of EVP_MAX_MD_SIZE will be written to digest */
 int calculate_digest(const EVP_MD* md, const uint8_t* data, size_t len, uint8_t* digest);

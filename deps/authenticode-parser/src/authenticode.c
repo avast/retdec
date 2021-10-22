@@ -428,6 +428,184 @@ end:
     return result;
 }
 
+static int authenticode_digest(
+    const EVP_MD* md,
+    const uint8_t* pe_data,
+    uint32_t pe_hdr_offset,
+    bool is_64bit,
+    uint32_t cert_table_addr,
+    uint8_t* digest)
+{
+    uint32_t buffer_size = 0xFFFF;
+    uint8_t* buffer = (uint8_t*)malloc(buffer_size);
+
+    /* BIO with the file data */
+    BIO* bio = BIO_new_mem_buf(pe_data, cert_table_addr);
+
+    EVP_MD_CTX* mdctx = EVP_MD_CTX_new();
+    if (!buffer || !bio || !mdctx)
+        goto error;
+
+    if (!EVP_DigestInit(mdctx, md))
+        goto error;
+
+    /* Calculate size of the space between file start and PE header */
+    /* Checksum starts at 0x58th byte of the header */
+    uint32_t pe_checksum_offset = pe_hdr_offset + 0x58;
+    /* Space between DOS and PE header could have arbitrary amount of data, read in chunks */
+    uint32_t fpos = 0;
+    while (fpos < pe_checksum_offset) {
+        uint32_t len_to_read = pe_checksum_offset - fpos;
+        if (len_to_read > buffer_size)
+            len_to_read = buffer_size;
+
+        int rlen = BIO_read(bio, buffer, len_to_read);
+        if (rlen <= 0)
+            goto error;
+
+        if (!EVP_DigestUpdate(mdctx, buffer, rlen))
+            goto error;
+
+        fpos += rlen;
+    }
+
+    /* Skip the checksum */
+    if (BIO_read(bio, buffer, 4) <= 0)
+        goto error;
+
+    /* 64bit PE file is larger than 32bit */
+    uint32_t pe64_extra = is_64bit ? 16 : 0;
+
+    /* Read up to certificate table*/
+    uint32_t cert_table_offset = 0x3c + pe64_extra;
+
+    if (BIO_read(bio, buffer, cert_table_offset) <= 0)
+        goto error;
+
+    if (!EVP_DigestUpdate(mdctx, buffer, cert_table_offset))
+        goto error;
+
+    /* Skip certificate table */
+    if (BIO_read(bio, buffer, 8) <= 0)
+        goto error;
+
+    /* PE header with check sum + checksum + cert table offset + cert table len */
+    fpos = pe_checksum_offset + 4 + cert_table_offset + 8;
+
+    /* Hash everything up to the signature (assuming signature is stored in the
+     * end of the file) */
+    /* Read chunks of the file in case the file is large */
+    while (fpos < cert_table_addr) {
+        uint32_t len_to_read = cert_table_addr - fpos;
+        if (len_to_read > buffer_size)
+            len_to_read = buffer_size;
+
+        int rlen = BIO_read(bio, buffer, len_to_read);
+        if (rlen <= 0)
+            goto error;
+
+        if (!EVP_DigestUpdate(mdctx, buffer, rlen))
+            goto error;
+        fpos += rlen;
+    }
+
+    /* Calculate the digest, write it into digest */
+    if (!EVP_DigestFinal(mdctx, digest, NULL))
+        goto error;
+
+    EVP_MD_CTX_free(mdctx);
+    BIO_free_all(bio);
+    free(buffer);
+    return 0;
+
+error:
+    EVP_MD_CTX_free(mdctx);
+    BIO_free_all(bio);
+    free(buffer);
+    return 1;
+}
+
+AuthenticodeArray* parse_authenticode(const uint8_t* pe_data, long pe_len)
+{
+    const int dos_hdr_size = 0x40;
+    if (pe_len < dos_hdr_size)
+        return NULL;
+
+    /* offset to pointer in DOS header, that points to PE header */
+    const int pe_hdr_ptr_offset = 0x3c;
+    /* Read the PE offset */
+    uint32_t pe_offset = letoh32(*(uint32_t*)(pe_data + pe_hdr_ptr_offset));
+    /* Offset to Magic, to know the PE class (32/64bit) */
+    uint32_t magic_addr = pe_offset + 0x18;
+
+    if (pe_len < magic_addr + sizeof(uint16_t))
+        return NULL;
+
+    /* Read the magic and check if we have 64bit PE */
+    uint16_t magic = letoh16(*(uint16_t*)(pe_data + magic_addr));
+    bool is_64bit = magic == 0x20b;
+    /* If PE is 64bit, header is 16 bytes larger */
+    uint8_t pe64_extra = is_64bit ? 16 : 0;
+
+    /* Calculate offset to certificate table directory */
+    uint32_t pe_cert_table_addr = pe_offset + pe64_extra + 0x98;
+
+    if (pe_len < pe_cert_table_addr + 2 * sizeof(uint32_t))
+        return NULL;
+
+    uint32_t cert_addr = letoh32(*(uint32_t*)(pe_data + pe_cert_table_addr));
+    uint32_t cert_len = letoh32(*(uint32_t*)(pe_data + pe_cert_table_addr + 4));
+
+    /* we need atleast 8 bytes to read dwLength, revision and certType */
+    if (cert_len < 8 || pe_len < cert_addr + cert_len)
+        return NULL;
+
+    uint32_t dwLength = letoh32(*(uint32_t*)(pe_data + cert_addr));
+    if (pe_len < cert_addr + dwLength)
+        return NULL;
+
+    AuthenticodeArray* auth_array = authenticode_new(pe_data + cert_addr + 0x8, dwLength);
+    if (!auth_array)
+        return NULL;
+
+    /* Compare valid signatures file digests to actual file digest, to complete verification */
+    for (size_t i = 0; i < auth_array->count; ++i) {
+        Authenticode* sig = auth_array->signatures[i];
+
+        const EVP_MD* md = EVP_get_digestbyname(sig->digest_alg);
+        if (!md || !sig->digest.len || !sig->digest.data) {
+            /* If there is an verification error, keep the first error */
+            if (sig->verify_flags == AUTHENTICODE_VFY_VALID)
+                sig->verify_flags = AUTHENTICODE_VFY_UNKNOWN_ALGORITHM;
+
+            continue;
+        }
+
+        int mdlen = EVP_MD_size(md);
+        sig->file_digest.len = mdlen;
+        sig->file_digest.data = (uint8_t*)malloc(mdlen);
+        if (!sig->file_digest.data)
+            continue;
+
+        if (authenticode_digest(
+                md, pe_data, pe_offset, is_64bit, cert_addr, sig->file_digest.data)) {
+
+            /* If there is an verification error, keep the first error */
+            if (sig->verify_flags == AUTHENTICODE_VFY_VALID)
+                sig->verify_flags = AUTHENTICODE_VFY_INTERNAL_ERROR;
+            break;
+        }
+
+        /* Complete the verification */
+        if (sig->verify_flags == AUTHENTICODE_VFY_VALID) {
+            if (memcmp(sig->file_digest.data, sig->digest.data, mdlen) != 0)
+                sig->verify_flags = AUTHENTICODE_VFY_WRONG_FILE_DIGEST;
+        }
+    }
+
+    return auth_array;
+}
+
 static void signer_free(Signer* si)
 {
     if (si) {
@@ -443,6 +621,7 @@ static void authenticode_free(Authenticode* auth)
 {
     if (auth) {
         free(auth->digest.data);
+        free(auth->file_digest.data);
         free(auth->digest_alg);
         signer_free(auth->signer);
         certificate_array_free(auth->certs);

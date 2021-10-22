@@ -30,23 +30,27 @@ extern "C" {
 #include <time.h>
 
 /* Signature is valid */
-#define AUTHENTICODE_VFY_VALID            0
+#define AUTHENTICODE_VFY_VALID             0
 /* Parsing error (from OpenSSL functions) */
-#define AUTHENTICODE_VFY_CANT_PARSE       1
+#define AUTHENTICODE_VFY_CANT_PARSE        1
 /* Signers certificate is missing */
-#define AUTHENTICODE_VFY_NO_SIGNER_CERT   2
+#define AUTHENTICODE_VFY_NO_SIGNER_CERT    2
 /* No digest saved inside the signature */
-#define AUTHENTICODE_VFY_DIGEST_MISSING   3
+#define AUTHENTICODE_VFY_DIGEST_MISSING    3
 /* Non verification errors - allocations etc. */
-#define AUTHENTICODE_VFY_INTERNAL_ERROR   4
+#define AUTHENTICODE_VFY_INTERNAL_ERROR    4
 /* SignerInfo part of PKCS7 is missing */
-#define AUTHENTICODE_VFY_NO_SIGNER_INFO   5
+#define AUTHENTICODE_VFY_NO_SIGNER_INFO    5
 /* PKCS7 doesn't have type of SignedData, can't proceed */
-#define AUTHENTICODE_VFY_WRONG_PKCS7_TYPE 6
+#define AUTHENTICODE_VFY_WRONG_PKCS7_TYPE  6
 /* PKCS7 doesn't have corrent content, can't proceed */
-#define AUTHENTICODE_VFY_BAD_CONTENT      7
+#define AUTHENTICODE_VFY_BAD_CONTENT       7
 /* Contained and calculated digest don't match */
-#define AUTHENTICODE_VFY_INVALID          8
+#define AUTHENTICODE_VFY_INVALID           8
+/* Signature hash and file hash doesn't match */
+#define AUTHENTICODE_VFY_WRONG_FILE_DIGEST 9
+/* Unknown algorithm, can't proceed with verification */
+#define AUTHENTICODE_VFY_UNKNOWN_ALGORITHM 10
 
 /* Countersignature is valid */
 #define COUNTERSIGNATURE_VFY_VALID                  0
@@ -138,6 +142,7 @@ typedef struct {
     int version;             /* Raw PKCS7 version */
     char* digest_alg;        /* name of the digest algorithm */
     ByteArray digest;        /* File Digest stored in the Signature */
+    ByteArray file_digest;   /* Actual calculated file digest */
     Signer* signer;          /* SignerInfo information of the Authenticode */
     CertificateArray* certs; /* All certificates in the Signature including the ones in timestamp
                                 countersignatures */
@@ -150,11 +155,28 @@ typedef struct {
 } AuthenticodeArray;
 
 /**
+ * @brief Constructs AuthenticodeArray from PE file data. Authenticode can
+ *        contains nested Authenticode signatures as its unsigned attribute,
+ *        which can also contain nested signatures. For this reason the function returns
+ *        an Array of parsed Authenticode signatures. Any field of the parsed out
+ *        structures can be NULL, depending on the input data.
+ *        Verification result is stored in verify_flags with the first verification error.
+ *
+ * @param pe_data PE binary data
+ * @param pe_len
+ * @return AuthenticodeArray*
+ */
+AuthenticodeArray* parse_authenticode(const uint8_t* pe_data, long pe_len);
+
+/**
  * @brief Constructs AuthenticodeArray from binary data containing Authenticode
  *        signature. Authenticode can contains nested Authenticode signatures
  *        as its unsigned attribute, which can also contain nested signatures.
  *        For this reason the function return an Array of parsed Authenticode signatures.
  *        Any field of the parsed out structures can be NULL, depending on the input data.
+ *        WARNING: in case of this interface, the file and signature digest comparison is
+ *        up to the library user, as there is no pe data to calculate file digest from.
+ *        Verification result is stored in verify_flags with the first verification error
  *
  * @param data Binary data containing Authenticode signature
  * @param len

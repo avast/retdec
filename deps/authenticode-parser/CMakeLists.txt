@@ -13,8 +13,14 @@ add_library(authenticode STATIC
         src/countersignature.c
         src/certificate.c
 )
+
 add_library(retdec::deps::authenticode ALIAS authenticode)
 
+include (TestBigEndian)
+TEST_BIG_ENDIAN(IS_BIG_ENDIAN)
+if(IS_BIG_ENDIAN)
+        target_compile_definitions(-DWORDS_BIGENDIAN)
+endif()
 
 target_compile_options(authenticode PRIVATE -Wall)
 target_compile_features(authenticode PRIVATE c_std_11)

@@ -28,6 +28,17 @@ SOFTWARE.
 #include <stdlib.h>
 #include <string.h>
 
+uint16_t bswap16(uint16_t d)
+{
+    return (d << 8) | (d >> 8);
+}
+
+uint32_t bswap32(uint32_t d)
+{
+    return (((d)&0xff000000) >> 24) | (((d)&0x00ff0000) >> 8) | (((d)&0x0000ff00) << 8) |
+           (((d)&0x000000ff) << 24);
+}
+
 int calculate_digest(const EVP_MD* md, const uint8_t* data, size_t len, uint8_t* digest)
 {
     unsigned int outLen = 0;
