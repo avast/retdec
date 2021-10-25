@@ -502,6 +502,11 @@ void PeDetector::detectFileType()
 	fileInfo.setFileType(peParser->getTypeOfFile());
 }
 
+void PeDetector::getTimestamps()
+{
+	fileInfo.pe_timestamps = peParser->getTimestamps();
+}
+
 void PeDetector::getAdditionalInfo()
 {
 	getHeaderInfo();
@@ -511,7 +516,7 @@ void PeDetector::getAdditionalInfo()
 	getRelocationTableInfo();
 	getDotnetInfo();
 	getVisualBasicInfo();
-
+	getTimestamps();
 	/* In future we can detect more information about PE files:
 		- TimeDateStamp
 		- MajorLinkerVersion

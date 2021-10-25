@@ -12,8 +12,6 @@
 #include "retdec/llvmir2hll/hll/hll_writer.h"
 #include "retdec/llvmir2hll/obtainer/call_info_obtainer.h"
 #include "retdec/llvmir2hll/optimizer/optimizer_manager.h"
-#include "retdec/llvmir2hll/optimizer/optimizers/aggressive_deref_optimizer.h"
-#include "retdec/llvmir2hll/optimizer/optimizers/aggressive_global_to_local_optimizer.h"
 #include "retdec/llvmir2hll/optimizer/optimizers/bit_op_to_log_op_optimizer.h"
 #include "retdec/llvmir2hll/optimizer/optimizers/bit_shift_optimizer.h"
 #include "retdec/llvmir2hll/optimizer/optimizers/break_continue_return_optimizer.h"
@@ -65,9 +63,6 @@ namespace {
 /// Suffix of all optimizers.
 const std::string OPT_SUFFIX = "Optimizer";
 
-/// Prefix of aggressive optimizations.
-const std::string AGGRESSIVE_OPTS_PREFIX = "Aggressive";
-
 /**
 * @brief Trims the optional suffix "Optimizer" from all optimization names in
 *        @a opts.
@@ -101,7 +96,6 @@ StringSet trimOptimizerSuffix(const StringSet &opts) {
 * @param[in] va Value analysis.
 * @param[in] cio Call info obtainer.
 * @param[in] arithmExprEvaluator Used evaluator of arithmetical expressions.
-* @param[in] enableAggressiveOpts Enables aggressive optimizations.
 * @param[in] enableDebug Enables emission of debug messages.
 *
 * To perform the actual optimizations, call optimize(). To get a list of
@@ -113,9 +107,6 @@ StringSet trimOptimizerSuffix(const StringSet &opts) {
 * empty, also all optimizations are run. If an optimization is in both @a
 * enabledOpts and @a disabledOpts, it is not run.
 *
-* Aggressive optimizations are run only if @a enableAggressiveOpts is @c true, or
-* they are specified in @a enabledOpts.
-*
 * @a hllWriter, @a va, and @a cio are needed in some optimizations, so they
 * have to be provided.
 *
@@ -125,13 +116,12 @@ StringSet trimOptimizerSuffix(const StringSet &opts) {
 OptimizerManager::OptimizerManager(const StringSet &enabledOpts,
 	const StringSet &disabledOpts, ShPtr<HLLWriter> hllWriter,
 	ShPtr<ValueAnalysis> va, ShPtr<CallInfoObtainer> cio,
-	ShPtr<ArithmExprEvaluator> arithmExprEvaluator,
-	bool enableAggressiveOpts, bool enableDebug):
+	ShPtr<ArithmExprEvaluator> arithmExprEvaluator, bool enableDebug):
 		enabledOpts(trimOptimizerSuffix(enabledOpts)),
 		disabledOpts(trimOptimizerSuffix(disabledOpts)),
 		hllWriter(hllWriter), va(va), cio(cio),
 		arithmExprEvaluator(arithmExprEvaluator),
-		enableAggressiveOpts(enableAggressiveOpts), enableDebug(enableDebug),
+		enableDebug(enableDebug),
 		recoverFromOutOfMemory(true), backendRunOpts() {
 			PRECONDITION_NON_NULL(hllWriter);
 			PRECONDITION_NON_NULL(va);
@@ -161,12 +151,6 @@ void OptimizerManager::optimize(ShPtr<Module> m) {
 
 	run<GotoStmtOptimizer>(m);
 	run<RemoveUselessCastsOptimizer>(m);
-
-	// The first part of removal of non-compound statements. The other part
-	// should be run after structure optimizations because they may introduce
-	// constructs that can be optimized.
-	run<AggressiveDerefOptimizer>(m);
-	run<AggressiveGlobalToLocalOptimizer>(m);
 
 	// Data-flow optimizations.
 	// The following optimizations should be run before CopyPropagation to
@@ -279,11 +263,6 @@ bool OptimizerManager::optShouldBeRun(const std::string &optId) const {
 	if (hasItem(enabledOpts, optId)) {
 		// The optimization is enabled.
 		return true;
-	}
-
-	if (enabledOpts.empty() && startsWith(optId, AGGRESSIVE_OPTS_PREFIX)) {
-		// It is an aggressive optimization.
-		return enableAggressiveOpts;
 	}
 
 	return enabledOpts.empty();

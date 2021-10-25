@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cstdint>
 #include <ctime>
 #include <exception>
 #include <iomanip>
@@ -612,6 +613,7 @@ void PeFormat::initStructures(const std::string & dllListFile)
 			file->readSecurityDirectory();
 			file->readComHeaderDirectory();
 			file->readRelocationsDirectory();
+			file->readLoadConfigDirectory();
 
 			// Fill-in the loader error info from PE file
 			initLoaderErrorInfo();
@@ -2172,6 +2174,88 @@ void PeFormat::loadDotnetHeaders()
 	detectModuleVersionId();
 	detectTypeLibId();
 	detectDotnetTypes();
+}
+
+/**
+ * @brief There are several places in the PE file that store some kind
+ *  of Timestamp information, read all of them and return them
+ */
+PeTimestamps PeFormat::getTimestamps() const
+{	
+	// Inspiration: http://waleedassar.blogspot.com/2014/02/pe-timedatestamp-viewer.html
+	// 1. TimeDateStamp in COFF header
+	// 2. TimeDateStamp in Export Directory Table
+	// 3. TimeDateStamp in Resource Directory Table
+	// 4. TimeDateStamp in Debug Directory Table
+	// IF Debug Directory Table has Type == 0x2 - CODEVIEW,
+	// 5. then following PointerToRawData we can find another TimeDateStamp in Pdb 2.0 structure
+	// 6. TimeDateStamp in Load Configuration Directory
+	PeTimestamps timestamps = { 0 };
+
+	auto pefile = formatParser->getPefile();
+	if (!pefile)
+		return timestamps;
+
+	timestamps.coffTime = getTimeStamp();
+	timestamps.exportTime = pefile->expDir().getTimeDateStamp();
+	timestamps.configTime = pefile->configDir().getTimeDateStamp();
+	const DebugDirectory& debugDir = pefile->debugDir();
+
+	for (int i = 0; i < debugDir.calcNumberOfEntries(); ++i)
+	{
+		timestamps.debugTime.push_back(debugDir.getTimeDateStamp(i));
+
+		auto type = debugDir.getType(i);
+		//  DebugDirectory only parses this type, but keep the check for clarity
+		if (type == PELIB_IMAGE_DEBUG_INFO_CODEVIEW)
+		{
+			/* Data structure if type == CodeView - PDB2.0
+				uint32 Signature = "NB10"
+				uint32 Offset
+				uint32 Timestamp
+				... */
+			std::vector<std::uint8_t> dataPtr = debugDir.getData(i);
+			if (dataPtr.size() < 12)
+				continue;
+
+			const std::uint8_t* signature = reinterpret_cast<const std::uint8_t*>("NB10");
+
+			if (!std::equal(dataPtr.begin(), dataPtr.begin() + 4, signature))
+				continue;
+
+			std::uint64_t timestamp;
+			if (get4ByteOffset(debugDir.getPointerToRawData(i) + 8, timestamp))
+				timestamps.pdbTime.push_back(timestamp);
+		}
+	}
+
+	/* Assume correct 3 level structure and only read through 3 levels */
+	auto root = formatParser->getResourceTreeRoot();
+	if (root)
+	{
+		timestamps.resourceTime.push_back(root->getTimeDateStamp());
+		for (std::size_t i = 0, e = root->getNumberOfChildren(); i < e; ++i)
+		{
+			const ResourceChild* child = root->getChild(i);
+			const ResourceNode* directory = dynamic_cast<const ResourceNode*>(child->getNode());
+			if (!directory)
+				continue;
+
+			timestamps.resourceTime.push_back((directory->getTimeDateStamp()));
+
+			for (int i = 0; i < directory->getNumberOfChildren(); i++)
+			{
+				const ResourceChild* second_child = directory->getChild(i);
+				const ResourceNode* second_directory = dynamic_cast<const ResourceNode*>(second_child->getNode());
+				if (!second_directory)
+					continue;
+
+				timestamps.resourceTime.push_back((second_directory->getTimeDateStamp()));
+			}
+		}
+	}
+
+	return timestamps;
 }
 
 /**

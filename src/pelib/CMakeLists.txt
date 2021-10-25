@@ -15,6 +15,7 @@ add_library(pelib STATIC
 	ResourceDirectory.cpp
 	RichHeader.cpp
 	SecurityDirectory.cpp
+	ConfigDirectory.cpp
 )
 add_library(retdec::pelib ALIAS pelib)
 

@@ -51,7 +51,6 @@ const std::string JSON_backendVarRenamer        = "backendVarRenamer";
 const std::string JSON_backendNoOpts            = "backendNoOpts";
 const std::string JSON_backendEmitCfg           = "backendEmitCfg";
 const std::string JSON_backendEmitCg            = "backendEmitCg";
-const std::string JSON_backendAggressiveOpts    = "backendAggressiveOpts";
 const std::string JSON_backendKeepAllBrackets   = "backendKeepAllBrackets";
 const std::string JSON_backendKeepLibraryFuncs  = "backendKeepLibraryFuncs";
 const std::string JSON_backendNoTimeVaryingInfo = "backendNoTimeVaryingInfo";
@@ -120,11 +119,6 @@ bool Parameters::isBackendEmitCfg() const
 bool Parameters::isBackendEmitCg() const
 {
 	return _backendEmitCg;
-}
-
-bool Parameters::isBackendAggressiveOpts() const
-{
-	return _backendAggressiveOpts;
 }
 
 bool Parameters::isBackendKeepAllBrackets() const
@@ -304,11 +298,6 @@ void Parameters::setIsBackendEmitCfg(bool b)
 void Parameters::setIsBackendEmitCg(bool b)
 {
 	_backendEmitCg = b;
-}
-
-void Parameters::setIsBackendAggressiveOpts(bool b)
-{
-	_backendAggressiveOpts = b;
 }
 
 void Parameters::setIsBackendKeepAllBrackets(bool b)
@@ -519,7 +508,6 @@ void Parameters::serialize(Writer& writer) const
 	serdes::serializeBool(writer, JSON_backendEmitCfg, isBackendEmitCfg());
 	serdes::serializeBool(writer, JSON_backendEmitCg, isBackendEmitCg());
 	serdes::serializeBool(writer, JSON_detectStaticCode, isDetectStaticCode());
-	serdes::serializeBool(writer, JSON_backendAggressiveOpts, isBackendAggressiveOpts());
 	serdes::serializeBool(writer, JSON_backendKeepAllBrackets, isBackendKeepAllBrackets());
 	serdes::serializeBool(writer, JSON_backendKeepLibraryFuncs, isBackendKeepLibraryFuncs());
 	serdes::serializeBool(writer, JSON_backendNoTimeVaryingInfo, isBackendNoTimeVaryingInfo());
@@ -588,7 +576,6 @@ void Parameters::deserialize(const rapidjson::Value& val)
 	setIsBackendNoOpts( serdes::deserializeBool(val, JSON_backendNoOpts, false) );
 	setIsBackendEmitCfg( serdes::deserializeBool(val, JSON_backendEmitCfg, false) );
 	setIsBackendEmitCg( serdes::deserializeBool(val, JSON_backendEmitCg, false) );
-	setIsBackendAggressiveOpts( serdes::deserializeBool(val, JSON_backendAggressiveOpts, false) );
 	setIsBackendKeepAllBrackets( serdes::deserializeBool(val, JSON_backendKeepAllBrackets, false) );
 	setIsBackendKeepLibraryFuncs( serdes::deserializeBool(val, JSON_backendKeepLibraryFuncs, false) );
 	setIsBackendNoTimeVaryingInfo( serdes::deserializeBool(val, JSON_backendNoTimeVaryingInfo, false) );

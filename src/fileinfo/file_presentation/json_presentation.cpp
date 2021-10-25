@@ -8,6 +8,7 @@
 #include "retdec/utils/conversion.h"
 #include "retdec/utils/string.h"
 #include "retdec/utils/io/log.h"
+#include "retdec/utils/time.h"
 #include "retdec/utils/version.h"
 #include "retdec/fileformat/utils/conversions.h"
 #include "retdec/serdes/pattern.h"
@@ -1253,6 +1254,50 @@ void JsonPresentation::presentIterativeSubtitle(
 	}
 }
 
+void presentPeTimestamps(JsonPresentation::Writer& writer, FileInformation& fileinfo)
+{
+	PeTimestamps pe_timestamps = fileinfo.pe_timestamps;
+
+	writer.String("timestamps");
+	writer.StartObject();
+
+	if (pe_timestamps.coffTime)
+		serializeString(writer, "coffHeader", timestampToGmtDatetime(static_cast<std::time_t>(pe_timestamps.coffTime)));
+	if (pe_timestamps.configTime)
+		serializeString(writer, "loadConfigDir", timestampToGmtDatetime(static_cast<std::time_t>(pe_timestamps.configTime)));
+	if (pe_timestamps.exportTime)
+		serializeString(writer, "exportDir", timestampToGmtDatetime(static_cast<std::time_t>(pe_timestamps.exportTime)));
+
+	writer.String("debugDirEntries");
+	writer.StartArray();
+	for (auto timestamp : pe_timestamps.debugTime)
+	{
+		if (timestamp)
+			writer.String(timestampToGmtDatetime(static_cast<std::time_t>(timestamp)));
+	}
+	writer.EndArray();
+
+	writer.String("resourceDirectories");
+	writer.StartArray();
+	for (auto timestamp : pe_timestamps.resourceTime)
+	{
+		if (timestamp)
+			writer.String(timestampToGmtDatetime(static_cast<std::time_t>(timestamp)));
+	}
+	writer.EndArray();
+
+	writer.String("pdbDebugInfos");
+	writer.StartArray();
+	for (auto timestamp : pe_timestamps.pdbTime)
+	{
+		if (timestamp)
+			writer.String(timestampToGmtDatetime(static_cast<std::time_t>(timestamp)));
+	}
+	writer.EndArray();
+
+	writer.EndObject();
+}
+
 bool JsonPresentation::present()
 {
 	rapidjson::StringBuffer sb;
@@ -1276,6 +1321,11 @@ bool JsonPresentation::present()
 
 	if(verbose)
 	{
+		if (fileinfo.getFileFormatEnum() == retdec::fileformat::Format::PE)
+		{
+			presentPeTimestamps(writer, this->fileinfo);
+		}
+
 		std::string flags, title;
 		std::vector<std::string> desc, info;
 

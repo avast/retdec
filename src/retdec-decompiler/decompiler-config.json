@@ -12,7 +12,6 @@
         "backendNoOpts": false,
         "backendEmitCfg": false,
         "backendEmitCg": false,
-        "backendAggressiveOpts": false,
         "backendKeepAllBrackets": false,
         "backendKeepLibraryFuncs": false,
         "backendNoTimeVaryingInfo": false,
