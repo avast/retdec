@@ -19,6 +19,7 @@ std::string getCurrentTime();
 std::string getCurrentYear();
 std::string timestampToDate(std::tm *tm);
 std::string timestampToDate(std::time_t timestamp);
+std::string timestampToGmtDatetime(std::time_t timestamp);
 
 double getElapsedTime();
 

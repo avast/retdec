@@ -103,6 +103,15 @@ std::string timestampToDate(std::time_t timestamp) {
 	return timestampToDate(std::gmtime(&timestamp));
 }
 
+std::string timestampToGmtDatetime(std::time_t timestamp)
+{
+	std::tm* tm = std::gmtime(&timestamp);
+	std::stringstream ss;
+	// "Dec 21 00:00:00 2012 GMT" format
+	ss << std::put_time(tm, "%b %e %OH:%OM:%OS %Y GMT");
+	return ss.str();
+}
+
 /**
 * @brief Returns how much time has elapsed since the program was started
 *        (in seconds).
