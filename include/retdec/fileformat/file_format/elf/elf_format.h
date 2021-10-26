@@ -18,6 +18,12 @@
 namespace retdec {
 namespace fileformat {
 
+enum ElfLoaderError : std::uint32_t
+{
+	LDR_ERROR_NONE = 0,
+	LDR_ERROR_SEGMENT_OUT_OF_FILE
+};
+
 /**
  * ElfFormat - wrapper for parsing ELF files
  */
