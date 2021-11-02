@@ -29,13 +29,10 @@ namespace fileformat {
 
 struct LoaderErrorInfo
 {
-	LoaderErrorInfo() : loaderErrorCode(0), loaderError(nullptr), loaderErrorUserFriendly(nullptr)
-	{}
-
-	std::uint32_t loaderErrorCode;               // Loader error code, cast to uint32_t
-	const char * loaderError;
-	const char * loaderErrorUserFriendly;
-	bool isLoadableAnyway;
+	std::uint32_t loaderErrorCode = 0;               // Loader error code, cast to uint32_t - 0 means OK
+	const char *loaderError = nullptr;
+	const char *loaderErrorUserFriendly = nullptr;
+	bool isLoadableAnyway = false;
 };
 
 /**

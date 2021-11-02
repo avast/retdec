@@ -81,6 +81,7 @@ class ElfFormat : public FileFormat
 				const ELFIO::dynamic_section_accessor *elfDynamicTable,
 				const ELFIO::section *sec);
 		void loadSections();
+		void checkSegmentLoadable(const ELFIO::segment* seg);
 		void loadSegments();
 		void loadDynamicSegmentSection();
 		void loadInfoFromDynamicTables(DynamicTable &dynTab, ELFIO::section *sec);

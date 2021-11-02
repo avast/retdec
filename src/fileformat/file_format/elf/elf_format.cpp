@@ -2062,6 +2062,25 @@ void ElfFormat::loadSections()
 	}
 }
 
+void ElfFormat::checkSegmentLoadable(const segment* seg)
+{
+	if (!seg)
+		return;
+
+	auto filesize = seg->get_file_size();
+	auto fileoffset = seg->get_offset();
+	int segtype = seg->get_type();
+
+	// Check if LOAD segments are actually in the file
+	if (segtype == PT_LOAD && getFileLength() < fileoffset + filesize)
+	{
+		_ldrErrInfo.isLoadableAnyway = false;
+		_ldrErrInfo.loaderErrorCode = ElfLoaderError::LDR_ERROR_SEGMENT_OUT_OF_FILE;
+		_ldrErrInfo.loaderError = "LOAD Segment data is not within file bounds";
+		_ldrErrInfo.loaderErrorUserFriendly = "LOAD Segment data is not within file bounds";
+	}
+}
+
 /**
  * Load information about segments
  */
@@ -2089,17 +2108,7 @@ void ElfFormat::loadSegments()
 		fSeg->load(this);
 		segments.push_back(fSeg);
 
-		auto filesize = fSeg->getSizeInFile();
-		auto fileoffset = fSeg->getOffset();
-		int segtype = seg->get_type();
-
-		// Check if LOAD segments are actually in the file
-		if (segtype == PT_LOAD && getFileLength() < fileoffset + filesize)
-		{
-			_ldrErrInfo.loaderErrorCode = ElfLoaderError::LDR_ERROR_SEGMENT_OUT_OF_FILE;
-			_ldrErrInfo.loaderError = "Segment data is not within file bounds";
-			_ldrErrInfo.loaderErrorUserFriendly = "Segment data is not within file bounds";
-		}
+		checkSegmentLoadable(seg);
 	}
 }
 
