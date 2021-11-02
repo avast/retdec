@@ -2,6 +2,7 @@
 
 # dev
 
+* New feature: Add checking for damaged (unloadable) ELF files ([#1036](https://github.com/avast/retdec/pull/1036), [regression-tests #113](https://github.com/avast/retdec-regression-tests/pull/113)).
 * New feature: Parse various PE timestamps and make them available in Fileinfo ([#1035](https://github.com/avast/retdec/pull/1035), [regression-tests #112](https://github.com/avast/retdec-regression-tests/pull/112)).
 * New feature: Generate ELF (import) symbol-related hashes, including VirusTotal compatible `telfhash` ([#286](https://github.com/avast/retdec/issues/286), [#936](https://github.com/avast/retdec/pull/936)).
 * New Feature: `retdec-fileinfo` can be configured via JSON file. See `--fileinfo-config` option for more details.
