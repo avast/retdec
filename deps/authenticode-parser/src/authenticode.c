@@ -581,7 +581,11 @@ AuthenticodeArray* parse_authenticode(const uint8_t* pe_data, long pe_len)
             continue;
         }
 
+#if OPENSSL_VERSION_NUMBER >= 0x3000000fL
+        int mdlen = EVP_MD_get_size(md);
+#else
         int mdlen = EVP_MD_size(md);
+#endif
         sig->file_digest.len = mdlen;
         sig->file_digest.data = (uint8_t*)malloc(mdlen);
         if (!sig->file_digest.data)
