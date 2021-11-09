@@ -912,7 +912,6 @@ PeLib::LoaderError PeLib::ImageLoader::loaderError() const
 
 //-----------------------------------------------------------------------------
 // Interface for loading files
-
 int PeLib::ImageLoader::Load(
 	ByteBuffer & fileData,
 	bool loadHeadersOnly)
@@ -1053,51 +1052,85 @@ int PeLib::ImageLoader::Load(
 int PeLib::ImageLoader::Save(
 	std::ostream & fs,
 	std::streamoff fileOffset,
-	bool saveHeadersOnly)
+	std::uint32_t saveFlags)
 {
-	std::streamoff fileSize;
 	int fileError;
 
-	// Check and capture DOS header
-	fileError = saveDosHeader(fs, fileOffset);
-	if(fileError != ERROR_NONE)
-		return fileError;
-
-	// Check and capture NT headers
-	fileError = saveNtHeaders(fs, fileOffset + dosHeader.e_lfanew);
-	if(fileError != ERROR_NONE)
-		return fileError;
-
-	// Check and capture section headers
-	fileOffset = fileOffset + dosHeader.e_lfanew + sizeof(PELIB_IMAGE_NT_SIGNATURE) + sizeof(PELIB_IMAGE_FILE_HEADER) + fileHeader.SizeOfOptionalHeader;
-	fileError = saveSectionHeaders(fs, fileOffset);
-	if(fileError != ERROR_NONE)
-		return fileError;
-
-	// Write zeros to the rest of the file, up to size of image
-	if(saveHeadersOnly == false)
+	// This save mode is intended for unpackers. Headers are constructed
+	// from metadata and sections are filled with zeros
+	if(saveFlags & IoFlagNewFile)
 	{
-		// Get the curent file offset and file size
-		fileOffset += sections.size() * sizeof(PELIB_IMAGE_SECTION_HEADER);
-		fileSize = fileOffset;
+		// Save the DOS header
+		fileError = saveDosHeaderNew(fs, fileOffset);
+		if(fileError != ERROR_NONE)
+			return fileError;
 
-		// Estimate the file size with data
-		for(const auto & section : sections)
+		// Save the NT headers
+		fileError = saveNtHeadersNew(fs, fileOffset + dosHeader.e_lfanew);
+		if(fileError != ERROR_NONE)
+			return fileError;
+
+		// Check and capture section headers
+		fileOffset = fileOffset + dosHeader.e_lfanew + sizeof(PELIB_IMAGE_NT_SIGNATURE) + sizeof(PELIB_IMAGE_FILE_HEADER) + fileHeader.SizeOfOptionalHeader;
+		fileError = saveSectionHeadersNew(fs, fileOffset);
+		if(fileError != ERROR_NONE)
+			return fileError;
+
+		// Write section data to the file, up to size of image
+		if(!(saveFlags & IoFlagHeadersOnly))
 		{
-			if(section.SizeOfRawData != 0)
+			// Get the curent file offset and file size
+			fileOffset += sections.size() * sizeof(PELIB_IMAGE_SECTION_HEADER);
+			std::streamoff fileSize = fileOffset;
+
+			// Estimate the file size with data
+			for(const auto & section : sections)
 			{
-				if((section.PointerToRawData + section.SizeOfRawData) > fileSize)
-					fileSize = section.PointerToRawData + section.SizeOfRawData;
+				if(section.SizeOfRawData != 0)
+				{
+					if((section.PointerToRawData + section.SizeOfRawData) > fileSize)
+						fileSize = section.PointerToRawData + section.SizeOfRawData;
+				}
+			}
+
+			// Shall we write data to the file?
+			if(fileSize > fileOffset)
+			{
+				std::vector<char> ZeroBuffer(fileSize - fileOffset);
+
+				fs.seekp(fileOffset, std::ios::beg);
+				fs.write(ZeroBuffer.data(), ZeroBuffer.size());
 			}
 		}
+	}
+	else
+	{
+		// Save the DOS header
+		fileError = saveDosHeader(fs, fileOffset);
+		if(fileError != ERROR_NONE)
+			return fileError;
 
-		// Shall we write data to the file?
-		if(fileSize > fileOffset)
+		// Save the NT headers
+		fileError = saveNtHeaders(fs, fileOffset + dosHeader.e_lfanew);
+		if(fileError != ERROR_NONE)
+			return fileError;
+
+		// Check and capture section headers
+		fileOffset = fileOffset + dosHeader.e_lfanew + sizeof(PELIB_IMAGE_NT_SIGNATURE) + sizeof(PELIB_IMAGE_FILE_HEADER) + fileHeader.SizeOfOptionalHeader;
+		fileError = saveSectionHeaders(fs, fileOffset);
+		if(fileError != ERROR_NONE)
+			return fileError;
+
+		// Write section data to the file, up to size of image
+		if(!(saveFlags & IoFlagHeadersOnly))
 		{
-			std::vector<char> ZeroBuffer(fileSize - fileOffset);
-
-			fs.seekp(fileOffset, std::ios::beg);
-			fs.write(ZeroBuffer.data(), ZeroBuffer.size());
+			// Write each section
+			for(const auto & section : sections)
+			{
+				fileError = saveToFile(fs, section.PointerToRawData, section.VirtualAddress, section.SizeOfRawData);
+				if(fileError != ERROR_NONE)
+					return fileError;
+			}
 		}
 	}
 
@@ -1106,13 +1139,13 @@ int PeLib::ImageLoader::Save(
 
 int PeLib::ImageLoader::Save(
 	const char * fileName,
-	bool saveHeadersOnly)
+	std::uint32_t saveFlags)
 {
     std::ofstream fs(fileName, std::ifstream::out | std::ifstream::binary);
     if(!fs.is_open())
         return ERROR_OPENING_FILE;
 
-    return Save(fs, 0, saveHeadersOnly);
+    return Save(fs, 0, saveFlags);
 }
 
 //-----------------------------------------------------------------------------
@@ -1162,29 +1195,31 @@ std::uint32_t PeLib::ImageLoader::readWriteImage(
 	if(rva < rvaEnd)
 	{
 		std::uint8_t * bufferPtr = static_cast<std::uint8_t *>(buffer);
-		std::size_t pageIndex = rva / PELIB_PAGE_SIZE;
 
-		// The page index must be in range
-		if(pageIndex < pages.size())
+		while(rva < rvaEnd)
 		{
-			while(rva < rvaEnd)
+			std::uint32_t offsetInPage = rva & (PELIB_PAGE_SIZE - 1);
+			std::uint32_t bytesInPage = PELIB_PAGE_SIZE - offsetInPage;
+			std::size_t pageIndex = rva / PELIB_PAGE_SIZE;
+
+			// Perhaps the last page loaded?
+			if(bytesInPage > (rvaEnd - rva))
+				bytesInPage = (rvaEnd - rva);
+
+			// The page index must be in range
+			if(pageIndex < pages.size())
 			{
-				PELIB_FILE_PAGE & page = pages[pageIndex++];
-				std::uint32_t offsetInPage = rva & (PELIB_PAGE_SIZE - 1);
-				std::uint32_t bytesInPage = PELIB_PAGE_SIZE - offsetInPage;
-
-				// Perhaps the last page loaded?
-				if(bytesInPage > (rvaEnd - rva))
-					bytesInPage = (rvaEnd - rva);
-
-				// Perform the read/write operation
-				ReadWrite(page, bufferPtr, offsetInPage, bytesInPage);
-
-				// Move pointers
-				bufferPtr += bytesInPage;
-				bytesRead += bytesInPage;
-				rva += bytesInPage;
+				ReadWrite(pages[pageIndex], bufferPtr, offsetInPage, bytesInPage);
 			}
+			else
+			{
+				memset(bufferPtr, 0, bytesInPage);
+			}
+
+			// Move pointers
+			bufferPtr += bytesInPage;
+			bytesRead += bytesInPage;
+			rva += bytesInPage;
 		}
 	}
 
@@ -1611,16 +1646,38 @@ int PeLib::ImageLoader::captureDosHeader(ByteBuffer & fileData)
 	return verifyDosHeader(dosHeader, fileData.size());
 }
 
+int PeLib::ImageLoader::saveToFile(
+	std::ostream & fs,
+	std::streamoff fileOffset,
+	std::size_t rva,
+	std::size_t length)
+{
+	std::vector<char> DataBuffer(length);
+
+	readImage(DataBuffer.data(), rva, length);
+	fs.seekp(fileOffset, std::ios::beg);
+	fs.write(DataBuffer.data(), length);
+	return ERROR_NONE;
+}
+
+int PeLib::ImageLoader::saveDosHeaderNew(
+	std::ostream & fs,
+	std::streamoff fileOffset)
+{
+	// Write DOS header as-is
+	fs.seekp(fileOffset, std::ios::beg);
+	fs.write(reinterpret_cast<char *>(&dosHeader), sizeof(PELIB_IMAGE_DOS_HEADER));
+	return ERROR_NONE;
+}
+
 int PeLib::ImageLoader::saveDosHeader(
 	std::ostream & fs,
 	std::streamoff fileOffset)
 {
-	// Move to the required file offset
-	fs.seekp(fileOffset, std::ios::beg);
-
-	// Write DOS header as-is
-	fs.write(reinterpret_cast<char *>(&dosHeader), sizeof(PELIB_IMAGE_DOS_HEADER));
-	return ERROR_NONE;
+	// Request some reasonable maximum to the DOS header size
+	if(dosHeader.e_lfanew > PELIB_PAGE_SIZE * 10)
+		return ERROR_INVALID_FILE;
+	return saveToFile(fs, fileOffset, 0, dosHeader.e_lfanew);
 }
 
 int PeLib::ImageLoader::captureNtHeaders(ByteBuffer & fileData)
@@ -1755,7 +1812,7 @@ int PeLib::ImageLoader::captureNtHeaders(ByteBuffer & fileData)
 	return ERROR_NONE;
 }
 
-int PeLib::ImageLoader::saveNtHeaders(
+int PeLib::ImageLoader::saveNtHeadersNew(
 	std::ostream & fs,
 	std::streamoff fileOffset)
 {
@@ -1864,6 +1921,21 @@ int PeLib::ImageLoader::saveNtHeaders(
 	}
 
 	return ERROR_NONE;
+}
+
+int PeLib::ImageLoader::saveNtHeaders(
+	std::ostream & fs,
+	std::streamoff fileOffset)
+{
+	// Calculate the size of the optional header. Any version of PE file,
+	// 32 or 64-bit, must have this field set to a correct value.
+	std::size_t sizeOfOptionalHeader = getFieldOffset(PELIB_MEMBER_TYPE::OPTHDR_sizeof_fixed) + optionalHeader.NumberOfRvaAndSizes * sizeof(PELIB_IMAGE_DATA_DIRECTORY);
+	std::size_t sizeOfHeaders = sizeof(std::uint32_t) + sizeof(PELIB_IMAGE_FILE_HEADER) + sizeOfOptionalHeader;
+
+	// Give the size of NT headers some reasonable maximum
+	if(sizeOfHeaders > PELIB_PAGE_SIZE * 10)
+		return ERROR_INVALID_FILE;
+	return saveToFile(fs, fileOffset, dosHeader.e_lfanew, sizeOfHeaders);
 }
 
 int PeLib::ImageLoader::captureSectionName(
@@ -2082,7 +2154,7 @@ int PeLib::ImageLoader::captureSectionHeaders(ByteBuffer & fileData)
 	return ERROR_NONE;
 }
 
-int PeLib::ImageLoader::saveSectionHeaders(
+int PeLib::ImageLoader::saveSectionHeadersNew(
 	std::ostream & fs,
 	std::streamoff fileOffset)
 {
@@ -2106,6 +2178,19 @@ int PeLib::ImageLoader::saveSectionHeaders(
 	}
 
 	return ERROR_NONE;
+}
+
+int PeLib::ImageLoader::saveSectionHeaders(
+	std::ostream & fs,
+	std::streamoff fileOffset)
+{
+	std::size_t offsetOfHeaders = dosHeader.e_lfanew + sizeof(std::uint32_t) + sizeof(PELIB_IMAGE_FILE_HEADER) + fileHeader.SizeOfOptionalHeader;
+	std::size_t sizeOfHeaders = fileHeader.NumberOfSections * sizeof(PELIB_IMAGE_SECTION_HEADER);
+
+	// Give the size of NT headers some reasonable maximum
+	if(sizeOfHeaders > PELIB_PAGE_SIZE * 10)
+		return ERROR_INVALID_FILE;
+	return saveToFile(fs, fileOffset, offsetOfHeaders, sizeOfHeaders);
 }
 
 int PeLib::ImageLoader::captureImageSections(ByteBuffer & fileData)

@@ -131,6 +131,16 @@ namespace PeLib
 		return m_tlsdir;
 	}
 
+	const ConfigDirectory& PeFileT::configDir() const
+	{
+		return m_configdir;
+	}
+
+	ConfigDirectory& PeFileT::configDir()
+	{
+		return m_configdir;
+	}
+
 	/**
 	* @return A reference to the file's delay import directory.
 	**/
@@ -384,6 +394,16 @@ namespace PeLib
 		if(m_imageLoader.getComDirRva() && m_imageLoader.getComDirSize())
 		{
 			return comDir().read(m_imageLoader);
+		}
+		return ERROR_DIRECTORY_DOES_NOT_EXIST;
+	}
+
+	int PeFileT::readLoadConfigDirectory()
+	{
+		// Need to do this regardless of NumberOf
+		if(m_imageLoader.getDataDirRva(PELIB_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG))
+		{
+			return configDir().read(m_imageLoader);
 		}
 		return ERROR_DIRECTORY_DOES_NOT_EXIST;
 	}

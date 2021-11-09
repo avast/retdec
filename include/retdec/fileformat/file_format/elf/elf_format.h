@@ -18,6 +18,12 @@
 namespace retdec {
 namespace fileformat {
 
+enum ElfLoaderError : std::uint32_t
+{
+	LDR_ERROR_NONE = 0,
+	LDR_ERROR_SEGMENT_OUT_OF_FILE
+};
+
 /**
  * ElfFormat - wrapper for parsing ELF files
  */
@@ -75,6 +81,7 @@ class ElfFormat : public FileFormat
 				const ELFIO::dynamic_section_accessor *elfDynamicTable,
 				const ELFIO::section *sec);
 		void loadSections();
+		void checkSegmentLoadable(const ELFIO::segment* seg);
 		void loadSegments();
 		void loadDynamicSegmentSection();
 		void loadInfoFromDynamicTables(DynamicTable &dynTab, ELFIO::section *sec);

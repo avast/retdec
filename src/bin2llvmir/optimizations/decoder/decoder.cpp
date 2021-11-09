@@ -295,6 +295,7 @@ void Decoder::decodeJumpTarget(const JumpTarget& jt)
 		LOG << "\t\t\t" << "translating = " << addr << std::endl;
 
 		Address oldAddr = addr;
+		
 		auto res = translate(bytes, addr, irb);
 
 		if (res.failed() || res.llvmInsn == nullptr)

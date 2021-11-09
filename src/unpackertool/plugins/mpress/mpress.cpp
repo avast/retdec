@@ -656,7 +656,7 @@ void MpressPlugin::saveFile(const std::string& fileName, DynamicBuffer& content)
 	std::remove(fileName.c_str());
 
 	// Headers
-	imageLoader.Save(fileName.c_str());
+	imageLoader.Save(fileName.c_str(), PeLib::IoFlagNewFile);
 
 	std::fstream outputFile(fileName, std::ios::binary | std::ios::out | std::ios::in);
 	// Copy the section bytes from original file for the sections preceding the packed section
