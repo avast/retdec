@@ -8,9 +8,8 @@
 
 namespace PeLib {
 /**
-	* @param inStream Input stream.
-	* @param imageLoader A valid image loader reference which is necessary because some RVA calculations need to be done.
-	**/
+ * @param imageLoader A valid image loader reference which is necessary because some RVA calculations need to be done.
+ **/
 
 int ConfigDirectory::read(ImageLoader& imageLoader)
 {

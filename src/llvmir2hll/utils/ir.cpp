@@ -87,18 +87,15 @@ ShPtr<Expression> skipUnaryExpr(ShPtr<Expression> expr) {
 
 } // anonymous namespace
 
-/**
-* @brief Sorts the given vector by the name of its elements (case-insensitively).
-* @note This one function is defined outside the namespace below with explicit
-*       namespace declarations to help Doxygen and prevent it from generating
-*       "no matching file member found for" warnings.
-*/
-void retdec::llvmir2hll::sortByName(retdec::llvmir2hll::FuncVector &vec) {
-	std::sort(vec.begin(), vec.end(), compareFuncs);
-}
-
 namespace retdec {
 namespace llvmir2hll {
+
+/**
+* @brief Sorts the given vector by the name of its elements (case-insensitively).
+*/
+void sortByName(FuncVector &vec) {
+	std::sort(vec.begin(), vec.end(), compareFuncs);
+}
 
 /**
 * @brief Sorts the given vector by the name of its elements (case-insensitively).
