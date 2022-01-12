@@ -287,7 +287,11 @@ Certificate* certificate_new(X509* x509)
     EVP_PKEY* pkey = X509_get0_pubkey(x509);
     if (pkey) {
         result->key = pubkey_to_pem(pkey);
+#if OPENSSL_VERSION_NUMBER >= 0x3000000fL
+        result->key_alg = strdup(OBJ_nid2sn(EVP_PKEY_get_base_id(pkey)));
+#else
         result->key_alg = strdup(OBJ_nid2sn(EVP_PKEY_base_id(pkey)));
+#endif
     }
 
     return result;

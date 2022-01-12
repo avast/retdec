@@ -163,7 +163,7 @@ std::string Config::generateJsonString() const
 }
 
 /**
- * Reads string containig JSON representation of configuration.
+ * Reads string containing JSON representation of configuration.
  * If file can not be parsed, an instance of @c ParseException is thrown.
  * @param json JSON string.
  */

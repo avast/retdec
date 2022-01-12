@@ -1,5 +1,5 @@
 /**
- * @file src/fileinfo/fileformat/file_information_types/pe_timestamps.h
+ * @file include/retdec/fileformat/types/pe_timestamps/pe_timestamps.h
  * @brief PE timestamps.
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
