@@ -1,0 +1,144 @@
+## Configuration of Github Actions CI for RetDec
+
+name: RetDec CI
+
+on:
+    push:
+        branches:
+            - master   # Activate CI on push on master.
+            - 'test-*' # Activate CI on branch with prefix test-.
+
+    pull_request:
+        branches:
+            - master # Activate on pull request.
+
+env:
+    # Universal ENV variable containing path to all workflows scripts.
+    # Each OS has it's own directory there: Windows, macOS, Linux.
+    # Names of directories are compatible with the $RUNNER_OS variable.
+    WORKFLOWS_DIR: ${{ github.workspace }}/.github/workflows/
+
+jobs:
+    ci-runner:
+        strategy:
+            matrix:
+                sys:
+                    - { os: windows-latest, shell: 'msys2 {0}' }
+                    - { os: ubuntu-latest, shell: bash }
+                    - { os: macos-latest, shell: bash }
+                type: [Release, Debug]
+
+            # Let other builds finish.
+            fail-fast: false
+
+        name: ${{ matrix.sys.os }} (${{ matrix.type }})
+
+        runs-on: ${{ matrix.sys.os }}
+
+        defaults:
+            run:
+                shell: ${{ matrix.sys.shell }}
+
+        steps:
+            # Checkouts the correct commit/branch.
+            - uses: actions/checkout@v2
+
+            # We want to use msys2 bash on Windows.
+            - uses: msys2/setup-msys2@v2
+              if: runner.os == 'Windows'
+
+            # Installs dependencies on all systems.
+            - name: Install Dependencies
+              run: bash "${WORKFLOWS_DIR}/${RUNNER_OS}/install-deps.sh"
+              shell: bash
+
+            - name: Windows Additional Packages
+              if: runner.os == 'Windows'
+              run: |
+                    pacman -S mingw-w64-i686-gcc --noconfirm
+                    pacman -S mingw-w64-x86_64-gcc --noconfirm
+                    pacman -S mingw-w64-x86_64-python --noconfirm
+                    pacman -S python3-pip --noconfirm
+
+            # Regression tests framework requires specific version of clang.
+            # The following script(s) prepares clang on each platform.
+            - name: Prepare Clang
+              run: bash "${WORKFLOWS_DIR}/${RUNNER_OS}/prepare-clang.sh"
+              env:
+                  # Clang will be available in build/clang
+                  CLANG_DIR_OUT: clang
+              shell: bash
+
+            - name: Build RetDec
+              run: bash "${WORKFLOWS_DIR}/${RUNNER_OS}/build.sh"
+              env:
+                  BUILD_TYPE: ${{ matrix.type }}
+              shell: bash
+
+            - name: Prepare RetDec Regression Tests & Framework
+              run: bash "${WORKFLOWS_DIR}/common/prepare-retdec-tests.sh"
+              shell: bash
+
+            - name: Run Tests
+              run: bash "${WORKFLOWS_DIR}/${RUNNER_OS}/run-tests.sh"
+
+
+            # Prepare files for publishing/release. The resulting structure:
+            #   RetDec-OSType-Release
+            #   |_ bin
+            #   |_ include
+            #   |_ lib
+            #   |_ share
+            #   |  \__ retdec/support/
+            #   |
+            #   |_ CHANGELOG.md
+            #   |_ LICENSE
+            #   |_ LICENSE-THIRD-PARTY
+            #   \_ README.md
+            - name: Prepare Files for Publishing
+              if: matrix.type == 'Release'
+              run: |
+                    cp LICENSE* install/
+                    cp CHANGELOG.md install/
+                    cp README.md install/
+
+            - name: Archive Artifacts
+              if: matrix.type == 'Release'
+              uses: actions/upload-artifact@v1
+              with:
+                  name: RetDec-${{ runner.os }}-Release
+                  path: install
+
+    docs-build:
+        name: doxygen-build (Linux)
+        runs-on: ubuntu-latest
+
+        steps:
+            # Checkouts the correct commit/branch.
+            - uses: actions/checkout@v2
+
+            # Installs dependencies on all systems.
+            - name: Install Dependencies
+              run: bash "${WORKFLOWS_DIR}/Linux/install-deps.sh"
+              shell: bash
+
+            - name: Build Docs
+              run: |
+                    mkdir build && cd build
+                    cmake .. -DCMAKE_INSTALL_PREFIX=install -DRETDEC_DOC=ON
+                    make doc -j$(nproc)
+
+            - name: Test Docs
+              run: |
+                    file="build/doc/doxygen/doxygen.log"
+                    echo "checking file: $file"
+                    content="$(cat $file)"
+                    if [ "$content" = "" ]; then
+                        echo "===> ok"
+                    else
+                        echo "===> fail:"
+                        echo "=========================================="
+                        echo "$content"
+                        echo "=========================================="
+                        exit 1
+                    fi
