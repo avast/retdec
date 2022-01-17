@@ -1664,7 +1664,7 @@ void PeFormat::loadResourceNodes(std::vector<const PeLib::ResourceChild*> &nodes
 			continue;
 		}
 		auto resource = std::make_unique<Resource>();
-		resource->setOffset(leaf->getOffsetToData() - rva + formatParser->getResourceDirectoryOffset());
+		resource->setOffset(getImageLoader().getValidOffsetFromRva(leaf->getOffsetToData()));
 		resource->setSizeInFile(leaf->getSize());
 		resource->load(this);
 		resourceTable->addResource(std::move(resource));
