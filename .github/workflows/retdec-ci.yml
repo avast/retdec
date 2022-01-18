@@ -23,9 +23,9 @@ jobs:
         strategy:
             matrix:
                 sys:
-                    - { os: windows-latest, shell: 'msys2 {0}' }
                     - { os: ubuntu-latest, shell: bash }
-                    - { os: macos-latest, shell: bash }
+                    - { os: windows-latest, shell: 'msys2 {0}' }
+                    - { os: macos-11, shell: bash }
                 type: [Release, Debug]
 
             # Let other builds finish.
