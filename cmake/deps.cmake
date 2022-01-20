@@ -2,11 +2,11 @@
 
 
 set(CAPSTONE_URL
-    "https://github.com/aquynh/capstone/archive/659c01aa9858f78ff726d1b375d41e7529c6c5b7.zip"
+    "https://github.com/aquynh/capstone/archive/960b371ca4257592051bcbd8efce6633e490e60e.zip"
     CACHE STRING "URL of Capstone archive to use."
 )
 set(CAPSTONE_ARCHIVE_SHA256
-    "5280b93496d515200ea2986f05bc740eb13e152353382c6911d29a9ba91514bb"
+    "aedbb169efb0a43bd330614d87470e74a164d8022e37be390c77ff85ebb3de9a"
     CACHE STRING ""
 )
 
