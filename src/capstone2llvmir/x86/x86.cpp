@@ -1281,7 +1281,7 @@ Capstone2LlvmIrTranslatorX86_impl::loadOpFloatingBinaryTop(
 	}
 
 	if (i->id == X86_INS_FSUBP
-			|| i->id == X86_INS_FADDP
+			|| i->id == X86_INS_FADD
 			|| i->id == X86_INS_FDIVP
 			|| i->id == X86_INS_FDIVRP
 			|| i->id == X86_INS_FMULP
@@ -4405,7 +4405,7 @@ void Capstone2LlvmIrTranslatorX86_impl::translateFadd(cs_insn* i, cs_x86* xi, ll
 
 	auto* fadd = irb.CreateFAdd(op0, op1);
 
-	if (xi->op_count == 2 || i->id == X86_INS_FADDP)
+	if (xi->op_count == 2 || i->id == X86_INS_FADD)
 	{
 		storeX87DataReg(irb, idx, fadd);
 	}
@@ -4414,7 +4414,7 @@ void Capstone2LlvmIrTranslatorX86_impl::translateFadd(cs_insn* i, cs_x86* xi, ll
 		storeX87DataReg(irb, top, fadd);
 	}
 
-	if (i->id == X86_INS_FADDP)
+	if (i->id == X86_INS_FADD)
 	{
 		x87IncTop(irb, top);
 	}
@@ -5068,16 +5068,16 @@ void Capstone2LlvmIrTranslatorX86_impl::translateFucomPop(cs_insn* i, cs_x86* xi
 
 	bool doublePop = i->id == X86_INS_FUCOMPP || i->id == X86_INS_FCOMPP;
 	bool pop = i->id == X86_INS_FUCOMP || i->id == X86_INS_FCOMP
-			|| i->id == X86_INS_FUCOMIP || i->id == X86_INS_FCOMIP
+			|| i->id == X86_INS_FUCOMPI || i->id == X86_INS_FCOMPI
 			|| i->id == X86_INS_FICOMP || doublePop;
 
 	uint32_t r1 = X87_REG_C0;
 	uint32_t r2 = X87_REG_C2;
 	uint32_t r3 = X87_REG_C3;
 	if (i->id == X86_INS_FUCOMI
-			|| i->id == X86_INS_FUCOMIP
+			|| i->id == X86_INS_FUCOMPI
 			|| i->id == X86_INS_FCOMI
-			|| i->id == X86_INS_FCOMIP)
+			|| i->id == X86_INS_FCOMPI)
 	{
 		r1 = X86_REG_CF;
 		r2 = X86_REG_PF;

@@ -372,7 +372,7 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::initializeRegTypeMap()
 			{PPC_REG_CTR8, defTy},
 			{PPC_REG_LR8, defTy},
 			{PPC_REG_CR1EQ, defTy},
-			{PPC_REG_X2, defTy},
+			{PPC_REG_XER, defTy},
 	};
 
 	_reg2type = std::move(r2t);
@@ -1649,7 +1649,6 @@ Capstone2LlvmIrTranslatorPowerpc_impl::_i2fm =
 		{PPC_INS_BDZFLA, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
 		{PPC_INS_BDZFLRL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
 
-		{PPC_INS_BCT, nullptr},
 };
 
 } // namespace capstone2llvmir
