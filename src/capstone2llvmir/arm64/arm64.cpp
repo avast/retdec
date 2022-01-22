@@ -1787,7 +1787,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateAnd(cs_insn* i, cs_arm64* ai,
 	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(ai, irb);
 	op2 = irb.CreateZExtOrTrunc(op2, op1->getType());
 
-	if (i->id == ARM64_INS_BIC)
+	if (i->id == ARM64_INS_BIC || i->id == ARM64_INS_BICS)
 	{
 		op2 = generateValueNegate(irb, op2);
 	}
