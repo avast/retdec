@@ -1682,7 +1682,7 @@ Capstone2LlvmIrTranslatorArm64_impl::_i2fm =
 	{ARM64_INS_DMB, nullptr},
 	{ARM64_INS_DRPS, nullptr},
 	{ARM64_INS_DSB, nullptr},
-	{ARM64_INS_DUP, nullptr},
+	{ARM64_INS_DUP, &Capstone2LlvmIrTranslatorArm64_impl::translateMov},
 	{ARM64_INS_EON, &Capstone2LlvmIrTranslatorArm64_impl::translateEor},
 	{ARM64_INS_EOR, &Capstone2LlvmIrTranslatorArm64_impl::translateEor},
 	{ARM64_INS_ERET, nullptr},
