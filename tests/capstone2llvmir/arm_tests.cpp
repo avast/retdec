@@ -1717,7 +1717,9 @@ TEST_P(Capstone2LlvmIrTranslatorArmTests, ARM_INS_NOP)
 
 	EXPECT_NO_REGISTERS_STORED();
 	EXPECT_NO_MEMORY_LOADED_STORED();
-	EXPECT_NO_VALUE_CALLED();
+	EXPECT_JUST_VALUES_CALLED({
+		{_module.getFunction("__asm_nop"), {}},
+	});
 }
 
 //
