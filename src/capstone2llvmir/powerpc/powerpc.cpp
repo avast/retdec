@@ -792,6 +792,7 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateCmp(cs_insn* i, cs_ppc* pi,
 	}
 
 	if (i->id == PPC_INS_CMPW
+			|| i->id == PPC_INS_CMPL
 			|| i->id == PPC_INS_CMPWI
 			|| i->id == PPC_INS_CMPLW
 			|| i->id == PPC_INS_CMPLWI)
