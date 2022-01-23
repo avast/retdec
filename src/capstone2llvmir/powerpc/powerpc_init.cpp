@@ -525,6 +525,7 @@ Capstone2LlvmIrTranslatorPowerpc_impl::_i2fm =
 		{PPC_INS_CMPB, nullptr},
 		{PPC_INS_CMPD, &Capstone2LlvmIrTranslatorPowerpc_impl::translateCmp},
 		{PPC_INS_CMPDI, &Capstone2LlvmIrTranslatorPowerpc_impl::translateCmp},
+		{PPC_INS_CMPL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateCmp},
 		{PPC_INS_CMPLD, &Capstone2LlvmIrTranslatorPowerpc_impl::translateCmp},
 		{PPC_INS_CMPLDI, &Capstone2LlvmIrTranslatorPowerpc_impl::translateCmp},
 		{PPC_INS_CMPLW, &Capstone2LlvmIrTranslatorPowerpc_impl::translateCmp},
