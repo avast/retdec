@@ -747,14 +747,22 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateAndis(cs_insn* i, cs_ppc* p
  */
 void Capstone2LlvmIrTranslatorPowerpc_impl::translateClrlwi(cs_insn* i, cs_ppc* pi, llvm::IRBuilder<>& irb)
 {
-	EXPECT_IS_BINARY_OR_TERNARY(i, pi, irb);
-
-	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::ZEXT_TRUNC_OR_BITCAST);
-	op2 = irb.CreateAnd(op2, llvm::ConstantInt::get(op2->getType(), 31));
-	op1 = irb.CreateShl(op1, op2);
-	op1 = irb.CreateLShr(op1, op2);
-	storeOp(pi->operands[0], op1, irb);
-	storeCr0(irb, pi, op1);
+	std::set<int> opCountTemp = {3, 5};
+	EXPECT_IS_SET(i, pi, irb, opCountTemp)
+	//EXPECT_IS_BINARY_OR_TERNARY(i, pi, irb);
+	if(pi->op_count == 3)
+	{
+		std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::ZEXT_TRUNC_OR_BITCAST);
+		op2 = irb.CreateAnd(op2, llvm::ConstantInt::get(op2->getType(), 31));
+		op1 = irb.CreateShl(op1, op2);
+		op1 = irb.CreateLShr(op1, op2);
+		storeOp(pi->operands[0], op1, irb);
+		storeCr0(irb, pi, op1);
+	}
+	else
+	{
+		translateRotateComplex5op(i, pi, irb);
+	}
 }
 
 /**
