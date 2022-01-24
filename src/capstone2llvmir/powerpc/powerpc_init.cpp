@@ -1650,6 +1650,15 @@ Capstone2LlvmIrTranslatorPowerpc_impl::_i2fm =
 		{PPC_INS_BDZFL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
 		{PPC_INS_BDZFLA, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
 		{PPC_INS_BDZFLRL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		
+		//Branch if less than
+		{PPC_INS_BLT, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BLTA, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BLTCTR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BLTCTRL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BLTL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BLTLA, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BLTLRL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
 
 };
 
