@@ -2204,18 +2204,6 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateB(cs_insn* i, cs_ppc* pi, l
 	uint32_t crReg = PPC_REG_CR0;
 	ppc_bc crBc = pi->bc;
 
-	// TODO: Special handling because of Capstone bug:
-	// https://github.com/aquynh/capstone/issues/968
-	//if (i->id == PPC_INS_BDZLA)
-	//{
-	//	if (pi->op_count != 1
-	//			|| pi->operands[0].type != PPC_OP_IMM)
-	//	{
-	//		throw GenericError("unhandled PPC_INS_BDZLA format");
-	//	}
-//
-	//	target = llvm::ConstantInt::get(getDefaultType(), pi->operands[0].imm);
-	//}
 	if (toLR)
 	{
 		target = loadRegister(PPC_REG_LR, irb);
