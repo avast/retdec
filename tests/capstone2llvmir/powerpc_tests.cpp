@@ -6601,7 +6601,7 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BDZLA_nonzero)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_translator->getCondBranchFunction(), {false, 0x100004bc}},
+		{_translator->getCondBranchFunction(), {false, 0x4bc}},
 	});
 }
 
@@ -6623,7 +6623,7 @@ TEST_P(Capstone2LlvmIrTranslatorPowerpcTests, PPC_INS_BDZLA_zero)
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_JUST_VALUES_CALLED({
-		{_translator->getCondBranchFunction(), {true, 0x100004bc}},
+		{_translator->getCondBranchFunction(), {true, 0x4bc}},
 	});
 }
 

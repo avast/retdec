@@ -454,6 +454,11 @@ llvm::Value* Capstone2LlvmIrTranslatorPowerpc_impl::loadCrX(
 	uint32_t eqR = PPC_REG_CR0EQ;
 	uint32_t soR = PPC_REG_CR0UN;
 
+	if (isCrRegister(crReg) && isCrBitRegister(crReg))
+	{
+		return loadRegister(crReg, irb);
+	}
+
 	switch (crReg)
 	{
 		case PPC_REG_CR0:
@@ -577,7 +582,7 @@ uint32_t Capstone2LlvmIrTranslatorPowerpc_impl::crBitIndexToCrRegister(uint32_t 
 bool Capstone2LlvmIrTranslatorPowerpc_impl::isCrRegister(uint32_t r)
 {
 	return (PPC_REG_CR0 <= r && r <= PPC_REG_CR7)
-			|| (PPC_REG_CR0EQ <= r && r <= PPC_REG_CR5UN);
+			|| isCrBitRegister(r);
 }
 
 bool Capstone2LlvmIrTranslatorPowerpc_impl::isCrRegister(cs_ppc_op& op)
@@ -585,6 +590,10 @@ bool Capstone2LlvmIrTranslatorPowerpc_impl::isCrRegister(cs_ppc_op& op)
 	return op.type == PPC_OP_REG && isCrRegister(op.reg);
 }
 
+bool Capstone2LlvmIrTranslatorPowerpc_impl::isCrBitRegister(uint32_t r)
+{
+	return PPC_REG_CR0EQ <= r && r <= PPC_REG_CR5UN;
+}
 bool Capstone2LlvmIrTranslatorPowerpc_impl::isOperandRegister(cs_ppc_op& op)
 {
 	return op.type == PPC_OP_REG;
@@ -2197,17 +2206,17 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateB(cs_insn* i, cs_ppc* pi, l
 
 	// TODO: Special handling because of Capstone bug:
 	// https://github.com/aquynh/capstone/issues/968
-	if (i->id == PPC_INS_BDZLA)
-	{
-		if (pi->op_count != 1
-				|| pi->operands[0].type != PPC_OP_IMM)
-		{
-			throw GenericError("unhandled PPC_INS_BDZLA format");
-		}
-
-		target = llvm::ConstantInt::get(getDefaultType(), pi->operands[0].imm - i->address);
-	}
-	else if (toLR)
+	//if (i->id == PPC_INS_BDZLA)
+	//{
+	//	if (pi->op_count != 1
+	//			|| pi->operands[0].type != PPC_OP_IMM)
+	//	{
+	//		throw GenericError("unhandled PPC_INS_BDZLA format");
+	//	}
+//
+	//	target = llvm::ConstantInt::get(getDefaultType(), pi->operands[0].imm);
+	//}
+	if (toLR)
 	{
 		target = loadRegister(PPC_REG_LR, irb);
 
