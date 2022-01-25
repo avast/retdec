@@ -576,7 +576,8 @@ uint32_t Capstone2LlvmIrTranslatorPowerpc_impl::crBitIndexToCrRegister(uint32_t 
 
 bool Capstone2LlvmIrTranslatorPowerpc_impl::isCrRegister(uint32_t r)
 {
-	return PPC_REG_CR0 <= r && r <= PPC_REG_CR7;
+	return (PPC_REG_CR0 <= r && r <= PPC_REG_CR7)
+			|| (PPC_REG_CR0EQ <= r && r <= PPC_REG_CR5UN);
 }
 
 bool Capstone2LlvmIrTranslatorPowerpc_impl::isCrRegister(cs_ppc_op& op)
@@ -1321,14 +1322,14 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateCrNotMove(cs_insn* i, cs_pp
 	uint32_t crReg0 = 0;
 	uint32_t crReg1 = 0;
 	if (pi->operands[0].type == PPC_OP_REG
-			&& isGeneralPurposeRegister(pi->operands[0].reg)
+			&& isCrRegister(pi->operands[0].reg)
 			&& pi->operands[1].type == PPC_OP_REG
-			&& isGeneralPurposeRegister(pi->operands[1].reg))
+			&& isCrRegister(pi->operands[1].reg))
 	{
 		auto r0 = pi->operands[0].reg;
-		crReg0 = crBitIndexToCrRegister(getGeneralPurposeRegisterIndex(r0));
+		crReg0 = r0;//crBitIndexToCrRegister(getGeneralPurposeRegisterIndex(r0));
 		auto r1 = pi->operands[1].reg;
-		crReg1 = crBitIndexToCrRegister(getGeneralPurposeRegisterIndex(r1));
+		crReg1 = r1;//crBitIndexToCrRegister(getGeneralPurposeRegisterIndex(r1));
 	}
 	else
 	{
@@ -1361,10 +1362,10 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateCrSetClr(cs_insn* i, cs_ppc
 
 	uint32_t crReg = 0;
 	if (pi->operands[0].type == PPC_OP_REG
-			&& isGeneralPurposeRegister(pi->operands[0].reg))
+			&& isCrRegister(pi->operands[0].reg))
 	{
 		auto r = pi->operands[0].reg;
-		crReg = crBitIndexToCrRegister(getGeneralPurposeRegisterIndex(r));
+		crReg = r;//crBitIndexToCrRegister(getGeneralPurposeRegisterIndex(r));
 	}
 	else
 	{
