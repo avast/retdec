@@ -1315,7 +1315,7 @@ Capstone2LlvmIrTranslatorX86_impl::_i2fm =
 		{X86_INS_FUCOMPP, &Capstone2LlvmIrTranslatorX86_impl::translateFucomPop},
 		{X86_INS_FUCOMP, &Capstone2LlvmIrTranslatorX86_impl::translateFucomPop},
 		{X86_INS_FUCOM, &Capstone2LlvmIrTranslatorX86_impl::translateFucomPop},
-		{X86_INS_UD2, &Capstone2LlvmIrTranslatorX86_impl::translateNop},
+		{X86_INS_UD1, &Capstone2LlvmIrTranslatorX86_impl::translateNop},
 		{X86_INS_UNPCKHPD, nullptr},
 		{X86_INS_UNPCKHPS, nullptr},
 		{X86_INS_UNPCKLPD, nullptr},
