@@ -10824,11 +10824,10 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FADDP_st3)
 	emulate("faddp st(3)");
 
 	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST5});
-	//TODO: in capstone-next fadd st(0), st(i)=>fadd st(i) = faddp st(i)
-	//EXPECT_JUST_REGISTERS_STORED({
-	//	{X87_REG_TOP, 0x3},
-	//	{X86_REG_ST2, 3.14 + 3.14},
-	//});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X87_REG_TOP, 0x3},
+		{X86_REG_ST5, 3.14 + 3.14},
+	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 }
 
@@ -10846,11 +10845,10 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_FADDP)
 	emulate("faddp");
 
 	EXPECT_JUST_REGISTERS_LOADED({X87_REG_TOP, X86_REG_ST2, X86_REG_ST3});
-	//TODO
-	//EXPECT_JUST_REGISTERS_STORED({
-	//	{X87_REG_TOP, 0x3},
-	//	{X86_REG_ST3, 3.14 + 3.14},
-	//});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X87_REG_TOP, 0x3},
+		{X86_REG_ST3, 3.14 + 3.14},
+	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 }
 

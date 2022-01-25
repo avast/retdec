@@ -4402,10 +4402,11 @@ void Capstone2LlvmIrTranslatorX86_impl::translateFadd(cs_insn* i, cs_x86* xi, ll
 	EXPECT_IS_EXPR(i, xi, irb, (xi->op_count <= 2));
 
 	std::tie(op0, op1, top, idx) = loadOpFloatingBinaryTop(i, xi, irb);
+	bool isFADDP = xi->opcode[0] == 0xDE && xi->opcode[1] == 0x00&& xi->opcode[2] == 0x00 && xi->opcode[3] == 0x00;
 
 	auto* fadd = irb.CreateFAdd(op0, op1);
 
-	if (xi->op_count == 2) //fadd st(i), st(0) => st(i) += st(0)
+	if (xi->op_count == 2 || isFADDP) //fadd st(i), st(0) => st(i) += st(0)
 	{
 		storeX87DataReg(irb, idx, fadd);
 	}
