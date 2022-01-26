@@ -4656,13 +4656,6 @@ void Capstone2LlvmIrTranslatorX86_impl::translateFxch(cs_insn* i, cs_x86* xi, ll
 
 	std::tie(op0, op1, top, idx) = loadOpFloatingBinaryTop(i, xi, irb);
 
-	//if (top == idx)
-	//{
-	//	auto reg2 = xi->operands[1].reg;
-	//	unsigned regOff2 = reg2 - X86_REG_ST0;
-	//	idx = irb.CreateAdd(top, llvm::ConstantInt::get(top->getType(), regOff2));
-	//}
-
 	storeX87DataReg(irb, top, op1);
 	storeX87DataReg(irb, idx, op0);
 }
