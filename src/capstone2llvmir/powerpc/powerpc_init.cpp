@@ -367,12 +367,13 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::initializeRegTypeMap()
 			{PPC_REG_Q30, i256},
 			{PPC_REG_Q31, i256},
 
-			// extra registers for PPCMapping.c
+			//FP ounding Mode
 			{PPC_REG_RM, defTy},
 			{PPC_REG_CTR8, defTy},
 			{PPC_REG_LR8, defTy},
-			{PPC_REG_CR1EQ, defTy},
 			{PPC_REG_XER, defTy},
+			//The reprsentation of r0 when treated as the constant 0.
+			{PPC_REG_ZERO, defTy},
 	};
 
 	_reg2type = std::move(r2t);
