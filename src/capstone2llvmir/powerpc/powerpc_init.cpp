@@ -1114,7 +1114,6 @@ Capstone2LlvmIrTranslatorPowerpc_impl::_i2fm =
 		{PPC_INS_RLDICR, nullptr},
 		{PPC_INS_RLDIMI, nullptr},
 		{PPC_INS_RLWIMI, &Capstone2LlvmIrTranslatorPowerpc_impl::translateRotateComplex5op},
-		{PPC_INS_RLWINM, &Capstone2LlvmIrTranslatorPowerpc_impl::translateRotateComplex5op},
 		{PPC_INS_RLWNM, &Capstone2LlvmIrTranslatorPowerpc_impl::translateRotateComplex5op},
 		{PPC_INS_SC, nullptr},
 		{PPC_INS_SLBIA, nullptr},

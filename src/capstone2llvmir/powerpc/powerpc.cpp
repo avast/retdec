@@ -754,6 +754,7 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateAndis(cs_insn* i, cs_ppc* p
 
 /**
  * PPC_INS_CLRLWI - clrlwi rA, RS, n (n < 32) = rlwinm rA, rS, 0, n, 31
+ * PPC_INS_RLWINM - in capstone, rlwinm is equivalent to clrlwi
  */
 void Capstone2LlvmIrTranslatorPowerpc_impl::translateClrlwi(cs_insn* i, cs_ppc* pi, llvm::IRBuilder<>& irb)
 {
