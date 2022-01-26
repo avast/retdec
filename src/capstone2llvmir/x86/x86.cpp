@@ -1194,6 +1194,7 @@ Capstone2LlvmIrTranslatorX86_impl::loadOpFloatingBinaryTop(
 	llvm::Value* op0 = nullptr;
 	llvm::Value* op1 = nullptr;
 	llvm::Value* idx = nullptr;
+	llvm::Value* idx2= nullptr;
 
 	if (xi->op_count == 0)
 	{
@@ -1214,7 +1215,7 @@ Capstone2LlvmIrTranslatorX86_impl::loadOpFloatingBinaryTop(
 
 		auto reg2 = xi->operands[1].reg;
 		unsigned regOff2 = reg2 - X86_REG_ST0;
-		auto* idx2 = regOff2
+		idx2 = regOff2
 				? irb.CreateAdd(top, llvm::ConstantInt::get(top->getType(), regOff2))
 				: top;
 
@@ -1290,6 +1291,12 @@ Capstone2LlvmIrTranslatorX86_impl::loadOpFloatingBinaryTop(
 		auto* tmp = op0;
 		op0 = op1;
 		op1 = tmp;
+	}
+
+	if (i->id == X86_INS_FXCH
+			&& top == idx)
+	{
+		idx = idx2;
 	}
 
 	return std::make_tuple(op0, op1, top, idx);
@@ -4648,6 +4655,13 @@ void Capstone2LlvmIrTranslatorX86_impl::translateFxch(cs_insn* i, cs_x86* xi, ll
 	EXPECT_IS_EXPR(i, xi, irb, (xi->op_count <= 2));
 
 	std::tie(op0, op1, top, idx) = loadOpFloatingBinaryTop(i, xi, irb);
+
+	//if (top == idx)
+	//{
+	//	auto reg2 = xi->operands[1].reg;
+	//	unsigned regOff2 = reg2 - X86_REG_ST0;
+	//	idx = irb.CreateAdd(top, llvm::ConstantInt::get(top->getType(), regOff2));
+	//}
 
 	storeX87DataReg(irb, top, op1);
 	storeX87DataReg(irb, idx, op0);
