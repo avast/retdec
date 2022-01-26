@@ -2073,8 +2073,6 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateB(cs_insn* i, cs_ppc* pi, l
 			PPC_INS_BNGL, PPC_INS_BNGLA, PPC_INS_BNGLRL, PPC_INS_BNGCTRL,
 			PPC_INS_BSOL, PPC_INS_BSOLA, PPC_INS_BSOLRL, PPC_INS_BSOCTRL,
 			PPC_INS_BNSL, PPC_INS_BNSLA, PPC_INS_BNSLRL, PPC_INS_BNSCTRL,
-			PPC_INS_BUNL, PPC_INS_BUNLA, PPC_INS_BUNLRL, PPC_INS_BUNCTRL,
-			PPC_INS_BNUL, PPC_INS_BNULA, PPC_INS_BNULRL, PPC_INS_BNUCTRL,
 	};
 	bool link = linkIds.count(i->id);
 
@@ -2105,8 +2103,6 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateB(cs_insn* i, cs_ppc* pi, l
 			PPC_INS_BNGLR, PPC_INS_BNELRL,
 			PPC_INS_BSOLR, PPC_INS_BSOLRL,
 			PPC_INS_BNSLR, PPC_INS_BNSLRL,
-			PPC_INS_BUNLR, PPC_INS_BUNLRL,
-			PPC_INS_BNULR, PPC_INS_BNULRL
 	};
 	bool toLR = toLRIds.count(i->id);
 
@@ -2129,8 +2125,6 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateB(cs_insn* i, cs_ppc* pi, l
 			PPC_INS_BNGCTR, PPC_INS_BNGCTRL,
 			PPC_INS_BSOCTR, PPC_INS_BSOCTRL,
 			PPC_INS_BNSCTR, PPC_INS_BNSCTRL,
-			PPC_INS_BUNCTR, PPC_INS_BUNCTRL,
-			PPC_INS_BNUCTR, PPC_INS_BNUCTRL
 	};
 	bool toCTR = toCTRIds.count(i->id);
 
