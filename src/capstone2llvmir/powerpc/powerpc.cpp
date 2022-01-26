@@ -1336,9 +1336,9 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateCrNotMove(cs_insn* i, cs_pp
 			&& isCrRegister(pi->operands[1].reg))
 	{
 		auto r0 = pi->operands[0].reg;
-		crReg0 = r0;//crBitIndexToCrRegister(getGeneralPurposeRegisterIndex(r0));
+		crReg0 = r0;
 		auto r1 = pi->operands[1].reg;
-		crReg1 = r1;//crBitIndexToCrRegister(getGeneralPurposeRegisterIndex(r1));
+		crReg1 = r1;
 	}
 	else
 	{
@@ -1374,7 +1374,7 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateCrSetClr(cs_insn* i, cs_ppc
 			&& isCrRegister(pi->operands[0].reg))
 	{
 		auto r = pi->operands[0].reg;
-		crReg = r;//crBitIndexToCrRegister(getGeneralPurposeRegisterIndex(r));
+		crReg = r;
 	}
 	else
 	{

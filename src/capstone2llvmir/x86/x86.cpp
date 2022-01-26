@@ -4413,11 +4413,11 @@ void Capstone2LlvmIrTranslatorX86_impl::translateFadd(cs_insn* i, cs_x86* xi, ll
 
 	auto* fadd = irb.CreateFAdd(op0, op1);
 
-	if (xi->op_count == 2 || isFADDP) //fadd st(i), st(0) => st(i) += st(0)
+	if (xi->op_count == 2 || isFADDP)
 	{
 		storeX87DataReg(irb, idx, fadd);
 	}
-	else //fadd st(0), st(i) = fadd st(i) => st(0) += st(i)
+	else
 	{
 		storeX87DataReg(irb, top, fadd);
 	}
