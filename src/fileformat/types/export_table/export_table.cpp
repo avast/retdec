@@ -14,6 +14,11 @@ using namespace retdec::utils;
 namespace retdec {
 namespace fileformat {
 
+void ExportTable::setDllName(const std::string& dllName)
+{
+	this->dllName = dllName;
+}
+
 /**
  * Get number of stored exports
  * @return Number of stored exports
@@ -48,6 +53,11 @@ const std::string& ExportTable::getExphashMd5() const
 const std::string& ExportTable::getExphashSha256() const
 {
 	return expHashSha256;
+}
+
+const std::string& ExportTable::getDllName() const
+{
+	return dllName;
 }
 
 /**

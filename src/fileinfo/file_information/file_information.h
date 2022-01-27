@@ -243,6 +243,7 @@ class FileInformation
 		/// @name Getters of @a exportTable
 		/// @{
 		std::size_t getNumberOfStoredExports() const;
+		std::string getExportDllName() const;
 		std::string getExphashCrc32() const;
 		std::string getExphashMd5() const;
 		std::string getExphashSha256() const;

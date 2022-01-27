@@ -1542,6 +1542,8 @@ void PeFormat::loadExports()
 		exportTable->addExport(newExport);
 	}
 
+	exportTable->setDllName(formatParser->getExportDirectory().getNameString());
+
 	loadExpHash();
 
 	for(auto&& addressRange : formatParser->getExportDirectoryOccupiedAddresses())

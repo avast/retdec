@@ -1310,6 +1310,7 @@ bool JsonPresentation::present()
 	}
 
 	serializeString(writer, "inputFile", fileinfo.getPathToFile());
+	serializeString(writer, "dllName", fileinfo.getExportDllName());
 
 	presentErrors(writer);
 	presentLoaderError(writer);
