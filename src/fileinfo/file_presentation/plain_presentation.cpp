@@ -829,6 +829,13 @@ bool PlainPresentation::present()
 				<< utils::version::getVersionStringShort() << "\n";
 	}
 	Log::info() << "Input file               : " << fileinfo.getPathToFile() << "\n";
+
+	const std::string& dllName = fileinfo.getExportDllName();
+	if (!dllName.empty())
+	{
+		Log::info() << "Dll name                 : " << dllName << "\n";
+	}
+
 	presentSimple(BasicPlainGetter(fileinfo), false);
 	presentCompiler();
 	presentLanguages();

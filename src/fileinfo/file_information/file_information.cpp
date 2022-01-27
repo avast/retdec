@@ -1340,6 +1340,11 @@ void FileInformation::setDepsListFailedToLoad(const std::string & depsList)
 	failedDepsList = depsList;
 }
 
+std::string FileInformation::getExportDllName() const
+{
+	return exportTable.getDllName();
+}
+
 /**
  * Get number of stored exports
  * @return Number of stored exports
