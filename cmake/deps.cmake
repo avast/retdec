@@ -36,11 +36,11 @@ set(LLVM_ARCHIVE_SHA256
 )
 
 set(YARA_URL
-    "https://github.com/VirusTotal/yara/archive/v4.0.1.zip"
+    "https://github.com/VirusTotal/yara/archive/v4.2.0-rc1.zip"
     CACHE STRING "URL of Yara archive to use."
 )
 set(YARA_ARCHIVE_SHA256
-    "4dcc6907b8537b67b52a61aa76f01196a4cc8e8e9f5fb6e4dd835692c2370e83"
+    "ae1adad2ae33106f4c296cef32ddba2c93867010ef853028d30cad42548d0474"
     CACHE STRING ""
 )
 
