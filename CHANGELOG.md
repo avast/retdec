@@ -7,6 +7,8 @@
 * New feature: Generate ELF (import) symbol-related hashes, including VirusTotal compatible `telfhash` ([#286](https://github.com/avast/retdec/issues/286), [#936](https://github.com/avast/retdec/pull/936)).
 * New Feature: `retdec-fileinfo` can be configured via JSON file. See `--fileinfo-config` option for more details.
 * New Feature: RetDec is now also a library ([#779](https://github.com/avast/retdec/pull/779). Related changes are the removal of `retdec-decompiler.py` (it is now a binary, e.g. `retdec-decompiler.exe` on Windows), `retdec-bin2llvmir`, `retdec-llvmir2hll`, and some other supportive functionality.
+* Enhancement: Add DLL name from export directory to output ([#1060](https://github.com/avast/retdec/pull/1060)).
+* Enhancement: Updated YARA to `v4.2.0-rc1` ([#1061](https://github.com/avast/retdec/pull/1061)).
 * Enhancement: Use [Authenticode parser](https://github.com/avast/authenticode-parser) library instead of RetDec's own implementation ([#1027](https://github.com/avast/retdec/pull/1027), [regression-tests #110](https://github.com/avast/retdec-regression-tests/pull/110)). 
 * Enhancement: Remove `--backend-aggressive-opts` option and all the related code ([#1016](https://github.com/avast/retdec/issues/1016), [#1032](https://github.com/avast/retdec/pull/1032)).
 * Enhancement: Add `SECURITY.md` ([#1018](https://github.com/avast/retdec/issues/1018), [#1025](https://github.com/avast/retdec/pull/1025)).
