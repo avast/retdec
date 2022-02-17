@@ -2695,7 +2695,8 @@ bool PeLib::ImageLoader::checkForInvalidImageRange()
 		std::uint64_t ImageBase = optionalHeader.ImageBase;
 		std::uint32_t AlignedSizeOfImage = AlignToSize(optionalHeader.SizeOfImage, PELIB_PAGE_SIZE);
 
-		// Align size of image to page size
+		// If any part of the image goes out of the allowed range, it's invalid
+		// Windows will do the same check and relocate the image if possible
 		if(ImageBase < MmLowestImageBase || ImageBase > MmHighestImageBase || (ImageBase + AlignedSizeOfImage) > MmHighestImageBase)
 		{
 			return true;
