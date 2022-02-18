@@ -912,9 +912,10 @@ PeLib::LoaderError PeLib::ImageLoader::loaderError() const
 
 //-----------------------------------------------------------------------------
 // Interface for loading files
+
 int PeLib::ImageLoader::Load(
 	ByteBuffer & fileData,
-	bool loadHeadersOnly)
+	std::uint32_t loadFlags)
 {
 	int fileError;
 
@@ -942,7 +943,7 @@ int PeLib::ImageLoader::Load(
 		setLoaderError(LDR_ERROR_IMAGE_NON_EXECUTABLE);
 
 	// Shall we map the image content?
-	if(loadHeadersOnly == false)
+	if(!(loadFlags & IoFlagHeadersOnly))
 	{
 		// Large amount of memory may be allocated during loading the image to memory.
 		// We need to handle low memory condition carefully here
@@ -951,13 +952,25 @@ int PeLib::ImageLoader::Load(
 			// If there was no detected image error, map the image as if Windows loader would do
 			if(isImageLoadable())
 			{
-				fileError = captureImageSections(fileData);
+				fileError = captureImageSections(fileData, loadFlags);
 
 				// If needed, also perform image load config directory check
 				if(fileError == ERROR_NONE)
 				{
 					if(checkImagePostMapping && checkForImageAfterMapping())
 						setLoaderError(LDR_ERROR_IMAGE_NON_EXECUTABLE);
+				}
+
+				// Fix for imaged that modify themselves via relocations
+				// Sample: 342EE6CCB04AB0194275360EE6F752007B9F0CE5420203A41C8C9B5BAC7626DD
+				// Modifies code and import directory via relocation table.
+				// This only works in Windows 7 or newer
+				if(ldrError == LDR_ERROR_NONE && checkForInvalidImageRange())
+				{
+					// The image is gonna be relocated to address 0x10000,
+					// which is the first valid base address that can happen
+					// The relocation is done by ntdll!LdrpProtectAndRelocateImage -> ntdll!LdrRelocateImage
+					relocateImage(0x10000);
 				}
 			}
 
@@ -980,7 +993,7 @@ int PeLib::ImageLoader::Load(
 int PeLib::ImageLoader::Load(
 	std::istream & fs,
 	std::streamoff fileOffset,
-	bool loadHeadersOnly)
+	std::uint32_t loadFlags)
 {
 	ByteBuffer fileData;
 	std::streampos fileSize;
@@ -1032,18 +1045,18 @@ int PeLib::ImageLoader::Load(
 	}
 
 	// Call the Load interface on char buffer
-	return Load(fileData, loadHeadersOnly);
+	return Load(fileData, loadFlags);
 }
 
 int PeLib::ImageLoader::Load(
 	const char * fileName,
-	bool loadHeadersOnly)
+	std::uint32_t loadFlags)
 {
 	std::ifstream fs(fileName, std::ifstream::in | std::ifstream::binary);
 	if(!fs.is_open())
 		return ERROR_OPENING_FILE;
 
-	return Load(fs, loadHeadersOnly);
+	return Load(fs, 0, loadFlags);
 }
 
 //-----------------------------------------------------------------------------
@@ -2193,7 +2206,7 @@ int PeLib::ImageLoader::saveSectionHeaders(
 	return saveToFile(fs, fileOffset, offsetOfHeaders, sizeOfHeaders);
 }
 
-int PeLib::ImageLoader::captureImageSections(ByteBuffer & fileData)
+int PeLib::ImageLoader::captureImageSections(ByteBuffer & fileData, std::uint32_t loadFlags)
 {
 	std::uint32_t virtualAddress = 0;
 	std::uint32_t sizeOfHeaders = optionalHeader.SizeOfHeaders;
@@ -2224,10 +2237,13 @@ int PeLib::ImageLoader::captureImageSections(ByteBuffer & fileData)
 		{
 			for(auto & sectionHeader : sections)
 			{
+				// If loading as image, we need to take data from its virtual address
+				std::uint32_t pointerToRawData = (loadFlags & IoFlagLoadAsImage) ? sectionHeader.VirtualAddress : sectionHeader.PointerToRawData;
+
 				// Capture all pages from the section
 				if(captureImageSection(fileData, sectionHeader.VirtualAddress,
 												 sectionHeader.VirtualSize,
-												 sectionHeader.PointerToRawData,
+												 pointerToRawData,
 												 sectionHeader.SizeOfRawData,
 												 sectionHeader.Characteristics) == 0)
 				{
@@ -2666,6 +2682,28 @@ bool PeLib::ImageLoader::checkForValid32BitMachine()
 	if(loadArmImages && fileHeader.Machine == PELIB_IMAGE_FILE_MACHINE_ARMNT)
 		return true;
 	return (fileHeader.Machine == PELIB_IMAGE_FILE_MACHINE_I386);
+}
+
+bool PeLib::ImageLoader::checkForInvalidImageRange()
+{
+	// Only do the check for 32-bit images
+	if(optionalHeader.Magic == PELIB_IMAGE_NT_OPTIONAL_HDR32_MAGIC)
+	{
+		std::uint64_t MmHighestUserAddress = 0x7FFEFFFF;
+		std::uint64_t MmHighestImageBase = MmHighestUserAddress - 0x10000;
+		std::uint64_t MmLowestImageBase = 0x00010000;
+		std::uint64_t ImageBase = optionalHeader.ImageBase;
+		std::uint32_t AlignedSizeOfImage = AlignToSize(optionalHeader.SizeOfImage, PELIB_PAGE_SIZE);
+
+		// If any part of the image goes out of the allowed range, it's invalid
+		// Windows will do the same check and relocate the image if possible
+		if(ImageBase < MmLowestImageBase || ImageBase > MmHighestImageBase || (ImageBase + AlignedSizeOfImage) > MmHighestImageBase)
+		{
+			return true;
+		}
+	}
+
+	return false;
 }
 
 bool PeLib::ImageLoader::isValidMachineForCodeIntegrifyCheck(std::uint32_t Bits)

@@ -343,6 +343,7 @@ class PeFormatParser
 		const auto imageBase = peFile->imageLoader().getImageBase();
 		const auto bits = peFile->imageLoader().getImageBitability();
 		std::string importName;
+		std::uint64_t addressMask = (bits == 0x20) ? 0xFFFFFFFF : 0xFFFFFFFFFFFFFFFF;
 		std::uint32_t ordinalNumber = 0;
 		std::uint32_t patchRva = 0;
 		std::uint16_t importHint = 0;
@@ -362,7 +363,10 @@ class PeFormatParser
 			import->setName(importName);
 
 			import->setLibraryIndex(fileIndex);
-			import->setAddress(imageBase + patchRva);
+			
+			// Don't allow address overflow for samples with high image bases
+			// (342EE6CCB04AB0194275360EE6F752007B9F0CE5420203A41C8C9B5BAC7626DD)
+			import->setAddress((imageBase + patchRva) & addressMask);
 			return import;
 		}
 

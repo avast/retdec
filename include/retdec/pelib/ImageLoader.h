@@ -147,9 +147,9 @@ class ImageLoader
 
 	ImageLoader(std::uint32_t loaderFlags = 0);
 
-	int Load(ByteBuffer & fileData, bool loadHeadersOnly = false);
-	int Load(std::istream & fs, std::streamoff fileOffset = 0, bool loadHeadersOnly = false);
-	int Load(const char * fileName, bool loadHeadersOnly = false);
+	int Load(ByteBuffer & fileData, std::uint32_t loadFlags = 0);
+	int Load(std::istream & fs, std::streamoff fileOffset = 0, std::uint32_t loadFlags = 0);
+	int Load(const char * fileName, std::uint32_t loadFlags = 0);
 
 	int Save(std::ostream & fs, std::streamoff fileOffset = 0, std::uint32_t saveFlags = 0);
 	int Save(const char * fileName, std::uint32_t saveFlags = 0);
@@ -410,7 +410,7 @@ class ImageLoader
 	int captureSectionHeaders(ByteBuffer & fileData);
 	int saveSectionHeadersNew(std::ostream & fs, std::streamoff fileOffset);
 	int saveSectionHeaders(std::ostream & fs, std::streamoff fileOffset);
-	int captureImageSections(ByteBuffer & fileData);
+	int captureImageSections(ByteBuffer & fileData, std::uint32_t loadFlags);
 	int captureOptionalHeader32(std::uint8_t * fileData, std::uint8_t * filePtr, std::uint8_t * fileEnd);
 	int captureOptionalHeader64(std::uint8_t * fileData, std::uint8_t * filePtr, std::uint8_t * fileEnd);
 	std::uint32_t copyDataDirectories(std::uint8_t * optionalHeaderPtr, std::uint8_t * dataDirectoriesPtr, std::size_t optionalHeaderMax, std::uint32_t numberOfRvaAndSizes);
@@ -436,6 +436,7 @@ class ImageLoader
 	bool isLegacyImageArchitecture(std::uint16_t Machine);
 	bool checkForValid64BitMachine();
 	bool checkForValid32BitMachine();
+	bool checkForInvalidImageRange();
 	bool isValidMachineForCodeIntegrifyCheck(std::uint32_t Bits);
 	bool checkForSectionTablesWithinHeader(std::uint32_t e_lfanew);
 	bool checkForBadCodeIntegrityImages(ByteBuffer & fileData);
