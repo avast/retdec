@@ -1963,7 +1963,7 @@ static Signer getCountersigner(Countersignature* counter)
 	// If there is any verification error, export it as a proper message
 	if (counter->verify_flags != COUNTERSIGNATURE_VFY_VALID)
 		countersigner.warnings.emplace_back(countersigFlagToString(counter->verify_flags));
-	
+
 	return countersigner;
 }
 
@@ -2197,7 +2197,7 @@ void PeFormat::loadDotnetHeaders()
  *  of Timestamp information, read all of them and return them
  */
 PeTimestamps PeFormat::getTimestamps() const
-{	
+{
 	// Inspiration: http://waleedassar.blogspot.com/2014/02/pe-timedatestamp-viewer.html
 	// 1. TimeDateStamp in COFF header
 	// 2. TimeDateStamp in Export Directory Table

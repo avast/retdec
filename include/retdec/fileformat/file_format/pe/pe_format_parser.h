@@ -363,7 +363,7 @@ class PeFormatParser
 			import->setName(importName);
 
 			import->setLibraryIndex(fileIndex);
-			
+
 			// Don't allow address overflow for samples with high image bases
 			// (342EE6CCB04AB0194275360EE6F752007B9F0CE5420203A41C8C9B5BAC7626DD)
 			import->setAddress((imageBase + patchRva) & addressMask);

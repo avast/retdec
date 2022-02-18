@@ -338,9 +338,9 @@ void Resource::setSublanguageId(std::size_t rId)
 
 /**
  * @brief Checks if the offset is valid, with UINT32_MAX reserved as invalid
- * 
- * @return true 
- * @return false 
+ *
+ * @return true
+ * @return false
  */
 bool Resource::isValidOffset() const
 {

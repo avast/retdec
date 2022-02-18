@@ -710,7 +710,7 @@ DEALINGS IN THE SOFTWARE.
    TLSH is provided for use under two licenses: Apache OR BSD.
    Users may opt to use either license depending on the license
    restictions of the systems with which they plan to integrate
-   the TLSH code. 
+   the TLSH code.
 
 
 
@@ -960,12 +960,12 @@ DEALINGS IN THE SOFTWARE.
    Trend Micro (http://www.trendmicro.com/)
 
    Refer to the following publications for more information:
-   
+
      Jonathan Oliver, Chun Cheng and Yanggui Chen,
      "TLSH - A Locality Sensitive Hash"
      4th Cybercrime and Trustworthy Computing Workshop, Sydney, November 2013
      https://github.com/trendmicro/tlsh/blob/master/TLSH_CTC_final.pdf
-    
+
      Jonathan Oliver, Scott Forman and Chun Cheng,
      "Using Randomization to Attack Similarity Digests"
      Applications and Techniques in Information Security. Springer Berlin Heidelberg, 2014. 199-210.

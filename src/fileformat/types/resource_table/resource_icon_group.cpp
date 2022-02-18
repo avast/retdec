@@ -45,7 +45,7 @@ bool iconCompare(const retdec::fileformat::ResourceIcon *i1, const retdec::filef
 	auto i2Height = i2->getHeight();
 	auto i2BitCount = i2->getBitCount();
 
-	// Priority 1: icon with the same dimensions over icons 
+	// Priority 1: icon with the same dimensions over icons
 	if((i1Width == i1Height) && (i2Width != i2Height))
 		return false;
 	if((i1Width != i1Height) && (i2Width == i2Height))

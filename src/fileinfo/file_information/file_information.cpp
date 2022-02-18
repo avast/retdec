@@ -106,7 +106,7 @@ std::string FileInformation::getPathToFile() const
 	return filePath;
 }
 
-std::string FileInformation::getTelfhash() const 
+std::string FileInformation::getTelfhash() const
 {
 	return telfhash;
 }

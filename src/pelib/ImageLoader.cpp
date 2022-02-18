@@ -3077,7 +3077,7 @@ void PeLib::ImageLoader::compareWithWindowsMappedImage(
 
 	// Check if the image was loaded by both Windows and us
 	// Note that in Windows 7, the image can actually be mapped at base address 0
-	// Sample: retdec-regression-tests\features\corkami\inputs\ibnullXP.ex 
+	// Sample: retdec-regression-tests\features\corkami\inputs\ibnullXP.ex
 	if((winImageData || imageSize) && isImageMappedOk())
 	{
 		// Check whether the image size is the same

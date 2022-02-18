@@ -799,8 +799,8 @@ namespace
 	 * @brief Checks if the decrypted header looks valid, if it does
 	 *        then it analyses the header contents and saves it
 	 *        into this->records
-	 * 
-	 * @param ignoreInvalidKey 
+	 *
+	 * @param ignoreInvalidKey
 	 * @return true - the header looks valid
 	 * @return false - header isn't valid
 	 */
