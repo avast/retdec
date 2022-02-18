@@ -961,7 +961,7 @@ int PeLib::ImageLoader::Load(
 						setLoaderError(LDR_ERROR_IMAGE_NON_EXECUTABLE);
 				}
 
-				// Fix for imaged that modify themselves via relocations
+				// Fix for images that modify themselves via relocations
 				// Sample: 342EE6CCB04AB0194275360EE6F752007B9F0CE5420203A41C8C9B5BAC7626DD
 				// Modifies code and import directory via relocation table.
 				// This only works in Windows 7 or newer
