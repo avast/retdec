@@ -389,11 +389,8 @@ void JsonPresentation::presentLoaderInfo(Writer& writer) const
 	writer.EndObject();
 }
 
-void WriteCertificateChain(JsonPresentation::Writer& writer, const std::vector<Certificate>& certificates)
+void WriteCertificate(JsonPresentation::Writer& writer, const Certificate& cert)
 {
-	writer.StartArray();
-	for (auto&& cert : certificates)
-	{
 		writer.StartObject();
 		serializeString(writer, "subject", cert.getRawSubject());
 		serializeString(writer, "issuer", cert.getRawIssuer());
@@ -452,6 +449,14 @@ void WriteCertificateChain(JsonPresentation::Writer& writer, const std::vector<C
 		writer.EndObject();
 
 		writer.EndObject();
+}
+
+void WriteCertificateChain(JsonPresentation::Writer& writer, const std::vector<Certificate>& certificates)
+{
+	writer.StartArray();
+	for (auto&& cert: certificates)
+	{
+		WriteCertificate(writer, cert);
 	}
 	writer.EndArray();
 }
@@ -461,7 +466,8 @@ void WriteSigner(JsonPresentation::Writer& writer, const Signer& signer)
 	writer.StartObject();
 	writer.String("warnings");
 	writer.StartArray();
-	for (auto&& warn : signer.warnings) {
+	for (auto&& warn: signer.warnings)
+	{
 		writer.String(warn);
 	}
 	writer.EndArray();
@@ -472,12 +478,19 @@ void WriteSigner(JsonPresentation::Writer& writer, const Signer& signer)
 
 	serializeString(writer, "digestAlgorithm", signer.digestAlgorithm);
 
+	if (!signer.chain.empty())
+	{
+		writer.String("certificate");
+		WriteCertificate(writer, signer.chain[0]);
+	}
+
 	writer.String("chain");
 	WriteCertificateChain(writer, signer.chain);
 
 	writer.String("counterSigners");
 	writer.StartArray();
-	for (auto&& csigner : signer.counterSigners) {
+	for (auto&& csigner: signer.counterSigners)
+	{
 		WriteSigner(writer, csigner);
 	}
 	writer.EndArray();
