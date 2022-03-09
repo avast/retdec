@@ -133,16 +133,17 @@ Countersignature* pkcs9_countersig_new(
 
     /* compare the encrypted digest and calculated digest */
     bool isValid = false;
-    /* Sometimes signed data contains DER encoded DigestInfo structure which contains hash of
-     * authenticated attributes (39c9d136f026a9ad18fb9f41a64f76dd8418e8de625dce5d3a372bd242fc5edd)
-     * but other times it is just purely and I didn't find another way to  distinguish it but only
-     * based on the length of data we get. Found mention of this in openssl mailing list:
-     * https://mta.openssl.org/pipermail/openssl-users/2015-September/002054.html */
+     
 #if OPENSSL_VERSION_NUMBER >= 0x3000000fL
     size_t mdLen = EVP_MD_get_size(md);
 #else
     size_t mdLen = EVP_MD_size(md);
 #endif
+    /* Sometimes signed data contains DER encoded DigestInfo structure which contains hash of
+     * authenticated attributes (39c9d136f026a9ad18fb9f41a64f76dd8418e8de625dce5d3a372bd242fc5edd)
+     * but other times it is just purely and I didn't find another way to  distinguish it but only
+     * based on the length of data we get. Found mention of this in openssl mailing list:
+     * https://mta.openssl.org/pipermail/openssl-users/2015-September/002054.html */
     if (mdLen == decLen) {
         isValid = !memcmp(calc_digest, decData, mdLen);
     } else {
@@ -199,7 +200,9 @@ Countersignature* ms_countersig_new(const uint8_t* data, long size, ASN1_STRING*
     const ASN1_TIME* rawTime = TS_TST_INFO_get_time(ts);
     if (!rawTime) {
         result->verify_flags = COUNTERSIGNATURE_VFY_TIME_MISSING;
-        goto end;
+        TS_TST_INFO_free(ts);
+        PKCS7_free(p7);
+        return result;
     }
 
     result->sign_time = ASN1_TIME_to_time_t(rawTime);
