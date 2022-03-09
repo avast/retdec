@@ -2030,6 +2030,7 @@ void PeFormat::loadCertificates()
 
 	std::vector<Section*> sections = getSections();
 
+	initialize_authenticode_parser();
 	AuthenticodeArray* auth = parse_authenticode(this->getBytesData(), this->getFileLength());
 	std::vector<DigitalSignature> sigs = authenticodeToSignatures(auth, this);
 	authenticode_array_free(auth);
