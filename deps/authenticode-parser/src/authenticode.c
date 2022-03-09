@@ -273,8 +273,9 @@ static bool authenticode_verify(PKCS7* p7, PKCS7_SIGNER_INFO* si, X509* signCert
     return isValid;
 }
 
-/* Creates all the Authenticode objects so we can parse them with OpenSSL */
-static void initialize_openssl()
+/* Creates all the Authenticode objects so we can parse them with OpenSSL, is not thread-safe, needs
+ * to be called once before any multi-threading environmentt - https://github.com/openssl/openssl/issues/13524 */
+void initialize_authenticode_parser()
 {
     OBJ_create("1.3.6.1.4.1.311.2.1.12", "spcSpOpusInfo", "SPC_SP_OPUS_INFO_OBJID");
     OBJ_create("1.3.6.1.4.1.311.3.3.1", "spcMsCountersignature", "SPC_MICROSOFT_COUNTERSIGNATURE");
@@ -288,9 +289,6 @@ AuthenticodeArray* authenticode_new(const uint8_t* data, long len)
 {
     if (!data || len == 0)
         return NULL;
-
-    /* We need to initialize all the custom objects for further parsing */
-    initialize_openssl();
 
     AuthenticodeArray* result = (AuthenticodeArray*)calloc(1, sizeof(*result));
     if (!result)
@@ -531,6 +529,11 @@ AuthenticodeArray* parse_authenticode(const uint8_t* pe_data, long pe_len)
     if (pe_len < dos_hdr_size)
         return NULL;
 
+    /* Check if it has DOS signature, so we don't parse random gibberish */
+    uint8_t dos_prefix[] = {0x4d, 0x5a};
+    if (memcmp(pe_data, dos_prefix, sizeof(dos_prefix)) != 0)
+        return NULL;
+
     /* offset to pointer in DOS header, that points to PE header */
     const int pe_hdr_ptr_offset = 0x3c;
     /* Read the PE offset */
@@ -553,18 +556,19 @@ AuthenticodeArray* parse_authenticode(const uint8_t* pe_data, long pe_len)
     if (pe_len < pe_cert_table_addr + 2 * sizeof(uint32_t))
         return NULL;
 
-    uint32_t cert_addr = letoh32(*(uint32_t*)(pe_data + pe_cert_table_addr));
-    uint32_t cert_len = letoh32(*(uint32_t*)(pe_data + pe_cert_table_addr + 4));
+    /* Use 64bit type due to the potential overflow in crafted binaries */
+    uint64_t cert_addr = letoh32(*(uint32_t*)(pe_data + pe_cert_table_addr));
+    uint64_t cert_len = letoh32(*(uint32_t*)(pe_data + pe_cert_table_addr + 4));
 
     /* we need atleast 8 bytes to read dwLength, revision and certType */
-    if (cert_len < 8 || pe_len < cert_addr + cert_len)
+    if (cert_len < 8 || pe_len < cert_addr + 8)
         return NULL;
 
     uint32_t dwLength = letoh32(*(uint32_t*)(pe_data + cert_addr));
     if (pe_len < cert_addr + dwLength)
         return NULL;
-
-    AuthenticodeArray* auth_array = authenticode_new(pe_data + cert_addr + 0x8, dwLength);
+    /* dwLength = offsetof(WIN_CERTIFICATE, bCertificate) + (size of the variable-length binary array contained within bCertificate) */
+    AuthenticodeArray* auth_array = authenticode_new(pe_data + cert_addr + 0x8, dwLength - 0x8);
     if (!auth_array)
         return NULL;
 
