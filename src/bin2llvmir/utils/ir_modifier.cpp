@@ -1496,6 +1496,22 @@ llvm::CallInst* IrModifier::modifyCallInst(
 	return _modifyCallInst(call, conv, args);
 }
 
+/**
+ * Simply change callee of a call instruction.
+ *
+ * The call instruction is also given an empty
+ * parameter list, but at the point this method
+ * is called the call is not expected to have
+ * arguments yet.
+ */
+llvm::CallInst* IrModifier::modifyCallInstCallee(
+        llvm::CallInst* call,
+        llvm::Function* new_callee)
+{
+    llvm::ArrayRef<llvm::Value*> args;
+    return _modifyCallInst(call, new_callee, args);
+}
+
 void _eraseUnusedInstructionRecursive(
 		const std::unordered_set<llvm::Value*>& workset)
 {

@@ -138,6 +138,8 @@ bool Decoder::run()
 
 	initializeGpReg_mips();
 
+	fixPltCalls();
+
 	return false;
 }
 
@@ -1588,6 +1590,110 @@ void Decoder::finalizePseudoCalls()
 			}
 		}
 	}
+}
+
+// Top level function for fixing PLT calls.
+void Decoder::fixPltCalls()
+{
+    identifyPltJumps();
+    makePltCallsDirect();
+    removePltJumps();
+}
+
+// Identify the jumps to library functions.
+void Decoder::identifyPltJumps()
+{
+    for (auto& p : _fnc2addr) {
+        identifyPltJumpsForFunction(p);
+    }
+}
+
+// Identify the jumps to library functions from a plt section.
+void Decoder::identifyPltJumpsForFunction(std::pair<llvm::Function *const, Address> &p) {
+    llvm::Function *f = p.first;
+    auto addr = p.second;
+    auto* config =  _config->getConfigFunction(addr);
+    auto* plt = _image->getFileFormat()->getSectionFromAddress(addr);
+    if (plt && plt->getName().compare(0, 4, ".plt") == 0) {
+        for (auto& basic_blk: *f) {
+            for (auto& inst : basic_blk) {
+                if (const llvm::StoreInst *SI = llvm::dyn_cast<llvm::StoreInst>(&inst))
+                {
+                    if (llvm::isa<llvm::ConstantInt>(SI->getValueOperand())
+                        && llvm::isa<llvm::GlobalVariable>(SI->getPointerOperand())
+                        && SI->getPointerOperand()->getName() == "_asm_program_counter")
+                    {
+                        continue; // Skip these special marker instructions.
+                    }
+                }
+
+                if (auto* CI = llvm::dyn_cast<llvm::CallInst>(&inst))
+                {
+                    auto* callee = CI->getCalledValue();
+                    if (!callee) {
+                        // std::cout << "identifyPltJumpsForFunction: call without callee" << std::endl;
+                        return;
+                    }
+                    auto name = callee->getName();
+                    if (name == "__asm_endbr64") {
+                        continue;
+                    }
+                    if (auto* calleeFun = llvm::dyn_cast<llvm::Function>(callee)) {
+                        _plt_function_map.emplace(f, calleeFun);
+                        return;
+                    } else {
+                        return;
+                        // std::cout << "identifyPltJumpsForFunction: callee not a function" << std::endl;
+                    }
+                } else {
+                    // std::cout << "identifyPltJumpsForFunction: non-call encountered" << std::endl;
+                    return; // Something unexpected.
+                }
+            }
+        }
+    }
+}
+
+// Modify indirect calls through the plt to direct calls.
+void Decoder::makePltCallsDirect()
+{
+    // Cannot modify instruction while iterating over basic block, so first collect the calls to fix.
+    std::map<llvm::CallInst*, llvm::Function*> callsToFix;
+    for (auto& fun: _module->functions()) {
+        for (auto& bb: fun) {
+            for (auto& inst : bb) {
+                if (auto *CI = llvm::dyn_cast<llvm::CallInst>(&inst)) {
+                    auto *callee = CI->getCalledValue();
+                    if (!callee) {
+                        continue;
+                    }
+                    if (auto *calleeFun = llvm::dyn_cast<llvm::Function>(callee)) {
+                        auto search = _plt_function_map.find(calleeFun);
+                        if (search != _plt_function_map.end()) {
+                            auto old_callee = search->first;
+                            auto new_callee = search->second;
+                            callsToFix.emplace(CI, new_callee);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    for (auto& p: callsToFix) {
+        auto new_call =
+                IrModifier::modifyCallInstCallee(p.first, p.second);
+    }
+}
+
+// Remove plt jumps.
+void Decoder::removePltJumps()
+{
+    for (auto& p: _plt_function_map) {
+        auto fun = p.first;
+        fun->replaceAllUsesWith(llvm::UndefValue::get(fun->getType()));
+        fun->eraseFromParent();
+    }
 }
 
 } // namespace bin2llvmir

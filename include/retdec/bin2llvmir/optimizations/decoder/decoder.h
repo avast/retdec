@@ -337,6 +337,46 @@ class Decoder : public llvm::ModulePass
 		bool _switchGenerated = false;
 
 		bool _somethingDecoded = false;
+
+	// Fixing Procedure Linkage Table (PLT) calls.
+	private:
+		// Top level function for fixing PLT calls.
+		//
+		// When a call is made to an external function, e.g. C++ operator new,
+		// the call is resolved by directing the call to an entry in the
+		// Procedure Linkage Table (PLT). For example, this call
+		//
+		// 12d1:	callq  1130 <_Znwm@plt>
+		//
+		// goes to this entry:
+		//
+		// Disassembly of section .plt.sec:
+		// ...
+		// <_Znwm@plt>:
+		// 1130:	endbr64
+		// 1134:	bnd jmpq *0x2e3d(%rip)        # 3f78 <_Znwm@GLIBCXX_3.4>
+		//
+		// fixPltCalls replaces indirect calls like this (in the LLVM IR)
+		// with direct calls to the external function. This is needed
+		// so that parameters will be correctly passed to the external
+		// function as the code in the PLT does not setup the
+		// parameters.
+		void fixPltCalls();
+
+		// Identify the jumps to library functions via the PLT
+		void identifyPltJumps();
+
+		// Modify indirect calls through the plt to direct calls.
+		void makePltCallsDirect();
+
+		// Remove plt jumps.
+		void removePltJumps();
+
+		// Identify the jumps to library functions from a plt section.
+		void identifyPltJumpsForFunction(std::pair<llvm::Function *const, retdec::common::Address> &p);
+
+		// Map from plt functions to the library functions they reference.
+		std::map<llvm::Function*, llvm::Function*> _plt_function_map;
 };
 
 } // namespace bin2llvmir
