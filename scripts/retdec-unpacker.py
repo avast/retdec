@@ -116,7 +116,7 @@ class Unpacker:
             try:
                 int(self.args.max_memory)
             except ValueError:
-                utils.print_error('Invalid value for --max-memory: %s (expected a positive integer)'
+                utils.print_error('Invalid value for --max-memory: %s (expected an integer)'
                                   % self.args.max_memory)
                 return False
 
