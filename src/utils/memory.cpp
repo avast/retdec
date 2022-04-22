@@ -27,7 +27,7 @@ namespace utils {
 
 namespace {
 
-#ifdef OS_POSIX
+#if defined(OS_POSIX) && !defined(OS_MACOS)
 
 /**
 * @brief Implementation of @c limitSystemMemory() on POSIX-compliant systems.
@@ -115,10 +115,21 @@ std::size_t getTotalSystemMemoryOnMacOS() {
 * @brief Implementation of @c limitSystemMemory() on MacOS.
 */
 bool limitSystemMemoryOnMacOS(std::size_t limit) {
-	// Warning: We have found that limitSystemMemoryOnPOSIX() does not actually
-	// do anything on macOS. We need to find another way. See
-	// https://github.com/avast/retdec/issues/379
-	return limitSystemMemoryOnPOSIX(limit);
+	// Warning: We can't limit memory on macOS. Before macOS 12
+	// limitSystemMemoryOnPOSIX() does not actually do anything on macOS.
+	// Anyway, it just succeed, since macOS 12 it returns error and retdec can't
+	// start. See:
+	// - https://github.com/avast/retdec/issues/379
+	// - https://github.com/avast/retdec/issues/1045
+	//
+	// To be honest Apple can control memmory limit via so-called the ledger()
+	// system call which is private. An old verison which was opened to OpenSource
+	// (from 10.9-10.10?) using setrlimit() but at some point setrlimit() was broken
+	// and not ledger(). Probably at macOS 12 the setrlimit() was completley broken.
+	//
+	// Because we haven't got any other choose just return true which haven't
+	// change anything.
+	return true;
 }
 
 #elif defined(OS_BSD)
