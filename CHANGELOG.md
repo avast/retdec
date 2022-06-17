@@ -30,6 +30,7 @@
 * Enhancement: Added support for new ELF UPX unpacking stubs (versions 3.93 - 3.96) ([#929](https://github.com/avast/retdec/pull/929)).
 * Enhancement: Improved YARA rules for detection of the SHA-512 algorithm ([#935](https://github.com/avast/retdec/pull/935)).
 * Enhancement: Improved PE Authenticode parsing ([#902](https://github.com/avast/retdec/pull/902), [#380](https://github.com/avast/retdec/issues/380)).
+* Fix: Disable memory-limiting capabilities on macOS because there is currently no working way of doing so ([#1074](https://github.com/avast/retdec/pull/1074), [#1045](https://github.com/avast/retdec/issues/1045), [#379](https://github.com/avast/retdec/issues/379)).
 * Fix: Add OpenSSL 3.0 support ([#1040](https://github.com/avast/retdec/issues/1040), [#1041](https://github.com/avast/retdec/pull/1041)).
 * Fix: `ImageLoader::Save()` properly saves PE's Rich Header and section data ([#1028](https://github.com/avast/retdec/issues/1028), [#1029](https://github.com/avast/retdec/pull/1029)).
 * Fix: Check if data is not empty in .NET integer decoding functions ([#1030](https://github.com/avast/retdec/pull/1030)).
@@ -47,7 +48,7 @@
 * Fix: Raise max length limit applied to PE symbol names ([#957](https://github.com/avast/retdec/issues/957), [#978](https://github.com/avast/retdec/pull/978), [regression tests #93](https://github.com/avast/retdec-regression-tests/pull/93)).
 * Fix: Fixed parsing of junk data from PE resource table's `type` entry ([#959](https://github.com/avast/retdec/issues/959), [#974](https://github.com/avast/retdec/pull/974)).
 * Fix: Fixed PE rich header analysis algorithm ([#973](https://github.com/avast/retdec/pull/973), [#960](https://github.com/avast/retdec/issues/960), [#965](https://github.com/avast/retdec/issues/965), [regression tests #91](https://github.com/avast/retdec-regression-tests/pull/91)).
-* Fix: Arithmetic shift is no longer converted to signed division as these operations provide different output with negative numbers. ([#724](https://github.com/avast/retdec/issues/724)).
+* Fix: Arithmetic shift is no longer converted to signed division as these operations provide different output with negative numbers ([#724](https://github.com/avast/retdec/issues/724)).
 * Fix: Fixed infinite looping during the copy-propagation optimization in `llvmir2hll` ([#876](https://github.com/avast/retdec/pull/876)).
 * Fix: Fixed analyzed calling convention on MIPS architecture. Register F0 is used for floating point function return ([#656](https://github.com/avast/retdec/issues/656)).
 * Fix: Fixed filtration to better handle functions with no arguments and therefore to reduce noise in output ([#155](https://github.com/avast/retdec/issues/155)).
