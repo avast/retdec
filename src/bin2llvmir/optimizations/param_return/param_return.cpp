@@ -99,6 +99,8 @@ bool ParamReturn::run()
 //	dumpInfo();
 	filterCalls();
 //	dumpInfo();
+	propagateWrapped();
+//	dumpInfo();
 	applyToIr();
 
 	_RDA.clear();
@@ -373,6 +375,7 @@ void ParamReturn::collectExtraData(DataFlowEntry* dataflow) const
 	//
 	if (CallInst* wrappedCall = getWrapper(fnc))
 	{
+		dataflow->setWrappedCall(wrappedCall);
 		auto* wf = wrappedCall->getCalledFunction();
 		auto* ltiFnc = _lti->getLlvmFunctionFree(wf->getName());
 		if (ltiFnc)
@@ -397,7 +400,6 @@ void ParamReturn::collectExtraData(DataFlowEntry* dataflow) const
 				dataflow->setVariadic();
 			}
 			dataflow->setRetType(ltiFnc->getReturnType());
-			dataflow->setWrappedCall(wrappedCall);
 
 			return;
 		}
@@ -407,7 +409,6 @@ void ParamReturn::collectExtraData(DataFlowEntry* dataflow) const
 		{
 			LOG << "wrapper: " << _demangler->demangleToString(wf->getName()) << std::endl;
 			modifyWithDemangledData(*dataflow, demFuncPair);
-			dataflow->setWrappedCall(wrappedCall);
 
 			return;
 		}
@@ -578,6 +579,7 @@ void ParamReturn::dumpInfo(const DataFlowEntry& de) const
 	auto wrappedCall = de.getWrappedCall();
 
 	LOG << "\n\t>|" << called->getName().str() << std::endl;
+	LOG << "\t>|&DataFlowEntry : " << &de << std::endl;
 	LOG << "\t>|fnc call : " << de.isFunction() << std::endl;
 	LOG << "\t>|val call : " << de.isValue() << std::endl;
 	LOG << "\t>|variadic : " << de.isVariadic() << std::endl;
@@ -919,6 +921,57 @@ void ParamReturn::modifyType(DataFlowEntry& de) const
 			[](Value* v){return v == nullptr;}),
 		args.end());
 	de.setArgs(std::move(args));
+}
+
+void ParamReturn::propagateWrapped() {
+	for (auto& p : _fnc2calls)
+	{
+		propagateWrapped(p.second);
+	}
+}
+
+void ParamReturn::propagateWrapped(DataFlowEntry& de) {
+	auto* fnc = de.getFunction();
+	auto* wrappedCall = de.getWrappedCall();
+	if (fnc == nullptr || wrappedCall == nullptr)
+	{
+		return;
+	}
+
+	llvm::CallInst* wrappedCall2 = nullptr;
+	for (inst_iterator I = inst_begin(fnc), E = inst_end(fnc); I != E; ++I)
+	{
+		if (auto* c = dyn_cast<CallInst>(&*I))
+		{
+			auto* cf = c->getCalledFunction();
+			if (cf && !cf->isIntrinsic()) // && cf->isDeclaration())
+			{
+				wrappedCall2 = c;
+				break;
+			}
+		}
+	}
+
+	if (wrappedCall != wrappedCall2) {
+		// Something strange. Reset wrapped call and give up.
+		de.setWrappedCall(nullptr);
+		return;
+	}
+	auto* callee = wrappedCall->getCalledFunction();
+	auto fIt = _fnc2calls.find(callee);
+	assert (fIt != _fnc2calls.end());
+	DataFlowEntry& wrapDe = fIt->second;
+	// dumpInfo(de);
+	// dumpInfo(wrapDe);
+
+	if (!wrapDe.argTypes().empty()) {
+		// Types have already been supplied.
+		return;
+	}
+
+	wrapDe.setArgTypes(std::vector(de.argTypes()), std::vector(de.argNames()));
+	wrapDe.setRetType(de.getRetType());
+	// dumpInfo(wrapDe);
 }
 
 void ParamReturn::applyToIr()
