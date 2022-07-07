@@ -90,6 +90,34 @@ class ParamReturn : public llvm::ModulePass
 	// Modification of functions in IR.
 	//
 	private:
+		// Calls to dynamically-linked functions go through the procedure linkage
+		// table (PLT).  RetDec turns a PLT entry into a function, say
+		// malloc@plt, that appears to do nothing but call the external function,
+		// say malloc (though the assembly code will do a jump rather than a
+		// call). User code that logically wants to call malloc instead calls
+		// malloc@plt (and sets up arguments as if calling malloc). The
+		// malloc@plt code first jumps to the dynamic linker which modifies it so
+		// that subsequent calls to malloc@plt will jump directly to malloc. We
+		// say that malloc@plt wraps malloc.  The call to malloc in malloc@plt
+		// will not have any arguments setup, so malloc will appear to have
+		// no parameters or returns (unless that information is provided by
+		// link-time-information, debug information, or name demangling), but it
+		// needs to have the same parameter types and return type as
+		// malloc@plt. The propagateWrapped methods copy the argument information
+		// from the DataFlowEntry of the wrapping function to the wrapped
+		// function. Then, when the calls to the wrapping function are inlined
+		// (in connectWrappers), effectively the call to the wrapping function is
+		// changed into a call to the wrapped function.
+		// 
+		// The motivation for this change is the programs that analyze the
+		// output of RetDec (either the C code, or the LLVM code) want to
+		// recognize library functions and treat them specially. This
+		// change makes it so that the library function names are used
+		// directly (rather than the plt version) and they are passed
+		// their parameters correctly.
+
+		void propagateWrapped();
+		void propagateWrapped(DataFlowEntry& de);
 		void applyToIr();
 		void applyToIr(DataFlowEntry& de);
 		void connectWrappers(const DataFlowEntry& de);
