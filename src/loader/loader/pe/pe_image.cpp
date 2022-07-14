@@ -109,7 +109,12 @@ Segment* PeImage::addSingleSegment(std::uint64_t address, std::vector<std::uint8
 
 bool PeImage::canAddSegment(std::uint64_t address, std::uint64_t memSize) const
 {
-	retdec::common::Range<std::uint64_t> newSegRange(address, memSize ? address + memSize : address + 1);
+	std::uint64_t end =  memSize ? address + memSize : address + 1;
+	// check for potential overflow - wrap around, memsize should be at most 32bit, so this could suffice
+	if (end < address)
+		end = std::numeric_limits<std::uint64_t>::max();
+
+	retdec::common::Range<std::uint64_t> newSegRange(address, end);
 	for (const auto& seg : getSegments())
 	{
 		auto overlapResult = OverlapResolver::resolve(retdec::common::Range<std::uint64_t>(seg->getAddress(), seg->getEndAddress()), newSegRange);
