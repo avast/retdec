@@ -27,7 +27,7 @@ public:
 
 	virtual const char* what() const noexcept override
 	{
-		return "Invalid Range: end is greater than start";
+		return "Invalid Range: start is greater than end";
 	}
 };
 
