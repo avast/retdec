@@ -2113,6 +2113,8 @@ Capstone2LlvmIrTranslatorX86_impl::_i2fm =
 		{X86_INS_VCMPGE_OQPD, nullptr},
 		{X86_INS_VCMPGT_OQPD, nullptr},
 		{X86_INS_VCMPTRUE_USPD, nullptr},
+		{X86_INS_ENDBR32, &Capstone2LlvmIrTranslatorX86_impl::translateNop},
+		{X86_INS_ENDBR64, &Capstone2LlvmIrTranslatorX86_impl::translateNop},
 
 		{X86_INS_ENDING, nullptr}, // mark the end of the list of insn
 };
