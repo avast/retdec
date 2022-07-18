@@ -853,6 +853,46 @@ common::Address Decoder::getJumpTarget(
 		}
 	}
 
+	if (plt &&
+			((plt->getName() == ".plt.sec") || (plt->getName() == ".plt.got")) &&
+		   _config->getConfig().architecture.isX86_32())
+	{
+		// This case is for x86 32 bit compiled with GCC. Its PLT entries are in
+		// sections .plt.sec or .plt.got. An entry is of the form:
+		//
+		// jmp *offset(%ebx)
+		//
+		// When this code is encountered register %ebx has been loaded with the
+		// address of the start of the Global Offset Table (.got) section.
+		//
+		// The above jump produces llvm code  that matches the following pattern
+		// where the global variable is a reference to the ebx register.
+
+		llvm::LoadInst* li1 = nullptr;
+		llvm::LoadInst* li2 = nullptr;
+		llvm::ConstantInt* ci = nullptr;
+		llvm::GlobalVariable* gv = nullptr;
+		auto pattern =
+			m_Load(
+				m_Add(
+					m_Load(m_GlobalVariable(gv), &li2),
+					m_ConstantInt(ci)),
+				&li1);
+
+		if (match(st, pattern) && (gv->getName().str() == "ebx")) {
+			auto* gotSec = _image->getFileFormat()->getSection(".got");
+			if (gotSec)
+			{
+				auto gotsecAddr = gotSec->getAddress();
+				Address t = gotsecAddr + ci->getZExtValue();
+				if (_imports.count(t))
+				{
+					return t;
+				}
+			}
+		}
+	}
+
 	st.simplifyNode();
 
 	llvm::ConstantInt* ci = nullptr;
