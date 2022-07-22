@@ -503,6 +503,9 @@ set_if_at_least_one_set(RETDEC_ENABLE_YARAMOD
 set_if_at_least_one_set(RETDEC_ENABLE_TLSH
 		RETDEC_ENABLE_FILEFORMAT)
 
+set_if_at_least_one_set(RETDEC_ENABLE_STB
+		RETDEC_ENABLE_FILEFORMAT)
+
 # Support
 
 set_if_at_least_one_set(RETDEC_ENABLE_SUPPORT_ORDINALS

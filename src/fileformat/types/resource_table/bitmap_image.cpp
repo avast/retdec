@@ -9,6 +9,7 @@
 #include "retdec/fileformat/types/resource_table/bitmap_image.h"
 #include "retdec/utils/conversion.h"
 #include "retdec/utils/system.h"
+#include <stb/stb_image.h>
 
 using namespace retdec::utils;
 
@@ -45,6 +46,30 @@ std::size_t BitmapImage::getHeight() const
 const std::vector<std::vector<struct BitmapPixel>> &BitmapImage::getImage() const
 {
 	return image;
+}
+
+bool BitmapImage::parsePngFormat(const ResourceIcon &icon)
+{
+	int x, y, n;
+	auto byte_span = icon.getBytes();
+	unsigned char* data = stbi_load_from_memory(byte_span.bytes_begin(), byte_span.size(), &x, &y, &n, 4);
+	if (!data) return false;
+
+	// Flip it height wise, as existing DIB format has height flipped compared to PNG
+	for (int i = y - 1; i >= 0; --i)
+	{
+		std::vector<BitmapPixel> row;
+		for (int j = 0; j < x; j++)
+		{
+			int offset = (i * x + j) * 4;
+			row.emplace_back(data[offset], data[offset + 1], data[offset + 2], data[offset + 3]);
+		}
+		this->image.push_back(row);
+	}
+
+	stbi_image_free(data);
+
+	return true;
 }
 
 /**
