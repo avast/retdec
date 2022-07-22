@@ -8,6 +8,7 @@
 
 #include "retdec/fileformat/types/resource_table/bitmap_image.h"
 #include "retdec/utils/conversion.h"
+#include "retdec/utils/scope_exit.h"
 #include "retdec/utils/system.h"
 #include <stb/stb_image.h>
 
@@ -55,6 +56,10 @@ bool BitmapImage::parsePngFormat(const ResourceIcon &icon)
 	unsigned char* data = stbi_load_from_memory(byte_span.bytes_begin(), byte_span.size(), &x, &y, &n, 4);
 	if (!data) return false;
 
+	SCOPE_EXIT {
+		stbi_image_free(data);
+	};
+
 	// Flip it height wise, as existing DIB format has height flipped compared to PNG
 	for (int i = y - 1; i >= 0; --i)
 	{
@@ -66,8 +71,6 @@ bool BitmapImage::parsePngFormat(const ResourceIcon &icon)
 		}
 		this->image.push_back(row);
 	}
-
-	stbi_image_free(data);
 
 	return true;
 }
