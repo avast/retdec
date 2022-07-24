@@ -101,7 +101,7 @@ std::string ResourceTable::computePerceptualAvgHash(const ResourceIcon &icon) co
 	std::size_t trashHold = 128;
 	auto img = BitmapImage();
 
-	if (!img.parseDibFormat(icon))
+	if (!img.parseDibFormat(icon) && !img.parsePngFormat(icon))
 	{
 		return "";
 	}
