@@ -91,6 +91,7 @@ protected:
 
 	virtual bool emitFunctionPrototypesHeader();
 	virtual bool emitFunctionPrototypes();
+	virtual bool emitFunctionPrototypes(const FuncSet &funcs);
 
 	virtual bool emitFunctionsHeader();
 	virtual bool emitFunctions();
@@ -99,7 +100,6 @@ protected:
 	virtual bool emitStaticallyLinkedFunctionsHeader();
 	virtual bool emitStaticallyLinkedFunctions();
 
-	virtual bool emitDynamicallyLinkedFunctionsHeader();
 	virtual bool emitDynamicallyLinkedFunctions();
 
 	virtual bool emitSyscallFunctionsHeader();

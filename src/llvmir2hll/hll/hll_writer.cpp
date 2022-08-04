@@ -33,6 +33,7 @@
 #include "retdec/llvmir2hll/llvm/llvm_support.h"
 #include "retdec/llvmir2hll/support/debug.h"
 #include "retdec/llvmir2hll/support/global_vars_sorter.h"
+#include "retdec/llvmir2hll/support/headers_for_declared_funcs.h"
 #include "retdec/llvmir2hll/support/smart_ptr.h"
 #include "retdec/llvmir2hll/utils/ir.h"
 #include "retdec/llvmir2hll/utils/string.h"
@@ -257,6 +258,12 @@ bool HLLWriter::emitTargetCode(ShPtr<Module> module) {
 	if (emitGlobalVariables()) { codeEmitted = true; out->newLine(); }
 
 	//
+	// Prototypes for Dynamically linked functions that do not have an
+	// associated header.
+	//
+	if (emitDynamicallyLinkedFunctions()) { codeEmitted = true; out->newLine(); }
+
+	//
 	// Functions
 	//
 	if (emitFunctionsHeader()) { codeEmitted = true; out->newLine(); }
@@ -267,12 +274,6 @@ bool HLLWriter::emitTargetCode(ShPtr<Module> module) {
 	//
 	if (emitStaticallyLinkedFunctionsHeader()) { codeEmitted = true; out->newLine(); }
 	if (emitStaticallyLinkedFunctions()) { codeEmitted = true; out->newLine(); }
-
-	//
-	// Dynamically linked functions
-	//
-	if (emitDynamicallyLinkedFunctionsHeader()) { codeEmitted = true; out->newLine(); }
-	if (emitDynamicallyLinkedFunctions()) { codeEmitted = true; out->newLine(); }
 
 	//
 	// Syscall functions
@@ -488,6 +489,10 @@ bool HLLWriter::emitFunctionPrototypes() {
 	return false;
 }
 
+bool HLLWriter::emitFunctionPrototypes(const FuncSet &funcs) {
+	return false;
+}
+
 /**
 * @brief Emits the header of the <em>functions</em> block.
 *
@@ -588,19 +593,6 @@ bool HLLWriter::emitStaticallyLinkedFunctions() {
 }
 
 /**
-* @brief Emits the header of the <em>dynamically linked functions</em> block.
-*
-* @return @c true if some code has been emitted, @c false otherwise.
-*/
-bool HLLWriter::emitDynamicallyLinkedFunctionsHeader() {
-	if (module->hasDynamicallyLinkedFuncs()) {
-		emitSectionHeader("Dynamically Linked Functions");
-		return true;
-	}
-	return false;
-}
-
-/**
 * @brief Emits dynamically linked functions in the module.
 *
 * @return @c true if some code has been emitted, @c false otherwise.
@@ -610,7 +602,18 @@ bool HLLWriter::emitDynamicallyLinkedFunctionsHeader() {
 * each of them.
 */
 bool HLLWriter::emitDynamicallyLinkedFunctions() {
-	return emitExternalFunctions(module->getDynamicallyLinkedFuncs());
+	FuncSet funcsToProto;
+	for (auto &func : module->getDynamicallyLinkedFuncs()) {
+		if (!HeadersForDeclaredFuncs::hasAssocHeader(module, func)) {
+			funcsToProto.insert(func);
+		}
+	}
+	if (funcsToProto.empty()) {
+		return false;
+	}
+	emitSectionHeader("Dynamically Linked Functions Without Header");
+	out->newLine();
+	return emitFunctionPrototypes(funcsToProto);
 }
 
 /**
