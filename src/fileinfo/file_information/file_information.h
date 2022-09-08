@@ -26,6 +26,7 @@ class FileInformation
 	private:
 		retdec::cpdetect::ReturnCode status = retdec::cpdetect::ReturnCode::OK;
 		std::string filePath;                          ///< path to input file
+		std::string analysisTime;                      ///< time when the analysis was done
 		std::string telfhash;                          ///< telfhash of ELF input file
 		std::string crc32;                             ///< CRC32 of input file
 		std::string md5;                               ///< MD5 of input file
@@ -78,6 +79,7 @@ class FileInformation
 		/// @{
 		retdec::cpdetect::ReturnCode getStatus() const;
 		std::string getPathToFile() const;
+		std::string getAnalysisTime() const;
 		std::string getTelfhash() const;
 		std::string getCrc32() const;
 		std::string getMd5() const;
@@ -504,6 +506,7 @@ class FileInformation
 		/// @{
 		void setStatus(retdec::cpdetect::ReturnCode state);
 		void setPathToFile(const std::string &filepath);
+		void setAnalysisTime(const std::string &analysistime);
 		void setTelfhash(const std::string &telfhash);
 		void setCrc32(const std::string &fileCrc32);
 		void setMd5(const std::string &fileMd5);
