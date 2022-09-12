@@ -97,9 +97,8 @@ bool presentSimple(
 /**
  * Constructor
  */
-JsonPresentation::JsonPresentation(FileInformation &fileinfo_, bool verbose_)
-		: FilePresentation(fileinfo_)
-		, verbose(verbose_)
+JsonPresentation::JsonPresentation(FileInformation &fileinfo_, bool verbose_, bool analysisTime_)
+		: FilePresentation(fileinfo_), verbose(verbose_), analysisTime(analysisTime_)
 {
 
 }
@@ -1320,6 +1319,11 @@ bool JsonPresentation::present()
 	if(verbose)
 	{
 		presentFileinfoVersion(writer);
+	}
+
+	if(analysisTime)
+	{
+		serializeString(writer, "analysisTime", fileinfo.getAnalysisTime());
 	}
 
 	serializeString(writer, "inputFile", fileinfo.getPathToFile());

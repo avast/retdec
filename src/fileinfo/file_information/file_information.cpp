@@ -106,6 +106,15 @@ std::string FileInformation::getPathToFile() const
 	return filePath;
 }
 
+/**
+ * Get time when the analysis was done
+ * @return Analysis time
+ */
+std::string FileInformation::getAnalysisTime() const
+{
+	return analysisTime;
+}
+
 std::string FileInformation::getTelfhash() const
 {
 	return telfhash;
@@ -3305,6 +3314,15 @@ void FileInformation::setStatus(ReturnCode state)
 void FileInformation::setPathToFile(const std::string &filepath)
 {
 	filePath = filepath;
+}
+
+/**
+ * Set when the analysis was done
+ * @param filepath Analysis time
+ */
+void FileInformation::setAnalysisTime(const std::string &analysistime)
+{
+	analysisTime = analysistime;
 }
 
 void FileInformation::setTelfhash(const std::string &hash)
