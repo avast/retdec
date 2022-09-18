@@ -53,6 +53,9 @@ ExternalProject_Add(llvm-project
 		# Force Python3.
 		-DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
 
+		# Use provided libtool
+		-DCMAKE_LIBTOOL=${CMAKE_LIBTOOL}
+
 		# Targets to be build.
 		-DLLVM_TARGETS_TO_BUILD=X86
 
