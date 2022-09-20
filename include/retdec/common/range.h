@@ -428,12 +428,9 @@ public:
 		{
 			--pos; // Move to previous no matter what.
 		}
-		while (pos != _ranges.end() && pos->getStart() <= r.getEnd())
+		while (pos != _ranges.end() && pos->getStart() < r.getEnd())
 		{
-			if (pos->contains(r.getStart())
-					|| pos->contains(r.getEnd())
-					|| r.contains(pos->getStart())
-					|| r.contains(pos->getEnd()))
+			if (r.getStart() < pos->getEnd())
 			{
 				RangeType old = *pos;
 
