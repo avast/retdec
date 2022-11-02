@@ -2253,7 +2253,7 @@ int PeLib::ImageLoader::captureImageSections(ByteBuffer & fileData, std::uint32_
 				// nor the end of the section must be beyond the end of the image
 				if(sectionEnd < sectionHeader.VirtualAddress || sectionEnd > sizeOfImage)
 				{
-					setLoaderError(LDR_ERROR_INVALID_SECTION_VA);
+					setLoaderError(LDR_ERROR_INVALID_SECTION_VSIZE);
 					break;
 				}
 			}
