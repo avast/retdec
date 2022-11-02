@@ -2549,7 +2549,7 @@ std::uint32_t PeLib::ImageLoader::captureImageSection(
 		if(pointerToRawData || isImageHeader)
 		{
 			// Fill all pages that contain data
-			while(pageOffset < sizeOfInitializedPages)
+			while(pageOffset < sizeOfInitializedPages && pageIndex < pages.size())
 			{
 				PELIB_FILE_PAGE & filePage = pages[pageIndex++];
 
@@ -2579,7 +2579,7 @@ std::uint32_t PeLib::ImageLoader::captureImageSection(
 		}
 
 		// Fill all pages that contain zeroed pages
-		while(pageOffset < sizeOfValidPages)
+		while(pageOffset < sizeOfValidPages && pageIndex < pages.size())
 		{
 			PELIB_FILE_PAGE & filePage = pages[pageIndex++];
 
