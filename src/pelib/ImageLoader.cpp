@@ -2239,13 +2239,19 @@ int PeLib::ImageLoader::captureImageSections(ByteBuffer & fileData, std::uint32_
 			{
 				// If loading as image, we need to take data from its virtual address
 				std::uint32_t pointerToRawData = (loadFlags & IoFlagLoadAsImage) ? sectionHeader.VirtualAddress : sectionHeader.PointerToRawData;
+				std::uint32_t sectionEnd;
 
 				// Capture all pages from the section
-				if(captureImageSection(fileData, sectionHeader.VirtualAddress,
+				sectionEnd = captureImageSection(fileData,
+												 sectionHeader.VirtualAddress,
 												 sectionHeader.VirtualSize,
 												 pointerToRawData,
 												 sectionHeader.SizeOfRawData,
-												 sectionHeader.Characteristics) == 0)
+												 sectionHeader.Characteristics);
+
+				// There must not be a Virtual Address overflow,
+				// nor the end of the section must be beyond the end of the image
+				if(sectionEnd < sectionHeader.VirtualAddress || sectionEnd > sizeOfImage)
 				{
 					setLoaderError(LDR_ERROR_INVALID_SECTION_VA);
 					break;
@@ -2522,7 +2528,13 @@ std::uint32_t PeLib::ImageLoader::captureImageSection(
 	// * has 0x1000 bytes of inaccessible memory at ImageBase+0x1000 (1 page after section header)
 	sizeOfInitializedPages = AlignToSize(sizeOfRawData, PELIB_PAGE_SIZE);
 	sizeOfValidPages = AlignToSize(virtualSize, PELIB_PAGE_SIZE);
+
+	// Calculate aligned size of the section. Mind invalid sizes.
+	// Example: 83e9cb2a6e78c742e1090292acf3c78baf76e82950d96548673795a1901db061
+	// * Size of the last section is 0xfffff000, sizeOfSection becomes 0
 	sizeOfSection = AlignToSize(virtualSize, optionalHeader.SectionAlignment);
+	if(sizeOfSection < virtualSize)
+		sizeOfSection = virtualSize;
 
 	// Get the range of the file containing valid data (aka nonzeros)
 	// Pointer to raw data is aligned down to the sector size
