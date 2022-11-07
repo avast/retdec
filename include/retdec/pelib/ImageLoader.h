@@ -53,7 +53,7 @@ enum struct PELIB_COMPARE_RESULT : std::uint32_t
 //-----------------------------------------------------------------------------
 // Windows build numbers
 
-const std::uint32_t	BuildNumberXP = 2600;           // Behavior equal to Windows XP
+const std::uint32_t BuildNumberXP = 2600;           // Behavior equal to Windows XP
 const std::uint32_t BuildNumberVista = 6000;        // Behavior equal to Windows Vista (SP0 = 6000, SP1 = 6001, SP2 = 6002)
 const std::uint32_t BuildNumber7 = 7600;            // Behavior equal to Windows 7 (SP0 = 7600, SP1 = 7601)
 const std::uint32_t BuildNumber8 = 9200;            // Behavior equal to Windows 8
