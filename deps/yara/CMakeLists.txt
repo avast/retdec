@@ -10,6 +10,12 @@ endif()
 set(YARA_INCLUDE_DIR  ${YARA_DIR}/libyara/include)
 set(YARA_LIBRARY_NAME "libyara")
 
+option(YARA_MAKE_PROGRAM "A path to make tool which should be used to compile yara" "make")
+# Use the same make tool when using Unix makefiles
+if(${CMAKE_GENERATOR} STREQUAL "Unix Makefiles")
+	set(YARA_MAKE_PROGRAM ${CMAKE_MAKE_PROGRAM})
+endif()
+
 if(MSVC)
 	if(CMAKE_SIZEOF_VOID_P EQUAL 8)
 		set(PLATFORM "x64")
@@ -40,8 +46,8 @@ if(MSVC)
 	set(YARAC_PATH         ${YARA_WIN_DIR}/${MSVC_CONFIG}/${YARAC_NAME})
 else()
 	set(YARA_LIBRARY_DIR ${YARA_DIR}/libyara/.libs)
-	set(YARA_CLEAN_COMMAND make clean)
-	set(YARA_BUILD_COMMAND make -j${CPUS})
+	set(YARA_CLEAN_COMMAND ${YARA_MAKE_PROGRAM} clean)
+	set(YARA_BUILD_COMMAND ${YARA_MAKE_PROGRAM} -j${CPUS})
 	set(YARAC_PATH         ${YARA_DIR}/yarac)
 endif()
 
@@ -66,6 +72,7 @@ set(YARA_CONFIGURE_ARGS
 	--enable-macho
 	--disable-shared
 	--without-crypto
+	MAKE=${YARA_MAKE_PROGRAM}
 	CC=${CMAKE_C_COMPILER}
 	CFLAGS=${CMAKE_C_FLAGS}
 	LDFLAGS=${CMAKE_SHARED_LINKER_FLAGS}
