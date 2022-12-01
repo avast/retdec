@@ -41,7 +41,7 @@ jobs:
 
         steps:
             # Checkouts the correct commit/branch.
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v3
 
             # We want to use msys2 bash on Windows.
             - uses: msys2/setup-msys2@v2
@@ -115,7 +115,7 @@ jobs:
 
         steps:
             # Checkouts the correct commit/branch.
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v3
 
             # Installs dependencies on all systems.
             - name: Install Dependencies
