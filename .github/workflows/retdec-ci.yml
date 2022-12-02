@@ -111,7 +111,7 @@ jobs:
 
     docs-build:
         name: doxygen-build (Linux)
-        runs-on: ubuntu-latest
+        runs-on: ubuntu-22.04
 
         steps:
             # Checkouts the correct commit/branch.
