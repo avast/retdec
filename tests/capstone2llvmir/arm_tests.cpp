@@ -1655,9 +1655,9 @@ TEST_P(Capstone2LlvmIrTranslatorArmTests, ARM_INS_MOVW)
 
 	emulate("movw r0, #0xabcd");
 
-	EXPECT_JUST_REGISTERS_LOADED({ARM_REG_R0});
+	EXPECT_NO_REGISTERS_LOADED();
 	EXPECT_JUST_REGISTERS_STORED({
-		{ARM_REG_R0, 0x1234abcd},
+		{ARM_REG_R0, 0xabcd},
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_NO_VALUE_CALLED();
@@ -1717,7 +1717,9 @@ TEST_P(Capstone2LlvmIrTranslatorArmTests, ARM_INS_NOP)
 
 	EXPECT_NO_REGISTERS_STORED();
 	EXPECT_NO_MEMORY_LOADED_STORED();
-	EXPECT_NO_VALUE_CALLED();
+	EXPECT_JUST_VALUES_CALLED({
+		{_module.getFunction("__asm_nop"), {}},
+	});
 }
 
 //

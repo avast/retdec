@@ -378,23 +378,35 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::extractVectorValue(
 	}
 
 	// Vector element size specifier
-	switch(op.vess)
+	switch(op.vas)
 	{
-		case ARM64_VESS_B:
+		case ARM64_VAS_16B:
+		case ARM64_VAS_8B :
+		case ARM64_VAS_4B :
+		case ARM64_VAS_1B :
 			val = irb.CreateLShr(val, llvm::ConstantInt::get(val->getType(), 8 * op.vector_index));
 			return irb.CreateZExtOrTrunc(val, llvm::IntegerType::getInt8Ty(_module->getContext()));
-		case ARM64_VESS_H:
+		case ARM64_VAS_8H:
+		case ARM64_VAS_4H:
+		case ARM64_VAS_2H:
+		case ARM64_VAS_1H:
 			val = irb.CreateLShr(val, llvm::ConstantInt::get(val->getType(), 16 * op.vector_index));
 			return irb.CreateZExtOrTrunc(val, llvm::IntegerType::getInt16Ty(_module->getContext()));
-		case ARM64_VESS_S:
+		case ARM64_VAS_4S:
+		case ARM64_VAS_2S:
+		case ARM64_VAS_1S:
 			val = irb.CreateLShr(val, llvm::ConstantInt::get(val->getType(), 32 * op.vector_index));
 			val = irb.CreateZExtOrTrunc(val, llvm::IntegerType::getInt32Ty(_module->getContext()));
 			return irb.CreateBitCast(val, llvm::Type::getFloatTy(_module->getContext()));
-		case ARM64_VESS_D:
+		case ARM64_VAS_1D:
 			val = irb.CreateLShr(val, llvm::ConstantInt::get(val->getType(), 64 * op.vector_index));
 			val = irb.CreateZExtOrTrunc(val, llvm::IntegerType::getInt64Ty(_module->getContext()));
 			return irb.CreateBitCast(val, llvm::Type::getDoubleTy(_module->getContext()));
-		case ARM64_VESS_INVALID:
+		case ARM64_VAS_1Q:
+			val = irb.CreateLShr(val, llvm::ConstantInt::get(val->getType(), 128 * op.vector_index));
+			val = irb.CreateZExtOrTrunc(val, llvm::IntegerType::getInt128Ty(_module->getContext()));
+			return irb.CreateBitCast(val, llvm::Type::getFP128Ty(_module->getContext()));
+		case ARM64_VAS_INVALID:
 			return val;
 		default:
 			throw GenericError("Arm64: extractVectorValue(): Unknown VESS type");
@@ -1775,7 +1787,7 @@ void Capstone2LlvmIrTranslatorArm64_impl::translateAnd(cs_insn* i, cs_arm64* ai,
 	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(ai, irb);
 	op2 = irb.CreateZExtOrTrunc(op2, op1->getType());
 
-	if (i->id == ARM64_INS_BIC)
+	if (i->id == ARM64_INS_BIC || i->id == ARM64_INS_BICS)
 	{
 		op2 = generateValueNegate(irb, op2);
 	}

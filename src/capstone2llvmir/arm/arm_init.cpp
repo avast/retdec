@@ -466,6 +466,7 @@ Capstone2LlvmIrTranslatorArm_impl::_i2fm =
 		{ARM_INS_MLA, &Capstone2LlvmIrTranslatorArm_impl::translateMla},
 		{ARM_INS_MLS, &Capstone2LlvmIrTranslatorArm_impl::translateMls},
 		{ARM_INS_MOV, &Capstone2LlvmIrTranslatorArm_impl::translateMov},
+		{ARM_INS_MOVS, &Capstone2LlvmIrTranslatorArm_impl::translateMov},
 		{ARM_INS_MOVT, &Capstone2LlvmIrTranslatorArm_impl::translateMovt},
 		{ARM_INS_MOVW, &Capstone2LlvmIrTranslatorArm_impl::translateMovw},
 		{ARM_INS_MRC, nullptr},
