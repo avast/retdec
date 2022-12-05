@@ -24,7 +24,7 @@ jobs:
             matrix:
                 sys:
                     - { os: ubuntu-latest, shell: bash }
-                    - { os: windows-latest, shell: 'msys2 {0}' }
+                    - { os: windows-2019, shell: 'msys2 {0}' }
                     - { os: macos-11, shell: bash }
                 type: [Release, Debug]
 
