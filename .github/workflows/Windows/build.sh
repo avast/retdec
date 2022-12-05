@@ -6,6 +6,6 @@ RD_DIR=$PWD
 mkdir -p /c/build
 cd /c/build
 
-cmake $RD_DIR -DRETDEC_TESTS=on -DCMAKE_INSTALL_PREFIX="$RD_DIR/install"
+cmake $RD_DIR -DRETDEC_TESTS=on -DCMAKE_INSTALL_PREFIX="$RD_DIR/install" -DRETDEC_DEV_TOOLS=ON -G"Visual Studio 15 2017 Win64"
 cmake --build . -j $NUMBER_OF_PROCESSORS --config $BUILD_TYPE -- -m
 cmake --build . --config $BUILD_TYPE --target "$PWD/install"
