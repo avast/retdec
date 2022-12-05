@@ -19,6 +19,7 @@ RetDec uses the following third-party libraries or other resources:
 11) Eigen: http://eigen.tuxfamily.org/index.php?title=Main_Page
 12) cmake-modules: https://github.com/rpavlik/cmake-modules
 13) tlsh: https://github.com/trendmicro/tlsh
+13) stb: https://github.com/nothings/stb
 
 These third-party libraries or other resources are licensed under the
 following licenses:
@@ -710,7 +711,7 @@ DEALINGS IN THE SOFTWARE.
    TLSH is provided for use under two licenses: Apache OR BSD.
    Users may opt to use either license depending on the license
    restictions of the systems with which they plan to integrate
-   the TLSH code. 
+   the TLSH code.
 
 
 
@@ -960,12 +961,12 @@ DEALINGS IN THE SOFTWARE.
    Trend Micro (http://www.trendmicro.com/)
 
    Refer to the following publications for more information:
-   
+
      Jonathan Oliver, Chun Cheng and Yanggui Chen,
      "TLSH - A Locality Sensitive Hash"
      4th Cybercrime and Trustworthy Computing Workshop, Sydney, November 2013
      https://github.com/trendmicro/tlsh/blob/master/TLSH_CTC_final.pdf
-    
+
      Jonathan Oliver, Scott Forman and Chun Cheng,
      "Using Randomization to Attack Similarity Digests"
      Applications and Techniques in Information Security. Springer Berlin Heidelberg, 2014. 199-210.
@@ -973,3 +974,25 @@ DEALINGS IN THE SOFTWARE.
 
      Jonathan Oliver and Jayson Pryde
      http://blog.trendmicro.com/trendlabs-security-intelligence/smart-whitelisting-using-locality-sensitive-hashing/
+
+===============================================================================
+12) stb
+===============================================================================
+
+MIT License
+Copyright (c) 2017 Sean Barrett
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

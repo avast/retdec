@@ -1,4 +1,4 @@
-FROM ubuntu:focal
+FROM ubuntu:focal AS builder
 
 RUN useradd -m retdec
 WORKDIR /home/retdec
@@ -31,4 +31,18 @@ RUN git clone https://github.com/avast/retdec && \
 	make -j$(nproc) && \
 	make install
 
-ENV PATH /home/retdec/retdec-install/bin:$PATH
+FROM ubuntu:focal
+
+RUN useradd -m retdec
+WORKDIR /home/retdec
+ENV HOME /home/retdec
+
+RUN apt-get update -y && \
+	DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    openssl graphviz upx python3
+
+USER retdec
+
+COPY --from=builder /home/retdec/retdec-install /retdec-install
+
+ENV PATH /retdec-install/bin:$PATH

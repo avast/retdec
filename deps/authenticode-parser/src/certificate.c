@@ -30,6 +30,27 @@ SOFTWARE.
 
 #include "helper.h"
 
+#if OPENSSL_VERSION_NUMBER >= 0x3000000fL
+/* Removes any escaping \/ -> / that is happening with oneline() functions
+    from OpenSSL 3.0 */
+static void parse_oneline_string(char* string)
+{
+    size_t len = strlen(string);
+    char* tmp = string;
+    while (true) {
+        char* ptr = strstr(tmp, "\\/");
+        if (!ptr)
+            break;
+
+        memmove(ptr, ptr + 1, strlen(ptr + 1));
+        tmp = ptr + 1;
+        len--;
+    }
+
+    string[len] = 0;
+}
+#endif
+
 static void parse_name_attributes(X509_NAME* raw, Attributes* attr)
 {
     if (!raw || !attr)
@@ -108,15 +129,14 @@ CertificateArray* parse_signer_chain(X509* signCert, STACK_OF(X509) * certs)
 
     int certCount = sk_X509_num(chain);
 
-    CertificateArray* result = (CertificateArray*)malloc(sizeof(*result));
+    CertificateArray* result = (CertificateArray*)calloc(1, sizeof(*result));
     if (!result)
         goto error;
 
-    result->certs = (Certificate**)malloc(sizeof(Certificate*) * certCount);
+    result->certs = (Certificate**)calloc(certCount, sizeof(Certificate*));
     if (!result->certs)
         goto error;
 
-    result->count = 0;
     /* Convert each certificate to internal representation */
     for (int i = 0; i < certCount; ++i) {
         Certificate* cert = certificate_new(sk_X509_value(chain, i));
@@ -132,12 +152,12 @@ CertificateArray* parse_signer_chain(X509* signCert, STACK_OF(X509) * certs)
     return result;
 
 error: /* In case of error, return nothing */
-    free(result);
     if (result) {
         for (size_t i = 0; i < result->count; ++i) {
             certificate_free(result->certs[i]);
         }
         free(result->certs);
+        free(result);
     }
     X509_STORE_free(store);
     X509_STORE_CTX_free(storeCtx);
@@ -269,11 +289,19 @@ Certificate* certificate_new(X509* x509)
      * but we want to comply with existing YARA code */
     X509_NAME* issuerName = X509_get_issuer_name(x509);
     X509_NAME_oneline(issuerName, buffer, sizeof(buffer));
+
     result->issuer = strdup(buffer);
+    /* This is a little ugly hack for 3.0 compatibility */
+#if OPENSSL_VERSION_NUMBER >= 0x3000000fL
+    parse_oneline_string(result->issuer);
+#endif
 
     X509_NAME* subjectName = X509_get_subject_name(x509);
     X509_NAME_oneline(subjectName, buffer, sizeof(buffer));
     result->subject = strdup(buffer);
+#if OPENSSL_VERSION_NUMBER >= 0x3000000fL
+    parse_oneline_string(result->subject);
+#endif
 
     parse_name_attributes(issuerName, &result->issuer_attrs);
     parse_name_attributes(subjectName, &result->subject_attrs);
@@ -282,7 +310,11 @@ Certificate* certificate_new(X509* x509)
     result->serial = integer_to_serial(X509_get_serialNumber(x509));
     result->not_after = ASN1_TIME_to_time_t(X509_get0_notAfter(x509));
     result->not_before = ASN1_TIME_to_time_t(X509_get0_notBefore(x509));
-    result->sig_alg = strdup(OBJ_nid2ln(X509_get_signature_nid(x509)));
+    int sig_nid = X509_get_signature_nid(x509);
+    result->sig_alg = strdup(OBJ_nid2ln(sig_nid));
+
+    OBJ_obj2txt(buffer, sizeof(buffer), OBJ_nid2obj(sig_nid), 1);
+    result->sig_alg_oid = strdup(buffer);
 
     EVP_PKEY* pkey = X509_get0_pubkey(x509);
     if (pkey) {
@@ -364,6 +396,7 @@ void certificate_free(Certificate* cert)
         free(cert->issuer);
         free(cert->subject);
         free(cert->sig_alg);
+        free(cert->sig_alg_oid);
         free(cert->key_alg);
         free(cert->key);
         free(cert->sha1.data);

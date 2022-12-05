@@ -105,6 +105,7 @@ typedef struct {
     ByteArray sha256;         /* SHA256 of the DER representation of the cert */
     char* key_alg;            /* Name of the key algorithm */
     char* sig_alg;            /* Name of the signature algorithm */
+    char* sig_alg_oid;        /* OID of the signature algorithm */
     time_t not_before;        /* NotBefore validity */
     time_t not_after;         /* NotAfter validity */
     char* key;                /* PEM encoded public key */
@@ -155,6 +156,13 @@ typedef struct {
 } AuthenticodeArray;
 
 /**
+ * @brief Initializes all globals OpenSSl objects we need for parsing, this is not thread-safe and
+ *        needs to be called only once, before any multithreading environment
+ *        https://github.com/openssl/openssl/issues/13524
+ */
+void initialize_authenticode_parser();
+
+/**
  * @brief Constructs AuthenticodeArray from PE file data. Authenticode can
  *        contains nested Authenticode signatures as its unsigned attribute,
  *        which can also contain nested signatures. For this reason the function returns
@@ -166,7 +174,7 @@ typedef struct {
  * @param pe_len
  * @return AuthenticodeArray*
  */
-AuthenticodeArray* parse_authenticode(const uint8_t* pe_data, long pe_len);
+AuthenticodeArray* parse_authenticode(const uint8_t* pe_data, uint64_t pe_len);
 
 /**
  * @brief Constructs AuthenticodeArray from binary data containing Authenticode

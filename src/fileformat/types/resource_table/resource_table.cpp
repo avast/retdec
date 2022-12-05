@@ -101,7 +101,7 @@ std::string ResourceTable::computePerceptualAvgHash(const ResourceIcon &icon) co
 	std::size_t trashHold = 128;
 	auto img = BitmapImage();
 
-	if (!img.parseDibFormat(icon))
+	if (!img.parseDibFormat(icon) && !img.parsePngFormat(icon))
 	{
 		return "";
 	}
@@ -413,7 +413,7 @@ const ResourceIcon* ResourceTable::getIconForIconHash() const
 	}
 
 	//
-	// Step 2: Parse all icons in the PE and retrieve the 
+	// Step 2: Parse all icons in the PE and retrieve the
 	// YARA: Done in module "pe.c", function "pe_collect_icon_data()"
 	//
 
@@ -440,14 +440,14 @@ const ResourceIcon* ResourceTable::getIconForIconHash() const
 				// Skip icons that are of different ID
 				iconGroup->getEntryNameID(i, nameIdInGroup);
 				icon->getNameId(nameIdOfIcon);
-				if(nameIdOfIcon != nameIdInGroup /* || fits_in_pe() */) 
+				if(nameIdOfIcon != nameIdInGroup /* || fits_in_pe() */)
 					continue;
 
 				// Retrieve size and bit count
 				iconGroup->getEntryWidth(i, iconWidth);
 				iconGroup->getEntryHeight(i, iconHeight);
 				iconGroup->getEntryBitCount(i, iconBitCount);
-				
+
 				// YARA ignores any icons that have width != height
 				if(iconWidth == iconHeight)
 				{

@@ -99,6 +99,7 @@ target_link_libraries(fileformat
 		retdec::deps::llvm
 	PRIVATE
 		retdec::deps::tlsh
+		retdec::deps::stb
 		retdec::deps::authenticode
 		OpenSSL::Crypto
 )

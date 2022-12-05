@@ -14,6 +14,7 @@
 #include "retdec/utils/memory.h"
 #include "retdec/utils/io/log.h"
 #include "retdec/utils/string.h"
+#include "retdec/utils/time.h"
 #include "retdec/utils/version.h"
 #include "retdec/ar-extractor/detection.h"
 #include "retdec/cpdetect/errors.h"
@@ -76,6 +77,8 @@ struct ProgParams
 	std::size_t epBytesCount = EP_BYTES_SIZE;
 	/// load flags for `fileformat`
 	LoadFlags loadFlags = LoadFlags::NONE;
+	/// flag whether to include analysis time into the output
+	bool analysisTime = false;
 
 	friend std::ostream& operator<<(std::ostream& os, const ProgParams& pp);
 };
@@ -96,6 +99,7 @@ std::ostream& operator<<(std::ostream& os, const ProgParams& pp)
 	os << "max half memory    : " << pp.maxMemoryHalfRAM << "\n";
 	os << "ep bytes count     : " << pp.epBytesCount << "\n";
 	os << "load flags         : " << pp.loadFlags << "\n";
+	os << "analysis time      : " << pp.analysisTime << "\n";
 
 	os << "yara malware rules : " << "\n";
 	for (auto& r : pp.yaraMalwarePaths)
@@ -134,11 +138,11 @@ void fatalErrorHandler(void *user_data, const std::string& /*reason*/, bool /*ge
 
 	if(params->plainText)
 	{
-		PlainPresentation(*fileinfo, params->verbose, params->explanatory).present();
+		PlainPresentation(*fileinfo, params->verbose, params->explanatory, params->analysisTime).present();
 	}
 	else
 	{
-		JsonPresentation(*fileinfo, params->verbose).present();
+		JsonPresentation(*fileinfo, params->verbose, params->analysisTime).present();
 	}
 
 	exit(static_cast<int>(ReturnCode::FORMAT_PARSER_PROBLEM));
@@ -206,6 +210,7 @@ void printHelp()
 				<< "                          Without this parameter program print only\n"
 				<< "                          basic information.\n"
 				<< "    --explanatory, -X     Print explanatory notes (only in plain text output).\n"
+				<< "    --analysis-time       Print also analysis time into output.\n"
 				<< "\n"
 				<< "Options for specifying configuration file:\n"
 				<< "    --config=file, -c=file\n"
@@ -390,6 +395,7 @@ bool doConfigString(
 	params.verbose = retdec::serdes::deserializeBool(root, "verbose", params.verbose);
 	params.explanatory = retdec::serdes::deserializeBool(root, "explanatory", params.explanatory);
 	params.maxMemoryHalfRAM = retdec::serdes::deserializeBool(root, "maxMemoryHalf", params.maxMemoryHalfRAM);
+	params.analysisTime = retdec::serdes::deserializeBool(root, "analysisTime", params.analysisTime);
 
 	if (root.HasMember("loadStrings"))
 	{
@@ -604,6 +610,10 @@ bool doParams(int argc, char **_argv, ProgParams &params)
 		{
 			params.explanatory = true;
 		}
+		else if (c == "--analysis-time")
+		{
+			params.analysisTime = true;
+		}
 		else if (c == "-S" || c == "--strings")
 		{
 			params.loadFlags = static_cast<LoadFlags>(params.loadFlags
@@ -773,6 +783,7 @@ int main(int argc, char* argv[])
 	FileInformation fileinfo;
 	FileDetector *fileDetector = nullptr;
 	fileinfo.setPathToFile(params.filePath);
+	fileinfo.setAnalysisTime(timestampToDate(getCurrentTimestamp()));
 	fileinfo.setFileFormatEnum(fileFormat);
 	ErrorHandlerInfo hInfo { &params, &fileinfo };
 	llvm::install_fatal_error_handler(fatalErrorHandler, &hInfo);
@@ -833,11 +844,11 @@ int main(int argc, char* argv[])
 	// print results on standard output
 	if(params.plainText)
 	{
-		PlainPresentation(fileinfo, params.verbose, params.explanatory).present();
+		PlainPresentation(fileinfo, params.verbose, params.explanatory, params.analysisTime).present();
 	}
 	else
 	{
-		JsonPresentation(fileinfo, params.verbose).present();
+		JsonPresentation(fileinfo, params.verbose, params.analysisTime).present();
 	}
 
 	// generate configuration file

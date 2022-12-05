@@ -28,5 +28,5 @@ set_target_properties(pat2yara
 
 install(TARGETS pat2yara
 	RUNTIME
-		DESTINATION bin
+		DESTINATION ${RETDEC_INSTALL_BIN_DIR}
 )

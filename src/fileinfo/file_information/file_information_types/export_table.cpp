@@ -46,6 +46,11 @@ std::string ExportTable::getExphashSha256() const
 	return table ? table->getExphashSha256() : "";
 }
 
+std::string ExportTable::getDllName() const
+{
+	return table ? table->getDllName() : "";
+}
+
 /**
  * Get export name
  * @param position Index of selected export from table (indexed from 0)

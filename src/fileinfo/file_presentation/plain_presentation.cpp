@@ -348,8 +348,8 @@ void presentIterativeSimple(const IterativeSimpleGetter &getter)
 /**
  * Constructor
  */
-PlainPresentation::PlainPresentation(FileInformation &fileinfo_, bool verbose_, bool explanatory_) :
-	FilePresentation(fileinfo_), verbose(verbose_), explanatory(explanatory_)
+PlainPresentation::PlainPresentation(FileInformation &fileinfo_, bool verbose_, bool explanatory_, bool analysisTime_) :
+	FilePresentation(fileinfo_), verbose(verbose_), explanatory(explanatory_), analysisTime(analysisTime_)
 {
 
 }
@@ -828,7 +828,19 @@ bool PlainPresentation::present()
 		Log::info() << "RetDec Fileinfo version  : "
 				<< utils::version::getVersionStringShort() << "\n";
 	}
+	if(analysisTime)
+	{
+		Log::info() << "Analysis time            : "
+				<< fileinfo.getAnalysisTime() << "\n";
+	}
 	Log::info() << "Input file               : " << fileinfo.getPathToFile() << "\n";
+
+	const std::string& dllName = fileinfo.getExportDllName();
+	if (!dllName.empty())
+	{
+		Log::info() << "Dll name                 : " << dllName << "\n";
+	}
+
 	presentSimple(BasicPlainGetter(fileinfo), false);
 	presentCompiler();
 	presentLanguages();

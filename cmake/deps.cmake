@@ -1,6 +1,4 @@
 
-
-
 set(CAPSTONE_URL
     "https://github.com/aquynh/capstone/archive/f049e65f596bf8b1cbf5f2371067e34715ef1764.zip"
     CACHE STRING "URL of Capstone archive to use."
@@ -38,20 +36,20 @@ set(LLVM_ARCHIVE_SHA256
 )
 
 set(YARA_URL
-    "https://github.com/VirusTotal/yara/archive/v4.0.1.zip"
+    "https://github.com/VirusTotal/yara/archive/v4.2.0-rc1.zip"
     CACHE STRING "URL of Yara archive to use."
 )
 set(YARA_ARCHIVE_SHA256
-    "4dcc6907b8537b67b52a61aa76f01196a4cc8e8e9f5fb6e4dd835692c2370e83"
+    "ae1adad2ae33106f4c296cef32ddba2c93867010ef853028d30cad42548d0474"
     CACHE STRING ""
 )
 
 set(YARAMOD_URL
-    "https://github.com/avast/yaramod/archive/94fc854153f48556087533616e3b0945d6f8023c.zip"
+    "https://github.com/avast/yaramod/archive/a367d910ae79698e64e99d8414695281723cd34b.zip"
     CACHE STRING "URL of YaraMod archive to use."
 )
 set(YARAMOD_ARCHIVE_SHA256
-    "f89546604a9617afb9c6cf8f241cb6dfb398e13b1c77a19f6193d037572b875c"
+    "2d2dc60890ad9b796fb908162bd3968b8ada693ab2b08e55cdd1c359c643b72b"
     CACHE STRING ""
 )
 

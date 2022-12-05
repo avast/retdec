@@ -11,9 +11,16 @@ string(REPLACE
     "${content}"
 )
 
-if("${new_content}" STREQUAL "${content}")
+string(REPLACE
+    "static void printS16ImmOperand(MCInst *MI, unsigned OpNo, SStream *O)\n{\n\tif (MCOperand_isImm(MCInst_getOperand(MI, OpNo))) {\n\t\tunsigned short Imm = (unsigned short)MCOperand_getImm(MCInst_getOperand(MI, OpNo));\n        if (Imm > HEX_THRESHOLD)\n            SStream_concat(O, \"0x%x\", Imm);\n        else\n            SStream_concat(O, \"%u\", Imm);\n"
+    "static void printS16ImmOperand(MCInst *MI, unsigned OpNo, SStream *O)\n{\n\tif (MCOperand_isImm(MCInst_getOperand(MI, OpNo))) {\n// RetDec fix\n\t\tshort Imm = (short)MCOperand_getImm(MCInst_getOperand(MI, OpNo));\n\t\tSStream_concat(O, \"%d\", Imm);\n"
+    new_content2
+    "${new_content}"
+)
+
+if("${new_content2}" STREQUAL "${content}")
     message(STATUS "-- Patching: ${full_path} skipped")
 else()
     message(STATUS "-- Patching: ${full_path} patched")
-    file(WRITE "${full_path}" "${new_content}")
+    file(WRITE "${full_path}" "${new_content2}")
 endif()
