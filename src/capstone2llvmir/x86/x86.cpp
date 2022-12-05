@@ -1194,6 +1194,7 @@ Capstone2LlvmIrTranslatorX86_impl::loadOpFloatingBinaryTop(
 	llvm::Value* op0 = nullptr;
 	llvm::Value* op1 = nullptr;
 	llvm::Value* idx = nullptr;
+	llvm::Value* idx2= nullptr;
 
 	if (xi->op_count == 0)
 	{
@@ -1214,7 +1215,7 @@ Capstone2LlvmIrTranslatorX86_impl::loadOpFloatingBinaryTop(
 
 		auto reg2 = xi->operands[1].reg;
 		unsigned regOff2 = reg2 - X86_REG_ST0;
-		auto* idx2 = regOff2
+		idx2 = regOff2
 				? irb.CreateAdd(top, llvm::ConstantInt::get(top->getType(), regOff2))
 				: top;
 
@@ -1281,7 +1282,7 @@ Capstone2LlvmIrTranslatorX86_impl::loadOpFloatingBinaryTop(
 	}
 
 	if (i->id == X86_INS_FSUBP
-			|| i->id == X86_INS_FADDP
+			|| i->id == X86_INS_FADD
 			|| i->id == X86_INS_FDIVP
 			|| i->id == X86_INS_FDIVRP
 			|| i->id == X86_INS_FMULP
@@ -1290,6 +1291,12 @@ Capstone2LlvmIrTranslatorX86_impl::loadOpFloatingBinaryTop(
 		auto* tmp = op0;
 		op0 = op1;
 		op1 = tmp;
+	}
+
+	if (i->id == X86_INS_FXCH
+			&& top == idx)
+	{
+		idx = idx2;
 	}
 
 	return std::make_tuple(op0, op1, top, idx);
@@ -4402,10 +4409,11 @@ void Capstone2LlvmIrTranslatorX86_impl::translateFadd(cs_insn* i, cs_x86* xi, ll
 	EXPECT_IS_EXPR(i, xi, irb, (xi->op_count <= 2));
 
 	std::tie(op0, op1, top, idx) = loadOpFloatingBinaryTop(i, xi, irb);
+	bool isFADDP = xi->opcode[0] == 0xDE && xi->opcode[1] == 0x00&& xi->opcode[2] == 0x00 && xi->opcode[3] == 0x00;
 
 	auto* fadd = irb.CreateFAdd(op0, op1);
 
-	if (xi->op_count == 2 || i->id == X86_INS_FADDP)
+	if (xi->op_count == 2 || isFADDP)
 	{
 		storeX87DataReg(irb, idx, fadd);
 	}
@@ -4414,7 +4422,7 @@ void Capstone2LlvmIrTranslatorX86_impl::translateFadd(cs_insn* i, cs_x86* xi, ll
 		storeX87DataReg(irb, top, fadd);
 	}
 
-	if (i->id == X86_INS_FADDP)
+	if (i->id == X86_INS_FADD)
 	{
 		x87IncTop(irb, top);
 	}
@@ -5068,16 +5076,16 @@ void Capstone2LlvmIrTranslatorX86_impl::translateFucomPop(cs_insn* i, cs_x86* xi
 
 	bool doublePop = i->id == X86_INS_FUCOMPP || i->id == X86_INS_FCOMPP;
 	bool pop = i->id == X86_INS_FUCOMP || i->id == X86_INS_FCOMP
-			|| i->id == X86_INS_FUCOMIP || i->id == X86_INS_FCOMIP
+			|| i->id == X86_INS_FUCOMPI || i->id == X86_INS_FCOMPI
 			|| i->id == X86_INS_FICOMP || doublePop;
 
 	uint32_t r1 = X87_REG_C0;
 	uint32_t r2 = X87_REG_C2;
 	uint32_t r3 = X87_REG_C3;
 	if (i->id == X86_INS_FUCOMI
-			|| i->id == X86_INS_FUCOMIP
+			|| i->id == X86_INS_FUCOMPI
 			|| i->id == X86_INS_FCOMI
-			|| i->id == X86_INS_FCOMIP)
+			|| i->id == X86_INS_FCOMPI)
 	{
 		r1 = X86_REG_CF;
 		r2 = X86_REG_PF;

@@ -308,60 +308,60 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::storeCrX(
 	// PPC_REG_CRx_SO is a copy of XER, which we do not have.
 	auto* so = zero;
 
-	uint32_t ltR = PPC_REG_CR0_LT;
-	uint32_t gtR = PPC_REG_CR0_GT;
-	uint32_t eqR = PPC_REG_CR0_EQ;
-	uint32_t soR = PPC_REG_CR0_SO;
+	uint32_t ltR = PPC_REG_CR0LT;
+	uint32_t gtR = PPC_REG_CR0GT;
+	uint32_t eqR = PPC_REG_CR0EQ;
+	uint32_t soR = PPC_REG_CR0UN;
 
 	switch (crReg)
 	{
 		case PPC_REG_CR0:
-			ltR = PPC_REG_CR0_LT;
-			gtR = PPC_REG_CR0_GT;
-			eqR = PPC_REG_CR0_EQ;
-			soR = PPC_REG_CR0_SO;
+			ltR = PPC_REG_CR0LT;
+			gtR = PPC_REG_CR0GT;
+			eqR = PPC_REG_CR0EQ;
+			soR = PPC_REG_CR0UN;
 			break;
 		case PPC_REG_CR1:
-			ltR = PPC_REG_CR1_LT;
-			gtR = PPC_REG_CR1_GT;
-			eqR = PPC_REG_CR1_EQ;
-			soR = PPC_REG_CR1_SO;
+			ltR = PPC_REG_CR1LT;
+			gtR = PPC_REG_CR1GT;
+			eqR = PPC_REG_CR1EQ;
+			soR = PPC_REG_CR1UN;
 			break;
 		case PPC_REG_CR2:
-			ltR = PPC_REG_CR2_LT;
-			gtR = PPC_REG_CR2_GT;
-			eqR = PPC_REG_CR2_EQ;
-			soR = PPC_REG_CR2_SO;
+			ltR = PPC_REG_CR2LT;
+			gtR = PPC_REG_CR2GT;
+			eqR = PPC_REG_CR2EQ;
+			soR = PPC_REG_CR2UN;
 			break;
 		case PPC_REG_CR3:
-			ltR = PPC_REG_CR3_LT;
-			gtR = PPC_REG_CR3_GT;
-			eqR = PPC_REG_CR3_EQ;
-			soR = PPC_REG_CR3_SO;
+			ltR = PPC_REG_CR3LT;
+			gtR = PPC_REG_CR3GT;
+			eqR = PPC_REG_CR3EQ;
+			soR = PPC_REG_CR3UN;
 			break;
 		case PPC_REG_CR4:
-			ltR = PPC_REG_CR4_LT;
-			gtR = PPC_REG_CR4_GT;
-			eqR = PPC_REG_CR4_EQ;
-			soR = PPC_REG_CR4_SO;
+			ltR = PPC_REG_CR4LT;
+			gtR = PPC_REG_CR4GT;
+			eqR = PPC_REG_CR4EQ;
+			soR = PPC_REG_CR4UN;
 			break;
 		case PPC_REG_CR5:
-			ltR = PPC_REG_CR5_LT;
-			gtR = PPC_REG_CR5_GT;
-			eqR = PPC_REG_CR5_EQ;
-			soR = PPC_REG_CR5_SO;
+			ltR = PPC_REG_CR5LT;
+			gtR = PPC_REG_CR5GT;
+			eqR = PPC_REG_CR5EQ;
+			soR = PPC_REG_CR5UN;
 			break;
 		case PPC_REG_CR6:
-			ltR = PPC_REG_CR6_LT;
-			gtR = PPC_REG_CR6_GT;
-			eqR = PPC_REG_CR6_EQ;
-			soR = PPC_REG_CR6_SO;
+			ltR = PPC_REG_CR6LT;
+			gtR = PPC_REG_CR6GT;
+			eqR = PPC_REG_CR6EQ;
+			soR = PPC_REG_CR6UN;
 			break;
 		case PPC_REG_CR7:
-			ltR = PPC_REG_CR7_LT;
-			gtR = PPC_REG_CR7_GT;
-			eqR = PPC_REG_CR7_EQ;
-			soR = PPC_REG_CR7_SO;
+			ltR = PPC_REG_CR7LT;
+			gtR = PPC_REG_CR7GT;
+			eqR = PPC_REG_CR7EQ;
+			soR = PPC_REG_CR7UN;
 			break;
 		default:
 			throw GenericError("Unhandled CR register.");
@@ -377,60 +377,60 @@ std::tuple<llvm::Value*, llvm::Value*, llvm::Value*, llvm::Value*> Capstone2Llvm
 		llvm::IRBuilder<>& irb,
 		uint32_t crReg)
 {
-	uint32_t ltR = PPC_REG_CR0_LT;
-	uint32_t gtR = PPC_REG_CR0_GT;
-	uint32_t eqR = PPC_REG_CR0_EQ;
-	uint32_t soR = PPC_REG_CR0_SO;
+	uint32_t ltR = PPC_REG_CR0LT;
+	uint32_t gtR = PPC_REG_CR0GT;
+	uint32_t eqR = PPC_REG_CR0EQ;
+	uint32_t soR = PPC_REG_CR0UN;
 
 	switch (crReg)
 	{
 		case PPC_REG_CR0:
-			ltR = PPC_REG_CR0_LT;
-			gtR = PPC_REG_CR0_GT;
-			eqR = PPC_REG_CR0_EQ;
-			soR = PPC_REG_CR0_SO;
+			ltR = PPC_REG_CR0LT;
+			gtR = PPC_REG_CR0GT;
+			eqR = PPC_REG_CR0EQ;
+			soR = PPC_REG_CR0UN;
 			break;
 		case PPC_REG_CR1:
-			ltR = PPC_REG_CR1_LT;
-			gtR = PPC_REG_CR1_GT;
-			eqR = PPC_REG_CR1_EQ;
-			soR = PPC_REG_CR1_SO;
+			ltR = PPC_REG_CR1LT;
+			gtR = PPC_REG_CR1GT;
+			eqR = PPC_REG_CR1EQ;
+			soR = PPC_REG_CR1UN;
 			break;
 		case PPC_REG_CR2:
-			ltR = PPC_REG_CR2_LT;
-			gtR = PPC_REG_CR2_GT;
-			eqR = PPC_REG_CR2_EQ;
-			soR = PPC_REG_CR2_SO;
+			ltR = PPC_REG_CR2LT;
+			gtR = PPC_REG_CR2GT;
+			eqR = PPC_REG_CR2EQ;
+			soR = PPC_REG_CR2UN;
 			break;
 		case PPC_REG_CR3:
-			ltR = PPC_REG_CR3_LT;
-			gtR = PPC_REG_CR3_GT;
-			eqR = PPC_REG_CR3_EQ;
-			soR = PPC_REG_CR3_SO;
+			ltR = PPC_REG_CR3LT;
+			gtR = PPC_REG_CR3GT;
+			eqR = PPC_REG_CR3EQ;
+			soR = PPC_REG_CR3UN;
 			break;
 		case PPC_REG_CR4:
-			ltR = PPC_REG_CR4_LT;
-			gtR = PPC_REG_CR4_GT;
-			eqR = PPC_REG_CR4_EQ;
-			soR = PPC_REG_CR4_SO;
+			ltR = PPC_REG_CR4LT;
+			gtR = PPC_REG_CR4GT;
+			eqR = PPC_REG_CR4EQ;
+			soR = PPC_REG_CR4UN;
 			break;
 		case PPC_REG_CR5:
-			ltR = PPC_REG_CR5_LT;
-			gtR = PPC_REG_CR5_GT;
-			eqR = PPC_REG_CR5_EQ;
-			soR = PPC_REG_CR5_SO;
+			ltR = PPC_REG_CR5LT;
+			gtR = PPC_REG_CR5GT;
+			eqR = PPC_REG_CR5EQ;
+			soR = PPC_REG_CR5UN;
 			break;
 		case PPC_REG_CR6:
-			ltR = PPC_REG_CR6_LT;
-			gtR = PPC_REG_CR6_GT;
-			eqR = PPC_REG_CR6_EQ;
-			soR = PPC_REG_CR6_SO;
+			ltR = PPC_REG_CR6LT;
+			gtR = PPC_REG_CR6GT;
+			eqR = PPC_REG_CR6EQ;
+			soR = PPC_REG_CR6UN;
 			break;
 		case PPC_REG_CR7:
-			ltR = PPC_REG_CR7_LT;
-			gtR = PPC_REG_CR7_GT;
-			eqR = PPC_REG_CR7_EQ;
-			soR = PPC_REG_CR7_SO;
+			ltR = PPC_REG_CR7LT;
+			gtR = PPC_REG_CR7GT;
+			eqR = PPC_REG_CR7EQ;
+			soR = PPC_REG_CR7UN;
 			break;
 		default:
 			throw GenericError("Unhandled CR register.");
@@ -449,60 +449,65 @@ llvm::Value* Capstone2LlvmIrTranslatorPowerpc_impl::loadCrX(
 		uint32_t crReg,
 		ppc_cr_types type)
 {
-	uint32_t ltR = PPC_REG_CR0_LT;
-	uint32_t gtR = PPC_REG_CR0_GT;
-	uint32_t eqR = PPC_REG_CR0_EQ;
-	uint32_t soR = PPC_REG_CR0_SO;
+	uint32_t ltR = PPC_REG_CR0LT;
+	uint32_t gtR = PPC_REG_CR0GT;
+	uint32_t eqR = PPC_REG_CR0EQ;
+	uint32_t soR = PPC_REG_CR0UN;
+
+	if (isCrRegister(crReg) && isCrBitRegister(crReg))
+	{
+		return loadRegister(crReg, irb);
+	}
 
 	switch (crReg)
 	{
 		case PPC_REG_CR0:
-			ltR = PPC_REG_CR0_LT;
-			gtR = PPC_REG_CR0_GT;
-			eqR = PPC_REG_CR0_EQ;
-			soR = PPC_REG_CR0_SO;
+			ltR = PPC_REG_CR0LT;
+			gtR = PPC_REG_CR0GT;
+			eqR = PPC_REG_CR0EQ;
+			soR = PPC_REG_CR0UN;
 			break;
 		case PPC_REG_CR1:
-			ltR = PPC_REG_CR1_LT;
-			gtR = PPC_REG_CR1_GT;
-			eqR = PPC_REG_CR1_EQ;
-			soR = PPC_REG_CR1_SO;
+			ltR = PPC_REG_CR1LT;
+			gtR = PPC_REG_CR1GT;
+			eqR = PPC_REG_CR1EQ;
+			soR = PPC_REG_CR1UN;
 			break;
 		case PPC_REG_CR2:
-			ltR = PPC_REG_CR2_LT;
-			gtR = PPC_REG_CR2_GT;
-			eqR = PPC_REG_CR2_EQ;
-			soR = PPC_REG_CR2_SO;
+			ltR = PPC_REG_CR2LT;
+			gtR = PPC_REG_CR2GT;
+			eqR = PPC_REG_CR2EQ;
+			soR = PPC_REG_CR2UN;
 			break;
 		case PPC_REG_CR3:
-			ltR = PPC_REG_CR3_LT;
-			gtR = PPC_REG_CR3_GT;
-			eqR = PPC_REG_CR3_EQ;
-			soR = PPC_REG_CR3_SO;
+			ltR = PPC_REG_CR3LT;
+			gtR = PPC_REG_CR3GT;
+			eqR = PPC_REG_CR3EQ;
+			soR = PPC_REG_CR3UN;
 			break;
 		case PPC_REG_CR4:
-			ltR = PPC_REG_CR4_LT;
-			gtR = PPC_REG_CR4_GT;
-			eqR = PPC_REG_CR4_EQ;
-			soR = PPC_REG_CR4_SO;
+			ltR = PPC_REG_CR4LT;
+			gtR = PPC_REG_CR4GT;
+			eqR = PPC_REG_CR4EQ;
+			soR = PPC_REG_CR4UN;
 			break;
 		case PPC_REG_CR5:
-			ltR = PPC_REG_CR5_LT;
-			gtR = PPC_REG_CR5_GT;
-			eqR = PPC_REG_CR5_EQ;
-			soR = PPC_REG_CR5_SO;
+			ltR = PPC_REG_CR5LT;
+			gtR = PPC_REG_CR5GT;
+			eqR = PPC_REG_CR5EQ;
+			soR = PPC_REG_CR5UN;
 			break;
 		case PPC_REG_CR6:
-			ltR = PPC_REG_CR6_LT;
-			gtR = PPC_REG_CR6_GT;
-			eqR = PPC_REG_CR6_EQ;
-			soR = PPC_REG_CR6_SO;
+			ltR = PPC_REG_CR6LT;
+			gtR = PPC_REG_CR6GT;
+			eqR = PPC_REG_CR6EQ;
+			soR = PPC_REG_CR6UN;
 			break;
 		case PPC_REG_CR7:
-			ltR = PPC_REG_CR7_LT;
-			gtR = PPC_REG_CR7_GT;
-			eqR = PPC_REG_CR7_EQ;
-			soR = PPC_REG_CR7_SO;
+			ltR = PPC_REG_CR7LT;
+			gtR = PPC_REG_CR7GT;
+			eqR = PPC_REG_CR7EQ;
+			soR = PPC_REG_CR7UN;
 			break;
 		default:
 			throw GenericError("Unhandled CR register.");
@@ -536,16 +541,16 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::storeCr0(
 	llvm::Value* zero = llvm::ConstantInt::get(val->getType(), 0);
 
 	auto* ltZero = irb.CreateICmpSLT(val, zero);
-	storeRegister(PPC_REG_CR0_LT, ltZero, irb);
+	storeRegister(PPC_REG_CR0LT, ltZero, irb);
 
 	auto* gtZero = irb.CreateICmpSGT(val, zero);
-	storeRegister(PPC_REG_CR0_GT, gtZero, irb);
+	storeRegister(PPC_REG_CR0GT, gtZero, irb);
 
 	auto* eqZero = irb.CreateICmpEQ(val, zero);
-	storeRegister(PPC_REG_CR0_EQ, eqZero, irb);
+	storeRegister(PPC_REG_CR0EQ, eqZero, irb);
 
-	// PPC_REG_CR0_SO is a copy of XER, which we do not have.
-	storeRegister(PPC_REG_CR0_SO, zero, irb);
+	// PPC_REG_CR0UN is a copy of XER, which we do not have.
+	storeRegister(PPC_REG_CR0UN, zero, irb);
 }
 
 bool Capstone2LlvmIrTranslatorPowerpc_impl::isGeneralPurposeRegister(uint32_t r)
@@ -559,24 +564,25 @@ uint32_t Capstone2LlvmIrTranslatorPowerpc_impl::getGeneralPurposeRegisterIndex(u
 }
 
 /**
- * 0  -> PPC_REG_CR0_LT
- * 1  -> PPC_REG_CR0_GT
- * 2  -> PPC_REG_CR0_EQ
- * 3  -> PPC_REG_CR0_SO
- * 4  -> PPC_REG_CR1_LT
- * 5  -> PPC_REG_CR2_GT
+ * 0  -> PPC_REG_CR0LT
+ * 1  -> PPC_REG_CR0GT
+ * 2  -> PPC_REG_CR0EQ
+ * 3  -> PPC_REG_CR0UN
+ * 4  -> PPC_REG_CR1LT
+ * 5  -> PPC_REG_CR2GT
  * ...
- * 30 -> PPC_REG_CR7_EQ
- * 31 -> PPC_REG_CR7_SO
+ * 30 -> PPC_REG_CR7EQ
+ * 31 -> PPC_REG_CR7UN
  */
 uint32_t Capstone2LlvmIrTranslatorPowerpc_impl::crBitIndexToCrRegister(uint32_t idx)
 {
-	return PPC_REG_CR0_LT + idx;
+	return PPC_REG_CR0LT + idx;
 }
 
 bool Capstone2LlvmIrTranslatorPowerpc_impl::isCrRegister(uint32_t r)
 {
-	return PPC_REG_CR0 <= r && r <= PPC_REG_CR7;
+	return (PPC_REG_CR0 <= r && r <= PPC_REG_CR7)
+			|| isCrBitRegister(r);
 }
 
 bool Capstone2LlvmIrTranslatorPowerpc_impl::isCrRegister(cs_ppc_op& op)
@@ -584,6 +590,10 @@ bool Capstone2LlvmIrTranslatorPowerpc_impl::isCrRegister(cs_ppc_op& op)
 	return op.type == PPC_OP_REG && isCrRegister(op.reg);
 }
 
+bool Capstone2LlvmIrTranslatorPowerpc_impl::isCrBitRegister(uint32_t r)
+{
+	return PPC_REG_CR0EQ <= r && r <= PPC_REG_CR5UN;
+}
 bool Capstone2LlvmIrTranslatorPowerpc_impl::isOperandRegister(cs_ppc_op& op)
 {
 	return op.type == PPC_OP_REG;
@@ -744,17 +754,25 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateAndis(cs_insn* i, cs_ppc* p
 
 /**
  * PPC_INS_CLRLWI - clrlwi rA, RS, n (n < 32) = rlwinm rA, rS, 0, n, 31
+ * PPC_INS_RLWINM - in capstone, rlwinm is equivalent to clrlwi
  */
 void Capstone2LlvmIrTranslatorPowerpc_impl::translateClrlwi(cs_insn* i, cs_ppc* pi, llvm::IRBuilder<>& irb)
 {
-	EXPECT_IS_BINARY_OR_TERNARY(i, pi, irb);
-
-	std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::ZEXT_TRUNC_OR_BITCAST);
-	op2 = irb.CreateAnd(op2, llvm::ConstantInt::get(op2->getType(), 31));
-	op1 = irb.CreateShl(op1, op2);
-	op1 = irb.CreateLShr(op1, op2);
-	storeOp(pi->operands[0], op1, irb);
-	storeCr0(irb, pi, op1);
+	std::set<int> opCountTemp = {3, 5};
+	EXPECT_IS_SET(i, pi, irb, opCountTemp)
+	if(pi->op_count == 3)
+	{
+		std::tie(op1, op2) = loadOpBinaryOrTernaryOp1Op2(pi, irb, eOpConv::ZEXT_TRUNC_OR_BITCAST);
+		op2 = irb.CreateAnd(op2, llvm::ConstantInt::get(op2->getType(), 31));
+		op1 = irb.CreateShl(op1, op2);
+		op1 = irb.CreateLShr(op1, op2);
+		storeOp(pi->operands[0], op1, irb);
+		storeCr0(irb, pi, op1);
+	}
+	else
+	{
+		translateRotateComplex5op(i, pi, irb);
+	}
 }
 
 /**
@@ -767,6 +785,8 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateClrlwi(cs_insn* i, cs_ppc* 
  * PPC_INS_CMPW, PPC_INS_CMPWI
  * PPC_INS_CMPLD, PPC_INS_CMPLDI
  * PPC_INS_CMPLW, PPC_INS_CMPLWI
+ * 
+ * PPC_INS_CMP, PPC_INS_CMPL
  */
 void Capstone2LlvmIrTranslatorPowerpc_impl::translateCmp(cs_insn* i, cs_ppc* pi, llvm::IRBuilder<>& irb)
 {
@@ -792,6 +812,7 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateCmp(cs_insn* i, cs_ppc* pi,
 	}
 
 	if (i->id == PPC_INS_CMPW
+			|| i->id == PPC_INS_CMPL
 			|| i->id == PPC_INS_CMPWI
 			|| i->id == PPC_INS_CMPLW
 			|| i->id == PPC_INS_CMPLWI)
@@ -802,6 +823,7 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateCmp(cs_insn* i, cs_ppc* pi,
 
 	bool signedCmp = true;
 	if (i->id == PPC_INS_CMPLD
+			|| i->id == PPC_INS_CMPL
 			|| i->id == PPC_INS_CMPLDI
 			|| i->id == PPC_INS_CMPLW
 			|| i->id == PPC_INS_CMPLWI)
@@ -1176,10 +1198,10 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateMtcrf(cs_insn* i, cs_ppc* p
 
 	auto* c = irb.CreateCall(fnc, llvm::ArrayRef<llvm::Value*>{op0, op1});
 
-	storeRegister(PPC_REG_CR0_LT, irb.CreateExtractValue(c, {0}), irb);
-	storeRegister(PPC_REG_CR0_GT, irb.CreateExtractValue(c, {1}), irb);
-	storeRegister(PPC_REG_CR0_EQ, irb.CreateExtractValue(c, {2}), irb);
-	storeRegister(PPC_REG_CR0_SO, irb.CreateExtractValue(c, {3}), irb);
+	storeRegister(PPC_REG_CR0LT, irb.CreateExtractValue(c, {0}), irb);
+	storeRegister(PPC_REG_CR0GT, irb.CreateExtractValue(c, {1}), irb);
+	storeRegister(PPC_REG_CR0EQ, irb.CreateExtractValue(c, {2}), irb);
+	storeRegister(PPC_REG_CR0UN, irb.CreateExtractValue(c, {3}), irb);
 
 	storeRegister(PPC_REG_CR1, irb.CreateExtractValue(c, {4}), irb);
 	storeRegister(PPC_REG_CR2, irb.CreateExtractValue(c, {5}), irb);
@@ -1200,45 +1222,45 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateMtcr(cs_insn* i, cs_ppc* pi
 	op0 = loadOpUnary(pi, irb);
 	op0 = irb.CreateZExtOrTrunc(op0, irb.getInt32Ty());
 
-	storeRegister(PPC_REG_CR0_LT, irb.CreateAnd(op0, irb.getInt32(1 << 0)), irb);
-	storeRegister(PPC_REG_CR0_GT, irb.CreateAnd(op0, irb.getInt32(1 << 1)), irb);
-	storeRegister(PPC_REG_CR0_EQ, irb.CreateAnd(op0, irb.getInt32(1 << 2)), irb);
-	storeRegister(PPC_REG_CR0_SO, irb.CreateAnd(op0, irb.getInt32(1 << 3)), irb);
+	storeRegister(PPC_REG_CR0LT, irb.CreateAnd(op0, irb.getInt32(1 << 0)), irb);
+	storeRegister(PPC_REG_CR0GT, irb.CreateAnd(op0, irb.getInt32(1 << 1)), irb);
+	storeRegister(PPC_REG_CR0EQ, irb.CreateAnd(op0, irb.getInt32(1 << 2)), irb);
+	storeRegister(PPC_REG_CR0UN, irb.CreateAnd(op0, irb.getInt32(1 << 3)), irb);
 
-	storeRegister(PPC_REG_CR1_LT, irb.CreateAnd(op0, irb.getInt32(1 << 4)), irb);
-	storeRegister(PPC_REG_CR1_GT, irb.CreateAnd(op0, irb.getInt32(1 << 5)), irb);
-	storeRegister(PPC_REG_CR1_EQ, irb.CreateAnd(op0, irb.getInt32(1 << 6)), irb);
-	storeRegister(PPC_REG_CR1_SO, irb.CreateAnd(op0, irb.getInt32(1 << 7)), irb);
+	storeRegister(PPC_REG_CR1LT, irb.CreateAnd(op0, irb.getInt32(1 << 4)), irb);
+	storeRegister(PPC_REG_CR1GT, irb.CreateAnd(op0, irb.getInt32(1 << 5)), irb);
+	storeRegister(PPC_REG_CR1EQ, irb.CreateAnd(op0, irb.getInt32(1 << 6)), irb);
+	storeRegister(PPC_REG_CR1UN, irb.CreateAnd(op0, irb.getInt32(1 << 7)), irb);
 
-	storeRegister(PPC_REG_CR2_LT, irb.CreateAnd(op0, irb.getInt32(1 << 8)), irb);
-	storeRegister(PPC_REG_CR2_GT, irb.CreateAnd(op0, irb.getInt32(1 << 9)), irb);
-	storeRegister(PPC_REG_CR2_EQ, irb.CreateAnd(op0, irb.getInt32(1 << 10)), irb);
-	storeRegister(PPC_REG_CR2_SO, irb.CreateAnd(op0, irb.getInt32(1 << 11)), irb);
+	storeRegister(PPC_REG_CR2LT, irb.CreateAnd(op0, irb.getInt32(1 << 8)), irb);
+	storeRegister(PPC_REG_CR2GT, irb.CreateAnd(op0, irb.getInt32(1 << 9)), irb);
+	storeRegister(PPC_REG_CR2EQ, irb.CreateAnd(op0, irb.getInt32(1 << 10)), irb);
+	storeRegister(PPC_REG_CR2UN, irb.CreateAnd(op0, irb.getInt32(1 << 11)), irb);
 
-	storeRegister(PPC_REG_CR3_LT, irb.CreateAnd(op0, irb.getInt32(1 << 12)), irb);
-	storeRegister(PPC_REG_CR3_GT, irb.CreateAnd(op0, irb.getInt32(1 << 13)), irb);
-	storeRegister(PPC_REG_CR3_EQ, irb.CreateAnd(op0, irb.getInt32(1 << 14)), irb);
-	storeRegister(PPC_REG_CR3_SO, irb.CreateAnd(op0, irb.getInt32(1 << 15)), irb);
+	storeRegister(PPC_REG_CR3LT, irb.CreateAnd(op0, irb.getInt32(1 << 12)), irb);
+	storeRegister(PPC_REG_CR3GT, irb.CreateAnd(op0, irb.getInt32(1 << 13)), irb);
+	storeRegister(PPC_REG_CR3EQ, irb.CreateAnd(op0, irb.getInt32(1 << 14)), irb);
+	storeRegister(PPC_REG_CR3UN, irb.CreateAnd(op0, irb.getInt32(1 << 15)), irb);
 
-	storeRegister(PPC_REG_CR4_LT, irb.CreateAnd(op0, irb.getInt32(1 << 16)), irb);
-	storeRegister(PPC_REG_CR4_GT, irb.CreateAnd(op0, irb.getInt32(1 << 17)), irb);
-	storeRegister(PPC_REG_CR4_EQ, irb.CreateAnd(op0, irb.getInt32(1 << 18)), irb);
-	storeRegister(PPC_REG_CR4_SO, irb.CreateAnd(op0, irb.getInt32(1 << 19)), irb);
+	storeRegister(PPC_REG_CR4LT, irb.CreateAnd(op0, irb.getInt32(1 << 16)), irb);
+	storeRegister(PPC_REG_CR4GT, irb.CreateAnd(op0, irb.getInt32(1 << 17)), irb);
+	storeRegister(PPC_REG_CR4EQ, irb.CreateAnd(op0, irb.getInt32(1 << 18)), irb);
+	storeRegister(PPC_REG_CR4UN, irb.CreateAnd(op0, irb.getInt32(1 << 19)), irb);
 
-	storeRegister(PPC_REG_CR5_LT, irb.CreateAnd(op0, irb.getInt32(1 << 20)), irb);
-	storeRegister(PPC_REG_CR5_GT, irb.CreateAnd(op0, irb.getInt32(1 << 21)), irb);
-	storeRegister(PPC_REG_CR5_EQ, irb.CreateAnd(op0, irb.getInt32(1 << 22)), irb);
-	storeRegister(PPC_REG_CR5_SO, irb.CreateAnd(op0, irb.getInt32(1 << 23)), irb);
+	storeRegister(PPC_REG_CR5LT, irb.CreateAnd(op0, irb.getInt32(1 << 20)), irb);
+	storeRegister(PPC_REG_CR5GT, irb.CreateAnd(op0, irb.getInt32(1 << 21)), irb);
+	storeRegister(PPC_REG_CR5EQ, irb.CreateAnd(op0, irb.getInt32(1 << 22)), irb);
+	storeRegister(PPC_REG_CR5UN, irb.CreateAnd(op0, irb.getInt32(1 << 23)), irb);
 
-	storeRegister(PPC_REG_CR6_LT, irb.CreateAnd(op0, irb.getInt32(1 << 24)), irb);
-	storeRegister(PPC_REG_CR6_GT, irb.CreateAnd(op0, irb.getInt32(1 << 25)), irb);
-	storeRegister(PPC_REG_CR6_EQ, irb.CreateAnd(op0, irb.getInt32(1 << 26)), irb);
-	storeRegister(PPC_REG_CR6_SO, irb.CreateAnd(op0, irb.getInt32(1 << 27)), irb);
+	storeRegister(PPC_REG_CR6LT, irb.CreateAnd(op0, irb.getInt32(1 << 24)), irb);
+	storeRegister(PPC_REG_CR6GT, irb.CreateAnd(op0, irb.getInt32(1 << 25)), irb);
+	storeRegister(PPC_REG_CR6EQ, irb.CreateAnd(op0, irb.getInt32(1 << 26)), irb);
+	storeRegister(PPC_REG_CR6UN, irb.CreateAnd(op0, irb.getInt32(1 << 27)), irb);
 
-	storeRegister(PPC_REG_CR7_LT, irb.CreateAnd(op0, irb.getInt32(1 << 28)), irb);
-	storeRegister(PPC_REG_CR7_GT, irb.CreateAnd(op0, irb.getInt32(1 << 29)), irb);
-	storeRegister(PPC_REG_CR7_EQ, irb.CreateAnd(op0, irb.getInt32(1 << 30)), irb);
-	storeRegister(PPC_REG_CR7_SO, irb.CreateAnd(op0, irb.getInt32(1 << 31)), irb);
+	storeRegister(PPC_REG_CR7LT, irb.CreateAnd(op0, irb.getInt32(1 << 28)), irb);
+	storeRegister(PPC_REG_CR7GT, irb.CreateAnd(op0, irb.getInt32(1 << 29)), irb);
+	storeRegister(PPC_REG_CR7EQ, irb.CreateAnd(op0, irb.getInt32(1 << 30)), irb);
+	storeRegister(PPC_REG_CR7UN, irb.CreateAnd(op0, irb.getInt32(1 << 31)), irb);
 }
 
 /**
@@ -1286,10 +1308,10 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateCrModifTernary(cs_insn* i, 
 
 	auto* c = irb.CreateCall(fnc, llvm::ArrayRef<llvm::Value*>{op0, op1, op2});
 
-	storeRegister(PPC_REG_CR0_LT, irb.CreateExtractValue(c, {0}), irb);
-	storeRegister(PPC_REG_CR0_GT, irb.CreateExtractValue(c, {1}), irb);
-	storeRegister(PPC_REG_CR0_EQ, irb.CreateExtractValue(c, {2}), irb);
-	storeRegister(PPC_REG_CR0_SO, irb.CreateExtractValue(c, {3}), irb);
+	storeRegister(PPC_REG_CR0LT, irb.CreateExtractValue(c, {0}), irb);
+	storeRegister(PPC_REG_CR0GT, irb.CreateExtractValue(c, {1}), irb);
+	storeRegister(PPC_REG_CR0EQ, irb.CreateExtractValue(c, {2}), irb);
+	storeRegister(PPC_REG_CR0UN, irb.CreateExtractValue(c, {3}), irb);
 
 	storeRegister(PPC_REG_CR1, irb.CreateExtractValue(c, {4}), irb);
 	storeRegister(PPC_REG_CR2, irb.CreateExtractValue(c, {5}), irb);
@@ -1311,14 +1333,14 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateCrNotMove(cs_insn* i, cs_pp
 	uint32_t crReg0 = 0;
 	uint32_t crReg1 = 0;
 	if (pi->operands[0].type == PPC_OP_REG
-			&& isGeneralPurposeRegister(pi->operands[0].reg)
+			&& isCrRegister(pi->operands[0].reg)
 			&& pi->operands[1].type == PPC_OP_REG
-			&& isGeneralPurposeRegister(pi->operands[1].reg))
+			&& isCrRegister(pi->operands[1].reg))
 	{
 		auto r0 = pi->operands[0].reg;
-		crReg0 = crBitIndexToCrRegister(getGeneralPurposeRegisterIndex(r0));
+		crReg0 = r0;
 		auto r1 = pi->operands[1].reg;
-		crReg1 = crBitIndexToCrRegister(getGeneralPurposeRegisterIndex(r1));
+		crReg1 = r1;
 	}
 	else
 	{
@@ -1351,10 +1373,10 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateCrSetClr(cs_insn* i, cs_ppc
 
 	uint32_t crReg = 0;
 	if (pi->operands[0].type == PPC_OP_REG
-			&& isGeneralPurposeRegister(pi->operands[0].reg))
+			&& isCrRegister(pi->operands[0].reg))
 	{
 		auto r = pi->operands[0].reg;
-		crReg = crBitIndexToCrRegister(getGeneralPurposeRegisterIndex(r));
+		crReg = r;
 	}
 	else
 	{
@@ -1390,10 +1412,10 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateMcrf(cs_insn* i, cs_ppc* pi
 	if (pi->operands[1].type == PPC_OP_REG
 			&& pi->operands[1].reg == PPC_REG_CR0)
 	{
-		auto* lt = loadRegister(PPC_REG_CR0_LT, irb);
-		auto* gt = loadRegister(PPC_REG_CR0_GT, irb);
-		auto* eq = loadRegister(PPC_REG_CR0_EQ, irb);
-		auto* so = loadRegister(PPC_REG_CR0_SO, irb);
+		auto* lt = loadRegister(PPC_REG_CR0LT, irb);
+		auto* gt = loadRegister(PPC_REG_CR0GT, irb);
+		auto* eq = loadRegister(PPC_REG_CR0EQ, irb);
+		auto* so = loadRegister(PPC_REG_CR0UN, irb);
 
 		llvm::Function* fnc = getPseudoAsmFunction(
 				i,
@@ -1423,10 +1445,10 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateMcrf(cs_insn* i, cs_ppc* pi
 
 		auto* c = irb.CreateCall(fnc, llvm::ArrayRef<llvm::Value*>{op1});
 
-		storeRegister(PPC_REG_CR0_LT, irb.CreateExtractValue(c, {0}), irb);
-		storeRegister(PPC_REG_CR0_GT, irb.CreateExtractValue(c, {1}), irb);
-		storeRegister(PPC_REG_CR0_EQ, irb.CreateExtractValue(c, {2}), irb);
-		storeRegister(PPC_REG_CR0_SO, irb.CreateExtractValue(c, {3}), irb);
+		storeRegister(PPC_REG_CR0LT, irb.CreateExtractValue(c, {0}), irb);
+		storeRegister(PPC_REG_CR0GT, irb.CreateExtractValue(c, {1}), irb);
+		storeRegister(PPC_REG_CR0EQ, irb.CreateExtractValue(c, {2}), irb);
+		storeRegister(PPC_REG_CR0UN, irb.CreateExtractValue(c, {3}), irb);
 	}
 	else
 	{
@@ -2043,6 +2065,17 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateB(cs_insn* i, cs_ppc* pi, l
 			PPC_INS_BDZL, PPC_INS_BDZLA, PPC_INS_BDZLRL,
 			PPC_INS_BDZTL, PPC_INS_BDZTLA, PPC_INS_BDZTLRL,
 			PPC_INS_BDZFL, PPC_INS_BDZFLA, PPC_INS_BDZFLRL,
+
+			PPC_INS_BLTL, PPC_INS_BLTLA, PPC_INS_BLTLRL, PPC_INS_BLTCTRL,
+			PPC_INS_BLEL, PPC_INS_BLELA, PPC_INS_BLELRL, PPC_INS_BLECTRL,
+			PPC_INS_BEQL, PPC_INS_BEQLA, PPC_INS_BEQLRL, PPC_INS_BEQCTRL,
+			PPC_INS_BGEL, PPC_INS_BGELA, PPC_INS_BGELRL, PPC_INS_BGECTRL,
+			PPC_INS_BGTL, PPC_INS_BGTLA, PPC_INS_BGTLRL, PPC_INS_BGTCTRL,
+			PPC_INS_BNLL, PPC_INS_BNLLA, PPC_INS_BNLLRL, PPC_INS_BNLCTRL,
+			PPC_INS_BNEL, PPC_INS_BNELA, PPC_INS_BNELRL, PPC_INS_BNECTRL,
+			PPC_INS_BNGL, PPC_INS_BNGLA, PPC_INS_BNGLRL, PPC_INS_BNGCTRL,
+			PPC_INS_BSOL, PPC_INS_BSOLA, PPC_INS_BSOLRL, PPC_INS_BSOCTRL,
+			PPC_INS_BNSL, PPC_INS_BNSLA, PPC_INS_BNSLRL, PPC_INS_BNSCTRL,
 	};
 	bool link = linkIds.count(i->id);
 
@@ -2062,6 +2095,17 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateB(cs_insn* i, cs_ppc* pi, l
 			PPC_INS_BDZLR, PPC_INS_BDZLRL,
 			PPC_INS_BDZTLR, PPC_INS_BDZTLRL,
 			PPC_INS_BDZFLR, PPC_INS_BDZFLRL,
+
+			PPC_INS_BLTLR, PPC_INS_BLTLRL,
+			PPC_INS_BLELR, PPC_INS_BLELRL,
+			PPC_INS_BEQLR, PPC_INS_BEQLRL,
+			PPC_INS_BGELR, PPC_INS_BGELRL,
+			PPC_INS_BGTLR, PPC_INS_BGTLRL,
+			PPC_INS_BNLLR, PPC_INS_BNLLRL,
+			PPC_INS_BNELR, PPC_INS_BNELRL,
+			PPC_INS_BNGLR, PPC_INS_BNGLRL,
+			PPC_INS_BSOLR, PPC_INS_BSOLRL,
+			PPC_INS_BNSLR, PPC_INS_BNSLRL,
 	};
 	bool toLR = toLRIds.count(i->id);
 
@@ -2072,7 +2116,18 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateB(cs_insn* i, cs_ppc* pi, l
 			PPC_INS_BCCTR, PPC_INS_BCCTRL,
 			PPC_INS_BCTR, PPC_INS_BCTRL,
 			PPC_INS_BTCTR, PPC_INS_BTCTRL,
-			PPC_INS_BFCTR, PPC_INS_BFCTRL
+			PPC_INS_BFCTR, PPC_INS_BFCTRL,
+
+			PPC_INS_BLTCTR, PPC_INS_BLTCTRL,
+			PPC_INS_BLECTR, PPC_INS_BLECTRL,
+			PPC_INS_BEQCTR, PPC_INS_BEQCTRL,
+			PPC_INS_BGECTR, PPC_INS_BGECTRL,
+			PPC_INS_BGTCTR, PPC_INS_BGTCTRL,
+			PPC_INS_BNLCTR, PPC_INS_BNLCTRL,
+			PPC_INS_BNECTR, PPC_INS_BNECTRL,
+			PPC_INS_BNGCTR, PPC_INS_BNGCTRL,
+			PPC_INS_BSOCTR, PPC_INS_BSOCTRL,
+			PPC_INS_BNSCTR, PPC_INS_BNSCTRL,
 	};
 	bool toCTR = toCTRIds.count(i->id);
 

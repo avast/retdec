@@ -19,45 +19,45 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::initializeArchSpecific()
 {
 	std::map<uint32_t, std::string> r2n =
 	{
-			{PPC_REG_CR0_LT, "cr0_lt"},
-			{PPC_REG_CR0_GT, "cr0_gt"},
-			{PPC_REG_CR0_EQ, "cr0_eq"},
-			{PPC_REG_CR0_SO, "cr0_so"},
+			{PPC_REG_CR0LT, "cr0_lt"},
+			{PPC_REG_CR0GT, "cr0_gt"},
+			{PPC_REG_CR0EQ, "cr0_eq"},
+			{PPC_REG_CR0UN, "cr0_so"},
 
-			{PPC_REG_CR1_LT, "cr1_lt"},
-			{PPC_REG_CR1_GT, "cr1_gt"},
-			{PPC_REG_CR1_EQ, "cr1_eq"},
-			{PPC_REG_CR1_SO, "cr1_so"},
+			{PPC_REG_CR1LT, "cr1_lt"},
+			{PPC_REG_CR1GT, "cr1_gt"},
+			{PPC_REG_CR1EQ, "cr1_eq"},
+			{PPC_REG_CR1UN, "cr1_so"},
 
-			{PPC_REG_CR2_LT, "cr2_lt"},
-			{PPC_REG_CR2_GT, "cr2_gt"},
-			{PPC_REG_CR2_EQ, "cr2_eq"},
-			{PPC_REG_CR2_SO, "cr2_so"},
+			{PPC_REG_CR2LT, "cr2_lt"},
+			{PPC_REG_CR2GT, "cr2_gt"},
+			{PPC_REG_CR2EQ, "cr2_eq"},
+			{PPC_REG_CR2UN, "cr2_so"},
 
-			{PPC_REG_CR3_LT, "cr3_lt"},
-			{PPC_REG_CR3_GT, "cr3_gt"},
-			{PPC_REG_CR3_EQ, "cr3_eq"},
-			{PPC_REG_CR3_SO, "cr3_so"},
+			{PPC_REG_CR3LT, "cr3_lt"},
+			{PPC_REG_CR3GT, "cr3_gt"},
+			{PPC_REG_CR3EQ, "cr3_eq"},
+			{PPC_REG_CR3UN, "cr3_so"},
 
-			{PPC_REG_CR4_LT, "cr4_lt"},
-			{PPC_REG_CR4_GT, "cr4_gt"},
-			{PPC_REG_CR4_EQ, "cr4_eq"},
-			{PPC_REG_CR4_SO, "cr4_so"},
+			{PPC_REG_CR4LT, "cr4_lt"},
+			{PPC_REG_CR4GT, "cr4_gt"},
+			{PPC_REG_CR4EQ, "cr4_eq"},
+			{PPC_REG_CR4UN, "cr4_so"},
 
-			{PPC_REG_CR5_LT, "cr5_lt"},
-			{PPC_REG_CR5_GT, "cr5_gt"},
-			{PPC_REG_CR5_EQ, "cr5_eq"},
-			{PPC_REG_CR5_SO, "cr5_so"},
+			{PPC_REG_CR5LT, "cr5_lt"},
+			{PPC_REG_CR5GT, "cr5_gt"},
+			{PPC_REG_CR5EQ, "cr5_eq"},
+			{PPC_REG_CR5UN, "cr5_so"},
 
-			{PPC_REG_CR6_LT, "cr6_lt"},
-			{PPC_REG_CR6_GT, "cr6_gt"},
-			{PPC_REG_CR6_EQ, "cr6_eq"},
-			{PPC_REG_CR6_SO, "cr6_so"},
+			{PPC_REG_CR6LT, "cr6_lt"},
+			{PPC_REG_CR6GT, "cr6_gt"},
+			{PPC_REG_CR6EQ, "cr6_eq"},
+			{PPC_REG_CR6UN, "cr6_so"},
 
-			{PPC_REG_CR7_LT, "cr7_lt"},
-			{PPC_REG_CR7_GT, "cr7_gt"},
-			{PPC_REG_CR7_EQ, "cr7_eq"},
-			{PPC_REG_CR7_SO, "cr7_so"},
+			{PPC_REG_CR7LT, "cr7_lt"},
+			{PPC_REG_CR7GT, "cr7_gt"},
+			{PPC_REG_CR7EQ, "cr7_eq"},
+			{PPC_REG_CR7UN, "cr7_so"},
 	};
 
 	_reg2name = std::move(r2n);
@@ -87,45 +87,45 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::initializeRegTypeMap()
 			// Condition registers.
 			// 4-bit x 8 = 32-bit CR register.
 			//
-			{PPC_REG_CR0_LT, i1},
-			{PPC_REG_CR0_GT, i1},
-			{PPC_REG_CR0_EQ, i1},
-			{PPC_REG_CR0_SO, i1},
+			{PPC_REG_CR0LT, i1},
+			{PPC_REG_CR0GT, i1},
+			{PPC_REG_CR0EQ, i1},
+			{PPC_REG_CR0UN, i1},
 
-			{PPC_REG_CR1_LT, i1},
-			{PPC_REG_CR1_GT, i1},
-			{PPC_REG_CR1_EQ, i1},
-			{PPC_REG_CR1_SO, i1},
+			{PPC_REG_CR1LT, i1},
+			{PPC_REG_CR1GT, i1},
+			{PPC_REG_CR1EQ, i1},
+			{PPC_REG_CR1UN, i1},
 
-			{PPC_REG_CR2_LT, i1},
-			{PPC_REG_CR2_GT, i1},
-			{PPC_REG_CR2_EQ, i1},
-			{PPC_REG_CR2_SO, i1},
+			{PPC_REG_CR2LT, i1},
+			{PPC_REG_CR2GT, i1},
+			{PPC_REG_CR2EQ, i1},
+			{PPC_REG_CR2UN, i1},
 
-			{PPC_REG_CR3_LT, i1},
-			{PPC_REG_CR3_GT, i1},
-			{PPC_REG_CR3_EQ, i1},
-			{PPC_REG_CR3_SO, i1},
+			{PPC_REG_CR3LT, i1},
+			{PPC_REG_CR3GT, i1},
+			{PPC_REG_CR3EQ, i1},
+			{PPC_REG_CR3UN, i1},
 
-			{PPC_REG_CR4_LT, i1},
-			{PPC_REG_CR4_GT, i1},
-			{PPC_REG_CR4_EQ, i1},
-			{PPC_REG_CR4_SO, i1},
+			{PPC_REG_CR4LT, i1},
+			{PPC_REG_CR4GT, i1},
+			{PPC_REG_CR4EQ, i1},
+			{PPC_REG_CR4UN, i1},
 
-			{PPC_REG_CR5_LT, i1},
-			{PPC_REG_CR5_GT, i1},
-			{PPC_REG_CR5_EQ, i1},
-			{PPC_REG_CR5_SO, i1},
+			{PPC_REG_CR5LT, i1},
+			{PPC_REG_CR5GT, i1},
+			{PPC_REG_CR5EQ, i1},
+			{PPC_REG_CR5UN, i1},
 
-			{PPC_REG_CR6_LT, i1},
-			{PPC_REG_CR6_GT, i1},
-			{PPC_REG_CR6_EQ, i1},
-			{PPC_REG_CR6_SO, i1},
+			{PPC_REG_CR6LT, i1},
+			{PPC_REG_CR6GT, i1},
+			{PPC_REG_CR6EQ, i1},
+			{PPC_REG_CR6UN, i1},
 
-			{PPC_REG_CR7_LT, i1},
-			{PPC_REG_CR7_GT, i1},
-			{PPC_REG_CR7_EQ, i1},
-			{PPC_REG_CR7_SO, i1},
+			{PPC_REG_CR7LT, i1},
+			{PPC_REG_CR7GT, i1},
+			{PPC_REG_CR7EQ, i1},
+			{PPC_REG_CR7UN, i1},
 
 			// We also define these registers, because they can unexpectedly be
 			// operands of some instructions, and if we do not have it, operand
@@ -367,12 +367,13 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::initializeRegTypeMap()
 			{PPC_REG_Q30, i256},
 			{PPC_REG_Q31, i256},
 
-			// extra registers for PPCMapping.c
+			//FP ounding Mode
 			{PPC_REG_RM, defTy},
 			{PPC_REG_CTR8, defTy},
 			{PPC_REG_LR8, defTy},
-			{PPC_REG_CR1EQ, defTy},
-			{PPC_REG_X2, defTy},
+			{PPC_REG_XER, defTy},
+			//The reprsentation of r0 when treated as the constant 0.
+			{PPC_REG_ZERO, defTy},
 	};
 
 	_reg2type = std::move(r2t);
@@ -488,6 +489,96 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::initializePseudoCallInstructionIDs()
 			 PPC_INS_BDZFL,
 			 PPC_INS_BDZFLA,
 			 PPC_INS_BDZFLRL,
+		
+			 PPC_INS_BLT,
+			 PPC_INS_BLTA,
+			 PPC_INS_BLTCTR,
+			 PPC_INS_BLTCTRL,
+			 PPC_INS_BLTL,
+			 PPC_INS_BLTLA,
+			 PPC_INS_BLTLR,
+			 PPC_INS_BLTLRL,
+			 
+			 PPC_INS_BLE,
+			 PPC_INS_BLEA,
+			 PPC_INS_BLECTR,
+			 PPC_INS_BLECTRL,
+			 PPC_INS_BLEL,
+			 PPC_INS_BLELA,
+			 PPC_INS_BLELR,
+			 PPC_INS_BLELRL,
+			 
+			 PPC_INS_BEQ,
+			 PPC_INS_BEQA,
+			 PPC_INS_BEQCTR,
+			 PPC_INS_BEQCTRL,
+			 PPC_INS_BEQL,
+			 PPC_INS_BEQLA,
+			 PPC_INS_BEQLR,
+			 PPC_INS_BEQLRL,
+			 
+			 PPC_INS_BGE,
+			 PPC_INS_BGEA,
+			 PPC_INS_BGECTR,
+			 PPC_INS_BGECTRL,
+			 PPC_INS_BGEL,
+			 PPC_INS_BGELA,
+			 PPC_INS_BGELR,
+			 PPC_INS_BGELRL,
+			 
+			 PPC_INS_BGT,
+			 PPC_INS_BGTA,
+			 PPC_INS_BGTCTR,
+			 PPC_INS_BGTCTRL,
+			 PPC_INS_BGTL,
+			 PPC_INS_BGTLA,
+			 PPC_INS_BGTLR,
+			 PPC_INS_BGTLRL,
+			 
+			 PPC_INS_BNL,
+			 PPC_INS_BNLA,
+			 PPC_INS_BNLCTR,
+			 PPC_INS_BNLCTRL,
+			 PPC_INS_BNLL,
+			 PPC_INS_BNLLA,
+			 PPC_INS_BNLLR,
+			 PPC_INS_BNLLRL,
+			 
+			 PPC_INS_BNE,
+			 PPC_INS_BNEA,
+			 PPC_INS_BNECTR,
+			 PPC_INS_BNECTRL,
+			 PPC_INS_BNEL,
+			 PPC_INS_BNELA,
+			 PPC_INS_BNELR,
+			 PPC_INS_BNELRL,
+			 
+			 PPC_INS_BNG,
+			 PPC_INS_BNGA,
+			 PPC_INS_BNGCTR,
+			 PPC_INS_BNGCTRL,
+			 PPC_INS_BNGL,
+			 PPC_INS_BNGLA,
+			 PPC_INS_BNGLR,
+			 PPC_INS_BNGLRL,
+			 
+			 PPC_INS_BSO,
+			 PPC_INS_BSOA,
+			 PPC_INS_BSOCTR,
+			 PPC_INS_BSOCTRL,
+			 PPC_INS_BSOL,
+			 PPC_INS_BSOLA,
+			 PPC_INS_BSOLR,
+			 PPC_INS_BSOLRL,
+			 
+			 PPC_INS_BNS,
+			 PPC_INS_BNSA,
+			 PPC_INS_BNSCTR,
+			 PPC_INS_BNSCTRL,
+			 PPC_INS_BNSL,
+			 PPC_INS_BNSLA,
+			 PPC_INS_BNSLR,
+			 PPC_INS_BNSLRL,
 	};
 }
 
@@ -521,9 +612,11 @@ Capstone2LlvmIrTranslatorPowerpc_impl::_i2fm =
 		{PPC_INS_ANDI, &Capstone2LlvmIrTranslatorPowerpc_impl::translateAnd},
 		{PPC_INS_ATTN, nullptr},
 		{PPC_INS_BRINC, nullptr},
+		{PPC_INS_CMP, &Capstone2LlvmIrTranslatorPowerpc_impl::translateCmp},
 		{PPC_INS_CMPB, nullptr},
 		{PPC_INS_CMPD, &Capstone2LlvmIrTranslatorPowerpc_impl::translateCmp},
 		{PPC_INS_CMPDI, &Capstone2LlvmIrTranslatorPowerpc_impl::translateCmp},
+		{PPC_INS_CMPL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateCmp},
 		{PPC_INS_CMPLD, &Capstone2LlvmIrTranslatorPowerpc_impl::translateCmp},
 		{PPC_INS_CMPLDI, &Capstone2LlvmIrTranslatorPowerpc_impl::translateCmp},
 		{PPC_INS_CMPLW, &Capstone2LlvmIrTranslatorPowerpc_impl::translateCmp},
@@ -1022,7 +1115,6 @@ Capstone2LlvmIrTranslatorPowerpc_impl::_i2fm =
 		{PPC_INS_RLDICR, nullptr},
 		{PPC_INS_RLDIMI, nullptr},
 		{PPC_INS_RLWIMI, &Capstone2LlvmIrTranslatorPowerpc_impl::translateRotateComplex5op},
-		{PPC_INS_RLWINM, &Capstone2LlvmIrTranslatorPowerpc_impl::translateRotateComplex5op},
 		{PPC_INS_RLWNM, &Capstone2LlvmIrTranslatorPowerpc_impl::translateRotateComplex5op},
 		{PPC_INS_SC, nullptr},
 		{PPC_INS_SLBIA, nullptr},
@@ -1440,7 +1532,7 @@ Capstone2LlvmIrTranslatorPowerpc_impl::_i2fm =
 		{PPC_INS_MFSRR2, nullptr},
 		{PPC_INS_MFSRR3, nullptr},
 		{PPC_INS_MFCFAR, nullptr},
-		{PPC_INS_MFAMR, nullptr},
+		{PPC_INS_MFAMR, &Capstone2LlvmIrTranslatorPowerpc_impl::translatePseudoAsmOp0FncOp1},
 		{PPC_INS_MFPID, nullptr},
 		{PPC_INS_MFTBLO, nullptr},
 		{PPC_INS_MFTBHI, nullptr},
@@ -1648,8 +1740,118 @@ Capstone2LlvmIrTranslatorPowerpc_impl::_i2fm =
 		{PPC_INS_BDZFL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
 		{PPC_INS_BDZFLA, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
 		{PPC_INS_BDZFLRL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		
+		//Branch mnemonics incorporating conditions
+		//Branch if less than
+		{PPC_INS_BLT, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BLTA, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BLTCTR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BLTCTRL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BLTL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BLTLA, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BLTLR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BLTLRL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		//Branch if less  than or equal 
+		{PPC_INS_BLE, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BLEA, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BLECTR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BLECTRL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BLEL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BLELA, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BLELR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BLELRL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		//Branch if equal 
+		{PPC_INS_BEQ, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BEQA, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BEQCTR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BEQCTRL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BEQL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BEQLA, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BEQLR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BEQLRL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		//Branch if greater than or equal
+		{PPC_INS_BGE, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BGEA, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BGECTR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BGECTRL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BGEL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BGELA, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BGELR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BGELRL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		//Branch if greater than
+		{PPC_INS_BGT, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BGTA, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BGTCTR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BGTCTRL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BGTL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BGTLA, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BGTLR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BGTLRL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		//Branch if not less than
+		{PPC_INS_BNL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BNLA, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BNLCTR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BNLCTRL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BNLL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BNLLA, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BNLLR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BNLLRL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		//Branch if not equal
+		{PPC_INS_BNE, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BNEA, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BNECTR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BNECTRL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BNEL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BNELA, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BNELR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BNELRL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		//Branch if not greater than
+		{PPC_INS_BNG, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BNGA, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BNGCTR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BNGCTRL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BNGL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BNGLA, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BNGLR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BNGLRL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		//Branch if summary overflow
+		{PPC_INS_BSO, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BSOA, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BSOCTR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BSOCTRL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BSOL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BSOLA, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BSOLR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BSOLRL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		//Branch if not summary overflow
+		{PPC_INS_BNS, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BNSA, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BNSCTR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BNSCTRL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BNSL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BNSLA, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BNSLR, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		{PPC_INS_BNSLRL, &Capstone2LlvmIrTranslatorPowerpc_impl::translateB},
+		//Branch if unordered
+		//PPC_INS_BUN     => PPC_INS_BSO 	
+		//PPC_INS_BUNA    => PPC_INS_BSOA
+		//PPC_INS_BUNCTR  => PPC_INS_BSOCTR  
+		//PPC_INS_BUNCTRL => PPC_INS_BSOCTRL 
+		//PPC_INS_BUNL    => PPC_INS_BSOL    
+		//PPC_INS_BUNLA   => PPC_INS_BSOLA   
+		//PPC_INS_BUNLR   => PPC_INS_BSOLR   
+		//PPC_INS_BUNLRL  => PPC_INS_BSOLRL  
+		
+		//Branch if not unordered
+		//PPC_INS_BNU     => PPC_INS_BNS
+		//PPC_INS_BNUA    => PPC_INS_BNSA 
+		//PPC_INS_BNUCTR  => PPC_INS_BNSCTR   
+		//PPC_INS_BNUCTRL => PPC_INS_BNSCTRL    
+		//PPC_INS_BNUL    => PPC_INS_BNSL 
+		//PPC_INS_BNULA   => PPC_INS_BNSLA  
+		//PPC_INS_BNULR   => PPC_INS_BNSLR  
+		//PPC_INS_BNULRL  => PPC_INS_BNSLRL   
 
-		{PPC_INS_BCT, nullptr},
 };
 
 } // namespace capstone2llvmir
