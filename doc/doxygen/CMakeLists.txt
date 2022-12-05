@@ -14,7 +14,7 @@ set(DOXYGEN_EXTRACT_LOCAL_CLASSES "YES")
 set(DOXYGEN_INTERNAL_DOCS "YES")
 set(DOXYGEN_EXCLUDE "")
 set(DOXYGEN_EXCLUDE_PATTERNS
-	"*/symbolic_tree_match.h" # Doxygen is not dealing with this.
+	"*/symbolic_tree_match.h */ir.cpp */ir.h" # Doxygen is not dealing with this.
 )
 set(DOXYGEN_EXCLUDE_SYMBOLS "")
 set(DOXYGEN_ENABLED_SECTIONS "internal")
