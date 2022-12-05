@@ -133,7 +133,9 @@ llvm::Value* Capstone2LlvmIrTranslatorPowerpc_impl::loadRegister(
 {
 	if (r == PPC_REG_INVALID)
 	{
-		return nullptr;
+		// TODO
+		// return nullptr;
+		return llvm::UndefValue::get(dstType ? dstType : getDefaultType());
 	}
 
 	llvm::Value* llvmReg = getRegister(r);
@@ -785,7 +787,7 @@ void Capstone2LlvmIrTranslatorPowerpc_impl::translateClrlwi(cs_insn* i, cs_ppc* 
  * PPC_INS_CMPW, PPC_INS_CMPWI
  * PPC_INS_CMPLD, PPC_INS_CMPLDI
  * PPC_INS_CMPLW, PPC_INS_CMPLWI
- * 
+ *
  * PPC_INS_CMP, PPC_INS_CMPL
  */
 void Capstone2LlvmIrTranslatorPowerpc_impl::translateCmp(cs_insn* i, cs_ppc* pi, llvm::IRBuilder<>& irb)
