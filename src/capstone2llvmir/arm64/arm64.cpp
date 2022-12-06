@@ -761,6 +761,10 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::loadOp(
 		case ARM64_OP_REG:
 		{
 			auto* val = loadRegister(op.reg, irb);
+			if (val == nullptr)
+			{
+				return llvm::UndefValue::get(ty ? ty : getDefaultType());
+			}
 			auto* vec = extractVectorValue(irb, op, val);
 			auto* ext = generateOperandExtension(irb, op.ext, vec, ty);
 			return generateOperandShift(irb, op, ext);

@@ -387,12 +387,16 @@ llvm::Value* Capstone2LlvmIrTranslatorArm_impl::loadOp(
 		case ARM_OP_SYSREG:
 		{
 			auto* val = loadRegister(sysregNumberTranslation(op.reg), irb);
-			return generateOperandShift(irb, op, val);
+			return val
+				? generateOperandShift(irb, op, val)
+				: llvm::UndefValue::get(ty ? ty : getDefaultType());
 		}
 		case ARM_OP_REG:
 		{
 			auto* val = loadRegister(op.reg, irb);
-			return generateOperandShift(irb, op, val);
+			return val
+				? generateOperandShift(irb, op, val)
+				: llvm::UndefValue::get(ty ? ty : getDefaultType());
 		}
 		case ARM_OP_IMM:
 		case ARM_OP_PIMM:
