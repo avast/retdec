@@ -3318,7 +3318,7 @@ void FileInformation::setPathToFile(const std::string &filepath)
 
 /**
  * Set when the analysis was done
- * @param filepath Analysis time
+ * @param analysistime Analysis time
  */
 void FileInformation::setAnalysisTime(const std::string &analysistime)
 {
