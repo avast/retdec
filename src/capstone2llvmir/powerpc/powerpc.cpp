@@ -133,9 +133,7 @@ llvm::Value* Capstone2LlvmIrTranslatorPowerpc_impl::loadRegister(
 {
 	if (r == PPC_REG_INVALID)
 	{
-		// TODO
-		// return nullptr;
-		return llvm::UndefValue::get(dstType ? dstType : getDefaultType());
+		return nullptr;
 	}
 
 	llvm::Value* llvmReg = getRegister(r);
