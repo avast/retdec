@@ -1,4 +1,4 @@
-FROM ubuntu:jammy-20220101 AS builder
+FROM ubuntu:focal AS builder
 
 RUN useradd -m retdec
 WORKDIR /home/retdec
@@ -28,11 +28,11 @@ RUN git clone https://github.com/avast/retdec && \
 	cd retdec && \
 	mkdir build && \
 	cd build && \
-	cmake .. -DCMAKE_INSTALL_PREFIX=/home/retdec/retdec-install -DCMAKE_BUILD_TYPE=Release && \
+	cmake .. -DCMAKE_INSTALL_PREFIX=/home/retdec/retdec-install -DCMAKE_LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/7/ -DCMAKE_BUILD_TYPE=Release && \
 	make -j$(nproc) && \
 	make install
 
-FROM ubuntu:jammy-20220101
+FROM ubuntu:focal
 
 RUN useradd -m retdec
 WORKDIR /home/retdec
