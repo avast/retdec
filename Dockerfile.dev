@@ -1,4 +1,4 @@
-FROM ubuntu:bionic
+FROM ubuntu:focal
 
 RUN useradd -m retdec
 WORKDIR /home/retdec

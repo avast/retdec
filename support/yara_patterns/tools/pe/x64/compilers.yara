@@ -149,19 +149,19 @@ rule autohotkey_uv_01 {
 		$3 = "Duplicate hotkey." wide ascii
 		$4 = ">AUTOHOTKEY SCRIPT<" wide ascii
     condition:
-        pe.is_64bit() 
-		and 
-		pe.number_of_resources > 0 
+        pe.is_64bit()
+		and
+		pe.number_of_resources > 0
 		and ((
-					(@4 > pe.sections[pe.section_index(".rdata")].raw_data_offset 
+					(@4 > pe.sections[pe.section_index(".rdata")].raw_data_offset
 					and
 					@4 < pe.sections[pe.section_index(".rdata")].raw_data_offset +
-					pe.sections[pe.section_index(".rdata")].raw_data_size) 
+					pe.sections[pe.section_index(".rdata")].raw_data_size)
 				or
 				(for 1 i in (0 .. pe.number_of_resources) : (
 					pe.resources[i].name_string matches />AUTOHOTKEY SCRIPT</))
 			)
-			or 
+			or
 			(3 of ($0,$1,$2,$3))
 		)
 }

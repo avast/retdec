@@ -438,10 +438,6 @@ void ProgramOptions::loadOption(std::list<std::string>::iterator& i)
 	{
 		params.setIsBackendEmitCg(true);
 	}
-	else if (isParam(i, "", "--backend-aggressive-opts"))
-	{
-		params.setIsBackendAggressiveOpts(true);
-	}
 	else if (isParam(i, "", "--backend-keep-all-brackets"))
 	{
 		params.setIsBackendKeepAllBrackets(true);
@@ -654,7 +650,6 @@ Backend arguments:
 	[--backend-no-opts] Disables backend optimizations.
 	[--backend-emit-cfg] Emits a CFG for each function in the backend IR (in the .dot format).
 	[--backend-emit-cg] Emits a CG for the decompiled module in the backend IR (in the .dot format).
-	[--backend-aggressive-opts] Enables aggressive optimizations.
 	[--backend-keep-all-brackets] Keeps all brackets in the generated code.
 	[--backend-keep-library-funcs] Keep functions from standard libraries.
 	[--backend-no-time-varying-info] Do not emit time-varying information, like dates.

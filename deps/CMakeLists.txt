@@ -14,6 +14,8 @@ endif()
 set(MSVC_GE $<BOOL:${MSVC}>)
 set(MSVC_CONFIG $<${MSVC_GE}:$<CONFIG>/>)
 
+cond_add_subdirectory(stb RETDEC_ENABLE_STB)
+cond_add_subdirectory(authenticode-parser RETDEC_ENABLE_AUTHENTICODE_PARSER)
 cond_add_subdirectory(capstone RETDEC_ENABLE_CAPSTONE)
 cond_add_subdirectory(elfio RETDEC_ENABLE_ELFIO)
 cond_add_subdirectory(googletest RETDEC_ENABLE_GOOGLETEST)

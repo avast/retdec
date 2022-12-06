@@ -76,6 +76,7 @@ class BitmapImage
 
 		/// @name Other methods
 		/// @{
+		bool parsePngFormat(const ResourceIcon &icon);
 		bool parseDibFormat(const ResourceIcon &icon);
 		bool parseDibHeader(const ResourceIcon &icon, struct BitmapInformationHeader &res) const;
 		bool parseDib1Data(const ResourceIcon &icon, const struct BitmapInformationHeader &hdr);

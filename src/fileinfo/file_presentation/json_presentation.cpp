@@ -8,6 +8,7 @@
 #include "retdec/utils/conversion.h"
 #include "retdec/utils/string.h"
 #include "retdec/utils/io/log.h"
+#include "retdec/utils/time.h"
 #include "retdec/utils/version.h"
 #include "retdec/fileformat/utils/conversions.h"
 #include "retdec/serdes/pattern.h"
@@ -96,9 +97,8 @@ bool presentSimple(
 /**
  * Constructor
  */
-JsonPresentation::JsonPresentation(FileInformation &fileinfo_, bool verbose_)
-		: FilePresentation(fileinfo_)
-		, verbose(verbose_)
+JsonPresentation::JsonPresentation(FileInformation &fileinfo_, bool verbose_, bool analysisTime_)
+		: FilePresentation(fileinfo_), verbose(verbose_), analysisTime(analysisTime_)
 {
 
 }
@@ -388,11 +388,8 @@ void JsonPresentation::presentLoaderInfo(Writer& writer) const
 	writer.EndObject();
 }
 
-void WriteCertificateChain(JsonPresentation::Writer& writer, const std::vector<Certificate>& certificates)
+void WriteCertificate(JsonPresentation::Writer& writer, const Certificate& cert)
 {
-	writer.StartArray();
-	for (auto&& cert : certificates)
-	{
 		writer.StartObject();
 		serializeString(writer, "subject", cert.getRawSubject());
 		serializeString(writer, "issuer", cert.getRawIssuer());
@@ -451,6 +448,14 @@ void WriteCertificateChain(JsonPresentation::Writer& writer, const std::vector<C
 		writer.EndObject();
 
 		writer.EndObject();
+}
+
+void WriteCertificateChain(JsonPresentation::Writer& writer, const std::vector<Certificate>& certificates)
+{
+	writer.StartArray();
+	for (auto&& cert: certificates)
+	{
+		WriteCertificate(writer, cert);
 	}
 	writer.EndArray();
 }
@@ -460,7 +465,8 @@ void WriteSigner(JsonPresentation::Writer& writer, const Signer& signer)
 	writer.StartObject();
 	writer.String("warnings");
 	writer.StartArray();
-	for (auto&& warn : signer.warnings) {
+	for (auto&& warn: signer.warnings)
+	{
 		writer.String(warn);
 	}
 	writer.EndArray();
@@ -471,12 +477,19 @@ void WriteSigner(JsonPresentation::Writer& writer, const Signer& signer)
 
 	serializeString(writer, "digestAlgorithm", signer.digestAlgorithm);
 
+	if (!signer.chain.empty())
+	{
+		writer.String("certificate");
+		WriteCertificate(writer, signer.chain[0]);
+	}
+
 	writer.String("chain");
 	WriteCertificateChain(writer, signer.chain);
 
 	writer.String("counterSigners");
 	writer.StartArray();
-	for (auto&& csigner : signer.counterSigners) {
+	for (auto&& csigner: signer.counterSigners)
+	{
 		WriteSigner(writer, csigner);
 	}
 	writer.EndArray();
@@ -1253,6 +1266,50 @@ void JsonPresentation::presentIterativeSubtitle(
 	}
 }
 
+void presentPeTimestamps(JsonPresentation::Writer& writer, FileInformation& fileinfo)
+{
+	PeTimestamps pe_timestamps = fileinfo.pe_timestamps;
+
+	writer.String("timestamps");
+	writer.StartObject();
+
+	if (pe_timestamps.coffTime)
+		serializeString(writer, "coffHeader", timestampToGmtDatetime(static_cast<std::time_t>(pe_timestamps.coffTime)));
+	if (pe_timestamps.configTime)
+		serializeString(writer, "loadConfigDir", timestampToGmtDatetime(static_cast<std::time_t>(pe_timestamps.configTime)));
+	if (pe_timestamps.exportTime)
+		serializeString(writer, "exportDir", timestampToGmtDatetime(static_cast<std::time_t>(pe_timestamps.exportTime)));
+
+	writer.String("debugDirEntries");
+	writer.StartArray();
+	for (auto timestamp : pe_timestamps.debugTime)
+	{
+		if (timestamp)
+			writer.String(timestampToGmtDatetime(static_cast<std::time_t>(timestamp)));
+	}
+	writer.EndArray();
+
+	writer.String("resourceDirectories");
+	writer.StartArray();
+	for (auto timestamp : pe_timestamps.resourceTime)
+	{
+		if (timestamp)
+			writer.String(timestampToGmtDatetime(static_cast<std::time_t>(timestamp)));
+	}
+	writer.EndArray();
+
+	writer.String("pdbDebugInfos");
+	writer.StartArray();
+	for (auto timestamp : pe_timestamps.pdbTime)
+	{
+		if (timestamp)
+			writer.String(timestampToGmtDatetime(static_cast<std::time_t>(timestamp)));
+	}
+	writer.EndArray();
+
+	writer.EndObject();
+}
+
 bool JsonPresentation::present()
 {
 	rapidjson::StringBuffer sb;
@@ -1264,7 +1321,13 @@ bool JsonPresentation::present()
 		presentFileinfoVersion(writer);
 	}
 
+	if(analysisTime)
+	{
+		serializeString(writer, "analysisTime", fileinfo.getAnalysisTime());
+	}
+
 	serializeString(writer, "inputFile", fileinfo.getPathToFile());
+	serializeString(writer, "dllName", fileinfo.getExportDllName());
 
 	presentErrors(writer);
 	presentLoaderError(writer);
@@ -1276,6 +1339,11 @@ bool JsonPresentation::present()
 
 	if(verbose)
 	{
+		if (fileinfo.getFileFormatEnum() == retdec::fileformat::Format::PE)
+		{
+			presentPeTimestamps(writer, this->fileinfo);
+		}
+
 		std::string flags, title;
 		std::vector<std::string> desc, info;
 

@@ -116,7 +116,7 @@ class Unpacker:
             try:
                 int(self.args.max_memory)
             except ValueError:
-                utils.print_error('Invalid value for --max-memory: %s (expected a positive integer)'
+                utils.print_error('Invalid value for --max-memory: %s (expected an integer)'
                                   % self.args.max_memory)
                 return False
 
@@ -129,6 +129,22 @@ class Unpacker:
     def _unpack(self, output):
         """Try to unpack the given file.
         """
+
+        if utils.tool_exists('upx'):
+            # Do not return -> try the next unpacker
+            # Try to unpack via UPX
+            self._print('\n##### Trying to unpack ' + self.input + ' into ' + output + ' by using UPX...')
+            out, upx_rc, _ = CmdRunner.run_cmd(['upx', '-d', self.input, '-o', output], buffer_output=True, discard_stdout=True, print_run_msg=True)
+            self._print(out)
+
+            if upx_rc == 0:
+                self._print('##### Unpacking by using UPX: successfully unpacked')
+                return self.unpacker_output, self.RET_UNPACK_OK
+            else:
+                # We cannot distinguish whether upx failed or the input file was not upx-packed
+                self._print('##### Unpacking by using UPX: nothing to do')
+        else:
+            self._print('##### \'upx\' not available: nothing to do')
 
         unpacker_params = [self.input, '-o', output]
 
@@ -149,29 +165,6 @@ class Unpacker:
         else:
             # Do not return -> try the next unpacker
             self._print('##### Unpacking by using generic unpacker: failed')
-
-        if utils.tool_exists('upx'):
-            # Do not return -> try the next unpacker
-            # Try to unpack via UPX
-            self._print('\n##### Trying to unpack ' + self.input + ' into ' + output + ' by using UPX...')
-            out, upx_rc, _ = CmdRunner.run_cmd(['upx', '-d', self.input, '-o', output], buffer_output=True, discard_stdout=True, print_run_msg=True)
-            self._print(out)
-
-            if upx_rc == 0:
-                self._print('##### Unpacking by using UPX: successfully unpacked')
-                if self.args.extended_exit_codes:
-                    if unpacker_rc == self.UNPACKER_EXIT_CODE_NOTHING_TO_DO:
-                        return self.unpacker_output, self.RET_UNPACKER_NOTHING_TO_DO_OTHERS_OK
-                    elif unpacker_rc >= self.UNPACKER_EXIT_CODE_UNPACKING_FAILED:
-                        return self.unpacker_output, self.RET_UNPACKER_FAILED_OTHERS_OK
-                else:
-                    return self.unpacker_output, self.RET_UNPACK_OK
-            else:
-                # We cannot distinguish whether upx failed or the input file was
-                # not upx-packed
-                self._print('##### Unpacking by using UPX: nothing to do')
-        else:
-            self._print('##### \'upx\' not available: nothing to do')
 
         if unpacker_rc >= self.UNPACKER_EXIT_CODE_UNPACKING_FAILED:
             return self.unpacker_output, self.RET_UNPACKER_FAILED

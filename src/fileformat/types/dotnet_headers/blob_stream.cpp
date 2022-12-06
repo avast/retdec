@@ -31,8 +31,8 @@ std::vector<std::uint8_t> BlobStream::getElement(std::size_t offset) const
 		return {};
 	}
 	// ECMA 335 II.24.2.4
-	/* Blob starts with their length in big-endian order 
-	which can be variable in size. We can figure out the 
+	/* Blob starts with their length in big-endian order
+	which can be variable in size. We can figure out the
 	size of the length using first few bits of the first byte. */
 	// If first bit is 0, length is encoded in the first byte
 	else if ((*ptr & 0x80) == 0x00)

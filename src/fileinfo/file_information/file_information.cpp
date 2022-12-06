@@ -106,7 +106,16 @@ std::string FileInformation::getPathToFile() const
 	return filePath;
 }
 
-std::string FileInformation::getTelfhash() const 
+/**
+ * Get time when the analysis was done
+ * @return Analysis time
+ */
+std::string FileInformation::getAnalysisTime() const
+{
+	return analysisTime;
+}
+
+std::string FileInformation::getTelfhash() const
 {
 	return telfhash;
 }
@@ -1338,6 +1347,11 @@ std::string FileInformation::getDepsListFailedToLoad() const
 void FileInformation::setDepsListFailedToLoad(const std::string & depsList)
 {
 	failedDepsList = depsList;
+}
+
+std::string FileInformation::getExportDllName() const
+{
+	return exportTable.getDllName();
 }
 
 /**
@@ -3300,6 +3314,15 @@ void FileInformation::setStatus(ReturnCode state)
 void FileInformation::setPathToFile(const std::string &filepath)
 {
 	filePath = filepath;
+}
+
+/**
+ * Set when the analysis was done
+ * @param filepath Analysis time
+ */
+void FileInformation::setAnalysisTime(const std::string &analysistime)
+{
+	analysisTime = analysistime;
 }
 
 void FileInformation::setTelfhash(const std::string &hash)

@@ -40,12 +40,19 @@ bool AbiArm::isGeneralPurposeRegister(const llvm::Value* val) const
 
 bool AbiArm::isNopInstruction(cs_insn* insn)
 {
+	cs_arm& insnArm = insn->detail->arm;
+
 	// True NOP variants.
 	//
 	if (insn->id == ARM_INS_NOP)
 	{
 		return true;
 	}
+	else if (insn->id == ARM_INS_HINT && insnArm.op_count == 0)
+	{
+		return true;
+	}
+
 
 	return false;
 }

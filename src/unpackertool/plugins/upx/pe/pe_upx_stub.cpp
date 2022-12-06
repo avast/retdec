@@ -1206,7 +1206,7 @@ template <int bits> void PeUpxStub<bits>::saveFile(const std::string& outputFile
 
 	// Write the DOS header, PE headers and section headers
 	pSectionHeader = imageLoader.getSectionHeader(_upx0Sect->getSecSeg()->getIndex());
-	imageLoader.Save(outputFile.c_str());
+	imageLoader.Save(outputFile.c_str(), PeLib::IoFlagNewFile);
 
 	// Save the import directory
 	if((Rva = imageLoader.getDataDirRva(PeLib::PELIB_IMAGE_DIRECTORY_ENTRY_IMPORT)) != 0)

@@ -2048,7 +2048,7 @@ std::vector<UpxStubData> UpxStubSignatures::allStubs =
 	{ Architecture::X86_64, Format::ELF,    &x64ElfNrv2bSignaturev395,  UpxStubVersion::NRV2B, 0x0,    0x90 },
 	{ Architecture::X86_64, Format::ELF,    &x64ElfNrv2bSignaturev396,  UpxStubVersion::NRV2B, 0x0,    0x90 },
 
-	
+
 	{ Architecture::X86_64, Format::ELF,    &x64ElfNrv2dSignaturev395,  UpxStubVersion::NRV2D, 0x0,    0x90 },
 	{ Architecture::X86_64, Format::ELF,    &x64ElfNrv2dSignaturev396,  UpxStubVersion::NRV2D, 0x0,    0x90 },
 

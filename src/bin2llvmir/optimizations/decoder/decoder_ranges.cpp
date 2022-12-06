@@ -106,16 +106,16 @@ void RangesToDecode::removeZeroSequences(
 				}
 				else
 				{
-					// +8 -> first few zeroes might be a part of some
-					// instruction. only somewhere after them might the real
-					// sequence start. if we remove them, we make instruction
+					// +8 -8 -> first few zeroes might be a part of some
+					// instruction. only somewhere after/before them might the real
+					// sequence start/end. if we remove them, we make instruction
 					// undecodable.
 					//
 					if (zeroStart.isDefined()
-							&& zeroStart + 8 < addr
+							&& zeroStart + 16 < addr
 							&& addr - zeroStart >= minSequence)
 					{
-						toRemove.insert(zeroStart+8, addr);
+						toRemove.insert(zeroStart + 8, addr - 8);
 					}
 					zeroStart = Address::Undefined;
 				}
@@ -125,10 +125,10 @@ void RangesToDecode::removeZeroSequences(
 			else
 			{
 				if (zeroStart.isDefined()
-						&& zeroStart + 8 < end
+						&& zeroStart + 16 < end
 						&& end - zeroStart >= minSequence)
 				{
-					toRemove.insert(zeroStart + 8, end);
+					toRemove.insert(zeroStart + 8, end - 8);
 				}
 				break;
 			}
@@ -137,10 +137,10 @@ void RangesToDecode::removeZeroSequences(
 		if (iter >= size
 				&& byte == 0
 				&& zeroStart.isDefined()
-				&& zeroStart + 8 < addr
+				&& zeroStart + 16 < addr
 				&& addr - zeroStart >= minSequence)
 		{
-			toRemove.insert(zeroStart + 8, addr);
+			toRemove.insert(zeroStart + 8, addr - 8);
 		}
 	}
 

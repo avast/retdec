@@ -8,6 +8,11 @@
 #define RETDEC_FILEFORMAT_PE_FORMAT_PARSER_H
 
 #include "retdec/common/range.h"
+#include "retdec/pelib/DebugDirectory.h"
+#include "retdec/pelib/DelayImportDirectory.h"
+#include "retdec/pelib/ExportDirectory.h"
+#include "retdec/pelib/ImportDirectory.h"
+#include "retdec/pelib/ResourceDirectory.h"
 #include "retdec/utils/alignment.h"
 #include "retdec/utils/string.h"
 #include "retdec/fileformat/fftypes.h"
@@ -31,6 +36,11 @@ class PeFormatParser
 	{}
 
 	virtual ~PeFormatParser() = default;
+
+	const PeLib::PeFileT* getPefile()
+	{
+		return peFile;
+	}
 
 	/// @name Detection methods
 	/// @{
@@ -333,6 +343,7 @@ class PeFormatParser
 		const auto imageBase = peFile->imageLoader().getImageBase();
 		const auto bits = peFile->imageLoader().getImageBitability();
 		std::string importName;
+		std::uint64_t addressMask = (bits == 0x20) ? 0xFFFFFFFF : 0xFFFFFFFFFFFFFFFF;
 		std::uint32_t ordinalNumber = 0;
 		std::uint32_t patchRva = 0;
 		std::uint16_t importHint = 0;
@@ -352,7 +363,10 @@ class PeFormatParser
 			import->setName(importName);
 
 			import->setLibraryIndex(fileIndex);
-			import->setAddress(imageBase + patchRva);
+
+			// Don't allow address overflow for samples with high image bases
+			// (342EE6CCB04AB0194275360EE6F752007B9F0CE5420203A41C8C9B5BAC7626DD)
+			import->setAddress((imageBase + patchRva) & addressMask);
 			return import;
 		}
 
@@ -554,6 +568,31 @@ class PeFormatParser
 	std::uint32_t getSecurityDirSize() const
 	{
 		return peFile->imageLoader().getDataDirSize(PeLib::PELIB_IMAGE_DIRECTORY_ENTRY_SECURITY);
+	}
+
+	const PeLib::ImportDirectory& getImportDirectory() const
+	{
+		return peFile->impDir();
+	}
+
+	const PeLib::DebugDirectory& getDebugDirectory() const
+	{
+		return peFile->debugDir();
+	}
+
+	const PeLib::ResourceDirectory& getResourceDirectory() const
+	{
+		return peFile->resDir();
+	}
+
+	const PeLib::ExportDirectory& getExportDirectory() const
+	{
+		return peFile->expDir();
+	}
+
+	const PeLib::DelayImportDirectory& getDelayDirectory() const
+	{
+		return peFile->delayImports();
 	}
 
 	retdec::common::RangeContainer<std::uint64_t> getImportDirectoryOccupiedAddresses() const

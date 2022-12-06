@@ -152,8 +152,6 @@ add_library(llvmir2hll STATIC
 	optimizer/func_optimizer.cpp
 	optimizer/optimizer.cpp
 	optimizer/optimizer_manager.cpp
-	optimizer/optimizers/aggressive_deref_optimizer.cpp
-	optimizer/optimizers/aggressive_global_to_local_optimizer.cpp
 	optimizer/optimizers/bit_op_to_log_op_optimizer.cpp
 	optimizer/optimizers/bit_shift_optimizer.cpp
 	optimizer/optimizers/break_continue_return_optimizer.cpp
