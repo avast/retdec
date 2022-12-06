@@ -1,6 +1,6 @@
 set -x
 
-IGNORE_TESTS=$(cat $1 | tr '\n' ',' | sed 's/,$//' | tr '.' '\\')
+IGNORE_TESTS=$(cat $1 | tr -d '\r' | tr '\n' ',' | sed 's/,$//' | tr '.' '\\')
 
 # We need to specify each path in Windows format.
 WIN_PWD=D:$(echo $PWD | sed 's/^\/d//' | sed 's/\//\\/g')
