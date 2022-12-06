@@ -1,4 +1,4 @@
-FROM ubuntu:focal AS builder
+FROM ubuntu:jammy-20220801 AS builder
 
 RUN useradd -m retdec
 WORKDIR /home/retdec
@@ -20,18 +20,19 @@ RUN apt-get -y update && \
 	automake                                            \
 	pkg-config                                          \
 	m4                                                  \
-	libtool
+	libtool                                             \
+	python-is-python3
 
 USER retdec
 RUN git clone https://github.com/avast/retdec && \
 	cd retdec && \
 	mkdir build && \
 	cd build && \
-	cmake .. -DCMAKE_INSTALL_PREFIX=/home/retdec/retdec-install -DCMAKE_LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/7/ && \
+	cmake .. -DCMAKE_INSTALL_PREFIX=/home/retdec/retdec-install -DCMAKE_BUILD_TYPE=Release && \
 	make -j$(nproc) && \
 	make install
 
-FROM ubuntu:focal
+FROM ubuntu:jammy-20220801
 
 RUN useradd -m retdec
 WORKDIR /home/retdec

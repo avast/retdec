@@ -1,4 +1,4 @@
-FROM ubuntu:focal
+FROM ubuntu:jammy-20220801
 
 RUN useradd -m retdec
 WORKDIR /home/retdec
@@ -20,7 +20,8 @@ RUN apt-get -y update && \
 	automake                                            \
 	pkg-config                                          \
 	m4                                                  \
-	libtool
+	libtool                                             \
+	python-is-python3
 
 # New versions of docker (>v17.09.0-ce) support the --chown flag given to COPY.
 # Once this version is more wide spread, consider updating this repository's
@@ -32,7 +33,7 @@ USER retdec
 RUN cd retdec && \
 	mkdir build && \
 	cd build && \
-	cmake .. -DCMAKE_INSTALL_PREFIX=/home/retdec/retdec-install -DCMAKE_LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/7/ && \
+	cmake .. -DCMAKE_INSTALL_PREFIX=/home/retdec/retdec-install && \
 	make -j$(nproc) && \
 	make install
 
