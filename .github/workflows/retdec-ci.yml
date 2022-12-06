@@ -80,8 +80,7 @@ jobs:
               shell: bash
 
             - name: Run Tests
-              run: bash "${WORKFLOWS_DIR}/${RUNNER_OS}/run-tests.sh"
-
+              run: bash "${WORKFLOWS_DIR}/${RUNNER_OS}/run-tests.sh" "${WORKFLOWS_DIR}/${RUNNER_OS}/ignore_${{ matrix.type }}"
 
             # Prepare files for publishing/release. The resulting structure:
             #   RetDec-OSType-Release

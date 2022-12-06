@@ -1,5 +1,9 @@
 #!/usr/bin/bash
 
+set -x
+
+IGNORE_TESTS=$(cat $1 | tr '\n' ',' | sed 's/,$//' | tr '.' '/')
+
 cat <<EOF > $PWD/retdec-regression-tests-framework/config_local.ini
 [runner]
 ; Path to the extracted Clang package containing subdirectories such as bin, include, lib, share.
@@ -8,6 +12,8 @@ clang_dir = $PWD/clang
 tests_root_dir = $PWD/retdec-regression-tests
 ; Path to the RetDec's installation directory.
 retdec_install_dir = $PWD/install
+; Exclude directories
+excluded_dirs = $IGNORE_TESTS
 EOF
 
 cd "$PWD/retdec-regression-tests-framework"
