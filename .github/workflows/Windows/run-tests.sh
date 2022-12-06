@@ -1,3 +1,7 @@
+set -x
+
+IGNORE_TESTS=$(cat $1 | tr '\n' ',' | sed 's/,$//' | tr '.' '\\')
+
 # We need to specify each path in Windows format.
 WIN_PWD=D:$(echo $PWD | sed 's/^\/d//' | sed 's/\//\\/g')
 
@@ -9,6 +13,8 @@ clang_dir = $WIN_PWD\\clang
 tests_root_dir = $WIN_PWD\\retdec-regression-tests
 ; Path to the RetDec's installation directory.
 retdec_install_dir = $WIN_PWD\\install
+; Exclude directories
+excluded_dirs = $IGNORE_TESTS
 EOF
 
 cd "$PWD/retdec-regression-tests-framework"

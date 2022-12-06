@@ -1,5 +1,9 @@
 #!/usr/bin/bash
 
+set -x
+
+IGNORE_TESTS=$(cat $1 | tr '\n' ',' | sed 's/,$//' | tr '.' '/')
+
 cat <<EOF > $PWD/retdec-regression-tests-framework/config_local.ini
 [runner]
 ; Path to the extracted Clang package containing subdirectories such as bin, include, lib, share.
@@ -19,7 +23,8 @@ retdec_install_dir = $PWD/install
 ; (https://github.com/avast/retdec/issues/213). So, we decided to skip tests that
 ; compile output C files when running regression tests on macOS.
 skip_c_compilation_tests = 0
-
+; Exclude directories
+excluded_dirs = $IGNORE_TESTS
 EOF
 
 cd "$PWD/retdec-regression-tests-framework"
