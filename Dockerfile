@@ -1,4 +1,4 @@
-FROM ubuntu:jammy-20220801 AS builder
+FROM ubuntu:jammy-20220101 AS builder
 
 RUN useradd -m retdec
 WORKDIR /home/retdec
@@ -32,7 +32,7 @@ RUN git clone https://github.com/avast/retdec && \
 	make -j$(nproc) && \
 	make install
 
-FROM ubuntu:jammy-20220801
+FROM ubuntu:jammy-20220101
 
 RUN useradd -m retdec
 WORKDIR /home/retdec
