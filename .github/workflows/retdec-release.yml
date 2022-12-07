@@ -1,0 +1,119 @@
+## Automatic Release flow.
+
+name: RetDec Release
+
+on:
+  push:
+    # Trigger anytime a release tag is created.
+    tags:
+      - "v*"
+
+env:
+  # Universal ENV variable containing path to all workflows scripts.
+  # Each OS has it's own directory there: Windows, macOS, Linux.
+  # Names of directories are compatible with the $RUNNER_OS variable.
+  WORKFLOWS_DIR: ${{ github.workspace }}/.github/workflows/
+
+jobs:
+  builder:
+    strategy:
+      matrix:
+        sys:
+          - { os: ubuntu-latest, shell: bash }
+          - { os: windows-2019, shell: bash }
+          - { os: macos-11, shell: bash }
+
+      # Fail if one instance fails.
+      fail-fast: true
+
+    name: Build RetDec (${{ matrix.sys.os }})
+
+    runs-on: ${{ matrix.sys.os }}
+
+    defaults:
+      run:
+        shell: ${{ matrix.sys.shell }}
+
+    steps:
+      # Checkouts the correct commit/branch.
+      - uses: actions/checkout@v3
+
+        # Installs dependencies on all systems.
+      - name: Install Dependencies
+        run: bash "${WORKFLOWS_DIR}/${RUNNER_OS}/install-deps.sh"
+        shell: bash
+
+      - name: Build RetDec
+        run: bash "${WORKFLOWS_DIR}/${RUNNER_OS}/build.sh"
+        env:
+          BUILD_TYPE: Release
+          RETDEC_MSVC_STATIC_RUNTIME: True
+        shell: bash
+
+        # Prepare files for publishing/release. The resulting structure:
+        #   RetDec-OSType-Release
+        #   |_ bin
+        #   |_ include
+        #   |_ lib
+        #   |_ share
+        #   |  \__ retdec/support/
+        #   |
+        #   |_ CHANGELOG.md
+        #   |_ LICENSE
+        #   |_ LICENSE-THIRD-PARTY
+        #   \_ README.md
+      - name: Prepare Files for Publishing
+        run: |
+          cp LICENSE* install/
+          cp SECURITY.md install/
+          cp CHANGELOG.md install/
+          cp README.md install/
+
+      - name: Pack Artifacts Compactly
+        if: runner.os != 'Windows'
+        run: |
+          tar -cvJf RetDec-${{ github.ref_name }}-${{ runner.os }}-Release.tar.xz *
+          mv *.tar.xz ..
+        working-directory: install
+
+      - name: Pack Artifacts Compactly on Windows
+        if: runner.os == 'Windows'
+        run: |
+          7z a RetDec-${{ github.ref_name }}-${{ runner.os }}-Release.7z *
+          mv *.7z ..
+        shell: bash
+        working-directory: install
+
+      - name: Archive Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: RetDec-${{ github.ref_name }}-${{ runner.os }}-Release
+          path: RetDec-*
+
+  release:
+    name: Release RetDec
+
+    runs-on: ubuntu-latest
+    needs: builder
+
+    steps:
+      - uses: actions/checkout@v3
+
+      # Fetch artifacts from the build step.
+      - name: Fetch Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: artifacts
+
+      # Create a release.
+      - name: Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Release ${{ github.ref_name }}
+          generate_release_notes: true
+          files: |
+            LICENSE*
+            CHANGELOG.md
+            artifacts/*/*.tar.xz
+            artifacts/*/*.7z
