@@ -1,12 +1,23 @@
 # Changelog
 
-# dev
+# v5.0 (2022-12-08)
 
+The major change:
+
+* New Feature: RetDec is now a library ([#779](https://github.com/avast/retdec/pull/779).
+  * Related changes are the removal of `retdec-decompiler.py` (it is now a binary, e.g. `retdec-decompiler.exe` on Windows), `retdec-bin2llvmir`, `retdec-llvmir2hll`, and some other supportive functionality.
+  * See an example in `src/retdectool`, or an actual implementation of RetDec executable in `src/retdec-decompiler`, to find out how to use RetDec library.
+
+Other changes:
+
+* New feature: Use GitHub Actions Continuous integration ([#1053](https://github.com/avast/retdec/pull/1053), [#1125](https://github.com/avast/retdec/pull/1125)).
 * New feature: Add checking for damaged (unloadable) ELF files ([#1036](https://github.com/avast/retdec/pull/1036), [regression-tests #113](https://github.com/avast/retdec-regression-tests/pull/113)).
 * New feature: Parse various PE timestamps and make them available in Fileinfo ([#1035](https://github.com/avast/retdec/pull/1035), [regression-tests #112](https://github.com/avast/retdec-regression-tests/pull/112)).
 * New feature: Generate ELF (import) symbol-related hashes, including VirusTotal compatible `telfhash` ([#286](https://github.com/avast/retdec/issues/286), [#936](https://github.com/avast/retdec/pull/936)).
 * New Feature: `retdec-fileinfo` can be configured via JSON file. See `--fileinfo-config` option for more details.
-* New Feature: RetDec is now also a library ([#779](https://github.com/avast/retdec/pull/779). Related changes are the removal of `retdec-decompiler.py` (it is now a binary, e.g. `retdec-decompiler.exe` on Windows), `retdec-bin2llvmir`, `retdec-llvmir2hll`, and some other supportive functionality.
+* Enhancement: Use Capstone v5 instead of v4 ([#1059](https://github.com/avast/retdec/pull/1059), [#1124](https://github.com/avast/retdec/pull/1124)).
+* Enhancement: Add prototypes for dynamically-linked functions without headers ([#1092](https://github.com/avast/retdec/pull/1092)).
+* Enhancement: Handle Procedure Linkage calls for 32bit x86 from gcc ([#1088](https://github.com/avast/retdec/pull/1088)).
 * Enhancement: Add DLL name from export directory to output ([#1060](https://github.com/avast/retdec/pull/1060)).
 * Enhancement: Updated YARA to `v4.2.0-rc1` ([#1061](https://github.com/avast/retdec/pull/1061)).
 * Enhancement: Use [Authenticode parser](https://github.com/avast/authenticode-parser) library instead of RetDec's own implementation ([#1027](https://github.com/avast/retdec/pull/1027), [regression-tests #110](https://github.com/avast/retdec-regression-tests/pull/110)).
@@ -30,6 +41,7 @@
 * Enhancement: Added support for new ELF UPX unpacking stubs (versions 3.93 - 3.96) ([#929](https://github.com/avast/retdec/pull/929)).
 * Enhancement: Improved YARA rules for detection of the SHA-512 algorithm ([#935](https://github.com/avast/retdec/pull/935)).
 * Enhancement: Improved PE Authenticode parsing ([#902](https://github.com/avast/retdec/pull/902), [#380](https://github.com/avast/retdec/issues/380)).
+* Fix: Fix parameter and return types for dynamically called functions ([#1085](https://github.com/avast/retdec/pull/1085)).
 * Fix: Disable memory-limiting capabilities on macOS because there is currently no working way of doing so ([#1074](https://github.com/avast/retdec/pull/1074), [#1045](https://github.com/avast/retdec/issues/1045), [#379](https://github.com/avast/retdec/issues/379)).
 * Fix: Add OpenSSL 3.0 support ([#1040](https://github.com/avast/retdec/issues/1040), [#1041](https://github.com/avast/retdec/pull/1041)).
 * Fix: `ImageLoader::Save()` properly saves PE's Rich Header and section data ([#1028](https://github.com/avast/retdec/issues/1028), [#1029](https://github.com/avast/retdec/pull/1029)).
@@ -61,6 +73,7 @@
 * Fix: Fixed parsing of corrupted resources in `retdec-fileinfo` ([#907](https://github.com/avast/retdec/pull/907), [#911](https://github.com/avast/retdec/issues/911)).
 * Fix: MPRESS unpacker will now correctly copy resources, exports and other non-packed sections correctly.
 * Fix: `retdec-fileinfo.py` is now usable even when decompiler is not installed.
+* ... and many others.
 
 # v4.0 (2020-04-07)
 

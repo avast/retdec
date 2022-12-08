@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.13)
 
 project(retdec
 	LANGUAGES C CXX
-	VERSION 4.0
+	VERSION 5.0
 )
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/GetGitRevisionDescription.cmake)

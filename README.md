@@ -113,12 +113,12 @@ Please, ensure that you reading instructions corresponding to the used RetDec ve
 
 ### Use of RetDec libraries
 
-As of RetDec version 4.0 you can easily use various RetDec libraries in your projects - if they are build with CMake. RetDec installation contains all the necessary headers, libraries, and CMake scripts.
+You can easily use various RetDec libraries in your projects - if they are build with CMake. RetDec installation contains all the necessary headers, libraries, and CMake scripts.
 
 If you installed RetDec into a standard installation location of your system (e.g. `/usr`, `/usr/local`), all you need to do in order to use its components is:
 
 ```cmake
-find_package(retdec 4.0 REQUIRED
+find_package(retdec 5.0 REQUIRED
    COMPONENTS
       <component>
       [...]
