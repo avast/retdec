@@ -308,15 +308,25 @@ docker run --rm -v /path/to/local/directory:/destination retdec retdec-decompile
 ```
 Note: Do not modify the `/destination` part is. You only need to change `/path/to/local/directory`. Output files will then be generated to `/path/to/local/directory`.
 
-## Automated TeamCity Builds
+## Nightly Builds
 
-Our TeamCity servers are continuously generating up-to-date RetDec packages from the latest commit in the `master` branch. These are mostly meant to be used by RetDec developers, contributors, and other people experimenting with the product (e.g. testing if an issue present in the official release still exists in the current `master`).
+We generate up-to-date RetDec packages from the latest commit in the `master` branch in two ways:
+* Using our TeamCity servers
+* Using Github Actions.
+
+The builds are mostly meant to be used by RetDec developers, contributors, and other people experimenting with the product (e.g. testing if an issue present in the official release still exists in the current `master`).
 
 You can use these as you wish, but keep in mind that there are no guarantees they will work on your system (especially the Linux version), and that regressions are a possibility. To get a stable RetDec version, either download the latest official pre-built package or build the latest RetDec version tag.
+
+**TeamCity**
 
 * [Windows Server 2016, version 10.0](https://retdec-tc.avast.com/repository/download/Retdec_WinBuild/.lastSuccessful/package/retdec-master-windows-64b.7z?guest=1)
 * [Ubuntu Bionic Linux, version 18.04](https://retdec-tc.avast.com/repository/download/RetDec_LinuxBuild/.lastSuccessful/package/retdec-master-linux-64b.tar.xz?guest=1)
 * [Mac OS X, version 10.14.6](https://retdec-tc.avast.com/repository/download/Retdec_MacBuild/.lastSuccessful/package/retdec-master-macos-64b.tar.xz?guest=1)
+
+**Github Actions**
+
+You can find builds for macOS, Linux and Windows in the [latest RetDec CI workflow run](https://github.com/avast/retdec/actions/workflows/retdec-ci.yml).
 
 ## Project Documentation
 
