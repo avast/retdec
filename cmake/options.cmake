@@ -6,6 +6,7 @@ option(RETDEC_TESTS "Build tests." OFF)
 option(RETDEC_DEV_TOOLS "Build dev tools." OFF)
 option(RETDEC_COMPILE_YARA "Compile YARA rules at installation." ON)
 option(RETDEC_MSVC_STATIC_RUNTIME "Use a multi-threaded statically-linked runtime library." OFF)
+option(RETDEC_USE_SYSTEM_CAPSTONE "Use Capstone installed in the system." OFF)
 
 # Component options.
 #

@@ -1,4 +1,49 @@
 
+if(RETDEC_USE_SYSTEM_CAPSTONE)
+	message(STATUS "Capstone: using system Capstone.")
+
+	include(FindPkgConfig)
+	pkg_check_modules(CAPSTONE REQUIRED capstone>=5.0)
+
+	add_library(capstone INTERFACE)
+	add_library(retdec::deps::capstone ALIAS capstone)
+
+	target_include_directories(capstone
+		SYSTEM INTERFACE
+			$<BUILD_INTERFACE:${CAPSTONE_INCLUDE_DIRS}>
+			$<INSTALL_INTERFACE:${CAPSTONE_INCLUDE_DIRS}>
+	)
+
+	target_link_libraries(capstone INTERFACE
+		$<BUILD_INTERFACE:${CAPSTONE_LINK_LIBRARIES}>
+		$<INSTALL_INTERFACE:${CAPSTONE_LINK_LIBRARIES}>
+	)
+
+	# Install targets.
+	install(TARGETS capstone
+		EXPORT capstone-targets
+	)
+
+	# Export targets.
+	install(EXPORT capstone-targets
+		FILE "retdec-capstone-targets.cmake"
+		NAMESPACE retdec::deps::
+		DESTINATION ${RETDEC_INSTALL_CMAKE_DIR}
+	)
+
+	# Install CMake files.
+	install(
+		FILES
+			"${CMAKE_CURRENT_LIST_DIR}/retdec-system-capstone-config.cmake"
+		DESTINATION
+			"${RETDEC_INSTALL_CMAKE_DIR}"
+		RENAME
+			"retdec-capstone-config.cmake"
+	)
+
+	return()
+endif()
+
 set(CAPSTONE_INSTALL_DIR ${CMAKE_BINARY_DIR}/deps/install/capstone)
 
 set(CAPSTONE_LIB_NAME  ${CMAKE_STATIC_LIBRARY_PREFIX}capstone${CMAKE_STATIC_LIBRARY_SUFFIX})
