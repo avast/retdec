@@ -10,7 +10,7 @@ endif()
 set(YARA_INCLUDE_DIR  ${YARA_DIR}/libyara/include)
 set(YARA_LIBRARY_NAME "libyara")
 
-option(YARA_MAKE_PROGRAM "A path to make tool which should be used to compile yara" "make")
+set(YARA_MAKE_PROGRAM "make" CACHE STRING "A path to make tool which should be used to compile yara")
 # Use the same make tool when using Unix makefiles
 if(${CMAKE_GENERATOR} STREQUAL "Unix Makefiles")
 	set(YARA_MAKE_PROGRAM ${CMAKE_MAKE_PROGRAM})
