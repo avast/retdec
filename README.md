@@ -10,6 +10,7 @@ The RetDec project is currently in a **limited maintenance mode** due to a lack 
 
 [![Travis CI build status](https://travis-ci.org/avast/retdec.svg?branch=master)](https://travis-ci.org/avast/retdec)
 [![TeamCity build status](https://retdec-tc.avast.com/app/rest/builds/aggregated/strob:(buildType:(project:(id:Retdec)))/statusIcon)](https://retdec-tc.avast.com/project.html?projectId=Retdec&guest=1)
+[![RetDec CI](https://github.com/avast/retdec/actions/workflows/retdec-ci.yml/badge.svg)](https://github.com/avast/retdec/actions/workflows/retdec-ci.yml)
 
 [RetDec](https://retdec.com/) is a retargetable machine-code decompiler based on [LLVM](https://llvm.org/).
 
