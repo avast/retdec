@@ -15,6 +15,8 @@ if(NOT TARGET retdec::fileformat)
             elfio
             llvm
             tlsh
+            stb
+            authenticode
     )
 
     include(${CMAKE_CURRENT_LIST_DIR}/retdec-fileformat-targets.cmake)
