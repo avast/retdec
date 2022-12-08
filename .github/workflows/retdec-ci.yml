@@ -3,141 +3,141 @@
 name: RetDec CI
 
 on:
-    push:
-        branches:
-            - master   # Activate CI on push on master.
-            - 'test-*' # Activate CI on branch with prefix test-.
+  push:
+    branches:
+      - master   # Activate CI on push on master.
+      - 'test-*' # Activate CI on branch with prefix test-.
 
     pull_request:
-        branches:
-            - master # Activate on pull request.
+      branches:
+        - master # Activate on pull request.
 
 env:
-    # Universal ENV variable containing path to all workflows scripts.
-    # Each OS has it's own directory there: Windows, macOS, Linux.
-    # Names of directories are compatible with the $RUNNER_OS variable.
-    WORKFLOWS_DIR: ${{ github.workspace }}/.github/workflows/
+  # Universal ENV variable containing path to all workflows scripts.
+  # Each OS has it's own directory there: Windows, macOS, Linux.
+  # Names of directories are compatible with the $RUNNER_OS variable.
+  WORKFLOWS_DIR: ${{ github.workspace }}/.github/workflows/
 
 jobs:
-    ci-runner:
-        strategy:
-            matrix:
-                sys:
-                    - { os: ubuntu-latest, shell: bash }
-                    - { os: windows-2019, shell: 'msys2 {0}' }
-                    - { os: macos-11, shell: bash }
-                type: [Release, Debug]
+  ci-runner:
+    strategy:
+      matrix:
+        sys:
+          - { os: ubuntu-latest, shell: bash }
+          - { os: windows-2019, shell: 'msys2 {0}' }
+          - { os: macos-11, shell: bash }
+        type: [Release, Debug]
 
-            # Let other builds finish.
-            fail-fast: false
+      # Let other builds finish.
+      fail-fast: false
 
-        name: ${{ matrix.sys.os }} (${{ matrix.type }})
+    name: ${{ matrix.sys.os }} (${{ matrix.type }})
 
-        runs-on: ${{ matrix.sys.os }}
+    runs-on: ${{ matrix.sys.os }}
 
-        defaults:
-            run:
-                shell: ${{ matrix.sys.shell }}
+    defaults:
+      run:
+        shell: ${{ matrix.sys.shell }}
 
-        steps:
-            # Checkouts the correct commit/branch.
-            - uses: actions/checkout@v3
+    steps:
+      # Checkouts the correct commit/branch.
+      - uses: actions/checkout@v3
 
-            # We want to use msys2 bash on Windows.
-            - uses: msys2/setup-msys2@v2
-              if: runner.os == 'Windows'
+        # We want to use msys2 bash on Windows.
+      - uses: msys2/setup-msys2@v2
+        if: runner.os == 'Windows'
 
-            # Installs dependencies on all systems.
-            - name: Install Dependencies
-              run: bash "${WORKFLOWS_DIR}/${RUNNER_OS}/install-deps.sh"
-              shell: bash
+        # Installs dependencies on all systems.
+      - name: Install Dependencies
+        run: bash "${WORKFLOWS_DIR}/${RUNNER_OS}/install-deps.sh"
+        shell: bash
 
-            - name: Windows Additional Packages
-              if: runner.os == 'Windows'
-              run: |
-                    pacman -S mingw-w64-i686-gcc --noconfirm
-                    pacman -S mingw-w64-x86_64-gcc --noconfirm
-                    pacman -S mingw-w64-x86_64-python --noconfirm
-                    pacman -S python3-pip --noconfirm
+      - name: Windows Additional Packages
+        if: runner.os == 'Windows'
+        run: |
+          pacman -S mingw-w64-i686-gcc --noconfirm
+          pacman -S mingw-w64-x86_64-gcc --noconfirm
+          pacman -S mingw-w64-x86_64-python --noconfirm
+          pacman -S python3-pip --noconfirm
 
-            # Regression tests framework requires specific version of clang.
-            # The following script(s) prepares clang on each platform.
-            - name: Prepare Clang
-              run: bash "${WORKFLOWS_DIR}/${RUNNER_OS}/prepare-clang.sh"
-              env:
-                  # Clang will be available in build/clang
-                  CLANG_DIR_OUT: clang
-              shell: bash
+          # Regression tests framework requires specific version of clang.
+          # The following script(s) prepares clang on each platform.
+      - name: Prepare Clang
+        run: bash "${WORKFLOWS_DIR}/${RUNNER_OS}/prepare-clang.sh"
+        env:
+          # Clang will be available in build/clang
+          CLANG_DIR_OUT: clang
+        shell: bash
 
-            - name: Build RetDec
-              run: bash "${WORKFLOWS_DIR}/${RUNNER_OS}/build.sh"
-              env:
-                  BUILD_TYPE: ${{ matrix.type }}
-              shell: bash
+      - name: Build RetDec
+        run: bash "${WORKFLOWS_DIR}/${RUNNER_OS}/build.sh"
+        env:
+          BUILD_TYPE: ${{ matrix.type }}
+        shell: bash
 
-            - name: Prepare RetDec Regression Tests & Framework
-              run: bash "${WORKFLOWS_DIR}/common/prepare-retdec-tests.sh"
-              shell: bash
+      - name: Prepare RetDec Regression Tests & Framework
+        run: bash "${WORKFLOWS_DIR}/common/prepare-retdec-tests.sh"
+        shell: bash
 
-            - name: Run Tests
-              run: bash "${WORKFLOWS_DIR}/${RUNNER_OS}/run-tests.sh" "${WORKFLOWS_DIR}/${RUNNER_OS}/ignore_${{ matrix.type }}"
+      - name: Run Tests
+        run: bash "${WORKFLOWS_DIR}/${RUNNER_OS}/run-tests.sh" "${WORKFLOWS_DIR}/${RUNNER_OS}/ignore_${{ matrix.type }}"
 
-            # Prepare files for publishing/release. The resulting structure:
-            #   RetDec-OSType-Release
-            #   |_ bin
-            #   |_ include
-            #   |_ lib
-            #   |_ share
-            #   |  \__ retdec/support/
-            #   |
-            #   |_ CHANGELOG.md
-            #   |_ LICENSE
-            #   |_ LICENSE-THIRD-PARTY
-            #   \_ README.md
-            - name: Prepare Files for Publishing
-              if: matrix.type == 'Release'
-              run: |
-                    cp LICENSE* install/
-                    cp CHANGELOG.md install/
-                    cp README.md install/
+        # Prepare files for publishing/release. The resulting structure:
+        #   RetDec-OSType-Release
+        #   |_ bin
+        #   |_ include
+        #   |_ lib
+        #   |_ share
+        #   |  \__ retdec/support/
+        #   |
+        #   |_ CHANGELOG.md
+        #   |_ LICENSE
+        #   |_ LICENSE-THIRD-PARTY
+        #   \_ README.md
+      - name: Prepare Files for Publishing
+        if: matrix.type == 'Release'
+        run: |
+          cp LICENSE* install/
+          cp CHANGELOG.md install/
+          cp README.md install/
 
-            - name: Archive Artifacts
-              if: matrix.type == 'Release'
-              uses: actions/upload-artifact@v1
-              with:
-                  name: RetDec-${{ runner.os }}-Release
-                  path: install
+      - name: Archive Artifacts
+        if: matrix.type == 'Release'
+        uses: actions/upload-artifact@v1
+        with:
+          name: RetDec-${{ runner.os }}-Release
+          path: install
 
-    docs-build:
-        name: doxygen-build (Linux)
-        runs-on: ubuntu-18.04
+  docs-build:
+    name: doxygen-build (Linux)
+    runs-on: ubuntu-18.04
 
-        steps:
-            # Checkouts the correct commit/branch.
-            - uses: actions/checkout@v3
+    steps:
+      # Checkouts the correct commit/branch.
+      - uses: actions/checkout@v3
 
-            # Installs dependencies on all systems.
-            - name: Install Dependencies
-              run: bash "${WORKFLOWS_DIR}/Linux/install-deps.sh"
-              shell: bash
+        # Installs dependencies on all systems.
+      - name: Install Dependencies
+        run: bash "${WORKFLOWS_DIR}/Linux/install-deps.sh"
+        shell: bash
 
-            - name: Build Docs
-              run: |
-                    mkdir build && cd build
-                    cmake .. -DCMAKE_INSTALL_PREFIX=install -DRETDEC_DOC=ON
-                    make doc -j$(nproc)
+      - name: Build Docs
+        run: |
+          mkdir build && cd build
+          cmake .. -DCMAKE_INSTALL_PREFIX=install -DRETDEC_DOC=ON
+          make doc -j$(nproc)
 
-            - name: Test Docs
-              run: |
-                    file="build/doc/doxygen/doxygen.log"
-                    echo "checking file: $file"
-                    content="$(cat $file)"
-                    if [ "$content" = "" ]; then
-                        echo "===> ok"
-                    else
-                        echo "===> fail:"
-                        echo "=========================================="
-                        echo "$content"
-                        echo "=========================================="
-                        exit 1
-                    fi
+      - name: Test Docs
+        run: |
+          file="build/doc/doxygen/doxygen.log"
+          echo "checking file: $file"
+          content="$(cat $file)"
+          if [ "$content" = "" ]; then
+            echo "===> ok"
+            else
+            echo "===> fail:"
+            echo "=========================================="
+            echo "$content"
+            echo "=========================================="
+            exit 1
+          fi
