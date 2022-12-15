@@ -8,9 +8,9 @@ on:
       - master   # Activate CI on push on master.
       - 'test-*' # Activate CI on branch with prefix test-.
 
-    pull_request:
-      branches:
-        - master # Activate on pull request.
+  pull_request:
+    branches:
+      - master # Activate on pull request.
 
 env:
   # Universal ENV variable containing path to all workflows scripts.
