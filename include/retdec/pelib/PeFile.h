@@ -177,13 +177,14 @@ namespace PeLib
 		/// Checks the entry point code
 		LoaderError checkEntryPointErrors() const;
 		LoaderError checkForInMemoryLayout(LoaderError ldrError) const;
+		bool isFirstSectionZeroed() const;
 
 		/// Returns a loader error, if there was any
 		LoaderError loaderError() const;
 
 		unsigned int getBits() const
 		{
-		  return m_imageLoader.getImageBitability();
+			return m_imageLoader.getImageBitability();
 		}
 
 		/// Accessor function for the export directory.
