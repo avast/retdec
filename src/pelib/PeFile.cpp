@@ -458,29 +458,55 @@ namespace PeLib
 			std::uint32_t sectionAlignment = m_imageLoader.getSectionAlignment();
 			std::uint32_t fileAlignment = m_imageLoader.getFileAlignment();
 			std::uint32_t sizeOfHeaders = m_imageLoader.getSizeOfHeaders();
+			std::uint32_t numberOfSections = m_imageLoader.getNumberOfSections();
 
 			// SectionAlignment must be greater than file alignment
-			if(sectionAlignment >= PELIB_PAGE_SIZE && sectionAlignment > fileAlignment)
+			if(numberOfSections > 0 && sectionAlignment >= PELIB_PAGE_SIZE && sectionAlignment > fileAlignment)
 			{
 				// SizeOfHeaders must be smaller than SectionAlignment
 				if(sizeOfHeaders < sectionAlignment)
 				{
+					// Calculate the length of the data between the header and the first section
 					std::size_t headerDataSize = sectionAlignment - sizeOfHeaders;
 
-					// Read the entire after-header-data
+					// Read the data between headers and the image alignment
 					ByteBuffer headerData(headerDataSize);
 					m_iStream.seekg(sizeOfHeaders, std::ios::beg);
 					m_iStream.read(reinterpret_cast<char *>(headerData.data()), headerDataSize);
 
-					// Check whether there are zeros only. If yes, we consider
-					// the file to be an in-memory image
+					// If the entire rest of the header is zeroed, it may mean that it's an in-memory image
 					if(std::all_of(headerData.begin(), headerData.end(), [](char item) { return item == 0; }))
-						ldrError = LDR_ERROR_INMEMORY_IMAGE;
+					{
+						// Most images have *something* at the RVA of 0x1000.
+						// If not, we can't assume an in-memory image
+						if(!isFirstSectionZeroed())
+						{
+							ldrError = LDR_ERROR_INMEMORY_IMAGE;
+						}
+					}
 				}
 			}
 		}
 
 		return ldrError;
+	}
+
+	bool PeFileT::isFirstSectionZeroed() const
+	{
+		const PeLib::PELIB_SECTION_HEADER* pSection = m_imageLoader.getSectionHeader(0);
+		std::uint32_t sectionAlignment = m_imageLoader.getSectionAlignment();
+
+		// Does the section exist?
+		if(pSection && pSection->VirtualAddress == sectionAlignment && pSection->SizeOfRawData >= 0x40)
+		{
+			ByteBuffer imageData(0x40);
+
+			// Is the first 0x40 bytes zeroed?
+			m_iStream.seekg(sectionAlignment, std::ios::beg);
+			m_iStream.read(reinterpret_cast<char*>(imageData.data()), 0x40);
+			return std::all_of(imageData.begin(), imageData.end(), [](char item) { return item == 0; });
+		}
+		return false;
 	}
 
 	// Returns an error code indicating loader problem. We check every part of the PE file
