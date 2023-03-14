@@ -1902,7 +1902,7 @@ void ElfFormat::loadTelfhash()
 
 		tlsh.final();
 		const int show_version = 1; /* this prepends the hash with 'T' + number of the version */
-		telfhash = toLower(tlsh.getHash(show_version));
+		telfhash = tlsh.getHash(show_version);
 	}
 }
 

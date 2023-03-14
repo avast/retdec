@@ -49,7 +49,7 @@ void ElfImportTable::computeHashes()
 		tlsh.final();
 		/* this prepends the hash with 'T' + number of the version */
 		const int show_version = 1;
-		impHashTlsh = toLower(tlsh.getHash(show_version));
+		impHashTlsh = tlsh.getHash(show_version);
 
 		impHashCrc32 = getCrc32(data, impHashString.size());
 		impHashMd5 = getMd5(data, impHashString.size());
