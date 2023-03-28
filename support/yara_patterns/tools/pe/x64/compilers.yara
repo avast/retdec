@@ -215,3 +215,21 @@ rule gc_mingw
 	condition:
 		$1 at pe.entry_point
 }
+
+rule gcc_QB64
+{
+	meta:
+		tool = "C"
+		name = "QB64"
+		language = "Basic"
+		reference = "https://qb64.com/"
+	strings:
+		$s01 = "www.qb64.org/ip.php"
+		$s10 = "FREEGLUT_dummy"
+	condition:
+		filesize > 1500000 and
+		pe.number_of_sections >= 8 and
+		pe.data_directories[9].size == 0x28 and
+		pe.imports(/^OPENGL32\.dll$/i, /^glBegin$/i) and
+		all of them
+}
