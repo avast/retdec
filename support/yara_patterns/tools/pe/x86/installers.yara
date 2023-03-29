@@ -3424,7 +3424,7 @@ rule wix_toolset_3x
 		$s03 = "Failed to read section info, data to short: %u"
 		$h04 = {00 43 F1 00 02 00 00 00}	// Wix section header + version
 	condition:
-		for any i in (0 .. pe.number_of_sections) : (pe.sections[i].name == ".wixburn") and
+		for any i in (0 .. pe.number_of_sections) : ((pe.sections[i].name == ".wixburn") and ($h04 at pe.sections[i].raw_data_offset)) and
 		all of them
 }
 
