@@ -262,6 +262,7 @@ rule aut2exe_3x
         $h02 = { e8 ?? ?? 00 00 e9 7f fe ff ff cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc  57 56 8b 74 24 10 8b 4c 24 14 8b 7c 24 0c 8b c1 8b d1 03 c6 3b fe 76 08 3b f8 0f 82 68 03 00 00 0f ba 25 58 ?? 4c 00 }
     condition:
 		(
+			pe.number_of_resources < 0x80 and
 			for any i in (0 .. pe.number_of_resources):
 			(
 				pe.resources[i].type == 0x0A and          // RESOURCE_TYPE_RCDATA
