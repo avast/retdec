@@ -247,6 +247,33 @@ rule aut2exe_uv_01 {
 		)
 }
 
+rule aut2exe_3x
+{
+	meta:
+		tool = "C"
+		name = "Aut2Exe"
+		version = "3.x"
+		language = "AutoIt"
+    strings:
+        $s01 = "AU3!EA06"
+        $s02 = "AutoIt v3" wide
+        $s03 = ">>>AUTOIT SCRIPT<<<" wide
+        $h01 = { 60 be ?? ?? ?? ?? 8d be 00 ?? ?? ff 57 eb 0b 90 8a 06 46 88 07 47 01 db 75 07 8b 1e 83 ee fc 11 db 72 ed b8 01 00 00 00 01 db 75 07 8b 1e 83 ee fc 11 db 11 c0 01 db 73 0b 75 28 8b 1e 83 ee fc }
+        $h02 = { e8 ?? ?? 00 00 e9 7f fe ff ff cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc  57 56 8b 74 24 10 8b 4c 24 14 8b 7c 24 0c 8b c1 8b d1 03 c6 3b fe 76 08 3b f8 0f 82 68 03 00 00 0f ba 25 58 ?? 4c 00 }
+    condition:
+		(
+			pe.number_of_resources < 0x80 and
+			for any i in (0 .. pe.number_of_resources):
+			(
+				pe.resources[i].type == 0x0A and          // RESOURCE_TYPE_RCDATA
+				pe.resources[i].name_string == "S\x00C\x00R\x00I\x00P\x00T\x00"
+			)
+			and all of ($s0*)
+		)
+		or $h01 at pe.entry_point
+		or $h02 at pe.entry_point
+}
+
 rule autohotkey_uv_01 {
 	meta:
 		tool = "C"
