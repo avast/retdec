@@ -127,6 +127,26 @@ rule install_creator {
 		$s01 at pe.overlay.offset
 }
 
+rule ms_setup_installer_8x
+{
+	meta:
+		tool = "I"
+		name = "Microsoft Setup"
+		version = "8.x"
+		source = "Made by RetDec Team"
+		hash = "fb7363e3a2e114f57f34b377b984ecf3e4805398279f318d7cc394e1bfbbc561"
+	strings:
+		$s01 = "MsiInstallProduct returned '%d'"
+		$s02 = "AssemblyCheck: Error creating assembly name object"
+		$s03 = "Status of package '%s' after install is 'InstallNeeded'"
+		$s04 = "Running external check, and writing to log file '%s'" wide
+		$s05 = "Using MsiInstallProduct with package path '%s' and command line '%s'" wide
+	condition:
+		pe.number_of_sections == 3 and
+		for any resource in pe.resources : (resource.name_string == "S\x00E\x00T\x00U\x00P\x00C\x00F\x00G\x00") and
+		all of them
+}
+
 rule quick_batch_compiler_2x {
 	meta:
 		tool = "I"
