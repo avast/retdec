@@ -222,9 +222,7 @@ Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::translate(
 			modifyBasicMode(CS_MODE_MIPS32);
 		}
 	}
-
 	cs_free(insn, 1);
-
 	return res;
 }
 
@@ -236,6 +234,9 @@ Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::translateOne(
 		retdec::common::Address& a,
 		llvm::IRBuilder<>& irb)
 {
+	std::vector<unsigned char> MPX_INSTRS{
+		X86_INS_BNDMK, X86_INS_BNDCL, X86_INS_BNDCU, X86_INS_BNDMOV, X86_INS_BNDLDX, X86_INS_BNDSTX};
+	bool MpxInstr = false;
 	TranslationResultOne res;
 
 	// We want to keep all Capstone instructions -> alloc a new one each time.
@@ -247,17 +248,43 @@ Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::translateOne(
 
 	// TODO: hack, solve better.
 	bool disasmRes = cs_disasm_iter(_handle, &bytes, &size, &address, insn);
-	if (!disasmRes && _arch == CS_ARCH_MIPS && _basicMode == CS_MODE_MIPS32)
+
+	for (auto& MpxIndexer : MPX_INSTRS)
 	{
-		modifyBasicMode(CS_MODE_MIPS64);
-		disasmRes = cs_disasm_iter(_handle, &bytes, &size, &address, insn);
-		modifyBasicMode(CS_MODE_MIPS32);
+		if (insn[0].id == MpxIndexer) 
+			MpxInstr = true;
 	}
 
-	if (disasmRes)
+	if (MpxInstr != true) 
+	{
+		if (!disasmRes && _arch == CS_ARCH_MIPS && _basicMode == CS_MODE_MIPS32)
+		{
+			modifyBasicMode(CS_MODE_MIPS64);
+			disasmRes = cs_disasm_iter(_handle, &bytes, &size, &address, insn);
+			modifyBasicMode(CS_MODE_MIPS32);
+		}
+
+		if (disasmRes)
+		{
+			auto* a2l = generateSpecialAsm2LlvmInstr(irb, insn);
+			translateInstruction(insn, irb);
+
+			res.llvmInsn = a2l;
+			res.capstoneInsn = insn;
+			res.size = insn->size;
+			res.branchCall = _branchGenerated;
+			res.inCondition = _inCondition;
+
+			a = address;
+		}
+		else
+		{
+			cs_free(insn, 1);
+		}
+	}
+	else 
 	{
 		auto* a2l = generateSpecialAsm2LlvmInstr(irb, insn);
-		translateInstruction(insn, irb);
 
 		res.llvmInsn = a2l;
 		res.capstoneInsn = insn;
@@ -266,12 +293,9 @@ Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::translateOne(
 		res.inCondition = _inCondition;
 
 		a = address;
-	}
-	else
-	{
-		cs_free(insn, 1);
-	}
 
+		return res;
+	}
 	return res;
 }
 
