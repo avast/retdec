@@ -222,7 +222,9 @@ Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::translate(
 			modifyBasicMode(CS_MODE_MIPS32);
 		}
 	}
+
 	cs_free(insn, 1);
+
 	return res;
 }
 
@@ -234,10 +236,11 @@ Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::translateOne(
 		retdec::common::Address& a,
 		llvm::IRBuilder<>& irb)
 {
-	std::vector<unsigned char> MPX_INSTRS{
-		X86_INS_BNDMK, X86_INS_BNDCL, X86_INS_BNDCU, X86_INS_BNDMOV, X86_INS_BNDLDX, X86_INS_BNDSTX};
-	bool MpxInstr = false;
 	TranslationResultOne res;
+	std::vector<unsigned char> MPX_INSTRS{
+	X86_INS_BNDMK, X86_INS_BNDCL, X86_INS_BNDCU, X86_INS_BNDMOV, X86_INS_BNDLDX, X86_INS_BNDSTX};
+	bool MpxInstr = false;
+	
 
 	// We want to keep all Capstone instructions -> alloc a new one each time.
 	cs_insn* insn = cs_malloc(_handle);
@@ -252,10 +255,10 @@ Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::translateOne(
 	for (auto& MpxIndexer : MPX_INSTRS)
 	{
 		if (insn[0].id == MpxIndexer) 
-			MpxInstr = true;
+		    MpxInstr = true;
 	}
 
-	if (MpxInstr != true) 
+	if (MpxInstr != true)
 	{
 		if (!disasmRes && _arch == CS_ARCH_MIPS && _basicMode == CS_MODE_MIPS32)
 		{
@@ -282,7 +285,7 @@ Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::translateOne(
 			cs_free(insn, 1);
 		}
 	}
-	else 
+	else
 	{
 		auto* a2l = generateSpecialAsm2LlvmInstr(irb, insn);
 
