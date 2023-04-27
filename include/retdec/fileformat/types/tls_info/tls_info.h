@@ -7,6 +7,7 @@
 #ifndef RETDEC_FILEFORMAT_TYPES_TLS_INFO_TLS_INFO_H
 #define RETDEC_FILEFORMAT_TYPES_TLS_INFO_TLS_INFO_H
 
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -52,7 +53,7 @@ class TlsInfo
 		void setCallBacksAddr(std::uint64_t cbAddr);
 		void setZeroFillSize(std::uint32_t zFill);
 		void setCharacteristics(std::uint32_t chars);
-		void setCallBacks(const std::vector<uint64_t> & callbacks);
+		void setCallBacks(const std::vector<std::uint64_t> & callbacks);
 		/// @}
 
 		/// @name Other methods

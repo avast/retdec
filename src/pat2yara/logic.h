@@ -7,6 +7,7 @@
 #ifndef PAT2YARA_LOGIC_H
 #define PAT2YARA_LOGIC_H
 
+#include <cstdint>
 #include <memory>
 #include <string>
 

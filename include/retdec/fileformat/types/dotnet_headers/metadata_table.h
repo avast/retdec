@@ -7,6 +7,7 @@
 #ifndef RETDEC_FILEFORMAT_TYPES_DOTNET_HEADERS_METADATA_TABLE_H
 #define RETDEC_FILEFORMAT_TYPES_DOTNET_HEADERS_METADATA_TABLE_H
 
+#include <cstdint>
 #include <string>
 #include <vector>
 

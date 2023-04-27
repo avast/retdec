@@ -7,6 +7,7 @@
 #ifndef RETDEC_CTYPES_ENUM_TYPE_H
 #define RETDEC_CTYPES_ENUM_TYPE_H
 
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <vector>

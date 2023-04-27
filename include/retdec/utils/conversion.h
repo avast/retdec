@@ -7,6 +7,7 @@
 #ifndef RETDEC_UTILS_CONVERSION_H
 #define RETDEC_UTILS_CONVERSION_H
 
+#include <cstdint>
 #include <iomanip>
 #include <ios>
 #include <limits>

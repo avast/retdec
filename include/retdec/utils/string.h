@@ -8,6 +8,7 @@
 #define RETDEC_UTILS_STRING_H
 
 #include <algorithm>
+#include <cstdint>
 #include <limits>
 #include <map>
 #include <string>

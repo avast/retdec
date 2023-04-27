@@ -7,6 +7,7 @@
 #ifndef RETDEC_FILEFORMAT_TYPES_RELOCATION_TABLE_RELOCATION_H
 #define RETDEC_FILEFORMAT_TYPES_RELOCATION_TABLE_RELOCATION_H
 
+#include <cstdint>
 #include <string>
 #include <vector>
 

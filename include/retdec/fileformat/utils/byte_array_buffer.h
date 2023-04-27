@@ -7,6 +7,7 @@
 #ifndef RETDEC_FILEFORMAT_UTILS_BYTE_ARRAY_BUFFER_H
 #define RETDEC_FILEFORMAT_UTILS_BYTE_ARRAY_BUFFER_H
 
+#include <cstdint>
 #include <streambuf>
 
 namespace retdec {

@@ -7,6 +7,7 @@
 #ifndef FILEINFO_FILE_INFORMATION_FILE_INFORMATION_TYPES_ELF_CORE_H
 #define FILEINFO_FILE_INFORMATION_FILE_INFORMATION_TYPES_ELF_CORE_H
 
+#include <cstdint>
 #include <string>
 #include <vector>
 

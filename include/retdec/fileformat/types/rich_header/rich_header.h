@@ -7,6 +7,7 @@
 #ifndef RETDEC_FILEFORMAT_TYPES_RICH_HEADER_RICH_HEADER_H
 #define RETDEC_FILEFORMAT_TYPES_RICH_HEADER_RICH_HEADER_H
 
+#include <cstdint>
 #include <string>
 #include <vector>
 
