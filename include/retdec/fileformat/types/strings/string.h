@@ -7,6 +7,7 @@
 #ifndef RETDEC_FILEFORMAT_TYPES_STRINGS_STRING_H
 #define RETDEC_FILEFORMAT_TYPES_STRINGS_STRING_H
 
+#include <cstdint>
 #include <string>
 
 namespace retdec {

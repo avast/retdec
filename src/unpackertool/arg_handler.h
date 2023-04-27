@@ -7,6 +7,7 @@
 #ifndef UNPACKERTOOL_ARG_HANDLER_H
 #define UNPACKERTOOL_ARG_HANDLER_H
 
+#include <cstdint>
 #include <map>
 #include <string>
 #include <vector>

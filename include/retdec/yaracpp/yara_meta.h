@@ -7,6 +7,7 @@
 #ifndef RETDEC_YARACPP_YARA_META_H
 #define RETDEC_YARACPP_YARA_META_H
 
+#include <cstdint>
 #include <string>
 
 namespace retdec {

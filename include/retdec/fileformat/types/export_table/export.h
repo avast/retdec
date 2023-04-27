@@ -7,6 +7,7 @@
 #ifndef RETDEC_FILEFORMAT_TYPES_EXPORT_TABLE_EXPORT_H
 #define RETDEC_FILEFORMAT_TYPES_EXPORT_TABLE_EXPORT_H
 
+#include <cstdint>
 #include <string>
 
 namespace retdec {

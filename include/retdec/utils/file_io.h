@@ -7,6 +7,7 @@
 #ifndef RETDEC_UTILS_FILE_IO_H
 #define RETDEC_UTILS_FILE_IO_H
 
+#include <cstdint>
 #include <fstream>
 #include <vector>
 

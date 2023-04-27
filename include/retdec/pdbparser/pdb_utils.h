@@ -7,6 +7,7 @@
 #ifndef RETDEC_PDBPARSER_PDB_UTILS_H
 #define RETDEC_PDBPARSER_PDB_UTILS_H
 
+#include <cstdint>
 #include <map>
 #include <string>
 #include <vector>

@@ -154,7 +154,7 @@ void TlsInfo::setCallBacksAddr(std::uint64_t cbAddr)
 * Set array of callbacks
 * @param callbacks address of callbacks to set
 */
-void TlsInfo::setCallBacks(const std::vector<uint64_t> & callbacks)
+void TlsInfo::setCallBacks(const std::vector<std::uint64_t> & callbacks)
 {
 	callBacks = callbacks;
 }

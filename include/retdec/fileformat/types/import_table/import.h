@@ -7,6 +7,7 @@
 #ifndef RETDEC_FILEFORMAT_TYPES_IMPORT_TABLE_IMPORT_H
 #define RETDEC_FILEFORMAT_TYPES_IMPORT_TABLE_IMPORT_H
 
+#include <cstdint>
 #include <string>
 
 namespace retdec {
