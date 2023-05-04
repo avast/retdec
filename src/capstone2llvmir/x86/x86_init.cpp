@@ -370,6 +370,12 @@ void Capstone2LlvmIrTranslatorX86_impl::initializeRegTypeMap()
 			{X86_REG_ZMM30, i512},
 			{X86_REG_ZMM31, i512},
 
+			// BND
+			{X86_REG_BND0, i128},
+			{X86_REG_BND1, i128},
+			{X86_REG_BND2, i128},
+			{X86_REG_BND3, i128},
+
 			// x86_reg_rflags
 			//
 			{X86_REG_CF, i1},

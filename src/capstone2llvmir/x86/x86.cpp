@@ -526,6 +526,12 @@ void Capstone2LlvmIrTranslatorX86_impl::generateRegistersCommon()
 	createRegister(X86_REG_ZMM30, _regLt);
 	createRegister(X86_REG_ZMM31, _regLt);
 
+	// BND
+	createRegister(X86_REG_BND0, _regLt);
+	createRegister(X86_REG_BND1, _regLt);
+	createRegister(X86_REG_BND2, _regLt);
+	createRegister(X86_REG_BND3, _regLt);
+
 	// Debug registers.
 	//
 	createRegister(X86_REG_DR0, _regLt);
