@@ -8,7 +8,7 @@
 
 The major change:
 
-* New Feature: RetDec is now a library ([#779](https://github.com/avast/retdec/pull/779).
+* New Feature: RetDec is now a library ([#779](https://github.com/avast/retdec/pull/779)).
   * Related changes are the removal of `retdec-decompiler.py` (it is now a binary, e.g. `retdec-decompiler.exe` on Windows), `retdec-bin2llvmir`, `retdec-llvmir2hll`, and some other supportive functionality.
   * See an example in `src/retdectool`, or an actual implementation of RetDec executable in `src/retdec-decompiler`, to find out how to use RetDec library.
 
