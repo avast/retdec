@@ -667,6 +667,7 @@ Capstone2LlvmIrTranslatorX86_impl::_i2fm =
 		{X86_INS_BNDMOV, &Capstone2LlvmIrTranslatorX86_impl::translateNop},
 		{X86_INS_BNDLDX, &Capstone2LlvmIrTranslatorX86_impl::translateNop},
 		{X86_INS_BNDSTX, &Capstone2LlvmIrTranslatorX86_impl::translateNop},
+		{X86_INS_BNDCN, &Capstone2LlvmIrTranslatorX86_impl::translateNop},
 		{X86_INS_CALL, &Capstone2LlvmIrTranslatorX86_impl::translateCall},
 		{X86_INS_CBW, &Capstone2LlvmIrTranslatorX86_impl::translateCbw},
 		{X86_INS_CDQ, &Capstone2LlvmIrTranslatorX86_impl::translateCdq},
