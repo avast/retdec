@@ -2,6 +2,7 @@
 
 # dev
 
+* Fix: Handle Intel MPX instructions ([#1154](https://github.com/avast/retdec/pull/1154), [#1148](https://github.com/avast/retdec/issues/1148), [#1135](https://github.com/avast/retdec/issues/1135)).
 * Fix: Make RetDec compilable by the new gcc-13 ([#1149](https://github.com/avast/retdec/issues/1149), [#1153](https://github.com/avast/retdec/pull/1153)).
 
 # v5.0 (2022-12-08)
