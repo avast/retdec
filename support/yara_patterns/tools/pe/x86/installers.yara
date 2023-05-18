@@ -5,6 +5,24 @@
 
 import "pe"
 
+rule advanced_installer
+{
+	meta:
+		tool = "I"
+		name = "Advanced Installer"
+		strength = "high"
+	strings:
+		$s00 = "ADVINSTSFX"
+		$s01 = "Software\\Caphyon\\Advanced Installer\\"
+		$s02 = "Detected working Internet connection." wide
+		$s03 = "<< Advanced Installer (x86) Log >>" wide
+		$s04 = "=====================End of Log=====================" wide
+		$s05 = "REINSTALL=ALL REINSTALLMODE=vomus" wide
+	condition:
+		pe.number_of_sections == 5 and
+		all of them
+}
+
 rule arc_sfx {
 	meta:
 		tool = "I"
