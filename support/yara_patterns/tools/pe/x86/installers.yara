@@ -325,18 +325,36 @@ rule pyinstaller_27
 		all of them
 }
 
-rule pyinstaller_3x
+rule pyinstaller_30_38
 {
 	meta:
 		tool = "I"
 		name = "PyInstaller"
-		version = "3.x"
+		version = "3.0-3.8"
 		strength = "high"
 	strings:
 		$s00 = "Failed to get address for PySys_SetObject"
 		$s01 = "Error copying %s"
 		$s02 = "Error loading Python DLL '%s'"
 		$s03 = "pyi-windows-manifest-filename"
+	condition:
+		pe.number_of_resources > 0 and
+		@s00 < pe.sections[2].raw_data_offset and
+		all of them
+}
+
+rule pyinstaller_39_plus
+{
+	meta:
+		tool = "I"
+		name = "PyInstaller"
+		version = "3.9+"
+		strength = "high"
+	strings:
+		$s00 = "Failed to get address for PySys_SetObject"
+		$s01 = "Failed to copy %s"
+		$s02 = "Error loading Python DLL '%s'"
+		$s03 = "_PYI_ONEDIR_MODE"
 	condition:
 		pe.number_of_resources > 0 and
 		@s00 < pe.sections[2].raw_data_offset and
