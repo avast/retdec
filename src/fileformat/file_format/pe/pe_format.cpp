@@ -2593,6 +2593,13 @@ void PeFormat::parseStringStream(std::uint64_t baseAddress, std::uint64_t offset
 	while (currentOffset < size)
 	{
 		std::string string;
+		std::uint64_t c = 0;
+		auto successful_read = get1Byte(address + currentOffset, c, getEndianness());
+		// If the reading fails (OOB or other) don't continue and terminate
+		if (!successful_read)
+		{
+			break;
+		}
 		getNTBS(address + currentOffset, string);
 		stringStream->addString(currentOffset, string);
 		// +1 for null-terminator
