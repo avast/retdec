@@ -110,7 +110,7 @@ jobs:
 
   docs-build:
     name: doxygen-build (Linux)
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
 
     steps:
       # Checkouts the correct commit/branch.
