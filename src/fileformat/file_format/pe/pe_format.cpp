@@ -2160,6 +2160,10 @@ void PeFormat::loadDotnetHeaders()
 	metadataHeader->setVersion(version);
 	metadataHeader->setFlags(flags);
 
+	// Check if it is actually a .NET application, this check is important to be aligned with YARA scanning
+	if (!this->isDotNet())
+		return;
+
 	auto currentAddress = metadataHeaderStreamsHeader + 4;
 	for (std::uint64_t i = 0; i < streamCount; ++i)
 	{
