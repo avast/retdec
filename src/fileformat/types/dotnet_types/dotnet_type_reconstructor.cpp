@@ -666,6 +666,10 @@ bool DotnetTypeReconstructor::reconstructNestedClasses()
 		if (enclosingItr == defClassTable.end())
 			continue;
 
+		// Ignore self-references
+		if (nestedItr == enclosingItr)
+			continue;
+
 		const std::string& namespac = nestedItr->second->getNameSpace();
 		if (namespac.empty())
 		{
