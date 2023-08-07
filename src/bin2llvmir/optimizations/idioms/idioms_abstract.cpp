@@ -44,7 +44,6 @@ bool IdiomsAbstract::findBranchDependingOn(llvm::BranchInst ** br, llvm::BasicBl
  *
  * @param val instruction value to look for
  * @param bb BasicBlock to erase instruction from
- * @return void
  */
 void IdiomsAbstract::eraseInstFromBasicBlock(llvm::Value * val, llvm::BasicBlock * bb) {
 	for (llvm::BasicBlock::iterator end = bb->end(), i = bb->begin(); i != end; ++i) {

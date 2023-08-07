@@ -476,7 +476,6 @@ void Parameters::fixRelativePaths(const std::string& configPath)
 
 /**
  * Returns JSON object (associative array) holding parameters information.
- * @return JSON object.
  */
 template <typename Writer>
 void Parameters::serialize(Writer& writer) const

@@ -21,7 +21,6 @@ namespace bin2llvmir {
 /**
  * Initialize capstone2llvmir translator according to the architecture of
  * file to decompile.
- * @return @c True if error, @c false otherwise.
  */
 void Decoder::initTranslator()
 {

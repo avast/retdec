@@ -585,8 +585,6 @@ bool Heuristics::parseOpen64Comment(const std::string &record)
 
 /**
  * Try to detect used compiler based on content of comment sections
- * @return @c true if used compiler was successfully detected,
- *         @c false otherwise
  */
 void Heuristics::getCommentSectionsHeuristics()
 {
