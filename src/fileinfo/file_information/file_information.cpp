@@ -1342,7 +1342,6 @@ std::string FileInformation::getDepsListFailedToLoad() const
 
 /**
  * Sets the name of the dependency file that failed to load
- * @return Nothing
  */
 void FileInformation::setDepsListFailedToLoad(const std::string & depsList)
 {
