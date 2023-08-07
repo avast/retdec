@@ -9,9 +9,8 @@ import "dotnet"
 rule blizzard_protector {
 	meta:
 		tool = "P"
-		name = "!EP"
+		name = "BlizzardProtector"
 		version = "1.0"
-		extra = "BlizzardProtector"
 	condition:
 		filesize > 5MB and
 		(pe.sections[4].name == "_RDATA" or pe.sections[5].name == "_RDATA" or pe.sections[6].name == "_RDATA" or pe.sections[7].name == "_RDATA") and
@@ -40,6 +39,23 @@ rule blizzard_protector {
 				uint32(pe.sections[2].raw_data_offset + pe.data_directories[pe.IMAGE_DIRECTORY_ENTRY_EXPORT].virtual_address - pe.sections[2].virtual_address + 4) == 0xFFFFFFFF
 			)
 		)
+}
+
+rule cfusion_app_25
+{
+	meta:
+		tool = "P"
+		name = "Clickteam Fusion"
+		version = "2.5"
+	strings:
+		$s01 = "cf25appsync" wide               // Created mutex
+		$s02 = ".00.FusionApp" wide             // Temporary directory suffix
+		$s03 = "Mf2MainClassTh" wide            // Window class
+	condition:
+		pe.is_32bit() and
+		pe.exports("NvOptimusEnablement") and   // Causes AMD drivers to select the most optimal GPU
+		pe.exports("AmdPowerXpressRequestHighPerformance") and
+		all of them
 }
 
 rule ep_exepack_10 {
