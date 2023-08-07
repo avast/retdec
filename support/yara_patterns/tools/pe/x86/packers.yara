@@ -6,6 +6,19 @@
 import "pe"
 import "dotnet"
 
+rule AppPacker_1_3_x {
+	meta:
+		tool = "P"
+		name = "AppPacker 1.3.x"
+	strings:
+		$h01 = { 3C 53 65 72 47 72 65 65 6E 3E }               // Overlay: "<SerGreen>"
+	condition:
+		pe.data_directories[0x0E].virtual_address != 0 and    // No pe.is_dotnet in retdec's YARA
+		pe.version_info["Comments"] contains "Packed portable application inside" and
+		pe.version_info["CompanyName"] contains "SerGreen" and
+		$h01 at pe.overlay.offset
+}
+
 rule blizzard_protector {
 	meta:
 		tool = "P"
