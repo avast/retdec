@@ -980,6 +980,7 @@ void MachOFormat::dyldInfoCommand(const llvm::object::MachOObjectFile::LoadComma
 		if (err)
 		{
 			// ignore errors
+			consumeError(std::move(err));
 		}
 	}
 
@@ -1005,6 +1006,7 @@ void MachOFormat::dyldInfoCommand(const llvm::object::MachOObjectFile::LoadComma
 		if (err)
 		{
 			// ignore errors
+			consumeError(std::move(err));
 		}
 	}
 
@@ -1024,6 +1026,7 @@ void MachOFormat::dyldInfoCommand(const llvm::object::MachOObjectFile::LoadComma
 		if (err)
 		{
 			// ignore errors
+			consumeError(std::move(err));
 		}
 	}
 
@@ -1043,6 +1046,7 @@ void MachOFormat::dyldInfoCommand(const llvm::object::MachOObjectFile::LoadComma
 		if (err)
 		{
 			// ignore errors
+			consumeError(std::move(err));
 		}
 	}
 }
