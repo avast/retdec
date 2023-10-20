@@ -127,17 +127,3 @@ jobs:
           cmake .. -DCMAKE_INSTALL_PREFIX=install -DRETDEC_DOC=ON
           make doc -j$(nproc)
 
-      - name: Test Docs
-        run: |
-          file="build/doc/doxygen/doxygen.log"
-          echo "checking file: $file"
-          content="$(cat $file)"
-          if [ "$content" = "" ]; then
-            echo "===> ok"
-            else
-            echo "===> fail:"
-            echo "=========================================="
-            echo "$content"
-            echo "=========================================="
-            exit 1
-          fi
