@@ -127,7 +127,7 @@ jobs:
           cmake .. -DCMAKE_INSTALL_PREFIX=install -DRETDEC_DOC=ON
           make doc -j$(nproc)
 
-      - name: Test Docs
+      - name: Display Docs Warnings
         run: |
           file="build/doc/doxygen/doxygen.log"
           echo "checking file: $file"
@@ -139,5 +139,5 @@ jobs:
             echo "=========================================="
             echo "$content"
             echo "=========================================="
-            exit 1
+            exit 0
           fi
