@@ -1443,6 +1443,35 @@ rule purebasic_4x {
 		$1 at pe.entry_point
 }
 
+rule rust_compiler_32
+{
+	meta:
+		tool = "C"
+		name = "Rust (32-bit)"
+		version = "i686-pc-windows-msvc"
+	strings:
+		$s02 = "Local\\RustBacktraceMutex"
+	condition:
+		pe.data_directories[9].size != 0 and
+		uint8(pe.entry_point) == 0xE8 and uint8(pe.entry_point+5) == 0xE9 and
+		@s02 > pe.sections[1].raw_data_offset
+}
+
+rule rust_compiler_64
+{
+	meta:
+		tool = "C"
+		name = "Rust (64-bit)"
+		version = "x86_64-pc-windows-msvc"
+	strings:
+		$s01 = { 48 83 ec 28 E8 ?? ?? ?? ?? 48 83 c4 28 E9 ?? ?? ?? ?? CC CC}
+		$s02 = "Local\\RustBacktraceMutex"
+	condition:
+		pe.data_directories[9].size != 0 and
+		$s01 at pe.entry_point and
+		@s02 > pe.sections[1].raw_data_offset
+}
+
 rule symantec_c_zortech_c_210_400_30r1 {
 	meta:
 		tool = "C"
