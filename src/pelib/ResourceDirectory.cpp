@@ -654,13 +654,15 @@ namespace PeLib
 		// 7dfc75ade04a0deb55dfbf87baff2306e625c5280748856f69f2f43599615249
 		//  * IMAGE_RESOURCE_DIRECTORY::Characteristics != 0
 		//  * IMAGE_RESOURCE_DIRECTORY::NumberOfIdEntries == 0x8000
+		// ef866e5eeacd096c4dab73c6d2b098253ba46f1ecf45467e6d65a8e1a75b4ca9
+		//  * The whole resource section is filled with an invalid pattern
 		// We artificially limit the allowed number of resource entries.
 		// If exceeded, we don't stop resource parsing, but rather ignore the resource and move on
 		// in order to be in sync with YARA
 		unsigned int uiNumberOfEntries = header.NumberOfNamedEntries + header.NumberOfIdEntries;
-		if((header.NumberOfNamedEntries > PELIB_MAX_RESOURCE_ENTRIES) ||
-		   (header.NumberOfIdEntries > PELIB_MAX_RESOURCE_ENTRIES) ||
-		   (uiNumberOfEntries > PELIB_MAX_RESOURCE_ENTRIES))
+		if((header.NumberOfNamedEntries >= PELIB_MAX_RESOURCE_ENTRIES) ||
+		   (header.NumberOfIdEntries >= PELIB_MAX_RESOURCE_ENTRIES) ||
+		   (uiNumberOfEntries >= PELIB_MAX_RESOURCE_ENTRIES))
 			return ERROR_SKIP_RESOURCE;
 
 		// Add the total number of entries to the occupied range
