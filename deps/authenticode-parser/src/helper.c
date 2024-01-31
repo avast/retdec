@@ -73,7 +73,7 @@ int byte_array_init(ByteArray* arr, const uint8_t* data, int len)
     return 0;
 }
 
-time_t ASN1_TIME_to_time_t(const ASN1_TIME* time)
+int64_t ASN1_TIME_to_int64_t(const ASN1_TIME* time)
 {
     struct tm t = {0};
     if (!time)

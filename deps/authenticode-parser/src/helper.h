@@ -59,7 +59,7 @@ int calculate_digest(const EVP_MD* md, const uint8_t* data, size_t len, uint8_t*
 /* Copies data of length len into already existing arr */
 int byte_array_init(ByteArray* arr, const uint8_t* data, int len);
 /* Converts ASN1_TIME string time into a unix timestamp */
-time_t ASN1_TIME_to_time_t(const ASN1_TIME* time);
+int64_t ASN1_TIME_to_int64_t(const ASN1_TIME* time);
 
 #ifdef __cplusplus
 }

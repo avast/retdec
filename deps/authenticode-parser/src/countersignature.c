@@ -21,8 +21,11 @@ SOFTWARE.
 
 #include "countersignature.h"
 
+#include <assert.h>
+#include <openssl/cms.h>
 #include <openssl/evp.h>
 #include <openssl/objects.h>
+#include <openssl/opensslv.h>
 #include <openssl/ossl_typ.h>
 #include <openssl/pkcs7.h>
 #include <openssl/safestack.h>
@@ -35,6 +38,73 @@ SOFTWARE.
 #include "certificate.h"
 #include "helper.h"
 #include "structs.h"
+
+struct CountersignatureImplStruct;
+
+typedef TS_TST_INFO* get_ts_tst_info_func(struct CountersignatureImplStruct*);
+typedef STACK_OF(X509) * get_signers_func(struct CountersignatureImplStruct*);
+typedef STACK_OF(X509) * get_certs_func(struct CountersignatureImplStruct*);
+typedef int
+verify_digest_func(struct CountersignatureImplStruct*, uint8_t* digest, size_t digest_size);
+typedef BIO* verify_signature_init_func(struct CountersignatureImplStruct*);
+typedef int
+verify_signature_finish_func(struct CountersignatureImplStruct*, BIO* bio, X509* signer);
+
+#define IMPL_FUNC_NAME(func, type) ms_countersig_impl_##func##_##type##_
+
+#define DECLARE_FUNCS(type)                                                                        \
+    get_ts_tst_info_func IMPL_FUNC_NAME(get_ts_tst_info, type);                                    \
+    get_signers_func IMPL_FUNC_NAME(get_signers, type);                                            \
+    get_certs_func IMPL_FUNC_NAME(get_certs, type);                                                \
+    verify_digest_func IMPL_FUNC_NAME(verify_digest, type);                                        \
+    verify_signature_init_func IMPL_FUNC_NAME(verify_signature_init, type);                        \
+    verify_signature_finish_func IMPL_FUNC_NAME(verify_signature_finish, type);
+
+DECLARE_FUNCS(pkcs7)
+DECLARE_FUNCS(cms)
+
+typedef struct {
+    get_ts_tst_info_func* get_ts_tst_info;
+    get_signers_func* get_signers;
+    get_certs_func* get_certs;
+    verify_digest_func* verify_digest;
+    verify_signature_init_func* verify_signature_init;
+    verify_signature_finish_func* verify_signature_finish;
+} CountersignatureImplFuncs;
+
+#define FUNC_ARRAY_NAME_FOR_IMPL(type) countersig_impl_funcs_##type##_
+#define FUNC_ARRAY_FOR_IMPL(type)                                                                  \
+    static const CountersignatureImplFuncs FUNC_ARRAY_NAME_FOR_IMPL(type) = {                      \
+        &IMPL_FUNC_NAME(get_ts_tst_info, type),                                                    \
+        &IMPL_FUNC_NAME(get_signers, type),                                                        \
+        &IMPL_FUNC_NAME(get_certs, type),                                                          \
+        &IMPL_FUNC_NAME(verify_digest, type),                                                      \
+        &IMPL_FUNC_NAME(verify_signature_init, type),                                              \
+        &IMPL_FUNC_NAME(verify_signature_finish, type),                                            \
+    };
+
+FUNC_ARRAY_FOR_IMPL(pkcs7)
+FUNC_ARRAY_FOR_IMPL(cms)
+
+typedef enum {
+    CS_IMPL_PKCS7,
+    CS_IMPL_CMS,
+} CountersignatureImplType;
+
+typedef struct CountersignatureImplStruct {
+    CountersignatureImplType type;
+    const CountersignatureImplFuncs* funcs;
+    union {
+        PKCS7* pkcs7;
+        CMS_ContentInfo* cms;
+    };
+    // this is here to serve as a cache for CMS because the only way to obtain
+    // certs from CMS is to use CMS_get1_certs which leaves the deallocation
+    // to the caller but it just complicates things if you need to remember to
+    // deallocate also certs. This makes it easier if CountersignatureImpl itself
+    // is an owner of this thing.
+    STACK_OF(X509) * _certs;
+} CountersignatureImpl;
 
 Countersignature* pkcs9_countersig_new(
     const uint8_t* data, long size, STACK_OF(X509) * certs, ASN1_STRING* enc_digest)
@@ -58,7 +128,7 @@ Countersignature* pkcs9_countersig_new(
         goto end;
     }
 
-    result->sign_time = ASN1_TIME_to_time_t(sign_time->value.utctime);
+    result->sign_time = ASN1_TIME_to_int64_t(sign_time->value.utctime);
 
     X509* signCert = X509_find_by_issuer_and_serial(
         certs, si->issuer_and_serial->issuer, si->issuer_and_serial->serial);
@@ -133,7 +203,7 @@ Countersignature* pkcs9_countersig_new(
 
     /* compare the encrypted digest and calculated digest */
     bool isValid = false;
-     
+
 #if OPENSSL_VERSION_NUMBER >= 0x3000000fL
     size_t mdLen = EVP_MD_get_size(md);
 #else
@@ -178,22 +248,264 @@ end:
     return result;
 }
 
+TS_TST_INFO* IMPL_FUNC_NAME(get_ts_tst_info, pkcs7)(CountersignatureImpl* impl)
+{
+    assert(impl->type == CS_IMPL_PKCS7);
+
+    return PKCS7_to_TS_TST_INFO(impl->pkcs7);
+}
+
+TS_TST_INFO* IMPL_FUNC_NAME(get_ts_tst_info, cms)(CountersignatureImpl* impl)
+{
+    assert(impl->type == CS_IMPL_CMS);
+
+    const ASN1_OBJECT* content_type = CMS_get0_eContentType(impl->cms);
+    if (!content_type || OBJ_obj2nid(content_type) != NID_id_smime_ct_TSTInfo) {
+        return NULL;
+    }
+
+    ASN1_OCTET_STRING** content = CMS_get0_content(impl->cms);
+    if (!content || !*content) {
+        return NULL;
+    }
+
+    const uint8_t* data = (*content)->data;
+    TS_TST_INFO* ts_tst_info = d2i_TS_TST_INFO(NULL, &data, (*content)->length);
+    if (!ts_tst_info) {
+        return NULL;
+    }
+
+    return ts_tst_info;
+}
+
+STACK_OF(X509) * IMPL_FUNC_NAME(get_signers, pkcs7)(CountersignatureImpl* impl)
+{
+    assert(impl->type == CS_IMPL_PKCS7);
+
+    return PKCS7_get0_signers(impl->pkcs7, impl->pkcs7->d.sign->cert, 0);
+}
+
+STACK_OF(X509) * IMPL_FUNC_NAME(get_signers, cms)(CountersignatureImpl* impl)
+{
+    assert(impl->type == CS_IMPL_CMS);
+
+    STACK_OF(CMS_SignerInfo)* signer_infos = CMS_get0_SignerInfos(impl->cms);
+    if (!signer_infos) {
+        return NULL;
+    }
+
+    // Use our func points to cache the certs and don't create another copy
+    STACK_OF(X509)* certs = impl->funcs->get_certs(impl);
+
+    int si_count = sk_CMS_SignerInfo_num(signer_infos);
+    int cert_count = certs ? sk_X509_num(certs) : 0;
+    STACK_OF(X509)* result = sk_X509_new_null();
+
+    // PKCS7_get0_signers() lets us specify the certificate array and looks up signer certificate
+    // there With CMS_ContentInfo, we don't have direct access to signer certificate, just all the
+    // certificates The only thing we can do is to go through all signer infos and find those which
+    // match some certificate in all certificates. It essentially simulates what
+    // PKCS7_get0_signers() does.
+    for (int i = 0; i < si_count; ++i) {
+        CMS_SignerInfo* si = sk_CMS_SignerInfo_value(signer_infos, i);
+        if (!si) {
+            continue;
+        }
+
+        if (certs) {
+            for (int j = 0; j < cert_count; ++j) {
+                X509* cert = sk_X509_value(certs, j);
+                if (!cert) {
+                    continue;
+                }
+
+                if (CMS_SignerInfo_cert_cmp(si, cert) == 0) {
+                    if (!sk_X509_push(result, cert)) {
+                        return NULL;
+                    }
+                }
+            }
+        }
+    }
+
+    return result;
+}
+
+STACK_OF(X509) * IMPL_FUNC_NAME(get_certs, pkcs7)(CountersignatureImpl* impl)
+{
+    assert(impl->type == CS_IMPL_PKCS7);
+
+    return impl->pkcs7->d.sign->cert;
+}
+
+STACK_OF(X509) * IMPL_FUNC_NAME(get_certs, cms)(CountersignatureImpl* impl)
+{
+    assert(impl->type == CS_IMPL_CMS);
+
+    if (impl->_certs) {
+        return impl->_certs;
+    }
+
+    impl->_certs = CMS_get1_certs(impl->cms);
+    return impl->_certs;
+}
+
+int IMPL_FUNC_NAME(verify_digest, pkcs7)(
+    CountersignatureImpl* impl, uint8_t* digest, size_t digest_size)
+{
+    assert(impl->type == CS_IMPL_PKCS7);
+
+    X509_STORE* store = X509_STORE_new();
+    TS_VERIFY_CTX* ctx = TS_VERIFY_CTX_new();
+    TS_VERIFY_CTX_init(ctx);
+
+    TS_VERIFY_CTX_set_flags(ctx, TS_VFY_VERSION | TS_VFY_IMPRINT);
+    TS_VERIFY_CTX_set_store(ctx, store);
+#if OPENSSL_VERSION_NUMBER >= 0x3000000fL
+    TS_VERIFY_CTX_set_certs(ctx, impl->funcs->get_certs(impl));
+#else
+    TS_VERIFY_CTS_set_certs(ctx, impl->funcs->get_certs(impl));
+#endif
+    TS_VERIFY_CTX_set_imprint(ctx, digest, digest_size);
+
+    int result = TS_RESP_verify_token(ctx, impl->pkcs7);
+
+    X509_STORE_free(store);
+    OPENSSL_free(ctx);
+
+    return result;
+}
+
+int IMPL_FUNC_NAME(verify_digest, cms)(
+    CountersignatureImpl* impl, uint8_t* digest, size_t digest_size)
+{
+    assert(impl->type == CS_IMPL_CMS);
+
+    // This is essentially just reimplementation of TS_RESP_verify_token() from OpenSSL
+    TS_TST_INFO* ts_tst_info = impl->funcs->get_ts_tst_info(impl);
+    if (!ts_tst_info || TS_TST_INFO_get_version(ts_tst_info) != 1) {
+        if (ts_tst_info)
+            TS_TST_INFO_free(ts_tst_info);
+        return 0;
+    }
+
+    TS_MSG_IMPRINT* ts_imprint = TS_TST_INFO_get_msg_imprint(ts_tst_info);
+    if (!ts_imprint) {
+        TS_TST_INFO_free(ts_tst_info);
+        return 0;
+    }
+
+    ASN1_OCTET_STRING* ts_imprint_digest = TS_MSG_IMPRINT_get_msg(ts_imprint);
+    if (!ts_imprint_digest) {
+        TS_TST_INFO_free(ts_tst_info);
+        return 0;
+    }
+
+    if (ts_imprint_digest->length != (int)digest_size ||
+        memcmp(ts_imprint_digest->data, digest, digest_size) != 0) {
+        TS_TST_INFO_free(ts_tst_info);
+        return 0;
+    }
+
+    TS_TST_INFO_free(ts_tst_info);
+    return 1;
+}
+
+BIO* IMPL_FUNC_NAME(verify_signature_init, pkcs7)(CountersignatureImpl* impl)
+{
+    assert(impl->type == CS_IMPL_PKCS7);
+
+    return PKCS7_dataInit(impl->pkcs7, NULL);
+}
+
+BIO* IMPL_FUNC_NAME(verify_signature_init, cms)(CountersignatureImpl* impl)
+{
+    assert(impl->type == CS_IMPL_CMS);
+
+    return CMS_dataInit(impl->cms, NULL);
+}
+
+int IMPL_FUNC_NAME(verify_signature_finish, pkcs7)(
+    CountersignatureImpl* impl, BIO* bio, X509* signer)
+{
+    assert(impl->type == CS_IMPL_PKCS7);
+
+    /* Verify signature with PKCS7_signatureVerify
+     because TS_RESP_verify_token would try to verify
+     chain and without trust anchors it always fails */
+    PKCS7_SIGNER_INFO* si = sk_PKCS7_SIGNER_INFO_value(PKCS7_get_signer_info(impl->pkcs7), 0);
+    return PKCS7_signatureVerify(bio, impl->pkcs7, si, signer);
+}
+
+int IMPL_FUNC_NAME(verify_signature_finish, cms)(CountersignatureImpl* impl, BIO* bio, X509* signer)
+{
+    assert(impl->type == CS_IMPL_CMS);
+
+    (void)signer;
+    CMS_SignerInfo* si = sk_CMS_SignerInfo_value(CMS_get0_SignerInfos(impl->cms), 0);
+    return CMS_SignerInfo_verify_content(si, bio);
+}
+
+CountersignatureImpl* ms_countersig_impl_new(const uint8_t* data, long size)
+{
+    const uint8_t* d = data;
+    PKCS7* p7 = d2i_PKCS7(NULL, &d, size);
+    if (p7 && PKCS7_type_is_signed(p7) && p7->d.sign) {
+        CountersignatureImpl* result =
+            (CountersignatureImpl*)calloc(1, sizeof(CountersignatureImpl));
+        result->type = CS_IMPL_PKCS7;
+        result->funcs = &FUNC_ARRAY_NAME_FOR_IMPL(pkcs7);
+        result->pkcs7 = p7;
+        return result;
+    }
+
+    d = data;
+    CMS_ContentInfo* cms = d2i_CMS_ContentInfo(NULL, &d, size);
+    if (cms) {
+        CountersignatureImpl* result =
+            (CountersignatureImpl*)calloc(1, sizeof(CountersignatureImpl));
+        result->type = CS_IMPL_CMS;
+        result->funcs = &FUNC_ARRAY_NAME_FOR_IMPL(cms);
+        result->cms = cms;
+        return result;
+    }
+
+    return NULL;
+}
+
+void ms_countersig_impl_free(CountersignatureImpl* impl)
+{
+    switch (impl->type) {
+    case CS_IMPL_PKCS7:
+        PKCS7_free(impl->pkcs7);
+        break;
+    case CS_IMPL_CMS:
+        if (impl->_certs) {
+            sk_X509_pop_free(impl->_certs, X509_free);
+        }
+        CMS_ContentInfo_free(impl->cms);
+        break;
+    }
+
+    free(impl);
+}
+
 Countersignature* ms_countersig_new(const uint8_t* data, long size, ASN1_STRING* enc_digest)
 {
     Countersignature* result = (Countersignature*)calloc(1, sizeof(*result));
     if (!result)
         return NULL;
 
-    PKCS7* p7 = d2i_PKCS7(NULL, &data, size);
-    if (!p7) {
+    CountersignatureImpl* impl = ms_countersig_impl_new(data, size);
+    if (!impl) {
         result->verify_flags = COUNTERSIGNATURE_VFY_CANT_PARSE;
         return result;
     }
 
-    TS_TST_INFO* ts = PKCS7_to_TS_TST_INFO(p7);
+    TS_TST_INFO* ts = impl->funcs->get_ts_tst_info(impl);
     if (!ts) {
         result->verify_flags = COUNTERSIGNATURE_VFY_CANT_PARSE;
-        PKCS7_free(p7);
+        ms_countersig_impl_free(impl);
         return result;
     }
 
@@ -201,20 +513,21 @@ Countersignature* ms_countersig_new(const uint8_t* data, long size, ASN1_STRING*
     if (!rawTime) {
         result->verify_flags = COUNTERSIGNATURE_VFY_TIME_MISSING;
         TS_TST_INFO_free(ts);
-        PKCS7_free(p7);
+        ms_countersig_impl_free(impl);
         return result;
     }
 
-    result->sign_time = ASN1_TIME_to_time_t(rawTime);
+    result->sign_time = ASN1_TIME_to_int64_t(rawTime);
 
-    STACK_OF(X509)* sigs = PKCS7_get0_signers(p7, p7->d.sign->cert, 0);
+    STACK_OF(X509)* sigs = impl->funcs->get_signers(impl);
     X509* signCert = sk_X509_value(sigs, 0);
     if (!signCert) {
         result->verify_flags = COUNTERSIGNATURE_VFY_NO_SIGNER_CERT;
         goto end;
     }
 
-    result->chain = parse_signer_chain(signCert, p7->d.sign->cert);
+    STACK_OF(X509)* certs = impl->funcs->get_certs(impl);
+    result->chain = parse_signer_chain(signCert, certs);
 
     /* Imprint == digest */
     TS_MSG_IMPRINT* imprint = TS_TST_INFO_get_msg_imprint(ts);
@@ -259,52 +572,30 @@ Countersignature* ms_countersig_new(const uint8_t* data, long size, ASN1_STRING*
         goto end;
     }
 
-    TS_VERIFY_CTX* ctx = TS_VERIFY_CTX_new();
-    X509_STORE* store = X509_STORE_new();
-    TS_VERIFY_CTX_init(ctx);
-
-    TS_VERIFY_CTX_set_flags(ctx, TS_VFY_VERSION | TS_VFY_IMPRINT);
-    TS_VERIFY_CTX_set_store(ctx, store);
-#if OPENSSL_VERSION_NUMBER >= 0x3000000fL
-    TS_VERIFY_CTX_set_certs(ctx, p7->d.sign->cert);
-#else
-    TS_VERIFY_CTS_set_certs(ctx, p7->d.sign->cert);
-#endif
-    TS_VERIFY_CTX_set_imprint(ctx, calc_digest, mdLen);
-
-    bool isValid = TS_RESP_verify_token(ctx, p7) == 1;
-
-    X509_STORE_free(store);
-    OPENSSL_free(ctx);
-
+    bool isValid = impl->funcs->verify_digest(impl, calc_digest, mdLen) == 1;
     if (!isValid) {
         result->verify_flags = COUNTERSIGNATURE_VFY_INVALID;
         goto end;
     }
 
-    /* Verify signature with PKCS7_signatureVerify
-     because TS_RESP_verify_token would try to verify
-     chain and without trust anchors it always fails */
-    BIO* p7bio = PKCS7_dataInit(p7, NULL);
+    BIO* bio = impl->funcs->verify_signature_init(impl);
 
     char buf[4096];
-    /* We now have to 'read' from p7bio to calculate digests etc. */
-    while (BIO_read(p7bio, buf, sizeof(buf)) > 0)
+    /* We now have to 'read' from bio to calculate digests etc. */
+    while (BIO_read(bio, buf, sizeof(buf)) > 0)
         continue;
 
-    PKCS7_SIGNER_INFO* si = sk_PKCS7_SIGNER_INFO_value(PKCS7_get_signer_info(p7), 0);
+    isValid = impl->funcs->verify_signature_finish(impl, bio, signCert) == 1;
 
-    isValid = PKCS7_signatureVerify(p7bio, p7, si, signCert) == 1;
-
-    BIO_free_all(p7bio);
+    BIO_free_all(bio);
 
     if (!isValid)
         result->verify_flags = COUNTERSIGNATURE_VFY_INVALID;
 
 end:
     sk_X509_free(sigs);
-    PKCS7_free(p7);
     TS_TST_INFO_free(ts);
+    ms_countersig_impl_free(impl);
     return result;
 }
 

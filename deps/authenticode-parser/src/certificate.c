@@ -24,6 +24,7 @@ SOFTWARE.
 #include <openssl/asn1.h>
 #include <openssl/crypto.h>
 #include <openssl/evp.h>
+#include <openssl/opensslv.h>
 #include <openssl/sha.h>
 #include <openssl/x509.h>
 #include <string.h>
@@ -308,8 +309,8 @@ Certificate* certificate_new(X509* x509)
 
     result->version = X509_get_version(x509);
     result->serial = integer_to_serial(X509_get_serialNumber(x509));
-    result->not_after = ASN1_TIME_to_time_t(X509_get0_notAfter(x509));
-    result->not_before = ASN1_TIME_to_time_t(X509_get0_notBefore(x509));
+    result->not_after = ASN1_TIME_to_int64_t(X509_get0_notAfter(x509));
+    result->not_before = ASN1_TIME_to_int64_t(X509_get0_notBefore(x509));
     int sig_nid = X509_get_signature_nid(x509);
     result->sig_alg = strdup(OBJ_nid2ln(sig_nid));
 
