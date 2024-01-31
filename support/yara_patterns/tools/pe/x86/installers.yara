@@ -165,70 +165,170 @@ rule ms_setup_installer_8x
 		all of them
 }
 
-rule quick_batch_compiler_2x {
+rule quick_batch_compiler_105 {
 	meta:
 		tool = "I"
 		name = "Quick Batch File Compiler"
-		version = "2.x"
+		version = "1.0.0.0 - 1.0.5.5"
 	strings:
-		$delphi_01 = "Runtime error     at 00000000"                                            // Common Delphi/Embarcadero
-		$delphi_02 = "Access violation at address %p in module '%s'. %s of address %p" wide     // Found in almost all Quick Batch samples
-		$s01 = "File is corrupt."
+		$h01 = { 31 2E 32 34 00 55 50 58 21 0C 09  }  // UPX signature
+		$h02 = { 2E 66 FE FF 04 10 40 00 03 07 42 6F 6F 6C 65 61 6E 01 00 04 15 FF DD F6 FF 05 46 61 6C 73 65 04 54 72 75 65 8D 0D 2C 11 01 07 49 6E 74 65 67 65 }  // The begin of the UPX section
+		$s01 = "OnAskForKey"
+		$s02 = "OFTWARE\\Borland\\Delphi\\RTL"
+	condition:
+		pe.overlay.offset >= 0xD000 and
+		uint32(pe.overlay.offset + pe.overlay.size - 4) == pe.overlay.size and
+		pe.number_of_sections == 3 and
+		pe.sections[0].name == "UPX0" and
+		pe.sections[1].name == "UPX1" and
+		pe.timestamp == 0x2A425E19 and
+		all of them
+}
+
+rule quick_batch_compiler_106 {
+	meta:
+		tool = "I"
+		name = "Quick Batch File Compiler"
+		version = "1.0.6.0+"
+	strings:
+		$h01 = { 55 8B EC B9 07 00 00 00 6A 00 6A 00 49 75 F9  }  // Entry point code
+		$s01 = "SOFTWARE\\Borland\\Delphi\\RTL"
 		$s02 = "Compressed file is corrupt"
 		$s03 = "Quick Batch File Compiler"
-		$s04 = "cmd.exe /c"
-		$s05 = "a%.5u.bat"
 	condition:
-		pe.number_of_sections >= 8 and
+		pe.overlay.offset >= 0x23000 and
+		uint32(pe.overlay.offset + pe.overlay.size - 4) == pe.overlay.size and
+		pe.number_of_sections == 8 and
 		pe.sections[0].name == "CODE" and
 		pe.sections[1].name == "DATA" and
-		all of ($delphi_*) and
-		4 of ($s*)
+		pe.timestamp == 0x2A425E19 and
+		$h01 at pe.entry_point and
+		all of them
 }
 
-rule quick_batch_compiler_4x {
+rule quick_batch_compiler_2xx {
 	meta:
 		tool = "I"
 		name = "Quick Batch File Compiler"
-		version = "4.x"
+		version = "2.0.0.0 - 2.1.7.0"
 	strings:
-		$delphi_01 = "Runtime error     at 00000000"                                            // Common Delphi/Embarcadero
-		$delphi_02 = "Access violation at address %p in module '%s'. %s of address %p" wide     // Found in almost all Quick Batch samples
-		$s01 = "Quick Batch File Compiler Runtime Module Version 4." wide
+		$h01 = { 55 8B EC B9 ?? 00 00 00 6A 00 6A 00 49 75 F9  }  // Entry point code
+		$h02 = { FF FF FF FF 10 00 00 00 46 69 6C 65 20 69 73 20 63 6F 72 72 75 70 74 2E 00 00 00 00 }                 // Delphi: "File is corrupt."
+		$h03 = { FF FF FF FF 1A 00 00 00 43 6F 6D 70 72 65 73 73 65 64 20 66 69 6C 65 20 69 73 20 63 6F 72 72 75 70 }  // Delphi: "Compressed file is corrupt"
+		$h04 = { FF FF FF FF 19 00 00 00 51 75 69 63 6B 20 42 61 74 63 68 20 46 69 6C 65 20 43 6F 6D 70 69 6C 65 72 }  // Delphi: "Quick Batch File Compiler"
+		$s05 = "TMultiReadExclusiveWriteSynchronizer"
+	condition:
+		pe.overlay.offset >= 0x1F000 and
+		uint32(pe.overlay.offset + pe.overlay.size - 4) == pe.overlay.size and
+		pe.number_of_sections == 8 and
+		pe.sections[0].name == "CODE" and
+		pe.sections[1].name == "DATA" and
+		pe.timestamp == 0x2A425E19 and
+		$h01 at pe.entry_point and
+		all of them
+}
+
+rule quick_batch_compiler_300 {
+	meta:
+		tool = "I"
+		name = "Quick Batch File Compiler"
+		version = "3.0.0.0 - 3.1.6.0"
+	strings:
+		$h01 = { 55 8B EC B9 ?? 00 00 00 6A 00 6A 00 49 75 F9  }  // Entry point code
+		$h02 = { FF FF FF FF 1A 00 00 00 43 6F 6D 70 72 65 73 73 65 64 20 66 69 6C 65 20 69 73 20 63 6F 72 72 75 70 }  // Delphi: "Compressed file is corrupt"
+		$s03 = "TResourceStreamSV"
+		$s04 = "PADDINGXXPADDING"
+	condition:
+		0x5000 <= filesize and filesize < 300KB and
+		pe.number_of_sections == 8 and
+		pe.sections[0].name == "CODE" and
+		pe.sections[1].name == "DATA" and
+		pe.timestamp == 0x2A425E19 and
+		$h01 at pe.entry_point and
+		@s04 > pe.sections[7].raw_data_offset and
+		all of them
+}
+
+rule quick_batch_compiler_320 {
+	meta:
+		tool = "I"
+		name = "Quick Batch File Compiler"
+		version = "3.2.0.0"
+	strings:
+		$h01 = { 55 8B EC B9 ?? 00 00 00 6A 00 6A 00 49 75 F9  }  // Entry point code
+		$h02 = { FF FF FF FF 19 00 00 00 51 75 69 63 6B 20 42 61 74 63 68 20 46 69 6C 65 20 43 6F 6D 70 69 6C 65 72 00 00 00 }  // Delphi: "Quick Batch File Compiler"
+		$h03 = { FF FF FF FF 0F 00 00 00 63 6F 6D 6D 61 6E 64 2E 63 6F 6D 20 2F 63 20 00 }                                      // Delphi: "command.com /c"
+		$h04 = { 50 41 44 44 49 4E 47 58 58 50 41 44 44 49 4E 47 }  // "PADDINGXXPADDING"
+		$h05 = { 63 6D 64 6C 6E 00 00 00 } // "cmdln\0\0\0"
+	condition:
+		0x5000 <= filesize and filesize < 300KB and
+		pe.number_of_sections == 8 and
+		pe.sections[0].name == "CODE" and
+		pe.sections[1].name == "DATA" and
+		pe.timestamp == 0x2A425E19 and
+		$h01 at pe.entry_point and
+		@h04 > pe.sections[7].raw_data_offset and
+		all of them
+}
+
+rule quick_batch_compiler_321 {
+	meta:
+		tool = "I"
+		name = "Quick Batch File Compiler"
+		version = "3.2.1.0+"
+	strings:
+		$res_name01 = "RTFM" wide
+		$res_name02 = "SCRIPT" wide
+		$h01 = { 55 8B EC B9 ?? 00 00 00 6A 00 6A 00 49 75 F9  }    // Entry point code
+		$h02 = { FF FF FF FF 57 00 00 00 46 61 73 74 4D 4D 20 42 6F 72 6C 61 6E 64 20 45 64 69 74 69 6F 6E 20 A9 20 }  // Delphi: "FastMM Borland Edition (c) 2004"
+		$h03 = { 50 41 44 44 49 4E 47 58 58 50 41 44 44 49 4E 47 }  // "PADDINGXXPADDING"
+		$h04 = { 63 6D 64 6C 6E 00 00 00 } // "cmdln\0\0\0"
+	condition:
+		0x5000 <= filesize and filesize < 300KB and
+		pe.number_of_sections == 9 and
+		pe.sections[0].name == ".text" and
+		pe.sections[1].name == ".itext" and
+		$h01 at pe.entry_point and
+		@h03 > pe.sections[7].raw_data_offset and
+		any of ($res_name*) and
+		all of ($h*)
+}
+
+rule quick_batch_compiler_4xx {
+	meta:
+		tool = "I"
+		name = "Quick Batch File Compiler"
+		version = "4.0.0.0+"
+	strings:
+		$h01 = { FF FF FF FF 3A 00 00 00 46 61 73 74 4D 4D 20 45 6D 62 61 72 63 61 64 65 72 6F 20 45 64 69 74 69 6F }  // Delphi: "FastMM Embarcadero Edition (c) 2004"
+		$h02 = { FF FF FF FF 18 00 00 00 78 66 74 6A 73 72 6A 73 75 79 68 65 77 33 35 33 79 34 35 79 33 65 34 72 00 }  // Delphi: "xftjsrjsuyhew353y45y3e4r"
+		$s03 = "In order to correctly identify malware while avoiding false positives, antivirus manufacturers shalldetect the presence of Quick Batch File Compiler label" wide
+		$s04 = "PADDINGXXPADDING"
+		$s05 = "QUICKBFC" wide
+	condition:
+		pe.number_of_sections >= 8 and
+		pe.sections[0].name == ".text" and
+		pe.timestamp != 0x2A425E19 and
+		@s03 > pe.sections[7].raw_data_offset and
+		all of them
+}
+
+rule quick_batch_compiler_5xx {
+	meta:
+		tool = "I"
+		name = "Quick Batch File Compiler"
+		version = "5.0.0.0+"
+	strings:
+		$s01 = "compiler.environment"
 		$s02 = "In order to correctly identify malware while avoiding false positives, antivirus manufacturers shalldetect the presence of Quick Batch File Compiler label" wide
-		$s03 = { 1A 00 00 00 53 00 63 00 72 00 69 00 70 00 74 00 43 00 72 00 79 00 70 00 74 00 6F 00 72 00 00 00 }  // Delphi "ScriptCryptor"
+		$s03 = "Encrypted user script: Resource Name: SCRIPT, Resource Type: RC DATA" wide
+		$s04 = "QUICKBFC" wide
 	condition:
 		pe.number_of_sections >= 8 and
-		all of ($delphi_*) and
-		2 of ($s*)
-}
-
-rule quick_batch_compiler {
-	meta:
-		tool = "I"
-		name = "Quick Batch File Compiler"
-		version = "2.x - 4.x"
-	strings:
-		$qbatch_01 = "Runtime error     at 00000000"                                            // Common Delphi/Embarcadero
-		$qbatch_02 = "Access violation at address %p in module '%s'. %s of address %p" wide     // Found in almost all Quick Batch samples
-		$qbatch_03 = "http://www.abyssmedia.com"                                                // Found in some samples
-		$code_01 = { c7 05 ?? ?? ?? 00 63 51 e1 b7 bb 2b 00 00 00 b8 ?? ?? ?? 00 8b 10 81 c2 b9 79 37 9e 89 }
-		$code_02 = { 6a 00 6a 00 6a 20 6a 00 6a 00 6a 00 8b 45 ?? e8 ?? ?? ?? ?? 50 6a 00 e8 }
-		$code_03 = { 6a 00 6a 00 6a 20 6a 00 6a 00 6a 00 a1 ?? ?? ?? 00 e8 ?? ?? ?? ?? 50 6a 00 e8 }
-		$code_04 = { 6a 00 6a 00 6a 20 6a ff 68 ?? ?? ?? 00 68 ?? ?? ?? 00 a1 ?? ?? ?? ?? e8 ?? ?? ?? ?? 50 6a 00 e8 }
-		$s10 = "Quick Batch File Compiler" ascii wide
-		$s20 = "RC_SCRIPT" wide
-		$s21 = "MYFILES" wide
-		$s22 = "SCRIPT" wide
-		$s23 = "FORM" wide
-		$s24 = "RTFM" wide
-	condition:
-		pe.number_of_sections >= 8 and
-		(pe.sections[0].name == "CODE" or pe.sections[0].name == ".text") and
-		(pe.sections[1].name == "DATA" or pe.sections[2].name == ".data") and
-		2 of ($qbatch_*) and
-		((2 of ($code_*)) or (1 of ($s*))) and
-		any of ($s*)
+		pe.sections[0].name == ".text" and
+		pe.timestamp != 0x2A425E19 and
+		@s03 > pe.sections[7].raw_data_offset and
+		all of them
 }
 
 rule kgb_sfx {
