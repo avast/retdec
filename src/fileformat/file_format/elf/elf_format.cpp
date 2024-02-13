@@ -1427,7 +1427,7 @@ ELFIO::section* ElfFormat::addPltRelocationTable(ELFIO::section *dynamicSection,
 	const auto *relEntrySizeRecord = table.getRecordOfType(DT_RELENT);
 	const auto *relaEntrySizeRecord = table.getRecordOfType(DT_RELAENT);
 
-	if(!pltgotRecord || !addrRecord || !sizeRecord)
+	if(!pltgotRecord || !addrRecord || !sizeRecord || !entryTypeRecord)
 	{
 		return nullptr;
 	}
