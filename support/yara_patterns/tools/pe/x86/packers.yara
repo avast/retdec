@@ -184,6 +184,21 @@ rule eziriz_dotnet_reactor_62_or_newer {
 		dotnet.user_strings[dotnet.number_of_user_strings - 2] == "{\x001\x001\x001\x001\x001\x00-\x002\x002\x002\x002\x002\x00-\x005\x000\x000\x000\x001\x00-\x000\x000\x000\x000\x001\x00}\x00"
 }
 
+rule pe_file_in_overlay
+{
+	meta:
+		tool = "P"
+		name = "PE-in-Overlay"
+		version = "-"
+		extra = "Various binary tools"
+	condition:
+		pe.overlay.size != 0 and
+		pe.overlay.offset != 0 and
+		uint16(pe.overlay.offset) == 0x5A4D and
+		uint32(pe.overlay.offset + 0x3C) >= 4 and
+		uint32(pe.overlay.offset + uint32(pe.overlay.offset + 0x3C)) == 0x00004550
+}
+
 rule spirit_15_01 {
 	meta:
 		tool = "P"
