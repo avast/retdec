@@ -1019,7 +1019,12 @@ bool ByteValueStorage::get10ByteImpl(
 	{
 		std::vector<std::uint8_t> d8;
 		double10ToDouble8(d8, data);
-		memcpy(&res, d8.data(), d8.size());
+
+		double d8res = 0;
+		static_assert(sizeof(double) == 8);
+
+		memcpy(&d8res, d8.data(), d8.size());
+		res = d8res;
 	}
 
 	return true;
