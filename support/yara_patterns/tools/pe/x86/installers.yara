@@ -461,22 +461,52 @@ rule pyinstaller_30_38
 		all of them
 }
 
-rule pyinstaller_39_plus
+rule pyinstaller_39
 {
 	meta:
 		tool = "I"
 		name = "PyInstaller"
-		version = "3.9+"
+		version = "3.9"
 		strength = "high"
 	strings:
-		$s00 = "Failed to get address for PySys_SetObject"
-		$s01 = "Failed to copy %s"
-		$s02 = "Error loading Python DLL '%s'"
-		$s03 = "_PYI_ONEDIR_MODE"
+		$s00 = "Cannot open PyInstaller archive from executable (%s) or external archive (%s)"
+		$s01 = "Cannot open self %s or archive %s"
+		$s10 = "PyInstaller: FormatMessageW failed."
+		$s11 = "PyInstaller: pyi_win32_utils_to_utf8 failed."
+		$s12 = "bpython39.dll"
+		$s13 = /PYZ-\d\d.pyz/
+		$s14 = { 4D 45 49 0C 0B 0A 0B 0E }      // PyInstaller magic number
 	condition:
 		pe.number_of_resources > 0 and
-		@s00 < pe.sections[2].raw_data_offset and
-		all of them
+		@s12 > pe.overlay.offset and
+		@s13 > pe.overlay.offset and
+		@s14 > pe.overlay.offset and
+		1 of ($s0*) and
+		all of ($s1*)
+}
+
+rule pyinstaller_310_plus
+{
+	meta:
+		tool = "I"
+		name = "PyInstaller"
+		version = "3.10+"
+		strength = "high"
+	strings:
+		$s00 = "Cannot open PyInstaller archive from executable (%s) or external archive (%s)"
+		$s01 = "Cannot open self %s or archive %s"
+		$s10 = /PyInstalle(r|m): FormatMessageW failed./
+		$s11 = /PyInstalle(r|m): pyi_win32_utils_to_utf8 failed./
+		$s12 = /bpython31\d.dll/
+		$s13 = /PYZ-\d\d.pyz/
+		$s14 = { 4D 45 49 0C 0B 0A 0B 0E }      // PyInstaller magic number
+	condition:
+		pe.number_of_resources > 0 and
+		@s12 > pe.overlay.offset and
+		@s13 > pe.overlay.offset and
+		@s14 > pe.overlay.offset and
+		1 of ($s0*) and
+		all of ($s1*)
 }
 
 rule installanywhere_61 {
