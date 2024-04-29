@@ -637,7 +637,7 @@ Capstone2LlvmIrTranslatorX86_impl::_i2fm =
 		{X86_INS_AESIMC, nullptr},
 		{X86_INS_AESKEYGENASSIST, nullptr},
 		{X86_INS_AND, &Capstone2LlvmIrTranslatorX86_impl::translateAnd},
-		{X86_INS_ANDN, nullptr},
+		{X86_INS_ANDN, &Capstone2LlvmIrTranslatorX86_impl::translateAndN},
 		{X86_INS_ANDNPD, nullptr},
 		{X86_INS_ANDNPS, nullptr},
 		{X86_INS_ANDPD, nullptr},

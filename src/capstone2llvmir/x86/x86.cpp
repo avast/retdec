@@ -1767,6 +1767,26 @@ void Capstone2LlvmIrTranslatorX86_impl::translateAnd(cs_insn* i, cs_x86* xi, llv
 }
 
 /**
+ * X86_INS_ANDN
+ */
+void Capstone2LlvmIrTranslatorX86_impl::translateAndN(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_TERNARY(i, xi, irb);
+
+	std::tie(op0, op1, op2) = loadOpTernary(xi, irb);
+
+	auto* andOp = irb.CreateAnd(irb.CreateNot(op1), op2);
+	storeRegister(X86_REG_AF, irb.getFalse(), irb); // undef
+	storeRegister(X86_REG_PF, irb.getFalse(), irb); // undef
+	storeRegister(X86_REG_OF, irb.getFalse(), irb); // cleared
+	storeRegister(X86_REG_CF, irb.getFalse(), irb); // cleared
+	storeRegister(X86_REG_ZF, generateZeroFlag(andOp, irb), irb);
+	storeRegister(X86_REG_ZF, generateSignFlag(andOp, irb), irb);
+
+	storeOp(xi->operands[0], andOp, irb);
+}
+
+/**
  * X86_INS_BSF, X86_INS_BSR
  */
 void Capstone2LlvmIrTranslatorX86_impl::translateBsf(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb)
