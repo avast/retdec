@@ -3364,6 +3364,7 @@ void Capstone2LlvmIrTranslatorX86_impl::translateShiftX(cs_insn* i, cs_x86* xi, 
 		case X86_INS_SHR: return llvm::Instruction::BinaryOps::LShr;
 		case X86_INS_SAR: return llvm::Instruction::BinaryOps::AShr;
 		case X86_INS_SHL: return llvm::Instruction::BinaryOps::Shl;
+		default: assert(false);
 		}
 	}();
 
@@ -5440,6 +5441,29 @@ void Capstone2LlvmIrTranslatorX86_impl::translateRdtscp(cs_insn* i, cs_x86* xi, 
 	storeRegister(X86_REG_EDX, irb.CreateExtractValue(c, {0}), irb);
 	storeRegister(X86_REG_EAX, irb.CreateExtractValue(c, {1}), irb);
 	storeRegister(X86_REG_ECX, irb.CreateExtractValue(c, {2}), irb);
+}
+
+void Capstone2LlvmIrTranslatorX86_impl::translateTzcntOrLzcnt(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_BINARY(i, xi, irb);
+
+	std::tie(op0, op1) = loadOpBinary(xi, irb);
+
+	storeRegister(X86_REG_CF, generateZeroFlag(op1, irb), irb);
+
+	op0 = irb.CreateIntrinsic(
+		i->id == X86_INS_LZCNT ? llvm::Intrinsic::ctlz : llvm::Intrinsic::cttz,
+		{op1->getType()},
+		{op1, irb.getFalse()});
+
+	storeRegister(X86_REG_OF, irb.getFalse(), irb); // undef
+	storeRegister(X86_REG_SF, irb.getFalse(), irb); // undef
+	storeRegister(X86_REG_PF, irb.getFalse(), irb); // undef
+	storeRegister(X86_REG_AF, irb.getFalse(), irb); // undef
+
+	storeRegister(X86_REG_ZF, generateZeroFlag(op0, irb), irb);
+
+	storeOp(xi->operands[0], op0, irb);
 }
 
 } // namespace capstone2llvmir
