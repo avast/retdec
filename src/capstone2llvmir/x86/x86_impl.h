@@ -346,6 +346,7 @@ class Capstone2LlvmIrTranslatorX86_impl :
 		void translateShiftRight(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateShld(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateShrd(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
+		void translateShiftX(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateStc(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateStd(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateStoreString(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
