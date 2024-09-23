@@ -39,7 +39,7 @@ class Import
 
 		/// @name Getters
 		/// @{
-		std::string getName() const;
+		const std::string& getName() const;
 		std::uint64_t getLibraryIndex() const;
 		std::uint64_t getAddress() const;
 		bool getOrdinalNumber(std::uint64_t &importOrdinalNumber) const;

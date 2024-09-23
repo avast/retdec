@@ -5,6 +5,7 @@
  */
 
 #include <elfio/elf_types.hpp>
+#include <functional>
 #include <map>
 #include <regex>
 
@@ -1744,10 +1745,18 @@ void ElfFormat::loadSymbols(const ELFIO::elfio *file, const ELFIO::symbol_sectio
 		telfhashSymbols = {};
 	}
 
+	// Cache keeping track of created imports (i.e. (name, address) pairs)
+	// to prevent repeated creation of the same imports.
+	// To save space, this uses string references and relies on imports not
+	// being moved -- they should not be, as ImportTable stores vector of unique
+	// pointers, but if that ever changes, this will end badly.
+	std::set<std::pair<const std::string&, unsigned long long>> createdImports;
+
 	for(std::size_t i = 0, e = elfSymbolTable->get_loaded_symbols_num(); i < e; ++i)
 	{
 		auto symbol = std::make_shared<ElfSymbol>();
 		elfSymbolTable->get_symbol(i, name, value, size, bind, type, link, other);
+
 		size ? symbol->setSize(size) : symbol->invalidateSize();
 		symbol->setType(getSymbolType(bind, type, link));
 		symbol->setUsageType(getSymbolUsageType(type));
@@ -1781,15 +1790,27 @@ void ElfFormat::loadSymbols(const ELFIO::elfio *file, const ELFIO::symbol_sectio
 					importTable = new ElfImportTable();
 				}
 				auto keyIter = importNameAddressMap.equal_range(name);
+
 				// we create std::set from std::multimap values in order to ensure determinism
-				std::set<std::pair<std::string, unsigned long long>> addresses(keyIter.first, keyIter.second);
+				std::set<std::pair<std::string, unsigned long long>> addresses;
+				for (auto it = keyIter.first; it != keyIter.second; ++it)
+				{
+					if (createdImports.count({std::cref(it->first), it->second})) {
+						addresses.insert(*it);
+					}
+				}
+
 				for(const auto &address : addresses)
 				{
 					auto import = std::make_unique<Import>();
 					import->setName(name);
 					import->setAddress(address.second);
 					import->setUsageType(symbolToImportUsage(symbol->getUsageType()));
-					importTable->addImport(std::move(import));
+					auto* inserted = importTable->addImport(std::move(import));
+
+					if (inserted) {
+						createdImports.emplace(inserted->getName(), inserted->getAddress());
+					}
 				}
 				if(keyIter.first == keyIter.second && getSectionFromAddress(value))
 				{
@@ -1797,7 +1818,11 @@ void ElfFormat::loadSymbols(const ELFIO::elfio *file, const ELFIO::symbol_sectio
 					import->setName(name);
 					import->setAddress(value);
 					import->setUsageType(symbolToImportUsage(symbol->getUsageType()));
-					importTable->addImport(std::move(import));
+					auto* inserted = importTable->addImport(std::move(import));
+
+					if (inserted) {
+						createdImports.emplace(inserted->getName(), inserted->getAddress());
+					}
 				}
 			}
 		}
