@@ -1750,7 +1750,19 @@ void ElfFormat::loadSymbols(const ELFIO::elfio *file, const ELFIO::symbol_sectio
 	// To save space, this uses string references and relies on imports not
 	// being moved -- they should not be, as ImportTable stores vector of unique
 	// pointers, but if that ever changes, this will end badly.
-	std::set<std::pair<const std::string&, unsigned long long>> createdImports;
+    auto createdImportsComparator = [](
+        const std::pair<const std::string*, unsigned long long>& lhs,
+        const std::pair<const std::string*, unsigned long long>& rhs
+    ) {
+        if (*(lhs.first) != *(rhs.first)) {
+            return *(lhs.first) < *(rhs.first);
+        }
+        return lhs.second < rhs.second;
+    };
+    std::set<
+        std::pair<const std::string*, unsigned long long>,
+        decltype(createdImportsComparator)
+    > createdImports(createdImportsComparator);
 
 	for(std::size_t i = 0, e = elfSymbolTable->get_loaded_symbols_num(); i < e; ++i)
 	{
@@ -1795,7 +1807,7 @@ void ElfFormat::loadSymbols(const ELFIO::elfio *file, const ELFIO::symbol_sectio
 				std::set<std::pair<std::string, unsigned long long>> addresses;
 				for (auto it = keyIter.first; it != keyIter.second; ++it)
 				{
-					if (createdImports.count({std::cref(it->first), it->second})) {
+					if (!createdImports.count({&it->first, it->second})) {
 						addresses.insert(*it);
 					}
 				}
@@ -1809,7 +1821,7 @@ void ElfFormat::loadSymbols(const ELFIO::elfio *file, const ELFIO::symbol_sectio
 					auto* inserted = importTable->addImport(std::move(import));
 
 					if (inserted) {
-						createdImports.emplace(inserted->getName(), inserted->getAddress());
+						createdImports.emplace(&inserted->getName(), inserted->getAddress());
 					}
 				}
 				if(keyIter.first == keyIter.second && getSectionFromAddress(value))
@@ -1821,7 +1833,7 @@ void ElfFormat::loadSymbols(const ELFIO::elfio *file, const ELFIO::symbol_sectio
 					auto* inserted = importTable->addImport(std::move(import));
 
 					if (inserted) {
-						createdImports.emplace(inserted->getName(), inserted->getAddress());
+						createdImports.emplace(&inserted->getName(), inserted->getAddress());
 					}
 				}
 			}
