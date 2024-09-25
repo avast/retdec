@@ -322,9 +322,10 @@ void ImportTable::addLibrary(std::string name, bool isMissingDependency)
  * Add import
  * @param import Import which will be added
  */
-void ImportTable::addImport(std::unique_ptr<Import>&& import)
+const Import* ImportTable::addImport(std::unique_ptr<Import>&& import)
 {
 	imports.push_back(std::move(import));
+	return imports.back().get();
 }
 
 /**

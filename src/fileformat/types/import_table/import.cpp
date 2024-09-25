@@ -13,7 +13,7 @@ namespace fileformat {
  * Get import name
  * @return Import name
  */
-std::string Import::getName() const
+const std::string& Import::getName() const
 {
 	return name;
 }
