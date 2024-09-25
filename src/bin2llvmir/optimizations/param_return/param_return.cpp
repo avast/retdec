@@ -108,6 +108,33 @@ bool ParamReturn::run()
 	return false;
 }
 
+void SOLVE_CALL(std::map<llvm::Value *, retdec::bin2llvmir::DataFlowEntry>& _fnc2calls,llvm::Function* funct,std::vector<llvm::Value *>& added,std::unordered_map<llvm::Value *, bool>& before){
+	for(auto &f2:_fnc2calls){
+		if(f2.first==funct){
+			for(auto &bf2:f2.second.getFunction()->getBasicBlockList()){
+				for (auto& i : bf2){
+					if(auto *func=dyn_cast<CallInst>(&i)){
+						if(func->getCalledFunction()==funct){
+							break;
+						}
+						SOLVE_CALL(_fnc2calls,func->getCalledFunction(),added,before);
+					}
+					else if(auto *l=dyn_cast<LoadInst>(&i)){
+						auto ptr=l->getPointerOperand();
+						if(before[ptr]==false&&find(added.begin(),added.end(),ptr)==added.end()){
+							before[ptr]=true;
+							added.push_back(ptr);
+						}
+					}
+					else if(auto *s=dyn_cast<StoreInst>(&i)){
+						before[s->getPointerOperand()]=true;
+					}
+				}
+			}
+		}
+	}
+}
+
 /**
  * Collect possible arguments' stores for all calls we want to analyze.
  * At the moment, we analyze only indirect or declared function calls with no
@@ -152,6 +179,28 @@ void ParamReturn::collectAllCalls()
 				std::make_pair(
 					calledVal,
 					createDataFlowEntry(calledVal))).first;
+		}
+		
+		std::unordered_map<Value *, bool> before;
+		std::vector<Value*> added;
+		for (auto& b : f){
+			for (auto& i : b){
+				if(auto *func=dyn_cast<CallInst>(&i)){
+					FUN_CALL(_fnc2calls,func->getCalledFunction(),added,before);
+				}
+				else if (auto *store = dyn_cast<StoreInst>(&i)) {
+					Value *storedPtr = store->getPointerOperand();
+					before[storedPtr] = true;
+				}
+			}
+		}
+		llvm::outs()<<"Add:"<<added.size()<<"\n";
+		for(auto &fc:_fnc2calls){
+			if(fc.first->getName()==f.getName()){
+				for(auto as:added){
+					fc.second.addArg(as);
+				}
+			}
 		}
 
 		addDataFromCall(&fIt->second, call);

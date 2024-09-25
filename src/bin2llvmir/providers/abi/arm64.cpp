@@ -35,7 +35,7 @@ AbiArm64::AbiArm64(llvm::Module* m, Config* c) :
 bool AbiArm64::isGeneralPurposeRegister(const llvm::Value* val) const
 {
 	uint32_t rid = getRegisterId(val);
-	return ARM64_REG_X0 <= rid && rid <= ARM64_REG_X30;
+	return (ARM64_REG_X0 <= rid && rid <= ARM64_REG_X28)||rid==ARM64_REG_X29||rid==ARM64_REG_X30;
 }
 
 bool AbiArm64::isNopInstruction(cs_insn* insn)
