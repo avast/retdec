@@ -233,6 +233,7 @@ class Capstone2LlvmIrTranslatorX86_impl :
 		void translateAdc(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateAdd(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateAnd(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
+		void translateAndN(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateBsf(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateBswap(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateBt(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
@@ -345,6 +346,7 @@ class Capstone2LlvmIrTranslatorX86_impl :
 		void translateShiftRight(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateShld(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateShrd(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
+		void translateShiftX(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateStc(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateStd(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateStoreString(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
@@ -352,6 +354,7 @@ class Capstone2LlvmIrTranslatorX86_impl :
 		void translateXchg(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateXlatb(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateXor(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
+		void translateTzcntOrLzcnt(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 };
 
 } // namespace capstone2llvmir

@@ -1767,6 +1767,26 @@ void Capstone2LlvmIrTranslatorX86_impl::translateAnd(cs_insn* i, cs_x86* xi, llv
 }
 
 /**
+ * X86_INS_ANDN
+ */
+void Capstone2LlvmIrTranslatorX86_impl::translateAndN(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_TERNARY(i, xi, irb);
+
+	std::tie(op0, op1, op2) = loadOpTernary(xi, irb);
+
+	auto* andOp = irb.CreateAnd(irb.CreateNot(op1), op2);
+	storeRegister(X86_REG_AF, irb.getFalse(), irb); // undef
+	storeRegister(X86_REG_PF, irb.getFalse(), irb); // undef
+	storeRegister(X86_REG_OF, irb.getFalse(), irb); // cleared
+	storeRegister(X86_REG_CF, irb.getFalse(), irb); // cleared
+	storeRegister(X86_REG_ZF, generateZeroFlag(andOp, irb), irb);
+	storeRegister(X86_REG_ZF, generateSignFlag(andOp, irb), irb);
+
+	storeOp(xi->operands[0], andOp, irb);
+}
+
+/**
  * X86_INS_BSF, X86_INS_BSR
  */
 void Capstone2LlvmIrTranslatorX86_impl::translateBsf(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb)
@@ -3327,6 +3347,35 @@ void Capstone2LlvmIrTranslatorX86_impl::translateShrd(cs_insn* i, cs_x86* xi, ll
 	auto* icmpOfV = bodyIrb.CreateICmpSLT(xorOf, llvm::ConstantInt::getSigned(xorOf->getType(), 0));
 	auto* ofV = bodyIrb.CreateSelect(icmpOf, icmpOfV, of);
 	storeRegister(X86_REG_OF, ofV, bodyIrb);
+}
+
+/**
+ * X86_INS_SHLX, X86_INS_SHRX, X86_INS_SARX
+ */
+void Capstone2LlvmIrTranslatorX86_impl::translateShiftX(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_TERNARY(i, xi, irb);
+
+	std::tie(op0, op1, op2) = loadOpTernary(xi, irb);
+
+	auto OpKind = [&] {
+		switch (i->id)
+		{
+		case X86_INS_SHR: return llvm::Instruction::BinaryOps::LShr;
+		case X86_INS_SAR: return llvm::Instruction::BinaryOps::AShr;
+		case X86_INS_SHL: return llvm::Instruction::BinaryOps::Shl;
+		default: assert(false);
+		}
+	}();
+
+	unsigned bitwidth = op0->getType()->getIntegerBitWidth();
+	auto* is_overflow = irb.CreateICmpUGE(op2, llvm::ConstantInt::get(op1->getType(), bitwidth));
+	auto* shift = irb.CreateBinOp(OpKind, op1, op2);
+	auto* res = irb.CreateSelect(is_overflow, llvm::ConstantInt::get(op2->getType(), 0), shift);
+
+	// X variants of shifts have no flag impact
+
+	storeOp(xi->operands[0], res, irb);
 }
 
 /**
@@ -5392,6 +5441,29 @@ void Capstone2LlvmIrTranslatorX86_impl::translateRdtscp(cs_insn* i, cs_x86* xi, 
 	storeRegister(X86_REG_EDX, irb.CreateExtractValue(c, {0}), irb);
 	storeRegister(X86_REG_EAX, irb.CreateExtractValue(c, {1}), irb);
 	storeRegister(X86_REG_ECX, irb.CreateExtractValue(c, {2}), irb);
+}
+
+void Capstone2LlvmIrTranslatorX86_impl::translateTzcntOrLzcnt(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_BINARY(i, xi, irb);
+
+	std::tie(op0, op1) = loadOpBinary(xi, irb);
+
+	storeRegister(X86_REG_CF, generateZeroFlag(op1, irb), irb);
+
+	op0 = irb.CreateIntrinsic(
+		i->id == X86_INS_LZCNT ? llvm::Intrinsic::ctlz : llvm::Intrinsic::cttz,
+		{op1->getType()},
+		{op1, irb.getFalse()});
+
+	storeRegister(X86_REG_OF, irb.getFalse(), irb); // undef
+	storeRegister(X86_REG_SF, irb.getFalse(), irb); // undef
+	storeRegister(X86_REG_PF, irb.getFalse(), irb); // undef
+	storeRegister(X86_REG_AF, irb.getFalse(), irb); // undef
+
+	storeRegister(X86_REG_ZF, generateZeroFlag(op0, irb), irb);
+
+	storeOp(xi->operands[0], op0, irb);
 }
 
 } // namespace capstone2llvmir
