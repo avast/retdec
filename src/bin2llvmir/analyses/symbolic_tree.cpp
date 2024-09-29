@@ -415,8 +415,7 @@ void SymbolicTree::_simplifyNode()
 		*this = std::move(ops[0].ops[0]);
 	}
 	else if (match(*this, m_Load(m_Value(val), &load))
-			&& (isa<AllocaInst>(llvm_utils::skipCasts(load->getPointerOperand()))
-			|| isa<GlobalVariable>(llvm_utils::skipCasts(load->getPointerOperand()))))
+			&& isa<AllocaInst>(llvm_utils::skipCasts(load->getPointerOperand())))
 	{
 		*this = std::move(ops[0]);
 	}
