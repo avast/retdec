@@ -7,6 +7,8 @@
 #include "retdec/utils/os.h"
 #include "retdec/utils/system.h"
 
+#include <cfloat>
+
 namespace retdec {
 namespace utils {
 
@@ -22,11 +24,11 @@ bool isLittleEndian() {
 }
 
 /**
-* @brief Finds out if the runtime system supports <tt>long double</tt> (at least
-*        10 bytes long).
+* @brief Finds out if the runtime system supports 80-bit <tt>long double</tt>
+*        (exactly 10 bytes long).
 */
 bool systemHasLongDouble() {
-	return sizeof(long double) >= 10;
+	return sizeof(long double) >= 10 && (LDBL_MANT_DIG == 64);
 }
 
 } // namespace utils
