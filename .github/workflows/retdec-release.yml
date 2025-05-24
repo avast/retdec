@@ -36,7 +36,7 @@ jobs:
 
     steps:
       # Checkouts the correct commit/branch.
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
         # Installs dependencies on all systems.
       - name: Install Dependencies
@@ -85,7 +85,7 @@ jobs:
         working-directory: install
 
       - name: Archive Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: RetDec-${{ github.ref_name }}-${{ runner.os }}-Release
           path: RetDec-*
@@ -97,11 +97,11 @@ jobs:
     needs: builder
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       # Fetch artifacts from the build step.
       - name: Fetch Artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           path: artifacts
 
