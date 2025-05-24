@@ -129,7 +129,7 @@ static void parse_nested_authenticode(PKCS7_SIGNER_INFO* si, AuthenticodeArray* 
 
     for (int i = 0; i < attrCount; ++i) {
         ASN1_TYPE* nested = X509_ATTRIBUTE_get0_type(attr, i);
-        if (nested == NULL)
+        if (nested == NULL || nested->type != V_ASN1_SEQUENCE || nested->value.sequence == NULL || nested->value.sequence->data == NULL)
             break;
         int len = nested->value.sequence->length;
         const uint8_t* data = nested->value.sequence->data;
@@ -191,7 +191,7 @@ static void parse_ms_countersig(PKCS7* p7, Authenticode* auth)
 
     for (int i = 0; i < attrCount; ++i) {
         ASN1_TYPE* nested = X509_ATTRIBUTE_get0_type(attr, i);
-        if (nested == NULL)
+        if (nested == NULL || nested->type != V_ASN1_SEQUENCE || nested->value.sequence == NULL || nested->value.sequence->data == NULL)
             break;
         int len = nested->value.sequence->length;
         const uint8_t* data = nested->value.sequence->data;
