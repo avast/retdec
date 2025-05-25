@@ -300,6 +300,8 @@ struct iterator_traits<retdec::fileformat::CharacterIterator<It>>
 {
 	using difference_type = std::ptrdiff_t;
 	using value_type = char;
+	using pointer = char*;
+	using reference = char&;
 	using iterator_category = std::random_access_iterator_tag;
 };
 
