@@ -23,7 +23,7 @@ jobs:
     strategy:
       matrix:
         sys:
-          - { os: ubuntu-latest, shell: bash }
+          - { os: ubuntu-22.04, shell: bash }
           - { os: windows-2019, shell: 'msys2 {0}' }
           - { os: macos-11, shell: bash }
         type: [Release, Debug]
