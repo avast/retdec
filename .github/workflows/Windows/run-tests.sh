@@ -22,7 +22,11 @@ cd "$PWD/retdec-regression-tests-framework"
 python -m pip install virtualenv
 python -m venv .venv
 
-. .venv/Scripts/activate
+if [ -d .venv/Scripts ]; then
+    source .venv/Scripts/activate
+else
+    source .venv/bin/activate
+fi
 pip3 install -r requirements.txt
 
 python3 ./runner.py
