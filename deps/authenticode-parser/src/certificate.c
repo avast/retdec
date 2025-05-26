@@ -379,15 +379,15 @@ Certificate* certificate_copy(Certificate* cert)
         return NULL;
 
     result->version = cert->version;
-    result->issuer = strdup(cert->issuer);
-    result->subject = strdup(cert->subject);
-    result->serial = strdup(cert->serial);
+    result->issuer = cert->issuer ? strdup(cert->issuer) : NULL;
+    result->subject = cert->subject ? strdup(cert->subject) : NULL;
+    result->serial = cert->serial ? strdup(cert->serial) : NULL;
     result->not_after = cert->not_after;
     result->not_before = cert->not_before;
-    result->sig_alg = strdup(cert->sig_alg);
-    result->sig_alg_oid = strdup(cert->sig_alg_oid);
-    result->key_alg = strdup(cert->key_alg);
-    result->key = strdup(cert->key);
+    result->sig_alg = cert->sig_alg ? strdup(cert->sig_alg) : NULL;
+    result->sig_alg_oid = cert->sig_alg_oid ? strdup(cert->sig_alg_oid) : NULL;
+    result->key_alg = cert->key_alg ? strdup(cert->key_alg) : NULL;
+    result->key = cert->key ? strdup(cert->key) : NULL;
     byte_array_init(&result->sha1, cert->sha1.data, cert->sha1.len);
     byte_array_init(&result->sha256, cert->sha256.data, cert->sha256.len);
     attributes_copy(&result->issuer_attrs, &cert->issuer_attrs);
