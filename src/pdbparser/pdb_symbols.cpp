@@ -8,6 +8,7 @@
 #include <cstdio>
 #include <cstring>
 #include <sstream>
+#include <cinttypes>	// Since C++11 for the macro of PRIx64
 
 #include "retdec/pdbparser/pdb_symbols.h"
 
@@ -58,7 +59,8 @@ void dump_local_variable(PDBLocalVariable &var)
 
 void PDBFunction::dump(void)
 {
-	printf("** Function [%s] at 0x%16lx\n", name, address);
+	printf("** Function [%s] at 0x%" PRIx64 "\n", name, address);
+
 	if (overload_index > 0)
 		printf("\tFunction is overloaded. Index: %d\n", overload_index);
 	printf("\tOffset : %08x\n", offset);
@@ -100,12 +102,12 @@ void PDBFunction::dump(void)
 			data[i].type_def->dump(true);
 			size = data[i].type_def->size_bytes;
 		}
-		printf(" Size: %d bytes [%s] at 0x%16lx\n", size, data[i].name, data[i].address);
+		printf(" Size: %d bytes [%s] at 0x%" PRIx64 "\n", size, data[i].name, data[i].address);
 	}
 	printf("\tLine number information:\n");
 	for (unsigned int i = 0; i < lines.size(); i++)
 	{
-		printf("\t\tLine: %d Offset: %08x (%16lx)\n", lines[i].line, lines[i].offset, lines[i].offset + address);
+		printf("\t\tLine: %d Offset: %08x (%" PRIx64 ")\n", lines[i].line, lines[i].offset, lines[i].offset + address);
 	}
 	puts("");
 }
@@ -297,7 +299,6 @@ void PDBSymbols::parse_symbols(void)
 			continue;
 		PDBStream *stream = modules[m].stream;
 		position = 4;
-		int cnt = 0;
 		PDBFunction * new_function = nullptr;
 		while (position < stream->size)
 		{  // Process all symbols in module stream
@@ -371,11 +372,9 @@ void PDBSymbols::parse_symbols(void)
 					break;
 				}
 			}
-			cnt++;
 			position += symbol->size + 2;
 		}
 
-		cnt = 0;
 		while (position < stream->size)
 		{  // Process all big symbols in module stream
 			PDBBigSymbol *symbol = reinterpret_cast<PDBBigSymbol *>(stream->data + position);
@@ -397,7 +396,6 @@ void PDBSymbols::parse_symbols(void)
 					break;
 			}
 			position += symbol->size + 8;
-			cnt++;
 		}
 	}
 	parsed = true;
@@ -768,7 +766,7 @@ void PDBSymbols::print_global_variables(void)
 	puts("******* SYM global variables list *******");
 	for (PDBGlobalVarAddressMap::iterator it = global_variables.begin(); it != global_variables.end(); ++it)
 	{
-		printf("Global variable [%s] at 0x%16lx\n", it->second.name, it->second.address);
+		printf("Global variable [%s] at 0x%" PRIx64 "\n", it->second.name, it->second.address);
 		printf("\tOffset : %08x\n", it->second.offset);
 		printf("\tSection: %04x\n", it->second.section);
 		printf("\tModule : %d\n", it->second.module_index);
