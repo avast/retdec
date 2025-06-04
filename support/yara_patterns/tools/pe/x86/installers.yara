@@ -2328,6 +2328,24 @@ rule inno_unicode_600
 		all of ($s1*)
 }
 
+rule ms_cabinet_sfx
+{
+	meta:
+		tool = "I"
+		name = "Microsoft Cabinet SFX"
+		version = "1.0.x - 11.00.x"
+		source = "Made by Retdec Team"
+	strings:
+		$s01 = { 4D 53 43 46 00 00 00 00 }                          // 'MSCF\x00\x00\x00\x00'
+		$s02 = { 52 49 46 46 12 2E 00 00 41 56 49 20 4C 49 53 54 }  // AVI header
+		$s03 = "wextract_cleanup%d"
+		$s04 = "CABINET" wide
+	condition:
+		pe.version_info["InternalName"] == "Wextract                " and
+		pe.pdb_path == "wextract.pdb" and
+		all of them
+}
+
 rule sevenzip_sfx_3xx_01
 {
 	meta:
