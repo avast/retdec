@@ -19,10 +19,10 @@ rule AppPacker_1_3_x {
 		$h01 at pe.overlay.offset
 }
 
-rule blizzard_protector {
+rule aegis_protector {
 	meta:
 		tool = "P"
-		name = "BlizzardProtector"
+		name = "Aegis Protector by Blizzard"
 		version = "1.0"
 	condition:
 		filesize > 5MB and
