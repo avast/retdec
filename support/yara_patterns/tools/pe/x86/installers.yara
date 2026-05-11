@@ -2328,6 +2328,59 @@ rule inno_unicode_600
 		all of ($s1*)
 }
 
+rule inno_unicode_670
+{
+	meta:
+		tool = "I"
+		name = "Inno Setup"
+		version = "6.7.0"
+		extra = "unicode version"
+		source = "Made by Retdec Team"
+		pattern = "558BECB90F0000006A006A004975F951535657B8(68|78)BA4A00E827C8F5FF33C05568C6264B0064FF3064892033D2556880264B0064FF32648922A134A64B00E8"
+	strings:
+		$s01 = { 55 8B EC B9 0F 00 00 00 6A 00 6A 00 49 75 F9 51 53 56 57 B8 (68|78) BA 4A 00 E8 27 C8 F5 FF 33 C0 55 68 C6 26 4B 00 64 FF 30 64 89 20 33 D2 55 68 80 26 4B 00 64 FF 32 64 89 22 A1 34 A6 4B 00 E8 }
+		$s10 = "Inno Setup Setup Data (6.7.0)"
+		$s11 = "Inno Setup Messages (6.5.0) (u)"
+	condition:
+		$s01 at pe.entry_point and
+		all of ($s1*)
+}
+
+rule inno_unicode_700
+{
+	meta:
+		tool = "I"
+		name = "Inno Setup"
+		version = "7.0.0"
+		extra = "unicode version"
+		source = "Made by Retdec Team"
+		pattern = "558BECB90F0000006A006A004975F951535657B894C24A00E827D8F5FF33C05568B0164B0064FF3064892033D255686A164B0064FF32648922A134964B00E811"
+	strings:
+		$s01 = { 55 8B EC B9 0F 00 00 00 6A 00 6A 00 49 75 F9 51 }
+		$s10 = "Inno Setup Setup Data (7.0.0"
+		$s11 = "Inno Setup Messages (6.5.0) (u)"
+	condition:
+		$s01 at pe.entry_point and
+		all of ($s1*)
+}
+
+rule inno_uninstaller
+{
+	meta:
+		tool = "I"
+		name = "Inno Uninstaller"
+		version = "6.3.0"
+		extra = "unicode version"
+		source = "Made by Retdec Team"
+		pattern = "Inno Setup Uninstall Log (b) 64-bit"
+	strings:
+		$s10 = "Inno Setup Uninstall Log (b)"
+		$s11 = "Embarcadero Delphi for Win32 compiler"
+		$s12 = "Inno Setup: Selected Components" wide
+	condition:
+		all of ($s1*)
+}
+
 rule ms_cabinet_sfx
 {
 	meta:
