@@ -2145,240 +2145,89 @@ rule inno_559
 		$1 at pe.entry_point
 }
 
-rule inno_unicode_530b_535
+rule inno_53_56
 {
 	meta:
 		tool = "I"
 		name = "Inno Setup"
-		version = "5.3.0b - 5.3.5"
-		extra = "unicode version"
+		version = "5.3 - 5.6"
 		source = "Made by Retdec Team"
-		pattern = "558BEC83C4A453565733C08945C48945C08945A48945D08945C88945CC8945D48945D88945ECB8A4524100E8F002FFFF33C05568896A410064FF3064892033D25568456A410064FF32648922A118AB4100E8F6ECFFFFE801E8FFFF8D55EC33C0E88386FF"
+		pattern = "Inno Setup Setup Data"
 	strings:
-		$1 = { 55 8B EC 83 C4 A4 53 56 57 33 C0 89 45 C4 89 45 C0 89 45 A4 89 45 D0 89 45 C8 89 45 CC 89 45 D4 89 45 D8 89 45 EC B8 A4 52 41 00 E8 F0 02 FF FF 33 C0 55 68 89 6A 41 00 64 FF 30 64 89 20 33 D2 55 68 45 6A 41 00 64 FF 32 64 89 22 A1 18 AB 41 00 E8 F6 EC FF FF E8 01 E8 FF FF 8D 55 EC 33 C0 E8 83 86 FF }
+		$s01 = "InnoSetupLdrWindow" ascii wide
+		$s02 = "Inno Setup Messages (5."
+		$s10 = "Inno Setup Setup Data (5."
 	condition:
-		$1 at pe.entry_point
+		(pe.sections[0].name == "CODE" or pe.sections[0].name == ".text") and
+		all of them
 }
 
-rule inno_unicode_536_537
+rule inno_unicode_6x
 {
 	meta:
 		tool = "I"
 		name = "Inno Setup"
-		version = "5.3.6 - 5.3.7"
-		extra = "unicode version"
+		version = "6.x"
 		source = "Made by Retdec Team"
-		pattern = "558BEC83C4A453565733C08945C48945C08945A48945D08945C88945CC8945D48945D88945ECB8E8544100E87004FFFF33C05568916A410064FF3064892033D255684D6A410064FF32648922A148AB4100E83AEFFFFFE845EAFFFF8D55EC33C0E8FB87FF"
+		pattern = "Inno Setup Setup Data"
 	strings:
-		$1 = { 55 8B EC 83 C4 A4 53 56 57 33 C0 89 45 C4 89 45 C0 89 45 A4 89 45 D0 89 45 C8 89 45 CC 89 45 D4 89 45 D8 89 45 EC B8 E8 54 41 00 E8 70 04 FF FF 33 C0 55 68 91 6A 41 00 64 FF 30 64 89 20 33 D2 55 68 4D 6A 41 00 64 FF 32 64 89 22 A1 48 AB 41 00 E8 3A EF FF FF E8 45 EA FF FF 8D 55 EC 33 C0 E8 FB 87 FF }
+		$s01 = "InnoSetupLdrWindow" wide
+		$s02 = "Inno Setup Messages ("
+		$s03 = "Inno Setup Setup Data (6."
 	condition:
-		$1 at pe.entry_point
+		pe.sections[0].name == ".text" and
+		all of them
 }
 
-rule inno_unicode_538
+rule inno_unicode_7x
 {
 	meta:
 		tool = "I"
 		name = "Inno Setup"
-		version = "5.3.8"
-		extra = "unicode version"
+		version = "7.x"
 		source = "Made by Retdec Team"
-		pattern = "558BEC83C4A453565733C08945C48945C08945A48945D08945C88945CC8945D48945D88945ECB8F0544100E87004FFFF33C05568916A410064FF3064892033D255684D6A410064FF32648922A148AB4100E842EFFFFFE84DEAFFFF8D55EC33C0E8FB87FF"
+		pattern = "Inno Setup Setup Data"
 	strings:
-		$1 = { 55 8B EC 83 C4 A4 53 56 57 33 C0 89 45 C4 89 45 C0 89 45 A4 89 45 D0 89 45 C8 89 45 CC 89 45 D4 89 45 D8 89 45 EC B8 E8 54 41 00 E8 70 04 FF FF 33 C0 55 68 91 6A 41 00 64 FF 30 64 89 20 33 D2 55 68 4D 6A 41 00 64 FF 32 64 89 22 A1 48 AB 41 00 E8 3A EF FF FF E8 45 EA FF FF 8D 55 EC 33 C0 E8 FB 87 FF }
+		$s01 = "InnoSetupLdrWindow" wide
+		$s02 = "Inno Setup Messages ("
+		$s11 = "Inno Setup Setup Data (7."
 	condition:
-		$1 at pe.entry_point
+		pe.sections[0].name == ".text" and
+		all of them
 }
 
-rule inno_unicode_539_5310
-{
-	meta:
-		tool = "I"
-		name = "Inno Setup"
-		version = "5.3.9 - 5.3.10"
-		extra = "unicode version"
-		source = "Made by Retdec Team"
-		pattern = "558BEC83C4A453565733C08945C48945C08945A48945D08945C88945CC8945D48945D88945ECB854554100E87004FFFF33C05568916A410064FF3064892033D255684D6A410064FF32648922A148AB4100E8A6EFFFFFE8B1EAFFFF8D55EC33C0E8FB87FF"
-	strings:
-		$1 = { 55 8B EC 83 C4 A4 53 56 57 33 C0 89 45 C4 89 45 C0 89 45 A4 89 45 D0 89 45 C8 89 45 CC 89 45 D4 89 45 D8 89 45 EC B8 54 55 41 00 E8 70 04 FF FF 33 C0 55 68 91 6A 41 00 64 FF 30 64 89 20 33 D2 55 68 4D 6A 41 00 64 FF 32 64 89 22 A1 48 AB 41 00 E8 A6 EF FF FF E8 B1 EA FF FF 8D 55 EC 33 C0 E8 FB 87 FF }
-	condition:
-		$1 at pe.entry_point
-}
-
-rule inno_unicode_5311
-{
-	meta:
-		tool = "I"
-		name = "Inno Setup"
-		version = "5.3.11"
-		extra = "unicode version"
-		source = "Made by Retdec Team"
-		pattern = "558BEC83C4A453565733C08945C48945C08945A48945D08945C88945CC8945D48945D88945ECB818564100E8E403FFFF33C055681D6B410064FF3064892033D25568D96A410064FF32648922A148AB4100E8DEEFFFFFE885EBFFFF8D55EC33C0E89F87FF"
-	strings:
-		$1 = { 55 8B EC 83 C4 A4 53 56 57 33 C0 89 45 C4 89 45 C0 89 45 A4 89 45 D0 89 45 C8 89 45 CC 89 45 D4 89 45 D8 89 45 EC B8 18 56 41 00 E8 E4 03 FF FF 33 C0 55 68 1D 6B 41 00 64 FF 30 64 89 20 33 D2 55 68 D9 6A 41 00 64 FF 32 64 89 22 A1 48 AB 41 00 E8 DE EF FF FF E8 85 EB FF FF 8D 55 EC 33 C0 E8 9F 87 FF }
-	condition:
-		$1 at pe.entry_point
-}
-
-rule inno_unicode_540_543
-{
-	meta:
-		tool = "I"
-		name = "Inno Setup"
-		version = "5.4.0 - 5.4.3"
-		extra = "unicode version"
-		source = "Made by Retdec Team"
-		pattern = "558BEC83C4A453565733C08945C48945C08945A48945D08945C88945CC8945D48945D88945ECB8B0524100E8AC03FFFF33C05568456B410064FF3064892033D25568016B410064FF32648922A148AB4100E84EECFFFFE8F5E7FFFF8D55EC33C0E87F84FF"
-	strings:
-		$1 = { 55 8B EC 83 C4 A4 53 56 57 33 C0 89 45 C4 89 45 C0 89 45 A4 89 45 D0 89 45 C8 89 45 CC 89 45 D4 89 45 D8 89 45 EC B8 B0 52 41 00 E8 AC 03 FF FF 33 C0 55 68 45 6B 41 00 64 FF 30 64 89 20 33 D2 55 68 01 6B 41 00 64 FF 32 64 89 22 A1 48 AB 41 00 E8 4E EC FF FF E8 F5 E7 FF FF 8D 55 EC 33 C0 E8 7F 84 FF }
-	condition:
-		$1 at pe.entry_point
-}
-
-rule inno_unicode_550_551
-{
-	meta:
-		tool = "I"
-		name = "Inno Setup"
-		version = "5.5.0 - 5.5.1"
-		extra = "unicode version"
-		source = "Made by Retdec Team"
-		pattern = "558BEC83C4A453565733C08945C48945C08945A48945D08945C88945CC8945D48945D88945ECB8B8524100E8AC03FFFF33C05568456B410064FF3064892033D25568016B410064FF32648922A148AB4100E856ECFFFFE8FDE7FFFF8D55EC33C0E87F84FF"
-	strings:
-		$1 = { 55 8B EC 83 C4 A4 53 56 57 33 C0 89 45 C4 89 45 C0 89 45 A4 89 45 D0 89 45 C8 89 45 CC 89 45 D4 89 45 D8 89 45 EC B8 B8 52 41 00 E8 AC 03 FF FF 33 C0 55 68 45 6B 41 00 64 FF 30 64 89 20 33 D2 55 68 01 6B 41 00 64 FF 32 64 89 22 A1 48 AB 41 00 E8 56 EC FF FF E8 FD E7 FF FF 8D 55 EC 33 C0 E8 7F 84 FF }
-	condition:
-		$1 at pe.entry_point
-}
-
-rule inno_unicode_552
-{
-	meta:
-		tool = "I"
-		name = "Inno Setup"
-		version = "5.5.2"
-		extra = "unicode version"
-		source = "Made by Retdec Team"
-		pattern = "558BEC83C4A453565733C08945C48945C08945A48945D08945C88945CC8945D48945D88945ECB864ED4000E8E871FFFF33C0556889FA400064FF3064892033D2556845FA400064FF32648922A1483B4100E8BEF7FFFFE865F3FFFF8D55EC33C0E8F7C3FF"
-	strings:
-		$1 = { 55 8B EC 83 C4 A4 53 56 57 33 C0 89 45 C4 89 45 C0 89 45 A4 89 45 D0 89 45 C8 89 45 CC 89 45 D4 89 45 D8 89 45 EC B8 64 ED 40 00 E8 E8 71 FF FF 33 C0 55 68 89 FA 40 00 64 FF 30 64 89 20 33 D2 55 68 45 FA 40 00 64 FF 32 64 89 22 A1 48 3B 41 00 E8 BE F7 FF FF E8 65 F3 FF FF 8D 55 EC 33 C0 E8 F7 C3 FF }
-	condition:
-		$1 at pe.entry_point
-}
-
-rule inno_unicode_553_555
-{
-	meta:
-		tool = "I"
-		name = "Inno Setup"
-		version = "5.5.3 - 5.5.5"
-		extra = "unicode version"
-		source = "Made by Retdec Team"
-		pattern = "558BEC83C4A453565733C08945C48945C08945A48945D08945C88945CC8945D48945D88945ECB82C004100E8E851FFFF33C055689E1A410064FF3064892033D255685A1A410064FF32648922A1485B4100E816D8FFFFE865D3FFFF803DDC2A410000740C"
-	strings:
-		$1 = { 55 8B EC 83 C4 A4 53 56 57 33 C0 89 45 C4 89 45 C0 89 45 A4 89 45 D0 89 45 C8 89 45 CC 89 45 D4 89 45 D8 89 45 EC B8 2C 00 41 00 E8 E8 51 FF FF 33 C0 55 68 9E 1A 41 00 64 FF 30 64 89 20 33 D2 55 68 5A 1A 41 00 64 FF 32 64 89 22 A1 48 5B 41 00 E8 16 D8 FF FF E8 65 D3 FF FF 80 3D DC 2A 41 00 00 74 0C }
-	condition:
-		$1 at pe.entry_point
-}
-
-rule inno_unicode_556_558
-{
-	meta:
-		tool = "I"
-		name = "Inno Setup"
-		version = "5.5.6 - 5.5.8"
-		extra = "unicode version"
-		source = "Made by Retdec Team"
-		pattern = "558BEC83C4A453565733C08945C48945C08945A48945D08945C88945CC8945D48945D88945ECB834004100E8E851FFFF33C055689E1A410064FF3064892033D255685A1A410064FF32648922A1485B4100E81ED8FFFFE86DD3FFFF803DDC2A410000740C"
-	strings:
-		$1 = { 55 8B EC 83 C4 A4 53 56 57 33 C0 89 45 C4 89 45 C0 89 45 A4 89 45 D0 89 45 C8 89 45 CC 89 45 D4 89 45 D8 89 45 EC B8 34 00 41 00 E8 E8 51 FF FF 33 C0 55 68 9E 1A 41 00 64 FF 30 64 89 20 33 D2 55 68 5A 1A 41 00 64 FF 32 64 89 22 A1 48 5B 41 00 E8 1E D8 FF FF E8 6D D3 FF FF 80 3D DC 2A 41 00 00 74 0C }
-	condition:
-		$1 at pe.entry_point
-}
-
-rule inno_unicode_559
-{
-	meta:
-		tool = "I"
-		name = "Inno Setup"
-		version = "5.5.9"
-		extra = "unicode version"
-		source = "Made by Retdec Team"
-		pattern = "558BEC83C4A453565733C08945C48945C08945A48945D08945C88945CC8945D48945D88945ECB844014100E8C84DFFFF33C05568BE1E410064FF3064892033D255687A1E410064FF32648922A1485B4100E80ED5FFFFE85DD0FFFF803DDC2A410000740C"
-	strings:
-		$1 = { 55 8B EC 83 C4 A4 53 56 57 33 C0 89 45 C4 89 45 C0 89 45 A4 89 45 D0 89 45 C8 89 45 CC 89 45 D4 89 45 D8 89 45 EC B8 44 01 41 00 E8 C8 4D FF FF 33 C0 55 68 BE 1E 41 00 64 FF 30 64 89 20 33 D2 55 68 7A 1E 41 00 64 FF 32 64 89 22 A1 48 5B 41 00 E8 0E D5 FF FF E8 5D D0 FF FF 80 3D DC 2A 41 00 00 74 0C }
-	condition:
-		$1 at pe.entry_point
-}
-
-rule inno_unicode_600
-{
-	meta:
-		tool = "I"
-		name = "Inno Setup"
-		version = "6.0.0"
-		extra = "unicode version"
-		source = "Made by Retdec Team"
-		pattern = "558BEC83C4A453565733C08945C48945C08945A48945D08945C88945CC8945D48945D88945ECB8D8104B00E8B072F5FF33C05568DE654B0064FF3064892033D2"
-	strings:
-		$s01 = { 55 8b ec 83 c4 a4 53 56 57 33 c0 89 45 c4 89 45 c0 89 45 a4 89 45 d0 89 45 c8 89 45 cc 89 45 d4 89 45 d8 89 45 ec b8 d8 10 4b 00 e8 b0 72 f5 ff 33 c0 55 68 de 65 4b 00 64 ff 30 64 89 20 33 d2 }
-		$s10 = "Inno Setup Setup Data (6.0.0) (u)"
-		$s11 = "Inno Setup Messages (6.0.0) (u)"
-	condition:
-		$s01 at pe.entry_point and
-		all of ($s1*)
-}
-
-rule inno_unicode_670
-{
-	meta:
-		tool = "I"
-		name = "Inno Setup"
-		version = "6.7.0"
-		extra = "unicode version"
-		source = "Made by Retdec Team"
-		pattern = "558BECB90F0000006A006A004975F951535657B8(68|78)BA4A00E827C8F5FF33C05568C6264B0064FF3064892033D2556880264B0064FF32648922A134A64B00E8"
-	strings:
-		$s01 = { 55 8B EC B9 0F 00 00 00 6A 00 6A 00 49 75 F9 51 53 56 57 B8 (68|78) BA 4A 00 E8 27 C8 F5 FF 33 C0 55 68 C6 26 4B 00 64 FF 30 64 89 20 33 D2 55 68 80 26 4B 00 64 FF 32 64 89 22 A1 34 A6 4B 00 E8 }
-		$s10 = "Inno Setup Setup Data (6.7.0)"
-		$s11 = "Inno Setup Messages (6.5.0) (u)"
-	condition:
-		$s01 at pe.entry_point and
-		all of ($s1*)
-}
-
-rule inno_unicode_700
-{
-	meta:
-		tool = "I"
-		name = "Inno Setup"
-		version = "7.0.0"
-		extra = "unicode version"
-		source = "Made by Retdec Team"
-		pattern = "558BECB90F0000006A006A004975F951535657B894C24A00E827D8F5FF33C05568B0164B0064FF3064892033D255686A164B0064FF32648922A134964B00E811"
-	strings:
-		$s01 = { 55 8B EC B9 0F 00 00 00 6A 00 6A 00 49 75 F9 51 }
-		$s10 = "Inno Setup Setup Data (7.0.0"
-		$s11 = "Inno Setup Messages (6.5.0) (u)"
-	condition:
-		$s01 at pe.entry_point and
-		all of ($s1*)
-}
-
-rule inno_uninstaller
+rule inno_uninstaller_5x
 {
 	meta:
 		tool = "I"
 		name = "Inno Uninstaller"
-		version = "6.3.0"
-		extra = "unicode version"
+		version = "5.x"
 		source = "Made by Retdec Team"
-		pattern = "Inno Setup Uninstall Log (b) 64-bit"
+		pattern = "Inno Setup Uninstall Log"
 	strings:
-		$s10 = "Inno Setup Uninstall Log (b)"
-		$s11 = "Embarcadero Delphi for Win32 compiler"
-		$s12 = "Inno Setup: Selected Components" wide
+		$s01 = "Inno-Setup-RegSvr-Mutex"
+		$s02 = "Inno Setup Uninstall Log (b)"
+		$s03 = "Inno Setup: Selected Components"
 	condition:
-		all of ($s1*)
+		pe.sections[0].name == "CODE" and
+		all of them
+}
+
+rule inno_uninstaller_6x_7x
+{
+	meta:
+		tool = "I"
+		name = "Inno Uninstaller"
+		version = "6.x - 7.x"
+		source = "Made by Retdec Team"
+		pattern = "Inno Setup Uninstall Log"
+	strings:
+		$s01 = "Inno-Setup-RegSvr-Mutex" wide
+		$s02 = "Inno Setup Uninstall Log (b)"
+		$s03 = "Inno Setup: Selected Components" wide
+	condition:
+		pe.sections[0].name == ".text" and
+		all of them
 }
 
 rule ms_cabinet_sfx
