@@ -18,6 +18,7 @@ ExternalProject_Add(keystone-project
 	URL ${_KEYSTONE_URL}
 	URL_HASH SHA256=${KEYSTONE_ARCHIVE_SHA256}
 	DOWNLOAD_NAME keystone.zip
+	DOWNLOAD_EXTRACT_TIMESTAMP TRUE
 	CMAKE_ARGS
 		-DCMAKE_INSTALL_PREFIX=${KEYSTONE_INSTALL_DIR}
 		# This does not work on MSVC, but may be useful on Linux.

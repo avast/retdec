@@ -446,7 +446,7 @@ void PDBFile::parse_modules(void)
 
 	unsigned int position = sizeof(NewDBIHdr);  //0x40
 	unsigned int limit = sizeof(NewDBIHdr) + dbi_header_v700->cbGpModi;
-	int cnt = 0;
+	//int cnt = 0;
 	MODI * entry;
 
 	while (position < limit)
@@ -481,7 +481,7 @@ void PDBFile::parse_modules(void)
 			s  // stream
 		};
 		modules.push_back(new_module);
-		cnt++;
+		//cnt++;
 		// Go to next entry
 		position += sizeof(MODI) + len;
 	}

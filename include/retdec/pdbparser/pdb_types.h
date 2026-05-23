@@ -592,6 +592,9 @@ class PDBTypes
 		;
 		~PDBTypes(void);
 
+		PDBTypes(const PDBTypes&) = delete;
+		PDBTypes& operator=(const PDBTypes&) = delete;
+
 		// Action methods
 		void parse_types(void);
 

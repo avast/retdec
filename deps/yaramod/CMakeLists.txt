@@ -28,6 +28,7 @@ ExternalProject_Add(yaramod-project
 	URL ${_YARAMOD_URL}
 	URL_HASH SHA256=${YARAMOD_ARCHIVE_SHA256}
 	DOWNLOAD_NAME yaramod.zip
+	DOWNLOAD_EXTRACT_TIMESTAMP TRUE
 	CMAKE_ARGS
 		-DCMAKE_INSTALL_PREFIX=${YARAMOD_INSTALL_DIR}
 		# This does not work on MSVC, but may be useful on Linux.

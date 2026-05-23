@@ -297,7 +297,7 @@ void PDBSymbols::parse_symbols(void)
 			continue;
 		PDBStream *stream = modules[m].stream;
 		position = 4;
-		int cnt = 0;
+		//int cnt = 0;
 		PDBFunction * new_function = nullptr;
 		while (position < stream->size)
 		{  // Process all symbols in module stream
@@ -371,11 +371,11 @@ void PDBSymbols::parse_symbols(void)
 					break;
 				}
 			}
-			cnt++;
+			//cnt++;
 			position += symbol->size + 2;
 		}
 
-		cnt = 0;
+		//cnt = 0;
 		while (position < stream->size)
 		{  // Process all big symbols in module stream
 			PDBBigSymbol *symbol = reinterpret_cast<PDBBigSymbol *>(stream->data + position);
@@ -397,7 +397,7 @@ void PDBSymbols::parse_symbols(void)
 					break;
 			}
 			position += symbol->size + 8;
-			cnt++;
+			//cnt++;
 		}
 	}
 	parsed = true;

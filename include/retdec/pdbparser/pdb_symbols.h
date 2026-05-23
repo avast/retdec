@@ -134,6 +134,9 @@ class PDBSymbols
 		;
 		~PDBSymbols(void);
 
+		PDBSymbols(const PDBSymbols&) = delete;
+		PDBSymbols& operator=(const PDBSymbols&) = delete;
+
 		// Action methods
 		void parse_symbols(void);
 

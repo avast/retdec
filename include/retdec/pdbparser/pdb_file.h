@@ -142,6 +142,9 @@ class PDBFile
 		;
 		~PDBFile(void);
 
+		PDBFile(const PDBFile&) = delete;
+		PDBFile& operator=(const PDBFile&) = delete;
+
 		// Action methods
 		PDBFileState load_pdb_file(const char *filename);
 		void initialize(uint64_t image_base = 0);
