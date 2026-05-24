@@ -64,9 +64,9 @@ BorlandASTParser::Status BorlandASTParser::status()
 /**
  * @return First character from rest of the mangled name. If empty then EOF.
  */
-inline char BorlandASTParser::peek() const
+inline int BorlandASTParser::peek() const
 {
-	return _mangled.empty() ? static_cast<char>(EOF) : _mangled.front();
+	return _mangled.empty() ? EOF : _mangled.front();
 }
 
 /**
@@ -926,7 +926,7 @@ std::shared_ptr<TypeNode> BorlandASTParser::parseBuildInType(const Qualifiers &q
  */
 unsigned BorlandASTParser::parseNumber()
 {
-	char c = peek();
+	int c = peek();
 	if (c == '0' || c == EOF) {
 		_status = invalid_mangled_name;
 		return 0;

@@ -2,6 +2,10 @@
 set(KEYSTONE_INSTALL_DIR ${CMAKE_BINARY_DIR}/deps/install/keystone)
 
 set(KEYSTONE_LIB ${KEYSTONE_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}keystone${CMAKE_STATIC_LIBRARY_SUFFIX})
+set(KEYSTONE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+	set(KEYSTONE_CXX_FLAGS "${KEYSTONE_CXX_FLAGS} -Wno-class-memaccess -Wno-deprecated-declarations -Wno-old-style-cast -Wno-switch-default -Wno-unused-but-set-variable")
+endif()
 
 if(KEYSTONE_LOCAL_DIR)
 	message(STATUS "Keystone: using local Keystone directory.")
@@ -18,8 +22,14 @@ ExternalProject_Add(keystone-project
 	URL ${_KEYSTONE_URL}
 	URL_HASH SHA256=${KEYSTONE_ARCHIVE_SHA256}
 	DOWNLOAD_NAME keystone.zip
+	DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+	PATCH_COMMAND
+		${CMAKE_COMMAND} -Dkeystone_path=<SOURCE_DIR> -P ${CMAKE_CURRENT_SOURCE_DIR}/patch.cmake
 	CMAKE_ARGS
+		-Wno-dev
+		-Wno-deprecated
 		-DCMAKE_INSTALL_PREFIX=${KEYSTONE_INSTALL_DIR}
+		-DCMAKE_POLICY_VERSION_MINIMUM=3.5
 		# This does not work on MSVC, but may be useful on Linux.
 		-DCMAKE_BUILD_TYPE=Release
 		# Force python3 version set in this cmake file.
@@ -27,6 +37,7 @@ ExternalProject_Add(keystone-project
 		# with UNIX paths, which do not work. Python3 generates proper Windows paths.
 		-DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
 		-DKEYSTONE_BUILD_STATIC_RUNTIME=${RETDEC_MSVC_STATIC_RUNTIME}
+		-DCMAKE_CXX_FLAGS=${KEYSTONE_CXX_FLAGS}
 		# Force the use of the same compiler as used to build the top-level
 		# project. Otherwise, the external project may pick up a different
 		# compiler, which may result in link errors.

@@ -42,8 +42,14 @@ ExternalProject_Add(llvm-project
 	URL ${_LLVM_URL}
 	URL_HASH SHA256=${LLVM_ARCHIVE_SHA256}
 	DOWNLOAD_NAME llvm.zip
+	DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+	PATCH_COMMAND
+		${CMAKE_COMMAND} -Dllvm_path=<SOURCE_DIR> -P ${CMAKE_CURRENT_SOURCE_DIR}/patch.cmake
 	CMAKE_ARGS
+		-Wno-dev
+		-Wno-deprecated
 		-DCMAKE_INSTALL_PREFIX=${LLVM_INSTALL_DIR}
+		-DCMAKE_POLICY_VERSION_MINIMUM=3.5
 		# Force a release build (we don't need to debug LLVM).
 		# This has no effect on Windows with MSVC, but is useful on Linux.
 		-DCMAKE_BUILD_TYPE=Release
@@ -52,9 +58,6 @@ ExternalProject_Add(llvm-project
 
 		# Force Python3.
 		-DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
-
-		# Use provided libtool
-		-DCMAKE_LIBTOOL=${CMAKE_LIBTOOL}
 
 		# Targets to be build.
 		-DLLVM_TARGETS_TO_BUILD=X86

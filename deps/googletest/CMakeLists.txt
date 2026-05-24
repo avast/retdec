@@ -51,8 +51,12 @@ ExternalProject_Add(googletest
 	URL ${_GOOGLETEST_URL}
 	URL_HASH SHA256=${GOOGLETEST_ARCHIVE_SHA256}
 	DOWNLOAD_NAME googletest.zip
+	DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+	PATCH_COMMAND
+		${CMAKE_COMMAND} -Dgoogletest_path=<SOURCE_DIR> -P ${CMAKE_CURRENT_SOURCE_DIR}/patch.cmake
 	CMAKE_ARGS
 		-DCMAKE_INSTALL_PREFIX=${GOOGLETEST_INSTALL_DIR}
+		-DCMAKE_POLICY_VERSION_MINIMUM=3.5
 		# This does not work on MSVC, but is useful on Linux.
 		-DCMAKE_BUILD_TYPE=Release
 		# Without this, googletest's CMakeLists.txt replaces "/MD" (dynamic run-time) with "-MT" (static runtime).

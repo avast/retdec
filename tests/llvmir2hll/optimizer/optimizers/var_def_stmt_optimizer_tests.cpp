@@ -352,7 +352,7 @@ MoveVarDefStmtToCloserWhileOptimize) {
 		"expected " << varDefC << ", got " << outVarDefC;
 	ShPtr<VarDefStmt> outVarDefA(cast<VarDefStmt>(outVarDefC->getSuccessor()));
 	ASSERT_TRUE(outVarDefA) <<
-		"expected VarDefStmt, got " << outVarDefA->getSuccessor();
+		"expected VarDefStmt, got " << outVarDefC->getSuccessor();
 	ASSERT_EQ(varDefA->getVar(), outVarDefA->getVar()) <<
 		"expected " << varDefA << ", got " << outVarDefC;
 }
@@ -414,7 +414,7 @@ MoveVarDefStmtToCloserForOptimize) {
 		"expected " << varDefC << ", got " << outVarDefC;
 	ShPtr<VarDefStmt> outVarDefA(cast<VarDefStmt>(outVarDefC->getSuccessor()));
 	ASSERT_TRUE(outVarDefA) <<
-		"expected VarDefStmt, got " << outVarDefA->getSuccessor();
+		"expected VarDefStmt, got " << outVarDefC->getSuccessor();
 	ASSERT_EQ(varDefA->getVar(), outVarDefA->getVar()) <<
 		"expected " << varDefA << ", got " << outVarDefC;
 }
@@ -478,7 +478,7 @@ MoveVarDefStmtToCloserSwitchStmtOptimize) {
 		"expected " << varDefC << ", got " << outVarDefC;
 	ShPtr<VarDefStmt> outVarDefA(cast<VarDefStmt>(outVarDefC->getSuccessor()));
 	ASSERT_TRUE(outVarDefA) <<
-		"expected VarDefStmt, got " << outVarDefA->getSuccessor();
+		"expected VarDefStmt, got " << outVarDefC->getSuccessor();
 	ASSERT_EQ(varDefA->getVar(), outVarDefA->getVar()) <<
 		"expected " << varDefA << ", got " << outVarDefC;
 }

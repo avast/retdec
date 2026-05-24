@@ -4,6 +4,7 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
+#include <array>
 #include <bitset>
 #include <cstring>
 
@@ -73,8 +74,7 @@ void double10ToDouble8(std::vector<unsigned char> &dest,
 		const std::vector<unsigned char> &src) {
 	// Taken from:
 	// http://blogs.perl.org/users/rurban/2012/09/reading-binary-floating-point-numbers-numbers-part2.html
-	dest.clear();
-	dest.resize(8, 0);
+	std::array<unsigned char, 8> result{};
 
 	int expo, i, sign;
 	// exponents 15 -> 11 bits
@@ -83,7 +83,8 @@ void double10ToDouble8(std::vector<unsigned char> &dest,
 	if (expo == 0) {
 	nul:
 		if (sign)
-			dest[7] |= 0x80;
+			result[7] |= 0x80;
+		dest.assign(result.begin(), result.end());
 		return;
 	}
 	expo -= 16383;       // - bias long double
@@ -91,21 +92,22 @@ void double10ToDouble8(std::vector<unsigned char> &dest,
 	if (expo <= 0)       // underflow
 		goto nul;
 	if (expo > 0x7ff) {  // inf/nan
-		dest[7] = 0x7f;
-		dest[6] = src[7] == 0xc0 ? 0xf8 : 0xf0 ;
+		result[7] = 0x7f;
+		result[6] = src[7] == 0xc0 ? 0xf8 : 0xf0 ;
 		goto nul;
 	}
 	expo <<= 4;
-	dest[6] = expo & 0xff;
-	dest[7] = (expo & 0x7f00) >> 8;
+	result[6] = expo & 0xff;
+	result[7] = (expo & 0x7f00) >> 8;
 	if (sign)
-		dest[7] |= 0x80;
+		result[7] |= 0x80;
 	// long double frac 63 bits => 52 bits src[7] &= 0x7f; reset intbit 63.
 	for (i = 0; i < 6; ++i) {
-		dest[i + 1] |= (i == 5 ? src[7] & 0x7f : src[i + 2]) >> 3;
-		dest[i] |= (src[i + 2] & 0x1f) << 5;
+		result[i + 1] |= (i == 5 ? src[7] & 0x7f : src[i + 2]) >> 3;
+		result[i] |= (src[i + 2] & 0x1f) << 5;
 	}
-	dest[0] |= src[1] >> 3;
+	result[0] |= src[1] >> 3;
+	dest.assign(result.begin(), result.end());
 }
 
 /**

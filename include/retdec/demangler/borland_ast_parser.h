@@ -7,6 +7,8 @@
 #ifndef RETDEC_BORLAND_AST_PARSER_H
 #define RETDEC_BORLAND_AST_PARSER_H
 
+#include <cstdint>
+
 #include <llvm/Demangle/StringView.h>
 
 #include "retdec/demangler/context.h"
@@ -47,7 +49,7 @@ public:
 	Status status();
 
 private:
-	char peek() const;
+	int peek() const;
 	bool peek(char c) const;
 	bool peek(const StringView &s) const;
 	unsigned peekNumber() const;

@@ -530,11 +530,17 @@ bool ByteValueStorage::set10Byte(std::uint64_t address, long double val)
 {
 	std::vector<std::uint8_t> bytes;
 	if (systemHasLongDouble())
+	{
 		bytes.resize(10);
+		memcpy(bytes.data(), &val, bytes.size());
+	}
 	else
+	{
 		bytes.resize(8);
+		double d = val;
+		memcpy(bytes.data(), &d, bytes.size());
+	}
 
-	memcpy(bytes.data(), &val, bytes.size());
 	return setXBytes(address, bytes);
 }
 
@@ -1019,7 +1025,9 @@ bool ByteValueStorage::get10ByteImpl(
 	{
 		std::vector<std::uint8_t> d8;
 		double10ToDouble8(d8, data);
-		memcpy(&res, d8.data(), d8.size());
+		double d = 0.0;
+		memcpy(&d, d8.data(), d8.size());
+		res = d;
 	}
 
 	return true;
