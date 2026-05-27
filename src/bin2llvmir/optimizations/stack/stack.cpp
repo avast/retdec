@@ -158,21 +158,11 @@ void StackAnalysis::handleInstruction(
 		}
 	}
 
-	auto* debugSv = getDebugStackVariable(inst->getFunction(), root);
-	auto* configSv = getConfigStackVariable(inst->getFunction(), root);
-
 	root.simplifyNode();
 	LOG << root << std::endl;
 
-	if (debugSv == nullptr)
-	{
-		debugSv = getDebugStackVariable(inst->getFunction(), root);
-	}
-
-	if (configSv == nullptr)
-	{
-		configSv = getConfigStackVariable(inst->getFunction(), root);
-	}
+	auto* debugSv = getDebugStackVariable(inst->getFunction(), root);
+	auto* configSv = getConfigStackVariable(inst->getFunction(), root);
 
 	auto* ci = dyn_cast_or_null<ConstantInt>(root.value);
 	if (ci == nullptr)
