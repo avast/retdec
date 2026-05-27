@@ -318,6 +318,7 @@ class Capstone2LlvmIrTranslatorX86_impl :
 		void translateMov(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateMoveString(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateMul(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
+		void translateMulx(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateNeg(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateNop(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);
 		void translateNot(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb);

@@ -4,8 +4,6 @@
  * @copyright (c) 2017 Avast Software, licensed under the MIT license
  */
 
-#include <iomanip>
-
 #include "capstone2llvmir/x86/x86_impl.h"
 
 namespace retdec {
@@ -2616,6 +2614,51 @@ void Capstone2LlvmIrTranslatorX86_impl::translateMul(cs_insn* i, cs_x86* xi, llv
 	}
 	storeRegister(X86_REG_OF, f, irb);
 	storeRegister(X86_REG_CF, f, irb);
+}
+
+/**
+ * X86_INS_MULX
+ */
+void Capstone2LlvmIrTranslatorX86_impl::translateMulx(cs_insn* i, cs_x86* xi, llvm::IRBuilder<>& irb)
+{
+	EXPECT_IS_TERNARY(i, xi, irb);
+
+	llvm::IntegerType* halfT = nullptr;
+	llvm::IntegerType* mulT = nullptr;
+	uint32_t otherOp = X86_REG_INVALID;
+	switch (xi->operands[0].size) {
+		case 4:
+		{
+			halfT = irb.getInt32Ty();
+			mulT = irb.getInt64Ty();
+			otherOp = X86_REG_EDX;
+			break;
+		}
+		case 8:
+		{
+			halfT = irb.getInt64Ty();
+			mulT = irb.getInt128Ty();
+			otherOp = X86_REG_RDX;
+			break;
+		}
+		default:
+		{
+			throw GenericError("Unhandled op size in translateMulx().");
+		}
+	}
+	op0 = loadOp(xi->operands[2], irb, halfT);
+	op1 = loadRegister(otherOp, irb, halfT);
+
+	op0 = irb.CreateZExt(op0, mulT);
+	op1 = irb.CreateZExt(op1, mulT);
+
+	auto* mul = irb.CreateMul(op0, op1);
+	auto* l = irb.CreateTrunc(mul, halfT);
+	auto* h = irb.CreateTrunc(irb.CreateLShr(mul, halfT->getBitWidth()), halfT);
+
+	// First operand is high destination register, second operand is low
+	storeRegister(xi->operands[1].reg, l, irb);
+	storeRegister(xi->operands[0].reg, h, irb);
 }
 
 /**

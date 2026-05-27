@@ -1106,7 +1106,7 @@ Capstone2LlvmIrTranslatorX86_impl::_i2fm =
 		{X86_INS_MULPS, nullptr},
 		{X86_INS_MULSD, nullptr},
 		{X86_INS_MULSS, nullptr},
-		{X86_INS_MULX, nullptr},
+		{X86_INS_MULX, &Capstone2LlvmIrTranslatorX86_impl::translateMulx},
 		{X86_INS_FMUL, &Capstone2LlvmIrTranslatorX86_impl::translateFmul},
 		{X86_INS_FIMUL, &Capstone2LlvmIrTranslatorX86_impl::translateFmul},
 		{X86_INS_FMULP, &Capstone2LlvmIrTranslatorX86_impl::translateFmul},
