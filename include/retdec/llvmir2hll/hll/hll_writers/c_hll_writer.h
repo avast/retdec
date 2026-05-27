@@ -135,7 +135,7 @@ private:
 	/// @}
 
 	bool shouldEmitFunctionPrototypesHeader() const;
-	bool emitFunctionPrototypes(const FuncSet &funcs);
+	bool emitFunctionPrototypes(const FuncSet& funcs) override;
 	bool emitStandardFunctionPrototypes();
 	bool emitFunctionPrototypesForNonLibraryFuncs();
 	bool emitFunctionPrototype(ShPtr<Function> func);

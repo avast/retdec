@@ -149,7 +149,7 @@ bool PDBFile::save_streams_to_files(void)
 	for (unsigned int i = 0; i < num_streams;i++)
 	{
 		char stream_filename[MAX_PATH+4];
-		sprintf(stream_filename,"%s.%03d",pdb_filename,i);
+		snprintf(stream_filename,MAX_PATH+4,"%s.%03d",pdb_filename,i);
 		FILE *fs = fopen(stream_filename,"wb");
 		if (fs == nullptr)
 			return false;
@@ -446,7 +446,6 @@ void PDBFile::parse_modules(void)
 
 	unsigned int position = sizeof(NewDBIHdr);  //0x40
 	unsigned int limit = sizeof(NewDBIHdr) + dbi_header_v700->cbGpModi;
-	int cnt = 0;
 	MODI * entry;
 
 	while (position < limit)
@@ -481,7 +480,6 @@ void PDBFile::parse_modules(void)
 			s  // stream
 		};
 		modules.push_back(new_module);
-		cnt++;
 		// Go to next entry
 		position += sizeof(MODI) + len;
 	}
