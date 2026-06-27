@@ -4,6 +4,8 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
+#include <cfloat>
+
 #include "retdec/utils/os.h"
 #include "retdec/utils/system.h"
 
@@ -22,11 +24,13 @@ bool isLittleEndian() {
 }
 
 /**
-* @brief Finds out if the runtime system supports <tt>long double</tt> (at least
-*        10 bytes long).
-*/
+ * @brief Finds out if the runtime system uses the x87 80-bit
+ *        <tt>long double</tt> representation.
+ */
 bool systemHasLongDouble() {
-	return sizeof(long double) >= 10;
+	return sizeof(long double) >= 10 &&
+		LDBL_MANT_DIG == 64 &&
+		LDBL_MAX_EXP == 16384;
 }
 
 } // namespace utils

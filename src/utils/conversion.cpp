@@ -4,7 +4,9 @@
 * @copyright (c) 2017 Avast Software, licensed under the MIT license
 */
 
+#include <array>
 #include <bitset>
+#include <cstdint>
 #include <cstring>
 
 #include "retdec/utils/conversion.h"
@@ -73,8 +75,7 @@ void double10ToDouble8(std::vector<unsigned char> &dest,
 		const std::vector<unsigned char> &src) {
 	// Taken from:
 	// http://blogs.perl.org/users/rurban/2012/09/reading-binary-floating-point-numbers-numbers-part2.html
-	dest.clear();
-	dest.resize(8, 0);
+	std::array<unsigned char, 8> result{};
 
 	int expo, i, sign;
 	// exponents 15 -> 11 bits
@@ -83,7 +84,8 @@ void double10ToDouble8(std::vector<unsigned char> &dest,
 	if (expo == 0) {
 	nul:
 		if (sign)
-			dest[7] |= 0x80;
+			result[7] |= 0x80;
+		dest.assign(result.begin(), result.end());
 		return;
 	}
 	expo -= 16383;       // - bias long double
@@ -91,21 +93,79 @@ void double10ToDouble8(std::vector<unsigned char> &dest,
 	if (expo <= 0)       // underflow
 		goto nul;
 	if (expo > 0x7ff) {  // inf/nan
-		dest[7] = 0x7f;
-		dest[6] = src[7] == 0xc0 ? 0xf8 : 0xf0 ;
+		result[7] = 0x7f;
+		result[6] = src[7] == 0xc0 ? 0xf8 : 0xf0 ;
 		goto nul;
 	}
 	expo <<= 4;
-	dest[6] = expo & 0xff;
-	dest[7] = (expo & 0x7f00) >> 8;
+	result[6] = expo & 0xff;
+	result[7] = (expo & 0x7f00) >> 8;
 	if (sign)
-		dest[7] |= 0x80;
+		result[7] |= 0x80;
 	// long double frac 63 bits => 52 bits src[7] &= 0x7f; reset intbit 63.
 	for (i = 0; i < 6; ++i) {
-		dest[i + 1] |= (i == 5 ? src[7] & 0x7f : src[i + 2]) >> 3;
-		dest[i] |= (src[i + 2] & 0x1f) << 5;
+		result[i + 1] |= (i == 5 ? src[7] & 0x7f : src[i + 2]) >> 3;
+		result[i] |= (src[i + 2] & 0x1f) << 5;
 	}
-	dest[0] |= src[1] >> 3;
+	result[0] |= src[1] >> 3;
+	dest.assign(result.begin(), result.end());
+}
+
+/**
+* @brief Convert 64-bit (8-byte) <tt>double</tt> binary data (byte array) into
+*        80-bit (10-byte) x87 extended <tt>long double</tt> binary data.
+*
+* This is the inverse of @c double10ToDouble8(). It lets platforms that do not
+* use the x87 80-bit @c long double representation still serialize a complete,
+* readable 10-byte value, keeping the write path symmetric with the 10-byte
+* read path.
+*
+* @param[out] dest 80-bit long double to create (10 bytes, little-endian).
+* @param[in] src 64-bit double to convert (8 bytes, little-endian).
+*/
+void double8ToDouble10(std::vector<unsigned char> &dest,
+		const std::vector<unsigned char> &src) {
+	std::array<unsigned char, 10> result{};
+
+	std::uint64_t bits = 0;
+	for (int i = 0; i < 8; ++i)
+		bits |= static_cast<std::uint64_t>(src[i]) << (8 * i);
+
+	std::uint64_t sign = (bits >> 63) & 0x1;
+	std::uint64_t expo = (bits >> 52) & 0x7ff;          // 11-bit double exponent
+	std::uint64_t frac = bits & 0xfffffffffffffULL;     // 52-bit fraction
+
+	std::uint64_t mant;                                 // 64-bit extended mantissa
+	std::uint16_t expo10;                               // 15-bit extended exponent
+
+	if (expo == 0) {
+		if (frac == 0) {                                // zero
+			expo10 = 0;
+			mant = 0;
+		} else {                                        // subnormal double
+			int shift = 0;
+			while (!(frac & (1ULL << 52))) {
+				frac <<= 1;
+				++shift;
+			}
+			frac &= 0xfffffffffffffULL;
+			expo10 = static_cast<std::uint16_t>(16383 - 1022 - shift);
+			mant = (1ULL << 63) | (frac << 11);
+		}
+	} else if (expo == 0x7ff) {                          // inf / nan
+		expo10 = 0x7fff;
+		mant = (1ULL << 63) | (frac << 11);
+	} else {                                             // normal number
+		expo10 = static_cast<std::uint16_t>(expo - 1023 + 16383);
+		mant = (1ULL << 63) | (frac << 11);
+	}
+
+	for (int i = 0; i < 8; ++i)
+		result[i] = (mant >> (8 * i)) & 0xff;
+	result[8] = expo10 & 0xff;
+	result[9] = ((expo10 >> 8) & 0x7f) | (sign << 7);
+
+	dest.assign(result.begin(), result.end());
 }
 
 /**

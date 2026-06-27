@@ -109,6 +109,7 @@ ExternalProject_Add(yara
 	URL_HASH SHA256=${YARA_ARCHIVE_SHA256}
 	PREFIX "yara"
 	DOWNLOAD_NAME yara.zip
+	DOWNLOAD_EXTRACT_TIMESTAMP TRUE
 	BUILD_IN_SOURCE 1
 	BUILD_ALWAYS ${CHANGED}
 	# Patch the Yara sources.
@@ -118,6 +119,7 @@ ExternalProject_Add(yara
 	BUILD_COMMAND ${YARA_CLEAN_COMMAND}
 	COMMAND       ${YARA_BUILD_COMMAND}
 	INSTALL_COMMAND ""
+	LOG_BUILD ON
 	BUILD_BYPRODUCTS
 		${YARA_LIB}
 )
@@ -132,6 +134,7 @@ if(NOT MSVC)
 		DEPENDERS build
 		COMMAND ./bootstrap.sh
 		COMMAND ./configure ${YARA_CONFIGURE_ARGS}
+		LOG 1
 	)
 else()
 	# Clean if patch file changed.

@@ -13,6 +13,11 @@ set(RE2_LIB_NAME      ${CMAKE_STATIC_LIBRARY_PREFIX}pog_re2${CMAKE_STATIC_LIBRAR
 set(RE2_LIB_PNAME     ${CMAKE_STATIC_LIBRARY_PREFIX}retdec-pog_re2${CMAKE_STATIC_LIBRARY_SUFFIX})
 set(RE2_LIB           ${YARAMOD_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}/${RE2_LIB_NAME})
 
+set(YARAMOD_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+	set(YARAMOD_CXX_FLAGS "${YARAMOD_CXX_FLAGS} -Wno-missing-field-initializers -Wno-template-id-cdtor -Wno-unused-but-set-variable -Wno-unused-parameter")
+endif()
+
 if(YARAMOD_LOCAL_DIR)
 	message(STATUS "YaraMod: using local YaraMod directory.")
 	set(YARAMOD_SOURCE_DIR "${YARAMOD_LOCAL_DIR}")
@@ -28,10 +33,17 @@ ExternalProject_Add(yaramod-project
 	URL ${_YARAMOD_URL}
 	URL_HASH SHA256=${YARAMOD_ARCHIVE_SHA256}
 	DOWNLOAD_NAME yaramod.zip
+	DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+	PATCH_COMMAND
+		${CMAKE_COMMAND} -Dyaramod_path=<SOURCE_DIR> -P ${CMAKE_CURRENT_SOURCE_DIR}/patch.cmake
 	CMAKE_ARGS
+		-Wno-dev
+		-Wno-deprecated
 		-DCMAKE_INSTALL_PREFIX=${YARAMOD_INSTALL_DIR}
+		-DCMAKE_POLICY_VERSION_MINIMUM=3.5
 		# This does not work on MSVC, but may be useful on Linux.
 		-DCMAKE_BUILD_TYPE=Release
+		-DCMAKE_CXX_FLAGS=${YARAMOD_CXX_FLAGS}
 		-DCMAKE_CXX_FLAGS_RELEASE=${CMAKE_CXX_FLAGS_RELEASE}
 		-DCMAKE_CXX_FLAGS_DEBUG=${CMAKE_CXX_FLAGS_DEBUG}
 		# Force the use of the same compiler as used to build the top-level
