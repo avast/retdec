@@ -6,6 +6,7 @@
 
 #include <array>
 #include <bitset>
+#include <cstdint>
 #include <cstring>
 
 #include "retdec/utils/conversion.h"
@@ -107,6 +108,63 @@ void double10ToDouble8(std::vector<unsigned char> &dest,
 		result[i] |= (src[i + 2] & 0x1f) << 5;
 	}
 	result[0] |= src[1] >> 3;
+	dest.assign(result.begin(), result.end());
+}
+
+/**
+* @brief Convert 64-bit (8-byte) <tt>double</tt> binary data (byte array) into
+*        80-bit (10-byte) x87 extended <tt>long double</tt> binary data.
+*
+* This is the inverse of @c double10ToDouble8(). It lets platforms that do not
+* use the x87 80-bit @c long double representation still serialize a complete,
+* readable 10-byte value, keeping the write path symmetric with the 10-byte
+* read path.
+*
+* @param[out] dest 80-bit long double to create (10 bytes, little-endian).
+* @param[in] src 64-bit double to convert (8 bytes, little-endian).
+*/
+void double8ToDouble10(std::vector<unsigned char> &dest,
+		const std::vector<unsigned char> &src) {
+	std::array<unsigned char, 10> result{};
+
+	std::uint64_t bits = 0;
+	for (int i = 0; i < 8; ++i)
+		bits |= static_cast<std::uint64_t>(src[i]) << (8 * i);
+
+	std::uint64_t sign = (bits >> 63) & 0x1;
+	std::uint64_t expo = (bits >> 52) & 0x7ff;          // 11-bit double exponent
+	std::uint64_t frac = bits & 0xfffffffffffffULL;     // 52-bit fraction
+
+	std::uint64_t mant;                                 // 64-bit extended mantissa
+	std::uint16_t expo10;                               // 15-bit extended exponent
+
+	if (expo == 0) {
+		if (frac == 0) {                                // zero
+			expo10 = 0;
+			mant = 0;
+		} else {                                        // subnormal double
+			int shift = 0;
+			while (!(frac & (1ULL << 52))) {
+				frac <<= 1;
+				++shift;
+			}
+			frac &= 0xfffffffffffffULL;
+			expo10 = static_cast<std::uint16_t>(16383 - 1022 - shift);
+			mant = (1ULL << 63) | (frac << 11);
+		}
+	} else if (expo == 0x7ff) {                          // inf / nan
+		expo10 = 0x7fff;
+		mant = (1ULL << 63) | (frac << 11);
+	} else {                                             // normal number
+		expo10 = static_cast<std::uint16_t>(expo - 1023 + 16383);
+		mant = (1ULL << 63) | (frac << 11);
+	}
+
+	for (int i = 0; i < 8; ++i)
+		result[i] = (mant >> (8 * i)) & 0xff;
+	result[8] = expo10 & 0xff;
+	result[9] = ((expo10 >> 8) & 0x7f) | (sign << 7);
+
 	dest.assign(result.begin(), result.end());
 }
 

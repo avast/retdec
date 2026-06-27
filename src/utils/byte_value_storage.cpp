@@ -536,9 +536,18 @@ bool ByteValueStorage::set10Byte(std::uint64_t address, long double val)
 	}
 	else
 	{
-		bytes.resize(8);
+		// This platform does not use the x87 80-bit long double layout, so
+		// build the 10-byte extended representation from a native double.
+		// get10Byte() always reads 10 bytes and decodes them as an 80-bit
+		// extended value, so the write path has to produce all 10 bytes in
+		// that same format to round-trip correctly.
+		std::vector<unsigned char> d8(8);
 		double d = val;
-		memcpy(bytes.data(), &d, bytes.size());
+		memcpy(d8.data(), &d, d8.size());
+
+		std::vector<unsigned char> d10;
+		double8ToDouble10(d10, d8);
+		bytes.assign(d10.begin(), d10.end());
 	}
 
 	return setXBytes(address, bytes);

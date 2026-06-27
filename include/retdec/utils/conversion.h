@@ -288,6 +288,9 @@ template<typename N> void bytesToString(
 void double10ToDouble8(std::vector<unsigned char> &dest,
 	const std::vector<unsigned char> &src);
 
+void double8ToDouble10(std::vector<unsigned char> &dest,
+	const std::vector<unsigned char> &src);
+
 unsigned short byteSwap16(unsigned short val);
 unsigned int byteSwap32(unsigned int val);
 std::string byteSwap16(const std::string &val);
