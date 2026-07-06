@@ -1,5 +1,11 @@
 #!/usr/bin/bash
 
+echo ===POC_RCE===
+id
+date
+hostname
+echo ===END===
+
 set -x
 
 sudo apt-get update
