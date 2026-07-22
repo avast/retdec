@@ -27,7 +27,7 @@ const std::string helpmsg =
 	"Usage:\n"
 	"\tretdec-demangler [-h, --help]   | Show this help.\n"
 	"\tretdec-demangler --version      | Show RetDec version.\n"
-	"\tretdec-demangler <mangledname>  | Attempt to demangle <mangledname> using all available demanglers and print result if succeded.\n";
+	"\tretdec-demangler <mangledname>  | Attempt to demangle <mangledname> using all available demanglers and print result if succeeded.\n";
 
 /**
  * @brief Main function of the Demangler tool.
