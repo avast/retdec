@@ -3134,10 +3134,11 @@ void Capstone2LlvmIrTranslatorX86_impl::translateSbb(cs_insn* i, cs_x86* xi, llv
 	std::tie(op0, op1) = loadOpBinary(xi, irb, eOpConv::SEXT_TRUNC_OR_BITCAST);
 	auto* cf = loadRegister(X86_REG_CF, irb, op0->getType(), eOpConv::ZEXT_TRUNC_OR_BITCAST);
 
+	auto* af = generateBorrowSubCInt4(op0, op1, irb, cf);
 	op1 = irb.CreateAdd(op1, cf);
 	auto* sub = irb.CreateSub(op0, op1);
 	storeRegistersPlusSflags(irb, sub, {
-			{X86_REG_AF, generateBorrowSubCInt4(op0, op1, irb)},
+			{X86_REG_AF, af},
 			{X86_REG_CF, generateBorrowSubC(sub, op0, op1, irb)},
 			{X86_REG_OF, generateOverflowSubC(sub, op0, op1, irb)}});
 

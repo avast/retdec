@@ -4507,7 +4507,7 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_SBB_cf_false)
 		{X86_REG_ZF, ANY},
 		{X86_REG_SF, ANY},
 		{X86_REG_PF, ANY},
-		{X86_REG_AF, ANY},
+		{X86_REG_AF, true}, // 0x4 < 0x7 + 0 => borrow from bit 3
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_NO_VALUE_CALLED();
@@ -4533,7 +4533,7 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_SBB_cf_true)
 		{X86_REG_ZF, ANY},
 		{X86_REG_SF, ANY},
 		{X86_REG_PF, ANY},
-		{X86_REG_AF, ANY},
+		{X86_REG_AF, true}, // 0x4 < 0x7 + 1 => borrow from bit 3
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_NO_VALUE_CALLED();
@@ -4558,7 +4558,7 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_SBB_eax_eax_cf_false)
 		{X86_REG_ZF, ANY},
 		{X86_REG_SF, ANY},
 		{X86_REG_PF, ANY},
-		{X86_REG_AF, ANY},
+		{X86_REG_AF, false}, // 0x4 < 0x4 + 0 is false => no borrow
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_NO_VALUE_CALLED();
@@ -4583,7 +4583,7 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_SBB_eax_eax_cf_true)
 		{X86_REG_ZF, ANY},
 		{X86_REG_SF, ANY},
 		{X86_REG_PF, ANY},
-		{X86_REG_AF, ANY},
+		{X86_REG_AF, true}, // 0x4 < 0x4 + 1 => borrow from bit 3
 	});
 	EXPECT_NO_MEMORY_LOADED_STORED();
 	EXPECT_NO_VALUE_CALLED();

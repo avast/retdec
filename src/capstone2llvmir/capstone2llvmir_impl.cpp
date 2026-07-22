@@ -1512,8 +1512,8 @@ llvm::Value* Capstone2LlvmIrTranslator_impl<CInsn, CInsnOp>::generateBorrowSubCI
 		cf = loadRegister(getCarryRegister(), irb);
 	}
 	auto* cfc = irb.CreateZExtOrTrunc(cf, sub->getType());
-	auto* add = irb.CreateAdd(sub, cfc);
-	return irb.CreateICmpUGT(add, ci15);
+	auto* res = irb.CreateSub(sub, cfc);
+	return irb.CreateICmpUGT(res, ci15);
 }
 
 //
