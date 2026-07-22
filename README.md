@@ -43,14 +43,14 @@ For more information, check out our
 ## Installation
 
 There are two ways of obtaining and installing RetDec:
-1. Download and unpack a pre-built [stable](https://github.com/avast/retdec/releases) or [bleeding-edge](https://github.com/avast/retdec#automated-teamcity-builds) package and follow instructions in the _Use_ section of its `retdec/share/retdec/README.md` file after unpacking.
+1. Download and unpack a pre-built [stable](https://github.com/avast/retdec/releases) or [bleeding-edge](https://github.com/avast/retdec#nightly-builds) package and follow instructions in the _Use_ section of its `retdec/share/retdec/README.md` file after unpacking.
 2. Build RetDec by yourself from sources by following the [Build and Installation](#build-and-installation) section. After installation, follow instructions below.
 
 We currently support Windows (7 or later), Linux, macOS, and (experimentally) FreeBSD. An installed version of RetDec requires approximately 5 to 6 GB of free disk space.
 
 ## Use
 
-Please, ensure that you reading instructions corresponding to the used RetDec version. If unsure, refer to the `retdec/share/retdec/README.md` file in the installation.
+Please, ensure that you are reading instructions corresponding to the used RetDec version. If unsure, refer to the `retdec/share/retdec/README.md` file in the installation.
 
 ### Windows
 
@@ -306,7 +306,7 @@ Now, you can run the decompiler inside a container:
 ```
 docker run --rm -v /path/to/local/directory:/destination retdec retdec-decompiler /destination/binary
 ```
-Note: Do not modify the `/destination` part is. You only need to change `/path/to/local/directory`. Output files will then be generated to `/path/to/local/directory`.
+Note: Do not modify the `/destination` part. You only need to change `/path/to/local/directory`. Output files will then be generated to `/path/to/local/directory`.
 
 ## Nightly Builds
 
