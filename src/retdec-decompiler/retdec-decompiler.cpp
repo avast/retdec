@@ -1061,7 +1061,7 @@ int main(int argc, char **argv)
 	}
 	catch (const std::bad_alloc& e)
 	{
-		Log::error() << "catched std::bad_alloc" << std::endl;
+		Log::error() << "caught std::bad_alloc" << std::endl;
 		ret = EXIT_BAD_ALLOC;
 	}
 

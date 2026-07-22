@@ -418,9 +418,9 @@ llvm::Constant* FileImage::getConstant(
 	}
 	else
 	{
-		errs() << "unhandled type catched : "
+		errs() << "unhandled type caught : "
 				<< *type << " @ " << addr.toHexString() << "\n";
-		assert(false && "unhandled type catched");
+		assert(false && "unhandled type caught");
 		return nullptr;
 	}
 
