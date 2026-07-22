@@ -307,9 +307,9 @@ def ensure_script_is_being_run_from_installed_retdec():
     # See https://github.com/avast/retdec/issues/418
     if not os.path.dirname(__file__).endswith('bin'):
         print_error_and_die(
-            'You need to build and install RetDec first and then run the installed script via '
-            '`python $RETDEC_INSTALL_DIR/bin/retdec-decompiler.py`.\n'
-            'For more details, see https://github.com/avast/retdec#installation-and-use'
+            'You need to build and install RetDec first and then run the installed script '
+            'from `$RETDEC_INSTALL_DIR/bin`.\n'
+            'For more details, see https://github.com/avast/retdec#installation'
         )
 
 
