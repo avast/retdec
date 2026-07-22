@@ -23,7 +23,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 AR = os.path.join(SCRIPT_DIR, 'retdec-ar-extractor')
 EXTRACT = os.path.join(SCRIPT_DIR, 'retdec-macho-extractor')
 
-if platform == "darwin":
+if sys.platform == "darwin":
     # mac os x need the `gnu-time´ package
     LOG_TIME = ['/usr/local/bin/gtime', '-v']
 else:
