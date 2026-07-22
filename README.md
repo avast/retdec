@@ -153,7 +153,7 @@ This section describes a local build and installation of RetDec. Instructions fo
 #### Linux
 
 * A C++ compiler and standard C++ library supporting C++17 (e.g. GCC >= 7)
-* [CMake](https://cmake.org/) (version >= 3.6)
+* [CMake](https://cmake.org/) (version >= 3.13)
 * [Git](https://git-scm.com/)
 * [OpenSSL](https://www.openssl.org/) (version >= 1.1.1)
 * [Python](https://www.python.org/) (version >= 3.4)
@@ -184,7 +184,7 @@ sudo pacman --needed -S base-devel cmake git openssl python3 autoconf automake l
 #### Windows
 
 * Microsoft Visual C++ (version >= Visual Studio 2017 version 15.7)
-* [CMake](https://cmake.org/) (version >= 3.6)
+* [CMake](https://cmake.org/) (version >= 3.13)
 * [Git](https://git-scm.com/)
 * [OpenSSL](https://www.openssl.org/) (version >= 1.1.1)
 * [Python](https://www.python.org/) (version >= 3.4)
@@ -196,7 +196,7 @@ Packages should be preferably installed via [Homebrew](https://brew.sh).
 
 * macOS >= 10.15
 * Full Xcode installation ([including command-line tools](https://github.com/frida/frida/issues/338#issuecomment-426777849), see [#425](https://github.com/avast/retdec/issues/425) and [#433](https://github.com/avast/retdec/issues/433))
-* [CMake](https://cmake.org/) (version >= 3.6)
+* [CMake](https://cmake.org/) (version >= 3.13)
 * [Git](https://git-scm.com/)
 * [OpenSSL](https://www.openssl.org/) (version >= 1.1.1)
 * [Python](https://www.python.org/) (version >= 3.4)
