@@ -80,7 +80,7 @@ def main():
                 tar.extractall(support_dir, filter='data')
             else:
                 tar.extractall(support_dir)
-        except tarfile.ExtractError as ex:
+        except tarfile.TarError as ex:
             print('ERROR: failed to unpack the archive', ex)
             cleanup(support_dir)
             sys.exit(1)
