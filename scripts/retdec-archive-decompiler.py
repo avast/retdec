@@ -47,12 +47,17 @@ def parse_args(args):
                         action='store_true',
                         help="list")
 
-    parser.add_argument("--",
-                        nargs='+',
-                        dest="arg_list",
-                        help="args passed to the decompiler")
+    # argparse consumes the first '--' as the positional-arguments
+    # separator, so the decompiler arguments have to be split off
+    # manually before parsing.
+    decompiler_args = []
+    if '--' in args:
+        split_at = args.index('--')
+        args, decompiler_args = args[:split_at], args[split_at + 1:]
 
-    return parser.parse_args(args)
+    parsed = parser.parse_args(args)
+    parsed.arg_list = decompiler_args
+    return parsed
 
 
 class ArchiveDecompiler:
@@ -172,7 +177,7 @@ class ArchiveDecompiler:
         print('Running `%s' % DECOMPILER, end='')
 
         if self.decompiler_args:
-            print(' '.join(self.decompiler_args), end='')
+            print(' ' + ' '.join(self.decompiler_args), end='')
 
         print('` over %d files with timeout %d s. (run `kill %d ` to terminate this script)...' % (
             self.file_count, self.timeout, os.getpid()), file=sys.stderr)
@@ -186,14 +191,13 @@ class ArchiveDecompiler:
 
             # Do not escape!
             arg_list = [
-                sys.executable,
                 DECOMPILER,
                 '--ar-index=' + str(i),
                 '-o', self.library_path + '.file_' + str(file_index) + '.c',
                 self.library_path,
             ]
             if self.decompiler_args:
-                arg_list.append(self.decompiler_args)
+                arg_list.extend(self.decompiler_args)
             output, rc, timeouted = CmdRunner.run_cmd(
                 arg_list,
                 timeout=self.timeout,
