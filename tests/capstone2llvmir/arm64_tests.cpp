@@ -8246,6 +8246,24 @@ TEST_P(Capstone2LlvmIrTranslatorArm64Tests, ARM64_INS_FSQRT_d_d)
 }
 */
 
+// https://github.com/avast/retdec/issues/1225
+TEST_P(Capstone2LlvmIrTranslatorArm64Tests, issue_1225_vas_2d_is_not_unknown_vess_type)
+{
+	setRegisters({
+		{ARM64_REG_V1, 0x1234},
+		{ARM64_REG_V2, 0x5678},
+	});
+
+	emulate("add v0.2d, v1.2d, v2.2d");
+
+	EXPECT_JUST_REGISTERS_LOADED({ARM64_REG_V1, ARM64_REG_V2});
+	EXPECT_JUST_REGISTERS_STORED({
+		{ARM64_REG_V0, ANY},
+	});
+	EXPECT_NO_MEMORY_LOADED_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
 // https://github.com/avast/retdec/issues/998
 TEST_P(Capstone2LlvmIrTranslatorArm64Tests, issue_998)
 {

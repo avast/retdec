@@ -398,6 +398,7 @@ llvm::Value* Capstone2LlvmIrTranslatorArm64_impl::extractVectorValue(
 			val = irb.CreateLShr(val, llvm::ConstantInt::get(val->getType(), 32 * op.vector_index));
 			val = irb.CreateZExtOrTrunc(val, llvm::IntegerType::getInt32Ty(_module->getContext()));
 			return irb.CreateBitCast(val, llvm::Type::getFloatTy(_module->getContext()));
+		case ARM64_VAS_2D:
 		case ARM64_VAS_1D:
 			val = irb.CreateLShr(val, llvm::ConstantInt::get(val->getType(), 64 * op.vector_index));
 			val = irb.CreateZExtOrTrunc(val, llvm::IntegerType::getInt64Ty(_module->getContext()));
