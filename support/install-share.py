@@ -76,7 +76,10 @@ def main():
     print('Unpacking archive ...')
     with tarfile.open(arch_path) as tar:
         try:
-            tar.extractall(support_dir)
+            if hasattr(tarfile, 'data_filter'):
+                tar.extractall(support_dir, filter='data')
+            else:
+                tar.extractall(support_dir)
         except tarfile.ExtractError as ex:
             print('ERROR: failed to unpack the archive', ex)
             cleanup(support_dir)
