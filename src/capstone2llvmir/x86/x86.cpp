@@ -1131,7 +1131,7 @@ Capstone2LlvmIrTranslatorX86_impl::loadOpFloatingNullaryOrUnaryTop(
 {
 	if (xi->op_count != 0 && xi->op_count != 1)
 	{
-		throw GenericError("This is not an unary instruction.");
+		throw GenericError("This is not a unary instruction.");
 	}
 
 	llvm::Value* top = loadX87Top(irb);
@@ -1194,7 +1194,7 @@ Capstone2LlvmIrTranslatorX86_impl::loadOpFloatingBinaryTop(
 {
 	if (xi->op_count != 0 && xi->op_count != 1 && xi->op_count != 2)
 	{
-		throw GenericError("This is not an binary instruction.");
+		throw GenericError("This is not a binary instruction.");
 	}
 
 	llvm::Value* top = loadX87Top(irb);
