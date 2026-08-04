@@ -3313,6 +3313,28 @@ TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_MOV_reg64_reg64)
 	EXPECT_NO_VALUE_CALLED();
 }
 
+TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_MOV_reg64_mem64)
+{
+	ONLY_MODE_64;
+
+	setRegisters({
+		{X86_REG_RBP, 0x2000},
+	});
+	setMemory({
+		{0x1e58, 0x00007fff89abcdef_qw},
+	});
+
+	emulate("mov rbx, [rbp - 0x1a8]");
+
+	EXPECT_JUST_REGISTERS_LOADED({X86_REG_RBP});
+	EXPECT_JUST_REGISTERS_STORED({
+		{X86_REG_RBX, 0x00007fff89abcdef},
+	});
+	EXPECT_JUST_MEMORY_LOADED({0x1e58});
+	EXPECT_NO_MEMORY_STORED();
+	EXPECT_NO_VALUE_CALLED();
+}
+
 TEST_P(Capstone2LlvmIrTranslatorX86Tests, X86_INS_MOV_from_ds_addr_space_1)
 {
 	SKIP_MODE_16;

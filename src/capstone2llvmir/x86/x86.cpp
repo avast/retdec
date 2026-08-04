@@ -2521,18 +2521,26 @@ void Capstone2LlvmIrTranslatorX86_impl::translateMov(cs_insn* i, cs_x86* xi, llv
 {
 	EXPECT_IS_BINARY(i, xi, irb);
 
-	op1 = loadOp(xi->operands[1], irb);
+	auto src = xi->operands[1];
 	switch (i->id)
 	{
 		case X86_INS_MOV:
 		case X86_INS_MOVABS:
+			if ((xi->operands[0].type == X86_OP_REG || xi->operands[0].type == X86_OP_MEM)
+					&& (src.type == X86_OP_REG || src.type == X86_OP_MEM))
+			{
+				src.size = xi->operands[0].size;
+			}
+			op1 = loadOp(src, irb);
 			storeOp(xi->operands[0], op1, irb, eOpConv::ZEXT_TRUNC_OR_BITCAST);
 			break;
 		case X86_INS_MOVSX:
 		case X86_INS_MOVSXD:
+			op1 = loadOp(src, irb);
 			storeOp(xi->operands[0], op1, irb, eOpConv::SEXT_TRUNC_OR_BITCAST);
 			break;
 		case X86_INS_MOVZX:
+			op1 = loadOp(src, irb);
 			storeOp(xi->operands[0], op1, irb, eOpConv::ZEXT_TRUNC_OR_BITCAST);
 			break;
 		default:
