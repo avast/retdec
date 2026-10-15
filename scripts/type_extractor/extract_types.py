@@ -66,8 +66,16 @@ def parse_header(header_file, path, output_handler, output_dir, output_format, i
 
 
 def main(args):
-    os.makedirs(args.output, exist_ok=True)
     dir_out = os.path.abspath(args.output)
+    outputs = {}
+    for path in args.path:
+        for header in get_files_with_suffix_from_path(path, ('.h', '.H')):
+            output = os.path.normcase(get_output_file(header, path, args.format, dir_out))
+            source = os.path.normcase(os.path.abspath(header))
+            if output in outputs and outputs[output] != source:
+                raise ValueError('Input headers share output path: ' + output)
+            outputs[output] = source
+    os.makedirs(args.output, exist_ok=True)
 
     output_handler = getattr(
         type_extractor.io,
