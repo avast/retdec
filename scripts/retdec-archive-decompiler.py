@@ -132,10 +132,10 @@ class ArchiveDecompiler:
         if utils.is_macho_archive(self.library_path):
             if self.enable_list_mode:
                 if self.use_json_format:
-                    CmdRunner.run_cmd([EXTRACT, '--objects', '--json', self.library_path])
+                    _, result, _ = CmdRunner.run_cmd([EXTRACT, '--objects', '--json', self.library_path])
                 else:
-                    CmdRunner.run_cmd([EXTRACT, '--objects', self.library_path])
-                return 1
+                    _, result, _ = CmdRunner.run_cmd([EXTRACT, '--objects', self.library_path])
+                return result
 
             self.tmp_archive = self.library_path + '.a'
             CmdRunner.run_cmd([EXTRACT, '--best', '--out', self.tmp_archive, self.library_path])
