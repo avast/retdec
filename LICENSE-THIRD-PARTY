@@ -19,7 +19,7 @@ RetDec uses the following third-party libraries or other resources:
 11) Eigen: http://eigen.tuxfamily.org/index.php?title=Main_Page
 12) cmake-modules: https://github.com/rpavlik/cmake-modules
 13) tlsh: https://github.com/trendmicro/tlsh
-13) stb: https://github.com/nothings/stb
+14) stb: https://github.com/nothings/stb
 
 These third-party libraries or other resources are licensed under the
 following licenses:
@@ -703,7 +703,7 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
 ===============================================================================
-12) tlsh
+13) tlsh
 ===============================================================================
   =====================
    LICENSE OPTION NOTICE
@@ -976,7 +976,7 @@ DEALINGS IN THE SOFTWARE.
      http://blog.trendmicro.com/trendlabs-security-intelligence/smart-whitelisting-using-locality-sensitive-hashing/
 
 ===============================================================================
-12) stb
+14) stb
 ===============================================================================
 
 MIT License
