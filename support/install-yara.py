@@ -74,7 +74,7 @@ def compile_yara_file(input_file, yarac, install_dir, stdout_lock):
     ret = subprocess.call(cmd)
     if ret != 0:
         print('Error: yarac failed during compilation of file', input_file, file=sys.stderr)
-        sys.exit(1)
+        raise RuntimeError('yarac compilation failed: ' + input_file)
 
     os.remove(input_file)
 
