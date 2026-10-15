@@ -55,14 +55,28 @@ def parse_args():
 
 
 def get_input_file(unknownargs):
-    """Find path to the input file.
-    We take the first parameter that does not start with a dash. This is a
-    simplification and may not work in all cases. A proper solution would
-    need to parse fileinfo parameters, which would be complex.
-    """
+    """Find the positional input using fileinfo.cpp doParams option arities."""
+    value_options = {'-m', '--malware', '-C', '--crypto', '-o', '--other',
+                     '-c', '--config', '--fileinfo-config', '--max-memory',
+                     '--ep-bytes', '--dlls'}
+    tokens = []
     for arg in unknownargs:
-        if not arg.startswith('-'):
+        name, equals, value = arg.partition('=')
+        if equals and (name in value_options or name == '--no-hashes'):
+            tokens.extend([name, value])
+        else:
+            tokens.append(arg)
+    i = 0
+    while i < len(tokens):
+        arg = tokens[i]
+        if arg in value_options:
+            i += 2
+        elif arg == '--no-hashes':
+            i += 2 if i + 1 < len(tokens) and tokens[i + 1] in {'file', 'verbose', 'all'} else 1
+        elif not arg.startswith('-'):
             return arg
+        else:
+            i += 1
     return None
 
 
