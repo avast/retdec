@@ -99,7 +99,7 @@ class SigFromLib:
         object_dirs = []
 
         # Create .pat files for every library.
-        for lib_path in self.args.input:
+        for lib_index, lib_path in enumerate(self.args.input):
             # Check for invalid archives.
             if not utils.is_valid_archive(lib_path):
                 print('ignoring file %s - not valid archive' % lib_path)
@@ -107,6 +107,8 @@ class SigFromLib:
 
             # Get library name for .pat file.
             lib_name = os.path.splitext(os.path.basename(lib_path))[0]
+            if len(self.args.input) > 1:
+                lib_name = str(lib_index) + '-' + lib_name
 
             # Create sub-directory for object files.
             object_dir = os.path.join(self.tmp_dir_path, lib_name) + '-objects'
