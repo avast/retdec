@@ -519,7 +519,7 @@ void MachOFormat::loadSectionRelocations(std::size_t offset, std::size_t count)
 			std::int32_t rInfo[2];
 			auto *src = buffPtr + i * 8;
 			std::size_t sz = 8;
-			if (src + sz >= buffEnd)
+			if (src + sz > buffEnd)
 			{
 				break;
 			}
